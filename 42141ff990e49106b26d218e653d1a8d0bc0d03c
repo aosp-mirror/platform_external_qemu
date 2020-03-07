@@ -1,0 +1,48 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000001871727",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1251870?revision\u003d4",
+      "fixSuggestions": [
+        {
+          "fixId": "b6132069_6a6938a3",
+          "description": "Change to \"android/scripts/unix/build-ffmpeg.sh\"",
+          "replacements": [
+            {
+              "path": "android/scripts/unix/build-ffmpeg.sh",
+              "range": {
+                "startLine": 137,
+                "startChar": 67,
+                "endLine": 137,
+                "endChar": 76
+              },
+              "replacement": "if you"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "b0e6b7bf_2943f3ed",
+        "filename": "android/scripts/unix/build-ffmpeg.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-03-07T00:24:44Z",
+      "side": 1,
+      "message": "Common typo found: \"if if you\" -- should it be \"if you\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 137,
+        "startChar": 67,
+        "endLine": 137,
+        "endChar": 76
+      },
+      "revId": "42141ff990e49106b26d218e653d1a8d0bc0d03c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
