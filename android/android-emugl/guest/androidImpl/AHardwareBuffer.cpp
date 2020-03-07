@@ -15,28 +15,20 @@
  */
 #define LOG_TAG "AHardwareBuffer"
 
-#include <android/AHardwareBufferHelpers.h>  // for AHardwareBuffer_to_ANati...
-#include <android/hardware_buffer.h>         // for AHardwareBuffer_Desc
-#include <cutils/native_handle.h>            // for native_handle_t
-#include <errno.h>                           // for errno, EINTR
+#include <android/hardware_buffer.h>
+#include <vndk/hardware_buffer.h>
+#include <errno.h>
+#include <sys/socket.h>
+#include <memory>
+#include <cutils/native_handle.h>
 #include <log/log.h>
-#include <string.h>                          // for strerror, size_t, memcpy
-#include <sys/socket.h>                      // for msghdr, cmsghdr, socklen_t
-#include <sys/types.h>                       // for iovec
-#include <ui/GraphicBuffer.h>                // for GraphicBuffer, GraphicBu...
-#include <unistd.h>                          // for getpid
-#include <utils/StrongPointer.h>             // for sp, android
-#include <vndk/hardware_buffer.h>            // for AHARDWAREBUFFER_CREATE_F...
-#include <cstdint>                           // for uint64_t, uint32_t, int32_t
-#include <memory>                            // for allocator, unique_ptr
-#include <string>                            // for operator+, to_string
-
-#include "android/log.h"                     // for ANDROID_LOG_ERROR
-#include "android/rect.h"                    // for ARect
-#include "log/log_main.h"                    // for ALOGE
-#include "nativebase/nativebase.h"           // for ANativeWindowBuffer
-#include "ui/Rect.h"                         // for Rect
-#include "utils/Errors.h"                    // for BAD_VALUE, NO_ERROR, INV...
+#include <utils/StrongPointer.h>
+#include <ui/GraphicBuffer.h>
+#include <system/graphics.h>
+#include <system/graphics-base.h>
+#include <system/graphics-base-v1.0.h>
+#include <system/graphics-base-v1.1.h>
+#include <android/AHardwareBufferHelpers.h>
 // #include <android/hardware/graphics/common/1.1/types.h>
 
 static constexpr int kFdBufferSize = 128 * sizeof(int);  // 128 ints
@@ -162,7 +154,7 @@ int AHardwareBuffer_sendHandleToUnixSocket(const AHardwareBuffer* buffer, int so
     char buf[CMSG_SPACE(kFdBufferSize)];
     struct msghdr msg = {
             .msg_control = buf,
-            .msg_controllen = static_cast<socklen_t>(sizeof(buf)),
+            .msg_controllen = sizeof(buf),
             .msg_iov = &iov[0],
             .msg_iovlen = 1,
     };
@@ -195,7 +187,7 @@ int AHardwareBuffer_recvHandleFromUnixSocket(int socketFd, AHardwareBuffer** out
     iov[0].iov_len = kMessageBufferSize;
     struct msghdr msg = {
             .msg_control = fdBuf,
-            .msg_controllen = static_cast<socklen_t>(sizeof(fdBuf)),
+            .msg_controllen = sizeof(fdBuf),
             .msg_iov = &iov[0],
             .msg_iovlen = 1,
     };
