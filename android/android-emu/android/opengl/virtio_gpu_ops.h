@@ -22,6 +22,24 @@ typedef void (*create_color_buffer_with_handle_t)(
     uint32_t format,
     uint32_t fwkFormat,
     uint32_t handle);
+
+/* create NV12 texture pair (Y and UV) with given width and height */
+typedef void (*create_nv12_textures_t)( uint32_t width, uint32_t height, uint32_t *Ytex, uint32_t* UVtex);
+
+/* delete NV12 texture pair (Y and UV) */
+typedef void (*delete_nv12_textures_t)(uint32_t Ytex, uint32_t UVtex);
+
+typedef void (*cuda_nv12_updater_t) (
+        void* src_frame, int src_pitch, uint32_t Ytex, uint32_t UVtext, int width, int heigh);
+typedef void (*copy_nv12_textures_t)(uint32_t Ytex, uint32_t UVtex, cuda_nv12_updater_t);
+
+/* swap out the nv12 textures of the colorbuffer, and use the new nv12 textures to update colorbuffer content
+ * on return, Ytex and UVtex are swapped with the existing textures and are free to hold new data again
+ * */
+typedef void (*swap_nv12_and_update_color_buffer_t)(
+    uint32_t colorbufferhandle, int x, int y, int width, int height,
+    uint32_t format, uint32_t type, uint32_t *Ytex, uint32_t *UVtex);
+
 typedef void (*open_color_buffer_t)(uint32_t handle);
 typedef void (*close_color_buffer_t)(uint32_t handle);
 typedef void (*update_color_buffer_t)(
