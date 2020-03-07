@@ -116,11 +116,11 @@ static void getYUVOffsets(int width, int height, FrameworkFormat format,
 // the |texture_unit| argument.
 // Returns a new OpenGL texture object in |texName_out|
 // that is to be cleaned up by the caller.
-static void createYUVGLTex(GLenum texture_unit,
-                           GLsizei width,
-                           GLsizei height,
-                           GLuint* texName_out,
-                           bool uvInterleaved) {
+void YUVConverter::createYUVGLTex(GLenum texture_unit,
+                                  GLsizei width,
+                                  GLsizei height,
+                                  GLuint* texName_out,
+                                  bool uvInterleaved) {
     assert(texName_out);
 
     std::vector<uint8_t> myvec(width*height*2, 0x0);

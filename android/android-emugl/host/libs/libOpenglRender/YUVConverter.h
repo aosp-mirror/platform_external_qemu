@@ -58,6 +58,14 @@ public:
     // the host color buffer
     // (rcUpdateColorBuffer)
     void drawConvert(int x, int y, int width, int height, char* pixels, cuda_video_decoder_callback_t callback = nullptr);
+
+    // public so other classes can call
+    static void createYUVGLTex(GLenum texture_unit,
+                               GLsizei width,
+                               GLsizei height,
+                               GLuint* texName_out,
+                               bool uvInterleaved);
+
 private:
     // For dealing with n-pixel-aligned buffers
     void updateCutoffs(float width, float ywidth, float halfwidth, float cwidth);

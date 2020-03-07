@@ -21,6 +21,7 @@
 #include "NativeSubWindow.h"
 #include "RenderControl.h"
 #include "RenderThreadInfo.h"
+#include "YUVConverter.h"
 #include "gles2_dec.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
@@ -1625,6 +1626,33 @@ void FrameBuffer::readColorBufferYUV(HandleType p_colorbuffer,
     }
 
     (*c).second.cb->readPixelsYUVCached(x, y, width, height, pixels, pixels_size);
+}
+
+void FrameBuffer::createNV12Textures(int width,
+                                     int height,
+                                     uint32_t* Ytex,
+                                     uint32_t* UVtex) {
+    constexpr bool kIsInterleaved = true;
+    constexpr bool kIsNotInterleaved = false;
+    AutoLock mutex(m_lock);
+    ScopedBind bind(m_colorBufferHelper);
+    YUVConverter::createYUVGLTex(GL_TEXTURE0, width, height, Ytex, kIsNotInterleaved);
+    YUVConverter::createYUVGLTex(GL_TEXTURE1, width/2, height/2, UVtex, kIsInterleaved);
+}
+
+void FrameBuffer::deleteNV12Textures(uint32_t Ytex, uint32_t UVtex) {
+    AutoLock mutex(m_lock);
+    ScopedBind bind(m_colorBufferHelper);
+    s_gles2.glDeleteTextures(1, &Ytex);
+    s_gles2.glDeleteTextures(1, &UVtex);
+}
+
+void FrameBuffer::copyDataToNV12(uint32_t Ytex,
+                                 uint32_t UVtex,
+                                 cuda_nv12_updater_t callback) {
+    AutoLock mutex(m_lock);
+    ScopedBind bind(m_colorBufferHelper);
+    callback(Ytex, UVtex);
 }
 
 bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
