@@ -1627,6 +1627,11 @@ void FrameBuffer::readColorBufferYUV(HandleType p_colorbuffer,
     (*c).second.cb->readPixelsYUVCached(x, y, width, height, pixels, pixels_size);
 }
 
+void FrameBuffer::createNV12Textures(int width,
+                                     int height,
+                                     uint32_t* Ytex,
+                                     uint32_t* UVtex) {}
+
 bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     int x,
                                     int y,
