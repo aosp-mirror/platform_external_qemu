@@ -22,6 +22,26 @@ typedef void (*create_color_buffer_with_handle_t)(
     uint32_t format,
     uint32_t fwkFormat,
     uint32_t handle);
+
+/* create NV12 texture pair (Y and UV) with given width and height */
+typedef void (*create_nv12_textures_t)(int width,
+                                       int height,
+                                       uint32_t* Ytex,
+                                       uint32_t* UVtex);
+
+/* delete NV12 texture pair (Y and UV) */
+typedef void (*delete_nv12_textures_t)(uint32_t Ytex, uint32_t UVtex);
+
+typedef void (*cuda_nv12_updater_t) (uint32_t Ytex, uint32_t UVtext);
+typedef void (*copy_data_to_nv12_textures_t)(uint32_t Ytex, uint32_t UVtex, cuda_nv12_updater_t);
+
+/* swap out the nv12 textures of the colorbuffer, and use the new nv12 textures to update colorbuffer content
+ * on return, Ytex and UVtex are swapped with the existing textures and are free to hold new data again
+ * */
+typedef void (*swap_nv12_and_update_color_buffer_t)(
+    uint32_t colorbufferhandle, int x, int y, int width, int height,
+    uint32_t format, uint32_t type, uint32_t *Ytex, uint32_t *UVtex);
+
 typedef void (*open_color_buffer_t)(uint32_t handle);
 typedef void (*close_color_buffer_t)(uint32_t handle);
 typedef void (*update_color_buffer_t)(
@@ -48,6 +68,13 @@ struct AndroidVirtioGpuOps {
     open_color_buffer_t open_color_buffer;
     close_color_buffer_t close_color_buffer;
     update_color_buffer_t update_color_buffer;
+
+    /* nv12 related */
+    create_nv12_textures_t create_nv12_textures;
+    delete_nv12_textures_t delete_nv12_textures;
+    copy_data_to_nv12_textures_t copy_data_to_nv12_textures;
+    swap_nv12_and_update_color_buffer_t swap_nv12_and_update_color_buffer;
+
     update_color_buffer_with_cuda_callback_t update_color_buffer_with_cuda_callback;
     read_color_buffer_t read_color_buffer;
     read_color_buffer_yuv_t read_color_buffer_yuv;

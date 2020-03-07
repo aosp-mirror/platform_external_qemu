@@ -462,49 +462,102 @@ void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
 }
 
 static struct AndroidVirtioGpuOps sVirtioGpuOps = {
-    .create_color_buffer_with_handle = [](
-        uint32_t width,
-        uint32_t height,
-        uint32_t format,
-        uint32_t fwkFormat,
-        uint32_t handle) {
-        FrameBuffer::getFB()->createColorBufferWithHandle(
-            width, height, (GLenum)format,
-            (FrameworkFormat)fwkFormat, handle);
-    },
-    .open_color_buffer = [](uint32_t handle) {
-        FrameBuffer::getFB()->openColorBuffer(handle);
-    },
-    .close_color_buffer = [](uint32_t handle) {
-        FrameBuffer::getFB()->closeColorBuffer(handle);
-    },
-    .update_color_buffer = [](
-        uint32_t handle, int x, int y, int width, int height,
-        uint32_t format, uint32_t type, void* pixels) {
-        FrameBuffer::getFB()->updateColorBuffer(handle, x, y, width, height, format, type, pixels);
-    },
-    .update_color_buffer_with_cuda_callback = [](
-        uint32_t handle, int x, int y, int width, int height,
-        uint32_t format, uint32_t type, void* pixels, cuda_video_decoder_callback_t callback) {
-        FrameBuffer::getFB()->updateColorBuffer(handle, x, y, width, height, format, type, pixels,
-                callback);
-    },
-    .read_color_buffer = [](
-        uint32_t handle, int x, int y, int width, int height,
-        uint32_t format, uint32_t type, void* pixels) {
-        FrameBuffer::getFB()->readColorBuffer(
-            handle, x, y, width, height, format, type, pixels);
-    },
-    .read_color_buffer_yuv = [](
-        uint32_t handle, int x, int y, int width, int height,
-        void* pixels, uint32_t pixels_size) {
-        FrameBuffer::getFB()->readColorBufferYUV(
-            handle, x, y, width, height,
-            pixels, pixels_size);
-    },
-    .post_color_buffer = [](uint32_t handle) {
-        FrameBuffer::getFB()->post(handle);
-    },
+        .create_color_buffer_with_handle =
+                [](uint32_t width,
+                   uint32_t height,
+                   uint32_t format,
+                   uint32_t fwkFormat,
+                   uint32_t handle) {
+                    FrameBuffer::getFB()->createColorBufferWithHandle(
+                            width, height, (GLenum)format,
+                            (FrameworkFormat)fwkFormat, handle);
+                },
+        .open_color_buffer =
+                [](uint32_t handle) {
+                    FrameBuffer::getFB()->openColorBuffer(handle);
+                },
+        .close_color_buffer =
+                [](uint32_t handle) {
+                    FrameBuffer::getFB()->closeColorBuffer(handle);
+                },
+        .update_color_buffer =
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t format,
+                   uint32_t type,
+                   void* pixels) {
+                    FrameBuffer::getFB()->updateColorBuffer(
+                            handle, x, y, width, height, format, type, pixels);
+                },
+        .create_nv12_textures =
+                [](int width, int height, uint32_t* Ytex, uint32_t* UVtex) {
+                    FrameBuffer::getFB()->createNV12Textures(width, height,
+                                                             Ytex, UVtex);
+                },
+        .delete_nv12_textures =
+                [](uint32_t Ytex, uint32_t UVtex) {
+                    FrameBuffer::getFB()->deleteNV12Textures(Ytex, UVtex);
+                },
+        .copy_data_to_nv12_textures =
+                [](uint32_t Ytex, uint32_t UVtex, cuda_nv12_updater_t fn) {
+                    FrameBuffer::getFB()->copyDataToNV12(Ytex, UVtex, fn);
+                },
+        .swap_nv12_and_update_color_buffer =
+                [](uint32_t colorbufferhandle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t format,
+                   uint32_t type,
+                   uint32_t* Ytex,
+                   uint32_t* UVtex) {
+                    FrameBuffer::getFB()->swapNV12UpdateColorBuffer(
+                            colorbufferhandle, x, y, width, height, format,
+                            type, Ytex, UVtex);
+                },
+        .update_color_buffer_with_cuda_callback =
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t format,
+                   uint32_t type,
+                   void* pixels,
+                   cuda_video_decoder_callback_t callback) {
+                    FrameBuffer::getFB()->updateColorBuffer(
+                            handle, x, y, width, height, format, type, pixels,
+                            callback);
+                },
+        .read_color_buffer =
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t format,
+                   uint32_t type,
+                   void* pixels) {
+                    FrameBuffer::getFB()->readColorBuffer(
+                            handle, x, y, width, height, format, type, pixels);
+                },
+        .read_color_buffer_yuv =
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   void* pixels,
+                   uint32_t pixels_size) {
+                    FrameBuffer::getFB()->readColorBufferYUV(
+                            handle, x, y, width, height, pixels, pixels_size);
+                },
+        .post_color_buffer =
+                [](uint32_t handle) { FrameBuffer::getFB()->post(handle); },
 };
 
 struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {
