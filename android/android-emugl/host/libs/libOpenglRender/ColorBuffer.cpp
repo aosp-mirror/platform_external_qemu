@@ -480,6 +480,14 @@ void ColorBuffer::reformat(GLint internalformat, GLenum type) {
     m_numBytes = bpp * m_width * m_height;
 }
 
+void ColorBuffer::swapNV12Textures(uint32_t* Ytex, uint32_t* UVtex) {
+    if (!m_nv12_converter) {
+        m_nv12_converter.reset(
+                new YUVConverter(m_width, m_height, FRAMEWORK_FORMAT_NV12));
+    }
+    m_nv12_converter->swapNV12Textures(Ytex, UVtex);
+}
+
 void ColorBuffer::subUpdate(int x,
                             int y,
                             int width,

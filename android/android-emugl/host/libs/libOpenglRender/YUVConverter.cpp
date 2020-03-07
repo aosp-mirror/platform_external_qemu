@@ -16,11 +16,12 @@
 
 #include "YUVConverter.h"
 
-#include "DispatchTables.h"
-#include "emugl/common/feature_control.h"
 #include <assert.h>
 #include <stdio.h>
+#include <algorithm>
 #include <chrono>
+#include "DispatchTables.h"
+#include "emugl/common/feature_control.h"
 
 #include <string.h>
 
@@ -116,11 +117,11 @@ static void getYUVOffsets(int width, int height, FrameworkFormat format,
 // the |texture_unit| argument.
 // Returns a new OpenGL texture object in |texName_out|
 // that is to be cleaned up by the caller.
-static void createYUVGLTex(GLenum texture_unit,
-                           GLsizei width,
-                           GLsizei height,
-                           GLuint* texName_out,
-                           bool uvInterleaved) {
+void YUVConverter::createYUVGLTex(GLenum texture_unit,
+                                  GLsizei width,
+                                  GLsizei height,
+                                  GLuint* texName_out,
+                                  bool uvInterleaved) {
     assert(texName_out);
 
     std::vector<uint8_t> myvec(width*height*2, 0x0);
@@ -578,6 +579,11 @@ void YUVConverter::restoreGLState() {
     s_gles2.glUseProgram(mCurrProgram);
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mCurrVbo);
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCurrIbo);
+}
+
+void YUVConverter::swapNV12Textures(uint32_t* Ytex, uint32_t* UVtex) {
+    std::swap(*Ytex, mYtex);
+    std::swap(*UVtex, mUVtex);
 }
 
 // drawConvert: per-frame updates.
