@@ -21,6 +21,7 @@
 #include "NativeSubWindow.h"
 #include "RenderControl.h"
 #include "RenderThreadInfo.h"
+#include "YUVConverter.h"
 #include "gles2_dec.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
@@ -1625,6 +1626,57 @@ void FrameBuffer::readColorBufferYUV(HandleType p_colorbuffer,
     }
 
     (*c).second.cb->readPixelsYUVCached(x, y, width, height, pixels, pixels_size);
+}
+
+void FrameBuffer::createNV12Textures(int width,
+                                     int height,
+                                     uint32_t* Ytex,
+                                     uint32_t* UVtex) {
+    constexpr bool kIsInterleaved = true;
+    constexpr bool kIsNotInterleaved = false;
+    AutoLock mutex(m_lock);
+    ScopedBind bind(m_colorBufferHelper);
+    YUVConverter::createYUVGLTex(GL_TEXTURE0, width, height, Ytex, kIsNotInterleaved);
+    YUVConverter::createYUVGLTex(GL_TEXTURE1, width/2, height/2, UVtex, kIsInterleaved);
+}
+
+void FrameBuffer::deleteNV12Textures(uint32_t Ytex, uint32_t UVtex) {
+    AutoLock mutex(m_lock);
+    ScopedBind bind(m_colorBufferHelper);
+    s_gles2.glDeleteTextures(1, &Ytex);
+    s_gles2.glDeleteTextures(1, &UVtex);
+}
+
+void FrameBuffer::copyDataToNV12(uint32_t Ytex,
+                                 uint32_t UVtex,
+                                 cuda_nv12_updater_t callback) {
+    AutoLock mutex(m_lock);
+    ScopedBind bind(m_colorBufferHelper);
+    callback(Ytex, UVtex);
+}
+
+void FrameBuffer::swapNV12UpdateColorBuffer(uint32_t p_colorbuffer,
+                                            int x,
+                                            int y,
+                                            int width,
+                                            int height,
+                                            uint32_t format,
+                                            uint32_t type,
+                                            uint32_t* Ytex,
+                                            uint32_t* UVtex) {
+    {
+        AutoLock mutex(m_lock);
+        // TODO: swap out colorbuffer's Y and UV
+        ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+        if (c == m_colorbuffers.end()) {
+            // bad colorbuffer handle
+            return;
+        }
+        (*c).second.cb->swapNV12Textures(Ytex, UVtex);
+    }
+
+    updateColorBuffer(p_colorbuffer, x, y, width, height, format, type, nullptr,
+                      nullptr);
 }
 
 bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,

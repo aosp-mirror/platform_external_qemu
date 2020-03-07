@@ -16,11 +16,12 @@
 
 #include "YUVConverter.h"
 
-#include "DispatchTables.h"
-#include "emugl/common/feature_control.h"
 #include <assert.h>
 #include <stdio.h>
+#include <algorithm>
 #include <chrono>
+#include "DispatchTables.h"
+#include "emugl/common/feature_control.h"
 
 #include <string.h>
 
@@ -116,11 +117,11 @@ static void getYUVOffsets(int width, int height, FrameworkFormat format,
 // the |texture_unit| argument.
 // Returns a new OpenGL texture object in |texName_out|
 // that is to be cleaned up by the caller.
-static void createYUVGLTex(GLenum texture_unit,
-                           GLsizei width,
-                           GLsizei height,
-                           GLuint* texName_out,
-                           bool uvInterleaved) {
+void YUVConverter::createYUVGLTex(GLenum texture_unit,
+                                  GLsizei width,
+                                  GLsizei height,
+                                  GLuint* texName_out,
+                                  bool uvInterleaved) {
     assert(texName_out);
 
     std::vector<uint8_t> myvec(width*height*2, 0x0);
@@ -580,6 +581,11 @@ void YUVConverter::restoreGLState() {
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCurrIbo);
 }
 
+void YUVConverter::swapNV12Textures(uint32_t* Ytex, uint32_t* UVtex) {
+    std::swap(*Ytex, mYtex);
+    std::swap(*UVtex, mUVtex);
+}
+
 // drawConvert: per-frame updates.
 // Update YUV textures, then draw the fullscreen
 // quad set up above, which results in a framebuffer
@@ -627,8 +633,10 @@ void YUVConverter::drawConvert(int x, int y,
         }
         fprintf(stderr, "%s %d after calling subUpdateYUVGLTexCallback\n", __func__, __LINE__);
     } else {
-        subUpdateYUVGLTex(GL_TEXTURE0, mYtex, x, y, ywidth, height, pixels + yoff, false);
-    fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
+        if (pixels)
+            subUpdateYUVGLTex(GL_TEXTURE0, mYtex, x, y, ywidth, height,
+                              pixels + yoff, false);
+        fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
     }
 
          elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
@@ -721,8 +729,10 @@ void YUVConverter::drawConvert(int x, int y,
                     fprintf(stderr, "%s %d skip doing subUpdateYUVGLTexCallback UV\n", __func__, __LINE__);
                 }
             } else {
-                subUpdateYUVGLTex(GL_TEXTURE1, mUVtex, x, y, cwidth, cheight, pixels + uoff, true);
-    fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
+                if (pixels)
+                    subUpdateYUVGLTex(GL_TEXTURE1, mUVtex, x, y, cwidth,
+                                      cheight, pixels + uoff, true);
+                fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
             }
             doYUVConversionDraw(mProgram,
                                 mYWidthCutoffLoc,

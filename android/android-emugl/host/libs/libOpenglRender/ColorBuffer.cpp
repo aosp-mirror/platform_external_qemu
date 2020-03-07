@@ -480,6 +480,14 @@ void ColorBuffer::reformat(GLint internalformat, GLenum type) {
     m_numBytes = bpp * m_width * m_height;
 }
 
+void ColorBuffer::swapNV12Textures(uint32_t* Ytex, uint32_t* UVtex) {
+    if (!m_nv12_converter) {
+        m_nv12_converter.reset(
+                new YUVConverter(m_width, m_height, FRAMEWORK_FORMAT_NV12));
+    }
+    m_nv12_converter->swapNV12Textures(Ytex, UVtex);
+}
+
 void ColorBuffer::subUpdate(int x,
                             int y,
                             int width,
@@ -550,10 +558,10 @@ void ColorBuffer::subUpdate(int x,
         uint32_t uvHeight = height / 2;
         uint32_t dataSize = yStride * height + 2 * (uvHeight * uvStride);
 
-        if (0) {
-        m_yuv_buf.clear();
-        uint8_t* data = (uint8_t*)pixels;
-        m_yuv_buf.insert(m_yuv_buf.begin(), data, data + dataSize);
+        if (pixels && !callback) {
+            m_yuv_buf.clear();
+            uint8_t* data = (uint8_t*)pixels;
+            m_yuv_buf.insert(m_yuv_buf.begin(), data, data + dataSize);
         }
          elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);
          if (bohuprint) fprintf(stderr, "%d subupdate take %lld ms\n", __LINE__, elapsed.count());
