@@ -250,6 +250,10 @@ FourCCToInternal(uint32_t cm_pix_format)
 
     /* Uninitialize capture device. */
     if (capture_device != nil) {
+        /* Make sure device is not opened. */
+        if ([capture_device isOpen]) {
+            [capture_device close];
+        }
         capture_device = nil;
     }
 
