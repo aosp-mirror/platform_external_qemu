@@ -21,6 +21,7 @@
 #include "NativeSubWindow.h"
 #include "RenderControl.h"
 #include "RenderThreadInfo.h"
+#include "YUVConverter.h"
 #include "gles2_dec.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
@@ -1626,6 +1627,18 @@ void FrameBuffer::readColorBufferYUV(HandleType p_colorbuffer,
 
     (*c).second.cb->readPixelsYUVCached(x, y, width, height, pixels, pixels_size);
 }
+
+void FrameBuffer::createNV12Textures(int width,
+                                     int height,
+                                     uint32_t* Ytex,
+                                     uint32_t* UVtex) {
+    constexpr bool kIsInterleaved = true;
+    constexpr bool kIsNotInterleaved = false;
+    YUVConverter::createYUVGLTex(GL_TEXTURE0, width, height, Ytex, kIsNotInterleaved);
+    YUVConverter::createYUVGLTex(GL_TEXTURE1, width/2, height/2, UVtex, kIsInterleaved);
+}
+
+void FrameBuffer::deleteNV12Textures(uint32_t Ytex, uint32_t UVtex) {}
 
 bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     int x,

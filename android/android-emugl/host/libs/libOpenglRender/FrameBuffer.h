@@ -325,6 +325,15 @@ public:
                              int x, int y, int width, int height,
                              void *pixels, uint32_t pixels_size);
 
+    // create a Y texture and a UV texture with width and height, the created
+    // texture ids are stored in Ytex and UVtex respectively
+    void createNV12Textures(int width,
+                            int height,
+                            uint32_t* Ytex,
+                            uint32_t* UVtex);
+
+    void deleteNV12Textures(uint32_t Ytex, uint32_t UVtex);
+
     // Update the content of a given ColorBuffer from client data.
     // |p_colorbuffer| is the ColorBuffer's handle value. Similar
     // to glReadPixels(), this can be a slow operation.
