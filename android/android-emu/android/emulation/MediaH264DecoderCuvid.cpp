@@ -65,11 +65,14 @@ static unsigned int g_nSrcPitch = 0;
 static CUdeviceptr g_dpSrcFrame = 0;
 static unsigned int g_mSurfaceHeight = 0;
 static int g_hostColorBufferId = 0;
+static int g_width = 0;
+static int g_height = 0;
 
 static bool g_gpuCopy = true;
 
 extern "C" {
 void cuda_copy_decoded_frame(void* src_frame, uint32_t dest_texture_handle, int mode, int width, int height);
+void cuda_nv12_updater(uint32_t Ytex, uint32_t UVtext);
 }
 
 namespace android {
@@ -343,15 +346,22 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
      H264_DPRINT("get image takes %lld ms\n\n", elapsed.count());
     if (mParser.version() == 200) {
         if (param.hostColorBufferId >= 0 && g_gpuCopy) {
-            mRenderer.renderToHostColorBufferWithCallback(g_hostColorBufferId, mOutputWidth,
-                                          mOutputHeight, pDecodedFrame, cuda_copy_decoded_frame);
-            //convert8.UVInterleavedToPlanar(pDecodedFrame);
-            //memset(pDecodedFrame, 0x0f, myOutputHeight * myOutputWidth * 3 / 2);
-            //mRenderer.renderToHostColorBuffer(param.hostColorBufferId, myOutputWidth,
-             //                             myOutputHeight, pDecodedFrame);
-     elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+            MediaHostRenderer::TextureFrame texFrame = mSavedTexFrames.front();
+            mSavedTexFrames.pop_front();
+            mRenderer.renderToHostColorBufferWithTextures(
+                    g_hostColorBufferId, mOutputWidth, mOutputHeight, texFrame);
+            // mRenderer.renderToHostColorBufferWithCallback(g_hostColorBufferId,
+            // mOutputWidth,
+            //                              mOutputHeight, pDecodedFrame,
+            //                              cuda_copy_decoded_frame);
+            // convert8.UVInterleavedToPlanar(pDecodedFrame);
+            // memset(pDecodedFrame, 0x0f, myOutputHeight * myOutputWidth * 3 /
+            // 2); mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
+            // myOutputWidth,
+            //                             myOutputHeight, pDecodedFrame);
+            elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
                     std::chrono::steady_clock::now() - startTime);
-     H264_DPRINT("get image takes %lld ms\n\n", elapsed.count());
+            H264_DPRINT("get image takes %lld ms\n\n", elapsed.count());
         } else {
             //memcpy(dst, pDecodedFrame, myOutputHeight * myOutputWidth * 3 / 2);
         }
@@ -541,6 +551,7 @@ int MediaH264DecoderCuvid::HandlePictureDecode(CUVIDPICPARAMS* pPicParams) {
 }
 
 extern "C" {
+
 void cuda_copy_decoded_frame(void* src_frame, uint32_t dest_texture_handle, int mode, int width, int height) {
 //    NVDEC_API_CALL(cuCtxPushCurrent(g_mCudaContext));
 //    NVDEC_API_CALL(cuStreamSynchronize(0));
@@ -588,6 +599,10 @@ void cuda_copy_decoded_frame(void* src_frame, uint32_t dest_texture_handle, int 
  //   NVDEC_API_CALL(cuCtxPopCurrent(NULL));
 }
 
+void cuda_nv12_updater(uint32_t Ytex, uint32_t UVtex) {
+    cuda_copy_decoded_frame(nullptr, Ytex, 1, g_width, g_height);
+    cuda_copy_decoded_frame(nullptr, UVtex, 2, g_width, g_height);
+}
 }
 
 int MediaH264DecoderCuvid::HandlePictureDisplay(
@@ -609,6 +624,8 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
 
     g_dpSrcFrame = dpSrcFrame;
     g_nSrcPitch = nSrcPitch;
+    g_width = mOutputWidth;
+    g_height = mOutputHeight;
     g_mCudaContext = mCudaContext;
 
     unsigned int newOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
@@ -644,8 +661,17 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
     auto elapsed = std::chrono::milliseconds::zero();
     if (mParser.version() == 200) {
         if (g_hostColorBufferId >= 0 && g_gpuCopy) {
-            mRenderer.renderToHostColorBufferWithCallback(g_hostColorBufferId, mOutputWidth,
-                                          mOutputHeight, nullptr, cuda_copy_decoded_frame);
+            // mRenderer.renderToHostColorBufferWithCallback(g_hostColorBufferId,
+            // mOutputWidth,
+            //                              mOutputHeight, nullptr,
+            //                              cuda_copy_decoded_frame);
+            MediaHostRenderer::TextureFrame texFrame =
+                    mRenderer.getTextureFrame(g_width, g_height);
+            mRenderer.saveFrameToTextures(texFrame, cuda_nv12_updater);
+            if (!mIsLoadingFromSnapshot) {
+                std::lock_guard<std::mutex> g(mFrameLock);
+                mSavedTexFrames.push_back(texFrame);
+            }
         }
     }
      elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::steady_clock::now() - startTime);

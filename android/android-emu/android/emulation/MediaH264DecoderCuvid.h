@@ -141,6 +141,7 @@ private:
     mutable std::list<int> mSavedH;
     mutable std::list<uint64_t> mSavedPts;
     mutable std::list<std::vector<uint8_t>> mSavedFrames;
+    mutable std::list<MediaHostRenderer::TextureFrame> mSavedTexFrames;
     std::mutex mFrameLock;
 
     // cuda stuff

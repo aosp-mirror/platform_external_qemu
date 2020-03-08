@@ -68,6 +68,14 @@ MediaHostRenderer::TextureFrame MediaHostRenderer::getTextureFrame(int w,
     return frame;
 }
 
+void MediaHostRenderer::saveFrameToTextures(TextureFrame& texFrame,
+                                            cuda_nv12_updater_t fn) {
+    if (mVirtioGpuOps) {
+        mVirtioGpuOps->copy_data_to_nv12_textures(texFrame.Ytex, texFrame.UVtex,
+                                                  fn);
+    }
+}
+
 void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
                                                 unsigned int outputWidth,
                                                 unsigned int outputHeight,

@@ -23,6 +23,7 @@
 extern "C" {
 typedef void (*cuda_video_decoder_callback_t) (
         void* src_frame, uint32_t dest_texture_handle, int src_pitch, int width, int heigh);
+typedef void (*cuda_nv12_updater_t)(uint32_t Ytex, uint32_t UVtext);
 }
 
 namespace android {
@@ -50,6 +51,8 @@ private:
     std::list<TextureFrame> mFramePool;
 
 public:
+    void saveFrameToTextures(TextureFrame& texFrame, cuda_nv12_updater_t fn);
+
     void renderToHostColorBuffer(int hostColorBufferId,
                                  unsigned int outputWidth,
                                  unsigned int outputHeight,

@@ -1652,7 +1652,7 @@ void FrameBuffer::copyDataToNV12(uint32_t Ytex,
                                  cuda_nv12_updater_t callback) {
     AutoLock mutex(m_lock);
     ScopedBind bind(m_colorBufferHelper);
-    callback(Ytex, UVtex);
+    callback(s_gles2.glGetGlobalTexName(Ytex), s_gles2.glGetGlobalTexName(UVtex));
 }
 
 void FrameBuffer::swapNV12UpdateColorBuffer(uint32_t p_colorbuffer,
