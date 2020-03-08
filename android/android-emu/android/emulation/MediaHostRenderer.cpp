@@ -41,10 +41,32 @@ MediaHostRenderer::MediaHostRenderer() {
     }
 }
 
+MediaHostRenderer::~MediaHostRenderer() {
+    for (auto frame : mFramePool) {
+        mVirtioGpuOps->delete_nv12_textures(frame.Ytex, frame.UVtex);
+    }
+}
+
 const uint32_t kGlUnsignedByte = 0x1401;
 
 constexpr uint32_t kGL_RGBA8 = 0x8058;
 constexpr uint32_t kGL_RGBA = 0x1908;
+constexpr uint32_t kFRAME_POOL_SIZE = 4;
+
+MediaHostRenderer::TextureFrame MediaHostRenderer::getTextureFrame(int w,
+                                                                   int h) {
+    if (mFramePool.empty()) {
+        for (uint32_t i = 0; i < kFRAME_POOL_SIZE; ++i) {
+            TextureFrame frame;
+            mVirtioGpuOps->create_nv12_textures(w, h, &frame.Ytex,
+                                                &frame.UVtex);
+            mFramePool.push_back(std::move(frame));
+        }
+    }
+    TextureFrame frame = mFramePool.front();
+    mFramePool.pop_front();
+    return frame;
+}
 
 void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
                                                 unsigned int outputWidth,
@@ -60,6 +82,27 @@ void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
         mVirtioGpuOps->update_color_buffer(hostColorBufferId, 0, 0, outputWidth,
                                            outputHeight, kGL_RGBA,
                                            kGlUnsignedByte, decodedFrame);
+    } else {
+        H264_DPRINT("ERROR: there is no virtio Gpu Ops is not setup");
+    }
+}
+
+void MediaHostRenderer::renderToHostColorBufferWithTextures(
+        int hostColorBufferId,
+        unsigned int outputWidth,
+        unsigned int outputHeight,
+        TextureFrame frame) {
+    H264_DPRINT("Calling %s at %d buffer id %d", __func__, __LINE__,
+                hostColorBufferId);
+    if (hostColorBufferId < 0) {
+        H264_DPRINT("ERROR: negative buffer id %d", hostColorBufferId);
+        return;
+    }
+    if (mVirtioGpuOps) {
+        mVirtioGpuOps->swap_nv12_and_update_color_buffer(
+                hostColorBufferId, 0, 0, outputWidth, outputHeight, kGL_RGBA,
+                kGlUnsignedByte, &frame.Ytex, &frame.UVtex);
+        putTextureFrame(frame);
     } else {
         H264_DPRINT("ERROR: there is no virtio Gpu Ops is not setup");
     }
