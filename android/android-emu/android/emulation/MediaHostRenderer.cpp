@@ -41,10 +41,32 @@ MediaHostRenderer::MediaHostRenderer() {
     }
 }
 
+MediaHostRenderer::~MediaHostRenderer() {
+    for (auto frame : mFramePool) {
+        mVirtioGpuOps->delete_nv12_textures(frame.Ytex, frame.UVtex);
+    }
+}
+
 const uint32_t kGlUnsignedByte = 0x1401;
 
 constexpr uint32_t kGL_RGBA8 = 0x8058;
 constexpr uint32_t kGL_RGBA = 0x1908;
+constexpr uint32_t kFRAME_POOL_SIZE = 4;
+
+MediaHostRenderer::TextureFrame MediaHostRenderer::getTextureFrame(int w,
+                                                                   int h) {
+    if (mFramePool.empty()) {
+        for (uint32_t i = 0; i < kFRAME_POOL_SIZE; ++i) {
+            TextureFrame frame;
+            mVirtioGpuOps->create_nv12_textures(w, h, &frame.Ytex,
+                                                &frame.UVtex);
+            mFramePool.push_back(std::move(frame));
+        }
+    }
+    TextureFrame frame = mFramePool.front();
+    mFramePool.pop_front();
+    return frame;
+}
 
 void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
                                                 unsigned int outputWidth,

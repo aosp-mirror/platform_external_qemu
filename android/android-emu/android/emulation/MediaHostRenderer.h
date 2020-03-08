@@ -18,6 +18,7 @@
 #include "android/opengles.h"
 
 #include <stddef.h>
+#include <list>
 
 extern "C" {
 typedef void (*cuda_video_decoder_callback_t) (
@@ -31,6 +32,24 @@ namespace emulation {
 // to host color buffer
 class MediaHostRenderer {
 public:
+    struct TextureFrame {
+        uint32_t Ytex;
+        uint32_t UVtex;
+    };
+
+    // get a TextureFrame structure to hold decoded frame
+    TextureFrame getTextureFrame(int w, int h);
+
+    // put back a used TextureFrame so it can be reused again
+    // later
+    void putTextureFrame(TextureFrame frame) {
+        mFramePool.push_back(std::move(frame));
+    }
+
+private:
+    std::list<TextureFrame> mFramePool;
+
+public:
     void renderToHostColorBuffer(int hostColorBufferId,
                                  unsigned int outputWidth,
                                  unsigned int outputHeight,
@@ -42,7 +61,7 @@ public:
                                  uint8_t* decodedFrame, cuda_video_decoder_callback_t callback);
 
     MediaHostRenderer();
-    ~MediaHostRenderer() = default;
+    ~MediaHostRenderer();
 
 private:
     AndroidVirtioGpuOps* mVirtioGpuOps = nullptr;
