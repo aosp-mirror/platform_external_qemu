@@ -1,0 +1,48 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000001877507",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1252914?revision\u003d10",
+      "fixSuggestions": [
+        {
+          "fixId": "2c755191_12ce0035",
+          "description": "Change to \"android/android-emu/android/opengl/virtio_gpu_ops.h\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/opengl/virtio_gpu_ops.h",
+              "range": {
+                "startLine": 40,
+                "startChar": 0,
+                "endLine": 40,
+                "endChar": 5
+              },
+              "replacement": " */"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "04b52305_b9db65b1",
+        "filename": "android/android-emu/android/opengl/virtio_gpu_ops.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-03-08T05:48:07Z",
+      "side": 1,
+      "message": "Common typo found: \" * */\" -- should it be \" */\"?\nMalformatted comment.\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 5
+      },
+      "revId": "9f938c1ff54842e7e96c07df08ce07e028e4f711",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
