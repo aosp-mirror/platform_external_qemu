@@ -365,7 +365,7 @@ void main(void) {
     cutoffCoordsC.y = outCoord.y;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
     yuv[1] = texture2D(uvsampler, cutoffCoordsC).r - 0.5;
-    yuv[2] = 0.96 * (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
+    yuv[2] = texture2D(uvsampler, cutoffCoordsC).a - 0.5;
     highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
                0,                  -0.39176229009491365, 2.017232142857143,
@@ -734,6 +734,11 @@ void YUVConverter::drawConvert(int x, int y,
                 if (pixels)
                     subUpdateYUVGLTex(GL_TEXTURE1, mUVtex, x, y, cwidth,
                                       cheight, pixels + uoff, true);
+	       
+		s_gles2.glActiveTexture(GL_TEXTURE1);
+	       	s_gles2.glBindTexture(GL_TEXTURE_2D, mUVtex);
+         	s_gles2.glActiveTexture(GL_TEXTURE0);
+            	s_gles2.glBindTexture(GL_TEXTURE_2D, mYtex);
                 fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
             }
             doYUVConversionDraw(mProgram,

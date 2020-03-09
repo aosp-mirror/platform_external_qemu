@@ -162,7 +162,7 @@ void MediaH264DecoderCuvid::initH264ContextInternal(unsigned int width,
     CUVIDPARSERPARAMS videoParserParameters = {};
     videoParserParameters.CodecType = cudaVideoCodec_H264;
     videoParserParameters.ulMaxNumDecodeSurfaces = 1;
-    videoParserParameters.ulMaxDisplayDelay = 4;
+    videoParserParameters.ulMaxDisplayDelay = 1;
     videoParserParameters.pUserData = this;
     videoParserParameters.pfnSequenceCallback = HandleVideoSequenceProc;
     videoParserParameters.pfnDecodePicture = HandlePictureDecodeProc;
@@ -346,20 +346,15 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
                     std::chrono::steady_clock::now() - startTime);
      H264_DPRINT("get image takes %lld ms\n\n", elapsed.count());
     if (mParser.version() == 200) {
-        if (param.hostColorBufferId >= 0 && g_gpuCopy) {
-            MediaHostRenderer::TextureFrame texFrame = mSavedTexFrames.front();
-            mSavedTexFrames.pop_front();
-            mRenderer.renderToHostColorBufferWithTextures(
-                    g_hostColorBufferId, mOutputWidth, mOutputHeight, texFrame);
-            // mRenderer.renderToHostColorBufferWithCallback(g_hostColorBufferId,
-            // mOutputWidth,
-            //                              mOutputHeight, pDecodedFrame,
-            //                              cuda_copy_decoded_frame);
-            // convert8.UVInterleavedToPlanar(pDecodedFrame);
-            // memset(pDecodedFrame, 0x0f, myOutputHeight * myOutputWidth * 3 /
-            // 2); mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
-            // myOutputWidth,
-            //                             myOutputHeight, pDecodedFrame);
+        if (param.hostColorBufferId >= 0) {
+		if (g_gpuCopy) {
+            		MediaHostRenderer::TextureFrame texFrame = mSavedTexFrames.front();
+            		mSavedTexFrames.pop_front();
+            		mRenderer.renderToHostColorBufferWithTextures(g_hostColorBufferId, mOutputWidth, mOutputHeight, texFrame);
+		} else {
+             //convert8.UVInterleavedToPlanar(pDecodedFrame);
+	     mRenderer.renderToHostColorBuffer(param.hostColorBufferId, myOutputWidth, myOutputHeight, pDecodedFrame);
+		}
             elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
                     std::chrono::steady_clock::now() - startTime);
             H264_DPRINT("get image takes %lld ms\n\n", elapsed.count());
@@ -438,7 +433,8 @@ bool MediaH264DecoderCuvid::initCudaDrivers() {
 }
 
 int MediaH264DecoderCuvid::HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat) {
-    int nDecodeSurface = 8;  // pVideoFormat->min_num_decode_surfaces;
+    int nDecodeSurface = 4; //pVideoFormat->min_num_decode_surfaces;
+    //int nDecodeSurface = 8;  // pVideoFormat->min_num_decode_surfaces;
 
     CUVIDDECODECAPS decodecaps;
     memset(&decodecaps, 0, sizeof(decodecaps));
@@ -556,7 +552,7 @@ extern "C" {
 void cuda_copy_decoded_frame(void* src_frame, uint32_t dest_texture_handle, int mode, int width, int height) {
 //    NVDEC_API_CALL(cuCtxPushCurrent(g_mCudaContext));
 //    NVDEC_API_CALL(cuStreamSynchronize(0));
-    if (g_mGLCudaContext == nullptr) {
+    if (g_mGLCudaContext == nullptr && false) {
         CUdevice cudaDevice = 0;
         cuDeviceGet(&cudaDevice, 0);
         NVDEC_API_CALL(cuGLCtxCreate(&g_mGLCudaContext, CU_CTX_BLOCKING_SYNC, cudaDevice));
@@ -585,7 +581,7 @@ void cuda_copy_decoded_frame(void* src_frame, uint32_t dest_texture_handle, int 
     m.dstPitch = width * 1;
     m.WidthInBytes = width * 1;
     m.Height = height;
-    H264_DPRINT("dstPitch %d, WidthInBytes %d Height %d", (int)m.dstPitch, (int)m.WidthInBytes, (int)m.Height);
+    H264_DPRINT("dstPitch %d, WidthInBytes %d Height %d surface-height %d", (int)m.dstPitch, (int)m.WidthInBytes, (int)m.Height, (int)g_mSurfaceHeight);
  
     if (mode == 1) { // copy Y data
         NVDEC_API_CALL(cuMemcpy2D(&m));
@@ -595,7 +591,7 @@ void cuda_copy_decoded_frame(void* src_frame, uint32_t dest_texture_handle, int 
         NVDEC_API_CALL(cuMemcpy2D(&m));
     }
     NVDEC_API_CALL(cuGraphicsUnmapResources(1, &CudaRes, 0));
-//    NVDEC_API_CALL(cuStreamSynchronize(0));
+    NVDEC_API_CALL(cuStreamSynchronize(0));
 //    NVDEC_API_CALL(cuCtxPopCurrent(NULL));
  //   NVDEC_API_CALL(cuCtxPopCurrent(NULL));
 }
@@ -649,14 +645,17 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
                 m.dstHost, (int)m.dstPitch, (int)m.WidthInBytes, (int)m.Height, (int)nSrcPitch, (int)mLumaHeight,
                 (int)mChromaHeight);
 
-    //NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
-
+    if (!g_gpuCopy) {
+    	NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
+    }
     m.srcDevice =
             (CUdeviceptr)((uint8_t*)dpSrcFrame + m.srcPitch * mSurfaceHeight);
     m.dstDevice =
             (CUdeviceptr)(m.dstHost = pDecodedFrame + m.dstPitch * mLumaHeight);
     m.Height = mChromaHeight;
-    //NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
+    if (!g_gpuCopy) {
+    	NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
+    }
 
     NVDEC_API_CALL(cuStreamSynchronize(0));
 
