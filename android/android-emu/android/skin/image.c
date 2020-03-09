@@ -117,6 +117,8 @@ skin_image_free( SkinImage*  image )
     if (image && image != _no_image)
     {
         skin_surface_unrefp(&image->surface);
+        D("free skin image: w %d h %d r %d surface %p\n", image->w, image->h,
+          image->desc.rotation, image->surface);
         free(image);
     }
 }
@@ -310,6 +312,7 @@ static SkinImage*
 skin_image_create( SkinImageDesc*  desc, unsigned  hash )
 {
     SkinImage*  node;
+    D("%s rotation %d\n", __FUNCTION__, desc->rotation);
 
     node = skin_image_alloc( desc, hash );
     if (node == NULL)
@@ -444,6 +447,9 @@ skin_image_rotate( SkinImage*  source, SkinRotation  rotation )
     SkinImageDesc  desc;
     SkinImage*     image;
 
+    D("%s: source (w %d h %d r %d) dest rotation %d\n", __FUNCTION__,
+      source->w, source->h, source->desc.rotation, rotation);
+
     if (source == _no_image || source->desc.rotation == rotation) {
         return skin_image_ref(source);
     }
@@ -480,6 +486,8 @@ skin_image_clone_rotated( SkinImage* source, SkinRotation by ) {
     }
     image->surface = skin_surface_create_derived(source->surface, by,
                                                  SKIN_BLEND_FULL);
+    D("%s w %d h %d r %d surface %p\n", __FUNCTION__,
+      image->w, image->h, image->desc.rotation, image->surface);
     if (image->surface == NULL) {
         goto Fail;
     }
