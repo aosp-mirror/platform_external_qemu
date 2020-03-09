@@ -636,6 +636,8 @@ void YUVConverter::drawConvert(int x, int y,
         if (pixels)
             subUpdateYUVGLTex(GL_TEXTURE0, mYtex, x, y, ywidth, height,
                               pixels + yoff, false);
+         s_gles2.glActiveTexture(GL_TEXTURE0);
+            s_gles2.glBindTexture(GL_TEXTURE_2D, mYtex);
         fprintf(stderr, "%s %d called here\n", __func__, __LINE__);
     }
 
