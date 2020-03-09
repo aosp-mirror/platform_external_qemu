@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d3be087e_a5ace999",
+        "filename": "android/data/advancedFeaturesCanary.ini",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-09T17:05:11Z",
+      "side": 1,
+      "message": "Need the same change in android/data/advancedFeatures.ini",
+      "revId": "042fdec91b17d36ffdcb6fbeea9e926eaa42ceb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9218ff5c_45321b49",
+        "filename": "mac.source.properties",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-09T17:05:11Z",
+      "side": 1,
+      "message": "put the version bump in a separate CL",
+      "revId": "042fdec91b17d36ffdcb6fbeea9e926eaa42ceb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
