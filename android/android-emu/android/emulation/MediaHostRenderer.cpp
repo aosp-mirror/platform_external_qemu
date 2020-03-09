@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MEDIA_H264_DEBUG 0
+#define MEDIA_H264_DEBUG 1
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt, ...)                                         \
@@ -51,7 +51,7 @@ const uint32_t kGlUnsignedByte = 0x1401;
 
 constexpr uint32_t kGL_RGBA8 = 0x8058;
 constexpr uint32_t kGL_RGBA = 0x1908;
-constexpr uint32_t kFRAME_POOL_SIZE = 4;
+constexpr uint32_t kFRAME_POOL_SIZE = 16;
 
 MediaHostRenderer::TextureFrame MediaHostRenderer::getTextureFrame(int w,
                                                                    int h) {
@@ -110,7 +110,9 @@ void MediaHostRenderer::renderToHostColorBufferWithTextures(
         mVirtioGpuOps->swap_nv12_and_update_color_buffer(
                 hostColorBufferId, 0, 0, outputWidth, outputHeight, kGL_RGBA,
                 kGlUnsignedByte, &frame.Ytex, &frame.UVtex);
-        putTextureFrame(frame);
+	if (frame.Ytex > 0 && frame.UVtex > 0) {
+           putTextureFrame(frame);
+	}
     } else {
         H264_DPRINT("ERROR: there is no virtio Gpu Ops is not setup");
     }

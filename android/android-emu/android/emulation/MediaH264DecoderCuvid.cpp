@@ -319,6 +319,7 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
 
     static int numbers = 0;
     H264_DPRINT("calling getImage %d colorbuffer %d", numbers++, param.hostColorBufferId);
+    g_hostColorBufferId = param.hostColorBufferId;
     doFlush();
     uint8_t* dst = param.pDecodedFrame;
     int myOutputWidth = mOutputWidth;
@@ -437,7 +438,7 @@ bool MediaH264DecoderCuvid::initCudaDrivers() {
 }
 
 int MediaH264DecoderCuvid::HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat) {
-    int nDecodeSurface = 4;  // pVideoFormat->min_num_decode_surfaces;
+    int nDecodeSurface = 8;  // pVideoFormat->min_num_decode_surfaces;
 
     CUVIDDECODECAPS decodecaps;
     memset(&decodecaps, 0, sizeof(decodecaps));
@@ -600,8 +601,10 @@ void cuda_copy_decoded_frame(void* src_frame, uint32_t dest_texture_handle, int 
 }
 
 void cuda_nv12_updater(uint32_t Ytex, uint32_t UVtex) {
-    cuda_copy_decoded_frame(nullptr, Ytex, 1, g_width, g_height);
+	H264_DPRINT("copyiong Ytex %d", Ytex);
+	H264_DPRINT("copyiong UVtex %d", UVtex);
     cuda_copy_decoded_frame(nullptr, UVtex, 2, g_width, g_height);
+    cuda_copy_decoded_frame(nullptr, Ytex, 1, g_width, g_height);
 }
 }
 
