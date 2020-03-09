@@ -434,6 +434,9 @@ bool skin_ui_process_events(SkinUI* ui) {
         case kEventSetNoSkin:
             emulator_window_set_no_skin();
             break;
+        case kEventRestoreSkin:
+            emulator_window_restore_skin();
+            break;
         }
     }
 

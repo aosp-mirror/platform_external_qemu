@@ -1390,6 +1390,12 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
 
     data->fbw = window->framebuffer.w;
     data->fbh = window->framebuffer.h;
+
+#if 0
+    printf("%s pos %d %d, size %d %d, fb %d %d\n", __func__,
+           data->wx, data->wy, data->ww, data->wh,
+           data->fbw, data->fbh);
+#endif
 #if defined(__APPLE__)
     // The native GL subwindow for OSX (using Cocoa) uses cartesian (y-up) coordinates. We
     // have code to transform window (y-down) coordinates into cartesian coordinates at that
@@ -1955,7 +1961,6 @@ skin_window_set_multi_display(SkinWindow* window,
         }
     }
 }
-
 
 void
 skin_window_set_scale(SkinWindow* window, double scale)

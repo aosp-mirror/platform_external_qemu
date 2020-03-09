@@ -35,7 +35,8 @@ typedef struct EmulatorScreenMask {
 typedef struct EmulatorWindow {
     const AConfig* aconfig;
     SkinFile*      layout_file;
-    SkinFile*      layout_file_original;
+    SkinFile*      layout_file_skin;
+    SkinFile*      layout_file_no_skin;
     int            win_x;
     int            win_y;
     SkinUI*        ui;
@@ -100,4 +101,5 @@ void emulator_window_set_screen_mask(int width, int height, const unsigned char*
 
 void emulator_window_set_no_skin();
 
+void emulator_window_restore_skin();
 ANDROID_END_HEADER
