@@ -2733,6 +2733,10 @@ int FrameBuffer::destroyDisplay(uint32_t displayId) {
     // unlock before calling setUIDisplayRegion
     if (needUIUpdate) {
         emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
+        if (m_displays.size() == 1) {
+            // only display 0 remains, restore skin
+          emugl::get_emugl_window_operations().restoreSkin();
+        }
     }
     Post postCmd;
     postCmd.cmd = PostCmd::Clear;

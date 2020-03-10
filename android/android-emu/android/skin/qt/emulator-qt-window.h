@@ -298,6 +298,7 @@ public:
     bool isMultiDisplayEnabled();
     bool getMonitorRect(uint32_t* width, uint32_t* height);
     void setNoSkin();
+    void restoreSkin();
     bool multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
                                    uint32_t dpi, uint32_t flag);
     void updateUIMultiDisplayPage(uint32_t id);
