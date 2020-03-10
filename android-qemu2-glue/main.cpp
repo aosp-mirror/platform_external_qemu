@@ -290,6 +290,23 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
 }
 
 
+static void prepareFreeformXml(const char* destDirectory,
+                              const char* srcDirectory) {
+    //TODO:
+    // in goldfish/vendor.mk:
+    // copy the freeformxml to data/system
+    // if(!feature_enabled_freeform(avd)) {
+    // return;
+    //}
+    static const int kDirFilePerm = 02750;
+    std::string guestXmlDir = PathUtils::join(destDirectory, "system");
+    std::string guestXmlPath = PathUtils::join(guestXmlDir, "display_settings.xml");
+    std::string guestFreeformXmlPath = PathUtils::join(guestXmlDir, "display_settings_freeform.xml");
+    path_mkdir_if_needed(guestXmlDir.c_str(), kDirFilePerm);
+    path_copy_file(guestXmlPath.c_dir(), guestFreeformXmlPath.c_str());
+    android_chmod(guestXmlPath.c_str(), 0640);
+}
+
 static void prepareDataFolder(const char* destDirectory,
                               const char* srcDirectory) {
     // The adb_keys file permission will also be set in guest system.
@@ -355,6 +372,8 @@ static int createUserData(AvdInfo* avd,
     if (path_exists(initDir.get())) {
         D("Creating ext4 userdata partition: %s", dataPath);
         prepareDataFolder(dataPath, initDir.get());
+        prepareFreeformXml(dataPath, initDir.get());
+
         needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
         path_delete_dir(dataPath);
     }
