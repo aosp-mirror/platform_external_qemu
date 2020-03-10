@@ -433,8 +433,9 @@ bool MediaH264DecoderCuvid::initCudaDrivers() {
 }
 
 int MediaH264DecoderCuvid::HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat) {
-    int nDecodeSurface = 4; //pVideoFormat->min_num_decode_surfaces;
-    //int nDecodeSurface = 8;  // pVideoFormat->min_num_decode_surfaces;
+//    int nDecodeSurface = 4; //pVideoFormat->min_num_decode_surfaces;
+//    for 4k video, the number has to be about 8 to avoid quality issues
+    int nDecodeSurface = 8;  // pVideoFormat->min_num_decode_surfaces;
 
     CUVIDDECODECAPS decodecaps;
     memset(&decodecaps, 0, sizeof(decodecaps));
