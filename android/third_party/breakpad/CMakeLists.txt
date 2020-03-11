@@ -584,7 +584,8 @@ elseif(WINDOWS_MSVC_X86_64)
         ${BREAKPAD_SRC}/client/windows/unittests/exception_handler_nesting_test.cc
         ${BREAKPAD_SRC}/client/windows/unittests/minidump_test.cc
         ${BREAKPAD_SRC}/client/windows/unittests/dump_analysis.cc
-        ${BREAKPAD_SRC}/client/windows/unittests/crash_generation_server_test.cc
+        # BUG: 151220246 this set of tests is flaky on windows
+        # ${BREAKPAD_SRC}/client/windows/unittests/crash_generation_server_test.cc
   )
   target_link_libraries(windows_client_unittests
                         PRIVATE breakpad_client mincore::mincore gmock_main)
