@@ -18,6 +18,7 @@
 #include "android/emulation/address_space_host_media.h"
 #endif
 #include "android/emulation/address_space_host_memory_allocator.h"
+#include "android/emulation/address_space_shared_slots_host_memory_allocator.h"
 #include "android/emulation/control/vm_operations.h"
 
 #include "android/base/memory/LazyInstance.h"
@@ -249,6 +250,9 @@ private:
             return nullptr;
         case AddressSpaceDeviceType::HostMemoryAllocator:
             return DeviceContextPtr(new AddressSpaceHostMemoryAllocatorContext(
+                get_address_space_device_control_ops()));
+        case AddressSpaceDeviceType::SharedSlotsHostMemoryAllocator:
+            return DeviceContextPtr(new AddressSpaceSharedSlotsHostMemoryAllocatorContext(
                 get_address_space_device_control_ops()));
 
         default:

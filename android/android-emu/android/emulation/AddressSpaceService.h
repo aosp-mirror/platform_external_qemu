@@ -37,6 +37,7 @@ enum AddressSpaceDeviceType {
     // TODO: All other services currently using goldfish pipe
     GenericPipe = 4,
     HostMemoryAllocator = 5,
+    SharedSlotsHostMemoryAllocator = 6,
 };
 
 struct AddressSpaceDevicePingInfo {
