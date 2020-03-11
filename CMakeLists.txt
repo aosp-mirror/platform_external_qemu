@@ -83,6 +83,13 @@ set(GFXSTREAM FALSE
 set(OPTION_AEMU_LIBS_ONLY FALSE
     CACHE BOOL "True if we should build only AEMU libraries and their tests.")
 
+set(CROSVM FALSE
+    CACHE BOOL "True if we should build crosvm (also builds gfxstream)")
+
+if (CROSVM)
+    set(GFXSTREAM TRUE)
+endif()
+
 if (GFXSTREAM)
     set(OPTION_AEMU_LIBS_ONLY TRUE)
     set(OPTION_GFXSTREAM_BACKEND TRUE)

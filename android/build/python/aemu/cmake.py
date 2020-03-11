@@ -78,9 +78,9 @@ flags.DEFINE_boolean(
     'minbuild', False, 'Minimize the build to only support x86_64/aarch64.')
 
 flags.DEFINE_boolean(
-    'gfxstream', False, 'Build gfxstream libs/tests + crosvm.')
+    'gfxstream', False, 'Build gfxstream libs/tests')
 flags.DEFINE_boolean(
-    'crosvm', False, 'Build gfxstrea libs/tests + crosvm.')
+    'crosvm', False, 'Build crosvm')
 
 def configure():
     """Configures the cmake project."""
@@ -132,7 +132,7 @@ def configure():
         cmake_cmd += ['-DGFXSTREAM=%s' % FLAGS.gfxstream]
 
     if FLAGS.crosvm:
-        cmake_cmd += ['-DGFXSTREAM=%s' % FLAGS.crosvm]
+        cmake_cmd += ['-DCROSVM=%s' % FLAGS.crosvm]
 
     cmake_cmd += Generator.from_string(FLAGS.generator).to_cmd()
     cmake_cmd += [get_qemu_root()]
