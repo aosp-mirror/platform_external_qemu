@@ -35,11 +35,14 @@ if(OPTION_GFXSTREAM_BACKEND)
                               OpenglRender)
 
   android_install_shared(gfxstream_backend)
-  android_crosvm_build(gfxstream_backend)
-  set(CMAKE_CROSVM_SRC_PATH
-      "${ANDROID_QEMU2_TOP_DIR}/../../platform/crosvm")
-  add_custom_target(crosvm_gfxstream ALL DEPENDS
-      "${CMAKE_BINARY_DIR}/crosvm-build-env/release/crosvm")
+
+  if (CROSVM)
+    android_crosvm_build(gfxstream_backend)
+    set(CMAKE_CROSVM_SRC_PATH
+        "${ANDROID_QEMU2_TOP_DIR}/../../platform/crosvm")
+    add_custom_target(crosvm_gfxstream ALL DEPENDS
+        "${CMAKE_BINARY_DIR}/crosvm-build-env/release/crosvm")
+  endif()
 
 endif()
 

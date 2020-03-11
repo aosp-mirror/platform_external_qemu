@@ -78,12 +78,23 @@ set(OPTION_GFXSTREAM_BACKEND FALSE
     CACHE BOOL "True if we should build the gfxstream backend (plus everything else).")
 
 set(GFXSTREAM FALSE
-    CACHE BOOL "True if we should build only gfxstream and its accompanying libraries/tests.")
+    CACHE BOOL "True if we should build gfxstream, crosvm, and its accompanying libraries/tests.")
 
 set(OPTION_AEMU_LIBS_ONLY FALSE
     CACHE BOOL "True if we should build only AEMU libraries and their tests.")
 
-if (GFXSTREAM)
+set(CROSVM FALSE
+    CACHE BOOL "True if we should build crosvm (also builds gfxstream)")
+
+set(GFXSTREAM_ONLY FALSE
+    CACHE BOOL "True if we should build only gfxstream")
+
+if (GFXSTREAM_ONLY)
+    set(CROSVM FALSE)
+    set(GFXSTREAM TRUE)
+endif()
+
+if (CROSVM OR GFXSTREAM)
     set(OPTION_AEMU_LIBS_ONLY TRUE)
     set(OPTION_GFXSTREAM_BACKEND TRUE)
     set(OPTION_TCMALLOC FALSE)
