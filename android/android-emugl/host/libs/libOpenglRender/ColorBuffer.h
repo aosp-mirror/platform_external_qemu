@@ -177,6 +177,8 @@ public:
                              void* pixels,
                              uint32_t pixels_size);
 
+    void swapYUVTextures(uint32_t texture_type, uint32_t* textures);
+
     // Update the ColorBuffer instance's pixel values from host memory.
     // |p_format / p_type| are the desired OpenGL color buffer format
     // and data type.
@@ -301,6 +303,7 @@ private:
     GLuint m_yuv_conversion_fbo = 0;  // FBO to offscreen-convert YUV to RGB
     GLuint m_scaleRotationFbo = 0;  // FBO to read scaled rotation pixels
     std::unique_ptr<YUVConverter> m_yuv_converter;
+    std::unique_ptr<YUVConverter> m_nv12_converter;
     std::vector<uint8_t> m_yuv_buf;
     HandleType mHndl;
 
