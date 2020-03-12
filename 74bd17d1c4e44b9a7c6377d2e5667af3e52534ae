@@ -39,6 +39,30 @@
       "revId": "74bd17d1c4e44b9a7c6377d2e5667af3e52534ae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b637857_364c032a",
+        "filename": "android/android-emu/android/emulation/address_space_shared_slots_host_memory_allocator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-03-12T17:54:37Z",
+      "side": 1,
+      "message": "What is the advantage of using LazyInstance?",
+      "parentUuid": "17e941d4_ba83bcbe",
+      "range": {
+        "startLine": 257,
+        "startChar": 0,
+        "endLine": 258,
+        "endChar": 18
+      },
+      "revId": "74bd17d1c4e44b9a7c6377d2e5667af3e52534ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
