@@ -782,6 +782,7 @@ android_add_test(
       android/base/StringView_unittest.cpp
       android/base/SubAllocator_unittest.cpp
       android/base/synchronization/ConditionVariable_unittest.cpp
+      android/base/synchronization/Event_unittest.cpp
       android/base/synchronization/Lock_unittest.cpp
       android/base/synchronization/ReadWriteLock_unittest.cpp
       android/base/synchronization/MessageChannel_unittest.cpp

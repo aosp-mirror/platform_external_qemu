@@ -20,6 +20,7 @@ public:
     TouchEventSender(const AndroidConsoleAgents* const consoleAgents);
     ~TouchEventSender();
     bool send(const TouchEvent* request);
+    bool sendOnThisThread(const TouchEvent* request);
 
 private:
     void doSend(const TouchEvent touch);
