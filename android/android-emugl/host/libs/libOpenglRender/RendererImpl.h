@@ -88,6 +88,7 @@ public:
     void unlockMultiDisplayOnLoad(void) override;
     void cleanupProcGLObjects(uint64_t puid) final;
     struct AndroidVirtioGpuOps* getVirtioGpuOps() final;
+    void* getFramebufferEGLContext() final;
 
     void pauseAllPreSave() final;
     void resumeAll() final;

@@ -650,3 +650,10 @@ struct AndroidVirtioGpuOps* android_getVirtioGpuOps() {
     }
     return nullptr;
 }
+
+void* android_getFramebufferEGLContext() {
+    if (sRenderer) {
+        return sRenderer->getFramebufferEGLContext();
+    }
+    return nullptr;
+}

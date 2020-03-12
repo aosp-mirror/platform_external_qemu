@@ -194,6 +194,8 @@ public:
 
     virtual struct AndroidVirtioGpuOps* getVirtioGpuOps(void) = 0;
 
+    virtual void* getFramebufferEGLContext(void) = 0;
+
     // Stops all channels and render threads. The renderer cannot be used after
     // stopped.
     virtual void stop(bool wait) = 0;

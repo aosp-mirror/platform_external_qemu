@@ -124,4 +124,5 @@ const emugl::RendererPtr& android_getOpenglesRenderer();
 
 struct AndroidVirtioGpuOps* android_getVirtioGpuOps(void);
 
+void* android_getFramebufferEGLContext();
 ANDROID_END_HEADER

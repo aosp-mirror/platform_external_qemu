@@ -539,6 +539,9 @@ public:
     bool tryLockMultiDisplayOnLoad(void);
     void unlockMultiDisplayOnLoad(void);
 
+    EGLContext getGlobalEGLContext() { return m_pbufContext; }
+    HandleType getLastPostedColorBuffer() { return m_lastPostedColorBuffer; }
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
