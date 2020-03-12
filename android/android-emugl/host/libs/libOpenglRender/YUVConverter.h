@@ -21,6 +21,7 @@
 
 #include "FrameworkFormats.h"
 
+#include <stdint.h>
 // The purpose of YUVConverter is to use
 // OpenGL shaders to convert YUV images to RGB
 // images that can be displayed on screen.
@@ -52,6 +53,16 @@ public:
     // the host color buffer
     // (rcUpdateColorBuffer)
     void drawConvert(int x, int y, int width, int height, char* pixels);
+
+    void swapTextures(uint32_t type, uint32_t* textures);
+
+    // public so other classes can call
+    static void createYUVGLTex(GLenum texture_unit,
+                               GLsizei width,
+                               GLsizei height,
+                               GLuint* texName_out,
+                               bool uvInterleaved);
+
 private:
     // For dealing with n-pixel-aligned buffers
     void updateCutoffs(float width, float ywidth, float halfwidth, float cwidth);
