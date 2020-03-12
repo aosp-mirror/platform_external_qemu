@@ -16,7 +16,7 @@
 
 # you need to install yasm
 # on Linux: sudo apt-get install yams
-# on MAC: 
+# on MAC:
 # (1) ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 # (2) brew install yams
 
@@ -56,7 +56,7 @@ package_builder_parse_package_list
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
     dump "Remote x264 build for: $DARWIN_SYSTEMS"
-    builder_prepare_remote_darwin_build 
+    builder_prepare_remote_darwin_build
 
     builder_run_remote_darwin_build
 
@@ -72,20 +72,47 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         dump "$(builder_text) Building x264"
 
         builder_unpack_package_source x264
+        case $SYSTEM in
+          linux-x86_64)
+                MY_FLAGS=" --enable-pic \
+                    --extra-cflags=-fPIC \
+                "
+                ;;
+          windows_msvc-x86_64)
+                MY_FLAGS="--host=x86_64-pc-mingw64 --extra-cflags=-ffast-math"
+                warn "X264 encoder is disabled until b/150910477 is fixed."
+                export CC=cl
+                export RC=rc /FO x264res.o f || true
+                _SHU_BUILDER_GNU_CONFIG_HOST_FLAG=
+                ;;
+          darwin-*)
+                # Use host compiler.
+                MY_FLAGS=" --enable-pic \
+                    --extra-cflags=-fPIC \
+                "
+                ;;
+          *)
+                panic "Host system '$CURRENT_HOST' is not supported by this script!"
+                ;;
+        esac
 
         builder_build_autotools_package x264 \
-                --enable-pic \
+                $MY_FLAGS \
                 --disable-asm \
-                --extra-cflags="-fPIC" \
-                --extra-cxxflags="-fPIC" \
+                --disable-cli  \
                 --enable-static
 
         # Copy binaries necessary for the build itself as well as static
-        # libraries.
+        # libraries. (Note missing files are nops.)
         copy_directory_files \
                 "$(builder_install_prefix)" \
                 "$INSTALL_DIR/$SYSTEM" \
                 lib/libx264.a
+
+        copy_directory_files \
+                "$(builder_install_prefix)" \
+                "$INSTALL_DIR/$SYSTEM" \
+                lib/libx264.lib
 
         copy_directory \
                 "$(builder_install_prefix)/include" \
