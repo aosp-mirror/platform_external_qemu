@@ -133,6 +133,9 @@ void EditableSliderWidget::lineEditValueChanged() {
 }
 
 bool EditableSliderWidget::eventFilter(QObject*, QEvent* e) {
+    // This function can be called by the destructor, hence we check null here.
+    if (!mLineEdit.validator()) return false;
+
     if (e->type() == QEvent::FocusIn) {
         // If the edit box was previously highlighted due to an
         // invalid value, un-highlight it.
