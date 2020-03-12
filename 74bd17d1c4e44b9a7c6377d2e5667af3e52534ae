@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5bce63b3_eeb23c85",
+        "filename": "android/android-emu/android/emulation/address_space_shared_slots_host_memory_allocator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-12T16:32:40Z",
+      "side": 1,
+      "message": "MemBlock operations could use a unit test that exercises creating/destroying enough memories from the allocator device to cause blocks to increase/decrease in number, kind of like https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-emu/android/emulation/address_space_graphics_unittests.cpp#798",
+      "revId": "74bd17d1c4e44b9a7c6377d2e5667af3e52534ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17e941d4_ba83bcbe",
+        "filename": "android/android-emu/android/emulation/address_space_shared_slots_host_memory_allocator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-12T16:32:40Z",
+      "side": 1,
+      "message": "should we put g_blocks and g_blocksLock inside a new class, and use LazyInstance pattern to init it?",
+      "range": {
+        "startLine": 257,
+        "startChar": 0,
+        "endLine": 258,
+        "endChar": 18
+      },
+      "revId": "74bd17d1c4e44b9a7c6377d2e5667af3e52534ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
