@@ -369,7 +369,8 @@ void main(void) {
     *ywidthcutoffloc_out = s_gles2.glGetUniformLocation(*program_out, "yWidthCutoff");
     *cwidthcutoffloc_out = s_gles2.glGetUniformLocation(*program_out, "cWidthCutoff");
     *ysamplerloc_out = s_gles2.glGetUniformLocation(*program_out, "ysampler");
-    *vusamplerloc_out = s_gles2.glGetUniformLocation(*program_out, "vusampler");
+    *vusamplerloc_out = s_gles2.glGetUniformLocation(
+            *program_out, YUVInterleaveDirectionVU ? "vusampler" : "uvsampler");
     *posloc_out = s_gles2.glGetAttribLocation(*program_out, "position");
     *incoordloc_out = s_gles2.glGetAttribLocation(*program_out, "inCoord");
 
