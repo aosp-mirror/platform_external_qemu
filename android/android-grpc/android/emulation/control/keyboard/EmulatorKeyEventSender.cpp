@@ -236,6 +236,11 @@ void EmulatorKeyEventSender::send(const KeyboardEvent* request) {
     mLooper->createTask([=]() { doSend(&event); });
 }
 
+void EmulatorKeyEventSender::sendOnThisThread(const KeyboardEvent* request) {
+    auto event = KeyboardEvent(*request);
+    doSend(&event);
+}
+
 void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
     if (request->key().size() > 0) {
         keyboard::DomKey domkey = browserKeyToDomKey(request->key());
