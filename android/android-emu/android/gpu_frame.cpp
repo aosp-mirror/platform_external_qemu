@@ -21,9 +21,13 @@
 #include <utility>        // for pair
 
 #include "android/base/Log.h"                   // for LogMessage, DCHECK
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "android/base/synchronization/MessageChannel.h"
 #include "android/opengl/GpuFrameBridge.h"      // for GpuFrameBridge
 #include "android/opengles.h"                   // for android_setPostCallback
+
+using android::base::AutoLock;
 
 namespace android {
 namespace base {
@@ -42,15 +46,94 @@ static GpuFrameBridge* sBridge = NULL;
 // path and it is not in use because glReadPixels will slow down everything.
 static bool sIsGuestMode = false;
 
-static std::unordered_map<void*, FrameAvailableCallback> sReceivers{};
-static android::base::Lock sReceiversLock;
+class FrameReceiverState {
+public:
+    FrameReceiverState() = default;
+
+    void registerCallback(FrameAvailableCallback frameAvailable, void* opaque) {
+        ForwarderMessage msg = {
+            .cmd = FRAME_FORWARDER_ADD,
+            .data = opaque,
+            .callback = frameAvailable,
+        };
+
+        mMessages.send(msg);
+    }
+
+    void unregisterCallback(void* opaque) {
+        ForwarderMessage msg = {
+            .cmd = FRAME_FORWARDER_REMOVE,
+            .data = opaque,
+            .callback = {},
+        };
+
+        mMessages.send(msg);
+    }
+
+    void process() {
+        ForwarderMessage msg;
+
+        while (mMessages.tryReceive(&msg)) {
+            switch (msg.cmd) {
+                case FRAME_FORWARDER_ADD: {
+                    AutoLock lock(mLock);
+                    mStoredForwarders[msg.data] = msg.callback;
+                    break;
+                }
+                case FRAME_FORWARDER_REMOVE: {
+                    AutoLock lock(mLock);
+                    mStoredForwarders.erase(msg.data);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        struct RegisteredForwarder {
+            void* data;
+            FrameAvailableCallback callback;
+        };
+
+        std::vector<RegisteredForwarder> toRun;
+
+        AutoLock lock(mLock);
+        for (auto it : mStoredForwarders) {
+            RegisteredForwarder rf = {
+                .data = it.first,
+                .callback = it.second,
+            };
+            toRun.push_back(rf);
+        }
+        lock.unlock();
+
+        for (const auto& rf: toRun) {
+            rf.callback(rf.data);
+        }
+    }
+
+private:
+    enum FrameForwarderCommand {
+        FRAME_FORWARDER_ADD = 0,
+        FRAME_FORWARDER_REMOVE = 1,
+    };
+
+    struct ForwarderMessage {
+        FrameForwarderCommand cmd;
+        void* data;
+        FrameAvailableCallback callback;
+    };
+
+    android::base::MessageChannel<ForwarderMessage, 16> mMessages;
+
+    android::base::Lock mLock; // protects mStoredForwarders
+    std::unordered_map<void*, FrameAvailableCallback> mStoredForwarders;
+};
+
+static android::base::LazyInstance<FrameReceiverState> sReceiverState = LAZY_INSTANCE_INIT;
 
 static void frameReceivedForwader(void* __ignored) {
-    android::base::AutoLock lock(sReceiversLock);
-    // Iterate over an unordered_map using range based for loop
-    for (auto fn : sReceivers) {
-        fn.second(fn.first);
-    }
+    sReceiverState->process();
 }
 
 // Used to keep track of how many recorders we have active.
@@ -196,17 +279,13 @@ void* gpu_frame_get_record_frame() {
 
 void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
                                          void* opaque) {
-    android::base::AutoLock lock(sReceiversLock);
-    auto cnt = sReceivers.size();
-    sReceivers[opaque] = frameAvailable;
+    sReceiverState->registerCallback(frameAvailable, opaque);
     gpu_frame_set_record_mode(true);
-    assert((cnt + 1) == sReceivers.size());
+    android_getVirtioGpuOps()->repost();
 }
 
 void gpu_unregister_shared_memory_callback(void* opaque) {
-    android::base::AutoLock lock(sReceiversLock);
-    auto cnt = sReceivers.size();
-    sReceivers.erase(opaque);
+    sReceiverState->unregisterCallback(opaque);
     gpu_frame_set_record_mode(false);
-    assert((cnt - 1) == sReceivers.size());
+    android_getVirtioGpuOps()->repost();
 }

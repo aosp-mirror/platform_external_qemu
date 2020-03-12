@@ -74,6 +74,7 @@ public:
     EmulatorKeyEventSender(const AndroidConsoleAgents* const consoleAgents);
     ~EmulatorKeyEventSender();
     void send(const KeyboardEvent* request);
+    void sendOnThisThread(const KeyboardEvent* request);
 
 private:
     void doSend(const KeyboardEvent* request);
