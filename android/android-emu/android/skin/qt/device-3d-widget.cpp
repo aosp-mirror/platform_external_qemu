@@ -8,7 +8,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/skin/qt/accelerometer-3d-widget.h"
+#include "android/skin/qt/device-3d-widget.h"
+
+#include "android/opengles.h"
 
 #include <assert.h>                                   // for assert
 #include <glm/gtc/quaternion.hpp>                     // for tquat
@@ -43,19 +45,19 @@ class QWidget;
 static glm::vec3 clampPosition(glm::vec3 position) {
     return glm::clamp(
             position,
-            glm::vec3(Accelerometer3DWidget::MinX, Accelerometer3DWidget::MinY,
-                      Accelerometer3DWidget::MinZ),
-            glm::vec3(Accelerometer3DWidget::MaxX, Accelerometer3DWidget::MaxY,
-                      Accelerometer3DWidget::MaxZ));
+            glm::vec3(Device3DWidget::MinX, Device3DWidget::MinY,
+                      Device3DWidget::MinZ),
+            glm::vec3(Device3DWidget::MaxX, Device3DWidget::MaxY,
+                      Device3DWidget::MaxZ));
 }
 
-Accelerometer3DWidget::Accelerometer3DWidget(QWidget* parent)
+Device3DWidget::Device3DWidget(QWidget* parent)
     : GLWidget(parent) {
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
 }
 
-Accelerometer3DWidget::~Accelerometer3DWidget() {
+Device3DWidget::~Device3DWidget() {
     // Free up allocated resources.
     if (!mGLES2) {
         return;
@@ -73,15 +75,15 @@ Accelerometer3DWidget::~Accelerometer3DWidget() {
     }
 }
 
-void Accelerometer3DWidget::setSensorsAgent(const QAndroidSensorsAgent* agent) {
+void Device3DWidget::setSensorsAgent(const QAndroidSensorsAgent* agent) {
     mSensorsAgent = agent;
 }
 
-void Accelerometer3DWidget::setTargetRotation(const glm::quat& rotation) {
+void Device3DWidget::setTargetRotation(const glm::quat& rotation) {
     mTargetRotation = rotation;
 }
 
-void Accelerometer3DWidget::setTargetPosition(const glm::vec3& position) {
+void Device3DWidget::setTargetPosition(const glm::vec3& position) {
     mTargetPosition = clampPosition(position);
 }
 
@@ -149,7 +151,7 @@ static GLuint create2DTexture(const GLESv2Dispatch* gles2,
     return gles2->glGetError() == GL_NO_ERROR ? texture : 0;
 }
 
-bool Accelerometer3DWidget::initGL() {
+bool Device3DWidget::initGL() {
     if (!mGLES2) {
         return false;
     }
@@ -183,7 +185,7 @@ bool Accelerometer3DWidget::initGL() {
     return true;
 }
 
-bool Accelerometer3DWidget::initProgram() {
+bool Device3DWidget::initProgram() {
     // Compile & link shaders.
     QFile vertex_shader_file(":/phone-model/vert.glsl");
     QFile fragment_shader_file(":/phone-model/frag.glsl");
@@ -218,7 +220,11 @@ bool Accelerometer3DWidget::initProgram() {
     return true;
 }
 
-bool Accelerometer3DWidget::initModel() {
+bool Device3DWidget::initModel() {
+    // Create an abstract parameterized model
+    // std::vector<float> model_vertex_data;
+    // std::vector<GLuint> indices;
+
     // Load the model and set up buffers.
     std::vector<float> model_vertex_data;
     std::vector<GLuint> indices;
@@ -254,7 +260,7 @@ bool Accelerometer3DWidget::initModel() {
     return true;
 }
 
-bool Accelerometer3DWidget::initTextures() {
+bool Device3DWidget::initTextures() {
     // Create textures.
     mDiffuseMap = create2DTexture(mGLES2,
                                   ":/phone-model/diffuse-map.png",
@@ -289,7 +295,7 @@ bool Accelerometer3DWidget::initTextures() {
     return true;
 }
 
-void Accelerometer3DWidget::resizeGL(int w, int h) {
+void Device3DWidget::resizeGL(int w, int h) {
     if (!mGLES2) {
         return;
     }
@@ -325,7 +331,7 @@ void Accelerometer3DWidget::resizeGL(int w, int h) {
 
 constexpr float kMetersPerInch = 0.0254f;
 
-void Accelerometer3DWidget::repaintGL() {
+void Device3DWidget::repaintGL() {
     if (!mGLES2) {
         return;
     }
@@ -387,6 +393,11 @@ void Accelerometer3DWidget::repaintGL() {
     // Set textures.
     mGLES2->glActiveTexture(GL_TEXTURE0);
     mGLES2->glBindTexture(GL_TEXTURE_2D, mDiffuseMap);
+
+    // HACK: Show the current framebuffer
+    struct AndroidVirtioGpuOps* ops = android_getVirtioGpuOps();
+    ops->bind_color_buffer_to_texture(ops->get_last_posted_color_buffer());
+
     mGLES2->glActiveTexture(GL_TEXTURE1);
     mGLES2->glBindTexture(GL_TEXTURE_2D, mSpecularMap);
     mGLES2->glActiveTexture(GL_TEXTURE2);
@@ -437,7 +448,7 @@ static float clamp(float a, float b, float x) {
     return std::max(a, std::min(b, x));
 }
 
-void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent* event) {
+void Device3DWidget::mouseMoveEvent(QMouseEvent* event) {
     if (mTracking && mOperationMode == OperationMode::Rotate) {
         float diff_x = event->x() - mPrevMouseX,
               diff_y = event->y() - mPrevMouseY;
@@ -463,7 +474,7 @@ void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent* event) {
     }
 }
 
-void Accelerometer3DWidget::wheelEvent(QWheelEvent* event) {
+void Device3DWidget::wheelEvent(QWheelEvent* event) {
     if (mOperationMode == OperationMode::Move) {
         // Note: angleDelta is given in 1/8 degree increments.
         const int angleDeltaDegrees = event->angleDelta().y() / 8;
@@ -476,7 +487,7 @@ void Accelerometer3DWidget::wheelEvent(QWheelEvent* event) {
     }
 }
 
-void Accelerometer3DWidget::mousePressEvent(QMouseEvent* event) {
+void Device3DWidget::mousePressEvent(QMouseEvent* event) {
     mPrevMouseX = event->x();
     mPrevMouseY = event->y();
     mPrevDragOrigin = screenToWorldCoordinate(event->x(), event->y());
@@ -484,7 +495,7 @@ void Accelerometer3DWidget::mousePressEvent(QMouseEvent* event) {
     emit dragStarted();
 }
 
-void Accelerometer3DWidget::mouseReleaseEvent(QMouseEvent* event) {
+void Device3DWidget::mouseReleaseEvent(QMouseEvent* event) {
     if (mTracking) {
         mTracking = false;
         emit dragStopped();
@@ -493,7 +504,7 @@ void Accelerometer3DWidget::mouseReleaseEvent(QMouseEvent* event) {
     emit targetRotationChanged();
 }
 
-glm::vec3 Accelerometer3DWidget::screenToWorldCoordinate(int x, int y) const {
+glm::vec3 Device3DWidget::screenToWorldCoordinate(int x, int y) const {
     const glm::vec4 screenSpace((2.0f * x / static_cast<float>(width())) - 1.0f,
                   1.0f - (2.0f * y / static_cast<float>(height())),
                   -1.f,
