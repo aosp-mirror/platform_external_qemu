@@ -44,6 +44,15 @@
 
 #include <stdint.h>
 
+extern "C" {
+typedef void (*cuda_video_decoder_callback_t)(void* src_frame,
+                                              uint32_t dest_texture_handle,
+                                              int src_pitch,
+                                              int width,
+                                              int heigh);
+typedef void (*cuda_nv12_updater_t)(uint32_t Ytex, uint32_t UVtext);
+}
+
 struct ColorBufferRef {
     ColorBufferPtr cb;
     uint32_t refcount;  // number of client-side references
@@ -319,6 +328,28 @@ public:
     void  readColorBufferYUV(HandleType p_colorbuffer,
                              int x, int y, int width, int height,
                              void *pixels, uint32_t pixels_size);
+
+    // create a Y texture and a UV texture with width and height, the created
+    // texture ids are stored in textures respectively
+    void createYUVTextures(uint32_t type,
+                           uint32_t count,
+                           int width,
+                           int height,
+                           uint32_t* output);
+    void destroyYUVTextures(uint32_t type, uint32_t count, uint32_t* textures);
+    void updateYUVTextures(uint32_t type,
+                           uint32_t* textures,
+                           void* privData,
+                           void* func);
+    void swapTexturesAndUpdateColorBuffer(uint32_t colorbufferhandle,
+                                          int x,
+                                          int y,
+                                          int width,
+                                          int height,
+                                          uint32_t format,
+                                          uint32_t type,
+                                          uint32_t texture_type,
+                                          uint32_t* textures);
 
     // Update the content of a given ColorBuffer from client data.
     // |p_colorbuffer| is the ColorBuffer's handle value. Similar
