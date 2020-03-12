@@ -21,6 +21,7 @@
 #include "android/globals.h"
 #include "android/hw-sensors.h"
 #include "android/utils/debug.h"
+#include "android/utils/path.h"
 #include "android/utils/system.h"
 
 #include <assert.h>
@@ -39,6 +40,7 @@ static std::atomic<int> num_watchdog {};
 static std::atomic<int> num_hostcts_watchdog {};
 
 extern "C" int get_host_cts_heart_beat_count(void);
+extern "C" bool android_op_wipe_data;
 
 namespace fc = android::featurecontrol;
 
@@ -131,6 +133,8 @@ static void watchHostCtsFunction(int sleep_minutes) {
 static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                                          std::vector<uint8_t>* outputp) {
     std::vector<uint8_t> & output = *outputp;
+    bool restartFrameWork = false;
+
     if (beginWith(input, "heartbeat")) {
         fillWithOK(output);
         guest_heart_beat_count ++;
@@ -157,6 +161,20 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                   "screen_off_timeout", "2147483647" });
             adbInterface->enqueueCommand(
                 { "shell", "logcat", "-G", "2M" });
+
+            // If hw.display.settings.xml set as freeform, config guest
+            if ((android_op_wipe_data || !path_exists(android_hw->disk_dataPartition_path))
+                && !strcmp(android_hw->display_settings_xml, "freeform")) {
+                adbInterface->enqueueCommand(
+                    { "shell", "settings", "put", "global", "sf", "1" });
+                adbInterface->enqueueCommand(
+                    { "shell", "settings", "put", "global",
+                      "enable_freeform_support", "1" });
+                adbInterface->enqueueCommand(
+                    { "shell", "settings", "put", "global",
+                      "force_resizable_activities", "1" });
+                restartFrameWork = true;
+            }
 
             // If we allowed host audio, don't revoke
             // microphone perms.
@@ -235,15 +253,15 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                         { "shell", "su", "0",
                           "setprop", "persist.sys.locale", languageCountry.c_str() });
                 }
+                restartFrameWork = true;
+                changing_language_country_locale = 0;
+            }
 
-
+            if (restartFrameWork) {
                 printf("Restarting framework.\n");
-
                 adbInterface->enqueueCommand(
                     { "shell", "su", "0",
                       "setprop", "ctl.restart", "zygote" });
-
-                changing_language_country_locale = 0;
             }
         }
 
