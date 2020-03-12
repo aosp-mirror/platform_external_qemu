@@ -32,7 +32,7 @@
     <attribute name="title">
      <string>Accelerometer</string>
     </attribute>
-    <widget class="Accelerometer3DWidget" name="accelWidget" native="true">
+    <widget class="Device3DWidget" name="accelWidget" native="true">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -866,9 +866,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>Accelerometer3DWidget</class>
+   <class>Device3DWidget</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/accelerometer-3d-widget.h</header>
+   <header>android/skin/qt/device-3d-widget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

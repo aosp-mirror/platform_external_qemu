@@ -220,6 +220,7 @@ public:
     // EGLImage. This is intended to implement glEGLImageTargetTexture2DOES()
     // for all GLES versions.
     bool bindToTexture();
+    bool bindToTexture2();
 
     // Bind the current context's EGL_RENDERBUFFER_OES render buffer to this
     // ColorBuffer's EGLImage. This is intended to implement
