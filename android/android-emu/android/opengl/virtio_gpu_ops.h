@@ -22,6 +22,39 @@ typedef void (*create_color_buffer_with_handle_t)(
     uint32_t format,
     uint32_t fwkFormat,
     uint32_t handle);
+
+/* create YUV texture pair (Y and UV) with given width and height */
+typedef void (*create_yuv_textures_t)(uint32_t type,
+                                      uint32_t count,
+                                      int width,
+                                      int height,
+                                      uint32_t* output);
+
+/* delete YUV texture pair (Y and UV) */
+typedef void (*destroy_yuv_textures_t)(uint32_t type,
+                                       uint32_t count,
+                                       uint32_t* textures);
+
+typedef void (*update_yuv_textures)(uint32_t type,
+                                    uint32_t* textures,
+                                    void* privData,
+                                    void* func);
+
+/* swap out the yuv textures of the colorbuffer, and use the new nv12 textures
+ * to update colorbuffer content on return, textures are free to hold new data
+ * again
+ */
+typedef void (*swap_textures_and_update_color_buffer_t)(
+        uint32_t colorbufferhandle,
+        int x,
+        int y,
+        int width,
+        int height,
+        uint32_t format,
+        uint32_t type,
+        uint32_t texture_type,
+        uint32_t* textures);
+
 typedef void (*open_color_buffer_t)(uint32_t handle);
 typedef void (*close_color_buffer_t)(uint32_t handle);
 typedef void (*update_color_buffer_t)(
@@ -43,6 +76,12 @@ struct AndroidVirtioGpuOps {
     read_color_buffer_t read_color_buffer;
     read_color_buffer_yuv_t read_color_buffer_yuv;
     post_color_buffer_t post_color_buffer;
+    /* yuv texture related */
+    create_yuv_textures_t create_yuv_textures;
+    destroy_yuv_textures_t destroy_yuv_textures;
+    update_yuv_textures update_yuv_textures;
+    swap_textures_and_update_color_buffer_t
+            swap_textures_and_update_color_buffer;
 };
 
 #endif // ANDROID_VIRTIO_GPU_OPS

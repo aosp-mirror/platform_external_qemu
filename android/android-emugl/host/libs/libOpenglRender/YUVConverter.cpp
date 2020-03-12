@@ -114,11 +114,11 @@ static void getYUVOffsets(int width, int height, FrameworkFormat format,
 // the |texture_unit| argument.
 // Returns a new OpenGL texture object in |texName_out|
 // that is to be cleaned up by the caller.
-static void createYUVGLTex(GLenum texture_unit,
-                           GLsizei width,
-                           GLsizei height,
-                           GLuint* texName_out,
-                           bool uvInterleaved) {
+void YUVConverter::createYUVGLTex(GLenum texture_unit,
+                                  GLsizei width,
+                                  GLsizei height,
+                                  GLuint* texName_out,
+                                  bool uvInterleaved) {
     assert(texName_out);
 
     s_gles2.glActiveTexture(texture_unit);
@@ -553,6 +553,19 @@ void YUVConverter::restoreGLState() {
     s_gles2.glUseProgram(mCurrProgram);
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mCurrVbo);
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCurrIbo);
+}
+
+void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
+    if (type == FRAMEWORK_FORMAT_NV12) {
+        std::swap(textures[0], mYtex);
+        std::swap(textures[1], mUVtex);
+    } else if (type == FRAMEWORK_FORMAT_YUV_420_888) {
+        std::swap(textures[0], mYtex);
+        std::swap(textures[1], mUtex);
+        std::swap(textures[2], mVtex);
+    } else {
+        FATAL("Unknown format: 0x%x", type);
+    }
 }
 
 // drawConvert: per-frame updates.
