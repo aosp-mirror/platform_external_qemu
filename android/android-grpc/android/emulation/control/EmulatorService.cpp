@@ -185,16 +185,24 @@ public:
     }
 
     Status setBattery(ServerContext* context,
-                      const BatteryState* request,
+                      const BatteryState* requestPtr,
                       ::google::protobuf::Empty* reply) override {
         auto battery = mAgents->battery;
-        battery->setHasBattery(request->hasbattery());
-        battery->setIsBatteryPresent(request->ispresent());
-        battery->setIsCharging(request->status() == BatteryState::CHARGING);
-        battery->setCharger((BatteryCharger)request->charger());
-        battery->setChargeLevel(request->chargelevel());
-        battery->setHealth((BatteryHealth)request->health());
-        battery->setStatus((BatteryStatus)request->status());
+
+        // Make a copy
+        BatteryState request = *requestPtr;
+
+        android::base::ThreadLooper::runOnMainLooper(
+            [battery, request]() {
+            battery->setHasBattery(request.hasbattery());
+            battery->setIsBatteryPresent(request.ispresent());
+            battery->setIsCharging(request.status() == BatteryState::CHARGING);
+            battery->setCharger((BatteryCharger)request.charger());
+            battery->setChargeLevel(request.chargelevel());
+            battery->setHealth((BatteryHealth)request.health());
+            battery->setStatus((BatteryStatus)request.status());
+        });
+
         return Status::OK;
     }
 
@@ -320,17 +328,28 @@ public:
     }
 
     Status sendMouse(ServerContext* context,
-                     const MouseEvent* request,
+                     const MouseEvent* requestPtr,
                      ::google::protobuf::Empty* reply) override {
-        mAgents->user_event->sendMouseEvent(request->x(), request->y(), 0,
-                                            request->buttons(), 0);
+        MouseEvent request = *requestPtr;
+        auto agent = mAgents->user_event;
+
+        android::base::ThreadLooper::runOnMainLooper(
+            [agent, request]() {
+            agent->sendMouseEvent(request.x(), request.y(), 0,
+                    request.buttons(), 0);
+        });
+
         return Status::OK;
     }
 
     Status sendTouch(ServerContext* context,
-                     const TouchEvent* request,
+                     const TouchEvent* requestPtr,
                      ::google::protobuf::Empty* reply) override {
-        mTouchEventSender.send(request);
+        TouchEvent request = *requestPtr;
+        android::base::ThreadLooper::runOnMainLooper(
+            [this, request]() {
+            mTouchEventSender.sendOnThisThread(&request);
+        });
         return Status::OK;
     }
 
@@ -363,19 +382,29 @@ public:
     Status streamScreenshot(ServerContext* context,
                             const ImageFormat* request,
                             ServerWriter<Image>* writer) override {
+
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+
         EventWaiter frameEvent(&gpu_register_shared_memory_callback,
                                &gpu_unregister_shared_memory_callback);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
         // Make sure we always write the first frame, this can be
         // a completely empty frame if the screen is not active.
         Image first;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         getScreenshot(context, request, &first);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         bool clientAvailable = writer->Write(first);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         bool lastFrameWasEmpty = first.format().width() == 0;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
         while (clientAvailable) {
             Image reply;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
             // The next call will return the number of frames that are
             // available. 0 means no frame was made available in the given time
@@ -383,7 +412,9 @@ public:
             // most kTimeToWaitForFrame so we can check if the client is still
             // there. (All clients get disconnected on emulator shutdown).
             auto arrived = frameEvent.next(kTimeToWaitForFrame);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             if (arrived > 0) {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
                 // TODO(jansene): Add metrics around dropped frames/timing?
                 getScreenshot(context, request, &reply);
                 reply.set_seq(frameEvent.current());
@@ -394,13 +425,21 @@ public:
                 // is empty frame. F is frame) [0, ... <nothing> ..., F1, F2,
                 // F3, 0, ...<nothing>... ]
                 bool emptyFrame = reply.format().width() == 0;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
                 if (!lastFrameWasEmpty || !emptyFrame) {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
                     clientAvailable = writer->Write(reply);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
                 }
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
                 lastFrameWasEmpty = emptyFrame;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             }
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             clientAvailable = !context->IsCancelled() && clientAvailable;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         }
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         return Status::OK;
     };
 

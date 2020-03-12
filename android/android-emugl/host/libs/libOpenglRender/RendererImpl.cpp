@@ -499,6 +499,15 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
     .post_color_buffer = [](uint32_t handle) {
         FrameBuffer::getFB()->post(handle);
     },
+    .get_last_posted_color_buffer = []() {
+        return FrameBuffer::getFB()->getLastPostedColorBuffer();
+    },
+    .bind_color_buffer_to_texture = [](uint32_t handle) {
+        FrameBuffer::getFB()->bindColorBufferToTexture2(handle);
+    },
+    .get_global_egl_context = []() {
+        return FrameBuffer::getFB()->getGlobalEGLContext();
+    },
 };
 
 struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {
