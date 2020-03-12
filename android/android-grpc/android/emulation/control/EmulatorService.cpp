@@ -363,19 +363,29 @@ public:
     Status streamScreenshot(ServerContext* context,
                             const ImageFormat* request,
                             ServerWriter<Image>* writer) override {
+
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+
         EventWaiter frameEvent(&gpu_register_shared_memory_callback,
                                &gpu_unregister_shared_memory_callback);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
         // Make sure we always write the first frame, this can be
         // a completely empty frame if the screen is not active.
         Image first;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         getScreenshot(context, request, &first);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         bool clientAvailable = writer->Write(first);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         bool lastFrameWasEmpty = first.format().width() == 0;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
         while (clientAvailable) {
             Image reply;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
             // The next call will return the number of frames that are
             // available. 0 means no frame was made available in the given time
@@ -383,7 +393,9 @@ public:
             // most kTimeToWaitForFrame so we can check if the client is still
             // there. (All clients get disconnected on emulator shutdown).
             auto arrived = frameEvent.next(kTimeToWaitForFrame);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             if (arrived > 0) {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
                 // TODO(jansene): Add metrics around dropped frames/timing?
                 getScreenshot(context, request, &reply);
                 reply.set_seq(frameEvent.current());
@@ -394,13 +406,21 @@ public:
                 // is empty frame. F is frame) [0, ... <nothing> ..., F1, F2,
                 // F3, 0, ...<nothing>... ]
                 bool emptyFrame = reply.format().width() == 0;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
                 if (!lastFrameWasEmpty || !emptyFrame) {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
                     clientAvailable = writer->Write(reply);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
                 }
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
                 lastFrameWasEmpty = emptyFrame;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             }
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             clientAvailable = !context->IsCancelled() && clientAvailable;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         }
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         return Status::OK;
     };
 

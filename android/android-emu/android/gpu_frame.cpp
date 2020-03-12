@@ -47,6 +47,7 @@ static android::base::Lock sReceiversLock;
 
 static void frameReceivedForwader(void* __ignored) {
     android::base::AutoLock lock(sReceiversLock);
+    fprintf(stderr, "%s: in receivers lock\n", __func__);
     // Iterate over an unordered_map using range based for loop
     for (auto fn : sReceivers) {
         fn.second(fn.first);
@@ -197,6 +198,7 @@ void* gpu_frame_get_record_frame() {
 void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
                                          void* opaque) {
     android::base::AutoLock lock(sReceiversLock);
+    fprintf(stderr, "%s: in receivers lock\n", __func__);
     auto cnt = sReceivers.size();
     sReceivers[opaque] = frameAvailable;
     gpu_frame_set_record_mode(true);
@@ -205,6 +207,7 @@ void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
 
 void gpu_unregister_shared_memory_callback(void* opaque) {
     android::base::AutoLock lock(sReceiversLock);
+    fprintf(stderr, "%s: in receivers lock\n", __func__);
     auto cnt = sReceivers.size();
     sReceivers.erase(opaque);
     gpu_frame_set_record_mode(false);

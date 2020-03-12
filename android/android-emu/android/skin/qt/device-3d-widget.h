@@ -31,7 +31,7 @@ struct QAndroidSensorsAgent;
 // The changes in rotation and position can be used to
 // derive the values which should be reported by the virtual accelerometer,
 // gyroscope, and magnetometer.
-class Accelerometer3DWidget : public GLWidget {
+class Device3DWidget : public GLWidget {
     Q_OBJECT
 
     Q_PROPERTY(glm::quat targetRotation READ targetRotation WRITE setTargetRotation NOTIFY targetRotationChanged USER true);
@@ -42,8 +42,8 @@ public:
         Move
     };
 
-     Accelerometer3DWidget(QWidget *parent = 0);
-    ~Accelerometer3DWidget();
+     Device3DWidget(QWidget *parent = 0);
+    ~Device3DWidget();
 
     void setSensorsAgent(const QAndroidSensorsAgent* agent);
 
