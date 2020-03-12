@@ -763,6 +763,15 @@ bool ColorBuffer::bindToTexture() {
     return true;
 }
 
+bool ColorBuffer::bindToTexture2() {
+    if (!m_eglImage) {
+        return false;
+    }
+
+    s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
+    return true;
+}
+
 bool ColorBuffer::bindToRenderbuffer() {
     if (!m_eglImage) {
         return false;
