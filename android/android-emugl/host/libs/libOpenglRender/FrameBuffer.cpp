@@ -21,6 +21,7 @@
 #include "NativeSubWindow.h"
 #include "RenderControl.h"
 #include "RenderThreadInfo.h"
+#include "YUVConverter.h"
 #include "gles2_dec.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
@@ -1625,6 +1626,95 @@ void FrameBuffer::readColorBufferYUV(HandleType p_colorbuffer,
     }
 
     (*c).second.cb->readPixelsYUVCached(x, y, width, height, pixels, pixels_size);
+}
+
+void FrameBuffer::createYUVTextures(uint32_t type,
+                                    uint32_t count,
+                                    int width,
+                                    int height,
+                                    uint32_t* output) {
+    constexpr bool kIsInterleaved = true;
+    constexpr bool kIsNotInterleaved = false;
+    AutoLock mutex(m_lock);
+    ScopedBind bind(m_colorBufferHelper);
+    for (uint32_t i = 0; i < count; ++i) {
+        if (type == FRAMEWORK_FORMAT_NV12) {
+            YUVConverter::createYUVGLTex(GL_TEXTURE0, width, height,
+                                         &output[2 * i], kIsNotInterleaved);
+            YUVConverter::createYUVGLTex(GL_TEXTURE1, width / 2, height / 2,
+                                         &output[2 * i + 1], kIsInterleaved);
+        } else if (type == FRAMEWORK_FORMAT_YUV_420_888) {
+            YUVConverter::createYUVGLTex(GL_TEXTURE0, width, height,
+                                         &output[3 * i], kIsNotInterleaved);
+            YUVConverter::createYUVGLTex(GL_TEXTURE1, width / 2, height / 2,
+                                         &output[3 * i + 1], kIsNotInterleaved);
+            YUVConverter::createYUVGLTex(GL_TEXTURE2, width / 2, height / 2,
+                                         &output[3 * i + 2], kIsNotInterleaved);
+        }
+    }
+}
+
+void FrameBuffer::destroyYUVTextures(uint32_t type,
+                                     uint32_t count,
+                                     uint32_t* textures) {
+    AutoLock mutex(m_lock);
+    ScopedBind bind(m_colorBufferHelper);
+    if (type == FRAMEWORK_FORMAT_NV12) {
+        s_gles2.glDeleteTextures(2 * count, textures);
+    } else if (type == FRAMEWORK_FORMAT_YUV_420_888) {
+        s_gles2.glDeleteTextures(3 * count, textures);
+    }
+}
+
+extern "C" {
+typedef void (*yuv_updater_t)(void* privData,
+                              uint32_t type,
+                              uint32_t* textures);
+}
+
+void FrameBuffer::updateYUVTextures(uint32_t type,
+                                    uint32_t* textures,
+                                    void* privData,
+                                    void* func) {
+    AutoLock mutex(m_lock);
+    ScopedBind bind(m_colorBufferHelper);
+
+    yuv_updater_t updater = (yuv_updater_t)func;
+    uint32_t gtextures[3] = {0, 0, 0};
+
+    if (type == FRAMEWORK_FORMAT_NV12) {
+        gtextures[0] = s_gles2.glGetGlobalTexName(textures[0]);
+        gtextures[1] = s_gles2.glGetGlobalTexName(textures[1]);
+    } else if (type == FRAMEWORK_FORMAT_YUV_420_888) {
+        gtextures[0] = s_gles2.glGetGlobalTexName(textures[0]);
+        gtextures[1] = s_gles2.glGetGlobalTexName(textures[1]);
+        gtextures[2] = s_gles2.glGetGlobalTexName(textures[2]);
+    }
+
+    updater(privData, type, gtextures);
+}
+
+void FrameBuffer::swapTexturesAndUpdateColorBuffer(uint32_t p_colorbuffer,
+                                                   int x,
+                                                   int y,
+                                                   int width,
+                                                   int height,
+                                                   uint32_t format,
+                                                   uint32_t type,
+                                                   uint32_t texture_type,
+                                                   uint32_t* textures) {
+    {
+        AutoLock mutex(m_lock);
+        ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+        if (c == m_colorbuffers.end()) {
+            // bad colorbuffer handle
+            return;
+        }
+        (*c).second.cb->swapYUVTextures(texture_type, textures);
+    }
+
+    updateColorBuffer(p_colorbuffer, x, y, width, height, format, type,
+                      nullptr);
 }
 
 bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
