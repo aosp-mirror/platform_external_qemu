@@ -287,6 +287,7 @@ public:
     // |p_colorbuffer| is the ColorBuffer's handle value.
     // Returns true on success, false on failure.
     bool  bindColorBufferToTexture(HandleType p_colorbuffer);
+    bool  bindColorBufferToTexture2(HandleType p_colorbuffer);
 
     // Bind the current context's EGL_RENDERBUFFER_OES render buffer to this
     // ColorBuffer's EGLImage. This is intended to implement
@@ -560,6 +561,9 @@ public:
     static uint32_t s_invalidIdMultiDisplay;
     bool tryLockMultiDisplayOnLoad(void);
     void unlockMultiDisplayOnLoad(void);
+
+    EGLContext getGlobalEGLContext() { return m_pbufContext; }
+    HandleType getLastPostedColorBuffer() { return m_lastPostedColorBuffer; }
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
