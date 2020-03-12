@@ -63,6 +63,30 @@
       "revId": "74bd17d1c4e44b9a7c6377d2e5667af3e52534ae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0383096c_9461016f",
+        "filename": "android/android-emu/android/emulation/address_space_shared_slots_host_memory_allocator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-12T17:57:30Z",
+      "side": 1,
+      "message": "thread safe lazy initialization when accessing static init members from multiple threads https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-emu/android/base/memory/LazyInstance.h#37",
+      "parentUuid": "4b637857_364c032a",
+      "range": {
+        "startLine": 257,
+        "startChar": 0,
+        "endLine": 258,
+        "endChar": 18
+      },
+      "revId": "74bd17d1c4e44b9a7c6377d2e5667af3e52534ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
