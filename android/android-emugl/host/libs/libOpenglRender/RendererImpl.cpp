@@ -462,46 +462,98 @@ void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
 }
 
 static struct AndroidVirtioGpuOps sVirtioGpuOps = {
-    .create_color_buffer_with_handle = [](
-        uint32_t width,
-        uint32_t height,
-        uint32_t format,
-        uint32_t fwkFormat,
-        uint32_t handle) {
-        FrameBuffer::getFB()->createColorBufferWithHandle(
-            width, height, (GLenum)format,
-            (FrameworkFormat)fwkFormat, handle);
-    },
-    .open_color_buffer = [](uint32_t handle) {
-        FrameBuffer::getFB()->openColorBuffer(handle);
-    },
-    .close_color_buffer = [](uint32_t handle) {
-        FrameBuffer::getFB()->closeColorBuffer(handle);
-    },
-    .update_color_buffer = [](
-        uint32_t handle, int x, int y, int width, int height,
-        uint32_t format, uint32_t type, void* pixels) {
-        FrameBuffer::getFB()->updateColorBuffer(handle, x, y, width, height, format, type, pixels);
-    },
-    .read_color_buffer = [](
-        uint32_t handle, int x, int y, int width, int height,
-        uint32_t format, uint32_t type, void* pixels) {
-        FrameBuffer::getFB()->readColorBuffer(
-            handle, x, y, width, height, format, type, pixels);
-    },
-    .read_color_buffer_yuv = [](
-        uint32_t handle, int x, int y, int width, int height,
-        void* pixels, uint32_t pixels_size) {
-        FrameBuffer::getFB()->readColorBufferYUV(
-            handle, x, y, width, height,
-            pixels, pixels_size);
-    },
-    .post_color_buffer = [](uint32_t handle) {
-        FrameBuffer::getFB()->post(handle);
-    },
-    .repost = []() {
-        FrameBuffer::getFB()->repost();
-    },
+        .create_color_buffer_with_handle =
+                [](uint32_t width,
+                   uint32_t height,
+                   uint32_t format,
+                   uint32_t fwkFormat,
+                   uint32_t handle) {
+                    FrameBuffer::getFB()->createColorBufferWithHandle(
+                            width, height, (GLenum)format,
+                            (FrameworkFormat)fwkFormat, handle);
+                },
+        .open_color_buffer =
+                [](uint32_t handle) {
+                    FrameBuffer::getFB()->openColorBuffer(handle);
+                },
+        .close_color_buffer =
+                [](uint32_t handle) {
+                    FrameBuffer::getFB()->closeColorBuffer(handle);
+                },
+        .update_color_buffer =
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t format,
+                   uint32_t type,
+                   void* pixels) {
+                    FrameBuffer::getFB()->updateColorBuffer(
+                            handle, x, y, width, height, format, type, pixels);
+                },
+        .read_color_buffer =
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t format,
+                   uint32_t type,
+                   void* pixels) {
+                    FrameBuffer::getFB()->readColorBuffer(
+                            handle, x, y, width, height, format, type, pixels);
+                },
+        .read_color_buffer_yuv =
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   void* pixels,
+                   uint32_t pixels_size) {
+                    FrameBuffer::getFB()->readColorBufferYUV(
+                            handle, x, y, width, height, pixels, pixels_size);
+                },
+        .post_color_buffer =
+                [](uint32_t handle) { FrameBuffer::getFB()->post(handle); },
+        .repost = []() { FrameBuffer::getFB()->repost(); },
+        .create_yuv_textures =
+                [](uint32_t type,
+                   uint32_t count,
+                   int width,
+                   int height,
+                   uint32_t* output) {
+                    FrameBuffer::getFB()->createYUVTextures(type, count, width,
+                                                            height, output);
+                },
+        .destroy_yuv_textures =
+                [](uint32_t type, uint32_t count, uint32_t* textures) {
+                    FrameBuffer::getFB()->destroyYUVTextures(type, count,
+                                                             textures);
+                },
+        .update_yuv_textures =
+                [](uint32_t type,
+                   uint32_t* textures,
+                   void* privData,
+                   void* func) {
+                    FrameBuffer::getFB()->updateYUVTextures(type, textures,
+                                                            privData, func);
+                },
+        .swap_textures_and_update_color_buffer =
+                [](uint32_t colorbufferhandle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t format,
+                   uint32_t type,
+                   uint32_t texture_type,
+                   uint32_t* textures) {
+                    FrameBuffer::getFB()->swapTexturesAndUpdateColorBuffer(
+                            colorbufferhandle, x, y, width, height, format,
+                            type, texture_type, textures);
+                },
 };
 
 struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {

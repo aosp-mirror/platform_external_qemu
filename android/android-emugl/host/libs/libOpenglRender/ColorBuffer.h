@@ -177,6 +177,8 @@ public:
                              void* pixels,
                              uint32_t pixels_size);
 
+    void swapYUVTextures(uint32_t texture_type, uint32_t* textures);
+
     // Update the ColorBuffer instance's pixel values from host memory.
     // |p_format / p_type| are the desired OpenGL color buffer format
     // and data type.
