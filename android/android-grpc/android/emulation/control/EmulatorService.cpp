@@ -42,6 +42,7 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
+#include "android/base/synchronization/Event.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
@@ -185,64 +186,93 @@ public:
     }
 
     Status setBattery(ServerContext* context,
-                      const BatteryState* request,
+                      const BatteryState* requestPtr,
                       ::google::protobuf::Empty* reply) override {
-        auto battery = mAgents->battery;
-        battery->setHasBattery(request->hasbattery());
-        battery->setIsBatteryPresent(request->ispresent());
-        battery->setIsCharging(request->status() == BatteryState::CHARGING);
-        battery->setCharger((BatteryCharger)request->charger());
-        battery->setChargeLevel(request->chargelevel());
-        battery->setHealth((BatteryHealth)request->health());
-        battery->setStatus((BatteryStatus)request->status());
+        auto agent = mAgents->battery;
+
+        // Make a copy
+        BatteryState request = *requestPtr;
+
+        android::base::ThreadLooper::runOnMainLooper(
+            [agent, request]() {
+            agent->setHasBattery(request.hasbattery());
+            agent->setIsBatteryPresent(request.ispresent());
+            agent->setIsCharging(request.status() == BatteryState::CHARGING);
+            agent->setCharger((BatteryCharger)request.charger());
+            agent->setChargeLevel(request.chargelevel());
+            agent->setHealth((BatteryHealth)request.health());
+            agent->setStatus((BatteryStatus)request.status());
+        });
+
         return Status::OK;
     }
 
     Status getBattery(ServerContext* context,
                       const ::google::protobuf::Empty* request,
                       BatteryState* reply) override {
-        auto battery = mAgents->battery;
-        reply->set_hasbattery(battery->hasBattery());
-        reply->set_ispresent(battery->present());
-        reply->set_charger((BatteryState_BatteryCharger)battery->charger());
-        reply->set_chargelevel(battery->chargeLevel());
-        reply->set_health((BatteryState_BatteryHealth)battery->health());
-        reply->set_status((BatteryState_BatteryStatus)battery->status());
+        auto agent = mAgents->battery;
+
+        android::base::Event e;
+
+        android::base::ThreadLooper::runOnMainLooper([agent, reply, &e]() {
+            reply->set_hasbattery(agent->hasBattery());
+            reply->set_ispresent(agent->present());
+            reply->set_charger((BatteryState_BatteryCharger)agent->charger());
+            reply->set_chargelevel(agent->chargeLevel());
+            reply->set_health((BatteryState_BatteryHealth)agent->health());
+            reply->set_status((BatteryState_BatteryStatus)agent->status());
+            e.signal();
+        });
+
+        e.wait();
+
         return Status::OK;
     }
 
     Status setGps(ServerContext* context,
-                  const GpsState* request,
+                  const GpsState* requestPtr,
                   ::google::protobuf::Empty* reply) override {
-        auto location = mAgents->location;
-        struct timeval tVal;
-        memset(&tVal, 0, sizeof(tVal));
-        gettimeofday(&tVal, NULL);
+        auto agent = mAgents->location;
+        GpsState request = *requestPtr;
 
-        location->gpsSetPassiveUpdate(request->passiveupdate());
-        location->gpsSendLoc(request->latitude(), request->longitude(),
-                             request->altitude(), request->speed(),
-                             request->bearing(), request->satellites(), &tVal);
+        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
+            struct timeval tVal;
+            memset(&tVal, 0, sizeof(tVal));
+            gettimeofday(&tVal, NULL);
+            agent->gpsSetPassiveUpdate(request.passiveupdate());
+            agent->gpsSendLoc(request.latitude(), request.longitude(),
+                                 request.altitude(), request.speed(),
+                                 request.bearing(), request.satellites(), &tVal);
+        });
+
         return Status::OK;
     }
 
     Status getGps(ServerContext* context,
                   const ::google::protobuf::Empty* request,
                   GpsState* reply) override {
-        auto location = mAgents->location;
-        double lat, lon, speed, heading, elevation;
-        int32_t count;
+        auto agent = mAgents->location;
+        android::base::Event e;
 
-        // TODO(jansene):Implement in underlying agent.
-        reply->set_passiveupdate(location->gpsGetPassiveUpdate());
-        location->gpsGetLoc(&lat, &lon, &elevation, &speed, &heading, &count);
+        android::base::ThreadLooper::runOnMainLooper([agent, request, reply, &e]() {
+            double lat, lon, speed, heading, elevation;
+            int32_t count;
 
-        reply->set_latitude(lat);
-        reply->set_longitude(lon);
-        reply->set_speed(speed);
-        reply->set_bearing(heading);
-        reply->set_altitude(elevation);
-        reply->set_satellites(count);
+            // TODO(jansene):Implement in underlying agent.
+            reply->set_passiveupdate(agent->gpsGetPassiveUpdate());
+            agent->gpsGetLoc(&lat, &lon, &elevation, &speed, &heading, &count);
+
+            reply->set_latitude(lat);
+            reply->set_longitude(lon);
+            reply->set_speed(speed);
+            reply->set_bearing(heading);
+            reply->set_altitude(elevation);
+            reply->set_satellites(count);
+            e.signal();
+        });
+
+        e.wait();
+
         return Status::OK;
     }
 
@@ -278,15 +308,20 @@ public:
     }
 
     Status setSensor(ServerContext* context,
-                     const SensorValue* request,
+                     const SensorValue* requestPtr,
                      ::google::protobuf::Empty* reply) override {
-        auto values = request->value();
-        int size = values.data().size();
-        float a = size > 0 ? values.data(0) : 0;
-        float b = size > 1 ? values.data(1) : 0;
-        float c = size > 2 ? values.data(2) : 0;
 
-        mAgents->sensors->setSensorOverride((int)request->target(), a, b, c);
+        auto agent = mAgents->sensors;
+        SensorValue request = *requestPtr;
+
+        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
+            auto values = request.value();
+            int size = values.data().size();
+            float a = size > 0 ? values.data(0) : 0;
+            float b = size > 1 ? values.data(1) : 0;
+            float c = size > 2 ? values.data(2) : 0;
+            agent->setSensorOverride((int)request.target(), a, b, c);
+        });
         return Status::OK;
     }
 
@@ -306,31 +341,53 @@ public:
     }
 
     Status sendFingerprint(ServerContext* context,
-                           const Fingerprint* request,
+                           const Fingerprint* requestPtr,
                            ::google::protobuf::Empty* reply) override {
-        mAgents->finger->setTouch(request->istouching(), request->touchid());
+
+        auto agent = mAgents->finger;
+        Fingerprint request = *requestPtr;
+
+        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
+            agent->setTouch(request.istouching(), request.touchid());
+        });
+
         return Status::OK;
     }
 
     Status sendKey(ServerContext* context,
-                   const KeyboardEvent* request,
+                   const KeyboardEvent* requestPtr,
                    ::google::protobuf::Empty* reply) override {
-        mKeyEventSender.send(request);
+        KeyboardEvent request = *requestPtr;
+        android::base::ThreadLooper::runOnMainLooper(
+            [this, request]() {
+            mKeyEventSender.sendOnThisThread(&request);
+        });
         return Status::OK;
     }
 
     Status sendMouse(ServerContext* context,
-                     const MouseEvent* request,
+                     const MouseEvent* requestPtr,
                      ::google::protobuf::Empty* reply) override {
-        mAgents->user_event->sendMouseEvent(request->x(), request->y(), 0,
-                                            request->buttons(), 0);
+        MouseEvent request = *requestPtr;
+        auto agent = mAgents->user_event;
+
+        android::base::ThreadLooper::runOnMainLooper(
+            [agent, request]() {
+            agent->sendMouseEvent(request.x(), request.y(), 0,
+                    request.buttons(), 0);
+        });
+
         return Status::OK;
     }
 
     Status sendTouch(ServerContext* context,
-                     const TouchEvent* request,
+                     const TouchEvent* requestPtr,
                      ::google::protobuf::Empty* reply) override {
-        mTouchEventSender.send(request);
+        TouchEvent request = *requestPtr;
+        android::base::ThreadLooper::runOnMainLooper(
+            [this, request]() {
+            mTouchEventSender.sendOnThisThread(&request);
+        });
         return Status::OK;
     }
 
@@ -363,6 +420,7 @@ public:
     Status streamScreenshot(ServerContext* context,
                             const ImageFormat* request,
                             ServerWriter<Image>* writer) override {
+
         EventWaiter frameEvent(&gpu_register_shared_memory_callback,
                                &gpu_unregister_shared_memory_callback);
 
@@ -402,7 +460,7 @@ public:
             clientAvailable = !context->IsCancelled() && clientAvailable;
         }
         return Status::OK;
-    };
+    }
 
     Status getScreenshot(ServerContext* context,
                          const ImageFormat* request,
@@ -527,7 +585,7 @@ public:
 
         // These need to happen on the qemu looper as these transitions
         // will require io locks.
-        mLooper->scheduleCallback([=]() {
+        android::base::ThreadLooper::runOnMainLooper([=]() {
             switch (request->state()) {
                 case VmRunState::RESET:
                     mAgents->vm->vmReset();
@@ -555,14 +613,26 @@ public:
     }
 
     Status sendPhone(ServerContext* context,
-                     const PhoneCall* request,
+                     const PhoneCall* requestPtr,
                      PhoneResponse* reply) override {
-        // We assume that the int mappings are consistent..
-        TelephonyOperation operation = (TelephonyOperation)request->operation();
-        std::string phoneNr = request->number();
-        TelephonyResponse response =
-                mAgents->telephony->telephonyCmd(operation, phoneNr.c_str());
-        reply->set_response((PhoneResponse_Response)response);
+        (void)context;
+        android::base::Event e;
+        PhoneCall request = *requestPtr;
+
+        // We're going to end up waiting for the reply anyway, so
+        // wait for it.
+        android::base::ThreadLooper::runOnMainLooper([this, request, reply, &e]() {
+            // We assume that the int mappings are consistent..
+            TelephonyOperation operation = (TelephonyOperation)request.operation();
+            std::string phoneNr = request.number();
+            TelephonyResponse response =
+                    mAgents->telephony->telephonyCmd(operation, phoneNr.c_str());
+            reply->set_response((PhoneResponse_Response)response);
+            e.signal();
+        });
+
+        e.wait();
+
         return Status::OK;
     }
 

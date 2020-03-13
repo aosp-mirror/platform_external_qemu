@@ -39,6 +39,13 @@ bool TouchEventSender::send(const TouchEvent* request) {
     return true;
 }
 
+bool TouchEventSender::sendOnThisThread(const TouchEvent* request) {
+    // Send the event on the current thread, not the background looper.
+    TouchEvent event = *request;
+    doSend(event);
+    return true;
+}
+
 // Scales an axis to the proper EVDEV value..
 static int scaleAxis(int value,
                      int min_in,
