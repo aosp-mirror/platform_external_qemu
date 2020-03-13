@@ -61,6 +61,8 @@ using InitContextParam = H264PingInfoParser::InitContextParam;
 using DecodeFrameParam = H264PingInfoParser::DecodeFrameParam;
 using ResetParam = H264PingInfoParser::ResetParam;
 using GetImageParam = H264PingInfoParser::GetImageParam;
+using TextureFrame = MediaHostRenderer::TextureFrame;
+
 MediaH264DecoderCuvid::MediaH264DecoderCuvid(uint64_t id,
                                              H264PingInfoParser parser)
     : mId(id), mParser(parser){};
@@ -300,6 +302,7 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
 
     memcpy(dst, pDecodedFrame, myOutputHeight * myOutputWidth * 3 / 2);
     mSavedFrames.pop_front();
+    mSavedTexFrames.pop_front();
     mSavedPts.pop_front();
     mSavedW.pop_front();
     mSavedH.pop_front();
@@ -481,6 +484,80 @@ int MediaH264DecoderCuvid::HandlePictureDecode(CUVIDPICPARAMS* pPicParams) {
     return 1;
 }
 
+extern "C" {
+
+#define MEDIA_H264_COPY_Y_TEXTURE 1
+#define MEDIA_H264_COPY_UV_TEXTURE 2
+
+struct h264_cuvid_copy_context {
+    CUdeviceptr src_frame;
+    unsigned int src_pitch;
+
+    // this usually >= dest_height due to padding, e.g.
+    // src_surface_height: 1088, dest_height: 1080
+    // so, when copying UV data, the src has to start at
+    // offset = src_pitch * src_surface_height
+    unsigned int src_surface_height;
+
+    unsigned int dest_width;
+    unsigned int dest_height;
+};
+
+void cuda_copy_decoded_frame(void* privData,
+                             int mode,
+                             uint32_t dest_texture_handle) {
+    h264_cuvid_copy_context* copy_context =
+            static_cast<h264_cuvid_copy_context*>(privData);
+
+    const unsigned int GL_TEXTURE_2D = 0x0DE1;
+    const unsigned int cudaGraphicsMapFlagsNone = 0x0;
+    CUgraphicsResource CudaRes{0};
+    H264_DPRINT("cuda copy decoded frame testure %d", (int)dest_texture_handle);
+    NVDEC_API_CALL(cuGraphicsGLRegisterImage(&CudaRes, dest_texture_handle,
+                                             GL_TEXTURE_2D, 0x0));
+    CUarray texture_ptr;
+    NVDEC_API_CALL(cuGraphicsMapResources(1, &CudaRes, 0));
+    NVDEC_API_CALL(
+            cuGraphicsSubResourceGetMappedArray(&texture_ptr, CudaRes, 0, 0));
+    CUdeviceptr dpSrcFrame = copy_context->src_frame;
+    CUDA_MEMCPY2D m = {0};
+    m.srcMemoryType = CU_MEMORYTYPE_DEVICE;
+    m.srcDevice = dpSrcFrame;
+    m.srcPitch = copy_context->src_pitch;
+    m.dstMemoryType = CU_MEMORYTYPE_ARRAY;
+    m.dstArray = texture_ptr;
+    m.dstPitch = copy_context->dest_width * 1;
+    m.WidthInBytes = copy_context->dest_width * 1;
+    m.Height = copy_context->dest_height;
+    H264_DPRINT("dstPitch %d, WidthInBytes %d Height %d surface-height %d",
+                (int)m.dstPitch, (int)m.WidthInBytes, (int)m.Height,
+                (int)copy_context->src_surface_height);
+
+    if (mode == MEDIA_H264_COPY_Y_TEXTURE) {  // copy Y data
+        NVDEC_API_CALL(cuMemcpy2D(&m));
+    } else if (mode == MEDIA_H264_COPY_UV_TEXTURE) {  // copy UV data
+        m.srcDevice =
+                (CUdeviceptr)((uint8_t*)dpSrcFrame +
+                              m.srcPitch * copy_context->src_surface_height);
+        m.Height = m.Height / 2;
+        NVDEC_API_CALL(cuMemcpy2D(&m));
+    }
+    NVDEC_API_CALL(cuGraphicsUnmapResources(1, &CudaRes, 0));
+}
+
+void cuda_nv12_updater(void* privData, uint32_t type, uint32_t* textures) {
+    constexpr uint32_t kFRAMEWORK_FORMAT_NV12 = 3;
+    if (type != kFRAMEWORK_FORMAT_NV12) {
+        return;
+    }
+    H264_DPRINT("copyiong Ytex %d", textures[0]);
+    H264_DPRINT("copyiong UVtex %d", textures[1]);
+    cuda_copy_decoded_frame(privData, MEDIA_H264_COPY_Y_TEXTURE, textures[0]);
+    cuda_copy_decoded_frame(privData, MEDIA_H264_COPY_UV_TEXTURE, textures[1]);
+}
+
+}  // end extern C
+
 int MediaH264DecoderCuvid::HandlePictureDisplay(
         CUVIDPARSERDISPINFO* pDispInfo) {
     CUVIDPROCPARAMS videoProcessingParameters = {};
@@ -499,30 +576,47 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
                                       &videoProcessingParameters));
 
     unsigned int newOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
-    std::vector<uint8_t> myFrame(newOutBufferSize);
-    uint8_t* pDecodedFrame = &(myFrame[0]);
+    std::vector<uint8_t> myFrame;
+    TextureFrame texFrame;
+    if (mUseGpuTexture) {
+	    //TODO: save to texture
+            h264_cuvid_copy_context my_copy_context{
+                    .src_frame = dpSrcFrame,
+                    .src_pitch = nSrcPitch,
+                    .src_surface_height = mSurfaceHeight,
+                    .dest_width = mOutputWidth,
+                    .dest_height = mOutputHeight,
+            };
+            texFrame = mRenderer.getTextureFrame(mOutputWidth, mOutputHeight);
+            mRenderer.saveDecodedFrameToTexture(texFrame, &my_copy_context,
+                                                (void*)cuda_nv12_updater);
+    } else {
+        myFrame.resize(newOutBufferSize);
+        uint8_t* pDecodedFrame = &(myFrame[0]);
 
-    NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
-    CUDA_MEMCPY2D m = {0};
-    m.srcMemoryType = CU_MEMORYTYPE_DEVICE;
-    m.srcDevice = dpSrcFrame;
-    m.srcPitch = nSrcPitch;
-    m.dstMemoryType = CU_MEMORYTYPE_HOST;
-    m.dstDevice = (CUdeviceptr)(m.dstHost = pDecodedFrame);
-    m.dstPitch = mOutputWidth * mBPP;
-    m.WidthInBytes = mOutputWidth * mBPP;
-    m.Height = mLumaHeight;
-    H264_DPRINT("dstDevice %p, dstPitch %d, WidthInBytes %d Height %d",
-                m.dstHost, (int)m.dstPitch, (int)m.WidthInBytes, (int)m.Height);
+        NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
+        CUDA_MEMCPY2D m = {0};
+        m.srcMemoryType = CU_MEMORYTYPE_DEVICE;
+        m.srcDevice = dpSrcFrame;
+        m.srcPitch = nSrcPitch;
+        m.dstMemoryType = CU_MEMORYTYPE_HOST;
+        m.dstDevice = (CUdeviceptr)(m.dstHost = pDecodedFrame);
+        m.dstPitch = mOutputWidth * mBPP;
+        m.WidthInBytes = mOutputWidth * mBPP;
+        m.Height = mLumaHeight;
+        H264_DPRINT("dstDevice %p, dstPitch %d, WidthInBytes %d Height %d",
+                    m.dstHost, (int)m.dstPitch, (int)m.WidthInBytes,
+                    (int)m.Height);
 
-    NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
+        NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
 
-    m.srcDevice =
-            (CUdeviceptr)((uint8_t*)dpSrcFrame + m.srcPitch * mSurfaceHeight);
-    m.dstDevice =
-            (CUdeviceptr)(m.dstHost = pDecodedFrame + m.dstPitch * mLumaHeight);
-    m.Height = mChromaHeight;
-    NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
+        m.srcDevice = (CUdeviceptr)((uint8_t*)dpSrcFrame +
+                                    m.srcPitch * mSurfaceHeight);
+        m.dstDevice = (CUdeviceptr)(m.dstHost = pDecodedFrame +
+                                                m.dstPitch * mLumaHeight);
+        m.Height = mChromaHeight;
+        NVDEC_API_CALL(cuMemcpy2DAsync(&m, 0));
+    }
 
     NVDEC_API_CALL(cuStreamSynchronize(0));
     NVDEC_API_CALL(cuCtxPopCurrent(NULL));
@@ -531,6 +625,7 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
     if (!mIsLoadingFromSnapshot) {
         std::lock_guard<std::mutex> g(mFrameLock);
         mSavedFrames.push_back(myFrame);
+        mSavedTexFrames.push_back(texFrame);
         mSavedPts.push_back(myOutputPts);
         mSavedW.push_back(mOutputWidth);
         mSavedH.push_back(mOutputHeight);
@@ -570,6 +665,7 @@ void MediaH264DecoderCuvid::save(base::Stream* stream) const {
                              mColorSpace},
                 myOutputPts);
         mSavedFrames.pop_front();
+        mSavedTexFrames.pop_front();
         mSavedW.pop_front();
         mSavedH.pop_front();
         mSavedPts.pop_front();
@@ -624,6 +720,7 @@ bool MediaH264DecoderCuvid::load(base::Stream* stream) {
         mColorSpace = frame.color.space;
         mOutputPts = frame.pts;
         mSavedFrames.push_back(frame.data);
+        mSavedTexFrames.push_back(TextureFrame{0, 0});
         mSavedW.push_back(mOutputWidth);
         mSavedH.push_back(mOutputHeight);
         mSavedPts.push_back(mOutputPts);
