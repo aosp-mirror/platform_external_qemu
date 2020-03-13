@@ -68,6 +68,7 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/globals.h"
 #include "android/gpu_frame.h"
 #include "android/hw-sensors.h"
 #include "android/opengles.h"
@@ -467,9 +468,20 @@ public:
                          Image* reply) override {
         uint32_t width, height;
         bool enabled;
-        mAgents->emu->getMultiDisplay(request->display(), nullptr, nullptr,
-                                      &width, &height, nullptr, nullptr,
-                                      &enabled);
+        bool multiDisplayQueryWorks =
+            mAgents->emu->getMultiDisplay(
+                request->display(), nullptr, nullptr,
+                &width, &height, nullptr, nullptr,
+                &enabled);
+
+        // TODO(b/151387266): Use new query that uses a shared state for
+        // multidisplay
+        if (!multiDisplayQueryWorks) {
+            width = android_hw->hw_lcd_width;
+            height = android_hw->hw_lcd_height;
+            enabled = true;
+        }
+
         if (!enabled)
             return Status::OK;
 

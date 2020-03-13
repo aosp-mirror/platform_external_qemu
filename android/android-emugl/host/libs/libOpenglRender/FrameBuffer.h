@@ -719,7 +719,8 @@ private:
         Viewport = 1,
         Compose = 2,
         Clear = 3,
-        Exit = 4,
+        Screenshot = 4,
+        Exit = 5,
     };
 
     struct Post {
@@ -731,6 +732,15 @@ private:
                 int height;
             } viewport;
             ComposeDevice* d;
+            struct {
+                ColorBuffer* cb;
+                int screenwidth;
+                int screenheight;
+                GLenum format;
+                GLenum type;
+                SkinRotation rotation;
+                void* pixels;
+            } screenshot;
         };
     };
 
