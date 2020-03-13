@@ -18,6 +18,7 @@
 #include "android/emulation/address_space_host_media.h"
 #endif
 #include "android/emulation/address_space_host_memory_allocator.h"
+#include "android/emulation/address_space_shared_slots_host_memory_allocator.h"
 #include "android/emulation/control/vm_operations.h"
 
 #include "android/base/memory/LazyInstance.h"
@@ -121,6 +122,8 @@ public:
     }
 
     void save(Stream* stream) const {
+        AddressSpaceSharedSlotsHostMemoryAllocatorContext::globalStateSave(stream);
+
         stream->putBe32(mHandleIndex);
         stream->putBe32(mContexts.size());
 
@@ -146,6 +149,13 @@ public:
         // First destroy all contexts, because
         // this can be done while an emulator is running
         clear();
+
+        if (!AddressSpaceSharedSlotsHostMemoryAllocatorContext::globalStateLoad(
+                stream,
+                get_address_space_device_control_ops(),
+                get_address_space_device_hw_funcs())) {
+            return false;
+        }
 
         const uint32_t handleIndex = stream->getBe32();
         const size_t size = stream->getBe32();
@@ -193,6 +203,7 @@ public:
     void clear() {
         AutoLock lock(mContextsLock);
         mContexts.clear();
+        AddressSpaceSharedSlotsHostMemoryAllocatorContext::globalStateClear();
         auto it = mMemoryMappings.begin();
         std::vector<std::pair<uint64_t, uint64_t>> gpasSizesToErase;
         for (auto it: mMemoryMappings) {
@@ -251,6 +262,10 @@ private:
         case AddressSpaceDeviceType::HostMemoryAllocator:
             return DeviceContextPtr(new AddressSpaceHostMemoryAllocatorContext(
                 get_address_space_device_control_ops()));
+        case AddressSpaceDeviceType::SharedSlotsHostMemoryAllocator:
+            return DeviceContextPtr(new AddressSpaceSharedSlotsHostMemoryAllocatorContext(
+                get_address_space_device_control_ops(),
+                get_address_space_device_hw_funcs()));
 
         default:
             AS_DEVICE_DPRINT("Bad device type");
