@@ -49,7 +49,7 @@ const uint32_t kGlUnsignedByte = 0x1401;
 
 constexpr uint32_t kGL_RGBA8 = 0x8058;
 constexpr uint32_t kGL_RGBA = 0x1908;
-constexpr uint32_t kFRAME_POOL_SIZE = 12;
+constexpr uint32_t kFRAME_POOL_SIZE = 8;
 constexpr uint32_t kFRAMEWORK_FORMAT_NV12 = 3;
 
 MediaHostRenderer::TextureFrame MediaHostRenderer::getTextureFrame(int w,
@@ -128,7 +128,7 @@ void MediaHostRenderer::renderToHostColorBufferWithTextures(
         mVirtioGpuOps->swap_textures_and_update_color_buffer(
                 hostColorBufferId, 0, 0, outputWidth, outputHeight, kGL_RGBA,
                 kGlUnsignedByte, kFRAMEWORK_FORMAT_NV12, textures);
-        if (frame.Ytex > 0 && frame.UVtex > 0) {
+        if (textures[0] > 0 && textures[1] > 0) {
             frame.Ytex = textures[0];
             frame.UVtex = textures[1];
         }

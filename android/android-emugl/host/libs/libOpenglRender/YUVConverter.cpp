@@ -592,14 +592,29 @@ void YUVConverter::drawConvert(int x, int y,
         init(mWidth, mHeight, mFormat);
     }
     s_gles2.glViewport(x, y, width, height);
-
-    uint32_t yoff, uoff, voff,
-             ywidth, cwidth, cheight;
-    getYUVOffsets(width, height, mFormat,
-                  &yoff, &uoff, &voff,
-                  &ywidth, &cwidth);
+    uint32_t yoff, uoff, voff, ywidth, cwidth, cheight;
+    getYUVOffsets(width, height, mFormat, &yoff, &uoff, &voff, &ywidth,
+                  &cwidth);
     cheight = height / 2;
     updateCutoffs(width, ywidth, width / 2, cwidth);
+
+    if (!pixels) {
+        // special case: draw from texture, only support NV12 for now
+        assert(mFormat == FRAMEWORK_FORMAT_NV12);
+        s_gles2.glActiveTexture(GL_TEXTURE1);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, mUVtex);
+        s_gles2.glActiveTexture(GL_TEXTURE0);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, mYtex);
+
+        doYUVConversionDraw(mProgram, mYWidthCutoffLoc, mCWidthCutoffLoc,
+                            mYSamplerLoc, mUSamplerLoc, mVSamplerLoc,
+                            mVUSamplerLoc, mInCoordLoc, mPosLoc, mVbuf, mIbuf,
+                            width, ywidth, width / 2, cwidth, mYWidthCutoff,
+                            mCWidthCutoff, true);
+
+        restoreGLState();
+        return;
+    }
 
     subUpdateYUVGLTex(GL_TEXTURE0, mYtex,
                       x, y, ywidth, height,
