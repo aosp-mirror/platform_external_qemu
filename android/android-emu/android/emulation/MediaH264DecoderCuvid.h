@@ -113,6 +113,7 @@ private:
 
 private:
     // image props
+    bool mUseGpuTexture = false;
     bool mImageReady = false;
     static constexpr int kBPP = 2;  // YUV420 is 2 bytes per pixel
     unsigned int mHeight = 0;
@@ -140,7 +141,10 @@ private:
     mutable std::list<int> mSavedW;
     mutable std::list<int> mSavedH;
     mutable std::list<uint64_t> mSavedPts;
+    // mSavedFrames are byte frames saved on CPU
     mutable std::list<std::vector<uint8_t>> mSavedFrames;
+    // mSavedTexFrames are texture frames saved on GPU
+    mutable std::list<MediaHostRenderer::TextureFrame> mSavedTexFrames;
     std::mutex mFrameLock;
 
     // cuda stuff
