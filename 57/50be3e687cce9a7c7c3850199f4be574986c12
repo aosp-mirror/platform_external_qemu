@@ -1,0 +1,10 @@
+Verified+1: Lingfeng Yang <lfy@google.com>
+Autosubmit+1: Lingfeng Yang <lfy@google.com>
+Presubmit-Ready+1: Lingfeng Yang <lfy@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Submitted-by: Lingfeng Yang <lfy@google.com>
+Submitted-at: Fri, 13 Mar 2020 07:07:30 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1257158
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
