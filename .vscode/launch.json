@@ -89,7 +89,6 @@
             "name": "(lldb) Debug Emulator",
             "type": "lldb",
             "request": "launch",
-            "stopOnEntry" : false,
             // Resolved by CMake Tools, but likely should point to qemu-system-i386, or qemu-system-x86_64
             // As there lldb is not capable of following child processes (like gdb can with follow-fork-mode)
             "program": "${command:cmake.launchTargetPath}",

@@ -328,7 +328,7 @@ bool qemu_android_emulation_setup() {
     // with a differrent fps suggestion. (Fps is mainly used by clients as a
     // suggestion on how often to check for new frames)
     if (android_cmdLineOptions->share_vid) {
-        if (!getConsoleAgents()->record->startSharedMemoryModule()) {
+        if (!getConsoleAgents()->record->startSharedMemoryModule(60)) {
             dwarning(
                     "Unable to setup a shared memory handler, last errno: "
                     "%d",
