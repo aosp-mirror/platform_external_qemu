@@ -3,6 +3,8 @@
 #include "android/base/Compiler.h"
 #include "android/base/synchronization/Lock.h"
 
+#include "android/skin/rect.h"
+
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 #include <GLES3/gl3.h>
@@ -41,6 +43,15 @@ public:
     // clear: blanks out emulator display when refreshing the subwindow
     // if there is no last posted color buffer to show yet.
     void clear();
+
+    void screenshot(
+        ColorBuffer* cb,
+        int screenwidth,
+        int screenheight,
+        GLenum format,
+        GLenum type,
+        SkinRotation rotation,
+        void* pixels);
 
 private:
     void composeLayer(ComposeLayer* l);

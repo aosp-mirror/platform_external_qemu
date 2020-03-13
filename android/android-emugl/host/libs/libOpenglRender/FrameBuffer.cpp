@@ -744,6 +744,16 @@ FrameBuffer::postWorkerFunc(const Post& post) {
         case PostCmd::Clear:
             m_postWorker->clear();
             break;
+        case PostCmd::Screenshot:
+            m_postWorker->screenshot(
+                post.screenshot.cb,
+                post.screenshot.screenwidth,
+                post.screenshot.screenheight,
+                post.screenshot.format,
+                post.screenshot.type,
+                post.screenshot.rotation,
+                post.screenshot.pixels);
+            break;
         case PostCmd::Exit:
             return WorkerProcessingResult::Stop;
         default:
@@ -2073,6 +2083,12 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
         postCmd.cb = c->second.cb.get();
         sendPostWorkerCmd(postCmd);
     } else {
+        markOpened(&c->second);
+        c->second.cb->touch();
+        c->second.cb->waitSync();
+        c->second.cb->scale();
+        s_gles2.glFlush();
+
         // If there is no sub-window, don't display anything, the client will
         // rely on m_onPost to get the pixels instead.
         ret = true;
@@ -2244,10 +2260,20 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
         std::swap(*width, *height);
     }
     pixels.resize(4 * (*width) * (*height));
-    c->second.cb->readPixelsScaled(*width, *height,
-            nChannels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE,
-            desiredRotation, pixels.data());
 
+    GLenum format = nChannels == 3 ? GL_RGB : GL_RGBA;
+
+    Post scrCmd;
+    scrCmd.cmd = PostCmd::Screenshot;
+    scrCmd.screenshot.cb = c->second.cb.get();
+    scrCmd.screenshot.screenwidth = *width;
+    scrCmd.screenshot.screenheight = *height;
+    scrCmd.screenshot.format = format;
+    scrCmd.screenshot.type = GL_UNSIGNED_BYTE;
+    scrCmd.screenshot.rotation = desiredRotation;
+    scrCmd.screenshot.pixels = pixels.data();
+
+    sendPostWorkerCmd(scrCmd);
 }
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
