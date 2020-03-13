@@ -41,9 +41,7 @@ typedef struct QAndroidRecordScreenAgent {
 
     // Setup a shared memory region. The framerate should ideally be fps
     // Returns the name of the memory handle, or null if initialization failed.
-    const char* (*initalizeSharedMemoryModule)();
-
-    bool (*startSharedMemoryModule)();
+    const char* (*startSharedMemoryModule)(int desiredFps);
 
     bool (*stopSharedMemoryModule)();
 } QAndroidRecordScreenAgent;
