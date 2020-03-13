@@ -108,6 +108,7 @@ public:
                 static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
 
             contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr, false);
+            pingInfo->metadata = contextDesc.device_context ? 0 : -1;
         }
     }
 
