@@ -18,6 +18,8 @@
 #include "android/opengles.h"
 
 #include <stddef.h>
+#include <stdint.h>
+#include <list>
 
 namespace android {
 namespace emulation {
@@ -26,13 +28,42 @@ namespace emulation {
 // to host color buffer
 class MediaHostRenderer {
 public:
+    // for now, there is only NV12
+    struct TextureFrame {
+        uint32_t Ytex;
+        uint32_t UVtex;
+    };
+
+    // get a TextureFrame structure to hold decoded frame
+    TextureFrame getTextureFrame(int w, int h);
+
+private:
+    // put back a used TextureFrame so it can be reused again
+    // later
+    void putTextureFrame(TextureFrame frame) {
+        mFramePool.push_back(std::move(frame));
+    }
+
+    void cleanUpTextures();
+
+    std::list<TextureFrame> mFramePool;
+
+public:
+    // render decoded frame stored in CPU memory
     void renderToHostColorBuffer(int hostColorBufferId,
                                  unsigned int outputWidth,
                                  unsigned int outputHeight,
                                  uint8_t* decodedFrame);
 
+    // render decoded frame stored in GPU texture; recycle the swapped
+    // out texture from colorbuffer into framepool
+    void renderToHostColorBufferWithTextures(int hostColorBufferId,
+                                             unsigned int outputWidth,
+                                             unsigned int outputHeight,
+                                             TextureFrame frame);
+
     MediaHostRenderer();
-    ~MediaHostRenderer() = default;
+    ~MediaHostRenderer();
 
 private:
     AndroidVirtioGpuOps* mVirtioGpuOps = nullptr;
