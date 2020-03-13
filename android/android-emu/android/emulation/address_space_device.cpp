@@ -284,23 +284,19 @@ private:
     }
 
     void *getHostPtrLocked(uint64_t gpa) const {
-        auto i = mMemoryMappings.lower_bound(gpa);
-        if (i == mMemoryMappings.end()) {
-            return nullptr;
-        } else if (i->first == gpa) {
+        auto i = mMemoryMappings.lower_bound(gpa); // i->first >= gpa (or i==end)
+        if ((i != mMemoryMappings.end()) && (i->first == gpa)) {
             return i->second.first;  // gpa is exactly the beginning of the range
         } else if (i == mMemoryMappings.begin()) {
-            return nullptr;
+            return nullptr;  // can't '--i', see below
         } else {
-            // gpa points into the range or between ranges, `i` points to the next range
-            --i;  // go the previous range
-            if (i == mMemoryMappings.begin()) {
-                return nullptr;  // there is no previous range
-            } else if ((i->first + i->second.second) > gpa) {
+            --i;
+
+            if ((i->first + i->second.second) > gpa) {
                 // move the host ptr by +(gpa-base)
                 return static_cast<char *>(i->second.first) + (gpa - i->first);
             } else {
-                return nullptr;  // the previous range does not cover gpa
+                return nullptr;  // the range does not cover gpa
             }
         }
     }
