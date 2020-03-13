@@ -288,7 +288,7 @@ public:
 
         mAgents->sensors->setPhysicalParameterTarget(
                 (int)request->target(), a, b, c,
-                PhysicalInterpolation::PHYSICAL_INTERPOLATION_SMOOTH);
+                PhysicalInterpolation::PHYSICAL_INTERPOLATION_STEP);
         return Status::OK;
     }
 

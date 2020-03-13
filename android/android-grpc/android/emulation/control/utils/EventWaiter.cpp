@@ -27,8 +27,7 @@ EventWaiter::~EventWaiter() {
 }
 
 uint64_t EventWaiter::next(std::chrono::milliseconds timeout_ms) {
-    uint64_t missed = next(mLastEvent + 1, timeout_ms);
-    // Note, technically possible that we received a few events here.
+    uint64_t missed = next(mLastEvent, timeout_ms);
     mLastEvent = current();
     return missed;
 }
@@ -43,8 +42,9 @@ uint64_t EventWaiter::next(uint64_t afterEvent,
     auto future = std::chrono::system_clock::now() + timeout_ms;
     bool timedOut = !mCv.wait_until(
             lock, future, [=]() { return mEventCounter > afterEvent; });
+    (void)timedOut;
 
-    return timedOut ? 0 : mEventCounter - afterEvent;
+    return afterEvent > mEventCounter ? 0 : mEventCounter - afterEvent;
 }
 
 void EventWaiter::callback() {
