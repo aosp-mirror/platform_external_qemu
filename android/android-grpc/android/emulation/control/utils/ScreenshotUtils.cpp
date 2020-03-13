@@ -80,14 +80,31 @@ SkinRotation ScreenshotUtils::translate(Rotation_SkinRotation x) {
 };
 
 Rotation_SkinRotation ScreenshotUtils::coarseRotation(double zaxis) {
-    if (zaxis < -90) {
-        return Rotation::REVERSE_PORTRAIT;
-    } else if (zaxis < 0) {
-        return Rotation::LANDSCAPE;
-    } else if (zaxis < 90) {
+    while (zaxis < 0.0) {
+        zaxis += 360.0;
+    }
+
+    while (zaxis > 360.0) {
+        zaxis -= 360.0;
+    }
+
+    if (zaxis >= 315.0 || zaxis < 45.0) {
         return Rotation::PORTRAIT;
     }
-    return Rotation::REVERSE_LANDSCAPE;  // z >= 90;
+
+    if (zaxis >= 45.0 && zaxis < 135.0) {
+        return Rotation::LANDSCAPE;
+    }
+
+    if (zaxis >= 135.0 && zaxis < 225.0) {
+        return Rotation::REVERSE_PORTRAIT;
+    }
+
+    if (zaxis >= 225.0 && zaxis < 315.0) {
+        return Rotation::REVERSE_LANDSCAPE;
+    }
+
+    return Rotation::PORTRAIT;
 }
 
 std::tuple<int, int> ScreenshotUtils::resizeKeepAspectRatio(
