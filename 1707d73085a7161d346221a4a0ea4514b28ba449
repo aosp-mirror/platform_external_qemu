@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c768fee0_c066ac77",
+        "filename": "android/android-emu/android/base/synchronization/Event.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-13T20:34:53Z",
+      "side": 1,
+      "message": "nit: not used",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 34
+      },
+      "revId": "1707d73085a7161d346221a4a0ea4514b28ba449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af3cb6cf_433d4fff",
+        "filename": "android/android-emu/android/base/synchronization/Event.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-13T20:34:53Z",
+      "side": 1,
+      "message": "FYI: the generic event interface is very easy to use incorrectly, and that\u0027s the reason Posix doesn\u0027t have it but got ConditionVariable instead. E.g. here two signal() calls will only let a single wait() to unblock, which may be non-obvious.\nIMO it\u0027s worth adding a big warning that using this is more complicated than one may think and as soon as the user becomes slightly complicated it\u0027s better to go to a different synchronization model",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 73
+      },
+      "revId": "1707d73085a7161d346221a4a0ea4514b28ba449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8015f66f_ac850934",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-13T20:34:53Z",
+      "side": 1,
+      "message": "nit: move",
+      "range": {
+        "startLine": 80,
+        "startChar": 50,
+        "endLine": 80,
+        "endChar": 63
+      },
+      "revId": "1707d73085a7161d346221a4a0ea4514b28ba449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b213863d_a0454d93",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-13T20:34:53Z",
+      "side": 1,
+      "message": "nit: this pattern IMO is worth moving into a separate call in ThreadLooper, something like\nThreadLooper::runOneMainLooperAndWait(). It would hide the event creation + signal + wait",
+      "range": {
+        "startLine": 214,
+        "startChar": 0,
+        "endLine": 226,
+        "endChar": 0
+      },
+      "revId": "1707d73085a7161d346221a4a0ea4514b28ba449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
