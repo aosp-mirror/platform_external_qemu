@@ -30,7 +30,9 @@
 #include <string.h>
 
 extern "C" {
+#define INIT_CUDA_GL 1
 #include "android/emulation/dynlink_cuda.h"
+#include "android/emulation/dynlink_cudaGL.h"
 #include "android/emulation/dynlink_nvcuvid.h"
 }
 #define MEDIA_H264_DEBUG 0

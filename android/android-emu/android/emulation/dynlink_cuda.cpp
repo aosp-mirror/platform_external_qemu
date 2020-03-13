@@ -16,9 +16,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#define INIT_CUDA_GL 1
 #include "dynlink_cuda.h"
 #if INIT_CUDA_GL
-#include "../inc/dynlink_cudaGL.h"
+#include "dynlink_cudaGL.h"
 #endif
 #if INIT_CUDA_D3D9
 #include "../inc/dynlink_cudaD3D9.h"
