@@ -944,7 +944,6 @@ int goldfish_address_space_alloc_shared_host_region(
 
     if (!s_current_state)
     {
-        fprintf(stderr, "%s: ERROR: no allocator present!\n", __func__);
         return -EINVAL;
     }
 
@@ -964,7 +963,6 @@ int goldfish_address_space_free_shared_host_region(uint64_t offset)
 
     if (!s_current_state)
     {
-        fprintf(stderr, "%s: ERROR: no allocator present!\n", __func__);
         return -EINVAL;
     }
 
