@@ -492,11 +492,10 @@ public:
 
         // TODO(jansene): Not clear if the rotation impacts displays other
         // than 0.
-        if (request->display() == 0) {
-            mAgents->sensors->getPhysicalParameter(
-                    PHYSICAL_PARAMETER_ROTATION, &xaxis, &yaxis, &zaxis,
-                    PARAMETER_VALUE_TYPE_CURRENT);
-        }
+        mAgents->sensors->getPhysicalParameter(
+                PHYSICAL_PARAMETER_ROTATION, &xaxis, &yaxis, &zaxis,
+                PARAMETER_VALUE_TYPE_CURRENT);
+
         auto rotation = ScreenshotUtils::coarseRotation(zaxis);
 
         // Calculate the desired rotation and width we should use..
@@ -531,6 +530,15 @@ public:
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(newWidth, newHeight);
+        }
+
+        // Screenshot backend uses the _skin layout_'s orientation,
+        // which is clockwise instead of counterclockwise.
+        // This makes the 90/270 cases flipped.
+        if (desiredRotation == SKIN_ROTATION_270) {
+            desiredRotation = SKIN_ROTATION_90;
+        } else if (desiredRotation == SKIN_ROTATION_90) {
+            desiredRotation = SKIN_ROTATION_270;
         }
 
         // Screenshots can come from either the gl renderer, or the guest.
