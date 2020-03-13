@@ -113,7 +113,7 @@ private:
 
 private:
     // image props
-    bool mUseGpuTexture = false;
+    bool mUseGpuTexture = true;
     bool mImageReady = false;
     static constexpr int kBPP = 2;  // YUV420 is 2 bytes per pixel
     unsigned int mHeight = 0;

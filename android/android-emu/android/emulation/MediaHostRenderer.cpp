@@ -128,7 +128,7 @@ void MediaHostRenderer::renderToHostColorBufferWithTextures(
         mVirtioGpuOps->swap_textures_and_update_color_buffer(
                 hostColorBufferId, 0, 0, outputWidth, outputHeight, kGL_RGBA,
                 kGlUnsignedByte, kFRAMEWORK_FORMAT_NV12, textures);
-        if (frame.Ytex > 0 && frame.UVtex > 0) {
+        if (textures[0] > 0 && textures[1] > 0) {
             frame.Ytex = textures[0];
             frame.UVtex = textures[1];
         }
