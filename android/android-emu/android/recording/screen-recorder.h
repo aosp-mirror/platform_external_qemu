@@ -81,11 +81,9 @@ extern bool screen_recorder_start(const RecordingInfo* info, bool async);
 extern bool screen_recorder_stop(bool async);
 // Get the recorder's current state.
 extern RecorderState screen_recorder_state_get(void);
-// Initializes the shared memory region. No data will be produced, but it will be made available.
-extern const char* initialize_shared_memory_module();
-
-// Start pushing frames into the shared memory module. Nop if initialize has not been called.
-extern bool start_shared_memory_module();
+// Starts the shared memory region. Note that the desired framerate
+// can be ignored.
+extern const char* start_shared_memory_module(int desiredFps);
 // Stops the webrtc module
 extern bool stop_shared_memory_module();
 ANDROID_END_HEADER
