@@ -64,8 +64,12 @@ public:
                                bool uvInterleaved);
 
 private:
+    void init(int w, int h, FrameworkFormat format);
+
     // For dealing with n-pixel-aligned buffers
     void updateCutoffs(float width, float ywidth, float halfwidth, float cwidth);
+    int mWidth = 0;
+    int mHeight = 0;
     FrameworkFormat mFormat;
     // We need the following GL objects:
     GLuint mProgram = 0;
