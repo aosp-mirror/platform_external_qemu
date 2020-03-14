@@ -41,6 +41,11 @@ public:
     using Closure = std::function<void()>;
     static void runOnMainLooper(Closure&& func);
 
+    // runOnMainLooper(), except waits until |func| finishes, then
+    // returns to the calling thread.
+    // WARNING: Please make sure you don't call this on the actual main looper
+    static void runOnMainLooperAndWaitForCompletion(Closure&& func);
+
     // Reset the main runner, used by test code when clearing the main looper.
     static void clearMainRunner();
 };
