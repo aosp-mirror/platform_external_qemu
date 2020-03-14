@@ -37,6 +37,10 @@ public:
     // get a TextureFrame structure to hold decoded frame
     TextureFrame getTextureFrame(int w, int h);
 
+    void saveDecodedFrameToTexture(TextureFrame frame,
+                                   void* privData,
+                                   void* func);
+
 private:
     // put back a used TextureFrame so it can be reused again
     // later

@@ -69,6 +69,16 @@ MediaHostRenderer::TextureFrame MediaHostRenderer::getTextureFrame(int w,
     return frame;
 }
 
+void MediaHostRenderer::saveDecodedFrameToTexture(TextureFrame frame,
+                                                  void* privData,
+                                                  void* func) {
+    if (mVirtioGpuOps) {
+        uint32_t textures[2] = {frame.Ytex, frame.UVtex};
+        mVirtioGpuOps->update_yuv_textures(kFRAMEWORK_FORMAT_NV12, textures,
+                                           privData, func);
+    }
+}
+
 void MediaHostRenderer::cleanUpTextures() {
     if (mFramePool.empty()) {
         return;
