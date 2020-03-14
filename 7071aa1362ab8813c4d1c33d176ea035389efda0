@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "280b4f5c_ef1236ce",
+        "filename": "android-qemu2-glue/emulation/virtio-wifi.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-03-14T01:31:18Z",
+      "side": 1,
+      "message": "I think it is better to start packed structs from larger types to reduce unaligned memory accesses.",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 12
+      },
+      "revId": "7071aa1362ab8813c4d1c33d176ea035389efda0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
