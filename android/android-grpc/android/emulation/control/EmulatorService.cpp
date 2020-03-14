@@ -213,19 +213,15 @@ public:
                       BatteryState* reply) override {
         auto agent = mAgents->battery;
 
-        android::base::Event e;
-
-        android::base::ThreadLooper::runOnMainLooper([agent, reply, &e]() {
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+            [agent, reply]() {
             reply->set_hasbattery(agent->hasBattery());
             reply->set_ispresent(agent->present());
             reply->set_charger((BatteryState_BatteryCharger)agent->charger());
             reply->set_chargelevel(agent->chargeLevel());
             reply->set_health((BatteryState_BatteryHealth)agent->health());
             reply->set_status((BatteryState_BatteryStatus)agent->status());
-            e.signal();
         });
-
-        e.wait();
 
         return Status::OK;
     }
@@ -253,9 +249,9 @@ public:
                   const ::google::protobuf::Empty* request,
                   GpsState* reply) override {
         auto agent = mAgents->location;
-        android::base::Event e;
 
-        android::base::ThreadLooper::runOnMainLooper([agent, request, reply, &e]() {
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+            [agent, request, reply]() {
             double lat, lon, speed, heading, elevation;
             int32_t count;
 
@@ -269,10 +265,7 @@ public:
             reply->set_bearing(heading);
             reply->set_altitude(elevation);
             reply->set_satellites(count);
-            e.signal();
         });
-
-        e.wait();
 
         return Status::OK;
     }
@@ -636,22 +629,19 @@ public:
                      const PhoneCall* requestPtr,
                      PhoneResponse* reply) override {
         (void)context;
-        android::base::Event e;
         PhoneCall request = *requestPtr;
 
         // We're going to end up waiting for the reply anyway, so
         // wait for it.
-        android::base::ThreadLooper::runOnMainLooper([this, request, reply, &e]() {
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+            [this, request, reply]() {
             // We assume that the int mappings are consistent..
             TelephonyOperation operation = (TelephonyOperation)request.operation();
             std::string phoneNr = request.number();
             TelephonyResponse response =
                     mAgents->telephony->telephonyCmd(operation, phoneNr.c_str());
             reply->set_response((PhoneResponse_Response)response);
-            e.signal();
         });
-
-        e.wait();
 
         return Status::OK;
     }

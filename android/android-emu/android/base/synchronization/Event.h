@@ -13,11 +13,18 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/Optional.h"
 #include "android/base/synchronization/MessageChannel.h"
 
 // super minimal wrapper around MessageChannel to make it less verbose to
 // specify simple events and waiting on them
+//
+// WARNING: This does not behave like most 'event' classes; if two threads call
+// wait(), then signal() will only unblock one of the threads (there's no
+// 'broadcast' feature). Not to be used widely.
+//
+// Once you need broadcasting or anything more complicated than a single waiter
+// and single signaler, please use a different method (such as plain condition
+// variables with mutexes)
 namespace android {
 namespace base {
 

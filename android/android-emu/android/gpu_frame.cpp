@@ -77,7 +77,7 @@ public:
             switch (msg.cmd) {
                 case FRAME_FORWARDER_ADD: {
                     AutoLock lock(mLock);
-                    mStoredForwarders[msg.data] = msg.callback;
+                    mStoredForwarders[msg.data] = std::move(msg.callback);
                     break;
                 }
                 case FRAME_FORWARDER_REMOVE: {
