@@ -31,7 +31,8 @@ extern void skin_generic_event_free(SkinGenericEvent* event);
 extern void skin_generic_event_add_event(SkinGenericEvent* ge,
                                          unsigned type,
                                          unsigned code,
-                                         unsigned value);
+                                         unsigned value,
+                                         unsigned displayId);
 
 extern void skin_generic_event_flush(SkinGenericEvent* ge);
 

@@ -21,7 +21,10 @@ ANDROID_BEGIN_HEADER
 /* Maximum number of virtio input devices*/
 #define VIRTIO_INPUT_MAX_NUM 11
 
-extern int android_virtio_input_send(int type, int code, int value);
+extern int android_virtio_input_send(int type,
+                                     int code,
+                                     int value,
+                                     int displayId);
 extern void android_virtio_kbd_mouse_event(int dx,
                                            int dy,
                                            int dz,
