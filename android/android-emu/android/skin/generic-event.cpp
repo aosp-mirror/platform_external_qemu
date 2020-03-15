@@ -41,8 +41,8 @@ void skin_generic_event_process_event(SkinGenericEvent* ge, SkinEvent* ev) {
         int type = ev->u.generic_event.type;
         int code = ev->u.generic_event.code;
         int value = ev->u.generic_event.value;
-
-        skin_generic_event_add_event(ge, type, code, value);
+        int displayId = 0;
+        skin_generic_event_add_event(ge, type, code, value, displayId);
         skin_generic_event_flush(ge);
     }
 }
@@ -50,8 +50,9 @@ void skin_generic_event_process_event(SkinGenericEvent* ge, SkinEvent* ev) {
 void skin_generic_event_add_event(SkinGenericEvent* ge,
                                   unsigned type,
                                   unsigned code,
-                                  unsigned value) {
-    skin_generic_event_buffer_add(ge->event_buf, type, code, value);
+                                  unsigned value,
+                                  unsigned displayId) {
+    skin_generic_event_buffer_add(ge->event_buf, type, code, value, displayId);
 }
 
 void skin_generic_event_flush(SkinGenericEvent* ge) {
