@@ -63,6 +63,8 @@ extern bool multitouch_is_touch_down(int buttons_state);
 extern bool multitouch_should_skip_sync(int buttons_state);
 extern bool multitouch_is_second_finger(int buttons_state);
 
+extern void multitouch_update_displayId(int displayId);
+
 /* Handles a MT pointer event.
  * Param:
  *  source - Identifies the source of the event (mouse or a device).

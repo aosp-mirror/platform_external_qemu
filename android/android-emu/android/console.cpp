@@ -2133,7 +2133,7 @@ do_event_send( ControlClient  client, char*  args )
     while (*p) {
         char*  q;
         char   temp[128];
-        int    type, code, value, ret;
+        int type, code, value, displayId, ret;
 
         p += strspn( p, " \t" );  /* skip spaces */
         if (*p == 0)
@@ -2162,8 +2162,9 @@ do_event_send( ControlClient  client, char*  args )
             }
             return -1;
         }
-
-        client->global->user_event_agent->sendGenericEvent(type, code, value);
+        displayId = 0;
+        client->global->user_event_agent->sendGenericEvent(
+                {type, code, value, displayId});
         p = q;
     }
     return 0;

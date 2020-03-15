@@ -74,21 +74,22 @@ static void user_event_keycodes(int* kcodes, int count) {
  * input multi touch device. For qemu2 and API 10+, multi-touch is always
  * supported by default.
  */
-static void user_event_generic(int type, int code, int value) {
+static void user_event_generic(SkinGenericEventCode event) {
     bool sent = false;
     if (feature_is_enabled(kFeature_VirtioInput)) {
-        sent = android_virtio_input_send(type, code, value);
+        sent = android_virtio_input_send(event.type, event.code, event.value,
+                                         event.displayId);
     }
 
     if (!sent) {
-        goldfish_event_send(type, code, value);
+        goldfish_event_send(event.type, event.code, event.value);
     }
 }
 
 static void user_event_generic_events(SkinGenericEventCode* events, int count) {
     int i;
     for (i = 0; i < count; i++) {
-        user_event_generic(events[i].type, events[i].code, events[i].value);
+        user_event_generic(events[i]);
     }
 }
 
