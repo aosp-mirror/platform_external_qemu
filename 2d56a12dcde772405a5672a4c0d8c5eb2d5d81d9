@@ -139,6 +139,30 @@
       "revId": "2d56a12dcde772405a5672a4c0d8c5eb2d5d81d9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a97d7aec_6bc06b42",
+        "filename": "android/android-emu/android/multitouch-screen.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-03-16T04:26:44Z",
+      "side": 1,
+      "message": "Good call.",
+      "parentUuid": "ada1f519_7e97c648",
+      "range": {
+        "startLine": 507,
+        "startChar": 33,
+        "endLine": 507,
+        "endChar": 46
+      },
+      "revId": "2d56a12dcde772405a5672a4c0d8c5eb2d5d81d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
