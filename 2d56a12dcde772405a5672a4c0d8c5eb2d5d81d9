@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "62b3ba3b_9b11a858",
+        "filename": "android/android-emu/android/multitouch-screen.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-03-16T16:19:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02b3dbe0_2aafc345",
+      "range": {
+        "startLine": 85,
+        "startChar": 25,
+        "endLine": 85,
+        "endChar": 26
+      },
+      "revId": "2d56a12dcde772405a5672a4c0d8c5eb2d5d81d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ada1f519_7e97c648",
         "filename": "android/android-emu/android/multitouch-screen.c",
         "patchSetId": 3
@@ -163,6 +187,30 @@
       "revId": "2d56a12dcde772405a5672a4c0d8c5eb2d5d81d9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ee4b2d2_d44314b8",
+        "filename": "android/android-emu/android/multitouch-screen.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-03-16T16:19:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a97d7aec_6bc06b42",
+      "range": {
+        "startLine": 507,
+        "startChar": 33,
+        "endLine": 507,
+        "endChar": 46
+      },
+      "revId": "2d56a12dcde772405a5672a4c0d8c5eb2d5d81d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
