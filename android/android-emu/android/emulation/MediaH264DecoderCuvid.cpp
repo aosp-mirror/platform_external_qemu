@@ -586,6 +586,10 @@ void cuda_nv12_updater(void* privData, uint32_t type, uint32_t* textures) {
 
 int MediaH264DecoderCuvid::HandlePictureDisplay(
         CUVIDPARSERDISPINFO* pDispInfo) {
+    if (mIsLoadingFromSnapshot) {
+        return 1;
+    }
+
     CUVIDPROCPARAMS videoProcessingParameters = {};
     videoProcessingParameters.progressive_frame = pDispInfo->progressive_frame;
     videoProcessingParameters.second_field = pDispInfo->repeat_first_field + 1;
@@ -606,7 +610,6 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
     std::vector<uint8_t> myFrame;
     TextureFrame texFrame;
     if (mUseGpuTexture) {
-	    //TODO: save to texture
             h264_cuvid_copy_context my_copy_context{
                     .src_frame = dpSrcFrame,
                     .src_pitch = nSrcPitch,
@@ -669,6 +672,10 @@ void MediaH264DecoderCuvid::oneShotDecode(std::vector<uint8_t>& data,
 
 void MediaH264DecoderCuvid::save(base::Stream* stream) const {
     stream->putBe32(mParser.version());
+    const int useGpuTexture = mUseGpuTexture ? 1 : 0;
+    stream->putBe32(useGpuTexture);
+
+    // mRenderer.save(stream);
     stream->putBe32(mWidth);
     stream->putBe32(mHeight);
     stream->putBe32(mOutputWidth);
@@ -685,11 +692,13 @@ void MediaH264DecoderCuvid::save(base::Stream* stream) const {
         int myOutputWidth = mSavedW.front();
         int myOutputHeight = mSavedH.front();
         int myOutputPts = mSavedPts.front();
+        TextureFrame texFrame = mSavedTexFrames.front();
+        std::vector<uint32_t> textures{texFrame.Ytex, texFrame.UVtex};
         mSnapshotState.saveDecodedFrame(
                 myFrame, myOutputWidth, myOutputHeight,
                 ColorAspects{mColorPrimaries, mColorRange, mColorTransfer,
                              mColorSpace},
-                myOutputPts);
+                myOutputPts, textures);
         mSavedFrames.pop_front();
         mSavedTexFrames.pop_front();
         mSavedW.pop_front();
@@ -705,6 +714,10 @@ bool MediaH264DecoderCuvid::load(base::Stream* stream) {
     mIsLoadingFromSnapshot = true;
     uint32_t version = stream->getBe32();
     mParser = H264PingInfoParser{version};
+    const int useGpuTexture = stream->getBe32();
+    mUseGpuTexture = useGpuTexture ? true : false;
+
+    // mRenderer.load(stream);
 
     mWidth = stream->getBe32();
     mHeight = stream->getBe32();
@@ -746,7 +759,11 @@ bool MediaH264DecoderCuvid::load(base::Stream* stream) {
         mColorSpace = frame.color.space;
         mOutputPts = frame.pts;
         mSavedFrames.push_back(frame.data);
-        mSavedTexFrames.push_back(TextureFrame{0, 0});
+        // mSavedTexFrames.push_back(
+        //        TextureFrame{frame.textures[0], frame.textures[1]});
+        TextureFrame texFrame =
+                mRenderer.getTextureFrame(mOutputPts, mOutputHeight);
+        mSavedTexFrames.push_back(texFrame);
         mSavedW.push_back(mOutputWidth);
         mSavedH.push_back(mOutputHeight);
         mSavedPts.push_back(mOutputPts);

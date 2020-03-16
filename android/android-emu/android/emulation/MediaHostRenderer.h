@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/base/files/Stream.h"
 #include "android/emulation/GoldfishMediaDefs.h"
 #include "android/opengles.h"
 
@@ -40,6 +41,10 @@ public:
     void saveDecodedFrameToTexture(TextureFrame frame,
                                    void* privData,
                                    void* func);
+
+public:
+    void save(base::Stream* stream) const;
+    bool load(base::Stream* stream);
 
 private:
     // put back a used TextureFrame so it can be reused again

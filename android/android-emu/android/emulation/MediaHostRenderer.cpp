@@ -34,6 +34,27 @@
 namespace android {
 namespace emulation {
 
+void MediaHostRenderer::save(base::Stream* stream) const {
+    stream->putBe32(mFramePool.size());
+    for (auto frame : mFramePool) {
+        H264_DPRINT("saving Y %d UV %d", (int)frame.Ytex, (int)frame.UVtex);
+        stream->putBe32(frame.Ytex);
+        stream->putBe32(frame.UVtex);
+    }
+}
+
+bool MediaHostRenderer::load(base::Stream* stream) {
+    size_t count = stream->getBe32();
+    mFramePool.clear();
+    for (size_t i = 0; i < count; ++i) {
+        mFramePool.push_back(
+                TextureFrame{stream->getBe32(), stream->getBe32()});
+        H264_DPRINT("loading Y %d UV %d", (int)mFramePool.back().Ytex,
+                    (int)mFramePool.back().UVtex);
+    }
+    return true;
+}
+
 MediaHostRenderer::MediaHostRenderer() {
     mVirtioGpuOps = android_getVirtioGpuOps();
     if (mVirtioGpuOps == nullptr) {
