@@ -105,7 +105,7 @@ void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
     }
     if (mVirtioGpuOps) {
         mVirtioGpuOps->update_color_buffer(hostColorBufferId, 0, 0, outputWidth,
-                                           outputHeight, kGL_RGBA8,
+                                           outputHeight, kGL_RGBA,
                                            kGlUnsignedByte, decodedFrame);
     } else {
         H264_DPRINT("ERROR: there is no virtio Gpu Ops is not setup");

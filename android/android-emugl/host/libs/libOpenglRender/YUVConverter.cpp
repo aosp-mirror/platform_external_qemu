@@ -600,6 +600,8 @@ void YUVConverter::drawConvert(int x, int y,
 
     if (!pixels) {
         // special case: draw from texture, only support NV12 for now
+        // as cuvid's native format is NV12.
+        // TODO: add more formats if there are such needs in the future.
         assert(mFormat == FRAMEWORK_FORMAT_NV12);
         s_gles2.glActiveTexture(GL_TEXTURE1);
         s_gles2.glBindTexture(GL_TEXTURE_2D, mUVtex);
