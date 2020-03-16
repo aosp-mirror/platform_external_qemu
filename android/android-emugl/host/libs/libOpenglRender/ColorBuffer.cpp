@@ -475,7 +475,12 @@ void ColorBuffer::reformat(GLint internalformat, GLenum type) {
 }
 
 void ColorBuffer::swapYUVTextures(uint32_t type, uint32_t* textures) {
-    m_yuv_converter->swapTextures(type, textures);
+    if (type == FRAMEWORK_FORMAT_NV12) {
+        m_yuv_converter->swapTextures(type, textures);
+    } else {
+        fprintf(stderr, "%s: Failed: Could not do this with type 0x%x\n",
+                __func__, type);
+    }
 }
 
 void ColorBuffer::subUpdate(int x,

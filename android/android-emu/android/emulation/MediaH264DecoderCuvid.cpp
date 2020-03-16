@@ -65,7 +65,13 @@ using TextureFrame = MediaHostRenderer::TextureFrame;
 
 MediaH264DecoderCuvid::MediaH264DecoderCuvid(uint64_t id,
                                              H264PingInfoParser parser)
-    : mId(id), mParser(parser){};
+    : mId(id), mParser(parser) {
+    auto useGpuTextureEnv = android::base::System::getEnvironmentVariable(
+            "ANDROID_EMU_CODEC_USE_GPU_TEXTURE");
+    if (useGpuTextureEnv != "") {
+        mUseGpuTexture = true;
+    }
+};
 
 MediaH264DecoderPlugin* MediaH264DecoderCuvid::clone() {
     return new MediaH264DecoderCuvid(mId, mParser);
@@ -283,6 +289,8 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
     uint8_t* dst = param.pDecodedFrame;
     int myOutputWidth = mOutputWidth;
     int myOutputHeight = mOutputHeight;
+    std::vector<uint8_t> decodedFrame;
+    TextureFrame decodedTexFrame;
     {
         std::lock_guard<std::mutex> g(mFrameLock);
         mImageReady = !mSavedFrames.empty();
@@ -291,31 +299,49 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
             *retErr = static_cast<int>(Err::NoDecodedFrame);
             return;
         }
-    std::vector<uint8_t>& myFrame = mSavedFrames.front();
-    mOutputPts = mSavedPts.front();
-    uint8_t* pDecodedFrame = &(myFrame[0]);
 
-    int myOutputWidth = mSavedW.front();
-    int myOutputHeight = mSavedH.front();
-    *retWidth = myOutputWidth;
-    *retHeight = myOutputHeight;
+        std::vector<uint8_t>& myFrame = mSavedFrames.front();
+        std::swap(decodedFrame, myFrame);
+        decodedTexFrame = mSavedTexFrames.front();
+        mOutputPts = mSavedPts.front();
 
-    memcpy(dst, pDecodedFrame, myOutputHeight * myOutputWidth * 3 / 2);
-    mSavedFrames.pop_front();
-    mSavedTexFrames.pop_front();
-    mSavedPts.pop_front();
-    mSavedW.pop_front();
-    mSavedH.pop_front();
+        myOutputWidth = mSavedW.front();
+        myOutputHeight = mSavedH.front();
+        *retWidth = myOutputWidth;
+        *retHeight = myOutputHeight;
+
+        mSavedFrames.pop_front();
+        mSavedTexFrames.pop_front();
+        mSavedPts.pop_front();
+        mSavedW.pop_front();
+        mSavedH.pop_front();
     }
 
-    YuvConverter<uint8_t> convert8(myOutputWidth, myOutputHeight);
-    convert8.UVInterleavedToPlanar(dst);
+    if (!mUseGpuTexture) {
+        YuvConverter<uint8_t> convert8(myOutputWidth, myOutputHeight);
+        convert8.UVInterleavedToPlanar(decodedFrame.data());
+    }
+
+    bool needToCopyToGuest = true;
 
     if (mParser.version() == 200) {
         if (param.hostColorBufferId >= 0) {
-            mRenderer.renderToHostColorBuffer(param.hostColorBufferId, myOutputWidth,
-                                          myOutputHeight, dst);
+            needToCopyToGuest = false;
+            if (mUseGpuTexture) {
+                mRenderer.renderToHostColorBufferWithTextures(
+                        param.hostColorBufferId, myOutputWidth, myOutputHeight,
+                        decodedTexFrame);
+            } else {
+                mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
+                                                  myOutputWidth, myOutputHeight,
+                                                  decodedFrame.data());
+            }
         }
+    }
+
+    if (needToCopyToGuest) {
+        memcpy(dst, decodedFrame.data(),
+               myOutputHeight * myOutputWidth * 3 / 2);
     }
 
     mImageReady = false;
@@ -376,7 +402,7 @@ bool MediaH264DecoderCuvid::initCudaDrivers() {
 }
 
 int MediaH264DecoderCuvid::HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat) {
-    int nDecodeSurface = 4;  // pVideoFormat->min_num_decode_surfaces;
+    int nDecodeSurface = 8;  // need 8 for 4K video
 
     CUVIDDECODECAPS decodecaps;
     memset(&decodecaps, 0, sizeof(decodecaps));
@@ -575,6 +601,7 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
                                       &dpSrcFrame, &nSrcPitch,
                                       &videoProcessingParameters));
 
+    NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
     unsigned int newOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
     std::vector<uint8_t> myFrame;
     TextureFrame texFrame;
@@ -594,7 +621,6 @@ int MediaH264DecoderCuvid::HandlePictureDisplay(
         myFrame.resize(newOutBufferSize);
         uint8_t* pDecodedFrame = &(myFrame[0]);
 
-        NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
         CUDA_MEMCPY2D m = {0};
         m.srcMemoryType = CU_MEMORYTYPE_DEVICE;
         m.srcDevice = dpSrcFrame;
