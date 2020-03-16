@@ -22,6 +22,30 @@
       "revId": "5344921129e9f3201e0b46ef8cd1234c41370ccb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82146ad7_097f5b04",
+        "filename": "android/android-emu/android/multitouch-screen.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-03-16T16:15:59Z",
+      "side": 1,
+      "message": "If it is ok, do mts_state-\u003edisplayId be set to something?",
+      "parentUuid": "9a16f8c6_93b84185",
+      "range": {
+        "startLine": 509,
+        "startChar": 4,
+        "endLine": 510,
+        "endChar": 15
+      },
+      "revId": "5344921129e9f3201e0b46ef8cd1234c41370ccb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
