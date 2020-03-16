@@ -81,6 +81,7 @@ public:
         int height;
         ColorAspects color;
         uint64_t pts;
+        std::vector<uint32_t> textures;
     };
 
     struct SnapshotState {
@@ -118,8 +119,9 @@ public:
                               int width = 0,
                               int height = 0,
                               ColorAspects xcolor = ColorAspects{},
-                              uint64_t pts = 0) {
-            FrameInfo frame{data, width, height, xcolor, pts};
+                              uint64_t pts = 0,
+                              std::vector<uint32_t> textures = {}) {
+            FrameInfo frame{data, width, height, xcolor, pts, textures};
             savedDecodedFrame = std::move(frame);
             savedFrames.push_back(savedDecodedFrame);
         }
@@ -132,8 +134,17 @@ public:
             }
         }
 
+        void saveUint32Vec(base::Stream* stream,
+                           const std::vector<uint32_t>& vec) const {
+            stream->putBe32(vec.size());
+            if (!vec.empty()) {
+                stream->write(vec.data(), vec.size() * sizeof(vec[0]));
+            }
+        }
+
         void saveFrameInfo(base::Stream* stream, const FrameInfo& frame) const {
             saveVec(stream, frame.data);
+            saveUint32Vec(stream, frame.textures);
             stream->putBe32(frame.width);
             stream->putBe32(frame.height);
             saveColor(stream, frame.color);
@@ -142,6 +153,7 @@ public:
 
         void loadFrameInfo(base::Stream* stream, FrameInfo& frame) {
             loadVec(stream, frame.data);
+            loadUint32Vec(stream, frame.textures);
             frame.width = stream->getBe32();
             frame.height = stream->getBe32();
             loadColor(stream, frame.color);
@@ -189,6 +201,15 @@ public:
                 stream->read(vec.data(), size);
             }
         }
+
+        void loadUint32Vec(base::Stream* stream, std::vector<uint32_t>& vec) {
+            int size = stream->getBe32();
+            vec.resize(size);
+            if (size > 0) {
+                stream->read(vec.data(), size * sizeof(vec[0]));
+            }
+        }
+
         void load(base::Stream* stream) {
             loadVec(stream, sps);
             loadVec(stream, pps);
