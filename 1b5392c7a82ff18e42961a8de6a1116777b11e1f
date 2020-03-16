@@ -46,6 +46,30 @@
       "revId": "1b5392c7a82ff18e42961a8de6a1116777b11e1f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c8deb9a_72ddb204",
+        "filename": "android/android-emu/android/multitouch-screen.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-03-16T19:11:24Z",
+      "side": 1,
+      "message": "Yeah, so are you ok with a fatal assertion? If not, then you can remove the ANDROID_ASSERT. Same for the other place you added it.",
+      "parentUuid": "6b0fe0b6_36a4d41e",
+      "range": {
+        "startLine": 513,
+        "startChar": 4,
+        "endLine": 515,
+        "endChar": 5
+      },
+      "revId": "1b5392c7a82ff18e42961a8de6a1116777b11e1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
