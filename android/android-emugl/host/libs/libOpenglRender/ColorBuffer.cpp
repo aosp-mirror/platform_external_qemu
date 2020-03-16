@@ -478,7 +478,8 @@ void ColorBuffer::swapYUVTextures(uint32_t type, uint32_t* textures) {
     if (type == FRAMEWORK_FORMAT_NV12) {
         m_yuv_converter->swapTextures(type, textures);
     } else {
-        fprintf(stderr, "%s: Failed: Could not do this with type 0x%x\n",
+        fprintf(stderr,
+                "%s: ERROR: format other than NV12 is not supported: 0x%x\n",
                 __func__, type);
     }
 }
