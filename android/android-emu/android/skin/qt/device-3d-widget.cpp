@@ -64,6 +64,7 @@ Device3DWidget::Device3DWidget(QWidget* parent)
     setFocusPolicy(Qt::ClickFocus);
 
     if (mUseAbstractDevice) {
+        mCurrentFoldableStatePtr = android_foldable_get_state_ptr();
         connect(&mAnimationTimer, SIGNAL(timeout()),
                 this, SLOT(animate()));
         mAnimationTimer.setInterval(kAnimationIntervalMs);
@@ -307,6 +308,14 @@ bool Device3DWidget::initModel() {
                              mElementsCount * sizeof(GLuint),
                              &indices[0],
                              GL_STATIC_DRAW);
+
+        mCachedFoldableState = *mCurrentFoldableStatePtr;
+        std::pair<std::vector<float>, std::vector<uint32_t>> newData = 
+            generateModelVerticesFromFoldableState(mCachedFoldableState);
+        updateModelVertices(
+            newData.first.data(), newData.first.size() * sizeof(float),
+            newData.second.data(), newData.second.size() * sizeof(uint32_t));
+
         CHECK_GL_ERROR_RETURN("Failed to load model", false);
         return true;
     } else {
@@ -388,6 +397,102 @@ bool Device3DWidget::initTextures() {
     return true;
 }
 
+void Device3DWidget::updateModelVertices(
+    const void* vertexData, size_t vertexDataBytes,
+    const void* indexData, size_t indexDataBytes) {
+
+    if (vertexDataBytes == 0) return;
+
+    mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
+    mGLES2->glBufferData(GL_ARRAY_BUFFER,
+                         vertexDataBytes,
+                         vertexData,
+                         GL_STATIC_DRAW);
+    mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
+    mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                         indexDataBytes,
+                         indexData,
+                         GL_STATIC_DRAW);
+    mElementsCount = indexDataBytes / sizeof(uint32_t);
+}
+
+std::pair<
+    std::vector<float>,
+    std::vector<uint32_t>>
+Device3DWidget::generateModelVerticesFromFoldableState(const FoldableState& state) {
+
+    // TODO: Generalize
+    // Assume split 0.5 for now, with 1 hinge
+    if (state.config.numHinges != 1) return {};
+
+    float hingeRadians = state.currentHingeDegrees[0] * M_PI / 180.0f;
+
+    float swingy = cos(hingeRadians - M_PI);
+    float swingz = sin(hingeRadians - M_PI);
+
+    float swingyn = cos(hingeRadians - M_PI * 0.5f);
+    float swingzn = sin(hingeRadians - M_PI * 0.5f);
+
+    std::vector<float> attribs = {
+        -1.0, -1.0, 0.0,   0.0, 0.0, 1.0,  0.0, 0.0, // 0
+        +1.0, -1.0, 0.0,   0.0, 0.0, 1.0,  1.0, 0.0, // 1
+        // Hinge, attached to non-swinging part
+        -1.0, 0.0, 0.0,   0.0, 0.0, 1.0,  0.0, 0.5, // 2
+        +1.0, 0.0, 0.0,   0.0, 0.0, 1.0,  1.0, 0.5, // 3
+        // Hinge, attached to swinging part
+        -1.0, 0.0, 0.0,   0.0, swingyn, swingzn,  0.0, 0.5, // 4
+        +1.0, 0.0, 0.0,   0.0, swingyn, swingzn,  1.0, 0.5, // 5
+        // Swinging part
+        +1.0, 1.0, 0.0,   0.0, swingyn, swingzn,  1.0, 1.0, // 6
+        -1.0, 1.0, 0.0,   0.0, swingyn, swingzn,  0.0, 1.0, // 7
+    };
+
+    // Size it to the aspect ratio
+    float aspect =
+        (float)(android_hw->hw_lcd_width) /
+        (float)(android_hw->hw_lcd_height);
+
+    float yheight = 1.0f;
+
+    // TODO: Remove hacky computation for the swung-out part
+    for (size_t i = 0; i < attribs.size(); ++i) {
+        if (i % 8 == 1) {
+            attribs[i] *= 1.0f / aspect;
+        }
+        if (i % 8 < 4) {
+            attribs[i] *= 2.0f;
+        }
+
+        if (i >= 6 * 8 && i < 8 * 8) {
+            if (i % 8 == 1) {
+                yheight = attribs[i];
+            }
+        }
+    }
+
+    for (size_t i = 0; i < attribs.size(); ++i) {
+        if (i >= 6 * 8 && i < 8 * 8) {
+
+            if (i % 8 == 2) {
+                attribs[i] = sin(hingeRadians - M_PI) * yheight;
+            }
+            if (i % 8 == 1) {
+                attribs[i] = cos(hingeRadians - M_PI) * yheight;
+            }
+        }
+
+    }
+
+    std::vector<uint32_t> indices = {
+        0, 1, 2,
+        1, 3, 2,
+        4, 5, 7,
+        7, 6, 5,
+    };
+
+    return {attribs, indices};
+}
+
 void Device3DWidget::resizeGL(int w, int h) {
     if (!mGLES2) {
         return;
@@ -450,6 +555,18 @@ void Device3DWidget::repaintGL() {
         rotation = glm::mat4(fromEulerAnglesXYZ(glm::radians(eulerDegrees)));
     }
 
+    // Upload new vertex data from foldable state, if necessary
+    if (mUseAbstractDevice) {
+        if (memcmp(&mCachedFoldableState, mCurrentFoldableStatePtr, sizeof(FoldableState))) {
+            mCachedFoldableState = *mCurrentFoldableStatePtr;
+            std::pair<std::vector<float>, std::vector<uint32_t>> newData = 
+                generateModelVerticesFromFoldableState(mCachedFoldableState);
+            updateModelVertices(
+                newData.first.data(), newData.first.size() * sizeof(float),
+                newData.second.data(), newData.second.size() * sizeof(uint32_t));
+        }
+    }
+
     if (mOperationMode == OperationMode::Rotate &&
         quaternionNearEqual(mLastTargetRotation, mTargetRotation)) {
         rotation = glm::mat4_cast(mLastTargetRotation);
@@ -509,6 +626,12 @@ void Device3DWidget::repaintGL() {
     mGLES2->glUniform1i(gloss_map_uniform, 2);
     GLuint env_map_uniform = mGLES2->glGetUniformLocation(mProgram, "env_map");
     mGLES2->glUniform1i(env_map_uniform, 3);
+    GLuint no_light_uniform = mGLES2->glGetUniformLocation(mProgram, "no_light");
+    if (mUseAbstractDevice) {
+        mGLES2->glUniform1f(no_light_uniform, 1.0f);
+    } else {
+        mGLES2->glUniform1f(no_light_uniform, 0.0f);
+    }
 
     // Set up attribute pointers.
     mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
