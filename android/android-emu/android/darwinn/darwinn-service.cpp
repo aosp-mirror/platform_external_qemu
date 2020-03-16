@@ -245,7 +245,7 @@ private:
 
     void sendResponse(darwinn::Response& message) {
         android::base::AutoLock lock(mSendResponseLock);
-        const int size = message.ByteSize();
+        const int size = message.ByteSizeLong();
         std::vector<uint8_t> result(static_cast<size_t>(size));
         message.SerializeToArray(result.data(), size);
 
