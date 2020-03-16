@@ -22,6 +22,30 @@
       "revId": "1b5392c7a82ff18e42961a8de6a1116777b11e1f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b0fe0b6_36a4d41e",
+        "filename": "android/android-emu/android/multitouch-screen.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-03-16T19:05:12Z",
+      "side": 1,
+      "message": "Now I realize that ANDROID_ASSERT will abort the program.",
+      "parentUuid": "69486e83_39013c97",
+      "range": {
+        "startLine": 513,
+        "startChar": 4,
+        "endLine": 515,
+        "endChar": 5
+      },
+      "revId": "1b5392c7a82ff18e42961a8de6a1116777b11e1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
