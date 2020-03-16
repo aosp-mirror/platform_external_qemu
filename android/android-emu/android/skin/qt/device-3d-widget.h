@@ -17,6 +17,7 @@
 
 #include "GLES3/gl3.h"                        // for GLuint
 #include "android/skin/qt/gl-widget.h"        // for GLWidget
+#include "android/hw-sensors.h"
 #include <glm/vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -116,6 +117,12 @@ private:
     bool initProgram();
     bool initModel();
     bool initTextures();
+    void updateModelVertices(
+            const void* vertexData, size_t vertexDataBytes,
+            const void* indexData, size_t indexDataBytes);
+    std::pair<std::vector<float>, std::vector<uint32_t>>
+        generateModelVerticesFromFoldableState(
+            const FoldableState& state);
 
     // Returns the world coordinates of a point on the XY plane
     // that corresponds to the given point on the screen.
@@ -156,4 +163,6 @@ private:
     QTimer mAnimationTimer;
 
     bool mUseAbstractDevice = false;
+    struct FoldableState* mCurrentFoldableStatePtr;
+    struct FoldableState mCachedFoldableState;
 };

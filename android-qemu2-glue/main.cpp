@@ -43,6 +43,7 @@
 #include "android/filesystems/ext4_utils.h"
 #include "android/globals.h"
 #include "android/help.h"
+#include "android/hw-sensors.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/main-common-ui.h"
 #include "android/main-common.h"
@@ -900,6 +901,8 @@ static int startEmulatorWithMinConfig(
             printf("emulator: argv[%02d] = \"%s\"\n", i, argv[i]);
         }
     }
+
+    android_foldable_initialize(nullptr);
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
                              argv);
@@ -1787,6 +1790,8 @@ extern "C" int main(int argc, char** argv) {
     }
 
     gQAndroidLocationAgent->gpsSetPassiveUpdate(!opts->no_passive_gps);
+
+    android_foldable_initialize(nullptr);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.

@@ -45,5 +45,6 @@ void main() {
     vec3 diffuse = lambert * ((1.0 - spec_intensity) * diffuse_color.rgb +
                                      spec_intensity * refl_color.rgb);
     vec3 specular = vec3(specular_value * spec_intensity);
-    gl_FragColor = vec4(diffuse + specular, diffuse_color.a);
+    // gl_FragColor = vec4(diffuse + specular, diffuse_color.a);
+    gl_FragColor = diffuse_color;
 }
