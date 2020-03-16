@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8fad9914_ce6fa719",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-16T16:44:39Z",
+      "side": 1,
+      "message": "%s: ERROR: format not supported: 0x%x",
+      "revId": "b52f9397f13520aa39f45bb3f3e06407f900cc59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f5d5f68_b7d414b2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-16T16:44:39Z",
+      "side": 1,
+      "message": "is there a path to supporting other formats than NV12 w/ CUDA?",
+      "revId": "b52f9397f13520aa39f45bb3f3e06407f900cc59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
