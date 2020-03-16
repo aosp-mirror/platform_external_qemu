@@ -1115,3 +1115,48 @@ extern int android_physical_model_stop_recording() {
 
     return physicalModel_stopRecording(hw->physical_model);
 }
+
+// Foldable
+static FoldableState _foldableState[1] = {};
+
+FoldableState* android_foldable_initialize(const struct FoldableConfig* config) {
+    bool needDefaultConfig = !config;
+    // Load a default config if there is nothing provided.
+    if (needDefaultConfig) {
+        struct FoldableConfig defaultConfig = {
+            .hingesType = ANDROID_FOLDABLE_HORIZONTAL_SPLIT,
+            .displayId = 0,
+            .numHinges = 1,
+        };
+
+        defaultConfig.hingeParams[0] = {
+            .percentAlongDisplay = 0.5f,
+            .minDegrees = 0.0f,
+            .maxDegrees = 359.0f,
+            .defaultDegrees = 180.0f,
+        };
+
+        _foldableState->config = defaultConfig;
+    } else {
+        _foldableState->config = *config;
+    }
+
+    for (unsigned int i = 0; i < _foldableState->config.numHinges ; ++i) {
+        _foldableState->currentHingeDegrees[i] =
+            _foldableState->config.hingeParams[i].defaultDegrees;
+    }
+
+    return _foldableState;
+}
+
+void android_foldable_set_hinge_degrees(unsigned int hinge_index, float degrees) {
+    if (hinge_index >= ANDROID_FOLDABLE_MAX_HINGES) return;
+
+    _foldableState->currentHingeDegrees[hinge_index] = degrees;
+}
+
+float android_foldable_get_hinge_degrees(unsigned int hinge_index) {
+    if (hinge_index >= ANDROID_FOLDABLE_MAX_HINGES) return 0.0f;
+
+    return _foldableState->currentHingeDegrees[hinge_index];
+}

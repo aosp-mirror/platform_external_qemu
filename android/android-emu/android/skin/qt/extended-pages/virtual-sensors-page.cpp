@@ -317,6 +317,10 @@ void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
     propagateSlidersChange();
 }
 
+void VirtualSensorsPage::on_foldSlider_valueChanged(double) {
+    propagateSlidersChange();
+}
+
 void VirtualSensorsPage::updateTargetState() {
     glm::vec3 position =
             getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_POSITION);
