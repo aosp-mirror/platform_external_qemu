@@ -112,6 +112,8 @@ void MediaH264DecoderFfmpeg::initH264ContextInternal(unsigned int width,
     }
     mCodecCtx = avcodec_alloc_context3(mCodec);
 
+    mCodecCtx->thread_count = 4;
+    mCodecCtx->thread_type = FF_THREAD_FRAME;
     avcodec_open2(mCodecCtx, mCodec, 0);
     mFrame = av_frame_alloc();
 
