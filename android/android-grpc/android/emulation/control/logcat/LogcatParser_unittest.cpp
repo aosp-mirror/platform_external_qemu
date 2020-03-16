@@ -94,7 +94,7 @@ TEST(LogcatParser, entryLooksAsExpected) {
     auto entry = res.second[0];
     EXPECT_EQ(entry.pid(), 2233);
     EXPECT_EQ(entry.tid(), 2414);
-    EXPECT_EQ(entry.level(), LogcatEntry::WARN);
+    EXPECT_EQ(entry.level(), LogcatEntry_LogLevel_WARN);
     EXPECT_STREQ(entry.tag().c_str(), "ErrorReporter");
     EXPECT_STREQ(entry.msg().c_str(),
                  "reportError [type: 211, code: 524300]: Error reading from "
