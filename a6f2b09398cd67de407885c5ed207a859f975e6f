@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f9a2b77b_82d210f2",
+        "filename": "android/android-emu/android/hw-sensors.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-16T22:41:48Z",
+      "side": 1,
+      "message": "Am wondering if Android fwk has something similar to these structs",
+      "revId": "a6f2b09398cd67de407885c5ed207a859f975e6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
