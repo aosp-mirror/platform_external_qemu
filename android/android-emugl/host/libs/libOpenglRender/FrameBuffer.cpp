@@ -1807,6 +1807,18 @@ bool FrameBuffer::bindColorBufferToTexture(HandleType p_colorbuffer) {
     return (*c).second.cb->bindToTexture();
 }
 
+bool FrameBuffer::bindColorBufferToTexture2(HandleType p_colorbuffer) {
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        return false;
+    }
+
+    return (*c).second.cb->bindToTexture2();
+}
+
 bool FrameBuffer::bindColorBufferToRenderbuffer(HandleType p_colorbuffer) {
     AutoLock mutex(m_lock);
 

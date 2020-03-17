@@ -10,6 +10,8 @@
 
 #include "android/skin/qt/gl-widget.h"
 
+#include "android/opengles.h"
+
 #include <qloggingcategory.h>                   // for qCWarning
 #include <qnamespace.h>                         // for WA_DontCreateNativeAn...
 #include <QRegion>                              // for QRegion
@@ -133,8 +135,14 @@ bool GLWidget::ensureInit() {
 
     // Create a context.
     EGLint context_attribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+    AndroidVirtioGpuOps* ops = android_getVirtioGpuOps();
+    // Share this context with the emulator framebuffer context by default.
     mEGLState->context = mEGL->eglCreateContext(
-            mEGLState->display, egl_config, EGL_NO_CONTEXT, context_attribs);
+        mEGLState->display,
+        egl_config,
+        (EGLContext)ops->get_global_egl_context(),
+        context_attribs);
+
     if (mEGLState->context == EGL_NO_CONTEXT) {
         qCWarning(emu, "Failed to create EGL context %d", mEGL->eglGetError());
     }

@@ -77,6 +77,9 @@ typedef void (*read_color_buffer_yuv_t)(
     void* pixels, uint32_t pixels_size);
 typedef void (*post_color_buffer_t)(uint32_t handle);
 typedef void (*repost_t)(void);
+typedef uint32_t (*get_last_posted_color_buffer_t)(void);
+typedef void (*bind_color_buffer_to_texture_t)(uint32_t);
+typedef void* (*get_global_egl_context_t)(void);
 
 struct AndroidVirtioGpuOps {
     create_color_buffer_with_handle_t create_color_buffer_with_handle;
@@ -93,6 +96,10 @@ struct AndroidVirtioGpuOps {
     update_yuv_textures_t update_yuv_textures;
     swap_textures_and_update_color_buffer_t
             swap_textures_and_update_color_buffer;
+    /* virtual device widget related */
+    get_last_posted_color_buffer_t get_last_posted_color_buffer;
+    bind_color_buffer_to_texture_t bind_color_buffer_to_texture;
+    get_global_egl_context_t get_global_egl_context;
 };
 
 #endif // ANDROID_VIRTIO_GPU_OPS

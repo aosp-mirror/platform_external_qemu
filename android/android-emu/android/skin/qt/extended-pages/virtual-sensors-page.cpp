@@ -36,7 +36,7 @@
 #include "android/metrics/PeriodicReporter.h"         // for PeriodicReporter
 #include "android/metrics/proto/studio_stats.pb.h"    // for AndroidStudioEvent
 #include "android/physics/GlmHelpers.h"               // for vecNearEqual
-#include "android/skin/qt/accelerometer-3d-widget.h"  // for Accelerometer3D...
+#include "android/skin/qt/device-3d-widget.h"  // for Device3D...
 #include "android/skin/qt/editable-slider-widget.h"   // for EditableSliderW...
 #include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
 #include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
@@ -77,12 +77,22 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     mUi->zRotSlider->setRange(-180.0, 180.0, false);
     mUi->xRotSlider->setRange(-180.0, 180.0, false);
     mUi->yRotSlider->setRange(-180.0, 180.0, false);
-    mUi->positionXSlider->setRange(Accelerometer3DWidget::MinX,
-                                   Accelerometer3DWidget::MaxX, false);
-    mUi->positionYSlider->setRange(Accelerometer3DWidget::MinY,
-                                   Accelerometer3DWidget::MaxY, false);
-    mUi->positionZSlider->setRange(Accelerometer3DWidget::MinZ,
-                                   Accelerometer3DWidget::MaxZ, false);
+    mUi->positionXSlider->setRange(Device3DWidget::MinX,
+                                   Device3DWidget::MaxX, false);
+    mUi->positionYSlider->setRange(Device3DWidget::MinY,
+                                   Device3DWidget::MaxY, false);
+    mUi->positionZSlider->setRange(Device3DWidget::MinZ,
+                                   Device3DWidget::MaxZ, false);
+    bool useAbstractFoldableDevice =
+        android::base::System::get()->envGet("ANDROID_EMU_ABSTRACT_DEVICE_VIEW") == "1";
+    if (useAbstractFoldableDevice) {
+        mUi->foldSlider->setRange(0.0, 1.0, false);
+        mUi->foldSlider->setSteps(200);
+        mUi->foldSlider->setValue(0.5); // TODO: Set to the correct mapping back to the 1d parameter from the foldable state
+    } else {
+        mUi->foldSliderLabel->setHidden(true);
+        mUi->foldSlider->setHidden(true);
+    }
 
     connect(mUi->accelWidget, SIGNAL(targetRotationChanged()), this,
             SLOT(propagateAccelWidgetChange()));
@@ -317,6 +327,10 @@ void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
     propagateSlidersChange();
 }
 
+void VirtualSensorsPage::on_foldSlider_valueChanged(double) {
+    propagateSlidersChange();
+}
+
 void VirtualSensorsPage::updateTargetState() {
     glm::vec3 position =
             getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_POSITION);
@@ -485,6 +499,8 @@ void VirtualSensorsPage::propagateAccelWidgetChange() {
 void VirtualSensorsPage::propagateSlidersChange() {
     reportVirtualSensorsInteraction();
     updateModelFromSliders(PHYSICAL_INTERPOLATION_SMOOTH);
+    android_foldable_set_with_1d_parameter(
+        mUi->foldSlider->getValue());
 }
 
 /*
@@ -678,7 +694,7 @@ void VirtualSensorsPage::on_accelModeRotate_toggled() {
     reportVirtualSensorsInteraction();
     if (mUi->accelModeRotate->isChecked()) {
         mUi->accelWidget->setOperationMode(
-            Accelerometer3DWidget::OperationMode::Rotate);
+            Device3DWidget::OperationMode::Rotate);
         mUi->accelerometerSliders->setCurrentIndex(0);
     }
 }
@@ -687,7 +703,7 @@ void VirtualSensorsPage::on_accelModeMove_toggled() {
     reportVirtualSensorsInteraction();
     if (mUi->accelModeMove->isChecked()) {
         mUi->accelWidget->setOperationMode(
-            Accelerometer3DWidget::OperationMode::Move);
+            Device3DWidget::OperationMode::Move);
         mUi->accelerometerSliders->setCurrentIndex(1);
     }
 }

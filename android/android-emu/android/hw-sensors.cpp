@@ -1115,3 +1115,68 @@ extern int android_physical_model_stop_recording() {
 
     return physicalModel_stopRecording(hw->physical_model);
 }
+
+// Foldable
+static FoldableState _foldableState[1] = {};
+
+FoldableState* android_foldable_initialize(const struct FoldableConfig* config) {
+    bool needDefaultConfig = !config;
+    // Load a default config if there is nothing provided.
+    if (needDefaultConfig) {
+        struct FoldableConfig defaultConfig = {
+            .hingesType = ANDROID_FOLDABLE_HORIZONTAL_SPLIT,
+            .displayId = 0,
+            .numHinges = 1,
+        };
+
+        defaultConfig.hingeParams[0] = {
+            .percentAlongDisplay = 0.5f,
+            .minDegrees = 0.0f,
+            .maxDegrees = 359.0f,
+            .defaultDegrees = 180.0f,
+        };
+
+        _foldableState->config = defaultConfig;
+    } else {
+        _foldableState->config = *config;
+    }
+
+    for (unsigned int i = 0; i < _foldableState->config.numHinges ; ++i) {
+        _foldableState->currentHingeDegrees[i] =
+            _foldableState->config.hingeParams[i].defaultDegrees;
+    }
+
+    return _foldableState;
+}
+
+void android_foldable_set_hinge_degrees(unsigned int hinge_index, float degrees) {
+    if (hinge_index >= ANDROID_FOLDABLE_MAX_HINGES) return;
+    if (hinge_index >= _foldableState->config.numHinges) return;
+
+    _foldableState->currentHingeDegrees[hinge_index] = degrees;
+}
+
+float android_foldable_get_hinge_degrees(unsigned int hinge_index) {
+    if (hinge_index >= ANDROID_FOLDABLE_MAX_HINGES) return 0.0f;
+    if (hinge_index >= _foldableState->config.numHinges) return 0.0f;
+
+    return _foldableState->currentHingeDegrees[hinge_index];
+}
+
+void android_foldable_set_with_1d_parameter(float t) {
+    if (_foldableState->config.numHinges < 1) return;
+
+
+    // Many different parameterizations are possible, just pick a crappy one for now
+    // (all hinges done at the same rate)
+    for (unsigned int i = 0; i < _foldableState->config.numHinges; ++i) {
+        _foldableState->currentHingeDegrees[i] =
+            _foldableState->config.hingeParams[i].minDegrees +
+            t * (_foldableState->config.hingeParams[i].maxDegrees -
+                    _foldableState->config.hingeParams[i].minDegrees);
+    }
+}
+
+struct FoldableState* android_foldable_get_state_ptr() {
+    return _foldableState;
+}

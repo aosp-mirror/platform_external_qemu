@@ -201,4 +201,81 @@ extern int android_physical_model_record_ground_truth(const char* file_name);
 // Stop recording ground truth.
 extern int android_physical_model_stop_recording();
 
+/* Foldable state */
+
+#define ANDROID_FOLDABLE_MAX_HINGES 16
+
+enum FoldableDisplayType {
+    // Horizontal split means something like a laptop, i.e.
+    // |-----| Camera is here
+    // | top |
+    // |-----| hinge 0
+    // |     |
+    // |-----| hinge 1
+    // |     |
+    // |-----|
+    ANDROID_FOLDABLE_HORIZONTAL_SPLIT = 0,
+
+    // Vertical split is left to right, rotated version of horizontal split:
+    // |-camera|-------|------|-------|
+    // |       |       |      |       |
+    // |       |       |      |       |
+    // |-------|-------|------|-------|
+    // hinge:  0       1      2
+    // |-----|
+    // | top |
+    // |-----| hinge 0
+    // |     |
+    // |-----| hinge 1
+    // |     |
+    // |-----|
+    ANDROID_FOLDABLE_VERTICAL_SPLIT = 1,
+
+    // Roll configurations (essentially the # hinges are infinite,
+    // representable via separate parameters)
+    ANDROID_FOLDABLE_HORIZONTAL_ROLL = 2,
+    ANDROID_FOLDABLE_VERTICAL_ROLL = 3,
+};
+
+struct FoldableHingeParameters {
+    float percentAlongDisplay; // % of display height (horiz. hinge) or display width (vertical hinge) where the hinge occurrs
+    float minDegrees;
+    float maxDegrees;
+    float defaultDegrees;
+};
+
+struct RollableParameters {
+    float rollRadiusAsDisplayPercent; // % of display height (horiz. roll) or display width (vertical roll) that determines the radius of the rollable
+    float minRolledPercent;
+    float maxRolledPercent;
+    float defaultRolledPercent;
+};
+
+struct FoldableConfig {
+    enum FoldableDisplayType hingesType;
+
+    // Display id where the folding occurs.  TODO: account for multiple
+    // displays that are related by a hinge, perhaps via folding (heh)
+    // displayId into hingeParams
+    int displayId;
+
+    // For hinges only
+    int numHinges;
+    struct FoldableHingeParameters hingeParams[ANDROID_FOLDABLE_MAX_HINGES];
+    // For rollables only
+    struct RollableParameters rollableParams;
+};
+
+struct FoldableState {
+    struct FoldableConfig config;
+    float currentHingeDegrees[ANDROID_FOLDABLE_MAX_HINGES];
+    float percentRolled;
+};
+
+struct FoldableState* android_foldable_initialize(const struct FoldableConfig* config);
+void android_foldable_set_hinge_degrees(unsigned int hinge_index, float degrees);
+float android_foldable_get_hinge_degrees(unsigned int hinge_index);
+void android_foldable_set_with_1d_parameter(float t);
+struct FoldableState* android_foldable_get_state_ptr();
+
 ANDROID_END_HEADER
