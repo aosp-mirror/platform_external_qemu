@@ -13,12 +13,14 @@
 #include <stdint.h>                                      // for int32_t
 #include <QCheckBox>                                     // for QCheckBox
 #include <QComboBox>                                     // for QComboBox
+#include <QFileDialog>
 #include <QLabel>                                        // for QLabel
 #include <QSlider>                                       // for QSlider
 #include <utility>                                       // for move
 
-#include "android/emulation/proto/VehicleHalProto.pb.h"  // for EmulatorMessage
+#include "android/base/Log.h"
 #include "android/utils/debug.h"                         // for VERBOSE_PRINT
+#include "android/skin/qt/error-dialog.h"              // for showErrorDialog
 #include "ui_car-sensor-data.h"                          // for CarSensorData
 #include "vehicle_constants_generated.h"                 // for VehicleIgnit...
 
@@ -35,6 +37,7 @@ using emulator::VehicleProperty;
 using emulator::VehiclePropValue;
 using emulator::VehicleGear;
 using emulator::VehicleIgnitionState;
+using emulator::VhalEventLoaderThread;
 
 CarSensorData::CarSensorData(QWidget* parent)
     : QWidget(parent), mUi(new Ui::CarSensorData) {
@@ -148,6 +151,28 @@ void CarSensorData::on_comboBox_gear_currentIndexChanged(int index) {
                       mUi->comboBox_gear->currentText().toStdString());
 }
 
+void CarSensorData::on_button_loadrecord_clicked() {
+    D("test load button");
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Json File"), ".",
+                                                    tr("Json files (*.json)"));
+
+    if (fileName.isNull()) return;
+    D(fileName.toStdString().c_str());
+    parseEventsFromJsonFile(fileName);
+}
+    
+void CarSensorData::on_button_playrecord_clicked() {
+    D("test play button");
+}
+
+void CarSensorData::parseEventsFromJsonFile(QString jsonPath) {
+        D("VhalEventLoaderThread parse from json");
+    mVhalEventLoader.reset(VhalEventLoaderThread::newInstance(this,
+        SLOT(vhalEventThreadStarted()),
+        SLOT(startupVhalEventThreadFinished(QString, bool, QString))));
+    mVhalEventLoader->loadVhalEventFromFile(jsonPath, &mVhalEvents);
+}
+
 void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
     if (emulatorMsg.prop_size() == 0 && emulatorMsg.value_size() == 0) {
         return;
@@ -225,4 +250,98 @@ int CarSensorData::getIndexFromVehicleGear(int gear) {
         }
     }
     return len - 1;
+}
+
+void VhalEventLoaderThread::loadVhalEventFromFile(const QString& file_name, std::vector<EmulatorMessage>* events) {
+    D("VhalEventLoaderThread start");
+
+    mFileName = file_name;
+    mEmulatorMessages = events;
+    start();
+}
+
+void VhalEventLoaderThread::run() {
+    D("VhalEventLoaderThread run");
+    if (mFileName.isEmpty() || mEmulatorMessages == nullptr) {
+        emit(loadingFinished(mFileName, false, tr("No file to load")));
+        return;
+    }
+    bool ok = false;
+    std::string err_str;
+
+    {
+        QFileInfo file_info(mFileName);
+        mEmulatorMessages->clear();
+        auto suffix = file_info.suffix().toLower();
+        if (suffix == "json") {
+            ok = parseJsonFile(mFileName.toStdString().c_str(),
+                                      mEmulatorMessages, &err_str);
+        } else {
+            err_str = tr("Unknown file type").toStdString();
+        }
+    }
+
+    auto err_qstring = QString::fromStdString(err_str);
+    emit(loadingFinished(mFileName, ok, err_qstring));
+}
+
+bool VhalEventLoaderThread::parseJsonFile(const char *filePath, std::vector<emulator::EmulatorMessage> *fixes, string *error) {
+    D("parse success stub");
+    return true;
+}
+
+VhalEventLoaderThread* VhalEventLoaderThread::newInstance(const QObject* handler,
+                                                      const char* started_slot,
+                                                      const char* finished_slot) {
+    D("VhalEventLoaderThread newinstance");
+    VhalEventLoaderThread* new_instance = new VhalEventLoaderThread();
+    connect(new_instance, SIGNAL(started()), handler, started_slot);
+    connect(new_instance, SIGNAL(loadingFinished(QString, bool, QString)), handler, finished_slot);
+
+    // Make sure new_instance gets cleaned up after the thread exits.
+    connect(new_instance, &QThread::finished, new_instance, &QObject::deleteLater);
+
+    return new_instance;
+}
+
+void CarSensorData::vhalEventThreadStarted() {
+    D("CarSensorData vhalEventThreadStarted");
+
+    // Prevent the user from initiating a load gpx/kml while another load is already
+    // in progress
+    mUi->button_loadrecord->setEnabled(false);
+    mUi->button_playrecord->setEnabled(false);
+
+    // setButtonEnabled(mUi->button_loadrecord, false);
+    // setButtonEnabled(mUi->button_playrecord, false);
+    mNowLoadingVhalEvent = true;
+}
+
+void CarSensorData::startupVhalEventThreadFinished(QString file_name, bool ok, QString error_message) {
+    D("CarSensorData startupVhalEventThreadFinished");
+    // on startup, we silently ignore the previously remebered geo data file being
+    // missing or malformed.
+    finishVhalEventLoading(file_name, ok, error_message, true);
+}
+
+void CarSensorData::finishVhalEventLoading(
+        const QString& file_name,
+        bool ok,
+        const QString& error_message,
+        bool ignore_error) {
+    D("CarSensorData finishVhalEventLoading");
+    mVhalEventLoader.reset();
+    if (!ok) {
+        if (!ignore_error) {
+            showErrorDialog(error_message, tr("Vhal EVENT Parser"));
+        }
+        updateControlsAfterLoading();
+        return;
+    }
+}
+
+void CarSensorData::updateControlsAfterLoading() {
+    mUi->button_loadrecord->setEnabled(true);
+    mUi->button_playrecord->setEnabled(true);
+    mNowLoadingVhalEvent = false;
 }
