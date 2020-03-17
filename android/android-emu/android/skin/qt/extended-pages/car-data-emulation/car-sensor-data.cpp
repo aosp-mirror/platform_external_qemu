@@ -13,10 +13,12 @@
 #include <stdint.h>                                      // for int32_t
 #include <QCheckBox>                                     // for QCheckBox
 #include <QComboBox>                                     // for QComboBox
+#include <QFileDialog>
 #include <QLabel>                                        // for QLabel
 #include <QSlider>                                       // for QSlider
 #include <utility>                                       // for move
 
+#include "android/base/Log.h"
 #include "android/emulation/proto/VehicleHalProto.pb.h"  // for EmulatorMessage
 #include "android/utils/debug.h"                         // for VERBOSE_PRINT
 #include "ui_car-sensor-data.h"                          // for CarSensorData
@@ -146,6 +148,18 @@ void CarSensorData::on_comboBox_ignition_currentIndexChanged(int index) {
 void CarSensorData::on_comboBox_gear_currentIndexChanged(int index) {
     sendGearChangeMsg(static_cast<int32_t>(sComboBoxGearValues[index]),
                       mUi->comboBox_gear->currentText().toStdString());
+}
+
+void CarSensorData::on_button_loadrecord_clicked() {
+    D("test load button");
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Json File"), ".",
+                                                    tr("Json files (*.json)"));
+
+    if (fileName.isNull()) return;
+    D(fileName.toStdString().c_str());
+}
+void CarSensorData::on_button_playrecord_clicked() {
+    D("test play button");
 }
 
 void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {

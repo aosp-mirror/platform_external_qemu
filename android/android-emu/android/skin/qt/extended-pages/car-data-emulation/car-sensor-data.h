@@ -42,6 +42,8 @@ private slots:
     void on_checkBox_night_toggled();
     void on_checkBox_park_toggled();
     void on_checkBox_fuel_low_toggled();
+    void on_button_loadrecord_clicked();
+    void on_button_playrecord_clicked();
 
 private:
     std::unique_ptr<Ui::CarSensorData> mUi;
