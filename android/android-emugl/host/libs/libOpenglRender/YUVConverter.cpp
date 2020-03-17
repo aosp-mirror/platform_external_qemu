@@ -488,7 +488,7 @@ void YUVConverter::init(int width, int height, FrameworkFormat format) {
         case FRAMEWORK_FORMAT_YV12:
             if (!mUtex)
                 createYUVGLTex(GL_TEXTURE1, cwidth, cheight, &mUtex, false);
-            if (!mUtex)
+            if (!mVtex)
                 createYUVGLTex(GL_TEXTURE2, cwidth, cheight, &mVtex, false);
             createYUVGLShader(&mProgram,
                               &mYWidthCutoffLoc,
