@@ -584,19 +584,23 @@ void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
 // quad set up above, which results in a framebuffer
 // with the RGB colors.
 void YUVConverter::drawConvert(int x, int y,
-                               int width, int height,
+                               int texture_width,
+                               int texture_height,
                                char* pixels) {
     saveGLState();
 
     if (mProgram == 0) {
         init(mWidth, mHeight, mFormat);
     }
-    s_gles2.glViewport(x, y, width, height);
+    const int color_buffer_width = mWidth;
+    const int color_buffer_height = mHeight;
+
+    s_gles2.glViewport(x, y, color_buffer_width, color_buffer_height);
     uint32_t yoff, uoff, voff, ywidth, cwidth, cheight;
-    getYUVOffsets(width, height, mFormat, &yoff, &uoff, &voff, &ywidth,
+    getYUVOffsets(texture_width, texture_height, mFormat, &yoff, &uoff, &voff, &ywidth,
                   &cwidth);
-    cheight = height / 2;
-    updateCutoffs(width, ywidth, width / 2, cwidth);
+    cheight = texture_height / 2;
+    updateCutoffs(texture_width, ywidth, texture_width / 2, cwidth);
 
     if (!pixels) {
         // special case: draw from texture, only support NV12 for now
@@ -611,7 +615,7 @@ void YUVConverter::drawConvert(int x, int y,
         doYUVConversionDraw(mProgram, mYWidthCutoffLoc, mCWidthCutoffLoc,
                             mYSamplerLoc, mUSamplerLoc, mVSamplerLoc,
                             mVUSamplerLoc, mInCoordLoc, mPosLoc, mVbuf, mIbuf,
-                            width, ywidth, width / 2, cwidth, mYWidthCutoff,
+                            texture_width, ywidth, texture_width / 2, cwidth, mYWidthCutoff,
                             mCWidthCutoff, true);
 
         restoreGLState();
@@ -619,7 +623,7 @@ void YUVConverter::drawConvert(int x, int y,
     }
 
     subUpdateYUVGLTex(GL_TEXTURE0, mYtex,
-                      x, y, ywidth, height,
+                      x, y, ywidth, texture_height,
                       pixels + yoff, false);
 
     switch (mFormat) {
@@ -640,8 +644,8 @@ void YUVConverter::drawConvert(int x, int y,
                                 mInCoordLoc,
                                 mPosLoc,
                                 mVbuf, mIbuf,
-                                width, ywidth,
-                                width / 2, cwidth,
+                                texture_width, ywidth,
+                                texture_width / 2, cwidth,
                                 mYWidthCutoff,
                                 mCWidthCutoff,
                                 false);
@@ -662,8 +666,8 @@ void YUVConverter::drawConvert(int x, int y,
                                     mInCoordLoc,
                                     mPosLoc,
                                     mVbuf, mIbuf,
-                                    width, ywidth,
-                                    width / 2, cwidth,
+                                    texture_width, ywidth,
+                                    texture_width / 2, cwidth,
                                     mYWidthCutoff,
                                     mCWidthCutoff,
                                     true);
@@ -684,8 +688,8 @@ void YUVConverter::drawConvert(int x, int y,
                                     mInCoordLoc,
                                     mPosLoc,
                                     mVbuf, mIbuf,
-                                    width, ywidth,
-                                    width / 2, cwidth,
+                                    texture_width, ywidth,
+                                    texture_width / 2, cwidth,
                                     mYWidthCutoff,
                                     mCWidthCutoff,
                                     false);
@@ -705,8 +709,8 @@ void YUVConverter::drawConvert(int x, int y,
                                 mInCoordLoc,
                                 mPosLoc,
                                 mVbuf, mIbuf,
-                                width, ywidth,
-                                width / 2, cwidth,
+                                texture_width, ywidth,
+                                texture_width / 2, cwidth,
                                 mYWidthCutoff,
                                 mCWidthCutoff,
                                 true);
