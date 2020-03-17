@@ -433,6 +433,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::VIRTIO_GPU_NEXT;
         case android::featurecontrol::Mac80211hwsimUserspaceManaged:
             return android_studio::EmulatorFeatureFlagState::MAC80211HWSIM_USERSPACE_MANAGED;
+        case android::featurecontrol::HasSharedSlotsHostMemoryAllocator:
+            return android_studio::EmulatorFeatureFlagState::HAS_SHARED_SLOTS_HOST_MEMORY_ALLOCATOR;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
