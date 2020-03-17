@@ -44,7 +44,8 @@
 #define MTS_POINTER_UP      -1
 /* Special tracking ID for a mouse pointer. */
 #define MTS_POINTER_MOUSE   -2
-
+/* Maximum number of virtio input devices*/
+#define VIRTIO_INPUT_MAX_NUM 11
 /* Describes state of a multi-touch pointer  */
 typedef struct MTSPointerState {
     /* Tracking ID assigned to the pointer by an app emulating multi-touch. */
@@ -82,6 +83,8 @@ typedef struct MTSState {
      * this value is negative, lines are arranged in bottom-up format (i.e. the
      * bottom line is at the beginning of the buffer). */
     int             ydir;
+    /* Current display ID. */
+    int             displayId;
     /* Current framebuffer pointer. */
     uint8_t*        current_fb;
 } MTSState;
@@ -96,7 +99,13 @@ static const QAndroidUserEventAgent* _UserEventAgent;
 static void
 _push_event(int type, int code, int value)
 {
-    _UserEventAgent->sendGenericEvent(type, code, value);
+    MTSState* const mts_state = &_MTSState;
+    SkinGenericEventCode evt;
+    evt.type = type;
+    evt.code = code;
+    evt.value = value;
+    evt.displayId = mts_state->displayId;
+    _UserEventAgent->sendGenericEvent(evt);
 }
 
 /* Gets an index in the MTS's tracking pointers array MTS for the given
@@ -496,6 +505,14 @@ bool multitouch_is_second_finger(int buttons_state) {
     return buttons_state & kShiftSecondaryTouch;
 }
 
+void multitouch_update_displayId(int displayId) {
+    if (displayId < 0 || displayId >= VIRTIO_INPUT_MAX_NUM) {
+        return;
+    }
+    MTSState* const mts_state = &_MTSState;
+    mts_state->displayId = displayId;
+}
+
 void multitouch_update_pointer(MTESource source,
                                int tracking_id,
                                int x,
@@ -503,7 +520,6 @@ void multitouch_update_pointer(MTESource source,
                                int pressure,
                                bool skip_sync) {
     MTSState* const mts_state = &_MTSState;
-
     /* Assign a fixed tracking ID to the mouse pointer. */
     if (source == MTES_MOUSE) {
         tracking_id = MTS_POINTER_MOUSE;

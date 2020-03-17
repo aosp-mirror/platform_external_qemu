@@ -84,7 +84,8 @@ void TouchEventSender::doSend(const TouchEvent request) {
         }
         // Only register slot if needed.
         if (mUsedSlots.count(slot) == 0 && touch.pressure() != 0) {
-            events.push_back({EV_ABS, LINUX_ABS_MT_TRACKING_ID, slot});
+            events.push_back(
+                    {EV_ABS, LINUX_ABS_MT_TRACKING_ID, slot, displayId});
             mUsedSlots.insert(slot);
         }
 
@@ -92,32 +93,33 @@ void TouchEventSender::doSend(const TouchEvent request) {
         int dx = scaleAxis(touch.x(), 0, w);
         int dy = scaleAxis(touch.y(), 0, h);
 
-        events.push_back({EV_ABS, LINUX_ABS_MT_SLOT, slot});
-        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_X, dx});
-        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_Y, dy});
+        events.push_back({EV_ABS, LINUX_ABS_MT_SLOT, slot, displayId});
+        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_X, dx, displayId});
+        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_Y, dy, displayId});
 
         if (touch.touch_major()) {
-            events.push_back(
-                    {EV_ABS, LINUX_ABS_MT_TOUCH_MAJOR, touch.touch_major()});
+            events.push_back({EV_ABS, LINUX_ABS_MT_TOUCH_MAJOR,
+                              touch.touch_major(), displayId});
         }
 
         if (touch.touch_minor()) {
-            events.push_back(
-                    {EV_ABS, LINUX_ABS_MT_TOUCH_MINOR, touch.touch_minor()});
+            events.push_back({EV_ABS, LINUX_ABS_MT_TOUCH_MINOR,
+                              touch.touch_minor(), displayId});
         }
 
         // Clean up slot if pressure is 0 (implies finger has been lifted)
         if (touch.pressure() == 0) {
-            events.push_back(
-                    {EV_ABS, LINUX_ABS_MT_TRACKING_ID, MTS_POINTER_UP});
+            events.push_back({EV_ABS, LINUX_ABS_MT_TRACKING_ID, MTS_POINTER_UP,
+                              displayId});
             mUsedSlots.erase(slot);
         } else {
-            events.push_back({EV_ABS, LINUX_ABS_MT_PRESSURE, touch.pressure()});
+            events.push_back({EV_ABS, LINUX_ABS_MT_PRESSURE, touch.pressure(),
+                              displayId});
         }
     }
 
     // Submit the events to kernel.
-    events.push_back({EV_SYN, LINUX_SYN_REPORT, 0});
+    events.push_back({EV_SYN, LINUX_SYN_REPORT, 0, displayId});
     mAgents->user_event->sendGenericEvents(events.data(), events.size());
 }
 }  // namespace control

@@ -44,7 +44,7 @@ typedef struct QAndroidUserEventAgent {
     void (*sendRotaryEvent)(int delta);
 
     // Send generic input events.
-    void (*sendGenericEvent)(int type, int code, int value);
+    void (*sendGenericEvent)(SkinGenericEventCode events);
     void (*sendGenericEvents)(SkinGenericEventCode* events, int count);
 
     // notify the emulator that new user event is available
