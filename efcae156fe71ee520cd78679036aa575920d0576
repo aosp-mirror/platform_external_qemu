@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0241056_c8a188cc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 594,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-03-17T21:43:18Z",
+      "side": 1,
+      "message": "There are mWidth vs width which is confusing. Can you leave a comment abort them to make sure the next person who look at the code can understand their difference?",
+      "range": {
+        "startLine": 594,
+        "startChar": 3,
+        "endLine": 594,
+        "endChar": 46
+      },
+      "revId": "efcae156fe71ee520cd78679036aa575920d0576",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
