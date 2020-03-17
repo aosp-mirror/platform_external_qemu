@@ -284,7 +284,8 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
     uint32_t* retColorSpace = param.pRetColorSpace;
 
     static int numbers = 0;
-    H264_DPRINT("calling getImage %d", numbers++);
+    H264_DPRINT("calling getImage %d colorbuffer %d", numbers++,
+                (int)param.hostColorBufferId);
     doFlush();
     uint8_t* dst = param.pDecodedFrame;
     int myOutputWidth = mOutputWidth;
@@ -317,12 +318,14 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
         mSavedH.pop_front();
     }
 
-    if (!mUseGpuTexture) {
+    bool needToCopyToGuest = true;
+
+    if (mUseGpuTexture || mIsInFlush) {
+        needToCopyToGuest = false;
+    } else {
         YuvConverter<uint8_t> convert8(myOutputWidth, myOutputHeight);
         convert8.UVInterleavedToPlanar(decodedFrame.data());
     }
-
-    bool needToCopyToGuest = true;
 
     if (mParser.version() == 200) {
         if (param.hostColorBufferId >= 0) {
