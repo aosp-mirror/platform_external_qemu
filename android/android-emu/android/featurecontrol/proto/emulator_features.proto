@@ -87,4 +87,6 @@ enum Feature {
     VirtioGpuNext = 49;
 
     Mac80211hwsimUserspaceManaged = 50;
+
+    HasSharedSlotsHostMemoryAllocator = 51;
 }

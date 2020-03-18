@@ -1425,7 +1425,8 @@ message EmulatorFeatureFlagState {
     VULKAN_IGNORED_HANDLES = 54;
     VIRTIO_GPU_NEXT = 55;
     MAC80211HWSIM_USERSPACE_MANAGED = 56;
-    // Next tag: 57
+    HAS_SHARED_SLOTS_HOST_MEMORY_ALLOCATOR = 57;
+    // Next tag: 58
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

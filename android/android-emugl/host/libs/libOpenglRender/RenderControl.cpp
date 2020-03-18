@@ -204,6 +204,9 @@ static constexpr android::base::StringView kVulkanIgnoredHandles = "ANDROID_EMU_
 // virtio-gpu-next
 static constexpr android::base::StringView kVirtioGpuNext = "ANDROID_EMU_virtio_gpu_next";
 
+// address space subdevices
+static constexpr android::base::StringView kHasSharedSlotsHostMemoryAllocator = "ANDROID_EMU_has_shared_slots_host_memory_allocator";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -418,6 +421,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         shouldEnableVulkan() && emugl_feature_is_enabled(android::featurecontrol::VulkanIgnoredHandles);
     bool virtioGpuNextEnabled =
         emugl_feature_is_enabled(android::featurecontrol::VirtioGpuNext);
+    bool hasSharedSlotsHostMemoryAllocatorEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::HasSharedSlotsHostMemoryAllocator);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -503,6 +508,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (virtioGpuNextEnabled && name == GL_EXTENSIONS) {
         glStr += kVirtioGpuNext;
+        glStr += " ";
+    }
+
+    if (hasSharedSlotsHostMemoryAllocatorEnabled && name == GL_EXTENSIONS) {
+        glStr += kHasSharedSlotsHostMemoryAllocator;
         glStr += " ";
     }
 
