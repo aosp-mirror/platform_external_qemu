@@ -14,9 +14,15 @@
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/base/sockets/SocketErrors.h"
+#include "android/crashreport/CrashReporter.h"
+#include "android/base/StringFormat.h"
+
+
 
 #include <algorithm>
 #include <utility>
+
+using android::crashreport::CrashReporter;
 
 namespace android {
 namespace base {
@@ -430,7 +436,13 @@ void DefaultLooper::Task::schedule() {
 }
 
 void DefaultLooper::Task::cancel() {
+  CrashReporter::get()->GenerateDumpAndDie(
+      StringFormat(
+          "jwu DefaultLooper cancel %s: %d",
+          __FUNCTION__, __LINE__)
+      .c_str());
     static_cast<DefaultLooper*>(mLooper)->delTask(this);
+
 }
 
 void DefaultLooper::Task::run() {

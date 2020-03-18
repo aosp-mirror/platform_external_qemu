@@ -130,6 +130,7 @@ void CrashReporter::GenerateDump(const char* message) {
 void CrashReporter::GenerateDumpAndDie(const char* message) {
     android_metrics_stop(METRICS_STOP_CRASH);
     passDumpMessage(message);
+    writeDump();
     // this is the most cross-platform way of crashing
     // any other I know about has its flaws:
     //  - abort() isn't caught by Breakpad on Windows
