@@ -316,6 +316,12 @@ void visit_type_NetdevUserOptions_members(Visitor *v, NetdevUserOptions *obj, Er
             goto out;
         }
     }
+    if (visit_optional(v, "ipv6-hostfwd", &obj->has_ipv6_hostfwd)) {
+        visit_type_StringList(v, "ipv6-hostfwd", &obj->ipv6_hostfwd, &err);
+        if (err) {
+            goto out;
+        }
+    }
 
 out:
     error_propagate(errp, err);

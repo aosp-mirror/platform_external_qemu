@@ -191,11 +191,11 @@ gen_wrapper_program ()
           FLAGS=$FLAGS" $EXTRA_CFLAGS"
           POST_FLAGS=" $POST_CFLAGS"
           ;;
-      c++|g++|clang++)
+      c++|g++|clang++|cl)
           FLAGS=$FLAGS" $EXTRA_CXXFLAGS"
           POST_FLAGS=" $POST_CXXFLAGS"
           ;;
-      ar) FLAGS=$FLAGS" $EXTRA_ARFLAGS";;
+      ar|lib) FLAGS=$FLAGS" $EXTRA_ARFLAGS";;
       as) FLAGS=$FLAGS" $EXTRA_ASFLAGS";;
       ld|ld.bfd|ld.gold)
         FLAGS=$FLAGS" $EXTRA_LDFLAGS"
@@ -208,7 +208,11 @@ gen_wrapper_program ()
     if [ "$CLANG_BINDIR" ]; then
         CLANG_BINDIR=${CLANG_BINDIR%/}
         case $PROG in
-            cc|gcc|clang)
+           cc|gcc|clang)
+                DST_PROG=clang
+                DST_PREFIX=$CLANG_BINDIR/
+                ;;
+            cl)
                 DST_PROG=clang
                 DST_PREFIX=$CLANG_BINDIR/
                 ;;
@@ -219,9 +223,20 @@ gen_wrapper_program ()
             clang-tidy)
                 DST_PREFIX=$CLANG_BINDIR/
                 ;;
-            ar|ranlib|nm|objcopy|objdump|strings)
+            ar|ranlib|nm|objcopy|objdump|strings|rc)
                 DST_PROG=llvm-$PROG
                 DST_PREFIX=$CLANG_BINDIR/
+                ;;
+            lib)
+                DST_PROG=llvm-lib
+                DST_PREFIX=$CLANG_BINDIR/
+              ;;
+            link)
+                # The msvc compatible linker
+                DST_PROG=clang-cl
+                DST_PREFIX=$CLANG_BINDIR/
+                FLAGS=$FLAGS" $EXTRA_CXXFLAGS"
+                POST_FLAGS=" $POST_CXXFLAGS"
                 ;;
         esac
     fi
@@ -323,7 +338,7 @@ gen_wrapper_toolchain () {
     local PROG
     case "$CURRENT_HOST" in
         windows_msvc*)
-          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy ar as ranlib strings nm objdump objcopy"
+          local COMPILERS="cc gcc clang c++ cl g++ clang++ cpp ld clang-tidy ar as ranlib strings nm objdump objcopy link lib rc"
           local PROGRAMS="dlltool"
           ;;
         linux-aarch64)
@@ -445,10 +460,6 @@ prepare_build_for_darwin() {
     var_append EXTRA_CXXFLAGS "-stdlib=libc++"
     EXTRA_LDFLAGS="$common_FLAGS"
     DST_PREFIX=
-
-    if [ "$OPT_CXX11" ]; then
-        var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
-    fi
 }
 
 prepare_build_for_linux_x86_64() {
@@ -494,10 +505,6 @@ prepare_build_for_linux_x86_64() {
     EXTRA_CXXFLAGS="-m64"
     var_append EXTRA_CXXFLAGS "-stdlib=libc++"
     var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}
-
-    if [ "$OPT_CXX11" ]; then
-        var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
-    fi
 
     # Make sure we can find libc++
     EXTRA_LDFLAGS="-m64"
@@ -547,10 +554,6 @@ prepare_build_for_linux_aarch64() {
 
     EXTRA_CXXFLAGS=
     var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}
-
-    if [ "$OPT_CXX11" ]; then
-        var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
-    fi
 
     # Make sure we can find libgcc on aarch64
     EXTRA_LDFLAGS="-L/usr/lib/gcc/aarch64-linux-gnu/5"
@@ -740,7 +743,6 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/shared"
     var_append EXTRA_CXXFLAGS "-isystem \"$MSVC_DIR/DIA SDK/include\""
     var_append EXTRA_CXXFLAGS ${CLANG_LINK_FLAGS}
-    var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
 
     EXTRA_LDFLAGS="-target x86_64-pc-win32"
     # Make sure we don't accidently pick up any clang libs or msvc libs

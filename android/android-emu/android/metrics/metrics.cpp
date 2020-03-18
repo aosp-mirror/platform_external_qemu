@@ -431,6 +431,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::KEYCODE_FORWARDING;
         case android::featurecontrol::VirtioGpuNext:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_GPU_NEXT;
+        case android::featurecontrol::Mac80211hwsimUserspaceManaged:
+            return android_studio::EmulatorFeatureFlagState::MAC80211HWSIM_USERSPACE_MANAGED;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

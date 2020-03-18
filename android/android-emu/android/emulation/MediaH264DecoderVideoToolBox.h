@@ -50,6 +50,12 @@ public:
     virtual void flush(void* ptr) override;
     virtual void getImage(void* ptr) override;
 
+    virtual void save(base::Stream* stream) const override;
+    virtual bool load(base::Stream* stream) override;
+
+    virtual int type() const override { return PLUGIN_TYPE_VIDEO_TOOL_BOX; }
+
+
     explicit MediaH264DecoderVideoToolBox(uint64_t id,
                                           H264PingInfoParser parser);
     virtual ~MediaH264DecoderVideoToolBox();
@@ -74,7 +80,7 @@ private:
     MediaHostRenderer mRenderer;
     DecoderState mState = DecoderState::GOOD_STATE;
 
-    void decodeFrameInternal(void* ptr, const uint8_t* frame, size_t szBytes, uint64_t pts, size_t consumedSzBytes);
+    void decodeFrameInternal(size_t* pRetSzBytes, int32_t* pRetErr, const uint8_t* frame, size_t szBytes, uint64_t pts, size_t consumedSzBytes);
     // Passes the Sequence Parameter Set (SPS) and Picture Parameter Set (PPS) to the
     // videotoolbox decoder
     CFDataRef createVTDecoderConfig();
@@ -116,7 +122,9 @@ private:
     static constexpr int kBPP = 2; // YUV420 is 2 bytes per pixel
     unsigned int mOutputHeight = 0;
     unsigned int mOutputWidth = 0;
-    PixelFormat mOutPixFmt; 
+    unsigned int mWidth = 0;
+    unsigned int mHeight = 0;
+    PixelFormat mOutPixFmt;
     // The calculated size of the outHeader buffer size allocated in the guest.
     // It should be sizeY + (sizeUV * 2), where:
     //  sizeY = outWidth * outHeight,
@@ -127,6 +135,15 @@ private:
     std::vector<uint8_t> mPPS; // pps NALU
 
     bool mIsInFlush = false;
+private:
+
+    bool mIsLoadingFromSnapshot = false;
+    std::vector<uint8_t> mSavedDecodedFrame;
+    void copyFrame();
+    void oneShotDecode(std::vector<uint8_t> & data, uint64_t pts);
+
+    mutable SnapshotState  mSnapshotState;
+
 }; // MediaH264DecoderVideoToolBox
 
 

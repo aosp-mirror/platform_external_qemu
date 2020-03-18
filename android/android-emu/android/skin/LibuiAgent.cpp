@@ -32,6 +32,7 @@ static int utf8_next(const unsigned char** pp, const unsigned char* end) {
 
             while (p < end && (p[0] & 0xc0) == 0x80) {
                 c = (c << 6) | (p[0] & 0x3f);
+                p++;
             }
         }
         result = c;

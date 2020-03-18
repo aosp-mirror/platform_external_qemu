@@ -30,9 +30,9 @@
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
-     <string>Accelerometer</string>
+     <string>Device Pose</string>
     </attribute>
-    <widget class="Accelerometer3DWidget" name="accelWidget" native="true">
+    <widget class="Device3DWidget" name="accelWidget" native="true">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -385,7 +385,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Device rotation</string>
+      <string>Rotation</string>
      </property>
     </widget>
     <widget class="QTextBrowser" name="resultingAccelerometerValues">
@@ -408,7 +408,30 @@
       </rect>
      </property>
      <property name="text">
-      <string>Resulting values</string>
+      <string>Sensor values</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="foldSliderLabel">
+     <property name="geometry">
+      <rect>
+       <x>520</x>
+       <y>350</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Fold</string>
+     </property>
+    </widget>
+    <widget class="EditableSliderWidget" name="foldSlider" native="true">
+     <property name="geometry">
+      <rect>
+       <x>520</x>
+       <y>370</y>
+       <width>81</width>
+       <height>50</height>
+      </rect>
      </property>
     </widget>
    </widget>
@@ -866,9 +889,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>Accelerometer3DWidget</class>
+   <class>Device3DWidget</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/accelerometer-3d-widget.h</header>
+   <header>android/skin/qt/device-3d-widget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

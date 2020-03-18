@@ -96,8 +96,6 @@ protected:
     }
     void resetHub() {
         mHub.reset(new AdbHub());
-        mHub->setWakePipeFunc(
-                [this](int wakeFlag) { mPipeWakeFlag |= wakeFlag; });
     }
     void expectGuestRecvPacket(const apacket& expectedPacket) {
         AndroidPipeBuffer buffer;
@@ -212,7 +210,6 @@ protected:
     base::ScopedSocket mHubSocket;
     base::ScopedSocket mTesterSocket;
     std::unique_ptr<AdbHub> mHub;
-    int mPipeWakeFlag = 0;
     std::unique_ptr<base::TestTempDir> mTempDir;
 };
 }  // namespace
@@ -285,12 +282,12 @@ TEST_F(AdbHubTest, RecvPacket) {
     buffer.data = new uint8_t[buffer.size];
 
     EXPECT_EQ(mHub->onGuestRecvData(&buffer, 1), PIPE_ERROR_AGAIN);
-    EXPECT_EQ(mPipeWakeFlag, 0);
+    EXPECT_FALSE(mHub->pipeWakeFlags() & PIPE_WAKE_READ);
 
     EXPECT_TRUE(sendPacket(mTesterSocket.get(), &packet));
     mHub->onHostSocketEvent(mHubSocket.get(), base::Looper::FdWatch::kEventRead,
                             [] { FAIL(); });
-    EXPECT_EQ(mPipeWakeFlag, PIPE_WAKE_READ);
+    EXPECT_TRUE(mHub->pipeWakeFlags() & PIPE_WAKE_READ);
     expectGuestRecvPacket(packet);
 
     EXPECT_EQ(mHub->onGuestRecvData(&buffer, 1), PIPE_ERROR_AGAIN);
@@ -313,14 +310,14 @@ TEST_F(AdbHubTest, RecvPacketSeparateHeader) {
                                     kHeaderSize));
     mHub->onHostSocketEvent(mHubSocket.get(), base::Looper::FdWatch::kEventRead,
                             [] { FAIL(); });
-    EXPECT_EQ(mPipeWakeFlag, 0);
+    EXPECT_FALSE(mHub->pipeWakeFlags() & PIPE_WAKE_READ);
     EXPECT_EQ(mHub->onGuestRecvData(&buffer, 1), PIPE_ERROR_AGAIN);
 
     EXPECT_TRUE(base::socketSendAll(mTesterSocket.get(), packet.data.data(),
                                     packet.mesg.data_length));
     mHub->onHostSocketEvent(mHubSocket.get(), base::Looper::FdWatch::kEventRead,
                             [] { FAIL(); });
-    EXPECT_EQ(mPipeWakeFlag, PIPE_WAKE_READ);
+    EXPECT_TRUE(mHub->pipeWakeFlags() & PIPE_WAKE_READ);
 
     buffer.size = kHeaderSize;
     buffer.data = (uint8_t*)&receivedPacket.mesg;
@@ -357,7 +354,7 @@ TEST_F(AdbHubTest, RecvPacketMultiplePacketSingleBuffer) {
 
     mHub->onHostSocketEvent(mHubSocket.get(), base::Looper::FdWatch::kEventRead,
                             [] { FAIL(); });
-    EXPECT_EQ(mPipeWakeFlag, PIPE_WAKE_READ);
+    EXPECT_TRUE(mHub->pipeWakeFlags() & PIPE_WAKE_READ);
     EXPECT_EQ(mHub->onGuestRecvData(&buffer, 1), buffer.size);
 
     uint8_t* data = buffer.data;
@@ -400,7 +397,7 @@ TEST_F(AdbHubTest, RecvPacketMultiplePacketMultipleBuffers) {
 
     mHub->onHostSocketEvent(mHubSocket.get(), base::Looper::FdWatch::kEventRead,
                             [] { FAIL(); });
-    EXPECT_EQ(mPipeWakeFlag, PIPE_WAKE_READ);
+    EXPECT_TRUE(mHub->pipeWakeFlags() & PIPE_WAKE_READ);
     EXPECT_EQ(mHub->onGuestRecvData(buffers, 4),
               packetSize(packet0) + packetSize(packet1));
 

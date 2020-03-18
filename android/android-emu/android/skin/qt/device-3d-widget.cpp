@@ -8,7 +8,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/skin/qt/accelerometer-3d-widget.h"
+#include "android/skin/qt/device-3d-widget.h"
+
+#include "android/opengles.h"
 
 #include <assert.h>                                   // for assert
 #include <glm/gtc/quaternion.hpp>                     // for tquat
@@ -28,6 +30,7 @@
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"          // for GLESv2Dispatch
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
+#include "android/globals.h"                          // for QAndroidSensors...
 #include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
 #include "android/physics/GlmHelpers.h"               // for fromEulerAnglesXYZ
 #include "android/physics/Physics.h"                  // for PARAMETER_VALUE...
@@ -35,6 +38,7 @@
 #include "android/skin/qt/logging-category.h"         // for emu
 #include "android/skin/qt/wavefront-obj-parser.h"     // for parseWavefrontOBJ
 
+using android::base::System;
 
 class QMouseEvent;
 class QWheelEvent;
@@ -43,19 +47,36 @@ class QWidget;
 static glm::vec3 clampPosition(glm::vec3 position) {
     return glm::clamp(
             position,
-            glm::vec3(Accelerometer3DWidget::MinX, Accelerometer3DWidget::MinY,
-                      Accelerometer3DWidget::MinZ),
-            glm::vec3(Accelerometer3DWidget::MaxX, Accelerometer3DWidget::MaxY,
-                      Accelerometer3DWidget::MaxZ));
+            glm::vec3(Device3DWidget::MinX, Device3DWidget::MinY,
+                      Device3DWidget::MinZ),
+            glm::vec3(Device3DWidget::MaxX, Device3DWidget::MaxY,
+                      Device3DWidget::MaxZ));
 }
 
-Accelerometer3DWidget::Accelerometer3DWidget(QWidget* parent)
-    : GLWidget(parent) {
+static constexpr int kAnimationIntervalMs = 33;
+
+Device3DWidget::Device3DWidget(QWidget* parent)
+    : GLWidget(parent),
+      mUseAbstractDevice(
+          System::get()->getEnvironmentVariable("ANDROID_EMU_ABSTRACT_DEVICE_VIEW") == "1") {
+
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
+
+    if (mUseAbstractDevice) {
+        mCurrentFoldableStatePtr = android_foldable_get_state_ptr();
+        connect(&mAnimationTimer, SIGNAL(timeout()),
+                this, SLOT(animate()));
+        mAnimationTimer.setInterval(kAnimationIntervalMs);
+        mAnimationTimer.start();
+    }
 }
 
-Accelerometer3DWidget::~Accelerometer3DWidget() {
+Device3DWidget::~Device3DWidget() {
+    if (mUseAbstractDevice) {
+        mAnimationTimer.stop();
+    }
+
     // Free up allocated resources.
     if (!mGLES2) {
         return;
@@ -73,15 +94,15 @@ Accelerometer3DWidget::~Accelerometer3DWidget() {
     }
 }
 
-void Accelerometer3DWidget::setSensorsAgent(const QAndroidSensorsAgent* agent) {
+void Device3DWidget::setSensorsAgent(const QAndroidSensorsAgent* agent) {
     mSensorsAgent = agent;
 }
 
-void Accelerometer3DWidget::setTargetRotation(const glm::quat& rotation) {
+void Device3DWidget::setTargetRotation(const glm::quat& rotation) {
     mTargetRotation = rotation;
 }
 
-void Accelerometer3DWidget::setTargetPosition(const glm::vec3& position) {
+void Device3DWidget::setTargetPosition(const glm::vec3& position) {
     mTargetPosition = clampPosition(position);
 }
 
@@ -129,10 +150,21 @@ static GLuint create2DTexture(const GLESv2Dispatch* gles2,
 
     // Upload texture data and set parameters.
     gles2->glBindTexture(GL_TEXTURE_2D, texture);
-    if(!loadTexture(gles2,
-                    source_filename,
-                    target,
-                    format)) return 0;
+
+    // If blank, have a blank texture (black)
+    if (!source_filename) {
+        uint32_t black = 0;
+        gles2->glTexImage2D(
+            GL_TEXTURE_2D,
+            0, format, 1, 1, 0,
+            format, GL_UNSIGNED_BYTE, &black);
+    } else {
+        if(!loadTexture(gles2,
+                        source_filename,
+                        target,
+                        format)) return 0;
+    }
+
     gles2->glTexParameteri(target, GL_TEXTURE_MIN_FILTER, min_filter);
     gles2->glTexParameteri(target, GL_TEXTURE_MAG_FILTER, mag_filter);
     gles2->glTexParameteri(target, GL_TEXTURE_WRAP_S, wrap_s);
@@ -149,7 +181,7 @@ static GLuint create2DTexture(const GLESv2Dispatch* gles2,
     return gles2->glGetError() == GL_NO_ERROR ? texture : 0;
 }
 
-bool Accelerometer3DWidget::initGL() {
+bool Device3DWidget::initGL() {
     if (!mGLES2) {
         return false;
     }
@@ -183,7 +215,7 @@ bool Accelerometer3DWidget::initGL() {
     return true;
 }
 
-bool Accelerometer3DWidget::initProgram() {
+bool Device3DWidget::initProgram() {
     // Compile & link shaders.
     QFile vertex_shader_file(":/phone-model/vert.glsl");
     QFile fragment_shader_file(":/phone-model/frag.glsl");
@@ -218,57 +250,133 @@ bool Accelerometer3DWidget::initProgram() {
     return true;
 }
 
-bool Accelerometer3DWidget::initModel() {
-    // Load the model and set up buffers.
-    std::vector<float> model_vertex_data;
-    std::vector<GLuint> indices;
-    QFile model_file(":/phone-model/model.obj");
-    if (model_file.open(QFile::ReadOnly)) {
-        QTextStream file_stream(&model_file);
-        if(!parseWavefrontOBJ(file_stream, model_vertex_data, indices)) {
-            qCWarning(emu, "Failed to load model");
+bool Device3DWidget::initModel() {
+    if (mUseAbstractDevice) {
+        // Create an abstract parameterized model
+        // std::vector<float> model_vertex_data;
+        // std::vector<GLuint> indices;
+
+        // Size it to the aspect ratio
+        float aspect =
+            (float)(android_hw->hw_lcd_width) /
+            (float)(android_hw->hw_lcd_height);
+
+        std::vector<float> pos = {
+            -1.0, -1.0, 0.0,
+            +1.0, -1.0, 0.0,
+            +1.0, +1.0, 0.0,
+            -1.0, -1.0, 0.0,
+            +1.0, +1.0, 0.0,
+            -1.0, +1.0, 0.0,
+        };
+
+        for (size_t i = 0; i < pos.size(); ++i) {
+            if (i % 3 == 1) {
+                pos[i] *= 1.0f / aspect;
+            }
+            pos[i] *= 2.0f;
+        }
+
+        std::vector<float> model_vertex_data = {
+            pos[0], pos[1], pos[2],    0.0, 0.0, 1.0,    0.0, 0.0,
+            pos[3], pos[4], pos[5],    0.0, 0.0, 1.0,    1.0, 0.0,
+            pos[6], pos[7], pos[8],    0.0, 0.0, 1.0,    1.0, 1.0,
+            pos[9], pos[10], pos[11],    0.0, 0.0, 1.0,    0.0, 0.0,
+            pos[12], pos[13], pos[14],    0.0, 0.0, 1.0,    1.0, 1.0,
+            pos[15], pos[16], pos[17],    0.0, 0.0, 1.0,    0.0, 1.0,
+        };
+
+        std::vector<GLuint> indices = {
+            0, 1, 2, 3, 4, 5,
+        };
+
+
+        mElementsCount = indices.size();
+
+        mVertexPositionAttribute = mGLES2->glGetAttribLocation(mProgram, "vtx_pos");
+        mVertexNormalAttribute   = mGLES2->glGetAttribLocation(mProgram, "vtx_normal");
+        mVertexUVAttribute   = mGLES2->glGetAttribLocation(mProgram, "vtx_uv");
+        mGLES2->glGenBuffers(1, &mVertexDataBuffer);
+        mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
+        mGLES2->glBufferData(GL_ARRAY_BUFFER,
+                             model_vertex_data.size() * sizeof(float),
+                             &model_vertex_data[0],
+                             GL_STATIC_DRAW);
+        mGLES2->glGenBuffers(1, &mVertexIndexBuffer);
+        mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
+        mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                             mElementsCount * sizeof(GLuint),
+                             &indices[0],
+                             GL_STATIC_DRAW);
+
+        mCachedFoldableState = *mCurrentFoldableStatePtr;
+        std::pair<std::vector<float>, std::vector<uint32_t>> newData = 
+            generateModelVerticesFromFoldableState(mCachedFoldableState);
+        updateModelVertices(
+            newData.first.data(), newData.first.size() * sizeof(float),
+            newData.second.data(), newData.second.size() * sizeof(uint32_t));
+
+        CHECK_GL_ERROR_RETURN("Failed to load model", false);
+        return true;
+    } else {
+        // Load the model and set up buffers.
+        std::vector<float> model_vertex_data;
+        std::vector<GLuint> indices;
+        QFile model_file(":/phone-model/model.obj");
+        if (model_file.open(QFile::ReadOnly)) {
+            QTextStream file_stream(&model_file);
+            if(!parseWavefrontOBJ(file_stream, model_vertex_data, indices)) {
+                qCWarning(emu, "Failed to load model");
+                return false;
+            }
+        } else {
+            qCWarning(emu, "Failed to open model file for reading");
             return false;
         }
-    } else {
-        qCWarning(emu, "Failed to open model file for reading");
-        return false;
-    }
-    mElementsCount = indices.size();
+        mElementsCount = indices.size();
 
-    mVertexPositionAttribute = mGLES2->glGetAttribLocation(mProgram, "vtx_pos");
-    mVertexNormalAttribute   = mGLES2->glGetAttribLocation(mProgram, "vtx_normal");
-    mVertexUVAttribute   = mGLES2->glGetAttribLocation(mProgram, "vtx_uv");
-    mGLES2->glGenBuffers(1, &mVertexDataBuffer);
-    mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
-    mGLES2->glBufferData(GL_ARRAY_BUFFER,
-                         model_vertex_data.size() * sizeof(float),
-                         &model_vertex_data[0],
-                         GL_STATIC_DRAW);
-    mGLES2->glGenBuffers(1, &mVertexIndexBuffer);
-    mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
-    mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                         mElementsCount * sizeof(GLuint),
-                         &indices[0],
-                         GL_STATIC_DRAW);
-    CHECK_GL_ERROR_RETURN("Failed to load model", false);
-    return true;
+        mVertexPositionAttribute = mGLES2->glGetAttribLocation(mProgram, "vtx_pos");
+        mVertexNormalAttribute   = mGLES2->glGetAttribLocation(mProgram, "vtx_normal");
+        mVertexUVAttribute   = mGLES2->glGetAttribLocation(mProgram, "vtx_uv");
+        mGLES2->glGenBuffers(1, &mVertexDataBuffer);
+        mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
+        mGLES2->glBufferData(GL_ARRAY_BUFFER,
+                             model_vertex_data.size() * sizeof(float),
+                             &model_vertex_data[0],
+                             GL_STATIC_DRAW);
+        mGLES2->glGenBuffers(1, &mVertexIndexBuffer);
+        mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
+        mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                             mElementsCount * sizeof(GLuint),
+                             &indices[0],
+                             GL_STATIC_DRAW);
+        CHECK_GL_ERROR_RETURN("Failed to load model", false);
+        return true;
+    }
 }
 
-bool Accelerometer3DWidget::initTextures() {
+bool Device3DWidget::initTextures() {
     // Create textures.
     mDiffuseMap = create2DTexture(mGLES2,
                                   ":/phone-model/diffuse-map.png",
                                   GL_TEXTURE_2D,
                                   GL_RGBA,
                                   GL_LINEAR_MIPMAP_LINEAR);
-    mSpecularMap = create2DTexture(mGLES2,
-                                   ":/phone-model/specular-map.png",
-                                   GL_TEXTURE_2D,
-                                   GL_LUMINANCE);
-    mGlossMap = create2DTexture(mGLES2,
-                                ":/phone-model/gloss-map.png",
-                                GL_TEXTURE_2D,
-                                GL_LUMINANCE);
+    if (mUseAbstractDevice) {
+        mSpecularMap = create2DTexture(
+            mGLES2, nullptr /* blank */, GL_TEXTURE_2D, GL_LUMINANCE);
+        mGlossMap = create2DTexture(
+            mGLES2, nullptr /* blank */, GL_TEXTURE_2D, GL_LUMINANCE);
+    } else {
+        mSpecularMap = create2DTexture(mGLES2,
+                                       ":/phone-model/specular-map.png",
+                                       GL_TEXTURE_2D,
+                                       GL_LUMINANCE);
+        mGlossMap = create2DTexture(mGLES2,
+                                    ":/phone-model/gloss-map.png",
+                                    GL_TEXTURE_2D,
+                                    GL_LUMINANCE);
+    }
     if (!mDiffuseMap || !mSpecularMap || !mGlossMap) {
         return false;
     }
@@ -289,7 +397,103 @@ bool Accelerometer3DWidget::initTextures() {
     return true;
 }
 
-void Accelerometer3DWidget::resizeGL(int w, int h) {
+void Device3DWidget::updateModelVertices(
+    const void* vertexData, size_t vertexDataBytes,
+    const void* indexData, size_t indexDataBytes) {
+
+    if (vertexDataBytes == 0) return;
+
+    mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
+    mGLES2->glBufferData(GL_ARRAY_BUFFER,
+                         vertexDataBytes,
+                         vertexData,
+                         GL_STATIC_DRAW);
+    mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
+    mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                         indexDataBytes,
+                         indexData,
+                         GL_STATIC_DRAW);
+    mElementsCount = indexDataBytes / sizeof(uint32_t);
+}
+
+std::pair<
+    std::vector<float>,
+    std::vector<uint32_t>>
+Device3DWidget::generateModelVerticesFromFoldableState(const FoldableState& state) {
+
+    // TODO: Generalize
+    // Assume split 0.5 for now, with 1 hinge
+    if (state.config.numHinges != 1) return {};
+
+    float hingeRadians = state.currentHingeDegrees[0] * M_PI / 180.0f;
+
+    float swingy = cos(hingeRadians - M_PI);
+    float swingz = sin(hingeRadians - M_PI);
+
+    float swingyn = cos(hingeRadians - M_PI * 0.5f);
+    float swingzn = sin(hingeRadians - M_PI * 0.5f);
+
+    std::vector<float> attribs = {
+        -1.0, -1.0, 0.0,   0.0, 0.0, 1.0,  0.0, 0.0, // 0
+        +1.0, -1.0, 0.0,   0.0, 0.0, 1.0,  1.0, 0.0, // 1
+        // Hinge, attached to non-swinging part
+        -1.0, 0.0, 0.0,   0.0, 0.0, 1.0,  0.0, 0.5, // 2
+        +1.0, 0.0, 0.0,   0.0, 0.0, 1.0,  1.0, 0.5, // 3
+        // Hinge, attached to swinging part
+        -1.0, 0.0, 0.0,   0.0, swingyn, swingzn,  0.0, 0.5, // 4
+        +1.0, 0.0, 0.0,   0.0, swingyn, swingzn,  1.0, 0.5, // 5
+        // Swinging part
+        +1.0, 1.0, 0.0,   0.0, swingyn, swingzn,  1.0, 1.0, // 6
+        -1.0, 1.0, 0.0,   0.0, swingyn, swingzn,  0.0, 1.0, // 7
+    };
+
+    // Size it to the aspect ratio
+    float aspect =
+        (float)(android_hw->hw_lcd_width) /
+        (float)(android_hw->hw_lcd_height);
+
+    float yheight = 1.0f;
+
+    // TODO: Remove hacky computation for the swung-out part
+    for (size_t i = 0; i < attribs.size(); ++i) {
+        if (i % 8 == 1) {
+            attribs[i] *= 1.0f / aspect;
+        }
+        if (i % 8 < 4) {
+            attribs[i] *= 2.0f;
+        }
+
+        if (i >= 6 * 8 && i < 8 * 8) {
+            if (i % 8 == 1) {
+                yheight = attribs[i];
+            }
+        }
+    }
+
+    for (size_t i = 0; i < attribs.size(); ++i) {
+        if (i >= 6 * 8 && i < 8 * 8) {
+
+            if (i % 8 == 2) {
+                attribs[i] = sin(hingeRadians - M_PI) * yheight;
+            }
+            if (i % 8 == 1) {
+                attribs[i] = cos(hingeRadians - M_PI) * yheight;
+            }
+        }
+
+    }
+
+    std::vector<uint32_t> indices = {
+        0, 1, 2,
+        1, 3, 2,
+        4, 5, 7,
+        7, 6, 5,
+    };
+
+    return {attribs, indices};
+}
+
+void Device3DWidget::resizeGL(int w, int h) {
     if (!mGLES2) {
         return;
     }
@@ -325,7 +529,7 @@ void Accelerometer3DWidget::resizeGL(int w, int h) {
 
 constexpr float kMetersPerInch = 0.0254f;
 
-void Accelerometer3DWidget::repaintGL() {
+void Device3DWidget::repaintGL() {
     if (!mGLES2) {
         return;
     }
@@ -349,6 +553,18 @@ void Accelerometer3DWidget::repaintGL() {
         position = clampPosition(position);
 
         rotation = glm::mat4(fromEulerAnglesXYZ(glm::radians(eulerDegrees)));
+    }
+
+    // Upload new vertex data from foldable state, if necessary
+    if (mUseAbstractDevice) {
+        if (memcmp(&mCachedFoldableState, mCurrentFoldableStatePtr, sizeof(FoldableState))) {
+            mCachedFoldableState = *mCurrentFoldableStatePtr;
+            std::pair<std::vector<float>, std::vector<uint32_t>> newData = 
+                generateModelVerticesFromFoldableState(mCachedFoldableState);
+            updateModelVertices(
+                newData.first.data(), newData.first.size() * sizeof(float),
+                newData.second.data(), newData.second.size() * sizeof(uint32_t));
+        }
     }
 
     if (mOperationMode == OperationMode::Rotate &&
@@ -387,6 +603,14 @@ void Accelerometer3DWidget::repaintGL() {
     // Set textures.
     mGLES2->glActiveTexture(GL_TEXTURE0);
     mGLES2->glBindTexture(GL_TEXTURE_2D, mDiffuseMap);
+
+    // Replace the current diffuse map w/ screen contents
+    // if we are using the abstract device
+    if (mUseAbstractDevice) {
+        struct AndroidVirtioGpuOps* ops = android_getVirtioGpuOps();
+        ops->bind_color_buffer_to_texture(ops->get_last_posted_color_buffer());
+    }
+
     mGLES2->glActiveTexture(GL_TEXTURE1);
     mGLES2->glBindTexture(GL_TEXTURE_2D, mSpecularMap);
     mGLES2->glActiveTexture(GL_TEXTURE2);
@@ -402,6 +626,12 @@ void Accelerometer3DWidget::repaintGL() {
     mGLES2->glUniform1i(gloss_map_uniform, 2);
     GLuint env_map_uniform = mGLES2->glGetUniformLocation(mProgram, "env_map");
     mGLES2->glUniform1i(env_map_uniform, 3);
+    GLuint no_light_uniform = mGLES2->glGetUniformLocation(mProgram, "no_light");
+    if (mUseAbstractDevice) {
+        mGLES2->glUniform1f(no_light_uniform, 1.0f);
+    } else {
+        mGLES2->glUniform1f(no_light_uniform, 0.0f);
+    }
 
     // Set up attribute pointers.
     mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
@@ -437,7 +667,7 @@ static float clamp(float a, float b, float x) {
     return std::max(a, std::min(b, x));
 }
 
-void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent* event) {
+void Device3DWidget::mouseMoveEvent(QMouseEvent* event) {
     if (mTracking && mOperationMode == OperationMode::Rotate) {
         float diff_x = event->x() - mPrevMouseX,
               diff_y = event->y() - mPrevMouseY;
@@ -463,7 +693,7 @@ void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent* event) {
     }
 }
 
-void Accelerometer3DWidget::wheelEvent(QWheelEvent* event) {
+void Device3DWidget::wheelEvent(QWheelEvent* event) {
     if (mOperationMode == OperationMode::Move) {
         // Note: angleDelta is given in 1/8 degree increments.
         const int angleDeltaDegrees = event->angleDelta().y() / 8;
@@ -476,7 +706,7 @@ void Accelerometer3DWidget::wheelEvent(QWheelEvent* event) {
     }
 }
 
-void Accelerometer3DWidget::mousePressEvent(QMouseEvent* event) {
+void Device3DWidget::mousePressEvent(QMouseEvent* event) {
     mPrevMouseX = event->x();
     mPrevMouseY = event->y();
     mPrevDragOrigin = screenToWorldCoordinate(event->x(), event->y());
@@ -484,7 +714,7 @@ void Accelerometer3DWidget::mousePressEvent(QMouseEvent* event) {
     emit dragStarted();
 }
 
-void Accelerometer3DWidget::mouseReleaseEvent(QMouseEvent* event) {
+void Device3DWidget::mouseReleaseEvent(QMouseEvent* event) {
     if (mTracking) {
         mTracking = false;
         emit dragStopped();
@@ -493,7 +723,7 @@ void Accelerometer3DWidget::mouseReleaseEvent(QMouseEvent* event) {
     emit targetRotationChanged();
 }
 
-glm::vec3 Accelerometer3DWidget::screenToWorldCoordinate(int x, int y) const {
+glm::vec3 Device3DWidget::screenToWorldCoordinate(int x, int y) const {
     const glm::vec4 screenSpace((2.0f * x / static_cast<float>(width())) - 1.0f,
                   1.0f - (2.0f * y / static_cast<float>(height())),
                   -1.f,

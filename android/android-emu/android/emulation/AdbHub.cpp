@@ -356,7 +356,6 @@ void AdbHub::pushToRecvQueue(apacket&& packet) {
     mRecvFromHostQueue.push(std::move(packet));
     DD("Wake pipe read");
     mWantRecv = true;
-    mWakePipe(PIPE_WAKE_READ);
 }
 
 AdbProxy* AdbHub::onNewConnection(const apacket& requestPacket,
@@ -413,10 +412,6 @@ AdbProxy* AdbHub::tryReuseConnection(const apacket& packet) {
 
 int AdbHub::getProxyCount() {
     return mProxies.size();
-}
-
-void AdbHub::setWakePipeFunc(WakePipeFunc wakePipe) {
-    mWakePipe = wakePipe;
 }
 
 unsigned AdbHub::onGuestPoll() const {

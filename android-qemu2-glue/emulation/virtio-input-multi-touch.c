@@ -51,13 +51,16 @@
 
 static VirtIOInput* s_virtio_input_multi_touch[VIRTIO_INPUT_MAX_NUM];
 
-static VirtIOInput* s_current_virtio_input = NULL;
-
-static void translate_mouse_event(int x, int y, int buttons_state) {
+static void translate_mouse_event(int x,
+                                  int y,
+                                  int buttons_state,
+                                  int displayId) {
     int pressure = multitouch_is_touch_down(buttons_state) ? 0x81 : 0;
     int finger = multitouch_is_second_finger(buttons_state);
+    multitouch_update_displayId(displayId);
     multitouch_update_pointer(MTES_DEVICE, finger, x, y, pressure,
                               multitouch_should_skip_sync(buttons_state));
+    multitouch_update_displayId(0);
 }
 
 #define VIRTIO_INPUT_MT_STRUCT(id) \
@@ -316,22 +319,21 @@ static const TypeInfo types[] = {
 
 DEFINE_TYPES(types)
 
-int android_virtio_input_send(int type, int code, int value) {
+int android_virtio_input_send(int type, int code, int value, int displayId) {
     if (type != EV_ABS && type != EV_SYN && type != EV_SW) {
         return 0;
     }
-    if (!s_current_virtio_input) {
-        s_current_virtio_input = s_virtio_input_multi_touch[0];
+    if (displayId < 0 || displayId >= VIRTIO_INPUT_MAX_NUM) {
+        displayId = 0;
     }
-    VirtIOInput* vinput = VIRTIO_INPUT(s_current_virtio_input);
-    if (vinput == NULL) {
-        return 1;
+    VirtIOInput* vinput = VIRTIO_INPUT(s_virtio_input_multi_touch[displayId]);
+    if (vinput) {
+        virtio_input_event event;
+        event.type = cpu_to_le16(type);
+        event.code = cpu_to_le16(code);
+        event.value = cpu_to_le32(value);
+        virtio_input_send(vinput, &event);
     }
-    virtio_input_event event;
-    event.type = cpu_to_le16(type);
-    event.code = cpu_to_le16(code);
-    event.value = cpu_to_le32(value);
-    virtio_input_send(vinput, &event);
     return 1;
 }
 
@@ -343,13 +345,13 @@ void android_virtio_kbd_mouse_event(int dx,
     uint32_t w, h = 0;
 
     if (displayId < 0 || displayId >= VIRTIO_INPUT_MAX_NUM) {
-      displayId = 0;
+        displayId = 0;
     }
 
-    s_current_virtio_input = s_virtio_input_multi_touch[displayId];
     if (!gQAndroidEmulatorWindowAgent->getMultiDisplay(displayId, NULL, NULL, &w,
                                                   &h, NULL, NULL, NULL)) {
-      gQAndroidDisplayAgent->getFrameBuffer((int*)&w, (int*)&h, NULL, NULL, NULL);
+        gQAndroidDisplayAgent->getFrameBuffer((int*)&w, (int*)&h, NULL, NULL,
+                                              NULL);
     }
 
     dx = qemu_input_scale_axis(dx, 0, w, INPUT_EVENT_ABS_MIN,
@@ -357,5 +359,5 @@ void android_virtio_kbd_mouse_event(int dx,
     dy = qemu_input_scale_axis(dy, 0, h, INPUT_EVENT_ABS_MIN,
                                INPUT_EVENT_ABS_MAX);
 
-    translate_mouse_event(dx, dy, buttonsState);
+    translate_mouse_event(dx, dy, buttonsState, displayId);
 }

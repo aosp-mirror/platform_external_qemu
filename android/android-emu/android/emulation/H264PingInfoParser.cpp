@@ -43,6 +43,10 @@ H264PingInfoParser::H264PingInfoParser(void* ptr) {
     mVersion = parseVersion(ptr);
 }
 
+H264PingInfoParser::H264PingInfoParser(uint32_t version) {
+    mVersion = version;
+}
+
 uint32_t H264PingInfoParser::parseVersion(void* ptr) {
     uint8_t* xptr = (uint8_t*)ptr;
     uint32_t version = *(uint32_t*)xptr;

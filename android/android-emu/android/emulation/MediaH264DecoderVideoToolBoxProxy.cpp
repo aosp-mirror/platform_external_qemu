@@ -104,5 +104,29 @@ void MediaH264DecoderVideoToolBoxProxy::destroyH264Context() {
     mCurrentDecoder->destroyH264Context();
 }
 
+void MediaH264DecoderVideoToolBoxProxy::save(base::Stream* stream) const {
+    H264_DPRINT("saving ...");
+    stream->putBe32(mParser.version());
+    const int useHardwareDecoder = mIsVideoToolBoxDecoderInGoodState ? 1 : 0;
+    stream->putBe32(useHardwareDecoder);
+    mFfmpegDecoder.save(stream);
+    mVideoToolBoxDecoder.save(stream);
+}
+
+bool MediaH264DecoderVideoToolBoxProxy::load(base::Stream* stream) {
+    H264_DPRINT("loading ...");
+    uint32_t version = stream->getBe32();
+    mParser = H264PingInfoParser{version};
+    const int useHardwareDecoder = stream->getBe32();
+    mFfmpegDecoder.load(stream);
+    mVideoToolBoxDecoder.load(stream);
+    if (useHardwareDecoder) {
+        mCurrentDecoder = &mVideoToolBoxDecoder;
+    } else {
+        mCurrentDecoder = &mFfmpegDecoder;
+    }
+    return true;
+}
+
 }  // namespace emulation
 }  // namespace android

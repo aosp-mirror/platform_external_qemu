@@ -27,8 +27,18 @@
 namespace android {
 namespace emulation {
 
-AddressSpaceHostMediaContext::AddressSpaceHostMediaContext(uint64_t phys_addr, const address_space_device_control_ops* ops) : mControlOps(ops) {
-    allocatePages(phys_addr, kNumPages);
+enum class DecoderType : uint8_t {
+    Vpx = 0,
+    H264 = 1,
+};
+
+AddressSpaceHostMediaContext::AddressSpaceHostMediaContext(uint64_t phys_addr, const address_space_device_control_ops* ops,
+        bool fromSnapshot) : mControlOps(ops) {
+    // The memory is allocated in the snapshot load if called from a snapshot load().
+    if (!fromSnapshot) {
+        mGuestAddr = phys_addr;
+        allocatePages(phys_addr, kNumPages);
+    }
 }
 
 void AddressSpaceHostMediaContext::perform(AddressSpaceDevicePingInfo *info) {
@@ -40,15 +50,53 @@ AddressSpaceDeviceType AddressSpaceHostMediaContext::getDeviceType() const {
 }
 
 void AddressSpaceHostMediaContext::save(base::Stream* stream) const {
-    mVpxDecoder.save(stream);
+    AS_DEVICE_DPRINT("Saving Host Media snapshot");
+    stream->putBe64(mGuestAddr);
+    int numActiveDecoders = 0;
+    if (mVpxDecoder != nullptr) {
+        ++ numActiveDecoders;
+    }
     if (mH264Decoder != nullptr) {
+        ++ numActiveDecoders;
+    }
+
+    stream->putBe32(numActiveDecoders);
+    if (mVpxDecoder != nullptr) {
+        AS_DEVICE_DPRINT("Saving VpxDecoder snapshot");
+        stream->putBe32((uint32_t)DecoderType::Vpx);
+        mVpxDecoder->save(stream);
+    }
+    if (mH264Decoder != nullptr) {
+        AS_DEVICE_DPRINT("Saving H264Decoder snapshot");
+        stream->putBe32((uint32_t)DecoderType::H264);
         mH264Decoder->save(stream);
     }
 }
 
 bool AddressSpaceHostMediaContext::load(base::Stream* stream) {
-    // TODO: NOT IMPLEMENTED
-    return false;
+    AS_DEVICE_DPRINT("Loading Host Media snapshot");
+    mGuestAddr = stream->getBe64();
+    allocatePages(mGuestAddr, kNumPages);
+
+    int numActiveDecoders = stream->getBe32();
+    for (int i = 0; i < numActiveDecoders; ++i) {
+        DecoderType t = (DecoderType)stream->getBe32();
+        switch (t) {
+        case DecoderType::Vpx:
+            AS_DEVICE_DPRINT("Loading VpxDecoder snapshot");
+            mVpxDecoder.reset(new MediaVpxDecoder);
+            mVpxDecoder->load(stream);
+            break;
+        case DecoderType::H264:
+            AS_DEVICE_DPRINT("Loading H264Decoder snapshot");
+            mH264Decoder.reset(MediaH264Decoder::create());
+            mH264Decoder->load(stream);
+            break;
+        default:
+            break;
+        }
+    }
+    return true;
 }
 
 void AddressSpaceHostMediaContext::allocatePages(uint64_t phys_addr, int num_pages) {
@@ -104,7 +152,10 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
     switch (codecType) {
         case MediaCodecType::VP8Codec:
         case MediaCodecType::VP9Codec:
-            mVpxDecoder.handlePing(codecType,
+            if (!mVpxDecoder) {
+                mVpxDecoder.reset(new MediaVpxDecoder);
+            }
+            mVpxDecoder->handlePing(codecType,
                                    op,
                                    mControlOps->get_host_ptr(info->phys_addr));
             break;

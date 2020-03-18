@@ -22,7 +22,11 @@
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/metrics.h"
 #include "android/metrics/MetricsReporter.h"
+
+#if SNAPSHOT_METRICS
 #include "android/metrics/proto/studio_stats.pb.h"
+#endif
+
 #include "android/metrics/StudioConfig.h"
 #include "android/opengl/emugl_config.h"
 #include "android/snapshot/Hierarchy.h"
@@ -244,6 +248,7 @@ void Snapshotter::setDiskSpaceCheck(bool enable) {
 
 static constexpr int kDefaultMessageTimeoutMs = 10000;
 
+#if SNAPSHOT_METRICS
 static void appendFailedSave(pb::EmulatorSnapshotSaveState state,
                              FailureReason failureReason) {
     MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
@@ -261,6 +266,12 @@ static void appendFailedLoad(pb::EmulatorSnapshotLoadState state,
         snap->set_load_failure_reason((pb::EmulatorSnapshotFailureReason)failureReason);
     });
 }
+#else
+
+#define appendFailedSave(...)
+#define appendFailedLoad(...)
+
+#endif
 
 OperationStatus Snapshotter::prepareForLoading(const char* name) {
     if (mSaver && mSaver->snapshot().name() == name) {
@@ -323,7 +334,7 @@ void Snapshotter::callCallbacks(Operation op, Stage stage) {
 
 void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
                                       const SnapshotOperationStats& stats) {
-
+#if SNAPSHOT_METRICS
     pb::EmulatorSnapshot* snapshot = nullptr;
 
     if (stats.forSave) {
@@ -380,6 +391,7 @@ void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
     memUsageProto->set_total_phys_memory(stats.memUsage.total_phys_memory);
     memUsageProto->set_total_page_file(stats.memUsage.total_page_file);
     android_metrics_fill_common_info(true /* opengl alive */, event);
+#endif
 }
 
 Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
@@ -449,6 +461,7 @@ Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(const char* name,
 
 void Snapshotter::appendSuccessfulSave(const char* name,
                                        System::Duration durationMs) {
+#if SNAPSHOT_METRICS
     if (!mSaver ||
         !mSaver->textureSaver()) return;
 
@@ -456,10 +469,12 @@ void Snapshotter::appendSuccessfulSave(const char* name,
     MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
         fillSnapshotMetrics(event, stats);
     });
+#endif
 }
 
 void Snapshotter::appendSuccessfulLoad(const char* name,
                                        System::Duration durationMs) {
+#if SNAPSHOT_METRICS
     if (!mLoader ||
         !mLoader->textureLoader()) return;
 
@@ -468,6 +483,7 @@ void Snapshotter::appendSuccessfulLoad(const char* name,
     MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
         fillSnapshotMetrics(event, stats);
     });
+#endif
 }
 
 void Snapshotter::showError(const std::string& message) {
@@ -768,13 +784,17 @@ void Snapshotter::invalidateSnapshot(const char* name) {
         // We're deleting the "loaded" snapshot, so first finish any pending
         // load, and then clear the snapshot file.  Do it under the VM lock to
         // finish background loading faster (i.e., no interference from VCPUs)
+#ifndef AEMU_MIN
         CrashReporter::get()->hangDetector().pause(true);
+#endif
         android::RecursiveScopedVmLock lock;
         if (mLoader && mLoader->status() == OperationStatus::Ok) {
             mLoader->synchronize(false /* not on exit */);
         }
         mLoadedSnapshotFile.clear();
+#ifndef AEMU_MIN
         CrashReporter::get()->hangDetector().pause(false);
+#endif
     }
 
     mIsInvalidating = true;
@@ -816,7 +836,9 @@ void Snapshotter::onCrashedSnapshot(const char* name) {
 }
 
 bool Snapshotter::onStartSaving(const char* name) {
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(true);
+#endif
     callCallbacks(Operation::Save, Stage::Start);
     prepareLoaderForSaving(name);
     if (!mSaver || isComplete(*mSaver)) {
@@ -840,7 +862,9 @@ bool Snapshotter::onStartSaving(const char* name) {
 bool Snapshotter::onSavingComplete(const char* name, int res) {
     assert(mSaver && name == mSaver->snapshot().name());
     mSaver->complete(res == 0);
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(false);
+#endif
     callCallbacks(Operation::Save, Stage::End);
     bool good = mSaver->status() != OperationStatus::Error &&
                 mSaver->status() != OperationStatus::Canceled;
@@ -859,7 +883,9 @@ void Snapshotter::onSavingFailed(const char* name, int res) {
 
 bool Snapshotter::onStartLoading(const char* name) {
     mLoadedSnapshotFile.clear();
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(true);
+#endif
     callCallbacks(Operation::Load, Stage::Start);
     mSaver.reset();
     if (!mLoader || isComplete(*mLoader)) {
@@ -885,7 +911,9 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
 
     mLoader->complete(res == 0);
 
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(false);
+#endif
     mLastLoadUptimeMs =
             System::Duration(System::get()->getProcessTimes().wallClockMs);
     callCallbacks(Operation::Load, Stage::End);
@@ -926,7 +954,9 @@ void Snapshotter::onLoadingFailed(const char* name, int err) {
 }
 
 bool Snapshotter::onStartDelete(const char*) {
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(true);
+#endif
     return true;
 }
 
@@ -942,7 +972,9 @@ bool Snapshotter::onDeletingComplete(const char* name, int res) {
             path_delete_dir(base::c_str(Snapshot::dataDir(name)));
         }
     }
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(false);
+#endif
     mIsInvalidating = false;
     return true;
 }
@@ -962,6 +994,7 @@ void androidSnapshot_initialize(
     using android::base::Version;
 
     static constexpr auto kMinStudioVersion = Version(3, 0, 0);
+#ifndef AEMU_MIN
     // Make sure the installed AndroidStudio is able to handle the snapshots
     // feature.
     if (isEnabled(android::featurecontrol::FastSnapshotV1)) {
@@ -978,6 +1011,7 @@ void androidSnapshot_initialize(
             setEnabledOverride(android::featurecontrol::FastSnapshotV1, false);
         }
     }
+#endif
 
     android::snapshot::sInstance->initialize(*vmOperations, *windowAgent);
     android::snapshot::Quickboot::initialize(*vmOperations, *windowAgent);

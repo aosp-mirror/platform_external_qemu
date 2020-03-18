@@ -55,9 +55,7 @@
 #endif
 
 /* Camera service version 1 */
-// #define V1 (avdInfo_getApiLevel(android_avdInfo) > 29)
-// bug: 149440912 camera protocol v1 crashes on windows
-#define V1 false
+#define V1 (avdInfo_getApiLevel(android_avdInfo) > 29)
 
 /* Defines name of the camera service. */
 #define SERVICE_NAME    "camera"
@@ -1695,7 +1693,7 @@ _camera_client_query_frame_v1(CameraClient* cc, QemudClient* qc, const char* par
         _qemu_client_reply_ko(qc, "Invalid or missing 'offset' parameter");
         return;
     } else {
-        if (sscanf(tmp, "%lu", &offset) != 1) {
+        if (sscanf(tmp, "%" PRIu64, &offset) != 1) {
             _qemu_client_reply_ko(qc, "not a decimal number for 'offset'");
             return;
         }

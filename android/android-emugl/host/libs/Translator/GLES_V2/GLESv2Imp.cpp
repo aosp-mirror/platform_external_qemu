@@ -28,7 +28,6 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
-#include "android/metrics/proto/studio_stats.pb.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
@@ -45,6 +44,7 @@
 #include "TransformFeedbackData.h"
 
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/metrics.h"
 
 #include "ANGLEShaderParser.h"
 
@@ -81,7 +81,6 @@ static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
                                       SaveableTexture::loader_t&& loader);
 static void restoreTexture(SaveableTexture* texture);
 static void blitFromCurrentReadBufferANDROID(EGLImage image);
-static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage);
 static bool vulkanInteropSupported();
 static GLsync internal_glFenceSync(GLenum condition, GLbitfield flags);
 static GLenum internal_glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
@@ -118,14 +117,13 @@ static GLESiface s_glesIface = {
     .restoreTexture = restoreTexture,
     .deleteRbo = deleteRenderbufferGlobal,
     .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
-    .fillGLESUsages = fillGLESUsages,
     .vulkanInteropSupported = vulkanInteropSupported,
     .getSynciv = (FUNCPTR_GET_SYNC_IV)internal_glGetSynciv,
 };
 
 #include <GLcommon/GLESmacros.h>
 
-static android::base::LazyInstance<android_studio::EmulatorGLESv30Usages> gles30usages = {};
+static android::base::LazyInstance<GLES3Usage> gles30usages = {};
 
 extern "C" {
 
@@ -215,6 +213,9 @@ GL_APICALL void GL_APIENTRY glGetSemaphoreParameterui64vEXT(GLuint semaphore, GL
 GL_APICALL void GL_APIENTRY glWaitSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *srcLayouts);
 GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *dstLayouts);
 
+// Utility to get global names
+GL_APICALL GLuint GL_APIENTRY glGetGlobalTexName(GLuint localName);
+
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
     GET_CTX_RET(NULL)
     ctx->getGlobalLock();
@@ -257,6 +258,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
         (*s_glesExtensions)["glGetSemaphoreParameterui64vEXT"] = (__translatorMustCastToProperFunctionPointerType)glGetSemaphoreParameterui64vEXT;
         (*s_glesExtensions)["glWaitSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glWaitSemaphoreEXT;
         (*s_glesExtensions)["glSignalSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glSignalSemaphoreEXT;
+        (*s_glesExtensions)["glGetGlobalTexName"] = (__translatorMustCastToProperFunctionPointerType)glGetGlobalTexName;
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -295,10 +297,6 @@ GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     s_eglIface = eglIface;
     return & s_glesIface;
-}
-
-static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage) {
-    usage->mutable_gles_3_0_usages()->CopyFrom(*gles30usages);
 }
 
 static bool vulkanInteropSupported() {
@@ -626,6 +624,13 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
 
     // update renderbuffer binding state
     ctx->setRenderbufferBinding(renderbuffer);
+}
+
+GL_APICALL GLuint GL_APIENTRY glGetGlobalTexName(GLuint localName) {
+    GET_CTX_V2_RET(0);
+    GLuint globalTextureName = ctx->shareGroup()->getGlobalName(
+            NamedObjectType::TEXTURE, localName);
+    return globalTextureName;
 }
 
 GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){

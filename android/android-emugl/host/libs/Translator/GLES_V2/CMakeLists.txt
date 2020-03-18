@@ -14,8 +14,14 @@ android_add_library(
       ProgramData.cpp
       ANGLEShaderParser.cpp)
 target_compile_options(GLES_V2_translator PRIVATE -fvisibility=hidden)
-target_link_libraries(
-  GLES_V2_translator PRIVATE GLcommon OpenglCodecCommon emugl_common
-                             android-emu ANGLE::ANGLE)
+if (OPTION_GFXSTREAM_BACKEND)
+  target_link_libraries(
+    GLES_V2_translator PRIVATE GLcommon OpenglCodecCommon emugl_common
+                               android-emu-shared ANGLE::ANGLE)
+else()
+  target_link_libraries(
+    GLES_V2_translator PRIVATE GLcommon OpenglCodecCommon emugl_common
+                               android-emu ANGLE::ANGLE)
+endif()
 target_link_libraries(GLES_V2_translator PRIVATE emugl_base)
 android_install_shared(GLES_V2_translator)

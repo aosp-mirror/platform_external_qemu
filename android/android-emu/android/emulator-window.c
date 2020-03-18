@@ -389,11 +389,21 @@ static int emulator_window_framebuffer_get_depth(void* opaque) {
 
 void emulator_window_set_no_skin() {
     EmulatorWindow* emulator = emulator_window_get();
-    if (emulator->layout_file_original) {
+    if (emulator->layout_file_no_skin == NULL) {
+        emulator->layout_file_no_skin = skin_file_create_from_display_v1(
+            emulator->layout_file->parts->display);
+        emulator->layout_file_skin = emulator->layout_file;
+    }
+    emulator->layout_file = emulator->layout_file_no_skin;
+    skin_ui_update_and_rotate(emulator->ui, emulator->layout_file, 0);
+}
+
+void emulator_window_restore_skin() {
+    EmulatorWindow* emulator = emulator_window_get();
+    if (emulator->layout_file_skin == NULL) {
         return;
     }
-    emulator->layout_file_original = emulator->layout_file;
-    emulator->layout_file = skin_file_create_from_display_v1(emulator->layout_file->parts->display);
+    emulator->layout_file = emulator->layout_file_skin;
     skin_ui_update_and_rotate(emulator->ui, emulator->layout_file, 0);
 }
 

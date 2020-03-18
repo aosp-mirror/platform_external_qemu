@@ -275,7 +275,6 @@ void VkReconstruction::destroyApiInfo(VkReconstruction::ApiHandle h) {
     if (!item) return;
 
     item->traceBytes = 0;
-    item->apiCall.Clear();
     item->createdHandles.clear();
 
     mApiTrace.remove(h);

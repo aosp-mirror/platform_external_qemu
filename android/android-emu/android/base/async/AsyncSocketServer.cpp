@@ -87,7 +87,8 @@ private:
             // If we listen on IPv4 and IPv6 both, then we could get onAccept from one socket
             // even we've already called stopListening on another socket if we get connections
             // from both sockets around same time. In such case, just ignore onAccept.
-            CHECK(server->getListenMode() == kIPv4AndIPv6) << "Hit onAccept after stopListening";
+            // b/150887008
+            // CHECK(server->getListenMode() == kIPv4AndIPv6) << "Hit onAccept after stopListening";
             return;
         }
         if (events & FdWatch::kEventRead) {
