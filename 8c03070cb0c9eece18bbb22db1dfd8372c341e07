@@ -1,0 +1,48 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002015734",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1260948?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "8ad0bb9a_19387433",
+          "description": "Change to \"android-qemu2-glue/main.cpp\"",
+          "replacements": [
+            {
+              "path": "android-qemu2-glue/main.cpp",
+              "range": {
+                "startLine": 986,
+                "startChar": 28,
+                "endLine": 986,
+                "endChar": 37
+              },
+              "replacement": "Overridden"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "23e98636_1ff87fe9",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 986,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-03-18T17:47:33Z",
+      "side": 1,
+      "message": "Common typo found: \"Overriden\" -- should it be \"Overridden\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 986,
+        "startChar": 28,
+        "endLine": 986,
+        "endChar": 37
+      },
+      "revId": "8c03070cb0c9eece18bbb22db1dfd8372c341e07",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
