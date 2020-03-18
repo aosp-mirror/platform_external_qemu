@@ -1798,14 +1798,16 @@ EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
 
 EGLAPI void EGLAPIENTRY eglFillUsages(void* usages) {
     MEM_TRACE("EMUGL");
-    if (g_eglInfo->getIface(GLES_1_1) &&
-            g_eglInfo->getIface(GLES_1_1)->fillGLESUsages) {
-        g_eglInfo->getIface(GLES_1_1)->fillGLESUsages(
-            (android_studio::EmulatorGLESUsages*)usages);
-    }
-    if (g_eglInfo->getIface(GLES_2_0) &&
-            g_eglInfo->getIface(GLES_2_0)->fillGLESUsages) {
-        g_eglInfo->getIface(GLES_2_0)->fillGLESUsages(
-            (android_studio::EmulatorGLESUsages*)usages);
-    }
+    // TODO: Figure out better usage metrics interface
+    // that doesn't require linking protobuf into Translator
+    // if (g_eglInfo->getIface(GLES_1_1) &&
+    //         g_eglInfo->getIface(GLES_1_1)->fillGLESUsages) {
+    //     g_eglInfo->getIface(GLES_1_1)->fillGLESUsages(
+    //         (android_studio::EmulatorGLESUsages*)usages);
+    // }
+    // if (g_eglInfo->getIface(GLES_2_0) &&
+    //         g_eglInfo->getIface(GLES_2_0)->fillGLESUsages) {
+    //     g_eglInfo->getIface(GLES_2_0)->fillGLESUsages(
+    //         (android_studio::EmulatorGLESUsages*)usages);
+    // }
 }

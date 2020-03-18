@@ -15,17 +15,16 @@
 #include "android/emulation/control/adb/AdbInterface.h"
 
 #include <assert.h>                                        // for assert
+#include <inttypes.h>                                      // for PRId64
 #include <stdint.h>                                        // for int64_t
-#include <algorithm>                                       // for max, copy
-#include <cstdio>                                          // for sscanf
+#include <cstdio>                                          // for printf
+#include <fstream>                                         // for fstream
 #include <limits>                                          // for numeric_li...
 #include <queue>                                           // for queue
-#include <fstream>                                         // for ifstream
 #include <sstream>                                         // for basic_stri...
 #include <string>                                          // for string
 #include <thread>                                          // for thread
 #include <tuple>                                           // for tie, tuple
-#include <type_traits>                                     // for decay<>::type
 #include <utility>                                         // for pair, move
 
 #include "android/avd/info.h"                              // for avdInfo_ge...
@@ -45,8 +44,10 @@
 #include "android/cmdline-option.h"                        // for android_cm...
 #include "android/emulation/AdbHostServer.h"               // for AdbHostServer
 #include "android/emulation/ConfigDirs.h"                  // for ConfigDirs
+#include "android/emulation/control/adb/AdbConnection.h"   // for AdbConnection
 #include "android/emulation/control/adb/AdbShellStream.h"  // for AdbShellSt...
 #include "android/globals.h"                               // for android_av...
+#include "android/utils/debug.h"                           // for VERBOSE_CHECK
 #include "android/utils/path.h"                            // for path_delet...
 
 namespace android {
@@ -79,6 +80,7 @@ namespace emulation {
 // to not notify people to upgrade adb. 23.1.0 ships with adb protocol 32
 static const int kMinAdbProtocol = 32;
 class AdbInterfaceImpl;
+
 class AdbDaemonImpl : public AdbDaemon {
 public:
     virtual Optional<int> getProtocolVersion() override {
@@ -92,6 +94,15 @@ class AdbThroughExe : public AdbCommand {
 
 public:
     using ResultCallback = AdbInterface::ResultCallback;
+    ~AdbThroughExe() {
+        if (VERBOSE_CHECK(adb)) {
+            for (auto cmd : mCommand) {
+                printf("%s ", cmd.c_str());
+            }
+            printf(" in %" PRId64 " usec\n",
+                   System::get()->getUnixTimeUs() - mStart);
+        }
+    }
 
     // Returns true if the command is currently in the process of execution.
     bool inFlight() const override { return static_cast<bool>(mTask); }
@@ -117,6 +128,7 @@ private:
     ResultCallback mResultCallback;
     std::string mOutputFilePath;
     std::vector<std::string> mCommand;
+    long mStart;
     bool mWantOutput;
     bool mCancelled = false;
     bool mFinished = false;
@@ -144,7 +156,12 @@ public:
         }
     }
 
-    ~AdbDirect() {  }
+    ~AdbDirect() {
+        if (VERBOSE_CHECK(adb)) {
+            printf("%s in %" PRId64 " usec\n", mCmd.c_str(),
+                   System::get()->getUnixTimeUs() - mStart);
+        }
+    }
     // Returns true if the command is currently in the process of execution.
     bool inFlight() const override { return mRunning; }
 
@@ -153,14 +170,16 @@ public:
 
     void start(int timeout_ms = 1000) override {
         mTimeout = System::get()->getUnixTimeUs() + timeout_ms * 1000;
+        mStart = System::get()->getUnixTimeUs();
         auto shared = shared_from_this();
-        std::thread t([this, shared]() { execute(); });
+        std::thread t([this, timeout_ms, shared]() { execute(timeout_ms); });
         t.detach();
     }
 
 private:
-    void execute() {
-        AdbShellStream shell(mCmd);
+    void execute(int timeout_ms) {
+        auto connection = AdbConnection::connection(timeout_ms);
+        AdbShellStream shell(mCmd, connection);
         auto output =
                 std::unique_ptr<std::stringstream>(new std::stringstream());
         std::vector<char> sout;
@@ -174,9 +193,11 @@ private:
             }
         }
 
-        if (mResultCallback && System::get()->getUnixTimeUs() < mTimeout) {
+        if (mResultCallback) {
             OptionalAdbCommandResult result;
-            result.emplace(exitcode, output.release());
+            if (System::get()->getUnixTimeUs() < mTimeout) {
+                result.emplace(exitcode, output.release());
+            }
             mResultCallback(result);
         }
         mRunning = false;
@@ -186,6 +207,7 @@ private:
     bool mWantOutput{false};
     bool mRunning{true};
     std::string mCmd;
+    long mStart;
     ResultCallback mResultCallback;
     AdbCommandPtr mSelf;
 };
@@ -297,7 +319,6 @@ static constexpr int SUBSEQUENT_ADB_RETRY_LIMIT =
 // and move on.
 static void adbResultHandler(const OptionalAdbCommandResult& result) {
     AutoLock lock(sStatics->adbLock);
-
     if (--(sStatics->retryCountdown) <= 0 ||
         (result && (result->exit_code == 0))) {
         // Either this command was successful or we are
@@ -462,8 +483,8 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         System::Duration timeout_ms,
         bool want_output) {
     AdbCommandPtr command;
-    if (android_cmdLineOptions && android_cmdLineOptions->direct_adb &&
-        (args[0] == "shell" || args[0] ==  "logcat")) {
+    if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) && AdbConnection::failed() &&
+        (args[0] == "shell" || args[0] == "logcat")) {
         command = std::shared_ptr<AdbDirect>(
                 new AdbDirect(args, std::move(result_callback), want_output));
     } else {
@@ -563,6 +584,7 @@ void AdbThroughExe::start(int checkTimeoutMs) {
                 },
                 checkTimeoutMs));
         mTask->start();
+        mStart = System::get()->getUnixTimeUs();
     }
 }
 

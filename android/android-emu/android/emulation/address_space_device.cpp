@@ -14,8 +14,11 @@
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/AddressSpaceService.h"
 #include "android/emulation/address_space_graphics.h"
+#ifndef AEMU_MIN
 #include "android/emulation/address_space_host_media.h"
+#endif
 #include "android/emulation/address_space_host_memory_allocator.h"
+#include "android/emulation/address_space_shared_slots_host_memory_allocator.h"
 #include "android/emulation/control/vm_operations.h"
 
 #include "android/base/memory/LazyInstance.h"
@@ -105,7 +108,8 @@ public:
             const AddressSpaceDeviceType device_type =
                 static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
 
-            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr);
+            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr, false);
+            pingInfo->metadata = contextDesc.device_context ? 0 : -1;
         }
     }
 
@@ -118,6 +122,8 @@ public:
     }
 
     void save(Stream* stream) const {
+        AddressSpaceSharedSlotsHostMemoryAllocatorContext::globalStateSave(stream);
+
         stream->putBe32(mHandleIndex);
         stream->putBe32(mContexts.size());
 
@@ -144,6 +150,13 @@ public:
         // this can be done while an emulator is running
         clear();
 
+        if (!AddressSpaceSharedSlotsHostMemoryAllocatorContext::globalStateLoad(
+                stream,
+                get_address_space_device_control_ops(),
+                get_address_space_device_hw_funcs())) {
+            return false;
+        }
+
         const uint32_t handleIndex = stream->getBe32();
         const size_t size = stream->getBe32();
 
@@ -160,7 +173,7 @@ public:
             case 1: {
                     const auto device_type =
                         static_cast<AddressSpaceDeviceType>(stream->getBe32());
-                    context = buildAddressSpaceDeviceContext(device_type, pingInfoGpa);
+                    context = buildAddressSpaceDeviceContext(device_type, pingInfoGpa, true);
                     if (!context || !context->load(stream)) {
                         return false;
                     }
@@ -190,6 +203,7 @@ public:
     void clear() {
         AutoLock lock(mContextsLock);
         mContexts.clear();
+        AddressSpaceSharedSlotsHostMemoryAllocatorContext::globalStateClear();
         auto it = mMemoryMappings.begin();
         std::vector<std::pair<uint64_t, uint64_t>> gpasSizesToErase;
         for (auto it: mMemoryMappings) {
@@ -226,16 +240,19 @@ private:
 
     std::unique_ptr<AddressSpaceDeviceContext>
     buildAddressSpaceDeviceContext(const AddressSpaceDeviceType device_type,
-                                   const uint64_t phys_addr) {
+                                   const uint64_t phys_addr,
+                                   bool fromSnapshot) {
         typedef std::unique_ptr<AddressSpaceDeviceContext> DeviceContextPtr;
 
         switch (device_type) {
         case AddressSpaceDeviceType::Graphics:
             asg::AddressSpaceGraphicsContext::init(get_address_space_device_control_ops());
             return DeviceContextPtr(new asg::AddressSpaceGraphicsContext());
+#ifndef AEMU_MIN
         case AddressSpaceDeviceType::Media:
             AS_DEVICE_DPRINT("allocating media context");
-            return DeviceContextPtr(new AddressSpaceHostMediaContext(phys_addr, get_address_space_device_control_ops()));
+            return DeviceContextPtr(new AddressSpaceHostMediaContext(phys_addr, get_address_space_device_control_ops(), fromSnapshot));
+#endif
         case AddressSpaceDeviceType::Sensors:
             return nullptr;
         case AddressSpaceDeviceType::Power:
@@ -245,6 +262,10 @@ private:
         case AddressSpaceDeviceType::HostMemoryAllocator:
             return DeviceContextPtr(new AddressSpaceHostMemoryAllocatorContext(
                 get_address_space_device_control_ops()));
+        case AddressSpaceDeviceType::SharedSlotsHostMemoryAllocator:
+            return DeviceContextPtr(new AddressSpaceSharedSlotsHostMemoryAllocatorContext(
+                get_address_space_device_control_ops(),
+                get_address_space_device_hw_funcs()));
 
         default:
             AS_DEVICE_DPRINT("Bad device type");
@@ -279,23 +300,19 @@ private:
     }
 
     void *getHostPtrLocked(uint64_t gpa) const {
-        auto i = mMemoryMappings.lower_bound(gpa);
-        if (i == mMemoryMappings.end()) {
-            return nullptr;
-        } else if (i->first == gpa) {
+        auto i = mMemoryMappings.lower_bound(gpa); // i->first >= gpa (or i==end)
+        if ((i != mMemoryMappings.end()) && (i->first == gpa)) {
             return i->second.first;  // gpa is exactly the beginning of the range
         } else if (i == mMemoryMappings.begin()) {
-            return nullptr;
+            return nullptr;  // can't '--i', see below
         } else {
-            // gpa points into the range or between ranges, `i` points to the next range
-            --i;  // go the previous range
-            if (i == mMemoryMappings.begin()) {
-                return nullptr;  // there is no previous range
-            } else if ((i->first + i->second.second) > gpa) {
+            --i;
+
+            if ((i->first + i->second.second) > gpa) {
                 // move the host ptr by +(gpa-base)
                 return static_cast<char *>(i->second.first) + (gpa - i->first);
             } else {
-                return nullptr;  // the previous range does not cover gpa
+                return nullptr;  // the range does not cover gpa
             }
         }
     }

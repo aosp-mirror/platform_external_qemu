@@ -883,6 +883,11 @@ bool runstate_check(RunState state)
     return current_run_state == state;
 }
 
+RunState get_runstate()
+{
+    return current_run_state;
+}
+
 bool runstate_store(char *str, size_t size)
 {
     const char *state = RunState_str(current_run_state);
@@ -5447,12 +5452,33 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         android_emulator_set_base_port(android_base_port);
 
         {
-            // Now that we know the serial number we can set it as the MAC prefix
-            // for wifi. This keeps the MAC addresses unique across several
-            // emulators that may have connected WiFi networks.
-            char* combined = g_strdup_printf("%s mac80211_hwsim.mac_prefix=%d",
-                                             current_machine->kernel_cmdline,
-                                             android_serial_number_port);
+            char* combined;
+
+            if (feature_is_enabled(kFeature_Mac80211hwsimUserspaceManaged)) {
+                char wifi_mac_prefix_str[8];
+
+                // With Mac80211hwsimUserspaceManaged enabled we don't want
+                // kernel to create default radios for us, userspace will create
+                // them.
+                combined = g_strdup_printf("%s mac80211_hwsim.radios=0",
+                                           current_machine->kernel_cmdline);
+
+                snprintf(wifi_mac_prefix_str, sizeof(wifi_mac_prefix_str),
+                         "%d", android_serial_number_port);
+
+                // Userspace will use wifi_mac_prefix to generate MAC addresses
+                // for wifi radios.
+                boot_property_add("net.wifi_mac_prefix", wifi_mac_prefix_str);
+            } else {
+                // Now that we know the serial number we can set it as the MAC prefix
+                // for wifi. This keeps the MAC addresses unique across several
+                // emulators that may have connected WiFi networks.
+
+                combined = g_strdup_printf("%s mac80211_hwsim.mac_prefix=%d",
+                                           current_machine->kernel_cmdline,
+                                           android_serial_number_port);
+            }
+
             g_free(current_machine->kernel_cmdline);
             current_machine->kernel_cmdline = combined;
         }

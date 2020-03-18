@@ -57,6 +57,13 @@ zip_sets = {
         "sdk-repo-{target}-emulator-{sdk_build_number}.zip": [
             ("{build_dir}/distribution", r".*", "/")
         ],
+        # crosvm/gfxstream build
+        "sdk-repo-{target}-crosvm-host-package-x86_64-{sdk_build_number}.zip": [
+            ("{build_dir}/distribution/cf-host-package/x86_64-linux-gnu", r".*", "/")
+        ],
+        "sdk-repo-{target}-crosvm-host-package-aarch64-{sdk_build_number}.zip": [
+            ("{build_dir}/distribution/cf-host-package/aarch64-linux-gnu", r".*", "/")
+        ],
     },
 }
 

@@ -105,30 +105,30 @@ class SnapshotService(object):
                         t.update(len(chunk))
                         yield SnapshotPackage(payload=chunk)
 
-        return self._exec_unary_grpc("pushSnapshot", push_snap_iterator(src))
+        return self._exec_unary_grpc("PushSnapshot", push_snap_iterator(src))
 
     def info(self, snap_id):
         """Lists all available snapshots."""
         self.logger.debug("Retrieving snapshots")
-        response = self.stub.listSnapshots(_EMPTY_)
+        response = self.stub.ListSnapshots(_EMPTY_)
         self.logger.debug("Response %s", response)
         return next((f for f in response.snapshots if f.snapshot_id == snap_id), None,)
 
     def lists(self):
         """Lists all available snapshots."""
         self.logger.debug("Retrieving snapshots")
-        response = self.stub.listSnapshots(_EMPTY_)
+        response = self.stub.ListSnapshots(_EMPTY_)
         self.logger.debug("Response %s", response)
         return [f.snapshot_id for f in response.snapshots]
 
     def load(self, snap_id):
         """Loads a snapshot inside the emulator."""
-        return self._exec_unary_grpc("loadSnapshot", SnapshotPackage(snapshot_id=snap_id))
+        return self._exec_unary_grpc("LoadSnapshot", SnapshotPackage(snapshot_id=snap_id))
 
     def save(self, snap_id):
         """Saves a snapshot inside the emulator."""
-        return self._exec_unary_grpc("saveSnapshot", SnapshotPackage(snapshot_id=snap_id))
+        return self._exec_unary_grpc("SaveSnapshot", SnapshotPackage(snapshot_id=snap_id))
 
     def delete(self, snap_id):
         """Deletes the given snapshot from the emulator."""
-        return self._exec_unary_grpc("deleteSnapshot", SnapshotPackage(snapshot_id=snap_id))
+        return self._exec_unary_grpc("DeleteSnapshot", SnapshotPackage(snapshot_id=snap_id))

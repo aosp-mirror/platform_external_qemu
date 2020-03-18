@@ -74,21 +74,27 @@ service EmulatorController {
 
   // Gets an individual screenshot in the desired format.
   //
-  // The image will be scaled to the desired ImageFormat, while maintaining the
-  // aspect ratio. The returned image will never exceed the provided width and
-  // height. Not setting the width or height (i.e. they are 0) will result in
-  // using the device width and height.
+  // The image will be scaled to the desired ImageFormat, while maintaining
+  // the aspect ratio. The returned image will never exceed the provided width
+  // and height. Not setting the width or height (i.e. they are 0) will result
+  // in using the device width and height.
   //
-  // The resulting image will be properly oriented and can be displayed directly
-  // without post processing. For example, if the device has a 1080x1920 screen
-  // and is in landscape mode and called with no width or height parameter, it
-  // will return an 1920x1080 image.
+  // The resulting image will be properly oriented and can be displayed
+  // directly without post processing. For example, if the device has a
+  // 1080x1920 screen and is in landscape mode and called with no width or
+  // height parameter, it will return an 1920x1080 image.
+  //
+  // This method will return an empty image if the display is not visible.
   rpc getScreenshot(ImageFormat) returns (Image) {}
 
   // Streams a series of screenshots in the desired format.
   // A new frame will be delivered whenever the device produces a new frame.
-  // (Beware that this can produce a significant amout of data, and that
+  // (Beware that this can produce a significant amount of data, and that
   // certain translations are (png transform) can be costly).
+  //
+  // If the requested display is not visible it will send a single empty image
+  // and wait start producing images once the display becomes active, again
+  // producing a single empty image when the display becomes inactive.
   rpc streamScreenshot(ImageFormat) returns (stream Image) {}
 
   // Returns the last 128Kb of logcat output from the emulator
@@ -102,10 +108,18 @@ service EmulatorController {
   // it is possible that the logcat buffer gets overwritten, or falls behind.
   rpc streamLogcat(LogMessage) returns (stream LogMessage) {}
 
+  // Transition the virtual machine to the desired state. Note that
+  // some states are only observable. For example you cannot transition
+  // to the error state.
+  rpc setVmState(VmRunState) returns (google.protobuf.Empty) {}
+
+  // Gets the state of the virtual machine.
+  rpc getVmState(google.protobuf.Empty) returns (VmRunState) {}
+
   // The following endpoints are needed to establish the webrtc protocol
   // Due to limitiations in Javascript we cannot make use of bidirectional
   // endpoints See this [blog](https://grpc.io/blog/state-of-grpc-web) for
-  // details. TODO(jansene): We should move this to a seperate service.
+  // details. TODO(jansene): We should move this to a separate service.
 
   // This function will generate a new identifier that the client
   // should use for further interaction. It will initiate the
@@ -125,16 +139,48 @@ service EmulatorController {
   rpc receiveJsepMessage(RtcId) returns (JsepMsg) {}
 }
 
-message ParameterValue {
-  repeated float data = 1 [packed = true];
+// A Run State that describes the state of the Virtual Machine.
+message VmRunState {
+  enum RunState {
+    // The emulator is in an unknown state. You cannot transition to this state.
+    UNKNOWN = 0;
+    // Guest is actively running. You can transition to this state from the
+    // paused state.
+    RUNNING = 1;
+    // Guest is paused to load a snapshot. You cannot transition to this state.
+    RESTORE_VM = 2;
+    // Guest has been paused. Transitioning to this state will pause the
+    // emulator the guest will not be consuming any cpu cycles.
+    PAUSED = 3;
+    // Guest is paused to take or export a snapshot. You cannot
+    // transition to this state.
+    SAVE_VM = 4;
+    // System shutdown, note that it is similar to power off. It tries to set
+    // the system status and notify guest. The system is likely going to
+    // disappear soon and do proper cleanup of resources, possibly taking
+    // a snapshot. This is the same behavior as closing the emulator by clicking
+    // the X (close) in the user interface.
+    SHUTDOWN = 5;
+    // Immediately terminate the emulator. No resource cleanup will take place.
+    // There is a good change to corrupt the system.
+    TERMINATE = 7;
+    // Will cause the emulator to reset. This is not a state you can observe.
+    RESET = 9;
+    // Guest experienced some error state, you cannot transition to this state.
+    INTERNAL_ERROR = 10;
+  }
+
+  RunState state = 1;
 }
+
+message ParameterValue { repeated float data = 1 [ packed = true ]; }
 
 message PhysicalModelValue {
   enum State {
     OK = 0;
-    NO_SERVICE = -3;  // qemud service is not available/initiated.
-    DISABLED = -2;    // Sensor is disabled.
-    UNKNOWN = -1;     // Unknown sensor (should not happen)
+    NO_SERVICE = -3; // qemud service is not available/initiated.
+    DISABLED = -2;   // Sensor is disabled.
+    UNKNOWN = -1;    // Unknown sensor (should not happen)
   }
 
   // Details on the sensors documentation can be found here:
@@ -179,9 +225,9 @@ message PhysicalModelValue {
 message SensorValue {
   enum State {
     OK = 0;
-    NO_SERVICE = -3;  // qemud service is not available/initiated.
-    DISABLED = -2;    // Sensor is disabled.
-    UNKNOWN = -1;     // Unknown sensor (should not happen)
+    NO_SERVICE = -3; // qemud service is not available/initiated.
+    DISABLED = -2;   // Sensor is disabled.
+    UNKNOWN = -1;    // Unknown sensor (should not happen)
   }
 
   // These are the various sensors that can be available in an emulated
@@ -222,7 +268,8 @@ message SensorValue {
   // [Output Only]
   State status = 2;
 
-  // Value interpretation depends on sensor enum, will contain at most 3 values.
+  // Value interpretation depends on sensor enum, will contain at most 3
+  // values.
   ParameterValue value = 3;
 }
 
@@ -420,6 +467,9 @@ message TouchEvent {
 
   // The display device where the touch event occurred.
   // Omitting or using the value 0 indicates the main display.
+  //
+  // Touch events cannot be send to devices other than 0, due to
+  // https://issuetracker.google.com/issues/150699691
   int32 device = 2;
 }
 
@@ -458,7 +508,7 @@ message KeyboardEvent {
   // will do its best to translate the code to an evdev value that
   // will be send to the emulator. This translation is based on
   // the chromium translation tables. See
-  // https://chromium.googlesource.com/chromium/src/+/lkgr/ui/events/keycodes/dom/keycode_converter_data.inc
+  // (this)[https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-grpc/android/emulation/control/keyboard/keycode_converter_data.inc]
   // for details on the translation.
   enum KeyCodeType {
     Usb = 0;
@@ -507,17 +557,23 @@ message KeyboardEvent {
   // You can find an accurate description of valid values
   // (here)[https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values]
   //
-  // Note that some keys can result in multiple evdev events that are delivered to the emulator.
-  // for example the Key "A" will result in a a sequence ["Shift", "a"] -> [0x2a, 0x1e]
-  // whereas "a" results in ["a"] -> [0x1e].
+  // Note that some keys can result in multiple evdev events that are
+  // delivered to the emulator. for example the Key "A" will result in a
+  // sequence:
+  // ["Shift", "a"] -> [0x2a, 0x1e] whereas "a" results in ["a"] -> [0x1e].
+  //
+  // Not all documented keys are understood by android, and only printable
+  // ASCII [32-127) characters are properly translated.
   string key = 4;
 
-  // Series of utf8 encoded characters to send to the emulator. Every
-  // character will be translated to an EvDev event type and send to the
-  // emulator as a keypress event. The values in keyCode, eventType,
-  // codeType and key will be ignored.
+  // Series of utf8 encoded characters to send to the emulator. An attempt
+  // will be made to translate every character will an EvDev event type and
+  // send to the emulator as a keypress event. The values in keyCode,
+  // eventType, codeType and key will be ignored.
   //
-  // Note that most printable utf-8 characters can be send individually with the "key" param.
+  // Note that most printable ASCII characters (range [32-127) can be send
+  // individually with the "key" param. Do not expect arbitrary UTF symbols to
+  // arrive in the emulator (most will be ignored).
   string text = 5;
 }
 
@@ -622,27 +678,38 @@ message ImageFormat {
   // Omitting this value (or passing in 0) will result in no scaling,
   // and the height of the actual device will be used.
   uint32 height = 4;
+
+  // The (desired) display id of the device. Setting this to 0 (or omitting)
+  // indicates the main display.
+  uint32 display = 5;
 }
 
 message Image {
   ImageFormat format = 1;
 
-  uint32 width = 2 [deprecated = true];   // width is contained in format.
-  uint32 height = 3 [deprecated = true];  // height is contained in format.
+  uint32 width = 2 [ deprecated = true ];  // width is contained in format.
+  uint32 height = 3 [ deprecated = true ]; // height is contained in format.
 
   // The organization of the pixels in the image buffer is from left to
   // right and bottom up.
   bytes image = 4;
+
+  // [Output Only] Monotonically increasing sequence number in a stream of
+  // screenshots. The first screenshot will have a sequence of 0. A single
+  // screenshot will always have a sequence number of 0. The sequence is not
+  // necessarily contiguous, and can be used to detect how many frames were
+  // dropped. An example sequence could be: [0, 3, 5, 7, 9, 11].
+  uint32 seq = 5;
 }
 
 message Rotation {
   enum SkinRotation {
-    PORTRAIT = 0;           // 0 degrees
-    REVERSE_LANDSCAPE = 1;  // -90 degrees
-    REVERSE_PORTRAIT = 2;   // -180 degrees
-    LANDSCAPE = 3;          // 90 degrees
+    PORTRAIT = 0;          // 0 degrees
+    LANDSCAPE = 1;         // 90 degrees
+    REVERSE_PORTRAIT = 2;  // -180 degrees
+    REVERSE_LANDSCAPE = 3; // -90 degrees
   }
-  SkinRotation rotation = 1;  // Can be inferred from z-axis as well.
+  SkinRotation rotation = 1; // Can be inferred from z-axis as well.
 
   // Specifies the angle of rotation, in degrees [-180, 180]
   double xAxis = 2;
@@ -667,11 +734,11 @@ message PhoneCall {
 message PhoneResponse {
   enum Response {
     OK = 0;
-    BadOperation = 1;   // Enum out of range
-    BadNumber = 2;      // Mal-formed telephone number
-    InvalidAction = 3;  // E.g., disconnect when no call is in progress
-    ActionFailed = 4;   // Internal error
-    RadioOff = 5;       // Radio power off
+    BadOperation = 1;  // Enum out of range
+    BadNumber = 2;     // Mal-formed telephone number
+    InvalidAction = 3; // E.g., disconnect when no call is in progress
+    ActionFailed = 4;  // Internal error
+    RadioOff = 5;      // Radio power off
   }
   Response response = 1;
 }
@@ -681,9 +748,7 @@ message Entry {
   string value = 2;
 }
 
-message EntryList {
-  repeated Entry entry = 1;
-}
+message EntryList { repeated Entry entry = 1; }
 
 message EmulatorStatus {
   // The emulator version string.

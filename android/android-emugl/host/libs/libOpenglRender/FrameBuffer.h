@@ -287,6 +287,7 @@ public:
     // |p_colorbuffer| is the ColorBuffer's handle value.
     // Returns true on success, false on failure.
     bool  bindColorBufferToTexture(HandleType p_colorbuffer);
+    bool  bindColorBufferToTexture2(HandleType p_colorbuffer);
 
     // Bind the current context's EGL_RENDERBUFFER_OES render buffer to this
     // ColorBuffer's EGLImage. This is intended to implement
@@ -319,6 +320,28 @@ public:
     void  readColorBufferYUV(HandleType p_colorbuffer,
                              int x, int y, int width, int height,
                              void *pixels, uint32_t pixels_size);
+
+    // create a Y texture and a UV texture with width and height, the created
+    // texture ids are stored in textures respectively
+    void createYUVTextures(uint32_t type,
+                           uint32_t count,
+                           int width,
+                           int height,
+                           uint32_t* output);
+    void destroyYUVTextures(uint32_t type, uint32_t count, uint32_t* textures);
+    void updateYUVTextures(uint32_t type,
+                           uint32_t* textures,
+                           void* privData,
+                           void* func);
+    void swapTexturesAndUpdateColorBuffer(uint32_t colorbufferhandle,
+                                          int x,
+                                          int y,
+                                          int width,
+                                          int height,
+                                          uint32_t format,
+                                          uint32_t type,
+                                          uint32_t texture_type,
+                                          uint32_t* textures);
 
     // Update the content of a given ColorBuffer from client data.
     // |p_colorbuffer| is the ColorBuffer's handle value. Similar
@@ -539,6 +562,9 @@ public:
     bool tryLockMultiDisplayOnLoad(void);
     void unlockMultiDisplayOnLoad(void);
 
+    EGLContext getGlobalEGLContext() { return m_pbufContext; }
+    HandleType getLastPostedColorBuffer() { return m_lastPostedColorBuffer; }
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -697,7 +723,8 @@ private:
         Viewport = 1,
         Compose = 2,
         Clear = 3,
-        Exit = 4,
+        Screenshot = 4,
+        Exit = 5,
     };
 
     struct Post {
@@ -709,6 +736,15 @@ private:
                 int height;
             } viewport;
             ComposeDevice* d;
+            struct {
+                ColorBuffer* cb;
+                int screenwidth;
+                int screenheight;
+                GLenum format;
+                GLenum type;
+                SkinRotation rotation;
+                void* pixels;
+            } screenshot;
         };
     };
 

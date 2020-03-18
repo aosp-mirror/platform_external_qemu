@@ -43,6 +43,7 @@
 #include "android/filesystems/ext4_utils.h"
 #include "android/globals.h"
 #include "android/help.h"
+#include "android/hw-sensors.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/main-common-ui.h"
 #include "android/main-common.h"
@@ -289,6 +290,28 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
     return 0;
 }
 
+static void prepareDisplaySettingXml(AndroidHwConfig* hw,
+                               const char* destDirectory) {
+    if(!strcmp(hw->display_settings_xml, "")){
+        return;
+    }
+    static const int kDirFilePerm = 02750;
+    std::string guestXmlDir = PathUtils::join(destDirectory, "system");
+    std::string guestXmlPath = PathUtils::join(guestXmlDir, "display_settings.xml");
+    std::string guestDisplaySettingXmlFile = "display_settings_" +
+                                             std::string(hw->display_settings_xml) +
+                                             ".xml";
+    std::string guestDisplaySettingXmlPath = PathUtils::join(guestXmlDir,
+                                                             guestDisplaySettingXmlFile);
+    if (!path_exists(guestDisplaySettingXmlPath.c_str())) {
+        dwarning("Could not locate display settings file: %s\n",
+                 guestDisplaySettingXmlPath.c_str());
+        return;
+    }
+    path_mkdir_if_needed(guestXmlDir.c_str(), kDirFilePerm);
+    path_copy_file(guestXmlPath.c_str(), guestDisplaySettingXmlPath.c_str());
+    android_chmod(guestXmlPath.c_str(), 0640);
+}
 
 static void prepareDataFolder(const char* destDirectory,
                               const char* srcDirectory) {
@@ -355,6 +378,8 @@ static int createUserData(AvdInfo* avd,
     if (path_exists(initDir.get())) {
         D("Creating ext4 userdata partition: %s", dataPath);
         prepareDataFolder(dataPath, initDir.get());
+        prepareDisplaySettingXml(hw, dataPath);
+
         needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
         path_delete_dir(dataPath);
     }
@@ -876,6 +901,8 @@ static int startEmulatorWithMinConfig(
             printf("emulator: argv[%02d] = \"%s\"\n", i, argv[i]);
         }
     }
+
+    android_foldable_initialize(nullptr);
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
                              argv);
@@ -1763,6 +1790,8 @@ extern "C" int main(int argc, char** argv) {
     }
 
     gQAndroidLocationAgent->gpsSetPassiveUpdate(!opts->no_passive_gps);
+
+    android_foldable_initialize(nullptr);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.

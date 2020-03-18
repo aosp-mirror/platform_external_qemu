@@ -13,6 +13,8 @@
 
 #include <stdint.h>  // for uint8_t, uint32_t
 #include <string>    // for string
+#include <openssl/rsa.h>
+
 
 // Size of an RSA modulus such as an encrypted block or a signature.
 constexpr const int ANDROID_PUBKEY_MODULUS_SIZE = 2048 / 8;
@@ -42,5 +44,15 @@ bool adb_auth_keygen(const char* filename);
 // |path| Path to the adb private key.
 // |out| string receiving the public key.
 bool pubkey_from_privkey(const std::string& path, std::string* out);
-bool sign_auth_token(const uint8_t* token, int token_size, uint8_t* sig, int& siglen);
 
+
+/* Encodes |key| in the Android RSA public key binary format and stores the
+ * bytes in |key_buffer|. |key_buffer| should be of size at least
+ * |ANDROID_PUBKEY_ENCODED_SIZE|.
+ *
+ * Returns true if successful, false on error.
+ */
+bool android_pubkey_encode(const RSA* key, uint8_t* key_buffer, size_t size);
+bool android_pubkey_decode(const uint8_t* key_buffer, size_t size, RSA** key);
+bool sign_auth_token(const uint8_t* token, int token_size, uint8_t* sig, int& siglen);
+bool calculate_public_key(std::string* out, RSA* private_key);

@@ -120,6 +120,14 @@ public:
     // The AdbConnection will take ownership of the socket.
     // Note that this is not thread safe!
     static void setAdbSocket(AsyncSocketAdapter* socket);
+
+    // This will create and set the adb socket to the given port
+    // initializing it with its own socket. The thread looper associated
+    // with this thread will be used.
+    static void setAdbPort(int port);
+
+    // We cannot offer auth keys from different connections. b/150160590
+    static bool failed();
 };
 
 // Adb uses the shell protocol when making use of the shell service v2.

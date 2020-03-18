@@ -54,6 +54,10 @@ int slirp_add_hostfwd(Slirp *slirp, int is_udp,
                       struct in_addr guest_addr, int guest_port);
 int slirp_remove_hostfwd(Slirp *slirp, int is_udp,
                          struct in_addr host_addr, int host_port);
+int slirp_add_ipv6_hostfwd(Slirp *slirp, int is_udp,
+                           struct in6_addr host_addr, int host_port,
+                           struct in6_addr guest_addr, int guest_port);
+int slirp_remove_ipv6_hostfwd(Slirp *slirp, int is_udp, struct in6_addr host_addr, int host_port);
 int slirp_add_exec(Slirp *slirp, int do_pty, const void *args,
                    struct in_addr *guest_addr, int guest_port);
 

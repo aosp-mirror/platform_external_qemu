@@ -215,11 +215,50 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
 }
 
 void MediaH264DecoderDefault::save(base::Stream* stream) const {
-    // NOT IMPLEMENTED
+    stream->putBe64(mId);
+    int size = mDecoders.size();
+    stream->putBe32(size);
+    for (auto item : mDecoders) {
+        stream->putBe64(item.first);
+        stream->putBe32(item.second->type());
+        item.second->save(stream);
+    }
 }
 
 bool MediaH264DecoderDefault::load(base::Stream* stream) {
-    // NOT IMPLEMENTED
+    mId = stream->getBe64();
+    int size = stream->getBe32();
+    for (int i = 0; i < size; ++i) {
+        // this is hacky; but we have to know the plugin type
+        uint64_t id = stream->getBe64();
+        int type = stream->getBe32();
+        if (type == MediaH264DecoderPlugin::PLUGIN_TYPE_FFMPEG) {  // ffmpeg
+            MediaH264DecoderFfmpeg* decoder =
+                    new MediaH264DecoderFfmpeg(id, H264PingInfoParser(100));
+            decoder->load(stream);
+            mDecoders[id] = decoder;
+            continue;
+        }
+#ifdef __APPLE__
+        if (type == MediaH264DecoderPlugin::PLUGIN_TYPE_VIDEO_TOOL_BOX_PROXY) {
+            MediaH264DecoderVideoToolBoxProxy* decoder =
+                    new MediaH264DecoderVideoToolBoxProxy(id, H264PingInfoParser(100));
+            decoder->load(stream);
+            mDecoders[id] = decoder;
+            continue;
+        }
+#else
+        if (type == MediaH264DecoderPlugin::PLUGIN_TYPE_CUVID) {
+            MediaH264DecoderCuvid* decoder =
+                    new MediaH264DecoderCuvid(id, H264PingInfoParser(100));
+            decoder->load(stream);
+            mDecoders[id] = decoder;
+            continue;
+        }
+#endif
+        fprintf(stderr, "Error, un-implemented %s %d\n", __func__, __LINE__);
+        exit(1);
+    }
     return true;
 }
 

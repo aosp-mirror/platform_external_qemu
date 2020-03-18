@@ -34,6 +34,7 @@
 #include "android/emulation/apacket_utils.h"
 #include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/globals.h"
 #include "android/jdwp/Jdwp.h"
 #include "android/snapshot/interface.h"
 
@@ -400,6 +401,15 @@ bool track(int pid, const std::string snapshot_name) {
         _RECV_PACKET(packet);   \
         _SEND_PACKET(ok_out);   \
     }
+#define _RECV_REPLY_PACKET_OK(packet, _id)                    \
+    {                                                         \
+        JdwpCommandHeader jdwp_reply_header;                  \
+        do {                                                  \
+            _RECV_PACKET_OK(packet);                          \
+            jdwp_reply_header.parseFrom(packet.data.data());  \
+        } while (jdwp_reply_header.flags != kJdwpReplyFlag || \
+                 jdwp_reply_header.id != _id);                \
+    }
 
     apacket packet_out;
     packet_out.mesg.command = ADB_WRTE;
@@ -442,7 +452,7 @@ bool track(int pid, const std::string snapshot_name) {
         jdwp_query.writeToBuffer(packet_out.data.data());
         _SEND_PACKET_OK(packet_out);
         D("ID size query OK");
-        _RECV_PACKET_OK(reply);
+        _RECV_REPLY_PACKET_OK(reply, jdwp_query.id);
         id_size.parseFrom(reply.data.data() + 11);
         D("ID sizes: field %d method %d obj %d ref %d frame %d",
             id_size.field_id_size,
@@ -450,22 +460,40 @@ bool track(int pid, const std::string snapshot_name) {
             id_size.object_id_size,
             id_size.reference_typ_id_size,
             id_size.frame_id_size);
+#if DEBUG >= 1
+        // Check suspecious values
+        if (reply.data[8] != kJdwpReplyFlag ||  // reply flag not set
+            reply.data[9] || reply.data[10] ||  // error flag not zero
+            (id_size.field_id_size != 4 && id_size.field_id_size != 8)) {
+            D("WARNING: abnormal ID size reply message.");
+            D("Reply flag 0x%x, error 0x%02x%02x", reply.data[8], reply.data[9],
+              reply.data[10]);
+            D("Whole message:");
+            for (size_t i = 0; i < reply.data.size(); i++) {
+                fprintf(stderr, "%02x", reply.data[i]);
+            }
+            fprintf(stderr, "\n");
+        }
+#endif
 
         // Version
         jdwp_query.command = VirtualMachineCommand::Version;
+        jdwp_query.id = jdwp_id++;
         jdwp_query.writeToBuffer(packet_out.data.data());
         _SEND_PACKET_OK(packet_out);
-        _RECV_PACKET_OK(reply);
+        _RECV_REPLY_PACKET_OK(reply, jdwp_query.id);
 
         // Capatibility
         jdwp_query.command = VirtualMachineCommand::Capabilities;
+        jdwp_query.id = jdwp_id++;
         jdwp_query.writeToBuffer(packet_out.data.data());
         _SEND_PACKET_OK(packet_out);
-        _RECV_PACKET_OK(reply);
+        _RECV_REPLY_PACKET_OK(reply, jdwp_query.id);
 
         // Class by signature
         {
             jdwp_query.command = VirtualMachineCommand::ClassBySignature;
+            jdwp_query.id = jdwp_id++;
             jdwp_query.length = 11 + 4 + strlen(kExceptionClass);
             packet_out.mesg.data_length = jdwp_query.length;
             packet_out.data.resize(packet_out.mesg.data_length);
@@ -476,7 +504,7 @@ bool track(int pid, const std::string snapshot_name) {
             packet_out.data.resize(packet_out.mesg.data_length);
             jdwp_query.writeToBuffer(packet_out.data.data());
             _SEND_PACKET_OK(packet_out);
-            _RECV_PACKET_OK(reply);
+            _RECV_REPLY_PACKET_OK(reply, jdwp_query.id);
             uint8_t* data_ptr = reply.data.data() + 11;
             exception_reference_type_ids.resize(uint32FromBuffer(data_ptr));
             data_ptr += 4;
@@ -494,12 +522,13 @@ bool track(int pid, const std::string snapshot_name) {
         {
             // Query all classes and validate exception class id
             jdwp_query.command = VirtualMachineCommand::AllClasses;
+            jdwp_query.id = jdwp_id++;
             jdwp_query.length = 11;
             packet_out.mesg.data_length = jdwp_query.length;
             packet_out.data.resize(packet_out.mesg.data_length);
             jdwp_query.writeToBuffer(packet_out.data.data());
             _SEND_PACKET_OK(packet_out);
-            _RECV_PACKET_OK(reply);
+            _RECV_REPLY_PACKET_OK(reply, jdwp_query.id);
             JdwpCommandHeader class_header;
             class_header.parseFrom(reply.data.data());
             std::vector<uint8_t> class_buffer(class_header.length);
@@ -561,7 +590,7 @@ bool track(int pid, const std::string snapshot_name) {
             packet_out.mesg.data_length = jdwp_header.length;
             packet_out.data.resize(packet_out.mesg.data_length);
             _SEND_PACKET_OK(packet_out);
-            _RECV_PACKET_OK(reply);
+            _RECV_REPLY_PACKET_OK(reply, jdwp_header.id);
         }
     }
     while (1) {
@@ -582,17 +611,23 @@ bool track(int pid, const std::string snapshot_name) {
             android::base::ThreadLooper::runOnMainLooper(
                     [&snapshot_done, &snapshot_signal, &snapshot_lock]() {
                         D("ready to take snapshot");
+                        gQAndroidVmOperations->vmStop();
                         const AndroidSnapshotStatus result =
                                 androidSnapshot_save("test_failure_snapshot");
-                        D("Snapshot done, result %d", result);
+                        D("Snapshot done, result %d (expect %d)", result,
+                                SNAPSHOT_STATUS_OK);
+                        gQAndroidVmOperations->vmStart();
                         snapshot_lock.lock();
                         snapshot_done = true;
                         snapshot_signal.broadcastAndUnlock(&snapshot_lock);
+                        D("Snapshot thread done");
                     });
+            D("Icebox thread waiting for snapshot");
             snapshot_lock.lock();
             snapshot_signal.wait(&snapshot_lock,
                                  [&snapshot_done]() { return snapshot_done; });
             snapshot_lock.unlock();
+            D("Icebox thread resume after snapshot");
             _SEND_PACKET(ok_out);
             // Resume and quit
             JdwpCommandHeader jdwp_command = {
@@ -606,13 +641,14 @@ bool track(int pid, const std::string snapshot_name) {
             packet_out.data.resize(packet_out.mesg.data_length);
             jdwp_command.writeToBuffer(packet_out.data.data());
             _SEND_PACKET_OK(packet_out);
-            _RECV_PACKET_OK(reply);
+            _RECV_REPLY_PACKET_OK(reply, jdwp_command.id);
             packet_out.mesg.command = ADB_CLSE;
             packet_out.mesg.data_length = 0;
             packet_out.data.resize(0);
             packet_out.mesg.magic = packet_out.mesg.command ^ 0xffffffff;
+            D("Icebox thread ready to close");
             _SEND_PACKET(packet_out);
-            //_RECV_PACKET(reply);
+            _RECV_PACKET(reply);
             return true;
         }
         _SEND_PACKET(ok_out);

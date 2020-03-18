@@ -474,6 +474,16 @@ void ColorBuffer::reformat(GLint internalformat, GLenum type) {
     m_numBytes = bpp * m_width * m_height;
 }
 
+void ColorBuffer::swapYUVTextures(uint32_t type, uint32_t* textures) {
+    if (type == FRAMEWORK_FORMAT_NV12) {
+        m_yuv_converter->swapTextures(type, textures);
+    } else {
+        fprintf(stderr,
+                "%s: ERROR: format other than NV12 is not supported: 0x%x\n",
+                __func__, type);
+    }
+}
+
 void ColorBuffer::subUpdate(int x,
                             int y,
                             int width,
@@ -516,9 +526,11 @@ void ColorBuffer::subUpdate(int x,
         uint32_t uvHeight = height / 2;
         uint32_t dataSize = yStride * height + 2 * (uvHeight * uvStride);
 
-        m_yuv_buf.clear();
-        uint8_t* data = (uint8_t*)pixels;
-        m_yuv_buf.insert(m_yuv_buf.begin(), data, data + dataSize);
+        if (pixels) {
+            m_yuv_buf.clear();
+            uint8_t* data = (uint8_t*)pixels;
+            m_yuv_buf.insert(m_yuv_buf.begin(), data, data + dataSize);
+        }
     } else {
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
         s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -754,6 +766,15 @@ bool ColorBuffer::bindToTexture() {
     } else {
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     }
+    return true;
+}
+
+bool ColorBuffer::bindToTexture2() {
+    if (!m_eglImage) {
+        return false;
+    }
+
+    s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     return true;
 }
 

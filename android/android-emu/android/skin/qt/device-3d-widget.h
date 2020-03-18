@@ -13,9 +13,11 @@
 #include <glm/gtc/quaternion.hpp>             // for tquat
 #include <qobjectdefs.h>                      // for Q_PROPERTY, Q_OBJECT
 #include <QString>                            // for QString
+#include <QTimer>                             // for QTimer
 
 #include "GLES3/gl3.h"                        // for GLuint
 #include "android/skin/qt/gl-widget.h"        // for GLWidget
+#include "android/hw-sensors.h"
 #include <glm/vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -31,7 +33,7 @@ struct QAndroidSensorsAgent;
 // The changes in rotation and position can be used to
 // derive the values which should be reported by the virtual accelerometer,
 // gyroscope, and magnetometer.
-class Accelerometer3DWidget : public GLWidget {
+class Device3DWidget : public GLWidget {
     Q_OBJECT
 
     Q_PROPERTY(glm::quat targetRotation READ targetRotation WRITE setTargetRotation NOTIFY targetRotationChanged USER true);
@@ -42,8 +44,8 @@ public:
         Move
     };
 
-     Accelerometer3DWidget(QWidget *parent = 0);
-    ~Accelerometer3DWidget();
+     Device3DWidget(QWidget *parent = 0);
+    ~Device3DWidget();
 
     void setSensorsAgent(const QAndroidSensorsAgent* agent);
 
@@ -70,6 +72,9 @@ public slots:
     // Sets the widget's operation mode which determines how it reacts
     // to mose dragging. It may either rotate the model or move it around.
     void setOperationMode(OperationMode mode) { mOperationMode = mode; }
+
+    // Slot for constant animation
+    void animate() { renderFrame(); }
 
 public:
     // Getters for the rotation quaternion and delta.
@@ -112,6 +117,12 @@ private:
     bool initProgram();
     bool initModel();
     bool initTextures();
+    void updateModelVertices(
+            const void* vertexData, size_t vertexDataBytes,
+            const void* indexData, size_t indexDataBytes);
+    std::pair<std::vector<float>, std::vector<uint32_t>>
+        generateModelVerticesFromFoldableState(
+            const FoldableState& state);
 
     // Returns the world coordinates of a point on the XY plane
     // that corresponds to the given point on the screen.
@@ -148,4 +159,10 @@ private:
     glm::vec3 mPrevDragOrigin;
     bool mTracking = false;
     OperationMode mOperationMode = OperationMode::Rotate;
+
+    QTimer mAnimationTimer;
+
+    bool mUseAbstractDevice = false;
+    struct FoldableState* mCurrentFoldableStatePtr;
+    struct FoldableState mCachedFoldableState;
 };

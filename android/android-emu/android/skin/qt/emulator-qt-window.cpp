@@ -2848,6 +2848,7 @@ void EmulatorQtWindow::setUIMultiDisplay(uint32_t id,
             runOnUiThread([this] {
                 mToolWindow->hideRotationButton(false);
             });
+            restoreSkin();
         }
     }
     SkinEvent* event = new SkinEvent();
@@ -2985,6 +2986,16 @@ void EmulatorQtWindow::setNoSkin() {
     if (skinDir != NULL) {
         SkinEvent* event = new SkinEvent();
         event->type = kEventSetNoSkin;
+        skin_event_add(event);
+    }
+}
+
+void EmulatorQtWindow::restoreSkin() {
+    char *skinName, *skinDir;
+    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    if (skinDir != NULL) {
+        SkinEvent* event = new SkinEvent();
+        event->type = kEventRestoreSkin;
         skin_event_add(event);
     }
 }

@@ -17,8 +17,6 @@
 #include "android/utils/compiler.h"
 #include "android/utils/looper.h"
 
-
-
 ANDROID_BEGIN_HEADER
 
 typedef void (*on_post_callback_t)(void*, int, int, const void*);
@@ -27,10 +25,9 @@ typedef void (*on_post_callback_t)(void*, int, int, const void*);
 // in the appropriate thread. |looper| is a Looper instance, |context| is an
 // opaque handle passed to |callback| at runtime, which is a function called
 // from the looper's thread whenever a new frame is available.
-void gpu_frame_set_post_callback(
-        Looper* looper,
-        void* context,
-        on_post_callback_t callback);
+void gpu_frame_set_post_callback(Looper* looper,
+                                 void* context,
+                                 on_post_callback_t callback);
 
 // Recording mode can only be enabled in host gpu mode. Any other configuration
 // will not work. Turning record mode on will initialize the gpu frame state for
@@ -44,12 +41,13 @@ bool gpu_frame_set_record_mode(bool on);
 // available.
 void* gpu_frame_get_record_frame();
 
-
 typedef void (*FrameAvailableCallback)(void* opaque);
 
 // Used by the VideoFrameSharer to obtain a new frame when one is available.
 // Do not do any expensive calculations on this callback, it should be as fast
 // as possible.
-void gpu_set_shared_memory_callback(FrameAvailableCallback frameAvailable, void* opaque);
+void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
+                                         void* opaque);
+void gpu_unregister_shared_memory_callback(void* opaque);
 
 ANDROID_END_HEADER

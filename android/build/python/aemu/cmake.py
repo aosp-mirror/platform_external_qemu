@@ -78,7 +78,11 @@ flags.DEFINE_boolean(
     'minbuild', False, 'Minimize the build to only support x86_64/aarch64.')
 
 flags.DEFINE_boolean(
-    'gfxstream', False, 'Build only gfxstream libs/tests.')
+    'gfxstream', False, 'Build gfxstream libs/tests and crosvm')
+flags.DEFINE_boolean(
+    'crosvm', False, 'Build crosvm')
+flags.DEFINE_boolean(
+    'gfxstream_only', False, 'Build only gfxstream libs/tests')
 
 def configure():
     """Configures the cmake project."""
@@ -129,6 +133,12 @@ def configure():
     if FLAGS.gfxstream:
         cmake_cmd += ['-DGFXSTREAM=%s' % FLAGS.gfxstream]
 
+    if FLAGS.crosvm:
+        cmake_cmd += ['-DCROSVM=%s' % FLAGS.crosvm]
+
+    if FLAGS.gfxstream_only:
+        cmake_cmd += ['-DGFXSTREAM_ONLY=%s' % FLAGS.gfxstream_only]
+
     cmake_cmd += Generator.from_string(FLAGS.generator).to_cmd()
     cmake_cmd += [get_qemu_root()]
 
@@ -170,7 +180,7 @@ def main(argv=None):
         cross_compile = platform.system().lower() != FLAGS.target
         if not cross_compile:
             run_tests_opts = []
-            if FLAGS.gfxstream:
+            if FLAGS.gfxstream or FLAGS.crosvm or FLAGS.gfxstream_only:
                 run_tests_opts.append("--skip-emulator-check")
 
             run_tests(FLAGS.out, FLAGS.test_jobs, run_tests_opts)

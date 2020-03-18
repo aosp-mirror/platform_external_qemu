@@ -1077,15 +1077,10 @@ function(android_extract_symbols TGT)
     # Note: we do not need to extract symbols on windows for uploading.
     return()
   endif()
-  set(DEV_NULL "/dev/null")
-  if(WINDOWS_MSVC_X86_64 AND NOT CROSSCOMPILE)
-    set(DEV_NULL "nul")
-  endif()
-
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
   add_custom_command(
     TARGET ${TGT} POST_BUILD COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
-                                     2> ${DEV_NULL} DEPENDS dump_syms
+    DEPENDS dump_syms
     COMMENT "Extracting symbols for ${TGT}" VERBATIM)
 endfunction()
 
@@ -1095,3 +1090,32 @@ if(WINDOWS_MSVC_X86_64 AND NOT INCLUDE_MSVC_POSIX)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/msvc-posix-compat/
                    msvc-posix-compat)
 endif()
+
+# Rule to build cf crosvm based on a combination of dependencies
+# built locally / prebuilt
+function(android_crosvm_build DEP)
+    message(STATUS "building crosvm with dependency ${DEP}")
+    set(CMAKE_CROSVM_HOST_PACKAGE_TOOLS_PATH
+        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/cf-host-package")
+    set(CMAKE_CROSVM_BUILD_SCRIPT_PATH
+        "${CMAKE_CROSVM_HOST_PACKAGE_TOOLS_PATH}/crosvm-build.sh")
+
+    set(CMAKE_CROSVM_REPO_TOP_LEVEL_PATH
+        "${ANDROID_QEMU2_TOP_DIR}/../..")
+    set(CMAKE_CROSVM_BUILD_ENV_DIR
+        "${CMAKE_BINARY_DIR}/crosvm-build-env")
+    set(CMAKE_CROSVM_GFXSTREAM_BUILD_DIR
+        "${CMAKE_BINARY_DIR}")
+    set(CMAKE_CROSVM_DIST_DIR
+        "${CMAKE_INSTALL_PREFIX}")
+    add_custom_command(
+        OUTPUT "${CMAKE_CROSVM_BUILD_ENV_DIR}/release/crosvm"
+        COMMAND
+            "${CMAKE_CROSVM_BUILD_SCRIPT_PATH}"
+            "${CMAKE_CROSVM_REPO_TOP_LEVEL_PATH}"
+            "${CMAKE_CROSVM_HOST_PACKAGE_TOOLS_PATH}"
+            "${CMAKE_CROSVM_BUILD_ENV_DIR}"
+            "${CMAKE_CROSVM_GFXSTREAM_BUILD_DIR}"
+            "${CMAKE_CROSVM_DIST_DIR}"
+        DEPENDS ${DEP})
+endfunction()

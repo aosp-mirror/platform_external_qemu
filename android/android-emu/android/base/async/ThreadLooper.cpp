@@ -13,6 +13,7 @@
 
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Event.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/threads/ThreadStore.h"
 #include "android/utils/debug.h"
@@ -122,6 +123,24 @@ void ThreadLooper::runOnMainLooper(ThreadLooper::Closure&& func) {
     }
 
     sMainRunner->appendAndWake(std::move(func));
+}
+
+// static
+void ThreadLooper::runOnMainLooperAndWaitForCompletion(ThreadLooper::Closure&& func) {
+    if (!android_getMainLooper()) {
+        derror("ERROR: trying to run on main looper "
+               "without a main looper!");
+        return;
+    }
+
+    android::base::Event e;
+    ThreadLooper::Closure funcWithSignal = [func, &e]() {
+        func();
+        e.signal();
+    };
+
+    sMainRunner->appendAndWake(std::move(funcWithSignal));
+    e.wait();
 }
 
 // static

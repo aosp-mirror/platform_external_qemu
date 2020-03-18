@@ -19,6 +19,7 @@ extern QemuUUID qemu_uuid;
 extern bool qemu_uuid_set;
 
 bool runstate_check(RunState state);
+RunState get_runstate();
 void runstate_set(RunState new_state);
 int runstate_is_running(void);
 bool runstate_needs_reset(void);

@@ -217,6 +217,18 @@ void PostWorker::composeLayer(ComposeLayer* l) {
     }
 }
 
+void PostWorker::screenshot(
+    ColorBuffer* cb,
+    int width,
+    int height,
+    GLenum format,
+    GLenum type,
+    SkinRotation rotation,
+    void* pixels) {
+    cb->readPixelsScaled(
+        width, height, format, type, rotation, pixels);
+}
+
 PostWorker::~PostWorker() {
     if (mFb->getDisplay() != EGL_NO_DISPLAY) {
         s_egl.eglMakeCurrent(mFb->getDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
