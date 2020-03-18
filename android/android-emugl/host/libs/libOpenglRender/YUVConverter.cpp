@@ -589,7 +589,7 @@ void YUVConverter::drawConvert(int x, int y,
     saveGLState();
 
     if (mProgram == 0) {
-        init(mWidth, mHeight, mFormat);
+        init(width, height, mFormat);
     }
     s_gles2.glViewport(x, y, width, height);
     uint32_t yoff, uoff, voff, ywidth, cwidth, cheight;
