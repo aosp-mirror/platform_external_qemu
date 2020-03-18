@@ -320,7 +320,7 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
 
     bool needToCopyToGuest = true;
 
-    if (mUseGpuTexture || mIsInFlush) {
+    if (mUseGpuTexture) {
         needToCopyToGuest = false;
     } else {
         YuvConverter<uint8_t> convert8(myOutputWidth, myOutputHeight);
