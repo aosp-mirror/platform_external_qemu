@@ -107,6 +107,9 @@ void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
             derror("%s%s", message.c_str(),
                   android::base::IsDebuggerAttached() ? ", ignored (debugger attached)" : "");
 
+            mTask->cancel();
+            abort();
+
             if (mHangCount >= kMaxHangCount &&
                 hangCallback && !android::base::IsDebuggerAttached()) {
                 hangCallback(message);

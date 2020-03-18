@@ -90,10 +90,9 @@ public:
 
     virtual const std::string& getCrashDirectory() override {
         if (mCrashDir.empty()) {
-            mCrashDir =
-                    PathUtils::join(::android::ConfigDirs::getUserDirectory(),
-                                    kCrashSubDir)
-                            .c_str();
+          std::string tempDir = System::get()->getTempDir();
+          mCrashDir = tempDir;
+          W("tempDir at %s, crashdir at %s\n", tempDir.c_str(), mCrashDir.c_str());
         }
         return mCrashDir;
     }

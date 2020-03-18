@@ -74,13 +74,16 @@ public:
         sys_prctl(PR_SET_PTRACER, pid, 0, 0, 0);
     }
 
-    void writeDump() override { mHandler->WriteMinidump(); }
+    void writeDump() override { 
+      W("jwu HostCrashReporter: writeDump()");
+      mHandler->WriteMinidump(); }
 
     static bool exceptionFilterCallback(void* context);
 
 private:
     static std::unique_ptr<google_breakpad::ExceptionHandler> CreateExceptionHandler(
             const int server_fd, const std::string& dumpDir) {
+      W("jwu HostCrashReporter:CreateExceptionHandler");
         return std::make_unique<google_breakpad::ExceptionHandler>(
                 google_breakpad::MinidumpDescriptor(dumpDir),
                 &HostCrashReporter::exceptionFilterCallback,

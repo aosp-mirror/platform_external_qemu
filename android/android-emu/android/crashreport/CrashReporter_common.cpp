@@ -92,6 +92,7 @@ CrashReporter::CrashReporter()
       mHangDetector([](StringView message) {
           if (CrashSystem::CrashType::CRASHUPLOAD !=
               CrashSystem::CrashType::NONE) {
+              W("jwu: CrashReporter init, mHangdetector -> GenerateDumpAndDie");
               CrashReporter::get()->GenerateDumpAndDie(c_str(message));
           }
       }) {
@@ -111,6 +112,7 @@ CrashReporter::~CrashReporter() {
 }
 
 const std::string& CrashReporter::getDumpDir() const {
+    W("jwu: getDumpDir: %s", mDumpDir.c_str());
     return mDumpDir;
 }
 
@@ -119,15 +121,18 @@ const std::string& CrashReporter::getDataExchangeDir() const {
 }
 
 void CrashReporter::AppendDump(const char* message) {
+    W("jwu: CrashReporter::AppendDump");
     passDumpMessage(message);
 }
 
 void CrashReporter::GenerateDump(const char* message) {
+    W("jwu: CrashReporter::GenerateDump");
     passDumpMessage(message);
     writeDump();
 }
 
 void CrashReporter::GenerateDumpAndDie(const char* message) {
+    W("jwu: CrashReporter::GenerateDumpDie");
     android_metrics_stop(METRICS_STOP_CRASH);
     passDumpMessage(message);
     // this is the most cross-platform way of crashing
@@ -160,6 +165,7 @@ void CrashReporter::SetExitMode(const char* msg) {
 }
 
 void CrashReporter::passDumpMessage(const char* message) {
+    W("jwu: CrashReporter::passDumpMessage - this really should get printed!!!");
     attachData(kDumpMessageFileName, message);
 }
 
