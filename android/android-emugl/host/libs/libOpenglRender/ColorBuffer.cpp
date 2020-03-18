@@ -409,6 +409,10 @@ void ColorBuffer::readPixelsYUVCached(int x,
     }
     touch();
 
+    assert(m_yuv_converter.get());
+    // s_gles1.glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+    // m_yuv_buf.data());
+    m_yuv_converter->readPixels(&m_yuv_buf);
     memcpy(pixels, m_yuv_buf.data(), pixels_size);
     return;
 }

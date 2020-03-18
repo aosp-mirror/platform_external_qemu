@@ -22,6 +22,7 @@
 #include "FrameworkFormats.h"
 
 #include <stdint.h>
+#include <vector>
 // The purpose of YUVConverter is to use
 // OpenGL shaders to convert YUV images to RGB
 // images that can be displayed on screen.
@@ -54,6 +55,10 @@ public:
     // (rcUpdateColorBuffer)
     void drawConvert(int x, int y, int width, int height, char* pixels);
 
+    // read YUV data into pbuf; will resize pbuf to the right size
+    // if necessary
+    void readPixels(std::vector<uint8_t>* pbuf);
+
     void swapTextures(uint32_t type, uint32_t* textures);
 
     // public so other classes can call
@@ -71,6 +76,10 @@ private:
     int mWidth = 0;
     int mHeight = 0;
     FrameworkFormat mFormat;
+    // colorbuffer w/h/format, could be different
+    int mCbWidth = 0;
+    int mCbHeight = 0;
+    FrameworkFormat mCbFormat;
     // We need the following GL objects:
     GLuint mProgram = 0;
     GLuint mVbuf = 0;
