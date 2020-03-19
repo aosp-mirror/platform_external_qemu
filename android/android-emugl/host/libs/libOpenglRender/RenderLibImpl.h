@@ -46,7 +46,8 @@ public:
 
     virtual void setVmOps(const QAndroidVmOperations &vm_operations) override;
 
-    virtual void setWindowOps(const QAndroidEmulatorWindowAgent &window_operations) override;
+    virtual void setWindowOps(const QAndroidEmulatorWindowAgent &window_operations,
+                              const QAndroidMultiDisplayAgent &multi_display_operations) override;
 
     virtual void setUsageTracker(android::base::CpuUsage* cpuUsage,
                                  android::base::MemoryTracker* memUsage) override;

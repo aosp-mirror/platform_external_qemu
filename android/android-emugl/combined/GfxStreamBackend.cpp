@@ -363,6 +363,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
         display_width, display_height, 1, 28,
         gQAndroidVmOperations,
         gQAndroidEmulatorWindowAgent,
+        gQAndroidMultiDisplayAgent,
         &maj, &min);
 
     char* vendor = nullptr;

@@ -64,14 +64,6 @@ typedef struct QAndroidEmulatorWindowAgent {
 
     // Set the UI display region
     void (*setUIDisplayRegion)(int, int, int, int);
-    // Inform UI creation/modification/deletion of multi-display window
-    void (*setUIMultiDisplay)(uint32_t,
-                            int32_t,
-                            int32_t,
-                            uint32_t,
-                            uint32_t,
-                            bool,
-                            uint32_t);
     bool (*getMultiDisplay)(uint32_t,
                             int32_t*,
                             int32_t*,
@@ -80,17 +72,8 @@ typedef struct QAndroidEmulatorWindowAgent {
                             uint32_t*,
                             uint32_t*,
                             bool*);
-    bool (*getMonitorRect)(uint32_t*, uint32_t*);
     void (*setNoSkin)(void);
     void (*restoreSkin)(void);
-    bool (*switchMultiDisplay)(bool,
-                               uint32_t,
-                               int32_t,
-                               int32_t,
-                               uint32_t,
-                               uint32_t,
-                               uint32_t,
-                               uint32_t);
     void (*updateUIMultiDisplayPage)(uint32_t);
 } QAndroidEmulatorWindowAgent;
 
