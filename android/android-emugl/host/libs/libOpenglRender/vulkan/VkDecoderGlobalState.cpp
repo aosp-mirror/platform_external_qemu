@@ -96,6 +96,7 @@ public:
             emugl::emugl_feature_is_enabled(
                 android::featurecontrol::VulkanSnapshots);
         mVkCleanupEnabled = System::get()->envGet("ANDROID_EMU_VK_NO_CLEANUP") != "1";
+        mLogMap = System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1";
     }
 
     ~Impl() = default;
@@ -2357,11 +2358,14 @@ public:
             ((info->size + pageOffset + kPageSize - 1) >>
              kPageBits) << kPageBits;
 
-        VKDGS_LOG("map: %p, %p -> [0x%llx 0x%llx]\n",
-                  info->ptr,
-                  info->pageAlignedHva,
-                  (unsigned long long)info->guestPhysAddr,
-                  (unsigned long long)info->guestPhysAddr + info->sizeToPage);
+        if (mLogMap) {
+            fprintf(stderr, "%s: map: %p, %p -> [0x%llx 0x%llx]\n", __func__,
+                    info->ptr,
+                    info->pageAlignedHva,
+                    (unsigned long long)info->guestPhysAddr,
+                    (unsigned long long)info->guestPhysAddr + info->sizeToPage);
+        }
+
         get_emugl_vm_operations().mapUserBackedRam(
                 info->guestPhysAddr,
                 info->pageAlignedHva,
@@ -2568,19 +2572,25 @@ public:
 #endif
 
         if (info->directMapped) {
-            VKDGS_LOG("unmap: %p, [0x%llx 0x%llx]\n",
-                      info->ptr,
-                      (unsigned long long)info->guestPhysAddr,
-                      (unsigned long long)info->guestPhysAddr + info->sizeToPage);
+            if (mLogMap) {
+                fprintf(stderr, "%s: unmap: %p, [0x%llx 0x%llx]\n", __func__,
+                        info->ptr,
+                        (unsigned long long)info->guestPhysAddr,
+                        (unsigned long long)info->guestPhysAddr + info->sizeToPage);
+            }
+
             get_emugl_vm_operations().unmapUserBackedRam(
                     info->guestPhysAddr,
                     info->sizeToPage);
         }
 
         if (info->virtioGpuMapped) {
-            VKDGS_LOG("unmap hostmem %p id 0x%llx\n",
-                      info->ptr,
-                      (unsigned long long)info->hostmemId);
+            if (mLogMap) {
+                fprintf(stderr, "%s: unmap hostmem %p id 0x%llx\n", __func__,
+                        info->ptr,
+                        (unsigned long long)info->hostmemId);
+            }
+
             get_emugl_vm_operations().hostmemUnregister(info->hostmemId);
         }
 
@@ -2829,6 +2839,12 @@ public:
         AutoLock lock(mLock);
 
         auto info = android::base::find(mMapInfo, memory);
+
+        if (mLogMap) {
+            fprintf(stderr, "%s: deviceMemory: 0x%llx pAddress: 0x%llx\n", __func__,
+                    (unsigned long long)memory,
+                    (unsigned long long)(*pAddress));
+        }
 
         if (!mapHostVisibleMemoryToGuestPhysicalAddressLocked(
                     vk, device, memory, *pAddress)) {
@@ -4972,6 +4988,7 @@ private:
     VkEmulation* m_emu;
     bool mSnapshotsEnabled = false;
     bool mVkCleanupEnabled = true;
+    bool mLogMap = false;
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
