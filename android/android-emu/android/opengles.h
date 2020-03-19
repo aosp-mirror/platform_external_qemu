@@ -14,6 +14,7 @@
 
 #include <stddef.h>
 
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/opengl/virtio_gpu_ops.h"
@@ -43,6 +44,7 @@ int android_startOpenglesRenderer(int width, int height,
                                   bool isPhone, int guestApiLevel,
                                   const QAndroidVmOperations *vm_operations,
                                   const QAndroidEmulatorWindowAgent *window_agent,
+				  const QAndroidMultiDisplayAgent *multi_display_agent,
                                   int* glesMajorVersion_out,
                                   int* glesMinorVersion_out);
 
