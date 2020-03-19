@@ -558,7 +558,7 @@ public:
     static uint32_t s_maxNumMultiDisplay;
     static uint32_t s_displayIdInternalBegin;
     static uint32_t s_invalidIdMultiDisplay;
-    bool tryLockMultiDisplayOnLoad(void);
+     bool tryLockMultiDisplayOnLoad(void);
     void unlockMultiDisplayOnLoad(void);
 
 private:
@@ -606,7 +606,6 @@ private:
     int m_framebufferHeight = 0;
     int m_windowWidth = 0;
     int m_windowHeight = 0;
-    double m_monitorAspectRatio = 1.0;
     float m_dpr = 0;
 
     bool m_useSubWindow = false;
