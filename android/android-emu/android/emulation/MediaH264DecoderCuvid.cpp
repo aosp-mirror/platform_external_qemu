@@ -162,6 +162,9 @@ void MediaH264DecoderCuvid::initH264ContextInternal(unsigned int width,
 void MediaH264DecoderCuvid::destroyH264Context() {
     H264_DPRINT("destroyH264Context calling");
 
+    for (auto texFrame : mSavedTexFrames) {
+            mRenderer.putTextureFrame(texFrame);
+    }
     if (mCudaContext != nullptr) {
         NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
         if (mCudaParser != nullptr) {
@@ -338,6 +341,12 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
                 mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
                                                   myOutputWidth, myOutputHeight,
                                                   decodedFrame.data());
+            }
+        } else {
+            if (mUseGpuTexture) {
+                // no colorbuffer to send the textures to, just recycle
+                // them back to Renderer
+                mRenderer.putTextureFrame(decodedTexFrame);
             }
         }
     }
