@@ -865,6 +865,7 @@ static int startEmulatorWithMinConfig(
     RendererConfig rendererConfig;
     configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
                            gQAndroidEmulatorWindowAgent,
+                           gQAndroidMultiDisplayAgent,
                            uiPreferredGlesBackend, &rendererConfig);
 
     // Gpu configuration is set, now initialize the screen recorder
@@ -1907,6 +1908,7 @@ extern "C" int main(int argc, char** argv) {
         RendererConfig rendererConfig;
         configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
                                gQAndroidEmulatorWindowAgent,
+			       gQAndroidMultiDisplayAgent,
                                uiPreferredGlesBackend, &rendererConfig);
 
         // Gpu configuration is set, now initialize the screen recorder
