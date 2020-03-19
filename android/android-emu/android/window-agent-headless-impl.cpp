@@ -93,17 +93,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                               uint32_t* dpi,
                               uint32_t* flag,
                               bool* enabled) { return false; },
-        .getMonitorRect = [](uint32_t* w, uint32_t* h) { return false; },
         .setNoSkin = []() {},
         .restoreSkin = []() {},
-        .switchMultiDisplay = [](bool add,
-                                 uint32_t id,
-                                 int32_t x,
-                                 int32_t y,
-                                 uint32_t w,
-                                 uint32_t h,
-                                 uint32_t dpi,
-                                 uint32_t flag)->bool { return true; },
         .updateUIMultiDisplayPage = [](uint32_t id) { },
 };
 
