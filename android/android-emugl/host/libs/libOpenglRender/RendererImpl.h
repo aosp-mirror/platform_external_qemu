@@ -84,8 +84,6 @@ public:
                          uint32_t dpi,
                          bool add) final;
     void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) override;
-    bool tryLockMultiDisplayOnLoad(void) override;
-    void unlockMultiDisplayOnLoad(void) override;
     void cleanupProcGLObjects(uint64_t puid) final;
     struct AndroidVirtioGpuOps* getVirtioGpuOps() final;
 
