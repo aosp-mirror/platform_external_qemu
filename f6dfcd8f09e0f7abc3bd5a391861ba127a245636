@@ -1,0 +1,92 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002038057",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1261880?revision\u003d5",
+      "fixSuggestions": [
+        {
+          "fixId": "c2adc204_6d70d6ba",
+          "description": "Change to \"android/android-emu/android/emulation/MultiDisplay.cpp\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/emulation/MultiDisplay.cpp",
+              "range": {
+                "startLine": 88,
+                "startChar": 39,
+                "endLine": 88,
+                "endChar": 47
+              },
+              "replacement": "guarantee"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "b6e4d429_fa719cd6",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-03-19T22:21:24Z",
+      "side": 1,
+      "message": "Common typo found: \"gurantee\" -- should it be \"guarantee\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 88,
+        "startChar": 39,
+        "endLine": 88,
+        "endChar": 47
+      },
+      "revId": "f6dfcd8f09e0f7abc3bd5a391861ba127a245636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002038057",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1261880?revision\u003d5",
+      "fixSuggestions": [
+        {
+          "fixId": "b1b55127_671d59c7",
+          "description": "Change to \"android/android-emu/android/emulation/MultiDisplay.cpp\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/emulation/MultiDisplay.cpp",
+              "range": {
+                "startLine": 575,
+                "startChar": 59,
+                "endLine": 575,
+                "endChar": 66
+              },
+              "replacement": "the"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "3c0a6240_7d5ec364",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 575,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-03-19T22:21:24Z",
+      "side": 1,
+      "message": "Common typo found: \"the the\" -- should it be \"the\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 575,
+        "startChar": 59,
+        "endLine": 575,
+        "endChar": 66
+      },
+      "revId": "f6dfcd8f09e0f7abc3bd5a391861ba127a245636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
