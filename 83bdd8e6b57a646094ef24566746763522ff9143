@@ -16,6 +16,24 @@
       "revId": "83bdd8e6b57a646094ef24566746763522ff9143",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8494074_ecff72f6",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/gles_extensions.entries",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-03-19T16:39:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b161adf_fcdf8706",
+      "revId": "83bdd8e6b57a646094ef24566746763522ff9143",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
