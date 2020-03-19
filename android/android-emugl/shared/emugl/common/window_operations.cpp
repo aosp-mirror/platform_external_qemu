@@ -20,13 +20,15 @@
 namespace {
 
 QAndroidEmulatorWindowAgent g_window_operations;
+QAndroidMultiDisplayAgent g_multi_display_operations;
 static bool g_window_initialized = false;
+static bool g_multi_display_initialized = false;
 
 }  // namespace
 
-void emugl::set_emugl_window_operations(const QAndroidEmulatorWindowAgent &window_operations)
+void emugl::set_emugl_window_operations(const QAndroidEmulatorWindowAgent &operations)
 {
-    g_window_operations = window_operations;
+    g_window_operations = operations;
     g_window_initialized = true;
 }
 
@@ -34,4 +36,14 @@ const QAndroidEmulatorWindowAgent &emugl::get_emugl_window_operations()
 {
     assert(g_window_initialized);
     return g_window_operations;
+}
+
+void emugl::set_emugl_multi_display_operations(const QAndroidMultiDisplayAgent &operations) {
+    g_multi_display_operations = operations;
+    g_multi_display_initialized = true;
+}
+
+const QAndroidMultiDisplayAgent &emugl::get_emugl_multi_display_operations() {
+    assert(g_multi_display_initialized);
+    return g_multi_display_operations;
 }
