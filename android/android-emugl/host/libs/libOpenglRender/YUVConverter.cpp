@@ -217,7 +217,7 @@ void main(void) {
     cutoffCoordsC.x = outCoord.x * cWidthCutoff;
     cutoffCoordsC.y = outCoord.y;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = 0.96*(texture2D(usampler, cutoffCoordsC).r - 0.5);
+    yuv[1] = texture2D(usampler, cutoffCoordsC).r - 0.5;
     yuv[2] = texture2D(vsampler, cutoffCoordsC).r - 0.5;
     highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
@@ -311,7 +311,7 @@ void main(void) {
     cutoffCoordsC.x = outCoord.x * cWidthCutoff;
     cutoffCoordsC.y = outCoord.y;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
-    yuv[1] = 0.96 * (texture2D(vusampler, cutoffCoordsC).a - 0.5);
+    yuv[1] = texture2D(vusampler, cutoffCoordsC).a - 0.5;
     yuv[2] = texture2D(vusampler, cutoffCoordsC).r - 0.5;
     highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
@@ -339,7 +339,7 @@ void main(void) {
     cutoffCoordsC.y = outCoord.y;
     yuv[0] = texture2D(ysampler, cutoffCoordsY).r - 0.0625;
     yuv[1] = texture2D(uvsampler, cutoffCoordsC).r - 0.5;
-    yuv[2] = 0.96 * (texture2D(uvsampler, cutoffCoordsC).a - 0.5);
+    yuv[2] = texture2D(uvsampler, cutoffCoordsC).a - 0.5;
     highp float yscale = 1.1643835616438356;
     rgb = mat3(yscale,                           yscale,            yscale,
                0,                  -0.39176229009491365, 2.017232142857143,
