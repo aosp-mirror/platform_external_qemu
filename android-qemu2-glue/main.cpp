@@ -36,6 +36,7 @@
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/emulation/MultiDisplay.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/feature_control.h"
@@ -870,6 +871,7 @@ static int startEmulatorWithMinConfig(
     RendererConfig rendererConfig;
     configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
                            gQAndroidEmulatorWindowAgent,
+                           gQAndroidMultiDisplayAgent,
                            uiPreferredGlesBackend, &rendererConfig);
 
     // Gpu configuration is set, now initialize the screen recorder
@@ -908,6 +910,10 @@ static int startEmulatorWithMinConfig(
     }
 
     android_foldable_initialize(nullptr);
+
+    if (fc::isEnabled(fc::MultiDisplay)) {
+        android_init_multi_display(gQAndroidEmulatorWindowAgent);
+    }
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
                              argv);
@@ -1799,6 +1805,10 @@ extern "C" int main(int argc, char** argv) {
 
     android_foldable_initialize(nullptr);
 
+    if (fc::isEnabled(fc::MultiDisplay)) {
+        android_init_multi_display(gQAndroidEmulatorWindowAgent);
+    }
+
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
     const UiEmuAgent uiEmuAgent = {
@@ -1913,6 +1923,7 @@ extern "C" int main(int argc, char** argv) {
         RendererConfig rendererConfig;
         configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
                                gQAndroidEmulatorWindowAgent,
+			       gQAndroidMultiDisplayAgent,
                                uiPreferredGlesBackend, &rendererConfig);
 
         // Gpu configuration is set, now initialize the screen recorder
