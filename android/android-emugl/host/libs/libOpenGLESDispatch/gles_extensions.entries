@@ -67,3 +67,6 @@ void glSignalSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLui
 
 # CUDA interop
 GLuint glGetGlobalTexName(GLuint localTexName);
+
+void glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid * pixels);
+

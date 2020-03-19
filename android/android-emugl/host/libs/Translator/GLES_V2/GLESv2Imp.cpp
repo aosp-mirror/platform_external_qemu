@@ -215,6 +215,7 @@ GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBuf
 
 // Utility to get global names
 GL_APICALL GLuint GL_APIENTRY glGetGlobalTexName(GLuint localName);
+GL_APICALL void  GL_APIENTRY glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid* pixels);
 
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
     GET_CTX_RET(NULL)
@@ -259,6 +260,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
         (*s_glesExtensions)["glWaitSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glWaitSemaphoreEXT;
         (*s_glesExtensions)["glSignalSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glSignalSemaphoreEXT;
         (*s_glesExtensions)["glGetGlobalTexName"] = (__translatorMustCastToProperFunctionPointerType)glGetGlobalTexName;
+        (*s_glesExtensions)["glGetTexImage"] = (__translatorMustCastToProperFunctionPointerType)glGetTexImage;
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -3434,6 +3436,26 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
     } else {
         ctx->dispatcher().glTexParameteriv(target,pname,params);
     }
+}
+
+GL_APICALL void  GL_APIENTRY glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid* pixels){
+    GET_CTX_V2();
+    SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
+                   GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
+    SET_ERROR_IF(!GLESv2Validate::pixelFrmt(ctx,format), GL_INVALID_ENUM);
+    SET_ERROR_IF(!GLESv2Validate::pixelType(ctx,type),GL_INVALID_ENUM);
+
+    // set an error if level < 0 or level > log 2 max
+    SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
+    SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,format) &&
+                   GLESv2Validate::pixelType(ctx,type)),GL_INVALID_ENUM);
+    SET_ERROR_IF(!GLESv2Validate::pixelOp(format,type),GL_INVALID_OPERATION);
+
+    if (isCoreProfile() &&
+        isCoreProfileEmulatedFormat(format)) {
+        format = getCoreProfileEmulatedFormat(format);
+    }
+    ctx->dispatcher().glGetTexImage(target,level,format,type,pixels);
 }
 
 GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels){
