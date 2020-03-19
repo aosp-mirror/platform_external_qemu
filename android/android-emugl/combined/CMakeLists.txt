@@ -49,7 +49,7 @@ endif()
 if(NOT WINDOWS)
 
   set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp
-                       Toplevel.cpp window-agent-mock-impl.cpp)
+                       multi-display-agent-mock-impl.cpp Toplevel.cpp window-agent-mock-impl.cpp)
   android_add_library(
     TARGET aemugraphics SHARED LICENSE Apache-2.0 SRC # cmake-format: sortable
                                                       ${aemugraphics_src})
