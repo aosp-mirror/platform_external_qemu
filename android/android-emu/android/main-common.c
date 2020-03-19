@@ -2047,6 +2047,7 @@ bool configAndStartRenderer(
          AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
          const QAndroidVmOperations *vm_operations,
          const struct QAndroidEmulatorWindowAgent *window_agent,
+	 const QAndroidMultiDisplayAgent *multi_display_agent,
          enum WinsysPreferredGlesBackend uiPreferredBackend,
          RendererConfig* config_out) {
     EmuglConfig config;
@@ -2236,6 +2237,7 @@ bool configAndStartRenderer(
                     avdInfo_getApiLevel(avd),
                     vm_operations,
                     window_agent,
+		    multi_display_agent,
                     &gles_major_version,
                     &gles_minor_version);
         if (gles_init_res || renderer_startup_res) {
