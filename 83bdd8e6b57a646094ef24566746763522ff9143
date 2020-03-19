@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b161adf_fcdf8706",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/gles_extensions.entries",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-19T15:40:14Z",
+      "side": 1,
+      "message": "this seems to already be in gles_common.entries",
+      "revId": "83bdd8e6b57a646094ef24566746763522ff9143",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
