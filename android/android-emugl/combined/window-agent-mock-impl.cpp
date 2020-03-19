@@ -79,13 +79,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .setNoSkin = [](void){
                 },
         .restoreSkin = [](void) {},
-        .switchMultiDisplay =
-                [](bool add, uint32_t id, int32_t x, int32_t y, uint32_t w, uint32_t h,
-                   uint32_t dpi, uint32_t flag)->bool {
-                    printf("window-agent-mock-impl: .switchMultiDisplay id %d %d %d %dx%d "
-                           "dpi %d flag %d %s\n",
-                           id, x, y, w, h, dpi, flag, add ? "add" : "del");
-                },
         .updateUIMultiDisplayPage =
                 [](uint32_t id) {
                     printf("updateMultiDisplayPage\n");
