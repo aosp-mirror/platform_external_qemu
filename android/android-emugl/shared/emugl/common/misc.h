@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/opengl/emugl_config.h"
 
@@ -70,6 +71,11 @@ namespace emugl {
     EMUGL_COMMON_API android::base::MemoryTracker* getMemoryTracker();
 
     // Window operation agent
-    EMUGL_COMMON_API void set_emugl_window_operations(const QAndroidEmulatorWindowAgent &vm_operations);
+    EMUGL_COMMON_API void set_emugl_window_operations(const QAndroidEmulatorWindowAgent &voperations);
     EMUGL_COMMON_API const QAndroidEmulatorWindowAgent &get_emugl_window_operations();
+
+    // MultiDisplay operation agent
+    EMUGL_COMMON_API void set_emugl_multi_display_operations(const QAndroidMultiDisplayAgent &operations);
+    EMUGL_COMMON_API const QAndroidMultiDisplayAgent &get_emugl_multi_display_operations();
+
 }
