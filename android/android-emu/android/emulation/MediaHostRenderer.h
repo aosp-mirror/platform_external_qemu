@@ -49,9 +49,9 @@ public:
         }
     }
 
-private:
     void cleanUpTextures();
 
+private:
     std::list<TextureFrame> mFramePool;
 
 public:

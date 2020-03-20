@@ -165,6 +165,8 @@ void MediaH264DecoderCuvid::destroyH264Context() {
     for (auto texFrame : mSavedTexFrames) {
             mRenderer.putTextureFrame(texFrame);
     }
+    mRenderer.cleanUpTextures();
+    mSavedTexFrames.clear();
     if (mCudaContext != nullptr) {
         NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
         if (mCudaParser != nullptr) {
@@ -581,6 +583,7 @@ void cuda_copy_decoded_frame(void* privData,
         NVDEC_API_CALL(cuMemcpy2D(&m));
     }
     NVDEC_API_CALL(cuGraphicsUnmapResources(1, &CudaRes, 0));
+    NVDEC_API_CALL(cuGraphicsUnregisterResource(CudaRes));
 }
 
 void cuda_nv12_updater(void* privData, uint32_t type, uint32_t* textures) {
