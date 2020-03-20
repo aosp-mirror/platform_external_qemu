@@ -22,6 +22,7 @@
 #include "FrameworkFormats.h"
 
 #include <stdint.h>
+#include <vector>
 // The purpose of YUVConverter is to use
 // OpenGL shaders to convert YUV images to RGB
 // images that can be displayed on screen.
@@ -54,7 +55,33 @@ public:
     // (rcUpdateColorBuffer)
     void drawConvert(int x, int y, int width, int height, char* pixels);
 
+    // read YUV data into pixels, exactly pixels_size bytes;
+    // if size mismatches, will read nothing.
+    void readPixels(uint8_t* pixels, uint32_t pixels_size);
+
     void swapTextures(uint32_t type, uint32_t* textures);
+
+    // NV12 and YUV420 are all packed
+    static void NV12ToYUV420PlanarInPlaceConvert(int nWidth,
+                                                 int nHeight,
+                                                 uint8_t* pFrame,
+                                                 uint8_t* pQuad) {
+        std::vector<uint8_t> tmp;
+        if (pQuad == nullptr) {
+            tmp.resize(nWidth * nHeight / 4);
+            pQuad = tmp.data();
+        }
+        int nPitch = nWidth;
+        uint8_t *puv = pFrame + nPitch * nHeight, *pu = puv,
+                *pv = puv + nPitch * nHeight / 4;
+        for (int y = 0; y < nHeight / 2; y++) {
+            for (int x = 0; x < nWidth / 2; x++) {
+                pu[y * nPitch / 2 + x] = puv[y * nPitch + x * 2];
+                pQuad[y * nWidth / 2 + x] = puv[y * nPitch + x * 2 + 1];
+            }
+        }
+        memcpy(pv, pQuad, nWidth * nHeight / 4);
+    }
 
     // public so other classes can call
     static void createYUVGLTex(GLenum texture_unit,
@@ -71,6 +98,10 @@ private:
     int mWidth = 0;
     int mHeight = 0;
     FrameworkFormat mFormat;
+    // colorbuffer w/h/format, could be different
+    int mCbWidth = 0;
+    int mCbHeight = 0;
+    FrameworkFormat mCbFormat;
     // We need the following GL objects:
     GLuint mProgram = 0;
     GLuint mVbuf = 0;
