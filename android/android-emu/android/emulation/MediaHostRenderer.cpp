@@ -54,6 +54,7 @@ constexpr uint32_t kFRAMEWORK_FORMAT_NV12 = 3;
 
 MediaHostRenderer::TextureFrame MediaHostRenderer::getTextureFrame(int w,
                                                                    int h) {
+    H264_DPRINT("calling %s %d", __func__, __LINE__);
     if (mFramePool.empty()) {
         std::vector<uint32_t> textures(2 * kFRAME_POOL_SIZE);
         mVirtioGpuOps->create_yuv_textures(kFRAMEWORK_FORMAT_NV12,
@@ -61,11 +62,14 @@ MediaHostRenderer::TextureFrame MediaHostRenderer::getTextureFrame(int w,
                                            textures.data());
         for (uint32_t i = 0; i < kFRAME_POOL_SIZE; ++i) {
             TextureFrame frame{textures[2 * i], textures[2 * i + 1]};
+            H264_DPRINT("allocated Y %d UV %d", frame.Ytex, frame.UVtex);
             mFramePool.push_back(std::move(frame));
         }
     }
     TextureFrame frame = mFramePool.front();
     mFramePool.pop_front();
+    H264_DPRINT("done %s %d ret Y %d UV %d", __func__, __LINE__, frame.Ytex,
+                frame.UVtex);
     return frame;
 }
 
@@ -87,6 +91,7 @@ void MediaHostRenderer::cleanUpTextures() {
     for (auto& frame : mFramePool) {
         textures.push_back(frame.Ytex);
         textures.push_back(frame.UVtex);
+        H264_DPRINT("delete Y %d UV %d", frame.Ytex, frame.UVtex);
     }
     mVirtioGpuOps->destroy_yuv_textures(kFRAMEWORK_FORMAT_NV12,
                                         mFramePool.size(), textures.data());
@@ -131,8 +136,8 @@ void MediaHostRenderer::renderToHostColorBufferWithTextures(
         if (textures[0] > 0 && textures[1] > 0) {
             frame.Ytex = textures[0];
             frame.UVtex = textures[1];
+            putTextureFrame(frame);
         }
-        putTextureFrame(frame);
     } else {
         H264_DPRINT("ERROR: there is no virtio Gpu Ops is not setup");
     }

@@ -41,13 +41,15 @@ public:
                                    void* privData,
                                    void* func);
 
-private:
     // put back a used TextureFrame so it can be reused again
     // later
     void putTextureFrame(TextureFrame frame) {
-        mFramePool.push_back(std::move(frame));
+        if (frame.Ytex > 0 && frame.UVtex > 0) {
+            mFramePool.push_back(std::move(frame));
+        }
     }
 
+private:
     void cleanUpTextures();
 
     std::list<TextureFrame> mFramePool;
