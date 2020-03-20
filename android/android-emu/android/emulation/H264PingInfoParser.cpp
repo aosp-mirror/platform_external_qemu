@@ -109,7 +109,9 @@ void* H264PingInfoParser::getReturnAddress(void* ptr) {
 
 void H264PingInfoParser::parseGetImageParams(void* ptr, GetImageParam& param) {
     param.hostDecoderId = parseHostDecoderId(ptr);
-    if (mVersion == 200) {
+    if (mVersion == 100) {
+        param.hostColorBufferId = -1;
+    } else if (mVersion == 200) {
         param.hostColorBufferId = parseHostColorBufferId(ptr);
     }
     uint8_t* retptr = (uint8_t*)getReturnAddress(ptr);

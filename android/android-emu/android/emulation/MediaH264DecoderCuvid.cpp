@@ -69,7 +69,9 @@ MediaH264DecoderCuvid::MediaH264DecoderCuvid(uint64_t id,
     auto useGpuTextureEnv = android::base::System::getEnvironmentVariable(
             "ANDROID_EMU_CODEC_USE_GPU_TEXTURE");
     if (useGpuTextureEnv != "") {
-        mUseGpuTexture = true;
+        if (mParser.version() == 200) {
+            mUseGpuTexture = true;
+        }
     }
 };
 
