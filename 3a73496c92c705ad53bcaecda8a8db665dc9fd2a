@@ -1,0 +1,28 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d8bed168_ea7306be",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-03-20T17:47:41Z",
+      "side": 1,
+      "message": "\u003e Common typo found: \"gurantee\" -- should it be \"guarantee\"?\n\u003e Note: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.\n\nPlease fix.",
+      "parentUuid": "33f79a2f_dc5af84a",
+      "range": {
+        "startLine": 88,
+        "startChar": 39,
+        "endLine": 88,
+        "endChar": 47
+      },
+      "revId": "3a73496c92c705ad53bcaecda8a8db665dc9fd2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a5b3c633_c6c82897",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-03-20T17:47:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "80435635_2e56640f",
+      "revId": "e4b5b38312f2cfd21f0966d32607026461ce977d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9e9bdb39_0f12f326",
         "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fa147948_0f2e7d69",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-03-20T17:47:41Z",
+      "side": 1,
+      "message": "headless does nothing. It won\u0027t impact multidisplay functionality.",
+      "parentUuid": "9e9bdb39_0f12f326",
+      "revId": "e4b5b38312f2cfd21f0966d32607026461ce977d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "24348f69_fe8eca0b",
         "filename": "android/android-emu/android/window-agent-headless-impl.cpp",
         "patchSetId": 6
@@ -50,6 +86,24 @@
       "revId": "e4b5b38312f2cfd21f0966d32607026461ce977d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6da0ccaf_c335ccac",
+        "filename": "android/android-emu/android/window-agent-headless-impl.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-03-20T17:47:41Z",
+      "side": 1,
+      "message": "Totally remove this function from windowAgent. It is only used by MultiDisplay. Instead we have winsys.h function: skin_winsys_get_monitor_rect() which returns the framebuffer size in headless mode.",
+      "parentUuid": "24348f69_fe8eca0b",
+      "revId": "e4b5b38312f2cfd21f0966d32607026461ce977d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
