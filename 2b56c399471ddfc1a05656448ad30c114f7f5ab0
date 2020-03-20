@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "095b5e9e_32f018e1",
+        "filename": "android/android-emu/android/avd/hw-config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-20T19:42:46Z",
+      "side": 1,
+      "message": "this won\u0027t affect guest mesa driver code",
+      "range": {
+        "startLine": 96,
+        "startChar": 4,
+        "endLine": 96,
+        "endChar": 51
+      },
+      "revId": "2b56c399471ddfc1a05656448ad30c114f7f5ab0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
