@@ -92,6 +92,7 @@ class Licensing(object):
         "crypt32::crypt32",
         "mincore::mincore",
         "imagehlp::imagehlp",
+        "virglrenderer",
     ]
 
     def __init__(self, build_dir, qemu_root):

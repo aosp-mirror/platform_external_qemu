@@ -1313,7 +1313,7 @@ VG_EXPORT uint32_t stream_renderer_resource_get_hv_slot(uint32_t res_handle) {
     return sRenderer->getResourceHvSlot(res_handle);
 }
 
-#define VIRGLRENDERER_API_PIPE_STRUCT_DEF(api) pipe_##api,
+#define VIRGLRENDERER_API_PIPE_STRUCT_DEF(api) api,
 
 static struct virgl_renderer_virtio_interface s_virtio_interface = {
     LIST_VIRGLRENDERER_API(VIRGLRENDERER_API_PIPE_STRUCT_DEF)

@@ -650,7 +650,7 @@ int virtio_gpu_virgl_init(VirtIOGPU *g)
     int ret;
 
     ret = g->virgl->virgl_renderer_init(
-        g, 0, g->gpu_3d_cbs ? g->gpu_3d_cbs : &standard_3d_cbs);
+        g, (VIRGL_RENDERER_USE_EGL | VIRGL_RENDERER_USE_SURFACELESS | VIRGL_RENDERER_USE_GLES), g->gpu_3d_cbs ? g->gpu_3d_cbs : &standard_3d_cbs);
     if (ret != 0) {
         return ret;
     }

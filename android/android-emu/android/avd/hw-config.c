@@ -91,6 +91,9 @@ androidHwConfig_init( AndroidHwConfig*  config,
     if (apiLevel >= 12) {
         config->hw_keyboard_lid = 0;
     }
+    config->hw_gpu_enabled = true;
+    config->hw_gpu_mode = ASTRDUP("host");
+    config->hw_gltransport = ASTRDUP("virtio-gpu");
 }
 
 int androidHwConfig_read(AndroidHwConfig* config, CIniFile* ini) {

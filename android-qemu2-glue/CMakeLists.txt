@@ -54,6 +54,7 @@ target_include_directories(
           ${VIRGLRENDERER_INCLUDE_DIR}
           ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
 
+target_link_libraries(libqemu2-glue PRIVATE virglrenderer)
 target_link_libraries(libqemu2-glue PRIVATE android-grpc)
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
