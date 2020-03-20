@@ -21,6 +21,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/SubAllocator.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/threads/Async.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/globals.h"
 
@@ -333,10 +334,21 @@ AddressSpaceGraphicsContext::~AddressSpaceGraphicsContext() {
         mExiting = 1;
         *(mHostContext.host_state) = ASG_HOST_STATE_EXIT;
         mConsumerMessages.send(ConsumerCommand::Exit);
-        mConsumerInterface.destroy(mCurrentConsumer);
+
+        void* consumer = mCurrentConsumer;
+        Allocation ringAllocation = mRingAllocation;
+        Allocation bufferAllocation = mBufferAllocation;
+        ConsumerDestroyCallback destroyCallback = mConsumerInterface.destroy;
+
+        android::base::async([consumer, ringAllocation, bufferAllocation, destroyCallback]() {
+            destroyCallback(consumer);
+            sGlobals->freeBuffer(bufferAllocation);
+            sGlobals->freeRingStorage(ringAllocation);
+        });
+    } else {
+        sGlobals->freeBuffer(mBufferAllocation);
+        sGlobals->freeRingStorage(mRingAllocation);
     }
-    sGlobals->freeBuffer(mBufferAllocation);
-    sGlobals->freeRingStorage(mRingAllocation);
 }
 
 void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo* info) {
