@@ -15,6 +15,7 @@
 #include "android/emulation/MediaH264DecoderCuvid.h"
 #include "android/emulation/H264NaluParser.h"
 #include "android/emulation/YuvConverter.h"
+#include "android/main-emugl.h"
 // MediaH264DecoderCuvid.h
 #include <cstdint>
 #include <string>
@@ -70,7 +71,17 @@ MediaH264DecoderCuvid::MediaH264DecoderCuvid(uint64_t id,
             "ANDROID_EMU_CODEC_USE_GPU_TEXTURE");
     if (useGpuTextureEnv != "") {
         if (mParser.version() == 200) {
-            mUseGpuTexture = true;
+            if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
+                mUseGpuTexture = true;
+            } else {
+                H264_DPRINT(
+                        "cannot use gpu texture to save decoded frame in "
+                        "non-host gpu mode");
+                if (emuglConfig_get_current_renderer() ==
+                    SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+                    H264_DPRINT("your gpu mode is: swiftshader_indirect");
+                }
+            }
         }
     }
 };
