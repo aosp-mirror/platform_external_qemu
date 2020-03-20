@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80435635_2e56640f",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-20T16:48:00Z",
+      "side": 1,
+      "message": "should this be coupled to the window agent?",
+      "revId": "e4b5b38312f2cfd21f0966d32607026461ce977d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9e9bdb39_0f12f326",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-20T16:48:00Z",
+      "side": 1,
+      "message": "is it ok if the mWindowAgent is headless and doesnt do anything?",
+      "revId": "e4b5b38312f2cfd21f0966d32607026461ce977d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "24348f69_fe8eca0b",
+        "filename": "android/android-emu/android/window-agent-headless-impl.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-20T16:48:00Z",
+      "side": 1,
+      "message": "multi display should not rely on getMonitorRect, as headless/vs non-headless then starts to be coupled to multi display",
+      "revId": "e4b5b38312f2cfd21f0966d32607026461ce977d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
