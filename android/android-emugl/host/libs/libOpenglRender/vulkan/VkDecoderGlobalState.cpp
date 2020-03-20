@@ -2402,6 +2402,17 @@ public:
             }
         }
 
+        for (auto it: mPendingUnmaps) {
+            if (mLogMap) {
+                fprintf(stderr, "%s: do pending unmap: gpa [0x%llx 0x%llx)\n", __func__,
+                        (unsigned long long)it.first,
+                        (unsigned long long)it.first + (unsigned long long)(it.second));
+            }
+            get_emugl_vm_operations().unmapUserBackedRam(
+                it.first,
+                it.second);
+        }
+
         get_emugl_vm_operations().mapUserBackedRam(
             gpa, hva, sizeToPage);
 
@@ -2613,15 +2624,13 @@ public:
 
         if (info->directMapped) {
             if (mLogMap) {
-                fprintf(stderr, "%s: unmap: %p, [0x%llx 0x%llx]\n", __func__,
+                fprintf(stderr, "%s: unmap pending: %p, [0x%llx 0x%llx]\n", __func__,
                         info->ptr,
                         (unsigned long long)info->guestPhysAddr,
                         (unsigned long long)info->guestPhysAddr + info->sizeToPage);
             }
 
-            get_emugl_vm_operations().unmapUserBackedRam(
-                    info->guestPhysAddr,
-                    info->sizeToPage);
+            mPendingUnmaps[info->guestPhysAddr] = info->sizeToPage;
 
             mOccupiedGpas.erase(info->guestPhysAddr);
         }
@@ -5367,6 +5376,7 @@ private:
         size_t sizeToPage;
     };
     std::unordered_map<uint64_t, OccupiedGpaInfo> mOccupiedGpas;
+    std::unordered_map<uint64_t, uint64_t> mPendingUnmaps;
 
     std::unordered_map<VkSemaphore, SemaphoreInfo> mSemaphoreInfo;
 
