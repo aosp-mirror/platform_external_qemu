@@ -85,6 +85,7 @@ MemBlock::MemBlock(const address_space_device_control_ops* o, const AddressSpace
 
 MemBlock::MemBlock(MemBlock&& rhs)
     : ops(std::exchange(rhs.ops, nullptr)),
+      hw(std::exchange(rhs.hw, nullptr)),
       physBase(std::exchange(rhs.physBase, 0)),
       physBaseLoaded(std::exchange(rhs.physBaseLoaded, 0)),
       bits(std::exchange(rhs.bits, nullptr)),
