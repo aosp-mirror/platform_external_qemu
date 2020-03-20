@@ -2366,12 +2366,52 @@ public:
                     (unsigned long long)info->guestPhysAddr + info->sizeToPage);
         }
 
-        get_emugl_vm_operations().mapUserBackedRam(
-                info->guestPhysAddr,
-                info->pageAlignedHva,
-                info->sizeToPage);
+        // Check for an existing memory at that address that may exist due to
+        // lack of proper synchronized cleanup guest/host.
 
         info->directMapped = true;
+
+        // Don't use |info| after this as freeMemoryLocked may change |mMapInfo|.
+
+        uint64_t gpa = info->guestPhysAddr;
+        void* hva = info->pageAlignedHva;
+        size_t sizeToPage = info->sizeToPage;
+
+        std::vector<uint64_t> keysToDelete;
+        for (auto it: mOccupiedGpas) {
+            bool overlap =
+                gpa >= it.first &&
+                gpa < it.first + it.second.sizeToPage;
+            if (overlap) {
+                keysToDelete.push_back(it.first);
+            }
+        }
+
+        for (auto key: keysToDelete) {
+            auto existingMemoryInfo =
+                android::base::find(mOccupiedGpas, key);
+            if (existingMemoryInfo) {
+                fprintf(stderr, "%s: Warning: existing mapping at gpa 0x%llx, deleting\n",
+                        __func__,
+                        (unsigned long long)gpa);
+                freeMemoryLocked(
+                    existingMemoryInfo->vk,
+                    existingMemoryInfo->device,
+                    existingMemoryInfo->memory,
+                    nullptr);
+            }
+        }
+
+        get_emugl_vm_operations().mapUserBackedRam(
+            gpa, hva, sizeToPage);
+
+        mOccupiedGpas[gpa] = {
+            vk,
+            device,
+            memory,
+            gpa,
+            sizeToPage,
+        };
 
         return true;
     }
@@ -2582,6 +2622,8 @@ public:
             get_emugl_vm_operations().unmapUserBackedRam(
                     info->guestPhysAddr,
                     info->sizeToPage);
+
+            mOccupiedGpas.erase(info->guestPhysAddr);
         }
 
         if (info->virtioGpuMapped) {
@@ -5315,6 +5357,16 @@ private:
     std::unordered_map<VkBuffer, BufferInfo> mBufferInfo;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
+    // Back-reference to the VkDeviceMemory that is occupying a particular
+    // guest physical address
+    struct OccupiedGpaInfo {
+        VulkanDispatch* vk;
+        VkDevice device;
+        VkDeviceMemory memory;
+        uint64_t gpa;
+        size_t sizeToPage;
+    };
+    std::unordered_map<uint64_t, OccupiedGpaInfo> mOccupiedGpas;
 
     std::unordered_map<VkSemaphore, SemaphoreInfo> mSemaphoreInfo;
 
