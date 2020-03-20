@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bdf9f720_acec6f9d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/YUVConverter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-03-20T21:18:58Z",
+      "side": 1,
+      "message": "you don\u0027t have to activate a different texture unit, I think. just call glGetIntegerv(GL_TEXTURE_BINDING_2D), bind texture, do your task, then bind it back to the previous texture binding.",
+      "range": {
+        "startLine": 161,
+        "startChar": 4,
+        "endLine": 161,
+        "endChar": 42
+      },
+      "revId": "4040e4427a9357cbc4402101f3932d561f3737fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
