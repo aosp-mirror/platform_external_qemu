@@ -247,6 +247,142 @@ TEST_F(FrameBufferTest, CreateOpenUpdateCloseColorBuffer) {
     mFb->closeColorBuffer(handle);
 }
 
+TEST_F(FrameBufferTest, CreateOpenUpdateCloseColorBuffer_ReadYUV420) {
+    HandleType handle = mFb->createColorBuffer(mWidth, mHeight, GL_RGBA,
+                                               FRAMEWORK_FORMAT_YUV_420_888);
+    EXPECT_NE(0, handle);
+    EXPECT_EQ(0, mFb->openColorBuffer(handle));
+
+    TestTexture forUpdate = createTestPatternRGBA8888(mWidth, mHeight);
+    mFb->updateColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGBA,
+                           GL_UNSIGNED_BYTE, forUpdate.data());
+
+    TestTexture forRead = createTestPatternRGBA8888(mWidth, mHeight);
+    memset(forRead.data(), 0x0, mWidth * mHeight * 3 / 2);
+    mFb->readColorBufferYUV(handle, 0, 0, mWidth, mHeight, forRead.data(),
+                            mWidth * mHeight * 3 / 2);
+
+    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(),
+                             forRead.data()));
+    memset(forRead.data(), 0xff, mWidth * mHeight * 3 / 2);
+    mFb->readColorBufferYUV(handle, 0, 0, mWidth, mHeight, forRead.data(),
+                            mWidth * mHeight * 3 / 2);
+
+    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(),
+                             forRead.data()));
+
+    mFb->closeColorBuffer(handle);
+}
+
+TEST_F(FrameBufferTest, CreateOpenUpdateCloseColorBuffer_ReadNV12) {
+    HandleType handle = mFb->createColorBuffer(mWidth, mHeight, GL_RGBA,
+                                               FRAMEWORK_FORMAT_NV12);
+    EXPECT_NE(0, handle);
+    EXPECT_EQ(0, mFb->openColorBuffer(handle));
+
+    TestTexture forUpdate = createTestPatternRGBA8888(mWidth, mHeight);
+    mFb->updateColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGBA,
+                           GL_UNSIGNED_BYTE, forUpdate.data());
+
+    TestTexture forRead = createTestPatternRGBA8888(mWidth, mHeight);
+    memset(forRead.data(), 0x0, mWidth * mHeight * 3 / 2);
+    mFb->readColorBufferYUV(handle, 0, 0, mWidth, mHeight, forRead.data(),
+                            mWidth * mHeight * 3 / 2);
+
+    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(),
+                             forRead.data()));
+    memset(forRead.data(), 0xff, mWidth * mHeight * 3 / 2);
+    mFb->readColorBufferYUV(handle, 0, 0, mWidth, mHeight, forRead.data(),
+                            mWidth * mHeight * 3 / 2);
+
+    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(),
+                             forRead.data()));
+
+    mFb->closeColorBuffer(handle);
+}
+
+TEST_F(FrameBufferTest, CreateOpenUpdateCloseColorBuffer_ReadNV12TOYUV420) {
+    // nv12
+    mWidth = 8;
+    mHeight = 8;
+    HandleType handle_nv12 = mFb->createColorBuffer(mWidth, mHeight, GL_RGBA,
+                                                    FRAMEWORK_FORMAT_NV12);
+    EXPECT_NE(0, handle_nv12);
+    EXPECT_EQ(0, mFb->openColorBuffer(handle_nv12));
+
+    uint8_t forUpdate[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                           1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                           2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3,
+                           2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3};
+
+    uint8_t golden[] = {
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+    };
+
+    mFb->updateColorBuffer(handle_nv12, 0, 0, mWidth, mHeight, GL_RGBA,
+                           GL_UNSIGNED_BYTE, forUpdate);
+
+    // yuv420
+    HandleType handle_yuv420 = mFb->createColorBuffer(
+            mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_YUV_420_888);
+    EXPECT_NE(0, handle_yuv420);
+    EXPECT_EQ(0, mFb->openColorBuffer(handle_yuv420));
+
+    uint32_t textures[2] = {1, 2};
+
+    mFb->swapTexturesAndUpdateColorBuffer(handle_nv12, 0, 0, mWidth, mHeight,
+                                          GL_RGBA, GL_UNSIGNED_BYTE,
+                                          FRAMEWORK_FORMAT_NV12, textures);
+    mFb->swapTexturesAndUpdateColorBuffer(handle_yuv420, 0, 0, mWidth, mHeight,
+                                          GL_RGBA, GL_UNSIGNED_BYTE,
+                                          FRAMEWORK_FORMAT_NV12, textures);
+
+    uint8_t forRead[sizeof(golden)];
+    memset(forRead, 0x0, mWidth * mHeight * 3 / 2);
+    mFb->readColorBufferYUV(handle_yuv420, 0, 0, mWidth, mHeight, forRead,
+                            mWidth * mHeight * 3 / 2);
+
+    EXPECT_TRUE(
+            ImageMatches(mWidth, mHeight * 3 / 2, 1, mWidth, golden, forRead));
+
+    mFb->closeColorBuffer(handle_nv12);
+    mFb->closeColorBuffer(handle_yuv420);
+}
+
+TEST_F(FrameBufferTest, CreateOpenUpdateCloseColorBuffer_ReadYV12) {
+    mWidth = 20 * 16;
+    HandleType handle = mFb->createColorBuffer(mWidth, mHeight, GL_RGBA,
+                                               FRAMEWORK_FORMAT_YV12);
+    EXPECT_NE(0, handle);
+    EXPECT_EQ(0, mFb->openColorBuffer(handle));
+
+    TestTexture forUpdate = createTestPatternRGBA8888(mWidth, mHeight);
+    mFb->updateColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGBA,
+                           GL_UNSIGNED_BYTE, forUpdate.data());
+
+    TestTexture forRead = createTestPatternRGBA8888(mWidth, mHeight);
+    memset(forRead.data(), 0x0, mWidth * mHeight * 3 / 2);
+    mFb->readColorBufferYUV(handle, 0, 0, mWidth, mHeight, forRead.data(),
+                            mWidth * mHeight * 3 / 2);
+
+    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(),
+                             forRead.data()));
+    memset(forRead.data(), 0xff, mWidth * mHeight * 3 / 2);
+    mFb->readColorBufferYUV(handle, 0, 0, mWidth, mHeight, forRead.data(),
+                            mWidth * mHeight * 3 / 2);
+
+    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(),
+                             forRead.data()));
+
+    mFb->closeColorBuffer(handle);
+}
+
 // bug: 110105029
 // Tests that color buffer updates should not fail if there is a format change.
 // Needed to accomodate format-changing behavior from the guest gralloc.
