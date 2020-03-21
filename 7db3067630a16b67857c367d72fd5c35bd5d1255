@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "681b47f6_1969fa4a",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-03-21T02:16:28Z",
+      "side": 1,
+      "message": "So if I understand correctly, with this change, even if the webrtc bridge cannot be started, the EmulatorController service and frame buffer in shared memory won\u0027t be broken, correct?",
+      "range": {
+        "startLine": 316,
+        "startChar": 7,
+        "endLine": 316,
+        "endChar": 21
+      },
+      "revId": "7db3067630a16b67857c367d72fd5c35bd5d1255",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
