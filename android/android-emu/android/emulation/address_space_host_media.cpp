@@ -145,9 +145,9 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
     auto slot = getAddrSlot(info->metadata);
     uint64_t offSetAddr = slot << 20;
 
-    AS_DEVICE_DPRINT("Got media request (type=%u, op=%u, slot=%lld)",
-                     static_cast<uint8_t>(codecType), static_cast<uint8_t>(op),
-                     (long long)(getAddrSlot(info->metadata)));
+    fprintf(stderr, "Got media request (type=%u, op=%u, slot=%lld)",
+            static_cast<uint8_t>(codecType), static_cast<uint8_t>(op),
+            (long long)(getAddrSlot(info->metadata)));
 
     switch (codecType) {
         case MediaCodecType::VP8Codec:
@@ -155,9 +155,10 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
             if (!mVpxDecoder) {
                 mVpxDecoder.reset(new MediaVpxDecoder);
             }
-            mVpxDecoder->handlePing(codecType,
-                                   op,
-                                   mControlOps->get_host_ptr(info->phys_addr));
+            mVpxDecoder->handlePing(
+                    codecType, op,
+                    (uint8_t*)(mControlOps->get_host_ptr(info->phys_addr)) +
+                            offSetAddr);
             break;
         case MediaCodecType::H264Codec:
             if (!mH264Decoder) {
