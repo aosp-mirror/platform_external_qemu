@@ -22,6 +22,30 @@
       "revId": "7db3067630a16b67857c367d72fd5c35bd5d1255",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2c3ba14_f448bc70",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-03-23T12:03:06Z",
+      "side": 1,
+      "message": "I\u0027ve pushed cl/302010620, which enables the video module (the part responsible for pushing frames to shared memory) on in case gRPC is enabled. This should make sure that you will always see frames in g3, regardless of the webrtc module.",
+      "parentUuid": "681b47f6_1969fa4a",
+      "range": {
+        "startLine": 316,
+        "startChar": 7,
+        "endLine": 316,
+        "endChar": 21
+      },
+      "revId": "7db3067630a16b67857c367d72fd5c35bd5d1255",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
