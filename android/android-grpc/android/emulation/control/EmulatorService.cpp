@@ -414,7 +414,6 @@ public:
     Status streamScreenshot(ServerContext* context,
                             const ImageFormat* request,
                             ServerWriter<Image>* writer) override {
-
         EventWaiter frameEvent(&gpu_register_shared_memory_callback,
                                &gpu_unregister_shared_memory_callback);
 
@@ -425,6 +424,7 @@ public:
         bool clientAvailable = writer->Write(first);
         bool lastFrameWasEmpty = first.format().width() == 0;
 
+        int frame = 0;
         while (clientAvailable) {
             Image reply;
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
@@ -436,6 +436,7 @@ public:
             // there. (All clients get disconnected on emulator shutdown).
             auto arrived = frameEvent.next(kTimeToWaitForFrame);
             if (arrived > 0) {
+                frame += arrived;
                 // TODO(jansene): Add metrics around dropped frames/timing?
                 getScreenshot(context, request, &reply);
                 reply.set_seq(frameEvent.current());
