@@ -194,8 +194,7 @@ public:
         // Make a copy
         BatteryState request = *requestPtr;
 
-        android::base::ThreadLooper::runOnMainLooper(
-            [agent, request]() {
+        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
             agent->setHasBattery(request.hasbattery());
             agent->setIsBatteryPresent(request.ispresent());
             agent->setIsCharging(request.status() == BatteryState::CHARGING);
@@ -214,14 +213,17 @@ public:
         auto agent = mAgents->battery;
 
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
-            [agent, reply]() {
-            reply->set_hasbattery(agent->hasBattery());
-            reply->set_ispresent(agent->present());
-            reply->set_charger((BatteryState_BatteryCharger)agent->charger());
-            reply->set_chargelevel(agent->chargeLevel());
-            reply->set_health((BatteryState_BatteryHealth)agent->health());
-            reply->set_status((BatteryState_BatteryStatus)agent->status());
-        });
+                [agent, reply]() {
+                    reply->set_hasbattery(agent->hasBattery());
+                    reply->set_ispresent(agent->present());
+                    reply->set_charger(
+                            (BatteryState_BatteryCharger)agent->charger());
+                    reply->set_chargelevel(agent->chargeLevel());
+                    reply->set_health(
+                            (BatteryState_BatteryHealth)agent->health());
+                    reply->set_status(
+                            (BatteryState_BatteryStatus)agent->status());
+                });
 
         return Status::OK;
     }
@@ -238,8 +240,8 @@ public:
             gettimeofday(&tVal, NULL);
             agent->gpsSetPassiveUpdate(request.passiveupdate());
             agent->gpsSendLoc(request.latitude(), request.longitude(),
-                                 request.altitude(), request.speed(),
-                                 request.bearing(), request.satellites(), &tVal);
+                              request.altitude(), request.speed(),
+                              request.bearing(), request.satellites(), &tVal);
         });
 
         return Status::OK;
@@ -251,21 +253,22 @@ public:
         auto agent = mAgents->location;
 
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
-            [agent, request, reply]() {
-            double lat, lon, speed, heading, elevation;
-            int32_t count;
+                [agent, request, reply]() {
+                    double lat, lon, speed, heading, elevation;
+                    int32_t count;
 
-            // TODO(jansene):Implement in underlying agent.
-            reply->set_passiveupdate(agent->gpsGetPassiveUpdate());
-            agent->gpsGetLoc(&lat, &lon, &elevation, &speed, &heading, &count);
+                    // TODO(jansene):Implement in underlying agent.
+                    reply->set_passiveupdate(agent->gpsGetPassiveUpdate());
+                    agent->gpsGetLoc(&lat, &lon, &elevation, &speed, &heading,
+                                     &count);
 
-            reply->set_latitude(lat);
-            reply->set_longitude(lon);
-            reply->set_speed(speed);
-            reply->set_bearing(heading);
-            reply->set_altitude(elevation);
-            reply->set_satellites(count);
-        });
+                    reply->set_latitude(lat);
+                    reply->set_longitude(lon);
+                    reply->set_speed(speed);
+                    reply->set_bearing(heading);
+                    reply->set_altitude(elevation);
+                    reply->set_satellites(count);
+                });
 
         return Status::OK;
     }
@@ -304,7 +307,6 @@ public:
     Status setSensor(ServerContext* context,
                      const SensorValue* requestPtr,
                      ::google::protobuf::Empty* reply) override {
-
         auto agent = mAgents->sensors;
         SensorValue request = *requestPtr;
 
@@ -337,7 +339,6 @@ public:
     Status sendFingerprint(ServerContext* context,
                            const Fingerprint* requestPtr,
                            ::google::protobuf::Empty* reply) override {
-
         auto agent = mAgents->finger;
         Fingerprint request = *requestPtr;
 
@@ -352,8 +353,7 @@ public:
                    const KeyboardEvent* requestPtr,
                    ::google::protobuf::Empty* reply) override {
         KeyboardEvent request = *requestPtr;
-        android::base::ThreadLooper::runOnMainLooper(
-            [this, request]() {
+        android::base::ThreadLooper::runOnMainLooper([this, request]() {
             mKeyEventSender.sendOnThisThread(&request);
         });
         return Status::OK;
@@ -365,10 +365,9 @@ public:
         MouseEvent request = *requestPtr;
         auto agent = mAgents->user_event;
 
-        android::base::ThreadLooper::runOnMainLooper(
-            [agent, request]() {
+        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
             agent->sendMouseEvent(request.x(), request.y(), 0,
-                    request.buttons(), 0);
+                                  request.buttons(), 0);
         });
 
         return Status::OK;
@@ -378,8 +377,7 @@ public:
                      const TouchEvent* requestPtr,
                      ::google::protobuf::Empty* reply) override {
         TouchEvent request = *requestPtr;
-        android::base::ThreadLooper::runOnMainLooper(
-            [this, request]() {
+        android::base::ThreadLooper::runOnMainLooper([this, request]() {
             mTouchEventSender.sendOnThisThread(&request);
         });
         return Status::OK;
@@ -414,20 +412,23 @@ public:
     Status streamScreenshot(ServerContext* context,
                             const ImageFormat* request,
                             ServerWriter<Image>* writer) override {
-
         EventWaiter frameEvent(&gpu_register_shared_memory_callback,
                                &gpu_unregister_shared_memory_callback);
 
         // Make sure we always write the first frame, this can be
         // a completely empty frame if the screen is not active.
         Image first;
-        getScreenshot(context, request, &first);
-        bool clientAvailable = writer->Write(first);
-        bool lastFrameWasEmpty = first.format().width() == 0;
+        bool clientAvailable = !context->IsCancelled();
 
+        if (clientAvailable) {
+            getScreenshot(context, request, &first);
+            clientAvailable = !context->IsCancelled() && writer->Write(first);
+        }
+
+        bool lastFrameWasEmpty = first.format().width() == 0;
         while (clientAvailable) {
             Image reply;
-            const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
+            const auto kTimeToWaitForFrame = std::chrono::milliseconds(125);
 
             // The next call will return the number of frames that are
             // available. 0 means no frame was made available in the given time
@@ -435,7 +436,7 @@ public:
             // most kTimeToWaitForFrame so we can check if the client is still
             // there. (All clients get disconnected on emulator shutdown).
             auto arrived = frameEvent.next(kTimeToWaitForFrame);
-            if (arrived > 0) {
+            if (arrived > 0 && !context->IsCancelled()) {
                 // TODO(jansene): Add metrics around dropped frames/timing?
                 getScreenshot(context, request, &reply);
                 reply.set_seq(frameEvent.current());
@@ -446,7 +447,8 @@ public:
                 // is empty frame. F is frame) [0, ... <nothing> ..., F1, F2,
                 // F3, 0, ...<nothing>... ]
                 bool emptyFrame = reply.format().width() == 0;
-                if (!lastFrameWasEmpty || !emptyFrame) {
+                if (!context->IsCancelled() &&
+                    (!lastFrameWasEmpty || !emptyFrame)) {
                     clientAvailable = writer->Write(reply);
                 }
                 lastFrameWasEmpty = emptyFrame;
@@ -461,11 +463,9 @@ public:
                          Image* reply) override {
         uint32_t width, height;
         bool enabled;
-        bool multiDisplayQueryWorks =
-            mAgents->emu->getMultiDisplay(
-                request->display(), nullptr, nullptr,
-                &width, &height, nullptr, nullptr,
-                &enabled);
+        bool multiDisplayQueryWorks = mAgents->emu->getMultiDisplay(
+                request->display(), nullptr, nullptr, &width, &height, nullptr,
+                nullptr, &enabled);
 
         // TODO(b/151387266): Use new query that uses a shared state for
         // multidisplay
@@ -485,9 +485,9 @@ public:
 
         // TODO(jansene): Not clear if the rotation impacts displays other
         // than 0.
-        mAgents->sensors->getPhysicalParameter(
-                PHYSICAL_PARAMETER_ROTATION, &xaxis, &yaxis, &zaxis,
-                PARAMETER_VALUE_TYPE_CURRENT);
+        mAgents->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_ROTATION,
+                                               &xaxis, &yaxis, &zaxis,
+                                               PARAMETER_VALUE_TYPE_CURRENT);
 
         auto rotation = ScreenshotUtils::coarseRotation(zaxis);
 
@@ -536,6 +536,13 @@ public:
 
         // Screenshots can come from either the gl renderer, or the guest.
         const auto& renderer = android_getOpenglesRenderer();
+
+        // This is an expensive operation, that frequently can get cancelled, so
+        // check availability of the client first.
+        if (context->IsCancelled()) {
+            return Status::CANCELLED;
+        }
+
         android::emulation::Image img = android::emulation::takeScreenshot(
                 desiredFormat, desiredRotation, renderer.get(),
                 mAgents->display->getFrameBuffer, request->display(), newWidth,
@@ -634,14 +641,16 @@ public:
         // We're going to end up waiting for the reply anyway, so
         // wait for it.
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
-            [this, request, reply]() {
-            // We assume that the int mappings are consistent..
-            TelephonyOperation operation = (TelephonyOperation)request.operation();
-            std::string phoneNr = request.number();
-            TelephonyResponse response =
-                    mAgents->telephony->telephonyCmd(operation, phoneNr.c_str());
-            reply->set_response((PhoneResponse_Response)response);
-        });
+                [this, request, reply]() {
+                    // We assume that the int mappings are consistent..
+                    TelephonyOperation operation =
+                            (TelephonyOperation)request.operation();
+                    std::string phoneNr = request.number();
+                    TelephonyResponse response =
+                            mAgents->telephony->telephonyCmd(operation,
+                                                             phoneNr.c_str());
+                    reply->set_response((PhoneResponse_Response)response);
+                });
 
         return Status::OK;
     }
@@ -804,13 +813,6 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     creators.emplace_back(std::make_unique<StdOutLoggingInterceptorFactory>());
     creators.emplace_back(std::make_unique<MetricsInterceptorFactory>());
     builder.experimental().SetInterceptorCreators(std::move(creators));
-
-    // TODO(jansene): It seems that we can easily overload the server with
-    // touch events. if the gRPC server runs out of threads to serve
-    // requests it appears to terminate ungoing requests. If one of those
-    // requests happens to have the event lock we will lock up the emulator.
-    // This is a work around until we have a proper solution.
-    builder.SetSyncServerOption(ServerBuilder::MAX_POLLERS, 1024);
 
     // Allow large messages, as raw screenshots can take up a significant amount
     // of memory.
