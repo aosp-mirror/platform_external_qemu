@@ -86,7 +86,7 @@ static AndroidOptions sTestEnvCmdLineOptions;
 
 // static
 std::vector<const char*> GoldfishOpenglTestEnv::getTransportsToTest() {
-    return { "pipe", };
+    return { "pipe", "asg" };
 }
 
 GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
