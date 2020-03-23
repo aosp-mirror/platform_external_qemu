@@ -239,13 +239,16 @@ void* RendererImpl::addressSpaceGraphicsConsumerCreate(
     android::emulation::asg::ConsumerCallbacks callbacks) {
     auto thread = new RenderThread(context, callbacks);
     thread->start();
+    fprintf(stderr, "%s: create %p\n", __func__, thread);
     return (void*)thread;
 }
 
 void RendererImpl::addressSpaceGraphicsConsumerDestroy(void* consumer) {
     RenderThread* thread = (RenderThread*)consumer;
+    fprintf(stderr, "%s: destroy %p\n", __func__, thread);
     thread->wait();
     delete thread;
+    fprintf(stderr, "%s: destroy %p done\n", __func__, thread);
 }
 
 void RendererImpl::pauseAllPreSave() {
