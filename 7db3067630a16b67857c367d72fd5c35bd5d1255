@@ -46,6 +46,30 @@
       "revId": "7db3067630a16b67857c367d72fd5c35bd5d1255",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28e32554_fadcf0c0",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-03-23T15:27:24Z",
+      "side": 1,
+      "message": "What about the emulator controller service? i.e if webrtc bridge cannot start, can we still control the emulator through EmulatorController when the grpc option is enabled?",
+      "parentUuid": "e2c3ba14_f448bc70",
+      "range": {
+        "startLine": 316,
+        "startChar": 7,
+        "endLine": 316,
+        "endChar": 21
+      },
+      "revId": "7db3067630a16b67857c367d72fd5c35bd5d1255",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
