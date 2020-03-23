@@ -611,6 +611,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                     UNKONWN_EMULATOR_UI_EVENT_TYPE);
                     event->mutable_emulator_ui_event()->set_value(
                             actionsCount);
+                    event->set_kind(
+                            android_studio::AndroidStudioEvent::
+                                    EMULATOR_UI_EVENT);
                     return true;
                 }
                 return false;

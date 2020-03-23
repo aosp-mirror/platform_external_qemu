@@ -515,7 +515,9 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
     }
 
     fillAvdMetrics(event);
-
+    event->set_kind(
+                android_studio::AndroidStudioEvent::
+                    EMULATOR_HOST);
     event->mutable_emulator_host()->set_os_bit_count(
                 System::get()->getHostBitness());
     const AndroidCpuInfoFlags cpuFlags = android::GetCpuInfo().first;

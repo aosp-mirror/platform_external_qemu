@@ -384,6 +384,8 @@ void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
     // Also report some common host machine stats so we can correlate performance with
     // host machine config.
     auto memUsageProto = event->mutable_emulator_performance_stats()->add_memory_usage();
+    event->set_kind(
+        android_studio::AndroidStudioEvent::EMULATOR_PERFORMANCE_STATS);
     memUsageProto->set_resident_memory(stats.memUsage.resident);
     memUsageProto->set_resident_memory_max(stats.memUsage.resident_max);
     memUsageProto->set_virtual_memory(stats.memUsage.virt);

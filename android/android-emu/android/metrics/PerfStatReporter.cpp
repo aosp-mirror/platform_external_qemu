@@ -87,7 +87,8 @@ PerfStatReporter::PerfStatReporter(
 
                 android_studio::EmulatorPerformanceStats* perfStatProto =
                         event->mutable_emulator_performance_stats();
-
+                event->set_kind(
+                    android_studio::AndroidStudioEvent::EMULATOR_PERFORMANCE_STATS);
                 fillProto(perfStatProto);
 
                 CommonReportedInfo::setPerformanceStats(perfStatProto);
