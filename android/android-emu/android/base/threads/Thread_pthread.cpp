@@ -31,6 +31,7 @@ Thread::Thread(ThreadFlags flags, int stackSize)
     : mThread((pthread_t)NULL), mStackSize(stackSize), mFlags(flags) {}
 
 Thread::~Thread() {
+    fprintf(stderr, "%s: call\n", __func__);
     assert(!mStarted || mFinished);
     if ((mFlags & ThreadFlags::Detach) == ThreadFlags::NoFlags && mStarted &&
         !mJoined) {

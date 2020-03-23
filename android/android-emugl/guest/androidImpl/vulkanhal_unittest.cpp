@@ -383,6 +383,43 @@ protected:
         vk->vkGetDeviceQueue(mDevice, mGraphicsQueueFamily, 0, &mQueue);
     }
 
+    void createAnotherVkDevice(VkDevice* device, VkQueue* queue) {
+        float priority = 1.0f;
+
+        VkDeviceQueueCreateInfo dqCi = {
+            VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            0, 0,
+            mGraphicsQueueFamily, 1,
+            &priority,
+        };
+
+        VkDeviceCreateInfo dCi = {
+            VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, 0, 0,
+            1, &dqCi,
+            0, nullptr,  // no layers
+            0, nullptr,  // no extensions
+            nullptr,  // no features
+        };
+
+        std::vector<const char*> externalMemoryExtensions = {
+            "VK_KHR_get_memory_requirements2",
+            "VK_KHR_dedicated_allocation",
+            "VK_KHR_external_memory",
+            "VK_ANDROID_external_memory_android_hardware_buffer",
+        };
+
+        if (mDeviceHasExternalMemorySupport) {
+            dCi.enabledExtensionCount =
+                (uint32_t)externalMemoryExtensions.size();
+            dCi.ppEnabledExtensionNames =
+            externalMemoryExtensions.data();
+        }
+
+        EXPECT_EQ(VK_SUCCESS, vk->vkCreateDevice(mPhysicalDevice, &dCi,
+                                             nullptr, device));
+        vk->vkGetDeviceQueue(*device, mGraphicsQueueFamily, 0, queue);
+    }
+
     void teardownVulkan() {
         vk->vkDestroyDevice(mDevice, nullptr);
         vk->vkDestroyInstance(mInstance, nullptr);
@@ -448,14 +485,14 @@ protected:
             AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
             AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
             AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN) {
-    
+
         AHardwareBuffer_Desc desc = {
             kWindowSize, kWindowSize, 1,
             AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
             usage,
             4, // stride ignored for allocate; don't check this
         };
-    
+
         AHardwareBuffer* buf = nullptr;
         AHardwareBuffer_allocate(&desc, &buf);
 
@@ -508,15 +545,15 @@ protected:
             VK_STRUCTURE_TYPE_IMPORT_ANDROID_HARDWARE_BUFFER_INFO_ANDROID,
             dedicated, ahw,
         };
-    
+
         VkMemoryAllocateInfo allocInfo = {
             VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, &importInfo,
             allocSize, memoryTypeIndex,
         };
-    
+
         VkDeviceMemory memory;
         VkResult res = vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, pMemory);
-    
+
         EXPECT_EQ(VK_SUCCESS, res);
     }
 
@@ -531,7 +568,7 @@ protected:
             VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO, 0,
             VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID,
         };
-    
+
         VkImageCreateInfo testImageCi = {
             VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
             (const void*)&extMemImgCi, 0,
@@ -544,7 +581,7 @@ protected:
             0, nullptr /* shared queue families */,
             VK_IMAGE_LAYOUT_UNDEFINED,
         };
-    
+
         EXPECT_EQ(VK_SUCCESS,
             vk->vkCreateImage(
                 mDevice, &testImageCi, nullptr, pImage));
@@ -936,7 +973,7 @@ TEST_P(VulkanHalTest, HostVisibleAllocations) {
 
     while (smallAllocCount < kNumTrialsSmall ||
            largeAllocCount < kNumTrialsLarge) {
-        
+
         VkDeviceMemory mem = VK_NULL_HANDLE;
         void* hostPtr = nullptr;
 
@@ -1260,6 +1297,38 @@ TEST_P(VulkanHalTest, SeparateThreadCommandBufferBeginEnd) {
 
     vk->vkFreeCommandBuffers(mDevice, pool, 1, &cb);
     vk->vkDestroyCommandPool(mDevice, pool, nullptr);
+}
+
+TEST_P(VulkanHalTest, ContextDestroyPendingUnmapMemory) {
+    FunctorThread allocMapUnmapThread([this]() {
+        VkDevice device;
+        VkQueue queue;
+        createAnotherVkDevice(&device, &queue);
+
+        static constexpr VkDeviceSize kTestAlloc = 16 * 1024;
+        VkMemoryAllocateInfo allocInfo = {
+            VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
+            kTestAlloc,
+            mHostVisibleMemoryTypeIndex,
+        };
+        VkDeviceMemory mem;
+        EXPECT_EQ(VK_SUCCESS, vk->vkAllocateMemory(device, &allocInfo, nullptr, &mem));
+
+        void* hostPtr;
+        EXPECT_EQ(VK_SUCCESS, vk->vkMapMemory(device, mem, 0, VK_WHOLE_SIZE, 0, &hostPtr));
+
+        memset(hostPtr, 0xff, kTestAlloc);
+
+        vk->vkUnmapMemory(device, mem);
+        vk->vkFreeMemory(device, mem, nullptr);
+
+        vk->vkDestroyDevice(device, nullptr);
+
+        fprintf(stderr, "%s: thread should exit now\n", __func__);
+    });
+
+    allocMapUnmapThread.start();
+    allocMapUnmapThread.wait();
 }
 
 INSTANTIATE_TEST_SUITE_P(
