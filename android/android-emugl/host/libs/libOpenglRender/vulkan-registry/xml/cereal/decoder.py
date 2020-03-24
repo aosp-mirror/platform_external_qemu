@@ -80,6 +80,12 @@ size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream) {
 READ_STREAM = "vkReadStream"
 WRITE_STREAM = "vkStream"
 
+# Driver workarounds for APIs that don't work well multithreaded
+driver_workarounds_global_lock_apis = [ \
+    "vkCreatePipelineLayout",
+    "vkDestroyPipelineLayout",
+]
+
 def emit_param_decl_for_reading(param, cgen):
     if param.staticArrExpr:
         cgen.stmt(
@@ -235,7 +241,13 @@ def emit_dispatch_call(api, cgen):
             customParam = "unboxed_%s" % p.paramName
         customParams.append(customParam)
 
+    if api.name in driver_workarounds_global_lock_apis:
+        cgen.stmt("m_state->lock()")
+
     cgen.vkApiCall(api, customPrefix="vk->", customParameters=customParams)
+
+    if api.name in driver_workarounds_global_lock_apis:
+        cgen.stmt("m_state->unlock()")
 
 def emit_global_state_wrapped_call(api, cgen):
     customParams = ["&m_pool"] + list(map(lambda p: p.paramName, api.parameters))
