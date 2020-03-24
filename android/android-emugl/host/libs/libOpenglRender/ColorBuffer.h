@@ -304,7 +304,6 @@ private:
     GLuint m_yuv_conversion_fbo = 0;  // FBO to offscreen-convert YUV to RGB
     GLuint m_scaleRotationFbo = 0;  // FBO to read scaled rotation pixels
     std::unique_ptr<YUVConverter> m_yuv_converter;
-    std::vector<uint8_t> m_yuv_buf;
     HandleType mHndl;
 
     GLsync m_sync = nullptr;

@@ -54,7 +54,8 @@ constexpr uint32_t kFRAMEWORK_FORMAT_NV12 = 3;
 
 MediaHostRenderer::TextureFrame MediaHostRenderer::getTextureFrame(int w,
                                                                    int h) {
-    H264_DPRINT("calling %s %d", __func__, __LINE__);
+    H264_DPRINT("calling %s %d for tex of w %d h %d\n", __func__, __LINE__, w,
+                h);
     if (mFramePool.empty()) {
         std::vector<uint32_t> textures(2 * kFRAME_POOL_SIZE);
         mVirtioGpuOps->create_yuv_textures(kFRAMEWORK_FORMAT_NV12,

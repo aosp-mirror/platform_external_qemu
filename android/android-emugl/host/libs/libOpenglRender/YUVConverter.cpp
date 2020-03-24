@@ -27,6 +27,16 @@
     assert(false); \
 } while(0)
 
+#define YUV_CONVERTER_DEBUG 0
+
+#if YUV_CONVERTER_DEBUG
+#define DDD(fmt, ...)                                                     \
+    fprintf(stderr, "yuv-converter: %s:%d " fmt "\n", __func__, __LINE__, \
+            ##__VA_ARGS__);
+#else
+#define DDD(fmt, ...)
+#endif
+
 enum YUVInterleaveDirection {
     YUVInterleaveDirectionVU = 0,
     YUVInterleaveDirectionUV = 1,
@@ -126,6 +136,9 @@ void YUVConverter::createYUVGLTex(GLenum texture_unit,
     s_gles2.glBindTexture(GL_TEXTURE_2D, *texName_out);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    GLint unprevAlignment = 0;
+    s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &unprevAlignment);
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     if (uvInterleaved) {
         s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA,
                              width, height, 0,
@@ -137,7 +150,34 @@ void YUVConverter::createYUVGLTex(GLenum texture_unit,
                              GL_LUMINANCE, GL_UNSIGNED_BYTE,
                              NULL);
     }
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, unprevAlignment);
     s_gles2.glActiveTexture(GL_TEXTURE0);
+}
+
+static void readYUVTex(GLuint tex, void* pixels, bool uvInterleaved) {
+    GLuint prevTexture = 0;
+    s_gles2.glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&prevTexture);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, tex);
+    GLint prevAlignment = 0;
+    s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
+    s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    if (uvInterleaved) {
+        if (s_gles2.glGetTexImage) {
+            s_gles2.glGetTexImage(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA,
+                                  GL_UNSIGNED_BYTE, pixels);
+        } else {
+            DDD("empty glGetTexImage");
+        }
+    } else {
+        if (s_gles2.glGetTexImage) {
+            s_gles2.glGetTexImage(GL_TEXTURE_2D, 0, GL_LUMINANCE,
+                                  GL_UNSIGNED_BYTE, pixels);
+        } else {
+            DDD("empty glGetTexImage");
+        }
+    }
+    s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, prevTexture);
 }
 
 // subUpdateYUVGLTex() updates a given YUV texture
@@ -152,6 +192,10 @@ static void subUpdateYUVGLTex(GLenum texture_unit,
                               void* pixels, bool uvInterleaved) {
     s_gles2.glActiveTexture(texture_unit);
     s_gles2.glBindTexture(GL_TEXTURE_2D, tex);
+    GLint unprevAlignment = 0;
+    s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &unprevAlignment);
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     if (uvInterleaved) {
         s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0,
                                 x, y, width, height,
@@ -163,6 +207,8 @@ static void subUpdateYUVGLTex(GLenum texture_unit,
                                 GL_LUMINANCE, GL_UNSIGNED_BYTE,
                                 pixels);
     }
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, unprevAlignment);
+
     s_gles2.glActiveTexture(GL_TEXTURE0);
 }
 
@@ -473,7 +519,12 @@ static void doYUVConversionDraw(GLuint program,
 // initialize(): allocate GPU memory for YUV components,
 // and create shaders and vertex data.
 YUVConverter::YUVConverter(int width, int height, FrameworkFormat format)
-    : mWidth(width), mHeight(height), mFormat(format) {}
+    : mWidth(width),
+      mHeight(height),
+      mFormat(format),
+      mCbWidth(width),
+      mCbHeight(height),
+      mCbFormat(format) {}
 
 void YUVConverter::init(int width, int height, FrameworkFormat format) {
     uint32_t yoff, uoff, voff, ywidth, cwidth, cheight;
@@ -481,6 +532,9 @@ void YUVConverter::init(int width, int height, FrameworkFormat format) {
                   &yoff, &uoff, &voff,
                   &ywidth, &cwidth);
     cheight = height / 2;
+
+    mWidth = width;
+    mHeight = height;
 
     if (!mYtex)
         createYUVGLTex(GL_TEXTURE0, ywidth, height, &mYtex, false);
@@ -562,6 +616,59 @@ void YUVConverter::restoreGLState() {
     s_gles2.glUseProgram(mCurrProgram);
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mCurrVbo);
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCurrIbo);
+}
+
+void YUVConverter::readPixels(uint8_t* pixels, uint32_t pixels_size) {
+    int width = mWidth;
+    int height = mHeight;
+
+    DDD("calling %s %d\n texture: width %d height %d\n", __func__, __LINE__,
+        width, height);
+    {
+        uint32_t align = (mFormat == FRAMEWORK_FORMAT_YV12) ? 16 : 1;
+        uint32_t yStride = (width + (align - 1)) & ~(align - 1);
+        uint32_t uvStride = (yStride / 2 + (align - 1)) & ~(align - 1);
+        uint32_t uvHeight = height / 2;
+        uint32_t dataSize = yStride * height + 2 * (uvHeight * uvStride);
+        if (pixels_size != dataSize) {
+            DDD("failed %s %d\n", __func__, __LINE__);
+            return;
+        }
+        DDD("%s %d reading %d bytes\n", __func__, __LINE__, (int)dataSize);
+    }
+
+    uint32_t yoff, uoff, voff, ywidth, cwidth;
+    getYUVOffsets(width, height, mFormat, &yoff, &uoff, &voff, &ywidth,
+                  &cwidth);
+
+    if (mFormat == FRAMEWORK_FORMAT_YUV_420_888) {
+        if (emugl::emugl_feature_is_enabled(
+                    android::featurecontrol::YUV420888toNV21)) {
+            readYUVTex(mVUtex, pixels + voff, true);
+            DDD("done");
+        } else {
+            readYUVTex(mUtex, pixels + uoff, false);
+            readYUVTex(mVtex, pixels + voff, false);
+            DDD("done");
+        }
+    } else if (mFormat == FRAMEWORK_FORMAT_NV12) {
+        readYUVTex(mUVtex, pixels + uoff, true);
+        if (mCbFormat == FRAMEWORK_FORMAT_YUV_420_888) {
+            // do a conversion here inplace: NV12 to YUV 420 888
+            uint8_t* scrath_memory = pixels;
+            NV12ToYUV420PlanarInPlaceConvert(width, height, pixels,
+                                             scrath_memory);
+            DDD("done");
+        }
+        DDD("done");
+    } else if (mFormat == FRAMEWORK_FORMAT_YV12) {
+            readYUVTex(mUtex, pixels + uoff, false);
+            readYUVTex(mVtex, pixels + voff, false);
+            DDD("done");
+    }
+    // read Y the last, because we can might used it as a scratch space
+    readYUVTex(mYtex, pixels + yoff, false);
+    DDD("done");
 }
 
 void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
