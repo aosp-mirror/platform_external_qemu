@@ -18,7 +18,7 @@
 #ifdef __APPLE__
 #else
 // for Linux and Window, Cuvid is available
-//#include "android/emulation/MediaVpxDecoderCuvid.h"
+#include "android/emulation/MediaVpxDecoderCuvid.h"
 #endif
 #include "android/base/system/System.h"
 
@@ -47,13 +47,13 @@ MediaVpxDecoderPlugin* makeDecoderPlugin(uint64_t pluginid,
                                          VpxPingInfoParser parser,
                                          MediaCodecType type) {
 #ifdef __APPLE__
-#elif HAVE_CUDA_READY
+#else
     auto useCuvidEnv = android::base::System::getEnvironmentVariable(
             "ANDROID_EMU_CODEC_USE_CUVID_DECODER");
     if (useCuvidEnv != "") {
         VPX_DPRINT("Using Cuvid decoder on Linux/Windows");
         if (MediaVpxDecoderCuvid::initCudaDrivers()) {
-            return new MediaVpxDecoderCuvid(pluginid, parser);
+            return new MediaVpxDecoderCuvid(parser, type);
         }
     }
 #endif
