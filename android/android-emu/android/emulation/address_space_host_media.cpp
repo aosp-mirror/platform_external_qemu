@@ -145,7 +145,7 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
     auto slot = getAddrSlot(info->metadata);
     uint64_t offSetAddr = slot << 20;
 
-    fprintf(stderr, "Got media request (type=%u, op=%u, slot=%lld)",
+    AS_DEVICE_DPRINT("Got media request (type=%u, op=%u, slot=%lld)",
             static_cast<uint8_t>(codecType), static_cast<uint8_t>(op),
             (long long)(getAddrSlot(info->metadata)));
 

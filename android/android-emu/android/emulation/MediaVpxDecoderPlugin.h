@@ -48,6 +48,7 @@ protected:
         PLUGIN_TYPE_NONE = 0,
         PLUGIN_TYPE_LIBVPX = 1,
         PLUGIN_TYPE_CUVID = 2,
+        PLUGIN_TYPE_FFMPEG = 3,
     };
 
     // this is required by save/load

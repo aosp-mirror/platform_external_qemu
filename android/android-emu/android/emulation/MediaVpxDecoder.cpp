@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/MediaVpxDecoder.h"
+#include "android/emulation/MediaVpxDecoderFfmpeg.h"
 #include "android/emulation/MediaVpxDecoderLibvpx.h"
 #include "android/emulation/VpxPingInfoParser.h"
 #ifdef __APPLE__
@@ -29,7 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MEDIA_VPX_DEBUG 1
+#define MEDIA_VPX_DEBUG 0
 
 #if MEDIA_VPX_DEBUG
 #define VPX_DPRINT(fmt, ...)                                        \
@@ -57,7 +58,8 @@ MediaVpxDecoderPlugin* makeDecoderPlugin(uint64_t pluginid,
         }
     }
 #endif
-    return new MediaVpxDecoderLibvpx(parser, type);
+    //return new MediaVpxDecoderLibvpx(parser, type);
+    return new MediaVpxDecoderFfmpeg(parser, type);
 }
 
 };  // namespace

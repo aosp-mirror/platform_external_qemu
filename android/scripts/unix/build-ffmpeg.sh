@@ -183,6 +183,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-decoders \
                 --enable-decoder=gif  \
                 --enable-decoder=libvpx_vp9 \
+                --enable-decoder=vp8 \
+                --enable-decoder=vp9 \
                 --enable-decoder=vorbis \
                 --enable-decoder=h264
 
