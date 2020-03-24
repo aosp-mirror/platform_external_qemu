@@ -1,0 +1,92 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002081482",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1261747?revision\u003d5",
+      "fixSuggestions": [
+        {
+          "fixId": "32c92a66_b29a5420",
+          "description": "Change to \"android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+              "range": {
+                "startLine": 455,
+                "startChar": 38,
+                "endLine": 455,
+                "endChar": 51
+              },
+              "replacement": "incompatible"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "619b9082_f8fb72f4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-03-24T02:50:12Z",
+      "side": 1,
+      "message": "Common typo found: \"incompatiable\" -- should it be \"incompatible\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 455,
+        "startChar": 38,
+        "endLine": 455,
+        "endChar": 51
+      },
+      "revId": "41fb73a743bb04e26344db7d11b500e8961112ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002081482",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1261747?revision\u003d5",
+      "fixSuggestions": [
+        {
+          "fixId": "e305d69b_427a0a0b",
+          "description": "Change to \"android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+              "range": {
+                "startLine": 488,
+                "startChar": 38,
+                "endLine": 488,
+                "endChar": 51
+              },
+              "replacement": "incompatible"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "d7949945_8131bafb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-03-24T02:50:12Z",
+      "side": 1,
+      "message": "Common typo found: \"incompatiable\" -- should it be \"incompatible\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 488,
+        "startChar": 38,
+        "endLine": 488,
+        "endChar": 51
+      },
+      "revId": "41fb73a743bb04e26344db7d11b500e8961112ba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
