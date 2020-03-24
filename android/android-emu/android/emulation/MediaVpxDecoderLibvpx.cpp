@@ -58,7 +58,7 @@ void MediaVpxDecoderLibvpx::decodeFrame(void* ptr) {
 
     const uint8_t* data = param.p_data;
     unsigned int len = param.size;
-    void* user_data = (void*)(*(uint64_t*)param.user_priv);
+    void* user_data = (void*)(param.user_priv);
 
     VPX_DPRINT("calling vpx_codec_decode data %p datalen %d userdata %p", data,
                (int)len, user_data);

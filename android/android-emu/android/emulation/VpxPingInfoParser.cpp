@@ -71,7 +71,7 @@ void VpxPingInfoParser::parseDecodeFrameParams(void* ptr,
     uint64_t offset = *(uint64_t*)(xptr + 1 * 8);
     param.p_data = xptr + offset;
     param.size = *(size_t*)(xptr + 2 * 8);
-    param.user_priv = (uint64_t)(xptr + 3 * 8);
+    param.user_priv = *(uint64_t*)(xptr + 3 * 8);
 }
 
 void VpxPingInfoParser::parseGetImageParams(void* ptr, GetImageParam& param) {

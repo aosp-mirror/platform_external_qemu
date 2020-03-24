@@ -102,7 +102,7 @@ void MediaVpxDecoderCuvid::decodeFrame(void* ptr) {
     const uint8_t* frame = param.p_data;
     size_t szBytes = param.size;
     // TODO: fix the guest to use pts directly
-    uint64_t inputPts = (uint64_t)param.user_priv;
+    uint64_t inputPts = param.user_priv;  // param.user_priv;
 
     decodeFrameInternal(frame, szBytes, inputPts);
 }
@@ -137,7 +137,7 @@ void MediaVpxDecoderCuvid::getImage(void* ptr) {
         mImageReady = !mSavedFrames.empty();
         if (!mImageReady) {
             VPX_DPRINT("%s: no new frame yet", __func__);
-            *retErr = 0;
+            *retErr = 1;
             return;
         }
 
@@ -194,7 +194,7 @@ void MediaVpxDecoderCuvid::getImage(void* ptr) {
     }
 
     mImageReady = false;
-    *retErr = myOutputHeight * myOutputWidth * 3 / 2;
+    *retErr = 0;
     *retPts = mOutputPts;
     VPX_DPRINT("Copying completed pts %lld", (long long)mOutputPts);
 }
