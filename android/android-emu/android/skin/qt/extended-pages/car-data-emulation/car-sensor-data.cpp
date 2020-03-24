@@ -10,17 +10,26 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
 
-#include <stdint.h>                                      // for int32_t
-#include <QCheckBox>                                     // for QCheckBox
-#include <QComboBox>                                     // for QComboBox
-#include <QLabel>                                        // for QLabel
-#include <QSlider>                                       // for QSlider
-#include <utility>                                       // for move
+#include <stdint.h>  // for int32_t
 
-#include "android/emulation/proto/VehicleHalProto.pb.h"  // for EmulatorMessage
-#include "android/utils/debug.h"                         // for VERBOSE_PRINT
-#include "ui_car-sensor-data.h"                          // for CarSensorData
-#include "vehicle_constants_generated.h"                 // for VehicleIgnit...
+#include <QByteArray>     // for QByteArray
+#include <QCheckBox>      // for QCheckBox
+#include <QComboBox>      // for QComboBox
+#include <QFileDialog>    // for QFileDialog
+#include <QJsonArray>     // for QJsonArray
+#include <QJsonDocument>  // for QJsonDocument
+#include <QJsonObject>    // for QJsonObject
+#include <QJsonValue>     // for QJsonValue
+#include <QLabel>         // for QLabel
+#include <QSlider>        // for QSlider
+#include <QTextStream>    // for QSlider
+#include <utility>        // for move
+
+#include "android/base/Log.h"
+#include "android/skin/qt/error-dialog.h"  // for showErrorDialog
+#include "android/utils/debug.h"           // for VERBOSE_PRINT
+#include "ui_car-sensor-data.h"            // for CarSensorData
+#include "vehicle_constants_generated.h"   // for VehicleIgnit...
 
 class QWidget;
 
@@ -31,14 +40,23 @@ using std::string;
 using emulator::EmulatorMessage;
 using emulator::MsgType;
 using emulator::Status;
-using emulator::VehicleProperty;
-using emulator::VehiclePropValue;
+using emulator::TimedEmulatorMessages;
 using emulator::VehicleGear;
 using emulator::VehicleIgnitionState;
+using emulator::VehicleProperty;
+using emulator::VehiclePropValue;
+using emulator::VhalEventLoaderThread;
+
+static constexpr int64_t VHAL_REPLAY_INTERVAL = 1000;
 
 CarSensorData::CarSensorData(QWidget* parent)
     : QWidget(parent), mUi(new Ui::CarSensorData) {
     mUi->setupUi(this);
+    QObject::connect(&mTimer, &QTimer::timeout, this,
+                     &CarSensorData::VhalTimeout);
+    mVhalEventLoader.reset(VhalEventLoaderThread::newInstance(
+        this, SLOT(vhalEventThreadStarted()),
+        SLOT(startupVhalEventThreadFinished(QString, bool, QString))));
 }
 
 static const enum VehicleGear sComboBoxGearValues[] = {
@@ -55,6 +73,24 @@ static EmulatorMessage makeSetPropMsg() {
     emulatorMsg.set_msg_type(MsgType::SET_PROPERTY_CMD);
     emulatorMsg.set_status(Status::RESULT_OK);
     return emulatorMsg;
+}
+
+void CarSensorData::VhalTimeout() {
+    if (mTimedEmulatorMessages.getStatus() != TimedEmulatorMessages::START) {
+        mTimer.stop();
+        D("CarSensorData timer stop");
+        return;
+    }
+    std::vector<emulator::EmulatorMessage> events =
+        mTimedEmulatorMessages.getEvents(VHAL_REPLAY_INTERVAL);
+    D("test play button size of events %d", events.size());
+    int realIndex = mTimedEmulatorMessages.getCurrentIndex() - events.size();
+    for (auto event : events) {
+        string log = "Send event from json index: " + std::to_string(realIndex);
+        D("Send event from json, ind d%", realIndex);
+        realIndex++;
+        mSendEmulatorMsg(event, log);
+    }
 }
 
 void CarSensorData::sendGearChangeMsg(const int gear, const string& gearName) {
@@ -148,6 +184,33 @@ void CarSensorData::on_comboBox_gear_currentIndexChanged(int index) {
                       mUi->comboBox_gear->currentText().toStdString());
 }
 
+void CarSensorData::on_button_loadrecord_clicked() {
+    D("test load button");
+    mVhalEventLoader.reset(VhalEventLoaderThread::newInstance(
+        this, SLOT(vhalEventThreadStarted()),
+        SLOT(vhalEventThreadFinished(QString, bool, QString))));
+    D("test load button after reset");
+
+    QString fileName = QFileDialog::getOpenFileName(
+        this, tr("Open Json File"), ".", tr("Json files (*.json)"));
+    D("test load button after getfilename");
+
+    if (fileName.isNull()) return;
+    D(fileName.toStdString().c_str());
+    parseEventsFromJsonFile(fileName);
+}
+
+void CarSensorData::on_button_playrecord_clicked() {
+    D("test play button");
+    mTimedEmulatorMessages.setStatus(TimedEmulatorMessages::START);
+    mTimer.start(VHAL_REPLAY_INTERVAL);
+}
+
+void CarSensorData::parseEventsFromJsonFile(QString jsonPath) {
+    D("VhalEventLoaderThread parse from json");
+    mVhalEventLoader->loadVhalEventFromFile(jsonPath, &mTimedEmulatorMessages);
+}
+
 void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
     if (emulatorMsg.prop_size() == 0 && emulatorMsg.value_size() == 0) {
         return;
@@ -226,3 +289,270 @@ int CarSensorData::getIndexFromVehicleGear(int gear) {
     }
     return len - 1;
 }
+
+void VhalEventLoaderThread::loadVhalEventFromFile(
+    const QString& file_name, TimedEmulatorMessages* events) {
+    D("VhalEventLoaderThread start");
+
+    mFileName = file_name;
+    mTimedEmulatorMessages = events;
+    start();
+}
+
+void VhalEventLoaderThread::run() {
+    D("VhalEventLoaderThread run");
+    if (mFileName.isEmpty() || mTimedEmulatorMessages == nullptr) {
+        D("VhalEventLoaderThread file is empty");
+        emit(loadingFinished(mFileName, false, tr("No file to load")));
+        return;
+    }
+    D("VhalEventLoaderThread find file");
+    bool ok = false;
+    std::string err_str;
+
+    QFileInfo file_info(mFileName);
+    mTimedEmulatorMessages->clear();
+    auto suffix = file_info.suffix().toLower();
+    if (suffix == "json") {
+        D("VhalEventLoaderThread start read");
+        ok = parseJsonFile(mFileName.toStdString().c_str(), mTimedEmulatorMessages);
+    } else {
+        err_str = tr("Unknown file type").toStdString();
+        D("VhalEventLoaderThread error %s", err_str.c_str());
+    }
+
+    auto err_qstring = QString::fromStdString(err_str);
+    D("VhalEventLoaderThread finish parse");
+    emit(loadingFinished(mFileName, ok, err_qstring));
+}
+
+bool VhalEventLoaderThread::parseJsonFile(
+    const char* filePath, TimedEmulatorMessages* timedEmulatorMessages) {
+    QString jsonString;
+    if (filePath) {
+        jsonString = readJsonStringFromFile(filePath);
+        D("read success stub");
+    }
+
+    QJsonDocument eventDoc = QJsonDocument::fromJson(jsonString.toUtf8());
+    if (eventDoc.isNull()) {
+        D("read faile stub");
+        return false;
+    } else {
+        return loadEmulatorEvents(eventDoc, timedEmulatorMessages);
+    }
+    return false;
+}
+
+bool VhalEventLoaderThread::loadEmulatorEvents(
+    const QJsonDocument& eventDoc,
+    TimedEmulatorMessages* timedEmulatorMessages) {
+    if (eventDoc.isNull()) {
+        D("loadEmulatorEvents could not decode the route Json");
+        return false;
+    }
+    QJsonObject eventsJson = eventDoc.object();
+    QJsonArray eventArray = eventsJson.value("events").toArray();
+
+    for (int eventIdx = 0; eventIdx < eventArray.size(); eventIdx++) {
+        QJsonObject eventObject = eventArray.at(eventIdx).toObject();
+        QJsonDocument Doc(eventObject);
+        QByteArray ba = Doc.toJson();
+        QJsonObject sensorrecord = eventObject.value("sensor_records").toObject();
+        QJsonObject carPropertyValues =
+            sensorrecord.value("car_property_values").toObject();
+        int propID = carPropertyValues.value("key").toInt();
+
+        EmulatorMessage emulatorMsg = makeSetPropMsg();
+        VehiclePropValue* value = emulatorMsg.add_value();
+        value->set_prop(static_cast<int32_t>(propID));
+
+        int prop = carPropertyValues.value("key").toInt();
+        int areaId =
+            carPropertyValues.value("value").toObject().value("area_id").toInt();
+        QJsonObject propertyValue = carPropertyValues.value("value").toObject();
+        int type = 0;
+        if (propertyValue.contains("int32_values")) {
+        value->add_int32_values(propertyValue.value("int32_values").toInt());
+        } else if (propertyValue.contains("float_values")) {
+        value->add_float_values(
+            (float)propertyValue.value("float_values").toDouble());
+        }
+
+        char* error = nullptr;
+        timedEmulatorMessages->addEvents(
+            strtol(
+                sensorrecord.value("timestamp_ns").toString().toStdString().c_str(),
+                &error, 0),
+            emulatorMsg);
+
+        D("parse json timestampe is %s",
+        sensorrecord.value("timestamp_ns").toString().toStdString().c_str());
+        D("parse json key %d", sensorrecord.value("car_property_values")
+                                .toObject()
+                                .value("key")
+                                .toInt());
+        D("parse json areaid %d", sensorrecord.value("car_property_values")
+                                    .toObject()
+                                    .value("value")
+                                    .toObject()
+                                    .value("area_id")
+                                    .toInt());
+    }
+
+    D("loadEmulatorEvents success stub");
+    return true;
+}
+
+QString VhalEventLoaderThread::readJsonStringFromFile(const char* filePath) {
+    QString fullContents;
+    if (filePath) {
+        QFile jsonFile(filePath);
+        if (jsonFile.open(QFile::ReadOnly | QFile::Text)) {
+        QTextStream jsonStream(&jsonFile);
+        fullContents = jsonStream.readAll();
+        jsonFile.close();
+        }
+        D("what is readed");
+        D(fullContents.toStdString().c_str());
+    }
+    return fullContents;
+}
+
+VhalEventLoaderThread* VhalEventLoaderThread::newInstance(
+    const QObject* handler, const char* started_slot,
+    const char* finished_slot) {
+    D("VhalEventLoaderThread newinstance");
+    VhalEventLoaderThread* new_instance = new VhalEventLoaderThread();
+
+    connect(new_instance, SIGNAL(started()), handler, started_slot);
+    D("VhalEventLoaderThread connect start()");
+
+    connect(new_instance, SIGNAL(loadingFinished(QString, bool, QString)),
+            handler, finished_slot);
+    D("VhalEventLoaderThread connect loadingfinished");
+
+
+    // Make sure new_instance gets cleaned up after the thread exits.
+    connect(new_instance, &QThread::finished, new_instance,
+            &QObject::deleteLater);
+    D("VhalEventLoaderThread connect thread finished");
+
+
+    return new_instance;
+}
+
+void CarSensorData::vhalEventThreadStarted() {
+    D("CarSensorData vhalEventThreadStarted");
+
+    // Prevent the user from initiating a load gpx/kml while another load is
+    // already in progress
+    mUi->button_loadrecord->setEnabled(false);
+    mUi->button_playrecord->setEnabled(false);
+
+    // setButtonEnabled(mUi->button_loadrecord, false);
+    // setButtonEnabled(mUi->button_playrecord, false);
+    mNowLoadingVhalEvent = true;
+}
+
+void CarSensorData::startupVhalEventThreadFinished(QString file_name, bool ok,
+                                                   QString error_message) {
+    D("CarSensorData startupVhalEventThreadFinished");
+    // on startup, we silently ignore the previously remebered event data file being
+    // missing or malformed.
+    finishVhalEventLoading(file_name, ok, error_message, true);
+}
+
+void CarSensorData::vhalEventThreadFinished(QString file_name, bool ok,
+                                                   QString error_message) {
+    D("CarSensorData eventDataThreadFinished");
+    // on startup, we silently ignore the previously remebered event data file being
+    // missing or malformed.
+    finishVhalEventLoading(file_name, ok, error_message, false);
+}
+
+void CarSensorData::finishVhalEventLoading(const QString& file_name, bool ok,
+                                           const QString& error_message,
+                                           bool ignore_error) {
+    D("CarSensorData finishVhalEventLoading");
+    mVhalEventLoader.reset();
+    if (!ok) {
+        if (!ignore_error) {
+        showErrorDialog(error_message, tr("Vhal EVENT Parser"));
+        }
+        updateControlsAfterLoading();
+        return;
+    }
+}
+
+void CarSensorData::updateControlsAfterLoading() {
+    mUi->button_loadrecord->setEnabled(true);
+    mUi->button_playrecord->setEnabled(true);
+    mNowLoadingVhalEvent = false;
+}
+
+std::vector<emulator::EmulatorMessage> TimedEmulatorMessages::getEvents(
+    int64_t interval) {
+    std::vector<emulator::EmulatorMessage> res;
+    D("TimedEmulatorMessages checking playing %d, %d", mCurrIndex,
+        mEmulatorMessages.size());
+
+    if (mTimestampes.size() != mEmulatorMessages.size()) {
+        D("TimedEmulatorMessages size incompatible");
+        clear();
+        return res;
+    }
+    if (mCurrIndex == mEmulatorMessages.size()) {
+        D("TimedEmulatorMessages end playing %d, %d", mCurrIndex,
+        mEmulatorMessages.size());
+        mCurrIndex = 0;
+        mBaseTimeStamp = -1;
+        mStatus = STOP;
+        return res;
+    }
+
+    int64_t nextTimeStamp = mBaseTimeStamp + (int64_t)interval;
+
+    for (; mCurrIndex < mEmulatorMessages.size(); mCurrIndex++) {
+        int64_t timestamp = mTimestampes.at(mCurrIndex);
+        D("TimedEmulatorMessages checking timestamp %lld, %lld, %lld",
+        (long long)timestamp, (long long)mBaseTimeStamp,
+        (long long)nextTimeStamp);
+        if (timestamp >= mBaseTimeStamp && timestamp < nextTimeStamp) {
+        D("Found one from %lld", timestamp);
+        res.push_back(mEmulatorMessages.at(mCurrIndex));
+        } else {
+        break;
+        }
+    }
+    mBaseTimeStamp = nextTimeStamp;
+    return res;
+}
+
+void TimedEmulatorMessages::addEvents(int64_t timestamp,
+                                      emulator::EmulatorMessage& msg) {
+    if (mBaseTimeStamp == -1) {
+        mBaseTimeStamp = timestamp;
+    }
+    if (mTimestampes.size() != mEmulatorMessages.size()) {
+        D("TimedEmulatorMessages size incompatible");
+        return;
+    }
+    mEmulatorMessages.push_back(msg);
+    mTimestampes.push_back(timestamp);
+}
+
+void TimedEmulatorMessages::clear() {
+    mEmulatorMessages.clear();
+    mTimestampes.clear();
+    mCurrIndex = 0;
+    mBaseTimeStamp = -1;
+}
+
+TimedEmulatorMessages::PlayStatus TimedEmulatorMessages::getStatus() {
+    return mStatus;
+}
+
+void TimedEmulatorMessages::setStatus(PlayStatus status) { mStatus = status; }
+
+int TimedEmulatorMessages::getCurrentIndex() { return mCurrIndex; }

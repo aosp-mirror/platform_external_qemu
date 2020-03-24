@@ -10,19 +10,74 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include <qobjectdefs.h>         // for Q_OBJECT, slots
-#include <QString>               // for QString
-#include <QWidget>               // for QWidget
-#include <functional>            // for function
-#include <memory>                // for unique_ptr
-#include <string>                // for string
+#include <qobjectdefs.h>  // for Q_OBJECT, slots
 
-#include "ui_car-sensor-data.h"  // for CarSensorData
+#include <QString>     // for QString
+#include <QThread>     // for QThread
+#include <QTimer>      // for QTimer
+#include <QWidget>     // for QWidget
+#include <functional>  // for function
+#include <memory>      // for unique_ptr
+#include <string>      // for string
+
+#include "android/emulation/proto/VehicleHalProto.pb.h"  // for EmulatorMessage
+#include "ui_car-sensor-data.h"                          // for CarSensorData
 
 class QObject;
 class QWidget;
 
 namespace emulator {
+
+class TimedEmulatorMessages {
+public:
+    enum PlayStatus { STOP, START, PAUSE };
+
+    std::vector<emulator::EmulatorMessage> getEvents(int64_t interval);
+    void addEvents(int64_t timestamp, emulator::EmulatorMessage& msg);
+    void clear();
+    PlayStatus getStatus();
+    void setStatus(PlayStatus status);
+    int getCurrentIndex();
+
+private:
+    std::vector<emulator::EmulatorMessage> mEmulatorMessages;
+    std::vector<int64_t> mTimestampes;
+    int mCurrIndex = 0;
+    int64_t mBaseTimeStamp = -1;
+    PlayStatus mStatus;
+};
+
+class VhalEventLoaderThread : public QThread {
+    Q_OBJECT
+public:
+    // Loads Vhal from a json file specified
+    // by file_name into the EmulatorMessage array
+    void loadVhalEventFromFile(const QString& file_name,
+                                emulator::TimedEmulatorMessages* events);
+
+    static VhalEventLoaderThread* newInstance(const QObject* handler,
+                                                const char* started_slot,
+                                                const char* finished_slot);
+
+signals:
+    void loadingFinished(QString file_name, bool ok, QString error);
+
+protected:
+    // Reimplemented to load the file into the given fixes array.
+    void run() override;
+
+private:
+    VhalEventLoaderThread() = default;
+    QString mFileName;
+    std::vector<emulator::EmulatorMessage>* mEmulatorMessages = nullptr;
+    emulator::TimedEmulatorMessages* mTimedEmulatorMessages = nullptr;
+    bool parseJsonFile(const char* filePath,
+                        emulator::TimedEmulatorMessages* emulatorMessages);
+    QString readJsonStringFromFile(const char* filePath);
+    bool loadEmulatorEvents(const QJsonDocument& eventDoc,
+                            emulator::TimedEmulatorMessages* emulatorMessages);
+};
+
 class EmulatorMessage;
 }
 class CarSensorData : public QWidget {
@@ -42,6 +97,8 @@ private slots:
     void on_checkBox_night_toggled();
     void on_checkBox_park_toggled();
     void on_checkBox_fuel_low_toggled();
+    void on_button_loadrecord_clicked();
+    void on_button_playrecord_clicked();
 
 private:
     std::unique_ptr<Ui::CarSensorData> mUi;
@@ -57,4 +114,20 @@ private:
                                const std::string& ignitionName);
     float getSpeedMetersPerSecond(int speed, int unitIndex);
     int getIndexFromVehicleGear(int gear);
+    void parseEventsFromJsonFile(QString jsonPath);
+
+    std::unique_ptr<emulator::VhalEventLoaderThread> mVhalEventLoader;
+    std::vector<emulator::EmulatorMessage> mVhalEvents;
+    emulator::TimedEmulatorMessages mTimedEmulatorMessages;
+    bool mNowLoadingVhalEvent = false;
+    QTimer mTimer;
+    void VhalTimeout();
+    void startupVhalEventThreadFinished(QString file_name, bool ok,
+                                        QString error);
+    void vhalEventThreadFinished(QString file_name, bool ok, QString error_message);                                     
+    void vhalEventThreadStarted();
+    void updateControlsAfterLoading();
+    void finishVhalEventLoading(const QString& file_name, bool ok,
+                                const QString& error_message,
+                                bool ignore_error);
 };
