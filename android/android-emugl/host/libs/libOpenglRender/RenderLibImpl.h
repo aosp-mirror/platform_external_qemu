@@ -52,9 +52,9 @@ public:
     virtual void setUsageTracker(android::base::CpuUsage* cpuUsage,
                                  android::base::MemoryTracker* memUsage) override;
 
-    virtual void* getGL(void) override;
+    virtual void* getGLESv2Dispatch(void) override;
 
-    virtual void* getEGL(void) override;
+    virtual void* getEGLDispatch(void) override;
 
     virtual bool getOpt(RenderOpt* opt) override;
 

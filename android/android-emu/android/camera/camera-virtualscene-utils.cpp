@@ -113,8 +113,8 @@ int RenderedCameraDevice::readFrame(ClientFrame* resultFrame,
 }
 
 bool RenderedCameraDevice::initializeEgl() {
-    mEglDispatch = emugl::LazyLoadedEGLDispatch::get();
-    mGles2 = emugl::LazyLoadedGLESv2Dispatch::get();
+    mEglDispatch = (const EGLDispatch*)android_getEGLDispatch();
+    mGles2 = (const GLESv2Dispatch*)android_getGLESv2Dispatch();
     mEglDisplay = mEglDispatch->eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
     if (mEglDisplay == EGL_NO_DISPLAY) {
