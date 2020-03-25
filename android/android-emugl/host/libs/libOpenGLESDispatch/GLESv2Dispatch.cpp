@@ -35,6 +35,19 @@ void gles2_unimplemented() {
     fprintf(stderr, "Called unimplemented GLES API\n");
 }
 
+#define LOOKUP_SYMBOL_STATIC(return_type,function_name,signature,callargs) \
+    dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            translator::gles2::function_name); \
+    if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
+        dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            s_egl.eglGetProcAddress(#function_name)); \
+
+bool gles2_dispatch_init_static(GLESv2Dispatch* dispatch_table) {
+    LIST_GLES2_FUNCTIONS(LOOKUP_SYMBOL_STATIC,LOOKUP_SYMBOL_STATIC)
+    
+    return true;
+}
+
 //
 // This function is called only once during initialiation before
 // any thread has been created - hence it should NOT be thread safe.
@@ -51,7 +64,7 @@ bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table)
     if (!s_gles2_lib) {
         fprintf(stderr, "%s: Could not load %s [%s]\n", __FUNCTION__,
                 libName, error);
-        return false;
+        return gles2_dispatch_init_static(dispatch_table);
     }
 
     //
