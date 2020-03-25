@@ -294,11 +294,23 @@ static void restoreTexture(SaveableTexture* texture) {
     texture->touch();
 }
 
-GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+extern "C" {
 
+#ifdef STATIC_TRANSLATOR
+GL_APICALL GLESiface* GL_APIENTRY static_translator_glesv2_getIfaces(const EGLiface* eglIface);
+#else
+GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+#endif
+
+#ifdef STATIC_TRANSLATOR
+GLESiface* static_translator_glesv2_getIfaces(const EGLiface* eglIface) {
+#else
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
-    s_eglIface = eglIface;
+#endif
+    s_eglIface = (EGLiface*)eglIface;
     return & s_glesIface;
+}
+
 }
 
 static bool vulkanInteropSupported() {
