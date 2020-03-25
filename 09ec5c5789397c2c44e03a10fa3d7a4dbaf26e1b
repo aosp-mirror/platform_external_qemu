@@ -22,6 +22,30 @@
       "revId": "09ec5c5789397c2c44e03a10fa3d7a4dbaf26e1b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9478bbde_729c4a6d",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-25T17:15:15Z",
+      "side": 1,
+      "message": "also, google translated version of https://blog.csdn.net/tang05505622334/article/details/102461905 suggests the other side also may need to change the max size",
+      "parentUuid": "3037a32e_bb4912d5",
+      "range": {
+        "startLine": 819,
+        "startChar": 0,
+        "endLine": 821,
+        "endChar": 49
+      },
+      "revId": "09ec5c5789397c2c44e03a10fa3d7a4dbaf26e1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
