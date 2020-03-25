@@ -21,6 +21,11 @@
 
 #include "GLES12Translator/underlying_apis.h"
 
+#include "OpenGLESDispatch/gles1_only_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/gles1_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/gles_common_for_gles1_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/gles_extensions_for_gles1_static_translator_namespaced_header.h"
+
 #include <stdint.h>
 
 // Define function pointer types.
