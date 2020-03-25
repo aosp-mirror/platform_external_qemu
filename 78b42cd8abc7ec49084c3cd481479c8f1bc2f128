@@ -22,6 +22,30 @@
       "revId": "78b42cd8abc7ec49084c3cd481479c8f1bc2f128",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "541edc03_2730a8a8",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-03-25T23:01:04Z",
+      "side": 1,
+      "message": "The logic for TimedEmulatorMessages is almost the same as GpsFixArray fixes used in location-page, both of them are the wrappers for std::vector. TimedEmulatorMessages includes some functions in extra.\nTthe read action for mTimedEmulatorMessages is only happens after load/write finished in Qthread\nDo I have to add something to make it thread safe?",
+      "parentUuid": "4965a47a_c44e73a8",
+      "range": {
+        "startLine": 351,
+        "startChar": 4,
+        "endLine": 351,
+        "endChar": 26
+      },
+      "revId": "78b42cd8abc7ec49084c3cd481479c8f1bc2f128",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
