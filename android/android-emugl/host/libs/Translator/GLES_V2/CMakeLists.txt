@@ -25,3 +25,29 @@ else()
 endif()
 target_link_libraries(GLES_V2_translator PRIVATE emugl_base)
 android_install_shared(GLES_V2_translator)
+
+android_add_library(
+  TARGET GLES_V2_translator_static
+  LICENSE Apache-2.0
+  SRC # cmake-format: sortable
+      GLESv2Imp.cpp
+      GLESv2Context.cpp
+      GLESv2Validate.cpp
+      SamplerData.cpp
+      ShaderParser.cpp
+      ShaderValidator.cpp
+      TransformFeedbackData.cpp
+      ProgramData.cpp
+      ANGLEShaderParser.cpp)
+target_compile_options(GLES_V2_translator_static PRIVATE -fvisibility=hidden -Wno-macro-redefined)
+target_compile_definitions(GLES_V2_translator_static PRIVATE -DSTATIC_TRANSLATOR=1)
+if (OPTION_GFXSTREAM_BACKEND)
+  target_link_libraries(
+    GLES_V2_translator_static PRIVATE GLcommon OpenglCodecCommon emugl_common
+                               android-emu-shared ANGLE::ANGLE)
+else()
+  target_link_libraries(
+    GLES_V2_translator_static PRIVATE GLcommon OpenglCodecCommon emugl_common
+                               android-emu ANGLE::ANGLE)
+endif()
+target_link_libraries(GLES_V2_translator_static PRIVATE emugl_base)
