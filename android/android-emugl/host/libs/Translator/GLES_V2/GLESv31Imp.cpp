@@ -98,7 +98,7 @@ GL_APICALL void GL_APIENTRY glActiveShaderProgram(GLuint pipeline, GLuint progra
     }
 }
 
-extern "C" GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv(GLenum type, GLsizei count, const char ** strings) {
+EXTERN_PART GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv(GLenum type, GLsizei count, const char ** strings) {
     GET_CTX_V2_RET(0);
     RET_AND_SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glCreateShaderProgramv, 0);
     GLuint glCreateShaderProgramvRET = ctx->dispatcher().glCreateShaderProgramv(type, count, strings);
@@ -228,7 +228,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform1ui(GLuint program, GLint location, 
     }
 }
 
-extern "C" GL_APICALL void GL_APIENTRY glProgramUniform2ui(GLuint program, GLint location, GLint v0, GLuint v1) {
+EXTERN_PART GL_APICALL void GL_APIENTRY glProgramUniform2ui(GLuint program, GLint location, GLint v0, GLuint v1) {
     GET_CTX_V2();
     SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform2ui);
     if (ctx->shareGroup().get()) {
@@ -240,7 +240,7 @@ extern "C" GL_APICALL void GL_APIENTRY glProgramUniform2ui(GLuint program, GLint
     }
 }
 
-extern "C" GL_APICALL void GL_APIENTRY glProgramUniform3ui(GLuint program, GLint location, GLint v0, GLint v1, GLuint v2) {
+EXTERN_PART GL_APICALL void GL_APIENTRY glProgramUniform3ui(GLuint program, GLint location, GLint v0, GLint v1, GLuint v2) {
     GET_CTX_V2();
     SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform3ui);
     if (ctx->shareGroup().get()) {
@@ -252,7 +252,7 @@ extern "C" GL_APICALL void GL_APIENTRY glProgramUniform3ui(GLuint program, GLint
     }
 }
 
-extern "C" GL_APICALL void GL_APIENTRY glProgramUniform4ui(GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLuint v3) {
+EXTERN_PART GL_APICALL void GL_APIENTRY glProgramUniform4ui(GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLuint v3) {
     GET_CTX_V2();
     SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform4ui);
     if (ctx->shareGroup().get()) {
@@ -584,7 +584,7 @@ GL_APICALL void GL_APIENTRY glDispatchComputeIndirect(GLintptr indirect) {
     ctx->dispatcher().glDispatchComputeIndirect(indirect);
 }
 
-extern "C" GL_APICALL void GL_APIENTRY glBindVertexBuffer(GLuint bindingindex, GLuint buffer, GLintptr offset, GLintptr stride) {
+EXTERN_PART GL_APICALL void GL_APIENTRY glBindVertexBuffer(GLuint bindingindex, GLuint buffer, GLintptr offset, GLintptr stride) {
     GET_CTX_V2();
     SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glBindVertexBuffer);
     ctx->bindIndexedBuffer(0, bindingindex, buffer, offset, 0, stride);
