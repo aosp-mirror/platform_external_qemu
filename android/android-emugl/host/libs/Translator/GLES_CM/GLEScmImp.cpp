@@ -19,6 +19,7 @@
 #define GL_API __declspec(dllexport)
 #define GL_APICALL __declspec(dllexport)
 #endif
+
 #define GL_GLEXT_PROTOTYPES
 #include "android/base/memory/LazyInstance.h"
 #include "GLEScmContext.h"
@@ -49,6 +50,30 @@
 #define GLES_CM_TRACE()
 #endif
 
+#ifdef STATIC_TRANSLATOR
+#define GLES1_NAMESPACED(f) translator::gles1::f
+#else
+#define GLES1_NAMESPACED(f) f
+#endif
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles1 {
+#else
+extern "C" {
+#endif
+
+GL_API void GL_APIENTRY  glFlush( void);
+GL_API void GL_APIENTRY  glFinish( void);
+GL_API GLenum GL_APIENTRY  glGetError( void);
+
+#ifdef STATIC_TRANSLATOR
+} // namespace gles1
+} // namespace translator
+#else
+} // extern "C"
+#endif
+
 extern "C" {
 
 //decleration
@@ -59,7 +84,7 @@ static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
-static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
+static __translatorMustCastToProperFunctionPointerType getProcAddressGles1(const char* procName);
 static bool vulkanInteropSupported();
 }
 
@@ -75,11 +100,11 @@ static GLESiface  s_glesIface = {
     .initContext                      = initContext,
     .setMaxGlesVersion                = setMaxGlesVersion,
     .deleteGLESContext                = deleteGLESContext,
-    .flush                            = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
-    .finish                           = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
-    .getError                         = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
+    .flush                            = (FUNCPTR_NO_ARGS_RET_VOID)GLES1_NAMESPACED(glFlush),
+    .finish                           = (FUNCPTR_NO_ARGS_RET_VOID)GLES1_NAMESPACED(glFinish),
+    .getError                         = (FUNCPTR_NO_ARGS_RET_INT)GLES1_NAMESPACED(glGetError),
     .setShareGroup                    = setShareGroup,
-    .getProcAddress                   = getProcAddress,
+    .getProcAddress                   = getProcAddressGles1,
     .fenceSync                        = NULL,
     .clientWaitSync                   = NULL,
     .waitSync                         = NULL,
@@ -98,6 +123,88 @@ static GLESiface  s_glesIface = {
 #include <GLcommon/GLESmacros.h>
 
 static android::base::LazyInstance<GLES1Usage> gles1usages = {};
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles1 {
+#else
+extern "C" {
+#endif
+
+GL_API void GL_APIENTRY glBindTexture (GLenum target, GLuint texture);
+GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image);
+GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image);
+
+GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
+GL_APICALL void  GL_APIENTRY glVertexAttribIPointerWithDataSize(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
+
+GL_API void GL_APIENTRY  glColorPointerWithDataSize( GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+GL_API void GL_APIENTRY  glNormalPointerWithDataSize(GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+GL_API void GL_APIENTRY  glTexCoordPointerWithDataSize( GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+GL_API void GL_APIENTRY  glVertexPointerWithDataSize( GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+
+GL_API void GL_APIENTRY glBlendEquationOES(GLenum mode);
+GL_API void GL_APIENTRY glBlendEquationSeparateOES (GLenum modeRGB, GLenum modeAlpha);
+GL_API void GL_APIENTRY glBlendFuncSeparateOES(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha);
+GL_API void GL_APIENTRY glCurrentPaletteMatrixOES(GLuint index);
+GL_API void GL_APIENTRY glLoadPaletteFromModelViewMatrixOES();
+GL_API void GL_APIENTRY glMatrixIndexPointerOES(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
+GL_API void GL_APIENTRY glWeightPointerOES(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
+GL_API void GL_APIENTRY  glDepthRangef( GLclampf zNear, GLclampf zFar);
+GL_API void GL_APIENTRY  glFrustumf( GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar);
+GL_API void GL_APIENTRY  glOrthof( GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar);
+GL_API void GL_APIENTRY  glClipPlanef( GLenum plane, const GLfloat *equation);
+GL_API void GL_APIENTRY  glGetClipPlanef( GLenum pname, GLfloat eqn[4]);
+GL_API void GL_APIENTRY  glClearDepthf( GLclampf depth);
+GL_API void GL_APIENTRY  glPointSizePointerOES( GLenum type, GLsizei stride, const GLvoid *pointer);
+GL_API void GL_APIENTRY glTexGenfOES (GLenum coord, GLenum pname, GLfloat param);
+GL_API void GL_APIENTRY glTexGenfvOES (GLenum coord, GLenum pname, const GLfloat *params);
+GL_API void GL_APIENTRY glTexGeniOES (GLenum coord, GLenum pname, GLint param);
+GL_API void GL_APIENTRY glTexGenivOES (GLenum coord, GLenum pname, const GLint *params);
+GL_API void GL_APIENTRY glTexGenxOES (GLenum coord, GLenum pname, GLfixed param);
+GL_API void GL_APIENTRY glTexGenxvOES (GLenum coord, GLenum pname, const GLfixed *params);
+GL_API void GL_APIENTRY glGetTexGenfvOES (GLenum coord, GLenum pname, GLfloat *params);
+GL_API void GL_APIENTRY glGetTexGenivOES (GLenum coord, GLenum pname, GLint *params);
+GL_API void GL_APIENTRY glGetTexGenxvOES (GLenum coord, GLenum pname, GLfixed *params);
+GL_API void GL_APIENTRY glDrawTexsOES (GLshort x, GLshort y, GLshort z, GLshort width, GLshort height);
+GL_API void GL_APIENTRY glDrawTexiOES (GLint x, GLint y, GLint z, GLint width, GLint height);
+GL_API void GL_APIENTRY glDrawTexfOES (GLfloat x, GLfloat y, GLfloat z, GLfloat width, GLfloat height);
+GL_API void GL_APIENTRY glDrawTexxOES (GLfixed x, GLfixed y, GLfixed z, GLfixed width, GLfixed height);
+GL_API void GL_APIENTRY glDrawTexsvOES (const GLshort * coords);
+GL_API void GL_APIENTRY glDrawTexivOES (const GLint * coords);
+GL_API void GL_APIENTRY glDrawTexfvOES (const GLfloat * coords);
+GL_API void GL_APIENTRY glDrawTexfvOES (const GLfloat * coords);
+GL_API void GL_APIENTRY glDrawTexxvOES (const GLfixed * coords);
+
+GL_API void GLAPIENTRY glGenRenderbuffersOES(GLsizei n, GLuint *renderbuffers);
+GL_API GLboolean GL_APIENTRY glIsRenderbufferOES(GLuint renderbuffer);
+GL_API void GLAPIENTRY glBindRenderbufferOES(GLenum target, GLuint renderbuffer);
+GL_API void GLAPIENTRY glDeleteRenderbuffersOES(GLsizei n, const GLuint *renderbuffers);
+GL_API void GLAPIENTRY glRenderbufferStorageOES(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+GL_API void GLAPIENTRY glGetRenderbufferParameterivOES(GLenum target, GLenum pname, GLint* params);
+
+GL_API GLboolean GLAPIENTRY glIsFramebufferOES(GLuint framebuffer);
+GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer);
+GL_API void GLAPIENTRY glDeleteFramebuffersOES(GLsizei n, const GLuint *framebuffers);
+GL_API void GLAPIENTRY glGenFramebuffersOES(GLsizei n, GLuint *framebuffers);
+GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attachment,GLenum renderbuffertarget, GLuint renderbuffer);
+GL_API void GLAPIENTRY glGetFramebufferAttachmentParameterivOES(GLenum target, GLenum attachment, GLenum pname, GLint *params);
+
+GL_API GLenum GLAPIENTRY glCheckFramebufferStatusOES(GLenum target);
+
+GL_API void GL_APIENTRY glGenerateMipmapOES(GLenum target);
+
+#ifdef STATIC_TRANSLATOR
+} // namespace gles1
+} // namespace translator
+#else
+} // extern "C"
+#endif
 
 extern "C" {
 
@@ -138,8 +245,13 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     }
     if (!ctx->isInitialized()) {
         ctx->init();
+#ifdef STATIC_TRANSLATOR
+        translator::gles1::glBindTexture(GL_TEXTURE_2D,0);
+        translator::gles1::glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
+#else
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
+#endif
     }
     if (ctx->needRestore()) {
         ctx->restore();
@@ -166,16 +278,7 @@ static bool vulkanInteropSupported() {
     return GLEScontext::vulkanInteropSupported();
 }
 
-GL_API void GL_APIENTRY  glColorPointerWithDataSize( GLint size, GLenum type,
-        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
-GL_API void GL_APIENTRY  glNormalPointerWithDataSize(GLenum type,
-        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
-GL_API void GL_APIENTRY  glTexCoordPointerWithDataSize( GLint size, GLenum type,
-        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
-GL_API void GL_APIENTRY  glVertexPointerWithDataSize( GLint size, GLenum type,
-        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
-
-static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
+static __translatorMustCastToProperFunctionPointerType getProcAddressGles1(const char* procName) {
     GET_CTX_RET(NULL)
     ctx->getGlobalLock();
     static bool proc_table_initialized = false;
@@ -185,65 +288,66 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
             s_glesExtensions = new ProcTableMap();
         else
             s_glesExtensions->clear();
-        (*s_glesExtensions)["glEGLImageTargetTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glEGLImageTargetTexture2DOES;
-        (*s_glesExtensions)["glEGLImageTargetRenderbufferStorageOES"]=(__translatorMustCastToProperFunctionPointerType)glEGLImageTargetRenderbufferStorageOES;
-        (*s_glesExtensions)["glBlendEquationSeparateOES"] = (__translatorMustCastToProperFunctionPointerType)glBlendEquationSeparateOES;
-        (*s_glesExtensions)["glBlendFuncSeparateOES"] = (__translatorMustCastToProperFunctionPointerType)glBlendFuncSeparateOES;
-        (*s_glesExtensions)["glBlendEquationOES"] = (__translatorMustCastToProperFunctionPointerType)glBlendEquationOES;
+
+        (*s_glesExtensions)["glEGLImageTargetTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glEGLImageTargetTexture2DOES);
+        (*s_glesExtensions)["glEGLImageTargetRenderbufferStorageOES"]=(__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glEGLImageTargetRenderbufferStorageOES);
+        (*s_glesExtensions)["glBlendEquationSeparateOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glBlendEquationSeparateOES);
+        (*s_glesExtensions)["glBlendFuncSeparateOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glBlendFuncSeparateOES);
+        (*s_glesExtensions)["glBlendEquationOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glBlendEquationOES);
 
         if (ctx->getCaps()->GL_ARB_MATRIX_PALETTE && ctx->getCaps()->GL_ARB_VERTEX_BLEND) {
-            (*s_glesExtensions)["glCurrentPaletteMatrixOES"] = (__translatorMustCastToProperFunctionPointerType)glCurrentPaletteMatrixOES;
-            (*s_glesExtensions)["glLoadPaletteFromModelViewMatrixOES"]=(__translatorMustCastToProperFunctionPointerType)glLoadPaletteFromModelViewMatrixOES;
-            (*s_glesExtensions)["glMatrixIndexPointerOES"] = (__translatorMustCastToProperFunctionPointerType)glMatrixIndexPointerOES;
-            (*s_glesExtensions)["glWeightPointerOES"] = (__translatorMustCastToProperFunctionPointerType)glWeightPointerOES;
+            (*s_glesExtensions)["glCurrentPaletteMatrixOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glCurrentPaletteMatrixOES);
+            (*s_glesExtensions)["glLoadPaletteFromModelViewMatrixOES"]=(__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glLoadPaletteFromModelViewMatrixOES);
+            (*s_glesExtensions)["glMatrixIndexPointerOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glMatrixIndexPointerOES);
+            (*s_glesExtensions)["glWeightPointerOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glWeightPointerOES);
         }
-        (*s_glesExtensions)["glDepthRangefOES"] = (__translatorMustCastToProperFunctionPointerType)glDepthRangef;
-        (*s_glesExtensions)["glFrustumfOES"] = (__translatorMustCastToProperFunctionPointerType)glFrustumf;
-        (*s_glesExtensions)["glOrthofOES"] = (__translatorMustCastToProperFunctionPointerType)glOrthof;
-        (*s_glesExtensions)["glClipPlanefOES"] = (__translatorMustCastToProperFunctionPointerType)glClipPlanef;
-        (*s_glesExtensions)["glGetClipPlanefOES"] = (__translatorMustCastToProperFunctionPointerType)glGetClipPlanef;
-        (*s_glesExtensions)["glClearDepthfOES"] = (__translatorMustCastToProperFunctionPointerType)glClearDepthf;
-        (*s_glesExtensions)["glPointSizePointerOES"] = (__translatorMustCastToProperFunctionPointerType)glPointSizePointerOES;
-        (*s_glesExtensions)["glTexGenfOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGenfOES;
-        (*s_glesExtensions)["glTexGenfvOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGenfvOES;
-        (*s_glesExtensions)["glTexGeniOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGeniOES;
-        (*s_glesExtensions)["glTexGenivOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGenivOES;
-        (*s_glesExtensions)["glTexGenxOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGenxOES;
-        (*s_glesExtensions)["glTexGenxvOES"] = (__translatorMustCastToProperFunctionPointerType)glTexGenxvOES;
-        (*s_glesExtensions)["glGetTexGenfvOES"] = (__translatorMustCastToProperFunctionPointerType)glGetTexGenfvOES;
-        (*s_glesExtensions)["glGetTexGenivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetTexGenivOES;
-        (*s_glesExtensions)["glGetTexGenxvOES"] = (__translatorMustCastToProperFunctionPointerType)glGetTexGenxvOES;
+        (*s_glesExtensions)["glDepthRangefOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDepthRangef);
+        (*s_glesExtensions)["glFrustumfOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glFrustumf);
+        (*s_glesExtensions)["glOrthofOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glOrthof);
+        (*s_glesExtensions)["glClipPlanefOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glClipPlanef);
+        (*s_glesExtensions)["glGetClipPlanefOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glGetClipPlanef);
+        (*s_glesExtensions)["glClearDepthfOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glClearDepthf);
+        (*s_glesExtensions)["glPointSizePointerOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glPointSizePointerOES);
+        (*s_glesExtensions)["glTexGenfOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glTexGenfOES);
+        (*s_glesExtensions)["glTexGenfvOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glTexGenfvOES);
+        (*s_glesExtensions)["glTexGeniOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glTexGeniOES);
+        (*s_glesExtensions)["glTexGenivOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glTexGenivOES);
+        (*s_glesExtensions)["glTexGenxOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glTexGenxOES);
+        (*s_glesExtensions)["glTexGenxvOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glTexGenxvOES);
+        (*s_glesExtensions)["glGetTexGenfvOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glGetTexGenfvOES);
+        (*s_glesExtensions)["glGetTexGenivOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glGetTexGenivOES);
+        (*s_glesExtensions)["glGetTexGenxvOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glGetTexGenxvOES);
         if (ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT) {
-            (*s_glesExtensions)["glIsRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glIsRenderbufferOES;
-            (*s_glesExtensions)["glBindRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glBindRenderbufferOES;
-            (*s_glesExtensions)["glDeleteRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glDeleteRenderbuffersOES;
-            (*s_glesExtensions)["glGenRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glGenRenderbuffersOES;
-            (*s_glesExtensions)["glRenderbufferStorageOES"] = (__translatorMustCastToProperFunctionPointerType)glRenderbufferStorageOES;
-            (*s_glesExtensions)["glGetRenderbufferParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetRenderbufferParameterivOES;
-            (*s_glesExtensions)["glIsFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)glIsFramebufferOES;
-            (*s_glesExtensions)["glBindFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)glBindFramebufferOES;
-            (*s_glesExtensions)["glDeleteFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glDeleteFramebuffersOES;
-            (*s_glesExtensions)["glGenFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)glGenFramebuffersOES;
-            (*s_glesExtensions)["glCheckFramebufferStatusOES"] = (__translatorMustCastToProperFunctionPointerType)glCheckFramebufferStatusOES;
-            (*s_glesExtensions)["glFramebufferTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glFramebufferTexture2DOES;
-            (*s_glesExtensions)["glFramebufferRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)glFramebufferRenderbufferOES;
-            (*s_glesExtensions)["glGetFramebufferAttachmentParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)glGetFramebufferAttachmentParameterivOES;
-            (*s_glesExtensions)["glGenerateMipmapOES"] = (__translatorMustCastToProperFunctionPointerType)glGenerateMipmapOES;
+            (*s_glesExtensions)["glIsRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glIsRenderbufferOES);
+            (*s_glesExtensions)["glBindRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glBindRenderbufferOES);
+            (*s_glesExtensions)["glDeleteRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDeleteRenderbuffersOES);
+            (*s_glesExtensions)["glGenRenderbuffersOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glGenRenderbuffersOES);
+            (*s_glesExtensions)["glRenderbufferStorageOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glRenderbufferStorageOES);
+            (*s_glesExtensions)["glGetRenderbufferParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glGetRenderbufferParameterivOES);
+            (*s_glesExtensions)["glIsFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glIsFramebufferOES);
+            (*s_glesExtensions)["glBindFramebufferOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glBindFramebufferOES);
+            (*s_glesExtensions)["glDeleteFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDeleteFramebuffersOES);
+            (*s_glesExtensions)["glGenFramebuffersOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glGenFramebuffersOES);
+            (*s_glesExtensions)["glCheckFramebufferStatusOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glCheckFramebufferStatusOES);
+            (*s_glesExtensions)["glFramebufferTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glFramebufferTexture2DOES);
+            (*s_glesExtensions)["glFramebufferRenderbufferOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glFramebufferRenderbufferOES);
+            (*s_glesExtensions)["glGetFramebufferAttachmentParameterivOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glGetFramebufferAttachmentParameterivOES);
+            (*s_glesExtensions)["glGenerateMipmapOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glGenerateMipmapOES);
         }
-        (*s_glesExtensions)["glDrawTexsOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexsOES;
-        (*s_glesExtensions)["glDrawTexiOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexiOES;
-        (*s_glesExtensions)["glDrawTexfOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexfOES;
-        (*s_glesExtensions)["glDrawTexxOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexxOES;
-        (*s_glesExtensions)["glDrawTexsvOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexsvOES;
-        (*s_glesExtensions)["glDrawTexivOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexivOES;
-        (*s_glesExtensions)["glDrawTexfvOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexfvOES;
-        (*s_glesExtensions)["glDrawTexxvOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexxvOES;
+        (*s_glesExtensions)["glDrawTexsOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDrawTexsOES);
+        (*s_glesExtensions)["glDrawTexiOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDrawTexiOES);
+        (*s_glesExtensions)["glDrawTexfOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDrawTexfOES);
+        (*s_glesExtensions)["glDrawTexxOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDrawTexxOES);
+        (*s_glesExtensions)["glDrawTexsvOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDrawTexsvOES);
+        (*s_glesExtensions)["glDrawTexivOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDrawTexivOES);
+        (*s_glesExtensions)["glDrawTexfvOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDrawTexfvOES);
+        (*s_glesExtensions)["glDrawTexxvOES"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glDrawTexxvOES);
 
         // Vertex array functions with size for snapshot
-        (*s_glesExtensions)["glColorPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glColorPointerWithDataSize;
-        (*s_glesExtensions)["glNormalPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glNormalPointerWithDataSize;
-        (*s_glesExtensions)["glTexCoordPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glTexCoordPointerWithDataSize;
-        (*s_glesExtensions)["glVertexPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexPointerWithDataSize;
+        (*s_glesExtensions)["glColorPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glColorPointerWithDataSize);
+        (*s_glesExtensions)["glNormalPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glNormalPointerWithDataSize);
+        (*s_glesExtensions)["glTexCoordPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glTexCoordPointerWithDataSize);
+        (*s_glesExtensions)["glVertexPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)GLES1_NAMESPACED(glVertexPointerWithDataSize);
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -254,10 +358,18 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     return ret;
 }
 
+#ifdef STATIC_TRANSLATOR
+GL_APICALL GLESiface* GL_APIENTRY static_translator_glescm_getIfaces(const EGLiface* eglIface);
+#else
 GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+#endif
 
+#ifdef STATIC_TRANSLATOR
+GLESiface* static_translator_glescm_getIfaces(const EGLiface* eglIface) {
+#else
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
-    s_eglIface = eglIface;
+#endif
+    s_eglIface = (EGLiface*)eglIface;
     return &s_glesIface;
 }
 
@@ -288,6 +400,11 @@ static TextureData* getTextureTargetData(GLenum target){
     unsigned int tex = ctx->getBindedTexture(target);
     return getTextureData(ctx->getTextureLocalName(target,tex));
 }
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles1 {
+#endif
 
 GL_API GLboolean GL_APIENTRY glIsBuffer(GLuint buffer) {
     GET_CTX_RET(GL_FALSE)
@@ -645,6 +762,10 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
     }
 }
 
+#ifdef STATIC_TRANSLATOR
+GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
+#endif
+
 GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) {
     GET_CTX_CM()
     GLES_CM_TRACE()
@@ -933,6 +1054,10 @@ GL_API void GL_APIENTRY  glGenTextures( GLsizei n, GLuint *textures) {
     }
 }
 
+#ifdef STATIC_TRANSLATOR
+GL_API void GL_APIENTRY  glGetIntegerv( GLenum pname, GLint *params);
+#endif
+
 GL_API void GL_APIENTRY  glGetBooleanv( GLenum pname, GLboolean *params) {
     GET_CTX()
     GLES_CM_TRACE()
@@ -1042,6 +1167,10 @@ GL_API void GL_APIENTRY  glGetClipPlanex( GLenum pname, GLfixed eqn[4]) {
         eqn[i] = F2X(tmpEqn[i]);
     }
 }
+
+#ifdef STATIC_TRANSLATOR
+GL_API void GL_APIENTRY  glGetFloatv( GLenum pname, GLfloat *params);
+#endif
 
 GL_API void GL_APIENTRY  glGetFixedv( GLenum pname, GLfixed *params) {
     GET_CTX()
@@ -2822,3 +2951,8 @@ GL_API void GL_APIENTRY glDrawTexxvOES (const GLfixed * coords) {
     GLES_CM_TRACE()
     glDrawTexOES<GLfloat,GL_FLOAT>(X2F(coords[0]),X2F(coords[1]),X2F(coords[2]),X2F(coords[3]),X2F(coords[4]));
 }
+
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace gles1
+#endif

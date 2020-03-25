@@ -910,7 +910,6 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
               libqemu2-util
               emulator-libui
               android-emu
-              OpenGLESDispatch
               android-qemu-deps
               android-qemu-deps-headful)
 endfunction()
@@ -934,7 +933,6 @@ function(android_add_qemu_headless_executable ANDROID_AARCH STUBS)
               libqemu2-util
               android-emu
               emulator-libui-headless
-              OpenGLESDispatch
               android-qemu-deps
               android-qemu-deps-headless)
 endfunction()

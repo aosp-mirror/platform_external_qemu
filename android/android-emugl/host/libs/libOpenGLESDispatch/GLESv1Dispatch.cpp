@@ -16,6 +16,7 @@
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/StaticDispatch.h"
 
 #include "android/utils/debug.h"
 
@@ -114,9 +115,32 @@ LIST_GLES12_TR_FUNCTIONS(DEFINE_DUMMY_FUNCTION);
         dispatch_table-> function_name = gles1_dummy_##function_name; \
         } while(0);
 
+// macro to assign from static library
+#define ASSIGN_GLES1_STATIC(return_type,function_name,signature,callargs)\
+    dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            translator::gles1::function_name); \
+        if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
+        dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            s_egl.eglGetProcAddress(#function_name)); \
+
+bool gles1_dispatch_init_from_static(GLESv1Dispatch* dispatch_table) {
+    if (dispatch_table->initialized) return true;
+
+    LIST_GLES1_FUNCTIONS(ASSIGN_GLES1_STATIC, ASSIGN_GLES1_STATIC);
+
+    dispatch_table->initialized = true;
+    return true;
+}
+
 bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
+    if (dispatch_table->initialized) return true;
 
     dispatch_table->underlying_gles2_api = NULL;
+
+    const char* useStatic = getenv("ANDROID_EMU_STATIC_TRANSLATOR");
+    if (useStatic) {
+        return gles1_dispatch_init_from_static(dispatch_table);
+    }
 
     const char* libName = getenv("ANDROID_GLESv1_LIB");
     if (!libName) {
@@ -131,15 +155,14 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
         LIST_GLES1_FUNCTIONS(ASSIGN_DUMMY,ASSIGN_DUMMY)
 
         DPRINT("assigning dummies because <gles2_only_backend>");
+        dispatch_table->initialized = true;
         return true;
     } else {
 
         char error[256];
         s_gles1_lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
         if (!s_gles1_lib) {
-            fprintf(stderr, "%s: Could not load %s [%s]\n", __FUNCTION__,
-                    libName, error);
-            return false;
+            return gles1_dispatch_init_from_static(dispatch_table);
         }
 
         //
@@ -201,6 +224,8 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
             LIST_GLES2_FUNCTIONS(SET_UNDERLYING_GLES2_FUNC,
                                  SET_UNDERLYING_GLES2_FUNC);
        }
+
+       dispatch_table->initialized = true;
        return true;
     }
 }
@@ -215,6 +240,12 @@ void *gles1_dispatch_get_proc_func(const char *name, void *userData)
     if (s_gles1_lib) {
         func = (void *)s_gles1_lib->findSymbol(name);
     }
+
+    // Check the static functions
+    if (!func) {
+        func = gles1_dispatch_get_proc_func_static(name);
+    }
+
     // To make it consistent with the guest, redirect any unsupported functions
     // to gles1_unimplemented.
     if (!func) {

@@ -120,4 +120,8 @@ const emugl::RendererPtr& android_getOpenglesRenderer();
 
 struct AndroidVirtioGpuOps* android_getVirtioGpuOps(void);
 
+/* Get EGL/GLESv2 dispatch tables */
+const void* android_getEGLDispatch();
+const void* android_getGLESv2Dispatch();
+
 ANDROID_END_HEADER

@@ -2,6 +2,7 @@
 # This is only a subset of the full EGL API.
 
 !Render_EGL_extensions
+namespaces translator,egl
 
 %#include <EGL/egl.h>
 %#define EGL_EGLEXT_PROTOTYPES

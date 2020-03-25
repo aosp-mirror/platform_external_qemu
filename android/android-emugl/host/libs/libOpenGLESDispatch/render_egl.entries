@@ -3,12 +3,15 @@
 
 !Render_EGL
 %#include <EGL/egl.h>
+%#define translator_egl_const_char const char
+
+namespaces translator,egl
 
 EGLint eglGetError(void);
 EGLDisplay eglGetDisplay(EGLNativeDisplayType dpy);
 EGLBoolean eglTerminate(EGLDisplay dpy);
 EGLBoolean eglInitialize(EGLDisplay dpy, EGLint* major, EGLint* minor);
-char* eglQueryString(EGLDisplay dpy, EGLint id);
+translator_egl_const_char* eglQueryString(EGLDisplay dpy, EGLint id);
 EGLBoolean eglGetConfigs(EGLDisplay display, EGLConfig* configs, EGLint config_size, EGLint* num_config);
 EGLBoolean eglChooseConfig(EGLDisplay display, const EGLint* attribs, EGLConfig* configs, EGLint config_size, EGLint* num_config);
 EGLBoolean eglGetConfigAttrib(EGLDisplay display, EGLConfig config, EGLint attribute, EGLint* value);

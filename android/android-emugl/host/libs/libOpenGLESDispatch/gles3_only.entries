@@ -1,4 +1,5 @@
 !gles3_only
+namespaces translator,gles2
 
 # GLES 3.0 functions required by the translator library.
 
