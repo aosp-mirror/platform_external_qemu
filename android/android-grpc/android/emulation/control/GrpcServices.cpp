@@ -16,7 +16,6 @@
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
-#else
 #endif
 #include <assert.h>
 #include <grpcpp/grpcpp.h>
@@ -38,6 +37,7 @@
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/interceptor/MetricsInterceptor.h"
+#include "android/emulation/control/interceptor/IdleInterceptor.h"
 #include "grpcpp/server_builder_impl.h"
 #include "grpcpp/server_impl.h"
 
@@ -135,6 +135,11 @@ Builder& Builder::withAddress(std::string address) {
     return *this;
 }
 
+Builder& Builder::withIdleTimeout(std::chrono::seconds timeout) {
+    mTimeout = timeout;
+    return *this;
+}
+
 Builder& Builder::withPortRange(int start, int end) {
     assert(end > start);
     int port = start;
@@ -171,6 +176,11 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
             creators;
     creators.emplace_back(std::make_unique<StdOutLoggingInterceptorFactory>());
     creators.emplace_back(std::make_unique<MetricsInterceptorFactory>());
+
+    if (mTimeout.count() > 0) {
+        creators.emplace_back(std::make_unique<IdleInterceptorFactory>(mTimeout, mAgents));
+    }
+
     builder.experimental().SetInterceptorCreators(std::move(creators));
 
     // Allow large messages, as raw screenshots can take up a significant amount
