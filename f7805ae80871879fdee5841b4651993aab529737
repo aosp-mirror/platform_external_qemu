@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "716ce772_8e82b1de",
+        "filename": "android/android-emu/android/emulation/MediaFrameRateCounter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-25T17:07:43Z",
+      "side": 1,
+      "message": "do you want to protect against double starts and double stops? Or that\u0027s part of the class public contract?",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 34
+      },
+      "revId": "f7805ae80871879fdee5841b4651993aab529737",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f0a02d5_38c214af",
+        "filename": "android/android-emu/android/emulation/MediaFrameRateCounter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-25T17:07:43Z",
+      "side": 1,
+      "message": "you can use a little trick with chrono here:\n\nauto elapsed \u003d \u003cstop time or now\u003e - mStartTime;\n// cast the whatever-precision integral duration to the double-based duration in seconds:\nauto elapsedDoubleSec \u003d std::chrono::duration_cast\u003cstd::chrono::duration\u003cdouble\u003e\u003e(elapsed);\n// zero checks\nreturn mFrameCount / elapsedDoubleSec.count();\n\nhttps://stackoverflow.com/a/57538583",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 66,
+        "endChar": 45
+      },
+      "revId": "f7805ae80871879fdee5841b4651993aab529737",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da87d510_3d79f2a2",
+        "filename": "android/android-emu/android/emulation/MediaFrameRateCounter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-25T17:07:43Z",
+      "side": 1,
+      "message": "std::chrono::steady_clock::duration ?\nyou can also add a \"using Clock \u003d std::chrono::steady_clock\" declaration to type less and have a simpler way of changing the default clock source",
+      "range": {
+        "startLine": 40,
+        "startChar": 8,
+        "endLine": 40,
+        "endChar": 18
+      },
+      "revId": "f7805ae80871879fdee5841b4651993aab529737",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35724466_7d9c3ad7",
+        "filename": "android/android-emu/android/emulation/MediaFrameRateCounter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-25T17:07:43Z",
+      "side": 1,
+      "message": "this can be done via std::chrono::duration_cast\u003c\u003e without any explicit conversion",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 48
+      },
+      "revId": "f7805ae80871879fdee5841b4651993aab529737",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
