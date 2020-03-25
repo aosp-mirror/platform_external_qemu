@@ -54,6 +54,12 @@
 ImagePtr getEGLImage(unsigned int imageId);
 GLEScontext* getGLESContext();
 GlLibrary* getGlLibrary();
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace egl {
+#endif
+
 static bool createAndBindAuxiliaryContext(
     EGLContext* context_out, EGLSurface* surface_out);
 static bool unbindAndDestroyAuxiliaryContext(
@@ -61,6 +67,11 @@ static bool unbindAndDestroyAuxiliaryContext(
 static bool bindAuxiliaryContext(
     EGLContext context, EGLSurface surface);
 static bool unbindAuxiliaryContext();
+
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace egl
+#endif
 
 #define tls_thread  EglThreadInfo::get()
 
@@ -80,10 +91,17 @@ static const EGLiface s_eglIface = {
     .getGLESContext = getGLESContext,
     .getEGLImage = getEGLImage,
     .eglGetGlLibrary = getGlLibrary,
+#ifdef STATIC_TRANSLATOR
+    .createAndBindAuxiliaryContext = translator::egl::createAndBindAuxiliaryContext,
+    .unbindAndDestroyAuxiliaryContext = translator::egl::unbindAndDestroyAuxiliaryContext,
+    .bindAuxiliaryContext = translator::egl::bindAuxiliaryContext,
+    .unbindAuxiliaryContext = translator::egl::unbindAuxiliaryContext,
+#else
     .createAndBindAuxiliaryContext = createAndBindAuxiliaryContext,
     .unbindAndDestroyAuxiliaryContext = unbindAndDestroyAuxiliaryContext,
     .bindAuxiliaryContext = bindAuxiliaryContext,
     .unbindAuxiliaryContext = unbindAuxiliaryContext,
+#endif
 };
 
 static void initGLESx(GLESVersion version) {
@@ -97,7 +115,13 @@ static void initGLESx(GLESVersion version) {
 
 /*****************************************  supported extensions  ***********************************************************************/
 
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace egl {
+#else
 extern "C" {
+#endif
+
 EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
 EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay display, EGLenum type, const EGLint* attribs);
@@ -111,7 +135,37 @@ EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence
 EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path);
 EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID(void);
 EGLAPI EGLBoolean EGLAPIENTRY eglGetSyncAttribKHR(EGLDisplay display, EGLSyncKHR sync, EGLint attribute, EGLint *value);
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
+EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream);
+
+EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglPostSaveContext(EGLDisplay display, EGLContext context, EGLStream stream);
+EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
+                                               EGLStream stream,
+                                               const void* textureSaver);
+EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
+                                               EGLStream stream,
+                                               const void* textureLoader);
+EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
+EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
+EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
+EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
+
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace egl
+#else
 }  // extern "C"
+#endif
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace egl {
+#endif
 
 static const ExtensionDescriptor s_eglExtensions[] = {
         {"eglCreateImageKHR" ,
@@ -145,29 +199,21 @@ static const ExtensionDescriptor s_eglExtensions[] = {
 static const int s_eglExtensionsSize =
         sizeof(s_eglExtensions) / sizeof(ExtensionDescriptor);
 
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace egl
+#endif
+
 /****************************************************************************************************************************************/
 //macros for accessing global egl info & tls objects
 
 extern "C" {
-EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
-EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream);
-
-EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
-EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
-EGLAPI EGLBoolean EGLAPIENTRY eglPostSaveContext(EGLDisplay display, EGLContext context, EGLStream stream);
-EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);
-
-EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
-                                               EGLStream stream,
-                                               const void* textureSaver);
-EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
-                                               EGLStream stream,
-                                               const void* textureLoader);
-EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
-EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
-EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
-EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
 }
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace egl {
+#endif
 
 #define CURRENT_THREAD() do {} while (0);
 
@@ -371,12 +417,43 @@ EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
     return dpy;
 }
 
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace egl
+#endif
 
 #define TRANSLATOR_GETIFACE_NAME "__translator_getIfaces"
+
+extern "C" {
+GLESiface* static_translator_glescm_getIfaces(const EGLiface*);
+GL_APICALL GLESiface* GL_APIENTRY static_translator_glesv2_getIfaces(const EGLiface*);
+}; // extern "C"
+
+#define STATIC_TRANSLATOR_GETIFACE_NAME_GLES_CM static_translator_glescm_getIfaces
+#define STATIC_TRANSLATOR_GETIFACE_NAME_GLES_V2 static_translator_glesv2_getIfaces
+
+#define LIB_GLES_CM_NAME EMUGL_LIBNAME("GLES_CM_translator")
+#define LIB_GLES_V2_NAME EMUGL_LIBNAME("GLES_V2_translator")
 
 static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
                                                 char* error,
                                                 size_t errorSize) {
+
+#ifdef STATIC_TRANSLATOR
+    fprintf(stderr, "%s: static egl translator, load static\n", __func__);
+    if (!strcmp(libName, LIB_GLES_CM_NAME)) {
+        return STATIC_TRANSLATOR_GETIFACE_NAME_GLES_CM;
+    }
+
+    if (!strcmp(libName, LIB_GLES_V2_NAME)) {
+        return STATIC_TRANSLATOR_GETIFACE_NAME_GLES_V2;
+    }
+
+    fprintf(stderr, "%s: uh oh!\n", __func__);
+
+    return 0;
+
+#else
     emugl::SharedLibrary* libGLES = emugl::SharedLibrary::open(
             libName, error, errorSize);
     if (!libGLES) {
@@ -390,10 +467,13 @@ static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
         return NULL;
     }
     return func;
+#endif
 }
 
-#define LIB_GLES_CM_NAME EMUGL_LIBNAME("GLES_CM_translator")
-#define LIB_GLES_V2_NAME EMUGL_LIBNAME("GLES_V2_translator")
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace egl {
+#endif
 
 EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, EGLint *minor) {
     MEM_TRACE("EMUGL");
@@ -1402,7 +1482,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglReleaseThread(void) {
     MEM_TRACE("EMUGL");
     ThreadInfo* thread  = getThreadInfo();
     EglDisplay* dpy     = static_cast<EglDisplay*>(thread->eglDisplay);
-    return eglMakeCurrent(dpy,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
+#ifdef STATIC_TRANSLATOR
+    return translator::egl::eglMakeCurrent(dpy,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
+#else
+    return ::eglMakeCurrent(dpy,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
+#endif
 }
 
 EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
@@ -1811,3 +1895,8 @@ EGLAPI void EGLAPIENTRY eglFillUsages(void* usages) {
     //         (android_studio::EmulatorGLESUsages*)usages);
     // }
 }
+
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace egl
+#endif

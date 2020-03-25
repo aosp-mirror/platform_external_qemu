@@ -20,6 +20,14 @@
 #include "OpenGLESDispatch/gles_functions.h"
 #include "KHR/khrplatform.h"
 
+#include "OpenGLESDispatch/gles2_extensions_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/gles2_only_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/gles_common_for_gles2_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/gles_extensions_for_gles2_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/gles31_only_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/gles3_extensions_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/gles3_only_static_translator_namespaced_header.h"
+
 // Define function pointer types.
 #define GLES2_DISPATCH_DEFINE_TYPE(return_type,func_name,signature,callargs) \
     typedef return_type (KHRONOS_APIENTRY * func_name ## _t) signature;
