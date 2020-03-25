@@ -814,8 +814,10 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
 
     // Allow large messages, as raw screenshots can take up a significant amount
     // of memory.
-    const int megaByte = 1024 * 1024;
-    builder.SetMaxSendMessageSize(16 * megaByte);
+    const int height = std::max<int>({1920, android_hw->hw_display1_height, android_hw->hw_display2_height, android_hw->hw_display3_height});
+    const int width = std::max<int>({1080, android_hw->hw_display1_width, android_hw->hw_display2_width, android_hw->hw_display3_width});
+    const int needed = width * height * 4 + 1024;
+    builder.SetMaxSendMessageSize(needed);
     auto service = builder.BuildAndStart();
     if (!service)
         return nullptr;
