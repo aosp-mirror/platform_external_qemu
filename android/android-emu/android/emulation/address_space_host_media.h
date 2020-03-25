@@ -27,6 +27,7 @@ namespace emulation {
 class AddressSpaceHostMediaContext : public AddressSpaceDeviceContext {
 public:
     AddressSpaceHostMediaContext(uint64_t phys_addr, const address_space_device_control_ops* ops, bool fromSnapshot);
+    virtual ~AddressSpaceHostMediaContext();
     void perform(AddressSpaceDevicePingInfo *info) override;
 
     AddressSpaceDeviceType getDeviceType() const override;
@@ -35,6 +36,7 @@ public:
 
 private:
     void allocatePages(uint64_t phys_addr, int num_pages);
+    void deallocatePages(uint64_t phys_addr, int num_pages);
     void handleMediaRequest(AddressSpaceDevicePingInfo *info);
     static MediaCodecType getMediaCodecType(uint64_t metadata);
     static MediaOperation getMediaOperation(uint64_t metadata);
