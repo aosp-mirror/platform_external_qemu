@@ -83,7 +83,7 @@ void MediaVpxDecoderFfmpeg::initVpxContextInternal() {
         return;
     }
 
-    mCodecCtx->thread_count = 4;
+    mCodecCtx->thread_count = 1;
     mCodecCtx->thread_type = FF_THREAD_FRAME;
     avcodec_open2(mCodecCtx, mCodec, 0);
     mFrame = av_frame_alloc();

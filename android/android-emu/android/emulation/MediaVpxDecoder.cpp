@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MEDIA_VPX_DEBUG 0
+#define MEDIA_VPX_DEBUG 1
 
 #if MEDIA_VPX_DEBUG
 #define VPX_DPRINT(fmt, ...)                                        \
@@ -58,8 +58,8 @@ MediaVpxDecoderPlugin* makeDecoderPlugin(uint64_t pluginid,
         }
     }
 #endif
-    //return new MediaVpxDecoderLibvpx(parser, type);
-    return new MediaVpxDecoderFfmpeg(parser, type);
+    return new MediaVpxDecoderLibvpx(parser, type);
+    // return new MediaVpxDecoderFfmpeg(parser, type);
 }
 
 };  // namespace
@@ -129,6 +129,7 @@ void MediaVpxDecoder::handlePing(MediaCodecType type,
                     makeDecoderPlugin(myid, parser, type);
             addDecoder(myid, mydecoder);
             mydecoder->initVpxContext(ptr);
+            mfps.start();
             VPX_DPRINT("done handling InitContext");
             break;
         }
@@ -141,6 +142,7 @@ void MediaVpxDecoder::handlePing(MediaCodecType type,
             mydecoder->destroyVpxContext(ptr);
             delete mydecoder;
             removeDecoder(readId(ptr));
+            mfps.stop();
             break;
         }
         case MediaOperation::DecodeImage: {
@@ -165,6 +167,9 @@ void MediaVpxDecoder::handlePing(MediaCodecType type,
             if (nullptr == mydecoder)
                 return;
             mydecoder->getImage(ptr);
+            mfps.addOneFrame();
+            double fps = mfps.frameRate();
+            VPX_DPRINT("current frame rate %g", fps);
             break;
         }
         case MediaOperation::Reset: {
