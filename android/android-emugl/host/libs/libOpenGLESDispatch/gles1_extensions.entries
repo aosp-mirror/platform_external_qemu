@@ -1,4 +1,5 @@
 !gles1_extensions
+namespaces translator,gles1
 
 # OpenGL functions which are needed ONLY for implementing GLES 1.1 EXTENSIONS
 void glCurrentPaletteMatrixARB(GLint index);
