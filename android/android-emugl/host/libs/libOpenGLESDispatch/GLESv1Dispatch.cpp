@@ -114,6 +114,19 @@ LIST_GLES12_TR_FUNCTIONS(DEFINE_DUMMY_FUNCTION);
         dispatch_table-> function_name = gles1_dummy_##function_name; \
         } while(0);
 
+// macro to assign from static library
+#define ASSIGN_GLES1_STATIC(return_type,function_name,signature,callargs)\
+    dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            translator::gles1::function_name); \
+        if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
+        dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            s_egl.eglGetProcAddress(#function_name)); \
+
+bool gles1_dispatch_init_from_static(GLESv1Dispatch* dispatch_table) {
+    LIST_GLES1_FUNCTIONS(ASSIGN_GLES1_STATIC, ASSIGN_GLES1_STATIC);
+    return true;
+}
+
 bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
 
     dispatch_table->underlying_gles2_api = NULL;
@@ -139,7 +152,8 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
         if (!s_gles1_lib) {
             fprintf(stderr, "%s: Could not load %s [%s]\n", __FUNCTION__,
                     libName, error);
-            return false;
+            fprintf(stderr, "%s: Falling back to static\n", __func__);
+            return gles1_dispatch_init_from_static(dispatch_table);
         }
 
         //

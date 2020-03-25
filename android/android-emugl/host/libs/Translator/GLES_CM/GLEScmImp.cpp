@@ -19,6 +19,7 @@
 #define GL_API __declspec(dllexport)
 #define GL_APICALL __declspec(dllexport)
 #endif
+
 #define GL_GLEXT_PROTOTYPES
 #include "android/base/memory/LazyInstance.h"
 #include "GLEScmContext.h"
@@ -59,7 +60,19 @@ static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles1 {
+#endif
+
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
+
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace gles1
+#endif
+
 static bool vulkanInteropSupported();
 }
 
@@ -79,7 +92,11 @@ static GLESiface  s_glesIface = {
     .finish                           = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
     .getError                         = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
     .setShareGroup                    = setShareGroup,
+#ifdef STATIC_TRANSLATOR
+    .getProcAddress                   = translator::gles1::getProcAddress,
+#else
     .getProcAddress                   = getProcAddress,
+#endif
     .fenceSync                        = NULL,
     .clientWaitSync                   = NULL,
     .waitSync                         = NULL,
@@ -98,6 +115,16 @@ static GLESiface  s_glesIface = {
 #include <GLcommon/GLESmacros.h>
 
 static android::base::LazyInstance<GLES1Usage> gles1usages = {};
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles1 {
+
+GL_API void GL_APIENTRY glBindTexture (GLenum target, GLuint texture);
+
+} // namespace gles1
+} // namespace translator
+#endif
 
 extern "C" {
 
@@ -138,8 +165,13 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     }
     if (!ctx->isInitialized()) {
         ctx->init();
+#ifdef STATIC_TRANSLATOR
+        translator::gles1::glBindTexture(GL_TEXTURE_2D,0);
+        translator::gles1::glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
+#else
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
+#endif
     }
     if (ctx->needRestore()) {
         ctx->restore();
@@ -165,6 +197,11 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
 static bool vulkanInteropSupported() {
     return GLEScontext::vulkanInteropSupported();
 }
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles1 {
+#endif
 
 GL_API void GL_APIENTRY  glColorPointerWithDataSize( GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
@@ -254,10 +291,24 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     return ret;
 }
 
-GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace gles1
+#endif
 
+
+#ifdef STATIC_TRANSLATOR
+GL_APICALL GLESiface* GL_APIENTRY static_translator_glescm_getIfaces(const EGLiface* eglIface);
+#else
+GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+#endif
+
+#ifdef STATIC_TRANSLATOR
+GLESiface* static_translator_glescm_getIfaces(const EGLiface* eglIface) {
+#else
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
-    s_eglIface = eglIface;
+#endif
+    s_eglIface = (EGLiface*)eglIface;
     return &s_glesIface;
 }
 
@@ -288,6 +339,11 @@ static TextureData* getTextureTargetData(GLenum target){
     unsigned int tex = ctx->getBindedTexture(target);
     return getTextureData(ctx->getTextureLocalName(target,tex));
 }
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles1 {
+#endif
 
 GL_API GLboolean GL_APIENTRY glIsBuffer(GLuint buffer) {
     GET_CTX_RET(GL_FALSE)
@@ -2822,3 +2878,8 @@ GL_API void GL_APIENTRY glDrawTexxvOES (const GLfixed * coords) {
     GLES_CM_TRACE()
     glDrawTexOES<GLfloat,GL_FLOAT>(X2F(coords[0]),X2F(coords[1]),X2F(coords[2]),X2F(coords[3]),X2F(coords[4]));
 }
+
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace gles1
+#endif
