@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "288440d2_197bdf24",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-03-25T23:47:23Z",
+      "side": 1,
+      "message": "Is this still needed if kFeature_CarVhalReplay is disabled?",
+      "range": {
+        "startLine": 56,
+        "startChar": 4,
+        "endLine": 58,
+        "endChar": 24
+      },
+      "revId": "78b42cd8abc7ec49084c3cd481479c8f1bc2f128",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4965a47a_c44e73a8",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
         "patchSetId": 14
@@ -46,6 +69,30 @@
       "revId": "78b42cd8abc7ec49084c3cd481479c8f1bc2f128",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0595bfd1_2fc15c25",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-03-25T23:47:23Z",
+      "side": 1,
+      "message": "Ok, I took a closer look, and it looks like a race can only happen it you allow the play or load button to be clicked while a load is in progress. Since it seems you disable it, you probably don\u0027t have any race conditions with that object.",
+      "parentUuid": "541edc03_2730a8a8",
+      "range": {
+        "startLine": 351,
+        "startChar": 4,
+        "endLine": 351,
+        "endChar": 26
+      },
+      "revId": "78b42cd8abc7ec49084c3cd481479c8f1bc2f128",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
