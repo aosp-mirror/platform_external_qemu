@@ -16,6 +16,7 @@
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/StaticDispatch.h"
 
 #include "android/utils/debug.h"
 
@@ -114,9 +115,30 @@ LIST_GLES12_TR_FUNCTIONS(DEFINE_DUMMY_FUNCTION);
         dispatch_table-> function_name = gles1_dummy_##function_name; \
         } while(0);
 
+// macro to assign from static library
+#define ASSIGN_GLES1_STATIC(return_type,function_name,signature,callargs)\
+    dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            translator::gles1::function_name); \
+        if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
+        dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            s_egl.eglGetProcAddress(#function_name)); \
+
+bool gles1_dispatch_init_from_static(GLESv1Dispatch* dispatch_table) {
+
+    LIST_GLES1_FUNCTIONS(ASSIGN_GLES1_STATIC, ASSIGN_GLES1_STATIC);
+
+    return true;
+}
+
 bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
 
     dispatch_table->underlying_gles2_api = NULL;
+
+    const char* useStatic = getenv("ANDROID_EMU_STATIC_TRANSLATOR");
+    if (useStatic) {
+        fprintf(stderr, "%s: using statically linked GLES1 translator\n", __func__);
+        return gles1_dispatch_init_from_static(dispatch_table);
+    }
 
     const char* libName = getenv("ANDROID_GLESv1_LIB");
     if (!libName) {
@@ -139,7 +161,8 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
         if (!s_gles1_lib) {
             fprintf(stderr, "%s: Could not load %s [%s]\n", __FUNCTION__,
                     libName, error);
-            return false;
+            fprintf(stderr, "%s: Falling back to static\n", __func__);
+            return gles1_dispatch_init_from_static(dispatch_table);
         }
 
         //
@@ -215,6 +238,12 @@ void *gles1_dispatch_get_proc_func(const char *name, void *userData)
     if (s_gles1_lib) {
         func = (void *)s_gles1_lib->findSymbol(name);
     }
+
+    // Check the static functions
+    if (!func) {
+        func = glse1_dispatch_get_proc_func_static(name);
+    }
+
     // To make it consistent with the guest, redirect any unsupported functions
     // to gles1_unimplemented.
     if (!func) {
