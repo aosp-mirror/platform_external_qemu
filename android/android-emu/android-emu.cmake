@@ -95,6 +95,7 @@ set(android-emu-common
     android/emulation/VpxPingInfoParser.cpp
     android/emulation/HostmemIdMapping.cpp
     android/emulation/MediaVpxDecoder.cpp
+    android/emulation/MediaFrameRateCounter.cpp
     android/emulation/MediaVpxDecoderLibvpx.cpp
     android/emulation/MediaVpxDecoderFfmpeg.cpp
     android/emulation/MediaH264DecoderDefault.cpp

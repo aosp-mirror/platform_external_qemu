@@ -15,6 +15,7 @@
 
 #include "android/emulation/GoldfishMediaDefs.h"
 #include "android/emulation/MediaCodec.h"
+#include "android/emulation/MediaFrameRateCounter.h"
 #include "android/emulation/MediaVpxDecoderPlugin.h"
 #include "android/emulation/VpxPingInfoParser.h"
 
@@ -49,6 +50,8 @@ public:
     void getImage(void* ptr);
 
 private:
+    MediaFrameRateCounter mfps;
+
 private:
     std::mutex mMapLock{};
     uint64_t mId = 0;
