@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7eda444f_7bf6d3e1",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-25T17:09:31Z",
+      "side": 1,
+      "message": "how is this change doing anything? the variable is never read from, am I missing it?",
+      "range": {
+        "startLine": 441,
+        "startChar": 0,
+        "endLine": 441,
+        "endChar": 33
+      },
+      "revId": "5293befe72e295b91bdf160e72e0944767aa47d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
