@@ -72,7 +72,19 @@ static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
 static GLEScontext* createGLESxContext(int maj, int min, GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles2 {
+#endif
+
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
+
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace gles2
+#endif
+
 static void preSaveTexture();
 static void postSaveTexture();
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
@@ -82,11 +94,23 @@ static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
 static void restoreTexture(SaveableTexture* texture);
 static void blitFromCurrentReadBufferANDROID(EGLImage image);
 static bool vulkanInteropSupported();
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles2 {
+#endif
+
 static GLsync internal_glFenceSync(GLenum condition, GLbitfield flags);
 static GLenum internal_glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
 static void internal_glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
 static void internal_glDeleteSync(GLsync to_delete);
 static void internal_glGetSynciv(GLsync sync, GLenum pname, GLsizei bufsize, GLsizei *length, GLint *values);
+
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace gles2
+#endif
+
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -105,11 +129,23 @@ static GLESiface s_glesIface = {
     .finish = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
     .getError = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
     .setShareGroup = setShareGroup,
+#ifdef STATIC_TRANSLATOR
+    .getProcAddress = translator::gles2::getProcAddress,
+#else
     .getProcAddress = getProcAddress,
+#endif
+
+#ifdef STATIC_TRANSLATOR
+    .fenceSync = (FUNCPTR_FENCE_SYNC)translator::gles2::internal_glFenceSync,
+    .clientWaitSync = (FUNCPTR_CLIENT_WAIT_SYNC)translator::gles2::internal_glClientWaitSync,
+    .waitSync = (FUNCPTR_WAIT_SYNC)translator::gles2::internal_glWaitSync,
+    .deleteSync = (FUNCPTR_DELETE_SYNC)translator::gles2::internal_glDeleteSync,
+#else
     .fenceSync = (FUNCPTR_FENCE_SYNC)internal_glFenceSync,
     .clientWaitSync = (FUNCPTR_CLIENT_WAIT_SYNC)internal_glClientWaitSync,
     .waitSync = (FUNCPTR_WAIT_SYNC)internal_glWaitSync,
     .deleteSync = (FUNCPTR_DELETE_SYNC)internal_glDeleteSync,
+#endif
     .preSaveTexture = preSaveTexture,
     .postSaveTexture = postSaveTexture,
     .saveTexture = saveTexture,
@@ -118,7 +154,13 @@ static GLESiface s_glesIface = {
     .deleteRbo = deleteRenderbufferGlobal,
     .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
     .vulkanInteropSupported = vulkanInteropSupported,
+
+#ifdef STATIC_TRANSLATOR
+    .getSynciv = (FUNCPTR_GET_SYNC_IV)translator::gles2::internal_glGetSynciv,
+#else
     .getSynciv = (FUNCPTR_GET_SYNC_IV)internal_glGetSynciv,
+#endif
+
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -131,6 +173,16 @@ static void setMaxGlesVersion(GLESVersion version) {
     GLESv2Context::setMaxGlesVersion(version);
 }
 
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles2 {
+
+GL_API void GL_APIENTRY glBindTexture (GLenum target, GLuint texture);
+
+} // namespace gles1
+} // namespace translator
+#endif
+
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     setCoreProfile(ctx->isCoreProfile());
     GLESv2Context::initGlobal(s_eglIface);
@@ -140,8 +192,13 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     }
     if (!ctx->isInitialized()) {
         ctx->init();
+#ifdef STATIC_TRANSLATOR
+        translator::gles2::glBindTexture(GL_TEXTURE_2D,0);
+        translator::gles2::glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+#else
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+#endif
     }
     if (ctx->needRestore()) {
         ctx->restore();
@@ -172,6 +229,11 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
         ctx->setShareGroup(grp);
     }
 }
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles2 {
+#endif
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
 GL_APICALL void  GL_APIENTRY glVertexAttribIPointerWithDataSize(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
@@ -271,6 +333,11 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     return ret;
 }
 
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace gles2
+#endif
+
 static void preSaveTexture() {
     SaveableTexture::preSave();
 }
@@ -294,11 +361,23 @@ static void restoreTexture(SaveableTexture* texture) {
     texture->touch();
 }
 
-GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+extern "C" {
 
+#ifdef STATIC_TRANSLATOR
+GL_APICALL GLESiface* GL_APIENTRY static_translator_glesv2_getIfaces(const EGLiface* eglIface);
+#else
+GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+#endif
+
+#ifdef STATIC_TRANSLATOR
+GLESiface* static_translator_glesv2_getIfaces(const EGLiface* eglIface) {
+#else
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
-    s_eglIface = eglIface;
+#endif
+    s_eglIface = (EGLiface*)eglIface;
     return & s_glesIface;
+}
+
 }
 
 static bool vulkanInteropSupported() {
@@ -373,6 +452,11 @@ static TextureData* getTextureTargetData(GLenum target){
     unsigned int tex = ctx->getBindedTexture(target);
     return getTextureData(ctx->getTextureLocalName(target,tex));
 }
+
+#ifdef STATIC_TRANSLATOR
+namespace translator {
+namespace gles2 {
+#endif
 
 GL_APICALL void  GL_APIENTRY glActiveTexture(GLenum texture){
     GET_CTX_V2();
@@ -4315,3 +4399,8 @@ GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBuf
     GET_CTX_V2();
     ctx->dispatcher().glSignalSemaphoreEXT(semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, dstLayouts);
 }
+
+#ifdef STATIC_TRANSLATOR
+} // namespace translator
+} // namespace gles2
+#endif

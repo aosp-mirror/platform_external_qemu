@@ -1,4 +1,5 @@
 !gles2_only
+namespaces translator,gles2
 
 # OpenGL functions which are needed ONLY for implementing GLES 2.0
 void glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
