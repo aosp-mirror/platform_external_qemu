@@ -574,6 +574,71 @@ protected:
         return memReqs.size;
     }
 
+    VkResult allocateTestDescriptorSetsFromExistingPool(
+        uint32_t setsToAllocate,
+        VkDescriptorPool pool,
+        VkDescriptorSetLayout setLayout,
+        VkDescriptorSet* sets_out) {
+
+        std::vector<VkDescriptorSetLayout> setLayouts;
+        for (uint32_t i = 0; i < setsToAllocate; ++i) {
+            setLayouts.push_back(setLayout);
+        }
+
+        VkDescriptorSetAllocateInfo setAi = {
+            VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO, 0,
+            pool, setsToAllocate, setLayouts.data(),
+        };
+
+        return vk->vkAllocateDescriptorSets(
+                    mDevice, &setAi, sets_out);
+    }
+
+    VkResult allocateTestDescriptorSets(
+        uint32_t maxSetCount,
+        uint32_t setsToAllocate,
+        VkDescriptorType descriptorType,
+        VkDescriptorPoolCreateFlags poolCreateFlags,
+        VkDescriptorPool* pool_out,
+        VkDescriptorSetLayout* setLayout_out,
+        VkDescriptorSet* sets_out) {
+
+        VkDescriptorPoolSize poolSize = {
+            descriptorType,
+            maxSetCount,
+        };
+
+        VkDescriptorPoolCreateInfo poolCi = {
+            VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, 0,
+            VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+            maxSetCount /* maxSets */,
+            1 /* poolSizeCount */,
+            &poolSize,
+        };
+
+        EXPECT_EQ(VK_SUCCESS, vk->vkCreateDescriptorPool(mDevice, &poolCi, nullptr, pool_out));
+
+        VkDescriptorSetLayoutBinding binding = {
+            0,
+            descriptorType,
+            1,
+            VK_SHADER_STAGE_VERTEX_BIT,
+            nullptr,
+        };
+
+        VkDescriptorSetLayoutCreateInfo setLayoutCi = {
+            VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO, 0, 0,
+            1,
+            &binding,
+        };
+
+        EXPECT_EQ(VK_SUCCESS, vk->vkCreateDescriptorSetLayout(
+            mDevice, &setLayoutCi, nullptr, setLayout_out));
+
+        return allocateTestDescriptorSetsFromExistingPool(
+            setsToAllocate, *pool_out, *setLayout_out, sets_out);
+    }
+
     struct gralloc_implementation mGralloc;
 
     bool mInstanceHasGetPhysicalDeviceProperties2Support = false;
@@ -1260,6 +1325,99 @@ TEST_P(VulkanHalTest, SeparateThreadCommandBufferBeginEnd) {
 
     vk->vkFreeCommandBuffers(mDevice, pool, 1, &cb);
     vk->vkDestroyCommandPool(mDevice, pool, nullptr);
+}
+
+// Tests creating a bunch of descriptor sets and freeing them via vkFreeDescriptorSet.
+// 1. Via vkFreeDescriptorSet directly
+// 2. Via vkResetDescriptorPool
+// 3. Via vkDestroyDescriptorPool
+// 4. Via vkResetDescriptorPool and double frees in vkFreeDescriptorSet
+// 5. Via vkResetDescriptorPool and double frees in vkFreeDescriptorSet
+// 4. Via vkResetDescriptorPool, creating more, and freeing vai vkFreeDescriptorSet
+// (because vkFree* APIs are expected to never fail)
+// https://github.com/KhronosGroup/Vulkan-Docs/issues/1070
+TEST_P(VulkanHalTest, DescriptorSetAllocFreeBasic) {
+    const uint32_t kSetCount = 4;
+    VkDescriptorPool pool;
+    VkDescriptorSetLayout setLayout;
+    std::vector<VkDescriptorSet> sets(kSetCount);
+
+    EXPECT_EQ(VK_SUCCESS, allocateTestDescriptorSets(
+        kSetCount, kSetCount,
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+        &pool, &setLayout, sets.data()));
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkFreeDescriptorSets(
+        mDevice, pool, kSetCount, sets.data()));
+
+    // The double free should also work
+    EXPECT_EQ(VK_SUCCESS, vk->vkFreeDescriptorSets(
+        mDevice, pool, kSetCount, sets.data()));
+
+    // Alloc/free again should also work
+    EXPECT_EQ(VK_SUCCESS,
+        allocateTestDescriptorSetsFromExistingPool(
+        kSetCount, pool, setLayout, sets.data()));
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkFreeDescriptorSets(
+        mDevice, pool, kSetCount, sets.data()));
+
+    vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
+}
+
+// Tests creating a bunch of descriptor sets and freeing them via
+// vkResetDescriptorPool, and that vkFreeDescriptorSets still succeeds.
+TEST_P(VulkanHalTest, DescriptorSetAllocFreeReset) {
+    const uint32_t kSetCount = 4;
+    VkDescriptorPool pool;
+    VkDescriptorSetLayout setLayout;
+    std::vector<VkDescriptorSet> sets(kSetCount);
+
+    EXPECT_EQ(VK_SUCCESS, allocateTestDescriptorSets(
+        kSetCount, kSetCount,
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+        &pool, &setLayout, sets.data()));
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkResetDescriptorPool(
+        mDevice, pool, 0));
+
+    // The double free should also work
+    EXPECT_EQ(VK_SUCCESS, vk->vkFreeDescriptorSets(
+        mDevice, pool, kSetCount, sets.data()));
+
+    // Alloc/reset/free again should also work
+    EXPECT_EQ(VK_SUCCESS,
+        allocateTestDescriptorSetsFromExistingPool(
+        kSetCount, pool, setLayout, sets.data()));
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkResetDescriptorPool(
+        mDevice, pool, 0));
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkFreeDescriptorSets(
+        mDevice, pool, kSetCount, sets.data()));
+
+    vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
+}
+
+// Tests creating a bunch of descriptor sets and freeing them via vkDestroyDescriptorPool, and that vkFreeDescriptorSets still succeeds.
+TEST_P(VulkanHalTest, DescriptorSetAllocFreeDestroy) {
+    const uint32_t kSetCount = 4;
+    VkDescriptorPool pool;
+    VkDescriptorSetLayout setLayout;
+    std::vector<VkDescriptorSet> sets(kSetCount);
+
+    EXPECT_EQ(VK_SUCCESS, allocateTestDescriptorSets(
+        kSetCount, kSetCount,
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+        &pool, &setLayout, sets.data()));
+
+    vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkFreeDescriptorSets(
+        mDevice, pool, kSetCount, sets.data()));
 }
 
 INSTANTIATE_TEST_SUITE_P(

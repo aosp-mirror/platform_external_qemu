@@ -58,6 +58,11 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkImportFenceFdKHR",
     "vkGetFenceFdKHR",
     "vkWaitForFences",
+    "vkCreateDescriptorPool",
+    "vkDestroyDescriptorPool",
+    "vkResetDescriptorPool",
+    "vkAllocateDescriptorSets",
+    "vkFreeDescriptorSets",
 ]
 
 SUCCESS_VAL = {
