@@ -4,6 +4,8 @@
 !Render_EGL
 %#include <EGL/egl.h>
 
+namespaces translator,egl
+
 EGLint eglGetError(void);
 EGLDisplay eglGetDisplay(EGLNativeDisplayType dpy);
 EGLBoolean eglTerminate(EGLDisplay dpy);
