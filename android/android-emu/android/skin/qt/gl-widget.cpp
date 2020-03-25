@@ -51,8 +51,8 @@ static int nearestPOT(int value) {
 
 GLWidget::GLWidget(QWidget* parent) :
         QWidget(parent),
-        mEGL(emugl::LazyLoadedEGLDispatch::get()),
-        mGLES2(emugl::LazyLoadedGLESv2Dispatch::get()),
+        mEGL((const EGLDispatch*)android_getEGLDispatch()),
+        mGLES2((const GLESv2Dispatch*)android_getGLESv2Dispatch()),
         mEGLState(nullptr),
         mValid(false),
         mEnableAA(false) {

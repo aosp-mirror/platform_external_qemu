@@ -96,11 +96,11 @@ void RenderLibImpl::setUsageTracker(android::base::CpuUsage* cpuUsage,
     emugl::setMemoryTracker(memUsage);
 }
 
-void* RenderLibImpl::getGL(void) {
+void* RenderLibImpl::getGLESv2Dispatch(void) {
     return &s_gles2;
 }
 
-void* RenderLibImpl::getEGL(void) {
+void* RenderLibImpl::getEGLDispatch(void) {
     return &s_egl;
 }
 

@@ -432,8 +432,8 @@ target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
 target_link_libraries(
   emulator-libui_unittests
-  PRIVATE gmock_main emulator-libui android-mock-vm-operations OpenGLESDispatch
-          FFMPEG::FFMPEG)
+  PRIVATE gmock_main emulator-libui android-mock-vm-operations android-emu
+  FFMPEG::FFMPEG)
 
 android_target_link_libraries(emulator-libui_unittests windows_msvc-x86_64
                               PUBLIC dirent-win32)

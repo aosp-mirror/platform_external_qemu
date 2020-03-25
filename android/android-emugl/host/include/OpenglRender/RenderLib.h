@@ -80,9 +80,9 @@ public:
     virtual void setUsageTracker(android::base::CpuUsage* cpuUsage,
                                  android::base::MemoryTracker* memUsage) = 0;
 
-    virtual void* getGL(void) = 0;
+    virtual void* getGLESv2Dispatch(void) = 0;
 
-    virtual void* getEGL(void) = 0;
+    virtual void* getEGLDispatch(void) = 0;
 
     virtual bool getOpt(RenderOpt* opt) = 0;
 
