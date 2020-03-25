@@ -1,0 +1,48 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002113390",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1267824?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "8c8f7e1e_1ef7497e",
+          "description": "Change to \"android/android-emu/android/help.c\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/help.c",
+              "range": {
+                "startLine": 1160,
+                "startChar": 9,
+                "endLine": 1160,
+                "endChar": 16
+              },
+              "replacement": "within"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "39e8afe5_9438f409",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1160,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-03-25T19:03:25Z",
+      "side": 1,
+      "message": "Common typo found: \"withing\" -- should it be \"within\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 1160,
+        "startChar": 9,
+        "endLine": 1160,
+        "endChar": 16
+      },
+      "revId": "879735d2b48b18ce6c652a14be92a8c40e3ecec5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
