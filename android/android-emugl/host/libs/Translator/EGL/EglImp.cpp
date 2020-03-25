@@ -374,9 +374,36 @@ EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
 
 #define TRANSLATOR_GETIFACE_NAME "__translator_getIfaces"
 
+extern "C" {
+GLESiface* static_translator_glescm_getIfaces(const EGLiface*);
+GLESiface* static_translator_glesv2_getIfaces(const EGLiface*);
+}; // extern "C"
+
+#define STATIC_TRANSLATOR_GETIFACE_NAME_GLES_CM static_translator_glescm_getIfaces
+#define STATIC_TRANSLATOR_GETIFACE_NAME_GLES_V2 static_translator_glesv2_getIfaces
+
+#define LIB_GLES_CM_NAME EMUGL_LIBNAME("GLES_CM_translator")
+#define LIB_GLES_V2_NAME EMUGL_LIBNAME("GLES_V2_translator")
+
 static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
                                                 char* error,
                                                 size_t errorSize) {
+
+#ifdef STATIC_TRANSLATOR
+    fprintf(stderr, "%s: static egl translator, load static\n", __func__);
+    if (!strcmp(libName, LIB_GLES_CM_NAME)) {
+        return STATIC_TRANSLATOR_GETIFACE_NAME_GLES_CM;
+    }
+
+    if (!strcmp(libName, LIB_GLES_V2_NAME)) {
+        return STATIC_TRANSLATOR_GETIFACE_NAME_GLES_V2;
+    }
+
+    fprintf(stderr, "%s: uh oh!\n", __func__);
+
+    return 0;
+
+#else
     emugl::SharedLibrary* libGLES = emugl::SharedLibrary::open(
             libName, error, errorSize);
     if (!libGLES) {
@@ -390,10 +417,8 @@ static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
         return NULL;
     }
     return func;
+#endif
 }
-
-#define LIB_GLES_CM_NAME EMUGL_LIBNAME("GLES_CM_translator")
-#define LIB_GLES_V2_NAME EMUGL_LIBNAME("GLES_V2_translator")
 
 EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, EGLint *minor) {
     MEM_TRACE("EMUGL");

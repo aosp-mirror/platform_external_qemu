@@ -15,9 +15,11 @@
 */
 #pragma once
 
-#include "OpenGLESDispatch/RenderEGL_functions.h"
-#include "OpenGLESDispatch/RenderEGL_extensions_functions.h"
-#include "OpenGLESDispatch/RenderEGL_snapshot_functions.h"
+extern "C" {
+    #include "OpenGLESDispatch/RenderEGL_functions.h"
+    #include "OpenGLESDispatch/RenderEGL_extensions_functions.h"
+    #include "OpenGLESDispatch/RenderEGL_snapshot_functions.h"
+}
 
 // This header is used to define the EGLDispatch structure that contains
 // pointers to the EGL shared library used by libOpenglRender. Normally,

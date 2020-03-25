@@ -113,6 +113,7 @@ android_target_compile_definitions(OpenglRender windows PRIVATE
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
 target_compile_options(OpenglRender PUBLIC -Wno-return-type-c-linkage)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
+target_link_libraries(OpenglRender PRIVATE EGL_translator_static)
 target_include_directories(
   OpenglRender PUBLIC ${ANDROID_EMUGL_DIR}/host/libs/Translator/include .
                       ${ANDROID_EMUGL_DIR}/host/include/OpenglRender)

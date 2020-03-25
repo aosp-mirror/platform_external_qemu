@@ -138,7 +138,37 @@ def gen_functions_header(entries, prefix_name, verbatim, filename, with_args):
         print(line)
 
     print("#define LIST_%s_FUNCTIONS(X) \\" % prefix_name)
+
+    new_header_apis = [
+        # AEMU private exts
+        "eglGetMaxGLESVersion",
+        "eglBlitFromCurrentReadBufferANDROID",
+        "eglSetImageFenceANDROID",
+        "eglWaitImageFenceANDROID",
+        "eglAddLibrarySearchPathANDROID",
+        "eglQueryVulkanInteropSupportANDROID",
+        "eglQueryVulkanInteropSupportANDROID",
+        # For snapshotting
+        "eglLoadConfig",
+        "eglLoadContext",
+        "eglLoadAllImages",
+        "eglSaveConfig",
+        "eglSaveContext",
+        "eglSaveAllImages",
+        "eglPreSaveContext",
+        "eglPostLoadAllImages",
+        "eglPostSaveContext",
+        "eglUseOsEglApi",
+        "eglFillUsages",
+        "eglSetMaxGLESVersion",
+    ]
+
+    need_decls = []
+
     for entry in entries:
+        if entry.__name__ in new_header_apis:
+            need_decls.append(entry)
+
         if with_args:
             print("  X(%s, %s, (%s), (%s)) \\" % \
                     (entry.return_type, entry.__name__, entry.parameters,
@@ -147,7 +177,12 @@ def gen_functions_header(entries, prefix_name, verbatim, filename, with_args):
             print("  X(%s, %s, (%s)) \\" % \
                     (entry.return_type, entry.__name__, entry.parameters))
 
+
     print("")
+
+    for entry in need_decls:
+        print("EGLAPI %s EGLAPIENTRY %s(%s);" % (entry.return_type, entry.__name__, entry.parameters))
+
     print("")
     print("#endif  // %s_FUNCTIONS_H" % prefix_name)
 

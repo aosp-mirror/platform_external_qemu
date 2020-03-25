@@ -254,10 +254,18 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     return ret;
 }
 
+#ifdef STATIC_TRANSLATOR
+GL_APICALL GLESiface* GL_APIENTRY static_translator_glescm_getIfaces(const EGLiface* eglIface);
+#else
 GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+#endif
 
+#ifdef STATIC_TRANSLATOR
+GLESiface* static_translator_glescm_getIfaces(const EGLiface* eglIface) {
+#else
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
-    s_eglIface = eglIface;
+#endif
+    s_eglIface = (EGLiface*)eglIface;
     return &s_glesIface;
 }
 
