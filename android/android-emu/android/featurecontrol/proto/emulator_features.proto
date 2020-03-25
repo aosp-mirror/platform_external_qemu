@@ -89,4 +89,6 @@ enum Feature {
     Mac80211hwsimUserspaceManaged = 50;
 
     HasSharedSlotsHostMemoryAllocator = 51;
+
+    CarVhalReplay = 52;
 }
