@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4965a47a_c44e73a8",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-03-25T22:34:17Z",
+      "side": 1,
+      "message": "Is this object thread safe? It looks like there may be concurrent access in the UI thread and the VhalEventLoaderThread.",
+      "range": {
+        "startLine": 351,
+        "startChar": 4,
+        "endLine": 351,
+        "endChar": 26
+      },
+      "revId": "78b42cd8abc7ec49084c3cd481479c8f1bc2f128",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
