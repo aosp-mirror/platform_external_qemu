@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2adebf9d_5421e3b1",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-25T21:34:42Z",
+      "side": 1,
+      "message": "Should there be an assertion that sRecordCounter never becomes negative?",
+      "range": {
+        "startLine": 252,
+        "startChar": 4,
+        "endLine": 252,
+        "endChar": 18
+      },
+      "revId": "3b179d580891eb638eb5ea9986188edbf1e30c8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
