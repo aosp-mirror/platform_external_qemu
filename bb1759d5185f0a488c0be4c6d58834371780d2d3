@@ -1,0 +1,48 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002110392",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1266687?revision\u003d2",
+      "fixSuggestions": [
+        {
+          "fixId": "d554caa1_95d03030",
+          "description": "Change to \"android/android-emu/android/emulation/MediaVpxDecoderFfmpeg.cpp\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/emulation/MediaVpxDecoderFfmpeg.cpp",
+              "range": {
+                "startLine": 251,
+                "startChar": 52,
+                "endLine": 251,
+                "endChar": 58
+              },
+              "replacement": "return"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "71cb0dcd_f317358a",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoderFfmpeg.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-03-25T16:53:28Z",
+      "side": 1,
+      "message": "Common typo found: \"retrun\" -- should it be \"return\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 251,
+        "startChar": 52,
+        "endLine": 251,
+        "endChar": 58
+      },
+      "revId": "bb1759d5185f0a488c0be4c6d58834371780d2d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
