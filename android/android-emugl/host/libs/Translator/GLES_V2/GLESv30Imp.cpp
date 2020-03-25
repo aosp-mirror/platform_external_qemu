@@ -2,7 +2,8 @@
 // This file is best left unedited.
 // Try to make changes through gen_translator in gen-entries.py,
 // and/or parcel out custom functionality in separate code.
-extern "C" GL_APICALL GLconstubyteptr GL_APIENTRY glGetStringi(GLenum name, GLint index) {
+
+EXTERN_PART GL_APICALL GLconstubyteptr GL_APIENTRY glGetStringi(GLenum name, GLint index) {
     GET_CTX_V2_RET(0);
     GLconstubyteptr glGetStringiRET = ctx->dispatcher().glGetStringi(name, index);
     return glGetStringiRET;
@@ -126,7 +127,7 @@ GL_APICALL GLuint GL_APIENTRY glGetUniformBlockIndex(GLuint program, const GLcha
     } else return 0;
 }
 
-extern "C" GL_APICALL void GL_APIENTRY glGetUniformIndices(GLuint program, GLsizei uniformCount, const GLchar ** uniformNames, GLuint * uniformIndices) {
+EXTERN_PART GL_APICALL void GL_APIENTRY glGetUniformIndices(GLuint program, GLsizei uniformCount, const GLchar ** uniformNames, GLuint * uniformIndices) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
@@ -171,7 +172,7 @@ GL_APICALL void GL_APIENTRY glUniform3ui(GLint location, GLuint v0, GLuint v1, G
     ctx->dispatcher().glUniform3ui(hostLoc, v0, v1, v2);
 }
 
-extern "C" GL_APICALL void GL_APIENTRY glUniform4ui(GLint location, GLint v0, GLuint v1, GLuint v2, GLuint v3) {
+EXTERN_PART GL_APICALL void GL_APIENTRY glUniform4ui(GLint location, GLint v0, GLuint v1, GLuint v2, GLuint v3) {
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
@@ -834,7 +835,7 @@ GL_APICALL GLboolean GL_APIENTRY glIsTransformFeedback(GLuint id) {
     return ctx->hasBoundTransformFeedback(id);
 }
 
-extern "C" GL_APICALL void GL_APIENTRY glTransformFeedbackVaryings(GLuint program, GLsizei count, const char ** varyings, GLenum bufferMode) {
+EXTERN_PART GL_APICALL void GL_APIENTRY glTransformFeedbackVaryings(GLuint program, GLsizei count, const char ** varyings, GLenum bufferMode) {
     GET_CTX_V2();
     gles30usages->set_is_used(true);
     if (ctx->shareGroup().get()) {
