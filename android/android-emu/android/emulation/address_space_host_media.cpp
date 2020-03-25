@@ -41,6 +41,10 @@ AddressSpaceHostMediaContext::AddressSpaceHostMediaContext(uint64_t phys_addr, c
     }
 }
 
+AddressSpaceHostMediaContext::~AddressSpaceHostMediaContext() {
+    deallocatePages(mGuestAddr, kNumPages);
+}
+
 void AddressSpaceHostMediaContext::perform(AddressSpaceDevicePingInfo *info) {
     handleMediaRequest(info);
 }
@@ -74,6 +78,7 @@ void AddressSpaceHostMediaContext::save(base::Stream* stream) const {
 }
 
 bool AddressSpaceHostMediaContext::load(base::Stream* stream) {
+    deallocatePages(mGuestAddr, kNumPages);
     AS_DEVICE_DPRINT("Loading Host Media snapshot");
     mGuestAddr = stream->getBe64();
     allocatePages(mGuestAddr, kNumPages);
@@ -105,6 +110,18 @@ void AddressSpaceHostMediaContext::allocatePages(uint64_t phys_addr, int num_pag
         phys_addr, mHostBuffer, num_pages * 4096);
     AS_DEVICE_DPRINT("Allocating host memory for media context: guest_addr 0x%" PRIx64 ", 0x%" PRIx64,
                      (uint64_t)phys_addr, (uint64_t)mHostBuffer);
+}
+
+void AddressSpaceHostMediaContext::deallocatePages(uint64_t phys_addr,
+                                                   int num_pages) {
+    mControlOps->remove_memory_mapping(phys_addr, mHostBuffer,
+                                       num_pages * 4096);
+    android::aligned_buf_free(mHostBuffer);
+    mHostBuffer = nullptr;
+    AS_DEVICE_DPRINT(
+            "De-Allocating host memory for media context: guest_addr 0x%" PRIx64
+            ", 0x%" PRIx64,
+            (uint64_t)phys_addr, (uint64_t)mHostBuffer);
 }
 
 // static
