@@ -234,6 +234,7 @@ OPT_PARAM(perf_stat, "<file>", "Run periodic perf stat reporter in the backgroun
 OPT_FLAG(share_vid, "Share current video state in shared memory region.")
 
 OPT_PARAM(grpc, "<port>", "TCP ports used for the gRPC bridge." )
+OPT_PARAM(idle_grpc_timeout, "<timeout>", "Terminate the emulator if there is no gRPC activity within <timeout> seconds.")
 OPT_PARAM(waterfall, "<mode>", "Mode in which to run waterfall.")
 
 #ifdef ANDROID_WEBRTC

@@ -1,18 +1,17 @@
 #include "android/help.h"
-#include "android/cmdline-option.h"
-#include "android/emulation/bufprint_config_dirs.h"
-#include "android/network/constants.h"
-#include "android/utils/path.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
-#include "android/utils/misc.h"
-#ifndef NO_SKIN
-#include "android/skin/keycode.h"
-#endif
-#include "android/android.h"
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
+
+#include <stdio.h>                                   // for snprintf
+#include <stdlib.h>                                  // for NULL
+#include <string.h>                                  // for strlen, strcmp
+
+#include "android/android.h"                         // for CORE_HARDWARE_INI
+#include "android/emulation/bufprint_config_dirs.h"  // for bufprint_config_...
+#include "android/network/constants.h"               // for AndroidNetworkLa...
+#include "android/utils/bufprint.h"                  // for bufprint
+#include "android/utils/debug.h"                     // for VERBOSE_adb, VER...
+#include "android/utils/misc.h"                      // for buffer_translate...
+#include "android/utils/path.h"                      // for MAX_PATH, PATH_SEP
+#include "android/utils/system.h"                    // for STRINGIFY
 
 /* XXX: TODO: put most of the help stuff in auto-generated files */
 
@@ -1159,6 +1158,19 @@ help_grpc(stralloc_t*  out)
     "  If the gRPC service will not be started if the port is not available on startup.\n\n");
 }
 
+
+static void
+help_idle_grpc_timeout(stralloc_t*  out)
+{
+    PRINTF(
+    "  Terminates the emulator if there is no interaction on the gRPC endpoint.\n\n"
+    "    <timeout> Time in seconds before the emulator should terminate.\n"
+    "    at first a clean shutdown will be attempted, if this does not succeed\n"
+    "    within <timeout> seconds, the process will be killed.\n\n"
+    "  Make sure that timeout is large enough to give the emulator a chance to \n"
+    "  attempt a clean shutdown.\n\n");
+}
+
 static void
 help_waterfall(stralloc_t*  out)
 {
@@ -1913,6 +1925,7 @@ static const OptionHelp    option_help[] = {
 #define  OPT_PARAM(_name,_template,_descr)  { STRINGIFY(_name), _template, _descr, help_##_name },
 #define  OPT_LIST                           OPT_PARAM
 #include "android/cmdline-options.h"
+
     { NULL, NULL, NULL, NULL }
 };
 

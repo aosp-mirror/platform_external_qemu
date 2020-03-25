@@ -13,11 +13,6 @@
 // limitations under the License.
 #include "android-qemu2-glue/qemu-setup.h"
 
-// We need to include this first due to msvc-posix defining some magical macros
-#ifdef ANDROID_WEBRTC
-#include "android/emulation/control/WebRtcBridge.h"  // for WebRtcBridge
-#endif
-
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #endif
@@ -26,8 +21,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <algorithm>
+#include <chrono>
 #include <functional>
 #include <memory>
 #include <random>
@@ -100,14 +95,6 @@ extern "C" {
 #include "qemu/thread.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/sysemu.h"
-
-namespace android {
-namespace emulation {
-namespace control {
-class RtcBridge;
-}  // namespace control
-}  // namespace emulation
-}  // namespace android
 
 extern char* android_op_ports;
 
@@ -314,11 +301,17 @@ int qemu_setup_grpc() {
                     .withService(h2o)
                     .withService(snapshot);
 
+    int timeout = 0;
+    if (android_cmdLineOptions->idle_grpc_timeout &&
+        sscanf(android_cmdLineOptions->idle_grpc_timeout, "%d", &timeout) ==
+                1) {
+        builder.withIdleTimeout(std::chrono::seconds(timeout));
+    }
 #ifdef ANDROID_WEBRTC
     builder.withService(android::emulation::control::getRtcService(
             getConsoleAgents(), android_cmdLineOptions->turncfg));
 #endif
-    int port = - 1;
+    int port = -1;
     grpcService = builder.build();
 
     if (grpcService) {
@@ -413,9 +406,9 @@ void qemu_android_emulation_teardown() {
     androidSnapshot_finalize();
     android_emulation_teardown();
     if (grpcService) {
-        // Explicitly cleanup resources. We do not want to do this at program exit
-        // as we may be holding on to loopers, which threads have likely been destroyed
-        // at that point.
+        // Explicitly cleanup resources. We do not want to do this at program
+        // exit as we may be holding on to loopers, which threads have likely
+        // been destroyed at that point.
         grpcService->stop();
         grpcService = nullptr;
     }
