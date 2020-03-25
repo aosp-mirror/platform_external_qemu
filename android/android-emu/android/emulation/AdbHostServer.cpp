@@ -40,6 +40,8 @@ static ScopedSocket connectToAdbServer(int adbClientPort) {
 // Sends a message to the ADB server on the socket file descriptor.
 // The message will be formatted according to the ADB protocol
 static bool sendMessage(int fd, const std::string& message) {
+
+    fprintf(stderr, "%s: fd %d msg %s\n", __func__, fd, message.c_str());
     // A client sends a request using the following format:
     //
     // 1. A 4-byte hexadecimal string giving the length of the payload
