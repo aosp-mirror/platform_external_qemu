@@ -198,9 +198,25 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
 
     if (!versionStringStart) {
         if (uncompressedKernel) {
-            versionStringStart = (const char*)memmem(
-                    uncompressedKernel, uncompressedKernelLen,
-                    kLinuxVersionPrefix.data(), kLinuxVersionPrefix.size());
+            const char* i = (const char*)uncompressedKernel;
+            const char* end = i + uncompressedKernelLen;
+
+            while (i < end) {
+                const char* start = (const char*)memmem(i, end - i,
+                        kLinuxVersionPrefix.data(), kLinuxVersionPrefix.size());
+
+                if (start) {
+                    KernelVersion dummy;
+                    if (android_parseLinuxVersionString(start, &dummy)) {
+                        versionStringStart = start;
+                        break;
+                    } else {
+                        i = start + 1;
+                    }
+                } else {
+                    break;
+                }
+            }
         }
         if (!versionStringStart) {
             KERNEL_ERROR << "Could not find 'Linux version ' in kernel!";
