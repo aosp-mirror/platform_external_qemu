@@ -14,13 +14,16 @@
 
 #include "android/emulation/control/EventDispatcher.h"
 
-#include <openssl/base64.h>                              // for EVP_DecodeBa...
-#include <stddef.h>                                      // for size_t
-#include <cstdint>                                       // for uint8_t
-#include <string>                                        // for operator==
-#include <vector>                                        // for vector
+#include <openssl/base64.h>  // for EVP_DecodeBa...
+#include <stddef.h>          // for size_t
+
+#include <cstdint>     // for uint8_t
+#include <functional>  // for __base
+#include <string>      // for operator==
+#include <vector>      // for vector
 
 #include "android/base/Log.h"                            // for LogStream, LOG
+#include "android/base/async/ThreadLooper.h"             // for ThreadLooper
 #include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
 #include "emulator_controller.pb.h"                      // for MouseEvent
 #include "nlohmann/json.hpp"                             // for basic_json
@@ -59,7 +62,6 @@ void EventDispatcher::dispatchEvent(const json msg) {
     EVP_DecodeBase64(decoded.data(), &decoded_size, decoded.size(),
                      (const uint8_t*)(blob.data()), blob.size());
 
-
     KeyboardEvent keyEvent;
     MouseEvent mouseEvent;
     TouchEvent touchEvent;
@@ -67,14 +69,18 @@ void EventDispatcher::dispatchEvent(const json msg) {
     // Valid labels are defined in Participant.h
     if (label == "keyboard" &&
         keyEvent.ParseFromArray(decoded.data(), decoded_size)) {
-        mKeyEventSender.send(&keyEvent);
+        android::base::ThreadLooper::runOnMainLooper(
+                [=]() { mKeyEventSender.sendOnThisThread(&keyEvent); });
     } else if (label == "mouse" &&
                mouseEvent.ParseFromArray(decoded.data(), decoded_size)) {
-        mAgents->user_event->sendMouseEvent(mouseEvent.x(), mouseEvent.y(), 0,
-                                            mouseEvent.buttons(), 0);
+        android::base::ThreadLooper::runOnMainLooper([=]() {
+            mAgents->user_event->sendMouseEvent(mouseEvent.x(), mouseEvent.y(),
+                                                0, mouseEvent.buttons(), 0);
+        });
     } else if (label == "touch" &&
                touchEvent.ParseFromArray(decoded.data(), decoded_size)) {
-        mTouchEventSender.send(&touchEvent);
+        android::base::ThreadLooper::runOnMainLooper(
+                [=]() { mTouchEventSender.send(&touchEvent); });
     } else {
         LOG(WARNING) << "Unable to handle " << label
                      << ", bad label or protobuf.";
