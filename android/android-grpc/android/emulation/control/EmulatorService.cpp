@@ -426,6 +426,7 @@ public:
         }
 
         bool lastFrameWasEmpty = first.format().width() == 0;
+        int frame = 0;
         while (clientAvailable) {
             Image reply;
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(125);
@@ -437,9 +438,10 @@ public:
             // there. (All clients get disconnected on emulator shutdown).
             auto arrived = frameEvent.next(kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
+                frame += arrived;
                 // TODO(jansene): Add metrics around dropped frames/timing?
                 getScreenshot(context, request, &reply);
-                reply.set_seq(frameEvent.current());
+                reply.set_seq(frame);
 
                 // We send the first empty frame, after that we wait for frames
                 // to come, or until the client gives up on us. So for a screen
