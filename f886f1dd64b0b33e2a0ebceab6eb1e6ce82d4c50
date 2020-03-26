@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "909981cb_d067b723",
+        "filename": "android/android-emu/android/kernel/kernel_utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-26T06:15:23Z",
+      "side": 1,
+      "message": "nit: else isn\u0027t needed - the previous block never falls through.",
+      "range": {
+        "startLine": 213,
+        "startChar": 22,
+        "endLine": 213,
+        "endChar": 28
+      },
+      "revId": "f886f1dd64b0b33e2a0ebceab6eb1e6ce82d4c50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df56aa2d_51e06b38",
+        "filename": "android/android-emu/android/kernel/kernel_utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-26T06:15:23Z",
+      "side": 1,
+      "message": "this function prints quite a bit of errors if it can\u0027t parse the string. Maybe should have a private version that doesn\u0027t print those can it here instead?",
+      "range": {
+        "startLine": 210,
+        "startChar": 19,
+        "endLine": 213,
+        "endChar": 28
+      },
+      "revId": "f886f1dd64b0b33e2a0ebceab6eb1e6ce82d4c50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6a7560f_13400fc7",
+        "filename": "android/android-emu/android/kernel/kernel_utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-03-26T06:15:23Z",
+      "side": 1,
+      "message": "1 \u003d\u003e kLinuxVersionPrefix.size() ?",
+      "range": {
+        "startLine": 214,
+        "startChar": 36,
+        "endLine": 214,
+        "endChar": 37
+      },
+      "revId": "f886f1dd64b0b33e2a0ebceab6eb1e6ce82d4c50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
