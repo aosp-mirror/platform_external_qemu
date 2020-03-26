@@ -63,6 +63,8 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkResetDescriptorPool",
     "vkAllocateDescriptorSets",
     "vkFreeDescriptorSets",
+    "vkCreateDescriptorSetLayout",
+    "vkUpdateDescriptorSets",
 ]
 
 SUCCESS_VAL = {

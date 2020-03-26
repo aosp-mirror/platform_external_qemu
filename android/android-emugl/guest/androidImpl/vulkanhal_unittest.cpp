@@ -639,6 +639,77 @@ protected:
             setsToAllocate, *pool_out, *setLayout_out, sets_out);
     }
 
+    VkResult allocateImmutableSamplerDescriptorSets(
+        uint32_t maxSetCount,
+        uint32_t setsToAllocate,
+        std::vector<bool> bindingImmutabilities,
+        VkSampler* sampler_out,
+        VkDescriptorPool* pool_out,
+        VkDescriptorSetLayout* setLayout_out,
+        VkDescriptorSet* sets_out) {
+
+        VkSamplerCreateInfo samplerCi = {
+            VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO, 0, 0,
+            VK_FILTER_NEAREST,
+            VK_FILTER_NEAREST,
+            VK_SAMPLER_MIPMAP_MODE_NEAREST,
+            VK_SAMPLER_ADDRESS_MODE_REPEAT,
+            VK_SAMPLER_ADDRESS_MODE_REPEAT,
+            VK_SAMPLER_ADDRESS_MODE_REPEAT,
+            0.0f,
+            VK_FALSE,
+            1.0f,
+            VK_FALSE,
+            VK_COMPARE_OP_NEVER,
+            0.0f,
+            1.0f,
+            VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK,
+            VK_FALSE,
+        };
+
+        EXPECT_EQ(VK_SUCCESS,
+            vk->vkCreateSampler(
+                mDevice, &samplerCi, nullptr, sampler_out));
+            
+        VkDescriptorPoolSize poolSize = {
+            VK_DESCRIPTOR_TYPE_SAMPLER,
+            maxSetCount,
+        };
+
+        VkDescriptorPoolCreateInfo poolCi = {
+            VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, 0,
+            VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+            maxSetCount /* maxSets */,
+            1 /* poolSizeCount */,
+            &poolSize,
+        };
+
+        EXPECT_EQ(VK_SUCCESS, vk->vkCreateDescriptorPool(mDevice, &poolCi, nullptr, pool_out));
+
+        std::vector<VkDescriptorSetLayoutBinding> samplerBindings;
+
+        for (size_t i = 0; i < bindingImmutabilities.size(); ++i) {
+            VkDescriptorSetLayoutBinding samplerBinding = {
+                (uint32_t)i, VK_DESCRIPTOR_TYPE_SAMPLER,
+                1, VK_SHADER_STAGE_FRAGMENT_BIT,
+                bindingImmutabilities[i] ? sampler_out : nullptr,
+            };
+            samplerBindings.push_back(samplerBinding);
+        }
+
+        VkDescriptorSetLayoutCreateInfo setLayoutCi = {
+            VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO, 0, 0,
+            (uint32_t)samplerBindings.size(),
+            samplerBindings.data(),
+        };
+
+        EXPECT_EQ(VK_SUCCESS, vk->vkCreateDescriptorSetLayout(
+            mDevice, &setLayoutCi, nullptr, setLayout_out));
+
+        return allocateTestDescriptorSetsFromExistingPool(
+            setsToAllocate, *pool_out, *setLayout_out, sets_out);
+    }
+
     struct gralloc_implementation mGralloc;
 
     bool mInstanceHasGetPhysicalDeviceProperties2Support = false;
@@ -1418,6 +1489,60 @@ TEST_P(VulkanHalTest, DescriptorSetAllocFreeDestroy) {
 
     EXPECT_EQ(VK_SUCCESS, vk->vkFreeDescriptorSets(
         mDevice, pool, kSetCount, sets.data()));
+}
+
+// Tests that immutable sampler descriptors properly cause
+// the |sampler| field of VkWriteDescriptorSet's descriptor image info
+// to be ignored.
+TEST_P(VulkanHalTest, ImmutableSamplersSuppressVkWriteDescriptorSetSampler) {
+    const uint32_t kSetCount = 4;
+    std::vector<bool> bindingImmutabilities = {
+        false,
+        true,
+        false,
+        false,
+    };
+
+    VkSampler sampler;
+    VkDescriptorPool pool;
+    VkDescriptorSetLayout setLayout;
+    std::vector<VkDescriptorSet> sets(kSetCount);
+
+    EXPECT_EQ(VK_SUCCESS,
+        allocateImmutableSamplerDescriptorSets(
+            kSetCount * bindingImmutabilities.size(),
+            kSetCount,
+            bindingImmutabilities,
+            &sampler,
+            &pool,
+            &setLayout,
+            sets.data()));
+
+    for (uint32_t i = 0; i < bindingImmutabilities.size(); ++i) {
+        VkDescriptorImageInfo imageInfo = {
+            bindingImmutabilities[i] ? (VkSampler)0xdeadbeef : sampler,
+            0,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        };
+
+        VkWriteDescriptorSet write = {
+            VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, 0,
+            sets[0],
+            1,
+            0,
+            1,
+            VK_DESCRIPTOR_TYPE_SAMPLER,
+            &imageInfo,
+            nullptr,
+            nullptr,
+        };
+
+        vk->vkUpdateDescriptorSets(mDevice, 1, &write, 0, nullptr);
+    }
+
+    vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
+    vk->vkDestroyDescriptorSetLayout(mDevice, setLayout, nullptr);
+    vk->vkDestroySampler(mDevice, sampler, nullptr);
 }
 
 INSTANTIATE_TEST_SUITE_P(
