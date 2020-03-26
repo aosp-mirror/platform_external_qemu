@@ -435,6 +435,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::MAC80211HWSIM_USERSPACE_MANAGED;
         case android::featurecontrol::HasSharedSlotsHostMemoryAllocator:
             return android_studio::EmulatorFeatureFlagState::HAS_SHARED_SLOTS_HOST_MEMORY_ALLOCATOR;
+        case android::featurecontrol::CarVhalReplay:
+            return android_studio::EmulatorFeatureFlagState::CAR_VHAL_REPLAY;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

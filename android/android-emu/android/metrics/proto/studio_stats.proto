@@ -1426,7 +1426,8 @@ message EmulatorFeatureFlagState {
     VIRTIO_GPU_NEXT = 55;
     MAC80211HWSIM_USERSPACE_MANAGED = 56;
     HAS_SHARED_SLOTS_HOST_MEMORY_ALLOCATOR = 57;
-    // Next tag: 58
+    CAR_VHAL_REPLAY = 58;
+    // Next tag: 59
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
