@@ -14,18 +14,19 @@
 
 #include "android/gpu_frame.h"
 
-#include <atomic>         // for atomic, __atomic_base
-#include <cassert>        // for assert
-#include <cstddef>        // for NULL
-#include <unordered_map>  // for unordered_map
-#include <utility>        // for pair
+#include <atomic>                                         // for atomic, __a...
+#include <cstddef>                                        // for NULL
+#include <unordered_map>                                  // for unordered_map
+#include <utility>                                        // for pair, move
+#include <vector>                                         // for vector
 
-#include "android/base/Log.h"                   // for LogMessage, DCHECK
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/opengl/GpuFrameBridge.h"      // for GpuFrameBridge
-#include "android/opengles.h"                   // for android_setPostCallback
+#include "android/base/Log.h"                             // for LogMessage
+#include "android/base/memory/LazyInstance.h"             // for LazyInstance
+#include "android/base/synchronization/Lock.h"            // for AutoLock, Lock
+#include "android/base/synchronization/MessageChannel.h"  // for MessageChannel
+#include "android/opengl/GpuFrameBridge.h"                // for GpuFrameBridge
+#include "android/opengl/virtio_gpu_ops.h"                // for AndroidVirt...
+#include "android/opengles.h"                             // for android_set...
 
 using android::base::AutoLock;
 
@@ -52,9 +53,9 @@ public:
 
     void registerCallback(FrameAvailableCallback frameAvailable, void* opaque) {
         ForwarderMessage msg = {
-            .cmd = FRAME_FORWARDER_ADD,
-            .data = opaque,
-            .callback = frameAvailable,
+                .cmd = FRAME_FORWARDER_ADD,
+                .data = opaque,
+                .callback = frameAvailable,
         };
 
         mMessages.send(msg);
@@ -62,9 +63,9 @@ public:
 
     void unregisterCallback(void* opaque) {
         ForwarderMessage msg = {
-            .cmd = FRAME_FORWARDER_REMOVE,
-            .data = opaque,
-            .callback = {},
+                .cmd = FRAME_FORWARDER_REMOVE,
+                .data = opaque,
+                .callback = {},
         };
 
         mMessages.send(msg);
@@ -100,14 +101,14 @@ public:
         AutoLock lock(mLock);
         for (auto it : mStoredForwarders) {
             RegisteredForwarder rf = {
-                .data = it.first,
-                .callback = it.second,
+                    .data = it.first,
+                    .callback = it.second,
             };
             toRun.push_back(rf);
         }
         lock.unlock();
 
-        for (const auto& rf: toRun) {
+        for (const auto& rf : toRun) {
             rf.callback(rf.data);
         }
     }
@@ -126,11 +127,12 @@ private:
 
     android::base::MessageChannel<ForwarderMessage, 16> mMessages;
 
-    android::base::Lock mLock; // protects mStoredForwarders
+    android::base::Lock mLock;  // protects mStoredForwarders
     std::unordered_map<void*, FrameAvailableCallback> mStoredForwarders;
 };
 
-static android::base::LazyInstance<FrameReceiverState> sReceiverState = LAZY_INSTANCE_INIT;
+static android::base::LazyInstance<FrameReceiverState> sReceiverState =
+        LAZY_INSTANCE_INIT;
 
 static void frameReceivedForwader(void* __ignored) {
     sReceiverState->process();
@@ -248,6 +250,11 @@ bool gpu_frame_set_record_mode(bool on) {
     // 3. The ffmpeg based video recorder might want to receive frames.
     // The updates are atomic operations.
     sRecordCounter += on ? 1 : -1;
+
+    // No need to do any additional configuration if we are
+    // still recording.
+    if (sRecordCounter > 1)
+        return true;
 
     if (!sBridge) {
         sBridge = android::opengl::GpuFrameBridge::create(nullptr, nullptr,
