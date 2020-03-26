@@ -68,6 +68,30 @@
       "revId": "f886f1dd64b0b33e2a0ebceab6eb1e6ce82d4c50",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f46665a_d14d926e",
+        "filename": "android/android-emu/android/kernel/kernel_utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-03-26T16:24:52Z",
+      "side": 1,
+      "message": "kLinuxVersionPrefix compared to 1 saves very little in memmem and requires assumptions about kLinuxVersionPrefix and android_parseLinuxVersionString.",
+      "parentUuid": "f6a7560f_13400fc7",
+      "range": {
+        "startLine": 214,
+        "startChar": 36,
+        "endLine": 214,
+        "endChar": 37
+      },
+      "revId": "f886f1dd64b0b33e2a0ebceab6eb1e6ce82d4c50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
