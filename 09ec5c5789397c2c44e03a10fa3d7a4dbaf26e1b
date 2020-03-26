@@ -46,6 +46,53 @@
       "revId": "09ec5c5789397c2c44e03a10fa3d7a4dbaf26e1b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da98a01e_aa6b53bc",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-26T17:24:57Z",
+      "side": 1,
+      "message": "The issue with max received message size will have to be addressed in Studio.",
+      "parentUuid": "9478bbde_729c4a6d",
+      "range": {
+        "startLine": 819,
+        "startChar": 0,
+        "endLine": 821,
+        "endChar": 49
+      },
+      "revId": "09ec5c5789397c2c44e03a10fa3d7a4dbaf26e1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31ad501c_2ced47ca",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-26T17:24:57Z",
+      "side": 1,
+      "message": "Why not use MAX_INT as suggested in https://nanxiao.me/en/message-length-setting-in-grpc?",
+      "range": {
+        "startLine": 822,
+        "startChar": 34,
+        "endLine": 822,
+        "endChar": 40
+      },
+      "revId": "09ec5c5789397c2c44e03a10fa3d7a4dbaf26e1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
