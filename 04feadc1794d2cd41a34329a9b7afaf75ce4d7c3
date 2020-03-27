@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "728f86a4_b570a7a3",
+        "filename": "android/android-grpc/android/emulation/control/interceptor/IdleInterceptor.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-27T22:48:49Z",
+      "side": 1,
+      "message": "In fact, an active stream request should not be interpreted as idle time even if no frames are sent back.",
+      "parentUuid": "bc839af4_70133026",
+      "range": {
+        "startLine": 35,
+        "startChar": 22,
+        "endLine": 35,
+        "endChar": 31
+      },
+      "revId": "04feadc1794d2cd41a34329a9b7afaf75ce4d7c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f3046a3b_17a2fd95",
         "filename": "android/android-grpc/android/emulation/control/interceptor/IdleInterceptor.cpp",
         "patchSetId": 2
