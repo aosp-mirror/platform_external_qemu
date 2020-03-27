@@ -46,6 +46,30 @@
       "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cfbf1c94_b4e5ee09",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-27T22:57:38Z",
+      "side": 1,
+      "message": "Is it possible to change the behavior the following way?\n\n-no-window: Swiftshader\n-no-window -gpu auto: host\n-gpu auto: host\nno flags: host",
+      "parentUuid": "3f842978_de4600c5",
+      "range": {
+        "startLine": 13,
+        "startChar": 6,
+        "endLine": 14,
+        "endChar": 28
+      },
+      "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
