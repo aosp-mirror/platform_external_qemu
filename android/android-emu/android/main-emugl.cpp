@@ -80,12 +80,13 @@ bool androidEmuglConfigInit(EmuglConfig* config,
     // Only check the blacklist for 'auto', 'host' or 'on' mode.
     if (gpuChoice && (!strcmp(gpuChoice, "auto") ||
                       !strcmp(gpuChoice, "host") ||
+                      !strcmp(gpuChoice, "auto-no-window") ||
                       !strcmp(gpuChoice, "on"))) {
 
          onBlacklist = isHostGpuBlacklisted();
     }
 
-    if (gpuChoice && !strcmp(gpuChoice, "auto")) {
+    if (gpuChoice && (!strcmp(gpuChoice, "auto") || !strcmp(gpuChoice, "auto-no-window"))) {
         if (onBlacklist) {
             dwarning("Your GPU drivers may have a bug. "
                      "Switching to software rendering.");

@@ -188,15 +188,17 @@ bool emuglConfig_init(EmuglConfig* config,
                       bool has_guest_renderer,
                       enum WinsysPreferredGlesBackend uiPreferredBackend,
                       bool use_host_vulkan) {
-    D("%s: blacklisted=%d has_guest_renderer=%d\n",
+    D("%s: blacklisted=%d has_guest_renderer=%d, mode: %s, option: %s\n",
       __FUNCTION__,
       blacklisted,
-      has_guest_renderer);
+      has_guest_renderer,
+      gpu_mode, gpu_option);
 
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
     bool host_set_in_hwconfig = false;
+    bool has_auto_no_window = false;
 
     bool hasUiPreference = uiPreferredBackend != WINSYS_GLESBACKEND_PREFERENCE_AUTO;
 
@@ -213,9 +215,13 @@ bool emuglConfig_init(EmuglConfig* config,
                    !strcmp(gpu_option, "guest")) {
             gpu_mode = gpu_option;
             gpu_enabled = false;
-        } else if (!strcmp(gpu_option, "auto")) {
+        } else if (!strcmp(gpu_option, "auto")){
             // Nothing to do, use gpu_mode set from
             // hardware properties instead.
+        } else if  (!strcmp(gpu_option, "auto-no-window")) {
+            // Nothing to do, use gpu_mode set from
+            // hardware properties instead.
+            has_auto_no_window = true;
         } else {
             gpu_enabled = true;
             gpu_mode = gpu_option;
@@ -284,7 +290,7 @@ bool emuglConfig_init(EmuglConfig* config,
             D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader_indirect";
         }
-        else if (no_window || (blacklisted && !hasUiPreference)) {
+        else if (!has_auto_no_window && (no_window || (blacklisted && !hasUiPreference))) {
             if (stringVectorContains(sBackendList->names(), "swiftshader")) {
                 D("%s: Headless mode or blacklisted GPU driver, "
                   "using Swiftshader backend\n",
@@ -375,6 +381,7 @@ bool emuglConfig_init(EmuglConfig* config,
     snprintf(config->status, sizeof(config->status),
              "GPU emulation enabled using '%s' mode", gpu_mode);
     setCurrentRenderer(gpu_mode);
+    D("%s: %s\n", __func__, config->status);
     return true;
 }
 
