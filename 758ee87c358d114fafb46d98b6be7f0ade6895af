@@ -22,6 +22,30 @@
       "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f842978_de4600c5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-27T22:47:21Z",
+      "side": 1,
+      "message": "Most external users of the emulator expect Swiftshader to always be used when -no-window is used. We\u0027ve already had some highly visible bugs due to the expectation. It should be documented, yes. This sentence also could use some clarification; if no -gpu flag is used, it\u0027s as if -gpu auto was passed on the command line, unless overriden in avd config.ini",
+      "parentUuid": "432f23bb_53da0e48",
+      "range": {
+        "startLine": 13,
+        "startChar": 6,
+        "endLine": 14,
+        "endChar": 28
+      },
+      "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
