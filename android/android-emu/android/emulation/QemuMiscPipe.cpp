@@ -142,7 +142,10 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
     } else if (beginWith(input, "bootcomplete")) {
         fillWithOK(output);
         printf("emulator: INFO: boot completed\n");
+        // bug: 152636877
+#ifndef _WIN32
         printf("emulator: INFO: boot time %lld ms\n", (long long)get_uptime_ms());
+#endif
         fflush(stdout);
 
         guest_boot_completed = 1;
