@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebf7b8fd_3e3ce28d",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1163,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-27T20:56:06Z",
+      "side": 1,
+      "message": "Android Studio, or just remove this sentence.",
+      "range": {
+        "startLine": 1163,
+        "startChar": 30,
+        "endLine": 1163,
+        "endChar": 44
+      },
+      "revId": "04feadc1794d2cd41a34329a9b7afaf75ce4d7c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a664dbe_2007f05f",
+        "filename": "android/android-grpc/android/emulation/control/GrpcServices.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-27T20:56:06Z",
+      "side": 1,
+      "message": "Explain that zero means no timeout.",
+      "range": {
+        "startLine": 138,
+        "startChar": 18,
+        "endLine": 138,
+        "endChar": 33
+      },
+      "revId": "04feadc1794d2cd41a34329a9b7afaf75ce4d7c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc839af4_70133026",
+        "filename": "android/android-grpc/android/emulation/control/interceptor/IdleInterceptor.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-27T20:56:06Z",
+      "side": 1,
+      "message": "It looks like sending back a screenshot in response to streamScreenshot doesn\u0027t count as gRPC activity. It should since there is no guarantee that a new screenshot stream is frequently requested.",
+      "range": {
+        "startLine": 35,
+        "startChar": 22,
+        "endLine": 35,
+        "endChar": 31
+      },
+      "revId": "04feadc1794d2cd41a34329a9b7afaf75ce4d7c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3046a3b_17a2fd95",
+        "filename": "android/android-grpc/android/emulation/control/interceptor/IdleInterceptor.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-27T20:56:06Z",
+      "side": 1,
+      "message": "Add a blank line above.",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 47
+      },
+      "revId": "04feadc1794d2cd41a34329a9b7afaf75ce4d7c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
