@@ -70,6 +70,30 @@
       "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "61a17568_7b986ff7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-03-30T18:10:17Z",
+      "side": 1,
+      "message": "I don\u0027t think we should do that. This could break existing users that are relying on \"-gpu auto -nowindow\" --\u003e swiftshader. \n\nI will update the documentation in the commit message. Let me know if the -help needs updating as that is very specific.",
+      "parentUuid": "cfbf1c94_b4e5ee09",
+      "range": {
+        "startLine": 13,
+        "startChar": 6,
+        "endLine": 14,
+        "endChar": 28
+      },
+      "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
