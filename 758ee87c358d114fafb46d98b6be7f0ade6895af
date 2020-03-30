@@ -142,6 +142,30 @@
       "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cff9f364_c445a4cf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-30T18:18:28Z",
+      "side": 1,
+      "message": "It\u0027s also more confusing if we require an additional -gpu auto flag ; that breaks existing logic where -gpu XXXX is applied; -gpu auto should in principle be equivalent to not having a -gpu flag",
+      "parentUuid": "5376e68b_712beff2",
+      "range": {
+        "startLine": 13,
+        "startChar": 6,
+        "endLine": 14,
+        "endChar": 28
+      },
+      "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
