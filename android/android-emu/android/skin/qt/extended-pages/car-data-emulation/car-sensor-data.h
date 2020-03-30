@@ -99,6 +99,7 @@ private slots:
     void on_checkBox_fuel_low_toggled();
     void on_button_loadrecord_clicked();
     void on_button_playrecord_clicked();
+    void on_button_voice_assistant_clicked();
     void vhalEventThreadStarted();
     void startupVhalEventThreadFinished(QString file_name,
                                         bool ok,
@@ -116,6 +117,7 @@ private:
     void sendGearChangeMsg(const int gear, const std::string& gearName);
     void sendIgnitionChangeMsg(const int ignition,
                                const std::string& ignitionName);
+    void sendInputEvent(int32_t keyCode);
     float getSpeedMetersPerSecond(int speed, int unitIndex);
     int getIndexFromVehicleGear(int gear);
     void parseEventsFromJsonFile(QString jsonPath);

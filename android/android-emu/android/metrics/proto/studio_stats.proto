@@ -1427,7 +1427,8 @@ message EmulatorFeatureFlagState {
     MAC80211HWSIM_USERSPACE_MANAGED = 56;
     HAS_SHARED_SLOTS_HOST_MEMORY_ALLOCATOR = 57;
     CAR_VHAL_REPLAY = 58;
-    // Next tag: 59
+    CAR_ASSIST_BUTTON = 59;
+    // Next tag: 60
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
