@@ -166,6 +166,30 @@
       "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "792c38b0_a869a4c9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-30T18:19:32Z",
+      "side": 1,
+      "message": "As for specifically who, it\u0027s pretty much everyone who uses the emulator since it was initially formed. There are tons of operators running the emulator in CI environments etc. who would not be happy about a breaking change.",
+      "parentUuid": "cff9f364_c445a4cf",
+      "range": {
+        "startLine": 13,
+        "startChar": 6,
+        "endLine": 14,
+        "endChar": 28
+      },
+      "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
