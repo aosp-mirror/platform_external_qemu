@@ -60,6 +60,7 @@ ANDROID_BEGIN_HEADER
     _AVD_IMG(KERNELRANCHU,"kernel-ranchu","kernel") \
     _AVD_IMG(KERNELRANCHU64,"kernel-ranchu-64","kernel") \
     _AVD_IMG(RAMDISK,"ramdisk.img","ramdisk") \
+    _AVD_IMG(USERRAMDISK,"ramdisk-qemu.img","user ramdisk") \
     _AVD_IMG(INITSYSTEM,"system.img","init system") \
     _AVD_IMG(INITVENDOR,"vendor.img","init vendor") \
     _AVD_IMG(INITDATA,"userdata.img","init data") \
