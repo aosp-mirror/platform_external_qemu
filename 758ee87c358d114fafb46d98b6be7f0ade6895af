@@ -118,6 +118,30 @@
       "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5376e68b_712beff2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-03-30T18:17:10Z",
+      "side": 1,
+      "message": "Removing the -gpu auto flag isn\u0027t going to help, and we\u0027re much better off maintaining compatibility for our users instead of trying to convince everyone to switch.",
+      "parentUuid": "5b760f7d_9c292881",
+      "range": {
+        "startLine": 13,
+        "startChar": 6,
+        "endLine": 14,
+        "endChar": 28
+      },
+      "revId": "758ee87c358d114fafb46d98b6be7f0ade6895af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
