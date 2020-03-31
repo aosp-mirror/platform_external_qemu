@@ -11,24 +11,31 @@
 
 #include "android/process_setup.h"
 
-#include "android/base/Debug.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/Log.h"
-#include "android/base/StringView.h"
-#include "android/base/system/System.h"
-#include "android/curl-support.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/crashreport/CrashReporter.h"
-#include "android/protobuf/ProtobufLogging.h"
-#include "android/utils/debug.h"
-#include "android/utils/filelock.h"
-#include "android/utils/sockets.h"
+#include <string.h>                             // for strdup
+#include <string>                               // for string, basic_string
+#include <vector>                               // for vector
 
-#include <string>
+#include "android/base/Debug.h"                 // for WaitForDebugger
+#include "android/base/Log.h"                   // for LOG, LogMessage
+#include "android/base/StringView.h"            // for StringView, operator==
+#include "android/base/files/PathUtils.h"       // for PathUtils
+#include "android/base/system/System.h"         // for System
+#include "android/crashreport/CrashReporter.h"  // for CrashReporter
+#include "android/crashreport/HangDetector.h"   // for HangDetector
+#include "android/crashreport/crash-handler.h"  // for crashhandler_cleanup
+#include "android/curl-support.h"               // for curl_cleanup, curl_init
+#include "android/protobuf/ProtobufLogging.h"   // for initProtobufLogger
+#include "android/utils/debug.h"                // for dprint
+#include "android/utils/filelock.h"             // for filelock_init
+#include "android/utils/sockets.h"              // for android_socket_init
+#include "android/base/StringFormat.h"
 
 using android::base::PathUtils;
 using android::base::StringView;
+using android::base::StringAppendFormatRaw;
 using android::base::System;
+
+const char* cmdLine = nullptr;
 
 // The order of initialization here can be very finicky. Handle with care, and
 // leave hints about any ordering constraints via comments.
@@ -51,6 +58,12 @@ void process_early_setup(int argc, char** argv) {
 
     filelock_init();
 
+    std::string args;
+    for (int i = 0; i < argc; ++i) {
+        StringAppendFormatRaw(&args, "[%s] ", argv[i]);
+    }
+    cmdLine = strdup(args.c_str());
+
     // Catch crashes in everything.
     // This promises to not launch any threads...
     if (crashhandler_init()) {
@@ -68,7 +81,7 @@ void process_early_setup(int argc, char** argv) {
         }
 
         android::crashreport::CrashReporter::get()->attachData(
-                    "command-line-and-environment.txt", arguments);
+                "command-line-and-environment.txt", arguments);
 
         // Make sure we don't report any hangs until all related loopers
         // actually get started.
