@@ -269,7 +269,6 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.addFormat("qemu.camera_protocol_ver=1");
     }
 
-    // User entered parameters are space separated. Passing false here to prevent
-    // parameters from being surrounded by quotes.
-    return params.toCStringCopy(false);
+    // User entered parameters are space separated.
+    return params.toCStringCopy(android::ParameterList::Format::space);
 }

@@ -11,8 +11,13 @@
 
 #include "android/emulation/ParameterList.h"
 
-#include "android/base/misc/StringUtils.h"
+#include <algorithm>  // for count
+
+#include "android/base/misc/StringUtils.h"  // for strDup
+
+#ifdef _WIN32
 #include "android/base/system/Win32Utils.h"
+#endif
 
 namespace android {
 
@@ -36,28 +41,60 @@ char** ParameterList::array() const {
     return &mArray[0];
 }
 
+// Escapes individual parameter by surrounding it with " and escaping inner "
+inline static std::string escapeCommandLine(const std::string& line) {
+    size_t quoteCnt = std::count_if(line.begin(), line.end(), [](char x) {
+        return x == '"' || x == '\\';
+    });
+    if (quoteCnt == 0)
+        return '"' + line + '"';
+
+    std::string escaped;
+    escaped.reserve(quoteCnt + line.size() + 2);
+    escaped += '"';
+    for (int i = 0; i < line.size(); i++) {
+        if (line[i] == '"' || line[i] == '\\') {
+            escaped += '\\';
+        }
+        escaped += line[i];
+    }
+    escaped += '"';
+
+    return escaped;
+}
+
 // Properly escapes individual parameters depending on the platform
 inline static std::string quoteCommandLine(const std::string& line) {
 #ifdef _WIN32
-  return base::Win32Utils::quoteCommandLine(line);
+    return base::Win32Utils::quoteCommandLine(line);
 #else
-  return line.find(' ') == std::string::npos ? line : '\'' + line + '\'';
+    return line.find(' ') == std::string::npos ? line : '\'' + line + '\'';
 #endif
 }
 
-std::string ParameterList::toString(bool quotes) const {
-  std::string result;
-  for (size_t n = 0; n < mParams.size(); ++n) {
-    if (n > 0) {
-      result += ' ';
+std::string ParameterList::toString(Format fmt) const {
+    std::string result;
+    for (size_t n = 0; n < mParams.size(); ++n) {
+        if (n > 0) {
+            result += ' ';
+        }
+        switch (fmt) {
+            case Format::space:
+                result += mParams[n];
+                break;
+            case Format::quoteWhenNeeded:
+                result += quoteCommandLine(mParams[n]);
+                break;
+            case Format::alwaysQuoteAndEscape:
+                result += escapeCommandLine(mParams[n]);
+                break;
+        }
     }
-    result += quotes ? quoteCommandLine(mParams[n]) : mParams[n];
-  }
-  return result;
+    return result;
 }
 
-char* ParameterList::toCStringCopy(bool quotes) const {
-    return android::base::strDup(toString(quotes));
+char* ParameterList::toCStringCopy(Format fmt) const {
+    return android::base::strDup(toString(fmt));
 }
 
 void ParameterList::add(const std::string& param) {
