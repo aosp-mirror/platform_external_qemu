@@ -574,7 +574,7 @@ void MultiDisplay::loadConfig() {
     // immediately.
     // For cold boot, MultiDisplayPipe queries configs when it is created.
     // For snapshot, MultiDisplayPipe query will not happen, instead,
-    // onLoad() fucntion later may overwrite the multidisplay states to
+    // onLoad() function later may overwrite the multidisplay states to
     // in sync with guest states.
     if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) ||
         isFoldableConfigured()) {
