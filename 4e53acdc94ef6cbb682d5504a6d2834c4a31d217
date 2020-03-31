@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce072a4e_cf0b9050",
+        "filename": "android/android-grpc/docs/README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-03-31T19:05:54Z",
+      "side": 1,
+      "message": "typo? python3-tk",
+      "revId": "4e53acdc94ef6cbb682d5504a6d2834c4a31d217",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
