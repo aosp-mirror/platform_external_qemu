@@ -3403,7 +3403,85 @@ static int do_screenrecord_stop(ControlClient client, char* args) {
 }
 
 static int do_screenrecord_screenshot(ControlClient client, char* args) {
-    client->global->record_agent->doSnap(args);
+    // kMaxArgs is max number of arguments that we have to process (options +
+    // parameters, if any, and the filename)
+    static constexpr int kMaxArgs = 1 * 2 + 1;
+    static const struct option longOptions[] = {
+            {"display", required_argument, NULL, 'd'},
+            {NULL, 0, NULL, 0}};
+
+    if (!args) {
+        // default file name and path
+        client->global->record_agent->doSnap(nullptr, 0);
+        return 0;
+    }
+
+    // Count number of arguments
+    // Need to get it into a format for getopt_long().
+    std::vector<std::string> splitArgs;
+    splitArgs.push_back("screenshot");
+    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+            splitArgs.push_back(s);
+    });
+
+    // Need char** for getopt()
+    std::vector<char*> sarray;
+    for (auto& arg : splitArgs) {
+        sarray.push_back(&arg[0]);
+    }
+    // last argument needs to be NULL for getopt().
+    sarray.push_back(nullptr);
+
+    RecordingInfo info = {};
+    // Setting optind to 1 does not completely reset the internal state for
+    // getopt() on gcc, despite what the documentation says. Setting it to 0
+    // does however, and this setting does not cause any issues on mingw and
+    // clang.
+    optind = 0;
+
+    uint32_t displayId = 0;
+    while (true) {
+        int optionIndex = 0;
+        int ic = getopt_long(sarray.size() - 1, sarray.data(), "", longOptions,
+                             &optionIndex);
+        if (ic == -1) {
+            D(("Got ic=-1\n"));
+            break;
+        }
+
+        switch (ic) {
+            case 'd':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                displayId = atoi(optarg);
+                break;
+
+            default:
+                D(("getopt_long returned %d\n", ic));
+                control_write(client,
+                              "KO: Invalid arguments (see help screenrecord "
+                              "screenshot).\r\n");
+                return -1;
+        }
+    }
+
+    if (!client->global->multi_display_agent->getMultiDisplay(displayId,
+                                                              nullptr,
+                                                              nullptr,
+                                                              nullptr,
+                                                              nullptr,
+                                                              nullptr,
+                                                              nullptr,
+                                                              nullptr)) {
+        return -1;
+    }
+
+    if (optind != splitArgs.size() - 1) {
+        client->global->record_agent->doSnap(nullptr, displayId);
+        return 0;
+    }
+
+    client->global->record_agent->doSnap(sarray[optind], displayId);
     return 0;
 }
 
@@ -3481,9 +3559,13 @@ static const CommandDefRec screenrecord_commands[] = {
          NULL, do_screenrecord_stop, NULL},
 
         {"screenshot", "Take a screenshot",
-         "'screenrecord screenshot <dirname>'\r\n"
+         "'screenrecord screenshot [options] <dirname>'\r\n"
          "\r\nTakes a single screenshot of emulator's display "
-         "and saves the resulting PNG in <dirname>.\r\n",
+         "and saves the resulting PNG in <dirname>.\r\n"
+         "\r\nOptions:\r\n"
+         "  --display ID\r\n"
+         "    Set display to take screenshot. Default is the device's "
+         "main display ID = 0\r\n",
          NULL, do_screenrecord_screenshot, NULL},
 
         {"webrtc", "start/stop the webrtc module",
