@@ -1005,10 +1005,19 @@ static void rcTriggerWait(uint64_t eglsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline) {
     AEMU_SCOPED_THRESHOLD_TRACE_CALL();
-    if (thread_ptr == 1) {
+
+#define GOLDFISH_SYNC_VULKAN_SEMAPHORE_SYNC 1
+#define GOLDFISH_SYNC_USER_SIGNALED 2
+
+    if (thread_ptr == GOLDFISH_SYNC_VULKAN_SEMAPHORE_SYNC) {
         // Is vulkan sync fd;
         // just signal right away for now
         SyncThread::get()->triggerWait(0, timeline);
+    }
+
+    if (thread_ptr == GOLDFISH_SYNC_USER_SIGNALED) {
+        // Is userspace signaled, ignore.
+        return;
     }
 
     FenceSync* fenceSync = (FenceSync*)(uintptr_t)eglsync_ptr;
