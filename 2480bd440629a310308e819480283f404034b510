@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "b08f6d14_3d08928f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-31T18:18:27Z",
+      "side": 1,
+      "message": "Please replace brackets with double quotes and backslash-escape the double quotes in parameters.",
+      "range": {
+        "startLine": 14,
+        "startChar": 51,
+        "endLine": 15,
+        "endChar": 10
+      },
+      "revId": "2480bd440629a310308e819480283f404034b510",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a82b6b5_29b0acae",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-03-31T18:18:27Z",
+      "side": 1,
+      "message": "What does \"...\" mean?",
+      "range": {
+        "startLine": 17,
+        "startChar": 11,
+        "endLine": 17,
+        "endChar": 14
+      },
+      "revId": "2480bd440629a310308e819480283f404034b510",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "76607e7e_45455915",
         "filename": "android/android-emu/android/process_setup.cpp",
         "patchSetId": 2
