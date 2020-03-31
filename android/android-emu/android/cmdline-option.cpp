@@ -11,6 +11,7 @@
 #include <string.h>
 
 const AndroidOptions* android_cmdLineOptions = NULL;
+const char* android_cmdLine = NULL;
 
 #define  _VERBOSE_TAG(x,y)   { #x, VERBOSE_##x, y },
 static const struct { const char*  name; int  flag; const char*  text; }

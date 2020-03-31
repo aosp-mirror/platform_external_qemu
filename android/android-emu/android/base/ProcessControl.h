@@ -14,11 +14,11 @@
 // kill and wait a process ID,
 // launch process with given cwd and args.
 
-#include "android/base/FunctionView.h"
-#include "android/base/StringView.h"
+#include <string>                     // for string
+#include <vector>                     // for vector
 
-#include <string>
-#include <vector>
+#include "android/base/StringView.h"    // for StringView
+#include "android/base/FunctionView.h"  // for FunctionView
 
 namespace android {
 namespace base {
@@ -36,14 +36,17 @@ struct ProcessLaunchParameters {
 
 std::vector<std::string> makeArgvStrings(int argc, const char** argv);
 
-ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc, char** argv);
+ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc, const char** argv);
+std::string createEscapedLaunchString(int argc, const char* const* argv);
 
 void saveLaunchParameters(const ProcessLaunchParameters& launchParams, StringView filename);
+
 
 void finalizeEmulatorRestartParameters(const char* dir);
 
 ProcessLaunchParameters loadLaunchParameters(StringView filename);
 void launchProcessFromParameters(const ProcessLaunchParameters& launchParams, bool useArgv0 = false);
+
 
 // Restart mechanism
 void disableRestart(); // Disables the restart mechanism.
