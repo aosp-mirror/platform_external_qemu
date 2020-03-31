@@ -1244,6 +1244,10 @@ avdInfo_getRanchuKernelPath( const AvdInfo*  i )
 char*
 avdInfo_getRamdiskPath( const AvdInfo* i )
 {
+    const char* userImageName = _imageFileNames[ AVD_IMAGE_USERRAMDISK ];
+    char* result = _avdInfo_getContentOrSdkFilePath(i, userImageName);
+    if (result) return result;
+
     const char* imageName = _imageFileNames[ AVD_IMAGE_RAMDISK ];
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
