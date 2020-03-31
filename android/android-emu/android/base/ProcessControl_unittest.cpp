@@ -10,18 +10,21 @@
 // GNU General Public License for more details.
 
 #include "android/base/ProcessControl.h"
-#include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
 
 #include <memory>
+
+#include "android/base/testing/TestTempDir.h"
 
 namespace android {
 namespace base {
 
 class ProcessControlTest : public ::testing::Test {
 protected:
-    void SetUp() override { mTempDir.reset(new TestTempDir("processcontroltest")); }
+    void SetUp() override {
+        mTempDir.reset(new TestTempDir("processcontroltest"));
+    }
 
     void TearDown() override { mTempDir.reset(); }
 
@@ -45,8 +48,7 @@ TEST_F(ProcessControlTest, TestMakeArgvStrings) {
     argv[3] = arg3;
     argv[4] = arg4;
 
-    std::vector<std::string> asVector =
-        makeArgvStrings(argc, argv);
+    std::vector<std::string> asVector = makeArgvStrings(argc, argv);
 
     EXPECT_EQ(argc, asVector.size());
 
@@ -60,9 +62,9 @@ TEST_F(ProcessControlTest, LaunchParametersCaptured) {
     std::string testParamsPath = mTempDir->makeSubPath("launchParams.txt");
 
     ProcessLaunchParameters test = {
-        "WorkingDir",
-        "ProgramName",
-        { "arg0", "arg1", "arg2" },
+            "WorkingDir",
+            "ProgramName",
+            {"arg0", "arg1", "arg2"},
     };
 
     saveLaunchParameters(test, testParamsPath);
@@ -72,6 +74,22 @@ TEST_F(ProcessControlTest, LaunchParametersCaptured) {
     EXPECT_EQ(test, loaded);
 }
 
+TEST_F(ProcessControlTest, LaunchParametersEscapedProperly) {
+    const int argc = 4;
+    const char** argv = new const char*[argc];
 
-} // namespace android
-} // namespace base
+    const char* arg0 = "foo";
+    const char* arg1 = " zoo ";
+    const char* arg2 = "A \"quote\"";
+    const char* arg3 = R"#(\t\n")#";
+
+    argv[0] = arg0;
+    argv[1] = arg1;
+    argv[2] = arg2;
+    argv[3] = arg3;
+
+    std::string expect_str = R"#("foo" " zoo " "A \"quote\"" "\\t\\n\"")#";
+    EXPECT_EQ(expect_str, createEscapedLaunchString(argc, argv));
+}
+}  // namespace base
+}  // namespace android

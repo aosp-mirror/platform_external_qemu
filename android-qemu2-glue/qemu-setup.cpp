@@ -268,7 +268,9 @@ int qemu_setup_grpc() {
             {"port.serial", std::to_string(android_serial_number_port)},
             {"port.adb", std::to_string(android_adb_port)},
             {"avd.name", avdInfo_getName(android_avdInfo)},
-            {"avd.id", avdInfo_getId(android_avdInfo)}};
+            {"avd.id", avdInfo_getId(android_avdInfo)},
+            {"avd.dir", avdInfo_getContentPath(android_avdInfo)},
+            {"cmdline", android_cmdLine}};
 
     int grpc_start = android_serial_number_port + 3000;
     int grpc_end = grpc_start + 1000;
