@@ -11,12 +11,15 @@
 
 #pragma once
 
-#include "android/base/StringFormat.h"
+#include <stdarg.h>  // for va_list
+#include <stddef.h>  // for size_t
 
-#include <string>
-#include <vector>
+#include <initializer_list>  // for initializer_list
+#include <string>            // for string
+#include <utility>           // for forward
+#include <vector>            // for vector
 
-#include <stdarg.h>
+#include "android/base/StringFormat.h"  // for unpackFormatArg
 
 namespace android {
 
@@ -30,6 +33,14 @@ namespace android {
 //      parameters as a char* array with array().
 class ParameterList {
 public:
+    enum Format {
+        space,            // Separate parameters by a space
+        quoteWhenNeeded,  // Separate parameters by a space, quoting them if
+                          // needed. This is platform specific.
+        alwaysQuoteAndEscape,  // Wrap parameters in double quotes (") separated
+                               // by a space. Existing quotes are escaped (\").
+    };
+
     // Default constructor.
     ParameterList() = default;
     ParameterList(int argc, char** argv);
@@ -43,19 +54,17 @@ public:
     char** array() const;
 
     // Access |n-th| items in the list. WARNING: Does not check bounds.
-    const std::string& operator[](size_t n) const {
-        return mParams[n];
-    }
+    const std::string& operator[](size_t n) const { return mParams[n]; }
 
     // Convert list into a std::string. This joins all parameters with a
     // single space.
-    // |quotes| add quotes to parameters when there is a space
-    std::string toString(bool quotes = true) const;
+    // |format| Mechanism used to separate individual parameters.
+    std::string toString(Format format = Format::quoteWhenNeeded) const;
 
     // A variant of toString() that returns instead a heap-allocated C string
     // that must be free-d by the caller.
-    // |quotes| add quotes to parameters when there is a space
-    char* toCStringCopy(bool quotes = true) const;
+    // |format| Mechanism used to separate individual parameters.
+    char* toCStringCopy(Format format = Format::quoteWhenNeeded) const;
 
     // Adds a set of parameters to the list.
     void add(const ParameterList& other);
@@ -75,12 +84,12 @@ public:
     // arguments.
     void addFormatWithArgs(const char* format, va_list args);
 
-    // These templated versions of StringFormat*() allow one to pass all kinds of
-    // string objects into the argument list
+    // These templated versions of StringFormat*() allow one to pass all kinds
+    // of string objects into the argument list
     template <class... Args>
     void addFormat(const char* format, Args&&... args) {
         return addFormatRaw(format, android::base::unpackFormatArg(
-                std::forward<Args>(args))...);
+                                            std::forward<Args>(args))...);
     }
 
     // Add two new parameters |param1| and |param2| to the list.
@@ -94,7 +103,7 @@ public:
 
 private:
     std::vector<std::string> mParams;
-    mutable std::vector<char *> mArray;
+    mutable std::vector<char*> mArray;
 };
 
 }  // namespace android

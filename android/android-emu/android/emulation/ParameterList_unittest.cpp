@@ -11,14 +11,12 @@
 
 #include "android/emulation/ParameterList.h"
 
-#include <gtest/gtest.h>
-
-#include <memory>
-#include <string>
-
-#include <stdlib.h>
+#include <gtest/gtest.h>  // for Test, Message, TestPartResult, SuiteApiReso...
+#include <stdlib.h>       // for free
+#include <string>         // for string
 
 namespace android {
+
 
 TEST(ParameterList, Construction) {
     ParameterList list;
@@ -26,13 +24,13 @@ TEST(ParameterList, Construction) {
 
     EXPECT_EQ(std::string(), list.toString());
 
-    EXPECT_EQ(std::string(), list.toString(false));
+    EXPECT_EQ(std::string(), list.toString(ParameterList::Format::space));
 
     char* str = list.toCStringCopy();
     EXPECT_STREQ("", str);
     ::free(str);
 
-    str = list.toCStringCopy(false);
+    str = list.toCStringCopy(ParameterList::Format::space);
     EXPECT_STREQ("", str);
     ::free(str);
 }
@@ -113,7 +111,18 @@ TEST(ParameterList, toStringWithoutQuotes) {
     list.add(" zoo ");
     EXPECT_EQ(3U, list.size());
     const char* expect_str = "foo bar  zoo ";
-    EXPECT_STREQ(expect_str, list.toString(false).c_str());
+    EXPECT_STREQ(expect_str, list.toString(ParameterList::Format::space).c_str());
+}
+
+
+TEST(ParameterList, toStringAlwaysQuoteAndEscape) {
+    ParameterList list;
+    list.add2("foo", "bar");
+    list.add(" zoo ");
+    list.add("A \"quote\"");
+    EXPECT_EQ(4U, list.size());
+    std::string expect_str = R"#("foo" "bar" " zoo " "A \"quote\"")#";
+    EXPECT_EQ(expect_str, list.toString(ParameterList::Format::alwaysQuoteAndEscape));
 }
 
 TEST(ParameterList, toCStringCopy) {
@@ -136,7 +145,7 @@ TEST(ParameterList, toCStringCopyWithoutQuotes) {
     list.add2("foo", "bar");
     list.add(" zoo ");
     EXPECT_EQ(3U, list.size());
-    char* str = list.toCStringCopy(false);
+    char* str = list.toCStringCopy(ParameterList::Format::space);
     const char* expect_str = "foo bar  zoo ";
     EXPECT_STREQ(expect_str, str);
     ::free(str);
