@@ -5,28 +5,36 @@ Most of the samples have moved over to the public container repository that you 
 
 The samples are well documented and run against the publicly released emulator binaries.
 
-
 # Controlling the emulator with Python
 
-In the python directory you will find two examples:
-
-- An example that aks the emulator about the vm configuration after which it
-  will send a series of key events with a 2ms delay. After building you can run this with
-  `python -m sample.keystrokes`
-
-- An example that uses the streaming interface to retrieve the logcat. After
-  building you can run this with `python -m sample.logcat`
-
-Before we can access the emulator we must launch it with the gRPC server enabled.
+In the python directory you will find a few examples. The examples require Python3, as Python2 is now [deprecated](https://www.python.org/doc/sunset-python-2/). You can build the examples by running:
 
 ```sh
-  $ emulator @my_avd -grpc 5556 [..other options...]
+  $ make clean deps
 ```
 
-Once the emulator is launched you can build the samples as follows:
+Next you need to launch an emulator with the gRPC port enabled on port 8554:
 
 ```sh
-  $ make deps && make protoc
+  $ $AOSP/external/qemu/objs/emulator @my_avd -grpc 8554 [..other options...]
 ```
 
-Note that the samples are currently developed against Python2.
+Now you can run any of the samples under the sample directory as follows:
+
+```sh
+  $ python3 -m sample.name_of_sample
+```
+
+Where name of sample can be any of the python modules in the sample directory (`ls -1 sample/*.py`). For example:
+
+```sh
+  $ python3 -m sample.keystrokes
+```
+
+### Screenshot
+
+The screenshot example requires tkInter. You can find details on installing tkInter [here](https://tkdocs.com/tutorial/install.html).
+
+Or try:
+- `sudo apt-get install python3-tk` on linux
+- `brew install python3` on macos (has tkinter)
