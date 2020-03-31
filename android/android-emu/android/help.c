@@ -1526,6 +1526,11 @@ help_gpu(stralloc_t* out)
     "  use cases:\n\n"
 
     "     auto (default)       -> Auto-select the renderer.\n"
+    "     auto-no-window       -> Auto-select the renderer when\n"
+    "                             running headless. This will use the same\n"
+    "                             gpu selection mechanism as running without\n"
+    "                             the \"-no-window\" flag and the \"-gpu auto\"\n"
+    "                             option. See auto for details on the behavior.\n"
     "     host                 -> Use the host system's OpenGL driver.\n"
     "     swiftshader_indirect -> Use SwiftShader software renderer on the\n"
     "                             host, which can be beneficial if you are\n"
@@ -1539,7 +1544,7 @@ help_gpu(stralloc_t* out)
     "                             In API 28 and later, guest rendering\n"
     "                             is not supported, and will fall back\n"
     "                             automatically to swiftshader_indirect.\n"
-
+    "\n"
     "  Note that enabling GPU emulation if the system image does not support it\n"
     "  will prevent the proper display of the emulated framebuffer.\n\n"
 
