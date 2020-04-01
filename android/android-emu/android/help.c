@@ -388,6 +388,15 @@ help_avd(stralloc_t*  out)
 }
 
 static void
+help_avd_arch(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-avd-arch <target>' to start the emulator program with a specific\n"
+    "  target architecture and without having to create an AVD.\n\n"
+    );
+}
+
+static void
 help_sysdir(stralloc_t*  out)
 {
     char   systemdir[MAX_PATH];
