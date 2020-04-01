@@ -489,6 +489,11 @@ int main(int argc, char** argv)
             continue;
         }
 
+        if (!strcmp(opt, "-avd-arch") && nn+1 < argc) {
+            avdArch = argv[nn+1];
+            continue;
+        }
+
         if (!avdName) {
             if (!strcmp(opt,"-avd") && nn+1 < argc) {
                 avdName = argv[nn+1];
@@ -661,6 +666,9 @@ int main(int argc, char** argv)
         }
         avdArch = path_getAvdTargetArch(avdName);
         D("Found AVD target architecture: %s", avdArch);
+    } else if (avdArch != NULL) {
+        android::base::disableRestart();
+        D("Using provided target architecture: %s", avdArch);
     } else {
         android::base::disableRestart();
 
@@ -675,7 +683,7 @@ int main(int argc, char** argv)
         }
     }
 
-    if (!avdName && !androidOut && !forceEngineLaunch && !queryVersion) {
+    if (!avdName && !avdArch && !androidOut && !forceEngineLaunch && !queryVersion) {
         derror("No AVD specified. Use '@foo' or '-avd foo' to launch a virtual"
                " device named 'foo'\n");
         return 1;
