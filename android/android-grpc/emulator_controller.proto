@@ -115,28 +115,6 @@ service EmulatorController {
 
   // Gets the state of the virtual machine.
   rpc getVmState(google.protobuf.Empty) returns (VmRunState) {}
-
-  // The following endpoints are needed to establish the webrtc protocol
-  // Due to limitiations in Javascript we cannot make use of bidirectional
-  // endpoints See this [blog](https://grpc.io/blog/state-of-grpc-web) for
-  // details. TODO(jansene): We should move this to a separate service.
-
-  // This function will generate a new identifier that the client
-  // should use for further interaction. It will initiate the
-  // JSEP protocol on the server side.
-  rpc requestRtcStream(google.protobuf.Empty) returns (RtcId) {}
-
-  // Sends the given JsepMsg to the server. The RtcId in the
-  // message should point to an active stream negotiation in
-  // progress, otherwise the message will be ignored.
-  rpc sendJsepMessage(JsepMsg) returns (google.protobuf.Empty) {}
-
-  // Reads an available jsep messages for the given client id,
-  // blocking at most 5 seconds, or until one becomes available.
-  //
-  // The ice candidates for example will trickle in on this callback,
-  // as will the SDP negotation.
-  rpc receiveJsepMessage(RtcId) returns (JsepMsg) {}
 }
 
 // A Run State that describes the state of the Virtual Machine.
@@ -273,48 +251,6 @@ message SensorValue {
   ParameterValue value = 3;
 }
 
-message RtcId {
-  // The unique identifier of this connection. You will have to use the
-  // same identifier when sending/receiving messages. The server will
-  // generate a guid when receiving the start message.
-  string guid = 1;
-}
-
-message JsepMsg {
-  // The unique identifier of this connection. You will have to use the
-  // same identifier when sending/receiving messages. The server will
-  // generate a guid when receiving the start message.
-  RtcId id = 1;
-  // The JSON payload. This usually can be directly handled by the
-  // Javascript The dictionary can contain the following properties
-  //
-  // - bye:
-  //        You can hang up now. No new message expected for you.
-  //        The server has stopped the RTC stream.
-  //
-  // - start:
-  //        An RTCConfiguration dictionary providing options to
-  //        configure the new connection. This can include the
-  //        turn configuration the serve is using. This dictionary can be
-  //        passed in directly to the
-  //        [RTCPeerConnection](https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection)
-  //        object.
-  //
-  // - candidate:
-  //        The WebRTC API's RTCIceCandidateInit dictionary, which
-  //        contains the information needed to fundamentally describe an
-  //        RTCIceCandidate. See
-  //        [RTCIceCandidate](https://developer.mozilla.org/en-US/docs/Web/API/RTCIceCandidate)
-  //        and [Session
-  //        Lifetime](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Session_lifetime)
-  //        for more details.
-  //
-  // - sdp:
-  //        RTCSessionDescriptionInit dictionary containing the values
-  //        to that can be assigned to a
-  //        [RTCSessionDescription](https://developer.mozilla.org/en-US/docs/Web/API/RTCSessionDescription)
-  string message = 2;
-}
 
 message LogMessage {
   // [Output Only] The contents of the log output.

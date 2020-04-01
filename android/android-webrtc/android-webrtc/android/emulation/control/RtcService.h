@@ -1,4 +1,3 @@
-
 // Copyright (C) 2018 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <grpcpp/grpcpp.h>
+#include "android/console.h"  // for AndroidConsoleAgents
+
+namespace grpc {
+class Service;
+}  // namespace grpc
 
 namespace android {
 namespace emulation {
 namespace control {
 
-using grpc::Service;
-
-enum class WaterfallProvider { none, adb, forward };
-
-Service* getAdbWaterfallService();
-Service* getWaterfallService();
-Service* getWaterfallService(WaterfallProvider variant);
-Service* getWaterfallService(const char* variant);
+grpc::Service* getRtcService(const AndroidConsoleAgents* agents,
+                             const char* turncfg);
 
 }  // namespace control
 }  // namespace emulation
