@@ -27,6 +27,7 @@
 
 #include "android/base/Log.h"
 #include "android/featurecontrol/feature_control.h"
+#include "android/hw-events.h"             // for EV_KEY, EV_SW
 #include "android/skin/qt/error-dialog.h"  // for showErrorDialog
 #include "android/utils/debug.h"           // for VERBOSE_PRINT
 #include "ui_car-sensor-data.h"            // for CarSensorData
@@ -42,12 +43,23 @@ using emulator::EmulatorMessage;
 using emulator::MsgType;
 using emulator::Status;
 using emulator::TimedEmulatorMessages;
+using emulator::VehicleArea;
 using emulator::VehicleGear;
 using emulator::VehicleIgnitionState;
 using emulator::VehicleProperty;
+using emulator::VehiclePropertyGroup;
+using emulator::VehiclePropertyType;
+using emulator::VehicleDisplay;
 using emulator::VehiclePropValue;
 using emulator::VhalEventLoaderThread;
 
+// See frameworks/base/core/java/android/view/KeyEvent.java
+static constexpr int32_t KEYCODE_VOICE_ASSIST = 231;
+// See android/hardware/interfaces/automotive/vehicle/2.0/default/impl/vhal_v2_0/DefaultConfig.h
+static constexpr int32_t kGenerateFakeDataControllingProperty =
+    0x0666 | (int)VehiclePropertyGroup::VENDOR | (int)VehicleArea::GLOBAL | (int)VehiclePropertyType::MIXED;
+// See android/hardware/interfaces/automotive/vehicle/2.0/default/impl/vhal_v2_0/DefaultConfig.h
+static constexpr int32_t kKeyPressCommand = 100;
 static constexpr int64_t VHAL_REPLAY_INTERVAL = 1000;
 
 CarSensorData::CarSensorData(QWidget* parent)
@@ -60,6 +72,10 @@ CarSensorData::CarSensorData(QWidget* parent)
         QObject::connect(&mTimer, &QTimer::timeout, this,
                      &CarSensorData::VhalTimeout);
         prepareVhalLoader();
+    }
+
+    if (!feature_is_enabled(kFeature_CarAssistButton)) {
+        mUi->button_voice_assistant->setVisible(false);
     }
 }
 
@@ -213,6 +229,22 @@ void CarSensorData::prepareVhalLoader() {
 void CarSensorData::on_button_playrecord_clicked() {
     mTimedEmulatorMessages.setStatus(TimedEmulatorMessages::START);
     mTimer.start(VHAL_REPLAY_INTERVAL);
+}
+
+void CarSensorData::on_button_voice_assistant_clicked() {
+    sendInputEvent(KEYCODE_VOICE_ASSIST);
+}
+
+void CarSensorData::sendInputEvent(int32_t keyCode) {
+    EmulatorMessage emulatorMsg = makeSetPropMsg();
+    VehiclePropValue* value = emulatorMsg.add_value();
+    value->set_prop(kGenerateFakeDataControllingProperty);
+    value->add_int32_values(kKeyPressCommand);
+    value->add_int32_values(static_cast<int32_t>(VehicleProperty::HW_KEY_INPUT));
+    value->add_int32_values(keyCode);
+    value->add_int32_values(static_cast<int32_t>(VehicleDisplay::MAIN));
+    string log = "Key event: " + std::to_string(keyCode);
+    mSendEmulatorMsg(emulatorMsg, log);
 }
 
 void CarSensorData::parseEventsFromJsonFile(QString jsonPath) {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>460</width>
-    <height>456</height>
+    <width>647</width>
+    <height>552</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -423,6 +423,19 @@
    </property>
    <property name="text">
     <string>PLAY RECORD</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_voice_assistant">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>210</y>
+     <width>101</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>VOICE ASSIST</string>
    </property>
   </widget>
  </widget>

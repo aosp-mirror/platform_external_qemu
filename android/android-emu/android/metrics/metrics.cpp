@@ -437,6 +437,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::HAS_SHARED_SLOTS_HOST_MEMORY_ALLOCATOR;
         case android::featurecontrol::CarVhalReplay:
             return android_studio::EmulatorFeatureFlagState::CAR_VHAL_REPLAY;
+        case android::featurecontrol::CarAssistButton:
+            return android_studio::EmulatorFeatureFlagState::CAR_ASSIST_BUTTON;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
