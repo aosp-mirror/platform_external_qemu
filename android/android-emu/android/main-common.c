@@ -1318,6 +1318,9 @@ const char* getAcceleratorEnableParam(AndroidCpuAccelerator accel_type) {
 
 bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                            CpuAccelMode* accel_mode, char** accel_status) {
+
+    fprintf(stderr, "%s: call\n", __func__);
+
     assert(accel_status != NULL);
 
     /* Handle CPU acceleration options. */
@@ -1346,6 +1349,8 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                    opts->accel);
             exit(1);
         }
+    } else {
+        fprintf(stderr, "%s: no accel param, using auto\n", __func__);
     }
 
     AndroidCpuAcceleration accel_capability = androidCpuAcceleration_getStatus(accel_status);
@@ -1374,6 +1379,10 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
             // TODO: Fix x86_64 support in HVF
             const bool hvf_is_ok = feature_is_enabled(kFeature_HVF) &&
                     androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF);
+            fprintf(stderr, "%s: hvf ok? %d %d %d\n", __func__, hvf_is_ok,
+                    feature_is_enabled(kFeature_HVF),
+                    androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF));
+
             if (!hvf_is_ok && !accel_ok && *accel_mode != ACCEL_OFF) {
                 derror(
                     "%s emulation currently requires hardware acceleration!\n"
@@ -1455,8 +1464,11 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                 }
 
                 if (hvf_is_ok) {
+                    fprintf(stderr, "%s: HVF is ok, using HVF for rest of system\n", __func__);
                     androidCpuAcceleration_resetCpuAccelerator(ANDROID_CPU_ACCELERATOR_HVF);
                     *accel_mode = ACCEL_HVF;
+                } else {
+                    fprintf(stderr, "%s: HVF is not ok\n", __func__);
                 }
             }
 

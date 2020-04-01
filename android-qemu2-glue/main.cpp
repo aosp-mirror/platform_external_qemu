@@ -835,6 +835,11 @@ static int startEmulatorWithMinConfig(
     }
 #endif
 
+    char* accel_status = NULL;
+    CpuAccelMode accel_mode = ACCEL_AUTO;
+    const bool accel_ok =
+            handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
+
     // Feature flags-related last-microsecond renderer changes
     {
         // Should enable OpenGL ES 3.x?
@@ -978,6 +983,7 @@ extern "C" int main(int argc, char** argv) {
                     args.add(argv[n]);
                 }
 
+                fc::setIfNotOverriden(fc::HVF, true);
                 fc::setIfNotOverriden(fc::Vulkan, true);
                 fc::setIfNotOverriden(fc::GLDirectMem, true);
                 fc::setIfNotOverriden(fc::VirtioInput, true);
