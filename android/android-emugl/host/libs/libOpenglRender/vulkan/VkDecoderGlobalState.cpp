@@ -79,6 +79,7 @@ kEmulatedExtensions[] = {
     "VK_KHR_external_semaphore",
     "VK_KHR_external_semaphore_capabilities",
     "VK_KHR_external_semaphore_fd",
+    "VK_KHR_external_semaphore_win32",
     "VK_KHR_external_fence_capabilities",
     "VK_KHR_external_fence",
     "VK_KHR_external_fence_fd",
@@ -1455,7 +1456,7 @@ public:
         AutoLock lock(mLock);
 
         auto infoPtr = android::base::find(
-                mSemaphoreInfo, pImportSemaphoreFdInfo->semaphore);
+                mSemaphoreInfo, mExternalSemaphoresById[pImportSemaphoreFdInfo->fd]);
 
         if (!infoPtr) {
             return VK_ERROR_INVALID_EXTERNAL_HANDLE;
