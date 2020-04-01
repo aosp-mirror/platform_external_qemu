@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1615cf42_35dc88b8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-01T16:44:07Z",
+      "side": 1,
+      "message": "verfiy -\u003e verify",
+      "range": {
+        "startLine": 26,
+        "startChar": 24,
+        "endLine": 26,
+        "endChar": 30
+      },
+      "revId": "e70da317fda96b9065167b8f38dd81e5c9881b87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1cb9d86f_3ee6295c",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-01T16:44:07Z",
+      "side": 1,
+      "message": "Why not just use base::Win32Utils::quoteCommandLine or quoteCommandLine defined in this file?",
+      "range": {
+        "startLine": 45,
+        "startChar": 14,
+        "endLine": 45,
+        "endChar": 43
+      },
+      "revId": "e70da317fda96b9065167b8f38dd81e5c9881b87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5fe7b9f5_775cdf33",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-01T16:44:07Z",
+      "side": 1,
+      "message": "Redundant backslash.",
+      "range": {
+        "startLine": 46,
+        "startChar": 60,
+        "endLine": 46,
+        "endChar": 61
+      },
+      "revId": "e70da317fda96b9065167b8f38dd81e5c9881b87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9c093000_4cfb5a67",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-01T16:44:07Z",
+      "side": 1,
+      "message": "Existing backslashes should be doubled.",
+      "range": {
+        "startLine": 54,
+        "startChar": 23,
+        "endLine": 54,
+        "endChar": 26
+      },
+      "revId": "e70da317fda96b9065167b8f38dd81e5c9881b87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
