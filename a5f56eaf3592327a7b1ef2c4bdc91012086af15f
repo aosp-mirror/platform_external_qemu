@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3bf978cb_83ba185f",
+        "filename": "android/android-grpc/android/emulation/control/interceptor/IdleInterceptor.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-01T16:28:03Z",
+      "side": 1,
+      "message": "nit: remove spaces",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 4
+      },
+      "revId": "a5f56eaf3592327a7b1ef2c4bdc91012086af15f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
