@@ -1,0 +1,48 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002249273",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1261880?revision\u003d22",
+      "fixSuggestions": [
+        {
+          "fixId": "ac36cf5f_d468d743",
+          "description": "Change to \"android/android-emu/android/emulation/MultiDisplay.cpp\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/emulation/MultiDisplay.cpp",
+              "range": {
+                "startLine": 577,
+                "startChar": 16,
+                "endLine": 577,
+                "endChar": 24
+              },
+              "replacement": "function"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "7482fc44_1ec1f54a",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 577,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-01T23:42:53Z",
+      "side": 1,
+      "message": "Common typo found: \"fucntion\" -- should it be \"function\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 577,
+        "startChar": 16,
+        "endLine": 577,
+        "endChar": 24
+      },
+      "revId": "1283f6287e2059002ca1f8a37b279784aa747268",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
