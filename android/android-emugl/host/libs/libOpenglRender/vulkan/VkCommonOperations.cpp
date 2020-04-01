@@ -1757,6 +1757,11 @@ transformExternalMemoryHandleTypeFlags_tohost(
         res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
     }
 
+#ifdef _WIN32
+    res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+    res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT;
+#endif
+
     if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID) {
         res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID;
         res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
@@ -1780,6 +1785,11 @@ transformExternalMemoryHandleTypeFlags_fromhost(
         res &= ~VK_EXT_MEMORY_HANDLE_TYPE_BIT;
         res |= wantedGuestHandleType;
     }
+
+#ifdef _WIN32
+    res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+    res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_KMT_BIT;
+#endif
 
     return res;
 }
