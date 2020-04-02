@@ -1,0 +1,48 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002260328",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277632?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "5639f7b7_64b3fc69",
+          "description": "Change to \"android/android-emu/android/base/async/CallbackRegistry.h\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/base/async/CallbackRegistry.h",
+              "range": {
+                "startLine": 40,
+                "startChar": 7,
+                "endLine": 40,
+                "endChar": 16
+              },
+              "replacement": "separated"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "64433cf3_83049f27",
+        "filename": "android/android-emu/android/base/async/CallbackRegistry.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T15:26:35Z",
+      "side": 1,
+      "message": "Common typo found: \"seperated\" -- should it be \"separated\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 40,
+        "startChar": 7,
+        "endLine": 40,
+        "endChar": 16
+      },
+      "revId": "b1fa77f7ddb302b6a22e311e49d3659bcbc03e2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
