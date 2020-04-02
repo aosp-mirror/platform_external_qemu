@@ -1,0 +1,28 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "582b451e_4fafd687",
+        "filename": "android/android-emu/android/base/async/CallbackRegistry.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-02T18:24:43Z",
+      "side": 1,
+      "message": "\u003e Common typo found: \"seperated\" -- should it be \"separated\"?\n\u003e Note: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.\n\nPlease fix.",
+      "parentUuid": "a52197ee_b067fe66",
+      "range": {
+        "startLine": 40,
+        "startChar": 7,
+        "endLine": 40,
+        "endChar": 16
+      },
+      "revId": "f99e7d02802c7b2e262bcc339f84cade8a9d49f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
