@@ -491,7 +491,7 @@ message KeyboardEvent {
   // the state of modifier keys such as Shift as well as the keyboard
   // locale and layout. This follows the w3c standard used in browsers.
   // You can find an accurate description of valid values
-  // (here)[https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values]
+  // [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values)
   //
   // Note that some keys can result in multiple evdev events that are
   // delivered to the emulator. for example the Key "A" will result in a
@@ -500,6 +500,16 @@ message KeyboardEvent {
   //
   // Not all documented keys are understood by android, and only printable
   // ASCII [32-127) characters are properly translated.
+  //
+  // Keep in mind that there are a set of key values that result in android
+  // specific behavior
+  // [see](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values#Phone_keys):
+  //
+  // - "AppSwitch": Behaves as the "Overview" button in android.
+  // - "GoBack": The Back button.
+  // - "GoHome": The Home button, which takes the user to the phone's main
+  //             screen (usually an application launcher).
+  // - "Power":  The Power button.
   string key = 4;
 
   // Series of utf8 encoded characters to send to the emulator. An attempt
