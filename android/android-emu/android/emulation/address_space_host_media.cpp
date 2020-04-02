@@ -114,6 +114,10 @@ void AddressSpaceHostMediaContext::allocatePages(uint64_t phys_addr, int num_pag
 
 void AddressSpaceHostMediaContext::deallocatePages(uint64_t phys_addr,
                                                    int num_pages) {
+    if (mHostBuffer == nullptr) {
+        return;
+    }
+
     mControlOps->remove_memory_mapping(phys_addr, mHostBuffer,
                                        num_pages * 4096);
     android::aligned_buf_free(mHostBuffer);
