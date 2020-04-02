@@ -694,6 +694,9 @@ void YUVConverter::drawConvert(int x, int y,
                                int width, int height,
                                char* pixels) {
     saveGLState();
+    if (pixels && (width != mWidth || height != mHeight)) {
+        reset();
+    }
 
     if (mProgram == 0) {
         init(width, height, mFormat);
@@ -845,7 +848,7 @@ void YUVConverter::updateCutoffs(float width, float ywidth,
     }
 }
 
-YUVConverter::~YUVConverter() {
+void YUVConverter::reset() {
     if (mIbuf) s_gles2.glDeleteBuffers(1, &mIbuf);
     if (mVbuf) s_gles2.glDeleteBuffers(1, &mVbuf);
     if (mProgram) s_gles2.glDeleteProgram(mProgram);
@@ -854,4 +857,16 @@ YUVConverter::~YUVConverter() {
     if (mVtex) s_gles2.glDeleteTextures(1, &mVtex);
     if (mVUtex) s_gles2.glDeleteTextures(1, &mVUtex);
     if (mUVtex) s_gles2.glDeleteTextures(1, &mUVtex);
+    mIbuf = 0;
+    mVbuf = 0;
+    mProgram = 0;
+    mYtex = 0;
+    mUtex = 0;
+    mVtex = 0;
+    mVUtex = 0;
+    mUVtex = 0;
+}
+
+YUVConverter::~YUVConverter() {
+    reset();
 }
