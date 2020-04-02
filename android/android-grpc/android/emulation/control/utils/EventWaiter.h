@@ -34,7 +34,8 @@ using RemoveCallback = void (*)(void* opaque);
 //   Callback should be invoked when a new event is available. Registration is
 //   identified by the opaque pointer.
 // - A RemoveCallback function, that can be used to unregister a Callback
-//   identified by the opaque pointer.
+//   identified by the opaque pointer. No events should be delivered after the
+//   return of this function. You will see crashes if you do.
 //
 // Typical usage would be something like:
 //
