@@ -92,6 +92,7 @@ public:
 
 private:
     void init(int w, int h, FrameworkFormat format);
+    void reset();
 
     // For dealing with n-pixel-aligned buffers
     void updateCutoffs(float width, float ywidth, float halfwidth, float cwidth);
