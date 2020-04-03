@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "bc89f80d_d9957967",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 1923,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ab441d4e_0471885c",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "69e349bd_c830d16a",
         "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
         "patchSetId": 27
@@ -33,6 +51,24 @@
       "revId": "6d893436f89e55329cb258a242ce16946386bb23",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d9c96c50_aca7ba8e",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "69e349bd_c830d16a",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "816c66c6_adcef02e",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "Agree.",
+      "parentUuid": "5edb92ee_97077b72",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ee03d978_d8de7285",
         "filename": "android/android-emu/android/emulation/control/multi_display_agent.h",
         "patchSetId": 27
@@ -67,6 +121,24 @@
       "revId": "6d893436f89e55329cb258a242ce16946386bb23",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "15864056_7281d266",
+        "filename": "android/android-emu/android/emulation/control/multi_display_agent.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "Sounds good. We can enhance this in a later patch.",
+      "parentUuid": "ee03d978_d8de7285",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "e01045fa_5b03f10b",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 2052,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f64cb67c_a264abbd",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "98514dfb_c4ed63af",
         "filename": "android/android-emu/android/main-common.h",
         "patchSetId": 27
@@ -101,6 +191,24 @@
       "revId": "6d893436f89e55329cb258a242ce16946386bb23",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0317e57c_5e2fdb77",
+        "filename": "android/android-emu/android/main-common.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "98514dfb_c4ed63af",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "f9913181_eb502d93",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dde1f71f_58628ad4",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d92352f_e997d701",
         "filename": "android/android-emu/android/opengles.h",
         "patchSetId": 27
@@ -135,6 +261,24 @@
       "revId": "6d893436f89e55329cb258a242ce16946386bb23",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1956f195_9abc8047",
+        "filename": "android/android-emu/android/opengles.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d92352f_e997d701",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "2d459d98_fdbd4cce",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 2314,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6667b80a_e6ab57c3",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "63d025e7_4e22bddb",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 27
@@ -169,6 +331,24 @@
       "revId": "6d893436f89e55329cb258a242ce16946386bb23",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "038f7c27_4dbcdc98",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 2914,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "This \"save\" makes sure that UI config restored after reboot. So, it only valid for QT window is active.",
+      "parentUuid": "63d025e7_4e22bddb",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -192,6 +372,30 @@
       "revId": "6d893436f89e55329cb258a242ce16946386bb23",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f414f2f_086b5dce",
+        "filename": "android/android-emu/android/skin/window.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-03T22:42:52Z",
+      "side": 1,
+      "message": "Good idea. It will use less lock/unlock for each mouse click calculation.",
+      "parentUuid": "4e801489_04f09972",
+      "range": {
+        "startLine": 1099,
+        "startChar": 1,
+        "endLine": 1121,
+        "endChar": 29
+      },
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
