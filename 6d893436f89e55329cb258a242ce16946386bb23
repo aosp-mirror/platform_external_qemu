@@ -1,0 +1,163 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab441d4e_0471885c",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 1923,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-03T20:30:56Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69e349bd_c830d16a",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-03T20:30:56Z",
+      "side": 1,
+      "message": "space between android and { : `namespace android {`",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f64cb67c_a264abbd",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 2052,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-03T20:30:56Z",
+      "side": 1,
+      "message": "nit: spaces (and below)",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "98514dfb_c4ed63af",
+        "filename": "android/android-emu/android/main-common.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-03T20:30:56Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dde1f71f_58628ad4",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-03T20:30:56Z",
+      "side": 1,
+      "message": "change to spaces (and check other files too)",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d92352f_e997d701",
+        "filename": "android/android-emu/android/opengles.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-03T20:30:56Z",
+      "side": 1,
+      "message": "nit: spaces (check throughout)\n\nYou may want to set up your ~/.vimrc like so:\n\nset tabstop\u003d4\nset expandtab\nset shiftwidth\u003d4",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6667b80a_e6ab57c3",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 2314,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-03T20:30:56Z",
+      "side": 1,
+      "message": "space between while and (",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "63d025e7_4e22bddb",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 2914,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-03T20:30:56Z",
+      "side": 1,
+      "message": "should the saving to config ini be part of the agent code?",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e801489_04f09972",
+        "filename": "android/android-emu/android/skin/window.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-03T20:30:56Z",
+      "side": 1,
+      "message": "May be better to wrap up this else block into another utility function in the agent code",
+      "range": {
+        "startLine": 1099,
+        "startChar": 1,
+        "endLine": 1121,
+        "endChar": 29
+      },
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

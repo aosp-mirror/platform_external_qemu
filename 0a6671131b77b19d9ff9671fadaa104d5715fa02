@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "913053c8_cb3f6174",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 2691,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-03T20:30:56Z",
+      "side": 0,
+      "message": "you will have to bump up the snapshot version number in android/android-emu/android/snapshot/Snapshot.cpp, or snapshots from older emulators will get an error and crash on load/save",
+      "revId": "0a6671131b77b19d9ff9671fadaa104d5715fa02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
