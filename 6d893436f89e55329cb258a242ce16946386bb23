@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "ee03d978_d8de7285",
+        "filename": "android/android-emu/android/emulation/control/multi_display_agent.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-04-03T21:10:38Z",
+      "side": 1,
+      "message": "Do you think it might be better for readability if we put fields id, x, y, w, h, dpi and flags into a struct?",
+      "revId": "6d893436f89e55329cb258a242ce16946386bb23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f64cb67c_a264abbd",
         "filename": "android/android-emu/android/main-common.c",
         "patchSetId": 27
