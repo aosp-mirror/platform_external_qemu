@@ -23,6 +23,30 @@
       "revId": "f99e7d02802c7b2e262bcc339f84cade8a9d49f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dae584db_6a15ed80",
+        "filename": "android/android-emu/android/base/async/CallbackRegistry.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-03T20:47:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "582b451e_4fafd687",
+      "range": {
+        "startLine": 40,
+        "startChar": 7,
+        "endLine": 40,
+        "endChar": 16
+      },
+      "revId": "f99e7d02802c7b2e262bcc339f84cade8a9d49f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
