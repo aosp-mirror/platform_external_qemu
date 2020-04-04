@@ -36,6 +36,7 @@
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/emulation/MultiDisplay.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/feature_control.h"
@@ -870,6 +871,7 @@ static int startEmulatorWithMinConfig(
     RendererConfig rendererConfig;
     configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
                            gQAndroidEmulatorWindowAgent,
+                           gQAndroidMultiDisplayAgent,
                            uiPreferredGlesBackend, &rendererConfig);
 
     // Gpu configuration is set, now initialize the screen recorder
@@ -878,8 +880,8 @@ static int startEmulatorWithMinConfig(
             (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
     screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
                          isGuestMode ? uiEmuAgent.display : nullptr);
-    android_registerScreenshotFunc([](const char* dirname) {
-        android::emulation::captureScreenshot(dirname, nullptr);
+    android_registerScreenshotFunc([](const char* dirname, uint32_t display) {
+        android::emulation::captureScreenshot(dirname, nullptr, display);
     });
 
     /* Disable the GLAsyncSwap for ANGLE so far */
@@ -908,6 +910,8 @@ static int startEmulatorWithMinConfig(
     }
 
     android_foldable_initialize(nullptr);
+
+    android_init_multi_display(gQAndroidEmulatorWindowAgent, isGuestMode);
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
                              argv);
@@ -1798,6 +1802,9 @@ extern "C" int main(int argc, char** argv) {
     gQAndroidLocationAgent->gpsSetPassiveUpdate(!opts->no_passive_gps);
 
     android_foldable_initialize(nullptr);
+    bool isGuestMode =
+        (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
+    android_init_multi_display(gQAndroidEmulatorWindowAgent, isGuestMode);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
@@ -1913,16 +1920,15 @@ extern "C" int main(int argc, char** argv) {
         RendererConfig rendererConfig;
         configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
                                gQAndroidEmulatorWindowAgent,
+                               gQAndroidMultiDisplayAgent,
                                uiPreferredGlesBackend, &rendererConfig);
 
         // Gpu configuration is set, now initialize the screen recorder
         // and screenshot callback
-        bool isGuestMode =
-                (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
         screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
                              isGuestMode ? uiEmuAgent.display : nullptr);
-        android_registerScreenshotFunc([](const char* dirname) {
-            android::emulation::captureScreenshot(dirname, nullptr);
+        android_registerScreenshotFunc([](const char* dirname, uint32_t display) {
+            android::emulation::captureScreenshot(dirname, nullptr, display);
         });
 
         /* Disable the GLAsyncSwap for ANGLE so far */
