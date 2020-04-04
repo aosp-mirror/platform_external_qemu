@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5b7e56f8_51db0d9f",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-04T03:27:35Z",
+      "side": 1,
+      "message": "The 80-character limit reminds me of my first job involving punch cards.",
+      "range": {
+        "startLine": 306,
+        "startChar": 16,
+        "endLine": 306,
+        "endChar": 20
+      },
+      "revId": "c15e9dac8f2317417eae97a0898765d1bea59ec0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2040208d_4f569199",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-04T03:27:35Z",
+      "side": 1,
+      "message": ".. -\u003e .",
+      "range": {
+        "startLine": 1166,
+        "startChar": 78,
+        "endLine": 1166,
+        "endChar": 80
+      },
+      "revId": "c15e9dac8f2317417eae97a0898765d1bea59ec0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "08f06adf_9660d71a",
+        "filename": "android/android-grpc/android/emulation/control/GrpcServices.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-04T03:27:35Z",
+      "side": 1,
+      "message": "This line is probably a leftover.",
+      "range": {
+        "startLine": 83,
+        "startChar": 7,
+        "endLine": 83,
+        "endChar": 37
+      },
+      "revId": "c15e9dac8f2317417eae97a0898765d1bea59ec0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
