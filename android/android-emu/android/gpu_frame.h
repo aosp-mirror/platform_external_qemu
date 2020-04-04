@@ -50,4 +50,7 @@ void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
                                          void* opaque);
 void gpu_unregister_shared_memory_callback(void* opaque);
 
+// Used to inform the recorders that the emulator is terminating.
+void gpu_emulator_shutdown();
+
 ANDROID_END_HEADER

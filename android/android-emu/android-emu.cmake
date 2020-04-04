@@ -24,6 +24,7 @@ set(android-emu-common
     android/base/async/AsyncSocket.cpp
     android/base/async/AsyncSocketServer.cpp
     android/base/async/AsyncWriter.cpp
+    android/base/async/CallbackRegistry.cpp
     android/base/async/DefaultLooper.cpp
     android/base/async/Looper.cpp
     android/base/async/ScopedSocketWatch.cpp
@@ -488,6 +489,7 @@ set(android-emu-min
     android/avd/util.c
     android/avd/util_wrapper.cpp
     android/base/async/ScopedSocketWatch.cpp
+    android/base/async/CallbackRegistry.cpp
     android/base/async/DefaultLooper.cpp
     android/base/async/Looper.cpp
     android/base/async/ScopedSocketWatch.cpp
@@ -731,6 +733,7 @@ android_add_test(
       android/base/ContiguousRangeMapper_unittest.cpp
       android/base/async/Looper_unittest.cpp
       android/base/async/AsyncSocketServer_unittest.cpp
+      android/base/async/CallbackRegistry_unittest.cpp
       android/base/async/RecurrentTask_unittest.cpp
       android/base/async/ScopedSocketWatch_unittest.cpp
       android/base/async/SubscriberList_unittest.cpp
