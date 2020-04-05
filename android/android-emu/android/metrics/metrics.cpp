@@ -439,6 +439,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::CAR_VHAL_REPLAY;
         case android::featurecontrol::CarAssistButton:
             return android_studio::EmulatorFeatureFlagState::CAR_ASSIST_BUTTON;
+        case android::featurecontrol::HardwareDecoder:
+            return android_studio::EmulatorFeatureFlagState::HARDWARE_DECODER;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

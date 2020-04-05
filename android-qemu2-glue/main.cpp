@@ -1968,14 +1968,25 @@ extern "C" int main(int argc, char** argv) {
           }
         }
 
+        // hardware codec feature
+        std::vector<std::string> hwcodec_boot_params;
+        if (feature_is_enabled(kFeature_HardwareDecoder)) {
+            hwcodec_boot_params.push_back("qemu.hwcodec.avcdec=2");
+            hwcodec_boot_params.push_back("qemu.hwcodec.vpxdec=2");
+        }
+
+        auto all_boot_params = std::move(verified_boot_params);
+        all_boot_params.insert(all_boot_params.end(),
+                               hwcodec_boot_params.begin(),
+                               hwcodec_boot_params.end());
+
         ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-                hw->kernel_parameters, &verified_boot_params,
+                hw->kernel_parameters, &all_boot_params,
                 rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
-                true /* isQemu2 */, hw->hw_arc, hw->hw_lcd_width, hw->hw_lcd_height,
-                hw->hw_lcd_vsync,
-                hw->hw_gltransport,
+                true /* isQemu2 */, hw->hw_arc, hw->hw_lcd_width,
+                hw->hw_lcd_height, hw->hw_lcd_vsync, hw->hw_gltransport,
                 hw->hw_gltransport_drawFlushInterval));
 
         if (!kernel_parameters.get()) {
