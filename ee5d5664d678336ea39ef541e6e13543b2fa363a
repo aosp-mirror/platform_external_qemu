@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a9f5f2e_ef3a3bc3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-04-06T20:05:18Z",
+      "side": 1,
+      "message": "In the tests, you always unregister after each registration, right? So the test should not slam the send message whether you yield or sleep.\n\nThe change in CallbackRegistry.cpp is a good catch.",
+      "range": {
+        "startLine": 9,
+        "startChar": 69,
+        "endLine": 10,
+        "endChar": 66
+      },
+      "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "39c4a957_4452eb9a",
+        "filename": "android/android-emu/android/base/async/CallbackRegistry.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-04-06T20:05:18Z",
+      "side": 1,
+      "message": "it looks like you can just call \"it.second(it.first);\" ?",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 9
+      },
+      "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d847f6b3_c7c5b184",
+        "filename": "android/android-emu/android/base/async/CallbackRegistry_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-04-06T20:05:18Z",
+      "side": 1,
+      "message": "This change doesn\u0027t seem necessary?",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 31
+      },
+      "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1243981_f6715e82",
+        "filename": "android/android-emu/android/base/async/CallbackRegistry_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-04-06T20:05:18Z",
+      "side": 1,
+      "message": "why do you need to check the read/send counters? (and why send counter +2 instead of +1 for every step?)",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 30
+      },
+      "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
