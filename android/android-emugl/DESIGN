@@ -255,16 +255,10 @@ There are three translator host libraries provided by this project:
    libGLES_CM_translator   -> GLES 1.1 translation
    libGLES_V2_translator   -> GLES 2.0 translation
 
-The full name of the library will depend on the host system.
-For simplicity, only the library name suffix will change (i.e. the
-'lib' prefix is not dropped on Windows), i.e.:
-
-   libEGL_translator.so    -> for Linux
-   libEGL_translator.dylib -> for OS X
-   libEGL_translator.dll   -> for Windows
-
-The source code for these libraries is located under the following
-path in the Android source tree:
+These used to be dynamically linked libraries, but are now statically linked as
+they can run any underlying GL or GLES backend anyway, and the translator
+libraries are necessary for snapshots to work.  The source code for these
+libraries is located under the following path in the Android source tree:
 
    $EMUGL_HOST/host/libs/Translator/EGL
    $EMUGL_HOST/host/libs/Translator/GLES_CM

@@ -101,12 +101,6 @@ if(NOT WINDOWS)
   # These are usually nops, but some code generators will not automatically
   # binplace these (Xcode!) So let's just guarantee that it gets properly
   # binplaced
-  android_copy_shared_lib(emugl_combined_unittests EGL_translator
-                          EGL_translator)
-  android_copy_shared_lib(emugl_combined_unittests GLES_V2_translator
-                          GLES_V2_translator)
-  android_copy_shared_lib(emugl_combined_unittests GLES_CM_translator
-                          GLES_CM_translator)
   android_copy_shared_lib(emugl_combined_unittests OpenglRender OpenglRender)
   android_copy_shared_lib(emugl_combined_unittests gralloc.ranchu
                           gralloc.ranchu)

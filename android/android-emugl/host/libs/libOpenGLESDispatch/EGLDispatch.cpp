@@ -75,8 +75,7 @@ bool init_egl_dispatch() {
     char error[256];
     emugl::SharedLibrary *lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
     if (!lib) {
-        init_egl_dispatch_from_static();
-        return false;
+        return init_egl_dispatch_from_static();
     }
 
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_LOAD_FIELD)
