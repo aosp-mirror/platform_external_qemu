@@ -102,6 +102,7 @@ set(android-emu-common
     android/emulation/MediaHostRenderer.cpp
     android/emulation/MediaSnapshotState.cpp
     android/emulation/MediaSnapshotHelper.cpp
+    android/emulation/MediaVideoHelper.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
     android/emulation/MultiDisplay.cpp
