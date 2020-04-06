@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4a93773a_e7c4b048",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-06T12:55:01Z",
+      "side": 1,
+      "message": "Too bad I missed out on those days :-)",
+      "parentUuid": "5b7e56f8_51db0d9f",
+      "range": {
+        "startLine": 306,
+        "startChar": 16,
+        "endLine": 306,
+        "endChar": 20
+      },
+      "revId": "c15e9dac8f2317417eae97a0898765d1bea59ec0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2040208d_4f569199",
         "filename": "android/android-emu/android/help.c",
         "patchSetId": 6
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "85cf0d36_411f872c",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-06T12:55:01Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "2040208d_4f569199",
+      "range": {
+        "startLine": 1166,
+        "startChar": 78,
+        "endLine": 1166,
+        "endChar": 80
+      },
+      "revId": "c15e9dac8f2317417eae97a0898765d1bea59ec0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08f06adf_9660d71a",
         "filename": "android/android-grpc/android/emulation/control/GrpcServices.h",
         "patchSetId": 6
@@ -68,6 +116,30 @@
       "revId": "c15e9dac8f2317417eae97a0898765d1bea59ec0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c488493e_2ee57eef",
+        "filename": "android/android-grpc/android/emulation/control/GrpcServices.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-06T12:55:01Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "08f06adf_9660d71a",
+      "range": {
+        "startLine": 83,
+        "startChar": 7,
+        "endLine": 83,
+        "endChar": 37
+      },
+      "revId": "c15e9dac8f2317417eae97a0898765d1bea59ec0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
