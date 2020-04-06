@@ -77,8 +77,7 @@ bool init_egl_dispatch() {
     emugl::SharedLibrary *lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
     if (!lib) {
         printf("Failed to open shared library %s: [%s]. Falling back to static\n", libName, error);
-        init_egl_dispatch_from_static();
-        return false;
+        return init_egl_dispatch_from_static();
     }
 
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_LOAD_FIELD)
