@@ -13,33 +13,35 @@
 // limitations under the License.
 #pragma once
 
-#include <memory>
 #include "android/emulation/GoldfishMediaDefs.h"
 #include "android/emulation/MediaCodec.h"
-#include <inttypes.h>
+#include "android/emulation/MediaVpxDecoderPlugin.h"
+#include "android/emulation/VpxPingInfoParser.h"
 
-extern "C" {
-#include "vpx/vpx_codec.h"
-#include "vpx/vpx_decoder.h"
-#include "vpx/vpx_image.h"
-#include "vpx/vp8dx.h"
-}
+#include <inttypes.h>
+#include <stddef.h>
+#include <memory>
+#include <mutex>
+#include <unordered_map>
 
 namespace android {
 namespace emulation {
 
 class MediaVpxDecoder : MediaCodec {
 public:
+    using InitContextParam = VpxPingInfoParser::InitContextParam;
+    using DecodeFrameParam = VpxPingInfoParser::DecodeFrameParam;
+    using GetImageParam = VpxPingInfoParser::GetImageParam;
+
     MediaVpxDecoder() = default;
     virtual ~MediaVpxDecoder() = default;
+    void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
 
 public:
-    // this is the entry point
-    virtual void handlePing(MediaCodecType type, MediaOperation op, void* ptr) override;
     virtual void save(base::Stream* stream) const override;
     virtual bool load(base::Stream* stream) override;
 
-private:
+public:
     void initVpxContext(void *ptr, MediaCodecType type);
     void destroyVpxContext(void *ptr);
     void decodeFrame(void* ptr);
@@ -47,14 +49,16 @@ private:
     void getImage(void* ptr);
 
 private:
-    std::unique_ptr<vpx_codec_ctx_t> mCtx;
-    bool mImageReady = false;
-    // Owned by the vpx context. Needs to be initialized to nullptr on the first
-    // vpx_codec_get_frame() call.
-    vpx_codec_iter_t mIter = nullptr;
-    // Owned by the vpx context. mImg is set when calling vpx_codec_get_frame(). mImg remains
-    // valid until the next vpx_codec_decode() is called.
-    vpx_image_t* mImg = nullptr;
+    std::mutex mMapLock{};
+    uint64_t mId = 0;
+    std::unordered_map<uint64_t, MediaVpxDecoderPlugin*> mDecoders;
+    uint64_t readId(void* ptr);  // read id from the address
+    void removeDecoder(uint64_t id);
+    void addDecoder(uint64_t key,
+                    MediaVpxDecoderPlugin* val);  // this just add
+    void updateDecoder(uint64_t key,
+                       MediaVpxDecoderPlugin* val);  // this will overwrite
+    MediaVpxDecoderPlugin* getDecoder(uint64_t key);
 };
 
 }  // namespace emulation

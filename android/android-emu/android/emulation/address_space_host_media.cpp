@@ -176,9 +176,10 @@ void AddressSpaceHostMediaContext::handleMediaRequest(AddressSpaceDevicePingInfo
             if (!mVpxDecoder) {
                 mVpxDecoder.reset(new MediaVpxDecoder);
             }
-            mVpxDecoder->handlePing(codecType,
-                                   op,
-                                   mControlOps->get_host_ptr(info->phys_addr));
+            mVpxDecoder->handlePing(
+                    codecType, op,
+                    (uint8_t*)(mControlOps->get_host_ptr(info->phys_addr)) +
+                            offSetAddr);
             break;
         case MediaCodecType::H264Codec:
             if (!mH264Decoder) {
