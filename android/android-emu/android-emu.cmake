@@ -328,6 +328,7 @@ android_add_library(
           android/emulation/MediaH264DecoderCuvid.cpp
           android/emulation/MediaCudaUtils.cpp
           android/emulation/MediaCudaDriverHelper.cpp
+          android/emulation/MediaCudaVideoHelper.cpp
           android/emulation/dynlink_cuda.cpp
           android/emulation/dynlink_nvcuvid.cpp
           android/camera/camera-capture-windows.cpp
@@ -338,6 +339,7 @@ android_add_library(
         android/emulation/MediaH264DecoderCuvid.cpp
         android/emulation/MediaCudaUtils.cpp
         android/emulation/MediaCudaDriverHelper.cpp
+        android/emulation/MediaCudaVideoHelper.cpp
         android/emulation/dynlink_cuda.cpp
         android/emulation/dynlink_nvcuvid.cpp
         android/camera/camera-capture-linux.c
