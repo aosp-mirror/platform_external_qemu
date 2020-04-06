@@ -34,6 +34,8 @@
 namespace android {
 namespace emulation {
 
+using TextureFrame = MediaTexturePool::TextureFrame;
+
 MediaHostRenderer::MediaHostRenderer() {
     mVirtioGpuOps = android_getVirtioGpuOps();
     if (mVirtioGpuOps == nullptr) {
@@ -52,51 +54,18 @@ constexpr uint32_t kGL_RGBA = 0x1908;
 constexpr uint32_t kFRAME_POOL_SIZE = 8;
 constexpr uint32_t kFRAMEWORK_FORMAT_NV12 = 3;
 
-MediaHostRenderer::TextureFrame MediaHostRenderer::getTextureFrame(int w,
-                                                                   int h) {
-    H264_DPRINT("calling %s %d for tex of w %d h %d\n", __func__, __LINE__, w,
-                h);
-    if (mFramePool.empty()) {
-        std::vector<uint32_t> textures(2 * kFRAME_POOL_SIZE);
-        mVirtioGpuOps->create_yuv_textures(kFRAMEWORK_FORMAT_NV12,
-                                           kFRAME_POOL_SIZE, w, h,
-                                           textures.data());
-        for (uint32_t i = 0; i < kFRAME_POOL_SIZE; ++i) {
-            TextureFrame frame{textures[2 * i], textures[2 * i + 1]};
-            H264_DPRINT("allocated Y %d UV %d", frame.Ytex, frame.UVtex);
-            mFramePool.push_back(std::move(frame));
-        }
-    }
-    TextureFrame frame = mFramePool.front();
-    mFramePool.pop_front();
-    H264_DPRINT("done %s %d ret Y %d UV %d", __func__, __LINE__, frame.Ytex,
-                frame.UVtex);
-    return frame;
+TextureFrame MediaHostRenderer::getTextureFrame(int w, int h) {
+    return mTexturePool.getTextureFrame(w, h);
 }
 
 void MediaHostRenderer::saveDecodedFrameToTexture(TextureFrame frame,
                                                   void* privData,
                                                   void* func) {
-    if (mVirtioGpuOps) {
-        uint32_t textures[2] = {frame.Ytex, frame.UVtex};
-        mVirtioGpuOps->update_yuv_textures(kFRAMEWORK_FORMAT_NV12, textures,
-                                           privData, func);
-    }
+    mTexturePool.saveDecodedFrameToTexture(frame, privData, func);
 }
 
 void MediaHostRenderer::cleanUpTextures() {
-    if (mFramePool.empty()) {
-        return;
-    }
-    std::vector<uint32_t> textures;
-    for (auto& frame : mFramePool) {
-        textures.push_back(frame.Ytex);
-        textures.push_back(frame.UVtex);
-        H264_DPRINT("delete Y %d UV %d", frame.Ytex, frame.UVtex);
-    }
-    mVirtioGpuOps->destroy_yuv_textures(kFRAMEWORK_FORMAT_NV12,
-                                        mFramePool.size(), textures.data());
-    mFramePool.clear();
+    mTexturePool.cleanUpTextures();
 }
 
 void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
@@ -127,6 +96,13 @@ void MediaHostRenderer::renderToHostColorBufferWithTextures(
                 hostColorBufferId);
     if (hostColorBufferId < 0) {
         H264_DPRINT("ERROR: negative buffer id %d", hostColorBufferId);
+        // try to recycle valid textures: this could happen
+        mTexturePool.putTextureFrame(frame);
+        return;
+    }
+    if (frame.Ytex <= 0 || frame.UVtex <= 0) {
+        H264_DPRINT("ERROR: invalid tex ids: Ytex %d UVtex %d", (int)frame.Ytex,
+                    (int)frame.UVtex);
         return;
     }
     if (mVirtioGpuOps) {
@@ -137,7 +113,9 @@ void MediaHostRenderer::renderToHostColorBufferWithTextures(
         if (textures[0] > 0 && textures[1] > 0) {
             frame.Ytex = textures[0];
             frame.UVtex = textures[1];
-            putTextureFrame(frame);
+            H264_DPRINT("return textures to pool %d %d", frame.Ytex,
+                        frame.UVtex);
+            mTexturePool.putTextureFrame(frame);
         }
     } else {
         H264_DPRINT("ERROR: there is no virtio Gpu Ops is not setup");
