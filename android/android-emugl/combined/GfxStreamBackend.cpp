@@ -298,16 +298,6 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 #define GFXSTREAM_LIB_SUFFIX ".dll"
 #endif
 
-    System::get()->envSet("ANDROID_EGL_LIB",
-        pj(System::get()->getProgramDirectory(), "libEGL_translator" GFXSTREAM_LIB_SUFFIX));
-    System::get()->envSet("ANDROID_GLESv1_LIB",
-        pj(System::get()->getProgramDirectory(), "libGLES_CM_translator" GFXSTREAM_LIB_SUFFIX));
-    System::get()->envSet("ANDROID_GLESv2_LIB",
-        pj(System::get()->getProgramDirectory(), "libGLES_V2_translator" GFXSTREAM_LIB_SUFFIX));
-
-    fprintf(stderr, "%s: program directory: %s\n", __func__, System::get()->getProgramDirectory().c_str());
-
-
     auto dispString = System::get()->envGet("DISPLAY");
     GFXS_LOG("current display: %s", dispString.c_str());
 
