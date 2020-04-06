@@ -733,7 +733,8 @@ android_add_test(
       android/base/ContiguousRangeMapper_unittest.cpp
       android/base/async/Looper_unittest.cpp
       android/base/async/AsyncSocketServer_unittest.cpp
-      android/base/async/CallbackRegistry_unittest.cpp
+      # bug: 153381599: disabled until flakiness is addressed
+      # android/base/async/CallbackRegistry_unittest.cpp
       android/base/async/RecurrentTask_unittest.cpp
       android/base/async/ScopedSocketWatch_unittest.cpp
       android/base/async/SubscriberList_unittest.cpp
