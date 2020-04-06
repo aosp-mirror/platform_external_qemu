@@ -99,6 +99,7 @@ set(android-emu-common
     android/emulation/MediaH264DecoderDefault.cpp
     android/emulation/MediaH264DecoderFfmpeg.cpp
     android/emulation/MediaH264Decoder.cpp
+    android/emulation/MediaTexturePool.cpp
     android/emulation/MediaHostRenderer.cpp
     android/emulation/MediaSnapshotState.cpp
     android/emulation/MediaSnapshotHelper.cpp
