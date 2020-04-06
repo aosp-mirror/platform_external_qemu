@@ -13,15 +13,9 @@
 // limitations under the License.
 
 #include "android/emulation/MediaH264DecoderDefault.h"
-#include "android/emulation/H264PingInfoParser.h"
-#include "android/emulation/MediaH264DecoderFfmpeg.h"
-#ifdef __APPLE__
-#include "android/emulation/MediaH264DecoderVideoToolBoxProxy.h"
-#else
-// for Linux and Window, Cuvid is available
-#include "android/emulation/MediaH264DecoderCuvid.h"
-#endif
 #include "android/base/system/System.h"
+#include "android/emulation/H264PingInfoParser.h"
+#include "android/emulation/MediaH264DecoderGeneric.h"
 
 #include <cstdint>
 #include <string>
@@ -44,23 +38,7 @@ namespace emulation {
 namespace {
 MediaH264DecoderPlugin* makeDecoderPlugin(uint64_t pluginid,
                                           H264PingInfoParser parser) {
-#ifdef __APPLE__
-    auto useVideoToolBox = android::base::System::getEnvironmentVariable(
-            "ANDROID_EMU_CODEC_USE_VIDEOTOOLBOX_DECODER");
-    if (useVideoToolBox != "") {
-        return new MediaH264DecoderVideoToolBoxProxy(pluginid, parser);
-    }
-#else
-    auto useCuvidEnv = android::base::System::getEnvironmentVariable(
-            "ANDROID_EMU_CODEC_USE_CUVID_DECODER");
-    if (useCuvidEnv != "") {
-        H264_DPRINT("Using Cuvid decoder on Linux/Windows");
-        if (MediaH264DecoderCuvid::initCudaDrivers()) {
-            return new MediaH264DecoderCuvid(pluginid, parser);
-        }
-    }
-#endif
-    return new MediaH264DecoderFfmpeg(pluginid, parser);
+    return new MediaH264DecoderGeneric(pluginid, parser);
 }
 
 }; // anon namespace
@@ -232,30 +210,13 @@ bool MediaH264DecoderDefault::load(base::Stream* stream) {
         // this is hacky; but we have to know the plugin type
         uint64_t id = stream->getBe64();
         int type = stream->getBe32();
-        if (type == MediaH264DecoderPlugin::PLUGIN_TYPE_FFMPEG) {  // ffmpeg
-            MediaH264DecoderFfmpeg* decoder =
-                    new MediaH264DecoderFfmpeg(id, H264PingInfoParser(100));
+        if (type == MediaH264DecoderPlugin::PLUGIN_TYPE_GENERIC) {
+            MediaH264DecoderGeneric* decoder =
+                    new MediaH264DecoderGeneric(id, H264PingInfoParser(100));
             decoder->load(stream);
             mDecoders[id] = decoder;
             continue;
         }
-#ifdef __APPLE__
-        if (type == MediaH264DecoderPlugin::PLUGIN_TYPE_VIDEO_TOOL_BOX_PROXY) {
-            MediaH264DecoderVideoToolBoxProxy* decoder =
-                    new MediaH264DecoderVideoToolBoxProxy(id, H264PingInfoParser(100));
-            decoder->load(stream);
-            mDecoders[id] = decoder;
-            continue;
-        }
-#else
-        if (type == MediaH264DecoderPlugin::PLUGIN_TYPE_CUVID) {
-            MediaH264DecoderCuvid* decoder =
-                    new MediaH264DecoderCuvid(id, H264PingInfoParser(100));
-            decoder->load(stream);
-            mDecoders[id] = decoder;
-            continue;
-        }
-#endif
         fprintf(stderr, "Error, un-implemented %s %d\n", __func__, __LINE__);
         exit(1);
     }
