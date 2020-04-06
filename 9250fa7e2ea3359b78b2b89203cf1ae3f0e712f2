@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af0f4b7b_daad6832",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-06T19:05:32Z",
+      "side": 1,
+      "message": "May also want to look at android/android-emu/android/base/ProcessControl.cpp and fold the parameter saving into that, or fold the ProcessControl\u0027s parameter saving into this (you decide)",
+      "revId": "9250fa7e2ea3359b78b2b89203cf1ae3f0e712f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
