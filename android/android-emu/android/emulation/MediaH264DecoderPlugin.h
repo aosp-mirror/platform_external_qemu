@@ -54,6 +54,7 @@ protected:
         PLUGIN_TYPE_CUVID = 2,
         PLUGIN_TYPE_VIDEO_TOOL_BOX = 3,
         PLUGIN_TYPE_VIDEO_TOOL_BOX_PROXY = 4,
+        PLUGIN_TYPE_GENERIC = 5,
 
     };
 
