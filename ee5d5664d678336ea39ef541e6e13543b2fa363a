@@ -150,6 +150,24 @@
       "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ccc7ff90_f4637d7f",
+        "filename": "android/android-emu/android/base/async/CallbackRegistry_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-04-06T23:38:25Z",
+      "side": 1,
+      "message": "+1\n\nThe test looks like it was originally designed to test the situations when (1) callback executes before unregistered (2) callback executes in the middle of the unregistration (3) callback (not) executes after unregistered. And it tries to test all 3 situations in one test (in a bad way)\n\nAnd I totally agree with lfy@ that we should not design tests on top of something inherently flaky.",
+      "parentUuid": "4a4dbe85_cd4d7fbf",
+      "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
