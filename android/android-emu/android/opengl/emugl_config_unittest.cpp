@@ -145,22 +145,6 @@ TEST(EmuglConfig, init) {
         EXPECT_STREQ("GPU emulation enabled using 'mesa' mode", config.status);
     }
 
-
-    {
-        EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(
-                &config, true, "vendor", "auto", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
-        EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("vendor", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'vendor' mode",
-                     config.status);
-        emuglConfig_setupEnv(&config);
-        EXPECT_TRUE(
-                strstr(System::get()->envGet("ANDROID_GLESv1_LIB").c_str(),
-                       android::opengl::kGLES12TranslatorName) != NULL);
-    }
-
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
@@ -268,7 +252,7 @@ TEST(EmuglConfig, initFromUISetting) {
             EXPECT_STREQ("angle_indirect", config.backend);
             break;
         case 2:
-            EXPECT_STREQ("angle9", config.backend);
+            EXPECT_STREQ("angle_indirect", config.backend);
             break;
         case 3:
             EXPECT_STREQ("swiftshader_indirect", config.backend);
@@ -317,30 +301,10 @@ TEST(EmuglConfig, initGLESv2Only) {
                 &config, true, "angle", "auto", 0, false, false, false,
                 WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
         EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("angle", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
+        EXPECT_STREQ("angle_indirect", config.backend);
+        EXPECT_STREQ("GPU emulation enabled using 'angle_indirect' mode",
                      config.status);
         emuglConfig_setupEnv(&config);
-        EXPECT_TRUE(
-                strstr(System::get()->envGet("ANDROID_GLESv1_LIB").c_str(),
-                       android::opengl::kGLES12TranslatorName) != NULL);
-    }
-
-    makeLibSubFile(myDir, GLESv1LibPath.c_str());
-
-    {
-        EmuglConfig config;
-        EXPECT_TRUE(emuglConfig_init(
-                &config, true, "angle", "auto", 0, false, false, false,
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
-        EXPECT_TRUE(config.enabled);
-        EXPECT_STREQ("angle", config.backend);
-        EXPECT_STREQ("GPU emulation enabled using 'angle' mode",
-                     config.status);
-        emuglConfig_setupEnv(&config);
-        EXPECT_FALSE(
-                strstr(System::get()->envGet("ANDROID_GLESv1_LIB").c_str(),
-                       android::opengl::kGLES12TranslatorName) != NULL);
     }
 }
 

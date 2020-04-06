@@ -38,7 +38,6 @@
 #endif
 
 static emugl::SharedLibrary *s_gles1_lib = NULL;
-static emugl::SharedLibrary *s_underlying_gles2_lib = NULL;
 
 // An unimplemented function which prints out an error message.
 // To make it consistent with the guest, all GLES1 functions not supported by
@@ -101,7 +100,6 @@ static return_type gles1_dummy_##func_name signature { \
 #endif
 
 LIST_GLES1_FUNCTIONS(DEFINE_DUMMY_FUNCTION, DEFINE_DUMMY_EXTENSION_FUNCTION);
-LIST_GLES12_TR_FUNCTIONS(DEFINE_DUMMY_FUNCTION);
 
 //
 // This function is called only once during initialiation before
@@ -134,8 +132,6 @@ bool gles1_dispatch_init_from_static(GLESv1Dispatch* dispatch_table) {
 
 bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
     if (dispatch_table->initialized) return true;
-
-    dispatch_table->underlying_gles2_api = NULL;
 
     const char* useStatic = getenv("ANDROID_EMU_STATIC_TRANSLATOR");
     if (useStatic) {
@@ -180,50 +176,6 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
 
         DPRINT("successful");
 
-        LIST_GLES12_TR_FUNCTIONS(ASSIGN_DUMMY);
-
-        // If we are using the translator,
-        // import the gles1->2 translator dll
-        if (strstr(libName, "GLES12Translator")) {
-
-            DPRINT("trying to assign gles12-specific functions");
-            LIST_GLES12_TR_FUNCTIONS(LOOKUP_SYMBOL);
-            DPRINT("hopefully, successfully assigned "
-                   "12tr-specific functions...");
-
-            DPRINT("Now creating the underlying api");
-            UnderlyingApis* gles2api =
-                (UnderlyingApis*)dispatch_table->create_underlying_api();
-            dispatch_table->underlying_gles2_api = gles2api;
-
-            DPRINT("api ptr:%p", dispatch_table->underlying_gles2_api);
-
-#define SET_UNDERLYING_GLES2_FUNC(rett, function_name, sig, callargs) do { \
-    dispatch_table->underlying_gles2_api->angle-> function_name = \
-        reinterpret_cast< function_name ## _t >( \
-                s_underlying_gles2_lib->findSymbol(#function_name)); \
-} while(0);
-
-            DPRINT("trying to initialize GLESv1->2 translation");
-            const char* underlying_gles2_lib_name =
-                getenv("ANDROID_GLESv2_LIB");
-
-            if (!underlying_gles2_lib_name) {
-                underlying_gles2_lib_name = DEFAULT_UNDERLYING_GLES_V2_LIB;
-            }
-            s_underlying_gles2_lib =
-                emugl::SharedLibrary::open(underlying_gles2_lib_name,
-                                           error, sizeof(error));
-            if (!s_underlying_gles2_lib) {
-                DPRINT("Could not load underlying gles2 lib %s [%s]",
-                        libName, error);
-                return false;
-            }
-            DPRINT("done trying to get gles2 lib");
-
-            LIST_GLES2_FUNCTIONS(SET_UNDERLYING_GLES2_FUNC,
-                                 SET_UNDERLYING_GLES2_FUNC);
-       }
 
        dispatch_table->initialized = true;
        return true;

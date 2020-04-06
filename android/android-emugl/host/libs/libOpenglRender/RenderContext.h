@@ -57,9 +57,6 @@ public:
     // Retrieve host EGLContext value.
     EGLContext getEGLContext() const { return mContext; }
 
-    // Retrieve emulated GLES1 context.
-    void* getEmulatedGLES1Context() const { return mEmulatedGLES1Context; }
-
     // Return the GLES version it is trying to emulate in this context.
     // This can be different from the underlying version when using
     // GLES12Translator.
@@ -95,7 +92,6 @@ private:
     EGLContext mContext;
     HandleType mHndl;
     GLESApi mVersion;
-    void* mEmulatedGLES1Context;
     GLDecoderContextData mContextData;
 };
 

@@ -107,8 +107,6 @@ if(NOT WINDOWS)
                           GLES_V2_translator)
   android_copy_shared_lib(emugl_combined_unittests GLES_CM_translator
                           GLES_CM_translator)
-  android_copy_shared_lib(emugl_combined_unittests GLES12Translator
-                          GLES12Translator)
   android_copy_shared_lib(emugl_combined_unittests OpenglRender OpenglRender)
   android_copy_shared_lib(emugl_combined_unittests gralloc.ranchu
                           gralloc.ranchu)

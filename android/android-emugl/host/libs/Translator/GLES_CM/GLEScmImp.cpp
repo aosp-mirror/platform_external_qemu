@@ -2314,7 +2314,7 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
         // underlying texture of the img
         GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
         if (prevFB != rbData->attachedFB) {
-            if (isCoreProfile()) {
+            if (isCoreProfile() || isGles2Gles()) {
                 ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER,
                         rbData->attachedFB);
             } else {
@@ -2322,7 +2322,7 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
                         rbData->attachedFB);
             }
         }
-        if (isCoreProfile()) {
+        if (isCoreProfile() || isGles2Gles()) {
             ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER,
                     rbData->attachedPoint,
                     GL_TEXTURE_2D,
@@ -2336,7 +2336,7 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
                     0);
         }
         if (prevFB != rbData->attachedFB) {
-            if (isCoreProfile()) {
+            if (isCoreProfile() || isGles2Gles()) {
                 ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER,
                                                     prevFB);
             } else {
@@ -2386,7 +2386,7 @@ GL_API GLboolean GL_APIENTRY glIsRenderbufferOES(GLuint renderbuffer) {
                        ? GL_TRUE
                        : GL_FALSE;
     }
-    if (isCoreProfile()) {
+    if (isCoreProfile() || isGles2Gles()) {
         return ctx->dispatcher().glIsRenderbuffer(renderbuffer);
     } else {
         return ctx->dispatcher().glIsRenderbufferEXT(renderbuffer);
@@ -2414,7 +2414,7 @@ GL_API void GLAPIENTRY glBindRenderbufferOES(GLenum target, GLuint renderbuffer)
                     ? ctx->shareGroup()->getGlobalName(
                               NamedObjectType::RENDERBUFFER, renderbuffer)
                     : 0;
-    if (isCoreProfile()) {
+    if (isCoreProfile() || isGles2Gles()) {
         ctx->dispatcher().glBindRenderbuffer(target,globalBufferName);
     } else {
         ctx->dispatcher().glBindRenderbufferEXT(target,globalBufferName);
@@ -2549,7 +2549,7 @@ GL_API GLboolean GLAPIENTRY glIsFramebufferOES(GLuint framebuffer) {
                        ? GL_TRUE
                        : GL_FALSE;
     }
-    if (isCoreProfile()) {
+    if (isCoreProfile() || isGles2Gles()) {
         return ctx->dispatcher().glIsFramebuffer(framebuffer);
     } else {
         return ctx->dispatcher().glIsFramebufferEXT(framebuffer);
@@ -2573,7 +2573,7 @@ GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
             (framebuffer != 0)
                     ? ctx->getFBOGlobalName(framebuffer)
                     : ctx->getDefaultFBOGlobalName();
-    if (isCoreProfile()) {
+    if (isCoreProfile() || isGles2Gles()) {
         ctx->dispatcher().glBindFramebuffer(target,globalBufferName);
     } else {
         ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
@@ -2704,7 +2704,7 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
         }
     }
 
-    if (isCoreProfile()) {
+    if (isCoreProfile() || isGles2Gles()) {
         ctx->dispatcher().glFramebufferRenderbuffer(target,attachment,renderbuffertarget,globalBufferName);
     } else {
         ctx->dispatcher().glFramebufferRenderbufferEXT(target,attachment,renderbuffertarget,globalBufferName);

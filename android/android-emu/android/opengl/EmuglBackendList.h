@@ -17,8 +17,6 @@
 namespace android {
 namespace opengl {
 
-const char kGLES12TranslatorName[] = "GLES12Translator";
-
 class EmuglBackendList {
 public:
     // Parse the content of |execDir|/<lib>/ for Emugl backends.
@@ -39,8 +37,6 @@ public:
     // Convert the name of an Emugl backend into the path of the
     // corresponding sub-directory, if it exits, or NULL otherwise.
     std::string getLibDirPath(const char* name);
-
-    std::string getGLES12TranslatorLibName();
 
     // List of supported Emugl shared libraries.
     enum Library {
