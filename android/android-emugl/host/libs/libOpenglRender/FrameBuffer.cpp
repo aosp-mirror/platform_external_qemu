@@ -1873,28 +1873,6 @@ bool FrameBuffer::bindContext(HandleType p_context,
         return false;
     }
 
-    if (ctx) {
-        if (ctx.get()->getEmulatedGLES1Context()) {
-            DBG("%s: found emulated gles1 context @ %p\n", __FUNCTION__,
-                ctx.get()->getEmulatedGLES1Context());
-            s_gles1.set_current_gles_context(
-                    ctx.get()->getEmulatedGLES1Context());
-            DBG("%s: set emulated gles1 context current in thread info\n",
-                __FUNCTION__);
-
-            if (draw.get() == NULL) {
-                DBG("%s: setup make current (null draw surface)\n",
-                    __FUNCTION__);
-                s_gles1.make_current_setup(0, 0);
-            } else {
-                DBG("%s: setup make current (draw surface %ux%u)\n",
-                    __FUNCTION__, draw->getWidth(), draw->getHeight());
-                s_gles1.make_current_setup(draw->getWidth(), draw->getHeight());
-            }
-            DBG("%s: set up the emulated gles1 context's info\n", __FUNCTION__);
-        }
-    }
-
     //
     // Bind the surface(s) to the context
     //

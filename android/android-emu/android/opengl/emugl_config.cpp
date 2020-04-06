@@ -258,6 +258,14 @@ bool emuglConfig_init(EmuglConfig* config,
         return true;
     }
 
+    if (!strcmp("angle", gpu_mode)) {
+        gpu_mode = "angle_indirect";
+    }
+
+    if (!strcmp("swiftshader", gpu_mode)) {
+        gpu_mode = "swiftshader_indirect";
+    }
+
     if (!bitness) {
         bitness = System::get()->getProgramBitness();
     }
@@ -287,7 +295,7 @@ bool emuglConfig_init(EmuglConfig* config,
                 setCurrentRenderer(gpu_mode);
                 return true;
             }
-            D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
+            D("%s: 'swiftshader_indirect' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader_indirect";
         }
         else if (!has_auto_no_window && (no_window || (blacklisted && !hasUiPreference))) {
@@ -326,7 +334,7 @@ bool emuglConfig_init(EmuglConfig* config,
                     gpu_mode = "angle_indirect";
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
-                    gpu_mode = "angle9";
+                    gpu_mode = "angle_indirect";
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
                     gpu_mode = "swiftshader_indirect";
@@ -450,8 +458,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
                         "Using GLESv2 only.\n",
                         config->backend);
         // A GLESv1 lib is optional---we can deal with a GLESv2 only
-        // backend by using a GLESv1->GLESv2 emulation library.
-        system->envSet("ANDROID_GLESv1_LIB", sBackendList->getGLES12TranslatorLibName().c_str());
+        // backend by using CoreProfileEngine in the Translator.
     }
 
     if (sBackendList->getBackendLibPath(
