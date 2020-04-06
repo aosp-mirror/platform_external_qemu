@@ -12,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <memory>                                // for unique_ptr, shared_ptr
+#include <chrono>                                // for seconds
+#include <memory>                                // for shared_ptr, unique_ptr
 #include <string>                                // for string
 #include <vector>                                // for vector
 
 #include "android/console.h"                     // for AndroidConsoleAgents
 #include "grpcpp/security/server_credentials.h"  // for ServerCredentials
-#include "grpcpp/impl/codegen/service_type.h"
+#include "grpcpp/impl/codegen/service_type.h"    // for Service
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
-#else
 #endif
-
-
 
 namespace android {
 namespace emulation {
@@ -81,6 +79,11 @@ public:
 
     Builder& withService(::grpc::Service* service);
 
+    // Shutdown the emulator after timeout seconds of gRPC inactivity.
+    // The timeout should be at least 1 second, otherwise it will
+    // be ignored.
+    Builder& withIdleTimeout(std::chrono::seconds timeout);
+
     // Returns the fully configured and running service, or nullptr if
     // construction failed.
     std::unique_ptr<EmulatorControllerService> build();
@@ -89,6 +92,7 @@ private:
     int port();
     const AndroidConsoleAgents* mAgents;
     int mPort{-1};
+    std::chrono::seconds mTimeout{0};
     std::vector<std::shared_ptr<::grpc::Service>> mServices;
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
     std::string mBindAddress{"127.0.0.1"};
