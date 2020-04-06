@@ -40,8 +40,6 @@ struct GLESv1Dispatch {
         func_name ## _t func_name;
     LIST_GLES1_FUNCTIONS(GLES1_DISPATCH_DECLARE_POINTER,
                          GLES1_DISPATCH_DECLARE_POINTER)
-    LIST_GLES12_TR_FUNCTIONS(GLES1_DISPATCH_DECLARE_POINTER)
-    UnderlyingApis* underlying_gles2_api;
 
     bool initialized = false;
 };

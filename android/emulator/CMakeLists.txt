@@ -127,7 +127,6 @@ android_license(TARGET "EMULATOR_FEATURE_DEPENDENCIES" LIBNAME None SPDX None
 android_copy_shared_lib(emulator EGL_translator EGL_translator)
 android_copy_shared_lib(emulator GLES_V2_translator GLES_V2_translator)
 android_copy_shared_lib(emulator GLES_CM_translator GLES_CM_translator)
-android_copy_shared_lib(emulator GLES12Translator GLES12Translator)
 android_copy_shared_lib(emulator OpenglRender OpenglRender)
 
 # And set the os specific properties
