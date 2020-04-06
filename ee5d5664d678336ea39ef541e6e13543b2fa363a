@@ -132,6 +132,24 @@
       "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a4dbe85_cd4d7fbf",
+        "filename": "android/android-emu/android/base/async/CallbackRegistry_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-06T23:21:11Z",
+      "side": 1,
+      "message": "while (system_clock::now() \u003c until) {\nthis pattern\nits really easy for this to miss callbacks\nwe can\u0027t design the test around something that is inherently flaky with yield/sleep being used in the sender thread to control how long a callback is registered\ntheres always going to be some reording of operationst hat makes it flake",
+      "parentUuid": "450cedeb_600dfd08",
+      "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
