@@ -91,6 +91,47 @@
       "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "96475c6b_b3c02557",
+        "filename": "android/android-emu/android/base/async/CallbackRegistry_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-06T23:19:24Z",
+      "side": 1,
+      "message": "+1",
+      "parentUuid": "e1243981_f6715e82",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 30
+      },
+      "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "450cedeb_600dfd08",
+        "filename": "android/android-emu/android/base/async/CallbackRegistry_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-06T23:19:24Z",
+      "side": 1,
+      "message": "it seems easy for this loop to miss that there are callbacks. Why not use a MessageChannel to pass from the reg_unreg thread to the processors and we can then be exactly sure how many times the callback was called?",
+      "revId": "ee5d5664d678336ea39ef541e6e13543b2fa363a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
