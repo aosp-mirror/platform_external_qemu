@@ -90,7 +90,6 @@ void CallbackRegistry::invokeCallbacks() {
         MessageAvailableCallback callback;
     };
 
-    std::vector<RegisteredForwarder> toRun;
 
     {
         AutoLock lock(mLock);
@@ -99,13 +98,10 @@ void CallbackRegistry::invokeCallbacks() {
                     .data = it.first,
                     .callback = it.second,
             };
-            toRun.push_back(rf);
+        rf.callback(rf.data);
         }
     }
 
-    for (const auto& rf : toRun) {
-        rf.callback(rf.data);
-    }
 
     mProcessing--;
     mLock.lock();

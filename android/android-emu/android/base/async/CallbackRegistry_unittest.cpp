@@ -14,12 +14,14 @@
 
 #include "android/base/async/CallbackRegistry.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // for Message, TestPartResult, EXP...
 
-#include <chrono>
-#include <thread>
+#include <chrono>  // for operator<, operator+, system...
+#include <string>  // for string
+#include <thread>  // for thread
+#include <vector>  // for vector
 
-#include "android/base/system/System.h"
+#include "android/base/system/System.h"  // for System
 
 static std::unordered_map<void*, int> sInvokeCnt{};
 
@@ -65,25 +67,30 @@ TEST_F(CallbackRegistryTest, no_increase_after_remove) {
 }
 
 void called_by_foo(void* opaque) {
-    std::string* incoming = reinterpret_cast<std::string*>(opaque);
-    EXPECT_EQ(*incoming, "foo");
+    std::string incoming = *reinterpret_cast<std::string*>(opaque);
+    EXPECT_EQ(incoming, "foo");
 }
 
 TEST_F(CallbackRegistryTest, no_calls_after_unregister) {
     EXPECT_EQ(sInvokeCnt.size(), 0);
     auto until = system_clock::now() + std::chrono::milliseconds(100);
-    std::thread invokeCallbacks([=]() {
-        while (system_clock::now() < until)
+    int mReads = 0;
+    int mSends = 0;
+    std::thread invokeCallbacks([=, &mReads]() {
+        while (system_clock::now() < until) {
             mReg.invokeCallbacks();
+            mReads++;
+        }
     });
-    std::thread reg_unreg([=]() {
+    std::thread reg_unreg([=, &mSends]() {
         std::string foo = "foo";
         while (system_clock::now() < until) {
             foo[2] = 'o';
             mReg.registerCallback(called_by_foo, &foo);
-            System::get()->yield();
+            System::get()->sleepMs(1);
+            // Make sure we do not overrun the send queue.
             mReg.unregisterCallback(&foo);
-
+            mSends += 2;
             // Callback should never been called after unregister.
             // if it does, it might see fox instead of foo.
             foo[2] = 'x';
@@ -93,26 +100,33 @@ TEST_F(CallbackRegistryTest, no_calls_after_unregister) {
 
     invokeCallbacks.join();
     reg_unreg.join();
+    EXPECT_GT(mReads, mSends);
 }
 
 TEST_F(CallbackRegistryTest, no_calls_after_unregister_with_many_processors) {
     EXPECT_EQ(sInvokeCnt.size(), 0);
     auto until = system_clock::now() + std::chrono::milliseconds(100);
     std::vector<std::thread> processors;
+    std::atomic_int mReads{0};
+    int mSends = 0;
+    for (int i = 0; i < 5; i++) {
+        processors.emplace_back([=, &mReads]() {
+            while (system_clock::now() < until) {
+                mReg.invokeCallbacks();
+                mReads++;
+            }
+        });
+    }
 
-    processors.emplace_back([=]() {
-        while (system_clock::now() < until)
-            mReg.invokeCallbacks();
-    });
-
-    std::thread reg_unreg([=]() {
+    std::thread reg_unreg([=, &mSends]() {
         std::string foo = "foo";
         while (system_clock::now() < until) {
             foo[2] = 'o';
             mReg.registerCallback(called_by_foo, &foo);
-            System::get()->yield();
+            // Make sure we do not overrun the send queue.
+            System::get()->sleepMs(1);
             mReg.unregisterCallback(&foo);
-
+            mSends += 2;
             // Callback should never been called after unregister.
             // if it does, it might see fox instead of foo.
             foo[2] = 'x';
@@ -124,6 +138,7 @@ TEST_F(CallbackRegistryTest, no_calls_after_unregister_with_many_processors) {
     for (auto& t : processors) {
         t.join();
     }
+    EXPECT_GT(mReads, mSends);
 }
 
 TEST_F(CallbackRegistryTest, safe_exit_when_processing_stops) {
