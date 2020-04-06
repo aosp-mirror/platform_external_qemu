@@ -344,11 +344,20 @@ bool qemu_android_emulation_setup() {
         return false;
     }
 
-    // Only proceed if flag is there
-    int grpc;
-    if (android_cmdLineOptions->grpc &&
-        sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
-        qemu_setup_grpc();
+    bool isRunningFuchsia = !android_qemu_mode;
+    if (isRunningFuchsia) {
+        // For fuchsia we only enable thr gRPC port if it is explicitly requested.
+        int grpc;
+        if (android_cmdLineOptions->grpc &&
+            sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
+            qemu_setup_grpc();
+        }
+    } else {
+        // If you explicitly request adb & telnet port, you must explicitly
+        // set the grpc port.
+        if (android_op_ports == nullptr || android_cmdLineOptions->grpc) {
+            qemu_setup_grpc();
+        }
     }
 
     // We are sharing video, time to launch the shared memory recorder.

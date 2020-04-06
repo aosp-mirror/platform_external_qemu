@@ -1141,7 +1141,8 @@ help_ports(stralloc_t*  out)
 
     "  This is a very special option that should probably *not* be used by typical\n"
     "  developers using the Android SDK (use '-port <port>' instead), because the\n"
-    "  corresponding instance is probably not going to be seen from adb. Its\n"
+    "  corresponding instance is probably not going to be seen from adb. \n"
+    "  It requires you to explicitly enable the gRPC port if you need it. Its\n"
     "  purpose is to use the emulator in very specific network configurations.\n\n"
 
     "    <consoleport> is the TCP port used to bind the control console\n"
