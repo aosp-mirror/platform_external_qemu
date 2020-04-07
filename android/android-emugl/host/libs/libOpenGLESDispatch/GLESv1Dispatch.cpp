@@ -106,13 +106,6 @@ LIST_GLES1_FUNCTIONS(DEFINE_DUMMY_FUNCTION, DEFINE_DUMMY_EXTENSION_FUNCTION);
 // any thread has been created - hence it should NOT be thread safe.
 //
 
-//
-// init dummy GLESv1 dispatch table
-//
-#define ASSIGN_DUMMY(return_type,function_name,signature,callargs) do { \
-        dispatch_table-> function_name = gles1_dummy_##function_name; \
-        } while(0);
-
 // macro to assign from static library
 #define ASSIGN_GLES1_STATIC(return_type,function_name,signature,callargs)\
     dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
@@ -121,65 +114,13 @@ LIST_GLES1_FUNCTIONS(DEFINE_DUMMY_FUNCTION, DEFINE_DUMMY_EXTENSION_FUNCTION);
         dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
             s_egl.eglGetProcAddress(#function_name)); \
 
-bool gles1_dispatch_init_from_static(GLESv1Dispatch* dispatch_table) {
+bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
     if (dispatch_table->initialized) return true;
 
     LIST_GLES1_FUNCTIONS(ASSIGN_GLES1_STATIC, ASSIGN_GLES1_STATIC);
 
     dispatch_table->initialized = true;
     return true;
-}
-
-bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
-    if (dispatch_table->initialized) return true;
-
-    const char* useStatic = getenv("ANDROID_EMU_STATIC_TRANSLATOR");
-    if (useStatic) {
-        return gles1_dispatch_init_from_static(dispatch_table);
-    }
-
-    const char* libName = getenv("ANDROID_GLESv1_LIB");
-    if (!libName) {
-        libName = DEFAULT_GLES_CM_LIB;
-    }
-
-    // If emugl_config has detected specifically a backend
-    // that supports only GLESv2, set GLESv1 entry points
-    // to the dummy functions.
-    if (!strcmp(libName, "<gles2_only_backend>")) {
-
-        LIST_GLES1_FUNCTIONS(ASSIGN_DUMMY,ASSIGN_DUMMY)
-
-        DPRINT("assigning dummies because <gles2_only_backend>");
-        dispatch_table->initialized = true;
-        return true;
-    } else {
-
-        char error[256];
-        s_gles1_lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
-        if (!s_gles1_lib) {
-            return gles1_dispatch_init_from_static(dispatch_table);
-        }
-
-        //
-        // init the GLES dispatch table
-        //
-#define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) do { \
-        dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-                s_gles1_lib->findSymbol(#function_name)); \
-            if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
-            dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-                s_egl.eglGetProcAddress(#function_name)); \
-        } while(0); \
-
-        LIST_GLES1_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
-
-        DPRINT("successful");
-
-
-       dispatch_table->initialized = true;
-       return true;
-    }
 }
 
 //

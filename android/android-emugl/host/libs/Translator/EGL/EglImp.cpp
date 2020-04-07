@@ -14,14 +14,9 @@
 * limitations under the License.
 */
 #ifdef _WIN32
-#ifdef STATIC_TRANSLATOR
 #undef EGLAPI
 #define EGLAPI
 #define EGLAPIENTRY
-#else
-#undef EGLAPI
-#define EGLAPI __declspec(dllexport)
-#endif
 #endif
 
 #include <GLcommon/GLESmacros.h>
@@ -57,10 +52,8 @@
 
 //declarations
 
-#ifdef STATIC_TRANSLATOR
 namespace translator {
 namespace egl {
-#endif
 
 ImagePtr getEGLImage(unsigned int imageId);
 GLEScontext* getGLESContext();
@@ -73,10 +66,8 @@ static bool bindAuxiliaryContext(
     EGLContext context, EGLSurface surface);
 static bool unbindAuxiliaryContext();
 
-#ifdef STATIC_TRANSLATOR
 } // namespace translator
 } // namespace egl
-#endif
 
 #define tls_thread  EglThreadInfo::get()
 
@@ -93,7 +84,6 @@ void initGlobalInfo()
 }
 
 static const EGLiface s_eglIface = {
-#ifdef STATIC_TRANSLATOR
     .getGLESContext = translator::egl::getGLESContext,
     .getEGLImage = translator::egl::getEGLImage,
     .eglGetGlLibrary = translator::egl::getGlLibrary,
@@ -101,15 +91,6 @@ static const EGLiface s_eglIface = {
     .unbindAndDestroyAuxiliaryContext = translator::egl::unbindAndDestroyAuxiliaryContext,
     .bindAuxiliaryContext = translator::egl::bindAuxiliaryContext,
     .unbindAuxiliaryContext = translator::egl::unbindAuxiliaryContext,
-#else
-    .getGLESContext = getGLESContext,
-    .getEGLImage = getEGLImage,
-    .eglGetGlLibrary = getGlLibrary,
-    .createAndBindAuxiliaryContext = createAndBindAuxiliaryContext,
-    .unbindAndDestroyAuxiliaryContext = unbindAndDestroyAuxiliaryContext,
-    .bindAuxiliaryContext = bindAuxiliaryContext,
-    .unbindAuxiliaryContext = unbindAuxiliaryContext,
-#endif
 };
 
 static void initGLESx(GLESVersion version) {
@@ -123,12 +104,8 @@ static void initGLESx(GLESVersion version) {
 
 /*****************************************  supported extensions  ***********************************************************************/
 
-#ifdef STATIC_TRANSLATOR
 namespace translator {
 namespace egl {
-#else
-extern "C" {
-#endif
 
 EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
@@ -163,17 +140,11 @@ EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
 EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
 EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
 
-#ifdef STATIC_TRANSLATOR
 } // namespace translator
 } // namespace egl
-#else
-}  // extern "C"
-#endif
 
-#ifdef STATIC_TRANSLATOR
 namespace translator {
 namespace egl {
-#endif
 
 static const ExtensionDescriptor s_eglExtensions[] = {
         {"eglCreateImageKHR" ,
@@ -207,10 +178,8 @@ static const ExtensionDescriptor s_eglExtensions[] = {
 static const int s_eglExtensionsSize =
         sizeof(s_eglExtensions) / sizeof(ExtensionDescriptor);
 
-#ifdef STATIC_TRANSLATOR
 } // namespace translator
 } // namespace egl
-#endif
 
 /****************************************************************************************************************************************/
 //macros for accessing global egl info & tls objects
@@ -218,10 +187,8 @@ static const int s_eglExtensionsSize =
 extern "C" {
 }
 
-#ifdef STATIC_TRANSLATOR
 namespace translator {
 namespace egl {
-#endif
 
 #define CURRENT_THREAD() do {} while (0);
 
@@ -305,10 +272,8 @@ EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
     return dpy;
 }
 
-#ifdef STATIC_TRANSLATOR
 } // namespace translator
 } // namespace egl
-#endif
 
 #define TRANSLATOR_GETIFACE_NAME "__translator_getIfaces"
 
@@ -327,7 +292,6 @@ static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
                                                 char* error,
                                                 size_t errorSize) {
 
-#ifdef STATIC_TRANSLATOR
     if (!strcmp(libName, LIB_GLES_CM_NAME)) {
         return STATIC_TRANSLATOR_GETIFACE_NAME_GLES_CM;
     }
@@ -337,28 +301,10 @@ static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
     }
 
     return 0;
-
-#else
-    emugl::SharedLibrary* libGLES = emugl::SharedLibrary::open(
-            libName, error, errorSize);
-    if (!libGLES) {
-        return NULL;
-    }
-    __translator_getGLESIfaceFunc func =  (__translator_getGLESIfaceFunc)
-            libGLES->findSymbol(TRANSLATOR_GETIFACE_NAME);
-    if (!func) {
-        snprintf(error, errorSize, "Missing symbol %s",
-                 TRANSLATOR_GETIFACE_NAME);
-        return NULL;
-    }
-    return func;
-#endif
 }
 
-#ifdef STATIC_TRANSLATOR
 namespace translator {
 namespace egl {
-#endif
 
 EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, EGLint *minor) {
     MEM_TRACE("EMUGL");
@@ -1367,18 +1313,10 @@ EGLAPI EGLBoolean EGLAPIENTRY eglReleaseThread(void) {
     MEM_TRACE("EMUGL");
     ThreadInfo* thread  = getThreadInfo();
     EglDisplay* dpy     = static_cast<EglDisplay*>(thread->eglDisplay);
-#ifdef STATIC_TRANSLATOR
     return translator::egl::eglMakeCurrent(dpy,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
-#else
-    return ::eglMakeCurrent(dpy,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
-#endif
 }
 
-#ifdef STATIC_TRANSLATOR
 EGLAPI void* EGLAPIENTRY
-#else
-EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY 
-#endif
 eglGetProcAddress(const char *procname){
     __eglMustCastToProperFunctionPointerType retVal = NULL;
 
@@ -1395,11 +1333,7 @@ eglGetProcAddress(const char *procname){
         // function table.
         retVal = ClientAPIExts::getProcAddress(procname);
     }
-#ifdef STATIC_TRANSLATOR
     return (void*)retVal;
-#else
-    return retVal;
-#endif
 }
 
 /************************** KHR IMAGE *************************************************************/
@@ -1800,11 +1734,7 @@ static const GLint kAuxiliaryContextAttribsCore[] = {
     EGL_NONE
 };
 
-#ifdef STATIC_TRANSLATOR
 #define NAMESPACED_EGL(f) translator::egl::f
-#else
-#define NAMESPACED_EGL(f) f
-#endif
 
 static bool createAndBindAuxiliaryContext(EGLContext* context_out, EGLSurface* surface_out) {
     // create the context
@@ -1915,7 +1845,5 @@ EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
 }
 
 
-#ifdef STATIC_TRANSLATOR
 } // namespace translator
 } // namespace egl
-#endif

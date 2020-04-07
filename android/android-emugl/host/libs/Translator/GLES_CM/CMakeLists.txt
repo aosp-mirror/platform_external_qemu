@@ -6,8 +6,6 @@ android_add_library(
       GLEScmValidate.cpp)
   target_compile_options(GLES_CM_translator_static PRIVATE -fvisibility=hidden -Wno-macro-redefined)
 
-target_compile_definitions(GLES_CM_translator_static PRIVATE -DSTATIC_TRANSLATOR=1)
-
 if (OPTION_GFXSTREAM_BACKEND)
     target_link_libraries(GLES_CM_translator_static PUBLIC GLcommon android-emu-shared
                                                   emugl_common)
