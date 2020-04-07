@@ -68,13 +68,22 @@ if(NOT WINDOWS_MSVC_X86_64)
   target_link_libraries(android-grpc PRIVATE android-waterfall)
 endif()
 
+protobuf_generate_grpc_cpp(
+  SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
+  SOURCES test_echo_service.proto OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  GENERATED ECHO_SERVICE_GRPC_SRC)
+
 android_add_test(
   TARGET android-grpc_unittest
   SRC # cmake-format: sortable
+      ${ECHO_SERVICE_GRPC_SRC}
+      android/emulation/control/GrpcServices_unittest.cpp
       android/emulation/control/logcat/LogcatParser_unittest.cpp
       android/emulation/control/logcat/RingStreambuf_unittest.cpp
       android/emulation/control/snapshot/TarStream_unittest.cpp
       android/emulation/control/utils/EventWaiter_unittest.cpp
+      android/emulation/control/test/TestEchoService.cpp
+      android/emulation/control/test/CertificateFactory.cpp
   DARWIN android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp
   LINUX android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp)
 target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++
