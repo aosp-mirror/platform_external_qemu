@@ -35,9 +35,9 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/control/RtcBridge.h"
+#include "android/emulation/control/interceptor/IdleInterceptor.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/interceptor/MetricsInterceptor.h"
-#include "android/emulation/control/interceptor/IdleInterceptor.h"
 #include "grpcpp/server_builder_impl.h"
 #include "grpcpp/server_impl.h"
 
@@ -63,16 +63,13 @@ public:
 
     EmulatorControllerServiceImpl(
             int port,
-            std::string cert,
             std::vector<std::shared_ptr<Service>> services,
             grpc::Server* server)
         : mPort(port),
-          mCert(cert),
           mRegisteredServices(services),
           mServer(server) {}
 
     int port() override { return mPort; }
-    std::string publicCert() override { return mCert; }
 
 private:
     std::unique_ptr<grpc::Server> mServer;
@@ -99,22 +96,20 @@ Builder& Builder::withService(Service* service) {
     return *this;
 }
 
-Builder& Builder::withCertAndKey(std::string certfile,
-                                 std::string privateKeyFile) {
-    if (!System::get()->pathExists(certfile)) {
-        LOG(WARNING) << "Cannot find certfile: " << certfile
-                     << " security will be disabled.";
+Builder& Builder::withCertAndKey(const char* certfile,
+                                 const char* privateKeyFile,
+                                 const char* caFile) {
+    if (!certfile) {
+        LOG(WARNING) << "No certfile, security disabled";
         return *this;
     }
 
-    if (!!System::get()->pathExists(privateKeyFile)) {
-        LOG(WARNING) << "Cannot find private key file: " << privateKeyFile
-                     << " security will be disabled, the emulator might be "
-                        "publicly accessible!";
+    if (!privateKeyFile) {
+        LOG(WARNING) << "No private key, security disabled";
         return *this;
     }
+
     mCertfile = certfile;
-
     std::ifstream key_file(privateKeyFile);
     std::string key((std::istreambuf_iterator<char>(key_file)),
                     std::istreambuf_iterator<char>());
@@ -126,6 +121,17 @@ Builder& Builder::withCertAndKey(std::string certfile,
     grpc::SslServerCredentialsOptions::PemKeyCertPair keycert = {key, cert};
     grpc::SslServerCredentialsOptions ssl_opts;
     ssl_opts.pem_key_cert_pairs.push_back(keycert);
+
+    // Register the certificate authority if one exists.
+    if (caFile) {
+        std::ifstream ca_file(caFile);
+        std::string ca((std::istreambuf_iterator<char>(ca_file)),
+                       std::istreambuf_iterator<char>());
+        ssl_opts.pem_root_certs = ca;
+        ssl_opts.client_certificate_request =
+                GRPC_SSL_REQUEST_AND_REQUIRE_CLIENT_CERTIFICATE_AND_VERIFY;
+    }
+
     mCredentials = grpc::SslServerCredentials(ssl_opts);
     return *this;
 }
@@ -157,7 +163,7 @@ Builder& Builder::withPortRange(int start, int end) {
 }  // namespace control
 
 std::unique_ptr<EmulatorControllerService> Builder::build() {
-    if (mAgents == nullptr || mPort == -1) {
+    if (mPort == -1) {
         // No agents, or no port was found.
         LOG(INFO) << "No agents, or valid port was found";
         return nullptr;
@@ -177,8 +183,9 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     creators.emplace_back(std::make_unique<StdOutLoggingInterceptorFactory>());
     creators.emplace_back(std::make_unique<MetricsInterceptorFactory>());
 
-    if (mTimeout.count() > 0) {
-        creators.emplace_back(std::make_unique<IdleInterceptorFactory>(mTimeout, mAgents));
+    if (mTimeout.count() > 0 && mAgents != nullptr) {
+        creators.emplace_back(
+                std::make_unique<IdleInterceptorFactory>(mTimeout, mAgents));
     }
 
     builder.experimental().SetInterceptorCreators(std::move(creators));
@@ -190,7 +197,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     fprintf(stderr, "Started GRPC server at %s\n", server_address.c_str());
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(
-                    mPort, mCertfile, std::move(mServices), service.release()));
+                    mPort, std::move(mServices), service.release()));
 }
 }  // namespace control
 }  // namespace emulation

@@ -63,7 +63,7 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 // "--verbose"
-                "--gtest_repeat=-1", "--gtest_break_on_failure", "--gtest_filter=CallbackRegistryTest.no_calls_after_unregister_with_many_processors"
+              //  "--gtest_repeat=0", "--gtest_break_on_failure"
             ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
@@ -96,6 +96,10 @@
                 "@Q", // Pick the image you would like to use
                 "-grpc",
                 "8554",
+                "-grpc-tls-key",
+                "/Users/jansene/.android/key.pem",
+                "-grpc-tls-cer",
+                "/Users/jansene/.android/cert.pem"
             ],
             "linux": {
                 "env": {

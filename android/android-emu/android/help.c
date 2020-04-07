@@ -1154,11 +1154,45 @@ static void
 help_grpc(stralloc_t*  out)
 {
     PRINTF(
-    "  Enables the gRPC service to control the emulator..\n\n"
+    "  Enables the gRPC service to control the emulator.\n\n"
     "    <port> is the TCP port used to bind the gRPC service\n\n"
-    "  If the gRPC service will not be started if the port is not available on startup.\n\n");
+    "  The gRPC service will not be started if the port is not available on startup.\n\n");
 }
 
+static void
+help_grpc_tls_key(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the PEM file containing a private key for TLS.\n\n"
+    "    <pem> a PEM file containing a private key used for TLS.\n\n"
+    "  You must provide the -grpc-pem flag as well.\n\n"
+    );
+}
+
+static void
+help_grpc_tls_cer(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the given file containing a X509 certificate for TLS.\n\n"
+    "    <pem> a PEM file with a X.509 public key certificate.\n\n"
+    "  The X509 certificate can be self signed.\n\n"
+    "  You must provide the -grpc-key flag as well.\n\n"
+    );
+}
+
+static void
+help_grpc_tls_ca(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the file containing a series of certificate authorities for client validation.\n\n"
+    "    <pem> The file with a root certificate chain to use.\n\n"
+    "  This file must be a PEM encoded file with all the roots such as the one that\n"
+    "  can be downloaded from https://pki.google.com/roots.pem.\n\n"
+    "  The emulator will request and validate the client certificate.\n"
+    "  Clients with invalid certificates will be rejected.\n"
+    );
+
+}
 
 static void
 help_idle_grpc_timeout(stralloc_t*  out)

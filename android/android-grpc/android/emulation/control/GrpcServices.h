@@ -18,8 +18,9 @@
 #include <vector>                                // for vector
 
 #include "android/console.h"                     // for AndroidConsoleAgents
-#include "grpcpp/security/server_credentials.h"  // for ServerCredentials
+
 #include "grpcpp/impl/codegen/service_type.h"    // for Service
+#include "grpcpp/security/server_credentials.h"  // for ServerCredentials
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -44,10 +45,6 @@ public:
 
     // The port that the gRPC service is available on.
     virtual int port() = 0;
-
-    // The location of the public certificate that can be used by clients to
-    // authenticate to the service.
-    virtual std::string publicCert() = 0;
 };
 
 // A Factory class that is capable of constructing a proper gRPC service that
@@ -63,7 +60,9 @@ public:
     // The certificate chain and private key that should be used. Setting a
     // certificate chain and private key will enable TLS, not calling this will
     // start the service in an unsecure fashion.
-    Builder& withCertAndKey(std::string certfile, std::string privateKeyFile);
+    Builder& withCertAndKey(const char* certfile,
+                            const char* privateKeyFile,
+                            const char* certAuthority);
 
     // Enables the gRPC service that binds on the given address on the first
     // port available in the port range [startPart, endPort).

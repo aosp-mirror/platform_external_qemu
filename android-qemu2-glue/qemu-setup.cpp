@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <algorithm>
 #include <chrono>
 #include <functional>
@@ -51,7 +52,6 @@
 #include "android/base/CpuUsage.h"
 #include "android/base/Log.h"
 #include "android/base/files/MemStream.h"
-#include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
@@ -61,7 +61,6 @@
 #include "android/crashreport/detectors/CrashDetectors.h"
 #include "android/emulation/AudioCaptureEngine.h"
 #include "android/emulation/AudioOutputEngine.h"
-#include "android/emulation/ConfigDirs.h"
 #include "android/emulation/DmaMap.h"
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/emulation/VmLock.h"
@@ -95,6 +94,12 @@ extern "C" {
 #include "qemu/thread.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/sysemu.h"
+
+namespace android {
+namespace base {
+class PathUtils;
+}  // namespace base
+}  // namespace android
 
 extern char* android_op_ports;
 
@@ -287,21 +292,16 @@ int qemu_setup_grpc() {
     auto h2o = android::emulation::control::getWaterfallService(
             android_cmdLineOptions->waterfall);
     auto snapshot = android::emulation::control::getSnapshotService();
-    auto builder =
-            EmulatorControllerService::Builder()
-                    .withConsoleAgents(getConsoleAgents())
-                    .withPortRange(grpc_start, grpc_end)
-                    .withCertAndKey(
-                            PathUtils::join(
-                                    android::ConfigDirs::getUserDirectory(),
-                                    kCertFileName),
-                            PathUtils::join(
-                                    android::ConfigDirs::getUserDirectory(),
-                                    kPrivateKeyFileName))
-                    .withAddress(address)
-                    .withService(emulator)
-                    .withService(h2o)
-                    .withService(snapshot);
+    auto builder = EmulatorControllerService::Builder()
+                           .withConsoleAgents(getConsoleAgents())
+                           .withPortRange(grpc_start, grpc_end)
+                           .withCertAndKey(android_cmdLineOptions->grpc_tls_cer,
+                                           android_cmdLineOptions->grpc_tls_key,
+                                           android_cmdLineOptions->grpc_tls_ca)
+                           .withAddress(address)
+                           .withService(emulator)
+                           .withService(h2o)
+                           .withService(snapshot);
 
     int timeout = 0;
     if (android_cmdLineOptions->idle_grpc_timeout &&
@@ -318,8 +318,22 @@ int qemu_setup_grpc() {
 
     if (grpcService) {
         props["grpc.port"] = std::to_string(grpcService->port());
-        props["grpc.certificate"] = grpcService->publicCert();
         port = grpcService->port();
+
+        if (android_cmdLineOptions->grpc_tls_cer) {
+            props["grpc.server_cert"] = android_cmdLineOptions->grpc_tls_cer;
+        }
+        if (android_cmdLineOptions->grpc_tls_ca) {
+            props["grpc.ca_root"] = android_cmdLineOptions->grpc_tls_ca;
+        }
+    }
+    if (!grpcService && (android_cmdLineOptions->grpc ||
+        android_cmdLineOptions->grpc_tls_ca || android_cmdLineOptions->grpc_tls_key ||
+        android_cmdLineOptions->grpc_tls_ca)) {
+        fprintf(stderr,
+                "Failed to start grpc service, even though it was explicitly "
+                "requested.\n");
+        exit(1);
     }
 
     advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
@@ -341,7 +355,8 @@ bool qemu_android_emulation_setup() {
 
     bool isRunningFuchsia = !android_qemu_mode;
     if (isRunningFuchsia) {
-        // For fuchsia we only enable thr gRPC port if it is explicitly requested.
+        // For fuchsia we only enable thr gRPC port if it is explicitly
+        // requested.
         int grpc;
         if (android_cmdLineOptions->grpc &&
             sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
