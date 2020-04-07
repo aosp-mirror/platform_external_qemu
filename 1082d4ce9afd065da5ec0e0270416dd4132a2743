@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f513fae_3a3d97d5",
+        "filename": "android/android-emu/android/opengles.h",
+        "patchSetId": 30
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-04-07T20:44:19Z",
+      "side": 1,
+      "message": "Maybe \"const void*\"?",
+      "range": {
+        "startLine": 124,
+        "startChar": 0,
+        "endLine": 124,
+        "endChar": 4
+      },
+      "revId": "1082d4ce9afd065da5ec0e0270416dd4132a2743",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
