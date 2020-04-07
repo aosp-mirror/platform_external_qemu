@@ -92,6 +92,7 @@ set(android-emu-common
     android/emulation/address_space_shared_slots_host_memory_allocator.cpp
     android/emulation/address_space_host_media.cpp
     android/emulation/H264NaluParser.cpp
+    android/emulation/VpxFrameParser.cpp
     android/emulation/H264PingInfoParser.cpp
     android/emulation/HostmemIdMapping.cpp
     android/emulation/MediaVpxDecoder.cpp
