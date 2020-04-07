@@ -50,29 +50,17 @@
 #define GLES_CM_TRACE()
 #endif
 
-#ifdef STATIC_TRANSLATOR
 #define GLES1_NAMESPACED(f) translator::gles1::f
-#else
-#define GLES1_NAMESPACED(f) f
-#endif
 
-#ifdef STATIC_TRANSLATOR
 namespace translator {
 namespace gles1 {
-#else
-extern "C" {
-#endif
 
 GL_API void GL_APIENTRY  glFlush( void);
 GL_API void GL_APIENTRY  glFinish( void);
 GL_API GLenum GL_APIENTRY  glGetError( void);
 
-#ifdef STATIC_TRANSLATOR
 } // namespace gles1
 } // namespace translator
-#else
-} // extern "C"
-#endif
 
 extern "C" {
 
@@ -124,12 +112,8 @@ static GLESiface  s_glesIface = {
 
 static android::base::LazyInstance<GLES1Usage> gles1usages = {};
 
-#ifdef STATIC_TRANSLATOR
 namespace translator {
 namespace gles1 {
-#else
-extern "C" {
-#endif
 
 GL_API void GL_APIENTRY glBindTexture (GLenum target, GLuint texture);
 GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image);
@@ -199,12 +183,8 @@ GL_API GLenum GLAPIENTRY glCheckFramebufferStatusOES(GLenum target);
 
 GL_API void GL_APIENTRY glGenerateMipmapOES(GLenum target);
 
-#ifdef STATIC_TRANSLATOR
 } // namespace gles1
 } // namespace translator
-#else
-} // extern "C"
-#endif
 
 extern "C" {
 
@@ -245,13 +225,8 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     }
     if (!ctx->isInitialized()) {
         ctx->init();
-#ifdef STATIC_TRANSLATOR
         translator::gles1::glBindTexture(GL_TEXTURE_2D,0);
         translator::gles1::glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
-#else
-        glBindTexture(GL_TEXTURE_2D,0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
-#endif
     }
     if (ctx->needRestore()) {
         ctx->restore();
@@ -358,17 +333,9 @@ static __translatorMustCastToProperFunctionPointerType getProcAddressGles1(const
     return ret;
 }
 
-#ifdef STATIC_TRANSLATOR
 GL_APICALL GLESiface* GL_APIENTRY static_translator_glescm_getIfaces(const EGLiface* eglIface);
-#else
-GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
-#endif
 
-#ifdef STATIC_TRANSLATOR
 GLESiface* static_translator_glescm_getIfaces(const EGLiface* eglIface) {
-#else
-GLESiface* __translator_getIfaces(EGLiface* eglIface) {
-#endif
     s_eglIface = (EGLiface*)eglIface;
     return &s_glesIface;
 }
@@ -401,10 +368,8 @@ static TextureData* getTextureTargetData(GLenum target){
     return getTextureData(ctx->getTextureLocalName(target,tex));
 }
 
-#ifdef STATIC_TRANSLATOR
 namespace translator {
 namespace gles1 {
-#endif
 
 GL_API GLboolean GL_APIENTRY glIsBuffer(GLuint buffer) {
     GET_CTX_RET(GL_FALSE)
@@ -762,9 +727,7 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
     }
 }
 
-#ifdef STATIC_TRANSLATOR
 GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels);
-#endif
 
 GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) {
     GET_CTX_CM()
@@ -1054,9 +1017,7 @@ GL_API void GL_APIENTRY  glGenTextures( GLsizei n, GLuint *textures) {
     }
 }
 
-#ifdef STATIC_TRANSLATOR
 GL_API void GL_APIENTRY  glGetIntegerv( GLenum pname, GLint *params);
-#endif
 
 GL_API void GL_APIENTRY  glGetBooleanv( GLenum pname, GLboolean *params) {
     GET_CTX()
@@ -1168,9 +1129,7 @@ GL_API void GL_APIENTRY  glGetClipPlanex( GLenum pname, GLfixed eqn[4]) {
     }
 }
 
-#ifdef STATIC_TRANSLATOR
 GL_API void GL_APIENTRY  glGetFloatv( GLenum pname, GLfloat *params);
-#endif
 
 GL_API void GL_APIENTRY  glGetFixedv( GLenum pname, GLfixed *params) {
     GET_CTX()
@@ -2952,7 +2911,5 @@ GL_API void GL_APIENTRY glDrawTexxvOES (const GLfixed * coords) {
     glDrawTexOES<GLfloat,GL_FLOAT>(X2F(coords[0]),X2F(coords[1]),X2F(coords[2]),X2F(coords[3]),X2F(coords[4]));
 }
 
-#ifdef STATIC_TRANSLATOR
 } // namespace translator
 } // namespace gles1
-#endif

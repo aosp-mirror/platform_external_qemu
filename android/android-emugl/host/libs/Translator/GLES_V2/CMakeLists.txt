@@ -14,7 +14,6 @@ android_add_library(
       ProgramData.cpp
       ANGLEShaderParser.cpp)
 target_compile_options(GLES_V2_translator_static PRIVATE -fvisibility=hidden -Wno-macro-redefined)
-target_compile_definitions(GLES_V2_translator_static PRIVATE -DSTATIC_TRANSLATOR=1)
 if (OPTION_GFXSTREAM_BACKEND)
   target_link_libraries(
     GLES_V2_translator_static PRIVATE GLcommon OpenglCodecCommon emugl_common
