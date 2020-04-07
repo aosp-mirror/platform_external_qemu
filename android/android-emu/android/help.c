@@ -1154,11 +1154,50 @@ static void
 help_grpc(stralloc_t*  out)
 {
     PRINTF(
-    "  Enables the gRPC service to control the emulator..\n\n"
+    "  Enables the gRPC service to control the emulator.\n\n"
     "    <port> is the TCP port used to bind the gRPC service\n\n"
-    "  If the gRPC service will not be started if the port is not available on startup.\n\n");
+    "  The gRPC service will not be started if the port is not available on startup.\n\n");
 }
 
+static void
+help_grpc_tls_key(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the given private key and X509 certificate for tls.\n\n"
+    "    <key>  a private RSA key to sign and authenticate the public key.\n"
+    "    <pem>  a (self-signed) X.509 public key certificate for distribution.\n\n"
+    "  The X509 certificate can be self signed.\n\n"
+    "  You must provide the -grpc-pem flag as well.\n\n"
+    );
+}
+
+static void
+help_grpc_tls_pem(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the given X509 certificate for tls.\n\n"
+    "    <pem>  a (self-signed) X.509 public key certificate for distribution.\n\n"
+    "  The X509 certificate can be self signed.\n\n"
+    "  You must provide the -grpc-key flag as well.\n\n"
+    );
+}
+
+static void
+help_grpc_tls_ca(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the given certificate authority for client validation.\n\n"
+    "    <rootca> The root certificate chain to use.\n\n"
+    "  This file must be a PEM encoded file with all \n"
+    "  the roots such as the one that can be downloaded from \n"
+    "  https://pki.google.com/roots.pem.\n\n"
+    "  Note, you can also set the GRPC_DEFAULT_SSL_ROOTS_FILE_PATH_ENV_VAR\n"
+    "  environment variable to achieve the same.\n\n"
+    "  The emulator will request and validate the client certificate\n"
+    "  clients with invalid certificates will be rejected."
+    );
+
+}
 
 static void
 help_idle_grpc_timeout(stralloc_t*  out)
