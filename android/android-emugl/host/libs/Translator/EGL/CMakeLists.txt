@@ -19,7 +19,6 @@ android_add_library(
   LINUX EglOsApi_glx.cpp EglOsApi_egl.cpp CoreProfileConfigs_linux.cpp
   WINDOWS EglOsApi_wgl.cpp EglOsApi_egl.cpp CoreProfileConfigs_windows.cpp)
 
-target_compile_definitions(EGL_translator_static PRIVATE -DSTATIC_TRANSLATOR=1)
 target_link_libraries(EGL_translator_static PUBLIC GLcommon emugl_common)
 target_link_libraries(EGL_translator_static PRIVATE emugl_base android-emu-base
                                              astc-codec)

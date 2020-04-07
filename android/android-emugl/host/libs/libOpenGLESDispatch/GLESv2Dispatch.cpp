@@ -43,54 +43,11 @@ void gles2_unimplemented() {
         dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
             s_egl.eglGetProcAddress(#function_name)); \
 
-bool gles2_dispatch_init_from_static(GLESv2Dispatch* dispatch_table) {
+bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table) {
     if (dispatch_table->initialized) return true;
 
     LIST_GLES2_FUNCTIONS(LOOKUP_SYMBOL_STATIC,LOOKUP_SYMBOL_STATIC)
    
-    dispatch_table->initialized = true;
-    return true;
-}
-
-static bool usingStaticDispatch = false;
-
-//
-// This function is called only once during initialiation before
-// any thread has been created - hence it should NOT be thread safe.
-//
-bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table)
-{
-    if (dispatch_table->initialized) return true;
-
-    const char* useStatic = getenv("ANDROID_EMU_STATIC_TRANSLATOR");
-    if (useStatic) {
-        usingStaticDispatch = true;
-        return gles2_dispatch_init_from_static(dispatch_table);
-    }
-
-    const char *libName = getenv("ANDROID_GLESv2_LIB");
-    if (!libName) {
-        libName = DEFAULT_GLES_V2_LIB;
-    }
-
-    char error[256];
-    s_gles2_lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
-    if (!s_gles2_lib) {
-        return gles2_dispatch_init_from_static(dispatch_table);
-    }
-
-    //
-    // init the GLES dispatch table
-    //
-#define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) \
-    dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-            s_gles2_lib->findSymbol(#function_name)); \
-    if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
-        dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-            s_egl.eglGetProcAddress(#function_name)); \
-
-    LIST_GLES2_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
-
     dispatch_table->initialized = true;
     return true;
 }
