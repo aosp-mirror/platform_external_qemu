@@ -1,0 +1,48 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002360089",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1282036?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "b82b7751_dfa2d2f6",
+          "description": "Change to \"android/android-emugl/combined/GfxStreamBackend.cpp\"",
+          "replacements": [
+            {
+              "path": "android/android-emugl/combined/GfxStreamBackend.cpp",
+              "range": {
+                "startLine": 319,
+                "startChar": 37,
+                "endLine": 319,
+                "endChar": 45
+              },
+              "replacement": "available"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "ae1d99fb_ffbc531e",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-08T21:12:09Z",
+      "side": 1,
+      "message": "Common typo found: \"availble\" -- should it be \"available\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 319,
+        "startChar": 37,
+        "endLine": 319,
+        "endChar": 45
+      },
+      "revId": "1a9a8f199c80b6b35ba8facc0cc1ed2753d1eddd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
