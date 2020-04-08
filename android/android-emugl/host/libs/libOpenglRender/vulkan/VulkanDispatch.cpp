@@ -52,50 +52,55 @@ static std::string icdJsonNameToProgramAndLauncherPaths(
 
 static void initIcdPaths(bool forTesting) {
     auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
-    if (forTesting || androidIcd == "swiftshader") {
-        auto res = pj(System::get()->getProgramDirectory(), "lib64", "vulkan");
-        LOG(VERBOSE) << "In test environment or ICD set to swiftshader, using "
-                        "Swiftshader ICD";
-        auto libPath = pj(System::get()->getProgramDirectory(), "lib64", "vulkan", "libvk_swiftshader.so");;
-        if (path_exists(libPath.c_str())) {
-            LOG(VERBOSE) << "Swiftshader library exists";
-        } else {
-            LOG(VERBOSE) << "Swiftshader library doesn't exist, trying launcher path";
-            libPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "libvk_swiftshader.so");;
-            if (path_exists(libPath.c_str())) {
-                LOG(VERBOSE) << "Swiftshader library found in launcher path";
-            } else {
-                LOG(VERBOSE) << "Swiftshader library not found in program nor launcher path";
-            }
-        }
-        setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
-        System::get()->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
+    if (System::get()->envGet("ANDROID_EMU_SANDBOX") == "1") {
+        // Rely on user to set VK_ICD_FILENAMES
+        return;
     } else {
-        LOG(VERBOSE) << "Not in test environment. ICD (blank for default): ["
-                     << androidIcd << "]";
-        // Mac: Use MoltenVK by default unless GPU mode is set to swiftshader,
-        // and switch between that and gfx-rs libportability-icd depending on
-        // the environment variable setting.
-#ifdef __APPLE__
-        if (androidIcd == "portability") {
-            setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos.json"));
-        } else if (androidIcd == "portability-debug") {
-            setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos-debug.json"));
-        } else {
-            if (androidIcd == "swiftshader" ||
-                emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER ||
-                emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
-                setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
-                System::get()->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
+        if (forTesting || androidIcd == "swiftshader") {
+            auto res = pj(System::get()->getProgramDirectory(), "lib64", "vulkan");
+            LOG(VERBOSE) << "In test environment or ICD set to swiftshader, using "
+                            "Swiftshader ICD";
+            auto libPath = pj(System::get()->getProgramDirectory(), "lib64", "vulkan", "libvk_swiftshader.so");;
+            if (path_exists(libPath.c_str())) {
+                LOG(VERBOSE) << "Swiftshader library exists";
             } else {
-                setIcdPath(icdJsonNameToProgramAndLauncherPaths("MoltenVK_icd.json"));
-                System::get()->envSet("ANDROID_EMU_VK_ICD", "moltenvk");
+                LOG(VERBOSE) << "Swiftshader library doesn't exist, trying launcher path";
+                libPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "libvk_swiftshader.so");;
+                if (path_exists(libPath.c_str())) {
+                    LOG(VERBOSE) << "Swiftshader library found in launcher path";
+                } else {
+                    LOG(VERBOSE) << "Swiftshader library not found in program nor launcher path";
+                }
             }
-        }
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
+            System::get()->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
+        } else {
+            LOG(VERBOSE) << "Not in test environment. ICD (blank for default): ["
+                         << androidIcd << "]";
+            // Mac: Use MoltenVK by default unless GPU mode is set to swiftshader,
+            // and switch between that and gfx-rs libportability-icd depending on
+            // the environment variable setting.
+    #ifdef __APPLE__
+            if (androidIcd == "portability") {
+                setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos.json"));
+            } else if (androidIcd == "portability-debug") {
+                setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos-debug.json"));
+            } else {
+                if (androidIcd == "swiftshader" ||
+                    emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER ||
+                    emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+                    setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
+                    System::get()->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
+                } else {
+                    setIcdPath(icdJsonNameToProgramAndLauncherPaths("MoltenVK_icd.json"));
+                    System::get()->envSet("ANDROID_EMU_VK_ICD", "moltenvk");
+                }
+            }
 #else
-        // By default, on other platforms, just use whatever the system
-        // is packing.
+            // By default, on other platforms, just use whatever the system
+            // is packing.
 #endif
+        }
     }
 }
 
@@ -147,23 +152,34 @@ public:
     void initialize(bool forTesting);
 
     void* dlopen() {
-        if (!mVulkanLoader) {
-            auto loaderPath = getLoaderPath(System::get()->getProgramDirectory(), mForTesting);
-            mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
+        bool sandbox = System::get()->envGet("ANDROID_EMU_SANDBOX") == "1";
 
-            if (!mVulkanLoader) {
-                loaderPath = getLoaderPath(System::get()->getLauncherDirectory(), mForTesting);
+        if (!mVulkanLoader) {
+            if (sandbox) {
+                mVulkanLoader = emugl::SharedLibrary::open(VULKAN_LOADER_FILENAME);
+            } else {
+                auto loaderPath = getLoaderPath(System::get()->getProgramDirectory(), mForTesting);
                 mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
+
+                if (!mVulkanLoader) {
+                    loaderPath = getLoaderPath(System::get()->getLauncherDirectory(), mForTesting);
+                    mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
+                }
             }
         }
 #ifdef __linux__
         // On Linux, it might not be called libvulkan.so.
         // Try libvulkan.so.1 if that doesn't work.
         if (!mVulkanLoader) {
-            auto altPath = pj(System::get()->getLauncherDirectory(),
-                "lib64", "vulkan", "libvulkan.so.1");
-            mVulkanLoader =
-                emugl::SharedLibrary::open(altPath.c_str());
+            if (sandbox) {
+                mVulkanLoader =
+                    emugl::SharedLibrary::open("libvulkan.so.1");
+            } else {
+                auto altPath = pj(System::get()->getLauncherDirectory(),
+                    "lib64", "vulkan", "libvulkan.so.1");
+                mVulkanLoader =
+                    emugl::SharedLibrary::open(altPath.c_str());
+            }
         }
 #endif
         return (void*)mVulkanLoader;

@@ -273,19 +273,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
         true /* is google APIs */,
         AVD_PHONE);
 
-    sTestContentDir = new android::base::TestTempDir("goldfish_opengl_snapshot_test_dir");
-    avdInfo_setCustomContentPath(android_avdInfo, sTestContentDir->path());
-    auto customHwIniPath =
-        pj(sTestContentDir->path(), "hardware.ini");
-
-    std::ofstream hwIniPathTouch(customHwIniPath, std::ios::out);
-    hwIniPathTouch << "test ini";
-    hwIniPathTouch.close();
-
-    avdInfo_setCustomCoreHwIniPath(android_avdInfo, customHwIniPath.c_str());
-
-    System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR",
-                          System::get()->getProgramDirectory());
+    System::setEnvironmentVariable("ANDROID_EMU_SANDBOX", "1");
+    System::setEnvironmentVariable("ANDROID_EMUGL_FIXED_BACKEND_LIST", "1");
 
     // Need to manually set the GLES backend paths in gfxstream environment
     // because the library search paths are not automatically set to include
@@ -306,6 +295,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLESDynamicVersion, true);
     android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::PlayStoreImage, true);
+    android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLDMA, false);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLAsyncSwap, false);
@@ -323,8 +314,12 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::HostComposition, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanIgnoredHandles, true);
+
+    // bug: 153580313
+    // Enable after host coherent is available in guest kernel
+    // and host VMM
     android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::VirtioGpuNext, true);
+            android::featurecontrol::VirtioGpuNext, false);
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
