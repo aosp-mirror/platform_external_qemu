@@ -89,7 +89,7 @@ II.3) Packaging binary releases:
 You can create redistributable tarballs by using:
 
   cd $TOP/external/qemu
-  android/scripts/package-release.sh
+  android/scripts/unix/package-release.sh
 
 This will create /tmp/android-emulator-<date>-<system>.tar.bz2 containing
 all binaries, ready to be uncompressed into an Android SDK installation
