@@ -1,0 +1,28 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a02461b_1b5f2e0f",
+        "filename": "android/android-emu/android/emulation/MediaCudaVideoHelper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-04-08T20:48:15Z",
+      "side": 1,
+      "message": "\u003e Common typo found: \" dont \" -- should it be \" don\u0027t \"?\n\u003e Check whether the apostrophe needs to be escaped.\n\u003e Note: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.\n\nPlease fix.",
+      "parentUuid": "9f0094fa_1c7f8e0f",
+      "range": {
+        "startLine": 81,
+        "startChar": 6,
+        "endLine": 81,
+        "endChar": 12
+      },
+      "revId": "ea005ef6f3bb86d0d60898f6d7eea59052585246",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
