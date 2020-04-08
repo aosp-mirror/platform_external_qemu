@@ -91,6 +91,7 @@ public:
               android::base::StringView defaultIniGuestPath,
               android::base::StringView userIniHostPath,
               android::base::StringView userIniGuestPath);
+    void initNoFiles();
 
     static void create();
     static FeatureControlImpl& get();

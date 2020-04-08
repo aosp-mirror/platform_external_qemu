@@ -44,8 +44,16 @@ static EmuglBackendList* sBackendList = NULL;
 
 static void resetBackendList(int bitness) {
     delete sBackendList;
-    sBackendList = new EmuglBackendList(
-            System::get()->getLauncherDirectory().c_str(), bitness);
+    if (System::getEnvironmentVariable("ANDROID_EMUGL_FIXED_BACKEND_LIST") == "1") {
+        std::vector<std::string> fixedBackendNames = {
+            "swiftshader_indirect",
+            "angle_indirect",
+        };
+        sBackendList = new EmuglBackendList(64, fixedBackendNames);
+    } else {
+        sBackendList = new EmuglBackendList(
+                System::get()->getLauncherDirectory().c_str(), bitness);
+    }
 }
 
 static bool stringVectorContains(const std::vector<std::string>& list,

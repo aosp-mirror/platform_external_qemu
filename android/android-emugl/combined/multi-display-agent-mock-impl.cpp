@@ -24,7 +24,7 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                               uint32_t dpi,
                               uint32_t flag,
                               bool add) -> int{
-            printf("%s\n", __func__);
+            printf("setMultiDisplay (mock)\n");
             return 0;
         },
         .getMultiDisplay = [](uint32_t id,
@@ -35,7 +35,7 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                              uint32_t* dpi,
                              uint32_t* flag,
                              bool* enable) -> bool{
-            printf("%s\n", __func__);
+            printf("getMultiDisplay (mock)\n");
             return false;
         },
         .getNextMultiDisplay = [](int32_t start_id,
@@ -47,40 +47,40 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                                 uint32_t* dpi,
                                 uint32_t* flag,
                                 uint32_t* cb) -> bool {
-            printf("%s\n", __func__);
+            printf("getNextMultiDisplay (mock)\n");
             return false;
         },
         .isMultiDisplayEnabled = [](void) -> bool {
-            printf("%s\n", __func__);
+            printf("isMultiDisplayEnabled (mock)\n");
             return false;
         },
         .getCombinedDisplaySize = [](uint32_t* width,
                                      uint32_t* height) {
-            printf("%s\n", __func__);
+            printf("getCombinedDisplaySize (mock)\n");
         },
         .multiDisplayParamValidate = [](uint32_t id,
                                         uint32_t w,
                                         uint32_t h,
                                         uint32_t dpi,
                                         uint32_t flag) -> bool {
-            printf("%s\n", __func__);
+            printf("multiDisplayParamValidate (mock)\n");
             return false;
         },
         .translateCoordination = [](uint32_t* x,
                                     uint32_t*y,
                                     uint32_t* displayId) -> bool {
-            printf("%s\n", __func__);
+            printf("translateCoordination (mock)\n");
             return true;
         },
         .setGpuMode = [](bool isGuestMode) {
-            printf("%s\n", __func__);
+            printf("setGpuMode (mock)\n");
         },
         .createDisplay = [](uint32_t* displayId) -> int {
-            printf("%s\n", __func__);
+            printf("createDisplay (mock)\n");
             return 0;
         },
         .destroyDisplay = [](uint32_t displayId) -> int {
-            printf("%s\n", __func__);
+            printf("destroyDisplay (mock)\n");
             return 0;
         },
         .setDisplayPose = [](uint32_t displayId,
@@ -89,7 +89,7 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                             uint32_t w,
                             uint32_t h,
                             uint32_t dpi) -> int {
-            printf("%s\n", __func__);
+            printf("setDisplayPose (mock)\n");
             return 0;
         },
         .getDisplayPose = [](uint32_t displayId,
@@ -97,22 +97,22 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                             int32_t* y,
                             uint32_t* w,
                             uint32_t* h) -> int {
-            printf("%s\n", __func__);
+            printf("getDisplayPose (mock)\n");
             return 0;
         },
         .getDisplayColorBuffer = [](uint32_t displayId,
                                     uint32_t* colorBuffer) -> int {
-            printf("%s\n", __func__);
+            printf("getDisplayColorBuffer (mock)\n");
             return 0;
          },
          .getColorBufferDisplay = [](uint32_t colorBuffer,
                                      uint32_t* displayId) -> int {
-            printf("%s\n", __func__);
+            printf("getColorBufferDisplay (mock)\n");
             return 0;
         },
         .setDisplayColorBuffer = [](uint32_t displayId,
                                     uint32_t colorBuffer) -> int {
-            printf("%s\n", __func__);
+            printf("setDisplayColorBuffer (mock)\n");
             return 0;
         }
 };

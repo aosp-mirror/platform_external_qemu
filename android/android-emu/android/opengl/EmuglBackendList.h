@@ -25,6 +25,9 @@ public:
     // and 'lib64' for 64-bit ones.
     EmuglBackendList(const char* execDir, int programBitness);
 
+    // Create a backend list with a fixed list of names
+    EmuglBackendList(int programBitness, const std::vector<std::string>& names);
+
     // Return the name of the default Emugl backend.
     const std::string& defaultName() const { return mDefaultName; }
 
