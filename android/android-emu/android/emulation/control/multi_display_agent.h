@@ -48,6 +48,7 @@ typedef struct QAndroidMultiDisplayAgent {
     bool (*multiDisplayParamValidate)(uint32_t id, uint32_t w, uint32_t h,
                                       uint32_t dpi, uint32_t flag);
     bool (*translateCoordination)(uint32_t* x, uint32_t*y, uint32_t* displayId);
+    void (*setGpuMode)(bool isGuestMode);
     int (*createDisplay)(uint32_t* displayId);
     int (*destroyDisplay)(uint32_t displayId);
     int (*setDisplayPose)(uint32_t displayId,

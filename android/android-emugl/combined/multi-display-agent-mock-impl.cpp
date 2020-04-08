@@ -72,6 +72,9 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
             printf("%s\n", __func__);
             return true;
         },
+        .setGpuMode = [](bool isGuestMode) {
+            printf("%s\n", __func__);
+        },
         .createDisplay = [](uint32_t* displayId) -> int {
             printf("%s\n", __func__);
             return 0;
