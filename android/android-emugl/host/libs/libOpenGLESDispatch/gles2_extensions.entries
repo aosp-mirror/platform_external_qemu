@@ -1,4 +1,5 @@
 !gles2_extensions
+namespaces translator,gles2
 
 # GLES 2.0 extensions
 void glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision);
@@ -7,3 +8,8 @@ void glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryformat, const
 void glVertexAttribPointerWithDataSize(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
 void glFramebufferTexture3DOES(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset);
 void glTestHostDriverPerformance(GLuint count, uint64_t* duration_us, uint64_t* duration_cpu_us);
+
+void glBindVertexArrayOES(GLuint array);
+void glDeleteVertexArraysOES(GLsizei n, const GLuint *arrays);
+void glGenVertexArraysOES(GLsizei n, GLuint *arrays);
+GLboolean glIsVertexArrayOES(GLuint array);

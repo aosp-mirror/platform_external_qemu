@@ -16,9 +16,9 @@
 
 #ifdef _WIN32
 #undef  GL_APICALL
-#define GL_API __declspec(dllexport)
-#define GL_APICALL __declspec(dllexport)
-#endif
+#define GL_API
+#define GL_APICALL
+#endif // !_WIN32
 
 #define GL_GLEXT_PROTOTYPES
 #include <GLES2/gl2.h>
@@ -60,7 +60,19 @@
 #include <sys/time.h>
 #endif
 
+#define GLES2_NAMESPACED(f) translator::gles2::f
+
 using android::base::c_str;
+
+namespace translator {
+namespace gles2 {
+
+GL_API void GL_APIENTRY  glFlush( void);
+GL_API void GL_APIENTRY  glFinish( void);
+GL_API GLenum GL_APIENTRY  glGetError( void);
+
+} // namespace gles1
+} // namespace translator
 
 extern "C" {
 
@@ -72,7 +84,7 @@ static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
 static GLEScontext* createGLESxContext(int maj, int min, GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
-static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
+static __translatorMustCastToProperFunctionPointerType getProcAddressGles2(const char* procName);
 static void preSaveTexture();
 static void postSaveTexture();
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
@@ -82,16 +94,24 @@ static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
 static void restoreTexture(SaveableTexture* texture);
 static void blitFromCurrentReadBufferANDROID(EGLImage image);
 static bool vulkanInteropSupported();
+
+namespace translator {
+namespace gles2 {
+
 static GLsync internal_glFenceSync(GLenum condition, GLbitfield flags);
 static GLenum internal_glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
 static void internal_glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
 static void internal_glDeleteSync(GLsync to_delete);
 static void internal_glGetSynciv(GLsync sync, GLenum pname, GLsizei bufsize, GLsizei *length, GLint *values);
+
+} // namespace translator
+} // namespace gles2
+
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
 typedef std::unordered_map<std::string, __translatorMustCastToProperFunctionPointerType> ProcTableMap;
-ProcTableMap *s_glesExtensions = NULL;
+ProcTableMap *s_gles2Extensions = NULL;
 /****************************************************************************************************************/
 
 static EGLiface*  s_eglIface = NULL;
@@ -101,15 +121,16 @@ static GLESiface s_glesIface = {
     .initContext = initContext,
     .setMaxGlesVersion = setMaxGlesVersion,
     .deleteGLESContext = deleteGLESContext,
-    .flush = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
-    .finish = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
-    .getError = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
+    .flush = (FUNCPTR_NO_ARGS_RET_VOID)GLES2_NAMESPACED(glFlush),
+    .finish = (FUNCPTR_NO_ARGS_RET_VOID)GLES2_NAMESPACED(glFinish),
+    .getError = (FUNCPTR_NO_ARGS_RET_INT)GLES2_NAMESPACED(glGetError),
     .setShareGroup = setShareGroup,
-    .getProcAddress = getProcAddress,
-    .fenceSync = (FUNCPTR_FENCE_SYNC)internal_glFenceSync,
-    .clientWaitSync = (FUNCPTR_CLIENT_WAIT_SYNC)internal_glClientWaitSync,
-    .waitSync = (FUNCPTR_WAIT_SYNC)internal_glWaitSync,
-    .deleteSync = (FUNCPTR_DELETE_SYNC)internal_glDeleteSync,
+    .getProcAddress = getProcAddressGles2,
+
+    .fenceSync = (FUNCPTR_FENCE_SYNC)translator::gles2::internal_glFenceSync,
+    .clientWaitSync = (FUNCPTR_CLIENT_WAIT_SYNC)translator::gles2::internal_glClientWaitSync,
+    .waitSync = (FUNCPTR_WAIT_SYNC)translator::gles2::internal_glWaitSync,
+    .deleteSync = (FUNCPTR_DELETE_SYNC)translator::gles2::internal_glDeleteSync,
     .preSaveTexture = preSaveTexture,
     .postSaveTexture = postSaveTexture,
     .saveTexture = saveTexture,
@@ -118,60 +139,19 @@ static GLESiface s_glesIface = {
     .deleteRbo = deleteRenderbufferGlobal,
     .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
     .vulkanInteropSupported = vulkanInteropSupported,
-    .getSynciv = (FUNCPTR_GET_SYNC_IV)internal_glGetSynciv,
+    .getSynciv = (FUNCPTR_GET_SYNC_IV)translator::gles2::internal_glGetSynciv,
 };
 
 #include <GLcommon/GLESmacros.h>
 
 static android::base::LazyInstance<GLES3Usage> gles30usages = {};
 
-extern "C" {
+namespace translator {
+namespace gles2 {
 
-static void setMaxGlesVersion(GLESVersion version) {
-    GLESv2Context::setMaxGlesVersion(version);
-}
-
-static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
-    setCoreProfile(ctx->isCoreProfile());
-    GLESv2Context::initGlobal(s_eglIface);
-
-    if (!ctx->shareGroup()) {
-        ctx->setShareGroup(grp);
-    }
-    if (!ctx->isInitialized()) {
-        ctx->init();
-        glBindTexture(GL_TEXTURE_2D,0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP,0);
-    }
-    if (ctx->needRestore()) {
-        ctx->restore();
-    }
-}
-
-static GLEScontext* createGLESContext() {
-    return new GLESv2Context(2, 0, nullptr, nullptr, nullptr);
-}
-static GLEScontext* createGLESxContext(int maj, int min,
-        GlobalNameSpace* globalNameSpace, android::base::Stream* stream) {
-    return new GLESv2Context(maj, min, globalNameSpace, stream,
-            s_eglIface->eglGetGlLibrary());
-}
-
-static bool shaderParserInitialized = false;
-
-static void initGLESx(bool isGles2Gles) {
-    setGles2Gles(isGles2Gles);
-}
-
-static void deleteGLESContext(GLEScontext* ctx) {
-    delete ctx;
-}
-
-static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
-    if(ctx) {
-        ctx->setShareGroup(grp);
-    }
-}
+GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image);
+GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image);
+GL_API void GL_APIENTRY glBindTexture (GLenum target, GLuint texture);
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
 GL_APICALL void  GL_APIENTRY glVertexAttribIPointerWithDataSize(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
@@ -217,54 +197,104 @@ GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBuf
 GL_APICALL GLuint GL_APIENTRY glGetGlobalTexName(GLuint localName);
 GL_APICALL void  GL_APIENTRY glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid* pixels);
 
-static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
+} // namespace gles2
+} // namespace translator
+
+extern "C" {
+
+static void setMaxGlesVersion(GLESVersion version) {
+    GLESv2Context::setMaxGlesVersion(version);
+}
+
+static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
+    setCoreProfile(ctx->isCoreProfile());
+    GLESv2Context::initGlobal(s_eglIface);
+
+    if (!ctx->shareGroup()) {
+        ctx->setShareGroup(grp);
+    }
+    if (!ctx->isInitialized()) {
+        ctx->init();
+        translator::gles2::glBindTexture(GL_TEXTURE_2D,0);
+        translator::gles2::glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+    }
+    if (ctx->needRestore()) {
+        ctx->restore();
+    }
+}
+
+static GLEScontext* createGLESContext() {
+    return new GLESv2Context(2, 0, nullptr, nullptr, nullptr);
+}
+static GLEScontext* createGLESxContext(int maj, int min,
+        GlobalNameSpace* globalNameSpace, android::base::Stream* stream) {
+    return new GLESv2Context(maj, min, globalNameSpace, stream,
+            s_eglIface->eglGetGlLibrary());
+}
+
+static bool shaderParserInitialized = false;
+
+static void initGLESx(bool isGles2Gles) {
+    setGles2Gles(isGles2Gles);
+}
+
+static void deleteGLESContext(GLEScontext* ctx) {
+    delete ctx;
+}
+
+static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
+    if(ctx) {
+        ctx->setShareGroup(grp);
+    }
+}
+
+static __translatorMustCastToProperFunctionPointerType getProcAddressGles2(const char* procName) {
     GET_CTX_RET(NULL)
     ctx->getGlobalLock();
     static bool proc_table_initialized = false;
     if (!proc_table_initialized) {
         proc_table_initialized = true;
-        if (!s_glesExtensions)
-            s_glesExtensions = new ProcTableMap();
+        if (!s_gles2Extensions)
+            s_gles2Extensions = new ProcTableMap();
         else
-            s_glesExtensions->clear();
-        (*s_glesExtensions)["glEGLImageTargetTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glEGLImageTargetTexture2DOES;
-        (*s_glesExtensions)["glEGLImageTargetRenderbufferStorageOES"]=(__translatorMustCastToProperFunctionPointerType)glEGLImageTargetRenderbufferStorageOES;
-        (*s_glesExtensions)["glVertexAttribPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribPointerWithDataSize;
-        (*s_glesExtensions)["glVertexAttribIPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribIPointerWithDataSize;
-        (*s_glesExtensions)["glTestHostDriverPerformance"] = (__translatorMustCastToProperFunctionPointerType)glTestHostDriverPerformance;
-        (*s_glesExtensions)["glDrawArraysNullAEMU"] = (__translatorMustCastToProperFunctionPointerType)glDrawArraysNullAEMU;
-        (*s_glesExtensions)["glDrawElementsNullAEMU"] = (__translatorMustCastToProperFunctionPointerType)glDrawElementsNullAEMU;
-
-        (*s_glesExtensions)["glGetUnsignedBytevEXT"] = (__translatorMustCastToProperFunctionPointerType)glGetUnsignedBytevEXT;
-        (*s_glesExtensions)["glGetUnsignedBytei_vEXT"] = (__translatorMustCastToProperFunctionPointerType)glGetUnsignedBytei_vEXT;
-        (*s_glesExtensions)["glImportMemoryFdEXT"] = (__translatorMustCastToProperFunctionPointerType)glImportMemoryFdEXT;
-        (*s_glesExtensions)["glImportMemoryWin32HandleEXT"] = (__translatorMustCastToProperFunctionPointerType)glImportMemoryWin32HandleEXT;
-        (*s_glesExtensions)["glDeleteMemoryObjectsEXT"] = (__translatorMustCastToProperFunctionPointerType)glDeleteMemoryObjectsEXT;
-        (*s_glesExtensions)["glIsMemoryObjectEXT"] = (__translatorMustCastToProperFunctionPointerType)glIsMemoryObjectEXT;
-        (*s_glesExtensions)["glCreateMemoryObjectsEXT"] = (__translatorMustCastToProperFunctionPointerType)glCreateMemoryObjectsEXT;
-        (*s_glesExtensions)["glMemoryObjectParameterivEXT"] = (__translatorMustCastToProperFunctionPointerType)glMemoryObjectParameterivEXT;
-        (*s_glesExtensions)["glGetMemoryObjectParameterivEXT"] = (__translatorMustCastToProperFunctionPointerType)glGetMemoryObjectParameterivEXT;
-        (*s_glesExtensions)["glTexStorageMem2DEXT"] = (__translatorMustCastToProperFunctionPointerType)glTexStorageMem2DEXT;
-        (*s_glesExtensions)["glTexStorageMem2DMultisampleEXT"] = (__translatorMustCastToProperFunctionPointerType)glTexStorageMem2DMultisampleEXT;
-        (*s_glesExtensions)["glTexStorageMem3DEXT"] = (__translatorMustCastToProperFunctionPointerType)glTexStorageMem3DEXT;
-        (*s_glesExtensions)["glTexStorageMem3DMultisampleEXT"] = (__translatorMustCastToProperFunctionPointerType)glTexStorageMem3DMultisampleEXT;
-        (*s_glesExtensions)["glBufferStorageMemEXT"] = (__translatorMustCastToProperFunctionPointerType)glBufferStorageMemEXT;
-        (*s_glesExtensions)["glTexParameteriHOST"] = (__translatorMustCastToProperFunctionPointerType)glTexParameteriHOST;
-        (*s_glesExtensions)["glImportSemaphoreFdEXT"] = (__translatorMustCastToProperFunctionPointerType)glImportSemaphoreFdEXT;
-        (*s_glesExtensions)["glImportSemaphoreWin32HandleEXT"] = (__translatorMustCastToProperFunctionPointerType)glImportSemaphoreWin32HandleEXT;
-        (*s_glesExtensions)["glGenSemaphoresEXT"] = (__translatorMustCastToProperFunctionPointerType)glGenSemaphoresEXT;
-        (*s_glesExtensions)["glDeleteSemaphoresEXT"] = (__translatorMustCastToProperFunctionPointerType)glDeleteSemaphoresEXT;
-        (*s_glesExtensions)["glIsSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glIsSemaphoreEXT;
-        (*s_glesExtensions)["glSemaphoreParameterui64vEXT"] = (__translatorMustCastToProperFunctionPointerType)glSemaphoreParameterui64vEXT;
-        (*s_glesExtensions)["glGetSemaphoreParameterui64vEXT"] = (__translatorMustCastToProperFunctionPointerType)glGetSemaphoreParameterui64vEXT;
-        (*s_glesExtensions)["glWaitSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glWaitSemaphoreEXT;
-        (*s_glesExtensions)["glSignalSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glSignalSemaphoreEXT;
-        (*s_glesExtensions)["glGetGlobalTexName"] = (__translatorMustCastToProperFunctionPointerType)glGetGlobalTexName;
-        (*s_glesExtensions)["glGetTexImage"] = (__translatorMustCastToProperFunctionPointerType)glGetTexImage;
+            s_gles2Extensions->clear();
+        (*s_gles2Extensions)["glEGLImageTargetTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glEGLImageTargetTexture2DOES);
+        (*s_gles2Extensions)["glEGLImageTargetRenderbufferStorageOES"]=(__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glEGLImageTargetRenderbufferStorageOES);
+        (*s_gles2Extensions)["glVertexAttribPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glVertexAttribPointerWithDataSize);
+        (*s_gles2Extensions)["glVertexAttribIPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glVertexAttribIPointerWithDataSize);
+        (*s_gles2Extensions)["glTestHostDriverPerformance"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glTestHostDriverPerformance);
+        (*s_gles2Extensions)["glDrawArraysNullAEMU"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDrawArraysNullAEMU);
+        (*s_gles2Extensions)["glDrawElementsNullAEMU"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDrawElementsNullAEMU);
+        (*s_gles2Extensions)["glGetUnsignedBytevEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGetUnsignedBytevEXT);
+        (*s_gles2Extensions)["glGetUnsignedBytei_vEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGetUnsignedBytei_vEXT);
+        (*s_gles2Extensions)["glImportMemoryFdEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glImportMemoryFdEXT);
+        (*s_gles2Extensions)["glImportMemoryWin32HandleEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glImportMemoryWin32HandleEXT);
+        (*s_gles2Extensions)["glDeleteMemoryObjectsEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDeleteMemoryObjectsEXT);
+        (*s_gles2Extensions)["glIsMemoryObjectEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glIsMemoryObjectEXT);
+        (*s_gles2Extensions)["glCreateMemoryObjectsEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glCreateMemoryObjectsEXT);
+        (*s_gles2Extensions)["glMemoryObjectParameterivEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glMemoryObjectParameterivEXT);
+        (*s_gles2Extensions)["glGetMemoryObjectParameterivEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGetMemoryObjectParameterivEXT);
+        (*s_gles2Extensions)["glTexStorageMem2DEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glTexStorageMem2DEXT);
+        (*s_gles2Extensions)["glTexStorageMem2DMultisampleEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glTexStorageMem2DMultisampleEXT);
+        (*s_gles2Extensions)["glTexStorageMem3DEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glTexStorageMem3DEXT);
+        (*s_gles2Extensions)["glTexStorageMem3DMultisampleEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glTexStorageMem3DMultisampleEXT);
+        (*s_gles2Extensions)["glBufferStorageMemEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glBufferStorageMemEXT);
+        (*s_gles2Extensions)["glTexParameteriHOST"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glTexParameteriHOST);
+        (*s_gles2Extensions)["glImportSemaphoreFdEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glImportSemaphoreFdEXT);
+        (*s_gles2Extensions)["glImportSemaphoreWin32HandleEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glImportSemaphoreWin32HandleEXT);
+        (*s_gles2Extensions)["glGenSemaphoresEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGenSemaphoresEXT);
+        (*s_gles2Extensions)["glDeleteSemaphoresEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glDeleteSemaphoresEXT);
+        (*s_gles2Extensions)["glIsSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glIsSemaphoreEXT);
+        (*s_gles2Extensions)["glSemaphoreParameterui64vEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glSemaphoreParameterui64vEXT);
+        (*s_gles2Extensions)["glGetSemaphoreParameterui64vEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGetSemaphoreParameterui64vEXT);
+        (*s_gles2Extensions)["glWaitSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glWaitSemaphoreEXT);
+        (*s_gles2Extensions)["glSignalSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glSignalSemaphoreEXT);
+        (*s_gles2Extensions)["glGetGlobalTexName"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGetGlobalTexName);
+        (*s_gles2Extensions)["glGetTexImage"] = (__translatorMustCastToProperFunctionPointerType)GLES2_NAMESPACED(glGetTexImage);
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
-    ProcTableMap::iterator val = s_glesExtensions->find(procName);
-    if (val!=s_glesExtensions->end())
+    ProcTableMap::iterator val = s_gles2Extensions->find(procName);
+    if (val!=s_gles2Extensions->end())
         ret = val->second;
     ctx->releaseGlobalLock();
 
@@ -294,11 +324,15 @@ static void restoreTexture(SaveableTexture* texture) {
     texture->touch();
 }
 
-GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
+extern "C" {
 
-GLESiface* __translator_getIfaces(EGLiface* eglIface) {
-    s_eglIface = eglIface;
+GL_APICALL GLESiface* GL_APIENTRY static_translator_glesv2_getIfaces(const EGLiface* eglIface);
+
+GLESiface* static_translator_glesv2_getIfaces(const EGLiface* eglIface) {
+    s_eglIface = (EGLiface*)eglIface;
     return & s_glesIface;
+}
+
 }
 
 static bool vulkanInteropSupported() {
@@ -373,6 +407,9 @@ static TextureData* getTextureTargetData(GLenum target){
     unsigned int tex = ctx->getBindedTexture(target);
     return getTextureData(ctx->getTextureLocalName(target,tex));
 }
+
+namespace translator {
+namespace gles2 {
 
 GL_APICALL void  GL_APIENTRY glActiveTexture(GLenum texture){
     GET_CTX_V2();
@@ -819,15 +856,19 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
     }
 }
 
+GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels);
+
 GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
 {
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
     SET_ERROR_IF(level < 0 || imageSize < 0, GL_INVALID_VALUE);
 
+    auto funcPtr = translator::gles2::glTexImage2D;
+
     doCompressedTexImage2D(ctx, target, level, internalformat,
                                 width, height, border,
-                                imageSize, data, glTexImage2D);
+                                imageSize, data, funcPtr);
 
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
@@ -835,6 +876,8 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
         texData->compressedFormat = internalformat;
     }
 }
+
+GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels);
 
 GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data){
     GET_CTX();
@@ -1127,6 +1170,9 @@ GL_APICALL void  GL_APIENTRY glDeleteFramebuffers(GLsizei n, const GLuint* frame
         ctx->deleteFBO(framebuffers[i]);
     }
 }
+
+GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
 
 static void s_detachFromFramebuffer(NamedObjectType bufferType,
                                     GLuint texture,
@@ -3039,6 +3085,9 @@ GL_APICALL void  GL_APIENTRY glPolygonOffset(GLfloat factor, GLfloat units){
     ctx->dispatcher().glPolygonOffset(factor,units);
 }
 
+GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+GL_APICALL void GL_APIENTRY glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
+
 GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::pixelOp(format,type)),GL_INVALID_OPERATION);
@@ -3975,6 +4024,8 @@ GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
     return ctx->dispatcher().glIsVertexArray(ctx->getVAOGlobalName(array));
 }
 
+#define EXTERN_PART
+
 #include "GLESv30Imp.cpp"
 #include "GLESv31Imp.cpp"
 
@@ -4315,3 +4366,6 @@ GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBuf
     GET_CTX_V2();
     ctx->dispatcher().glSignalSemaphoreEXT(semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, dstLayouts);
 }
+
+} // namespace translator
+} // namespace gles2

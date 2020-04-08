@@ -104,8 +104,8 @@ static bool sEgl2egl = false;
 static emugl::RenderLibPtr sRenderLib = nullptr;
 static emugl::RendererPtr sRenderer = nullptr;
 
-static EGLDispatch* sEgl = nullptr;
-static GLESv2Dispatch* sGLES = nullptr;
+static const EGLDispatch* sEgl = nullptr;
+static const GLESv2Dispatch* sGlesv2 = nullptr;
 
 int android_initOpenglesEmulation() {
     android_init_opengl_logger();
@@ -180,8 +180,8 @@ int android_initOpenglesEmulation() {
         }
     }
 
-    sEgl = (EGLDispatch *)sRenderLib->getEGL();
-    sGLES = (GLESv2Dispatch *)sRenderLib->getGL();
+    sEgl = (const EGLDispatch *)sRenderLib->getEGLDispatch();
+    sGlesv2 = (const GLESv2Dispatch *)sRenderLib->getGLESv2Dispatch();
 
     return 0;
 
@@ -209,7 +209,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
         return -1;
     }
 
-    if (!sGLES) {
+    if (!sGlesv2) {
         D("Can't start OpenGLES renderer without GLES libraries");
         return -1;
     }
@@ -511,7 +511,7 @@ void android_setMultiDisplay(uint32_t id,
 static void* sContext, * sRenderContext, * sSurface;
 static EGLint s_gles_attr[5];
 
-extern void tinyepoxy_init(GLESv2Dispatch* gles, int version);
+extern void tinyepoxy_init(const GLESv2Dispatch* gles, int version);
 
 static bool prepare_epoxy(void) {
     if (!sRenderLib->getOpt(&sOpt)) {
@@ -546,7 +546,7 @@ static bool prepare_epoxy(void) {
     }
     static_assert(sizeof(attr) == sizeof(s_gles_attr), "Mismatch");
     memcpy(s_gles_attr, attr, sizeof(s_gles_attr));
-    tinyepoxy_init(sGLES, major * 10 + minor);
+    tinyepoxy_init(sGlesv2, major * 10 + minor);
     return true;
 }
 
@@ -595,11 +595,11 @@ void android_gl_scanout_texture(DisplayChangeListener* unuse,
     sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface,
                          sRenderContext);
     if (!s_fbo_id) {
-        sGLES->glGenFramebuffers(1, &s_fbo_id);
+        sGlesv2->glGenFramebuffers(1, &s_fbo_id);
     }
-    sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
-    sGLES->glViewport(0, 0, h, w);
-    sGLES->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0,
+    sGlesv2->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
+    sGlesv2->glViewport(0, 0, h, w);
+    sGlesv2->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0,
                                   GL_TEXTURE_2D, backing_id, 0);
 }
 
@@ -612,18 +612,18 @@ void android_gl_scanout_flush(DisplayChangeListener* unuse,
     sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface,
                          sRenderContext);
 
-    sGLES->glBindFramebuffer(GL_READ_FRAMEBUFFER, s_fbo_id);
-    sGLES->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    sGlesv2->glBindFramebuffer(GL_READ_FRAMEBUFFER, s_fbo_id);
+    sGlesv2->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     int y1 = s_y0_top ? 0 : s_gfx_h;
     int y2 = s_y0_top ? s_gfx_h : 0;
 
-    sGLES->glViewport(0, 0, sWidth, sHeight);
-    sGLES->glBlitFramebuffer(0, y1, s_gfx_w, y2,
+    sGlesv2->glViewport(0, 0, sWidth, sHeight);
+    sGlesv2->glBlitFramebuffer(0, y1, s_gfx_w, y2,
                              0, 0, sWidth, sHeight,
                              GL_COLOR_BUFFER_BIT, GL_NEAREST);
     sEgl->eglSwapBuffers(sOpt.display, sOpt.surface);
-    sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
+    sGlesv2->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
 }
 
 struct AndroidVirtioGpuOps* android_getVirtioGpuOps() {
@@ -631,4 +631,12 @@ struct AndroidVirtioGpuOps* android_getVirtioGpuOps() {
         return sRenderer->getVirtioGpuOps();
     }
     return nullptr;
+}
+
+const void* android_getEGLDispatch() {
+    return sEgl;
+}
+
+const void* android_getGLESv2Dispatch() {
+    return sGlesv2;
 }

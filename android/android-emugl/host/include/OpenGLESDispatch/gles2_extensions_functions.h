@@ -11,6 +11,10 @@
   X(void, glVertexAttribPointerWithDataSize, (GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize), (indx, size, type, normalized, stride, ptr, dataSize)) \
   X(void, glFramebufferTexture3DOES, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset), (target, attachment, textarget, texture, level, zoffset)) \
   X(void, glTestHostDriverPerformance, (GLuint count, uint64_t* duration_us, uint64_t* duration_cpu_us), (count, duration_us, duration_cpu_us)) \
+  X(void, glBindVertexArrayOES, (GLuint array), (array)) \
+  X(void, glDeleteVertexArraysOES, (GLsizei n, const GLuint * arrays), (n, arrays)) \
+  X(void, glGenVertexArraysOES, (GLsizei n, GLuint * arrays), (n, arrays)) \
+  X(GLboolean, glIsVertexArrayOES, (GLuint array), (array)) \
 
 
 #endif  // GLES2_EXTENSIONS_FUNCTIONS_H

@@ -76,20 +76,6 @@ static const char kLibSuffix[] = ".dylib";
 static const char kLibSuffix[] = ".so";
 #endif
 
-std::string EmuglBackendList::getGLES12TranslatorLibName() {
-
-    std::string res;
-
-    if (mProgramBitness == 64) {
-        res += "64";
-    }
-
-    res += kGLES12TranslatorName;
-
-    res += kLibSuffix;
-    return res;
-}
-
 bool EmuglBackendList::getBackendLibPath(const char* name,
                                          Library library,
                                          std::string* libPath) {

@@ -80,6 +80,6 @@ CpuAccelerator GetCurrentCpuAccelerator() {
 
 } // namespace android
 
-void tinyepoxy_init(GLESv2Dispatch* gles, int version) {
+void tinyepoxy_init(const GLESv2Dispatch* gles, int version) {
     (void)gles;
 }

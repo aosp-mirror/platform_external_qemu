@@ -18,5 +18,17 @@
   X(void, eglSetMaxGLESVersion, (EGLint glesVersion)) \
   X(void, eglFillUsages, (void* usages)) \
 
+EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream);
+EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint * attrib_list, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display, EGLStream stream, const void* textureLoader);
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext context, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display, EGLStream stream, const void* textureSaver);
+EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglPostSaveContext(EGLDisplay display, EGLConfig config, EGLStream stream);
+EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
+EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint glesVersion);
+EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
 
 #endif  // RENDER_EGL_SNAPSHOT_FUNCTIONS_H

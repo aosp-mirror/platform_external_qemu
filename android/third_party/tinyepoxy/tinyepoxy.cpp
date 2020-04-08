@@ -20,7 +20,7 @@
 #include "OpenGLESDispatch/gles_functions.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
-static GLESv2Dispatch* s_gles2;
+static const GLESv2Dispatch* s_gles2;
 static int s_gles2_version;
 
 static void fatal(const char * message, const char * func) {
@@ -112,7 +112,7 @@ STUB(glTexSubImage1D)
 STUB(glViewportIndexedf)
 STUB(glWindowPos2i)
 
-void tinyepoxy_init(GLESv2Dispatch* gles, int version) {
+void tinyepoxy_init(const GLESv2Dispatch* gles, int version) {
     s_gles2 = gles;
     s_gles2_version = version;
     epoxy_glBindFramebufferEXT = gles->glBindFramebuffer;

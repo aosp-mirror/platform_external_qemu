@@ -124,10 +124,6 @@ android_license(TARGET "EMULATOR_FEATURE_DEPENDENCIES" LIBNAME None SPDX None
 # DARWINN_DEPENDENCIES) android_install_dependency(linux-x86_64
 # DARWINN_DEPENDENCIES) These are usually nops, but some code generators will
 # not automatically binplace these (Xcode!)
-android_copy_shared_lib(emulator EGL_translator EGL_translator)
-android_copy_shared_lib(emulator GLES_V2_translator GLES_V2_translator)
-android_copy_shared_lib(emulator GLES_CM_translator GLES_CM_translator)
-android_copy_shared_lib(emulator GLES12Translator GLES12Translator)
 android_copy_shared_lib(emulator OpenglRender OpenglRender)
 
 # And set the os specific properties
