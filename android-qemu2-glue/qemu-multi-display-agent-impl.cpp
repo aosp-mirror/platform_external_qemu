@@ -93,6 +93,12 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                 return false;
             }
         },
+        .setGpuMode = [](bool isGuestMode) {
+            auto instance = MultiDisplay::getInstance();
+            if (instance) {
+                instance->setGpuMode(isGuestMode);
+            }
+        },
         .createDisplay = [](uint32_t* displayId) -> int {
             auto instance = MultiDisplay::getInstance();
             if (instance) {
