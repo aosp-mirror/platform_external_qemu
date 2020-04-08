@@ -239,6 +239,31 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
     }
 }
 
+void FeatureControlImpl::initNoFiles() {
+    memset(mGuestTriedEnabledFeatures, 0, sizeof(FeatureOption) * Feature_n_items);
+
+    // Apply overrides from the hw config.
+    if (android_hw->hw_featureflags) {
+        parseAndApplyOverrides(android_hw->hw_featureflags);
+    }
+
+    // Enumerate the command line and environment variables to add overrides.
+    const auto envVar =
+            android::base::System::get()->envGet("ANDROID_EMULATOR_FEATURES");
+    if (!envVar.empty()) {
+        parseAndApplyOverrides(envVar);
+    }
+
+    if (android_cmdLineOptions) {
+        if (const ParamList* feature = android_cmdLineOptions->feature) {
+            do {
+                parseAndApplyOverrides(feature->param);
+                feature = feature->next;
+            } while (feature);
+        }
+    }
+}
+
 void FeatureControlImpl::create() {
     if (s_featureControl.hasInstance()) {
         LOG(ERROR) << "Feature control already exists in create() call";
@@ -247,6 +272,12 @@ void FeatureControlImpl::create() {
 }
 
 FeatureControlImpl::FeatureControlImpl() {
+
+    if (base::System::getEnvironmentVariable("ANDROID_EMU_SANDBOX") == "1") {
+        initNoFiles();
+        return;
+    }
+
     const auto updateChannel = studio::updateChannel();
 
     std::string defaultIniHostName;

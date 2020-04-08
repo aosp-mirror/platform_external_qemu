@@ -7,6 +7,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     SRC
       ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp
       GfxStreamBackend.cpp
+      multi-display-agent-mock-impl.cpp 
       window-agent-mock-impl.cpp)
 
   target_compile_options(gfxstream_backend PRIVATE -fvisibility=hidden)

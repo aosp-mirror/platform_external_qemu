@@ -43,6 +43,10 @@ EmuglBackendList::EmuglBackendList(const char* execDir,
     mNames = EmuglBackendScanner::scanDir(execDir, programBitness);
 }
 
+EmuglBackendList::EmuglBackendList(int programBitness,
+                                   const std::vector<std::string>& names) :
+        mDefaultName("auto"), mNames(names), mProgramBitness(programBitness) { }
+
 bool EmuglBackendList::contains(const char* name) const {
     for (size_t n = 0; n < mNames.size(); ++n) {
         if (mNames[n] == name) {
