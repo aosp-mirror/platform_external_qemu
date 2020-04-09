@@ -77,7 +77,6 @@ public:
     bool multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
                                    uint32_t dpi, uint32_t flag);
     bool translateCoordination(uint32_t* x, uint32_t* y, uint32_t* displayId);
-    void setGpuMode(bool isGuestMode);
     int createDisplay(uint32_t* displayId);
     int setDisplayPose(uint32_t displayId,
                        int32_t x,
@@ -108,7 +107,7 @@ public:
 
 private:
     const QAndroidEmulatorWindowAgent* mWindowAgent;
-    bool mGuestMode;
+    const bool mGuestMode;
     std::map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mLock;
     double m_monitorAspectRatio = 1.0;
@@ -132,4 +131,4 @@ private:
 } // namespace android
 
 void android_init_multi_display(const QAndroidEmulatorWindowAgent* const agent,
-                                bool isGUestMode = false);
+                                bool isGUestMode);

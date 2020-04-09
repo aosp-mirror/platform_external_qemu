@@ -255,9 +255,6 @@ bool MultiDisplay::translateCoordination(uint32_t* x, uint32_t* y, uint32_t* dis
     return false;
 }
 
-void MultiDisplay::setGpuMode(bool isGuestMode) {
-    mGuestMode = isGuestMode;
-}
 
 int MultiDisplay::createDisplay(uint32_t* displayId) {
     if (mGuestMode) {

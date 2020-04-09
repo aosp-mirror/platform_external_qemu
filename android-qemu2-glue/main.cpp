@@ -1802,7 +1802,9 @@ extern "C" int main(int argc, char** argv) {
     gQAndroidLocationAgent->gpsSetPassiveUpdate(!opts->no_passive_gps);
 
     android_foldable_initialize(nullptr);
-    android_init_multi_display(gQAndroidEmulatorWindowAgent);
+    bool isGuestMode =
+        (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
+    android_init_multi_display(gQAndroidEmulatorWindowAgent, isGuestMode);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
@@ -1923,10 +1925,6 @@ extern "C" int main(int argc, char** argv) {
 
         // Gpu configuration is set, now initialize the screen recorder
         // and screenshot callback
-        bool isGuestMode =
-            (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
-        gQAndroidMultiDisplayAgent->setGpuMode(isGuestMode);
-
         screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
                              isGuestMode ? uiEmuAgent.display : nullptr);
         android_registerScreenshotFunc([](const char* dirname, uint32_t display) {
