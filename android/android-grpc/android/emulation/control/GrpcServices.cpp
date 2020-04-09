@@ -183,10 +183,6 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
 
     builder.experimental().SetInterceptorCreators(std::move(creators));
 
-    // Allow large messages, as raw screenshots can take up a significant amount
-    // of memory.
-    const int megaByte = 1024 * 1024;
-    builder.SetMaxSendMessageSize(16 * megaByte);
     auto service = builder.BuildAndStart();
     if (!service)
         return nullptr;
