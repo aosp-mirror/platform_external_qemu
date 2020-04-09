@@ -24,21 +24,24 @@ class MultiDisplayPipe : public AndroidAsyncMessagePipe {
 public:
     class Service : public AndroidAsyncMessagePipe::Service<MultiDisplayPipe> {
     public:
-        Service(const char* serviceName)
-          : AndroidAsyncMessagePipe::Service<MultiDisplayPipe>(serviceName)
-        {}
+        Service(const char* serviceName, const QAndroidEmulatorWindowAgent* const agent)
+          : AndroidAsyncMessagePipe::Service<MultiDisplayPipe>(serviceName),
+            mWindowAgent(agent) {}
+        const QAndroidEmulatorWindowAgent* const mWindowAgent;
     };
 
     MultiDisplayPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs);
     virtual ~MultiDisplayPipe();
 
     void onMessage(const std::vector<uint8_t>& data) override;
-    void fillData(std::vector<uint8_t>& data, uint32_t id, uint32_t w, uint32_t h,
-                  uint32_t dpi, uint32_t flag, bool add);
-    virtual void onSave(base::Stream* stream) override;
-    virtual void onLoad(base::Stream* stream) override;
-
-    static MultiDisplayPipe* getInstance();
+    static void setMultiDisplay(uint32_t id,
+                                int32_t x,
+                                int32_t y,
+                                uint32_t w,
+                                uint32_t h,
+                                uint32_t dpi,
+                                uint32_t flag,
+                                bool add);
     const static uint8_t ADD;
     const static uint8_t DEL;
     const static uint8_t QUERY;
@@ -46,8 +49,10 @@ public:
     const static uint8_t MAX_DISPLAYS;
 
 private:
+    static void fillData(std::vector<uint8_t>& data, uint32_t id, uint32_t w, uint32_t h,
+                  uint32_t dpi, uint32_t flag, bool add);
     Service* const mService;
 };
 }
 
-void android_init_multi_display_pipe();
+void android_init_multi_display_pipe(const QAndroidEmulatorWindowAgent* const agent);

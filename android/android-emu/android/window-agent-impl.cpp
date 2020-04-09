@@ -15,7 +15,6 @@
 #include "android/emulation/control/window_agent.h"
 
 #include "android/emulator-window.h"
-#include "android/emulation/MultiDisplay.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/debug.h"
 
@@ -34,8 +33,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
         .rotate90Clockwise =
                 [] {
-                    if (const auto instance = android::MultiDisplay::getInstance()) {
-                        if (instance && instance->isMultiDisplayEnabled() == false) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        if (win->isMultiDisplayEnabled() == false) {
                             return emulator_window_rotate_90(true);
                         }
                     }
@@ -119,8 +118,22 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .setUIDisplayRegion =
                 [](int x, int y, int w, int h) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
-                        win->setUIDisplayRegion(x, y, w, h);
-                    };
+                        win->runOnUiThread([win, x, y, w, h]() {
+                            win->resizeAndChangeAspectRatio(x, y, w, h);
+                        });
+                    }
+                },
+        .setUIMultiDisplay =
+                [](uint32_t id,
+                   int32_t x,
+                   int32_t y,
+                   uint32_t w,
+                   uint32_t h,
+                   bool add,
+                   uint32_t dpi = 0) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->setUIMultiDisplay(id, x, y, w, h, add, dpi);
+                    }
                 },
         .getMultiDisplay =
                 [](uint32_t id,
@@ -131,10 +144,18 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                    uint32_t* dpi,
                    uint32_t* flag,
                    bool* enabled) {
-                    if (const auto ins = android::MultiDisplay::getInstance()) {
-                        return ins->getMultiDisplay(id, x, y, w, h, dpi, flag, enabled);
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        return win->getMultiDisplay(id, x, y, w, h, dpi, flag, enabled);
                     }
                     return false;
+                },
+        .getMonitorRect =
+                [](uint32_t* w, uint32_t* h) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        return win->getMonitorRect(w, h);
+                    } else {
+                        return false;
+                    }
                 },
         .setNoSkin =
                 []() {
@@ -147,6 +168,20 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         return win->restoreSkin();
                     }
+                },
+        .switchMultiDisplay =
+                [](bool add,
+                   uint32_t id,
+                   int32_t x,
+                   int32_t y,
+                   uint32_t w,
+                   uint32_t h,
+                   uint32_t dpi,
+                   uint32_t flag)->bool {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        return win->switchMultiDisplay(add, id, x, y, w, h, dpi, flag);
+                    }
+                    return false;
                 },
         .updateUIMultiDisplayPage =
                 [](uint32_t id) {

@@ -35,7 +35,6 @@
 #include "android/avd/info.h"
 #include "android/avd/util.h"
 #include "android/cmdline-option.h"
-#include "android/emulation/control/multi_display_agent.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"
 #include "android/globals.h"
@@ -500,5 +499,5 @@ void ExtendedWindow::showMacroRecordPage() {
 
 void ExtendedWindow::hideRotationButtons() {
     mExtendedUi->virtualSensorsPage->hideRotationButtons(
-            mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled());
+            mEmulatorWindow->isMultiDisplayEnabled());
 }

@@ -108,7 +108,6 @@ set(android-emu-common
     android/emulation/MediaVideoHelper.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
-    android/emulation/MultiDisplay.cpp
     android/emulation/MultiDisplayPipe.cpp
     android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp
@@ -537,6 +536,7 @@ set(android-emu-min
     android/emulation/HostmemIdMapping.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
+    android/emulation/MultiDisplayPipe.cpp
     android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp
     android/emulation/RefcountPipe.cpp

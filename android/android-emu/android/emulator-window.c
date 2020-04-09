@@ -198,7 +198,6 @@ static void _emulator_window_on_gpu_frame(void* context,
     skin_ui_update_gpu_frame(emulator->ui, width, height, pixels);
 }
 
-extern void android_load_multi_display_config();
 static void
 emulator_window_setup( EmulatorWindow*  emulator )
 {
@@ -307,7 +306,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     }
 
     skin_winsys_set_ui_agent(emulator->uiEmuAgent);
-    android_load_multi_display_config();
+
     // Determine whether to use an EmuGL sub-window or not.
     if (!s_use_emugl_subwindow) {
         gpu_frame_set_post_callback(looper_getForThread(),

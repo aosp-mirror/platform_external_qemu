@@ -90,7 +90,6 @@ bool configAndStartRenderer(
          AvdInfo* avd, AndroidOptions* opt, AndroidHwConfig* hw,
          const struct QAndroidVmOperations *vm_operations,
          const struct QAndroidEmulatorWindowAgent *window_agent,
-         const struct QAndroidMultiDisplayAgent *multi_display_agent,
          enum WinsysPreferredGlesBackend uiPreferredBackend,
          RendererConfig* config_out);
 

@@ -555,7 +555,12 @@ public:
         DisplayInfo(uint32_t cb, int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t d)
             : cb(cb), pos_x(x), pos_y(y), width(w), height(h), dpi(d) {}
     };
-    static const uint32_t s_invalidIdMultiDisplay;
+    std::unordered_map<uint32_t, DisplayInfo> m_displays;
+    static uint32_t s_maxNumMultiDisplay;
+    static uint32_t s_displayIdInternalBegin;
+    static uint32_t s_invalidIdMultiDisplay;
+    bool tryLockMultiDisplayOnLoad(void);
+    void unlockMultiDisplayOnLoad(void);
 
     EGLContext getGlobalEGLContext() { return m_pbufContext; }
     HandleType getLastPostedColorBuffer() { return m_lastPostedColorBuffer; }
@@ -605,6 +610,7 @@ private:
     int m_framebufferHeight = 0;
     int m_windowWidth = 0;
     int m_windowHeight = 0;
+    double m_monitorAspectRatio = 1.0;
     float m_dpr = 0;
 
     bool m_useSubWindow = false;
@@ -749,6 +755,8 @@ private:
 
     bool m_fastBlitSupported = false;
     bool m_vulkanInteropSupported = false;
+    emugl::Mutex m_multiDisplayOnLoadLock;
+    bool m_multiDisplayOnLoadDone = false;
 
     android::base::MessageChannel<HandleType, 1024>
         mOutstandingColorBufferDestroys;
