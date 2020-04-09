@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/emulation/GoldfishMediaDefs.h"
+#include "android/emulation/MediaTexturePool.h"
 #include "android/opengles.h"
 
 #include <stddef.h>
@@ -28,31 +29,26 @@ namespace emulation {
 // to host color buffer
 class MediaHostRenderer {
 public:
-    // for now, there is only NV12
-    struct TextureFrame {
-        uint32_t Ytex;
-        uint32_t UVtex;
-    };
-
+    using TextureFrame = MediaTexturePool::TextureFrame;
     // get a TextureFrame structure to hold decoded frame
-    TextureFrame getTextureFrame(int w, int h);
+    MediaTexturePool::TextureFrame getTextureFrame(int w, int h);
 
-    void saveDecodedFrameToTexture(TextureFrame frame,
+    void saveDecodedFrameToTexture(MediaTexturePool::TextureFrame frame,
                                    void* privData,
                                    void* func);
 
     // put back a used TextureFrame so it can be reused again
     // later
-    void putTextureFrame(TextureFrame frame) {
-        if (frame.Ytex > 0 && frame.UVtex > 0) {
-            mFramePool.push_back(std::move(frame));
-        }
+    void putTextureFrame(MediaTexturePool::TextureFrame frame) {
+        mTexturePool.putTextureFrame(frame);
     }
 
     void cleanUpTextures();
 
+    MediaTexturePool* getTexturePool() { return &mTexturePool; }
+
 private:
-    std::list<TextureFrame> mFramePool;
+    MediaTexturePool mTexturePool;
 
 public:
     // render decoded frame stored in CPU memory
@@ -63,10 +59,11 @@ public:
 
     // render decoded frame stored in GPU texture; recycle the swapped
     // out texture from colorbuffer into framepool
-    void renderToHostColorBufferWithTextures(int hostColorBufferId,
-                                             unsigned int outputWidth,
-                                             unsigned int outputHeight,
-                                             TextureFrame frame);
+    void renderToHostColorBufferWithTextures(
+            int hostColorBufferId,
+            unsigned int outputWidth,
+            unsigned int outputHeight,
+            MediaTexturePool::TextureFrame frame);
 
     MediaHostRenderer();
     ~MediaHostRenderer();
