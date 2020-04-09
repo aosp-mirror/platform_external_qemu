@@ -47,7 +47,6 @@ set(android-emu-common
     android/crashreport/detectors/CrashDetectors.cpp
     android/cros.c
     android/curl-support.c
-    android/emuctl-client.cpp
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
     android/emulation/AdbMessageSniffer.cpp
