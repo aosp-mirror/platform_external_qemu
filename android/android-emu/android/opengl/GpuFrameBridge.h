@@ -22,50 +22,20 @@ class Looper;
 
 namespace opengl {
 
-// EmuGL provides a way to send GPU frame data to its client, but will do
-// so by calling a user-provided callback in an EmuGL-created thread. The
-// corresponding data cannot be easily send to the UI, which expects to run
-// on the process' main loop.
-//
-// GpuFrameBridge is a helper class that works-around this situation. Usage
-// is the following:
-//
-//  1) Create a new GpuFrameBridge instance in the main loop thread, passing
-//     a handle to the main loop's Looper instance, and the address of a
-//     callback to retrieve frame data.
-//
-//  2) In the EmuGL callback, which runs in its own EmuGL thread, call the
-//     postFrame() method.
-//
+// GpuFrameBridge is a helper class to forward Gpu frame to its clients.
+// Usage is the following:
+// 1) Create a new GpuFrameBridge instance.
+// 2) Register the FrameAvailableCallback if needed.
+// 3) Call getRecordFrame or getRecordFrameAsync to receive frame.
 class GpuFrameBridge {
 public:
-    // Type of function that is called to transfer the content of a new
-    // GPU frame to the main thread. |opaque| is a user-provided pointer,
-    // |width| and |height| are dimensions in pixels, and |pixels| is
-    // the memory buffer of 32-bit RGBA image data. This buffer is freed
-    // when the function returns.
-    typedef void(Callback)(void* opaque,
-                           int width,
-                           int height,
-                           const void* pixels);
-
-    // Create a new GpuFrameBridge instance. |looper| is a handle to the main
-    // loop's Looper instance, and |callback| is a function that will be
-    // called, from the looper thread, to send the frame data to the client.
-    static GpuFrameBridge* create(android::base::Looper* looper,
-                                  Callback* callback,
-                                  void* callbackOpaque);
+    // Create a new GpuFrameBridge instance.
+    static GpuFrameBridge* create();
 
     // Destructor
     virtual ~GpuFrameBridge() {}
 
-    // Post a new frame from the EmuGL thread (synchronous).
-    virtual void postFrame(int width, int height, const void* pixels) = 0;
-
     // Post callback (synchronous) specifically for recording purposes.
-    // The intention is to either use this one or postFrame() as the callback
-    // and not both, because the speed to allocate + copy the pixel data in
-    // the postFrame() method is much too slow for recording.
     virtual void postRecordFrame(int width, int height, const void* pixels) = 0;
 
     // Async version of postRecordFrame for use with async readback.

@@ -30,99 +30,19 @@ namespace opengl {
 using android::base::ScopedPtr;
 using android::base::Looper;
 
-namespace {
-
-struct Frame {
-    Frame(int w, int h, const void* pixels) {
-        this->width = w;
-        this->height = h;
-        this->pixels = ::malloc(w * 4 * h);
-        ::memcpy(this->pixels, pixels, w * h * 4);
-    }
-
-    ~Frame() {
-        ::free(this->pixels);
-    }
-
-    int width;
-    int height;
-    void* pixels;
-};
-
-class FrameList {
-public:
-    FrameList() : mCount(0) {}
-
-    ~FrameList() {
-        for (int n = mCount; n > 0; --n) {
-            delete mFrames[n - 1];
-        }
-    }
-
-    int count() const { return mCount; }
-
-    Frame* popFront() {
-        if (mCount == 0) {
-            return NULL;
-        }
-        Frame* result = mFrames[0];
-        mCount--;
-        ::memmove(&mFrames[0], &mFrames[1], mCount * sizeof(Frame*));
-        mFrames[mCount] = NULL;
-        return result;
-    }
-
-    const Frame* get(int index) const {
-        if (index >= 0 && index < mCount) {
-            return mFrames[index];
-        } else {
-            return NULL;
-        }
-    }
-
-    static void add(void* context, int w, int h, const void* pixels) {
-        FrameList* list = reinterpret_cast<FrameList*>(context);
-        CHECK(list->mCount < kMaxFrames);
-        Frame* frame = new Frame(w, h, pixels);
-        list->mFrames[list->mCount++] = frame;
-    }
-
-private:
-    enum {
-        kMaxFrames = 128
-    };
-
-    int mCount;
-    Frame* mFrames[kMaxFrames];
-};
-
-}  // namespace
-
 TEST(GpuFrameBridge, postFrameWithinSingleThread) {
-    ScopedPtr<Looper> looper(Looper::create());
-    ASSERT_TRUE(looper.get());
-
-    FrameList list;
     GpuFrameBridge* bridge =
-            GpuFrameBridge::create(looper.get(), FrameList::add, &list);
+            GpuFrameBridge::create();
     EXPECT_TRUE(bridge);
 
     static const unsigned char kFrame0[4] = {
         0xff, 0x80, 0x40, 0xff,
     };
 
-    bridge->postFrame(1, 1, kFrame0);
-
-    EXPECT_EQ(ETIMEDOUT, looper->runWithTimeoutMs(100));
-
-    EXPECT_EQ(1, list.count());
-    ScopedPtr<Frame> frame(list.popFront());
-    EXPECT_TRUE(frame.get());
-    EXPECT_EQ(1, frame->width);
-    EXPECT_EQ(1, frame->height);
+    bridge->postRecordFrame(1, 1, kFrame0);
+    unsigned char* pixel = (unsigned char*)bridge->getRecordFrame();
     for (size_t n = 0; n < sizeof(kFrame0); ++n) {
-        EXPECT_EQ(kFrame0[n], reinterpret_cast<unsigned char*>(frame->pixels)[n])
-                << "# " << n;
+        EXPECT_EQ(kFrame0[n], pixel[n]) << "# " << n;
     }
 }
 
