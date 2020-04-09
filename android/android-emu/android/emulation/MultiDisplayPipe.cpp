@@ -15,7 +15,6 @@
 */
 
 #include "MultiDisplayPipe.h"
-#include "MultiDisplay.h"
 #include "android/opengles.h"
 
 namespace android {
@@ -45,41 +44,57 @@ MultiDisplayPipe::~MultiDisplayPipe() {
 void MultiDisplayPipe::onMessage(const std::vector<uint8_t>& data) {
     uint8_t cmd = data[0];
     switch (cmd) {
-        case QUERY: {
+        case QUERY:
             LOG(VERBOSE) << "MultiDisplayPipe recevied QUERY";
-            uint32_t w, h, dpi, flag, id;
-            int32_t startId = -1;
-            const auto ins = MultiDisplay::getInstance();
-            while (ins && ins->getNextMultiDisplay(startId, &id, nullptr, nullptr,
-                                                    &w, &h, &dpi, &flag, nullptr)) {
-                if (id >= MultiDisplay::s_displayIdInternalBegin) {
-                    // Display created by guest through rcCommand, e.g., HWC2,
-                    // not by UI/config.ini/cmd, need not report
-                    break;
+            for (uint32_t i = 1; i < MAX_DISPLAYS + 1; i++) {
+                uint32_t w, h, dpi, flag;
+                if (mService->mWindowAgent->getMultiDisplay(i, NULL, NULL, &w, &h,
+                                                            &dpi, &flag, NULL)) {
+                    if (dpi == 0) {
+                        // Display created by guest through rcCommand,
+                        // not by UI/config.ini/cmd, need not report
+                        continue;
+                    }
+                    std::vector<uint8_t> buf;
+                    fillData(buf, i, w, h, dpi, flag, true);
+                    LOG(VERBOSE) << "MultiDisplayPipe send add id " << i << " width " << w
+                                 << " height " << h << " dpi " << dpi << " flag " << flag;
+                    send(std::move(buf));
                 }
-                std::vector<uint8_t> buf;
-                fillData(buf, id, w, h, dpi, flag, true);
-                LOG(VERBOSE) << "MultiDisplayPipe send add id " << id << " width " << w
-                                << " height " << h << " dpi " << dpi << " flag " << flag;
-                send(std::move(buf));
-                startId = id;
             }
             break;
-        }
         case BIND: {
             uint32_t id = *(uint32_t*)&(data[1]);
             uint32_t cb = *(uint32_t*)&(data[5]);
             LOG(VERBOSE) << "MultiDisplayPipe bind display " << id << " cb " << cb;
-            const auto ins = MultiDisplay::getInstance();
-            if (ins) {
-                ins->setDisplayColorBuffer(id, cb);
-            }
+            android_setMultiDisplayColorBuffer(id, cb);
             break;
         }
         default:
             LOG(WARNING) << "unexpected cmommand " << cmd;
     }
 
+}
+
+//static
+void MultiDisplayPipe::setMultiDisplay(uint32_t id,
+                                       int32_t x,
+                                       int32_t y,
+                                       uint32_t w,
+                                       uint32_t h,
+                                       uint32_t dpi,
+                                       uint32_t flag,
+                                       bool add) {
+    if (sMultiDisplayPipeInstance) {
+        std::vector<uint8_t> data;
+        fillData(data, id, w, h, dpi, flag, add);
+        LOG(VERBOSE) << "MultiDisplayPipe send " << (add ? "add":"del") << " id " << id
+                     << " width " << w << " height " << h << " dpi " << dpi
+                     << " flag " << flag;
+        sMultiDisplayPipeInstance->send(std::move(data));
+    }
+    // adjust the host window
+    android_setMultiDisplay(id, x, y, w, h, dpi, add);
 }
 
 void MultiDisplayPipe::fillData(std::vector<uint8_t>& data, uint32_t id, uint32_t w, uint32_t h,
@@ -96,35 +111,10 @@ void MultiDisplayPipe::fillData(std::vector<uint8_t>& data, uint32_t id, uint32_
     }
 }
 
-void MultiDisplayPipe::onSave(base::Stream* stream) {
-    AndroidAsyncMessagePipe::onSave(stream);
-    MultiDisplay* instance = MultiDisplay::getInstance();
-    if (!instance) {
-        LOG(ERROR) << "Failed to save MultiDisplay info, MultiDisplay "
-                   << "not initiated";
-        return;
-    }
-    instance->onSave(stream);
-}
-
-void MultiDisplayPipe::onLoad(base::Stream* stream) {
-    AndroidAsyncMessagePipe::onLoad(stream);
-    MultiDisplay* instance = MultiDisplay::getInstance();
-    if (!instance) {
-        LOG(ERROR) << "Failed to load MultiDisplay info, MultiDisplay "
-                   << "not initiated";
-        return;
-    }
-    instance->onLoad(stream);
-}
-
-MultiDisplayPipe* MultiDisplayPipe::getInstance() {
-    return sMultiDisplayPipeInstance;
-}
 } // namespace android
 
-void android_init_multi_display_pipe() {
+void android_init_multi_display_pipe(const QAndroidEmulatorWindowAgent* const agent) {
     android::AndroidPipe::Service::add(
-        new android::MultiDisplayPipe::Service("multidisplay"));
+        new android::MultiDisplayPipe::Service("multidisplay", agent));
 }
 

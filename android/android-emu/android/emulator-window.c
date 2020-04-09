@@ -198,7 +198,6 @@ static void _emulator_window_on_gpu_frame(void* context,
     skin_ui_update_gpu_frame(emulator->ui, width, height, pixels);
 }
 
-extern void android_load_multi_display_config();
 static void
 emulator_window_setup( EmulatorWindow*  emulator )
 {
@@ -263,6 +262,9 @@ emulator_window_setup( EmulatorWindow*  emulator )
             .framebuffer_invalidate = &emulator_window_framebuffer_invalidate,
     };
 
+    // Determine whether to use an EmuGL sub-window or not.
+    const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER");
+    s_use_emugl_subwindow = !env || !env[0] || env[0] == '0';
     // for gpu off or gpu guest, we don't use the subwindow
     if (!android_hw->hw_gpu_enabled || !strcmp(android_hw->hw_gpu_mode, "guest")) {
         s_use_emugl_subwindow = 0;
@@ -272,7 +274,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     if (s_use_emugl_subwindow) {
         VERBOSE_PRINT(gles, "Using EmuGL sub-window for GPU display");
     } else {
-        VERBOSE_PRINT(gles, "Using guest rendering for display");
+        VERBOSE_PRINT(gles, "Using glReadPixels() for GPU display");
     }
 
     emulator->ui = skin_ui_create(
@@ -304,7 +306,14 @@ emulator_window_setup( EmulatorWindow*  emulator )
     }
 
     skin_winsys_set_ui_agent(emulator->uiEmuAgent);
-    android_load_multi_display_config();
+
+    // Determine whether to use an EmuGL sub-window or not.
+    if (!s_use_emugl_subwindow) {
+        gpu_frame_set_post_callback(looper_getForThread(),
+                                    emulator,
+                                    _emulator_window_on_gpu_frame);
+    }
+
     skin_ui_reset_title(emulator->ui);
 }
 

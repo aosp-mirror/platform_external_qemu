@@ -18,55 +18,16 @@
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidMultiDisplayAgent {
-    int (*setMultiDisplay)(uint32_t id,
-                           int32_t x,
-                           int32_t y,
-                           uint32_t w,
-                           uint32_t h,
-                           uint32_t dpi,
-                           uint32_t flag,
-                           bool add);
-    bool (*getMultiDisplay)(uint32_t id,
-                            int32_t* x,
-                            int32_t* y,
-                            uint32_t* w,
-                            uint32_t* h,
-                            uint32_t* dpi,
-                            uint32_t* flag,
-                            bool* enable);
-    bool (*getNextMultiDisplay)(int32_t start_id,
-                                uint32_t* id,
-                                int32_t* x,
-                                int32_t* y,
-                                uint32_t* w,
-                                uint32_t* h,
-                                uint32_t* dpi,
-                                uint32_t* flag,
-                                uint32_t* cb);
-    bool (*isMultiDisplayEnabled)(void);
-    void (*getCombinedDisplaySize)(uint32_t* width, uint32_t* height);
-    bool (*multiDisplayParamValidate)(uint32_t id, uint32_t w, uint32_t h,
-                                      uint32_t dpi, uint32_t flag);
-    bool (*translateCoordination)(uint32_t* x, uint32_t*y, uint32_t* displayId);
-    void (*setGpuMode)(bool isGuestMode);
-    int (*createDisplay)(uint32_t* displayId);
-    int (*destroyDisplay)(uint32_t displayId);
-    int (*setDisplayPose)(uint32_t displayId,
-                          int32_t x,
-                          int32_t y,
-                          uint32_t w,
-                          uint32_t h,
-                          uint32_t dpi);
-    int (*getDisplayPose)(uint32_t displayId,
-                         int32_t* x,
-                         int32_t* y,
-                         uint32_t* w,
-                         uint32_t* h);
-    int (*getDisplayColorBuffer)(uint32_t displayId, uint32_t* colorBuffer);
-    int (*getColorBufferDisplay)(uint32_t colorBuffer, uint32_t* displayId);
-    int (*setDisplayColorBuffer)(uint32_t displayId, uint32_t colorBuffer);
+    void (*setMultiDisplay)(uint32_t id,
+                            int32_t x,
+                            int32_t y,
+                            uint32_t w,
+                            uint32_t h,
+                            uint32_t dpi,
+                            uint32_t flag,
+                            bool add);
+    bool (*tryLockMultiDisplayOnLoad)(void);
+    void (*unlockMultiDisplayOnLoad)(void);
 } QAndroidMultiDisplayAgent;
-
-extern const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
 
 ANDROID_END_HEADER

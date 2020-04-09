@@ -356,6 +356,21 @@ void RendererImpl::setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) {
     }
 }
 
+bool RendererImpl::tryLockMultiDisplayOnLoad(void) {
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        return fb->tryLockMultiDisplayOnLoad();
+    }
+    return false;
+}
+
+void RendererImpl::unlockMultiDisplayOnLoad(void) {
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        fb->unlockMultiDisplayOnLoad();
+    }
+}
+
 RendererImpl::HardwareStrings RendererImpl::getHardwareStrings() {
     assert(mRenderWindow);
 

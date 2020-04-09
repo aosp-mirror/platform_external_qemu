@@ -25,8 +25,8 @@
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
-#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -640,7 +640,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         }
     }
 
-
+    for (int i = 0; i < MAX_MULTIDISPLAYS + 1; i++) {
+        mMultiDisplay.emplace(i, MultiDisplayInfo());
+    }
 
     ScreenMask::loadMask();
 
@@ -2218,9 +2220,6 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
 void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
     QRect windowGeo = this->geometry();
     QSize backingSize = mBackingSurface->bitmap->size();
-    if (backingSize.width() == w && backingSize.height() == h) {
-        return;
-    }
     float scale = (float)windowGeo.width() / (float)backingSize.width();
     setDisplayRegionAndUpdate(x, y, w, h);
     simulateSetScale(std::max(.2, (double)scale));
@@ -2296,7 +2295,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
             (event->modifiers() == Qt::ControlModifier ||
              event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier) )) {
         if (type == kEventKeyDown) {
-            if (mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled() == false) {
+            if (countEnabledMultiDisplayLocked() == 0) {
                 raise();
                 D("%s: Using default display for multi touch\n", __FUNCTION__);
                 mOverlay.showForMultitouch(
@@ -2306,29 +2305,25 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
                 QPoint mousePosition = mapFromGlobal(QCursor::pos());
                 uint32_t w = 0;
                 uint32_t h = 0;
-                mToolWindow->getUiEmuAgent()->multiDisplay->getCombinedDisplaySize(&w, &h);
+                getCombinedDisplaySize(&w, &h);
                 double widthRatio = (double)geometry().width() / (double)w;
                 double heightRatio = (double)geometry().height() / (double)h;
-                int pos_x, pos_y, startId = -1;
-                uint32_t width, height, id;
-                while (mToolWindow->getUiEmuAgent()->multiDisplay->getNextMultiDisplay(startId, &id,
-                                                                                       &pos_x, &pos_y,
-                                                                                       &width, &height,
-                                                                                       nullptr, nullptr,
-                                                                                       nullptr)) {
-                    QRect r(static_cast<int>(pos_x * widthRatio),
-                            static_cast<int>(pos_y * heightRatio),
-                            static_cast<int>(width * widthRatio),
-                            static_cast<int>(height * heightRatio));
+                for (const auto& iter : mMultiDisplay) {
+                    if (!iter.second.enabled) {
+                        continue;
+                    }
+                    QRect r(static_cast<int>(iter.second.pos_x * widthRatio),
+                            static_cast<int>(iter.second.pos_y * heightRatio),
+                            static_cast<int>(iter.second.width * widthRatio),
+                            static_cast<int>(iter.second.height * heightRatio));
                     if (r.contains(mousePosition, true)) {
                         D("%s: using display %d for multi touch\n",
-                          __FUNCTION__, id);
+                          __FUNCTION__, iter.first);
                         mOverlay.showForMultitouch(
                                 event->modifiers() == Qt::ControlModifier,
                                 r.center());
                         break;
                     }
-                    startId = id;
                 }
             }
         }
@@ -2827,6 +2822,49 @@ void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
     }
 }
 
+void EmulatorQtWindow::setUIMultiDisplay(uint32_t id,
+                                       int32_t x,
+                                       int32_t y,
+                                       uint32_t w,
+                                       uint32_t h,
+                                       bool add,
+                                       uint32_t dpi) {
+    LOG(VERBOSE) << "setUIMultiDisplay id " << id << " " << x
+                 << " " << y << " " << w << " " << h
+                 << " " << (add ? "add" : "del");
+    {
+        AutoLock lock(mMultiDisplayLock);
+        mMultiDisplay[id].enabled = add;
+        if (add) {
+            mMultiDisplay[id].pos_x = x;
+            mMultiDisplay[id].pos_y = y;
+            mMultiDisplay[id].width = w;
+            mMultiDisplay[id].height = h;
+            mMultiDisplay[id].dpi = dpi;
+            if (countEnabledMultiDisplayLocked() > 0) {
+                runOnUiThread([this] {
+                    mToolWindow->hideRotationButton(true);
+                    setFrameAlways(true);
+                });
+            }
+        } else if (countEnabledMultiDisplayLocked() == 0) {
+            runOnUiThread([this] {
+                mToolWindow->hideRotationButton(false);
+            });
+            restoreSkin();
+        }
+    }
+    SkinEvent* event = new SkinEvent();
+    event->type = kEventSetMultiDisplay;
+    event->u.multi_display.id = id;
+    event->u.multi_display.xOffset = x;
+    event->u.multi_display.yOffset = y;
+    event->u.multi_display.width = w;
+    event->u.multi_display.height = h;
+    event->u.multi_display.add = add;
+    skin_event_add(event);
+}
+
 void EmulatorQtWindow::updateUIMultiDisplayPage(uint32_t id) {
     // update the MutiDisplay UI page, e.g., config through console,
     // loaded from snapshot
@@ -2843,11 +2881,47 @@ bool EmulatorQtWindow::getMultiDisplay(uint32_t id,
                                        uint32_t* dpi,
                                        uint32_t* flag,
                                        bool* enabled) {
-    const auto uiAgent = mToolWindow->getUiEmuAgent();
-    return uiAgent->multiDisplay->getMultiDisplay(id, x, y, w, h, dpi, flag, enabled);
+    AutoLock lock(mMultiDisplayLock);
+    if (x) {
+        *x = mMultiDisplay[id].pos_x;
+    }
+    if (y) {
+        *y = mMultiDisplay[id].pos_y;
+    }
+    if (w) {
+        *w = mMultiDisplay[id].width;
+    }
+    if (h) {
+        *h = mMultiDisplay[id].height;
+    }
+    if (dpi) {
+        *dpi = mMultiDisplay[id].dpi;
+    }
+    if (flag) {
+        *flag = mMultiDisplay[id].flag;
+    }
+    if (enabled) {
+        *enabled = mMultiDisplay[id].enabled;
+    }
+    return mMultiDisplay[id].enabled;
 }
 
-int EmulatorQtWindow::switchMultiDisplay(bool enabled,
+bool EmulatorQtWindow::isMultiDisplayEnabled() {
+    AutoLock lock(mMultiDisplayLock);
+    return countEnabledMultiDisplayLocked() > 0;
+}
+
+int EmulatorQtWindow::countEnabledMultiDisplayLocked() {
+    // Not counting 0, the default Android display
+    return std::count_if(
+            mMultiDisplay.begin(), mMultiDisplay.end(),
+            [this](const std::unordered_map<
+                    uint32_t, MultiDisplayInfo>::value_type& entry) {
+                return entry.first != 0 && entry.second.enabled;
+            });
+}
+
+bool EmulatorQtWindow::switchMultiDisplay(bool enabled,
                                           uint32_t id,
                                           int32_t x,
                                           int32_t y,
@@ -2855,8 +2929,46 @@ int EmulatorQtWindow::switchMultiDisplay(bool enabled,
                                           uint32_t height,
                                           uint32_t dpi,
                                           uint32_t flag) {
+    LOG(VERBOSE) << "switchMultiDisplay id " << id << " "
+                 << x << " " << y << " " << width << " " << height << " "
+                << dpi << " " << flag << " " << (enabled? "add":"del");
+    if (!android::featurecontrol::isEnabled(
+                android::featurecontrol::MultiDisplay) ||
+        ToolWindow::isFoldableConfigured()) {
+        return false;
+    }
+    if (enabled && !multiDisplayParamValidate(id, width, height, dpi, flag)) {
+        return false;
+    }
+    if (mOrientation != SKIN_ROTATION_0) {
+        showMessage("Please apply multiple displays without rotation",
+                    Ui::OverlayMessageType::Error, 1000);
+         return false;
+    }
+    {
+      AutoLock lock(mMultiDisplayLock);
+      mMultiDisplay[id].pos_x = x;
+      mMultiDisplay[id].pos_y = y;
+      mMultiDisplay[id].width = width;
+      mMultiDisplay[id].height = height;
+      mMultiDisplay[id].dpi= dpi;
+      mMultiDisplay[id].flag = flag;
+      mMultiDisplay[id].enabled = enabled;
+    }
+
+    // Service inside guest already started in QemuMiscPipe when guesst
+    // bootCompleted. But this service may be killed, e.g., Android low
+    // memory. Send broadcast again to gurantee servce running.
+    // P.S. Service has check to avoid duplication.
+    getAdbInterface()->enqueueCommand(
+        {"shell", "am", "broadcast", "-a",
+         "com.android.emulator.multidisplay.START", "-n",
+         "com.android.emulator.multidisplay/"
+         ".MultiDisplayServiceReceiver"});
     const auto uiAgent = mToolWindow->getUiEmuAgent();
-    return uiAgent->multiDisplay->setMultiDisplay(id, x, y, width, height, dpi, flag, enabled);
+    uiAgent->multiDisplay->setMultiDisplay(id, x, y, width, height, dpi, flag, enabled);
+
+    return true;
 }
 
 bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
@@ -2872,48 +2984,96 @@ bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
 }
 
 void EmulatorQtWindow::setNoSkin() {
-    runOnUiThread([this]() {
-        char *skinName, *skinDir;
-        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
-        if (skinDir != NULL) {
-            SkinEvent* event = new SkinEvent();
-            event->type = kEventSetNoSkin;
-            skin_event_add(event);
-        }
-        mToolWindow->hideRotationButton(true);
-        setFrameAlways(true);
-    });
+    char *skinName, *skinDir;
+    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    if (skinDir != NULL) {
+        SkinEvent* event = new SkinEvent();
+        event->type = kEventSetNoSkin;
+        skin_event_add(event);
+    }
 }
 
 void EmulatorQtWindow::restoreSkin() {
-    runOnUiThread([this]() {
-        char *skinName, *skinDir;
-        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
-        if (skinDir != NULL) {
-            SkinEvent* event = new SkinEvent();
-            event->type = kEventRestoreSkin;
-            skin_event_add(event);
-        }
-        mToolWindow->hideRotationButton(false);
-        setFrameAlways(false);
-    });
+    char *skinName, *skinDir;
+    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    if (skinDir != NULL) {
+        SkinEvent* event = new SkinEvent();
+        event->type = kEventRestoreSkin;
+        skin_event_add(event);
+    }
 }
 
-void EmulatorQtWindow::setUIDisplayRegion(int x, int y, int w, int h) {
-    runOnUiThread([this, x, y, w, h]() {this->resizeAndChangeAspectRatio(x, y, w, h);});
+void EmulatorQtWindow::getCombinedDisplaySize(uint32_t* w, uint32_t* h) {
+    uint32_t total_h = 0;
+    uint32_t total_w = 0;
+    for (const auto& iter : mMultiDisplay) {
+        total_h = std::max(total_h, iter.second.height + iter.second.pos_y);
+        total_w = std::max(total_w, iter.second.width + iter.second.pos_x);
+    }
+    if (h) {
+        *h = total_h;
+    }
+    if (w) {
+        *w = total_w;
+    }
 }
 
 bool EmulatorQtWindow::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
                                                  uint32_t dpi, uint32_t flag) {
-    const auto uiAgent = mToolWindow->getUiEmuAgent();
-    return uiAgent->multiDisplay->multiDisplayParamValidate(id, w, h, dpi, flag);
+    // According the Android 9 CDD,
+    // * 120 <= dpi <= 640
+    // * 320 * (dpi / 160) <= width
+    // * 320 * (dpi / 160) <= height
+    // * Screen aspect ratio cannot be longer (or wider) than 21:9 (or 9:21).
+    //
+    // Also we don't want a screen too big to limit the performance impact.
+    // * 4K might be a good upper limit
+
+    if (dpi < 120 || dpi > 640) {
+        showMessage("dpi should be between 120 and 640",
+                    Ui::OverlayMessageType::Error, 1000);
+        fprintf(stderr, "dpi should be between 120 and 640\n");
+        return false;
+    }
+    if (w < 320 * dpi / 160 || h < 320 * dpi / 160) {
+        showMessage("width and height should be >= 320dp",
+                    Ui::OverlayMessageType::Error, 1000);
+        fprintf(stderr, "width and height should be >= 320dp\n");
+        return false;
+    }
+    if (!((w <= 4096 && h <= 2160) || (w <= 2160 && h <= 4096))) {
+        showMessage("resolution should not exceed 4k (4096*2160)",
+                    Ui::OverlayMessageType::Error, 1000);
+        fprintf(stderr, "resolution should not exceed 4k (4096*2160)\n");
+        return false;
+    }
+    if (w * 21 < h * 9 || w * 9 > h * 21) {
+        showMessage("Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)",
+                    Ui::OverlayMessageType::Error, 1000);
+        fprintf(stderr, "Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)\n");
+        return false;
+    }
+    if (id > MultiDisplayPage::sMaxItem) {
+        showMessage("Display index cannot be more than 3",
+                    Ui::OverlayMessageType::Error, 1000);
+        fprintf(stderr, "Display index cannot be more than 3\n");
+        return false;
+    }
+    return true;
 }
 
 void EmulatorQtWindow::saveMultidisplayToConfig() {
-    int pos_x, pos_y;
-    uint32_t width, height, dpi, flag;
-    for (uint32_t i = 1; i < MultiDisplayPage::sMaxItem + 1; i++) {
-        if (!getMultiDisplay(i, &pos_x, &pos_y, &width, &height, &dpi, &flag, nullptr)) {
+    for (int i = 1; i < MultiDisplayPage::sMaxItem + 1; i++) {
+        if (mMultiDisplay[i].enabled && mMultiDisplay[i].dpi != 0) {
+            avdInfo_replaceMultiDisplayInConfigIni(android_avdInfo,
+                                                   i,
+                                                   mMultiDisplay[i].pos_x,
+                                                   mMultiDisplay[i].pos_y,
+                                                   mMultiDisplay[i].width,
+                                                   mMultiDisplay[i].height,
+                                                   mMultiDisplay[i].dpi,
+                                                   mMultiDisplay[i].flag);
+        } else {
             avdInfo_replaceMultiDisplayInConfigIni(android_avdInfo,
                                                    i,
                                                    -1,
@@ -2922,15 +3082,6 @@ void EmulatorQtWindow::saveMultidisplayToConfig() {
                                                    0,
                                                    0,
                                                    0);
-        } else  {
-            avdInfo_replaceMultiDisplayInConfigIni(android_avdInfo,
-                                                   i,
-                                                   pos_x,
-                                                   pos_y,
-                                                   width,
-                                                   height,
-                                                   dpi,
-                                                   flag);
         }
     }
 }

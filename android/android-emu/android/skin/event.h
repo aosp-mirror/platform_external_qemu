@@ -43,6 +43,7 @@ typedef enum {
     kEventWindowChanged,
     kEventSetDisplayRegion,
     kEventSetDisplayRegionAndUpdate,
+    kEventSetMultiDisplay,
     kEventSetNoSkin,
     kEventRestoreSkin,
 } SkinEventType;

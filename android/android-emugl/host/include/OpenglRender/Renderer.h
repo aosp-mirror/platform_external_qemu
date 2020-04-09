@@ -184,6 +184,9 @@ public:
     //    bind ColorBuffer to the display
     virtual void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) = 0;
 
+    virtual bool tryLockMultiDisplayOnLoad(void) = 0;
+    virtual void unlockMultiDisplayOnLoad(void) = 0;
+
     // cleanupProcGLObjects -
     //    clean up all per-process resources when guest process exits (or is
     // killed). Such resources include color buffer handles and EglImage handles.

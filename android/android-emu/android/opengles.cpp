@@ -195,7 +195,6 @@ int
 android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int guestApiLevel,
                               const QAndroidVmOperations *vm_operations,
                               const QAndroidEmulatorWindowAgent *window_agent,
-                              const QAndroidMultiDisplayAgent *multi_display_agent,
                               int* glesMajorVersion_out,
                               int* glesMinorVersion_out)
 {
@@ -244,7 +243,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
     sRenderLib->setDmaOps(dma_ops);
     sRenderLib->setVmOps(*vm_operations);
-    sRenderLib->setWindowOps(*window_agent, *multi_display_agent);
+    sRenderLib->setWindowOps(*window_agent);
     sRenderLib->setUsageTracker(android::base::CpuUsage::get(),
                                 android::base::MemoryTracker::get());
 
@@ -479,10 +478,10 @@ void android_registerScreenshotFunc(ScreenshotFunc f)
     sScreenshotFunc = f;
 }
 
-void android_screenShot(const char* dirname, uint32_t displayId)
+void android_screenShot(const char* dirname)
 {
     if (sScreenshotFunc) {
-        sScreenshotFunc(dirname, displayId);
+        sScreenshotFunc(dirname);
     }
 }
 
@@ -505,6 +504,25 @@ void android_setMultiDisplay(uint32_t id,
                              bool add) {
     if (sRenderer) {
        sRenderer->setMultiDisplay(id, x, y, w, h, dpi, add);
+    }
+}
+
+void android_setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) {
+    if (sRenderer) {
+       sRenderer->setMultiDisplayColorBuffer(id, cb);
+    }
+}
+
+bool android_tryLockMultiDisplayOnLoad(void) {
+    if (sRenderer) {
+        return sRenderer->tryLockMultiDisplayOnLoad();
+    }
+    return false;
+}
+
+void android_unlockMultiDisplayOnLoad(void) {
+    if (sRenderer) {
+        sRenderer->unlockMultiDisplayOnLoad();
     }
 }
 

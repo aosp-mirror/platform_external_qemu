@@ -24,7 +24,6 @@
 #include "android/emulation/address_space_graphics.h"
 #include "android/emulation/address_space_graphics_types.h"
 #include "android/emulation/AndroidPipe.h"
-#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/emulation/hostdevices/HostAddressSpace.h"
@@ -76,8 +75,6 @@ using android::emulation::asg::ConsumerCallbacks;
 static constexpr int kWindowSize = 256;
 
 extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
-
-extern const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
 
 extern const QAndroidVmOperations* const gQAndroidVmOperations;
 
@@ -174,8 +171,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     android_startOpenglesRenderer(
         kWindowSize, kWindowSize, 1, 28, gQAndroidVmOperations,
-        gQAndroidEmulatorWindowAgent, gQAndroidMultiDisplayAgent,
-        &maj, &min);
+        gQAndroidEmulatorWindowAgent, &maj, &min);
 
     androidSnapshot_initialize(
         gQAndroidVmOperations,

@@ -37,7 +37,7 @@ typedef struct QAndroidRecordScreenAgent {
     // Get the state of the recorder.
     RecorderState (*getRecorderState)(void);
     // Take a screenshot.
-    void (*doSnap)(const char* dirname, uint32_t displayId);
+    void (*doSnap)(const char* dirname);
 
     // Setup a shared memory region. The framerate should ideally be fps
     // Returns the name of the memory handle, or null if initialization failed.

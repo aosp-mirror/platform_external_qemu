@@ -14,7 +14,6 @@
 
 #include <stddef.h>
 
-#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/opengl/virtio_gpu_ops.h"
@@ -44,7 +43,6 @@ int android_startOpenglesRenderer(int width, int height,
                                   bool isPhone, int guestApiLevel,
                                   const QAndroidVmOperations *vm_operations,
                                   const QAndroidEmulatorWindowAgent *window_agent,
-                                  const QAndroidMultiDisplayAgent *multi_display_agent,
                                   int* glesMajorVersion_out,
                                   int* glesMinorVersion_out);
 
@@ -90,14 +88,20 @@ void android_setMultiDisplay(uint32_t id,
                              uint32_t dpi,
                              bool add);
 
+void android_setMultiDisplayColorBuffer(uint32_t id, uint32_t cb);
+
+bool android_tryLockMultiDisplayOnLoad(void);
+
+void android_unlockMultiDisplayOnLoad(void);
+
 void android_redrawOpenglesWindow(void);
 
 bool android_hasGuestPostedAFrame(void);
 void android_resetGuestPostedAFrame(void);
 
-typedef void (*ScreenshotFunc)(const char* dirname, uint32_t displayId);
+typedef void (*ScreenshotFunc)(const char* dirname);
 void android_registerScreenshotFunc(ScreenshotFunc f);
-void android_screenShot(const char* dirname, uint32_t displayId);
+void android_screenShot(const char* dirname);
 
 /* Stop the renderer process */
 void android_stopOpenglesRenderer(bool wait);
