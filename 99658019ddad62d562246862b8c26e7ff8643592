@@ -94,6 +94,30 @@
       "revId": "99658019ddad62d562246862b8c26e7ff8643592",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "873f2253_75437a8c",
+        "filename": "android/android-emu/android/base/ProcessControl.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-09T20:52:17Z",
+      "side": 1,
+      "message": "Ok, I did some more digging and read https://docs.microsoft.com/en-gb/archive/blogs/twistylittlepassagesallalike/everyone-quotes-command-line-arguments-the-wrong-way on which the Win32Utils function is based.\n\nTakeaways:\n\n- Intention is to produce a single string that can be properly fed to CreateProcess, such that main(argc, argv) will see the same argc/argv as used when this function was called.\n- so on windows: CreateProcess( ..., string (a),...) --\u003e calls main(argc, argv) -\u003e quoteCommandLine(argc, argv) --\u003e  string (b) --\u003e CreateProcess(..., string(b), ...) --\u003e main(argc\u0027, argv\u0027) would have argc \u003d\u003d argc\u0027 and argv \u003d\u003d argv\u0027\n\nI\u0027m not sure if this will hold on posix (esp, since \\ is treated diff in a path).\n\nThere might be a whole slew of unexpected behaviors. With the code here we at least are guaranteed that we can reconstruct the individual arguments as they were seen by the main function. (You still would have to call the Win32Utils::quoteCommandLine to call CreateProcess).",
+      "parentUuid": "321191d2_2dda5d4b",
+      "range": {
+        "startLine": 60,
+        "startChar": 26,
+        "endLine": 60,
+        "endChar": 43
+      },
+      "revId": "99658019ddad62d562246862b8c26e7ff8643592",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
