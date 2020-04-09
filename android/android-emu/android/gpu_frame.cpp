@@ -42,12 +42,6 @@ using android::base::AutoLock;
             ##__VA_ARGS__)
 #endif
 
-namespace android {
-namespace base {
-class Looper;
-}  // namespace base
-}  // namespace android
-
 // Standard values from Khronos.
 #define GL_RGBA 0x1908
 #define GL_UNSIGNED_BYTE 0x1401
@@ -56,9 +50,6 @@ using android::opengl::GpuFrameBridge;
 using android::base::CallbackRegistry;
 
 static GpuFrameBridge* sBridge = NULL;
-// We need some way to disable the post() if only the recording is using that
-// path and it is not in use because glReadPixels will slow down everything.
-static bool sIsGuestMode = false;
 static std::atomic_bool sRequestPost{false};
 
 static android::base::LazyInstance<CallbackRegistry> sReceiverState =
@@ -82,21 +73,6 @@ typedef void (*on_new_gpu_frame_t)(void* opaque,
                                    int format,
                                    int type,
                                    unsigned char* pixels);
-// Guest mode:
-static void onNewGpuFrame_guest(void* opaque,
-                                int width,
-                                int height,
-                                int ydir,
-                                int format,
-                                int type,
-                                unsigned char* pixels) {
-    DCHECK(ydir == -1);
-    DCHECK(format == GL_RGBA);
-    DCHECK(type == GL_UNSIGNED_BYTE);
-
-    GpuFrameBridge* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
-    bridge->postFrame(width, height, pixels);
-}
 
 // Recording (synchronous):
 static void onNewGpuFrame_record(void* opaque,
@@ -131,14 +107,10 @@ static void onNewGpuFrame_recordAsync(void* opaque,
 }
 
 static on_new_gpu_frame_t choose_on_new_gpu_frame() {
-    if (sIsGuestMode) {
-        return onNewGpuFrame_guest;
+    if (android_asyncReadbackSupported()) {
+        return onNewGpuFrame_recordAsync;
     } else {
-        if (android_asyncReadbackSupported()) {
-            return onNewGpuFrame_recordAsync;
-        } else {
-            return onNewGpuFrame_record;
-        }
+        return onNewGpuFrame_record;
     }
 }
 
@@ -153,27 +125,7 @@ static void gpu_frame_set_post(bool on) {
     }
 }
 
-void gpu_frame_set_post_callback(Looper* looper,
-                                 void* context,
-                                 on_post_callback_t callback) {
-    DCHECK(!sBridge);
-    sBridge = android::opengl::GpuFrameBridge::create(
-            reinterpret_cast<android::base::Looper*>(looper), callback,
-            context);
-    CHECK(sBridge);
-    sBridge->setFrameReceiver(frameReceivedForwader, nullptr);
-    android_setPostCallback(choose_on_new_gpu_frame(), sBridge,
-                            true /* BGRA readback */);
-    sIsGuestMode = true;
-}
-
-bool gpu_frame_set_record_mode(bool on) {
-    // Assumption: gpu_frame_set_post_callback() is called before this one, so
-    // we can determine if we are in host mode based on if sBridge is set.
-    if (sIsGuestMode) {
-        return false;
-    }
-
+void gpu_frame_set_record_mode(bool on) {
     // Note that we can have multiple recorders active at the same time:
     // 1. The WebRTC module might want to expose the shared region
     // 2. A Java View might want expose the shared region inside android studio
@@ -184,14 +136,14 @@ bool gpu_frame_set_record_mode(bool on) {
     // No need to do any additional configuration if we are
     // still recording.
     if (sRecordCounter > 1)
-        return true;
+        return;
+    if (sRecordCounter == 1 && !on)
+        return;
 
     if (!sBridge) {
-        sBridge = android::opengl::GpuFrameBridge::create(nullptr, nullptr,
-                                                          nullptr);
+        sBridge = android::opengl::GpuFrameBridge::create();
         sBridge->setFrameReceiver(frameReceivedForwader, nullptr);
     }
-    CHECK(sBridge);
 
     // We need frames if we have at least one recorder.
     gpu_frame_set_post(sRecordCounter > 0);
@@ -202,7 +154,6 @@ bool gpu_frame_set_record_mode(bool on) {
     if (!on) {
         sBridge->invalidateRecordingBuffers();
     }
-    return true;
 }
 
 void* gpu_frame_get_record_frame() {
