@@ -479,10 +479,10 @@ void android_registerScreenshotFunc(ScreenshotFunc f)
     sScreenshotFunc = f;
 }
 
-void android_screenShot(const char* dirname, uint32_t displayId)
+void android_screenShot(const char* dirname)
 {
     if (sScreenshotFunc) {
-        sScreenshotFunc(dirname, displayId);
+        sScreenshotFunc(dirname);
     }
 }
 

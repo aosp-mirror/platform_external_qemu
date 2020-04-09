@@ -75,8 +75,7 @@ Image takeScreenshot(
         );
 
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
-                       std::string* outputFilepath = NULL,
-                       uint32_t displayId = 0);
+                       std::string* outputFilepath = NULL);
 // The following one is for testing only
 // It loads texture from renderer if renderer is not null.
 // (-gpu host, swiftshader_indirect, angle_indirect)
