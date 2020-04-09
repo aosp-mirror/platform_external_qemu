@@ -1,0 +1,48 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002380834",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1283754?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "ac2b933e_2870af00",
+          "description": "Change to \"android/android-emu/android/emulation/MediaFfmpegVideoHelper.cpp\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/emulation/MediaFfmpegVideoHelper.cpp",
+              "range": {
+                "startLine": 73,
+                "startChar": 26,
+                "endLine": 73,
+                "endChar": 32
+              },
+              "replacement": "invalid"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "c3dd9117_ea14aa07",
+        "filename": "android/android-emu/android/emulation/MediaFfmpegVideoHelper.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-09T17:18:18Z",
+      "side": 1,
+      "message": "Common typo found: \"invaid\" -- should it be \"invalid\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 73,
+        "startChar": 26,
+        "endLine": 73,
+        "endChar": 32
+      },
+      "revId": "c85c91bc631d263218d8774d5af79ec08d7db275",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
