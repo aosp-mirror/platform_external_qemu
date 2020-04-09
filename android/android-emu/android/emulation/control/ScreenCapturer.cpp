@@ -43,6 +43,9 @@ bool captureScreenshot(android::base::StringView outputDirectoryPath,
                                  outputDirectoryPath, pOutputFilepath, displayId);
     } else {
         // renderer is nullptr in -gpu guest
+        if (displayId > 0) {
+            return false;
+        }
         return captureScreenshot(
                 nullptr,
                 emulator_window_get()->uiEmuAgent->display->getFrameBuffer,

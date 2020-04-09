@@ -479,11 +479,12 @@ void android_registerScreenshotFunc(ScreenshotFunc f)
     sScreenshotFunc = f;
 }
 
-void android_screenShot(const char* dirname, uint32_t displayId)
+bool android_screenShot(const char* dirname, uint32_t displayId)
 {
     if (sScreenshotFunc) {
-        sScreenshotFunc(dirname, displayId);
+        return sScreenshotFunc(dirname, displayId);
     }
+    return false;
 }
 
 const emugl::RendererPtr& android_getOpenglesRenderer() {
