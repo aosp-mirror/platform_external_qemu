@@ -3403,8 +3403,72 @@ static int do_screenrecord_stop(ControlClient client, char* args) {
 }
 
 static int do_screenrecord_screenshot(ControlClient client, char* args) {
-    client->global->record_agent->doSnap(args);
-    return 0;
+    // kMaxArgs is max number of arguments that we have to process (options +
+    // parameters, if any, and the filename)
+    static constexpr int kMaxArgs = 1 * 2 + 1;
+    static const struct option longOptions[] = {
+            {"display", required_argument, NULL, 'd'},
+            {NULL, 0, NULL, 0}};
+
+    if (!args) {
+        // default file name and path
+        return client->global->record_agent->doSnap(nullptr, 0) ? 0 : -1;
+    }
+
+    // Count number of arguments
+    // Need to get it into a format for getopt_long().
+    std::vector<std::string> splitArgs;
+    splitArgs.push_back("screenshot");
+    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+            splitArgs.push_back(s);
+    });
+
+    // Need char** for getopt()
+    std::vector<char*> sarray;
+    for (auto& arg : splitArgs) {
+        sarray.push_back(&arg[0]);
+    }
+    // last argument needs to be NULL for getopt().
+    sarray.push_back(nullptr);
+
+    RecordingInfo info = {};
+    // Setting optind to 1 does not completely reset the internal state for
+    // getopt() on gcc, despite what the documentation says. Setting it to 0
+    // does however, and this setting does not cause any issues on mingw and
+    // clang.
+    optind = 0;
+
+    uint32_t displayId = 0;
+    while (true) {
+        int optionIndex = 0;
+        int ic = getopt_long(sarray.size() - 1, sarray.data(), "", longOptions,
+                             &optionIndex);
+        if (ic == -1) {
+            D(("Got ic=-1\n"));
+            break;
+        }
+
+        switch (ic) {
+            case 'd':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                displayId = atoi(optarg);
+                break;
+
+            default:
+                D(("getopt_long returned %d\n", ic));
+                control_write(client,
+                              "KO: Invalid arguments (see help screenrecord "
+                              "screenshot).\r\n");
+                return -1;
+        }
+    }
+
+    if (optind != splitArgs.size() - 1) {
+        return client->global->record_agent->doSnap(nullptr, displayId) ? 0 : -1;
+    }
+
+    return client->global->record_agent->doSnap(sarray[optind], displayId) ? 0 : -1;
 }
 
 static int do_screenrecord_webrtc(ControlClient client, char* args) {
@@ -3481,9 +3545,13 @@ static const CommandDefRec screenrecord_commands[] = {
          NULL, do_screenrecord_stop, NULL},
 
         {"screenshot", "Take a screenshot",
-         "'screenrecord screenshot <dirname>'\r\n"
+         "'screenrecord screenshot [options] <dirname>'\r\n"
          "\r\nTakes a single screenshot of emulator's display "
-         "and saves the resulting PNG in <dirname>.\r\n",
+         "and saves the resulting PNG in <dirname>.\r\n"
+         "\r\nOptions:\r\n"
+         "  --display ID\r\n"
+         "    Set display to take screenshot. Default is the device's "
+         "main display ID = 0\r\n",
          NULL, do_screenrecord_screenshot, NULL},
 
         {"webrtc", "start/stop the webrtc module",
@@ -3622,11 +3690,10 @@ do_multi_display_add( ControlClient  client, char*  args ) {
     int dpi = std::stoi(splitArgs[3]);
     int flag = std::stoi(splitArgs[4]);
 
-    if (!client->global->emu_agent->switchMultiDisplay(true, id, -1, -1, width,
-                                                       height, dpi, flag)) {
-        return -1;
-    }
-    return 0;
+    return client->global->multi_display_agent->setMultiDisplay(id, -1,
+                                                                -1, width,
+                                                                height, dpi,
+                                                                flag, true);
 }
 
 static int
@@ -3652,11 +3719,9 @@ do_multi_display_del( ControlClient  client, char*  args ) {
         return -1;
     }
 
-    if (!client->global->emu_agent->switchMultiDisplay(false, id, -1, -1,
-                                                       0, 0, 0, 0)) {
-        return -1;
-    }
-    return 0;
+    return client->global->multi_display_agent->setMultiDisplay(id, -1, -1,
+                                                                0, 0, 0, 0,
+                                                                false);
 }
 
 static const CommandDefRec  multi_display_commands[] =

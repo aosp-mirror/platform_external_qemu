@@ -34,14 +34,18 @@ namespace android {
 namespace emulation {
 
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
-                       std::string* pOutputFilepath) {
+                       std::string* pOutputFilepath,
+                       uint32_t displayId) {
     const auto& renderer = android_getOpenglesRenderer();
     SkinRotation rotation = gQAndroidEmulatorWindowAgent->getRotation();
     if (const auto renderer_ptr = renderer.get()) {
         return captureScreenshot(renderer_ptr, nullptr, rotation,
-                                 outputDirectoryPath, pOutputFilepath);
+                                 outputDirectoryPath, pOutputFilepath, displayId);
     } else {
         // renderer is nullptr in -gpu guest
+        if (displayId > 0) {
+            return false;
+        }
         return captureScreenshot(
                 nullptr,
                 emulator_window_get()->uiEmuAgent->display->getFrameBuffer,
@@ -161,6 +165,7 @@ bool captureScreenshot(
     Image img = takeScreenshot(ImageFormat::RAW, rotation, renderer, getFrameBuffer, displayId);
 
     if (img.getWidth() == 0 || img.getHeight() == 0) {
+        LOG(ERROR) << "take screenshot failed";
         return false;
     }
 
@@ -204,6 +209,7 @@ bool captureScreenshot(
     if (pOutputFilepath) {
         *pOutputFilepath = outputFilePath;
     }
+
     // already rotated through rendering
     rotation = renderer ? SKIN_ROTATION_0 : rotation;
     savepng(outputFilePath.c_str(), img.getChannels(), img.getWidth(),
