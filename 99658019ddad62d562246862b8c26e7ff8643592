@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cdff58bb_d6fafc99",
+        "filename": "android/android-emu/android/base/ProcessControl.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-09T19:07:35Z",
+      "side": 1,
+      "message": "Why not use ParameterList.escapeCommandLine ?",
+      "range": {
+        "startLine": 60,
+        "startChar": 26,
+        "endLine": 60,
+        "endChar": 43
+      },
+      "revId": "99658019ddad62d562246862b8c26e7ff8643592",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
