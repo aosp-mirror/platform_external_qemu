@@ -867,6 +867,7 @@ static int startEmulatorWithMinConfig(
                             WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
         }
     }
+    android_init_multi_display(gQAndroidEmulatorWindowAgent);
 
     RendererConfig rendererConfig;
     configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
@@ -880,6 +881,7 @@ static int startEmulatorWithMinConfig(
             (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
     screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
                          isGuestMode ? uiEmuAgent.display : nullptr);
+    gQAndroidMultiDisplayAgent->setGpuMode(isGuestMode);
     android_registerScreenshotFunc([](const char* dirname, uint32_t display) ->bool {
         return android::emulation::captureScreenshot(dirname, nullptr, display);
     });
@@ -910,8 +912,6 @@ static int startEmulatorWithMinConfig(
     }
 
     android_foldable_initialize(nullptr);
-
-    android_init_multi_display(gQAndroidEmulatorWindowAgent, isGuestMode);
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
                              argv);
