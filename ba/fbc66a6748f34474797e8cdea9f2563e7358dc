@@ -1,0 +1,9 @@
+Code-Review+2: Sergey Prigogin <sprigogin@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Autosubmit+1: Erwin Jansen <jansene@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Thu, 09 Apr 2020 15:50:21 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1281853
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
