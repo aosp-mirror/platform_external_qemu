@@ -76,6 +76,11 @@
      <string>Full</string>
     </property>
    </item>
+   <item>
+    <property name="text">
+     <string>5G</string>
+    </property>
+   </item>
   </widget>
   <widget class="QGroupBox" name="cell_vStatusGroupBox">
    <property name="geometry">
