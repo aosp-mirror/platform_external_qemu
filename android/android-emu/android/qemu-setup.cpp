@@ -451,7 +451,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     }
 
     if (fc::isEnabled(fc::MultiDisplay)) {
-        android_init_multi_display_pipe(gQAndroidEmulatorWindowAgent);
+        android_init_multi_display_pipe();
     }
 
 #ifndef _WIN32

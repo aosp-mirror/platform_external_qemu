@@ -71,10 +71,10 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
     for (int i = 1; i <= sMaxItem; i++) {
         uint32_t w, h, d;
         bool e;
-        EmulatorQtWindow::getInstance()->getMultiDisplay(i, nullptr, nullptr,
-                                                         &w, &h, &d, nullptr,
-                                                         &e);
-        if (e && d != 0) {
+        if (EmulatorQtWindow::getInstance()->getMultiDisplay(i, nullptr, nullptr,
+                                                             &w, &h, &d, nullptr,
+                                                             &e)
+            && e && d != 0) {
             MultiDisplayItem *item = new MultiDisplayItem(i, w, h, d, this);
             LOG(VERBOSE) << "add MultiDisplayItem " << i << " and insert widget";
             mUi->verticalLayout_5->insertWidget(i - 1, item);

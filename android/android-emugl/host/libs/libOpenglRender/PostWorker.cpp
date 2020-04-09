@@ -6,6 +6,7 @@
 #include "RenderThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "emugl/common/misc.h"
 
 #define POST_DEBUG 0
 #if POST_DEBUG >= 1
@@ -20,15 +21,16 @@ PostWorker::PostWorker(PostWorker::BindSubwinCallback&& cb) :
     mFb(FrameBuffer::getFB()),
     mBindSubwin(cb) {}
 
-void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l, int idx, ColorBuffer* cb) {
+void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l, int32_t x, int32_t y,
+                                            uint32_t w, uint32_t h, ColorBuffer* cb) {
     l->composeMode = HWC2_COMPOSITION_DEVICE;
     l->blendMode = HWC2_BLEND_MODE_NONE;
     l->transform = (hwc_transform_t)0;
     l->alpha = 1.0;
-    l->displayFrame.left = mFb->m_displays[idx].pos_x;
-    l->displayFrame.top = mFb->m_displays[idx].pos_y;
-    l->displayFrame.right = mFb->m_displays[idx].pos_x + mFb->m_displays[idx].width;
-    l->displayFrame.bottom =  mFb->m_displays[idx].pos_y + mFb->m_displays[idx].height;
+    l->displayFrame.left = x;
+    l->displayFrame.top = y;
+    l->displayFrame.right = x + w;
+    l->displayFrame.bottom =  y + h;
     l->crop.left = 0.0;
     l->crop.top = (float)cb->getHeight();
     l->crop.right = (float)cb->getWidth();
@@ -61,28 +63,30 @@ void PostWorker::post(ColorBuffer* cb) {
     float dx = px * fx;
     float dy = py * fy;
 
-    if (mFb->m_displays.size() > 1 ) {
-        int combinedW, combinedH;
-        mFb->getCombinedDisplaySize(&combinedW, &combinedH);
+    if (emugl::get_emugl_multi_display_operations().isMultiDisplayEnabled()) {
+        uint32_t combinedW, combinedH;
+        emugl::get_emugl_multi_display_operations().getCombinedDisplaySize(&combinedW, &combinedH);
         mFb->getTextureDraw()->prepareForDrawLayer();
-        for (const auto& iter : mFb->m_displays) {
-            if ((iter.first != 0) &&
-                (iter.second.width == 0 || iter.second.height == 0 || iter.second.cb == 0)) {
+        int32_t start_id = -1, x, y;
+        uint32_t id, w, h, c;
+        while(emugl::get_emugl_multi_display_operations().getNextMultiDisplay(start_id, &id,
+                                                                              &x, &y, &w, &h,
+                                                                              nullptr, nullptr,
+                                                                              &c)) {
+            if ((id != 0) && (w == 0 || h == 0 || c == 0)) {
+                start_id = id;
                 continue;
             }
-            // don't render 2nd cb to primary display
-            if (iter.first == 0 && cb->getDisplay() != 0) {
-                continue;
-            }
-            ColorBuffer* multiDisplayCb = iter.first == 0 ? cb :
-                mFb->findColorBuffer(iter.second.cb).get();
+            ColorBuffer* multiDisplayCb = id == 0 ? cb : mFb->findColorBuffer(c).get();
             if (multiDisplayCb == nullptr) {
-                ERR("fail to find cb %d\n", iter.second.cb);
+                ERR("fail to find cb %d\n", c);
+                start_id = id;
                 continue;
             }
             ComposeLayer l;
-            fillMultiDisplayPostStruct(&l, iter.first, multiDisplayCb);
+            fillMultiDisplayPostStruct(&l, x, y, w, h, multiDisplayCb);
             multiDisplayCb->postLayer(&l, combinedW, combinedH);
+            start_id = id;
         }
     } else {
         // render the color buffer to the window and apply the overlay

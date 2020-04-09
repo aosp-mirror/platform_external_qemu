@@ -77,13 +77,6 @@ extern void             skin_window_set_display_region_and_update(SkinWindow* wi
                                                                   int         yOffset,
                                                                   int         width,
                                                                   int         height);
-extern void             skin_window_set_multi_display(SkinWindow* window,
-                                                      int         id,
-                                                      int         xOffset,
-                                                      int         yOffset,
-                                                      int         width,
-                                                      int         height,
-                                                      bool        add);
 
 extern void             skin_window_set_scale( SkinWindow*  window,
                                                double       scale );

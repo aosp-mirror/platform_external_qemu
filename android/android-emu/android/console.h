@@ -22,6 +22,7 @@
 #include "android/emulation/control/libui_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/http_proxy_agent.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/telephony_agent.h"
@@ -54,6 +55,7 @@ ANDROID_BEGIN_HEADER
     X(QCarDataAgent, car)                 \
     X(QGrpcAgent, grpc)                   \
     X(QAndroidSensorsAgent, sensors)      \
+    X(QAndroidMultiDisplayAgent, multi_display)\
 
 
 

@@ -370,20 +370,6 @@ bool skin_ui_process_events(SkinUI* ui) {
                                                       ev.u.display_region.height);
             break;
 
-        case kEventSetMultiDisplay:
-            DE("EVENT: kEventSetMultiDisplay %d (%d, %d) %d x %d %s\n",
-               ev.u.multi_display.id, ev.u.multi_display.xOffset, ev.u.multi_display.yOffset,
-               ev.u.multi_display.width, ev.u.multi_display.height,
-               ev.u.multi_display.add ? "add" : "delete");
-            skin_window_set_multi_display(ui->window,
-                                          ev.u.multi_display.id,
-                                          ev.u.multi_display.xOffset,
-                                          ev.u.multi_display.yOffset,
-                                          ev.u.multi_display.width,
-                                          ev.u.multi_display.height,
-                                          ev.u.multi_display.add);
-            break;
-
         case kEventSetScale:
             DE("EVENT: kEventSetScale scale=%f\n", ev.u.window.scale);
             ignoreScroll = true;

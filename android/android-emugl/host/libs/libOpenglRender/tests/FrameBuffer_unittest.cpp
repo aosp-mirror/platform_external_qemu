@@ -18,7 +18,9 @@
 #include "android/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/emulation/MultiDisplay.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
 
@@ -42,50 +44,6 @@ using android::snapshot::TextureLoader;
 using android::snapshot::TextureSaver;
 
 namespace emugl {
-static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
-        .getEmulatorWindow = nullptr,
-        .rotate90Clockwise = nullptr,
-        .rotate = nullptr,
-        .getRotation = nullptr,
-        .showMessage = nullptr,
-        .showMessageWithDismissCallback = nullptr,
-        .fold = nullptr,
-        .isFolded = nullptr,
-        .setUIDisplayRegion = [](int x,
-                                 int y,
-                                 int width,
-                                 int height) {},
-        .setUIMultiDisplay = [](uint32_t id,
-                              int32_t x,
-                              int32_t y,
-                              uint32_t w,
-                              uint32_t h,
-                              bool add,
-                              uint32_t dpi = 0) {},
-        .getMultiDisplay = nullptr,
-        .getMonitorRect =
-                [](uint32_t* w, uint32_t* h) {
-                    if (w)
-                        *w = 2500;
-                    if (h)
-                        *h = 1600;
-                    return true;
-                },
-        .setNoSkin = []() {},
-        .restoreSkin = []() {},
-        .switchMultiDisplay = [](bool add,
-                               uint32_t id,
-                               int32_t x,
-                               int32_t y,
-                               uint32_t w,
-                               uint32_t h,
-                               uint32_t dpi,
-                               uint32_t flag) { return true;},
-        .updateUIMultiDisplayPage = [](uint32_t id) { },
-};
-
-extern "C" const QAndroidEmulatorWindowAgent* const
-        gQAndroidEmulatorWindowAgent = &sQAndroidEmulatorWindowAgent;
 
 class FrameBufferTest : public ::testing::Test {
 public:
@@ -100,6 +58,7 @@ protected:
         setupStandaloneLibrarySearchPaths();
         emugl::setGLObjectCounter(android::base::GLObjectCounter::get());
         emugl::set_emugl_window_operations(*gQAndroidEmulatorWindowAgent);
+        emugl::set_emugl_multi_display_operations(*gQAndroidMultiDisplayAgent);
         const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
         ASSERT_NE(nullptr, egl);
         ASSERT_NE(nullptr, LazyLoadedGLESv2Dispatch::get());
@@ -828,9 +787,8 @@ TEST_F(FrameBufferTest, ReadColorBufferSwitchRedBlue) {
 }
 
 TEST_F(FrameBufferTest, CreateMultiDisplay) {
-    uint32_t id = FrameBuffer::s_invalidIdMultiDisplay;
+    uint32_t id = 1;
     mFb->createDisplay(&id);
-    EXPECT_EQ(FrameBuffer::s_displayIdInternalBegin, id);
     EXPECT_EQ(0, mFb->createDisplay(&id));
     EXPECT_EQ(0, mFb->destroyDisplay(id));
 }
