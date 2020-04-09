@@ -45,6 +45,54 @@
       "revId": "2f5b527b601e835d0ba63249aaca54d0d1e1dabe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b857dd7_0a3c3bec",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-09T19:46:12Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e5291396_4c518ce7",
+      "range": {
+        "startLine": 15,
+        "startChar": 2,
+        "endLine": 15,
+        "endChar": 5
+      },
+      "revId": "2f5b527b601e835d0ba63249aaca54d0d1e1dabe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "66834235_d66e0157",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-09T19:46:12Z",
+      "side": 1,
+      "message": "Yes, this is true for every platform.",
+      "parentUuid": "56d8fc0b_ed778e3f",
+      "range": {
+        "startLine": 15,
+        "startChar": 2,
+        "endLine": 15,
+        "endChar": 67
+      },
+      "revId": "2f5b527b601e835d0ba63249aaca54d0d1e1dabe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }

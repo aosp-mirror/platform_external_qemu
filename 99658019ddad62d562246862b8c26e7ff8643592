@@ -46,6 +46,30 @@
       "revId": "99658019ddad62d562246862b8c26e7ff8643592",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b258cc0_c644d7f8",
+        "filename": "android/android-emu/android/base/ProcessControl.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-09T19:46:12Z",
+      "side": 1,
+      "message": "It doesn\u0027t exactly do what we want. See for example the unittest:\n\n```\nTEST(ParameterList, toString) {\n    ParameterList list;\n    list.add2(\"foo\", \"bar\");\n    list.add(\" zoo \");\n    EXPECT_EQ(3U, list.size());\n#ifdef _WIN32\n    const char* expect_str \u003d  \"foo bar \\\" zoo \\\"\";\n#else\n    const char* expect_str \u003d \"foo bar \u0027 zoo \u0027\";\n#endif\n    EXPECT_STREQ(expect_str, list.toString().c_str());\n}\n```\n\n(toString calls quoteCommandLine for each parameter)\n\n- You would get different behavior on windows/posix.\n- Not every command gets quoted\n- No escaping of special characters on posix",
+      "parentUuid": "675b914b_5f60da96",
+      "range": {
+        "startLine": 60,
+        "startChar": 26,
+        "endLine": 60,
+        "endChar": 43
+      },
+      "revId": "99658019ddad62d562246862b8c26e7ff8643592",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
