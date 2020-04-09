@@ -147,6 +147,7 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                                     uint32_t* displayId) -> bool {
             return true;
         },
+        .setGpuMode = [](bool isGuestMode) { },
         .createDisplay = [](uint32_t* displayId) -> int {
             mMultiDisplay.emplace(*displayId, android::MultiDisplayInfo());
             return 0;

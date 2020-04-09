@@ -674,7 +674,10 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
           return postWorkerFunc(post);
       }) {
      uint32_t displayId = 0;
-     createDisplay(&displayId);
+     if (createDisplay(&displayId) < 0) {
+         fprintf(stderr, "Failed to create default display\n");
+     }
+
      setDisplayPose(displayId, 0, 0, getWidth(), getHeight(), 0);
 }
 
