@@ -303,6 +303,8 @@ typedef struct AModemRec_
     int           cell_id;
     int           base_port;
 
+    int           send_phys_channel_cfg_unsol;
+
     /* Signal strength variables */
     int             use_signal_profile;
     signal_strength quality;
@@ -625,6 +627,7 @@ amodem_reset( AModem  modem )
     int i;
     modem->nvram_config = amodem_load_nvram(modem);
     modem->radio_state = A_RADIO_STATE_OFF;
+    modem->send_phys_channel_cfg_unsol = 0;
     modem->wait_sms    = 0;
 
     modem->use_signal_profile = 1;
@@ -1467,6 +1470,13 @@ handlePrlVersion( const char* cmd, AModem modem )
 }
 
 static const char*
+enableGoldfishPhysicalChannelConfigUnsol( const char*  cmd, AModem  modem )
+{
+    modem->send_phys_channel_cfg_unsol = 1;
+    return NULL;
+}
+
+static const char*
 handleRadioPower( const char*  cmd, AModem  modem )
 {
     if ( !strcmp( cmd, "+CFUN=0" ) )
@@ -2241,6 +2251,34 @@ handleListCurrentCalls( const char*  cmd, AModem  modem )
     return amodem_end_line( modem );
 }
 
+static void
+amodem_addOnePhysChanCfgUpdate(int status, int bandwidth, int rat, int freq, int id, AModem  modem )
+{
+    amodem_add_line( modem, "%%CGFPCCFG: %d %d %d %d %d\r\n", status, bandwidth, rat, freq, id);
+}
+
+static void
+amodem_addPhysChanCfgUpdate( AModem  modem )
+{
+    if (modem->send_phys_channel_cfg_unsol == 0) {
+        return;
+    }
+
+    int PRIMARY_SERVING = 1;
+    int SECONDARY_SERVING = 2;
+    int cellBandwidthDownlink = 5000;
+    int NR = 20;
+    int MMWAVE = 4;
+    int nn;
+    for (nn = 0; nn < MAX_DATA_CONTEXTS; nn++) {
+        ADataContext  data = modem->data_contexts + nn;
+        if (!data->active || data->id <= 0)
+            continue;
+        amodem_addOnePhysChanCfgUpdate(PRIMARY_SERVING, cellBandwidthDownlink, NR, MMWAVE, data->id, modem);
+        amodem_addOnePhysChanCfgUpdate(SECONDARY_SERVING, cellBandwidthDownlink, NR, MMWAVE, data->id, modem);
+    }
+}
+
 /* Add a(n unsolicited) time response.
  *
  * retrieve the current time and zone in a format suitable
@@ -2777,6 +2815,7 @@ static const struct {
     /* see onRadioPowerOn() */
     { "%CPHS=1", NULL, NULL },
     { "%CTZV=1", NULL, NULL },
+    { "%CGFPCCFG=1", NULL, enableGoldfishPhysicalChannelConfigUnsol},
 
     /* see onSIMReady() */
     { "+CSMS=1", "+CSMS: 1, 1, 1", NULL },
