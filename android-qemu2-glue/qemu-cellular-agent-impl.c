@@ -106,6 +106,7 @@ static void cellular_setStandard(enum CellularStandard cStandard)
         case Cellular_Std_UMTS:   speedName = "umts";   break;
         case Cellular_Std_HSDPA:  speedName = "hsdpa";  break;
         case Cellular_Std_LTE:    speedName = "lte";    break;
+        case Cellular_Std_5G:     speedName = "5g";     break;
         case Cellular_Std_full:   speedName = "full";   break;
 
         default:
@@ -122,6 +123,8 @@ static void cellular_setStandard(enum CellularStandard cStandard)
     netshaper_set_rate(android_net_shaper_in,  android_net_download_speed);
     netshaper_set_rate(android_net_shaper_out, android_net_upload_speed);
 
+    fprintf(stderr, "calling amodem_set_data_network_type %s %d speed %s\n",
+            __func__, __LINE__, speedName);
     if (android_modem) {
         // Tell the guest about the new network type.
         amodem_set_data_network_type(android_modem,

@@ -97,6 +97,10 @@ void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
 
     // Network type
     if (sCellularAgent->setStandard) {
+           fprintf(stderr, "calling amodem_set_data_network_type %s %d %d\n",
+            __func__, __LINE__,(int)getSavedNetworkType() );
+
+
         sCellularAgent->setStandard((CellularStandard)getSavedNetworkType());
     }
 
@@ -123,6 +127,8 @@ void CellularPage::on_cell_standardBox_currentIndexChanged(int index)
     android::RecursiveScopedVmLock vmlock;
     if (sCellularAgent && sCellularAgent->setStandard) {
         CellularStandard cStandard = (CellularStandard)index;
+           fprintf(stderr, "calling amodem_set_data_network_type %s %d %d\n",
+            __func__, __LINE__,(int)cStandard );
         sCellularAgent->setStandard(cStandard);
     }
 }

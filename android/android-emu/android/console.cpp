@@ -895,6 +895,9 @@ do_network_speed( ControlClient  client, char*  args )
     netshaper_set_rate( android_net_shaper_in,  android_net_download_speed );
     netshaper_set_rate( android_net_shaper_out, android_net_upload_speed );
 
+     fprintf(stderr, "calling amodem_set_data_network_type %s %d speed %s\n",
+            __func__, __LINE__, args);
+
     if (android_modem_get()) {
         amodem_set_data_network_type( android_modem_get(),
                                     android_parse_network_type( args ) );

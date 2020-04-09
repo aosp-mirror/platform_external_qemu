@@ -73,6 +73,11 @@
    </item>
    <item>
     <property name="text">
+     <string>5G</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
      <string>Full</string>
     </property>
    </item>
