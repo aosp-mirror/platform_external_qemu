@@ -3412,8 +3412,7 @@ static int do_screenrecord_screenshot(ControlClient client, char* args) {
 
     if (!args) {
         // default file name and path
-        client->global->record_agent->doSnap(nullptr, 0);
-        return 0;
+        return client->global->record_agent->doSnap(nullptr, 0) ? 0 : -1;
     }
 
     // Count number of arguments
@@ -3465,24 +3464,11 @@ static int do_screenrecord_screenshot(ControlClient client, char* args) {
         }
     }
 
-    if (!client->global->multi_display_agent->getMultiDisplay(displayId,
-                                                              nullptr,
-                                                              nullptr,
-                                                              nullptr,
-                                                              nullptr,
-                                                              nullptr,
-                                                              nullptr,
-                                                              nullptr)) {
-        return -1;
-    }
-
     if (optind != splitArgs.size() - 1) {
-        client->global->record_agent->doSnap(nullptr, displayId);
-        return 0;
+        return client->global->record_agent->doSnap(nullptr, displayId) ? 0 : -1;
     }
 
-    client->global->record_agent->doSnap(sarray[optind], displayId);
-    return 0;
+    return client->global->record_agent->doSnap(sarray[optind], displayId) ? 0 : -1;
 }
 
 static int do_screenrecord_webrtc(ControlClient client, char* args) {
