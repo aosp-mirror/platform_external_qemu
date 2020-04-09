@@ -20,7 +20,8 @@ enum CellularStatus { Cellular_Stat_Home,   Cellular_Stat_Roaming, Cellular_Stat
                       Cellular_Stat_Denied, Cellular_Stat_Unregistered };
 
 enum CellularStandard { Cellular_Std_GSM,  Cellular_Std_HSCSD, Cellular_Std_GPRS, Cellular_Std_EDGE,
-                        Cellular_Std_UMTS, Cellular_Std_HSDPA, Cellular_Std_LTE, Cellular_Std_full };
+                        Cellular_Std_UMTS, Cellular_Std_HSDPA, Cellular_Std_LTE, Cellular_Std_5G,
+                        Cellular_Std_full };
 
 enum CellularSignal { Cellular_Signal_None, Cellular_Signal_Poor, Cellular_Signal_Moderate,
                       Cellular_Signal_Good, Cellular_Signal_Great };
