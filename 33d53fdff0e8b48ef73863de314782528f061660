@@ -1,0 +1,48 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002402605",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1284200?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "52dcfaa8_7cdf3bbc",
+          "description": "Change to \"android/android-emu/android/emulation/MediaVpxDecoderGeneric.cpp\"",
+          "replacements": [
+            {
+              "path": "android/android-emu/android/emulation/MediaVpxDecoderGeneric.cpp",
+              "range": {
+                "startLine": 185,
+                "startChar": 71,
+                "endLine": 185,
+                "endChar": 77
+              },
+              "replacement": "switch"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "062da658_6069955f",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoderGeneric.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-10T17:04:04Z",
+      "side": 1,
+      "message": "Common typo found: \"swithc\" -- should it be \"switch\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 185,
+        "startChar": 71,
+        "endLine": 185,
+        "endChar": 77
+      },
+      "revId": "33d53fdff0e8b48ef73863de314782528f061660",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
