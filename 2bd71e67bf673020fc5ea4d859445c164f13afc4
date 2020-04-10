@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1c504197_8a046891",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-10T22:45:35Z",
+      "side": 1,
+      "message": "wht hapens with old guest that wants full and wants LTE?",
+      "range": {
+        "startLine": 143,
+        "startChar": 19,
+        "endLine": 143,
+        "endChar": 37
+      },
+      "revId": "2bd71e67bf673020fc5ea4d859445c164f13afc4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
