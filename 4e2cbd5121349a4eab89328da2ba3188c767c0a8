@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "292ffbd7_992a9389",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-04-10T23:45:45Z",
+      "side": 1,
+      "message": "change to void now?",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 4
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "97d5c77a_22d7f8ac",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-04-10T23:45:45Z",
+      "side": 1,
+      "message": "Maybe we should check sRecordCounter never goes \u003c 0? In case someone is misusing this API.",
+      "range": {
+        "startLine": 134,
+        "startChar": 4,
+        "endLine": 134,
+        "endChar": 18
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "018bee3b_6ac93cc7",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-04-10T23:45:45Z",
+      "side": 1,
+      "message": "Move this check to right after create()?",
+      "range": {
+        "startLine": 147,
+        "startChar": 4,
+        "endLine": 147,
+        "endChar": 19
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f934c56c_eb342f9e",
+        "filename": "android/android-emu/android/gpu_frame.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-04-10T23:45:45Z",
+      "side": 1,
+      "message": "this looks unused. remove?",
+      "range": {
+        "startLine": 22,
+        "startChar": 15,
+        "endLine": 22,
+        "endChar": 34
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b26e648e_591a8969",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-04-10T23:45:45Z",
+      "side": 1,
+      "message": "This mReadPixelsFunc is only set to one function. Can we just use android_getReadPixelsFunc directly on line 108?",
+      "range": {
+        "startLine": 69,
+        "startChar": 8,
+        "endLine": 69,
+        "endChar": 52
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f134680c_1c8d0143",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-04-10T23:45:45Z",
+      "side": 1,
+      "message": "Since you\u0027ve change to only reading/writing from mRecFrame, this means that the caller must hold mRecLock right? Otherwise, we may have concurrent read/write going on.\n\nPreviously, post callback was only writing to mRecTmpFrame and caller was reading from mRecFrame.",
+      "range": {
+        "startLine": 107,
+        "startChar": 12,
+        "endLine": 110,
+        "endChar": 21
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "469180c2_77d73973",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-04-10T23:45:45Z",
+      "side": 1,
+      "message": "Don\u0027t need void parameter in C++.",
+      "range": {
+        "startLine": 27,
+        "startChar": 34,
+        "endLine": 27,
+        "endChar": 38
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
