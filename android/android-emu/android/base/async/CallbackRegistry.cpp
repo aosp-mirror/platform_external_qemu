@@ -38,6 +38,10 @@ void CallbackRegistry::close() {
     mMessages.stop();
 }
 
+size_t CallbackRegistry::available() {
+    return mMessages.capacity() - mMessages.size();
+}
+
 void CallbackRegistry::registerCallback(
         MessageAvailableCallback messageAvailable,
         void* opaque) {
@@ -46,7 +50,6 @@ void CallbackRegistry::registerCallback(
             .data = opaque,
             .callback = messageAvailable,
     };
-
     mMessages.send(msg);
 }
 
@@ -59,14 +62,14 @@ void CallbackRegistry::unregisterCallback(void* opaque) {
     mMessages.send(msg);
     AutoLock removeLock(mLock);
     mCvRemoval.wait(&mLock, [=]() {
-        return mProcessing == 0 || mStoredForwarders.count(msg.data) == 0;
+        return !mProcessing || mStoredForwarders.count(msg.data) == 0;
     });
 }
 
 void CallbackRegistry::invokeCallbacks() {
-    mProcessing++;
+    AutoLock processingLock(mProcessingLock);
+    mProcessing = true;
     ForwarderMessage msg;
-    DD("Process: %d", mProcessing.load());
     while (mMessages.tryReceive(&msg)) {
         switch (msg.cmd) {
             case MESSAGE_FORWARDER_ADD: {
@@ -77,6 +80,9 @@ void CallbackRegistry::invokeCallbacks() {
             case MESSAGE_FORWARDER_REMOVE: {
                 mLock.lock();
                 mStoredForwarders.erase(msg.data);
+
+                // Since there is only on thread active here we are
+                // guaranteed that msg.callback will never be invoked.
                 mCvRemoval.signalAndUnlock(&mLock);
                 break;
             }
@@ -85,29 +91,13 @@ void CallbackRegistry::invokeCallbacks() {
         }
     }
 
-    struct RegisteredForwarder {
-        void* data;
-        MessageAvailableCallback callback;
-    };
-
-    std::vector<RegisteredForwarder> toRun;
-
     {
         AutoLock lock(mLock);
         for (auto it : mStoredForwarders) {
-            RegisteredForwarder rf = {
-                    .data = it.first,
-                    .callback = it.second,
-            };
-            toRun.push_back(rf);
+            it.second(it.first);
         }
     }
-
-    for (const auto& rf : toRun) {
-        rf.callback(rf.data);
-    }
-
-    mProcessing--;
+    mProcessing = false;
     mLock.lock();
     mCvRemoval.signalAndUnlock(&mLock);
 }

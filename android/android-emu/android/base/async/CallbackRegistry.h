@@ -29,12 +29,16 @@ typedef void (*MessageAvailableCallback)(void* opaque);
 // are invoked when the invokeCallbacks is called. A callback is guaranteed
 // never to be called once unregisterCallback is returned.
 //
-// The expectation is that the invokeCallbacks merhod is called relatively
+// The expectation is that the invokeCallbacks method is called relatively
 // frequently, since registration only really happens when this method is
-// invoked and registration will block until processing resumes.
+// invoked. Unregister can block if processing is currently take place to
+// guarantee that a callback is never called once unregisterCallback returns.
+//
+// Only one thread can be actively processing invokeCallbacks, other threads
+// will block and wait until invokeCallbacks has completed.
 //
 // The MessageAvailableCallback functions should not block too long, as this can
-// cause blocking on the unregister method.
+// cause blocking on the unregister method and invokeCallbacks.
 //
 // It is expected that registration and procesessing happen on
 // two separate threads.
@@ -66,10 +70,21 @@ public:
     // Close the registry, cancelling any pending registrations.
     void close();
 
+    // Number of register/unregister slots available before blocking.
+    // (Mainly used by unit tests to make sure we do not overrun the queue)
+    size_t available();
+
+    // Maximum number of slots
+    size_t max_slots() { return MAX_QUEUE_SIZE; };
+
+    // true if we are currently processing requests.
+    bool processing() { return mProcessing; }
+
 private:
     enum MessageForwarderCommand {
         MESSAGE_FORWARDER_ADD = 0,
         MESSAGE_FORWARDER_REMOVE = 1,
+        MESSAGE_UNKNOWN = 2,
     };
 
     struct ForwarderMessage {
@@ -78,11 +93,15 @@ private:
         MessageAvailableCallback callback;
     };
 
-    android::base::MessageChannel<ForwarderMessage, 64> mMessages;
-    android::base::Lock mLock;  // protects mStoredForwarders
+    void updateForwarders();
+
+    static const size_t MAX_QUEUE_SIZE = 64;
+    android::base::MessageChannel<ForwarderMessage, MAX_QUEUE_SIZE> mMessages;
+    android::base::Lock mLock;            // protects mStoredForwarders
+    android::base::Lock mProcessingLock;  // protects processing.
     android::base::ConditionVariable mCvRemoval;
     std::unordered_map<void*, MessageAvailableCallback> mStoredForwarders;
-    std::atomic_int mProcessing{0};
+    bool mProcessing{false};
 };
 
 }  // namespace base
