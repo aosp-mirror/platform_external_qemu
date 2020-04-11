@@ -88,6 +88,14 @@ public:
                         const SnapshotPackage* request,
                         ServerWriter<SnapshotPackage>* writer) override {
         SnapshotPackage result;
+
+        /*{
+            result.set_success(true);
+            writer->Write(result);
+            return Status::OK;
+        }*/
+
+
         auto snapshot =
                 snapshot::Snapshot::getSnapshotById(request->snapshot_id());
 
