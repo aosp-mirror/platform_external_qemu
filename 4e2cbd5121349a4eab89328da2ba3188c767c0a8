@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "accbf633_5948ca81",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-11T04:21:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "292ffbd7_992a9389",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 4
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "97d5c77a_22d7f8ac",
         "filename": "android/android-emu/android/gpu_frame.cpp",
         "patchSetId": 3
@@ -45,6 +69,30 @@
       "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f47aef5_9cff3fe3",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-11T04:21:03Z",
+      "side": 1,
+      "message": "Actually the design here requires no duplicated set and unset.",
+      "parentUuid": "97d5c77a_22d7f8ac",
+      "range": {
+        "startLine": 134,
+        "startChar": 4,
+        "endLine": 134,
+        "endChar": 18
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "b05ebaee_0892289a",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-11T04:21:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "018bee3b_6ac93cc7",
+      "range": {
+        "startLine": 147,
+        "startChar": 4,
+        "endLine": 147,
+        "endChar": 19
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f934c56c_eb342f9e",
         "filename": "android/android-emu/android/gpu_frame.h",
         "patchSetId": 3
@@ -91,6 +163,30 @@
       "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c759bf9_63026db4",
+        "filename": "android/android-emu/android/gpu_frame.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-11T04:21:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f934c56c_eb342f9e",
+      "range": {
+        "startLine": 22,
+        "startChar": 15,
+        "endLine": 22,
+        "endChar": 34
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "c9ef8140_8fe93345",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-11T04:21:03Z",
+      "side": 1,
+      "message": "Yes, we can. Keeping the function as variable may benefit the future improvement for assigning different readPixel functions,",
+      "parentUuid": "b26e648e_591a8969",
+      "range": {
+        "startLine": 69,
+        "startChar": 8,
+        "endLine": 69,
+        "endChar": 52
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f134680c_1c8d0143",
         "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
         "patchSetId": 3
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "17d281ea_52999cd6",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-11T04:21:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f134680c_1c8d0143",
+      "range": {
+        "startLine": 107,
+        "startChar": 12,
+        "endLine": 110,
+        "endChar": 21
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "469180c2_77d73973",
         "filename": "android/android-emu/android/opengl/GpuFrameBridge.h",
         "patchSetId": 3
@@ -160,6 +304,30 @@
       "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d115ec0_15e11e44",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-11T04:21:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "469180c2_77d73973",
+      "range": {
+        "startLine": 27,
+        "startChar": 34,
+        "endLine": 27,
+        "endChar": 38
+      },
+      "revId": "4e2cbd5121349a4eab89328da2ba3188c767c0a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
