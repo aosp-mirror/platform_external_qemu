@@ -256,6 +256,37 @@ GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat) {
             return GL_RG32F;
         case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
             return GL_SRGB8_ALPHA8;
+        // ASTC formats
+        case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
+        case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
+            return glrgba;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR:
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR:
+            return GL_SRGB8_ALPHA8;
         // palette formats
         case GL_PALETTE4_RGB8_OES:
         case GL_PALETTE4_R5_G6_B5_OES:
@@ -269,6 +300,7 @@ GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat) {
         case GL_PALETTE8_RGBA4_OES:
         case GL_PALETTE8_RGB5_A1_OES:
             return glrgba;
+        
         default:
             return compressedFormat;
     }
