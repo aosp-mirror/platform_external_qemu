@@ -30,8 +30,9 @@ android_add_library(
       ${PNG_SRC_DIR}/pngwrite.c
       ${PNG_SRC_DIR}/pngwtran.c
       ${PNG_SRC_DIR}/pngwutil.c
-      ${PNG_SRC_DIR}/intel/intel_init.c # amd64 specific optimizations.
-      ${PNG_SRC_DIR}/intel/filter_sse2_intrinsics.c)
+      ${PNG_SRC_DIR}/arm/arm_init.c # arm
+      ${PNG_SRC_DIR}/arm/filter_neon_intrinsics.c
+      )
 target_compile_options(
   png PRIVATE -std=gnu89 -Wall -Wno-unused-parameter
               -Wno-tautological-constant-out-of-range-compare)
@@ -39,6 +40,7 @@ target_compile_definitions(png PRIVATE -DPNG_INTEL_SSE_OPT=1)
 target_include_directories(png PUBLIC ${PNG_SRC_DIR})
 target_link_libraries(png PUBLIC zlib)
 android_target_link_libraries(png linux-x86_64 PRIVATE m)
+android_target_link_libraries(png linux-aarch64 PRIVATE m)
 android_target_compile_options(png darwin-x86_64
                                PRIVATE -Wno-unguarded-availability-new)
 android_target_compile_options(
@@ -91,9 +93,10 @@ list(SORT TEST_PNGS)
 
 set(PNGTEST_PNG "${PNG_SRC_DIR}/pngtest.png")
 
+if (NOT OPTION_MINBUILD)
 android_add_executable(TARGET pngtest NODISTRIBUTE SRC # cmake-format: sortable
                                                        ${PNG_SRC_DIR}/pngtest.c)
-target_link_libraries(pngtest PRIVATE png)
+target_link_libraries(pngtest PRIVATE png "-lm")
 
 png_add_test(NAME pngtest COMMAND pngtest FILES "${PNGTEST_PNG}")
 
@@ -228,3 +231,4 @@ android_add_executable(
   TARGET pngimage NODISTRIBUTE SRC # cmake-format: sortable
                                    ${PNG_SRC_DIR}/contrib/libtests/pngimage.c)
 target_link_libraries(pngimage PRIVATE png)
+endif()

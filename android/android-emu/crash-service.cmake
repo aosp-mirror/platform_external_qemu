@@ -1,4 +1,5 @@
 # This file defines emulator crash service
+if (NOT OPTION_MINBUILD)
 prebuilt(QT5)
 set(CRASH_WINDOWS_ICON ../images/emulator_icon.rc)
 
@@ -44,6 +45,7 @@ target_link_libraries(
                                  emulator-libui breakpad_server Qt5::Gui)
 
 android_install_exe(emulator-crash-service .)
+
 android_add_executable(
   TARGET emulator64_test_crasher NODISTRIBUTE
   SRC # cmake-format: sortable
@@ -69,3 +71,5 @@ target_include_directories(emulator_crashreport_unittests PRIVATE .)
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(emulator_crashreport_unittests windows_msvc-x86_64
                               PUBLIC dirent-win32)
+
+endif()
