@@ -46,6 +46,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#define H264_DPRINT(fmt, ...)                                              \
+    fprintf(stderr, "framebuffer: %s:%d " fmt "\n", __func__, __LINE__, \
+            ##__VA_ARGS__);
+
 using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Stream;
@@ -135,8 +139,8 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
     int n;
     if (!s_egl.eglChooseConfig(p_dpy, configAttribs, &config, 1, &n) ||
         n == 0) {
-        GL_LOG("Could not find GLES 2.x config!", __FUNCTION__);
-        ERR("%s: Could not find GLES 2.x config!\n", __FUNCTION__);
+        H264_DPRINT("Could not find GLES 2.x config!", __FUNCTION__);
+        H264_DPRINT("%s: Could not find GLES 2.x config!\n", __FUNCTION__);
         return NULL;
     }
 
@@ -144,23 +148,23 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
 
     surface = s_egl.eglCreatePbufferSurface(p_dpy, config, pbufAttribs);
     if (surface == EGL_NO_SURFACE) {
-        GL_LOG("Could not create GLES 2.x Pbuffer!");
-        ERR("%s: Could not create GLES 2.x Pbuffer!\n", __FUNCTION__);
+        H264_DPRINT("Could not create GLES 2.x Pbuffer!");
+        H264_DPRINT("%s: Could not create GLES 2.x Pbuffer!\n", __FUNCTION__);
         return NULL;
     }
 
     EGLContext ctx = s_egl.eglCreateContext(p_dpy, config, EGL_NO_CONTEXT,
                                             getGlesMaxContextAttribs());
     if (ctx == EGL_NO_CONTEXT) {
-        GL_LOG("Could not create GLES 2.x Context!");
-        ERR("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
+        H264_DPRINT("Could not create GLES 2.x Context!");
+        H264_DPRINT("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
         return NULL;
     }
 
     if (!s_egl.eglMakeCurrent(p_dpy, surface, surface, ctx)) {
-        GL_LOG("Could not make GLES 2.x context current!");
-        ERR("%s: Could not make GLES 2.x context current!\n", __FUNCTION__);
+        H264_DPRINT("Could not make GLES 2.x context current!");
+        H264_DPRINT("%s: Could not make GLES 2.x context current!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
         s_egl.eglDestroyContext(p_dpy, ctx);
         return NULL;
@@ -172,8 +176,8 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
 
     // It is rare but some drivers actually fail this...
     if (!s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL)) {
-        GL_LOG("Could not unbind context. Please try updating graphics card driver!");
-        ERR("%s: Could not unbind context. Please try updating graphics card "
+        H264_DPRINT("Could not unbind context. Please try updating graphics card driver!");
+        H264_DPRINT("%s: Could not unbind context. Please try updating graphics card "
             "driver!\n",
             __FUNCTION__);
         free(extString);
@@ -265,7 +269,7 @@ void FrameBuffer::finalize() {
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         bool egl2egl) {
-    GL_LOG("FrameBuffer::initialize");
+    H264_DPRINT("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
         return true;
     }
@@ -276,8 +280,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     std::unique_ptr<FrameBuffer> fb(
             new FrameBuffer(width, height, useSubWindow));
     if (!fb) {
-        GL_LOG("Failed to create fb");
-        ERR("Failed to create fb\n");
+        H264_DPRINT("Failed to create fb");
+        H264_DPRINT("Failed to create fb\n");
         return false;
     }
 
@@ -288,21 +292,21 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     fb->m_eglDisplay = s_egl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (fb->m_eglDisplay == EGL_NO_DISPLAY) {
-        GL_LOG("Failed to Initialize backend EGL display");
-        ERR("Failed to Initialize backend EGL display\n");
+        H264_DPRINT("Failed to Initialize backend EGL display");
+        H264_DPRINT("Failed to Initialize backend EGL display\n");
         return false;
     }
 
-    GL_LOG("call eglInitialize");
+    H264_DPRINT("call eglInitialize");
     if (!s_egl.eglInitialize(fb->m_eglDisplay, &fb->m_caps.eglMajor,
                              &fb->m_caps.eglMinor)) {
-        GL_LOG("Failed to eglInitialize");
-        ERR("Failed to eglInitialize\n");
+        H264_DPRINT("Failed to eglInitialize");
+        H264_DPRINT("Failed to eglInitialize\n");
         return false;
     }
 
     DBG("egl: %d %d\n", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
-    GL_LOG("egl: %d %d", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
+    H264_DPRINT("egl: %d %d", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
     s_egl.eglBindAPI(EGL_OPENGL_ES_API);
 
     GLESDispatchMaxVersion dispatchMaxVersion =
@@ -319,15 +323,15 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     emugl::getGlesVersion(&glesMaj, &glesMin);
 
     DBG("gles version: %d %d\n", glesMaj, glesMin);
-    GL_LOG("gles version: %d %d\n", glesMaj, glesMin);
+    H264_DPRINT("gles version: %d %d\n", glesMaj, glesMin);
 
     fb->m_asyncReadbackSupported = glesMaj > 2;
     if (fb->m_asyncReadbackSupported) {
         DBG("Async readback supported\n");
-        GL_LOG("Async readback supported");
+        H264_DPRINT("Async readback supported");
     } else {
         DBG("Async readback not supported\n");
-        GL_LOG("Async readback not supported");
+        H264_DPRINT("Async readback not supported");
     }
 
     fb->m_fastBlitSupported =
@@ -345,8 +349,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             getGLES2ExtensionString(fb->m_eglDisplay));
     if (!gles2Extensions) {
         // Could not create GLES2 context - drop GL2 capability
-        GL_LOG("Failed to obtain GLES 2.x extensions string!");
-        ERR("Failed to obtain GLES 2.x extensions string!\n");
+        H264_DPRINT("Failed to obtain GLES 2.x extensions string!");
+        H264_DPRINT("Failed to obtain GLES 2.x extensions string!\n");
         return false;
     }
 
@@ -391,23 +395,23 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     if (exact_match_index < 0) {
-        GL_LOG("Failed on eglChooseConfig");
-        ERR("Failed on eglChooseConfig\n");
+        H264_DPRINT("Failed on eglChooseConfig");
+        H264_DPRINT("Failed on eglChooseConfig\n");
         return false;
     }
 
     fb->m_eglConfig = all_configs[exact_match_index];
 
-    GL_LOG("attempting to create egl context");
+    H264_DPRINT("attempting to create egl context");
     fb->m_eglContext = s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
                                               EGL_NO_CONTEXT, getGlesMaxContextAttribs());
     if (fb->m_eglContext == EGL_NO_CONTEXT) {
-        GL_LOG("Failed to create context 0x%x", s_egl.eglGetError());
-        ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
+        H264_DPRINT("Failed to create context 0x%x", s_egl.eglGetError());
+        H264_DPRINT("Failed to create context 0x%x\n", s_egl.eglGetError());
         return false;
     }
 
-    GL_LOG("attempting to create egl pbuffer context");
+    H264_DPRINT("attempting to create egl pbuffer context");
     //
     // Create another context which shares with the eglContext to be used
     // when we bind the pbuffer. That prevent switching drawable binding
@@ -420,12 +424,12 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
                                    fb->m_eglContext, getGlesMaxContextAttribs());
     if (fb->m_pbufContext == EGL_NO_CONTEXT) {
-        GL_LOG("Failed to create Pbuffer Context 0x%x", s_egl.eglGetError());
-        ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
+        H264_DPRINT("Failed to create Pbuffer Context 0x%x", s_egl.eglGetError());
+        H264_DPRINT("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
         return false;
     }
 
-    GL_LOG("context creation successful");
+    H264_DPRINT("context creation successful");
     //
     // create a 1x1 pbuffer surface which will be used for binding
     // the FB context.
@@ -436,20 +440,20 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     fb->m_pbufSurface = s_egl.eglCreatePbufferSurface(
             fb->m_eglDisplay, fb->m_eglConfig, pbufAttribs);
     if (fb->m_pbufSurface == EGL_NO_SURFACE) {
-        GL_LOG("Failed to create pbuf surface for FB 0x%x", s_egl.eglGetError());
-        ERR("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
+        H264_DPRINT("Failed to create pbuf surface for FB 0x%x", s_egl.eglGetError());
+        H264_DPRINT("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
         return false;
     }
 
-    GL_LOG("attempting to make context current");
+    H264_DPRINT("attempting to make context current");
     // Make the context current
     ScopedBind bind(fb->m_colorBufferHelper);
     if (!bind.isOk()) {
-        GL_LOG("Failed to make current");
-        ERR("Failed to make current\n");
+        H264_DPRINT("Failed to make current");
+        H264_DPRINT("Failed to make current\n");
         return false;
     }
-    GL_LOG("context-current successful");
+    H264_DPRINT("context-current successful");
 
     //
     // Initilize framebuffer capabilities
@@ -478,19 +482,19 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //     GL_OES_EGL_IMAGE (by both GLES implementations [1 and 2])
     //
     if (!fb->m_caps.has_eglimage_texture_2d) {
-        GL_LOG("Failed: Missing egl_image related extension(s)");
-        ERR("Failed: Missing egl_image related extension(s)\n");
+        H264_DPRINT("Failed: Missing egl_image related extension(s)");
+        H264_DPRINT("Failed: Missing egl_image related extension(s)\n");
         return false;
     }
 
-    GL_LOG("host system has enough extensions");
+    H264_DPRINT("host system has enough extensions");
     //
     // Initialize set of configs
     //
     fb->m_configs = new FbConfigList(fb->m_eglDisplay);
     if (fb->m_configs->empty()) {
-        GL_LOG("Failed: Initialize set of configs");
-        ERR("Failed: Initialize set of configs\n");
+        H264_DPRINT("Failed: Initialize set of configs");
+        H264_DPRINT("Failed: Initialize set of configs\n");
         return false;
     }
 
@@ -518,12 +522,12 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // If no configs at all, exit
     //
     if (nGLConfigs + nGL2Configs == 0) {
-        GL_LOG("Failed: No GLES 2.x configs found!");
-        ERR("Failed: No GLES 2.x configs found!\n");
+        H264_DPRINT("Failed: No GLES 2.x configs found!");
+        H264_DPRINT("Failed: No GLES 2.x configs found!\n");
         return false;
     }
 
-    GL_LOG("There are sufficient EGLconfigs available");
+    H264_DPRINT("There are sufficient EGLconfigs available");
 
     //
     // Cache the GL strings so we don't have to think about threading or
@@ -536,14 +540,14 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     DBG("GL Vendor %s\n", fb->m_glVendor.c_str());
     DBG("GL Renderer %s\n", fb->m_glRenderer.c_str());
     DBG("GL Extensions %s\n", fb->m_glVersion.c_str());
-    GL_LOG("GL Vendor %s", fb->m_glVendor.c_str());
-    GL_LOG("GL Renderer %s", fb->m_glRenderer.c_str());
-    GL_LOG("GL Extensions %s", fb->m_glVersion.c_str());
+    H264_DPRINT("GL Vendor %s", fb->m_glVendor.c_str());
+    H264_DPRINT("GL Renderer %s", fb->m_glRenderer.c_str());
+    H264_DPRINT("GL Extensions %s", fb->m_glVersion.c_str());
 
     fb->m_textureDraw = new TextureDraw();
     if (!fb->m_textureDraw) {
-        GL_LOG("Failed: creation of TextureDraw instance");
-        ERR("Failed: creation of TextureDraw instance\n");
+        H264_DPRINT("Failed: creation of TextureDraw instance");
+        H264_DPRINT("Failed: creation of TextureDraw instance\n");
         return false;
     }
 
@@ -573,7 +577,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         auto dispatch = emugl::vkDispatch(false /* not for testing */);
         auto emu = goldfish_vk::createOrGetGlobalVkEmulation(dispatch);
         bool useDeferredCommands =
-            android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_DEFERRED_COMMANDS").empty();
+            android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_DEFH264_DPRINTED_COMMANDS").empty();
         bool useCreateResourcesWithRequirements =
             android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_USE_CREATE_RESOURCES_WITH_REQUIREMENTS").empty();
         goldfish_vk::setUseDeferredCommands(emu, useDeferredCommands);
@@ -585,7 +589,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         SyncThread::get();
     }
 
-    GL_LOG("basic EGL initialization successful");
+    H264_DPRINT("basic EGL initialization successful");
 
     // Nothing else to do - we're ready to rock!
     return true;
@@ -607,7 +611,7 @@ bool FrameBuffer::importMemoryToColorBuffer(
     ColorBufferMap::iterator c(m_colorbuffers.find(colorBufferHandle));
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
-        ERR("FB: importMemoryToColorBuffer cb handle %#x not found\n", colorBufferHandle);
+        H264_DPRINT("FB: importMemoryToColorBuffer cb handle %#x not found\n", colorBufferHandle);
         return false;
     }
 
@@ -623,7 +627,7 @@ void FrameBuffer::setColorBufferInUse(
     ColorBufferMap::iterator c(m_colorbuffers.find(colorBufferHandle));
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
-        ERR("FB: setColorBufferInUse cb handle %#x not found\n", colorBufferHandle);
+        H264_DPRINT("FB: setColorBufferInUse cb handle %#x not found\n", colorBufferHandle);
         return;
     }
 
@@ -779,7 +783,7 @@ void FrameBuffer::setPostCallback(
                                                                          nullptr,
                                                                          nullptr,
                                                                          nullptr)) {
-            ERR("display %d not exist, cancelling OnPost callback", displayId);
+            H264_DPRINT("display %d not exist, cancelling OnPost callback", displayId);
             return;
         }
         m_onPost[displayId].cb = onPost;
@@ -796,7 +800,7 @@ void FrameBuffer::setPostCallback(
 }
 
 static void subWindowRepaint(void* param) {
-    GL_LOG("call repost from subWindowRepaint callback");
+    H264_DPRINT("call repost from subWindowRepaint callback");
     auto fb = static_cast<FrameBuffer*>(param);
     fb->repost();
 }
@@ -811,9 +815,9 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  float dpr,
                                  float zRot,
                                  bool deleteExisting) {
-    GL_LOG("Begin setupSubWindow");
+    H264_DPRINT("Begin setupSubWindow");
     if (!m_useSubWindow) {
-        ERR("%s: Cannot create native sub-window in this configuration\n",
+        H264_DPRINT("%s: Cannot create native sub-window in this configuration\n",
             __FUNCTION__);
         return false;
     }
@@ -843,7 +847,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             createSubWindow || moveSubWindow || m_zRot != zRot || m_dpr != dpr;
     if (!createSubWindow && !moveSubWindow && !redrawSubwindow) {
         assert(sInitialized.load(std::memory_order_relaxed));
-        GL_LOG("Exit setupSubWindow (nothing to do)");
+        H264_DPRINT("Exit setupSubWindow (nothing to do)");
 #if SNAPSHOT_PROFILE > 1
         printf("FrameBuffer::%s(): nothing to do at %lld ms\n", __func__,
                (long long)System::get()->getProcessTimes().wallClockMs);
@@ -936,7 +940,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             bool posted = false;
 
             if (m_lastPostedColorBuffer) {
-                GL_LOG("setupSubwindow: draw last posted cb");
+                H264_DPRINT("setupSubwindow: draw last posted cb");
                 posted = postImpl(m_lastPostedColorBuffer, false);
             }
 
@@ -969,13 +973,13 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
            (long long)System::get()->getProcessTimes().wallClockMs);
 #endif
 
-    GL_LOG("Exit setupSubWindow (successful setup)");
+    H264_DPRINT("Exit setupSubWindow (successful setup)");
     return success;
 }
 
 bool FrameBuffer::removeSubWindow() {
     if (!m_useSubWindow) {
-        ERR("%s: Cannot remove native sub-window in this configuration\n",
+        H264_DPRINT("%s: Cannot remove native sub-window in this configuration\n",
             __FUNCTION__);
         return false;
     }
@@ -989,7 +993,7 @@ bool FrameBuffer::removeSubWindow() {
 
 bool FrameBuffer::removeSubWindow_locked() {
     if (!m_useSubWindow) {
-        ERR("%s: Cannot remove native sub-window in this configuration\n",
+        H264_DPRINT("%s: Cannot remove native sub-window in this configuration\n",
             __FUNCTION__);
         return false;
     }
@@ -1310,7 +1314,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
-        ERR("FB: openColorBuffer cb handle %#x not found\n", p_colorbuffer);
+        H264_DPRINT("FB: openColorBuffer cb handle %#x not found\n", p_colorbuffer);
         return -1;
     }
 
@@ -1535,7 +1539,7 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
 
     WindowSurfaceMap::iterator w(m_windows.find(p_surface));
     if (w == m_windows.end()) {
-        ERR("FB::flushWindowSurfaceColorBuffer: window handle %#x not found\n",
+        H264_DPRINT("FB::flushWindowSurfaceColorBuffer: window handle %#x not found\n",
             p_surface);
         // bad surface handle
         return false;
@@ -1564,7 +1568,7 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     WindowSurfaceMap::iterator w(m_windows.find(p_surface));
     if (w == m_windows.end()) {
         // bad surface handle
-        ERR("%s: bad window surface handle %#x\n", __FUNCTION__, p_surface);
+        H264_DPRINT("%s: bad window surface handle %#x\n", __FUNCTION__, p_surface);
         return false;
     }
 
@@ -1866,7 +1870,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
                               draw ? draw->getEGLSurface() : EGL_NO_SURFACE,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
                               ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT)) {
-        ERR("eglMakeCurrent failed\n");
+        H264_DPRINT("eglMakeCurrent failed\n");
         return false;
     }
 
@@ -1987,11 +1991,11 @@ bool FrameBuffer::bind_locked() {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_pbufSurface, m_pbufSurface,
                                   m_pbufContext)) {
             if (!m_shuttingDown)
-                ERR("eglMakeCurrent failed\n");
+                H264_DPRINT("eglMakeCurrent failed\n");
             return false;
         }
     } else {
-        ERR("Nested %s call detected, should never happen\n", __func__);
+        H264_DPRINT("Nested %s call detected, should never happen\n", __func__);
     }
 
     m_prevContext = prevContext;
@@ -2009,7 +2013,7 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed in binding subwindow!\n");
+            H264_DPRINT("eglMakeCurrent failed in binding subwindow!\n");
             return false;
         }
     }
@@ -2045,7 +2049,7 @@ bool FrameBuffer::bindFakeWindow_locked() {
 
     if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglFakeWindowSurface,
                               m_eglFakeWindowSurface, m_eglFakeWindowContext)) {
-        ERR("eglMakeCurrent failed in binding fake window!\n");
+        H264_DPRINT("eglMakeCurrent failed in binding fake window!\n");
         return false;
     }
     return true;
@@ -2291,16 +2295,16 @@ FrameBuffer::getReadPixelsCallback() {
 }
 
 bool FrameBuffer::repost(bool needLockAndBind) {
-    GL_LOG("Reposting framebuffer.");
+    H264_DPRINT("Reposting framebuffer.");
     if (m_lastPostedColorBuffer &&
         sInitialized.load(std::memory_order_relaxed)) {
-        GL_LOG("Has last posted colorbuffer and is initialized; post.");
+        H264_DPRINT("Has last posted colorbuffer and is initialized; post.");
         return postImpl(m_lastPostedColorBuffer, needLockAndBind,
                         true /* need repaint */);
     } else {
-        GL_LOG("No repost: no last posted color buffer");
+        H264_DPRINT("No repost: no last posted color buffer");
         if (!sInitialized.load(std::memory_order_relaxed)) {
-            GL_LOG("No repost: initialization is not finished.");
+            H264_DPRINT("No repost: initialization is not finished.");
         }
     }
     return false;
@@ -2681,7 +2685,7 @@ bool FrameBuffer::onLoad(Stream* stream,
         return { handle, { std::move(cb), refCount, opened, closedTs } };
     });
     m_lastPostedColorBuffer = static_cast<HandleType>(stream->getBe32());
-    GL_LOG("Got lasted posted color buffer from snapshot");
+    H264_DPRINT("Got lasted posted color buffer from snapshot");
 
     loadCollection(stream, &m_windows,
                    [this](Stream* stream) -> WindowSurfaceMap::value_type {

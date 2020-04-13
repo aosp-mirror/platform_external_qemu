@@ -30,7 +30,7 @@ if(LINUX_X86_64)
     NOTICE "REPO/NOTICE"
     LICENSE "OpenSSL"
     SRC # cmake-format: sortable
-        ${crypto_sources} ${crypto_sources_linux_x86_64})
+        ${crypto_sources} ${crypto_sources_linux_aarch64})
 elseif(DARWIN_X86_64)
   android_add_library(
     TARGET crypto
@@ -43,6 +43,18 @@ elseif(DARWIN_X86_64)
     LICENSE "OpenSSL"
     SRC # cmake-format: sortable
         ${crypto_sources} ${crypto_sources_mac_x86_64})
+elseif(LINUX_CROSS_AARCH64)
+  android_add_library(
+    TARGET crypto
+    LIBNAME
+      boringssl
+      URL
+      "https://android.googlesource.com/platform/external/boringssl/+/refs/heads/master"
+    REPO "${BORINGSSL_ROOT}"
+    NOTICE "REPO/NOTICE"
+    LICENSE "OpenSSL"
+    SRC # cmake-format: sortable
+        ${crypto_sources} ${crypto_sources_linux_aarch64})
 
 else()
   android_add_library(
@@ -55,22 +67,7 @@ else()
     NOTICE "REPO/NOTICE"
     LICENSE "OpenSSL"
     SRC # cmake-format: sortable
-        ${crypto_sources})
-
-  android_target_compile_options(crypto windows PRIVATE "-std=c99" "-UNDEBUG")
-
-  android_nasm_compile(
-    TARGET crypto_asm_lib
-    LIBNAME
-      boringssl
-      URL
-      "https://android.googlesource.com/platform/external/boringssl/+/refs/heads/master"
-    REPO "${BORINGSSL_ROOT}"
-    NOTICE "REPO/NOTICE"
-    LICENSE "OpenSSL"
-    SRC # cmake-format: sortable
-        ${crypto_sources_win_x86_64})
-  target_link_libraries(crypto PRIVATE crypto_asm_lib ws2_32::ws2_32)
+        ${crypto_sources} ${crypto_sources_linux_aarch64})
 endif()
 target_include_directories(crypto PUBLIC ${BORINGSSL_ROOT}/src/include)
 target_link_libraries(ssl PUBLIC crypto)
