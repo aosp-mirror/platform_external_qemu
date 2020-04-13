@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "057f3903_aa39d933",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-13T17:20:49Z",
+      "side": 1,
+      "message": "Usefulness of this approach is questionable because the private key is exposed to anybody who can execute ps -Af command. It probably makes sense to describe this approach holistically in the Embedded Emulator design doc and have a discussion around that.",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 61
+      },
+      "revId": "79216423bfd5dfccd99b617db116df277dcf608c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
