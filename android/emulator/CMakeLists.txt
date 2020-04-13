@@ -18,8 +18,8 @@ target_compile_definitions(
 
 # Make sure we have the qemu dependencies available
 if(OPTION_MINBUILD)
-  add_dependencies(emulator qemu-system-x86_64 qemu-system-aarch64
-                   qemu-system-x86_64-headless qemu-system-aarch64-headless)
+  add_dependencies(emulator 
+                   qemu-system-aarch64-headless)
 else()
   add_dependencies(
     emulator
@@ -30,7 +30,7 @@ else()
     qemu-system-armel-headless
     qemu-system-x86_64-headless
     qemu-system-aarch64-headless
-    emulator-crash-service)
+    )
 endif()
 
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/pc-bios")

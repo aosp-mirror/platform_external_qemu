@@ -230,6 +230,8 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     return true;
 }
 
+#ifdef CONFIG_SDL
+
 extern "C" void sdl_display_early_init(DisplayOptions* opts) {
     if (opts->gl && android_hw->hw_arc) {
         display_opengl = 1;
@@ -246,6 +248,7 @@ extern "C" int sdl_display_init(DisplayState* ds, DisplayOptions* opts) {
 
     return android_display_init(ds, qframebuffer_fifo_get());
 }
+#endif
 
 static QemuDisplay qemu_display_android = {
     .type       = DISPLAY_TYPE_SDL,
