@@ -801,7 +801,7 @@ print_info () {
             ;;
         libcplusplus)
             if [ "$BUILD_HOST" = "linux" -a "$BUILD_ARCH" = "aarch64" ]; then
-                printf "%s\n" "/usr/lib/aarch64-linux-gnu/libc++.so"
+                printf "%s\n" "/usr/aarch64-linux-gnu/lib/libstdc++.so.6"
             else
                 printf "%s\n" "$CLANG_DIR/lib64/libc++.so"
             fi

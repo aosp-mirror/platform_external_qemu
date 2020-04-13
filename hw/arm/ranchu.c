@@ -186,45 +186,6 @@ static void create_fdt(VirtBoardInfo *vbi)
                                 "clk24mhz");
     qemu_fdt_setprop_cell(fdt, "/apb-pclk", "phandle", vbi->clock_phandle);
 
-    /* No PSCI for TCG yet */
-    if (kvm_enabled()) {
-        uint32_t cpu_suspend_fn;
-        uint32_t cpu_off_fn;
-        uint32_t cpu_on_fn;
-        uint32_t migrate_fn;
-        ARMCPU *armcpu = ARM_CPU(qemu_get_cpu(0));
-
-        qemu_fdt_add_subnode(fdt, "/psci");
-        if (armcpu->psci_version == 2) {
-            const char comp[] = "arm,psci-0.2\0arm,psci";
-            qemu_fdt_setprop(fdt, "/psci", "compatible", comp, sizeof(comp));
-
-            cpu_off_fn = QEMU_PSCI_0_2_FN_CPU_OFF;
-            if (arm_feature(&armcpu->env, ARM_FEATURE_AARCH64)) {
-                cpu_suspend_fn = QEMU_PSCI_0_2_FN64_CPU_SUSPEND;
-                cpu_on_fn = QEMU_PSCI_0_2_FN64_CPU_ON;
-                migrate_fn = QEMU_PSCI_0_2_FN64_MIGRATE;
-            } else {
-                cpu_suspend_fn = QEMU_PSCI_0_2_FN_CPU_SUSPEND;
-                cpu_on_fn = QEMU_PSCI_0_2_FN_CPU_ON;
-                migrate_fn = QEMU_PSCI_0_2_FN_MIGRATE;
-            }
-        } else {
-            qemu_fdt_setprop_string(fdt, "/psci", "compatible", "arm,psci");
-
-            cpu_suspend_fn = QEMU_PSCI_0_1_FN_CPU_SUSPEND;
-            cpu_off_fn = QEMU_PSCI_0_1_FN_CPU_OFF;
-            cpu_on_fn = QEMU_PSCI_0_1_FN_CPU_ON;
-            migrate_fn = QEMU_PSCI_0_1_FN_MIGRATE;
-        }
-
-        qemu_fdt_setprop_string(fdt, "/psci", "method", "hvc");
-
-        qemu_fdt_setprop_cell(fdt, "/psci", "cpu_suspend", cpu_suspend_fn);
-        qemu_fdt_setprop_cell(fdt, "/psci", "cpu_off", cpu_off_fn);
-        qemu_fdt_setprop_cell(fdt, "/psci", "cpu_on", cpu_on_fn);
-        qemu_fdt_setprop_cell(fdt, "/psci", "migrate", migrate_fn);
-    }
 }
 
 static void fdt_add_timer_nodes(const VirtBoardInfo *vbi)
@@ -522,6 +483,7 @@ static void ranchu_init(MachineState *machine)
             exit(1);
         }
         cpuobj = object_new(object_class_get_name(oc));
+        object_property_set_bool(cpuobj, false, "has_el3", NULL);
 
         /* Secondary CPUs start in PSCI powered-down state */
         if (n > 0) {
@@ -535,6 +497,47 @@ static void ranchu_init(MachineState *machine)
 
         object_property_set_bool(cpuobj, true, "realized", NULL);
     }
+
+        /* No PSCI for TCG yet */
+    if (kvm_enabled()) {
+        uint32_t cpu_suspend_fn;
+        uint32_t cpu_off_fn;
+        uint32_t cpu_on_fn;
+        uint32_t migrate_fn;
+        ARMCPU *armcpu = ARM_CPU(qemu_get_cpu(0));
+
+        qemu_fdt_add_subnode(vbi->fdt, "/psci");
+        if (armcpu->psci_version == 2) {
+            const char comp[] = "arm,psci-0.2\0arm,psci";
+            qemu_fdt_setprop(vbi->fdt, "/psci", "compatible", comp, sizeof(comp));
+
+            cpu_off_fn = QEMU_PSCI_0_2_FN_CPU_OFF;
+            if (arm_feature(&armcpu->env, ARM_FEATURE_AARCH64)) {
+                cpu_suspend_fn = QEMU_PSCI_0_2_FN64_CPU_SUSPEND;
+                cpu_on_fn = QEMU_PSCI_0_2_FN64_CPU_ON;
+                migrate_fn = QEMU_PSCI_0_2_FN64_MIGRATE;
+            } else {
+                cpu_suspend_fn = QEMU_PSCI_0_2_FN_CPU_SUSPEND;
+                cpu_on_fn = QEMU_PSCI_0_2_FN_CPU_ON;
+                migrate_fn = QEMU_PSCI_0_2_FN_MIGRATE;
+            }
+        } else {
+            qemu_fdt_setprop_string(vbi->fdt, "/psci", "compatible", "arm,psci");
+
+            cpu_suspend_fn = QEMU_PSCI_0_1_FN_CPU_SUSPEND;
+            cpu_off_fn = QEMU_PSCI_0_1_FN_CPU_OFF;
+            cpu_on_fn = QEMU_PSCI_0_1_FN_CPU_ON;
+            migrate_fn = QEMU_PSCI_0_1_FN_MIGRATE;
+        }
+
+        qemu_fdt_setprop_string(vbi->fdt, "/psci", "method", "hvc");
+
+        qemu_fdt_setprop_cell(vbi->fdt, "/psci", "cpu_suspend", cpu_suspend_fn);
+        qemu_fdt_setprop_cell(vbi->fdt, "/psci", "cpu_off", cpu_off_fn);
+        qemu_fdt_setprop_cell(vbi->fdt, "/psci", "cpu_on", cpu_on_fn);
+        qemu_fdt_setprop_cell(vbi->fdt, "/psci", "migrate", migrate_fn);
+    }
+
     fdt_add_cpu_nodes(vbi);
 
     memory_region_init_ram_nomigrate(ram, NULL, "ranchu.ram", machine->ram_size,

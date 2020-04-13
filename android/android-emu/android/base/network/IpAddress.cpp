@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 
 #include <algorithm>
+#include <cstring>
 #include <string>
 
 #ifdef _WIN32

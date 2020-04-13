@@ -219,7 +219,7 @@ android_target_link_libraries(
   breakpad_common windows PRIVATE wininet::wininet diaguids::diaguids
                                   dbghelp::dbghelp imagehlp::imagehlp)
 # ASAN does not play nice with breakpad tests
-if(NOT OPTION_ASAN)
+if(NOT OPTION_ASAN AND NOT OPTION_MINBUILD)
   android_add_test(
     TARGET breakpad_common_unittests
     SRC # cmake-format: sortable
@@ -499,6 +499,7 @@ android_target_compile_definitions(dump_syms darwin-x86_64 PUBLIC
                                    -DHAVE_MACH_O_NLIST_H)
 #
 # Symupload
+if(NOT OPTION_MINBUILD)
 android_add_executable(
   TARGET sym_upload NODISTRIBUTE
   LINUX ${BREAKPAD_SRC}/common/linux/http_upload.cc
@@ -526,6 +527,9 @@ android_target_compile_definitions(sym_upload darwin-x86_64 PRIVATE
 android_target_compile_definitions(sym_upload windows PRIVATE -DUNICODE
                                    -D_UNICODE)
 android_install_as_debug_info(sym_upload)
+
+endif()
+
 if(LINUX_X86_64)
   android_add_executable(
     TARGET linux_dumper_unittest_helper NODISTRIBUTE
