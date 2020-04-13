@@ -274,6 +274,20 @@ ExtendedWindow::~ExtendedWindow() {
 void ExtendedWindow::sendMetricsOnShutDown() {
     mExtendedUi->location_page->sendMetrics();
     mExtendedUi->multiDisplayPage->sendMetrics();
+    if (mExtendedWindowWasShown) {
+        android::metrics::MetricsReporter::get().report(
+                [](android_studio::AndroidStudioEvent* event) {
+                    // Send extended-window open metrics
+                    auto* metrics = event->mutable_emulator_ui_event();
+                    metrics->set_context(android_studio::EmulatorUiEvent::
+                                                 EXTENDED_WINDOW_OPEN);
+                    metrics->set_type(android_studio::EmulatorUiEvent::
+                                              UNKONWN_EMULATOR_UI_EVENT_TYPE);
+                    metrics->set_value(1);
+                    event->set_kind(android_studio::AndroidStudioEvent::
+                                            EMULATOR_UI_EVENT);
+                });
+    }
 }
 
 // static
@@ -306,6 +320,7 @@ void ExtendedWindow::shutDown() {
 
 void ExtendedWindow::show() {
     QFrame::show();
+    mExtendedWindowWasShown = true;
 
     // Verify that the extended pane is fully visible (otherwise it may be
     // impossible for the user to move it)
