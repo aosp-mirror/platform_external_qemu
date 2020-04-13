@@ -6,3 +6,6 @@
 #define TARGET_SUPPORTS_MTTCG 1
 #define CONFIG_I386_DIS 1
 #define CONFIG_ARM_DIS 1
+#ifdef __linux__
+#define CONFIG_KVM 1
+#endif // __linux__

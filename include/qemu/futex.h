@@ -16,6 +16,7 @@
 
 #include <sys/syscall.h>
 #include <linux/futex.h>
+#include <stdio.h>
 
 #define qemu_futex(...)              syscall(__NR_futex, __VA_ARGS__)
 
@@ -33,7 +34,8 @@ static inline void qemu_futex_wait(void *f, unsigned val)
         case EINTR:
             break; /* get out of switch and retry */
         default:
-            abort();
+            return;
+            //break;//abort();
         }
     }
 }

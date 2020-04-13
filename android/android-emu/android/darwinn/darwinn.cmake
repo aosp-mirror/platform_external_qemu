@@ -1,4 +1,4 @@
-if(LINUX_X86_64)
+if(LINUX_X86_64 AND NOT OPTION_MINBUILD)
   prebuilt(DARWINN)
   android_add_library(TARGET darwinn LICENSE "Apache-2.0"
                       SRC android/darwinn/darwinn-service.cpp)

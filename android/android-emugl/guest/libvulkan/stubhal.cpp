@@ -29,6 +29,7 @@
 #include <array>
 #include <bitset>
 #include <mutex>
+#include <cstring>
 
 #include <log/log.h>
 #include <hardware/hwvulkan.h>
