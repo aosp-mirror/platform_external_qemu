@@ -56,6 +56,11 @@ if(LINUX_X86_64)
       # for translating shaders to SPIRV
       "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator"
       ${VULKAN_COMMON_DEPENDENCIES})
+  if (LINUX_CROSS_AARCH64)
+  set(VULKAN_TEST_DEPENDENCIES
+      # Loader (for testing)
+      "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so")
+  else()
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so"
@@ -85,6 +90,7 @@ if(LINUX_X86_64)
       "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json"
       # Shaders
       ${VULKAN_COMMON_DEPENDENCIES})
+  endif()
 elseif(DARWIN_X86_64)
   set(VULKAN_DEPENDENCIES
       # Swiftshader

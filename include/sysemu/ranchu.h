@@ -28,4 +28,5 @@
  */
 typedef void (*QemuDeviceTreeSetupFunc)(void *);
 void qemu_device_tree_setup_callback(QemuDeviceTreeSetupFunc setup_func);
+void qemu_device_tree_setup_callback2(QemuDeviceTreeSetupFunc setup_func);
 

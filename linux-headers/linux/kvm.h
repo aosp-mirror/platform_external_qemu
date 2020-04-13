@@ -11,7 +11,11 @@
 #include <linux/types.h>
 
 #include <linux/ioctl.h>
+#ifdef TARGET_AARCH64
+#include <asm-arm64/kvm.h>
+#else
 #include <asm/kvm.h>
+#endif
 
 #define KVM_API_VERSION 12
 
