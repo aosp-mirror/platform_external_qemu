@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e9cab099_50cfd296",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-13T09:10:32Z",
+      "side": 1,
+      "message": "We can remove this line.",
+      "revId": "1757b4d1dc6356fe2bc171249156cf4f2155b90f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3483517_5ae8e29b",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-13T09:10:32Z",
+      "side": 1,
+      "message": "Nit: whitespace",
+      "revId": "1757b4d1dc6356fe2bc171249156cf4f2155b90f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
