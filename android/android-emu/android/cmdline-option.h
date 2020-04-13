@@ -37,6 +37,10 @@ typedef struct {
 /* A global pointer to the current process' parsed options */
 extern const AndroidOptions* android_cmdLineOptions;
 
+/* Null terminated string of the cmdline, parameters
+  are separated as as [v0] [v1] ... */
+extern const char* android_cmdLine;
+
 /* Parse command-line arguments options and remove them from (argc,argv)
  * 'opt' will be set to the content of parsed options
  * returns 0 on success, -1 on error (unknown option)

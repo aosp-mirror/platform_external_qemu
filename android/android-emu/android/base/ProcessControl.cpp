@@ -11,27 +11,34 @@
 
 #include "android/base/ProcessControl.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/Optional.h"
-#include "android/base/process-control.h"
-#include "android/base/system/System.h"
-#include "android/utils/path.h"
-
-#include <functional>
-#include <fstream>
+#include <stddef.h>                            // for size_t
+#include <algorithm>                           // for count_if
+#include <fstream>                             // for operator<<, basic_ostream
 #include <sstream>
+#include <functional>                          // for function, __base
+
+#include "android/base/FunctionView.h"         // for FunctionView
+#include "android/base/Optional.h"             // for Optional, kNullopt
+#include "android/base/files/PathUtils.h"      // for PathUtils
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance, LAZY_INS...
+#include "android/base/process-control.h"      // for handle_emulator_restart
+#include "android/base/system/System.h"        // for System
 
 namespace android {
 namespace base {
 
-bool ProcessLaunchParameters::operator==(const ProcessLaunchParameters& other)  const {
-    if (workingDirectory != other.workingDirectory) return false;
-    if (programPath != other.programPath) return false;
-    if (argv.size() != other.argv.size()) return false;
+bool ProcessLaunchParameters::operator==(
+        const ProcessLaunchParameters& other) const {
+    if (workingDirectory != other.workingDirectory)
+        return false;
+    if (programPath != other.programPath)
+        return false;
+    if (argv.size() != other.argv.size())
+        return false;
 
     for (int i = 0; i < argv.size(); ++i) {
-        if (argv[i] != other.argv[i]) return false;
+        if (argv[i] != other.argv[i])
+            return false;
     }
 
     return true;
@@ -51,6 +58,27 @@ std::string ProcessLaunchParameters::str() const {
     return ss.str();
 }
 
+inline static std::string escapeCommandLine(const std::string& line) {
+    size_t quoteCnt = std::count_if(line.begin(), line.end(), [](char x) {
+        return x == '"' || x == '\\';
+    });
+    if (quoteCnt == 0)
+        return '"' + line + '"';
+
+    std::string escaped;
+    escaped.reserve(quoteCnt + line.size() + 2);
+    escaped += '"';
+    for (int i = 0; i < line.size(); i++) {
+        if (line[i] == '"' || line[i] == '\\') {
+            escaped += '\\';
+        }
+        escaped += line[i];
+    }
+    escaped += '"';
+
+    return escaped;
+}
+
 std::vector<std::string> makeArgvStrings(int argc, const char** argv) {
     std::vector<std::string> res;
 
@@ -61,16 +89,31 @@ std::vector<std::string> makeArgvStrings(int argc, const char** argv) {
     return res;
 }
 
-ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc, char** argv) {
+std::string createEscapedLaunchString(int argc, const char* const* argv) {
+    std::string result;
+    auto mParams = makeArgvStrings(argc, (const char**) argv);
+    for (size_t n = 0; n < mParams.size(); ++n) {
+        if (n > 0) {
+            result += ' ';
+        }
+        result += escapeCommandLine(mParams[n]);
+    }
+    return result;
+}
+
+ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc,
+                                                                char** argv) {
     ProcessLaunchParameters currentLaunchParams = {
-        System::get()->getCurrentDirectory(),
-        PathUtils::join(System::get()->getProgramDirectory(), PathUtils::decompose(argv[0]).back()),
-        makeArgvStrings(argc, (const char**)argv),
+            System::get()->getCurrentDirectory(),
+            PathUtils::join(System::get()->getProgramDirectory(),
+                            PathUtils::decompose(argv[0]).back()),
+            makeArgvStrings(argc, (const char**)argv),
     };
     return currentLaunchParams;
 }
 
-void saveLaunchParameters(const ProcessLaunchParameters& launchParams, StringView filename) {
+void saveLaunchParameters(const ProcessLaunchParameters& launchParams,
+                          StringView filename) {
     std::ofstream file(c_str(filename));
 
     file << launchParams.workingDirectory << std::endl;
@@ -111,7 +154,8 @@ ProcessLaunchParameters loadLaunchParameters(StringView filename) {
     return res;
 }
 
-void launchProcessFromParameters(const ProcessLaunchParameters& launchParams, bool useArgv0) {
+void launchProcessFromParameters(const ProcessLaunchParameters& launchParams,
+                                 bool useArgv0) {
     std::vector<std::string> cmdArgs;
     cmdArgs.push_back(launchParams.programPath);
 
@@ -143,17 +187,21 @@ bool isRestartDisabled() {
 static constexpr char kLaunchParamsFileName[] = "emu-launch-params.txt";
 static constexpr char kRestartParam[] = "-is-restart";
 
-void initializeEmulatorRestartParameters(int argc, char** argv, const char* outPath) {
+void initializeEmulatorRestartParameters(int argc,
+                                         char** argv,
+                                         const char* outPath) {
     auto params = createLaunchParametersForCurrentProcess(argc, argv);
-    android::base::saveLaunchParameters(createLaunchParametersForCurrentProcess(argc, argv),
-                                        PathUtils::join(outPath, kLaunchParamsFileName));
+    android::base::saveLaunchParameters(
+            createLaunchParametersForCurrentProcess(argc, argv),
+            PathUtils::join(outPath, kLaunchParamsFileName));
     sRestartGlobals->restartParams.emplace(params);
 }
 
 void finalizeEmulatorRestartParameters(const char* dir) {
     auto path = PathUtils::join(dir, kLaunchParamsFileName);
 
-    if (!System::get()->pathExists(path)) return;
+    if (!System::get()->pathExists(path))
+        return;
 
     auto params = loadLaunchParameters(path);
 
@@ -183,7 +231,8 @@ void finalizeEmulatorRestartParameters(const char* dir) {
 }
 
 void setEmulatorRestartOnExit() {
-    if (sRestartGlobals->disabled) return;
+    if (sRestartGlobals->disabled)
+        return;
     sRestartGlobals->doRestartOnExit = true;
 }
 
@@ -198,16 +247,16 @@ class EmulatorRestarter {
 public:
     EmulatorRestarter() = default;
 
-    void registerQuit(FunctionView<void()> func) {
-        mQuitFunc = func;
-    }
+    void registerQuit(FunctionView<void()> func) { mQuitFunc = func; }
 
     void quit() {
-        if (mQuitFunc) mQuitFunc();
+        if (mQuitFunc)
+            mQuitFunc();
     }
 
     void restart() {
-        if (!mQuitFunc) return;
+        if (!mQuitFunc)
+            return;
         android::base::setEmulatorRestartOnExit();
         quit();
     }
@@ -216,7 +265,8 @@ private:
     std::function<void()> mQuitFunc;
 };
 
-static android::base::LazyInstance<EmulatorRestarter> sRestarter = LAZY_INSTANCE_INIT;
+static android::base::LazyInstance<EmulatorRestarter> sRestarter =
+        LAZY_INSTANCE_INIT;
 
 void registerEmulatorQuitCallback(FunctionView<void()> func) {
     sRestarter->registerQuit(func);
@@ -226,13 +276,12 @@ void restartEmulator() {
     sRestarter->restart();
 }
 
-} // namespace base
-} // namespace android
+}  // namespace base
+}  // namespace android
 
 extern "C" {
 
 void handle_emulator_restart() {
     android::base::handleEmulatorRestart();
 }
-
 }
