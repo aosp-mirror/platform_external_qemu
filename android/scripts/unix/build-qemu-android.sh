@@ -140,7 +140,7 @@ if [ "$BAD_TARGETS" ]; then
     panic "Invalid target name(s): [$BAD_TARGETS], use one of: $VALID_TARGETS"
 fi
 
-export PKG_CONFIG=$(find_program pkg-config)
+run export PKG_CONFIG=$(find_program pkg-config)
 if [ "$PKG_CONFIG" ]; then
     log "Found pkg-config at: $PKG_CONFIG"
 else
@@ -266,7 +266,7 @@ build_qemu_android () {
             linux-x86*)
                 # Use PulseAudio on Linux because the default backend,
                 # OSS, does not work
-                AUDIO_BACKENDS_FLAG="--audio-drv-list=pa"
+                AUDIO_BACKENDS_FLAG=""
                 ;;
             linux-aarch64)
                 # TODO(bohu) cross build pa for aarch64
@@ -301,13 +301,17 @@ build_qemu_android () {
                 LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
                 ;;
             *)
-                LIBUSB_FLAGS="--enable-libusb --enable-usb-redir"
+                LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
                 ;;
         esac
 
 
         PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
         PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig
+        log "PKG_CONFIG_LIBDIR $PKG_CONFIG_LIBDIR"
+        log "PKG_CONFIG_PATH $PKG_CONFIG_PATH"
+        log "PKG_CONFIG $PKG_CONFIG"
+
         case $1 in
             windows*)
                 # Use the host version, or the build will freeze.
@@ -327,14 +331,14 @@ EOF
         chmod a+x pkg-config
         PKG_CONFIG=$(pwd -P)/pkg-config
 
-        export PKG_CONFIG PKG_CONFIG_PATH PKG_CONFIG_LIBDIR
+        run export PKG_CONFIG PKG_CONFIG_PATH PKG_CONFIG_LIBDIR
 
         # Export these to ensure that pkg-config picks them up properly.
-        export GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include"
+        run export GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include"
         if [ "$BUILD_OS" = "windows_msvc" ]; then
-          export GLIB_LIBS="$PREFIX/lib/libglib-2.0.lib"
+          run export GLIB_LIBS="$PREFIX/lib/libglib-2.0.lib"
         else
-          export GLIB_LIBS="$PREFIX/lib/libglib-2.0.la"
+          run export GLIB_LIBS="$PREFIX/lib/libglib-2.0.la"
         fi
         case $BUILD_OS in
             darwin)
@@ -347,6 +351,7 @@ EOF
             ;;
           linux-x86*)
             GCC=gcc
+            GCC=g++
             ;;
           linux-aarch64)
             GCC=g++
@@ -407,7 +412,7 @@ EOF
         chmod a+x ar-prog
 
         SDL_CONFIG=$PREFIX/bin/sdl2-config
-        export SDL_CONFIG
+        run export SDL_CONFIG
 
         DEBUG_FLAGS=
         if [ "$OPT_DEBUG" ]; then
@@ -458,10 +463,9 @@ EOF
             --disable-xen \
             --disable-xen-pci-passthrough \
             --disable-xfsctl \
-            --enable-sdl \
+            --disable-sdl \
             --enable-trace-backends=nop \
             --enable-vnc \
-            --with-sdlabi=2.0 \
             &&
 
             case $1 in

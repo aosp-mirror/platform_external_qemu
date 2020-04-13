@@ -47,7 +47,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
 endif()
 
-if(NOT WINDOWS)
+if(NOT WINDOWS AND NOT OPTION_MINBUILD)
 
   set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp
                        multi-display-agent-mock-impl.cpp Toplevel.cpp window-agent-mock-impl.cpp)
@@ -77,7 +77,6 @@ if(NOT WINDOWS)
            android-emu-shared
            cutils
            gui
-           OpenglSystemCommon
            EGL_emulation
            GLESv2_emulation
            emugl_base

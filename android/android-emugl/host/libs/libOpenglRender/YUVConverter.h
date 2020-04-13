@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <cstring>
 // The purpose of YUVConverter is to use
 // OpenGL shaders to convert YUV images to RGB
 // images that can be displayed on screen.
