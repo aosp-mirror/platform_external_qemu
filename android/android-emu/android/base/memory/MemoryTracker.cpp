@@ -25,6 +25,7 @@
 #include <libunwind.h>
 #include <set>
 #include <sstream>
+#include <algorithm>
 #include <vector>
 #endif
 

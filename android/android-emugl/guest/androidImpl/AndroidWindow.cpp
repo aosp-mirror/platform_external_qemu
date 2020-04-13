@@ -18,6 +18,7 @@
 #include "android/base/Backtrace.h"
 
 #include <hardware/gralloc.h>
+#include <cassert>
 #include <errno.h>
 #include <stdio.h>
 

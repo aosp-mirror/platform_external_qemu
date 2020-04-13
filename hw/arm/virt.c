@@ -142,6 +142,8 @@ static const MemMapEntry a15memmap[] = {
     [VIRT_GPIO] =               { 0x09030000, 0x00001000 },
     [VIRT_SECURE_UART] =        { 0x09040000, 0x00001000 },
     [VIRT_MMIO] =               { 0x0a000000, 0x00000200 },
+    [VIRT_GOLDFISH_PIPE] =      { 0x0a010000, 0x00002000 },
+    [VIRT_GOLDFISH_FB] =        { 0x0a020000, 0x00000100 },
     /* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */
     [VIRT_PLATFORM_BUS] =       { 0x0c000000, 0x02000000 },
     [VIRT_SECURE_MEM] =         { 0x0e000000, 0x01000000 },
@@ -159,6 +161,8 @@ static const int a15irqmap[] = {
     [VIRT_PCIE] = 3, /* ... to 6 */
     [VIRT_GPIO] = 7,
     [VIRT_SECURE_UART] = 8,
+    [VIRT_GOLDFISH_PIPE] = 9,
+    [VIRT_GOLDFISH_FB] = 10,
     [VIRT_MMIO] = 16, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
     [VIRT_GIC_V2M] = 48, /* ...to 48 + NUM_GICV2M_SPIS - 1 */
     [VIRT_PLATFORM_BUS] = 112, /* ...to 112 + PLATFORM_BUS_NUM_IRQS -1 */
@@ -582,6 +586,64 @@ static void create_gic(VirtMachineState *vms, qemu_irq *pic)
     } else if (type == 2) {
         create_v2m(vms, pic);
     }
+}
+
+static void init_simple_device(DeviceState *dev,
+                               const VirtMachineState *vms,qemu_irq *pic,
+                               int devid, const char *sysbus_name,
+                               const char *compat,
+                               int num_compat_strings,
+                               const char *clocks, int num_clocks)
+{
+    int irq = vms->irqmap[devid];
+    hwaddr base = vms->memmap[devid].base;
+    hwaddr size = vms->memmap[devid].size;
+    char *nodename;
+    int i;
+    int compat_sz = 0;
+    int clocks_sz = 0;
+
+    SysBusDevice *s = SYS_BUS_DEVICE(dev);
+    qdev_init_nofail(dev);
+    sysbus_mmio_map(s, 0, base);
+    if (pic[irq]) {
+        sysbus_connect_irq(s, 0, pic[irq]);
+    }
+
+    for (i = 0; i < num_compat_strings; i++) {
+        compat_sz += strlen(compat + compat_sz) + 1;
+    }
+
+    for (i = 0; i < num_clocks; i++) {
+        clocks_sz += strlen(clocks + clocks_sz) + 1;
+    }
+
+    nodename = g_strdup_printf("/%s@%" PRIx64, sysbus_name, base);
+    qemu_fdt_add_subnode(vms->fdt, nodename);
+    qemu_fdt_setprop(vms->fdt, nodename, "compatible", compat, compat_sz);
+    qemu_fdt_setprop_sized_cells(vms->fdt, nodename, "reg", 2, base, 2, size);
+    if (irq) {
+        qemu_fdt_setprop_cells(vms->fdt, nodename, "interrupts",
+                               GIC_FDT_IRQ_TYPE_SPI, irq,
+                               GIC_FDT_IRQ_FLAGS_LEVEL_HI);
+    }
+    if (num_clocks) {
+        qemu_fdt_setprop_cells(vms->fdt, nodename, "clocks",
+                               vms->clock_phandle, vms->clock_phandle);
+        qemu_fdt_setprop(vms->fdt, nodename, "clock-names",
+                         clocks, clocks_sz);
+    }
+    g_free(nodename);
+}
+
+static void create_simple_device(const VirtMachineState *vms, qemu_irq *pic,
+                                 int devid, const char *sysbus_name,
+                                 const char *compat, int num_compat_strings,
+                                 const char *clocks, int num_clocks)
+{
+    DeviceState *dev = qdev_create(NULL, sysbus_name);
+    init_simple_device(dev, vms, pic, devid, sysbus_name, compat,
+                       num_compat_strings, clocks, num_clocks);
 }
 
 static void create_uart(const VirtMachineState *vms, qemu_irq *pic, int uart,
@@ -1392,6 +1454,12 @@ static void machvirt_init(MachineState *machine)
 
     create_gpio(vms, pic);
 
+    create_simple_device(vms, pic, VIRT_GOLDFISH_FB, "goldfish_fb",
+                         "google,goldfish-fb\0"
+                         "generic,goldfish-fb", 2, 0, 0);
+    create_simple_device(vms, pic, VIRT_GOLDFISH_PIPE, "goldfish_pipe",
+                         "google,android-pipe\0"
+                         "generic,android-pipe", 2, 0, 0);
     /* Create mmio transports, so the user can create virtio backends
      * (which will be automatically plugged in to the transports). If
      * no backend is created the transport will just sit harmlessly idle.
