@@ -29,6 +29,7 @@
 
 #include <grallocusage/GrallocUsageConversion.h>
 #include "GrallocDispatch.h"
+#include <cstring>
 
 namespace android {
 namespace Gralloc2 {

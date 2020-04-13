@@ -16,6 +16,7 @@
 
 #include <sys/syscall.h>
 #include <linux/futex.h>
+#include <stdio.h>
 
 #define qemu_futex(...)              syscall(__NR_futex, __VA_ARGS__)
 
