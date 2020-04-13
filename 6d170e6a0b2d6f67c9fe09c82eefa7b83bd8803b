@@ -46,6 +46,29 @@
       "revId": "6d170e6a0b2d6f67c9fe09c82eefa7b83bd8803b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50787c8b_8668d33b",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-04-13T15:58:15Z",
+      "side": 0,
+      "message": "Add some comments for what this class is for?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 2
+      },
+      "revId": "6d170e6a0b2d6f67c9fe09c82eefa7b83bd8803b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
