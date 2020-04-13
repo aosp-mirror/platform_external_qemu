@@ -76,7 +76,7 @@ ifeq ($(BUILD_DEBUG),true)
     endif
 else
     ifneq (windows,$(BUILD_TARGET_OS))
-        BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1
+        BUILD_OPT_CFLAGS += -O2 -DNDEBUG=1
     else
     # for windows, qemu1 will crash with O3, lets stay with O2 until qemu1 is gone
         BUILD_OPT_CFLAGS += -O2 -DNDEBUG=1
