@@ -17,7 +17,9 @@
 #include "trace.h"
 #include "hw/virtio/virtio.h"
 #include "hw/virtio/virtio-gpu.h"
+#ifdef CONFIG_ANDROID
 #include "hw/virtio/virtio-goldfish-pipe.h"
+#endif
 
 #ifdef CONFIG_VIRGL
 

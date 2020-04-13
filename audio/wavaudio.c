@@ -124,9 +124,11 @@ static int wav_run_in (HWVoiceIn *hw)
         int chunk = audio_MIN (to_grab, hw->samples - wpos);
         void *buf = advance(wavin->pcm_buf, wpos);
 
+#ifdef ANDROID_IO
         if (qemu_wav_audio_rewind_input_wave()) {
             fseek(wavin->infp, 44, SEEK_SET);
         }
+#endif
 
         if(fread(buf, chunk << hw->info.shift, 1, wavin->infp) != 1) {
             // reached EOF, rewind

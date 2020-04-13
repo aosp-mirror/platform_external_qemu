@@ -32,7 +32,7 @@
 # $ cd $QEMU2_TOP_DIR
 # $ android-qemu2-glue/scripts/gen-cmake.py -i ../../prebuilts/android-emulator-build/qemu-upstream -r .
 #
-from __future__ import print_function
+
 import argparse
 import logging
 import os
@@ -58,13 +58,13 @@ class SetLikeList(list):
       self.append(item)
 
   def __sub__(self, other):
-    for idx in xrange(len(self) - 1, 0, -1):
+    for idx in range(len(self) - 1, 0, -1):
       if self[idx] in other:
         del self[idx]
     return self
 
   def __and__(self, other):
-    for idx in xrange(len(self) - 1, 0, -1):
+    for idx in range(len(self) - 1, 0, -1):
       if self[idx] not in other:
         del self[idx]
     return self
@@ -83,6 +83,10 @@ class GitFiles(object):
       'hw/i386/acpi-build',
       'hw/i386/pc_piix',  # in the default build..
 
+      # We introduced this later on with a set of special rules.
+      'hw/pci/goldfish_address_space',
+
+
       # these aren't used in the emulator but add 1MB+ to binary size
       'hw/net/e1000',
       'hw/net/e1000e',
@@ -99,8 +103,8 @@ class GitFiles(object):
 
   def __init__(self, root):
     self.root = root
-    self.files = set(
-        subprocess.check_output(['git', 'ls-files'], cwd=root).split('\n'))
+    gitls = subprocess.check_output(['git', 'ls-files'], cwd=root).decode("utf-8")
+    self.files = set(gitls.split('\n'))
 
   def get_revision(self):
     """Returns the current sha of this git repo."""
@@ -258,7 +262,7 @@ def source_properties(source_list, git_fs):
   """
   cmake = ''
   buckets = group_by_dir(source_list)
-  for dir_name, file_list in buckets.iteritems():
+  for dir_name, file_list in buckets.items():
     generated, files = split_by_generated(file_list, git_fs)
     sources = ['${ANDROID_AUTOGEN}/' + fname for fname in generated]
     sources += files
@@ -348,6 +352,7 @@ def main(_):
     cmake += '# ./android-qemu2-glue/scripts/gen-cmake.py -i ../../prebuilts/android-emulator-build/qemu-upstream -r .\n'
     cmake += '# Defines targets: ' + '\n#   '.join(targets)
     cmake += '\n\n'
+    shared = set()
     for (target, _, files, libdeps, shared) in deps:
       logging.info('Considering target: %s - files: %d', target, len(files))
       all_sources |= set(files)

@@ -22,6 +22,7 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <memory>
 
 extern "C" {
 #include "vpx/vp8dx.h"

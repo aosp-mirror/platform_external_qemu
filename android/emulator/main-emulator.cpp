@@ -240,6 +240,10 @@ static bool checkOsVersion() {
 
 static void doLauncherTest(const char* launcherTestArg);
 
+extern "C"  {
+    void rcu_register_thread();
+}
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -259,6 +263,8 @@ int main(int argc, char** argv)
     bool isRestart = false;
     int restartPid = -1;
     bool doDeleteTempDir = false;
+
+    rcu_register_thread();
 
     const char* qemu_top_dir = nullptr;
     for (int nn = 1; nn < argc; nn++) {
