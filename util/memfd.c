@@ -35,7 +35,7 @@
 #include <sys/syscall.h>
 #include <asm/unistd.h>
 
-static int memfd_create(const char *name, unsigned int flags)
+static int my_static_memfd_create(const char *name, unsigned int flags)
 {
 #ifdef __NR_memfd_create
     return syscall(__NR_memfd_create, name, flags);
@@ -84,7 +84,7 @@ int qemu_memfd_create(const char *name, size_t size, bool hugetlb,
         flags |= MFD_HUGETLB;
         flags |= htsize;
     }
-    mfd = memfd_create(name, flags);
+    mfd = my_static_memfd_create(name, flags);
     if (mfd < 0) {
         goto err;
     }

@@ -187,7 +187,7 @@ static void create_fdt(VirtBoardInfo *vbi)
     qemu_fdt_setprop_cell(fdt, "/apb-pclk", "phandle", vbi->clock_phandle);
 
     /* No PSCI for TCG yet */
-    if (kvm_enabled()) {
+    if (false && kvm_enabled()) {
         uint32_t cpu_suspend_fn;
         uint32_t cpu_off_fn;
         uint32_t cpu_on_fn;

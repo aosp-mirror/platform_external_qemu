@@ -9,9 +9,9 @@ int pa_context_connect(pa_context* c, const char* server, pa_context_flags_t fla
 
 void pa_context_disconnect(pa_context* c) { }
 
-int pa_context_errno(pa_context* c) { return ENODEV; }
+int pa_context_errno(const pa_context* c) { return ENODEV; }
 
-pa_context_state_t pa_context_get_state(pa_context* c) { return PA_CONTEXT_FAILED; }
+pa_context_state_t pa_context_get_state(const pa_context* c) { return PA_CONTEXT_FAILED; }
 
 pa_context* pa_context_new(pa_mainloop_api* api, const char* name) { return NULL; }
 
@@ -85,13 +85,13 @@ pa_operation* pa_stream_cork(
 
 int pa_stream_drop(pa_stream *p) { return -1; }
 
-uint32_t pa_stream_get_device_index(pa_stream* s) { return PA_INVALID_INDEX; }
+uint32_t pa_stream_get_device_index(const pa_stream* s) { return PA_INVALID_INDEX; }
 
-uint32_t pa_stream_get_index(pa_stream* s) { return PA_INVALID_INDEX; }
+uint32_t pa_stream_get_index(const pa_stream* s) { return PA_INVALID_INDEX; }
 
-pa_stream_state_t pa_stream_get_state(pa_stream* p) { return PA_STREAM_FAILED; }
+pa_stream_state_t pa_stream_get_state(const pa_stream* p) { return PA_STREAM_FAILED; }
 
-int pa_stream_is_corked(pa_stream *s) { return -1; }
+int pa_stream_is_corked(const pa_stream *s) { return -1; }
 
 pa_stream* pa_stream_new(
     pa_context* c,
@@ -127,7 +127,7 @@ void pa_stream_set_write_callback(
 
 void pa_stream_unref(pa_stream* s) { }
 
-size_t pa_stream_writable_size(pa_stream* p) { return 0; }
+size_t pa_stream_writable_size(const pa_stream* p) { return 0; }
 
 int pa_stream_write(
     pa_stream* p,

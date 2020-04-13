@@ -17,6 +17,7 @@
 #include <chrono>   // for milliseconds
 #include <cstdint>  // for uint64_t
 #include <mutex>    // for condition_variable, mutex
+#include <condition_variable>
 
 namespace android {
 namespace emulation {
