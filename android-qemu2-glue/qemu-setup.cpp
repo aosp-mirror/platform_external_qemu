@@ -292,16 +292,18 @@ int qemu_setup_grpc() {
     auto h2o = android::emulation::control::getWaterfallService(
             android_cmdLineOptions->waterfall);
     auto snapshot = android::emulation::control::getSnapshotService();
-    auto builder = EmulatorControllerService::Builder()
-                           .withConsoleAgents(getConsoleAgents())
-                           .withPortRange(grpc_start, grpc_end)
-                           .withCertAndKey(android_cmdLineOptions->grpc_tls_cer,
-                                           android_cmdLineOptions->grpc_tls_key,
-                                           android_cmdLineOptions->grpc_tls_ca)
-                           .withAddress(address)
-                           .withService(emulator)
-                           .withService(h2o)
-                           .withService(snapshot);
+    auto builder =
+            EmulatorControllerService::Builder()
+                    .withConsoleAgents(getConsoleAgents())
+                    .withPortRange(grpc_start, grpc_end)
+                    .withCertAndKey(android_cmdLineOptions->grpc_tls_cer,
+                                    android_cmdLineOptions->grpc_tls_key,
+                                    android_cmdLineOptions->grpc_tls_ca)
+                    .withAuthToken(android_cmdLineOptions->grpc_token_file)
+                    .withAddress(address)
+                    .withService(emulator)
+                    .withService(h2o)
+                    .withService(snapshot);
 
     int timeout = 0;
     if (android_cmdLineOptions->idle_grpc_timeout &&
@@ -326,10 +328,17 @@ int qemu_setup_grpc() {
         if (android_cmdLineOptions->grpc_tls_ca) {
             props["grpc.ca_root"] = android_cmdLineOptions->grpc_tls_ca;
         }
+        if (android_cmdLineOptions->grpc_token_file) {
+            props["grpc.token_file"] = android_cmdLineOptions->grpc_token_file;
+        }
     }
-    if (!grpcService && (android_cmdLineOptions->grpc ||
-        android_cmdLineOptions->grpc_tls_ca || android_cmdLineOptions->grpc_tls_key ||
-        android_cmdLineOptions->grpc_tls_ca)) {
+
+    bool userRequestedGrpc = android_cmdLineOptions->grpc ||
+                             android_cmdLineOptions->grpc_tls_ca ||
+                             android_cmdLineOptions->grpc_tls_key ||
+                             android_cmdLineOptions->grpc_tls_ca ||
+                             android_cmdLineOptions->grpc_token_file;
+    if (!grpcService && userRequestedGrpc) {
         fprintf(stderr,
                 "Failed to start grpc service, even though it was explicitly "
                 "requested.\n");
