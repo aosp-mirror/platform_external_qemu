@@ -39,7 +39,6 @@ std::array<std::string, 17> kStatus{"OK",
                                     "NOT_FOUND",
                                     "ALREADY_EXISTS",
                                     "PERMISSION_DENIED",
-                                    "UNAUTHENTICATED",
                                     "RESOURCE_EXHAUSTED",
                                     "FAILED_PRECONDITION",
                                     "ABORTED",
@@ -47,14 +46,14 @@ std::array<std::string, 17> kStatus{"OK",
                                     "UNIMPLEMENTED",
                                     "INTERNAL",
                                     "UNAVAILABLE",
-                                    "DATA_LOSS"};
+                                    "DATA_LOSS",
+                                    "UNAUTHENTICATED"};
 
 static std::string statusToString(grpc::Status status) {
     if (status.error_code() == grpc::StatusCode::OK)
         return "OK";
     return kStatus[std::min<int>(static_cast<int>(status.error_code()), 16)]
-            .append(":")
-            .append(status.error_message());
+             +  ":" + status.error_message();
 }
 
 static uint64_t getTimeDiffUs(InvocationRecord loginfo,
