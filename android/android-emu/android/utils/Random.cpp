@@ -14,6 +14,9 @@
 #include "android/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
+extern "C" {
+#include "android/proxy/proxy_int.h"
+}
 
 #ifdef _WIN32
 #include <windows.h>
@@ -62,5 +65,6 @@ bool generateRandomBytes(char* buf, size_t buf_len) {
     return true;
 #endif
 }
+
 
 }  // namespace android

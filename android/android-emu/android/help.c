@@ -1195,6 +1195,24 @@ help_grpc_tls_ca(stralloc_t*  out)
 }
 
 static void
+help_grpc_use_token(stralloc_t*  out)
+{
+    PRINTF(
+    "  Require an x-grpc-authorization header with a valid token for every grpc call.\n\n"
+    "  This is the same token used for the emulator console. Usually the file can be found\n"
+#ifdef _WIN32
+    "  in %%CSIDL_PROFILE%%\\.emulator_console_auth_token\n\n"
+#else
+    "  in $HOME/.emulator_console_auth_token\n\n"
+#endif
+    "  Every grpc request expects the following header:\n"
+    "    x-grpc-authorization: Bearer <token>\n\n"
+    "  If an incorrect token is present the status UNAUTHORIZED will be returned.\n\n"
+    "  Note: Token based security can only be installed if you are using localhost or TLS.\n\n");
+}
+
+
+static void
 help_idle_grpc_timeout(stralloc_t*  out)
 {
     PRINTF(
