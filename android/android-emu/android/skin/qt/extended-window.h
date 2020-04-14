@@ -105,4 +105,5 @@ private:
     bool mFirstShowEvent = true;
     SizeTweaker mSizeTweaker;
     QButtonGroup mSidebarButtons;
+    bool mExtendedWindowWasShown = false;
 };
