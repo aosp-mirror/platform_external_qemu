@@ -22,6 +22,30 @@
       "revId": "dbc514f48e226da8d7a0cf466c218e35e5e3caa7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "286c8e9a_4fa38b29",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-14T20:14:23Z",
+      "side": 1,
+      "message": "I\u0027ve updated the design document and added some clarifications in the commit message.\n\nA good starting point is the ~/.emulator_console_auth_token which is generated during launch if it does not yet exist and should have 600 permissions on creation.",
+      "parentUuid": "ec042363_382e983a",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 22
+      },
+      "revId": "dbc514f48e226da8d7a0cf466c218e35e5e3caa7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
