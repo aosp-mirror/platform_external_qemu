@@ -22,6 +22,30 @@
       "revId": "79216423bfd5dfccd99b617db116df277dcf608c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1bc8c465_bdf4a7fd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-14T14:20:24Z",
+      "side": 1,
+      "message": "I\u0027ve updated the documentation as it was indeed very misleading. The flags point to files.\n\nIt is the users responsibility to make sure that the files have the proper access rights (chmod 600 my_private_key).",
+      "parentUuid": "057f3903_aa39d933",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 61
+      },
+      "revId": "79216423bfd5dfccd99b617db116df277dcf608c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
