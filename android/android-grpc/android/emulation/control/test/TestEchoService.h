@@ -14,14 +14,29 @@
 // limitations under the License.
 #pragma once
 #include <grpcpp/grpcpp.h>
+#include "test_echo_service.grpc.pb.h"  // for TestEcho
+#include "test_echo_service.pb.h"       // for Msg
 
 namespace android {
 namespace emulation {
 namespace control {
 
-using grpc::Service;
 
-Service* getTestEchoService();
+using grpc::ServerContext;
+using grpc::Status;
+
+class TestEchoServiceImpl final : public TestEcho::Service {
+public:
+    Status echo(ServerContext* context,
+                const Msg* request,
+                Msg* response) override;
+
+    int invocations() { return mCounter; }
+
+private:
+    int mCounter{0};
+};
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
