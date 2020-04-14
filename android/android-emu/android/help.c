@@ -1195,6 +1195,19 @@ help_grpc_tls_ca(stralloc_t*  out)
 }
 
 static void
+help_grpc_use_token(stralloc_t*  out)
+{
+    PRINTF(
+    "  Require an authorization header with a valid token for every grpc call.\n\n"
+    "  Every grpc request expects the following header:\n"
+    "    authorization: Bearer <token>\n\n"
+    "  The token can be found in the android studio discovery file "
+    "  If an incorrect token is present the status UNAUTHORIZED will be returned.\n\n"
+    "  Note: Token based security can only be installed if you are using localhost or TLS.\n\n");
+}
+
+
+static void
 help_idle_grpc_timeout(stralloc_t*  out)
 {
     PRINTF(

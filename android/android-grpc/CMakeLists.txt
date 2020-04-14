@@ -50,6 +50,7 @@ android_add_library(
       android/emulation/control/keyboard/TouchEventSender.cpp
       android/emulation/control/logcat/LogcatParser.cpp
       android/emulation/control/logcat/RingStreambuf.cpp
+      android/emulation/control/secure/BasicTokenAuth.cpp
       android/emulation/control/snapshot/SnapshotService.cpp
       android/emulation/control/snapshot/TarStream.cpp
       android/emulation/control/utils/EventWaiter.cpp

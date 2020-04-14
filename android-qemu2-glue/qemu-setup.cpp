@@ -55,6 +55,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
+#include "android/console_auth.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/HangDetector.h"
 #include "android/crashreport/crash-handler.h"
@@ -79,6 +80,7 @@
 #include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot/interface.h"
+#include "android/utils/Random.h"
 #include "android/utils/debug.h"
 #include "snapshot_service.grpc.pb.h"
 
@@ -88,6 +90,7 @@
 
 extern "C" {
 
+#include "android/proxy/proxy_int.h"
 #include "qemu/abort.h"
 #include "qemu/main-loop.h"
 #include "qemu/osdep.h"
@@ -265,6 +268,22 @@ bool qemu_android_ports_setup() {
 static const std::string kCertFileName{"emulator-grpc.cer"};
 static const std::string kPrivateKeyFileName{"emulator-grpc.key"};
 
+// Generates a secure base64 encoded token of
+// |cnt| bytes.
+static std::string generateToken(int cnt) {
+    char buf[cnt];
+    if (!android::generateRandomBytes(buf, sizeof(buf))) {
+        return "";
+    }
+
+    const size_t kBase64Len = 4 * ((cnt + 2) / 3);
+    char base64[kBase64Len];
+    int len = proxy_base64_encode(buf, cnt, base64, kBase64Len);
+    // len < 0 can only happen if we calculate kBase64Len incorrectly..
+    assert(len > 0);
+    return std::string(base64, len);
+}
+
 int qemu_setup_grpc() {
     if (grpcService)
         return grpcService->port();
@@ -309,6 +328,12 @@ int qemu_setup_grpc() {
                 1) {
         builder.withIdleTimeout(std::chrono::seconds(timeout));
     }
+    if (android_cmdLineOptions->grpc_use_token) {
+        const int of64Bytes = 64;
+        auto token = generateToken(of64Bytes);
+        builder.withAuthToken(token);
+        props["grpc.token"] = token;
+    }
 #ifdef ANDROID_WEBRTC
     builder.withService(android::emulation::control::getRtcService(
             getConsoleAgents(), android_cmdLineOptions->turncfg));
@@ -317,9 +342,9 @@ int qemu_setup_grpc() {
     grpcService = builder.build();
 
     if (grpcService) {
-        props["grpc.port"] = std::to_string(grpcService->port());
         port = grpcService->port();
 
+        props["grpc.port"] = std::to_string(port);
         if (android_cmdLineOptions->grpc_tls_cer) {
             props["grpc.server_cert"] = android_cmdLineOptions->grpc_tls_cer;
         }
@@ -327,9 +352,13 @@ int qemu_setup_grpc() {
             props["grpc.ca_root"] = android_cmdLineOptions->grpc_tls_ca;
         }
     }
-    if (!grpcService && (android_cmdLineOptions->grpc ||
-        android_cmdLineOptions->grpc_tls_ca || android_cmdLineOptions->grpc_tls_key ||
-        android_cmdLineOptions->grpc_tls_ca)) {
+
+    bool userWantsGrpc = android_cmdLineOptions->grpc ||
+                         android_cmdLineOptions->grpc_tls_ca ||
+                         android_cmdLineOptions->grpc_tls_key ||
+                         android_cmdLineOptions->grpc_tls_ca ||
+                         android_cmdLineOptions->grpc_use_token;
+    if (!grpcService && userWantsGrpc) {
         fprintf(stderr,
                 "Failed to start grpc service, even though it was explicitly "
                 "requested.\n");

@@ -26,21 +26,12 @@ namespace android {
 namespace emulation {
 namespace control {
 
-class TestEchoServiceImpl final : public TestEcho::Service {
-    Status echo(ServerContext* context,
-                const Msg* request,
-                Msg* response) override {
-        response->set_counter(mCounter++);
-        response->set_msg(request->msg());
-        return Status::OK;
-    }
-
-private:
-    int mCounter{0};
-};
-
-Service* getTestEchoService() {
-    return new TestEchoServiceImpl();
+Status TestEchoServiceImpl::echo(ServerContext* context,
+                                 const Msg* request,
+                                 Msg* response)  {
+    response->set_counter(mCounter++);
+    response->set_msg(request->msg());
+    return Status::OK;
 }
 }  // namespace control
 }  // namespace emulation

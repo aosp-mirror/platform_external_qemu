@@ -18,8 +18,7 @@
 #include <vector>                                // for vector
 
 #include "android/console.h"                     // for AndroidConsoleAgents
-
-#include "grpcpp/impl/codegen/service_type.h"    // for Service
+#include "grpcpp/impl/codegen/service_type.h"    // IWYU pragma: keep
 #include "grpcpp/security/server_credentials.h"  // for ServerCredentials
 
 #ifdef _MSC_VER
@@ -51,6 +50,8 @@ public:
 // can be used to control the emulator
 class EmulatorControllerService::Builder {
 public:
+    enum class Security { Insecure = 0, Tls, Local };
+
     Builder();
 
     // Sets the console agents to be used. Construction will fail without
@@ -63,6 +64,12 @@ public:
     Builder& withCertAndKey(const char* certfile,
                             const char* privateKeyFile,
                             const char* certAuthority);
+
+    // Reject any request with the status UNAUTHORIZED if the following header is not
+    // present: Authorization: Bearer <token>
+    //
+    // |token| Token to use.
+    Builder& withAuthToken(std::string token);
 
     // Enables the gRPC service that binds on the given address on the first
     // port available in the port range [startPart, endPort).
@@ -88,14 +95,19 @@ public:
     std::unique_ptr<EmulatorControllerService> build();
 
 private:
+    std::string readSecrets(const char* fname);
+
     int port();
     const AndroidConsoleAgents* mAgents;
     int mPort{-1};
     std::chrono::seconds mTimeout{0};
     std::vector<std::shared_ptr<::grpc::Service>> mServices;
+    Security mSecurity{Security::Insecure};
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
     std::string mBindAddress{"127.0.0.1"};
     std::string mCertfile;
+    std::string mAuthToken;
+    bool mValid{true};
 };
 
 }  // namespace control
