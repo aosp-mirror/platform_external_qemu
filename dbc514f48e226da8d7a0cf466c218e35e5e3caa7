@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ec042363_382e983a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-14T16:40:37Z",
+      "side": 1,
+      "message": "How do you envision token file creation in the Embedded Emulator scenario? Please describe the overall picture in the Embedded Emulator design document.",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 22
+      },
+      "revId": "dbc514f48e226da8d7a0cf466c218e35e5e3caa7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
