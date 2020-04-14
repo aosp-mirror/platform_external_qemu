@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <chrono>                                // for seconds
-#include <memory>                                // for shared_ptr, unique_ptr
-#include <string>                                // for string
-#include <vector>                                // for vector
+#include <chrono>  // for seconds
+#include <memory>  // for shared_ptr, unique_ptr
+#include <string>  // for string
+#include <vector>  // for vector
 
 #include "android/console.h"                     // for AndroidConsoleAgents
-
 #include "grpcpp/impl/codegen/service_type.h"    // for Service
 #include "grpcpp/security/server_credentials.h"  // for ServerCredentials
 
@@ -51,6 +50,8 @@ public:
 // can be used to control the emulator
 class EmulatorControllerService::Builder {
 public:
+    enum class Security { Insecure = 0, Tls, Local };
+
     Builder();
 
     // Sets the console agents to be used. Construction will fail without
@@ -63,6 +64,12 @@ public:
     Builder& withCertAndKey(const char* certfile,
                             const char* privateKeyFile,
                             const char* certAuthority);
+
+    // Reject any request with the status 401 if the following header is not
+    // present: x-grpc-authorization Basic <token>
+    //
+    // |token| Token to use, or nullptr if not used.
+    Builder& withAuthToken(const char* token);
 
     // Enables the gRPC service that binds on the given address on the first
     // port available in the port range [startPart, endPort).
@@ -93,9 +100,11 @@ private:
     int mPort{-1};
     std::chrono::seconds mTimeout{0};
     std::vector<std::shared_ptr<::grpc::Service>> mServices;
+    Security mSecurity{Security::Insecure};
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
     std::string mBindAddress{"127.0.0.1"};
     std::string mCertfile;
+    std::string mAuthToken;
 };
 
 }  // namespace control

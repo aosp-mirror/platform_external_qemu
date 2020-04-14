@@ -237,6 +237,7 @@ OPT_PARAM(grpc, "<port>", "TCP ports used for the gRPC bridge." )
 OPT_PARAM(grpc_tls_key, "<key>", "Private key used to enable gRPC tls.")
 OPT_PARAM(grpc_tls_pem, "<pem>", "Public X509 certificate used to enable gRPC tls.")
 OPT_PARAM(grpc_tls_ca, "<pem>", "Certificate Authority used to validate client certificates.")
+OPT_PARAM(grpc_token_file, "<file>", "File with token used for token based authentication." )
 OPT_PARAM(idle_grpc_timeout, "<timeout>", "Terminate the emulator if there is no gRPC activity within <timeout> seconds.")
 OPT_PARAM(waterfall, "<mode>", "Mode in which to run waterfall.")
 

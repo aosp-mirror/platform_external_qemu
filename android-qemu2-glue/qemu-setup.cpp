@@ -298,6 +298,7 @@ int qemu_setup_grpc() {
                            .withCertAndKey(android_cmdLineOptions->grpc_tls_pem,
                                            android_cmdLineOptions->grpc_tls_key,
                                            android_cmdLineOptions->grpc_tls_ca)
+                           .withAuthToken(android_cmdLineOptions->grpc_token_file)
                            .withAddress(address)
                            .withService(emulator)
                            .withService(h2o)
@@ -326,9 +327,13 @@ int qemu_setup_grpc() {
         if (android_cmdLineOptions->grpc_tls_ca) {
             props["grpc.ca_root"] = android_cmdLineOptions->grpc_tls_ca;
         }
+        if (android_cmdLineOptions->grpc_token_file) {
+            props["grpc.token_file"] = android_cmdLineOptions->grpc_token_file;
+        }
     }
     if (!grpcService && android_cmdLineOptions->grpc ||
-        android_cmdLineOptions->grpc_tls_ca || android_cmdLineOptions->grpc_tls_key ||
+        android_cmdLineOptions->grpc_tls_ca ||
+        android_cmdLineOptions->grpc_tls_key ||
         android_cmdLineOptions->grpc_tls_ca) {
         fprintf(stderr,
                 "Failed to start grpc service, even though it was explicitly "
