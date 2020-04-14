@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <grpcpp/grpcpp.h>                                   // for Status
-
 #include "android/emulation/control/test/TestEchoService.h"  // for Service
-#include "test_echo_service.grpc.pb.h"                       // for TestEcho
-#include "test_echo_service.pb.h"                            // for Msg
+
+#include <grpcpp/grpcpp.h>  // for Status
+
+#include "test_echo_service.grpc.pb.h"  // for TestEcho
+#include "test_echo_service.pb.h"       // for Msg
 
 using grpc::ServerContext;
 using grpc::Status;
@@ -25,22 +26,12 @@ namespace android {
 namespace emulation {
 namespace control {
 
-class TestEchoServiceImpl final : public TestEcho::Service {
-
-    Status echo(ServerContext* context, const Msg* request, Msg* response) override {
-        response->set_counter(mCounter++);
-        response->set_msg(request->msg());
-        return Status::OK;
-    }
-
-private:
-    int mCounter{0};
-
-};
-
-
-Service* getTestEchoService() {
-    return new TestEchoServiceImpl();
+Status TestEchoServiceImpl::echo(ServerContext* context,
+                                 const Msg* request,
+                                 Msg* response)  {
+    response->set_counter(mCounter++);
+    response->set_msg(request->msg());
+    return Status::OK;
 }
 
 }  // namespace control
