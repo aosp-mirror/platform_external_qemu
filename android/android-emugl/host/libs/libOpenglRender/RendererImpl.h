@@ -54,7 +54,9 @@ public:
 
     HardwareStrings getHardwareStrings() final;
     void setPostCallback(OnPostCallback onPost,
-                         void* context, bool useBgraReadback) final;
+                         void* context,
+                         bool useBgraReadback,
+                         uint32_t displayId) final;
     bool asyncReadbackSupported() final;
     ReadPixelsCallback getReadPixelsCallback() final;
     bool showOpenGLSubwindow(FBNativeWindowType window,

@@ -71,7 +71,7 @@ static bool sInitialized = false;
 struct renderer_display_info;
 typedef void (*get_pixels_t)(void*, uint32_t);
 static get_pixels_t sGetPixelsFunc = 0;
-typedef void (*post_callback_t)(void*, int, int, int, int, int, unsigned char*);
+typedef void (*post_callback_t)(void*, uint32_t, int, int, int, int, int, unsigned char*);
 
 extern "C" VG_EXPORT void gfxstream_backend_init(
     uint32_t display_width,
@@ -244,7 +244,7 @@ extern const QAndroidVmOperations* const gQAndroidVmOperations;
 static void set_post_callback(struct renderer_display_info* r, post_callback_t func, uint32_t display_type);
 
 static void default_post_callback(
-    void* context, int width, int height, int ydir, int format, int frame_type, unsigned char* pixels) {
+    void* context, uint32_t displayId, int width, int height, int ydir, int format, int frame_type, unsigned char* pixels) {
     (void)context;
     (void)width;
     (void)height;
@@ -400,7 +400,7 @@ static void set_post_callback(struct renderer_display_info* r, post_callback_t f
             break;
     }
 
-    android_setPostCallback(func, r, false);
+    android_setPostCallback(func, r, false, 0);
 }
 
 extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes) {

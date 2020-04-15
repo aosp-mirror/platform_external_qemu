@@ -95,6 +95,7 @@ extern int multitouch_get_max_slot();
  *   context        The pointer optionally provided when the callback was
  *                  registered. The client can use this to pass whatever
  *                  information it wants to the callback.
+ *   displayId      Default is 0, can also be 1 to 10 if multi display is configured.
  *   width, height  Dimensions of the image, in pixels. Rows are tightly packed;
  *                  there is no inter-row padding.
  *   ydir           Indicates row order: 1 means top-to-bottom order, -1 means
@@ -108,6 +109,7 @@ extern int multitouch_get_max_slot();
  * always be the same as the ones passed to initOpenGLRenderer().
  */
 extern void multitouch_opengles_fb_update(void* context,
+                                          uint32_t displayId,
                                           int width,
                                           int height,
                                           int ydir,

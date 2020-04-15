@@ -48,13 +48,13 @@ MultiDisplay* MultiDisplay::getInstance() {
 }
 
 int MultiDisplay::setMultiDisplay(uint32_t id,
-                                   int32_t x,
-                                   int32_t y,
-                                   uint32_t w,
-                                   uint32_t h,
-                                   uint32_t dpi,
-                                   uint32_t flag,
-                                   bool add) {
+                                  int32_t x,
+                                  int32_t y,
+                                  uint32_t w,
+                                  uint32_t h,
+                                  uint32_t dpi,
+                                  uint32_t flag,
+                                  bool add) {
     int ret = 0;
     SkinRotation rotation = SKIN_ROTATION_0;
     LOG(VERBOSE) << "setMultiDisplay id " << id << " "
