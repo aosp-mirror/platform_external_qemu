@@ -112,7 +112,7 @@ for h in HANDLE_TYPES:
         if h == "VkDeviceMemory":
             HANDLE_INFO[h] = \
                 HandleInfo("VkDeviceMemory",
-                           "vkAllocateMemory", "vkFreeMemory")
+                           "vkAllocateMemory", ["vkFreeMemory", "vkFreeMemorySyncGOOGLE"])
         if h == "VkDescriptorSet":
             HANDLE_INFO[h] = \
                 HandleInfo("VkDescriptorSet", "vkAllocateDescriptorSets",

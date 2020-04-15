@@ -6372,6 +6372,12 @@ server.
             <param optional="false,true"><type>uint64_t</type>* <name>pSize</name></param>
             <param optional="false,true"><type>uint64_t</type>* <name>pHostmemId</name></param>
         </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY">
+            <proto><type>VkResult</type> <name>vkFreeMemorySyncGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param optional="true" externsync="true" devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -9235,6 +9241,14 @@ server.
                 <enum value="223"                                           name="VK_GOOGLE_ADDRESS_SPACE_INFO_NUMBER"/>
                 <enum value="&quot;VK_GOOGLE_address_space_info&quot;"           name="VK_GOOGLE_ADDRESS_SPACE_INFO_EXTENSION_NAME"/>
                 <command name="vkGetMemoryHostAddressInfoGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_free_memory_sync" number="224" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_FREE_MEMORY_SYNC_SPEC_VERSION"/>
+                <enum value="224"                                           name="VK_GOOGLE_FREE_MEMORY_SYNC_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_free_memory_sync&quot;"           name="VK_GOOGLE_FREE_MEMORY_SYNC_EXTENSION_NAME"/>
+                <command name="vkFreeMemorySyncGOOGLE"/>
             </require>
         </extension>
     </extensions>

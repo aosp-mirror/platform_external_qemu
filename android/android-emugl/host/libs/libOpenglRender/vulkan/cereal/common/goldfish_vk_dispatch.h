@@ -660,6 +660,9 @@ PFN_vkCreateBufferWithRequirementsGOOGLE vkCreateBufferWithRequirementsGOOGLE;
 #ifdef VK_GOOGLE_address_space_info
 PFN_vkGetMemoryHostAddressInfoGOOGLE vkGetMemoryHostAddressInfoGOOGLE;
 #endif
+#ifdef VK_GOOGLE_free_memory_sync
+PFN_vkFreeMemorySyncGOOGLE vkFreeMemorySyncGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk
