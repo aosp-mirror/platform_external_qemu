@@ -2408,6 +2408,9 @@ public:
                     existingMemoryInfo->device,
                     existingMemoryInfo->memory,
                     nullptr);
+                // fprintf(stderr, "%s: waiting debug\n", __func__);
+                // usleep(1000000);
+                // fprintf(stderr, "%s: done\n", __func__);
             }
         }
 
@@ -2943,6 +2946,17 @@ public:
                 (unsigned long long)(*pHostmemId));
         return VK_SUCCESS;
     }
+
+    VkResult on_vkFreeMemorySyncGOOGLE(
+        android::base::Pool* pool,
+        VkDevice boxed_device, VkDeviceMemory memory,
+        const VkAllocationCallbacks* pAllocator) {
+
+        on_vkFreeMemory(pool, boxed_device, memory, pAllocator);
+
+        return VK_SUCCESS;
+    }
+
 
     VkResult on_vkRegisterImageColorBufferGOOGLE(
             android::base::Pool* pool,
@@ -6034,6 +6048,16 @@ VkResult VkDecoderGlobalState::on_vkGetMemoryHostAddressInfoGOOGLE(
     return mImpl->on_vkGetMemoryHostAddressInfoGOOGLE(
         pool, device, memory, pAddress, pSize, pHostmemId);
 }
+
+// VK_GOOGLE_free_memory_sync
+VkResult VkDecoderGlobalState::on_vkFreeMemorySyncGOOGLE(
+    android::base::Pool* pool,
+    VkDevice device,
+    VkDeviceMemory memory,
+    const VkAllocationCallbacks* pAllocator) {
+    return mImpl->on_vkFreeMemorySyncGOOGLE(pool, device, memory, pAllocator);
+}
+
 
 // VK_GOOGLE_color_buffer
 VkResult VkDecoderGlobalState::on_vkRegisterImageColorBufferGOOGLE(

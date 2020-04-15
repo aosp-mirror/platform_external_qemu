@@ -4446,6 +4446,22 @@ void vkGetMemoryHostAddressInfoGOOGLE(
     // TODO: Implement
 }
 #endif
+#ifdef VK_GOOGLE_free_memory_sync
+void vkFreeMemorySyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    VkDeviceMemory memory,
+    const VkAllocationCallbacks* pAllocator)
+{
+    // TODO: Implement
+    android::base::AutoLock lock(mLock);
+    // memory destroy
+    mReconstruction.removeHandles((const uint64_t*)(&memory), 1);
+}
+#endif
 
 private:
     android::base::Lock mLock;
@@ -8758,6 +8774,19 @@ void VkDecoderSnapshot::vkGetMemoryHostAddressInfoGOOGLE(
     uint64_t* pHostmemId)
 {
     mImpl->vkGetMemoryHostAddressInfoGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, memory, pAddress, pSize, pHostmemId);
+}
+#endif
+#ifdef VK_GOOGLE_free_memory_sync
+void VkDecoderSnapshot::vkFreeMemorySyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    VkDeviceMemory memory,
+    const VkAllocationCallbacks* pAllocator)
+{
+    mImpl->vkFreeMemorySyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, memory, pAllocator);
 }
 #endif
 

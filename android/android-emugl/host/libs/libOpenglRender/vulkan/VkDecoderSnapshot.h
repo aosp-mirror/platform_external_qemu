@@ -2963,6 +2963,16 @@ public:
         uint64_t* pSize,
         uint64_t* pHostmemId);
 #endif
+#ifdef VK_GOOGLE_free_memory_sync
+    void vkFreeMemorySyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkResult input_result,
+        VkDevice device,
+        VkDeviceMemory memory,
+        const VkAllocationCallbacks* pAllocator);
+#endif
 
 private:
     class Impl;
