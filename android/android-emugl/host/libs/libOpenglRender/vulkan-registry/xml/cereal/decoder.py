@@ -509,6 +509,9 @@ custom_decodes = {
     "vkImportSemaphoreFdKHR" : emit_global_state_wrapped_decoding,
     "vkDestroySemaphore" : emit_global_state_wrapped_decoding,
 
+    # VK_GOOGLE_free_memory_sync
+    "vkFreeMemorySyncGOOGLE" : emit_global_state_wrapped_decoding,
+
     # VK_GOOGLE_address_space
     "vkMapMemoryIntoAddressSpaceGOOGLE" : emit_global_state_wrapped_decoding,
     "vkGetMemoryHostAddressInfoGOOGLE" : emit_global_state_wrapped_decoding,

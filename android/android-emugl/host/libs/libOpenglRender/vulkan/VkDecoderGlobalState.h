@@ -485,6 +485,13 @@ public:
         uint64_t* pSize,
         uint64_t* pHostmemId);
 
+    // VK_GOOGLE_free_memory_sync
+    VkResult on_vkFreeMemorySyncGOOGLE(
+        android::base::Pool* pool,
+        VkDevice device,
+        VkDeviceMemory memory,
+        const VkAllocationCallbacks* pAllocator);
+
     // VK_GOOGLE_color_buffer
     VkResult on_vkRegisterImageColorBufferGOOGLE(
         android::base::Pool* pool,

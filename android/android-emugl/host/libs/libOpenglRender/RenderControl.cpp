@@ -207,6 +207,9 @@ static constexpr android::base::StringView kVirtioGpuNext = "ANDROID_EMU_virtio_
 // address space subdevices
 static constexpr android::base::StringView kHasSharedSlotsHostMemoryAllocator = "ANDROID_EMU_has_shared_slots_host_memory_allocator";
 
+// vulkan free memory sync
+static constexpr android::base::StringView kVulkanFreeMemorySync = "ANDROID_EMU_vulkan_free_memory_sync";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -423,6 +426,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         emugl_feature_is_enabled(android::featurecontrol::VirtioGpuNext);
     bool hasSharedSlotsHostMemoryAllocatorEnabled =
         emugl_feature_is_enabled(android::featurecontrol::HasSharedSlotsHostMemoryAllocator);
+    bool vulkanFreeMemorySyncEnabled =
+        shouldEnableVulkan();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -513,6 +518,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (hasSharedSlotsHostMemoryAllocatorEnabled && name == GL_EXTENSIONS) {
         glStr += kHasSharedSlotsHostMemoryAllocator;
+        glStr += " ";
+    }
+
+    if (vulkanFreeMemorySyncEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanFreeMemorySync;
         glStr += " ";
     }
 

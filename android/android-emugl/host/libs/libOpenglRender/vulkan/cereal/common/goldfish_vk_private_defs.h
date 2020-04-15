@@ -155,6 +155,10 @@ typedef void (VKAPI_PTR *PFN_vkCreateBufferWithRequirementsGOOGLE)(
 
 typedef VkResult (VKAPI_PTR *PFN_vkGetMemoryHostAddressInfoGOOGLE)(VkDevice device, VkDeviceMemory memory, uint64_t* pAddress, uint64_t* pSize);
 
+#define VK_GOOGLE_free_memory_sync 1
+
+typedef VkResult (VKAPI_PTR *PFN_vkFreeMemorySyncGOOGLE)(VkDevice device, VkDeviceMemory memory, const VkAllocationCallbacks* pAllocator);
+
 #ifndef VK_FUCHSIA_external_memory
 #define VK_FUCHSIA_external_memory 1
 #define VK_FUCHSIA_EXTERNAL_MEMORY_SPEC_VERSION 1
