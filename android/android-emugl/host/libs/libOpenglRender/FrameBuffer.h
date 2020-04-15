@@ -165,7 +165,10 @@ public:
     // Set a callback that will be called each time the emulated GPU content
     // is updated. This can be relatively slow with host-based GPU emulation,
     // so only do this when you need to.
-    void setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext, bool useBgraReadback = false);
+    void setPostCallback(emugl::Renderer::OnPostCallback onPost,
+                         void* onPostContext,
+                         uint32_t displayId,
+                         bool useBgraReadback = false);
 
     // Retrieve the GL strings of the underlying EGL/GLES implementation.
     // On return, |*vendor|, |*renderer| and |*version| will point to strings

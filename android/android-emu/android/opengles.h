@@ -51,9 +51,13 @@ int android_startOpenglesRenderer(int width, int height,
 bool android_asyncReadbackSupported();
 
 /* See the description in render_api.h. */
-typedef void (*OnPostFunc)(void* context, int width, int height, int ydir,
-                           int format, int type, unsigned char* pixels);
-void android_setPostCallback(OnPostFunc onPost, void* onPostContext, bool useBgraReadback);
+typedef void (*OnPostFunc)(void* context, uint32_t displayId, int width,
+                           int height, int ydir, int format, int type,
+                           unsigned char* pixels);
+void android_setPostCallback(OnPostFunc onPost,
+                             void* onPostContext,
+                             bool useBgraReadback,
+                             uint32_t displayId);
 
 typedef void (*ReadPixelsFunc)(void* pixels, uint32_t bytes);
 ReadPixelsFunc android_getReadPixelsFunc();

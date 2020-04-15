@@ -67,6 +67,7 @@ static std::atomic<int> sRecordCounter(0);
 // to the main loop.
 
 typedef void (*on_new_gpu_frame_t)(void* opaque,
+                                   uint32_t displayId,
                                    int width,
                                    int height,
                                    int ydir,
@@ -76,6 +77,7 @@ typedef void (*on_new_gpu_frame_t)(void* opaque,
 
 // Recording (synchronous):
 static void onNewGpuFrame_record(void* opaque,
+                                 uint32_t displayId,
                                  int width,
                                  int height,
                                  int ydir,
@@ -92,6 +94,7 @@ static void onNewGpuFrame_record(void* opaque,
 
 // Recording (asynchronous):
 static void onNewGpuFrame_recordAsync(void* opaque,
+                                      uint32_t displayId,
                                       int width,
                                       int height,
                                       int ydir,
@@ -119,9 +122,9 @@ static void gpu_frame_set_post(bool on) {
 
     if (on) {
         android_setPostCallback(choose_on_new_gpu_frame(), sBridge,
-                                true /* BGRA readback */);
+                                true /* BGRA readback */, 0);
     } else {
-        android_setPostCallback(nullptr, nullptr, true /* BGRA readback */);
+        android_setPostCallback(nullptr, nullptr, true /* BGRA readback */, 0);
     }
 }
 

@@ -778,6 +778,7 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
 void FrameBuffer::setPostCallback(
         emugl::Renderer::OnPostCallback onPost,
         void* onPostContext,
+        uint32_t displayId,
         bool useBgraReadback) {
     AutoLock mutex(m_lock);
     m_onPost = onPost;
@@ -2230,7 +2231,7 @@ EXIT:
 }
 
 void FrameBuffer::doPostCallback(void* pixels) {
-    m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1, GL_RGBA, GL_UNSIGNED_BYTE,
+    m_onPost(m_onPostContext, 0, m_framebufferWidth, m_framebufferHeight, -1, GL_RGBA, GL_UNSIGNED_BYTE,
              (unsigned char*)pixels);
 }
 
