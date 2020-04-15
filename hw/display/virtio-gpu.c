@@ -17,7 +17,9 @@
 #include "ui/console.h"
 #include "trace.h"
 #include "hw/virtio/virtio.h"
+#ifdef CONFIG_ANDROID
 #include "hw/virtio/virtio-goldfish-pipe.h"
+#endif
 #include "hw/virtio/virtio-gpu.h"
 #include "hw/virtio/virtio-bus.h"
 #include "migration/blocker.h"
@@ -113,7 +115,6 @@ static void update_cursor_data_simple(VirtIOGPU *g,
            pixels * sizeof(uint32_t));
 }
 
-#ifdef CONFIG_VIRGL
 
 static void update_cursor_data_virgl(VirtIOGPU *g,
                                      struct virtio_gpu_scanout *s,
@@ -122,7 +123,11 @@ static void update_cursor_data_virgl(VirtIOGPU *g,
     uint32_t width, height;
     uint32_t pixels, *data;
 
+#ifdef CONFIG_VIRGL
     data = g->virgl->virgl_renderer_get_cursor_data(resource_id, &width, &height);
+#else
+    data = virgl_renderer_get_cursor_data(resource_id, &width, &height);
+#endif
     if (!data) {
         return;
     }
@@ -138,7 +143,6 @@ static void update_cursor_data_virgl(VirtIOGPU *g,
     free(data);
 }
 
-#endif
 
 static void update_cursor(VirtIOGPU *g, struct virtio_gpu_update_cursor *cursor)
 {
@@ -1188,6 +1192,7 @@ void proxy_virgl_write_fence(void *opaque, uint32_t fence) {
     }
 }
 
+#ifdef CONFIG_ANDROID
 static virgl_renderer_gl_context
 proxy_virgl_create_context(void *opaque, int scanout_idx,
                      struct virgl_renderer_gl_ctx_param *params)
@@ -1208,6 +1213,7 @@ static struct virgl_renderer_callbacks proxy_3d_cbs = {
     .destroy_gl_context  = proxy_virgl_destroy_context,
     .make_current        = proxy_virgl_make_context_current,
 };
+#endif
 
 static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
 {
@@ -1227,11 +1233,15 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
         return;
     }
 
+#ifdef CONFIG_ANDROID
     g->use_virgl_renderer = true;
     g->conf.flags |= (1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
     g->virgl_as_proxy = true;
     g->virgl = get_goldfish_pipe_virgl_renderer_virtio_interface();
     g->gpu_3d_cbs = &proxy_3d_cbs;
+#else
+    g->use_virgl_renderer = false;
+#endif
 
     if (virtio_gpu_virgl_enabled(g->conf)) {
         error_setg(&g->migration_blocker, "virgl is not yet migratable");

@@ -58,8 +58,8 @@ allowing one to inspect build failures easily."
 
 package_builder_register_options
 
-VALID_TARGETS="arm,arm64,x86,x86_64,mips,mips64"
-DEFAULT_TARGETS="arm,arm64,mips,mips64,x86,x86_64"
+VALID_TARGETS="arm,arm64,x86,x86_64"
+DEFAULT_TARGETS="arm,arm64,x86,x86_64"
 
 OPT_TARGET=
 option_register_var "--target=<list>" OPT_TARGET \
@@ -90,7 +90,7 @@ fi
 if [ "$OPT_SRC_DIR" ]; then
     QEMU_SRCDIR=$OPT_SRC_DIR
 else
-    DEFAULT_SRC_DIR=$(cd $(program_directory)/../.. && pwd -P 2>/dev/null || true)
+    DEFAULT_SRC_DIR=$(cd $(program_directory)/../../.. && pwd -P 2>/dev/null || true)
     if [ "$DEFAULT_SRC_DIR" ]; then
         QEMU_SRCDIR=$DEFAULT_SRC_DIR
         log "Auto-config: --src-dir=$QEMU_SRCDIR"
@@ -116,6 +116,9 @@ if [ -z "$OPT_INSTALL_DIR" ]; then
     # 'qemu-upstream' instead of 'qemu-android'
     INSTALL_DIR=${INSTALL_DIR%%-android}-upstream
 fi
+
+# Qemu needs python2 to build
+PYTHON2=$(which python2)
 
 ##
 ## Handle target system list
@@ -406,6 +409,7 @@ EOF
             --prefix=$PREFIX \
             --extra-cflags="$EXTRA_CFLAGS" \
             --extra-ldflags="$EXTRA_LDFLAGS" \
+            --python=$PYTHON2 \
             $DEBUG_FLAGS \
             $LIBUSB_FLAGS \
             $AUDIO_BACKENDS_FLAG \
