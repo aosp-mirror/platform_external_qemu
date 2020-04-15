@@ -290,6 +290,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_address_space_info
 #endif
+#ifdef VK_GOOGLE_free_memory_sync
+#endif
 
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -780,6 +782,9 @@ void init_vulkan_dispatch_from_system_loader(
 #endif
 #ifdef VK_GOOGLE_address_space_info
     out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)dlSymFunc(lib, "vkGetMemoryHostAddressInfoGOOGLE");
+#endif
+#ifdef VK_GOOGLE_free_memory_sync
+    out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)dlSymFunc(lib, "vkFreeMemorySyncGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
@@ -1299,6 +1304,9 @@ void init_vulkan_dispatch_from_instance(
 #ifdef VK_GOOGLE_address_space_info
     out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetMemoryHostAddressInfoGOOGLE");
 #endif
+#ifdef VK_GOOGLE_free_memory_sync
+    out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkFreeMemorySyncGOOGLE");
+#endif
 }
 
 void init_vulkan_dispatch_from_device(
@@ -1788,6 +1796,9 @@ void init_vulkan_dispatch_from_device(
 #endif
 #ifdef VK_GOOGLE_address_space_info
     out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetMemoryHostAddressInfoGOOGLE");
+#endif
+#ifdef VK_GOOGLE_free_memory_sync
+    out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkFreeMemorySyncGOOGLE");
 #endif
 }
 
