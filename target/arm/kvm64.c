@@ -193,7 +193,7 @@ static int insert_hw_watchpoint(target_ulong addr,
     HWWatchpoint wp = {
         .wcr = 1, /* E=1, enable */
         .wvr = addr & (~0x7ULL),
-        .details = { .vaddr = addr, .len = len }
+        .details = { .vaddress = addr, .len = len }
     };
 
     if (cur_hw_wps >= max_hw_wps) {
