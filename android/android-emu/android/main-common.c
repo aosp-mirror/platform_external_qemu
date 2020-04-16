@@ -1376,7 +1376,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
             const bool hvf_is_ok = feature_is_enabled(kFeature_HVF) &&
                     androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF);
 
-            if (!hvf_is_ok && !accel_ok && *accel_mode != ACCEL_OFF) {
+            if (android_qemu_mode && !hvf_is_ok && !accel_ok && *accel_mode != ACCEL_OFF) {
                 derror(
                     "%s emulation currently requires hardware acceleration!\n"
                     "Please ensure %s is properly installed and usable.\n"
@@ -1409,7 +1409,10 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                     abi, kAccelerator, *accel_status);
                 exit(1);
             }
-            else if (*accel_mode == ACCEL_OFF) {
+            else if (*accel_mode == ACCEL_OFF || !android_qemu_mode) {
+                if (!android_qemu_mode) {
+                    *accel_mode = ACCEL_OFF;
+                }
                 // '-no-accel' of '-accel off' was used explicitly. Warn about
                 // the issue but do not exit.
                 dwarning("%s emulation may not work without hardware acceleration!", abi);
