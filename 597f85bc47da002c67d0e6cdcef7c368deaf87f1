@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8d7f78a8_5ccd776e",
+        "filename": "android/build/cmake/android.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-16T18:53:28Z",
+      "side": 1,
+      "message": "elseif(LINUX_AARCH64) AND build_LINUX)\n  list(APPEND src ${build_LINUX})",
+      "revId": "597f85bc47da002c67d0e6cdcef7c368deaf87f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b30c3819_d40d3d38",
+        "filename": "android/build/cmake/toolchain.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-16T18:53:28Z",
+      "side": 1,
+      "message": "This will likely cause a lot of issues/confusion (esp with prebuilts), you might also be able change function(_register_target) in android.cmake to have the linux src be included in the CROSS_AARCH64 target.",
+      "revId": "597f85bc47da002c67d0e6cdcef7c368deaf87f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "876c41d9_69258c93",
+        "filename": "android/build/python/aemu/definitions.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-16T18:53:28Z",
+      "side": 1,
+      "message": "nit: linux_aarch64",
+      "revId": "597f85bc47da002c67d0e6cdcef7c368deaf87f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
