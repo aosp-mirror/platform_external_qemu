@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d2dc6d9_a86cde1b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T16:51:20Z",
+      "side": 1,
+      "message": "We should be prepared to flip the default in a week or so to turn on the token-based authentication by default. We should decide on the name of the flag that will be used to disable the token-based authentication when it becomes the default.",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 21
+      },
+      "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4d48c8c_f03ccc5a",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1198,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T16:51:20Z",
+      "side": 1,
+      "message": "Should we leave the flag undocumented since it will soon go away?",
+      "range": {
+        "startLine": 1198,
+        "startChar": 0,
+        "endLine": 1198,
+        "endChar": 37
+      },
+      "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5dc4ae3_922f99f3",
+        "filename": "android/android-emu/android/utils/Random.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T16:51:20Z",
+      "side": 1,
+      "message": "Is this include used?",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 36
+      },
+      "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "407b014e_51dacc84",
+        "filename": "android/android-grpc/android/emulation/control/GrpcServices.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T16:51:20Z",
+      "side": 1,
+      "message": "Does this expression have to be parenthesized?",
+      "range": {
+        "startLine": 94,
+        "startChar": 32,
+        "endLine": 94,
+        "endChar": 73
+      },
+      "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0946b80c_b149feab",
+        "filename": "android/android-grpc/android/emulation/control/GrpcServices_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T16:51:20Z",
+      "side": 1,
+      "message": "Should there be an underscore between \"does\" and \"not\"?",
+      "range": {
+        "startLine": 130,
+        "startChar": 54,
+        "endLine": 130,
+        "endChar": 69
+      },
+      "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
