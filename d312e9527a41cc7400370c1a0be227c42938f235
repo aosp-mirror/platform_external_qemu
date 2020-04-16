@@ -1,0 +1,182 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "52e4bd1b_7bb5666e",
+        "filename": "android/android-emu/android/cmdline-options.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T17:01:53Z",
+      "side": 1,
+      "message": "tls -\u003e TLS",
+      "range": {
+        "startLine": 237,
+        "startChar": 80,
+        "endLine": 237,
+        "endChar": 83
+      },
+      "revId": "d312e9527a41cc7400370c1a0be227c42938f235",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "794012fb_6a8f30a9",
+        "filename": "android/android-emu/android/cmdline-options.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T17:01:53Z",
+      "side": 1,
+      "message": "tls -\u003e TLS",
+      "range": {
+        "startLine": 238,
+        "startChar": 92,
+        "endLine": 238,
+        "endChar": 95
+      },
+      "revId": "d312e9527a41cc7400370c1a0be227c42938f235",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6654ef62_e948e288",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T17:01:53Z",
+      "side": 1,
+      "message": "tls -\u003e TLS\n\nSame below.",
+      "range": {
+        "startLine": 1166,
+        "startChar": 53,
+        "endLine": 1166,
+        "endChar": 56
+      },
+      "revId": "d312e9527a41cc7400370c1a0be227c42938f235",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8872ca9_bac58df9",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1189,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T17:01:53Z",
+      "side": 1,
+      "message": "nit: extra space",
+      "range": {
+        "startLine": 1189,
+        "startChar": 53,
+        "endLine": 1189,
+        "endChar": 54
+      },
+      "revId": "d312e9527a41cc7400370c1a0be227c42938f235",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd6d6f50_1d5f84a7",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1189,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T17:01:53Z",
+      "side": 1,
+      "message": "nit: extra space",
+      "range": {
+        "startLine": 1189,
+        "startChar": 84,
+        "endLine": 1189,
+        "endChar": 85
+      },
+      "revId": "d312e9527a41cc7400370c1a0be227c42938f235",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9818b14c_1f611911",
+        "filename": "android/android-grpc/android/emulation/control/test/CertificateFactory.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T17:01:53Z",
+      "side": 1,
+      "message": "Create -\u003e Creates",
+      "range": {
+        "startLine": 24,
+        "startChar": 7,
+        "endLine": 24,
+        "endChar": 13
+      },
+      "revId": "d312e9527a41cc7400370c1a0be227c42938f235",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "054abe00_cea7cf8d",
+        "filename": "android/android-grpc/android/emulation/control/test/TestEchoService.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T17:01:53Z",
+      "side": 1,
+      "message": "nit: unnecessary blank line",
+      "revId": "d312e9527a41cc7400370c1a0be227c42938f235",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4ad757c6_db772f8b",
+        "filename": "android/android-grpc/test_echo_service.proto",
+        "patchSetId": 10
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-16T17:01:53Z",
+      "side": 1,
+      "message": "nit: unnecessary blank line",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 0
+      },
+      "revId": "d312e9527a41cc7400370c1a0be227c42938f235",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
