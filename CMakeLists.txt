@@ -467,7 +467,7 @@ target_include_directories(
   android-qemu-deps
   INTERFACE
     tcg
-    tcg/i386
+    tcg/aarch64
     accel/tcg
     include
     disas/libvixl
@@ -612,7 +612,16 @@ set(ANDROID_QEMU_i386_DEVICES_linux-x86_64
 )
 set(ANDROID_QEMU_arm_DEVICES_linux-x86_64
     "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+
+set(ANDROID_QEMU_i386_DEVICES_linux-aarch64
+    "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}"
+)
+set(ANDROID_QEMU_arm_DEVICES_linux-aarch64
+    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+
 android_target_include_directories(android-qemu-deps linux-x86_64 INTERFACE
+                                   linux-headers)
+android_target_include_directories(android-qemu-deps linux-aarch64 INTERFACE
                                    linux-headers)
 android_target_compile_options(
   android-qemu-deps
@@ -636,6 +645,8 @@ android_target_compile_options(
   "-Wno-implicit-int-float-conversion"
   "-Wno-reorder-init-list")
 android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE
+                              "${TCMALLOC_LIBRARIES} -lutil")
+android_target_link_libraries(android-qemu-deps linux-aarch64 INTERFACE
                               "${TCMALLOC_LIBRARIES} -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE
                               "-framework CoreAudio")
@@ -703,6 +714,8 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     NOTICE "REPO/LICENSE")
   android_target_link_libraries(android-qemu-deps-headless linux-x86_64 INTERFACE
                                 headless-paaudio)
+  android_target_link_libraries(android-qemu-deps-headless linux-aarch64 INTERFACE
+                                headless-paaudio)
 
   android_add_library(
     TARGET libqemu2-util
@@ -751,12 +764,6 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
                                          android-qemu-deps android-emu-base)
 
   # Create the qemu targets.
-  android_add_qemu_executable(
-    x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_executable(aarch64
-                              "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_headless_executable(
-    x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_headless_executable(
     aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
 

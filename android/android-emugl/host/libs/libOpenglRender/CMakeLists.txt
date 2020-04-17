@@ -134,6 +134,8 @@ android_target_link_libraries(
   PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 android_install_shared(OpenglRender)
 
+if(NOT OPTION_MINBUILD)
+
 android_add_library(
   TARGET OpenglRender_standalone_common
   LICENSE Apache-2.0
@@ -336,3 +338,5 @@ target_link_libraries(
          OpenglRender_vulkan
          OSWindow)
 add_opengl_dependencies(HelloVulkan)
+
+endif()

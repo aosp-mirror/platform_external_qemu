@@ -15,7 +15,7 @@
 #include <rpc.h>
 #else
 
-// #include <uuid/uuid.h>
+#include <uuid/uuid.h>
 
 #endif
 
