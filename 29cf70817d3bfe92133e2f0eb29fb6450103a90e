@@ -281,6 +281,30 @@
       "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab0ff551_4a85bc0a",
+        "filename": "android/android-grpc/android/emulation/control/secure/BasicTokenAuth.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-17T03:26:27Z",
+      "side": 1,
+      "message": "https://github.com/grpc/grpc-java/blob/54d7e6ba65da6b4e63995d8375ff123ef6e8a117/examples/example-jwt-auth/src/main/java/io/grpc/examples/jwtauth/Constant.java also uses \"Authorization\".",
+      "parentUuid": "020b4dd1_3ce7fcbd",
+      "range": {
+        "startLine": 62,
+        "startChar": 51,
+        "endLine": 62,
+        "endChar": 73
+      },
+      "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
