@@ -96,6 +96,7 @@ android_add_executable(
   NODISTRIBUTE
   SRC # cmake-format: sortable
       android/emulation/control/keyboard/KeytranslatePerf.cpp
-      android/emulation/control/logcat/RingStreamPerf.cpp)
+      android/emulation/control/logcat/RingStreamPerf.cpp
+      android/emulation/control/snapshot/TarStreamPerf.cpp)
 target_link_libraries(grpc_benchmark PRIVATE android-grpc android-emu-base
                                              emulator-gbench)
