@@ -110,7 +110,7 @@ public:
     virtual bool asyncReadbackSupported() = 0;
 
     // Separate callback to get RGBA Pixels in async readback mode.
-    using ReadPixelsCallback = void (*)(void* pixels, uint32_t bytes);
+    using ReadPixelsCallback = void (*)(void* pixels, uint32_t bytes, uint32_t displayId);
     virtual ReadPixelsCallback getReadPixelsCallback() = 0;
 
     // showOpenGLSubwindow -

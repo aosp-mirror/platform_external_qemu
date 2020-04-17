@@ -395,9 +395,9 @@ public:
 
     // Runs the post callback with |pixels| (good for when the readback
     // happens in a separate place)
-    void doPostCallback(void* pixels);
+    void doPostCallback(void* pixels, uint32_t displayId);
 
-    void getPixels(void* pixels, uint32_t bytes);
+    void getPixels(void* pixels, uint32_t bytes, uint32_t displayId);
 
     bool asyncReadbackSupported();
     emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();
@@ -558,7 +558,9 @@ public:
         DisplayInfo(uint32_t cb, int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t d)
             : cb(cb), pos_x(x), pos_y(y), width(w), height(h), dpi(d) {}
     };
-    static const uint32_t s_invalidIdMultiDisplay;
+    // Inline with MultiDisplay::s_invalidIdMultiDisplay
+    static const uint32_t s_invalidIdMultiDisplay = 0xFFFFFFAB;
+    static const uint32_t s_maxNumMultiDisplay = 11;
 
     EGLContext getGlobalEGLContext() { return m_pbufContext; }
     HandleType getLastPostedColorBuffer() { return m_lastPostedColorBuffer; }
@@ -667,9 +669,48 @@ private:
     float      m_px = 0;
     float      m_py = 0;
 
-    emugl::Renderer::OnPostCallback m_onPost = nullptr;
-    void* m_onPostContext = nullptr;
-    unsigned char* m_fbImage = nullptr;
+    // Async readback
+    enum class ReadbackCmd {
+        Init = 0,
+        GetPixels = 1,
+        Exit = 2,
+    };
+    struct Readback {
+        ReadbackCmd cmd;
+        uint32_t displayId;
+        GLuint bufferId;
+        void* pixelsOut;
+        uint32_t bytes;
+    };
+    android::base::WorkerProcessingResult sendReadbackWorkerCmd(const Readback& readback);
+    bool m_asyncReadbackSupported = true;
+    bool m_guestPostedAFrame = false;
+
+    struct onPost {
+        emugl::Renderer::OnPostCallback cb;
+        void* context;
+        uint32_t displayId;
+        uint32_t width;
+        uint32_t height;
+        unsigned char* img;
+        bool readBgra;
+        std::unique_ptr<ReadbackWorker> readbackWorker;
+        std::unique_ptr<android::base::WorkerThread<Readback>> readbackThread;
+        void finish() {
+            if (readbackThread) {
+                if (readbackThread->isStarted()) {
+                    readbackThread->enqueue({ReadbackCmd::Exit, displayId});
+                }
+                readbackThread->join();
+            }
+        }
+        ~onPost() {
+            if (img) {
+                delete[] img;
+            }
+        }
+    };
+    std::map<uint32_t, onPost> m_onPost;
 
     std::string m_glVendor;
     std::string m_glRenderer;
@@ -693,26 +734,6 @@ private:
     // automatically closed by the kernel. We only need to do reference counting
     // for color buffers attached in window surface.
     bool m_refCountPipeEnabled = false;
-    // Async readback
-    enum class ReadbackCmd {
-        Init = 0,
-        GetPixels = 1,
-        Exit = 2,
-    };
-
-    struct Readback {
-        ReadbackCmd cmd;
-        GLuint bufferId;
-        void* pixelsOut;
-        uint32_t bytes;
-    };
-    std::unique_ptr<ReadbackWorker> m_readbackWorker = {};
-    android::base::WorkerThread<Readback> m_readbackThread;
-    android::base::WorkerProcessingResult sendReadbackWorkerCmd(const Readback& readback);
-
-    bool m_asyncReadbackSupported = true;
-    bool m_guestPostedAFrame = false;
-    bool m_postCallbackReadBgra = false;
 
     // Posting
     enum class PostCmd {

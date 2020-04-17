@@ -103,7 +103,8 @@ public:
         if (mRecFrameUpdated.exchange(false)) {
             AutoLock lock(mRecLock);
             mReadPixelsFunc(mRecFrame->pixels,
-                            mRecFrame->width * mRecFrame->height * 4);
+                            mRecFrame->width * mRecFrame->height * 4,
+                            mDisplayId);
             mRecFrame->isValid = true;
         }
         return mRecFrame && mRecFrame->isValid ? mRecFrame->pixels : nullptr;
@@ -143,6 +144,10 @@ public:
         }
     }
 
+    virtual void setDisplayId(uint32_t displayId) {
+        mDisplayId = displayId;
+    }
+
 private:
     FrameAvailableCallback mReceiver = nullptr;
     void* mReceiverOpaque = nullptr;
@@ -151,6 +156,7 @@ private:
     Frame* mRecTmpFrame;
     std::atomic_bool mRecFrameUpdated;
     ReadPixelsFunc mReadPixelsFunc = 0;
+    uint32_t mDisplayId = 0;
 };
 
 }  // namespace

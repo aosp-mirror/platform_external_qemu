@@ -25,12 +25,14 @@
 #include "android/base/memory/LazyInstance.h"             // for LazyInstance
 #include "android/base/synchronization/Lock.h"            // for AutoLock, Lock
 #include "android/base/synchronization/MessageChannel.h"  // for MessageChannel
+#include "android/emulation/MultiDisplay.h"
 #include "android/opengl/GpuFrameBridge.h"                // for GpuFrameBridge
 #include "android/opengl/virtio_gpu_ops.h"                // for AndroidVirt...
 #include "android/opengles.h"                             // for android_set...
 
 
 using android::base::AutoLock;
+using android::MultiDisplay;
 
 /* set >0 for very verbose debugging */
 #define DEBUG 1
@@ -49,7 +51,7 @@ using android::base::AutoLock;
 using android::opengl::GpuFrameBridge;
 using android::base::CallbackRegistry;
 
-static GpuFrameBridge* sBridge = NULL;
+static GpuFrameBridge* sBridge[MultiDisplay::s_maxNumMultiDisplay];
 static std::atomic_bool sRequestPost{false};
 
 static android::base::LazyInstance<CallbackRegistry> sReceiverState =
@@ -59,9 +61,10 @@ static void frameReceivedForwader(void* __ignored) {
     sReceiverState->invokeCallbacks();
 }
 
+static android::base::Lock sLock[MultiDisplay::s_maxNumMultiDisplay];
 // Used to keep track of how many recorders we have active.
 // Frame forwarding will stop if this hits 0.
-static std::atomic<int> sRecordCounter(0);
+int sRecordCounter[MultiDisplay::s_maxNumMultiDisplay];
 
 // Called from an EmuGL thread to transfer a new frame of the GPU display
 // to the main loop.
@@ -117,61 +120,67 @@ static on_new_gpu_frame_t choose_on_new_gpu_frame() {
     }
 }
 
-static void gpu_frame_set_post(bool on) {
-    CHECK(sBridge);
+static void gpu_frame_set_post(bool on, GpuFrameBridge* bridge, uint32_t displayId) {
+    CHECK(bridge);
 
     if (on) {
-        android_setPostCallback(choose_on_new_gpu_frame(), sBridge,
-                                true /* BGRA readback */, 0);
+        android_setPostCallback(choose_on_new_gpu_frame(), bridge,
+                                true /* BGRA readback */, displayId);
     } else {
-        android_setPostCallback(nullptr, nullptr, true /* BGRA readback */, 0);
+        android_setPostCallback(nullptr, nullptr, true /* BGRA readback */, displayId);
     }
 }
 
-void gpu_frame_set_record_mode(bool on) {
+void gpu_frame_set_record_mode(bool on, uint32_t displayId) {
+    AutoLock lock(sLock[displayId]);
     // Note that we can have multiple recorders active at the same time:
     // 1. The WebRTC module might want to expose the shared region
     // 2. A Java View might want expose the shared region inside android studio
     // 3. The ffmpeg based video recorder might want to receive frames.
     // The updates are atomic operations.
-    sRecordCounter += on ? 1 : -1;
+    sRecordCounter[displayId] += on ? 1 : -1;
 
     // No need to do any additional configuration if we are
     // still recording.
-    if (sRecordCounter > 1)
+    if (sRecordCounter[displayId] > 1)
         return;
-    if (sRecordCounter == 1 && !on)
+    if (sRecordCounter[displayId] == 1 && !on)
         return;
 
-    if (!sBridge) {
-        sBridge = android::opengl::GpuFrameBridge::create();
-        sBridge->setFrameReceiver(frameReceivedForwader, nullptr);
+    if (!sBridge[displayId]) {
+        sBridge[displayId] = android::opengl::GpuFrameBridge::create();
+        sBridge[displayId]->setDisplayId(displayId);
+        //TODO: support frameReceivedForwader for display >= 1
+        if (displayId == 0) {
+            sBridge[displayId]->setFrameReceiver(frameReceivedForwader, nullptr);
+        }
     }
 
     // We need frames if we have at least one recorder.
-    gpu_frame_set_post(sRecordCounter > 0);
+    gpu_frame_set_post(sRecordCounter[displayId] > 0, sBridge[displayId], displayId);
 
     // Need to invalidate the recording buffers in GpuFrameBridge so on the next
     // recording we only read the new data and not data from the previous
     // recording. The buffers will be valid again once new data has been posted.
     if (!on) {
-        sBridge->invalidateRecordingBuffers();
+        sBridge[displayId]->invalidateRecordingBuffers();
     }
 }
 
-void* gpu_frame_get_record_frame() {
-    CHECK(sBridge);
+void* gpu_frame_get_record_frame(uint32_t displayId) {
+    CHECK(sBridge[displayId]);
     if (android_asyncReadbackSupported()) {
-        return sBridge->getRecordFrameAsync();
+        return sBridge[displayId]->getRecordFrameAsync();
     } else {
-        return sBridge->getRecordFrame();
+        return sBridge[displayId]->getRecordFrame();
     }
 }
 
 void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
                                          void* opaque) {
     sReceiverState->registerCallback(frameAvailable, opaque);
-    gpu_frame_set_record_mode(true);
+    //TODO: need sync with grpc for multi display, put default 0 so far
+    gpu_frame_set_record_mode(true, 0);
     bool expected = false;
     if (sRequestPost.compare_exchange_strong(expected, true)) {
         android_getVirtioGpuOps()->repost();
@@ -181,7 +190,7 @@ void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
 
 void gpu_unregister_shared_memory_callback(void* opaque) {
     sReceiverState->unregisterCallback(opaque);
-    gpu_frame_set_record_mode(false);
+    gpu_frame_set_record_mode(false, 0);
     bool expected = false;
     if (sRequestPost.compare_exchange_strong(expected, true)) {
         android_getVirtioGpuOps()->repost();
