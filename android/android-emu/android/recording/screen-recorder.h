@@ -18,6 +18,7 @@
 #include <stdbool.h>
 
 #include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/utils/compiler.h"                   // for ANDROID_BEGIN_H...
 
 ANDROID_BEGIN_HEADER
@@ -57,6 +58,7 @@ typedef struct RecordingInfo {
     uint32_t videoBitrate;
     uint32_t timeLimit;
     uint32_t fps;
+    uint32_t displayId;
     RecordingCallback cb;
     void* opaque;
 } RecordingInfo;
@@ -67,7 +69,8 @@ typedef struct RecordingInfo {
 // the recorder will assume it is in host mode.
 extern void screen_recorder_init(uint32_t w,
                                  uint32_t h,
-                                 const QAndroidDisplayAgent* dpy_agent);
+                                 const QAndroidDisplayAgent* dpy_agent,
+                                 const QAndroidMultiDisplayAgent* mdpy_agent);
 // Starts recording the screen. When stopped, the file will be saved as
 // |info->filename|. Set |async| true do not block as recording initialization
 // takes time. Returns true if recorder started recording, false if it failed.

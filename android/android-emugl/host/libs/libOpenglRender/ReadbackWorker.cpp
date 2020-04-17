@@ -9,10 +9,11 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 
-ReadbackWorker::ReadbackWorker(uint32_t width, uint32_t height) :
+ReadbackWorker::ReadbackWorker(uint32_t width, uint32_t height, uint32_t displayId) :
     mFb(FrameBuffer::getFB()),
     mBufferSize(4 * width * height /* RGBA8 (4 bpp) */),
-    mBuffers(3 /* mailbox */, 0) {
+    mBuffers(3 /* mailbox */, 0),
+    mDisplayId(displayId) {
 }
 
 void ReadbackWorker::initGL() {
@@ -108,7 +109,7 @@ void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage,
         // option to avoid this glitch is to wait until all 3 potential
         // buffers in our triple buffering setup have had chances to readback.
         if (m_readbackCount > 2) {
-            mFb->doPostCallback(fbImage);
+            mFb->doPostCallback(fbImage, mDisplayId);
         }
         m_readbackCount++;
 
