@@ -75,6 +75,7 @@ struct Globals {
     std::unique_ptr<VideoFrameSharer> webrtc_module;
     std::string sharedMemoryHandle;
     const QAndroidDisplayAgent* displayAgent = nullptr;
+    const QAndroidMultiDisplayAgent* multiDisplayAgent = nullptr;
     uint32_t fbWidth = 0;
     uint32_t fbHeight = 0;
     QFrameBuffer dummyQf = {};
@@ -207,7 +208,7 @@ bool ScreenRecorder::startRecordingWorker() {
 
     // Add the video track
     auto videoProducer = android::recording::createVideoProducer(
-            mFbWidth, mFbHeight, mInfo.fps, mAgent);
+            mFbWidth, mFbHeight, mInfo.fps, mInfo.displayId, mAgent);
     // Fill in the codec params for the audio and video
     CodecParams videoParams;
     videoParams.width = mInfo.width;
@@ -383,17 +384,20 @@ static void screen_recorder_record_session(const char* cmdLineArgs) {
         // Make the quality and fps low, so we don't have so much cpu usage.
         info.fps = 3;
         info.videoBitrate = 500000;
+        info.displayId = 0;
         screen_recorder_start(&info, true);
     }, tokens[0], delay, duration)).detach();
 }
 void screen_recorder_init(uint32_t w,
                           uint32_t h,
-                          const QAndroidDisplayAgent* dpy_agent) {
+                          const QAndroidDisplayAgent* dpy_agent,
+                          const QAndroidMultiDisplayAgent* mdpy_agent) {
     assert(w > 0 && h > 0);
     auto& globals = *sGlobals;
     globals.fbWidth = w;
     globals.fbHeight = h;
     globals.displayAgent = dpy_agent;
+    globals.multiDisplayAgent = mdpy_agent;
 
     if (dpy_agent) {
         if (emulator_window_get()->opts->no_window) {
@@ -419,8 +423,15 @@ bool screen_recorder_start(const RecordingInfo* info, bool async) {
 
     AutoLock lock(globals.lock);
 
-    globals.recorder.reset(new ScreenRecorder(globals.fbWidth, globals.fbHeight,
-                                              info, globals.displayAgent));
+    // Check if the display is created. For guest mode, display 0 return true.
+    uint32_t w, h;
+    if (globals.multiDisplayAgent->getMultiDisplay(info->displayId, nullptr, nullptr,
+                                                   &w, &h, nullptr,
+                                                   nullptr, nullptr) == false) {
+        return false;
+    }
+
+    globals.recorder.reset(new ScreenRecorder(w, h, info, globals.displayAgent));
     return globals.recorder->startRecording(async);
 }
 

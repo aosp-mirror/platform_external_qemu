@@ -3245,6 +3245,7 @@ static int do_screenrecord_start(ControlClient client, char* args) {
             {"bit-rate", required_argument, NULL, 'b'},
             {"time-limit", required_argument, NULL, 't'},
             {"fps", required_argument, NULL, 'f'},
+            {"display", required_argument, NULL, 'd'},
             {NULL, 0, NULL, 0}};
 
     switch (client->global->record_agent->getRecorderState()) {
@@ -3278,6 +3279,7 @@ static int do_screenrecord_start(ControlClient client, char* args) {
     sarray.push_back(nullptr);
 
     RecordingInfo info = {};
+    info.displayId = 0;
     // Setting optind to 1 does not completely reset the internal state for
     // getopt() on gcc, despite what the documentation says. Setting it to 0
     // does however, and this setting does not cause any issues on mingw and
@@ -3347,6 +3349,10 @@ static int do_screenrecord_start(ControlClient client, char* args) {
                             info.fps, kMaxFPS);
                     return -1;
                 }
+                break;
+            case 'd':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                info.displayId = atoi(optarg);
                 break;
             default:
                 D(("getopt_long returned %d\n", ic));

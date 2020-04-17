@@ -255,8 +255,14 @@ bool MultiDisplay::translateCoordination(uint32_t* x, uint32_t* y, uint32_t* dis
     return false;
 }
 
-void MultiDisplay::setGpuMode(bool isGuestMode) {
+void MultiDisplay::setGpuMode(bool isGuestMode, uint32_t w, uint32_t h) {
     mGuestMode = isGuestMode;
+    if (isGuestMode) {
+        // Guest mode will not start renderer, which in turn will not set the
+        // default display from FrameBuffer. So we set display 0 here.
+        AutoLock lock(mLock);
+        mMultiDisplay.emplace(0, MultiDisplayInfo(0, 0, w, h, 0, 0, true, 0));
+    }
 }
 
 int MultiDisplay::createDisplay(uint32_t* displayId) {
