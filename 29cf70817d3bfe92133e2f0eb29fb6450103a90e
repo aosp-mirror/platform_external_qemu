@@ -258,6 +258,29 @@
       "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "020b4dd1_3ce7fcbd",
+        "filename": "android/android-grpc/android/emulation/control/secure/BasicTokenAuth.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-17T02:47:51Z",
+      "side": 1,
+      "message": "How was the header name chosen? An example at https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md contains \"authorization\". Avast JWT library is using \"Authorization\" (https://github.com/avast/grpc-java-jwt/blob/master/core/src/main/java/com/avast/grpc/jwt/Constants.java)",
+      "range": {
+        "startLine": 62,
+        "startChar": 51,
+        "endLine": 62,
+        "endChar": 73
+      },
+      "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
