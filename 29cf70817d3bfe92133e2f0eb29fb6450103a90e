@@ -305,6 +305,30 @@
       "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c3e27d0_a0eea863",
+        "filename": "android/android-grpc/android/emulation/control/secure/BasicTokenAuth.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-17T08:41:32Z",
+      "side": 1,
+      "message": "Will change.",
+      "parentUuid": "ab0ff551_4a85bc0a",
+      "range": {
+        "startLine": 62,
+        "startChar": 51,
+        "endLine": 62,
+        "endChar": 73
+      },
+      "revId": "29cf70817d3bfe92133e2f0eb29fb6450103a90e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
