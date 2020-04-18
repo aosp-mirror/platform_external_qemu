@@ -17,7 +17,7 @@
 #include <iosfwd>       // for basic_ios
 #include <ostream>      // for istream, ostream
 #include <string>       // for string
-
+#include "android/utils/file_io.h"         // for android_mkdir, android_stat
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -96,7 +96,10 @@ static_assert(sizeof(posix_header) == TARBLOCK,
 // Make sure to call close when you are finished adding files.
 class TarWriter : public std::ios {
 public:
-    TarWriter(std::string cwd, std::ostream& dest);
+    TarWriter(std::string cwd, std::ostream& dest, size_t bufsize=4096);
+
+    // Add a file entry using the given stream, filename and stats.
+    bool addFileEntryFromStream(std::istream& src, std::string fname, struct stat sb);
     bool addFileEntry(std::string fname);
     bool addDirectoryEntry(std::string dname);
     bool addDirectory(std::string dname);
@@ -108,10 +111,12 @@ public:
 private:
     bool error(std::string msg);
     bool writeTarHeader(std::string name);
+    bool writeTarHeader(std::string fname, bool isDir, struct stat sb);
     std::ostream& mDest;
     std::string mCwd{};
     std::string mErrMsg{};
     bool mClosed = false;
+    size_t mBufferSize;
 };
 
 struct TarInfo {

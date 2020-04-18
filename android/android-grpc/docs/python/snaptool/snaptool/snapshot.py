@@ -54,7 +54,7 @@ class SnapshotService(object):
         total_size = sum([img.size for img in snap.details.images if img.present])
 
         try:
-            it = self.stub.pullSnapshot(SnapshotPackage(snapshot_id=snap_id, format=fmt))
+            it = self.stub.PullSnapshot(SnapshotPackage(snapshot_id=snap_id, format=fmt))
             with open(fname, "wb") as fn:
                 with tqdm(fn, total=total_size, unit="B", unit_scale=True) as t:
                     for msg in it:

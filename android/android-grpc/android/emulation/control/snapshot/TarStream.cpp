@@ -13,9 +13,10 @@
 // limitations under the License.
 #include "android/emulation/control/snapshot/TarStream.h"
 
-#include <assert.h>       // for assert
-#include <stdio.h>        // for sprintf
-#include <string.h>       // for memcpy, strncmp, strncpy
+#include <assert.h>  // for assert
+#include <stdio.h>   // for sprintf
+#include <string.h>  // for memcpy, strncmp, strncpy
+
 #include <algorithm>      // for min
 #include <fstream>        // for basic_istream, getline
 #include <regex>          // for regex_match, match_results
@@ -111,15 +112,10 @@ bool TarWriter::error(std::string msg) {
     return false;
 }
 
-bool TarWriter::writeTarHeader(std::string name) {
+bool TarWriter::writeTarHeader(std::string name, bool isDir, struct stat sb) {
     posix_header header = {0};
     if (name.size() > sizeof(header.name) - 1)
         return false;
-    std::string fname = base::PathUtils::join(mCwd, name);
-    struct stat sb;
-    if (android_stat(fname.c_str(), &sb) != 0) {
-        return error("Unable to stat " + fname);
-    }
 
     memcpy(header.name, name.data(), name.size());
     ITOO(header.mode, sb.st_mode);
@@ -127,15 +123,13 @@ bool TarWriter::writeTarHeader(std::string name) {
     ITOO(header.uid, sb.st_uid);
     ITOO(header.gid, sb.st_gid);
 
-    if (System::get()->pathIsDir(fname)) {
+    if (isDir) {
         header.typeflag = TarType::DIRTYPE;
         ITOO(header.size, 0);
     } else {
         header.typeflag = TarType::REGTYPE;
         ITOO(header.size, sb.st_size);
     }
-    header.typeflag = System::get()->pathIsDir(fname) ? TarType::DIRTYPE
-                                                      : TarType::REGTYPE;
     strncpy(header.magic, USTAR, sizeof(header.magic));
 
     // And finally we can create the checksum.
@@ -149,23 +143,32 @@ bool TarWriter::writeTarHeader(std::string name) {
     return true;
 }
 
-TarWriter::TarWriter(std::string cwd, std::ostream& dest)
-    : mDest(dest), mCwd(cwd) {
+bool TarWriter::writeTarHeader(std::string name) {
+    posix_header header = {0};
+    if (name.size() > sizeof(header.name) - 1)
+        return false;
+    std::string fname = base::PathUtils::join(mCwd, name);
+    struct stat sb;
+    if (android_stat(fname.c_str(), &sb) != 0) {
+        return error("Unable to stat " + fname);
+    }
+
+    return writeTarHeader(name, System::get()->pathIsDir(fname), sb);
+}
+
+TarWriter::TarWriter(std::string cwd, std::ostream& dest, size_t bufferSize)
+    : mDest(dest), mCwd(cwd), mBufferSize(bufferSize) {
     init(dest.rdbuf());
     assert(good());
 }
 
-bool TarWriter::addFileEntry(std::string name) {
-    std::string fname = base::PathUtils::join(mCwd, name);
-    if (!System::get()->pathIsFile(fname)) {
-        return error("Refusing to add: " + fname + ", it is not a file.");
-    };
-
-    if (!writeTarHeader(name)) {
+bool TarWriter::addFileEntryFromStream(std::istream& ifs,
+                                       std::string name,
+                                       struct stat sb) {
+    if (!writeTarHeader(name, false, sb)) {
         return false;
     }
 
-    std::ifstream ifs(fname, std::ios_base::in | std::ios_base::binary);
     char buf[TARBLOCK];
     char zero = 0;
     do {
@@ -189,7 +192,27 @@ bool TarWriter::addFileEntry(std::string name) {
         }
     } while (ifs.gcount() > 0);
     return true;
-}  // namespace control
+}
+
+bool TarWriter::addFileEntry(std::string name) {
+    std::string fname = base::PathUtils::join(mCwd, name);
+    if (!System::get()->pathIsFile(fname)) {
+        return error("Refusing to add: " + fname + ", it is not a file.");
+    };
+
+    struct stat sb;
+    if (android_stat(fname.c_str(), &sb) != 0) {
+        return error("Unable to stat " + fname);
+    }
+
+    std::ifstream ifs(fname, std::ios_base::in | std::ios_base::binary);
+    char readBuffer[mBufferSize];
+    if (mBufferSize != 0) {
+        ifs.rdbuf()->pubsetbuf(readBuffer, mBufferSize);
+    }
+
+    return addFileEntryFromStream(ifs, name, sb);
+}
 
 bool TarWriter::addDirectoryEntry(std::string name) {
     std::string fname = base::PathUtils::join(mCwd, name);

@@ -14,24 +14,25 @@
 
 #include <grpcpp/grpcpp.h>
 #include <stdint.h>
+#include <sys/stat.h>                                              // for stat
 #include <cstdio>
 #include <fstream>
 #include <functional>
-#include <iostream>
-#include <regex>
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "android/base/memory/ScopedPtr.h"
-
 #include "android/base/Log.h"
+#include "android/base/Optional.h"
+#include "android/base/Stopwatch.h"
 #include "android/base/StringView.h"
-#include "android/base/Uuid.h"
+#include "android/base/Uuid.h"                                     // for Uuid
 #include "android/base/files/GzipStreambuf.h"
-#include "android/base/files/PathUtils.h"
+#include "android/base/files/PathUtils.h"                          // for pj
+#include "android/base/memory/ScopedPtr.h"
+#include "android/base/system/System.h"
 #include "android/emulation/control/LineConsumer.h"
 #include "android/emulation/control/adb/AdbShellStream.h"
-#include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
 #include "android/emulation/control/snapshot/TarStream.h"
 #include "android/emulation/control/vm_operations.h"
@@ -39,12 +40,11 @@
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
 #include "android/snapshot/Snapshotter.h"
+#include "android/utils/file_io.h"
 #include "android/utils/path.h"
-#include "grpcpp/server.h"
-#include "grpcpp/server_builder.h"
+#include "snapshot.pb.h"
 #include "snapshot_service.grpc.pb.h"
 #include "snapshot_service.pb.h"
-#include "snapshot.pb.h"
 
 namespace google {
 namespace protobuf {
@@ -99,21 +99,14 @@ public:
             return Status::OK;
         }
 
+        Stopwatch sw;
         auto tmpdir = pj(System::get()->getTempDir(), snapshot->name());
         const auto tmpdir_deleter =
                 base::makeCustomScopedPtr(&tmpdir, [](std::string* tmpdir) {
                     // Best effort to cleanup the mess.
                     path_delete_dir(tmpdir->c_str());
                 });
-
-        // Copy over the meta data etc..
-        if (path_copy_dir(tmpdir.data(), snapshot->dataDir().data()) != 0) {
-            result.set_success(false);
-            result.set_err("Could not copy: " + snapshot->dataDir().str() +
-                           " to " + tmpdir);
-            writer->Write(result);
-            return Status::OK;
-        }
+        android_mkdir(tmpdir.data(), 0700);
 
         // An imported snapshot already has the qcow2 images inside its snapshot
         // directory, so they are already in a good state.
@@ -128,6 +121,8 @@ public:
                 writer->Write(*slc.error());
                 return Status::OK;
             }
+
+            LOG(VERBOSE) << "Exported snapshot in " << sw.restartUs() << " us";
         }
 
         // Stream the tmpdir out as a tar.gz..
@@ -139,18 +134,43 @@ public:
                     return writer->Write(msg);
                 });
 
-
         std::unique_ptr<std::ostream> stream;
         if (request->format() == SnapshotPackage::TARGZ) {
             stream = std::make_unique<GzipOutputStream>(&csb);
         } else {
             stream = std::make_unique<std::ostream>(&csb);
         }
-        TarWriter tw(tmpdir, *stream);
+
+        // Use of  a 64 KB  buffer gives good performance (see performance tests.)
+        TarWriter tw(tmpdir, *stream, k64KB);
         result.set_success(tw.addDirectory(".") && tw.close());
         if (tw.fail()) {
             result.set_err(tw.error_msg());
         }
+        LOG(VERBOSE) << "Completed writing in " << sw.restartUs() << " us";
+
+        // Now add in the metadata.
+        auto entries = System::get()->scanDirEntries(snapshot->dataDir(), true);
+        for (const auto& fname : entries) {
+            if (!System::get()->pathIsFile(fname)) {
+                continue;
+            }
+            struct stat sb;
+            android::base::StringView name;
+            char buf[k64KB];
+            PathUtils::split(fname, nullptr, &name);
+
+            // Use of  a 64 KB  buffer gives good performance (see performance tests.)
+            std::ifstream ifs(fname, std::ios_base::in | std::ios_base::binary);
+            ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
+
+            if (android_stat(fname.c_str(), &sb) != 0 ||
+                !tw.addFileEntryFromStream(ifs, name, sb)) {
+                result.set_err("Unable to tar " + fname);
+                break;
+            }
+        }
+        LOG(VERBOSE) << "Wrote metadata in " << sw.restartUs() << " us";
 
         writer->Write(result);
         return Status::OK;
@@ -360,6 +380,7 @@ public:
 
 private:
     static constexpr uint32_t k256KB = 256 * 1024;
+    static constexpr uint32_t k64KB = 64 * 1024;
 };  // namespace control
 
 SnapshotService::Service* getSnapshotService() {
