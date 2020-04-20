@@ -1,0 +1,10 @@
+Autosubmit+1: Calvin Huang <calhuang@google.com>
+Autosubmit+1: Lingfeng Yang <lfy@google.com>
+Code-Review+2: Yurii Zubrytskyi <zyy@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Mon, 20 Apr 2020 21:17:53 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1291036
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
