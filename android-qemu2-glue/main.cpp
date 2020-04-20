@@ -1634,9 +1634,9 @@ extern "C" int main(int argc, char** argv) {
 
 #ifdef __APPLE__
         // macOS emulator is super slow on machines with less
-        // than 8 logical cores.
-        if (System::get()->getCpuCoreCount() < 8) {
-            dwarning("Running on a sytem with less than 8 logical cores. "
+        // than 6 logical cores.
+        if (System::get()->getCpuCoreCount() < 6) {
+            dwarning("Running on a system with less than 6 logical cores. "
                      "Setting number of virtual cores to 1");
             hw->hw_cpu_ncore = 1;
         }
