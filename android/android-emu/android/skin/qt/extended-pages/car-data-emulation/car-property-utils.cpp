@@ -102,7 +102,7 @@ map<int32_t, QString> doorMap = {
 
 map<int32_t, QString> wheelMap = {
     { (int32_t) VehicleAreaWheel::UNKNOWN, QObject::tr("Unknown") },
-    { (int32_t) VehicleAreaWheel::LEFT_FRONT, QObject::tr("Front right") },
+    { (int32_t) VehicleAreaWheel::LEFT_FRONT, QObject::tr("Front left") },
     { (int32_t) VehicleAreaWheel::RIGHT_FRONT, QObject::tr("Front right") },
     { (int32_t) VehicleAreaWheel::LEFT_REAR, QObject::tr("Rear left") },
     { (int32_t) VehicleAreaWheel::RIGHT_REAR, QObject::tr("Rear right") }
