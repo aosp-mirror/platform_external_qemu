@@ -37,7 +37,7 @@
 #define MAC_OS_X_VERSION_10_6 1060
 #endif
 
-#define DEBUG_COREAUDIO 0
+#define DEBUG_COREAUDIO 1
 
 #if DEBUG_COREAUDIO
 
@@ -135,6 +135,8 @@ void coreaudio_print_device_name(AudioDeviceID device) {
 
 static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
 {
+    fprintf(stderr, "%s: call\n", __func__);
+
     UInt32 size, numDevices, numStreams;
     UInt32 transportType;
     OSStatus res, transportTypeQueryRes, currentQueryResult;
@@ -160,7 +162,13 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
 
     // We're going to be using hardcoded return values later on, so if this is
     // anything other than 'no error', return that right away.
-    if (res != kAudioHardwareNoError) return res;
+    if (res != kAudioHardwareNoError) {
+        D("error in setting up hardware. isInput? %d err 0x%x %u", isInput, res, res);
+        return res;
+    } else {
+        D("found property data. isInput? %d", isInput);
+        coreaudio_print_device_name(*id);
+    }
 
     // Bluetooth audio inputs should not be activated since they cause an
     // unexpected drop in audio output quality. Protect users from this nasty
@@ -180,6 +188,10 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
     if (transportTypeQueryRes != kAudioHardwareNoError ||
         (transportType != kAudioDeviceTransportTypeBluetooth &&
          transportType != kAudioDeviceTransportTypeBluetoothLE)) {
+        D("goto default exit: query err: %u transport type bt? %u btle %u",
+          transportTypeQueryRes != kAudioHardwareNoError,
+          transportType != kAudioDeviceTransportTypeBluetooth,
+          transportType != kAudioDeviceTransportTypeBluetoothLE);
         goto defaultExit;
     }
 
@@ -675,10 +687,12 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
     if (frameRange.mMinimum > conf->buffer_frames) {
         core->audioDevicePropertyBufferFrameSize = (UInt32) frameRange.mMinimum;
         dolog ("warning: Upsizing Buffer Frames to %f\n", frameRange.mMinimum);
+        D ("warning: Upsizing Buffer Frames to %f\n", frameRange.mMinimum);
     }
     else if (frameRange.mMaximum < conf->buffer_frames) {
         core->audioDevicePropertyBufferFrameSize = (UInt32) frameRange.mMaximum;
         dolog ("warning: Downsizing Buffer Frames to %f\n", frameRange.mMaximum);
+        D ("warning: Downsizing Buffer Frames to %f\n", frameRange.mMaximum);
     }
     else {
         core->audioDevicePropertyBufferFrameSize = conf->buffer_frames;
@@ -710,12 +724,26 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
     status = coreaudio_get_streamformat(core->deviceID,
                                         &core->streamBasicDescription,
                                         isInput);
+
+
+
     if (status != kAudioHardwareNoError) {
         coreaudio_logerr2 (status, typ,
                            "Could not get Device Stream properties\n");
         core->deviceID = kAudioDeviceUnknown;
         return -1;
     }
+
+    D("stream basic description: isInput? %d formatId: %d flags: %d samplerate: %f ch per frame: %d bytes per frame: %zu frames per packet: %d bytes per packet: %zu",
+            isInput,
+            core->streamBasicDescription.mFormatID,
+            core->streamBasicDescription.mFormatFlags,
+            core->streamBasicDescription.mSampleRate,
+            core->streamBasicDescription.mChannelsPerFrame,
+            core->streamBasicDescription.mBytesPerFrame,
+            core->streamBasicDescription.mFramesPerPacket,
+            core->streamBasicDescription.mBytesPerPacket);
+
 
     /* set Samplerate */
     core->streamBasicDescription.mSampleRate = (Float64) as->freq;
