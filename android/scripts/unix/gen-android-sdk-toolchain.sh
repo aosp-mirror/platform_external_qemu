@@ -556,7 +556,7 @@ prepare_build_for_linux_aarch64() {
     var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}
 
     # Make sure we can find libgcc on aarch64
-    EXTRA_LDFLAGS="-L/usr/lib/gcc/aarch64-linux-gnu/5"
+    EXTRA_LDFLAGS="-L/usr/aarch64-linux-gnu/lib"
 
     # If we manually call the linker we need to pass in the correct default libs
     # we link against. These have to go last!
