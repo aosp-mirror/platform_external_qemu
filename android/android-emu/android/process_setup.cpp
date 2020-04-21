@@ -108,7 +108,8 @@ void process_early_setup(int argc, char** argv) {
 
     // For macOS, app nap can cause all sorts of issues with timers.
     // Disable it.
-    System::get()->disableAppNap();
+    // bug: 153616209 Not good when we want to allow sleep.
+    // System::get()->disableAppNap();
 }
 
 void process_late_teardown() {
