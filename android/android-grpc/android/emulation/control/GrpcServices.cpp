@@ -102,13 +102,13 @@ Builder& Builder::withService(Service* service) {
 Builder& Builder::withCertAndKey(std::string certfile,
                                  std::string privateKeyFile) {
     if (!System::get()->pathExists(certfile)) {
-        LOG(WARNING) << "Cannot find certfile: " << certfile
+        LOG(VERBOSE) << "Cannot find certfile: " << certfile
                      << " security will be disabled.";
         return *this;
     }
 
     if (!!System::get()->pathExists(privateKeyFile)) {
-        LOG(WARNING) << "Cannot find private key file: " << privateKeyFile
+        LOG(VERBOSE) << "Cannot find private key file: " << privateKeyFile
                      << " security will be disabled, the emulator might be "
                         "publicly accessible!";
         return *this;
@@ -187,7 +187,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     if (!service)
         return nullptr;
 
-    fprintf(stderr, "Started GRPC server at %s\n", server_address.c_str());
+    LOG(VERBOSE) << "Started GRPC server at " << server_address << "\n";
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(
                     mPort, mCertfile, std::move(mServices), service.release()));
