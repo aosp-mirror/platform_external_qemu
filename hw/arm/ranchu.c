@@ -195,7 +195,7 @@ static void create_fdt(VirtBoardInfo *vbi)
         ARMCPU *armcpu = ARM_CPU(qemu_get_cpu(0));
 
         qemu_fdt_add_subnode(fdt, "/psci");
-        if (armcpu->psci_version == 2) {
+        if (armcpu && armcpu->psci_version == 2) {
             const char comp[] = "arm,psci-0.2\0arm,psci";
             qemu_fdt_setprop(fdt, "/psci", "compatible", comp, sizeof(comp));
 
@@ -534,6 +534,7 @@ static void ranchu_init(MachineState *machine)
         }
 
         object_property_set_bool(cpuobj, true, "realized", NULL);
+        object_property_set_bool(cpuobj, false, "has_el3", NULL);
     }
     fdt_add_cpu_nodes(vbi);
 
