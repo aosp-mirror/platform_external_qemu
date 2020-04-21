@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a3f15e3_5279a2fc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1170,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-21T21:32:35Z",
+      "side": 1,
+      "message": "change this comment to reflect the new behavior?",
+      "revId": "97a66bf2121d87859592ca217ccf21aa9e3e24fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
