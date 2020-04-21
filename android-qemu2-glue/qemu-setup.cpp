@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <algorithm>
 #include <chrono>
 #include <functional>
@@ -51,17 +52,16 @@
 #include "android/base/CpuUsage.h"
 #include "android/base/Log.h"
 #include "android/base/files/MemStream.h"
-#include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
+#include "android/console_auth.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/HangDetector.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/detectors/CrashDetectors.h"
 #include "android/emulation/AudioCaptureEngine.h"
 #include "android/emulation/AudioOutputEngine.h"
-#include "android/emulation/ConfigDirs.h"
 #include "android/emulation/DmaMap.h"
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/emulation/VmLock.h"
@@ -80,6 +80,7 @@
 #include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot/interface.h"
+#include "android/utils/Random.h"
 #include "android/utils/debug.h"
 #include "snapshot_service.grpc.pb.h"
 
@@ -89,12 +90,19 @@
 
 extern "C" {
 
+#include "android/proxy/proxy_int.h"
 #include "qemu/abort.h"
 #include "qemu/main-loop.h"
 #include "qemu/osdep.h"
 #include "qemu/thread.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/sysemu.h"
+
+namespace android {
+namespace base {
+class PathUtils;
+}  // namespace base
+}  // namespace android
 
 extern char* android_op_ports;
 
@@ -260,6 +268,22 @@ bool qemu_android_ports_setup() {
 static const std::string kCertFileName{"emulator-grpc.cer"};
 static const std::string kPrivateKeyFileName{"emulator-grpc.key"};
 
+// Generates a secure base64 encoded token of
+// |cnt| bytes.
+static std::string generateToken(int cnt) {
+    char buf[cnt];
+    if (!android::generateRandomBytes(buf, sizeof(buf))) {
+        return "";
+    }
+
+    const size_t kBase64Len = 4 * ((cnt + 2) / 3);
+    char base64[kBase64Len];
+    int len = proxy_base64_encode(buf, cnt, base64, kBase64Len);
+    // len < 0 can only happen if we calculate kBase64Len incorrectly..
+    assert(len > 0);
+    return std::string(base64, len);
+}
+
 int qemu_setup_grpc() {
     if (grpcService)
         return grpcService->port();
@@ -287,27 +311,28 @@ int qemu_setup_grpc() {
     auto h2o = android::emulation::control::getWaterfallService(
             android_cmdLineOptions->waterfall);
     auto snapshot = android::emulation::control::getSnapshotService();
-    auto builder =
-            EmulatorControllerService::Builder()
-                    .withConsoleAgents(getConsoleAgents())
-                    .withPortRange(grpc_start, grpc_end)
-                    .withCertAndKey(
-                            PathUtils::join(
-                                    android::ConfigDirs::getUserDirectory(),
-                                    kCertFileName),
-                            PathUtils::join(
-                                    android::ConfigDirs::getUserDirectory(),
-                                    kPrivateKeyFileName))
-                    .withAddress(address)
-                    .withService(emulator)
-                    .withService(h2o)
-                    .withService(snapshot);
+    auto builder = EmulatorControllerService::Builder()
+                           .withConsoleAgents(getConsoleAgents())
+                           .withPortRange(grpc_start, grpc_end)
+                           .withCertAndKey(android_cmdLineOptions->grpc_tls_cer,
+                                           android_cmdLineOptions->grpc_tls_key,
+                                           android_cmdLineOptions->grpc_tls_ca)
+                           .withAddress(address)
+                           .withService(emulator)
+                           .withService(h2o)
+                           .withService(snapshot);
 
     int timeout = 0;
     if (android_cmdLineOptions->idle_grpc_timeout &&
         sscanf(android_cmdLineOptions->idle_grpc_timeout, "%d", &timeout) ==
                 1) {
         builder.withIdleTimeout(std::chrono::seconds(timeout));
+    }
+    if (android_cmdLineOptions->grpc_use_token) {
+        const int of64Bytes = 64;
+        auto token = generateToken(of64Bytes);
+        builder.withAuthToken(token);
+        props["grpc.token"] = token;
     }
 #ifdef ANDROID_WEBRTC
     builder.withService(android::emulation::control::getRtcService(
@@ -317,9 +342,27 @@ int qemu_setup_grpc() {
     grpcService = builder.build();
 
     if (grpcService) {
-        props["grpc.port"] = std::to_string(grpcService->port());
-        props["grpc.certificate"] = grpcService->publicCert();
         port = grpcService->port();
+
+        props["grpc.port"] = std::to_string(port);
+        if (android_cmdLineOptions->grpc_tls_cer) {
+            props["grpc.server_cert"] = android_cmdLineOptions->grpc_tls_cer;
+        }
+        if (android_cmdLineOptions->grpc_tls_ca) {
+            props["grpc.ca_root"] = android_cmdLineOptions->grpc_tls_ca;
+        }
+    }
+
+    bool userWantsGrpc = android_cmdLineOptions->grpc ||
+                         android_cmdLineOptions->grpc_tls_ca ||
+                         android_cmdLineOptions->grpc_tls_key ||
+                         android_cmdLineOptions->grpc_tls_ca ||
+                         android_cmdLineOptions->grpc_use_token;
+    if (!grpcService && userWantsGrpc) {
+        fprintf(stderr,
+                "Failed to start grpc service, even though it was explicitly "
+                "requested.\n");
+        exit(1);
     }
 
     advertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
@@ -341,7 +384,8 @@ bool qemu_android_emulation_setup() {
 
     bool isRunningFuchsia = !android_qemu_mode;
     if (isRunningFuchsia) {
-        // For fuchsia we only enable thr gRPC port if it is explicitly requested.
+        // For fuchsia we only enable thr gRPC port if it is explicitly
+        // requested.
         int grpc;
         if (android_cmdLineOptions->grpc &&
             sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {

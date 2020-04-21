@@ -234,6 +234,10 @@ OPT_PARAM(perf_stat, "<file>", "Run periodic perf stat reporter in the backgroun
 OPT_FLAG(share_vid, "Share current video state in shared memory region.")
 
 OPT_PARAM(grpc, "<port>", "TCP ports used for the gRPC bridge." )
+OPT_PARAM(grpc_tls_key, "<pem>", "File with the private key used to enable gRPC TLS.")
+OPT_PARAM(grpc_tls_cer, "<pem>", "File with the public X509 certificate used to enable gRPC TLS.")
+OPT_PARAM(grpc_tls_ca, "<pem>", "File with the Certificate Authorities used to validate client certificates.")
+OPT_FLAG(grpc_use_token, "Use the emulator console token for gRPC authentication.")
 OPT_PARAM(idle_grpc_timeout, "<timeout>", "Terminate the emulator if there is no gRPC activity within <timeout> seconds.")
 OPT_PARAM(waterfall, "<mode>", "Mode in which to run waterfall.")
 
