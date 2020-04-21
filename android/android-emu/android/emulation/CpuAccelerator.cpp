@@ -590,6 +590,9 @@ AndroidCpuAcceleration ProbeHaxCpu(std::string* status) {
 
 #if defined(_WIN32)
 
+#include "android/base/system/System.h"
+
+using ::android::base::System;
 using base::ScopedFileHandle;
 using namespace android;
 
@@ -632,24 +635,29 @@ struct hax_capabilityinfo
 AndroidCpuAcceleration ProbeHAX(std::string* status) {
     status->clear();
 
+    int32_t haxm_installer_version = 0;
+
     AndroidCpuAcceleration cpu = ProbeHaxCpu(status);
     if (cpu != ANDROID_CPU_ACCELERATION_READY)
         return cpu;
 
-    const char* productDisplayName = u8"Intel® Hardware Accelerated Execution Manager";
-    int32_t haxm_installer_version = WindowsInstaller::getVersion(productDisplayName);
-    if (haxm_installer_version == 0) {
-        status->assign(
-            "HAXM is not installed on this machine");
-        return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
-    }
+    std::string HaxInstallerCheck = System::get()->envGet("HAXM_BYPASS_INSTALLER_CHECK");
+    if (HaxInstallerCheck.compare("1")) {
+        const char* productDisplayName = u8"Intel® Hardware Accelerated Execution Manager";
+        haxm_installer_version = WindowsInstaller::getVersion(productDisplayName);
+        if (haxm_installer_version == 0) {
+            status->assign(
+                "HAXM is not installed on this machine");
+            return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
+        }
 
-    if (haxm_installer_version < HAXM_INSTALLER_VERSION_MINIMUM) {
-        StringAppendFormat(
-                status, "HAXM must be updated (version %s < %s).",
-                cpuAcceleratorFormatVersion(haxm_installer_version),
-                cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM));
-        return ANDROID_CPU_ACCELERATION_ACCEL_OBSOLETE;
+        if (haxm_installer_version < HAXM_INSTALLER_VERSION_MINIMUM) {
+            StringAppendFormat(
+                    status, "HAXM must be updated (version %s < %s).",
+                    cpuAcceleratorFormatVersion(haxm_installer_version),
+                    cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM));
+            return ANDROID_CPU_ACCELERATION_ACCEL_OBSOLETE;
+        }
     }
 
     // 1) Try to find the HAX kernel module.
