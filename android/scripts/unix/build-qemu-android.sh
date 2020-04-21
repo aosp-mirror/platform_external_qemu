@@ -266,7 +266,7 @@ build_qemu_android () {
             linux-*)
                 # Use PulseAudio on Linux because the default backend,
                 # OSS, does not work
-                AUDIO_BACKENDS_FLAG="--audio-drv-list=pa"
+                AUDIO_BACKENDS_FLAG=""
                 ;;
             windows*)
                 # Prefer winaudio on Windows over dsound.
@@ -293,7 +293,7 @@ build_qemu_android () {
                 LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
                 ;;
             *)
-                LIBUSB_FLAGS="--enable-libusb --enable-usb-redir"
+                LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
                 ;;
         esac
 
@@ -338,7 +338,7 @@ EOF
             GCC=g++
             ;;
           linux*)
-            GCC=gcc
+            GCC=g++
             ;;
           windows*)
             GCC=g++
@@ -447,10 +447,9 @@ EOF
             --disable-xen \
             --disable-xen-pci-passthrough \
             --disable-xfsctl \
-            --enable-sdl \
+            --disable-sdl \
             --enable-trace-backends=nop \
-            --enable-vnc \
-            --with-sdlabi=2.0 \
+            --disable-vnc \
             &&
 
             case $1 in

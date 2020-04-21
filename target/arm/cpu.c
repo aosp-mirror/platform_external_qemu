@@ -606,7 +606,7 @@ static Property arm_cpu_has_el2_property =
             DEFINE_PROP_BOOL("has_el2", ARMCPU, has_el2, true);
 
 static Property arm_cpu_has_el3_property =
-            DEFINE_PROP_BOOL("has_el3", ARMCPU, has_el3, true);
+            DEFINE_PROP_BOOL("has_el3", ARMCPU, has_el3, false);
 
 static Property arm_cpu_cfgend_property =
             DEFINE_PROP_BOOL("cfgend", ARMCPU, cfgend, false);

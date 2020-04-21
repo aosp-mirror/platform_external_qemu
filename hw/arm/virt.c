@@ -1008,11 +1008,12 @@ static void create_pcie(const VirtMachineState *vms, qemu_irq *pic)
         for (i = 0; i < nb_nics; i++) {
             NICInfo *nd = &nd_table[i];
 
-            if (!nd->model) {
+            //if (!nd->model) {
                 nd->model = g_strdup("virtio");
-            }
+            //}
 
             pci_nic_init_nofail(nd, pci->bus, nd->model, NULL);
+            break;
         }
     }
 
