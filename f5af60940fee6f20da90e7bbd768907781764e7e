@@ -34,6 +34,24 @@
       "revId": "f5af60940fee6f20da90e7bbd768907781764e7e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3528863c_e3078979",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-22T18:49:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a10ecf51_38997d82",
+      "revId": "f5af60940fee6f20da90e7bbd768907781764e7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
