@@ -69,7 +69,7 @@ static bool sInitialized = false;
 #define POST_CALLBACK_DISPLAY_TYPE_WINDOWS_HWND 2
 
 struct renderer_display_info;
-typedef void (*get_pixels_t)(void*, uint32_t);
+typedef void (*get_pixels_t)(void*, uint32_t, uint32_t);
 static get_pixels_t sGetPixelsFunc = 0;
 typedef void (*post_callback_t)(void*, uint32_t, int, int, int, int, int, unsigned char*);
 

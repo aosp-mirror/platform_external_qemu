@@ -697,21 +697,14 @@ FrameBuffer::~FrameBuffer() {
 
 WorkerProcessingResult
 FrameBuffer::sendReadbackWorkerCmd(const Readback& readback) {
-    const auto& iter = m_onPost.find(readback.displayId);
-    if (iter == m_onPost.end()) {
-        ERR("Cannot find readback worker for display %d cmd %d\n",
-            readback.displayId, readback.cmd);
-        return WorkerProcessingResult::Stop;
-    }
     switch (readback.cmd) {
     case ReadbackCmd::Init:
-        iter->second.readbackWorker->initGL();
+        readback.readbackWorker->initGL();
         return WorkerProcessingResult::Continue;
     case ReadbackCmd::GetPixels:
-        iter->second.readbackWorker->getPixels(readback.pixelsOut, readback.bytes);
+        readback.readbackWorker->getPixels(readback.pixelsOut, readback.bytes);
         return WorkerProcessingResult::Continue;
     case ReadbackCmd::Exit:
-        iter->second.readbackWorker.reset();
         return WorkerProcessingResult::Stop;
     }
     return WorkerProcessingResult::Stop;
@@ -776,7 +769,7 @@ void FrameBuffer::setPostCallback(
         void* onPostContext,
         uint32_t displayId,
         bool useBgraReadback) {
-    AutoLock mutex(m_lock);
+    AutoLock lock(m_lock);
     if (onPost) {
         uint32_t w, h;
         if (!emugl::get_emugl_multi_display_operations().getMultiDisplay(displayId,
@@ -799,7 +792,7 @@ void FrameBuffer::setPostCallback(
     } else {
         m_onPost[displayId].finish();
         m_onPost.erase(displayId);
-    }  
+    }
 }
 
 static void subWindowRepaint(void* param) {
@@ -2234,11 +2227,11 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                 iter.second.readbackThread.reset(new android::base::WorkerThread<Readback>
                     ([this](Readback&& readback) {
                         return sendReadbackWorkerCmd(readback);
-                    })); 
+                    }));
             }
             if (!iter.second.readbackThread->isStarted()) {
                 iter.second.readbackThread->start();
-                iter.second.readbackThread->enqueue({ReadbackCmd::Init, iter.first});
+                iter.second.readbackThread->enqueue({ReadbackCmd::Init, iter.second.readbackWorker});
                 iter.second.readbackThread->waitQueuedItems();
             }
             iter.second.readbackWorker->doNextReadback(cb.get(), iter.second.img,
@@ -2246,7 +2239,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
         } else {
             cb->readback(iter.second.img, iter.second.readBgra);
             doPostCallback(iter.second.img, iter.first);
-        }    
+        }
     }
 
 EXIT:
@@ -2277,7 +2270,9 @@ void FrameBuffer::getPixels(void* pixels, uint32_t bytes, uint32_t displayId) {
         ERR("readback thread not started for display %d", displayId);
         return;
     }
-    iter->second.readbackThread->enqueue({ ReadbackCmd::GetPixels, displayId, 0, pixels, bytes });
+    iter->second.readbackThread->enqueue({ ReadbackCmd::GetPixels,
+                                           iter->second.readbackWorker,
+                                           0, pixels, bytes });
     iter->second.readbackThread->waitQueuedItems();
 }
 
