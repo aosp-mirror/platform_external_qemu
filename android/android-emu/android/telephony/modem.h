@@ -88,7 +88,6 @@ typedef enum {
     A_DATA_NETWORK_EDGE,           // RADIO_TECH_EDGE
     A_DATA_NETWORK_UMTS,           // RADIO_TECH_UMTS
     A_DATA_NETWORK_LTE     = 14,   // RADIO_TECH_LTE
-    A_DATA_NETWORK_NR      = 20,   // RADIO_TECH_NR
 } ADataNetworkType;
 // TODO: Merge the usage of these two structs and rename ADataNetworkType
 typedef enum {

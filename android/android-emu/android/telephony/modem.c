@@ -74,10 +74,7 @@
 #define  OPERATOR_ROAMING_MCCMNC  STRINGIFY(OPERATOR_ROAMING_MCC) \
                                   STRINGIFY(OPERATOR_ROAMING_MNC)
 
-static const char* _amodem_switch_technology(AModem modem, AModemTech newtech, int32_t newpreferred,
-        bool new_data_network);
-static void adjustNetDataNetwork(AModem modem);
-static void amodem_addPhysChanCfgUpdate( AModem  modem );
+static const char* _amodem_switch_technology(AModem modem, AModemTech newtech, int32_t newpreferred);
 static int _amodem_set_cdma_subscription_source( AModem modem, ACdmaSubscriptionSource ss);
 static int _amodem_set_cdma_prl_version( AModem modem, int prlVersion);
 
@@ -142,8 +139,7 @@ android_parse_network_type( const char*  speed )
         { "umts",  A_DATA_NETWORK_UMTS },
         { "hsdpa", A_DATA_NETWORK_UMTS },  /* not handled yet by Android GSM framework */
         { "lte",   A_DATA_NETWORK_LTE },
-        { "5g",   A_DATA_NETWORK_NR},      /* non-standalone 5g, based on lte, there is no 5g sa yet */
-        { "full",  A_DATA_NETWORK_NR },    /* will de-generate to LTE for non-supporting guest */
+        { "full",  A_DATA_NETWORK_LTE },
         { NULL, 0 }
     };
     int  nn;
@@ -153,11 +149,9 @@ android_parse_network_type( const char*  speed )
     }
 
     for (nn = 0; types[nn].name; nn++) {
-        if (!strcmp(speed, types[nn].name)){
+        if (!strcmp(speed, types[nn].name))
             return types[nn].type;
-        }
     }
-
     /* not found, be conservative */
     return A_DATA_NETWORK_GPRS;
 }
@@ -309,8 +303,6 @@ typedef struct AModemRec_
     int           cell_id;
     int           base_port;
 
-    int           send_phys_channel_cfg_unsol;
-
     /* Signal strength variables */
     int             use_signal_profile;
     signal_strength quality;
@@ -330,7 +322,6 @@ typedef struct AModemRec_
     ARegistrationUnsolMode   data_mode;
     ARegistrationState       data_state;
     ADataNetworkType         data_network;
-    ADataNetworkType         data_network_requested;
 
     /* operator names */
     AOperatorSelection  oper_selection_mode;
@@ -634,7 +625,6 @@ amodem_reset( AModem  modem )
     int i;
     modem->nvram_config = amodem_load_nvram(modem);
     modem->radio_state = A_RADIO_STATE_OFF;
-    modem->send_phys_channel_cfg_unsol = 0;
     modem->wait_sms    = 0;
 
     modem->use_signal_profile = 1;
@@ -679,7 +669,6 @@ amodem_reset( AModem  modem )
     modem->data_mode    = A_REGISTRATION_UNSOL_ENABLED_FULL;
     modem->data_state   = A_REGISTRATION_HOME;
     modem->data_network = A_DATA_NETWORK_LTE;
-    modem->data_network_requested = A_DATA_NETWORK_LTE;
 
     tmp = amodem_nvram_get_str( modem, NV_MODEM_TECHNOLOGY, "gsm" );
     modem->technology = android_parse_modem_tech( tmp );
@@ -877,13 +866,11 @@ amodem_set_data_registration( AModem  modem, ARegistrationState  state )
             break;
 
         case A_REGISTRATION_UNSOL_ENABLED_FULL:
-            if (modem->supportsNetworkDataType) {
-                adjustNetDataNetwork(modem);
+            if (modem->supportsNetworkDataType)
                 amodem_unsol( modem, "+CGREG: %d,%d,\"%04x\",\"%04x\",\"%04x\"\r",
                             modem->data_mode, modem->data_state,
                             modem->area_code & 0xffff, modem->cell_id & 0xffff,
                             modem->data_network );
-            }
             else
                 amodem_unsol( modem, "+CGREG: %d,%d,\"%04x\",\"%04x\"\r",
                             modem->data_mode, modem->data_state,
@@ -893,7 +880,6 @@ amodem_set_data_registration( AModem  modem, ARegistrationState  state )
         default:
             ;
     }
-    amodem_addPhysChanCfgUpdate(modem);
 }
 
 static int
@@ -911,7 +897,6 @@ tech_from_network_type( ADataNetworkType type )
         case A_DATA_NETWORK_UMTS:
             return A_TECH_GSM;
         case A_DATA_NETWORK_LTE:
-        case A_DATA_NETWORK_NR:
             return A_TECH_LTE;
         case A_DATA_NETWORK_UNKNOWN:
             return A_TECH_UNKNOWN;
@@ -923,14 +908,12 @@ void
 amodem_set_data_network_type( AModem  modem, ADataNetworkType   type )
 {
     AModemTech modemTech;
-    modem->data_network_requested = type;
-    bool new_data_network = (modem->data_network_requested != type);
+    modem->data_network = type;
     amodem_set_data_registration( modem, modem->data_state );
     modemTech = tech_from_network_type(type);
     if (modem->unsol_func && modemTech != A_TECH_UNKNOWN) {
-        if (_amodem_switch_technology( modem, modemTech, modem->preferred_mask, new_data_network)) {
+        if (_amodem_switch_technology( modem, modemTech, modem->preferred_mask )) {
             modem->unsol_func( modem->unsol_opaque, modem->out_buff );
-            amodem_addPhysChanCfgUpdate(modem);
         }
     }
 }
@@ -1257,7 +1240,7 @@ chooseTechFromMask( AModem modem, int32_t preferred )
 }
 
 static const char*
-_amodem_switch_technology( AModem modem, AModemTech newtech, int32_t newpreferred, bool new_data_network)
+_amodem_switch_technology( AModem modem, AModemTech newtech, int32_t newpreferred )
 {
     D("_amodem_switch_technology: oldtech: %d, newtech %d, preferred: %d. newpreferred: %d\n",
                       modem->technology, newtech, modem->preferred_mask, newpreferred);
@@ -1277,7 +1260,7 @@ _amodem_switch_technology( AModem modem, AModemTech newtech, int32_t newpreferre
         }
     }
 
-    if (modem->technology != newtech || new_data_network) {
+    if (modem->technology != newtech) {
         modem->technology = newtech;
         ret = amodem_printf(modem, "+CTEC: %d", modem->technology);
     }
@@ -1432,7 +1415,7 @@ handleTech( const char*  cmd, AModem  modem )
         D( "cmd: %s\n", cmd );
         if (cmd[0] == ',' && ! parsePreferred( ++cmd, &pt ))
             return amodem_printf( modem, "ERROR: invalid preferred mode" );
-        return _amodem_switch_technology( modem, newtech, pt, false );
+        return _amodem_switch_technology( modem, newtech, pt );
     }
     return amodem_printf( modem, "ERROR: %s: Unknown Technology", cmd + 1 );
 }
@@ -1481,13 +1464,6 @@ handlePrlVersion( const char* cmd, AModem modem )
     }
 
     return amodem_printf(modem, "ERROR");
-}
-
-static const char*
-enableGoldfishPhysicalChannelConfigUnsol( const char*  cmd, AModem  modem )
-{
-    modem->send_phys_channel_cfg_unsol = 1;
-    return NULL;
 }
 
 static const char*
@@ -1758,15 +1734,6 @@ handleSetCarrierRestrictionsReq( const char*  cmd, AModem  modem )
     }
 }
 
-static void adjustNetDataNetwork(AModem modem)
-{
-    /* ignore system that does not support 5g*/
-    modem->data_network = modem->data_network_requested;
-    if (modem->send_phys_channel_cfg_unsol == 0 && modem-> data_network_requested == A_DATA_NETWORK_NR) {
-         modem-> data_network = A_DATA_NETWORK_LTE;
-    }
-}
-
 /* TODO: Will we need this?
 static const char*
 handleSRegister( const char * cmd, AModem modem )
@@ -1818,13 +1785,11 @@ handleNetworkRegistration( const char*  cmd, AModem  modem )
     } else if ( !memcmp( cmd, "+CGREG", 6 ) ) {
         cmd += 6;
         if (cmd[0] == '?') {
-            if (modem->supportsNetworkDataType) {
-                adjustNetDataNetwork(modem);
+            if (modem->supportsNetworkDataType)
                 return amodem_printf( modem, "+CGREG: %d,%d,\"%04x\",\"%04x\",\"%04x\"",
                                     modem->data_mode, modem->data_state,
                                     modem->area_code, modem->cell_id,
                                     modem->data_network );
-            }
             else
                 return amodem_printf( modem, "+CGREG: %d,%d,\"%04x\",\"%04x\"",
                                     modem->data_mode, modem->data_state,
@@ -2276,41 +2241,6 @@ handleListCurrentCalls( const char*  cmd, AModem  modem )
     return amodem_end_line( modem );
 }
 
-static void
-amodem_addOnePhysChanCfgUpdate(int status, int bandwidth, int rat, int freq, int id, AModem  modem )
-{
-    amodem_add_line( modem, "%%CGFPCCFG: %d,%d,%d,%d,%d\r\n", status, bandwidth, rat, freq, id);
-}
-
-static void
-amodem_addPhysChanCfgUpdate( AModem  modem )
-{
-    if (modem->send_phys_channel_cfg_unsol == 0 ) {
-        return;
-    }
-
-    const int PRIMARY_SERVING = 1;
-    const int SECONDARY_SERVING = 2;
-    int cellBandwidthDownlink = 5000;
-    const int UNKNOWN = 0;
-    const int MMWAVE = 4;
-    int freq = UNKNOWN;
-    if (modem->data_network == A_DATA_NETWORK_NR) {
-        freq = MMWAVE;
-        cellBandwidthDownlink = 50000;
-    }
-    int nn;
-    for (nn = 0; nn < MAX_DATA_CONTEXTS; nn++) {
-        ADataContext  data = modem->data_contexts + nn;
-        if (!data->active || data->id <= 0)
-            continue;
-        amodem_addOnePhysChanCfgUpdate(PRIMARY_SERVING, cellBandwidthDownlink, modem->data_network,
-                freq, data->id, modem);
-        amodem_addOnePhysChanCfgUpdate(SECONDARY_SERVING, cellBandwidthDownlink, modem->data_network,
-                freq, data->id, modem);
-    }
-}
-
 /* Add a(n unsolicited) time response.
  *
  * retrieve the current time and zone in a format suitable
@@ -2376,7 +2306,6 @@ handleEndOfInit( const char*  cmd, AModem  modem )
 {
     amodem_begin_line( modem );
     amodem_addTimeUpdate( modem );
-    amodem_addPhysChanCfgUpdate( modem );
     return amodem_end_line( modem );
 }
 
@@ -2666,19 +2595,11 @@ handleSignalStrength( const char*  cmd, AModem  modem )
       modem->snapshotTimeUpdateRequested = 0;
     } else if (wakeup_from_sleep()) {
         amodem_addTimeUpdate(modem);
-        amodem_addPhysChanCfgUpdate( modem );
     } else if (firstSignalStrengthRequest) {
         firstSignalStrengthRequest = false;
         amodem_addTimeUpdate(modem);
-        amodem_addPhysChanCfgUpdate( modem );
     }
 
-    if(modem->send_phys_channel_cfg_unsol) {
-        amodem_addPhysChanCfgUpdate( modem );
-        if(modem->data_network_requested != modem->data_network) {
-            amodem_set_data_registration( modem, modem->data_state );
-        }
-    }
     android_last_signal_time = time(NULL);
 
     if (modem->use_signal_profile) {
@@ -2856,7 +2777,6 @@ static const struct {
     /* see onRadioPowerOn() */
     { "%CPHS=1", NULL, NULL },
     { "%CTZV=1", NULL, NULL },
-    { "%CGFPCCFG=1", NULL, enableGoldfishPhysicalChannelConfigUnsol},
 
     /* see onSIMReady() */
     { "+CSMS=1", "+CSMS: 1, 1, 1", NULL },
