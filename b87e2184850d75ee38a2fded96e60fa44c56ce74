@@ -22,6 +22,30 @@
       "revId": "b87e2184850d75ee38a2fded96e60fa44c56ce74",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "313317be_24e0f6a1",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1415,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-22T01:36:21Z",
+      "side": 1,
+      "message": "Well, this makes it so if accel was set to auto and we\u0027re running in fuchsia mode, we won\u0027t try to set it to off here.",
+      "parentUuid": "ec972df8_25397e14",
+      "range": {
+        "startLine": 1412,
+        "startChar": 45,
+        "endLine": 1415,
+        "endChar": 17
+      },
+      "revId": "b87e2184850d75ee38a2fded96e60fa44c56ce74",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
