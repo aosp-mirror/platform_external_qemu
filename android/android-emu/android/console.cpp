@@ -3248,7 +3248,7 @@ static int do_screenrecord_start(ControlClient client, char* args) {
             {"display", required_argument, NULL, 'd'},
             {NULL, 0, NULL, 0}};
 
-    switch (client->global->record_agent->getRecorderState()) {
+    switch (client->global->record_agent->getRecorderState().state) {
         case RECORDER_STOPPED:
             break;
         default:
@@ -3390,7 +3390,7 @@ static int do_screenrecord_start(ControlClient client, char* args) {
 }
 
 static int do_screenrecord_stop(ControlClient client, char* args) {
-    switch (client->global->record_agent->getRecorderState()) {
+    switch (client->global->record_agent->getRecorderState().state) {
         case RECORDER_RECORDING:
             break;
         case RECORDER_STOPPED:
@@ -3815,7 +3815,7 @@ do_crash_on_exit( ControlClient  client, char*  args )
 static int
 do_kill( ControlClient  client, char*  args )
 {
-    if (client->global->record_agent->getRecorderState() == RECORDER_RECORDING) {
+    if (client->global->record_agent->getRecorderState().state == RECORDER_RECORDING) {
         D(("Stopping the recording ...\n"));
         client->global->record_agent->stopRecording();
     }

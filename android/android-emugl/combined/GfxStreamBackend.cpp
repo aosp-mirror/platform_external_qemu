@@ -69,7 +69,7 @@ static bool sInitialized = false;
 #define POST_CALLBACK_DISPLAY_TYPE_WINDOWS_HWND 2
 
 struct renderer_display_info;
-typedef void (*get_pixels_t)(void*, uint32_t);
+typedef void (*get_pixels_t)(void*, uint32_t, uint32_t);
 static get_pixels_t sGetPixelsFunc = 0;
 typedef void (*post_callback_t)(void*, uint32_t, int, int, int, int, int, unsigned char*);
 
@@ -404,7 +404,8 @@ static void set_post_callback(struct renderer_display_info* r, post_callback_t f
 }
 
 extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes) {
-    sGetPixelsFunc(pixels, bytes);
+    //TODO: support display > 0
+    sGetPixelsFunc(pixels, bytes, 0);
 }
 
 extern "C" const GoldfishPipeServiceOps* goldfish_pipe_get_service_ops() {

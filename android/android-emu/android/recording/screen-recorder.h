@@ -49,6 +49,11 @@ typedef enum {
     RECORDER_STOPPED,
 } RecorderState;
 
+typedef struct {
+    RecorderState state;
+    uint32_t displayId;
+} RecorderStates;
+
 typedef void (*RecordingCallback)(void* opaque, RecordingStatus status);
 
 typedef struct RecordingInfo {
@@ -83,7 +88,7 @@ extern bool screen_recorder_start(const RecordingInfo* info, bool async);
 // finished.
 extern bool screen_recorder_stop(bool async);
 // Get the recorder's current state.
-extern RecorderState screen_recorder_state_get(void);
+extern RecorderStates screen_recorder_state_get(void);
 // Starts the shared memory region. Note that the desired framerate
 // can be ignored.
 extern const char* start_shared_memory_module(int desiredFps);

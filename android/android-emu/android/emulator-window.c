@@ -180,7 +180,7 @@ bool emulator_window_stop_recording_async(void) {
     return screen_recorder_stop(true);
 }
 
-RecorderState emulator_window_recorder_state_get(void) {
+RecorderStates emulator_window_recorder_state_get(void) {
     return screen_recorder_state_get();
 }
 

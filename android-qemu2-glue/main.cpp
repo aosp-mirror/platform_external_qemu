@@ -867,7 +867,7 @@ static int startEmulatorWithMinConfig(
                             WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
         }
     }
-    android_init_multi_display(gQAndroidEmulatorWindowAgent);
+    android_init_multi_display(gQAndroidEmulatorWindowAgent, gQAndroidRecordScreenAgent);
 
     RendererConfig rendererConfig;
     configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
@@ -1803,7 +1803,7 @@ extern "C" int main(int argc, char** argv) {
     gQAndroidLocationAgent->gpsSetPassiveUpdate(!opts->no_passive_gps);
 
     android_foldable_initialize(nullptr);
-    android_init_multi_display(gQAndroidEmulatorWindowAgent);
+    android_init_multi_display(gQAndroidEmulatorWindowAgent, gQAndroidRecordScreenAgent);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.

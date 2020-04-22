@@ -18,6 +18,7 @@
 
 #include "android/base/synchronization/Lock.h"
 #include "android/base/files/Stream.h"
+#include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/window_agent.h"
 
 #include <map>
@@ -43,7 +44,8 @@ struct MultiDisplayInfo {
 
 class MultiDisplay {
 public:
-    MultiDisplay(const QAndroidEmulatorWindowAgent* const agent,
+    MultiDisplay(const QAndroidEmulatorWindowAgent* const windowAgent,
+                 const QAndroidRecordScreenAgent* const recordAgent,
                  bool isGuestMode);
     static MultiDisplay* getInstance();
     bool isMultiDisplayEnabled() { base::AutoLock lock(mLock); return mMultiDisplay.size() > 1; }
@@ -108,6 +110,7 @@ public:
 
 private:
     const QAndroidEmulatorWindowAgent* mWindowAgent;
+    const QAndroidRecordScreenAgent* mRecordAgent;
     bool mGuestMode;
     std::map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mLock;
@@ -131,5 +134,6 @@ private:
 };
 } // namespace android
 
-void android_init_multi_display(const QAndroidEmulatorWindowAgent* const agent,
+void android_init_multi_display(const QAndroidEmulatorWindowAgent* const windowAgent,
+                                const QAndroidRecordScreenAgent* const recordAgent,
                                 bool isGUestMode = false);
