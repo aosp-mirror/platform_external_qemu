@@ -69,7 +69,7 @@ static bool sInitialized = false;
 #define POST_CALLBACK_DISPLAY_TYPE_WINDOWS_HWND 2
 
 struct renderer_display_info;
-typedef void (*get_pixels_t)(void*, uint32_t);
+typedef void (*get_pixels_t)(void*, uint32_t, uint32_t);
 static get_pixels_t sGetPixelsFunc = 0;
 typedef void (*post_callback_t)(void*, uint32_t, int, int, int, int, int, unsigned char*);
 
@@ -82,7 +82,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     struct virgl_renderer_callbacks* virglrenderer_callbacks);
 
 // For reading back rendered contents to display
-extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes);
+extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes, uint32_t displayId);
 
 static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         // guest_open()
@@ -403,8 +403,8 @@ static void set_post_callback(struct renderer_display_info* r, post_callback_t f
     android_setPostCallback(func, r, false, 0);
 }
 
-extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes) {
-    sGetPixelsFunc(pixels, bytes);
+extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes, uint32_t displayId) {
+    sGetPixelsFunc(pixels, bytes, displayId);
 }
 
 extern "C" const GoldfishPipeServiceOps* goldfish_pipe_get_service_ops() {
