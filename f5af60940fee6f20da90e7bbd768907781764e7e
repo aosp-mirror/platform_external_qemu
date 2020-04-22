@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e8ae905_559eea79",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-22T00:50:19Z",
+      "side": 1,
+      "message": "Should we preserve the previous behavior where we check the installer status if the environment variable is not set?",
+      "revId": "f5af60940fee6f20da90e7bbd768907781764e7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
