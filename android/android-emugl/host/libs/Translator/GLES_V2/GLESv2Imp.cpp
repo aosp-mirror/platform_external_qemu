@@ -4367,5 +4367,10 @@ GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBuf
     ctx->dispatcher().glSignalSemaphoreEXT(semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, dstLayouts);
 }
 
+GL_APICALL void GL_APIENTRY glPrimitiveRestartIndex(GLuint index) {
+    GET_CTX_V2();
+    ctx->dispatcher().glPrimitiveRestartIndex(index);
+}
+
 } // namespace translator
 } // namespace gles2
