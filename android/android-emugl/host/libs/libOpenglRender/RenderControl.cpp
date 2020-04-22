@@ -614,8 +614,15 @@ static EGLint rcChooseConfig(EGLint *attribs,
 {
     AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
-    if (!fb || attribs_size==0) {
+    if (!fb) {
         return 0;
+    }
+
+    if (attribs_size == 0) {
+        if (configs && configs_size > 0) {
+            // Pick the first config
+            *configs = 0;
+        }
     }
 
     return fb->getConfigs()->chooseConfig(
