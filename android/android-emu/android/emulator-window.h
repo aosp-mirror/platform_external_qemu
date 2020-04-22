@@ -95,7 +95,7 @@ bool emulator_window_stop_recording(void);
  * status. */
 bool emulator_window_stop_recording_async(void);
 /* Returns the current state of the screen recorder. */
-RecorderState emulator_window_recorder_state_get(void);
+RecorderStates emulator_window_recorder_state_get(void);
 
 void emulator_window_set_screen_mask(int width, int height, const unsigned char* rgbaData);
 
