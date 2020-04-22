@@ -95,7 +95,7 @@ public:
     bool startRecording(bool async);
     bool stopRecording(bool async);
 
-    RecorderState getRecorderState() const;
+    RecorderStates getRecorderState() const;
 
 private:
     bool startRecordingWorker();
@@ -153,9 +153,9 @@ ScreenRecorder::ScreenRecorder(uint32_t fbWidth,
     // string because info->fileName is pointing to data that we don't own.
     D("RecordingInfo "
       "{\n\tfileName=[%s],\n\twidth=[%u],\n\theight=[%u],\n\tvideoBitrate=[%u],"
-      "\n\ttimeLimit=[%u],\n\tcb=[%p],\n\topaque=[%p]\n}\n",
+      "\n\ttimeLimit=[%u],\n\tdisplay=[%u],\n\tcb=[%p],\n\topaque=[%p]\n}\n",
       info->fileName, info->width, info->height, info->videoBitrate,
-      info->timeLimit, info->cb, info->opaque);
+      info->timeLimit, info->displayId, info->cb, info->opaque);
     mFilename = info->fileName;
     mInfo.fileName = mFilename.c_str();
 }
@@ -282,7 +282,6 @@ bool ScreenRecorder::stopRecordingWorker() {
         mFinished = true;
         mCond.signalAndUnlock(&lock);
     }
-
     bool has_frames = ffmpegRecorder->stop();
     ffmpegRecorder.reset();
 
@@ -327,21 +326,22 @@ bool ScreenRecorder::parseRecordingInfo(RecordingInfo& info) {
     return true;
 }
 
-RecorderState ScreenRecorder::getRecorderState() const {
-    return mRecorderState;
+RecorderStates ScreenRecorder::getRecorderState() const {
+    RecorderStates ret = {mRecorderState, mInfo.displayId};
+    return ret;
 }
 }  // namespace
 
 // C compatibility functions
-RecorderState screen_recorder_state_get(void) {
+RecorderStates screen_recorder_state_get(void) {
     auto& globals = *sGlobals;
+    RecorderStates ret = {RECORDER_STOPPED, 0};
 
     AutoLock lock(globals.lock);
     if (globals.recorder) {
-        return globals.recorder->getRecorderState();
-    } else {
-        return RECORDER_STOPPED;
+        ret = globals.recorder->getRecorderState();
     }
+    return ret;
 }
 
 static void screen_recorder_record_session(const char* cmdLineArgs) {
@@ -424,11 +424,17 @@ bool screen_recorder_start(const RecordingInfo* info, bool async) {
     AutoLock lock(globals.lock);
 
     // Check if the display is created. For guest mode, display 0 return true.
-    uint32_t w, h;
+    uint32_t w, h, cb = 0;
     if (globals.multiDisplayAgent->getMultiDisplay(info->displayId, nullptr, nullptr,
                                                    &w, &h, nullptr,
                                                    nullptr, nullptr) == false) {
         return false;
+    }
+    if (info->displayId != 0) {
+        globals.multiDisplayAgent->getDisplayColorBuffer(info->displayId, &cb);
+        if (cb == 0) {
+            return false;
+        }
     }
 
     globals.recorder.reset(new ScreenRecorder(w, h, info, globals.displayAgent));
@@ -441,9 +447,10 @@ bool screen_recorder_stop(bool async) {
     AutoLock lock(globals.lock);
 
     if (globals.recorder) {
-        return globals.recorder->stopRecording(async);
+        globals.recorder->stopRecording(async);
+        globals.recorder.reset();
+        return true;
     }
-
     return false;
 }
 

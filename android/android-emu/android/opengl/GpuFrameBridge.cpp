@@ -113,8 +113,15 @@ public:
     virtual void invalidateRecordingBuffers() override {
         {
             AutoLock lock(mRecLock);
+            // Release the buffers because new recording in the furturemay have different
+            // resolution if multi display changes its resolution.
             if (mRecFrame) {
-                mRecFrame->isValid = false;
+                delete mRecFrame;
+                mRecFrame = nullptr;
+            }
+            if (mRecTmpFrame) {
+                delete mRecTmpFrame;
+                mRecTmpFrame = nullptr;
             }
         }
         mRecFrameUpdated.store(false, std::memory_order_release);
