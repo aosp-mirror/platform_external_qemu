@@ -1409,7 +1409,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                     abi, kAccelerator, *accel_status);
                 exit(1);
             }
-            else if (*accel_mode == ACCEL_OFF || !android_qemu_mode) {
+            else if (*accel_mode == ACCEL_OFF || (*accel_mode == ACCEL_OFF && !android_qemu_mode)) {
                 if (!android_qemu_mode) {
                     *accel_mode = ACCEL_OFF;
                 }
