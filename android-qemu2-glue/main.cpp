@@ -838,8 +838,9 @@ static int startEmulatorWithMinConfig(
 
     char* accel_status = NULL;
     CpuAccelMode accel_mode = ACCEL_AUTO;
-    const bool accel_ok =
-            handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
+    // bug: handle fuchsia accel opt here
+    // const bool accel_ok =
+    // handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
 
     // Feature flags-related last-microsecond renderer changes
     {
