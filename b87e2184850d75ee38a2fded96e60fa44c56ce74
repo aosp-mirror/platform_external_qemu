@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ec972df8_25397e14",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1415,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-04-22T01:32:05Z",
+      "side": 1,
+      "message": "this looks redundant..?",
+      "range": {
+        "startLine": 1412,
+        "startChar": 45,
+        "endLine": 1415,
+        "endChar": 17
+      },
+      "revId": "b87e2184850d75ee38a2fded96e60fa44c56ce74",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
