@@ -14,23 +14,28 @@
 
 #include "android/opengl/GpuFrameBridge.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/Log.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/opengles.h"
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for NULL, free, malloc
+#include <string.h>  // for memcpy
 
-#include <atomic>
+#include <atomic>  // for atomic_bool, memory_o...
+#include <memory>  // for unique_ptr
 
-#include <stdlib.h>
-#include <string.h>
+#include "android/base/async/Looper.h"          // for Looper::Timer, Looper
+#include "android/base/async/ThreadLooper.h"    // for ThreadLooper
+#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "android/opengles.h"                   // for android_getFlushReadP...
 
 #ifdef _WIN32
 #undef ERROR
 #endif
 
 namespace android {
+namespace base {
+template <typename T, size_t CAPACITY>
+class MessageChannel;
+}  // namespace base
+
 namespace opengl {
 
 using android::base::AutoLock;
@@ -48,26 +53,40 @@ struct Frame {
     void* pixels;
     bool isValid;
 
-    Frame(int w, int h, const void* pixels) :
-            width(w), height(h), pixels(NULL), isValid(true) {
+    Frame(int w, int h, const void* pixels)
+        : width(w), height(h), pixels(NULL), isValid(true) {
         this->pixels = ::malloc(w * 4 * h);
     }
 
-    ~Frame() {
-        ::free(pixels);
-    }
+    ~Frame() { ::free(pixels); }
 };
 
 // Real implementation of GpuFrameBridge interface.
 class Bridge : public GpuFrameBridge {
 public:
     // Constructor.
-    Bridge() :
-        GpuFrameBridge(),
-        mRecFrame(NULL),
-        mRecTmpFrame(NULL),
-        mRecFrameUpdated(false),
-        mReadPixelsFunc(android_getReadPixelsFunc()) { }
+    Bridge()
+        : GpuFrameBridge(),
+          mRecFrame(NULL),
+          mRecTmpFrame(NULL),
+          mRecFrameUpdated(false),
+          mReadPixelsFunc(android_getReadPixelsFunc()),
+          mFlushPixelPipeline(android_getFlushReadPixelPipeline()) {
+        auto looper = android::base::ThreadLooper::get();
+        mTimer = std::unique_ptr<android::base::Looper::Timer>(
+                looper->createTimer(_on_frame_notify, this));
+    }
+
+    // The gpu bridge receives frames from a buffer that can contain multiple
+    // frames. usually the bridge is one frame behind. This is usually not a
+    // problem when we have a high enough framerate. However it is possible that
+    // the framerate drops really low (even <1). This can result in the bridge
+    // never delivering this "stuck frame".
+    //
+    // As a work around we will flush the reader pipeline if no frames are
+    // delivered within at most 2x kFrameDelayms
+    const long kMinFPS = 24;
+    const long kFrameDelayMs = 1000 / kMinFPS;
 
     // Destructor
     virtual ~Bridge() {
@@ -79,13 +98,41 @@ public:
         }
     }
 
+    void notify() {
+        AutoLock delay(mDelayLock);
+        switch (mDelayCallback) {
+            case FrameDelay::Reschedule:
+                mTimer->startRelative(kFrameDelayMs);
+                mDelayCallback = FrameDelay::Scheduled;
+                break;
+            case FrameDelay::Scheduled:
+                mTimer->stop();
+                mDelayCallback = FrameDelay::Firing;
+                delay.unlock();
+                mFlushPixelPipeline();
+                break;
+            default:
+                assert(false);
+        }
+    }
+
+    static void _on_frame_notify(void* opaque,
+                                 android::base::Looper::Timer* timer) {
+        Bridge* worker = static_cast<Bridge*>(opaque);
+        worker->notify();
+    }
+
     // Implementation of the GpuFrameBridge::postRecordFrame() method, must be
     // called from the EmuGL thread.
-    virtual void postRecordFrame(int width, int height, const void* pixels) override {
+    virtual void postRecordFrame(int width,
+                                 int height,
+                                 const void* pixels) override {
         postFrame(width, height, pixels, true);
     }
 
-    virtual void postRecordFrameAsync(int width, int height, const void* pixels) override {
+    virtual void postRecordFrameAsync(int width,
+                                      int height,
+                                      const void* pixels) override {
         postFrame(width, height, pixels, false);
     }
 
@@ -119,7 +166,8 @@ public:
         mRecFrameUpdated.store(false, std::memory_order_release);
     }
 
-    void setFrameReceiver(FrameAvailableCallback receiver, void* opaque) override {
+    void setFrameReceiver(FrameAvailableCallback receiver,
+                          void* opaque) override {
         mReceiver = receiver;
         mReceiverOpaque = opaque;
     }
@@ -140,8 +188,29 @@ public:
         mRecFrameUpdated.store(true, std::memory_order_release);
         if (mReceiver) {
             mReceiver(mReceiverOpaque);
+            AutoLock delay(mDelayLock);
+            switch (mDelayCallback) {
+                case FrameDelay::NotScheduled:
+                    mTimer->startRelative(kFrameDelayMs);
+                    mDelayCallback = FrameDelay::Scheduled;
+                    break;
+                case FrameDelay::Firing:
+                    mDelayCallback = FrameDelay::NotScheduled;
+                    break;
+                default:
+                    mDelayCallback = FrameDelay::Reschedule;
+                    break;
+            }
         }
     }
+
+    enum class FrameDelay {
+        NotScheduled = 0,  // No delay timer is scheduled
+        Scheduled,   // A delay timer has been scheduled and will flush the
+                     // pipeline on experation
+        Reschedule,  // Do not flush the pipeline, but reschedule
+        Firing,      // A callback has been scheduled, nothing needs to happen
+    };
 
 private:
     FrameAvailableCallback mReceiver = nullptr;
@@ -151,6 +220,11 @@ private:
     Frame* mRecTmpFrame;
     std::atomic_bool mRecFrameUpdated;
     ReadPixelsFunc mReadPixelsFunc = 0;
+    FlushReadPixelPipeline mFlushPixelPipeline = 0;
+
+    std::unique_ptr<android::base::Looper::Timer> mTimer;
+    Lock mDelayLock;
+    FrameDelay mDelayCallback{FrameDelay::NotScheduled};
 };
 
 }  // namespace

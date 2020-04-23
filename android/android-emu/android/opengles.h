@@ -58,6 +58,15 @@ void android_setPostCallback(OnPostFunc onPost, void* onPostContext, bool useBgr
 typedef void (*ReadPixelsFunc)(void* pixels, uint32_t bytes);
 ReadPixelsFunc android_getReadPixelsFunc();
 
+
+typedef void (*FlushReadPixelPipeline)(void);
+
+/* Gets the function that can be used to make sure no
+ * frames are left in the video producer pipeline.
+ * This can result in a post callback.
+ */
+FlushReadPixelPipeline android_getFlushReadPixelPipeline();
+
 /* Retrieve the Vendor/Renderer/Version strings describing the underlying GL
  * implementation. The call only works while the renderer is started.
  *
