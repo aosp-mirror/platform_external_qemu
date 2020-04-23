@@ -14,8 +14,9 @@
 
 #pragma once
 
-#include "android/utils/compiler.h"
-#include "android/utils/looper.h"
+#include <stdint.h>                  // for uint32_t
+
+#include "android/utils/compiler.h"  // for ANDROID_BEGIN_HEADER, ANDROID_EN...
 
 ANDROID_BEGIN_HEADER
 
@@ -38,6 +39,10 @@ typedef void (*FrameAvailableCallback)(void* opaque);
 void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
                                          void* opaque);
 void gpu_unregister_shared_memory_callback(void* opaque);
+
+// Used to inject a looper that will be used to create timers for the gpu bridge.
+// should be called early during startup with a thread that hulooper that has support for timers.
+void gpu_initialize_recorders();
 
 // Used to inform the recorders that the emulator is terminating.
 void gpu_emulator_shutdown();
