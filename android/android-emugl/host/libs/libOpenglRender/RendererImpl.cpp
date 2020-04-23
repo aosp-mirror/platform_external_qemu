@@ -391,6 +391,12 @@ RendererImpl::getReadPixelsCallback() {
     return mRenderWindow->getReadPixelsCallback();
 }
 
+RendererImpl::FlushReadPixelPipeline
+RendererImpl::getFlushReadPixelPipeline() {
+    assert(mRenderWindow);
+    return mRenderWindow->getFlushReadPixelPipeline();
+}
+
 bool RendererImpl::showOpenGLSubwindow(FBNativeWindowType window,
                                        int wx,
                                        int wy,

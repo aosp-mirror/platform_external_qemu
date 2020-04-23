@@ -1,12 +1,12 @@
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/synchronization/Lock.h"
+#include <EGL/egl.h>                            // for EGLContext, EGLSurface
+#include <GLES3/gl3.h>                          // for GLuint
+#include <stdint.h>                             // for uint32_t
+#include <vector>                               // for vector
 
-#include <EGL/egl.h>
-#include <GLES3/gl3.h>
-
-#include <vector>
+#include "android/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
+#include "android/base/synchronization/Lock.h"  // for Lock
 
 class ColorBuffer;
 class FrameBuffer;
@@ -42,9 +42,19 @@ public:
     // need to do synchronized communication with the thread ReadbackWorker
     // is running on.
     void getPixels(void* out, uint32_t bytes);
+
+    // Duplicates the last frame and generates a post events if
+    // there are no read events active.
+    // This is usually called when there was no doNextReadback activity
+    // for a few ms, to guarantee that end users see the final frame.
+    void flushPipeline();
 private:
     EGLContext mContext;
+    EGLContext mFlushContext;
+
     EGLSurface mSurf;
+    EGLSurface mFlushSurf;
+
     RenderThreadInfo* mTLS;
     FrameBuffer* mFb;
 
