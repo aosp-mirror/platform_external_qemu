@@ -59,16 +59,16 @@ function download_sdk() {
     LOG INFO "Looking to get tools version: ${MSVC_HASH}"
     LOG INFO "Downloading and copying the SDK (this might take a couple of minutes ...)"
     rm ${HOME}/.boto.bak
-    ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH
+    python2 ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH
     if [ $? -ne 0 ]; then
       echo "${RED}Likely not authenticated... Trying to authenticate${RESET}"
       echo "${RED}Please follow the instructions below. ${RESET}"
       echo "${RED}Your project code is 0.${RESET}"
 
 
-      ${DEPOT_TOOLS}/download_from_google_storage --config
+      python2 ${DEPOT_TOOLS}/download_from_google_storage --config
       LOG INFO "Downloading and copying the SDK (this might take a couple of minutes ...)"
-      ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH || gbash::die "Unable to fetch toolchain"
+      python2 ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH || gbash::die "Unable to fetch toolchain"
     fi
 
     # Setup the symlink to a well known location for the build system.

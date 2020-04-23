@@ -57,6 +57,7 @@ public:
                          void* context, bool useBgraReadback) final;
     bool asyncReadbackSupported() final;
     ReadPixelsCallback getReadPixelsCallback() final;
+    FlushReadPixelPipeline getFlushReadPixelPipeline() final;
     bool showOpenGLSubwindow(FBNativeWindowType window,
                              int wx,
                              int wy,

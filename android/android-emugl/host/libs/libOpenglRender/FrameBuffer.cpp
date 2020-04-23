@@ -2192,7 +2192,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                 auto cpuUsage = emugl::getCpuUsage();
                 std::string lastStats =
                     cpuUsage ? cpuUsage->printUsage() : "";
-                
+
                 printf("Resident memory: %f mb %s \n%s\n",
                     (float)usage.resident / 1048576.0f, lastStats.c_str(),
                     memoryStats.c_str());
@@ -2239,9 +2239,17 @@ void FrameBuffer::getPixels(void* pixels, uint32_t bytes) {
     m_readbackThread.waitQueuedItems();
 }
 
+void FrameBuffer::flushReadPipeline() {
+    m_readbackWorker->flushPipeline();
+}
+
 static void sFrameBuffer_ReadPixelsCallback(
     void* pixels, uint32_t bytes) {
     FrameBuffer::getFB()->getPixels(pixels, bytes);
+}
+
+static void sFrameBuffer_FlushReadPixelPipeline() {
+    FrameBuffer::getFB()->flushReadPipeline();
 }
 
 bool FrameBuffer::asyncReadbackSupported() {
@@ -2252,6 +2260,11 @@ emugl::Renderer::ReadPixelsCallback
 FrameBuffer::getReadPixelsCallback() {
     return sFrameBuffer_ReadPixelsCallback;
 }
+
+emugl::Renderer::FlushReadPixelPipeline FrameBuffer::getFlushReadPixelPipeline() {
+    return sFrameBuffer_FlushReadPixelPipeline;
+}
+
 
 bool FrameBuffer::repost(bool needLockAndBind) {
     GL_LOG("Reposting framebuffer.");

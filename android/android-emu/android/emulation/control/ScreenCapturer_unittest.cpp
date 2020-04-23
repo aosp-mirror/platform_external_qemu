@@ -143,6 +143,11 @@ public:
     ReadPixelsCallback getReadPixelsCallback() {
         return nullptr;
     }
+
+    FlushReadPixelPipeline getFlushReadPixelPipeline()  {
+        return nullptr;
+    }
+
     bool showOpenGLSubwindow(FBNativeWindowType window,
                                      int wx,
                                      int wy,
