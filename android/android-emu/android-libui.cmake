@@ -377,8 +377,9 @@ target_link_libraries(
           android-hw-config)
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug.
-# This implies a direct dependency to libX11.so
-android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
+# This implies a direct dependency to libX11.so, unless we dlsym() in which
+# case we don't need to depend on it
+# android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
 android_target_link_libraries(emulator-libui darwin-x86_64
                               PRIVATE "-framework Carbon")
 # Windows-msvc specific dependencies. Need these for posix support.
