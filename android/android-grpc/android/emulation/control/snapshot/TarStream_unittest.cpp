@@ -153,6 +153,14 @@ TEST_F(TarStreamTest, handle_unclosed_tar_properly) {
     EXPECT_TRUE(fst.valid);
 };
 
+TEST_F(TarStreamTest, cannot_write_to_closed_tar) {
+    std::stringstream ss;
+    TarWriter tw(indir, ss);
+    EXPECT_TRUE(tw.addFileEntry("hello.txt"));
+    EXPECT_TRUE(tw.close());
+    EXPECT_FALSE(tw.addFileEntry("hello.txt"));
+};
+
 TEST_F(TarStreamTest, read_write_dir) {
     std::stringstream ss;
     TarWriter tw(mTestSystem.getTempRoot()->path(), ss);
