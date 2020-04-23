@@ -113,6 +113,13 @@ public:
     using ReadPixelsCallback = void (*)(void* pixels, uint32_t bytes, uint32_t displayId);
     virtual ReadPixelsCallback getReadPixelsCallback() = 0;
 
+    using FlushReadPixelPipeline = void(*)(int displayId);
+    // Flushes the pipeline by duplicating the last frame and informing
+    // the async callback that a new frame is available if no reads are
+    // active
+    virtual FlushReadPixelPipeline getFlushReadPixelPipeline() = 0;
+
+
     // showOpenGLSubwindow -
     //     Create or modify a native subwindow which is a child of 'window'
     //     to be used for framebuffer display. If a subwindow already exists,

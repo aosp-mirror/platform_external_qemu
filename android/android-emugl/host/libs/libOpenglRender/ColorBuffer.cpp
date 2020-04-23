@@ -851,6 +851,19 @@ void ColorBuffer::readbackAsync(GLuint buffer, bool readbackBgra) {
         GLenum format = shouldReadbackBgra ? GL_BGRA_EXT : GL_RGBA;
         s_gles2.glReadPixels(0, 0, m_width, m_height, format, m_asyncReadbackType, 0);
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+        size_t siz = m_width * m_height * 4;
+        std::vector<uint8_t> buf(siz);
+        s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, buffer);
+        void* pixels = s_gles2.glMapBufferRange(GL_COPY_READ_BUFFER, 0,
+                                                siz, GL_MAP_READ_BIT);
+        memcpy(buf.data(), pixels, siz);
+        s_gles2.glUnmapBuffer(GL_COPY_READ_BUFFER);
+        int hash = 0;
+        for (auto v : buf) {
+            hash += v;
+        }
+        printf("%s: buffer: %d, pix: %d\n", __func__, buffer, hash);
         unbindFbo();
     }
 }
