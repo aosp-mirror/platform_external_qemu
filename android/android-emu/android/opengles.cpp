@@ -318,6 +318,15 @@ ReadPixelsFunc android_getReadPixelsFunc() {
     }
 }
 
+FlushReadPixelPipeline android_getFlushReadPixelPipeline() {
+    if (sRenderer) {
+        return sRenderer->getFlushReadPixelPipeline();
+    } else {
+        return nullptr;
+    }
+}
+
+
 static char* strdupBaseString(const char* src) {
     const char* begin = strchr(src, '(');
     if (!begin) {
