@@ -22,6 +22,30 @@
       "revId": "9d69907aa345cde7f4c385f3ba7d86beb5f67503",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32a24465_89d04a68",
+        "filename": "android/android-emu/android/emulation/control/cellular_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-04-23T00:47:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "13c1dd63_d3006a9a",
+      "range": {
+        "startLine": 24,
+        "startChar": 24,
+        "endLine": 24,
+        "endChar": 39
+      },
+      "revId": "9d69907aa345cde7f4c385f3ba7d86beb5f67503",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
