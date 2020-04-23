@@ -4,17 +4,18 @@
 #include "ColorBuffer.h"
 #include "DispatchTables.h"
 #include "FrameBuffer.h"
-#include "RenderThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "RenderThreadInfo.h"
 
-
-ReadbackWorker::ReadbackWorker(uint32_t width, uint32_t height, uint32_t displayId) :
-    mFb(FrameBuffer::getFB()),
-    mBufferSize(4 * width * height /* RGBA8 (4 bpp) */),
-    mBuffers(3 /* mailbox */, 0),
-    mDisplayId(displayId) {
-}
+ReadbackWorker::ReadbackWorker(uint32_t width,
+                               uint32_t height,
+                               uint32_t displayId)
+    : mFb(FrameBuffer::getFB()),
+      mBufferSize(4 * width * height /* RGBA8 (4 bpp) */),
+      mBuffers(4 /* mailbox */,
+               0),  // Note, last index is used for duplicating buffer on flush
+      mDisplayId(displayId) {}
 
 void ReadbackWorker::initGL() {
     mFb->createAndBindTrivialSharedContext(&mContext, &mSurf);
@@ -22,8 +23,7 @@ void ReadbackWorker::initGL() {
     for (auto buffer : mBuffers) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
         s_gles2.glBufferData(GL_PIXEL_PACK_BUFFER, mBufferSize,
-                             0 /* init, with no data */,
-                             GL_STREAM_READ);
+                             0 /* init, with no data */, GL_STREAM_READ);
     }
     s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
@@ -35,9 +35,10 @@ ReadbackWorker::~ReadbackWorker() {
     mFb->unbindAndDestroyTrivialSharedContext(mContext, mSurf);
 }
 
-void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage,
-                                    bool repaint, bool readbackBgra) {
-
+void ReadbackWorker::doNextReadback(ColorBuffer* cb,
+                                    void* fbImage,
+                                    bool repaint,
+                                    bool readbackBgra) {
     // if |repaint|, make sure that the current frame is immediately sent down
     // the pipeline and made available to the consumer by priming async
     // readback; doing 4 consecutive reads in a row, which should be enough to
@@ -100,7 +101,8 @@ void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage,
         } else {
             readAt = mReadPixelsIndexOdd;
         }
-        lock.unlock();
+        m_readbackCount++;
+        mPrevReadPixelsIndex = readAt;
 
         cb->readbackAsync(mBuffers[readAt], readbackBgra);
 
@@ -108,13 +110,67 @@ void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage,
         // have written any data yet, which results in a black frame.  Safer
         // option to avoid this glitch is to wait until all 3 potential
         // buffers in our triple buffering setup have had chances to readback.
-        if (m_readbackCount > 2) {
+        lock.unlock();
+        if (m_readbackCount > 3) {
+            printf("%s: mMapCopyIndex: %d, mPrevReadPixelsIndex: %d, "
+                   "iter:%d, frame:%d\n",
+                   __func__, mMapCopyIndex, mPrevReadPixelsIndex, numIter,
+                   m_readbackCount);
             mFb->doPostCallback(fbImage, mDisplayId);
         }
-        m_readbackCount++;
-
-        mPrevReadPixelsIndex = readAt;
     }
+}
+
+static uint64_t calcHash(GLuint src, size_t bufferSize) {
+    uint64_t hash = 0;
+    std::vector<uint8_t> buf(bufferSize);
+    s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, src);
+    void* pixels = s_gles2.glMapBufferRange(GL_COPY_READ_BUFFER, 0, buf.size(),
+                                            GL_MAP_READ_BIT);
+    if (!pixels) {
+        printf("Failed %d\n", s_gles2.glGetError());
+        return 0;
+    }
+    memcpy(buf.data(), pixels, buf.size());
+    for (auto const pixel : buf) {
+        hash = pixel + (hash << 6) + (hash << 16) - hash;
+    }
+
+    s_gles2.glUnmapBuffer(GL_COPY_READ_BUFFER);
+    return hash;
+}
+
+void ReadbackWorker::flushPipeline() {
+    android::base::AutoLock lock(mLock);
+    if (mIsCopying) {
+        // No need to make the last frame available,
+        // we are currently being read.
+        return;
+    }
+
+    auto src = mBuffers[mPrevReadPixelsIndex];
+    auto dst = mBuffers.back();
+
+    // This is not called from a renderthread, so let's activate
+    // the context.
+    s_egl.eglMakeCurrent(mFb->getDisplay(), mSurf, mSurf, mContext);
+
+    // We now copy the last frame into slot 4, where no other thread
+    // ever writes.
+    s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, src);
+    s_gles2.glBindBuffer(GL_COPY_WRITE_BUFFER, dst);
+    s_gles2.glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0,
+                                mBufferSize);
+    s_gles2.glUnmapBuffer(GL_COPY_READ_BUFFER);
+    s_gles2.glUnmapBuffer(GL_COPY_WRITE_BUFFER);
+
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    s_egl.eglMakeCurrent(mFb->getDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
+                         EGL_NO_CONTEXT);
+
+    mMapCopyIndex = mBuffers.size() - 1;
+    lock.unlock();
+    mFb->doPostCallback(nullptr, mDisplayId);
 }
 
 void ReadbackWorker::getPixels(void* buf, uint32_t bytes) {
