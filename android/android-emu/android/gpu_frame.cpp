@@ -14,25 +14,27 @@
 
 #include "android/gpu_frame.h"
 
-#include <atomic>         // for atomic, __a...
-#include <cstddef>        // for NULL
-#include <unordered_map>  // for unordered_map
-#include <utility>        // for pair, move
-#include <vector>         // for vector
+#include <stdio.h>                                // for stderr
+#include <atomic>                                 // for atomic_bool
 
-#include "android/base/Log.h"                             // for LogMessage
-#include "android/base/async/CallbackRegistry.h"
-#include "android/base/memory/LazyInstance.h"             // for LazyInstance
-#include "android/base/synchronization/Lock.h"            // for AutoLock, Lock
-#include "android/base/synchronization/MessageChannel.h"  // for MessageChannel
-#include "android/emulation/MultiDisplay.h"
-#include "android/opengl/GpuFrameBridge.h"                // for GpuFrameBridge
-#include "android/opengl/virtio_gpu_ops.h"                // for AndroidVirt...
-#include "android/opengles.h"                             // for android_set...
+#include "android/base/Log.h"                     // for LogMessage, DCHECK
+#include "android/base/async/CallbackRegistry.h"  // for CallbackRegistry
+#include "android/base/async/ThreadLooper.h"      // for ThreadLooper
+#include "android/base/memory/LazyInstance.h"     // for LazyInstance, LAZY_...
+#include "android/base/synchronization/Lock.h"    // for Lock, AutoLock
+#include "android/emulation/MultiDisplay.h"       // for MultiDisplay, Multi...
+#include "android/opengl/GpuFrameBridge.h"        // for GpuFrameBridge
+#include "android/opengl/virtio_gpu_ops.h"        // for AndroidVirtioGpuOps
+#include "android/opengles.h"                     // for android_asyncReadba...
 
+namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+}  // namespace android
 
-using android::base::AutoLock;
 using android::MultiDisplay;
+using android::base::AutoLock;
 
 /* set >0 for very verbose debugging */
 #define DEBUG 1
@@ -48,11 +50,12 @@ using android::MultiDisplay;
 #define GL_RGBA 0x1908
 #define GL_UNSIGNED_BYTE 0x1401
 
-using android::opengl::GpuFrameBridge;
 using android::base::CallbackRegistry;
+using android::opengl::GpuFrameBridge;
 
 static GpuFrameBridge* sBridge[MultiDisplay::s_maxNumMultiDisplay];
 static std::atomic_bool sRequestPost{false};
+static android::base::Looper* sLooper;
 
 static android::base::LazyInstance<CallbackRegistry> sReceiverState =
         LAZY_INSTANCE_INIT;
@@ -120,14 +123,17 @@ static on_new_gpu_frame_t choose_on_new_gpu_frame() {
     }
 }
 
-static void gpu_frame_set_post(bool on, GpuFrameBridge* bridge, uint32_t displayId) {
+static void gpu_frame_set_post(bool on,
+                               GpuFrameBridge* bridge,
+                               uint32_t displayId) {
     CHECK(bridge);
 
     if (on) {
         android_setPostCallback(choose_on_new_gpu_frame(), bridge,
                                 true /* BGRA readback */, displayId);
     } else {
-        android_setPostCallback(nullptr, nullptr, true /* BGRA readback */, displayId);
+        android_setPostCallback(nullptr, nullptr, true /* BGRA readback */,
+                                displayId);
     }
 }
 
@@ -149,15 +155,18 @@ void gpu_frame_set_record_mode(bool on, uint32_t displayId) {
 
     if (!sBridge[displayId]) {
         sBridge[displayId] = android::opengl::GpuFrameBridge::create();
+        sBridge[displayId]->setLooper(sLooper);
         sBridge[displayId]->setDisplayId(displayId);
-        //TODO: support frameReceivedForwader for display >= 1
+        // TODO: support frameReceivedForwader for display >= 1
         if (displayId == 0) {
-            sBridge[displayId]->setFrameReceiver(frameReceivedForwader, nullptr);
+            sBridge[displayId]->setFrameReceiver(frameReceivedForwader,
+                                                 nullptr);
         }
     }
 
     // We need frames if we have at least one recorder.
-    gpu_frame_set_post(sRecordCounter[displayId] > 0, sBridge[displayId], displayId);
+    gpu_frame_set_post(sRecordCounter[displayId] > 0, sBridge[displayId],
+                       displayId);
 
     // Need to invalidate the recording buffers in GpuFrameBridge so on the next
     // recording we only read the new data and not data from the previous
@@ -179,7 +188,7 @@ void* gpu_frame_get_record_frame(uint32_t displayId) {
 void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
                                          void* opaque) {
     sReceiverState->registerCallback(frameAvailable, opaque);
-    //TODO: need sync with grpc for multi display, put default 0 so far
+    // TODO: need sync with grpc for multi display, put default 0 so far
     gpu_frame_set_record_mode(true, 0);
     bool expected = false;
     if (sRequestPost.compare_exchange_strong(expected, true)) {
@@ -196,4 +205,8 @@ void gpu_unregister_shared_memory_callback(void* opaque) {
         android_getVirtioGpuOps()->repost();
         sRequestPost.store(false);
     }
+}
+
+void gpu_initialize_recorders() {
+    sLooper = android::base::ThreadLooper::get();
 }

@@ -398,9 +398,11 @@ public:
     void doPostCallback(void* pixels, uint32_t displayId);
 
     void getPixels(void* pixels, uint32_t bytes, uint32_t displayId);
+    void flushReadPipeline(int displayId);
 
     bool asyncReadbackSupported();
     emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();
+    emugl::Renderer::FlushReadPixelPipeline getFlushReadPixelPipeline();
 
     // Re-post the last ColorBuffer that was displayed through post().
     // This is useful if you detect that the sub-window content needs to
