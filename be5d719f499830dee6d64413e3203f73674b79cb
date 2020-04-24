@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff24d567_aec23885",
+        "filename": "android/android-emu/android/emulation/control/record_screen_agent.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T15:13:27Z",
+      "side": 1,
+      "message": "It seems that nobody seems to care about the displayId, so why does this api change?",
+      "revId": "be5d719f499830dee6d64413e3203f73674b79cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "722e3ca6_35d1beb7",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T15:13:27Z",
+      "side": 1,
+      "message": "Maybe turn mRecFrame and mRecTmpFrame into std::unique_ptrs?",
+      "revId": "be5d719f499830dee6d64413e3203f73674b79cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45050768_90745835",
+        "filename": "android/android-emu/android/recording/screen-recorder.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T15:13:27Z",
+      "side": 1,
+      "message": "Maybe name DisplayState, or rename RecorderState state; to something else?",
+      "revId": "be5d719f499830dee6d64413e3203f73674b79cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
