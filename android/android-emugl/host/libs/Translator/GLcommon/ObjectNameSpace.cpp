@@ -178,13 +178,21 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
                         m_localToGlobalMap.end() );
     }
 
-    auto it = m_localToGlobalMap.emplace(localName,
-                                         NamedObjectPtr(
-                                            new NamedObject(genNameInfo,
-                                                    m_globalNameSpace))).first;
-    unsigned int globalName = it->second->getGlobalName();
-    m_globalToLocalMap[globalName] = localName;
+    auto newObjPtr = NamedObjectPtr( new NamedObject(genNameInfo, m_globalNameSpace));
 
+    auto itr = m_localToGlobalMap.emplace(
+        localName, newObjPtr);
+
+    // It's possible we are orphaning a replaced global object, so
+    // we need to actually replace the object data
+    if (itr.second == false) {
+        m_localToGlobalMap[localName] = newObjPtr;
+    } else {
+        // Typical expected path where emplace succeeds
+    }
+
+    unsigned int globalName = newObjPtr->getGlobalName();
+    m_globalToLocalMap[globalName] = localName;
     return localName;
 }
 
