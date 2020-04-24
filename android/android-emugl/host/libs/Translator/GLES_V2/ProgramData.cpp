@@ -469,7 +469,7 @@ void ProgramData::restore(ObjectLocalName localName,
             GLint hostLoc = dispatcher.glGetUniformLocation(
                     globalName, c_str(getTranslatedName(uniform.first)));
             if (hostLoc != -1) {
-                mGuestLocToHostLoc.emplace(uniform.second, hostLoc);
+                mGuestLocToHostLoc[uniform.second] = hostLoc;
             }
         }
         for (const auto& uniformEntry : uniforms) {
@@ -1092,7 +1092,7 @@ void ProgramData::initGuestUniformLocForKey(StringView key) {
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
         if (hostLoc != -1) {
-            mGuestLocToHostLoc.emplace(mCurrUniformBaseLoc, hostLoc);
+            mGuestLocToHostLoc[mCurrUniformBaseLoc] = hostLoc;
         }
 
         mCurrUniformBaseLoc++;
@@ -1118,7 +1118,7 @@ void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
         if (hostLoc != -1) {
-            mGuestLocToHostLoc.emplace(mCurrUniformBaseLoc, hostLoc);
+            mGuestLocToHostLoc[mCurrUniformBaseLoc] = hostLoc;
         }
 
         mCurrUniformBaseLoc++;
@@ -1141,8 +1141,8 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
                 if (guestLoc == -1) {
                     return -1;
                 } else {
-                    mUniNameToGuestLoc.emplace(uniName, guestLoc);
-                    mGuestLocToHostLoc.emplace(guestLoc, guestLoc);
+                    mUniNameToGuestLoc[uniName] = guestLoc;
+                    mGuestLocToHostLoc[guestLoc] = guestLoc;
                 }
             }
             return guestLoc;
@@ -1164,7 +1164,7 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
                 return -1;
             }
 
-            mGuestLocToHostLoc.emplace(guestLoc, hostLoc);
+            mGuestLocToHostLoc[guestLoc] = hostLoc;
             return guestLoc;
         }
     } else {
