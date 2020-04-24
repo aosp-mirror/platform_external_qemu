@@ -97,6 +97,7 @@ static_assert(sizeof(posix_header) == TARBLOCK,
 class TarWriter : public std::ios {
 public:
     TarWriter(std::string cwd, std::ostream& dest, size_t bufsize=4096);
+    ~TarWriter();
 
     // Add a file entry using the given stream, filename and stats.
     bool addFileEntryFromStream(std::istream& src, std::string fname, struct stat sb);

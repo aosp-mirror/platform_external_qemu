@@ -113,6 +113,9 @@ bool TarWriter::error(std::string msg) {
 }
 
 bool TarWriter::writeTarHeader(std::string name, bool isDir, struct stat sb) {
+    if (eof()) {
+        return error("Refusing to add to closed archive.");
+    }
     posix_header header = {0};
     if (name.size() > sizeof(header.name) - 1)
         return false;
@@ -162,6 +165,12 @@ TarWriter::TarWriter(std::string cwd, std::ostream& dest, size_t bufferSize)
     assert(good());
 }
 
+TarWriter::~TarWriter() {
+    if (!mClosed) {
+        close();
+    }
+}
+
 bool TarWriter::addFileEntryFromStream(std::istream& ifs,
                                        std::string name,
                                        struct stat sb) {
@@ -170,27 +179,24 @@ bool TarWriter::addFileEntryFromStream(std::istream& ifs,
     }
 
     char buf[TARBLOCK];
-    char zero = 0;
     do {
         ifs.read(&buf[0], TARBLOCK);
         mDest.write(&buf[0], ifs.gcount());
         if (mDest.bad()) {
             return error("Failed to write " + name + " to stream");
         }
-
-        // A tar file conists of chunks of 512 bytes, so we need to
-        // add some padding if we didn't write a full block..
-        if (ifs.gcount() != 0 && ifs.gcount() < TARBLOCK) {
-            int64_t left = TARBLOCK - ifs.gcount();
-            for (int64_t i = 0; i < left; i++) {
-                mDest.write(&zero, sizeof(zero));
-                if (mDest.bad()) {
-                    return error("Failed to write padding for " + name +
-                                 " to stream");
-                }
-            }
-        }
     } while (ifs.gcount() > 0);
+
+    size_t bytes_to_write = sb.st_size;
+    int padding = TARBLOCK - (bytes_to_write % TARBLOCK);
+    if (padding != TARBLOCK) {
+        char empty[TARBLOCK] = {0};
+        mDest.write(empty, padding);
+        if (mDest.bad()) {
+            return error("Failed to write " + std::to_string(padding) +
+                         " padding bytes for entry " + name + " to stream");
+        }
+    }
     return true;
 }
 

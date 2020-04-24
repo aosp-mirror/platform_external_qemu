@@ -143,7 +143,7 @@ public:
 
         // Use of  a 64 KB  buffer gives good performance (see performance tests.)
         TarWriter tw(tmpdir, *stream, k64KB);
-        result.set_success(tw.addDirectory(".") && tw.close());
+        result.set_success(tw.addDirectory("."));
         if (tw.fail()) {
             result.set_err(tw.error_msg());
         }
@@ -171,6 +171,11 @@ public:
             }
         }
         LOG(VERBOSE) << "Wrote metadata in " << sw.restartUs() << " us";
+
+        tw.close();
+        if (tw.fail()) {
+            result.set_err(tw.error_msg());
+        }
 
         writer->Write(result);
         return Status::OK;
