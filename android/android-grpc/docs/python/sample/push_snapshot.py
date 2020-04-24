@@ -47,5 +47,5 @@ if not os.path.exists(sys.argv[1]):
 
  # Create a client
 stub = proto.snapshot_service_pb2_grpc.SnapshotServiceStub(channel)
-msg = stub.pushSnapshot(push_snapshot(sys.argv[1]))
+msg = stub.PushSnapshot(push_snapshot(sys.argv[1]))
 print(msg)
