@@ -177,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "06ebaf05_81b0e31a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:53:54Z",
+      "side": 1,
+      "message": "Actually, unique_ptr for readbackThread does not allow copy operation...",
+      "parentUuid": "620f4eb9_e6c4bfe5",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c06adc08_7de27cce",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 4
