@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "953e22c2_b18c9072",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-04-24T19:02:20Z",
+      "side": 0,
+      "message": "FYI: there\u0027s a new https://en.cppreference.com/w/cpp/container/map/insert_or_assign (same for unordered one) method that would do what emplace() was doing but also overwrite the old value. A benefit over the |map[key] \u003d value| is that it tells you if it was insertion or assignment\nneeds C++17 support in the library",
+      "range": {
+        "startLine": 181,
+        "startChar": 33,
+        "endLine": 181,
+        "endChar": 40
+      },
+      "revId": "8c9003c4824bcae1710d9dd8d705297daae2582b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
