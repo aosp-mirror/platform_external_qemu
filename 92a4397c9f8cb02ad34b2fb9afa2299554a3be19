@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "19071a7f_b83942d6",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:41:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "846b777d_91161c4e",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c267028_6dd3f1ca",
         "filename": "android/android-emu/android/recording/video/VideoFrameSharer.cpp",
         "patchSetId": 4
@@ -33,6 +51,24 @@
       "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "04e40589_9453485b",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:41:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c267028_6dd3f1ca",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "cc67c785_15239172",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 700,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:41:52Z",
+      "side": 1,
+      "message": "Thanks, new patch removed the displayId already.",
+      "parentUuid": "3694ae90_28d2bf33",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ca68871_1ee17754",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 4
@@ -67,6 +121,24 @@
       "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3d1e3384_092bc2ed",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:41:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ca68871_1ee17754",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "620f4eb9_e6c4bfe5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:41:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "73eb7537_934bb101",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c06adc08_7de27cce",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 4
@@ -101,6 +191,24 @@
       "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68675717_9985076c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:41:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c06adc08_7de27cce",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "4584e0d6_0608aa26",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2211,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:41:52Z",
+      "side": 1,
+      "message": "Thanks. postImpl function is locked already.",
+      "parentUuid": "390639e7_557972de",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "38574ebc_075b80e2",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 4
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "10c2185c_9fc8d232",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2213,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:41:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "38574ebc_075b80e2",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a83c5c1_1f351e17",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 4
@@ -152,6 +296,24 @@
       "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "963b82e2_5e7c1982",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:41:52Z",
+      "side": 1,
+      "message": "Thanks for the suggestion, this pointer will be copied to other thread for read/write pixels.",
+      "parentUuid": "3a83c5c1_1f351e17",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
