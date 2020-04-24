@@ -3245,9 +3245,10 @@ static int do_screenrecord_start(ControlClient client, char* args) {
             {"bit-rate", required_argument, NULL, 'b'},
             {"time-limit", required_argument, NULL, 't'},
             {"fps", required_argument, NULL, 'f'},
+            {"display", required_argument, NULL, 'd'},
             {NULL, 0, NULL, 0}};
 
-    switch (client->global->record_agent->getRecorderState()) {
+    switch (client->global->record_agent->getRecorderState().state) {
         case RECORDER_STOPPED:
             break;
         default:
@@ -3278,6 +3279,7 @@ static int do_screenrecord_start(ControlClient client, char* args) {
     sarray.push_back(nullptr);
 
     RecordingInfo info = {};
+    info.displayId = 0;
     // Setting optind to 1 does not completely reset the internal state for
     // getopt() on gcc, despite what the documentation says. Setting it to 0
     // does however, and this setting does not cause any issues on mingw and
@@ -3348,6 +3350,10 @@ static int do_screenrecord_start(ControlClient client, char* args) {
                     return -1;
                 }
                 break;
+            case 'd':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                info.displayId = atoi(optarg);
+                break;
             default:
                 D(("getopt_long returned %d\n", ic));
                 control_write(client,
@@ -3384,7 +3390,7 @@ static int do_screenrecord_start(ControlClient client, char* args) {
 }
 
 static int do_screenrecord_stop(ControlClient client, char* args) {
-    switch (client->global->record_agent->getRecorderState()) {
+    switch (client->global->record_agent->getRecorderState().state) {
         case RECORDER_RECORDING:
             break;
         case RECORDER_STOPPED:
@@ -3809,7 +3815,7 @@ do_crash_on_exit( ControlClient  client, char*  args )
 static int
 do_kill( ControlClient  client, char*  args )
 {
-    if (client->global->record_agent->getRecorderState() == RECORDER_RECORDING) {
+    if (client->global->record_agent->getRecorderState().state == RECORDER_RECORDING) {
         D(("Stopping the recording ...\n"));
         client->global->record_agent->stopRecording();
     }

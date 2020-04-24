@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace android {
 
 namespace base {
@@ -60,6 +62,8 @@ public:
     typedef void (*FrameAvailableCallback)(void* opaque);
 
     virtual void setFrameReceiver(FrameAvailableCallback receiver, void* opaque) = 0;
+
+    virtual void setDisplayId(uint32_t displayId) = 0;
 
 protected:
     GpuFrameBridge() {}

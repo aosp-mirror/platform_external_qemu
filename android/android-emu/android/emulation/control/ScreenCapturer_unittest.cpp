@@ -134,7 +134,7 @@ public:
     HardwareStrings getHardwareStrings() {
         return {};
     }
-    void setPostCallback(OnPostCallback onPost, void* context, bool useBgraReadback) {
+    void setPostCallback(OnPostCallback onPost, void* context, bool useBgraReadback, uint32_t displayId) {
         return;
     }
     bool asyncReadbackSupported() {

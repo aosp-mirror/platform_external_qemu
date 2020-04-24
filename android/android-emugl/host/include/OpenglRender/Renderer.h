@@ -80,6 +80,8 @@ public:
     // RGB conversion, or in-place y-inversion.
     //
     // Parameters are:
+    //   displayId      Default is 0. Can also be 1 to 10 if multi display
+    //                  configured.
     //   width, height  Dimensions of the image, in pixels. Rows are tightly
     //                  packed; there is no inter-row padding.
     //   ydir           Indicates row order: 1 means top-to-bottom order, -1
@@ -92,19 +94,23 @@ public:
     // and type are always GL_RGBA and GL_UNSIGNED_BYTE, and the width and
     // height will always be the same as the ones used to create the renderer.
     using OnPostCallback = void (*)(void* context,
+                                    uint32_t displayId,
                                     int width,
                                     int height,
                                     int ydir,
                                     int format,
                                     int type,
                                     unsigned char* pixels);
-    virtual void setPostCallback(OnPostCallback onPost, void* context, bool useBgraReadback) = 0;
+    virtual void setPostCallback(OnPostCallback onPost,
+                                 void* context,
+                                 bool useBgraReadback,
+                                 uint32_t displayId) = 0;
 
     // Async readback API
     virtual bool asyncReadbackSupported() = 0;
 
     // Separate callback to get RGBA Pixels in async readback mode.
-    using ReadPixelsCallback = void (*)(void* pixels, uint32_t bytes);
+    using ReadPixelsCallback = void (*)(void* pixels, uint32_t bytes, uint32_t displayId);
     virtual ReadPixelsCallback getReadPixelsCallback() = 0;
 
     // showOpenGLSubwindow -

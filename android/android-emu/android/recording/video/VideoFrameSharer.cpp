@@ -93,7 +93,8 @@ void VideoFrameSharer::stop() {
 void VideoFrameSharer::frameAvailable() {
     VideoInfo* info = (VideoInfo*)mMemory.get();
     uint8_t* bPixels = (uint8_t*)mMemory.get() + sizeof(mVideo);
-    mReadPixels(bPixels, mPixelBufferSize);
+    // TODO: enable displayId > 0
+    mReadPixels(bPixels, mPixelBufferSize, 0);
 
     // Update frame information.
     info->frameNumber++;

@@ -361,6 +361,7 @@ _mt_fb_update(void* opaque, int x, int y, int w, int h)
 
 void
 multitouch_opengles_fb_update(void* context,
+                              uint32_t displayId,
                               int w, int h, int ydir,
                               int format, int type,
                               unsigned char* pixels)

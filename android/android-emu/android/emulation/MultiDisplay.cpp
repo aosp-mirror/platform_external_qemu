@@ -34,8 +34,11 @@ namespace android {
 
 static MultiDisplay* sMultiDisplay = nullptr;
 
-MultiDisplay::MultiDisplay(const QAndroidEmulatorWindowAgent* const agent, bool isGuestMode)
-    : mWindowAgent(agent),
+MultiDisplay::MultiDisplay(const QAndroidEmulatorWindowAgent* const windowAgent,
+                           const QAndroidRecordScreenAgent* const recordAgent,
+                           bool isGuestMode)
+    : mWindowAgent(windowAgent),
+      mRecordAgent(recordAgent),
       mGuestMode(isGuestMode) {
     SkinRect monitor;
     skin_winsys_get_monitor_rect(&monitor);
@@ -48,13 +51,13 @@ MultiDisplay* MultiDisplay::getInstance() {
 }
 
 int MultiDisplay::setMultiDisplay(uint32_t id,
-                                   int32_t x,
-                                   int32_t y,
-                                   uint32_t w,
-                                   uint32_t h,
-                                   uint32_t dpi,
-                                   uint32_t flag,
-                                   bool add) {
+                                  int32_t x,
+                                  int32_t y,
+                                  uint32_t w,
+                                  uint32_t h,
+                                  uint32_t dpi,
+                                  uint32_t flag,
+                                  bool add) {
     int ret = 0;
     SkinRotation rotation = SKIN_ROTATION_0;
     LOG(VERBOSE) << "setMultiDisplay id " << id << " "
@@ -255,8 +258,14 @@ bool MultiDisplay::translateCoordination(uint32_t* x, uint32_t* y, uint32_t* dis
     return false;
 }
 
-void MultiDisplay::setGpuMode(bool isGuestMode) {
+void MultiDisplay::setGpuMode(bool isGuestMode, uint32_t w, uint32_t h) {
     mGuestMode = isGuestMode;
+    if (isGuestMode) {
+        // Guest mode will not start renderer, which in turn will not set the
+        // default display from FrameBuffer. So we set display 0 here.
+        AutoLock lock(mLock);
+        mMultiDisplay.emplace(0, MultiDisplayInfo(0, 0, w, h, 0, 0, true, 0));
+    }
 }
 
 int MultiDisplay::createDisplay(uint32_t* displayId) {
@@ -327,6 +336,11 @@ int MultiDisplay::destroyDisplay(uint32_t displayId) {
     }
 
     if (needUIUpdate) {
+        // stop recording of this display if it is happening.
+        RecorderStates states = mRecordAgent->getRecorderState();
+        if (states.displayId == displayId && states.state == RECORDER_RECORDING) {
+            mRecordAgent->stopRecording();
+        }
         mWindowAgent->setUIDisplayRegion(0, 0, width, height);
         if (restoreSkin) {
             mWindowAgent->restoreSkin();
@@ -343,6 +357,7 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
                                 uint32_t h,
                                 uint32_t dpi) {
     bool UIUpdate = false;
+    bool checkRecording = false;
     uint32_t width, height;
     if (mGuestMode) {
         return -1;
@@ -352,6 +367,10 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
         if (mMultiDisplay.find(displayId) == mMultiDisplay.end()) {
             LOG(ERROR) << "cannot find display " << displayId;
             return -1;
+        }
+        if (mMultiDisplay[displayId].cb != 0 &&
+            (mMultiDisplay[displayId].width != w || mMultiDisplay[displayId].height != h)) {
+                checkRecording = true;
         }
         mMultiDisplay[displayId].width = w;
         mMultiDisplay[displayId].height = h;
@@ -364,6 +383,13 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
             }
             getCombinedDisplaySizeLocked(&width, &height);
             UIUpdate = true;
+        }
+    }
+    if (checkRecording) {
+        // stop recording of this display if it is happening.
+        RecorderStates states = mRecordAgent->getRecorderState();
+        if (states.displayId == displayId && states.state == RECORDER_RECORDING) {
+            mRecordAgent->stopRecording();
         }
     }
     if (UIUpdate) {
@@ -778,9 +804,10 @@ void MultiDisplay::onLoad(base::Stream* stream) {
 
 }   // namespace android
 
-void android_init_multi_display(const QAndroidEmulatorWindowAgent* const agent,
+void android_init_multi_display(const QAndroidEmulatorWindowAgent* const windowAgent,
+                                const QAndroidRecordScreenAgent* const recordAgent,
                                 bool isGuestMode) {
-    android::sMultiDisplay = new android::MultiDisplay(agent, isGuestMode);
+    android::sMultiDisplay = new android::MultiDisplay(windowAgent, recordAgent, isGuestMode);
 }
 
 extern "C" {

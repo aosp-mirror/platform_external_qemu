@@ -88,8 +88,6 @@ private:
 
 FrameBuffer* FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
-// Inline with MultiDisplay::s_invalidIdMultiDisplay
-const uint32_t FrameBuffer::s_invalidIdMultiDisplay = 0xFFFFFFAB;
 
 static const GLint gles2ContextAttribsESOrGLCompat[] =
    { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
@@ -263,8 +261,6 @@ void FrameBuffer::finalize() {
         }
         m_eglDisplay = EGL_NO_DISPLAY;
     }
-
-    m_readbackThread.enqueue({ReadbackCmd::Exit});
 }
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
@@ -667,9 +663,6 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_colorBufferHelper(new ColorBufferHelper(this)),
       m_refCountPipeEnabled(emugl::emugl_feature_is_enabled(
               android::featurecontrol::RefCountPipe)),
-      m_readbackThread([this](FrameBuffer::Readback&& readback) {
-          return sendReadbackWorkerCmd(readback);
-      }),
       m_postThread([this](FrameBuffer::Post&& post) {
           return postWorkerFunc(post);
       }) {
@@ -691,17 +684,14 @@ FrameBuffer::~FrameBuffer() {
     delete m_textureDraw;
     delete m_configs;
     delete m_colorBufferHelper;
-    free(m_fbImage);
 
     if (s_theFrameBuffer) {
         s_theFrameBuffer = nullptr;
     }
     sInitialized.store(false, std::memory_order_relaxed);
 
-    m_readbackThread.join();
     m_postThread.join();
 
-    m_readbackWorker.reset();
     m_postWorker.reset();
 }
 
@@ -709,13 +699,12 @@ WorkerProcessingResult
 FrameBuffer::sendReadbackWorkerCmd(const Readback& readback) {
     switch (readback.cmd) {
     case ReadbackCmd::Init:
-        m_readbackWorker->initGL();
+        readback.readbackWorker->initGL();
         return WorkerProcessingResult::Continue;
     case ReadbackCmd::GetPixels:
-        m_readbackWorker->getPixels(readback.pixelsOut, readback.bytes);
+        readback.readbackWorker->getPixels(readback.pixelsOut, readback.bytes);
         return WorkerProcessingResult::Continue;
     case ReadbackCmd::Exit:
-        m_readbackWorker.reset();
         return WorkerProcessingResult::Stop;
     }
     return WorkerProcessingResult::Stop;
@@ -778,26 +767,31 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
 void FrameBuffer::setPostCallback(
         emugl::Renderer::OnPostCallback onPost,
         void* onPostContext,
+        uint32_t displayId,
         bool useBgraReadback) {
-    AutoLock mutex(m_lock);
-    m_onPost = onPost;
-    m_onPostContext = onPostContext;
-
-    if (m_onPost) {
-        m_postCallbackReadBgra = useBgraReadback;
-    } else {
-        m_postCallbackReadBgra = false;
-    }
-
-    if (m_onPost && !m_fbImage) {
-        m_fbImage = (unsigned char*)malloc(4 * m_framebufferWidth *
-                m_framebufferHeight);
-        if (!m_fbImage) {
-            ERR("out of memory, cancelling OnPost callback");
-            m_onPost = NULL;
-            m_onPostContext = NULL;
+    AutoLock lock(m_lock);
+    if (onPost) {
+        uint32_t w, h;
+        if (!emugl::get_emugl_multi_display_operations().getMultiDisplay(displayId,
+                                                                         nullptr,
+                                                                         nullptr,
+                                                                         &w, &h,
+                                                                         nullptr,
+                                                                         nullptr,
+                                                                         nullptr)) {
+            ERR("display %d not exist, cancelling OnPost callback", displayId);
             return;
         }
+        m_onPost[displayId].cb = onPost;
+        m_onPost[displayId].context = onPostContext;
+        m_onPost[displayId].displayId = displayId;
+        m_onPost[displayId].width = w;
+        m_onPost[displayId].height = h;
+        m_onPost[displayId].img = new unsigned char[4 * w * h];
+        m_onPost[displayId].readBgra = useBgraReadback;
+    } else {
+        m_onPost[displayId].finish();
+        m_onPost.erase(displayId);
     }
 }
 
@@ -2203,22 +2197,48 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
     //
     // Send framebuffer (without FPS overlay) to callback
     //
-    if (m_onPost) {
-        if (m_asyncReadbackSupported) {
-            auto cb = (*c).second.cb;
-            if (!m_readbackWorker) {
-                if (!m_readbackThread.isStarted()) {
-                    m_readbackWorker.reset(new ReadbackWorker(cb->getWidth(), cb->getHeight()));
-                    m_readbackThread.start();
-                    m_readbackThread.enqueue({ReadbackCmd::Init});
-                    m_readbackThread.waitQueuedItems();
-                }
-            }
-
-            m_readbackWorker->doNextReadback(cb.get(), m_fbImage, repaint, m_postCallbackReadBgra);
+    if (m_onPost.size() == 0) {
+        goto EXIT;
+    }
+    for (auto& iter : m_onPost) {
+        ColorBufferPtr cb;
+        if (iter.first == 0) {
+            cb = c->second.cb;
         } else {
-            (*c).second.cb->readback(m_fbImage, m_postCallbackReadBgra);
-            doPostCallback(m_fbImage);
+            uint32_t colorBuffer;
+            if (getDisplayColorBuffer(iter.first, &colorBuffer) < 0) {
+                ERR("Failed to get color buffer for display %d, skip onPost", iter.first);
+                continue;
+            }
+            cb = findColorBuffer(colorBuffer);
+            if (!cb) {
+                ERR("Failed to find colorbuffer %d, skip onPost", colorBuffer);
+                continue;
+            }
+        }
+
+        if (m_asyncReadbackSupported) {
+            if (!iter.second.readbackWorker) {
+                iter.second.readbackWorker.reset(new ReadbackWorker(cb->getWidth(),
+                                                                    cb->getHeight(),
+                                                                    iter.first));
+            }
+            if (!iter.second.readbackThread) {
+                iter.second.readbackThread.reset(new android::base::WorkerThread<Readback>
+                    ([this](Readback&& readback) {
+                        return sendReadbackWorkerCmd(readback);
+                    }));
+            }
+            if (!iter.second.readbackThread->isStarted()) {
+                iter.second.readbackThread->start();
+                iter.second.readbackThread->enqueue({ReadbackCmd::Init, iter.second.readbackWorker});
+                iter.second.readbackThread->waitQueuedItems();
+            }
+            iter.second.readbackWorker->doNextReadback(cb.get(), iter.second.img,
+                repaint, iter.second.readBgra);
+        } else {
+            cb->readback(iter.second.img, iter.second.readBgra);
+            doPostCallback(iter.second.img, iter.first);
         }
     }
 
@@ -2229,19 +2249,36 @@ EXIT:
     return ret;
 }
 
-void FrameBuffer::doPostCallback(void* pixels) {
-    m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1, GL_RGBA, GL_UNSIGNED_BYTE,
-             (unsigned char*)pixels);
+void FrameBuffer::doPostCallback(void* pixels, uint32_t displayId) {
+    const auto& iter = m_onPost.find(displayId);
+    if (iter == m_onPost.end()) {
+        ERR("Cannot find post callback function for display %d", displayId);
+        return;
+    }
+    iter->second.cb(iter->second.context, displayId, iter->second.width,
+                    iter->second.height, -1, GL_RGBA, GL_UNSIGNED_BYTE,
+                    (unsigned char*)pixels);
 }
 
-void FrameBuffer::getPixels(void* pixels, uint32_t bytes) {
-    m_readbackThread.enqueue({ ReadbackCmd::GetPixels, 0, pixels, bytes });
-    m_readbackThread.waitQueuedItems();
+void FrameBuffer::getPixels(void* pixels, uint32_t bytes, uint32_t displayId) {
+    const auto& iter = m_onPost.find(displayId);
+    if (iter == m_onPost.end()) {
+        ERR("Cannot find onPost pixels for display %d", displayId);
+        return;
+    }
+    if (!iter->second.readbackThread || !iter->second.readbackThread->isStarted()) {
+        ERR("readback thread not started for display %d", displayId);
+        return;
+    }
+    iter->second.readbackThread->enqueue({ ReadbackCmd::GetPixels,
+                                           iter->second.readbackWorker,
+                                           0, pixels, bytes });
+    iter->second.readbackThread->waitQueuedItems();
 }
 
 static void sFrameBuffer_ReadPixelsCallback(
-    void* pixels, uint32_t bytes) {
-    FrameBuffer::getFB()->getPixels(pixels, bytes);
+    void* pixels, uint32_t bytes, uint32_t displayId) {
+    FrameBuffer::getFB()->getPixels(pixels, bytes, displayId);
 }
 
 bool FrameBuffer::asyncReadbackSupported() {

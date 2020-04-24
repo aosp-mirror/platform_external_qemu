@@ -79,7 +79,10 @@ public:
     // Specify a function that will be called everytime a new frame is
     // displayed. This is relatively slow but allows one to capture the
     // output.
-    void setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext, bool useBgraReadback = false);
+    void setPostCallback(emugl::Renderer::OnPostCallback onPost,
+                         void* onPostContext,
+                         uint32_t displayId,
+                         bool useBgraReadback = false);
 
     bool asyncReadbackSupported();
     emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();

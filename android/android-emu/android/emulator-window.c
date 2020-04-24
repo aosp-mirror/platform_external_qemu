@@ -24,7 +24,6 @@
 #include "android/emulation/control/window_agent.h"      // for EmulatorWindow
 #include "android/framebuffer.h"                         // for QFrameBuffer
 #include "android/globals.h"                             // for android_hw
-#include "android/gpu_frame.h"                           // for gpu_frame_se...
 #include "android/hw-control.h"                          // for android_hw_c...
 #include "android/hw-sensors.h"                          // for android_sens...
 #include "android/network/globals.h"                     // for android_net_...
@@ -181,7 +180,7 @@ bool emulator_window_stop_recording_async(void) {
     return screen_recorder_stop(true);
 }
 
-RecorderState emulator_window_recorder_state_get(void) {
+RecorderStates emulator_window_recorder_state_get(void) {
     return screen_recorder_state_get();
 }
 

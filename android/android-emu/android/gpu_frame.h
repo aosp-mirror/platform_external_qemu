@@ -23,12 +23,12 @@ ANDROID_BEGIN_HEADER
 // will not work. Turning record mode on will initialize the gpu frame state for
 // recording, and turning off will detach and deallocate resources that were
 // being used, if any.
-void gpu_frame_set_record_mode(bool on);
+void gpu_frame_set_record_mode(bool on, uint32_t displayId = 0);
 
 // Use in recording mode only. Make sure to turn on recording mode first with
 // gpu_frame_set_record_mode() before using this. May return NULL if no data is
 // available.
-void* gpu_frame_get_record_frame();
+void* gpu_frame_get_record_frame(uint32_t displayId = 0);
 
 typedef void (*FrameAvailableCallback)(void* opaque);
 

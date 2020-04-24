@@ -55,8 +55,9 @@ public:
     VideoProducer(uint32_t fbWidth,
                   uint32_t fbHeight,
                   uint8_t fps,
+                  uint32_t displayId,
                   const QAndroidDisplayAgent* dpyAgent)
-        : mFbWidth(fbWidth), mFbHeight(fbHeight), mFps(fps) {
+        : mFbWidth(fbWidth), mFbHeight(fbHeight), mFps(fps), mDisplayId(displayId) {
         mTimeDeltaMs = 1000 / mFps;
         // Is |dpyAgent| was supplied, then assume we are in guest mode.
         if (dpyAgent) {
@@ -86,7 +87,7 @@ public:
         mIsStopped = false;
         if (!mIsGuestMode) {
             // Force a repost
-            gpu_frame_set_record_mode(true);
+            gpu_frame_set_record_mode(true, mDisplayId);
             android_redrawOpenglesWindow();
         }
 
@@ -120,13 +121,14 @@ public:
     }
 
     virtual void stop() override {
-        if (!mIsGuestMode) {
-            gpu_frame_set_record_mode(false);
-        }
         mIsStopped = true;
         mDataQueue.stop();
         mFreeQueue.stop();
         waitForPoke();
+        // disable Gpu record when sendFramesWorker() thread exits.
+        if (!mIsGuestMode) {
+            gpu_frame_set_record_mode(false, mDisplayId);
+        }
     }
 
 private:
@@ -152,7 +154,7 @@ private:
             frame->tsUs = android::base::System::get()->getHighResTimeUs();
             bool gotFrame = false;
             if (!mIsGuestMode) {
-                auto px = (unsigned char*)gpu_frame_get_record_frame();
+                auto px = (unsigned char*)gpu_frame_get_record_frame(mDisplayId);
                 if (px) {
                     frame->dataVec.assign(px, px + frame->dataVec.size());
                     gotFrame = true;
@@ -207,6 +209,7 @@ private:
     uint32_t mFbWidth = 0;
     uint32_t mFbHeight = 0;
     uint32_t mTimeDeltaMs = 0;
+    uint32_t mDisplayId = 0;
     uint8_t mFps = 0;
     uint8_t mTimeLimitSecs = 0;
     bool mIsGuestMode = false;
@@ -237,9 +240,10 @@ std::unique_ptr<Producer> createVideoProducer(
         uint32_t fbWidth,
         uint32_t fbHeight,
         uint8_t fps,
+        uint32_t displayId,
         const QAndroidDisplayAgent* dpyAgent) {
     return std::unique_ptr<Producer>(
-            new VideoProducer(fbWidth, fbHeight, fps, dpyAgent));
+            new VideoProducer(fbWidth, fbHeight, fps, displayId, dpyAgent));
 }
 
 }  // namespace recording

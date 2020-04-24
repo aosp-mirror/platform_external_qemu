@@ -103,7 +103,8 @@ public:
         if (mRecFrameUpdated.exchange(false)) {
             AutoLock lock(mRecLock);
             mReadPixelsFunc(mRecFrame->pixels,
-                            mRecFrame->width * mRecFrame->height * 4);
+                            mRecFrame->width * mRecFrame->height * 4,
+                            mDisplayId);
             mRecFrame->isValid = true;
         }
         return mRecFrame && mRecFrame->isValid ? mRecFrame->pixels : nullptr;
@@ -112,8 +113,15 @@ public:
     virtual void invalidateRecordingBuffers() override {
         {
             AutoLock lock(mRecLock);
+            // Release the buffers because new recording in the furturemay have different
+            // resolution if multi display changes its resolution.
             if (mRecFrame) {
-                mRecFrame->isValid = false;
+                delete mRecFrame;
+                mRecFrame = nullptr;
+            }
+            if (mRecTmpFrame) {
+                delete mRecTmpFrame;
+                mRecTmpFrame = nullptr;
             }
         }
         mRecFrameUpdated.store(false, std::memory_order_release);
@@ -143,6 +151,10 @@ public:
         }
     }
 
+    virtual void setDisplayId(uint32_t displayId) override {
+        mDisplayId = displayId;
+    }
+
 private:
     FrameAvailableCallback mReceiver = nullptr;
     void* mReceiverOpaque = nullptr;
@@ -151,6 +163,7 @@ private:
     Frame* mRecTmpFrame;
     std::atomic_bool mRecFrameUpdated;
     ReadPixelsFunc mReadPixelsFunc = 0;
+    uint32_t mDisplayId = 0;
 };
 
 }  // namespace

@@ -868,7 +868,7 @@ static int startEmulatorWithMinConfig(
                             WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
         }
     }
-    android_init_multi_display(gQAndroidEmulatorWindowAgent);
+    android_init_multi_display(gQAndroidEmulatorWindowAgent, gQAndroidRecordScreenAgent);
 
     RendererConfig rendererConfig;
     configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
@@ -876,13 +876,14 @@ static int startEmulatorWithMinConfig(
                            gQAndroidMultiDisplayAgent,
                            uiPreferredGlesBackend, &rendererConfig);
 
-    // Gpu configuration is set, now initialize the screen recorder
+    // Gpu configuration is set, now initialize the multi display, screen recorder
     // and screenshot callback
     bool isGuestMode =
             (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
+    gQAndroidMultiDisplayAgent->setGpuMode(isGuestMode, hw->hw_lcd_width, hw->hw_lcd_height);
     screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
-                         isGuestMode ? uiEmuAgent.display : nullptr);
-    gQAndroidMultiDisplayAgent->setGpuMode(isGuestMode);
+                         isGuestMode ? uiEmuAgent.display : nullptr,
+                         gQAndroidMultiDisplayAgent);
     android_registerScreenshotFunc([](const char* dirname, uint32_t display) ->bool {
         return android::emulation::captureScreenshot(dirname, nullptr, display);
     });
@@ -1803,7 +1804,7 @@ extern "C" int main(int argc, char** argv) {
     gQAndroidLocationAgent->gpsSetPassiveUpdate(!opts->no_passive_gps);
 
     android_foldable_initialize(nullptr);
-    android_init_multi_display(gQAndroidEmulatorWindowAgent);
+    android_init_multi_display(gQAndroidEmulatorWindowAgent, gQAndroidRecordScreenAgent);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
@@ -1922,14 +1923,14 @@ extern "C" int main(int argc, char** argv) {
                                gQAndroidMultiDisplayAgent,
                                uiPreferredGlesBackend, &rendererConfig);
 
-        // Gpu configuration is set, now initialize the screen recorder
+        // Gpu configuration is set, now initialize the multi display, screen recorder
         // and screenshot callback
         bool isGuestMode =
             (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
-        gQAndroidMultiDisplayAgent->setGpuMode(isGuestMode);
-
+        gQAndroidMultiDisplayAgent->setGpuMode(isGuestMode, hw->hw_lcd_width, hw->hw_lcd_height);
         screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
-                             isGuestMode ? uiEmuAgent.display : nullptr);
+                             isGuestMode ? uiEmuAgent.display : nullptr,
+                             gQAndroidMultiDisplayAgent);
         android_registerScreenshotFunc([](const char* dirname, uint32_t display) -> bool {
             return android::emulation::captureScreenshot(dirname, nullptr, display);
         });

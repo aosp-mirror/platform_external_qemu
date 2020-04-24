@@ -75,6 +75,7 @@ struct Globals {
     std::unique_ptr<VideoFrameSharer> webrtc_module;
     std::string sharedMemoryHandle;
     const QAndroidDisplayAgent* displayAgent = nullptr;
+    const QAndroidMultiDisplayAgent* multiDisplayAgent = nullptr;
     uint32_t fbWidth = 0;
     uint32_t fbHeight = 0;
     QFrameBuffer dummyQf = {};
@@ -94,7 +95,7 @@ public:
     bool startRecording(bool async);
     bool stopRecording(bool async);
 
-    RecorderState getRecorderState() const;
+    RecorderStates getRecorderState() const;
 
 private:
     bool startRecordingWorker();
@@ -152,9 +153,9 @@ ScreenRecorder::ScreenRecorder(uint32_t fbWidth,
     // string because info->fileName is pointing to data that we don't own.
     D("RecordingInfo "
       "{\n\tfileName=[%s],\n\twidth=[%u],\n\theight=[%u],\n\tvideoBitrate=[%u],"
-      "\n\ttimeLimit=[%u],\n\tcb=[%p],\n\topaque=[%p]\n}\n",
+      "\n\ttimeLimit=[%u],\n\tdisplay=[%u],\n\tcb=[%p],\n\topaque=[%p]\n}\n",
       info->fileName, info->width, info->height, info->videoBitrate,
-      info->timeLimit, info->cb, info->opaque);
+      info->timeLimit, info->displayId, info->cb, info->opaque);
     mFilename = info->fileName;
     mInfo.fileName = mFilename.c_str();
 }
@@ -207,7 +208,7 @@ bool ScreenRecorder::startRecordingWorker() {
 
     // Add the video track
     auto videoProducer = android::recording::createVideoProducer(
-            mFbWidth, mFbHeight, mInfo.fps, mAgent);
+            mFbWidth, mFbHeight, mInfo.fps, mInfo.displayId, mAgent);
     // Fill in the codec params for the audio and video
     CodecParams videoParams;
     videoParams.width = mInfo.width;
@@ -281,7 +282,6 @@ bool ScreenRecorder::stopRecordingWorker() {
         mFinished = true;
         mCond.signalAndUnlock(&lock);
     }
-
     bool has_frames = ffmpegRecorder->stop();
     ffmpegRecorder.reset();
 
@@ -326,21 +326,22 @@ bool ScreenRecorder::parseRecordingInfo(RecordingInfo& info) {
     return true;
 }
 
-RecorderState ScreenRecorder::getRecorderState() const {
-    return mRecorderState;
+RecorderStates ScreenRecorder::getRecorderState() const {
+    RecorderStates ret = {mRecorderState, mInfo.displayId};
+    return ret;
 }
 }  // namespace
 
 // C compatibility functions
-RecorderState screen_recorder_state_get(void) {
+RecorderStates screen_recorder_state_get(void) {
     auto& globals = *sGlobals;
+    RecorderStates ret = {RECORDER_STOPPED, 0};
 
     AutoLock lock(globals.lock);
     if (globals.recorder) {
-        return globals.recorder->getRecorderState();
-    } else {
-        return RECORDER_STOPPED;
+        ret = globals.recorder->getRecorderState();
     }
+    return ret;
 }
 
 static void screen_recorder_record_session(const char* cmdLineArgs) {
@@ -383,17 +384,20 @@ static void screen_recorder_record_session(const char* cmdLineArgs) {
         // Make the quality and fps low, so we don't have so much cpu usage.
         info.fps = 3;
         info.videoBitrate = 500000;
+        info.displayId = 0;
         screen_recorder_start(&info, true);
     }, tokens[0], delay, duration)).detach();
 }
 void screen_recorder_init(uint32_t w,
                           uint32_t h,
-                          const QAndroidDisplayAgent* dpy_agent) {
+                          const QAndroidDisplayAgent* dpy_agent,
+                          const QAndroidMultiDisplayAgent* mdpy_agent) {
     assert(w > 0 && h > 0);
     auto& globals = *sGlobals;
     globals.fbWidth = w;
     globals.fbHeight = h;
     globals.displayAgent = dpy_agent;
+    globals.multiDisplayAgent = mdpy_agent;
 
     if (dpy_agent) {
         if (emulator_window_get()->opts->no_window) {
@@ -419,8 +423,21 @@ bool screen_recorder_start(const RecordingInfo* info, bool async) {
 
     AutoLock lock(globals.lock);
 
-    globals.recorder.reset(new ScreenRecorder(globals.fbWidth, globals.fbHeight,
-                                              info, globals.displayAgent));
+    // Check if the display is created. For guest mode, display 0 return true.
+    uint32_t w, h, cb = 0;
+    if (globals.multiDisplayAgent->getMultiDisplay(info->displayId, nullptr, nullptr,
+                                                   &w, &h, nullptr,
+                                                   nullptr, nullptr) == false) {
+        return false;
+    }
+    if (info->displayId != 0) {
+        globals.multiDisplayAgent->getDisplayColorBuffer(info->displayId, &cb);
+        if (cb == 0) {
+            return false;
+        }
+    }
+
+    globals.recorder.reset(new ScreenRecorder(w, h, info, globals.displayAgent));
     return globals.recorder->startRecording(async);
 }
 
@@ -430,9 +447,10 @@ bool screen_recorder_stop(bool async) {
     AutoLock lock(globals.lock);
 
     if (globals.recorder) {
-        return globals.recorder->stopRecording(async);
+        globals.recorder->stopRecording(async);
+        globals.recorder.reset();
+        return true;
     }
-
     return false;
 }
 

@@ -17,7 +17,7 @@ struct RenderThreadInfo;
 // and a separate GL thread, with two main points of interaction:
 class ReadbackWorker {
 public:
-    ReadbackWorker(uint32_t width, uint32_t height);
+    ReadbackWorker(uint32_t width, uint32_t height, uint32_t displayId);
     ~ReadbackWorker();
 
     // GL initialization (must be on the thread that
@@ -58,6 +58,7 @@ private:
     uint32_t mBufferSize = 0;
     std::vector<GLuint> mBuffers = {};
     uint32_t m_readbackCount = 0;
+    uint32_t mDisplayId = 0;
 
     DISALLOW_COPY_AND_ASSIGN(ReadbackWorker);
 };
