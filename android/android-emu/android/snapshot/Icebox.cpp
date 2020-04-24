@@ -613,7 +613,7 @@ bool track(int pid, const std::string snapshot_name) {
                         D("ready to take snapshot");
                         gQAndroidVmOperations->vmStop();
                         const AndroidSnapshotStatus result =
-                                androidSnapshot_save("test_failure_snapshot");
+                                androidSnapshot_save(snapshot_name.c_str());
                         D("Snapshot done, result %d (expect %d)", result,
                                 SNAPSHOT_STATUS_OK);
                         gQAndroidVmOperations->vmStart();
