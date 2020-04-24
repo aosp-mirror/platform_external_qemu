@@ -22,6 +22,30 @@
       "revId": "8c9003c4824bcae1710d9dd8d705297daae2582b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8080613e_a44cf259",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-24T19:32:14Z",
+      "side": 0,
+      "message": "Thanks! Looks like we can switch to C++17 soon for this (and other) features",
+      "parentUuid": "953e22c2_b18c9072",
+      "range": {
+        "startLine": 181,
+        "startChar": 33,
+        "endLine": 181,
+        "endChar": 40
+      },
+      "revId": "8c9003c4824bcae1710d9dd8d705297daae2582b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
