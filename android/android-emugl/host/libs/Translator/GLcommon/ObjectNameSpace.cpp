@@ -179,7 +179,8 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
     }
 
     auto newObjPtr = NamedObjectPtr( new NamedObject(genNameInfo, m_globalNameSpace));
-    m_localToGlobalMap[localName] = newObjPtr;
+    m_localToGlobalMap.insert_or_assign(
+        localName, newObjPtr);
 
     unsigned int globalName = newObjPtr->getGlobalName();
     m_globalToLocalMap[globalName] = localName;
