@@ -130,7 +130,8 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
 # So we are using some C++14 features
-set(CMAKE_CXX_STANDARD 14)
+# try 17?
+set(CMAKE_CXX_STANDARD 17)
 
 # Gather compile time statistics
 if(OPTION_TIME_INFO)
