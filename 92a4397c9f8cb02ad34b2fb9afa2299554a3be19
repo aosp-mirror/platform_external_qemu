@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "846b777d_91161c4e",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T13:57:19Z",
+      "side": 1,
+      "message": "I filed b/154905108, to track this.",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c267028_6dd3f1ca",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T13:57:19Z",
+      "side": 1,
+      "message": "Cool! Just filed b/154905108 to track this.",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3694ae90_28d2bf33",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 700,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T13:57:19Z",
+      "side": 1,
+      "message": "There is a hash table insert in setPostCallback, no lock needed?",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ca68871_1ee17754",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T13:57:19Z",
+      "side": 1,
+      "message": "Nit: inconsistent formatting.",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "73eb7537_934bb101",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T13:57:19Z",
+      "side": 1,
+      "message": "nit: m_omnPost[displayId] \u003d { .cb\u003donPost, .displayId\u003d, .. .. .. } avoids a series of hashtable lookups (note, you will have to use a std::unique_ptr for pixels in that case as you will need a copy constructor.)",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c06adc08_7de27cce",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T13:57:19Z",
+      "side": 1,
+      "message": "Nit: whitespace",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "390639e7_557972de",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2211,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T13:57:19Z",
+      "side": 1,
+      "message": "No lock needed?",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "38574ebc_075b80e2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2213,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T13:57:19Z",
+      "side": 1,
+      "message": "Nit: c-\u003esecond",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a83c5c1_1f351e17",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-24T13:57:19Z",
+      "side": 1,
+      "message": "std::unique_ptr/std::vector?",
+      "revId": "92a4397c9f8cb02ad34b2fb9afa2299554a3be19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
