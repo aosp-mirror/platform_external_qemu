@@ -382,6 +382,14 @@ gen_wrapper_toolchain () {
         gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR" "$CLANG_BINDIR"
     done
 
+    if [ ! -f "${DST_DIR}/c++" ]; then
+        case "$CURRENT_HOST" in
+            linux-aarch64*)
+                ln -sf ${DST_DIR}/g++ ${DST_DIR}/c++
+                ;;
+        esac
+    fi
+
     for PROG in $PROGRAMS; do
         gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
     done
