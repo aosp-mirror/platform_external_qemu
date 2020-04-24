@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "90e47991_7e63c96a",
+        "filename": "android/android-emu/android/emulation/control/record_screen_agent.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:49:07Z",
+      "side": 1,
+      "message": "The newly added MultiDisplay control needs the displayId in the states.",
+      "parentUuid": "ff24d567_aec23885",
+      "revId": "be5d719f499830dee6d64413e3203f73674b79cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "722e3ca6_35d1beb7",
         "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "b9d92f2f_69944f56",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:49:07Z",
+      "side": 1,
+      "message": "Thanks, will do later in the ongoing polish CL. Trying to minimal impact/changes to existing structure.",
+      "parentUuid": "722e3ca6_35d1beb7",
+      "revId": "be5d719f499830dee6d64413e3203f73674b79cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "45050768_90745835",
         "filename": "android/android-emu/android/recording/screen-recorder.h",
         "patchSetId": 6
@@ -50,6 +86,24 @@
       "revId": "be5d719f499830dee6d64413e3203f73674b79cb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3965d984_ce204340",
+        "filename": "android/android-emu/android/recording/screen-recorder.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-04-24T16:49:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "45050768_90745835",
+      "revId": "be5d719f499830dee6d64413e3203f73674b79cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
