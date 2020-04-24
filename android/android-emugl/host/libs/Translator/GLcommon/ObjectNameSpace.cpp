@@ -247,7 +247,7 @@ NameSpace::setGlobalObject(ObjectLocalName p_localName,
     } else {
         m_localToGlobalMap.emplace(p_localName, p_namedObject);
     }
-    m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
+    m_globalToLocalMap[p_namedObject->getGlobalName()] = p_localName;
 }
 
 void
@@ -258,7 +258,7 @@ NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
         (*n).second = p_namedObject;
-        m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
+        m_globalToLocalMap[p_namedObject->getGlobalName()] = p_localName;
     }
 }
 
@@ -283,7 +283,7 @@ const ObjectDataPtr& NameSpace::getObjectDataPtr(
 
 void NameSpace::setObjectData(ObjectLocalName p_localName,
         ObjectDataPtr data) {
-    m_objectDataMap.emplace(p_localName, std::move(data));
+    m_objectDataMap[p_localName] = std::move(data);
 }
 
 void GlobalNameSpace::preSaveAddEglImage(EglImage* eglImage) {
