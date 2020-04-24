@@ -163,8 +163,8 @@ message IceboxTarget {
   // what you will find in your AndroidManifest.xml
   string package_name = 2;
 
-  // [Output Only] The name of the snapshot that icebox will create if a
-  // snapshot is generated.
+  // The name of the snapshot that icebox will create if a snapshot is
+  // generated.
   string snapshot_id = 3;
 
   // [Output Only] True if icebox failed to track the given target.
