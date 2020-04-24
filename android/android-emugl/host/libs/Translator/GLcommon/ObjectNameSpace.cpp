@@ -178,13 +178,11 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
                         m_localToGlobalMap.end() );
     }
 
-    auto it = m_localToGlobalMap.emplace(localName,
-                                         NamedObjectPtr(
-                                            new NamedObject(genNameInfo,
-                                                    m_globalNameSpace))).first;
-    unsigned int globalName = it->second->getGlobalName();
-    m_globalToLocalMap[globalName] = localName;
+    auto newObjPtr = NamedObjectPtr( new NamedObject(genNameInfo, m_globalNameSpace));
+    m_localToGlobalMap[localName] = newObjPtr;
 
+    unsigned int globalName = newObjPtr->getGlobalName();
+    m_globalToLocalMap[globalName] = localName;
     return localName;
 }
 
