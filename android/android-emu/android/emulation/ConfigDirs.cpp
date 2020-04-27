@@ -14,11 +14,13 @@
 
 #include "android/emulation/ConfigDirs.h"
 
-#include <assert.h>     // for assert
-
-#include <vector>  // for vector
+#include <assert.h>                        // for assert
+#include <errno.h>                         // for errno
+#include <string.h>                        // for strerror
+#include <vector>                          // for vector
 
 #include "android/base/Log.h"              // for LogStream, LOG, LogMessage
+#include "android/base/Optional.h"         // for Optional
 #include "android/base/files/PathUtils.h"  // for PathUtils, pj
 #include "android/base/system/System.h"    // for System
 #include "android/utils/path.h"            // for path_mkdir_if_needed
@@ -207,25 +209,39 @@ bool ConfigDirs::isValidAvdRoot(android::base::StringView avdPath) {
     return true;
 }
 
-typedef struct discovery_dir {
-    const char* root_env;
-    const char* subdir;
-} discovery_dir;
-
+// Preference orderings for the various systems.
 #if defined(_WIN32)
-discovery_dir discovery{"LOCALAPPDATA", "Temp"};
+std::vector<std::string> discovery_pref = {"${LOCALAPPDATA}/Temp",
+                                           "${USERPROFILE}/.android"};
 #elif defined(__linux__)
-discovery_dir discovery{"XDG_RUNTIME_DIR", ""};
+std::vector<std::string> discovery_pref = {
+        "${XDG_RUNTIME_DIR}", "/run/user/${UID}", "${HOME}/.android"};
 #elif defined(__APPLE__)
-discovery_dir discovery{"HOME", "Library/Caches/TemporaryItems"};
+std::vector<std::string> discovery_pref = {
+        "${HOME}/Library/Caches/TemnporaryItems", "${HOME}/.android"};
 #else
 #error This platform is not supported.
 #endif
 
 std::string ConfigDirs::getDiscoveryDirectory() {
-    auto root = System::get()->getEnvironmentVariable(discovery.root_env);
-    auto desired_directory = pj(root, discovery.subdir, "avd", "running");
-    auto path = PathUtils::decompose(desired_directory);
+    std::string desired_directory;
+    for (auto pref : discovery_pref) {
+        auto discovery = PathUtils::pathWithEnvSubstituted(pref);
+        if (discovery && System::get()->pathExists(*discovery)) {
+            desired_directory = discovery;
+            break;
+        }
+    }
+
+    // Reverting to the temporary directory.
+    if (desired_directory.empty()) {
+        LOG(WARNING)
+                << "No avd running directory, reverting to temp directory..";
+        desired_directory = System::get()->getTempDir();
+    }
+
+    auto running_dir = pj(desired_directory, "avd", "running");
+    auto path = PathUtils::decompose(running_dir);
     PathUtils::simplifyComponents(&path);
     auto recomposed = PathUtils::recompose(path);
     if (!System::get()->pathExists(recomposed)) {
@@ -234,7 +250,7 @@ std::string ConfigDirs::getDiscoveryDirectory() {
                        << errno << ": " << strerror(errno);
         }
     }
-    return desired_directory;
+    return recomposed;
 }
 
 }  // namespace android
