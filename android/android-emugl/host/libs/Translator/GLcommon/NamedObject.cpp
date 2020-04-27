@@ -80,8 +80,18 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
                 GLEScontext::dispatcher().glGenVertexArrays(1, &m_globalName);
                 break;
             case NamedObjectType::TRANSFORM_FEEDBACK:
-                GLEScontext::dispatcher().glGenTransformFeedbacks(
-                        1, &m_globalName);
+                if (!GLEScontext::dispatcher().glGenTransformFeedbacks) {
+                    fprintf(stderr,
+                        "%s: Warning: Your GPU driver does not support "
+                        "glGenTransformFeedbacks "
+                        "(commonly seen in Parallels Display Adater). "
+                        "Skipping generation of transform feedback object.\n",
+                        __func__);
+                    m_globalName = 0;
+                } else {
+                    GLEScontext::dispatcher().glGenTransformFeedbacks(
+                            1, &m_globalName);
+                }
                 break;
             default:
                 m_globalName = 0;
