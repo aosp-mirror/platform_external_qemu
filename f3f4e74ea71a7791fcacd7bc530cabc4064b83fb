@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7078a08_a5f45d91",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/NamedObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-04-27T19:44:40Z",
+      "side": 1,
+      "message": "Can we provide default implementations to these functions to avoid ifs?",
+      "range": {
+        "startLine": 92,
+        "startChar": 46,
+        "endLine": 92,
+        "endChar": 69
+      },
+      "revId": "f3f4e74ea71a7791fcacd7bc530cabc4064b83fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
