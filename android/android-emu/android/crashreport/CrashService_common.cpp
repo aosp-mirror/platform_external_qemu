@@ -476,6 +476,7 @@ static const char* const gfx_drivers_lcase[] = {
     "atidxx", // "TMM Com Clone Control Module" (???)
     "atimpenc", // video encoder
     "atigl", // another ATI OpenGL driver
+    "amdvlk", // AMD Vulkan
 
     // Intel
     "i915", // Intel i915 gpu
@@ -490,6 +491,26 @@ static const char* const gfx_drivers_lcase[] = {
     "opengl32.dll", // Low-level Windows OpenGL
 };
 
+// List of gfx driver hooks that are known to crash
+static const char* const gfx_hooks_lcase[] = {
+    "bdcamvk", // Bandicam Vulkan hook
+    "fpsmonvk", // FPS monitor hook
+};
+
+// Suggestions for each gfx driver hook, by index in |gfx_hooks_lcase|
+static const char* const gfx_hooks_suggestions[] = {
+    // Bandicam
+    "It appears Bandicam Vulkan hooks are installed on your system, "
+    "which can be causing the crash. Try uninstalling Bandicam / removing the hooks.",
+    // FPS monitor
+    "It appears FPS Monitor Vulkan hooks are installed, "
+    "which can be causing the crash. "
+    "Try running without the monitor or uninstalling FPS Monitor. ",
+};
+
+static_assert(sizeof(gfx_hooks_lcase) == sizeof(gfx_hooks_suggestions),
+              "Each crashy graphics hook must come with a suggestion");
+
 static bool containsGfxPattern(const std::string& str) {
     for (const char* pattern : gfx_drivers_lcase) {
         if (str.find(pattern) != std::string::npos) {
@@ -498,6 +519,27 @@ static bool containsGfxPattern(const std::string& str) {
     }
 
     return false;
+}
+
+static bool containsGfxHookPattern(const std::string& str) {
+    for (const char* pattern : gfx_hooks_lcase) {
+        if (str.find(pattern) != std::string::npos) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static int getGfxHookIndex(const std::string& str) {
+    const int defaultRes = -1;
+    int i = 0;
+    for (const char* pattern : gfx_hooks_lcase) {
+        if (str.find(pattern) != std::string::npos) {
+            return i;
+        }
+        ++i;
+    }
+    return defaultRes;
 }
 
 UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
@@ -534,6 +576,15 @@ UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
             // Should the user update their graphics drivers?
             if (containsGfxPattern(file)) {
                 suggestions.insert(Suggestion::UpdateGfxDrivers);
+            }
+
+            // Should the user disable a graphics hook?
+            if (containsGfxHookPattern(file)) {
+                int gfxHookIndex = getGfxHookIndex(file);
+                if (gfxHookIndex != -1) {
+                    stringSuggestions.insert(
+                            gfx_hooks_suggestions[gfxHookIndex]);
+                }
                 break;
             }
         }

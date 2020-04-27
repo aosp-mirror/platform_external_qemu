@@ -41,6 +41,8 @@ enum class Suggestion {
 class UserSuggestions {
 public:
     std::set<Suggestion> suggestions;
+    // Not std::string in order to avoid allocations in crash state
+    std::set<const char*> stringSuggestions;
 
     UserSuggestions(google_breakpad::ProcessState* process_state);
 };
