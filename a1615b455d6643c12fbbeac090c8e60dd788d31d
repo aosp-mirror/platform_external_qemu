@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "be35b650_209d8924",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-27T16:50:35Z",
+      "side": 1,
+      "message": "This change is not needed since the problem is limited to Linux.",
+      "range": {
+        "startLine": 215,
+        "startChar": 43,
+        "endLine": 215,
+        "endChar": 68
+      },
+      "revId": "a1615b455d6643c12fbbeac090c8e60dd788d31d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3d5b144b_7592f962",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-27T16:50:35Z",
+      "side": 1,
+      "message": "TemnporaryItems -\u003e TemporaryItems",
+      "range": {
+        "startLine": 221,
+        "startChar": 32,
+        "endLine": 221,
+        "endChar": 47
+      },
+      "revId": "a1615b455d6643c12fbbeac090c8e60dd788d31d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c888eae2_89d8c775",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-27T16:50:35Z",
+      "side": 1,
+      "message": "\"${HOME}/.android\" is not needed since the problem is limited to Linux.",
+      "range": {
+        "startLine": 221,
+        "startChar": 50,
+        "endLine": 221,
+        "endChar": 67
+      },
+      "revId": "a1615b455d6643c12fbbeac090c8e60dd788d31d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be4ac0c3_0a59f899",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-27T16:50:35Z",
+      "side": 1,
+      "message": "The directory doesn\u0027t necessarily have to exist in order to be used. For example, on Mac ${HOME}/Library/Caches/TemporaryItems should be used event if it doesn\u0027t exist.",
+      "range": {
+        "startLine": 230,
+        "startChar": 40,
+        "endLine": 230,
+        "endChar": 50
+      },
+      "revId": "a1615b455d6643c12fbbeac090c8e60dd788d31d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
