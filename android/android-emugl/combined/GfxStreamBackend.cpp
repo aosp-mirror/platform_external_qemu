@@ -314,12 +314,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::HostComposition, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanIgnoredHandles, true);
-
-    // bug: 153580313
-    // Enable after host coherent is available in guest kernel
-    // and host VMM
     android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::VirtioGpuNext, false);
+            android::featurecontrol::VirtioGpuNext, true);
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
