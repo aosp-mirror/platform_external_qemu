@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "20202b53_4b0f8979",
+        "filename": "android/android-emu/android/crashreport/CrashService_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-04-27T19:47:54Z",
+      "side": 1,
+      "message": "I believe this one allocates. Why do we care?",
+      "range": {
+        "startLine": 585,
+        "startChar": 38,
+        "endLine": 585,
+        "endChar": 44
+      },
+      "revId": "c3a7e9fb7260bd15f1edf20fbaab106652ed4622",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
