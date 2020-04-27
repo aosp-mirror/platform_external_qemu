@@ -2844,7 +2844,9 @@ bool EmulatorQtWindow::getMultiDisplay(uint32_t id,
                                        uint32_t* flag,
                                        bool* enabled) {
     const auto uiAgent = mToolWindow->getUiEmuAgent();
-    return uiAgent->multiDisplay->getMultiDisplay(id, x, y, w, h, dpi, flag, enabled);
+    return (uiAgent != nullptr &&
+            uiAgent->multiDisplay != nullptr &&
+            uiAgent->multiDisplay->getMultiDisplay(id, x, y, w, h, dpi, flag, enabled));
 }
 
 int EmulatorQtWindow::switchMultiDisplay(bool enabled,
@@ -2856,7 +2858,9 @@ int EmulatorQtWindow::switchMultiDisplay(bool enabled,
                                           uint32_t dpi,
                                           uint32_t flag) {
     const auto uiAgent = mToolWindow->getUiEmuAgent();
-    return uiAgent->multiDisplay->setMultiDisplay(id, x, y, width, height, dpi, flag, enabled);
+    return (uiAgent != nullptr &&
+            uiAgent->multiDisplay != nullptr &&
+            uiAgent->multiDisplay->setMultiDisplay(id, x, y, width, height, dpi, flag, enabled));
 }
 
 bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
