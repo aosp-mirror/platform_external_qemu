@@ -14,11 +14,14 @@
 
 #include "android/emulation/ConfigDirs.h"
 
-#include <assert.h>     // for assert
+#include <assert.h>  // for assert
+#include <errno.h>   // for errno
+#include <string.h>  // for strerror
 
 #include <vector>  // for vector
 
 #include "android/base/Log.h"              // for LogStream, LOG, LogMessage
+#include "android/base/Optional.h"         // for Optional
 #include "android/base/files/PathUtils.h"  // for PathUtils, pj
 #include "android/base/system/System.h"    // for System
 #include "android/utils/path.h"            // for path_mkdir_if_needed
@@ -216,6 +219,20 @@ typedef struct discovery_dir {
 discovery_dir discovery{"LOCALAPPDATA", "Temp"};
 #elif defined(__linux__)
 discovery_dir discovery{"XDG_RUNTIME_DIR", ""};
+std::vector<std::string> discovery_pref = {"/run/user/${UID}",
+                                           "${HOME}/.android"};
+static std::string getLinuxRoot() {
+    std::string desired_directory;
+    for (auto pref : discovery_pref) {
+        auto discovery = PathUtils::pathWithEnvSubstituted(pref);
+        if (discovery && System::get()->pathExists(*discovery)) {
+            return discovery;
+        }
+    }
+    // Reverting to the temporary directory.
+    LOG(WARNING) << "No default discovery directory, reverting to temp directory..";
+    return System::get()->getTempDir();
+}
 #elif defined(__APPLE__)
 discovery_dir discovery{"HOME", "Library/Caches/TemporaryItems"};
 #else
@@ -224,6 +241,13 @@ discovery_dir discovery{"HOME", "Library/Caches/TemporaryItems"};
 
 std::string ConfigDirs::getDiscoveryDirectory() {
     auto root = System::get()->getEnvironmentVariable(discovery.root_env);
+
+#ifdef __linux__
+    if (root.empty()) {
+        root = getLinuxRoot();
+    }
+#endif
+
     auto desired_directory = pj(root, discovery.subdir, "avd", "running");
     auto path = PathUtils::decompose(desired_directory);
     PathUtils::simplifyComponents(&path);
@@ -234,7 +258,7 @@ std::string ConfigDirs::getDiscoveryDirectory() {
                        << errno << ": " << strerror(errno);
         }
     }
-    return desired_directory;
+    return recomposed;
 }
 
 }  // namespace android

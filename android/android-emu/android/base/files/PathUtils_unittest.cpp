@@ -11,7 +11,10 @@
 
 #include "android/base/files/PathUtils.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>                      // for Message, Test, TestPart...
+
+#include "android/base/system/System.h"       // for System, System::kProgra...
+#include "android/base/testing/TestSystem.h"  // for TestSystem
 
 #define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
 
@@ -19,6 +22,8 @@
 
 namespace android {
 namespace base {
+
+using android::base::Optional;
 
 static const int kHostTypeCount = PathUtils::kHostTypeCount;
 
@@ -509,6 +514,21 @@ TEST(PathUtils, extension) {
                     PathUtils::extension(kData[n].input).data());
         }
     }
+}
+
+TEST(PathUtils, substitute_envs) {
+    android::base::TestSystem test("/", System::kProgramBitness);
+    test.envSet("foo", "bar");
+    test.envSet("bar", "foo");
+    EXPECT_EQ("bar", System::get()->envGet("foo"));
+    EXPECT_EQ(kNullopt,  PathUtils::pathWithEnvSubstituted(pj("a", "${NopeUnknown}", "b")));
+    EXPECT_EQ(kNullopt,  PathUtils::pathWithEnvSubstituted(pj("a", "${foo}", "${NopeUnknown}")));
+    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "bar", "c"}), PathUtils::pathWithEnvSubstituted(pj("a", "${foo}", "c")));
+    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "bar", "c", "foo"}), PathUtils::pathWithEnvSubstituted(pj("a", "${foo}", "c", "${bar}")));
+    EXPECT_EQ(PathUtils::recompose<std::string>({"a", "b", "c"}), PathUtils::pathWithEnvSubstituted(pj("a", "b", "c")));
+
+    // Make sure we properly observe win32 decomposition on /
+    EXPECT_EQ(PathUtils::decompose("a/b/c", kHostWin32), PathUtils::decompose("a/b/c", kHostPosix));
 }
 
 TEST(PathUtils, relativeTo) {

@@ -73,8 +73,19 @@ struct ConfigDirs {
     // used by android studio to detect running emulator. This directory
     // will be created if it does not exist, with 0700 permissions.
     //
-    // The user-specific_tmp_directory is $XDG_RUNTIME_DIR on Linux,
-    // ~/Library/Caches/TemporaryItems on Mac and %LOCALAPPDATA%/Temp on Windows.
+    // The user-specific_tmp_directory is based on the first directory that
+    // exists in the following preference order:
+    //
+    // Linux:
+    //   - $XDG_RUNTIME_DIR or
+    //   - /run/user/$UID or
+    //   - $HOME/.android
+    // MacOs:
+    //   - ~/Library/Caches/TemporaryItems
+    //   - $HOME/.android
+    // Windows:
+    //   - %LOCALAPPDATA%/Temp
+    //   - %USERPROFILE%/.android
     static std::string getDiscoveryDirectory();
 
 private:
