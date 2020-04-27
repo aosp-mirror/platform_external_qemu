@@ -15,6 +15,12 @@
 #include <stdio.h>
 #include "android/emulation/control/multi_display_agent.h"
 
+static int32_t sDisplayX = 0;
+static int32_t sDisplayY = 0;
+static int32_t sDisplayW = 0;
+static int32_t sDisplayH = 0;
+static int32_t sDisplayDpi = 0;
+
 static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
         .setMultiDisplay = [](uint32_t id,
                               int32_t x,
@@ -24,7 +30,8 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                               uint32_t dpi,
                               uint32_t flag,
                               bool add) -> int{
-            printf("setMultiDisplay (mock)\n");
+            printf("setMultiDisplay (mock). id %u x y w h %d %d %u %u dpi %u flag %u add? %d\n",
+                   id, x, y, w, h, dpi, flag, add);
             return 0;
         },
         .getMultiDisplay = [](uint32_t id,
@@ -35,8 +42,13 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                              uint32_t* dpi,
                              uint32_t* flag,
                              bool* enable) -> bool{
-            printf("getMultiDisplay (mock)\n");
-            return false;
+            printf("getMultiDisplay (mock) id %u\n", id);
+            if (x) *x = sDisplayX;
+            if (y) *y = sDisplayY;
+            if (w) *w = sDisplayW;
+            if (h) *h = sDisplayH;
+            if (dpi) *dpi = sDisplayDpi;
+            return id == 0;
         },
         .getNextMultiDisplay = [](int32_t start_id,
                                 uint32_t* id,
@@ -77,6 +89,7 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
         },
         .createDisplay = [](uint32_t* displayId) -> int {
             printf("createDisplay (mock)\n");
+            *displayId = 0;
             return 0;
         },
         .destroyDisplay = [](uint32_t displayId) -> int {
@@ -89,7 +102,12 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                             uint32_t w,
                             uint32_t h,
                             uint32_t dpi) -> int {
-            printf("setDisplayPose (mock)\n");
+            printf("setDisplayPose (mock): x y w h %d %d %u %u dpi %u\n", x, y, w, h, dpi);
+            sDisplayX = x;
+            sDisplayY = y;
+            sDisplayW = w;
+            sDisplayH = h;
+            sDisplayDpi = dpi;
             return 0;
         },
         .getDisplayPose = [](uint32_t displayId,
