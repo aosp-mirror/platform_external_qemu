@@ -46,6 +46,30 @@
       "revId": "f3f4e74ea71a7791fcacd7bc530cabc4064b83fb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b005d139_7e11b993",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/NamedObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-04-27T19:51:58Z",
+      "side": 1,
+      "message": "Default implementations could only say \"%s is not implemented\".",
+      "parentUuid": "6db3c865_400da26d",
+      "range": {
+        "startLine": 92,
+        "startChar": 46,
+        "endLine": 92,
+        "endChar": 69
+      },
+      "revId": "f3f4e74ea71a7791fcacd7bc530cabc4064b83fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
