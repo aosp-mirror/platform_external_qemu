@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6aed512_88bf0480",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-27T17:32:44Z",
+      "side": 1,
+      "message": "Extra period.",
+      "range": {
+        "startLine": 233,
+        "startChar": 81,
+        "endLine": 233,
+        "endChar": 82
+      },
+      "revId": "01208d01893e099decece68cb5c4e981d72ff501",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "471ab633_b66716d8",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-04-27T17:32:44Z",
+      "side": 1,
+      "message": "When falling back to /tmp we should probably use runtime-${USER} subdirectory. At least KDE programs seem to behave this way when XDG_RUNTIME_DIR is not set.",
+      "range": {
+        "startLine": 234,
+        "startChar": 26,
+        "endLine": 234,
+        "endChar": 36
+      },
+      "revId": "01208d01893e099decece68cb5c4e981d72ff501",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
