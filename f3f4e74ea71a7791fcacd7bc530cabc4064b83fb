@@ -22,6 +22,30 @@
       "revId": "f3f4e74ea71a7791fcacd7bc530cabc4064b83fb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6db3c865_400da26d",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/NamedObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-27T19:49:26Z",
+      "side": 1,
+      "message": "Transform feedbacks are highly coupled to the vertex rendering engine, so in order to emulate, it would require a significant amount of functionality pulled out of the gpu and onto the cpu. Probably not worth it.",
+      "parentUuid": "d7078a08_a5f45d91",
+      "range": {
+        "startLine": 92,
+        "startChar": 46,
+        "endLine": 92,
+        "endChar": 69
+      },
+      "revId": "f3f4e74ea71a7791fcacd7bc530cabc4064b83fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
