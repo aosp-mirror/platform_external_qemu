@@ -375,7 +375,9 @@ public:
             return Status::OK;
         }
 
-        std::string snapshotName = "icebox-" + std::to_string(pid);
+        std::string snapshotName = request->snapshot_id() == ""
+                                           ? "icebox-" + std::to_string(pid)
+                                           : request->snapshot_id();
         icebox::track_async(pid, snapshotName);
 
         reply->set_pid(pid);
