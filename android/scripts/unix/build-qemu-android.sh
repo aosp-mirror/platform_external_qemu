@@ -263,10 +263,14 @@ build_qemu_android () {
 
         AUDIO_BACKENDS_FLAG=
         case $1 in
-            linux-*)
+            linux-x86*)
                 # Use PulseAudio on Linux because the default backend,
                 # OSS, does not work
                 AUDIO_BACKENDS_FLAG="--audio-drv-list=pa"
+                ;;
+            linux-aarch64)
+                # TODO(bohu) cross build pa for aarch64
+                AUDIO_BACKENDS_FLAG=""
                 ;;
             windows*)
                 # Prefer winaudio on Windows over dsound.
@@ -290,6 +294,10 @@ build_qemu_android () {
         case $1 in
             windows*)
                 # Libusb support on windows is not what we would like it to be
+                LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
+                ;;
+            linux-aarch64)
+                # TODO(bohu): cross build libusb for aarch64
                 LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
                 ;;
             *)
@@ -337,8 +345,11 @@ EOF
           darwin*)
             GCC=g++
             ;;
-          linux*)
+          linux-x86*)
             GCC=gcc
+            ;;
+          linux-aarch64)
+            GCC=g++
             ;;
           windows*)
             GCC=g++
@@ -509,7 +520,13 @@ EOF
             "$BINARY_DIR"/$QEMU_TARGET-softmmu/config-target.h
 
         if [ -z "$OPT_DEBUG" ]; then
-            run ${GNU_CONFIG_HOST_PREFIX}strip "$BINARY_DIR"/$QEMU_EXE
+            case $1 in
+                linux-aarch64*)
+                ;;
+                *)
+                run ${GNU_CONFIG_HOST_PREFIX}strip "$BINARY_DIR"/$QEMU_EXE
+                ;;
+            esac
         fi
     done
 
