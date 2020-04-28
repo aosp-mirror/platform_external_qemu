@@ -106,7 +106,7 @@ protected:
 
     void TearDown() override {
         teardownVulkan();
-        teardownGralloc();
+        // teardownGralloc();
     }
 
     void setupGralloc() {
@@ -1543,6 +1543,20 @@ TEST_P(VulkanHalTest, ImmutableSamplersSuppressVkWriteDescriptorSetSampler) {
     vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
     vk->vkDestroyDescriptorSetLayout(mDevice, setLayout, nullptr);
     vk->vkDestroySampler(mDevice, sampler, nullptr);
+}
+
+// Tests VK_ANDROID_external_memory_android_hardware_buffer's allocation API.
+// Export allocate host visible memory.
+TEST_P(VulkanHalTest, AndroidHardwareBufferAllocate_ExportHostVisible) {
+    if (!mDeviceHasExternalMemorySupport) return;
+
+    VkDeviceMemory memory;
+    AHardwareBuffer* ahw;
+    exportAllocateAndroidHardwareBuffer(
+        nullptr, 4096, mHostVisibleMemoryTypeIndex,
+        &memory, &ahw);
+
+    vk->vkFreeMemory(mDevice, memory, nullptr);
 }
 
 INSTANTIATE_TEST_SUITE_P(
