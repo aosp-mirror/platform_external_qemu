@@ -4849,6 +4849,9 @@ private:
         }
 
         for (uint32_t i = 0; i < devicesToDestroy.size(); ++i) {
+            // https://bugs.chromium.org/p/chromium/issues/detail?id=1074600
+            // it's important to idle the device before destroying it!
+            devicesToDestroyDispatches[i]->vkDeviceWaitIdle(devicesToDestroy[i]);
             auto it = mMapInfo.begin();
             while (it != mMapInfo.end()) {
                 if (it->second.device == devicesToDestroy[i]) {
