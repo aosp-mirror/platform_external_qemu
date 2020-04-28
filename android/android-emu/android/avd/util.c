@@ -247,7 +247,7 @@ bool propertyFile_findProductName(const FileData* data,
                                   const char* productNames[],
                                   int count,
                                   bool prefix) {
-    const char* props[] = {"ro.product.name", "ro.product.system.name"};
+    const char* props[] = {"ro.product.name", "ro.product.system.name", "ro.build.flavor"};
     char *prop = propertyFile_getAnyValue((const char*)data->data, data->size,
                                           props, ARRAY_SIZE(props));
 
