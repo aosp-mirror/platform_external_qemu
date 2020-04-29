@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "64bb3ee6_135a4a5c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-29T21:00:35Z",
+      "side": 1,
+      "message": "this will slow things down by quite a bit for screenrecord; the gpu will need to pause for a long time to get the mapped contents. try testing again with screenrecord at a 60 fps limit, and scroll through Chrome",
+      "revId": "c5b453d0722a1cbdca3747f982c12f12fef5d1e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
