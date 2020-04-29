@@ -435,7 +435,6 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer
             return -1;
         }
         if (mMultiDisplay[displayId].cb == colorBuffer) {
-            LOG(WARNING) << "duplicated binding";
             return 0;
         }
         if (mMultiDisplay[displayId].cb == 0) {
