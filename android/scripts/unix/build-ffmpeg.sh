@@ -97,6 +97,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             --disable-xlib \
             --extra-ldflags=\"-L$PREBUILTS_DIR/common/x264/$SYSTEM/lib\" \
             --enable-pic \
+            --enable-cross-compile --arch=aarch64 --target-os=linux \
             --extra-ldflags=\"-L$PREBUILTS_DIR/common/libvpx/$SYSTEM/lib\ \
             "
             ;;

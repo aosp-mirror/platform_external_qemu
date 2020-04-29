@@ -76,10 +76,16 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
           linux-x86_64)
                 MY_FLAGS=" --enable-pic \
                     --extra-cflags=-fPIC \
+                    --disable-asm \
+                "
+                ;;
+          linux-aarch64)
+                MY_FLAGS=" --enable-pic \
+                    --extra-cflags=-fPIC \
                 "
                 ;;
           windows_msvc-x86_64)
-                MY_FLAGS="--host=x86_64-pc-mingw64 --extra-cflags=-ffast-math"
+                MY_FLAGS="--host=x86_64-pc-mingw64 --extra-cflags=-ffast-math --disable-asm"
                 warn "X264 encoder is disabled until b/150910477 is fixed."
                 export CC=cl
                 export RC=rc /FO x264res.o f || true
@@ -89,6 +95,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 # Use host compiler.
                 MY_FLAGS=" --enable-pic \
                     --extra-cflags=-fPIC \
+                    --disable-asm \
                 "
                 ;;
           *)
@@ -98,7 +105,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         builder_build_autotools_package x264 \
                 $MY_FLAGS \
-                --disable-asm \
                 --disable-cli  \
                 --enable-static
 
