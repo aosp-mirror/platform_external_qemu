@@ -16,6 +16,24 @@
       "revId": "3fffa6806c2f00b74e816bbf075f01fa1da012e2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "367feac7_149cab23",
+        "filename": "android/scripts/unix/build-x264.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-04-29T22:30:26Z",
+      "side": 1,
+      "message": "it still builds if enable asm, but not tested; not sure why it was disabled",
+      "parentUuid": "1d6cae7d_7ac85ef0",
+      "revId": "3fffa6806c2f00b74e816bbf075f01fa1da012e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
