@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1d6cae7d_7ac85ef0",
+        "filename": "android/scripts/unix/build-x264.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-29T22:21:59Z",
+      "side": 1,
+      "message": "can we still use asm for the x86_64 cases?",
+      "revId": "3fffa6806c2f00b74e816bbf075f01fa1da012e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
