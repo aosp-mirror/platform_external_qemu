@@ -67,7 +67,16 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         builder_unpack_package_source libxml2
 
+        case $SYSTEM in
+          linux-aarch64)
+                # TODO(bohu) build lzma for aarch64. but I am not sure it is
+                # used by emulator though
+                MY_FLAGS="--without-lzma"
+                ;;
+        esac
+
         builder_build_autotools_package libxml2 \
+                $MY_FLAGS \
                 --disable-shared \
                 --without-debug \
                 --without-docbook \
