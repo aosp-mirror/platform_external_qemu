@@ -16,6 +16,23 @@
       "revId": "c5b453d0722a1cbdca3747f982c12f12fef5d1e7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "abe7a349_317511bb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-29T21:00:56Z",
+      "side": 1,
+      "message": "This may result in a crash or other error because the readback worker won\u0027t have its context made current again in its own thread.",
+      "revId": "c5b453d0722a1cbdca3747f982c12f12fef5d1e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
