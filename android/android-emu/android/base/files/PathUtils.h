@@ -11,11 +11,13 @@
 
 #pragma once
 
-#include "android/base/Optional.h"
-#include "android/base/StringView.h"
+#include <stddef.h>                   // for size_t
+#include <string>                     // for string, basic_string
+#include <utility>                    // for move, forward
+#include <vector>                     // for vector
 
-#include <string>
-#include <vector>
+#include "android/base/Optional.h"    // for Optional
+#include "android/base/StringView.h"  // for StringView
 
 #ifdef __APPLE__
 
@@ -275,6 +277,16 @@ public:
 
     static Optional<std::string> pathWithoutDirs(StringView name);
     static Optional<std::string> pathToDir(StringView name);
+
+    // Replaces the entries ${xx} with the value of the environment variable
+    // xx if it exists. Returns kNullopt if the environment variable is
+    // not set or empty.
+    static Optional<std::string> pathWithEnvSubstituted(StringView path);
+
+    // Replaces the entries ${xx} with the value of the environment variable
+    // xx if it exists. Returns kNullopt if the environment variable is
+    // not set or empty.
+    static Optional<std::string> pathWithEnvSubstituted(std::vector<StringView> decomposedPath);
 };
 
 // Useful shortcuts to avoid too much typing.

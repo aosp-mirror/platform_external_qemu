@@ -14,11 +14,14 @@
 
 #include "android/emulation/ConfigDirs.h"
 
-#include <assert.h>     // for assert
+#include <assert.h>  // for assert
+#include <errno.h>   // for errno
+#include <string.h>  // for strerror
 
 #include <vector>  // for vector
 
 #include "android/base/Log.h"              // for LogStream, LOG, LogMessage
+#include "android/base/Optional.h"         // for Optional
 #include "android/base/files/PathUtils.h"  // for PathUtils, pj
 #include "android/base/system/System.h"    // for System
 #include "android/utils/path.h"            // for path_mkdir_if_needed
@@ -222,9 +225,29 @@ discovery_dir discovery{"HOME", "Library/Caches/TemporaryItems"};
 #error This platform is not supported.
 #endif
 
+static std::string getAlternativeRoot() {
+#ifdef __linux__
+    auto discovery = PathUtils::pathWithEnvSubstituted("/run/user/${UID}");
+    if (discovery && System::get()->pathExists(*discovery)) {
+        return *discovery;
+    }
+#endif
+
+    // Reverting to the standard emulator user directories
+    return ConfigDirs::getUserDirectory();
+}
+
 std::string ConfigDirs::getDiscoveryDirectory() {
     auto root = System::get()->getEnvironmentVariable(discovery.root_env);
-    auto desired_directory = pj(root, discovery.subdir, "avd", "running");
+    if (root.empty()) {
+        // Reverting to the alternative root if these environment variables do
+        // not exist.
+        root = getAlternativeRoot();
+    } else {
+        root = pj(root, discovery.subdir);
+    }
+
+    auto desired_directory = pj(root, "avd", "running");
     auto path = PathUtils::decompose(desired_directory);
     PathUtils::simplifyComponents(&path);
     auto recomposed = PathUtils::recompose(path);
@@ -234,7 +257,7 @@ std::string ConfigDirs::getDiscoveryDirectory() {
                        << errno << ": " << strerror(errno);
         }
     }
-    return desired_directory;
+    return recomposed;
 }
 
 }  // namespace android
