@@ -288,12 +288,14 @@ int qemu_setup_grpc() {
     if (grpcService)
         return grpcService->port();
 
+    auto contentPath = avdInfo_getContentPath(android_avdInfo);
+
     EmulatorProperties props{
             {"port.serial", std::to_string(android_serial_number_port)},
             {"port.adb", std::to_string(android_adb_port)},
             {"avd.name", avdInfo_getName(android_avdInfo)},
             {"avd.id", avdInfo_getId(android_avdInfo)},
-            {"avd.dir", avdInfo_getContentPath(android_avdInfo)},
+            {"avd.dir", contentPath ? contentPath : ""},
             {"cmdline", android_cmdLine}};
 
     int grpc_start = android_serial_number_port + 3000;
