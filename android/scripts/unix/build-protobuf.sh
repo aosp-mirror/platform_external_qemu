@@ -98,7 +98,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         fi
 
         case $SYSTEM in
-            linux*)
+            linux-x86*)
                 # Passing in $ORIGIN does not work due to multiple variable
                 # rewrites, instead we will fix the rpath later, of now
                 # we make sure we have enough space for the overwrite
@@ -107,7 +107,16 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             *) ;;
         esac
 
+        case $SYSTEM in
+            # when cross build, use the linux-x86_64 protoc to build tests
+            linux-aarch64)
+                MYFLAGS="--with-protoc=$INSTALL_DIR/linux-x86_64/bin/protoc"
+                ;;
+            *) ;;
+        esac
+
         builder_build_autotools_package protobuf \
+                $MYFLAGS \
                 --disable-shared \
                 --without-zlib \
                 --with-pic \
@@ -117,7 +126,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 "$INSTALL_DIR/$SYSTEM"
 
         case $SYSTEM in
-            linux*)
+            linux-x86*)
                 # We need to fixup the rpath to make sure we can find libc++.so
                 cp "$(aosp_clang_libcplusplus)" "$INSTALL_DIR/$SYSTEM/lib"
                 chrpath  -r \$ORIGIN/../lib  "$INSTALL_DIR/$SYSTEM/bin/protoc"
