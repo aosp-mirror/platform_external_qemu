@@ -77,7 +77,9 @@ add_subdirectory(mksdcard)
 add_subdirectory(breakpad)
 
 add_subdirectory(boringssl)
-add_subdirectory(hostapd)
+if (NOT OPTION_GFXSTREAM_BACKEND)
+  add_subdirectory(hostapd)
+endif()
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
 
