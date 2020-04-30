@@ -69,6 +69,24 @@
       "revId": "c5b453d0722a1cbdca3747f982c12f12fef5d1e7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd82f3dd_f69a3ba5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-04-30T18:12:05Z",
+      "side": 1,
+      "message": "You can create a separate shared contenxt by repeating the process that created mContext, since mContext itself uses the global shared context as its shared context, which means the same info will make it to the new shared context",
+      "parentUuid": "9cb51a53_05629c25",
+      "revId": "c5b453d0722a1cbdca3747f982c12f12fef5d1e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
