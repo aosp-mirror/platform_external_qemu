@@ -42,7 +42,7 @@
 #define GFXSTREAM_DEBUG_LEVEL 1
 
 #if GFXSTREAM_DEBUG_LEVEL >= 1
-#define GFXS_LOG(fmt,...) printf("%s:%d" fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#define GFXS_LOG(fmt,...) printf("%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
 #else
 #define GFXS_LOG(fmt,...)
 #endif
@@ -275,6 +275,10 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     System::setEnvironmentVariable("ANDROID_EMU_SANDBOX", "1");
     System::setEnvironmentVariable("ANDROID_EMUGL_FIXED_BACKEND_LIST", "1");
+    bool enableVk =
+        System::getEnvironmentVariable("ANDROID_EMU_DISABLE_VULKAN") != "1";
+
+    GFXS_LOG("Vulkan enabled? %d", enableVk);
 
     // Need to manually set the GLES backend paths in gfxstream environment
     // because the library search paths are not automatically set to include
@@ -305,7 +309,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLDirectMem, false);
     android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::Vulkan, true);
+            android::featurecontrol::Vulkan, enableVk);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanSnapshots, false);
     android::featurecontrol::setEnabledOverride(
