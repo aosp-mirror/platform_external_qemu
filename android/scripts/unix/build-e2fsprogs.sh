@@ -114,7 +114,14 @@ fi
 
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     (
-        builder_prepare_for_host_no_binprefix "$SYSTEM" "$AOSP_DIR"
+        case $SYSTEM in
+            linux-aarch64)
+                builder_prepare_for_host "$SYSTEM" "$AOSP_DIR"
+            ;;
+            *)
+                builder_prepare_for_host_no_binprefix "$SYSTEM" "$AOSP_DIR"
+            ;;
+        esac
 
         dump "$(builder_text) Building e2fsprogs"
 
