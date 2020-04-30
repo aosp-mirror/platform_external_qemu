@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a4a3cce6_bc1f1ca9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-30T18:03:52Z",
+      "side": 1,
+      "message": "Wait, this is test code, that needs to be removed! Thank you for catching this.",
+      "parentUuid": "64bb3ee6_135a4a5c",
+      "revId": "c5b453d0722a1cbdca3747f982c12f12fef5d1e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "abe7a349_317511bb",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2020-04-29T21:00:56Z",
       "side": 1,
       "message": "This may result in a crash or other error because the readback worker won\u0027t have its context made current again in its own thread.",
+      "revId": "c5b453d0722a1cbdca3747f982c12f12fef5d1e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9cb51a53_05629c25",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-04-30T18:03:52Z",
+      "side": 1,
+      "message": "Looks like we need to create a separate shared context.",
+      "parentUuid": "abe7a349_317511bb",
       "revId": "c5b453d0722a1cbdca3747f982c12f12fef5d1e7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
