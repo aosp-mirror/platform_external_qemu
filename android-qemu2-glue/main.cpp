@@ -1625,7 +1625,7 @@ extern "C" int main(int argc, char** argv) {
         args.add("-smp");
 
 #ifdef _WIN32
-        if (hw->hw_cpu_ncore > 16) {
+        if (hw->hw_cpu_ncore > 16 && accelerator == ANDROID_CPU_ACCELERATOR_HAX) {
             dwarning(
                     "HAXM does not support more than 16 cores. Number of cores "
                     "set to 16");
