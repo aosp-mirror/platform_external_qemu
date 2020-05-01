@@ -18,10 +18,11 @@
 #include <sstream>                                            // IWYU pragma: keep
 #include <utility>                                            // for move
 
-
 #include "android/base/Log.h"                                 // for LOG
+#include "android/base/StringView.h"                          // for StringView
 #include "android/base/Uuid.h"                                // for Uuid
 #include "android/base/files/GzipStreambuf.h"                 // for GzipOut...
+#include "android/base/files/PathUtils.h"                     // for PathUtils
 #include "android/base/system/System.h"                       // for System
 #include "android/curl-support.h"                             // for curl_post
 #include "android/metrics/MetricsLogging.h"                   // for D
@@ -46,7 +47,8 @@ PlaystoreMetricsWriter::PlaystoreMetricsWriter(const std::string& sessionId,
                                                const std::string& cookieFile,
                                                std::string url)
     : MetricsWriter(sessionId), mUrl(std::move(url)), mCookieFile(cookieFile) {
-    std::ifstream cookieResponse(cookieFile, std::ios::in | std::ios::binary);
+    std::ifstream cookieResponse(base::PathUtils::asUnicodePath(cookieFile),
+                                 std::ios::in | std::ios::binary);
     if (cookieResponse.good()) {
         LogResponse response;
         response.ParseFromIstream(&cookieResponse);
@@ -142,12 +144,13 @@ void PlaystoreMetricsWriter::writeCookie(std::string proto) {
     if (response.ParseFromString(proto)) {
         // The cookie will contain the earlies timestamp after which we are
         // good to send data.
-        mSendAfterMs = milliseconds(response.next_request_wait_millis()) + epoch_time_in_ms();
+        mSendAfterMs = milliseconds(response.next_request_wait_millis()) +
+                       epoch_time_in_ms();
 
         response.set_next_request_wait_millis(mSendAfterMs.count());
-        std::ofstream cookieResponse(mCookieFile, std::ios::out |
-                                                          std::ios::binary |
-                                                          std::ios::trunc);
+        std::ofstream cookieResponse(
+                base::PathUtils::asUnicodePath(mCookieFile),
+                std::ios::out | std::ios::binary | std::ios::trunc);
         response.SerializeToOstream(&cookieResponse);
         cookieResponse.close();
         D("Wrote a timeout cookie for %" PRIi64 " ms to %s",
@@ -156,8 +159,7 @@ void PlaystoreMetricsWriter::writeCookie(std::string proto) {
 }
 
 void PlaystoreMetricsWriter::commit() {
-    if (mEvents.empty() ||
-        epoch_time_in_ms() < mSendAfterMs) {
+    if (mEvents.empty() || epoch_time_in_ms() < mSendAfterMs) {
         D("Not reporting %d metrics time: %" PRIi64 ", wait until %" PRIi64,
           mEvents.empty(), epoch_time_in_ms(), mSendAfterMs);
         return;

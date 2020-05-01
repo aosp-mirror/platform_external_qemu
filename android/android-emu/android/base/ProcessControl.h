@@ -18,7 +18,7 @@
 #include <vector>                     // for vector
 
 #include "android/base/StringView.h"    // for StringView
-#include "android/base/FunctionView.h"  // for FunctionView
+#include "android/base/FunctionView.h"  // IWYU pragma: keep
 
 namespace android {
 namespace base {

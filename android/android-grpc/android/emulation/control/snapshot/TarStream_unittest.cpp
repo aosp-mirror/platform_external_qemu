@@ -16,7 +16,8 @@
 
 #include <gtest/gtest.h>  // for Assert...
 #include <string.h>       // for memcmp
-#include <fstream>        // for ostream
+
+#include <fstream>  // for ostream
 
 #include "android/base/Optional.h"             // for Optional
 #include "android/base/StringView.h"           // for String...
@@ -26,13 +27,13 @@
 #include "android/base/testing/TestSystem.h"   // for TestSy...
 #include "android/base/testing/TestTempDir.h"  // for TestTe...
 
+using android::base::GzipInputStream;
+using android::base::GzipOutputStream;
 using android::base::PathUtils;
 using android::base::pj;
 using android::base::System;
 using android::base::TestSystem;
 using android::base::TestTempDir;
-using android::base::GzipInputStream;
-using android::base::GzipOutputStream;
 
 namespace android {
 namespace emulation {
@@ -98,6 +99,27 @@ TEST_F(TarStreamTest, bad_header_no_ustar) {
 
     EXPECT_TRUE(tr.fail());
 };
+
+TEST_F(TarStreamTest, can_write_unicode) {
+    std::string unicode_file = "ⓗⓔⓛⓛⓞ.txt";
+    std::string hi = pj(indir, unicode_file);
+
+    std::ofstream hello(PathUtils::asUnicodePath(hi), std::ios_base::binary);
+    hello << "Hello World!";
+    hello.close();
+
+    std::stringstream ss;
+    TarWriter tw(indir, ss);
+    EXPECT_TRUE(tw.addFileEntry(unicode_file));
+    EXPECT_TRUE(tw.close());
+
+    TarReader tr(outdir, ss);
+    for (auto entry = tr.first(); tr.good(); entry = tr.next(entry)) {
+        tr.extract(entry);
+    }
+
+    EXPECT_TRUE(mTestSystem.host()->pathIsFile(pj(outdir, "ⓗⓔⓛⓛⓞ.txt")));
+}
 
 TEST_F(TarStreamTest, bad_header_chksum) {
     std::stringstream ss;

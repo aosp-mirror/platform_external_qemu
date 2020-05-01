@@ -11,31 +11,27 @@
 
 #pragma once
 
-#include <stddef.h>                   // for size_t
-#include <string>                     // for string, basic_string
-#include <utility>                    // for move, forward
-#include <vector>                     // for vector
+#include <stddef.h>  // for size_t
+
+#include <string>   // for string, basic_string
+#include <utility>  // for move, forward
+#include <vector>   // for vector
 
 #include "android/base/Optional.h"    // for Optional
 #include "android/base/StringView.h"  // for StringView
 
 #ifdef __APPLE__
-
 #define LIBSUFFIX ".dylib"
-
 #else
-
+#include <filesystem>
+namespace fs = std::filesystem;
 #ifdef _WIN32
-
 #define LIBSUFFIX ".dll"
-
 #else
 
 #define LIBSUFFIX ".so"
-
-#endif // !_WIN32 (linux)
-
-#endif // !__APPLE__
+#endif  // !_WIN32 (linux)
+#endif  // !__APPLE__
 
 namespace android {
 namespace base {
@@ -79,9 +75,7 @@ public:
     static bool isDirSeparator(int ch, HostType hostType);
 
     // Return true if |ch| is a directory separator for the current platform.
-    static bool isDirSeparator(int ch) {
-        return isDirSeparator(ch, HOST_TYPE);
-    }
+    static bool isDirSeparator(int ch) { return isDirSeparator(ch, HOST_TYPE); }
 
     // Return true if |ch| is a path separator for a given |hostType|.
     static bool isPathSeparator(int ch, HostType hostType);
@@ -214,8 +208,7 @@ public:
     }
 
     template <class String>
-    static std::vector<String> decompose(const String& path,
-                                         HostType hostType);
+    static std::vector<String> decompose(const String& path, HostType hostType);
 
     // Decompose |path| into individual components for the host platform.
     // See comments above for more details.
@@ -270,7 +263,9 @@ public:
     // AppData\Local\Android\Sdk.
     // If |base| is not a prefix of |path|, fails by returning
     // the original |path| unmodified.
-    static std::string relativeTo(StringView base, StringView path, HostType hostType);
+    static std::string relativeTo(StringView base,
+                                  StringView path,
+                                  HostType hostType);
     static std::string relativeTo(StringView base, StringView path) {
         return relativeTo(base, path, HOST_TYPE);
     }
@@ -286,7 +281,16 @@ public:
     // Replaces the entries ${xx} with the value of the environment variable
     // xx if it exists. Returns kNullopt if the environment variable is
     // not set or empty.
-    static Optional<std::string> pathWithEnvSubstituted(std::vector<StringView> decomposedPath);
+    static Optional<std::string> pathWithEnvSubstituted(
+            std::vector<StringView> decomposedPath);
+
+#ifdef __APPLE__
+    // fs::filesystem is only available on MacOS SDK 11.15>=
+    // paths are unicode in macos so, this should be ok.
+    static StringView asUnicodePath(StringView path) { return path; }
+#else
+    static fs::path asUnicodePath(StringView path) { return fs::u8path(path.str()); }
+#endif
 };
 
 // Useful shortcuts to avoid too much typing.
@@ -295,11 +299,8 @@ static const PathUtils::HostType kHostWin32 = PathUtils::HOST_WIN32;
 static const PathUtils::HostType kHostType = PathUtils::HOST_TYPE;
 
 template <class... Paths>
-std::string pj(StringView path1,
-                  StringView path2,
-                  Paths&&... paths) {
-    return PathUtils::join(path1,
-               pj(path2, std::forward<Paths>(paths)...));
+std::string pj(StringView path1, StringView path2, Paths&&... paths) {
+    return PathUtils::join(path1, pj(path2, std::forward<Paths>(paths)...));
 }
 
 std::string pj(StringView path1, StringView path2);

@@ -14,10 +14,12 @@
 
 #pragma once
 
-#include "android/base/Version.h"
+#include <cstddef>                 // for size_t
+#include <string>                  // for string
+#include <type_traits>             // for __underlying_type_impl<>::type
+#include <utility>                 // for hash
 
-#include <functional>
-#include <type_traits>
+#include "android/base/Version.h"  // for Version
 
 namespace android {
 namespace studio {

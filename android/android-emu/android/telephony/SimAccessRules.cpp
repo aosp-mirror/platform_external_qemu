@@ -9,22 +9,25 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "sim_access_rules.h"
+#include <stdint.h>                                       // for uint16_t
+#include <string.h>                                       // for strdup, NULL
+#include <fstream>                                        // for ifstream
+#include <string>                                         // for string, hash
+#include <unordered_map>                                  // for unordered_map
+#include <vector>                                         // for vector
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/cmdline-option.h"
-#include "android/telephony/SimAccessRules.h"
-#include "android/telephony/TagLengthValue.h"
-#include "android/telephony/proto/sim_access_rules.pb.h"
-#include "android/utils/debug.h"
-
-#include "google/protobuf/io/zero_copy_stream_impl.h"
-#include "google/protobuf/text_format.h"
-
-#include <fstream>
-#include <string>
-#include <unordered_map>
+#include "android/base/StringView.h"                      // for StringView
+#include "android/base/containers/Lookup.h"               // for find
+#include "android/base/files/PathUtils.h"                 // for PathUtils
+#include "android/base/memory/LazyInstance.h"             // for LazyInstance
+#include "android/cmdline-option.h"                       // for android_cmd...
+#include "android/telephony/SimAccessRules.h"             // for SimAccessRules
+#include "android/telephony/TagLengthValue.h"             // for AllRefArDo
+#include "android/telephony/proto/sim_access_rules.pb.h"  // for ArDo, RefDo
+#include "android/utils/debug.h"                          // for dwarning
+#include "google/protobuf/io/zero_copy_stream_impl.h"     // for IstreamInpu...
+#include "google/protobuf/text_format.h"                  // for TextFormat
+#include "sim_access_rules.h"                             // for sim_get_acc...
 
 using ::google::protobuf::TextFormat;
 using ::google::protobuf::io::IstreamInputStream;
@@ -101,7 +104,7 @@ std::unordered_map<std::string, AllRefArDo> parseSimAccessRules(
 SimAccessRules::SimAccessRules() : mHasCustomRules(false) {
     if (android_cmdLineOptions &&
         android_cmdLineOptions->sim_access_rules_file != nullptr) {
-        std::ifstream file(android_cmdLineOptions->sim_access_rules_file);
+        std::ifstream file(base::PathUtils::asUnicodePath(android_cmdLineOptions->sim_access_rules_file));
         if (file.is_open()) {
             IstreamInputStream istream(&file);
             android_emulator::SimAccessRules sim_access_rules_proto;

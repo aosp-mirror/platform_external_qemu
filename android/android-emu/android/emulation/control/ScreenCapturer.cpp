@@ -14,21 +14,26 @@
 
 #include "android/emulation/control/ScreenCapturer.h"
 
-#include "android/base/Log.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/System.h"
-#include "android/emulation/control/display_agent.h"
-#include "android/emulation/control/window_agent.h"
-#include "android/emulation/proto/observation.pb.h"
-#include "android/emulator-window.h"
-#include "android/loadpng.h"
-#include "android/opengles.h"
-#include "android/utils/string.h"
+#include <assert.h>                                   // for assert
+#include <png.h>                                      // for png_create_info...
+#include <stdio.h>                                    // for NULL, snprintf
+#include <string.h>                                   // for memcpy
+#include <fstream>                                    // for ofstream, basic...
+#include <memory>                                     // for shared_ptr
+#include <vector>                                     // for vector
 
-#include <png.h>
-#include <fstream>
-#include <iostream>
-#include <vector>
+#include "OpenglRender/Renderer.h"                    // for Renderer
+#include "android/base/Log.h"                         // for LOG, LogMessage
+#include "android/base/files/PathUtils.h"             // for PathUtils
+#include "android/base/system/System.h"               // for System
+#include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...
+#include "android/emulation/control/window_agent.h"   // for QAndroidEmulato...
+#include "android/emulation/proto/observation.pb.h"   // for Observation
+#include "android/emulator-window.h"                  // for emulator_window...
+#include "android/loadpng.h"                          // for savepng, write_...
+#include "android/opengles.h"                         // for android_getOpen...
+#include "android/utils/string.h"                     // for str_ends_with
+#include "pngconf.h"                                  // for png_byte, png_b...
 
 namespace android {
 namespace emulation {
@@ -40,7 +45,8 @@ bool captureScreenshot(android::base::StringView outputDirectoryPath,
     SkinRotation rotation = gQAndroidEmulatorWindowAgent->getRotation();
     if (const auto renderer_ptr = renderer.get()) {
         return captureScreenshot(renderer_ptr, nullptr, rotation,
-                                 outputDirectoryPath, pOutputFilepath, displayId);
+                                 outputDirectoryPath, pOutputFilepath,
+                                 displayId);
     } else {
         // renderer is nullptr in -gpu guest
         if (displayId > 0) {
@@ -64,16 +70,16 @@ Image takeScreenshot(
                            uint8_t** frameBufferData)> getFrameBuffer,
         int displayId,
         int desiredWidth,
-        int desiredHeight
-        ) {
+        int desiredHeight) {
     unsigned int nChannels = 4;
     unsigned int width;
     unsigned int height;
     ImageFormat outputFormat = ImageFormat::RGBA8888;
     std::vector<unsigned char> pixelBuffer;
     if (renderer) {
-        renderer->getScreenshot(nChannels, &width, &height, pixelBuffer, displayId,
-                                desiredWidth, desiredHeight, rotation);
+        renderer->getScreenshot(nChannels, &width, &height, pixelBuffer,
+                                displayId, desiredWidth, desiredHeight,
+                                rotation);
     } else {
         unsigned char* pixels = nullptr;
         int bpp = 4;
@@ -117,7 +123,8 @@ Image takeScreenshot(
             pixels = pixelBuffer.data();
         } else {
             // Just copy the pixels to our buffer.
-            pixelBuffer.insert(pixelBuffer.end(), &pixels[0], &pixels[width * height * nChannels]);
+            pixelBuffer.insert(pixelBuffer.end(), &pixels[0],
+                               &pixels[width * height * nChannels]);
         }
     }
     // We only convert png at this time..
@@ -137,13 +144,14 @@ Image takeScreenshot(
                 [](png_structp png_ptr) {});
         // already rotated through rendering
         rotation = renderer ? SKIN_ROTATION_0 : rotation;
-        write_png_user_function(p, pi, nChannels, width,
-                                height, rotation,
+        write_png_user_function(p, pi, nChannels, width, height, rotation,
                                 pixelBuffer.data());
         png_destroy_write_struct(&p, &pi);
-        return Image((uint16_t)width, (uint16_t)height, nChannels, ImageFormat::PNG, pngData);
+        return Image((uint16_t)width, (uint16_t)height, nChannels,
+                     ImageFormat::PNG, pngData);
     }
-    return Image((uint16_t)width, (uint16_t)height, nChannels, outputFormat, pixelBuffer);
+    return Image((uint16_t)width, (uint16_t)height, nChannels, outputFormat,
+                 pixelBuffer);
 }
 
 bool captureScreenshot(
@@ -162,7 +170,8 @@ bool captureScreenshot(
         return false;
     }
 
-    Image img = takeScreenshot(ImageFormat::RAW, rotation, renderer, getFrameBuffer, displayId);
+    Image img = takeScreenshot(ImageFormat::RAW, rotation, renderer,
+                               getFrameBuffer, displayId);
 
     if (img.getWidth() == 0 || img.getHeight() == 0) {
         LOG(ERROR) << "take screenshot failed";
@@ -173,7 +182,8 @@ bool captureScreenshot(
     // extension, write a serialized Observation instead.
     std::string outputFilePath;
     if (str_ends_with(outputDirectoryPath.data(), ".pb")) {
-        std::ofstream file(outputDirectoryPath.data(), std::ios_base::binary);
+        std::ofstream file(base::PathUtils::asUnicodePath(outputDirectoryPath),
+                           std::ios_base::binary);
         if (!file) {
             LOG(ERROR) << "Failed to open " << outputDirectoryPath;
             return false;

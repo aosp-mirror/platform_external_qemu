@@ -21,7 +21,8 @@
 
 #include "android/base/Log.h"              // for LOG, LogMessage, LogStream
 #include "android/base/StringFormat.h"     // for StringFormat
-#include "android/base/files/PathUtils.h"  // for pj
+#include "android/base/StringView.h"       // for StringView
+#include "android/base/files/PathUtils.h"  // for pj, PathUtils
 #include "android/base/system/System.h"    // for System, System::WaitExitRe...
 #include "android/emulation/ConfigDirs.h"  // for ConfigDirs
 
@@ -31,7 +32,6 @@ namespace control {
 
 using android::base::System;
 static const char* location_format = "pid_%d.ini";
-
 
 EmulatorAdvertisement::EmulatorAdvertisement(EmulatorProperties&& config)
     : mStudioConfig(config) {
@@ -74,12 +74,12 @@ std::string EmulatorAdvertisement::location() const {
     return android::base::pj(mSharedDirectory, pidfile);
 }
 
-bool EmulatorAdvertisement::write()  const {
+bool EmulatorAdvertisement::write() const {
     auto pidFile = location();
     if (System::get()->pathExists(pidFile)) {
         LOG(WARNING) << "Overwriting existing discovery file: " << pidFile;
     }
-    auto shareFile = std::ofstream(pidFile);
+    auto shareFile = std::ofstream(base::PathUtils::asUnicodePath(pidFile));
     for (const auto& elem : mStudioConfig) {
         shareFile << elem.first << "=" << elem.second << "\n";
     }

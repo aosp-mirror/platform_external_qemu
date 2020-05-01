@@ -30,6 +30,7 @@
 #include <vector>
 
 #include "android/base/Log.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/console.h"
@@ -90,7 +91,7 @@ std::string Builder::readSecrets(const char* fname) {
         mValid = false;
         return "";
     }
-    std::ifstream fstream(fname);
+    std::ifstream fstream(base::PathUtils::asUnicodePath(fname));
     auto contents = std::string(std::istreambuf_iterator<char>(fstream),
                                 std::istreambuf_iterator<char>());
 

@@ -14,30 +14,37 @@
 
 #include "android/metrics/StudioConfig.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/Optional.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/StringView.h"
-#include "android/base/system/System.h"
-#include "android/base/Version.h"
-#include "android/emulation/ConfigDirs.h"
-#include "android/metrics/MetricsPaths.h"
-#include "android/utils/debug.h"
-#include "android/utils/dirscanner.h"
-#include "android/utils/path.h"
-#include "android/version.h"
+#include <ctype.h>                             // for isspace, ispunct
+#include <libxml/globals.h>                    // for xmlFree
+#include <libxml/parser.h>                     // for xmlReadFile
+#include <libxml/tree.h>                       // for xmlGetProp, xmlNode
+#include <libxml/xmlstring.h>                  // for xmlStrcmp, BAD_CAST
+#include <stdlib.h>                            // for NULL, free
+#include <string.h>                            // for strncmp
+#include <algorithm>                           // for find, find_if
+#include <fstream>                             // for char_traits, basic_ist...
+#include <iterator>                            // for end, begin
+#include <memory>                              // for unique_ptr
+#include <vector>                              // for vector
 
-#include <libxml/tree.h>
+#include "android/base/ArraySize.h"            // for stringLiteralLength
+#include "android/base/Optional.h"             // for Optional
+#include "android/base/StringView.h"           // for StringView, c_str, ope...
+#include "android/base/Version.h"              // for Version, Version::kMajor
+#include "android/base/files/PathUtils.h"      // for PathUtils
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance, LAZY_INS...
+#include "android/base/memory/ScopedPtr.h"     // for makeCustomScopedPtr
+#include "android/base/misc/StringUtils.h"     // for strDup
+#include "android/base/system/System.h"        // for System
+#include "android/metrics/MetricsPaths.h"      // for getSettingsFilePath
+#include "android/utils/debug.h"               // for VERBOSE_PRINT, VERBOSE...
+#include "android/utils/dirscanner.h"          // for dirScanner_new, dirSca...
+#include "android/utils/path.h"                // for path_basename
+#include "android/version.h"                   // for EMULATOR_CL_SHA1, EMUL...
 
-#include <algorithm>
-#include <iterator>
-#include <fstream>
-
-#include <stdlib.h>
-#include <string.h>
+namespace android {
+struct ConfigDirs;
+}  // namespace android
 
 using android::base::LazyInstance;
 using android::base::Optional;
@@ -369,7 +376,7 @@ static Optional<ValueType> getStudioConfigJsonValue(
         StringView name,
         ValueExtractor extractValue) {
     const std::string configPath = android::metrics::getSettingsFilePath();
-    std::ifstream in(configPath.c_str());
+    std::ifstream in(base::PathUtils::asUnicodePath(configPath));
     if (!in) {
         return {};
     }

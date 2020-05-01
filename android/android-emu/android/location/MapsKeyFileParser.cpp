@@ -11,9 +11,11 @@
 
 #include "android/location/MapsKeyFileParser.h"
 
-#include <fstream>
-#include <sstream>
-#include <string>
+#include <fstream>                         // for ifstream, basic_istream
+#include <sstream>                         // IWYU pragma: keep
+#include <string>                          // for string, char_traits
+
+#include "android/base/files/PathUtils.h"  // for PathUtils
 
 namespace android {
 namespace location {
@@ -27,7 +29,7 @@ std::string parseMapsKeyFromFile(const base::StringView& file) {
     std::ifstream fin;
     std::string apikey;
 
-    fin.open(file, std::ifstream::in);
+    fin.open(base::PathUtils::asUnicodePath(file), std::ifstream::in);
     if (!fin.good()) {
         return "";
     }

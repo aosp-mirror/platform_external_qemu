@@ -10,11 +10,10 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "android/emulation/AndroidPipe.h"
+#include <fstream>                                  // for ostream
 
-#include <fstream>
-#include <vector>
-#include "android/base/synchronization/Lock.h"
+#include "android/emulation/AndroidPipe.h"          // for AndroidPipe, Andr...
+#include "android/emulation/android_pipe_common.h"  // for AndroidPipeBuffer
 
 namespace android {
 namespace emulation {
