@@ -29,6 +29,7 @@
 #include "hw/arm/primecell.h"
 #include "hw/char/pl011.h"
 #include "hw/devices.h"
+#include "hw/pci-host/gpex.h"
 #include "net/net.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/ranchu.h"
@@ -563,6 +564,13 @@ static void ranchu_init(MachineState *machine)
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_SYNC, "goldfish_sync",
                          "google,goldfish-sync\0"
                          "generic,goldfish-sync", 2, 0, 0);
+
+    {
+        PCIBus *pci_bus = (PCIBus*)object_resolve_path_type("", TYPE_PCI_BUS, NULL);
+        if (!pci_bus)
+            error_report("No PCI bus available to add goldfish_address_space device to.");
+        pci_create_simple(pci_bus, PCI_DEVFN(11,0), "goldfish_address_space");
+    }
 
     /* Create mmio transports, so the user can create virtio backends
      * (which will be automatically plugged in to the transports). If
