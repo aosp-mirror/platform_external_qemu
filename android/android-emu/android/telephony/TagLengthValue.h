@@ -35,8 +35,8 @@ public:
     size_t size() const {
         return mData.size();
     }
+
 protected:
-    // Disallow construction and destruction of base class.
     TagLengthValue() = default;
     ~TagLengthValue() = default;
 

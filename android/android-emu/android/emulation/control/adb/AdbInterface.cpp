@@ -483,7 +483,8 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         System::Duration timeout_ms,
         bool want_output) {
     AdbCommandPtr command;
-    if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) && AdbConnection::failed() &&
+    if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) &&
+        AdbConnection::failed() &&
         (args[0] == "shell" || args[0] == "logcat")) {
         command = std::shared_ptr<AdbDirect>(
                 new AdbDirect(args, std::move(result_callback), want_output));
@@ -627,8 +628,9 @@ void AdbThroughExe::taskFunction(OptionalAdbCommandResult* result) {
 AdbCommandResult::AdbCommandResult(System::ProcessExitCode exitCode,
                                    const std::string& outputName)
     : exit_code(exitCode),
-      output(outputName.empty() ? nullptr
-                                : new std::ifstream(outputName.c_str())),
+      output(outputName.empty()
+                     ? nullptr
+                     : new std::ifstream(PathUtils::asUnicodePath(outputName))),
       output_name(outputName) {}
 
 AdbCommandResult::AdbCommandResult(

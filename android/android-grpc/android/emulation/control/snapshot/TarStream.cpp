@@ -147,6 +147,7 @@ bool TarWriter::writeTarHeader(std::string name, bool isDir, struct stat sb) {
 }
 
 bool TarWriter::writeTarHeader(std::string name) {
+    DD("Writing header for %s", name.c_str());
     posix_header header = {0};
     if (name.size() > sizeof(header.name) - 1)
         return false;
@@ -174,6 +175,7 @@ TarWriter::~TarWriter() {
 bool TarWriter::addFileEntryFromStream(std::istream& ifs,
                                        std::string name,
                                        struct stat sb) {
+    DD("Add file entry %s, size: %d", name.c_str(), sb.st_size);
     if (!writeTarHeader(name, false, sb)) {
         return false;
     }
@@ -211,7 +213,8 @@ bool TarWriter::addFileEntry(std::string name) {
         return error("Unable to stat " + fname);
     }
 
-    std::ifstream ifs(fname, std::ios_base::in | std::ios_base::binary);
+    std::ifstream ifs(base::PathUtils::asUnicodePath(fname),
+                      std::ios_base::in | std::ios_base::binary);
     char readBuffer[mBufferSize];
     if (mBufferSize != 0) {
         ifs.rdbuf()->pubsetbuf(readBuffer, mBufferSize);

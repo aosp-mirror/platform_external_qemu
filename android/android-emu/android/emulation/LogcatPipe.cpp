@@ -11,15 +11,23 @@
 
 #include "android/emulation/LogcatPipe.h"
 
-#include <fstream>
-#include <iostream>
-#include <memory>
+#include <fstream>                              // for ostream, basic_ostream
+#include <memory>                               // for unique_ptr
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
-#include "android/globals.h"
-#include "android/logcat-pipe.h"
-#include "android/utils/debug.h"
+#include "android/base/StringView.h"            // for StringView
+#include "android/base/files/PathUtils.h"       // for PathUtils
+#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "android/globals.h"                    // for android_hw
+#include "android/logcat-pipe.h"                // for android_init_logcat_pipe
+#include "android/utils/debug.h"                // for dwarning
 
 namespace android {
+namespace base {
+class Stream;
+}  // namespace base
+
 namespace emulation {
 
 static base::Lock sLogcatStreamLock;
@@ -74,8 +82,10 @@ int LogcatPipe::onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) {
 void registerLogcatPipeService() {
     if (android_hw->hw_logcatOutput_path &&
         *android_hw->hw_logcatOutput_path != '\0') {
-        std::unique_ptr<std::ofstream> outputfile(new std::ofstream(
-                android_hw->hw_logcatOutput_path, std::ios_base::app));
+        std::unique_ptr<std::ofstream> outputfile(
+                new std::ofstream(base::PathUtils::asUnicodePath(
+                                          android_hw->hw_logcatOutput_path),
+                                  std::ios_base::app));
         if (outputfile->good()) {
             sLogcatOutputStreams.push_back(std::move(outputfile));
         } else {

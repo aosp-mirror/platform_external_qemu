@@ -6,6 +6,9 @@ extern "C" {
 #include "gtest/gtest.h"
 #include <inttypes.h>
 #include <cstdint>
+#include <fstream>
+
+#include "android/base/testing/TestSystem.h"
 
 // This test makes sure that the definitions in tcg are correct.
 // Note, calling gtest from C doesn't work well, and using qemu from C++ doesn't
@@ -52,4 +55,22 @@ TEST(CompilerTest, g_strdup_printf_incorrect_b129781540) {
     char* str = g_strdup_printf("%" PRId64, val);
     EXPECT_STREQ("6442450944", str);
     free(str);
+}
+
+TEST(CompilerTest, streams_use_unicode_paths) {
+    // If this test is green then you are able to open a UTF-8 encoded file path
+    // by calling the PathUtils::asUnicodePath translation function.
+    //
+    android::base::TestSystem testSystem("/", android::base::System::kProgramBitness);
+    std::string fname = "⺁⺶ɥǝןןo.txt";
+
+    auto testDir = testSystem.getTempRoot();
+    auto unicode_file = android::base::pj(testDir->path(), fname);
+    // Note that using the unicode_file directly on windows will fail
+    // std::ofstream out(unicode_file);
+    std::ofstream out(android::base::PathUtils::asUnicodePath(unicode_file));
+    out << "Hello there!";
+    out.close();
+
+    EXPECT_TRUE(android::base::System::get()->pathExists(unicode_file));
 }
