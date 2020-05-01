@@ -138,8 +138,10 @@ endif()
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
-# So we are using some C++14 features
-set(CMAKE_CXX_STANDARD 14)
+# Enable C++17 in C++
+# (Note, cmake does not set the proper flags when using CXX_STANDARD) with our
+# custom clang.
+add_cxx_flag("-std=c++17")
 
 # Gather compile time statistics
 if(OPTION_TIME_INFO)
