@@ -26,7 +26,7 @@
 #else
 
 #ifdef _WIN32
-
+#include "android/base/system/Win32UnicodeString.h"
 #define LIBSUFFIX ".dll"
 
 #else
@@ -287,6 +287,12 @@ public:
     // xx if it exists. Returns kNullopt if the environment variable is
     // not set or empty.
     static Optional<std::string> pathWithEnvSubstituted(std::vector<StringView> decomposedPath);
+
+#ifdef _WIN32
+    static Win32UnicodeString asUnicodePath(StringView path) { return Win32UnicodeString(path); }
+#else
+    static CStrWrapper asUnicodePath(StringView path) { return c_str(path); }
+#endif
 };
 
 // Useful shortcuts to avoid too much typing.
