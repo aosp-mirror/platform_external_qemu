@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72cf3321_73b07a13",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-01T15:16:07Z",
+      "side": 1,
+      "message": "this is an error; buffers are not supposed to be mapped in gl for very long (can\u0027t do much with them when they are mapped), and on top of that, it looks like we\u0027re unmapping with mapping.",
+      "range": {
+        "startLine": 147,
+        "startChar": 0,
+        "endLine": 148,
+        "endChar": 48
+      },
+      "revId": "e61d1b7748ee856f9fa4d57a20427c59baf50127",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
