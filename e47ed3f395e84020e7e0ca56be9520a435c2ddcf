@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "efb713da_6fa43001",
+        "filename": "android/tests/compiler/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-01T16:31:44Z",
+      "side": 1,
+      "message": "Not sure about taking extra dependency on android-emu here. Can we move the test to android-emu unittests, somewhere in path utils?",
+      "range": {
+        "startLine": 22,
+        "startChar": 63,
+        "endLine": 22,
+        "endChar": 74
+      },
+      "revId": "e47ed3f395e84020e7e0ca56be9520a435c2ddcf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
