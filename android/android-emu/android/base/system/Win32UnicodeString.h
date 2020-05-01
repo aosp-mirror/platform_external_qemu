@@ -69,6 +69,9 @@ public:
     // Return pointer to first wchar_t in the string.
     const wchar_t* c_str() const { return mStr ? mStr : L""; }
 
+    // Enable casting to const wchar_t*
+    operator const wchar_t*() { return c_str(); }
+
     // Return pointer to writable wchar_t array. This can never be NULL
     // but no more than size() items should be accessed.
     wchar_t* data();
