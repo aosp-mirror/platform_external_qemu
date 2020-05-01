@@ -30,6 +30,7 @@ namespace emulation {
 namespace control {
 
 using android::base::System;
+using android::base::PathUtils;
 static const char* location_format = "pid_%d.ini";
 
 
@@ -79,7 +80,7 @@ bool EmulatorAdvertisement::write()  const {
     if (System::get()->pathExists(pidFile)) {
         LOG(WARNING) << "Overwriting existing discovery file: " << pidFile;
     }
-    auto shareFile = std::ofstream(pidFile);
+    auto shareFile = std::ofstream(PathUtils::asUnicodePath(pidFile).c_str());
     for (const auto& elem : mStudioConfig) {
         shareFile << elem.first << "=" << elem.second << "\n";
     }
