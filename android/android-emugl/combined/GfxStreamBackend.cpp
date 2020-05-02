@@ -255,6 +255,19 @@ static void default_post_callback(
     // no-op
 }
 
+uint32_t sBackendFlags = 0;
+
+enum BackendFlags {
+    GFXSTREAM_BACKEND_FLAGS_NO_VK_BIT = 1 << 0,
+};
+
+// Sets backend flags for different kinds of initialization.
+// Default (and default if not called): flags == 0
+// Needs to be called before |gfxstream_backend_init|.
+extern "C" VG_EXPORT void gfxstream_backend_set_flags(uint32_t flags) {
+    sBackendFlags = flags;
+}
+
 extern "C" VG_EXPORT void gfxstream_backend_init(
     uint32_t display_width,
     uint32_t display_height,
@@ -277,8 +290,9 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     System::setEnvironmentVariable("ANDROID_EMU_SANDBOX", "1");
     System::setEnvironmentVariable("ANDROID_EMUGL_FIXED_BACKEND_LIST", "1");
-    bool enableVk =
-        System::getEnvironmentVariable("ANDROID_EMU_DISABLE_VULKAN") != "1";
+    bool vkDisabledByEnv = System::getEnvironmentVariable("ANDROID_EMU_DISABLE_VULKAN") == "1";
+    bool vkDisabledByFlag = sBackendFlags & GFXSTREAM_BACKEND_FLAGS_NO_VK_BIT;
+    bool enableVk = !vkDisabledByEnv && !vkDisabledByFlag;
 
     GFXS_LOG("Vulkan enabled? %d", enableVk);
 
