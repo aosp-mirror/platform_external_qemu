@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "android/base/export.h"
 #include "android/constants.h"
 #include "android/avd/info.h"
 #include "android/avd/hw-config.h"
@@ -31,8 +32,14 @@ extern AvdInfoParams     android_avdParams[1];
  */
 extern AvdInfo*          android_avdInfo;
 
+/* MSVC only exports function pointers */
+extern AEMU_EXPORT AvdInfo** aemu_get_android_avdInfoPtr();
+
 /* the hardware configuration for this specific virtual device */
 extern AndroidHwConfig   android_hw[1];
+
+/* MSVC only exports function pointers */
+AEMU_EXPORT AndroidHwConfig* aemu_get_android_hw();
 
 /* this is to support snapshot (currently only qemu1+software-renderer) */
 extern const char* savevm_on_exit;

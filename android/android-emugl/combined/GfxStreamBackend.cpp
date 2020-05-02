@@ -255,6 +255,19 @@ static void default_post_callback(
     // no-op
 }
 
+uint32_t sBackendFlags = 0;
+
+enum BackendFlags {
+    GFXSTREAM_BACKEND_FLAGS_NO_VK_BIT = 1 << 0,
+};
+
+// Sets backend flags for different kinds of initialization.
+// Default (and default if not called): flags == 0
+// Needs to be called before |gfxstream_backend_init|.
+extern "C" VG_EXPORT void gfxstream_backend_set_flags(uint32_t flags) {
+    sBackendFlags = flags;
+}
+
 extern "C" VG_EXPORT void gfxstream_backend_init(
     uint32_t display_width,
     uint32_t display_height,
@@ -265,7 +278,9 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     GFXS_LOG("start. display dimensions: width %u height %u", display_width, display_height);
 
-    android_avdInfo = avdInfo_newCustom(
+    AvdInfo** avdInfoPtr = aemu_get_android_avdInfoPtr();
+
+    (*avdInfoPtr) = avdInfo_newCustom(
         "goldfish_opengl_test",
         28,
         "x86_64",
@@ -275,8 +290,9 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     System::setEnvironmentVariable("ANDROID_EMU_SANDBOX", "1");
     System::setEnvironmentVariable("ANDROID_EMUGL_FIXED_BACKEND_LIST", "1");
-    bool enableVk =
-        System::getEnvironmentVariable("ANDROID_EMU_DISABLE_VULKAN") != "1";
+    bool vkDisabledByEnv = System::getEnvironmentVariable("ANDROID_EMU_DISABLE_VULKAN") == "1";
+    bool vkDisabledByFlag = sBackendFlags & GFXSTREAM_BACKEND_FLAGS_NO_VK_BIT;
+    bool enableVk = !vkDisabledByEnv && !vkDisabledByFlag;
 
     GFXS_LOG("Vulkan enabled? %d", enableVk);
 
@@ -323,10 +339,12 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
-    android_hw->hw_gltransport_asg_writeBufferSize = 262144;
-    android_hw->hw_gltransport_asg_writeStepSize = 8192;
-    android_hw->hw_gltransport_asg_dataRingSize = 131072;
-    android_hw->hw_gltransport_drawFlushInterval = 800;
+    auto androidHw = aemu_get_android_hw();
+
+    androidHw->hw_gltransport_asg_writeBufferSize = 262144;
+    androidHw->hw_gltransport_asg_writeStepSize = 8192;
+    androidHw->hw_gltransport_asg_dataRingSize = 131072;
+    androidHw->hw_gltransport_drawFlushInterval = 800;
 
     EmuglConfig config;
 

@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/base/containers/SmallVector.h"
+#include "android/base/export.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
 #include "android/snapshot/common.h"
@@ -46,20 +47,20 @@ class TextureSaver final : public ITextureSaver {
     DISALLOW_COPY_AND_ASSIGN(TextureSaver);
 
 public:
-    TextureSaver(android::base::StdioStream&& stream);
-    ~TextureSaver();
-    void saveTexture(uint32_t texId, const saver_t& saver) override;
-    void done();
+    AEMU_EXPORT TextureSaver(android::base::StdioStream&& stream);
+    AEMU_EXPORT ~TextureSaver();
+    AEMU_EXPORT void saveTexture(uint32_t texId, const saver_t& saver) override;
+    AEMU_EXPORT void done();
 
-    bool hasError() const override { return mHasError; }
-    uint64_t diskSize() const override { return mDiskSize; }
-    bool compressed() const override { return mIndex.version > 1; }
+    AEMU_EXPORT bool hasError() const override { return mHasError; }
+    AEMU_EXPORT uint64_t diskSize() const override { return mDiskSize; }
+    AEMU_EXPORT bool compressed() const override { return mIndex.version > 1; }
 
     // getDuration():
     // Returns true if there was save with measurable time
     // (and writes it to |duration| if |duration| is not null),
     // otherwise returns false.
-    bool getDuration(base::System::Duration* duration) override {
+    AEMU_EXPORT bool getDuration(base::System::Duration* duration) override {
         if (mEndTime < mStartTime) {
             return false;
         }
