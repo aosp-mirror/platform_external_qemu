@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/base/export.h"
 #include "android/skin/winsys.h"
 #include "android/utils/compiler.h"
 
@@ -127,19 +128,19 @@ void free_emugl_host_gpu_props(emugl_host_gpu_prop_list props);
 // Returns true on success, or false if there was an error (e.g. bad
 // mode or option value), in which case the |status| field will contain
 // a small error message.
-bool emuglConfig_init(EmuglConfig* config,
-                      bool gpu_enabled,
-                      const char* gpu_mode,
-                      const char* gpu_option,
-                      int bitness,
-                      bool no_window,
-                      bool blacklisted,
-                      bool google_apis,
-                      enum WinsysPreferredGlesBackend uiPreferredBackend,
-                      bool use_host_vulkan);
+AEMU_EXPORT bool emuglConfig_init(EmuglConfig* config,
+                                  bool gpu_enabled,
+                                  const char* gpu_mode,
+                                  const char* gpu_option,
+                                  int bitness,
+                                  bool no_window,
+                                  bool blacklisted,
+                                  bool google_apis,
+                                  enum WinsysPreferredGlesBackend uiPreferredBackend,
+                                  bool use_host_vulkan);
 
 // Setup GPU emulation according to a given |backend|.
 // |bitness| is the host bitness, and can be 0 (autodetect), 32 or 64.
-void emuglConfig_setupEnv(const EmuglConfig* config);
+AEMU_EXPORT void emuglConfig_setupEnv(const EmuglConfig* config);
 
 ANDROID_END_HEADER

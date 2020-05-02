@@ -11,11 +11,12 @@
 
 #pragma once
 
+#include "android/base/export.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
 
 // Initialize the 'refcount' pipe.
-void android_init_refcount_pipe(void);
+AEMU_EXPORT void android_init_refcount_pipe(void);
 
 ANDROID_END_HEADER

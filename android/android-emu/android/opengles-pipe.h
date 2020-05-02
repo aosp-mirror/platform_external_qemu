@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "android/base/export.h"
 #include "android/utils/compiler.h"
 #include "android/utils/looper.h"
 
@@ -24,11 +25,11 @@ ANDROID_BEGIN_HEADER
 // Initialize the 'opengles' pipe - the one used for GPU emulation protocol
 // between guest and the emugl library.
 // |dummyLooper| is now unused, this will be removed in a future patch.
-void android_init_opengles_pipe(void);
+AEMU_EXPORT void android_init_opengles_pipe(void);
 
 // Set the way in which the pipe processes guest recv depending on the OS
 // 0: Android
 // 1: Fuchsia
-void android_opengles_pipe_set_recv_mode(int);
+AEMU_EXPORT void android_opengles_pipe_set_recv_mode(int);
 
 ANDROID_END_HEADER

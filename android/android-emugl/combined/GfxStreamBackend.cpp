@@ -265,7 +265,9 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     GFXS_LOG("start. display dimensions: width %u height %u", display_width, display_height);
 
-    android_avdInfo = avdInfo_newCustom(
+    AvdInfo** avdInfoPtr = aemu_get_android_avdInfoPtr();
+
+    (*avdInfoPtr) = avdInfo_newCustom(
         "goldfish_opengl_test",
         28,
         "x86_64",
@@ -323,10 +325,12 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
-    android_hw->hw_gltransport_asg_writeBufferSize = 262144;
-    android_hw->hw_gltransport_asg_writeStepSize = 8192;
-    android_hw->hw_gltransport_asg_dataRingSize = 131072;
-    android_hw->hw_gltransport_drawFlushInterval = 800;
+    auto androidHw = aemu_get_android_hw();
+
+    androidHw->hw_gltransport_asg_writeBufferSize = 262144;
+    androidHw->hw_gltransport_asg_writeStepSize = 8192;
+    androidHw->hw_gltransport_asg_dataRingSize = 131072;
+    androidHw->hw_gltransport_drawFlushInterval = 800;
 
     EmuglConfig config;
 
