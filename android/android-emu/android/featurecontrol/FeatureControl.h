@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/base/export.h"
 #include "android/featurecontrol/Features.h"
 #include "android/featurecontrol/HWMatching.h"
 
@@ -40,7 +41,7 @@ namespace featurecontrol {
 void initialize();
 
 bool isEnabled(Feature feature);
-void setEnabledOverride(Feature feature, bool isEnabled);
+AEMU_EXPORT void setEnabledOverride(Feature feature, bool isEnabled);
 void resetEnabledToDefault(Feature feature);
 
 // Queries whether this feature is tied to the guest.

@@ -15,6 +15,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/containers/StaticMap.h"
+#include "android/base/export.h"
 #include "android/emulation/control/structs.h"
 
 #include <atomic>
@@ -38,7 +39,7 @@ class HostmemIdMapping {
 public:
     HostmemIdMapping() = default;
 
-    static HostmemIdMapping* get();
+    AEMU_EXPORT static HostmemIdMapping* get();
 
     using Id = uint64_t;
     using Entry = HostmemEntry;
@@ -46,19 +47,19 @@ public:
     static const Id kInvalidHostmemId;
 
     // Returns kInvalidHostmemId if hva or size is 0.
-    Id add(uint64_t hva, uint64_t size);
+    AEMU_EXPORT Id add(uint64_t hva, uint64_t size);
 
     // No-op if kInvalidHostmemId or a nonexistent entry
     // is referenced.
-    void remove(Id id);
+    AEMU_EXPORT void remove(Id id);
 
     // If id == kInvalidHostmemId or not found in map,
     // returns entry with id == kInvalidHostmemId,
     // hva == 0, and size == 0.
-    Entry get(Id id) const;
+    AEMU_EXPORT Entry get(Id id) const;
 
     // Restores to starting state where there are no entries.
-    void clear();
+    AEMU_EXPORT void clear();
 
 private:
     std::atomic<Id> mCurrentId {1};
@@ -72,8 +73,8 @@ private:
 // C interface for use with vm operations
 extern "C" {
 
-uint64_t android_emulation_hostmem_register(uint64_t hva, uint64_t size);
-void android_emulation_hostmem_unregister(uint64_t id);
-HostmemEntry android_emulation_hostmem_get_info(uint64_t id);
+AEMU_EXPORT uint64_t android_emulation_hostmem_register(uint64_t hva, uint64_t size);
+AEMU_EXPORT void android_emulation_hostmem_unregister(uint64_t id);
+AEMU_EXPORT HostmemEntry android_emulation_hostmem_get_info(uint64_t id);
 
 } // extern "C"

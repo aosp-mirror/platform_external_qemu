@@ -15,6 +15,7 @@
 #include "android/avd/util.h"
 #include "android/avd/keys.h"
 #include "android/base/ArraySize.h"
+#include "android/base/export.h"
 #include "android/cmdline-option.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/featurecontrol/feature_control.h"
@@ -40,6 +41,10 @@
 /* global variables - see android/globals.h */
 AvdInfoParams   android_avdParams[1];
 AvdInfo*        android_avdInfo;
+
+AEMU_EXPORT AvdInfo** aemu_get_android_avdInfoPtr() {
+    return &android_avdInfo;
+}
 
 /* set to 1 for debugging */
 #define DEBUG 0
