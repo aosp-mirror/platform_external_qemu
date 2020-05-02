@@ -37,6 +37,23 @@
     },
     {
       "key": {
+        "uuid": "b26ec9e7_41362dfc",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-05-02T01:53:07Z",
+      "side": 1,
+      "message": "Can we use another function name? setLooper is a basic thread looper function.",
+      "revId": "e61d1b7748ee856f9fa4d57a20427c59baf50127",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "72cf3321_73b07a13",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
         "patchSetId": 7
