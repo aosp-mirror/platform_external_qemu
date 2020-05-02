@@ -14,6 +14,7 @@
 
 #include "android/avd/hw-config.h"
 #include "android/avd/util.h"
+#include "android/base/export.h"
 #include "android/utils/compiler.h"
 #include "android/utils/file_data.h"
 #include "android/utils/ini.h"
@@ -432,7 +433,7 @@ void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes);
 
 bool avdInfo_isMarshmallowOrHigher(AvdInfo* i);
 
-AvdInfo* avdInfo_newCustom(
+AEMU_EXPORT AvdInfo* avdInfo_newCustom(
     const char* name,
     int apiLevel,
     const char* abi,

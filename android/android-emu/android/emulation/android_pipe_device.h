@@ -11,12 +11,15 @@
 */
 #pragma once
 
+#include "android/base/export.h"
 #include "android/emulation/android_pipe_common.h"
 #include "android/utils/compiler.h"
 #include "android/utils/stream.h"
 
 #include <stdbool.h>
 #include <stdint.h>
+
+#define ANDROID_PIPE_DEVICE_EXPORT extern AEMU_EXPORT
 
 ANDROID_BEGIN_HEADER
 
@@ -107,31 +110,34 @@ ANDROID_BEGIN_HEADER
 // hardware-side view of the pipe, and will be passed to the 'init' callback
 // from AndroidPipeHwFuncs. This returns a new |internal-pipe| value that is
 // only used by the virtual device to call android_pipe_xxx() functions below.
-extern void* android_pipe_guest_open(void* hwpipe);
+ANDROID_PIPE_DEVICE_EXPORT void* android_pipe_guest_open(
+    void* hwpipe);
 
 // Similar to android_pipe_guest_open(), but has a flags parameter that is used
 // to communicate unique transport properties about the pipe.
-extern void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags);
+ANDROID_PIPE_DEVICE_EXPORT void* android_pipe_guest_open_with_flags(
+    void* hwpipe, uint32_t flags);
 
 // Close and free an Android pipe. |pipe| must be the result of a previous
 // android_pipe_guest_open() call or the second parameter to
 // android_pipe_reset().
 // This must *not* be called from the host side, see android_pipe_host_close()
 // instead.
-extern void android_pipe_guest_close(void* internal_pipe,
-                                     PipeCloseReason reason);
+ANDROID_PIPE_DEVICE_EXPORT void android_pipe_guest_close(
+    void* internal_pipe, PipeCloseReason reason);
 
 // Hooks for a start/end of save/load operations, called once per each snapshot.
-extern void android_pipe_guest_pre_load(Stream* file);
-extern void android_pipe_guest_post_load(Stream* file);
-extern void android_pipe_guest_pre_save(Stream* file);
-extern void android_pipe_guest_post_save(Stream* file);
+ANDROID_PIPE_DEVICE_EXPORT void android_pipe_guest_pre_load(Stream* file);
+ANDROID_PIPE_DEVICE_EXPORT void android_pipe_guest_post_load(Stream* file);
+ANDROID_PIPE_DEVICE_EXPORT void android_pipe_guest_pre_save(Stream* file);
+ANDROID_PIPE_DEVICE_EXPORT void android_pipe_guest_post_save(Stream* file);
 
 // Save the state of an Android pipe to a stream. |internal_pipe| is the pipe
 // instance from android_pipe_guest_open() or android_pipe_guest_load(), and
 // |file| is the
 // output stream.
-extern void android_pipe_guest_save(void* internal_pipe, Stream* file);
+ANDROID_PIPE_DEVICE_EXPORT void android_pipe_guest_save(
+    void* internal_pipe, Stream* file);
 
 // Load the state of an Android pipe from a stream. |file| is the input stream,
 // |hwpipe| is the hardware-side pipe descriptor. On success, return a new
@@ -140,9 +146,8 @@ extern void android_pipe_guest_save(void* internal_pipe, Stream* file);
 // sets |*force_close| to 1 to indicate that the pipe must be force-closed
 // just after its load/creation (only useful for certain services that can't
 // preserve state into streams). Return NULL on faillure.
-extern void* android_pipe_guest_load(Stream* file,
-                                     void* hwpipe,
-                                     char* force_close);
+ANDROID_PIPE_DEVICE_EXPORT void* android_pipe_guest_load(
+    Stream* file, void* hwpipe, char* force_close);
 
 // Similar to android_pipe_guest_load(), but this function is only called from
 // the
@@ -152,28 +157,24 @@ extern void* android_pipe_guest_load(Stream* file,
 // The difference is that this must also read the hardware-specific state
 // fields, and store them into |*channel|, |*wakes| and |*closed| on
 // success.
-extern void* android_pipe_guest_load_legacy(Stream* file,
-                                            void* hwpipe,
-                                            uint64_t* channel,
-                                            unsigned char* wakes,
-                                            unsigned char* closed,
-                                            char* force_close);
+ANDROID_PIPE_DEVICE_EXPORT void* android_pipe_guest_load_legacy(
+    Stream* file, void* hwpipe, uint64_t* channel,
+    unsigned char* wakes, unsigned char* closed, char* force_close);
 
 // Call the poll() callback of the client associated with |pipe|.
-extern unsigned android_pipe_guest_poll(void* internal_pipe);
+ANDROID_PIPE_DEVICE_EXPORT unsigned android_pipe_guest_poll(void* internal_pipe);
 
 // Call the recvBuffers() callback of the client associated with |pipe|.
-extern int android_pipe_guest_recv(void* internal_pipe,
-                                   AndroidPipeBuffer* buffers,
-                                   int numBuffers);
+ANDROID_PIPE_DEVICE_EXPORT int android_pipe_guest_recv(
+    void* internal_pipe, AndroidPipeBuffer* buffers, int numBuffers);
 
 // Call the sendBuffers() callback of the client associated with |pipe|.
-extern int android_pipe_guest_send(void* internal_pipe,
-                                   const AndroidPipeBuffer* buffer,
-                                   int numBuffer);
+ANDROID_PIPE_DEVICE_EXPORT int android_pipe_guest_send(
+    void* internal_pipe, const AndroidPipeBuffer* buffer, int numBuffer);
 
 // Call the wakeOn() callback of the client associated with |pipe|.
-extern void android_pipe_guest_wake_on(void* internal_pipe, unsigned wakes);
+ANDROID_PIPE_DEVICE_EXPORT void android_pipe_guest_wake_on(
+    void* internal_pipe, unsigned wakes);
 
 // A set of functions that must be implemented by the virtual device
 // implementation. Used with call android_pipe_set_hw_funcs().
@@ -188,17 +189,17 @@ typedef struct AndroidPipeHwFuncs {
 } AndroidPipeHwFuncs;
 
 // Utility functions to look up pipe instances and ids.
-extern int android_pipe_get_id(void* internal_pipe);
-extern void* android_pipe_lookup_by_id(int id);
+ANDROID_PIPE_DEVICE_EXPORT int android_pipe_get_id(void* internal_pipe);
+ANDROID_PIPE_DEVICE_EXPORT void* android_pipe_lookup_by_id(int id);
 
 // Change the set of AndroidPipeHwFuncs corresponding to the hardware virtual
 // device, return the old value. This must be called from the virtual device
 // when it is realized / initialized.
-extern const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
+ANDROID_PIPE_DEVICE_EXPORT const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
         const AndroidPipeHwFuncs* hw_funcs);
 
 // Similar to android_pipe_set_hw_funcs, but if in virtio mode.
-extern const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_funcs(
+ANDROID_PIPE_DEVICE_EXPORT const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_funcs(
         const AndroidPipeHwFuncs* hw_funcs);
 
 ANDROID_END_HEADER
