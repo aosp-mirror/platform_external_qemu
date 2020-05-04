@@ -67,12 +67,23 @@ bool MediaCudaDriverHelper::initCudaDrivers() {
     typedef void* CUDADRIVER;
 #endif
     CUDADRIVER hHandleDriver = 0;
-    if (CUDA_SUCCESS != cuInit(0, __CUDA_API_VERSION, hHandleDriver)) {
+    int initResult = CUDA_SUCCESS;
+    // try 3 times: especially important after reboot
+    // the cuda ko might not be loaded in the firs try
+    for (int i = 0; i < 3; ++ i) {
+        initResult = cuInit(0, __CUDA_API_VERSION, hHandleDriver);
+        if (CUDA_SUCCESS == initResult) {
+            break;
+        }
+    }
+
+    if (initResult != CUDA_SUCCESS) {
         fprintf(stderr,
                 "Failed to call cuInit, cannot use nvidia cuvid decoder for "
                 "h264 stream\n");
         return false;
     }
+
     if (CUDA_SUCCESS != cuvidInit(0)) {
         fprintf(stderr,
                 "Failed to call cuvidInit, cannot use nvidia cuvid decoder for "
