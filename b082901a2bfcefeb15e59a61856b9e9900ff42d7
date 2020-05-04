@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "42c101ef_cc5e12e0",
+        "filename": "android/android-emu/android/base/files/PathUtils_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-05-04T17:30:50Z",
+      "side": 1,
+      "message": "there\u0027s a chance this ends up as \"□□□□□□.txt\" and then everything works because that\u0027s a valid path and so on. Do all emulator compilers support explicit utf8 literals (u8\"...\")?",
+      "range": {
+        "startLine": 572,
+        "startChar": 24,
+        "endLine": 572,
+        "endChar": 36
+      },
+      "revId": "b082901a2bfcefeb15e59a61856b9e9900ff42d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "438a5e34_a343ff7b",
+        "filename": "android/android-emu/android/base/system/Win32UnicodeString.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-05-04T17:30:50Z",
+      "side": 1,
+      "message": "1. make it const\n2. it\u0027s dangerous because wchar_t* converts to bool easily, getting you a whole bunch of undesirable implicit conversions (to bool, int etc). Are you sure having it adds more benefit than introduces bugs?",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 74,
+        "endChar": 0
+      },
+      "revId": "b082901a2bfcefeb15e59a61856b9e9900ff42d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
