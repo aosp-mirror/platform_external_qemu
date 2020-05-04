@@ -123,6 +123,24 @@
       "revId": "c5b453d0722a1cbdca3747f982c12f12fef5d1e7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51441b1b_66091557",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-04T11:12:18Z",
+      "side": 1,
+      "message": "In that scenario we must inject the looper thread into the readworker, as the doPost callback must be made on a separate thread than the processing thread. Let me know if you think that is a better approach.",
+      "parentUuid": "9de50a3c_62b80bd8",
+      "revId": "c5b453d0722a1cbdca3747f982c12f12fef5d1e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
