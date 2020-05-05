@@ -77,8 +77,8 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include <unordered_set>
 
 #ifndef _WIN32
-#include <fcntl.h>
 #include <dirent.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <signal.h>
 #include <sys/statvfs.h>
@@ -103,6 +103,7 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #if defined (__linux__)
 #include <fstream>
 #include <string>
+#include <sys/sysmacros.h>
 #include <sys/resource.h>
 #include <sys/utsname.h>
 #include <sys/vfs.h>

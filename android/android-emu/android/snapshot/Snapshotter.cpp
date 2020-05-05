@@ -44,9 +44,14 @@
 #include <cassert>
 #include <utility>
 
+#ifdef __x86_64__
+#define FAST_ZERO_CHECK 1
 extern "C" {
 #include <emmintrin.h>
 }
+#else
+#define FAST_ZERO_CHECK 0
+#endif
 
 using android::base::LazyInstance;
 using android::base::PathUtils;
@@ -60,6 +65,7 @@ namespace pb = android_studio;
 // Inspired by QEMU's bufferzero.c implementation, but simplified for the case
 // when checking the whole aligned memory page.
 static bool buffer_zero_sse2(const void* buf, int len) {
+#ifdef __x86_64__
     buf = __builtin_assume_aligned(buf, 1024);
     __m128i t = _mm_load_si128(static_cast<const __m128i*>(buf));
     auto p = reinterpret_cast<__m128i*>(
@@ -94,6 +100,15 @@ static bool buffer_zero_sse2(const void* buf, int len) {
     t |= e[-1];
 #endif
     return _mm_movemask_epi8(_mm_cmpeq_epi32(t, zero)) == 0xFFFF;
+#else
+    // TODO(bohu): find faster implementation for aarch64
+    const char* bytes = (const char*)buf;
+    for (int i = 0; i < len; ++i) {
+        if (bytes[i])
+            return false;
+    }
+    return true;
+#endif
 }
 
 namespace android {
