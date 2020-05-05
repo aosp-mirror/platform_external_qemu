@@ -476,13 +476,13 @@ private:
                             systemDir,
                             get_qcow2_image_basename(sysImagePath).c_str()));
                     filePath = allocatedPath.get();
-                    driveParam += StringFormat("index=%d,id=system,file=%s",
+                    driveParam += StringFormat("index=%d,id=system,if=none,file=%s",
                                                m_driveIndex++, filePath);
                 } else {
                     qCow2Format = false;
                     filePath = sysImagePath.c_str();
                     driveParam += StringFormat(
-                            "index=%d,id=system,file=%s"
+                            "index=%d,id=system,if=none,file=%s"
                             ",read-only",
                             m_driveIndex++, filePath);
                 }
@@ -504,13 +504,13 @@ private:
                             systemDir,
                             get_qcow2_image_basename(vendorImagePath).c_str()));
                     filePath = allocatedPath.get();
-                    driveParam += StringFormat("index=%d,id=vendor,file=%s",
+                    driveParam += StringFormat("index=%d,id=vendor,if=none,file=%s",
                                                m_driveIndex++, filePath);
                 } else {
                     qCow2Format = false;
                     filePath = vendorImagePath.c_str();
                     driveParam += StringFormat(
-                            "index=%d,id=vendor,file=%s"
+                            "index=%d,id=vendor,if=none,file=%s"
                             ",read-only",
                             m_driveIndex++, filePath);
                 }
@@ -521,7 +521,7 @@ private:
                 filePath = m_hw->disk_cachePartition_path;
                 bufferString = StringFormat("%s.qcow2", filePath);
                 driveParam +=
-                        StringFormat("index=%d,id=cache,file=%s",
+                        StringFormat("index=%d,id=cache,if=none,file=%s",
                                      m_driveIndex++, bufferString.c_str());
                 deviceParam = StringFormat("%s,drive=cache",
                                            kTarget.storageDeviceType);
@@ -530,7 +530,7 @@ private:
                 filePath = m_hw->disk_dataPartition_path;
                 bufferString = StringFormat("%s.qcow2", filePath);
                 driveParam +=
-                        StringFormat("index=%d,id=userdata,file=%s",
+                        StringFormat("index=%d,id=userdata,if=none,file=%s",
                                      m_driveIndex++, bufferString.c_str());
                 deviceParam = StringFormat("%s,drive=userdata",
                                            kTarget.storageDeviceType);
@@ -541,7 +541,7 @@ private:
                     filePath = m_hw->hw_sdCard_path;
                     bufferString = StringFormat("%s.qcow2", filePath);
                     driveParam +=
-                            StringFormat("index=%d,id=sdcard,file=%s",
+                            StringFormat("index=%d,id=sdcard,if=none,file=%s",
                                          m_driveIndex++, bufferString.c_str());
                     deviceParam = StringFormat("%s,drive=sdcard",
                                                kTarget.storageDeviceType);
@@ -557,7 +557,7 @@ private:
                     filePath = m_hw->disk_encryptionKeyPartition_path;
                     bufferString = StringFormat("%s.qcow2", filePath);
                     driveParam +=
-                            StringFormat("index=%d,id=encrypt,file=%s",
+                            StringFormat("index=%d,id=encrypt,if=none,file=%s",
                                          m_driveIndex++, bufferString.c_str());
                     deviceParam = StringFormat("%s,drive=encrypt",
                                                kTarget.storageDeviceType);
