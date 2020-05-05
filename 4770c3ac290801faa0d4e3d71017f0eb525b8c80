@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0bb02435_5a00606a",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-05-05T07:23:03Z",
+      "side": 1,
+      "message": "nit: It looks like this variable will be unused on non-Linux platforms, which may result in a compiler warning / error. You could either move its definition inside the #if defined(__linux__) .. #else block, or simply use:\n\n  struct pollfd fds[] \u003d {\n    .fd \u003d fd,\n    ...\n  };\n\nwhich should compile just fine, iirc.",
+      "revId": "4770c3ac290801faa0d4e3d71017f0eb525b8c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
