@@ -35,6 +35,10 @@
 #include "msvc-posix.h"
 #endif
 
+#ifndef _WIN32
+#include <poll.h>
+#endif
+
 #include <vector>
 
 #include <stdlib.h>
@@ -618,7 +622,6 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
     // Allow an entire 250ms to connect to "loopback" address :thinkingface:
     tv.tv_usec = 1000 * 250;
     int fd = s.get();
-    FD_SET(fd, &my_set);
 
     // The initial connection needs to be nonblocking since simple configs like
     // firewalls can make connect() hang. The initial connect() is in a VCPU
@@ -636,8 +639,30 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
         (errno == EWOULDBLOCK ||
          errno == EAGAIN ||
          errno == EINPROGRESS)) {
-        int selectRes = HANDLE_EINTR(::select(fd + 1, 0, &my_set, 0, &tv));
-        if (selectRes > 0) {
+
+#ifndef _WIN32
+        // On Linux (at least), dont' actually use select(), because the fd
+        // number can be > 1024
+        // On other platforms, let
+        struct pollfd fds[] = {
+            {
+                .fd = fd,
+                .events = POLLIN | POLLOUT | POLLHUP,
+                .revents = 0,
+            },
+        };
+        int numFdsReady = HANDLE_EINTR(::poll(fds, 1, tv.tv_usec / 1000));
+#else // !_WIN32
+        if (fd >= FD_SETSIZE) {
+            fprintf(stderr, "%s: error: fd %d above FD_SETSIZE (%d)\n",
+                    __func__, fd, FD_SETSIZE);
+            return -1;
+        }
+        FD_SET(fd, &my_set);
+        int numFdsReady = HANDLE_EINTR(::select(fd + 1, 0, &my_set, 0, &tv));
+#endif // _WIN32
+
+        if (numFdsReady > 0) {
             int err = 0;
             socklen_t optLen = sizeof(err);
             if (getsockopt(fd, SOL_SOCKET, SO_ERROR,
@@ -649,7 +674,7 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
             socketSetBlocking(fd);
             return s.release();
         } else {
-            // select() failed.
+            // poll / select() failed.
             return -1;
         }
     } else {
