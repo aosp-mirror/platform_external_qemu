@@ -22,6 +22,30 @@
       "revId": "0062336d696188160472ed624a062a5a2fbcefbe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "60e7d0e9_8eaaba64",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-05-05T16:33:59Z",
+      "side": 1,
+      "message": "Good catch! And this could be moved to the Win32 segment below as well.",
+      "parentUuid": "1a6dd771_37b0b2e4",
+      "range": {
+        "startLine": 625,
+        "startChar": 0,
+        "endLine": 625,
+        "endChar": 24
+      },
+      "revId": "0062336d696188160472ed624a062a5a2fbcefbe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
