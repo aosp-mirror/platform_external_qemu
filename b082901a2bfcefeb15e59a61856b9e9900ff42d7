@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b2d17c74_325831f9",
+        "filename": "android/android-emu/android/base/files/PathUtils_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-05T09:57:32Z",
+      "side": 1,
+      "message": "We are using clang on all platforms now, will switch to u8 to make it explicit.",
+      "parentUuid": "42c101ef_cc5e12e0",
+      "range": {
+        "startLine": 572,
+        "startChar": 24,
+        "endLine": 572,
+        "endChar": 36
+      },
+      "revId": "b082901a2bfcefeb15e59a61856b9e9900ff42d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "438a5e34_a343ff7b",
         "filename": "android/android-emu/android/base/system/Win32UnicodeString.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2020-05-04T17:30:50Z",
       "side": 1,
       "message": "1. make it const\n2. it\u0027s dangerous because wchar_t* converts to bool easily, getting you a whole bunch of undesirable implicit conversions (to bool, int etc). Are you sure having it adds more benefit than introduces bugs?",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 74,
+        "endChar": 0
+      },
+      "revId": "b082901a2bfcefeb15e59a61856b9e9900ff42d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9fbb1c84_09ef7949",
+        "filename": "android/android-emu/android/base/system/Win32UnicodeString.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-05T09:57:32Z",
+      "side": 1,
+      "message": "Let me just remove it. We should probably remove it from android::base::StringView as well for the same reason. Tracking in b/155718488",
+      "parentUuid": "438a5e34_a343ff7b",
       "range": {
         "startLine": 72,
         "startChar": 0,
