@@ -48,6 +48,7 @@
 
 #include "ANGLEShaderParser.h"
 
+#include <math.h>
 #include <stdio.h>
 
 #include <numeric>
