@@ -19,7 +19,19 @@ target_include_directories(ssl PRIVATE ${BORINGSSL_ROOT}/src/ssl)
 android_target_compile_options(ssl windows PRIVATE "-UNDEBUG")
 
 # Setup the crypto libraries:
-if(LINUX_X86_64)
+if(LINUX_AARCH64)
+  android_add_library(
+    TARGET crypto
+    LIBNAME
+      boringssl
+      URL
+      "https://android.googlesource.com/platform/external/boringssl/+/refs/heads/master"
+    REPO "${BORINGSSL_ROOT}"
+    NOTICE "REPO/NOTICE"
+    LICENSE "OpenSSL"
+    SRC # cmake-format: sortable
+        ${crypto_sources} ${crypto_sources_linux_aarch64})
+elseif(LINUX_X86_64)
   android_add_library(
     TARGET crypto
     LIBNAME
