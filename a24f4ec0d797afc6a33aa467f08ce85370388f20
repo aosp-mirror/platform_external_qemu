@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "73ded1b0_0b72b047",
+        "filename": "android/third_party/breakpad/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-05T18:16:15Z",
+      "side": 1,
+      "message": "nit: We might want to make a linux tag that encompasses both linux-aarch64 and linux-x86_64",
+      "revId": "a24f4ec0d797afc6a33aa467f08ce85370388f20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
