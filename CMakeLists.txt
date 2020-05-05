@@ -1,5 +1,7 @@
 project(Android-Emulator)
 cmake_minimum_required(VERSION 3.5)
+message("Android target tag: ${ANDROID_TARGET_TAG}")
+
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(
     WARNING
@@ -156,14 +158,26 @@ prebuilt(Threads)
 
 # Configure OS depdendency licensenses
 if(LINUX_X86_64)
-  android_license(
-    TARGET "RUNTIME_OS_DEPENDENCIES"
-    LIBNAME "libc++"
-    URL "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/"
-    SPDX "LLVM-exception"
-    LICENSE
-      "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/LICENSE.TXT"
-    LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LLVM")
+  if (LINUX_CROSS_AARCH64)
+      message("Cross build aarch64 libstdc++")
+      android_license(
+        TARGET "RUNTIME_OS_DEPENDENCIES"
+        LIBNAME "libstdc++"
+        URL "https://packages.debian.org/sid/crossbuild-essential-arm64"
+        SPDX "LLVM-exception"
+        LICENSE
+          "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/LICENSE.TXT"
+        LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LLVM")
+  else()
+      android_license(
+        TARGET "RUNTIME_OS_DEPENDENCIES"
+        LIBNAME "libc++"
+        URL "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/"
+        SPDX "LLVM-exception"
+        LICENSE
+          "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/LICENSE.TXT"
+        LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LLVM")
+  endif()
 else()
   android_license(TARGET "RUNTIME_OS_DEPENDENCIES" LIBNAME None SPDX None
                   LICENSE None LOCAL None)
