@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "04b45037_4983fc2f",
+        "filename": "android/build/cmake/toolchain-linux-aarch64.cmake",
+        "patchSetId": 8
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-05T22:59:39Z",
+      "side": 1,
+      "message": "I guess this might be able to say ${ANDROID_TARGET_TAG}, otherwise seems good to me",
+      "revId": "11f86047e83dca569574cd5e527a3fa460373fc2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
