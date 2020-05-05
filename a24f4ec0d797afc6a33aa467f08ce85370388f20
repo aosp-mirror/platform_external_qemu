@@ -16,6 +16,24 @@
       "revId": "a24f4ec0d797afc6a33aa467f08ce85370388f20",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "204e70c7_1ce0c7c8",
+        "filename": "android/third_party/breakpad/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-05-05T19:10:07Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "73ded1b0_0b72b047",
+      "revId": "a24f4ec0d797afc6a33aa467f08ce85370388f20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
