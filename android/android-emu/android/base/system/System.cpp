@@ -77,11 +77,12 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include <unordered_set>
 
 #ifndef _WIN32
-#include <fcntl.h>
 #include <dirent.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <signal.h>
 #include <sys/statvfs.h>
+#include <sys/sysmacros.h>
 #include <sys/times.h>
 #include <sys/types.h>
 #include <sys/wait.h>
