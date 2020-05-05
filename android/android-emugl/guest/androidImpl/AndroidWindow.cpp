@@ -17,9 +17,10 @@
 
 #include "android/base/Backtrace.h"
 
-#include <hardware/gralloc.h>
 #include <errno.h>
+#include <hardware/gralloc.h>
 #include <stdio.h>
+#include <cassert>
 
 #define AW_DEBUG 1
 
