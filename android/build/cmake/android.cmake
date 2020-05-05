@@ -28,6 +28,7 @@ function(_check_target_tag TAG)
       windows
       windows_msvc-x86_64
       linux-x86_64
+      linux-aarch64
       darwin-x86_64
       all
       Clang)
