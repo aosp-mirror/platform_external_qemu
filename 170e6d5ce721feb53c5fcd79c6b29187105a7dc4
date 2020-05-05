@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "881022ea_014dd9b3",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-05T18:21:30Z",
+      "side": 1,
+      "message": "Nit: whitespace",
+      "revId": "170e6d5ce721feb53c5fcd79c6b29187105a7dc4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9621e862_a464e2a3",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 6
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-05T18:21:30Z",
+      "side": 1,
+      "message": "You can leave this message out.",
+      "revId": "170e6d5ce721feb53c5fcd79c6b29187105a7dc4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
