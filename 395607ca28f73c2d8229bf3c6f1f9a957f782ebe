@@ -16,6 +16,24 @@
       "revId": "395607ca28f73c2d8229bf3c6f1f9a957f782ebe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9e75d934_8672412d",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-05-05T18:25:30Z",
+      "side": 1,
+      "message": "that will be a bug to figure out, b/155787437",
+      "parentUuid": "440590d8_55aa0073",
+      "revId": "395607ca28f73c2d8229bf3c6f1f9a957f782ebe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
