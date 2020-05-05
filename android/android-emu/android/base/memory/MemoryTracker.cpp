@@ -23,6 +23,7 @@
 
 #include <execinfo.h>
 #include <libunwind.h>
+#include <algorithm>
 #include <set>
 #include <sstream>
 #include <vector>
