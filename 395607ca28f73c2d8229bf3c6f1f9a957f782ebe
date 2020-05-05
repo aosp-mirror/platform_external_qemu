@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "440590d8_55aa0073",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-05T18:01:13Z",
+      "side": 1,
+      "message": "Does arm have something comparable like the code above to make it fast? (or is that for later?)",
+      "revId": "395607ca28f73c2d8229bf3c6f1f9a957f782ebe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

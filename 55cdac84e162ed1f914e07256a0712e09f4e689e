@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4674e712_5d93b844",
+        "filename": "android/android-emu/android/base/ring_buffer.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-05T18:01:13Z",
+      "side": 1,
+      "message": "Is it okay to skip this is this just merely a performance improvement?",
+      "range": {
+        "startLine": 449,
+        "startChar": 8,
+        "endLine": 449,
+        "endChar": 17
+      },
+      "revId": "55cdac84e162ed1f914e07256a0712e09f4e689e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
