@@ -22,6 +22,30 @@
       "revId": "55cdac84e162ed1f914e07256a0712e09f4e689e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7de826eb_12b15719",
+        "filename": "android/android-emu/android/base/ring_buffer.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-05-05T18:15:10Z",
+      "side": 1,
+      "message": "IIUC, this just do some noop with low power comsumption. \n\nadd lfy@",
+      "parentUuid": "4674e712_5d93b844",
+      "range": {
+        "startLine": 449,
+        "startChar": 8,
+        "endLine": 449,
+        "endChar": 17
+      },
+      "revId": "55cdac84e162ed1f914e07256a0712e09f4e689e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
