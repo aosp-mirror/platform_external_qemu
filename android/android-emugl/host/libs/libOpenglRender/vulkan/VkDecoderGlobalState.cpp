@@ -225,11 +225,18 @@ public:
         createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
 
+        // bug: 155795731 (see below)
+        AutoLock lock(mLock);
+
         VkResult res = m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
 
         if (res != VK_SUCCESS) return res;
 
-        AutoLock lock(mLock);
+        // bug: 155795731 we should protect vkCreateInstance in the driver too
+        // because, at least w/ tcmalloc, there is a flaky crash on loading its
+        // procs
+        //
+        // AutoLock lock(mLock);
 
         // TODO: bug 129484301
         get_emugl_vm_operations().setSkipSnapshotSave(
@@ -821,13 +828,19 @@ public:
         createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
 
+        // bug: 155795731 (see below)
+        AutoLock lock(mLock);
         VkResult result =
             vk->vkCreateDevice(
                     physicalDevice, &createInfoFiltered, pAllocator, pDevice);
 
         if (result != VK_SUCCESS) return result;
 
-        AutoLock lock(mLock);
+        // bug: 155795731 we should protect vkCreateDevice in the driver too
+        // because, at least w/ tcmalloc, there is a flaky crash on loading its
+        // procs
+        //
+        // AutoLock lock(mLock);
 
         mDeviceToPhysicalDevice[*pDevice] = physicalDevice;
 
