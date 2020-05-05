@@ -13,8 +13,9 @@
 // limitations under the License.
 #pragma once
 
-#include <atomic>   // for atomic
-#include <chrono>   // for milliseconds
+#include <atomic>  // for atomic
+#include <chrono>  // for milliseconds
+#include <condition_variable>
 #include <cstdint>  // for uint64_t
 #include <mutex>    // for condition_variable, mutex
 

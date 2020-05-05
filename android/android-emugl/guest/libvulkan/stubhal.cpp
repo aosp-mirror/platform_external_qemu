@@ -28,6 +28,7 @@
 
 #include <array>
 #include <bitset>
+#include <cstring>
 #include <mutex>
 
 #include <log/log.h>

@@ -21,7 +21,9 @@
 #include <sys/time.h>
 #endif
 
+#ifdef __x86_64__
 #include <emmintrin.h>
+#endif
 
 #ifdef _WIN32
 #include <windows.h>
@@ -443,7 +445,9 @@ bool ring_buffer_wait_write(
             ring_buffer_can_write(r, bytes);
 
     while (!can_write) {
+#ifdef __x86_64
         _mm_pause();
+#endif
         curr_wait_us = ring_buffer_curr_us() - start_us;
 
         if (curr_wait_us > yield_backoff_us) {
@@ -480,7 +484,10 @@ bool ring_buffer_wait_read(
             ring_buffer_can_read(r, bytes);
 
     while (!can_read) {
+        // TODO(bohu): find aarch64 equivalent
+#ifdef __x86_64
         _mm_pause();
+#endif
         curr_wait_us = ring_buffer_curr_us() - start_us;
 
         if (curr_wait_us > yield_backoff_us) {
@@ -585,7 +592,9 @@ uint32_t ring_buffer_read_fully_with_abort(
     uint8_t* dst = (uint8_t*)data;
 
     while (processed < bytes) {
+#ifdef __x86_64
         _mm_pause();
+#endif
         if (bytes - processed < candidate_step) {
             candidate_step = bytes - processed;
         }

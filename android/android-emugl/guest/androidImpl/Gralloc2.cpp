@@ -28,6 +28,7 @@
 #pragma clang diagnostic pop
 
 #include <grallocusage/GrallocUsageConversion.h>
+#include <cstring>
 #include "GrallocDispatch.h"
 
 namespace android {
