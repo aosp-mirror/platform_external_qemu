@@ -6,3 +6,7 @@
 #define TARGET_SUPPORTS_MTTCG 1
 #define CONFIG_I386_DIS 1
 #define CONFIG_ARM_DIS 1
+#if HOST_AARCH64
+#define CONFIG_KVM 1
+#define CONFIG_ARM_A64_DIS 1
+#endif
