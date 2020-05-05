@@ -16,6 +16,24 @@
       "revId": "4770c3ac290801faa0d4e3d71017f0eb525b8c80",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "325c9f0c_661fb66d",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-05T13:54:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0bb02435_5a00606a",
+      "revId": "4770c3ac290801faa0d4e3d71017f0eb525b8c80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
