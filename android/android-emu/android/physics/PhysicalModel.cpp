@@ -793,6 +793,10 @@ void PhysicalModelImpl::getTransform(
     }
 }
 
+float PhysicalModelImpl::getPhysicalHingeAngle0() const {
+    return android_foldable_get_hinge_degrees(0);
+}
+
 void PhysicalModelImpl::setPhysicalStateAgent(
         const QAndroidPhysicalStateAgent* agent) {
     bool stateChanging = false;
