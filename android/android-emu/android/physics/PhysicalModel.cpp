@@ -22,6 +22,7 @@
 #include "android/automation/AutomationController.h"
 #include "android/automation/AutomationEventSink.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/Backtrace.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
@@ -231,6 +232,7 @@ private:
     void setOverride(AndroidSensor sensor,
                      T* overrideMemberPointer,
                      T overrideValue) {
+        if (sensor == 11) printf("%s\n",android::base::bt().c_str());
         physicalStateChanging();
         {
             std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -249,6 +251,7 @@ private:
                      std::function<T()> physicalGetter,
                      long* measurement_id) const {
         std::lock_guard<std::recursive_mutex> lock(mMutex);
+        if (sensor == 11) printf("%s\n", android::base::bt().c_str());
         if (mUseOverride[sensor]) {
             *measurement_id = mMeasurementId[sensor];
             return *overrideMemberPointer;
@@ -791,6 +794,11 @@ void PhysicalModelImpl::getTransform(
                 *out_translation_z, *out_rotation_x, *out_rotation_y,
                 *out_rotation_z);
     }
+}
+
+float PhysicalModelImpl::getPhysicalHingeAngle0() const {
+    // hinge sensor value always set by override
+    return mHingeAngle0Override;
 }
 
 void PhysicalModelImpl::setPhysicalStateAgent(

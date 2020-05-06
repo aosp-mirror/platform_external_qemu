@@ -68,6 +68,7 @@ message SensorOverrideEvent {
         HUMIDITY = 8;
         MAGNETIC_FIELD_UNCALIBRATED = 9;
         GYROSCOPE_UNCALIBRATED = 10;
+        HINGE_ANGLE0 = 11;
     }
 
     optional Sensor sensor = 1;
