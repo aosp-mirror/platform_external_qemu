@@ -635,6 +635,19 @@ android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE
                               android-emu-base)
 
 set(ANDROID_AUTOGEN "qemu2-auto-generated")
+if (LINUX_AARCH64)
+    set(ASM_DIR_TARGET "../linux-headers/asm-arm64" )
+else()
+    set(ASM_DIR_TARGET "../linux-headers/asm-x86" )
+endif()
+
+if (NOT EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm)
+message("create_symlink ${ASM_DIR_TARGET} ${ANDROID_AUTOGEN}/asm")
+execute_process(
+        COMMAND ${CMAKE_COMMAND} -E create_symlink "${ASM_DIR_TARGET}" "${ANDROID_AUTOGEN}/asm"
+        WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR})
+endif()
+
 set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
 include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 
