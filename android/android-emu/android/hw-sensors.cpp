@@ -871,6 +871,10 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_HUMIDITY].enabled = true;
     }
 
+    if (android_hw->hw_fold_hinge_count > 0) {
+        h->sensors[ANDROID_SENSOR_HINGE_ANGLE0].enabled = true;
+    }
+
     /* XXX: TODO: Add other tests when we add the corresponding
         * properties to hardware-properties.ini et al. */
 
@@ -978,8 +982,9 @@ extern int android_sensors_override_set(
         return SENSOR_STATUS_UNKNOWN;
 
     if (hw->service != NULL) {
-        if (!hw->sensors[sensor_id].enabled)
+        if (!hw->sensors[sensor_id].enabled) {
             return SENSOR_STATUS_DISABLED;
+        }
     } else {
         return SENSOR_STATUS_NO_SERVICE;
     }
@@ -1121,20 +1126,23 @@ static FoldableState _foldableState[1] = {};
 
 FoldableState* android_foldable_initialize(const struct FoldableConfig* config) {
     bool needDefaultConfig = !config;
+    if (android_hw->hw_fold_hinge_count == 0) {
+        return nullptr;
+    }
     // Load a default config if there is nothing provided.
     if (needDefaultConfig) {
         struct FoldableConfig defaultConfig = {
             .hingesType = ANDROID_FOLDABLE_HORIZONTAL_SPLIT,
             .displayId = 0,
-            .numHinges = 1,
+            .numHinges = android_hw->hw_fold_hinge_count,
         };
-
         defaultConfig.hingeParams[0] = {
             .percentAlongDisplay = 0.5f,
-            .minDegrees = 0.0f,
-            .maxDegrees = 359.0f,
-            .defaultDegrees = 180.0f,
+            .minDegrees = (float)android_hw->hw_fold_0_min_degree,
+            .maxDegrees = (float)android_hw->hw_fold_0_max_degree,
+            .defaultDegrees = (float)android_hw->hw_fold_0_default_degree,
         };
+        //TODO: add hinge 1, 2
 
         _foldableState->config = defaultConfig;
     } else {
@@ -1166,7 +1174,6 @@ float android_foldable_get_hinge_degrees(unsigned int hinge_index) {
 void android_foldable_set_with_1d_parameter(float t) {
     if (_foldableState->config.numHinges < 1) return;
 
-
     // Many different parameterizations are possible, just pick a crappy one for now
     // (all hinges done at the same rate)
     for (unsigned int i = 0; i < _foldableState->config.numHinges; ++i) {
@@ -1175,6 +1182,11 @@ void android_foldable_set_with_1d_parameter(float t) {
             t * (_foldableState->config.hingeParams[i].maxDegrees -
                     _foldableState->config.hingeParams[i].minDegrees);
     }
+    android_sensors_override_set(ANDROID_SENSOR_HINGE_ANGLE0,
+                                 _foldableState->currentHingeDegrees[0],
+                                 0.0,
+                                 0.0);
+    //TODO: add hinge 1 and 2
 }
 
 struct FoldableState* android_foldable_get_state_ptr() {
