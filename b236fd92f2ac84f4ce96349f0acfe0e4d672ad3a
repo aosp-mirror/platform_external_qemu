@@ -22,6 +22,30 @@
       "revId": "b236fd92f2ac84f4ce96349f0acfe0e4d672ad3a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de0aee00_8772fb65",
+        "filename": "android/build/cmake/toolchain.cmake",
+        "patchSetId": 9
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-05-06T16:14:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5dcc7c5f_ebfba23a",
+      "range": {
+        "startLine": 198,
+        "startChar": 3,
+        "endLine": 200,
+        "endChar": 48
+      },
+      "revId": "b236fd92f2ac84f4ce96349f0acfe0e4d672ad3a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
