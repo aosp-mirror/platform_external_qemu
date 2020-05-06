@@ -58,7 +58,7 @@ static constexpr int kAnimationIntervalMs = 33;
 Device3DWidget::Device3DWidget(QWidget* parent)
     : GLWidget(parent),
       mUseAbstractDevice(
-          System::get()->getEnvironmentVariable("ANDROID_EMU_ABSTRACT_DEVICE_VIEW") == "1") {
+          android_hw->hw_sensor_hinge) {
 
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
@@ -423,7 +423,7 @@ Device3DWidget::generateModelVerticesFromFoldableState(const FoldableState& stat
 
     // TODO: Generalize
     // Assume split 0.5 for now, with 1 hinge
-    if (state.config.numHinges != 1) return {};
+    if (state.config.numHinges < 1) return {};
 
     float hingeRadians = state.currentHingeDegrees[0] * M_PI / 180.0f;
 

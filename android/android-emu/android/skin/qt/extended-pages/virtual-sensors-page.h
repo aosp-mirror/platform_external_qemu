@@ -62,7 +62,7 @@ private slots:
     void updateTargetState();
 
     void propagateAccelWidgetChange();
-    void propagateSlidersChange();
+    void propagateSlidersChange(bool updateHinge = false, int hingeIndex = 0);
 
     void updateModelFromAccelWidget(PhysicalInterpolation mode);
     void updateModelFromSliders(PhysicalInterpolation mode);
@@ -104,7 +104,9 @@ private slots:
     void on_positionXSlider_valueChanged(double);
     void on_positionYSlider_valueChanged(double);
     void on_positionZSlider_valueChanged(double);
-    void on_foldSlider_valueChanged(double);
+    void on_hinge0Slider_valueChanged(double);
+    void on_hinge1Slider_valueChanged(double);
+    void on_hinge2Slider_valueChanged(double);
 
     void updateResultingValues(glm::vec3 acceleration,
                                glm::vec3 gyroscope,
@@ -131,6 +133,7 @@ private:
     void onTargetStateChanged();
     void onPhysicalStateChanging();
     void onPhysicalStateStabilized();
+    void setupHingeSensorUI();
 
     static void onTargetStateChanged(void* context);
     static void onPhysicalStateChanging(void* context);
