@@ -735,6 +735,7 @@ target_include_directories(android-mock-vm-operations
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(android-mock-vm-operations PRIVATE gmock)
 
+if(NOT LINUX_AARCH64)
 # And declare the test
 android_add_test(
   TARGET android-emu_unittests
@@ -1044,3 +1045,4 @@ android_add_test(
 target_compile_options(android-emu-metrics_unittests PRIVATE -O0)
 target_link_libraries(android-emu-metrics_unittests PRIVATE gmock_main
                                                             android-emu)
+endif()
