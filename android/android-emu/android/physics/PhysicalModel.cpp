@@ -793,6 +793,21 @@ void PhysicalModelImpl::getTransform(
     }
 }
 
+float PhysicalModelImpl::getPhysicalHingeAngle0() const {
+    // hinge sensor value always set by override
+    return mHingeAngle0Override;
+}
+
+float PhysicalModelImpl::getPhysicalHingeAngle1() const {
+    // hinge sensor value always set by override
+    return mHingeAngle1Override;
+}
+
+float PhysicalModelImpl::getPhysicalHingeAngle2() const {
+    // hinge sensor value always set by override
+    return mHingeAngle2Override;
+}
+
 void PhysicalModelImpl::setPhysicalStateAgent(
         const QAndroidPhysicalStateAgent* agent) {
     bool stateChanging = false;
