@@ -70,10 +70,11 @@ TEST_F(EventWaiterTest, wake_up_for_event) {
             notify_all();
     });
 
-    // At least one event should be available..
-    // Note we assume that we got scheduled within 10 ms :-)
-    EXPECT_GT(tst.next(std::chrono::milliseconds(10)), 1);
+    // Wait until we have fired a lot of events.
     test.join();
+
+    // At least one event should be available..
+    EXPECT_GT(tst.next(std::chrono::milliseconds(10)), 1);
 }
 
 TEST_F(EventWaiterTest, times_out_not_enough) {
@@ -85,12 +86,18 @@ TEST_F(EventWaiterTest, times_out_not_enough) {
         completed = true;
     });
 
-    // We fire 99 events, and we are waiting for >100..
+
+    test.join();
+    EXPECT_TRUE(completed);
+
+    auto start = std::chrono::system_clock::now();
+    // We are waiting for >100..
     EXPECT_EQ(0, tst.next(100, std::chrono::milliseconds(10)));
 
-    // Note we assume that we got scheduled within the 10 ms above :-)
-    EXPECT_TRUE(completed);
-    test.join();
+    // Make sure we waited at least 10ms.
+    auto end = std::chrono::system_clock::now();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    EXPECT_GE(milliseconds.count(), 10);
 }
 
 }  // namespace control
