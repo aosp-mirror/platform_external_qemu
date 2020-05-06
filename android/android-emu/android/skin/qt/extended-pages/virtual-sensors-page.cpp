@@ -499,8 +499,7 @@ void VirtualSensorsPage::propagateAccelWidgetChange() {
 void VirtualSensorsPage::propagateSlidersChange() {
     reportVirtualSensorsInteraction();
     updateModelFromSliders(PHYSICAL_INTERPOLATION_SMOOTH);
-    android_foldable_set_with_1d_parameter(
-        mUi->foldSlider->getValue());
+    android_foldable_set_with_1d_parameter(mUi->foldSlider->getValue());
 }
 
 /*
