@@ -2370,7 +2370,6 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
     }
     ColorBufferMap::iterator c(m_colorbuffers.find(cb));
     if (c == m_colorbuffers.end()) {
-        fprintf(stderr, "Screenshot failed to find cb %d\n", cb);
         *width = 0;
         *height = 0;
         pixels.resize(0);
