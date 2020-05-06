@@ -455,11 +455,16 @@ android_add_interface(
 
 # This defines all the include directories needed to compile the libqemu
 # libraries. There should be no need to make additions here.
+if (LINUX_AARCH64)
+    set(TCG_ARCH_DIR "tcg/aarch64")
+else()
+    set(TCG_ARCH_DIR "tcg/i386")
+endif()
 target_include_directories(
   android-qemu-deps
   INTERFACE
     tcg
-    tcg/i386
+    ${TCG_ARCH_DIR}
     accel/tcg
     include
     disas/libvixl
