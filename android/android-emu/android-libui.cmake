@@ -340,7 +340,9 @@ if(QTWEBENGINE)
                            Qt5::WebSockets)
 endif()
 
+if(NOT LINUX_CROSS_AARCH64)
 target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
+endif()
 
 # Target specific compiler flags for windows, since we include FFMPEG C sources
 # from C++ we need to make sure this flag is set for c++ sources.
@@ -379,6 +381,7 @@ target_link_libraries(
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug.
 # This implies a direct dependency to libX11.so
 android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
+android_target_link_libraries(emulator-libui linux-aarch64 PRIVATE -lX11 -lxcb -lXau)
 android_target_link_libraries(emulator-libui darwin-x86_64
                               PRIVATE "-framework Carbon")
 # Windows-msvc specific dependencies. Need these for posix support.
@@ -387,6 +390,7 @@ android_target_link_libraries(emulator-libui windows_msvc-x86_64
 
 list(APPEND android-libui-testdata testdata/mp4/video.mp4)
 
+if (NOT LINUX_AARCH64)
 android_add_test(
   TARGET emulator-libui_unittests
   SRC # cmake-format: sortable
@@ -438,6 +442,7 @@ target_link_libraries(
 android_target_link_libraries(emulator-libui_unittests windows_msvc-x86_64
                               PUBLIC dirent-win32)
 
+endif()
 # Version of libui without Qt
 set(emulator-libui-headless_src ${ANDROID_LIBUI_HEADLESS_SRC_FILES})
 android_add_library(
@@ -450,8 +455,9 @@ android_add_library(
   MSVC ${emulator-libui-headless_windows_msvc-x86_64_src})
 
 target_compile_definitions(emulator-libui-headless PRIVATE -DCONFIG_HEADLESS)
+if (NOT LINUX_AARCH64)
 target_compile_options(emulator-libui-headless PRIVATE "-DUSE_MMX=1" "-mmmx")
-
+endif()
 # Target specific compiler flags for windows, since we include FFMPEG C sources
 # from C++ we need to make sure this flag is set for c++ sources.
 if(NOT MSVC)
