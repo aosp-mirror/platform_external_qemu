@@ -25,10 +25,13 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+
+#include <string>
+#include <vector>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -56,12 +59,11 @@
 /* the version number used for compatibility checks when saving and loading */
 #define SENSOR_FILE_VERSION 0
 
-
 static const struct {
     const char* name;
     int id;
 } _sSensors[MAX_SENSORS] = {
-#define SENSOR_(x,y,z,v,w) {y, ANDROID_SENSOR_##x},
+#define SENSOR_(x, y, z, v, w) {y, ANDROID_SENSOR_##x},
         SENSORS_LIST
 #undef SENSOR_
 };
@@ -86,8 +88,8 @@ static const struct {
     const char* name;
     int id;
 } _sPhysicalParameters[MAX_PHYSICAL_PARAMETERS] = {
-#define PHYSICAL_PARAMETER_(x,y,z,w) {y, PHYSICAL_PARAMETER_##x},
-    PHYSICAL_PARAMETERS_LIST
+#define PHYSICAL_PARAMETER_(x, y, z, w) {y, PHYSICAL_PARAMETER_##x},
+        PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 };
 
@@ -293,42 +295,42 @@ static void _hwSensorClient_sanitizeSensorString(char* string, int maxlen) {
     }
 }
 
-static void serializeValue_float(Sensor* sensor, const char* format, float value) {
-    sensor->serialized.length = snprintf(
-            sensor->serialized.value,
-            sizeof(sensor->serialized.value),
-            format,
-            value);
+static void serializeValue_float(Sensor* sensor,
+                                 const char* format,
+                                 float value) {
+    sensor->serialized.length =
+            snprintf(sensor->serialized.value, sizeof(sensor->serialized.value),
+                     format, value);
 }
 
-static void serializeValue_vec3(Sensor* sensor, const char* format, vec3 value) {
-    sensor->serialized.length = snprintf(
-            sensor->serialized.value,
-            sizeof(sensor->serialized.value),
-            format,
-            value.x, value.y, value.z);
+static void serializeValue_vec3(Sensor* sensor,
+                                const char* format,
+                                vec3 value) {
+    sensor->serialized.length =
+            snprintf(sensor->serialized.value, sizeof(sensor->serialized.value),
+                     format, value.x, value.y, value.z);
 }
 
 // a function to serialize the sensor value based on its ID
-static void serializeSensorValue(
-        PhysicalModel* physical_model,
-        Sensor* sensor,
-        AndroidSensor sensor_id) {
+static void serializeSensorValue(PhysicalModel* physical_model,
+                                 Sensor* sensor,
+                                 AndroidSensor sensor_id) {
     long measurement_id = -1L;
 
     switch (sensor_id) {
 #define ENUM_NAME(x) ANDROID_SENSOR_##x
 #define GET_FUNCTION_NAME(x) physicalModel_get##x
 #define SERIALIZE_VALUE_NAME(x) serializeValue_##x
-#define SENSOR_(x,y,z,v,w) case ENUM_NAME(x): {\
-            const v current_value = GET_FUNCTION_NAME(z)(\
-                    physical_model, &measurement_id);\
-            if (measurement_id != sensor->serialized.measurement_id) {\
-                SERIALIZE_VALUE_NAME(v)(sensor, w, current_value);\
-            }\
-            break;\
-        }
-SENSORS_LIST
+#define SENSOR_(x, y, z, v, w)                                         \
+    case ENUM_NAME(x): {                                               \
+        const v current_value =                                        \
+                GET_FUNCTION_NAME(z)(physical_model, &measurement_id); \
+        if (measurement_id != sensor->serialized.measurement_id) {     \
+            SERIALIZE_VALUE_NAME(v)(sensor, w, current_value);         \
+        }                                                              \
+        break;                                                         \
+    }
+        SENSORS_LIST
 #undef SENSOR_
 #undef SERIALIZE_VALUE_NAME
 #undef GET_FUNCTION_NAME
@@ -341,7 +343,7 @@ SENSORS_LIST
 
     if (measurement_id != sensor->serialized.measurement_id) {
         _hwSensorClient_sanitizeSensorString(sensor->serialized.value,
-                                            sensor->serialized.length);
+                                             sensor->serialized.length);
     }
     sensor->serialized.measurement_id = measurement_id;
 }
@@ -367,16 +369,15 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
         }
         Sensor* sensor = &cl->sensors->sensors[sensor_id];
 
-        serializeSensorValue(
-                cl->sensors->physical_model, sensor, (AndroidSensor)sensor_id);
+        serializeSensorValue(cl->sensors->physical_model, sensor,
+                             (AndroidSensor)sensor_id);
         _hwSensorClient_send(cl, (uint8_t*)sensor->serialized.value,
                              sensor->serialized.length);
     }
 
     char buffer[64];
-    int buffer_len =
-            snprintf(buffer, sizeof(buffer), "guest-sync:%" PRId64,
-            ((int64_t)now_ns) + cl->sensors->time_offset_ns);
+    int buffer_len = snprintf(buffer, sizeof(buffer), "guest-sync:%" PRId64,
+                              ((int64_t)now_ns) + cl->sensors->time_offset_ns);
     assert(buffer_len < sizeof(buffer));
     _hwSensorClient_send(cl, (uint8_t*)buffer, buffer_len);
 
@@ -397,7 +398,8 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
     //  as close to the desired rate as possible.
     // Note2: Let's cap the minimal tick interval to 10ms, to make sure:
     // - We never overload the main QEMU loop.
-    // - Some CTS hardware test cases require a limit on the maximum update rate,
+    // - Some CTS hardware test cases require a limit on the maximum update
+    // rate,
     //   which has been known to be in the low 100's of Hz.
     if (delay_ms < 10) {
         delay_ms = 10;
@@ -510,13 +512,14 @@ static void _hwSensorClient_receive(HwSensorClient* cl,
     if (msglen > 5 && !memcmp(msg, "time:", 5)) {
         msg += 5;
         int64_t guest_time_ns;
-        if (sscanf((const char *)msg, "%" PRId64, &guest_time_ns) != 1) { /* should not happen */
+        if (sscanf((const char*)msg, "%" PRId64, &guest_time_ns) !=
+            1) { /* should not happen */
             D("%s: ignore bad 'time' command", __FUNCTION__);
             return;
         }
 
-        const DurationNs now_ns =
-                looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
+        const DurationNs now_ns = looper_nowNsWithClock(looper_getForThread(),
+                                                        LOOPER_CLOCK_VIRTUAL);
 
         hw->time_offset_ns = guest_time_ns - now_ns;
         return;
@@ -579,12 +582,12 @@ static void _hwSensors_setSensorValue(HwSensors* h,
 #define OVERRIDE_FUNCTION_NAME(x) physicalModel_override##x
 #define GET_TYPE_VALUE_FUNCTION_NAME(x) get_##x##_value
 #define ENUM_NAME(x) ANDROID_SENSOR_##x
-#define SENSOR_(x,y,z,v,w) case ENUM_NAME(x):\
-            OVERRIDE_FUNCTION_NAME(z)(\
-                    h->physical_model,\
-                    GET_TYPE_VALUE_FUNCTION_NAME(v)(a, b, c));\
-            break;
-SENSORS_LIST
+#define SENSOR_(x, y, z, v, w)                                         \
+    case ENUM_NAME(x):                                                 \
+        OVERRIDE_FUNCTION_NAME(z)                                      \
+        (h->physical_model, GET_TYPE_VALUE_FUNCTION_NAME(v)(a, b, c)); \
+        break;
+        SENSORS_LIST
 #undef SENSOR_
 #undef ENUM_NAME
 #undef GET_TYPE_VALUE_FUNCTION_NAME
@@ -596,14 +599,18 @@ SENSORS_LIST
 }
 
 void vec3_get_values(const vec3 value,
-                     float* out_a, float* out_b, float* out_c) {
+                     float* out_a,
+                     float* out_b,
+                     float* out_c) {
     *out_a = value.x;
     *out_b = value.y;
     *out_c = value.z;
 }
 
 void float_get_values(const float value,
-                      float* out_a, float* out_b, float* out_c) {
+                      float* out_a,
+                      float* out_b,
+                      float* out_c) {
     *out_a = value;
     *out_b = 0.f;
     *out_c = 0.f;
@@ -612,20 +619,20 @@ void float_get_values(const float value,
 /* get the value of the emulated sensor vector */
 static void _hwSensors_getSensorValue(HwSensors* h,
                                       int sensor_id,
-                                      float *a,
-                                      float *b,
-                                      float *c) {
+                                      float* a,
+                                      float* b,
+                                      float* c) {
     long measurement_id;
     switch (sensor_id) {
 #define GET_FUNCTION_NAME(x) physicalModel_get##x
 #define TYPE_GET_VALUES_FUNCTION_NAME(x) x##_get_values
 #define ENUM_NAME(x) ANDROID_SENSOR_##x
-#define SENSOR_(x,y,z,v,w) case ENUM_NAME(x):\
-            TYPE_GET_VALUES_FUNCTION_NAME(v)(\
-                GET_FUNCTION_NAME(z)(h->physical_model, &measurement_id),\
-                a, b, c);\
-            break;
-SENSORS_LIST
+#define SENSOR_(x, y, z, v, w)                                               \
+    case ENUM_NAME(x):                                                       \
+        TYPE_GET_VALUES_FUNCTION_NAME(v)                                     \
+        (GET_FUNCTION_NAME(z)(h->physical_model, &measurement_id), a, b, c); \
+        break;
+        SENSORS_LIST
 #undef SENSOR_
 #undef ENUM_NAME
 #undef TYPE_GET_VALUES_FUNCTION_NAME
@@ -647,13 +654,13 @@ static void _hwSensors_setPhysicalParameterValue(HwSensors* h,
 #define ENUM_NAME(x) PHYSICAL_PARAMETER_##x
 #define GET_TYPE_VALUE_FUNCTION_NAME(x) get_##x##_value
 #define SET_TARGET_FUNCTION_NAME(x) physicalModel_setTarget##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) case ENUM_NAME(x):\
-            SET_TARGET_FUNCTION_NAME(z)(\
-                    h->physical_model,\
-                    GET_TYPE_VALUE_FUNCTION_NAME(w)(a, b, c),\
-                    (PhysicalInterpolation)interpolation_mode);\
-            break;
-PHYSICAL_PARAMETERS_LIST
+#define PHYSICAL_PARAMETER_(x, y, z, w)                               \
+    case ENUM_NAME(x):                                                \
+        SET_TARGET_FUNCTION_NAME(z)                                   \
+        (h->physical_model, GET_TYPE_VALUE_FUNCTION_NAME(w)(a, b, c), \
+         (PhysicalInterpolation)interpolation_mode);                  \
+        break;
+        PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef SET_TARGET_FUNCTION_NAME
 #undef GET_TYPE_VALUE_FUNCTION_NAME
@@ -665,23 +672,25 @@ PHYSICAL_PARAMETERS_LIST
 }
 
 /* get the value of the physical parameter */
-static void _hwSensors_getPhysicalParameterValue(HwSensors* h,
-                                                 int parameter_id,
-                                                 float* a,
-                                                 float* b,
-                                                 float* c,
-                                                 ParameterValueType parameter_value_type) {
+static void _hwSensors_getPhysicalParameterValue(
+        HwSensors* h,
+        int parameter_id,
+        float* a,
+        float* b,
+        float* c,
+        ParameterValueType parameter_value_type) {
     switch (parameter_id) {
 #define ENUM_NAME(x) PHYSICAL_PARAMETER_##x
 #define TYPE_GET_VALUES_FUNCTION_NAME(x) x##_get_values
 #define GET_PARAMETER_FUNCTION_NAME(x) physicalModel_getParameter##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) case ENUM_NAME(x):\
-            TYPE_GET_VALUES_FUNCTION_NAME(w)(\
-                    GET_PARAMETER_FUNCTION_NAME(z)(h->physical_model,\
-                                                   parameter_value_type),\
-                    a, b, c);\
-            break;
-PHYSICAL_PARAMETERS_LIST
+#define PHYSICAL_PARAMETER_(x, y, z, w)                        \
+    case ENUM_NAME(x):                                         \
+        TYPE_GET_VALUES_FUNCTION_NAME(w)                       \
+        (GET_PARAMETER_FUNCTION_NAME(z)(h->physical_model,     \
+                                        parameter_value_type), \
+         a, b, c);                                             \
+        break;
+        PHYSICAL_PARAMETERS_LIST
 #undef GET_PARAMETER_FUNCTION_NAME
 #undef TYPE_GET_VALUES_FUNCTION_NAME
 #undef ENUM_NAME
@@ -717,7 +726,8 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
     /* load version number to check compatibility. */
     const int32_t version_number = stream_get_be32(f);
     if (version_number != SENSOR_FILE_VERSION) {
-        D("%s: cannot load: snapshot requires file version %d.  Saved file is version %d\n",
+        D("%s: cannot load: snapshot requires file version %d.  Saved file is "
+          "version %d\n",
           __FUNCTION__, SENSOR_FILE_VERSION, version_number);
         return -EIO;
     }
@@ -774,9 +784,9 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
             if (VERBOSE_CHECK(rotation)) {
                 fprintf(stderr, "Setting coarse orientation to portrait\n");
             }
-            _hwSensors_setPhysicalParameterValue(h,
-                    PHYSICAL_PARAMETER_ROTATION, -tilt_degrees, 0.f, 0.f,
-                    PHYSICAL_INTERPOLATION_STEP);
+            _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_ROTATION,
+                                                 -tilt_degrees, 0.f, 0.f,
+                                                 PHYSICAL_INTERPOLATION_STEP);
             break;
 
         case ANDROID_COARSE_REVERSE_LANDSCAPE:
@@ -784,9 +794,9 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
                 fprintf(stderr,
                         "Setting coarse orientation to reverse landscape\n");
             }
-            _hwSensors_setPhysicalParameterValue(h,
-                    PHYSICAL_PARAMETER_ROTATION, 0.f, -tilt_degrees, -90.f,
-                    PHYSICAL_INTERPOLATION_STEP);
+            _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_ROTATION,
+                                                 0.f, -tilt_degrees, -90.f,
+                                                 PHYSICAL_INTERPOLATION_STEP);
             break;
 
         case ANDROID_COARSE_REVERSE_PORTRAIT:
@@ -794,18 +804,18 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
                 fprintf(stderr,
                         "Setting coarse orientation to reverse portrait\n");
             }
-            _hwSensors_setPhysicalParameterValue(h,
-                    PHYSICAL_PARAMETER_ROTATION, tilt_degrees, 0.f, 180.f,
-                    PHYSICAL_INTERPOLATION_STEP);
+            _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_ROTATION,
+                                                 tilt_degrees, 0.f, 180.f,
+                                                 PHYSICAL_INTERPOLATION_STEP);
             break;
 
         case ANDROID_COARSE_LANDSCAPE:
             if (VERBOSE_CHECK(rotation)) {
                 fprintf(stderr, "Setting coarse orientation to landscape\n");
             }
-            _hwSensors_setPhysicalParameterValue(h,
-                    PHYSICAL_PARAMETER_ROTATION, 0.f, tilt_degrees, 90.f,
-                    PHYSICAL_INTERPOLATION_STEP);
+            _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_ROTATION,
+                                                 0.f, tilt_degrees, 90.f,
+                                                 PHYSICAL_INTERPOLATION_STEP);
             break;
         default:
             if (VERBOSE_CHECK(rotation)) {
@@ -871,13 +881,26 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_HUMIDITY].enabled = true;
     }
 
-    /* XXX: TODO: Add other tests when we add the corresponding
-        * properties to hardware-properties.ini et al. */
+    if (android_hw->hw_sensor_hinge) {
+        switch (android_hw->hw_sensor_hinge_count) {
+            case 3:
+                h->sensors[ANDROID_SENSOR_HINGE_ANGLE2].enabled = true;
+            case 2:
+                h->sensors[ANDROID_SENSOR_HINGE_ANGLE1].enabled = true;
+            case 1:
+                h->sensors[ANDROID_SENSOR_HINGE_ANGLE0].enabled = true;
+            default:;
+        }
+    }
 
-    _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_PRESSURE,
-            1013.25f, 0.f, 0.f, PHYSICAL_INTERPOLATION_SMOOTH); // One "standard atmosphere"
-    _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_PROXIMITY,
-            1.f, 0.f, 0.f, PHYSICAL_INTERPOLATION_STEP);
+    /* XXX: TODO: Add other tests when we add the corresponding
+     * properties to hardware-properties.ini et al. */
+
+    _hwSensors_setPhysicalParameterValue(
+            h, PHYSICAL_PARAMETER_PRESSURE, 1013.25f, 0.f, 0.f,
+            PHYSICAL_INTERPOLATION_SMOOTH);  // One "standard atmosphere"
+    _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_PROXIMITY, 1.f,
+                                         0.f, 0.f, PHYSICAL_INTERPOLATION_STEP);
 }
 
 static HwSensors _sensorsState[1] = {};
@@ -896,7 +919,7 @@ void android_hw_sensors_init_remote_controller(void) {
 
     if (!hw->sensors_port) {
         /* Try to see if there is a device attached that can be used for
-        * sensor emulation. */
+         * sensor emulation. */
         hw->sensors_port = sensors_port_create(hw);
         if (hw->sensors_port == NULL) {
             V("Realistic sensor emulation is not available, since the remote "
@@ -908,7 +931,8 @@ void android_hw_sensors_init_remote_controller(void) {
 
 /* change the coarse orientation value */
 extern int android_sensors_set_coarse_orientation(
-        AndroidCoarseOrientation orient, float tilt_degrees) {
+        AndroidCoarseOrientation orient,
+        float tilt_degrees) {
     android_hw_sensors_init();
     _hwSensors_setCoarseOrientation(_sensorsState, orient, tilt_degrees);
     return 0;
@@ -944,8 +968,10 @@ extern int android_sensors_get_id_from_name(const char* sensorname) {
 }
 
 /* Interface of reading the data for all sensors */
-extern int android_sensors_get(
-        int sensor_id, float* out_a, float* out_b, float* out_c) {
+extern int android_sensors_get(int sensor_id,
+                               float* out_a,
+                               float* out_b,
+                               float* out_c) {
     HwSensors* hw = _sensorsState;
 
     *out_a = 0;
@@ -954,7 +980,6 @@ extern int android_sensors_get(
 
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
         return SENSOR_STATUS_UNKNOWN;
-
 
     Sensor* sensor = &hw->sensors[sensor_id];
     if (hw->service != NULL) {
@@ -970,16 +995,19 @@ extern int android_sensors_get(
 }
 
 /* Interface of setting the data for all sensors */
-extern int android_sensors_override_set(
-        int sensor_id, float a, float b, float c) {
+extern int android_sensors_override_set(int sensor_id,
+                                        float a,
+                                        float b,
+                                        float c) {
     HwSensors* hw = _sensorsState;
 
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
         return SENSOR_STATUS_UNKNOWN;
 
     if (hw->service != NULL) {
-        if (!hw->sensors[sensor_id].enabled)
+        if (!hw->sensors[sensor_id].enabled) {
             return SENSOR_STATUS_DISABLED;
+        }
     } else {
         return SENSOR_STATUS_NO_SERVICE;
     }
@@ -1028,9 +1056,11 @@ extern PhysicalModel* android_physical_model_instance() {
 }
 
 /* Get a physical model parameter target value*/
-extern int android_physical_model_get(
-        int physical_parameter, float* out_a, float* out_b, float* out_c,
-        ParameterValueType parameter_value_type) {
+extern int android_physical_model_get(int physical_parameter,
+                                      float* out_a,
+                                      float* out_b,
+                                      float* out_c,
+                                      ParameterValueType parameter_value_type) {
     HwSensors* hw = _sensorsState;
 
     *out_a = 0;
@@ -1044,18 +1074,20 @@ extern int android_physical_model_get(
         return PHYSICAL_PARAMETER_STATUS_NO_SERVICE;
     }
 
-    _hwSensors_getPhysicalParameterValue(
-            hw, physical_parameter, out_a, out_b, out_c, parameter_value_type);
+    _hwSensors_getPhysicalParameterValue(hw, physical_parameter, out_a, out_b,
+                                         out_c, parameter_value_type);
 
     return PHYSICAL_PARAMETER_STATUS_OK;
 }
 
 /* Set a physical model parameter */
-extern int android_physical_model_set(
-        int physical_parameter, float a, float b, float c,
-        int interpolation_mode) {
-
-    fprintf(stderr, "Set %d -> (%f, %f, %f) : %d\n", physical_parameter, a, b, c, interpolation_mode);
+extern int android_physical_model_set(int physical_parameter,
+                                      float a,
+                                      float b,
+                                      float c,
+                                      int interpolation_mode) {
+    fprintf(stderr, "Set %d -> (%f, %f, %f) : %d\n", physical_parameter, a, b,
+            c, interpolation_mode);
     HwSensors* hw = _sensorsState;
 
     if (physical_parameter < 0 || physical_parameter >= MAX_PHYSICAL_PARAMETERS)
@@ -1066,12 +1098,13 @@ extern int android_physical_model_set(
     }
 
     _hwSensors_setPhysicalParameterValue(hw, physical_parameter, a, b, c,
-            interpolation_mode);
+                                         interpolation_mode);
     return PHYSICAL_PARAMETER_STATUS_OK;
 }
 
 /* Set agent to receive physical state change callbacks */
-extern int android_physical_agent_set(const struct QAndroidPhysicalStateAgent* agent) {
+extern int android_physical_agent_set(
+        const struct QAndroidPhysicalStateAgent* agent) {
     HwSensors* hw = _sensorsState;
 
     physicalModel_setPhysicalStateAgent(hw->physical_model, agent);
@@ -1080,7 +1113,7 @@ extern int android_physical_agent_set(const struct QAndroidPhysicalStateAgent* a
 
 /* Get physical parameter id from name */
 extern int android_physical_model_get_parameter_id_from_name(
-        const char* physical_parameter_name ) {
+        const char* physical_parameter_name) {
     if (physical_parameter_name == NULL)
         return PHYSICAL_PARAMETER_STATUS_UNKNOWN;
 
@@ -1094,9 +1127,9 @@ extern int android_physical_model_get_parameter_id_from_name(
 
 /* Get physical parameter name from id */
 extern const char* android_physical_model_get_parameter_name_from_id(
-        int physical_parameter_id ) {
+        int physical_parameter_id) {
     if (physical_parameter_id < 0 ||
-            physical_parameter_id >= MAX_PHYSICAL_PARAMETERS)
+        physical_parameter_id >= MAX_PHYSICAL_PARAMETERS)
         return NULL;
 
     return _physicalParamNameFromId(physical_parameter_id);
@@ -1119,61 +1152,161 @@ extern int android_physical_model_stop_recording() {
 // Foldable
 static FoldableState _foldableState[1] = {};
 
-FoldableState* android_foldable_initialize(const struct FoldableConfig* config) {
+// Parse the |input| string as a list of tokens seperated by seperator.
+#define WHITESPACE " \t\n"
+static bool parse_for_tokens(const std::string& input,
+                             std::vector<std::string>* out,
+                             const char seperator) {
+    out->clear();
+    size_t pos = 0U;
+
+    // Parse all tokens in the input, treat '*' as a single token.
+    // I.e.
+    for (;;) {
+        // skip leading whitespace.
+        pos = input.find_first_not_of(WHITESPACE, pos);
+        if (pos == std::string::npos) {
+            break;  // end of parse.
+        }
+
+        // find end of type/token.
+        size_t end = input.find_first_of(seperator, pos);
+        if (end == std::string::npos) {
+            end = input.size();
+        }
+        std::string str = input.substr(pos, end - pos);
+        if (str.size() == 0) {
+            return false;
+        }
+
+        out->push_back(str);
+        pos = end + 1;
+    }
+
+    return true;
+}
+
+FoldableState* android_foldable_initialize(
+        const struct FoldableConfig* config) {
     bool needDefaultConfig = !config;
+    if (android_hw->hw_sensor_hinge == false) {
+        return nullptr;
+    }
     // Load a default config if there is nothing provided.
     if (needDefaultConfig) {
+        // hinge type
+        enum FoldableDisplayType type =
+                (enum FoldableDisplayType)android_hw->hw_sensor_hinge_type;
+        if (type < 0 || type >= ANDROID_FOLDABLE_TYPE_MAX) {
+            type = ANDROID_FOLDABLE_HORIZONTAL_SPLIT;
+            E("Incorrect hinge type %d, default to 0\n",
+              android_hw->hw_sensor_hinge_type);
+        }
+        // hinge number
+        int numHinge = android_hw->hw_sensor_hinge_count;
+        if (numHinge < 0 || numHinge > ANDROID_FOLDABLE_MAX_HINGES) {
+            numHinge = 0;
+            E("Incorrect hinge count %d, default to 0\n",
+              android_hw->hw_sensor_hinge_count);
+        }
         struct FoldableConfig defaultConfig = {
-            .hingesType = ANDROID_FOLDABLE_HORIZONTAL_SPLIT,
-            .displayId = 0,
-            .numHinges = 1,
+                .hingesType = type,
+                .displayId = 0,
+                .numHinges = numHinge,
         };
-
-        defaultConfig.hingeParams[0] = {
-            .percentAlongDisplay = 0.5f,
-            .minDegrees = 0.0f,
-            .maxDegrees = 359.0f,
-            .defaultDegrees = 180.0f,
-        };
-
+        // hinge angle ranges and defaults
+        std::string hingeAngleRanges(android_hw->hw_sensor_hinge_ranges);
+        std::string hingeAngleDefaults(android_hw->hw_sensor_hinge_defaults);
+        std::vector<std::string> hingeAngleRangeTokens, hingeAngleDefaultTokens;
+        if (!parse_for_tokens(hingeAngleRanges, &hingeAngleRangeTokens, ',') ||
+            !parse_for_tokens(hingeAngleDefaults, &hingeAngleDefaultTokens,
+                              ',') ||
+            hingeAngleRangeTokens.size() != numHinge ||
+            hingeAngleDefaultTokens.size() != numHinge) {
+            E("Incorrect hinge angle configs for ranges %s or defaults %s\n",
+                hingeAngleRanges.c_str(), hingeAngleDefaults.c_str());
+        } else {
+            for (int i = 0; i < numHinge; i++) {
+                std::vector<std::string> angleTokens;
+                if (!parse_for_tokens(hingeAngleRangeTokens[i], &angleTokens,
+                                      '-') ||
+                    angleTokens.size() != 2) {
+                    E("Incorrect hinge angle ranges %s\n",
+                      android_hw->hw_sensor_hinge_ranges);
+                } else {
+                    defaultConfig.hingeParams[i] = {
+                            .percentAlongDisplay =
+                                    0.5f,  // TODO: calculate from hinge area
+                            .minDegrees = std::stof(angleTokens[0]),
+                            .maxDegrees = std::stof(angleTokens[1]),
+                            .defaultDegrees =
+                                    std::stof(hingeAngleDefaultTokens[i]),
+                    };
+                }
+            }
+        }
         _foldableState->config = defaultConfig;
     } else {
         _foldableState->config = *config;
     }
 
-    for (unsigned int i = 0; i < _foldableState->config.numHinges ; ++i) {
-        _foldableState->currentHingeDegrees[i] =
-            _foldableState->config.hingeParams[i].defaultDegrees;
+    for (unsigned int i = 0; i < _foldableState->config.numHinges; ++i) {
+        if (needDefaultConfig) {
+            _foldableState->currentHingeDegrees[i] =
+                    _foldableState->config.hingeParams[i].defaultDegrees;
+        }
+        android_sensors_override_set(ANDROID_SENSOR_HINGE_ANGLE0 + i,
+                                    _foldableState->currentHingeDegrees[i], 0.0,
+                                    0.0);
     }
-
     return _foldableState;
 }
 
-void android_foldable_set_hinge_degrees(unsigned int hinge_index, float degrees) {
-    if (hinge_index >= ANDROID_FOLDABLE_MAX_HINGES) return;
-    if (hinge_index >= _foldableState->config.numHinges) return;
+void android_foldable_set_hinge_degrees(unsigned int hinge_index,
+                                        float degrees) {
+    if (hinge_index >= ANDROID_FOLDABLE_MAX_HINGES)
+        return;
+    if (hinge_index >= _foldableState->config.numHinges)
+        return;
 
     _foldableState->currentHingeDegrees[hinge_index] = degrees;
+    android_sensors_override_set(ANDROID_SENSOR_HINGE_ANGLE0 + hinge_index,
+                                 degrees, 0.0, 0.0);
 }
 
 float android_foldable_get_hinge_degrees(unsigned int hinge_index) {
-    if (hinge_index >= ANDROID_FOLDABLE_MAX_HINGES) return 0.0f;
-    if (hinge_index >= _foldableState->config.numHinges) return 0.0f;
+    if (hinge_index >= ANDROID_FOLDABLE_MAX_HINGES)
+        return 0.0f;
+    if (hinge_index >= _foldableState->config.numHinges)
+        return 0.0f;
 
     return _foldableState->currentHingeDegrees[hinge_index];
 }
 
+float android_foldable_get_with_1d_parameter() {
+    // Use hinge 0
+    if (_foldableState->config.numHinges < 1)
+        return 0.0;
+    return (_foldableState->currentHingeDegrees[0] -
+            _foldableState->config.hingeParams[0].minDegrees) /
+           (_foldableState->config.hingeParams[0].maxDegrees -
+            _foldableState->config.hingeParams[0].minDegrees);
+}
+
 void android_foldable_set_with_1d_parameter(float t) {
-    if (_foldableState->config.numHinges < 1) return;
+    if (_foldableState->config.numHinges < 1)
+        return;
 
-
-    // Many different parameterizations are possible, just pick a crappy one for now
-    // (all hinges done at the same rate)
+    // Many different parameterizations are possible, just pick a crappy one for
+    // now (all hinges done at the same rate)
     for (unsigned int i = 0; i < _foldableState->config.numHinges; ++i) {
         _foldableState->currentHingeDegrees[i] =
-            _foldableState->config.hingeParams[i].minDegrees +
-            t * (_foldableState->config.hingeParams[i].maxDegrees -
-                    _foldableState->config.hingeParams[i].minDegrees);
+                _foldableState->config.hingeParams[i].minDegrees +
+                t * (_foldableState->config.hingeParams[i].maxDegrees -
+                     _foldableState->config.hingeParams[i].minDegrees);
+        android_sensors_override_set(ANDROID_SENSOR_HINGE_ANGLE0 + i,
+                                     _foldableState->currentHingeDegrees[i],
+                                     0.0, 0.0);
     }
 }
 
