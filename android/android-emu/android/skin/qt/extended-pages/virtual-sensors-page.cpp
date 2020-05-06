@@ -10,23 +10,25 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/virtual-sensors-page.h"
 
-#include <glm/gtc/quaternion.hpp>                     // for tquat
-#include <math.h>                                     // for fabs
-#include <qtextstream.h>                              // for QTextStream::Fi...
-#include <stdint.h>                                   // for uint64_t
-#include <QDesktopServices>                           // for QDesktopServices
-#include <QDoubleSpinBox>                             // for QDoubleSpinBox
-#include <QFlags>                                     // for QFlags
-#include <QLocale>                                    // for QLocale
-#include <QRadioButton>                               // for QRadioButton
-#include <QStackedWidget>                             // for QStackedWidget
-#include <QTabWidget>                                 // for QTabWidget
-#include <QTextBrowser>                               // for QTextBrowser
-#include <QTextStream>                                // for QTextStream
-#include <QUrl>                                       // for QUrl
-#include <array>                                      // for array
-#include <functional>                                 // for __base
-#include <utility>                                    // for make_pair, pair
+#include <math.h>         // for fabs
+#include <qtextstream.h>  // for QTextStream::Fi...
+#include <stdint.h>       // for uint64_t
+
+#include <QDesktopServices>  // for QDesktopServices
+#include <QDoubleSpinBox>    // for QDoubleSpinBox
+#include <QFlags>            // for QFlags
+#include <QLocale>           // for QLocale
+#include <QPoint>
+#include <QRadioButton>            // for QRadioButton
+#include <QStackedWidget>          // for QStackedWidget
+#include <QTabWidget>              // for QTabWidget
+#include <QTextBrowser>            // for QTextBrowser
+#include <QTextStream>             // for QTextStream
+#include <QUrl>                    // for QUrl
+#include <array>                   // for array
+#include <functional>              // for __base
+#include <glm/gtc/quaternion.hpp>  // for tquat
+#include <utility>                 // for make_pair, pair
 
 #include "android/avd/info.h"                         // for avdInfo_getAvdF...
 #include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
@@ -36,12 +38,11 @@
 #include "android/metrics/PeriodicReporter.h"         // for PeriodicReporter
 #include "android/metrics/proto/studio_stats.pb.h"    // for AndroidStudioEvent
 #include "android/physics/GlmHelpers.h"               // for vecNearEqual
-#include "android/skin/qt/device-3d-widget.h"  // for Device3D...
+#include "android/skin/qt/device-3d-widget.h"         // for Device3D...
 #include "android/skin/qt/editable-slider-widget.h"   // for EditableSliderW...
 #include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
 #include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
 #include "android/skin/qt/stylesheet.h"               // for stylesheetFontSize
-
 
 class QShowEvent;
 class QWidget;
@@ -77,48 +78,37 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     mUi->zRotSlider->setRange(-180.0, 180.0, false);
     mUi->xRotSlider->setRange(-180.0, 180.0, false);
     mUi->yRotSlider->setRange(-180.0, 180.0, false);
-    mUi->positionXSlider->setRange(Device3DWidget::MinX,
-                                   Device3DWidget::MaxX, false);
-    mUi->positionYSlider->setRange(Device3DWidget::MinY,
-                                   Device3DWidget::MaxY, false);
-    mUi->positionZSlider->setRange(Device3DWidget::MinZ,
-                                   Device3DWidget::MaxZ, false);
-    bool useAbstractFoldableDevice =
-        android::base::System::get()->envGet("ANDROID_EMU_ABSTRACT_DEVICE_VIEW") == "1";
-    if (useAbstractFoldableDevice) {
-        mUi->foldSlider->setRange(0.0, 1.0, false);
-        mUi->foldSlider->setSteps(200);
-        mUi->foldSlider->setValue(0.5); // TODO: Set to the correct mapping back to the 1d parameter from the foldable state
-    } else {
-        mUi->foldSliderLabel->setHidden(true);
-        mUi->foldSlider->setHidden(true);
-    }
-
+    mUi->positionXSlider->setRange(Device3DWidget::MinX, Device3DWidget::MaxX,
+                                   false);
+    mUi->positionYSlider->setRange(Device3DWidget::MinY, Device3DWidget::MaxY,
+                                   false);
+    mUi->positionZSlider->setRange(Device3DWidget::MinZ, Device3DWidget::MaxZ,
+                                   false);
+    setupHingeSensorUI();
     connect(mUi->accelWidget, SIGNAL(targetRotationChanged()), this,
             SLOT(propagateAccelWidgetChange()));
     connect(mUi->accelWidget, SIGNAL(targetPositionChanged()), this,
             SLOT(propagateAccelWidgetChange()));
 
-    connect(this, &VirtualSensorsPage::updateResultingValuesRequired,
-            this, &VirtualSensorsPage::updateResultingValues);
+    connect(this, &VirtualSensorsPage::updateResultingValuesRequired, this,
+            &VirtualSensorsPage::updateResultingValues);
 
-    connect(this, &VirtualSensorsPage::updateTargetStateRequired,
-            this, &VirtualSensorsPage::updateTargetState);
+    connect(this, &VirtualSensorsPage::updateTargetStateRequired, this,
+            &VirtualSensorsPage::updateTargetState);
 
-    connect(this, &VirtualSensorsPage::startSensorUpdateTimerRequired,
-            this, &VirtualSensorsPage::startSensorUpdateTimer);
+    connect(this, &VirtualSensorsPage::startSensorUpdateTimerRequired, this,
+            &VirtualSensorsPage::startSensorUpdateTimer);
 
-    connect(this, &VirtualSensorsPage::stopSensorUpdateTimerRequired,
-            this, &VirtualSensorsPage::stopSensorUpdateTimer);
+    connect(this, &VirtualSensorsPage::stopSensorUpdateTimerRequired, this,
+            &VirtualSensorsPage::stopSensorUpdateTimer);
 
-    connect(&mAccelerationTimer, SIGNAL(timeout()),
-            this, SLOT(updateSensorValuesInUI()));
+    connect(&mAccelerationTimer, SIGNAL(timeout()), this,
+            SLOT(updateSensorValuesInUI()));
     mAccelerationTimer.setInterval(33);
     mAccelerationTimer.stop();
 
     connect(this, SIGNAL(coarseOrientationChanged(SkinRotation)),
-            EmulatorQtWindow::getInstance(),
-            SLOT(rotateSkin(SkinRotation)));
+            EmulatorQtWindow::getInstance(), SLOT(rotateSkin(SkinRotation)));
 
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
@@ -132,7 +122,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
                     return true;
                 }
                 return false;
-    });
+            });
 
     if (sSensorsAgent != nullptr) {
         sSensorsAgent->setPhysicalStateAgent(&mQAndroidPhysicalStateAgent);
@@ -150,6 +140,104 @@ VirtualSensorsPage::~VirtualSensorsPage() {
     // Unregister for physical state change callbacks.
     if (sSensorsAgent != nullptr) {
         sSensorsAgent->setPhysicalStateAgent(nullptr);
+    }
+}
+
+void VirtualSensorsPage::setupHingeSensorUI() {
+    // Hide the hinge sensors based on the config.
+    mUi->hinge0Label->setHidden(true);
+    mUi->hinge1Label->setHidden(true);
+    mUi->hinge2Label->setHidden(true);
+    mUi->hinge0Slider->setHidden(true);
+    mUi->hinge1Slider->setHidden(true);
+    mUi->hinge2Slider->setHidden(true);
+    int yOffset = 90;
+    if (android_hw->hw_sensor_hinge) {
+        struct FoldableState* foldableState = android_foldable_get_state_ptr();
+        switch (foldableState->config.numHinges) {
+            case 3:
+                mUi->hinge2Slider->setRange(
+                        foldableState->config.hingeParams[2].minDegrees,
+                        foldableState->config.hingeParams[2].maxDegrees, false);
+                mUi->hinge2Slider->setSteps(200);
+                mUi->hinge2Slider->setValue(
+                        foldableState->currentHingeDegrees[2]);
+                mUi->hinge2Label->setHidden(false);
+                mUi->hinge2Slider->setHidden(false);
+                yOffset -= 30;
+            case 2:
+                mUi->hinge1Slider->setRange(
+                        foldableState->config.hingeParams[1].minDegrees,
+                        foldableState->config.hingeParams[1].maxDegrees, false);
+                mUi->hinge1Slider->setSteps(200);
+                mUi->hinge1Slider->setValue(
+                        foldableState->currentHingeDegrees[1]);
+                mUi->hinge1Label->setHidden(false);
+                mUi->hinge1Slider->setHidden(false);
+                yOffset -= 30;
+            case 1:
+                mUi->hinge0Slider->setRange(
+                        foldableState->config.hingeParams[0].minDegrees,
+                        foldableState->config.hingeParams[0].maxDegrees, false);
+                mUi->hinge0Slider->setSteps(200);
+                mUi->hinge0Slider->setValue(
+                        foldableState->currentHingeDegrees[0]);
+                mUi->hinge0Label->setHidden(false);
+                mUi->hinge0Slider->setHidden(false);
+                yOffset -= 30;
+            default:;
+        }
+    }
+    // Realign the positions of slider bars for x, y, z, and hinges.
+    QPoint p;
+    switch (yOffset) {
+        case 90:
+            p = mUi->zRotLabel->pos();
+            mUi->zRotLabel->move(p.x(), p.y() + 10);
+            p = mUi->zRotSlider->pos();
+            mUi->zRotSlider->move(p.x(), p.y() + 10);
+            p = mUi->xRotLabel->pos();
+            mUi->xRotLabel->move(p.x(), p.y() + 40);
+            p = mUi->xRotSlider->pos();
+            mUi->xRotSlider->move(p.x(), p.y() + 40);
+            p = mUi->yRotLabel->pos();
+            mUi->yRotLabel->move(p.x(), p.y() + 70);
+            p = mUi->yRotSlider->pos();
+            mUi->yRotSlider->move(p.x(), p.y() + 70);
+            break;
+        case 60:
+            p = mUi->xRotLabel->pos();
+            mUi->xRotLabel->move(p.x(), p.y() + 15);
+            p = mUi->xRotSlider->pos();
+            mUi->xRotSlider->move(p.x(), p.y() + 15);
+            p = mUi->yRotLabel->pos();
+            mUi->yRotLabel->move(p.x(), p.y() + 30);
+            p = mUi->yRotSlider->pos();
+            mUi->yRotSlider->move(p.x(), p.y() + 30);
+            p = mUi->hinge0Label->pos();
+            mUi->hinge0Label->move(p.x(), p.y() + 45);
+            p = mUi->hinge0Slider->pos();
+            mUi->hinge0Slider->move(p.x(), p.y() + 45);
+            break;
+        case 30:
+            p = mUi->xRotLabel->pos();
+            mUi->xRotLabel->move(p.x(), p.y() + 7);
+            p = mUi->xRotSlider->pos();
+            mUi->xRotSlider->move(p.x(), p.y() + 7);
+            p = mUi->yRotLabel->pos();
+            mUi->yRotLabel->move(p.x(), p.y() + 14);
+            p = mUi->yRotSlider->pos();
+            mUi->yRotSlider->move(p.x(), p.y() + 14);
+            p = mUi->hinge0Label->pos();
+            mUi->hinge0Label->move(p.x(), p.y() + 21);
+            p = mUi->hinge0Slider->pos();
+            mUi->hinge0Slider->move(p.x(), p.y() + 21);
+            p = mUi->hinge1Label->pos();
+            mUi->hinge1Label->move(p.x(), p.y() + 28);
+            p = mUi->hinge1Slider->pos();
+            mUi->hinge1Slider->move(p.x(), p.y() + 28);
+            break;
+        default:;
     }
 }
 
@@ -216,11 +304,8 @@ void VirtualSensorsPage::setPhysicalParameterTarget(
     if (sSensorsAgent) {
         mIsUIModifyingPhysicalState = true;
         sSensorsAgent->setPhysicalParameterTarget(
-                parameter_id,
-                static_cast<float>(v1),
-                static_cast<float>(v2),
-                static_cast<float>(v3),
-                mode);
+                parameter_id, static_cast<float>(v1), static_cast<float>(v2),
+                static_cast<float>(v3), mode);
         mIsUIModifyingPhysicalState = false;
     }
 }
@@ -239,67 +324,51 @@ void VirtualSensorsPage::setCoarseOrientation(
 
 void VirtualSensorsPage::on_temperatureSensorValueWidget_valueChanged(
         double value) {
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_TEMPERATURE,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            value);
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_TEMPERATURE,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_proximitySensorValueWidget_valueChanged(
         double value) {
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_PROXIMITY,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            value);
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_PROXIMITY,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_lightSensorValueWidget_valueChanged(double value) {
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_LIGHT,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            value);
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_LIGHT,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_pressureSensorValueWidget_valueChanged(
-    double value) {
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_PRESSURE,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            value);
+        double value) {
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_PRESSURE,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
-    double value) {
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_HUMIDITY,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            value);
+        double value) {
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HUMIDITY,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
     setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_MAGNETIC_FIELD,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            mUi->magNorthWidget->value(),
-            mUi->magEastWidget->value(),
+            PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
+            mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
             mUi->magVerticalWidget->value());
 }
 
 void VirtualSensorsPage::on_magEastWidget_valueChanged(double value) {
     setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_MAGNETIC_FIELD,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            mUi->magNorthWidget->value(),
-            mUi->magEastWidget->value(),
+            PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
+            mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
             mUi->magVerticalWidget->value());
 }
 
 void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
     setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_MAGNETIC_FIELD,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            mUi->magNorthWidget->value(),
-            mUi->magEastWidget->value(),
+            PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
+            mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
             mUi->magVerticalWidget->value());
 }
 
@@ -327,8 +396,16 @@ void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
     propagateSlidersChange();
 }
 
-void VirtualSensorsPage::on_foldSlider_valueChanged(double) {
-    propagateSlidersChange();
+void VirtualSensorsPage::on_hinge0Slider_valueChanged(double) {
+    propagateSlidersChange(true, 0);
+}
+
+void VirtualSensorsPage::on_hinge1Slider_valueChanged(double) {
+    propagateSlidersChange(true, 1);
+}
+
+void VirtualSensorsPage::on_hinge2Slider_valueChanged(double) {
+    propagateSlidersChange(true, 2);
 }
 
 void VirtualSensorsPage::updateTargetState() {
@@ -400,8 +477,8 @@ void VirtualSensorsPage::setTargetHeadingDegrees(double heading) {
         heading += 360.0;
     }
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION,
-                               PHYSICAL_INTERPOLATION_STEP,
-                               -90.0, 0.0, -heading);
+                               PHYSICAL_INTERPOLATION_STEP, -90.0, 0.0,
+                               -heading);
 }
 
 void VirtualSensorsPage::onTargetStateChanged() {
@@ -440,16 +517,12 @@ void VirtualSensorsPage::onPhysicalStateStabilized(void* context) {
     }
 }
 
-void VirtualSensorsPage::updateResultingValues(glm::vec3 acceleration,
-                                               glm::vec3 gyroscope,
-                                               glm::vec3 device_magnetic_vector) {
-
-    static const QString rotation_labels[] = {
-        "ROTATION_0",
-        "ROTATION_90",
-        "ROTATION_180",
-        "ROTATION_270"
-    };
+void VirtualSensorsPage::updateResultingValues(
+        glm::vec3 acceleration,
+        glm::vec3 gyroscope,
+        glm::vec3 device_magnetic_vector) {
+    static const QString rotation_labels[] = {"ROTATION_0", "ROTATION_90",
+                                              "ROTATION_180", "ROTATION_270"};
 
     // Update labels with new values.
     QString table_html;
@@ -458,30 +531,33 @@ void VirtualSensorsPage::updateResultingValues(glm::vec3 acceleration,
     table_html_stream.setNumberFlags(table_html_stream.numberFlags() |
                                      QTextStream::ForcePoint);
     table_html_stream.setRealNumberNotation(QTextStream::FixedNotation);
-    table_html_stream
-        << "<table border=\"0\""
-        << "       cellpadding=\"3\" style=\"font-size:" <<
-           Ui::stylesheetFontSize(Ui::FontSize::Medium) << "\">"
-        << "<tr>"
-        << "<td>" << tr("Accelerometer (m/s<sup>2</sup>)") << ":</td>"
-        << "<td align=left>" << acceleration.x << "</td>"
-        << "<td align=left>" << acceleration.y << "</td>"
-        << "<td align=left>" << acceleration.z << "</td></tr>"
-        << "<tr>"
-        << "<td>" << tr("Gyroscope (rad/s)") << ":</td>"
-        << "<td align=left>" << gyroscope.x << "</td>"
-        << "<td align=left>" << gyroscope.y << "</td>"
-        << "<td align=left>" << gyroscope.z << "</td></tr>"
-        << "<tr>"
-        << "<td>" << tr("Magnetometer (&mu;T)") << ":</td>"
-        << "<td align=left>" << device_magnetic_vector.x << "</td>"
-        << "<td align=left>" << device_magnetic_vector.y << "</td>"
-        << "<td align=left>" << device_magnetic_vector.z << "</td></tr>"
-        << "<tr><td>" << tr("Rotation")
-        << ":</td><td colspan = \"3\" align=left>"
-        << rotation_labels[mCoarseOrientation - SKIN_ROTATION_0]
-        << "</td></tr>"
-        << "</table>";
+    table_html_stream << "<table border=\"0\""
+                      << "       cellpadding=\"3\" style=\"font-size:"
+                      << Ui::stylesheetFontSize(Ui::FontSize::Medium) << "\">"
+                      << "<tr>"
+                      << "<td>" << tr("Accelerometer (m/s<sup>2</sup>)")
+                      << ":</td>"
+                      << "<td align=left>" << acceleration.x << "</td>"
+                      << "<td align=left>" << acceleration.y << "</td>"
+                      << "<td align=left>" << acceleration.z << "</td></tr>"
+                      << "<tr>"
+                      << "<td>" << tr("Gyroscope (rad/s)") << ":</td>"
+                      << "<td align=left>" << gyroscope.x << "</td>"
+                      << "<td align=left>" << gyroscope.y << "</td>"
+                      << "<td align=left>" << gyroscope.z << "</td></tr>"
+                      << "<tr>"
+                      << "<td>" << tr("Magnetometer (&mu;T)") << ":</td>"
+                      << "<td align=left>" << device_magnetic_vector.x
+                      << "</td>"
+                      << "<td align=left>" << device_magnetic_vector.y
+                      << "</td>"
+                      << "<td align=left>" << device_magnetic_vector.z
+                      << "</td></tr>"
+                      << "<tr><td>" << tr("Rotation")
+                      << ":</td><td colspan = \"3\" align=left>"
+                      << rotation_labels[mCoarseOrientation - SKIN_ROTATION_0]
+                      << "</td></tr>"
+                      << "</table>";
     mUi->resultingAccelerometerValues->setText(table_html);
 }
 
@@ -496,11 +572,23 @@ void VirtualSensorsPage::propagateAccelWidgetChange() {
 /*
  * Propagate a UI change from the sliders to the accel widget and model.
  */
-void VirtualSensorsPage::propagateSlidersChange() {
+void VirtualSensorsPage::propagateSlidersChange(bool updateHinge, int hingeIndex) {
     reportVirtualSensorsInteraction();
     updateModelFromSliders(PHYSICAL_INTERPOLATION_SMOOTH);
-    android_foldable_set_with_1d_parameter(
-        mUi->foldSlider->getValue());
+    if (updateHinge) {
+        switch (hingeIndex) {
+            case 0:
+                android_foldable_set_hinge_degrees(0, mUi->hinge0Slider->getValue());
+                break;
+            case 1:
+                android_foldable_set_hinge_degrees(1, mUi->hinge1Slider->getValue());
+                break;
+            case 2:
+                android_foldable_set_hinge_degrees(2, mUi->hinge2Slider->getValue());
+                break;
+            default: ;
+        } 
+    }
 }
 
 /*
@@ -547,17 +635,19 @@ void VirtualSensorsPage::updateModelFromSliders(PhysicalInterpolation mode) {
 
     position = kMetersPerInch * position;
 
-    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode,
-            position.x, position.y, position.z);
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode, position.x,
+                               position.y, position.z);
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION, mode,
-            rotationDegrees.x, rotationDegrees.y, rotationDegrees.z);
+                               rotationDegrees.x, rotationDegrees.y,
+                               rotationDegrees.z);
 }
 
 /*
  * Update the UI to reflect the underlying model state.
  */
 void VirtualSensorsPage::updateUIFromModelCurrentState() {
-    if (EmulatorQtWindow::sClosed) return;
+    if (EmulatorQtWindow::sClosed)
+        return;
 
     if (sSensorsAgent != nullptr) {
         glm::vec3 position;
@@ -616,7 +706,8 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
  * inertial model.
  */
 void VirtualSensorsPage::updateSensorValuesInUI() {
-    if (EmulatorQtWindow::sClosed) return;
+    if (EmulatorQtWindow::sClosed)
+        return;
 
     updateUIFromModelCurrentState();
 
@@ -626,27 +717,30 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
         glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
 
         glm::vec3 device_accelerometer;
-        sSensorsAgent->getSensor(ANDROID_SENSOR_ACCELERATION,
-                &device_accelerometer.x,
-                &device_accelerometer.y,
-                &device_accelerometer.z);
+        sSensorsAgent->getSensor(
+                ANDROID_SENSOR_ACCELERATION, &device_accelerometer.x,
+                &device_accelerometer.y, &device_accelerometer.z);
 
         if (!mBypassOrientationChecks) {
             glm::vec3 normalized_accelerometer =
                     glm::normalize(device_accelerometer);
 
-            // Update the "rotation" label according to the current acceleraiton.
-            static const std::array<std::pair<glm::vec3, SkinRotation>, 4> directions {
-                std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f), SKIN_ROTATION_0),
-                std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f), SKIN_ROTATION_90),
-                std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f), SKIN_ROTATION_180),
-                std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f), SKIN_ROTATION_270)
-            };
+            // Update the "rotation" label according to the current
+            // acceleraiton.
+            static const std::array<std::pair<glm::vec3, SkinRotation>, 4>
+                    directions{std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f),
+                                              SKIN_ROTATION_0),
+                               std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f),
+                                              SKIN_ROTATION_90),
+                               std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f),
+                                              SKIN_ROTATION_180),
+                               std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f),
+                                              SKIN_ROTATION_270)};
             QString rotation_label;
             SkinRotation coarse_orientation = mCoarseOrientation;
             for (const auto& v : directions) {
                 if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) <
-                        0.1f) {
+                    0.1f) {
                     coarse_orientation = v.second;
                     break;
                 }
@@ -661,15 +755,12 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
 
         glm::vec3 device_magnetometer;
         sSensorsAgent->getSensor(ANDROID_SENSOR_MAGNETIC_FIELD,
-                &device_magnetometer.x,
-                &device_magnetometer.y,
-                &device_magnetometer.z);
+                                 &device_magnetometer.x, &device_magnetometer.y,
+                                 &device_magnetometer.z);
 
         glm::vec3 device_gyroscope;
-        sSensorsAgent->getSensor(ANDROID_SENSOR_GYROSCOPE,
-                &device_gyroscope.x,
-                &device_gyroscope.y,
-                &device_gyroscope.z);
+        sSensorsAgent->getSensor(ANDROID_SENSOR_GYROSCOPE, &device_gyroscope.x,
+                                 &device_gyroscope.y, &device_gyroscope.z);
 
         // Emit a signal to update the UI. We cannot just update
         // the UI here because the current function is sometimes
@@ -677,15 +768,12 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
         // We only block signals for this widget if it's running on the Qt
         // thread, so it's Ok to call the connected function directly.
         if (signalsBlocked()) {
-            updateResultingValues(
-                    device_accelerometer,
-                    device_gyroscope,
-                    device_magnetometer);
+            updateResultingValues(device_accelerometer, device_gyroscope,
+                                  device_magnetometer);
         } else {
-            emit updateResultingValuesRequired(
-                    device_accelerometer,
-                    device_gyroscope,
-                    device_magnetometer);
+            emit updateResultingValuesRequired(device_accelerometer,
+                                               device_gyroscope,
+                                               device_magnetometer);
         }
     }
 }
@@ -694,7 +782,7 @@ void VirtualSensorsPage::on_accelModeRotate_toggled() {
     reportVirtualSensorsInteraction();
     if (mUi->accelModeRotate->isChecked()) {
         mUi->accelWidget->setOperationMode(
-            Device3DWidget::OperationMode::Rotate);
+                Device3DWidget::OperationMode::Rotate);
         mUi->accelerometerSliders->setCurrentIndex(0);
     }
 }
@@ -702,40 +790,45 @@ void VirtualSensorsPage::on_accelModeRotate_toggled() {
 void VirtualSensorsPage::on_accelModeMove_toggled() {
     reportVirtualSensorsInteraction();
     if (mUi->accelModeMove->isChecked()) {
-        mUi->accelWidget->setOperationMode(
-            Device3DWidget::OperationMode::Move);
+        mUi->accelWidget->setOperationMode(Device3DWidget::OperationMode::Move);
         mUi->accelerometerSliders->setCurrentIndex(1);
     }
 }
 
 void VirtualSensorsPage::on_helpMagneticField_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_MAGNETIC_FIELD"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_MAGNETIC_FIELD"));
 }
 
 void VirtualSensorsPage::on_helpLight_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_LIGHT"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_LIGHT"));
 }
 
 void VirtualSensorsPage::on_helpPressure_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_PRESSURE"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_PRESSURE"));
 }
 
 void VirtualSensorsPage::on_helpAmbientTemp_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_AMBIENT_TEMPERATURE"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_AMBIENT_TEMPERATURE"));
 }
 
 void VirtualSensorsPage::on_helpProximity_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_PROXIMITY"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_PROXIMITY"));
 }
 
 void VirtualSensorsPage::on_helpHumidity_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_RELATIVE_HUMIDITY"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_RELATIVE_HUMIDITY"));
 }
 
 void VirtualSensorsPage::hideRotationButtons(bool hide) {
