@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5dcc7c5f_ebfba23a",
+        "filename": "android/build/cmake/toolchain.cmake",
+        "patchSetId": 9
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-05-06T15:15:43Z",
+      "side": 1,
+      "message": "Erwin raised a question on the confusion with this change, could we briefly discuss this in the meeting?",
+      "range": {
+        "startLine": 198,
+        "startChar": 3,
+        "endLine": 200,
+        "endChar": 48
+      },
+      "revId": "b236fd92f2ac84f4ce96349f0acfe0e4d672ad3a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
