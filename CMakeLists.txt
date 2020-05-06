@@ -157,8 +157,7 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 prebuilt(Threads)
 
 # Configure OS depdendency licensenses
-if(LINUX_X86_64)
-  if (LINUX_CROSS_AARCH64)
+if (LINUX_AARCH64)
       message("Cross build aarch64 libstdc++")
       android_license(
         TARGET "RUNTIME_OS_DEPENDENCIES"
@@ -168,7 +167,7 @@ if(LINUX_X86_64)
         LICENSE
           "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/LICENSE.TXT"
         LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LLVM")
-  else()
+elseif(LINUX_X86_64)
       android_license(
         TARGET "RUNTIME_OS_DEPENDENCIES"
         LIBNAME "libc++"
@@ -177,7 +176,6 @@ if(LINUX_X86_64)
         LICENSE
           "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/LICENSE.TXT"
         LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LLVM")
-  endif()
 else()
   android_license(TARGET "RUNTIME_OS_DEPENDENCIES" LIBNAME None SPDX None
                   LICENSE None LOCAL None)
