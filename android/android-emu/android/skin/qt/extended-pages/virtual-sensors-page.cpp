@@ -84,11 +84,11 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     mUi->positionZSlider->setRange(Device3DWidget::MinZ,
                                    Device3DWidget::MaxZ, false);
     bool useAbstractFoldableDevice =
-        android::base::System::get()->envGet("ANDROID_EMU_ABSTRACT_DEVICE_VIEW") == "1";
+        android_hw->hw_fold_hinge_count > 0;
     if (useAbstractFoldableDevice) {
         mUi->foldSlider->setRange(0.0, 1.0, false);
         mUi->foldSlider->setSteps(200);
-        mUi->foldSlider->setValue(0.5); // TODO: Set to the correct mapping back to the 1d parameter from the foldable state
+        mUi->foldSlider->setValue(android_foldable_get_with_1d_parameter());
     } else {
         mUi->foldSliderLabel->setHidden(true);
         mUi->foldSlider->setHidden(true);
@@ -499,8 +499,7 @@ void VirtualSensorsPage::propagateAccelWidgetChange() {
 void VirtualSensorsPage::propagateSlidersChange() {
     reportVirtualSensorsInteraction();
     updateModelFromSliders(PHYSICAL_INTERPOLATION_SMOOTH);
-    android_foldable_set_with_1d_parameter(
-        mUi->foldSlider->getValue());
+    android_foldable_set_with_1d_parameter(mUi->foldSlider->getValue());
 }
 
 /*

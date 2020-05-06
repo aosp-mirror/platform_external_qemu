@@ -58,7 +58,7 @@ static constexpr int kAnimationIntervalMs = 33;
 Device3DWidget::Device3DWidget(QWidget* parent)
     : GLWidget(parent),
       mUseAbstractDevice(
-          System::get()->getEnvironmentVariable("ANDROID_EMU_ABSTRACT_DEVICE_VIEW") == "1") {
+          android_hw->hw_fold_hinge_count > 0) {
 
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
