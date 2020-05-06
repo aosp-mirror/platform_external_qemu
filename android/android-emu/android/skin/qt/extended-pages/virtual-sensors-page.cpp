@@ -499,8 +499,12 @@ void VirtualSensorsPage::propagateAccelWidgetChange() {
 void VirtualSensorsPage::propagateSlidersChange() {
     reportVirtualSensorsInteraction();
     updateModelFromSliders(PHYSICAL_INTERPOLATION_SMOOTH);
-    android_foldable_set_with_1d_parameter(
-        mUi->foldSlider->getValue());
+    if (sSensorsAgent) {
+        sSensorsAgent->setSensorOverride(ANDROID_SENSOR_HINGE_ANGLE0,
+                                         mUi->foldSlider->getValue() * 360,
+                                         0.0, 0.0);
+    }
+    android_foldable_set_with_1d_parameter(mUi->foldSlider->getValue());
 }
 
 /*
