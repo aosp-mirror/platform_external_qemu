@@ -120,6 +120,7 @@
 /qemu-monitor-info.texi
 /qemu-version.h
 /qemu-version.h.tmp
+/qemu2-auto-generated/asm
 /module_block.h
 /scsi/qemu-pr-helper
 /vhost-user-scsi
