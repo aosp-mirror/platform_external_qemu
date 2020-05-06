@@ -10,7 +10,7 @@ android_add_library(
 target_include_directories(log PRIVATE android/android-emugl/guest
                                        android/android-emu)
 target_link_libraries(log PRIVATE emugl_base)
-
+if (NOT LINUX_AARCH64)
 # The cutils library.
 android_add_library(
   TARGET cutils SHARED
@@ -112,3 +112,5 @@ android_target_properties(vulkanhal_unittests darwin-x86_64
 android_target_properties(
   vulkanhal_unittests linux-x86_64
   "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
+
+endif()
