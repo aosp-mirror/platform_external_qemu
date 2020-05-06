@@ -89,6 +89,7 @@ typedef enum{
     SENSOR_(HUMIDITY,"humidity",Humidity,float,"humidity:%g") \
     SENSOR_(MAGNETIC_FIELD_UNCALIBRATED,"magnetic-field-uncalibrated",MagnetometerUncalibrated,vec3,"magnetic-uncalibrated:%g:%g:%g") \
     SENSOR_(GYROSCOPE_UNCALIBRATED,"gyroscope-uncalibrated",GyroscopeUncalibrated,vec3,"gyroscope-uncalibrated:%g:%g:%g") \
+    SENSOR_(HINGE_ANGLE0, "hinge-angle0", HingeAngle0, float, "hinge-angle0:%g") \
 
 typedef enum {
 #define  SENSOR_(x,y,z,v,w)  ANDROID_SENSOR_##x,
@@ -203,7 +204,8 @@ extern int android_physical_model_stop_recording();
 
 /* Foldable state */
 
-#define ANDROID_FOLDABLE_MAX_HINGES 16
+#define ANDROID_FOLDABLE_MAX_HINGES 5
+#define ANDROID_FOLDABLE_MAX_POSTURES 8
 
 enum FoldableDisplayType {
     // Horizontal split means something like a laptop, i.e.
@@ -237,11 +239,19 @@ enum FoldableDisplayType {
     ANDROID_FOLDABLE_VERTICAL_ROLL = 3,
 };
 
+struct FoldablePosture {
+    int lowerBound;
+    int upperBound;
+    int posture;
+};
+
 struct FoldableHingeParameters {
     float percentAlongDisplay; // % of display height (horiz. hinge) or display width (vertical hinge) where the hinge occurrs
     float minDegrees;
     float maxDegrees;
     float defaultDegrees;
+    int numPostures;
+    struct FoldablePosture postures[ANDROID_FOLDABLE_MAX_POSTURES];
 };
 
 struct RollableParameters {
