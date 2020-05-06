@@ -793,6 +793,11 @@ void PhysicalModelImpl::getTransform(
     }
 }
 
+float PhysicalModelImpl::getPhysicalHingeAngle0() const {
+    E("Cannot be here!!! Hinge Angle Sensor 0 is alway overwritten");
+    return 0.0;
+}
+
 void PhysicalModelImpl::setPhysicalStateAgent(
         const QAndroidPhysicalStateAgent* agent) {
     bool stateChanging = false;

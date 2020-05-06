@@ -14,6 +14,7 @@
 
 #include "android/automation/AutomationController.h"
 #include "android/emulation/android_qemud.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 #include "android/globals.h"
 #include "android/physics/PhysicalModel.h"
 #include "android/sensors-port.h"
@@ -36,7 +37,7 @@
 #define V(...) VERBOSE_PRINT(init, __VA_ARGS__)
 
 /* define T_ACTIVE to 1 to debug transport communications */
-#define T_ACTIVE 0
+#define T_ACTIVE 1
 
 #if T_ACTIVE
 #define T(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
@@ -323,8 +324,10 @@ static void serializeSensorValue(
 #define SENSOR_(x,y,z,v,w) case ENUM_NAME(x): {\
             const v current_value = GET_FUNCTION_NAME(z)(\
                     physical_model, &measurement_id);\
+            printf("enter %s\n", __func__);\
             if (measurement_id != sensor->serialized.measurement_id) {\
                 SERIALIZE_VALUE_NAME(v)(sensor, w, current_value);\
+                if (sensor_id ==  ENUM_NAME(HINGE_ANGLE0)) printf("upload hinge0\n");\
             }\
             break;\
         }
@@ -575,6 +578,7 @@ static void _hwSensors_setSensorValue(HwSensors* h,
                                       float a,
                                       float b,
                                       float c) {
+    printf("set sensor %d value %f\n", sensor_id, a);
     switch (sensor_id) {
 #define OVERRIDE_FUNCTION_NAME(x) physicalModel_override##x
 #define GET_TYPE_VALUE_FUNCTION_NAME(x) get_##x##_value
@@ -870,6 +874,8 @@ static void _hwSensors_init(HwSensors* h) {
     if (android_hw->hw_sensors_humidity) {
         h->sensors[ANDROID_SENSOR_HUMIDITY].enabled = true;
     }
+    printf("init hinge angle %d enabled\n", ANDROID_SENSOR_HINGE_ANGLE0);
+    h->sensors[ANDROID_SENSOR_HINGE_ANGLE0].enabled = true;
 
     /* XXX: TODO: Add other tests when we add the corresponding
         * properties to hardware-properties.ini et al. */
@@ -974,13 +980,21 @@ extern int android_sensors_override_set(
         int sensor_id, float a, float b, float c) {
     HwSensors* hw = _sensorsState;
 
+    printf("enter %s, sensor %d value %f\n", __func__, sensor_id, a);
+
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
         return SENSOR_STATUS_UNKNOWN;
 
+        printf("1\n");
+
     if (hw->service != NULL) {
-        if (!hw->sensors[sensor_id].enabled)
+        if (!hw->sensors[sensor_id].enabled) {
+            printf("2\n");
             return SENSOR_STATUS_DISABLED;
+        }
     } else {
+        printf("3\n");
+
         return SENSOR_STATUS_NO_SERVICE;
     }
 
@@ -1166,7 +1180,6 @@ float android_foldable_get_hinge_degrees(unsigned int hinge_index) {
 void android_foldable_set_with_1d_parameter(float t) {
     if (_foldableState->config.numHinges < 1) return;
 
-
     // Many different parameterizations are possible, just pick a crappy one for now
     // (all hinges done at the same rate)
     for (unsigned int i = 0; i < _foldableState->config.numHinges; ++i) {
@@ -1175,6 +1188,17 @@ void android_foldable_set_with_1d_parameter(float t) {
             t * (_foldableState->config.hingeParams[i].maxDegrees -
                     _foldableState->config.hingeParams[i].minDegrees);
     }
+    auto adbInterface = android::emulation::AdbInterface::getGlobal();
+    if (!adbInterface) {
+        E("Adb interface unavailable\n");
+        return;
+    }
+    uint32_t device_posture = (uint32_t)(t * 3.0);
+    adbInterface->enqueueCommand(
+        {"shell", "settings", "put", "global",
+         "device_posture",
+         std::to_string(device_posture)});
+
 }
 
 struct FoldableState* android_foldable_get_state_ptr() {
