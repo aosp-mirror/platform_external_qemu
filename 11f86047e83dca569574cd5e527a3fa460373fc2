@@ -16,6 +16,24 @@
       "revId": "11f86047e83dca569574cd5e527a3fa460373fc2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fddac5c6_c26987fc",
+        "filename": "android/build/cmake/toolchain-linux-aarch64.cmake",
+        "patchSetId": 8
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-05-06T15:08:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04b45037_4983fc2f",
+      "revId": "11f86047e83dca569574cd5e527a3fa460373fc2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
