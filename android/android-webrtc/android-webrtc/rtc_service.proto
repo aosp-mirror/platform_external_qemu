@@ -12,6 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Note that if you add/remove methods in this file you must update
+// the metrics sql as well by running ./android/scripts/gen-grpc-sql.py
+//
+// Please group deleted methods in a block including the date (MM/DD/YY)
+// it was removed. This enables us to easily keep metrics around after removal
+//
+// List of deleted methods
+// rpc iWasDeleted (03/12/12)
+// ...
 syntax = "proto3";
 
 option java_multiple_files = true;
