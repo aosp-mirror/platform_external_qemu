@@ -1,4 +1,5 @@
 # This file defines emulator crash service
+if (NOT LINUX_AARCH64)
 prebuilt(QT5)
 set(CRASH_WINDOWS_ICON ../images/emulator_icon.rc)
 
@@ -69,3 +70,5 @@ target_include_directories(emulator_crashreport_unittests PRIVATE .)
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(emulator_crashreport_unittests windows_msvc-x86_64
                               PUBLIC dirent-win32)
+
+endif()
