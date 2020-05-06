@@ -47,7 +47,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
 endif()
 
-if(NOT WINDOWS)
+if(NOT WINDOWS AND NOT LINUX_AARCH64)
 
   set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp
                        multi-display-agent-mock-impl.cpp Toplevel.cpp window-agent-mock-impl.cpp)
