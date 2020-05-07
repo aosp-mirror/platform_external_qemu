@@ -17,10 +17,17 @@ target_compile_definitions(
           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
 # Make sure we have the qemu dependencies available
-if(OPTION_MINBUILD)
+if(LINUX_AARCH64)
+  add_dependencies(emulator qemu-system-aarch64
+                   qemu-system-aarch64-headless)
+elseif(OPTION_MINBUILD)
   add_dependencies(emulator qemu-system-x86_64 qemu-system-aarch64
                    qemu-system-x86_64-headless qemu-system-aarch64-headless)
 else()
+  if (NOT LINUX_AARCH64)
+    add_dependencies(
+    emulator emulator-crash-service)
+  endif()
   add_dependencies(
     emulator
     qemu-system-i386
@@ -30,7 +37,7 @@ else()
     qemu-system-armel-headless
     qemu-system-x86_64-headless
     qemu-system-aarch64-headless
-    emulator-crash-service)
+    )
 endif()
 
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/pc-bios")

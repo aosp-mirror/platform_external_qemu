@@ -19,7 +19,7 @@ if(DARWIN_X86_64)
   # set them explicitly.
   android_license(TARGET UUID::UUID LIBNAME uuid SPDX None LICENSE None
                   LOCAL None)
-elseif(LINUX_X86_64)
+elseif(LINUX)
   set(UUID_INCLUDE_DIR "${PREBUILT_ROOT}/include")
   set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}")
   set(UUID_LIBRARIES
