@@ -2186,7 +2186,6 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                 auto cpuUsage = emugl::getCpuUsage();
                 std::string lastStats =
                     cpuUsage ? cpuUsage->printUsage() : "";
-                
                 printf("Resident memory: %f mb %s \n%s\n",
                     (float)usage.resident / 1048576.0f, lastStats.c_str(),
                     memoryStats.c_str());
@@ -2276,9 +2275,25 @@ void FrameBuffer::getPixels(void* pixels, uint32_t bytes, uint32_t displayId) {
     iter->second.readbackThread->waitQueuedItems();
 }
 
+void FrameBuffer::flushReadPipeline(int displayId) {
+    const auto& iter = m_onPost.find(displayId);
+    if (iter == m_onPost.end()) {
+        ERR("Cannot find onPost pixels for display %d", displayId);
+        return;
+    }
+
+    if (iter->second.readbackWorker) {
+        iter->second.readbackWorker->flushPipeline();
+    }
+}
+
 static void sFrameBuffer_ReadPixelsCallback(
     void* pixels, uint32_t bytes, uint32_t displayId) {
     FrameBuffer::getFB()->getPixels(pixels, bytes, displayId);
+}
+
+static void sFrameBuffer_FlushReadPixelPipeline(int displayId) {
+    FrameBuffer::getFB()->flushReadPipeline(displayId);
 }
 
 bool FrameBuffer::asyncReadbackSupported() {
@@ -2288,6 +2303,10 @@ bool FrameBuffer::asyncReadbackSupported() {
 emugl::Renderer::ReadPixelsCallback
 FrameBuffer::getReadPixelsCallback() {
     return sFrameBuffer_ReadPixelsCallback;
+}
+
+emugl::Renderer::FlushReadPixelPipeline FrameBuffer::getFlushReadPixelPipeline() {
+    return sFrameBuffer_FlushReadPixelPipeline;
 }
 
 bool FrameBuffer::repost(bool needLockAndBind) {

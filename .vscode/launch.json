@@ -94,12 +94,6 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 "@Q", // Pick the image you would like to use
-                "-grpc",
-                "8554",
-                "-grpc-tls-key",
-                "/Users/jansene/.android/key.pem",
-                "-grpc-tls-cer",
-                "/Users/jansene/.android/cert.pem"
             ],
             "linux": {
                 "env": {
@@ -113,10 +107,8 @@
             },
             "osx": {
                 "args": [
-                    "@L",
+                    "@Q",
                     "-verbose",
-                    "-grpc",
-                    "8554",
                     "-feature",
                     "-HVF",
                 ],
@@ -140,7 +132,7 @@
             "type": "lldb",
             "request": "attach",
             // Replace this with the process executable you want to attach to
-            "pid": 40203, // replace pid with your real pid
+            "pid": 79475, // replace pid with your real pid
             // Ignore signal SIGUSR1
             "postRunCommands": [
                 "pro hand -p true -s false SIGUSR1",

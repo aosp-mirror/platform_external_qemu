@@ -63,6 +63,15 @@ AEMU_EXPORT void android_setPostCallback(OnPostFunc onPost,
 typedef void (*ReadPixelsFunc)(void* pixels, uint32_t bytes, uint32_t displayId);
 AEMU_EXPORT ReadPixelsFunc android_getReadPixelsFunc();
 
+
+typedef void (*FlushReadPixelPipeline)(int displayId);
+
+/* Gets the function that can be used to make sure no
+ * frames are left in the video producer pipeline.
+ * This can result in a post callback.
+ */
+FlushReadPixelPipeline android_getFlushReadPixelPipeline();
+
 /* Retrieve the Vendor/Renderer/Version strings describing the underlying GL
  * implementation. The call only works while the renderer is started.
  *
