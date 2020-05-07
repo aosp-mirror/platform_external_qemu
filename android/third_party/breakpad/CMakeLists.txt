@@ -496,6 +496,7 @@ target_link_libraries(breakpad_client PRIVATE breakpad_common
 
 #
 # dump_syms
+if (NOT LINUX_AARCH64)
 android_add_executable(
   TARGET dump_syms NODISTRIBUTE
   WINDOWS ${BREAKPAD_SRC}/tools/windows/dump_syms/dump_syms.cc
@@ -614,4 +615,5 @@ elseif(WINDOWS_MSVC_X86_64)
                         PRIVATE breakpad_client mincore::mincore gmock_main)
   android_target_compile_definitions(windows_client_unittests windows PRIVATE
                                      ${ANDROID_BREAKPAD_WINDOWS_DEFS})
+endif()
 endif()
