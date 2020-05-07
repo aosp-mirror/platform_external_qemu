@@ -33,7 +33,7 @@ if(DARWIN_X86_64)
   # Optimizations will cause the compiler to optimize away some crucial breakpad
   # behavior, so let's not do that.
   add_c_flag("-O0")
-elseif(LINUX_X86_64)
+elseif(LINUX)
   add_c_flag("-fexceptions")
   add_c_flag("-frtti")
 elseif(WINDOWS_MSVC_X86_64)

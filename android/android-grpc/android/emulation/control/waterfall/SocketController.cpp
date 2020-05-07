@@ -16,7 +16,9 @@
 
 #include <errno.h>                                // for errno, EAGAIN
 #include <unistd.h>                               // for close
+#ifdef __x86_64__
 #include <__hash_table>                           // for __hash_const_iterator
+#endif
 #include <cassert>                                // for assert
 #include <functional>                             // for __base
 #include <string>                                 // for basic_string
