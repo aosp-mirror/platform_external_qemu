@@ -3,6 +3,18 @@ cmake_policy(VERSION 3.0.2)
 project(libpng)
 set(PNG_SRC_DIR ${ANDROID_QEMU2_TOP_DIR}/../libpng/)
 
+if (LINUX_AARCH64)
+set (PNG_ARCH_SPECIFIC
+    ${PNG_SRC_DIR}/arm/arm_init.c
+    ${PNG_SRC_DIR}/arm/filter_neon_intrinsics.c
+    )
+else()
+set (PNG_ARCH_SPECIFIC
+    ${PNG_SRC_DIR}/intel/intel_init.c
+    ${PNG_SRC_DIR}/intel/filter_sse2_intrinsics.c
+    )
+endif()
+
 # TODO(jansene): We can likely turn this into a shared library. Which would save
 # around 280kb per executable.
 android_add_library(
@@ -30,8 +42,8 @@ android_add_library(
       ${PNG_SRC_DIR}/pngwrite.c
       ${PNG_SRC_DIR}/pngwtran.c
       ${PNG_SRC_DIR}/pngwutil.c
-      ${PNG_SRC_DIR}/intel/intel_init.c # amd64 specific optimizations.
-      ${PNG_SRC_DIR}/intel/filter_sse2_intrinsics.c)
+      ${PNG_ARCH_SPECIFIC}
+      )
 target_compile_options(
   png PRIVATE -std=gnu89 -Wall -Wno-unused-parameter
               -Wno-tautological-constant-out-of-range-compare)
@@ -39,6 +51,7 @@ target_compile_definitions(png PRIVATE -DPNG_INTEL_SSE_OPT=1)
 target_include_directories(png PUBLIC ${PNG_SRC_DIR})
 target_link_libraries(png PUBLIC zlib)
 android_target_link_libraries(png linux-x86_64 PRIVATE m)
+android_target_link_libraries(png linux-aarch64 PRIVATE m)
 android_target_compile_options(png darwin-x86_64
                                PRIVATE -Wno-unguarded-availability-new)
 android_target_compile_options(
