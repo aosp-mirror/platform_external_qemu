@@ -376,6 +376,9 @@ target_link_libraries(
           Qt5::Gui
           Qt5::Svg
           zlib
+          "-lX11"
+          "-lxcb"
+          "-lXau"
           android-hw-config)
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug.
