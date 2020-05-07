@@ -17,7 +17,7 @@ if(NOT ANDROID_TARGET_TAG MATCHES "windows.*")
   set(TCMALLOC_INCLUDE_DIR "${PREBUILT_ROOT}/include")
   set(TCMALLOC_INCLUDE_DIRS ${TCMALLOC_INCLUDE_DIR})
   set(TCMALLOC_LIBRARIES -ltcmalloc_minimal -L${PREBUILT_ROOT}/lib)
-  if(LINUX_X86_64)
+  if(LINUX)
     set(TCMALLOC_OS_DEPENDENCIES
         "${PREBUILT_ROOT}/lib/libtcmalloc_minimal.so.4>lib64/libtcmalloc_minimal.so.4"
     )
