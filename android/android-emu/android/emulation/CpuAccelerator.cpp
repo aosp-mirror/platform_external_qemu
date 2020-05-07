@@ -304,6 +304,7 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
             "You may need to log out and back in for changes to take effect.\n",
             kvm_device,
             etcGroupsKvmLine.c_str());
+
         // There are issues with ensuring the above is actually printed. Print it now.
         fprintf(stderr, "%s: %s\n", __func__, status->c_str());
         return ANDROID_CPU_ACCELERATION_DEV_PERMISSION;
