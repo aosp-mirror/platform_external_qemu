@@ -36,6 +36,9 @@ if(DARWIN_X86_64)
 elseif(LINUX_X86_64)
   add_c_flag("-fexceptions")
   add_c_flag("-frtti")
+elseif(LINUX_AARCH64)
+  add_c_flag("-fexceptions")
+  add_c_flag("-frtti")
 elseif(WINDOWS_MSVC_X86_64)
   add_c_flag("-Wno-c++17-narrowing")
 else()
@@ -496,6 +499,7 @@ target_link_libraries(breakpad_client PRIVATE breakpad_common
 
 #
 # dump_syms
+if (NOT LINUX_AARCH64)
 android_add_executable(
   TARGET dump_syms NODISTRIBUTE
   WINDOWS ${BREAKPAD_SRC}/tools/windows/dump_syms/dump_syms.cc
@@ -546,7 +550,7 @@ android_target_compile_definitions(sym_upload darwin-x86_64 PRIVATE
 android_target_compile_definitions(sym_upload windows PRIVATE -DUNICODE
                                    -D_UNICODE)
 android_install_as_debug_info(sym_upload)
-if(LINUX_X86_64)
+if(LINUX_X86_64 OR LINUX_AARCH64)
   android_add_executable(
     TARGET linux_dumper_unittest_helper NODISTRIBUTE
     SRC # cmake-format: sortable
@@ -614,4 +618,5 @@ elseif(WINDOWS_MSVC_X86_64)
                         PRIVATE breakpad_client mincore::mincore gmock_main)
   android_target_compile_definitions(windows_client_unittests windows PRIVATE
                                      ${ANDROID_BREAKPAD_WINDOWS_DEFS})
+endif()
 endif()

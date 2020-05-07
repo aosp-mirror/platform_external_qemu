@@ -23,7 +23,7 @@ if(DARWIN_X86_64)
 elseif(WINDOWS_MSVC_X86_64)
   set(GLIB2_LIBRARIES ${PREBUILT_ROOT}/lib/libglib-2.0.lib ole32::ole32
                       ws2_32::ws2_32)
-elseif(LINUX_X86_64)
+elseif(LINUX)
   set(GLIB2_LIBRARIES -lglib-2.0 -lpthread -lrt -L${PREBUILT_ROOT}/lib)
 endif()
 
