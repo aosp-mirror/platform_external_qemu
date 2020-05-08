@@ -45,7 +45,12 @@ class TemporaryDirectory(object):
 
 def run_tests(out_dir, jobs, additional_opts):
     if platform.system() == 'Windows':
-        run_binary_exists(out_dir)
+
+        if "--skip-emulator-check" in additional_opts:
+            pass
+        else:
+            run_binary_exists(out_dir)
+
         run_emugen_test(out_dir)
         run_ctest(out_dir, jobs)
     else:
