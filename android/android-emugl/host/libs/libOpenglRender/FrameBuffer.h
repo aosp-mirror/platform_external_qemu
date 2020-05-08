@@ -675,14 +675,18 @@ private:
     enum class ReadbackCmd {
         Init = 0,
         GetPixels = 1,
-        Exit = 2,
+        AddRecordDisplay = 2,
+        DelRecordDisplay = 3,
+        Exit = 4,
     };
     struct Readback {
         ReadbackCmd cmd;
-        std::shared_ptr<ReadbackWorker> readbackWorker;
+        uint32_t displayId;
         GLuint bufferId;
         void* pixelsOut;
         uint32_t bytes;
+        uint32_t width;
+        uint32_t height;
     };
     android::base::WorkerProcessingResult sendReadbackWorkerCmd(const Readback& readback);
     bool m_asyncReadbackSupported = true;
@@ -696,16 +700,6 @@ private:
         uint32_t height;
         unsigned char* img;
         bool readBgra;
-        std::shared_ptr<ReadbackWorker> readbackWorker;
-        std::unique_ptr<android::base::WorkerThread<Readback>> readbackThread;
-        void finish() {
-            if (readbackThread) {
-                if (readbackThread->isStarted()) {
-                    readbackThread->enqueue({ReadbackCmd::Exit, readbackWorker});
-                }
-                readbackThread->join();
-            }
-        }
         ~onPost() {
             if (img) {
                 delete[] img;
@@ -713,6 +707,8 @@ private:
         }
     };
     std::map<uint32_t, onPost> m_onPost;
+    ReadbackWorker m_readbackWorker;
+    android::base::WorkerThread<Readback> m_readbackThread;
 
     std::string m_glVendor;
     std::string m_glRenderer;
