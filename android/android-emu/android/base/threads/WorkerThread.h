@@ -74,7 +74,7 @@ public:
         : mProcessor(std::move(processor)), mThread([this]() { worker(); }) {
         mQueue.reserve(10);
     }
-    ~WorkerThread() { join(); }
+    ~WorkerThread() { join(); printf("exit WorkerThread\n");}
 
     // Starts the worker thread.
     bool start() {
