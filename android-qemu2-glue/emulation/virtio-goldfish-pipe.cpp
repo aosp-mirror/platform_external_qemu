@@ -1027,10 +1027,8 @@ public:
         (void)y;
         (void)width;
         (void)height;
-        //TODO: displayId > 0 ?
-        uint32_t displayId = 0;
         mVirtioGpuOps->post_color_buffer(res_handle);
-        mReadPixelsFunc(pixels, max_bytes, displayId);
+        mReadPixelsFunc(pixels, max_bytes);
     }
 
     void createResourceV2(uint32_t res_handle, uint64_t hvaId) {
