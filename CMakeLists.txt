@@ -96,6 +96,13 @@ if (GFXSTREAM_ONLY)
     set(GFXSTREAM TRUE)
 endif()
 
+if (LINUX_AARCH64)
+    set(OPTION_MINBUILD TRUE)
+    set(QTWEBENGINE FALSE)
+    set(QEMU_UPSTREAM FALSE)
+    set(WEBRTC FALSE)
+endif()
+
 if (CROSVM OR GFXSTREAM)
     set(OPTION_AEMU_LIBS_ONLY TRUE)
     set(OPTION_GFXSTREAM_BACKEND TRUE)
@@ -223,6 +230,8 @@ if(LINUX_X86_64)
   add_c_flag("-Werror")
   add_c_flag("-Wno-deprecated-declarations") # Protobuf generates deprecation warnings for deprecated enums
   # And the asm type if we are compiling with yasm
+  set(ANDROID_NASM_TYPE elf64)
+elseif(LINUX_AARCH64)
   set(ANDROID_NASM_TYPE elf64)
 elseif(WINDOWS_MSVC_X86_64)
   # And the asm type if we are compiling with yasm
@@ -372,10 +381,16 @@ set(EMULATOR_FEATURE_DEPENDENCIES
     "${ANDROID_QEMU2_TOP_DIR}/android/data/emu-original-feature-flags.protobuf>lib/emu-original-feature-flags.protobuf"
 )
 
+if(LINUX_AARCH64)
+    set(ANDROID_TARGET_ARCH "aarch64")
+else()
+    set(ANDROID_TARGET_ARCH "x86_64")
+endif()
+
 set(SWIFTSHADER_DEPENDENCIES
-    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-x86_64/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
-    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-x86_64/lib/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}"
-    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-x86_64/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
 )
 android_license(
   TARGET SWIFTSHADER_DEPENDENCIES
@@ -609,7 +624,16 @@ set(ANDROID_QEMU_i386_DEVICES_linux-x86_64
 )
 set(ANDROID_QEMU_arm_DEVICES_linux-x86_64
     "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+
+set(ANDROID_QEMU_i386_DEVICES_linux-aarch64
+    "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}"
+)
+set(ANDROID_QEMU_arm_DEVICES_linux-aarch64
+    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+
 android_target_include_directories(android-qemu-deps linux-x86_64 INTERFACE
+                                   linux-headers)
+android_target_include_directories(android-qemu-deps linux-aarch64 INTERFACE
                                    linux-headers)
 android_target_compile_options(
   android-qemu-deps
@@ -633,6 +657,8 @@ android_target_compile_options(
   "-Wno-implicit-int-float-conversion"
   "-Wno-reorder-init-list")
 android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE
+                              "${TCMALLOC_LIBRARIES} -lutil")
+android_target_link_libraries(android-qemu-deps linux-aarch64 INTERFACE
                               "${TCMALLOC_LIBRARIES} -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE
                               "-framework CoreAudio")
@@ -677,6 +703,7 @@ target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 if (NOT OPTION_AEMU_LIBS_ONLY)
 
   # Not allowed to have libraries without source files.
+if (NOT LINUX_AARCH64)
   android_add_library(
     TARGET headless-paaudio
     LICENSE "GPL-2.0-only"
@@ -689,6 +716,7 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     SRC # cmake-format: sortable
         audio/paaudio-headless-impl-placeholder.c
     LINUX audio/paaudio-headless-impl.c)
+endif()
 
   android_add_interface(
     TARGET android-qemu-deps-headful
@@ -761,12 +789,14 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
                                          android-qemu-deps android-emu-base)
 
   # Create the qemu targets.
+  if(NOT LINUX_AARCH64)
   android_add_qemu_executable(
     x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_executable(aarch64
-                              "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_headless_executable(
     x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+  endif()
+  android_add_qemu_executable(aarch64
+                              "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_headless_executable(
     aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
 

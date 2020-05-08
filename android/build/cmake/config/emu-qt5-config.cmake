@@ -361,7 +361,8 @@ elseif(LINUX)
          "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'")
   endif()
 
-  list(
+  if (LINUX_X86_64)
+    list(
     APPEND
     QT5_SHARED_DEPENDENCIES
     ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so;
@@ -380,7 +381,8 @@ elseif(LINUX)
     ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
     ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6
     ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfontconfig.so.1.12.0>lib64/qt/lib/libfontconfig.so.1
-  )
+    )
+  endif()
 
 endif()
 

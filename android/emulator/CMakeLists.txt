@@ -17,7 +17,10 @@ target_compile_definitions(
           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
 # Make sure we have the qemu dependencies available
-if(OPTION_MINBUILD)
+if(LINUX_AARCH64)
+  add_dependencies(emulator qemu-system-aarch64
+                   qemu-system-aarch64-headless)
+elseif(OPTION_MINBUILD)
   add_dependencies(emulator qemu-system-x86_64 qemu-system-aarch64
                    qemu-system-x86_64-headless qemu-system-aarch64-headless)
 else()

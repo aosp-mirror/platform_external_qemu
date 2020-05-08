@@ -340,7 +340,7 @@ if(QTWEBENGINE)
                            Qt5::WebSockets)
 endif()
 
-if(NOT LINUX_CROSS_AARCH64)
+if(NOT LINUX_AARCH64)
 target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
 endif()
 
