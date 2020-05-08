@@ -275,7 +275,7 @@ elseif(WINDOWS_MSVC_X86_64)
     # translations
     ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/bin/qtwebengine_locales
   )
-elseif(LINUX_X86_64)
+elseif(LINUX)
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   # LD_DEBUG=libs ./emulator @P_64 2>&1 | grep qt | grep init
   set(QT5_SHARED_DEPENDENCIES

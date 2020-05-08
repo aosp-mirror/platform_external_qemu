@@ -229,7 +229,7 @@ function(_register_target)
   endif()
 
   set(src ${build_SRC})
-  if(LINUX_X86_64 AND build_LINUX)
+  if(LINUX AND build_LINUX)
     list(APPEND src ${build_LINUX})
   elseif(DARWIN_X86_64 AND build_DARWIN)
     list(APPEND src ${build_DARWIN})
