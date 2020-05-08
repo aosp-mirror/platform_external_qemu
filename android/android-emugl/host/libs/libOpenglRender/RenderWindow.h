@@ -86,7 +86,6 @@ public:
 
     bool asyncReadbackSupported();
     emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();
-    emugl::Renderer::FlushReadPixelPipeline getFlushReadPixelPipeline();
 
     // Start displaying the emulated framebuffer using a sub-window of a
     // parent |window| id. |wx|, |wy|, |ww| and |wh| are the position

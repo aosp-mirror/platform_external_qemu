@@ -77,7 +77,6 @@
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/globals.h"
-#include "android/gpu_frame.h"
 #include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot/interface.h"
@@ -401,10 +400,6 @@ bool qemu_android_emulation_setup() {
             qemu_setup_grpc();
         }
     }
-
-    // Make sure we have the proper loopers available for frame sharing and
-    // video recording
-    gpu_initialize_recorders();
 
     // We are sharing video, time to launch the shared memory recorder.
     // Note, the webrtc module could have started the shared memory module
