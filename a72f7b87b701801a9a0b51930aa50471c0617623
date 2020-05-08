@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fe7e0639_dd9f4188",
+        "filename": "hw/arm/virt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-08T16:51:16Z",
+      "side": 1,
+      "message": "nit: trailing whitespace",
+      "revId": "a72f7b87b701801a9a0b51930aa50471c0617623",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
