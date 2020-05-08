@@ -59,7 +59,6 @@ public:
                          uint32_t displayId) final;
     bool asyncReadbackSupported() final;
     ReadPixelsCallback getReadPixelsCallback() final;
-    FlushReadPixelPipeline getFlushReadPixelPipeline() final;
     bool showOpenGLSubwindow(FBNativeWindowType window,
                              int wx,
                              int wy,
