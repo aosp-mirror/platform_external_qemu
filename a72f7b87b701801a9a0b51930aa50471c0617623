@@ -16,6 +16,24 @@
       "revId": "a72f7b87b701801a9a0b51930aa50471c0617623",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4584a49c_e911e9fe",
+        "filename": "hw/arm/virt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-05-08T18:52:58Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "fe7e0639_dd9f4188",
+      "revId": "a72f7b87b701801a9a0b51930aa50471c0617623",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
