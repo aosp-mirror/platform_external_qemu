@@ -34,11 +34,8 @@ namespace android {
 
 static MultiDisplay* sMultiDisplay = nullptr;
 
-MultiDisplay::MultiDisplay(const QAndroidEmulatorWindowAgent* const windowAgent,
-                           const QAndroidRecordScreenAgent* const recordAgent,
-                           bool isGuestMode)
-    : mWindowAgent(windowAgent),
-      mRecordAgent(recordAgent),
+MultiDisplay::MultiDisplay(const QAndroidEmulatorWindowAgent* const agent, bool isGuestMode)
+    : mWindowAgent(agent),
       mGuestMode(isGuestMode) {
     SkinRect monitor;
     skin_winsys_get_monitor_rect(&monitor);
@@ -336,11 +333,6 @@ int MultiDisplay::destroyDisplay(uint32_t displayId) {
     }
 
     if (needUIUpdate) {
-        // stop recording of this display if it is happening.
-        RecorderStates states = mRecordAgent->getRecorderState();
-        if (states.displayId == displayId && states.state == RECORDER_RECORDING) {
-            mRecordAgent->stopRecording();
-        }
         mWindowAgent->setUIDisplayRegion(0, 0, width, height);
         if (restoreSkin) {
             mWindowAgent->restoreSkin();
@@ -357,7 +349,6 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
                                 uint32_t h,
                                 uint32_t dpi) {
     bool UIUpdate = false;
-    bool checkRecording = false;
     uint32_t width, height;
     if (mGuestMode) {
         return -1;
@@ -367,10 +358,6 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
         if (mMultiDisplay.find(displayId) == mMultiDisplay.end()) {
             LOG(ERROR) << "cannot find display " << displayId;
             return -1;
-        }
-        if (mMultiDisplay[displayId].cb != 0 &&
-            (mMultiDisplay[displayId].width != w || mMultiDisplay[displayId].height != h)) {
-                checkRecording = true;
         }
         mMultiDisplay[displayId].width = w;
         mMultiDisplay[displayId].height = h;
@@ -383,13 +370,6 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
             }
             getCombinedDisplaySizeLocked(&width, &height);
             UIUpdate = true;
-        }
-    }
-    if (checkRecording) {
-        // stop recording of this display if it is happening.
-        RecorderStates states = mRecordAgent->getRecorderState();
-        if (states.displayId == displayId && states.state == RECORDER_RECORDING) {
-            mRecordAgent->stopRecording();
         }
     }
     if (UIUpdate) {
@@ -803,10 +783,9 @@ void MultiDisplay::onLoad(base::Stream* stream) {
 
 }   // namespace android
 
-void android_init_multi_display(const QAndroidEmulatorWindowAgent* const windowAgent,
-                                const QAndroidRecordScreenAgent* const recordAgent,
+void android_init_multi_display(const QAndroidEmulatorWindowAgent* const agent,
                                 bool isGuestMode) {
-    android::sMultiDisplay = new android::MultiDisplay(windowAgent, recordAgent, isGuestMode);
+    android::sMultiDisplay = new android::MultiDisplay(agent, isGuestMode);
 }
 
 extern "C" {

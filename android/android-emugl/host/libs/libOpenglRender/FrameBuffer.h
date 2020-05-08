@@ -677,7 +677,7 @@ private:
     };
     struct Readback {
         ReadbackCmd cmd;
-        std::shared_ptr<ReadbackWorker> readbackWorker;
+        uint32_t displayId;
         GLuint bufferId;
         void* pixelsOut;
         uint32_t bytes;
@@ -694,12 +694,12 @@ private:
         uint32_t height;
         unsigned char* img;
         bool readBgra;
-        std::shared_ptr<ReadbackWorker> readbackWorker;
+        std::unique_ptr<ReadbackWorker> readbackWorker;
         std::unique_ptr<android::base::WorkerThread<Readback>> readbackThread;
         void finish() {
             if (readbackThread) {
                 if (readbackThread->isStarted()) {
-                    readbackThread->enqueue({ReadbackCmd::Exit, readbackWorker});
+                    readbackThread->enqueue({ReadbackCmd::Exit, displayId});
                 }
                 readbackThread->join();
             }
