@@ -60,7 +60,7 @@ AEMU_EXPORT void android_setPostCallback(OnPostFunc onPost,
                              bool useBgraReadback,
                              uint32_t displayId);
 
-typedef void (*ReadPixelsFunc)(void* pixels, uint32_t bytes, uint32_t displayId);
+typedef void (*ReadPixelsFunc)(void* pixels, uint32_t bytes);
 AEMU_EXPORT ReadPixelsFunc android_getReadPixelsFunc();
 
 /* Retrieve the Vendor/Renderer/Version strings describing the underlying GL

@@ -29,7 +29,6 @@ std::unique_ptr<Producer> createVideoProducer(
         uint32_t fbWidth,
         uint32_t fbHeight,
         uint8_t fps,
-        uint32_t displayId,
         const QAndroidDisplayAgent* dpyAgent = nullptr);
 
 }  // namespace recording

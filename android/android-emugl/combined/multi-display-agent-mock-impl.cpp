@@ -84,7 +84,7 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
             printf("translateCoordination (mock)\n");
             return true;
         },
-        .setGpuMode = [](bool isGuestMode, uint32_t w, uint32_t h) {
+        .setGpuMode = [](bool isGuestMode) {
             printf("setGpuMode (mock)\n");
         },
         .createDisplay = [](uint32_t* displayId) -> int {
