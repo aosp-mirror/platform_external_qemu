@@ -121,14 +121,13 @@ public:
     }
 
     virtual void stop() override {
+        if (!mIsGuestMode) {
+            gpu_frame_set_record_mode(false, mDisplayId);
+        }
         mIsStopped = true;
         mDataQueue.stop();
         mFreeQueue.stop();
         waitForPoke();
-        // disable Gpu record when sendFramesWorker() thread exits.
-        if (!mIsGuestMode) {
-            gpu_frame_set_record_mode(false, mDisplayId);
-        }
     }
 
 private:
