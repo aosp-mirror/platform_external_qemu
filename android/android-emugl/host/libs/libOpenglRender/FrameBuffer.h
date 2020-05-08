@@ -708,6 +708,7 @@ private:
         }
         ~onPost() {
             if (img) {
+                printf("delete img\n");
                 delete[] img;
             }
         }

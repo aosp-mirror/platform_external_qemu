@@ -39,6 +39,7 @@ ReadbackWorker::~ReadbackWorker() {
     s_gles2.glDeleteBuffers(mBuffers.size(), &mBuffers[0]);
     mFb->unbindAndDestroyTrivialSharedContext(mContext, mSurf);
     mFb->unbindAndDestroyTrivialSharedContext(mFlushContext, mFlushSurf);
+    printf("exit ReadbackWorker\n");
 }
 
 void ReadbackWorker::doNextReadback(ColorBuffer* cb,

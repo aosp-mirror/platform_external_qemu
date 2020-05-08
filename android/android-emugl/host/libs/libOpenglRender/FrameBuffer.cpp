@@ -787,11 +787,12 @@ void FrameBuffer::setPostCallback(
         m_onPost[displayId].displayId = displayId;
         m_onPost[displayId].width = w;
         m_onPost[displayId].height = h;
-        m_onPost[displayId].img = new unsigned char[4 * w * h];
+        if (m_onPost[displayId].img == nullptr)
+            m_onPost[displayId].img = new unsigned char[4 * w * h];
         m_onPost[displayId].readBgra = useBgraReadback;
     } else {
-        m_onPost[displayId].finish();
-        m_onPost.erase(displayId);
+//        m_onPost[displayId].finish();
+//        m_onPost.erase(displayId);
     }
 }
 
