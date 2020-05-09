@@ -2515,8 +2515,10 @@ public:
                     importCbInfoPtr->colorBuffer,
                     false /* not vulkan only */,
                     nullptr,
-                    // Modify the allocation size to suit the resulting image memory size.
-                    &localAllocInfo.allocationSize);
+                    // Modify the allocation size and type index
+                    // to suit the resulting image memory size.
+                    &localAllocInfo.allocationSize,
+                    &localAllocInfo.memoryTypeIndex);
 
             if (m_emu->instanceSupportsExternalMemoryCapabilities) {
                 VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =

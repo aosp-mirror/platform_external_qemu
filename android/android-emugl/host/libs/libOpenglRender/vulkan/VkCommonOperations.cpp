@@ -1197,7 +1197,7 @@ static uint32_t lastGoodTypeIndex(uint32_t indices) {
     return 0;
 }
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* exported, VkDeviceSize* allocSize) {
+bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* exported, VkDeviceSize* allocSize, uint32_t* typeIndex) {
     if (!isColorBufferVulkanCompatible(colorBufferHandle)) return false;
 
     auto vk = sVkEmulation->dvk;
@@ -1222,6 +1222,9 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
         // Update the allocation size to what the host driver wanted, or we
         // might get VK_ERROR_OUT_OF_DEVICE_MEMORY and a host crash
         if (allocSize) *allocSize = infoPtr->memory.size;
+        // Update the type index to what the host driver wanted, or we might
+        // get VK_ERROR_DEVICE_LOST
+        if (typeIndex) *typeIndex = infoPtr->memory.typeIndex;
         return true;
     }
 
@@ -1339,6 +1342,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
 
     if (exported) *exported = res.glExported;
     if (allocSize) *allocSize = res.memory.size;
+    if (typeIndex) *typeIndex = res.memory.typeIndex;
 
     sVkEmulation->colorBuffers[colorBufferHandle] = res;
 
