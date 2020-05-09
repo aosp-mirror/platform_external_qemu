@@ -73,9 +73,12 @@ TEST(Console, preauth_ping) {
     ping_test();
 }
 
+// BUG: 156158638
+#ifndef _WIN32
 TEST(Console, postauth_ping) {
     ping_test();
 }
+#endif
 
 
 static void ping_test() {
