@@ -2085,6 +2085,15 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
             getter(pname, params);
         }
         break;
+    case GL_ALIASED_POINT_SIZE_RANGE:
+        if (isCoreProfile()) {
+#ifndef GL_POINT_SIZE_RANGE
+#define GL_POINT_SIZE_RANGE               0x0B12
+#endif
+            getter(GL_POINT_SIZE_RANGE, params);
+        } else {
+            getter(pname, params);
+        }
     default:
         getter(pname,params);
         break;
