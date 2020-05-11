@@ -78,6 +78,9 @@ service EmulatorController {
   // Make a phone call.
   rpc sendPhone(PhoneCall) returns (PhoneResponse) {}
 
+  // Sends an sms message to the emulator.
+  rpc sendSms(SmsMessage) returns (PhoneResponse) {}
+
   // Retrieve the status of the emulator. This will contain general
   // hardware information, and whether the device has booted or not.
   rpc getStatus(google.protobuf.Empty) returns (EmulatorStatus) {}
@@ -757,4 +760,17 @@ message AudioPacket {
 
   // Contains a sample in the given audio format.
   bytes audio = 3;
+}
+
+message SmsMessage {
+  // The source address where this message came from.
+  //
+  // The address should be a valid GSM-formatted address as specified by
+  // 3GPP 23.040 Sec 9.1.2.5.
+  //
+  // For example: +3106225412 or (650) 555-1221
+  string srcAddress = 1;
+
+  // A utf8 encoded text message that should be delivered.
+  string text = 2;
 }
