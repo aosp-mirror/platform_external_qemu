@@ -23,12 +23,12 @@
 #include <grpcpp/grpcpp.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <chrono>
 #include <cstdint>
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <ratio>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -37,11 +37,7 @@
 #include <vector>
 
 #include "android/base/Log.h"
-#include "android/base/Uuid.h"
 #include "android/base/async/ThreadLooper.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/synchronization/Event.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
@@ -70,6 +66,9 @@
 #include "android/opengles.h"
 #include "android/physics/Physics.h"
 #include "android/skin/rect.h"
+#include "android/telephony/gsm.h"
+#include "android/telephony/modem.h"
+#include "android/telephony/sms.h"
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
@@ -600,6 +599,40 @@ public:
         return Status::OK;
     }
 
+    Status sendSms(ServerContext* context,
+                   const SmsMessage* smsMessage,
+                   PhoneResponse* reply) override {
+        SmsAddressRec sender;
+
+        if (sms_address_from_str(&sender, smsMessage->srcaddress().c_str(),
+                                 smsMessage->srcaddress().size()) < 0) {
+            reply->set_response(PhoneResponse::BadNumber);
+            return Status::OK;
+        }
+
+        auto modem = mAgents->telephony->getModem();
+        if (!modem) {
+            reply->set_response(PhoneResponse::ActionFailed);
+            return Status::OK;
+        }
+
+        // create a list of SMS PDUs, then send them
+        SmsPDU* pdus = smspdu_create_deliver_utf8(
+                (cbytes_t)smsMessage->text().c_str(),
+                smsMessage->text().size(), &sender, NULL);
+
+        if (pdus == NULL) {
+            reply->set_response(PhoneResponse::ActionFailed);
+        }
+
+        for (int nn = 0; pdus[nn] != NULL; nn++) {
+            amodem_receive_sms(modem, pdus[nn]);
+        }
+        smspdu_free_list(pdus);
+
+        return Status::OK;
+    }
+
     Status sendPhone(ServerContext* context,
                      const PhoneCall* requestPtr,
                      PhoneResponse* reply) override {
@@ -637,7 +670,7 @@ private:
 };
 
 grpc::Service* getEmulatorController(const AndroidConsoleAgents* agents) {
-    return  new EmulatorControllerImpl(agents);
+    return new EmulatorControllerImpl(agents);
 }
 
 }  // namespace control
