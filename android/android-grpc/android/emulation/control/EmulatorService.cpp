@@ -23,6 +23,7 @@
 #include <grpcpp/grpcpp.h>
 #include <stdio.h>
 #include <string.h>
+
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -72,6 +73,9 @@
 #include "android/recording/Producer.h"
 #include "android/recording/audio/AudioProducer.h"
 #include "android/skin/rect.h"
+#include "android/telephony/gsm.h"
+#include "android/telephony/modem.h"
+#include "android/telephony/sms.h"
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
@@ -662,6 +666,41 @@ public:
                     break;
             };
         });
+
+        return Status::OK;
+    }
+
+    Status sendSms(ServerContext* context,
+                   const SmsMessage* smsMessage,
+                   PhoneResponse* reply) override {
+        SmsAddressRec sender;
+
+        if (sms_address_from_str(&sender, smsMessage->srcaddress().c_str(),
+                                 smsMessage->srcaddress().size()) < 0) {
+            reply->set_response(PhoneResponse::BadNumber);
+            return Status::OK;
+        }
+
+        auto modem = mAgents->telephony->getModem();
+        if (!modem) {
+            reply->set_response(PhoneResponse::ActionFailed);
+            return Status::OK;
+        }
+
+        // create a list of SMS PDUs, then send them
+        SmsPDU* pdus = smspdu_create_deliver_utf8(
+                (cbytes_t)smsMessage->text().c_str(), smsMessage->text().size(),
+                &sender, NULL);
+
+        if (pdus == NULL) {
+            reply->set_response(PhoneResponse::ActionFailed);
+            return Status::OK;
+        }
+
+        for (int nn = 0; pdus[nn] != NULL; nn++) {
+            amodem_receive_sms(modem, pdus[nn]);
+        }
+        smspdu_free_list(pdus);
 
         return Status::OK;
     }
