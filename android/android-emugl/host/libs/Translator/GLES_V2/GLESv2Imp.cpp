@@ -2085,6 +2085,16 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
             getter(pname, params);
         }
         break;
+    case GL_ALIASED_POINT_SIZE_RANGE:
+        if (isCoreProfile()) {
+#ifndef GL_POINT_SIZE_RANGE
+#define GL_POINT_SIZE_RANGE               0x0B12
+#endif
+            getter(GL_POINT_SIZE_RANGE, params);
+        } else {
+            getter(pname, params);
+        }
+        break;
     default:
         getter(pname,params);
         break;
@@ -2222,6 +2232,16 @@ GL_APICALL void  GL_APIENTRY glGetBooleanv(GLenum pname, GLboolean* params){
         if (isCoreProfile()) {
             GLuint fboBinding = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
             TO_GLBOOL(params, ctx->queryCurrFboBits(fboBinding, pname));
+        } else {
+            s_glGetBooleanv_wrapper(pname, params);
+        }
+        break;
+    case GL_ALIASED_POINT_SIZE_RANGE:
+        if (isCoreProfile()) {
+#ifndef GL_POINT_SIZE_RANGE
+#define GL_POINT_SIZE_RANGE               0x0B12
+#endif
+            s_glGetBooleanv_wrapper(GL_POINT_SIZE_RANGE, params);
         } else {
             s_glGetBooleanv_wrapper(pname, params);
         }
