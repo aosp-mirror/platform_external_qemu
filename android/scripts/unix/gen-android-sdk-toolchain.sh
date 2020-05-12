@@ -132,7 +132,7 @@ if [ "$OPT_HOST" ]; then
             ;;
     esac
     HOST=$OPT_HOST
-    if [[ $OPT_HOST == "linux-aarch64" ]]; then
+    if [ "$OPT_HOST" = "linux-aarch64" ]; then
         log "Setting BUILD_ARCH to aarch64"
         BUILD_ARCH="aarch64"
     fi
@@ -628,7 +628,7 @@ fetch_dependencies_msvc() {
 get_clang_version() {
     CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for ${BUILD_HOST})
     CLANG_DIR=$(realpath $CLANG_BINDIR/..)
-    if [[ $BUILD_HOST == "darwin" ]]; then
+    if [ "$BUILD_HOST" = "darwin" ]; then
        CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | egrep -E 'clang version \d+.\d+.\d' -o | egrep -E '\d+.\d+.\d+' -o)
     else
        CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | grep -P 'clang version \d+.\d+.\d' -o | grep -P '\d+.\d+.\d+' -o)
@@ -771,7 +771,7 @@ print_info () {
     fi
     case $PRINT in
         binprefix)
-            if [[ $BUILD_HOST == "darwin" ]]; then
+            if [ "$BUILD_HOST" = "darwin" ]; then
                 BINPREFIX=""
             fi
             printf "%s\n" "$BINPREFIX"
@@ -835,7 +835,7 @@ prepare_build_for_host () {
             prepare_build_for_darwin
             ;;
         windows_msvc-*)
-            if [ $BUILD_HOST == "darwin" ]; then
+            if [ "$BUILD_HOST" = "darwin" ]; then
                 which x86_64-w64-mingw32-gcc > /dev/null || panic "No mingw install available!"
                 TOOLCHAIN_PREFIX=x86_64-w64-mingw32-
                 DST_PREFIX=$(dirname $(which x86_64-w64-mingw32-gcc))
