@@ -665,6 +665,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_colorBufferHelper(new ColorBufferHelper(this)),
       m_refCountPipeEnabled(emugl::emugl_feature_is_enabled(
               android::featurecontrol::RefCountPipe)),
+      m_noDelayCloseColorBufferEnabled(emugl::emugl_feature_is_enabled(
+              android::featurecontrol::NoDelayCloseColorBuffer)),
       m_readbackThread([this](FrameBuffer::Readback&& readback) {
           return sendReadbackWorkerCmd(readback);
       }),
@@ -1245,7 +1247,9 @@ void FrameBuffer::drainWindowSurface() {
                         colorBuffersToCleanup.push_back(oldColorBufferHandle);
                     }
                 } else {
-                    closeColorBufferLocked(oldColorBufferHandle);
+                    if (closeColorBufferLocked(oldColorBufferHandle)) {
+                        colorBuffersToCleanup.push_back(oldColorBufferHandle);
+                    }
                 }
                 m_windows.erase(winIt);
             }
@@ -1305,7 +1309,9 @@ std::vector<HandleType> FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_sur
                 colorBuffersToCleanUp.push_back(w->second.second);
             }
         } else {
-            closeColorBufferLocked(w->second.second);
+            if (closeColorBufferLocked(w->second.second)) {
+                colorBuffersToCleanUp.push_back(w->second.second);
+            }
         }
         m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
@@ -1357,6 +1363,8 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
 
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
+    std::vector<HandleType> toCleanup;
+
     AutoLock mutex(m_lock);
     uint64_t puid = tInfo->m_puid;
     if (puid) {
@@ -1365,20 +1373,33 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
             const auto& cb = ite->second.find(p_colorbuffer);
             if (cb != ite->second.end()) {
                 ite->second.erase(cb);
-                closeColorBufferLocked(p_colorbuffer);
+                if (closeColorBufferLocked(p_colorbuffer)) {
+                    toCleanup.push_back(p_colorbuffer);
+                }
             }
         }
     } else {
-        closeColorBufferLocked(p_colorbuffer);
+        if (closeColorBufferLocked(p_colorbuffer)) {
+            toCleanup.push_back(p_colorbuffer);
+        }
+    }
+
+    mutex.unlock();
+
+    for (auto handle : toCleanup) {
+        goldfish_vk::teardownVkColorBuffer(handle);
     }
 }
 
-void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
+bool FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
                                          bool forced) {
     // When guest feature flag RefCountPipe is on, no reference counting is
     // needed.
     if (m_refCountPipeEnabled)
-        return;
+        return false;
+
+    if (m_noDelayCloseColorBufferEnabled)
+        forced = true;
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -1386,9 +1407,10 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
         // closeColorBuffer command when the color buffer is already
         // garbage collected on the host. (we dont have a mechanism
         // to give guest a notice yet)
-        return;
+        return false;
     }
 
+    bool deleted = false;
     // The guest can and will gralloc_alloc/gralloc_free and then
     // gralloc_register a buffer, due to API level (O+) or
     // timing issues.
@@ -1399,6 +1421,7 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
         if (forced) {
             eraseDelayedCloseColorBufferLocked(c->first, c->second.closedTs);
             m_colorbuffers.erase(c);
+            deleted = true;
         } else {
             c->second.closedTs = System::get()->getUnixTime();
             m_colorBufferDelayedCloseList.push_back(
@@ -1407,6 +1430,8 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
     }
 
     performDelayedColorBufferCloseLocked(false);
+
+    return deleted;
 }
 
 void FrameBuffer::performDelayedColorBufferCloseLocked(bool forced) {
@@ -1498,7 +1523,9 @@ std::vector<HandleType> FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, 
                             colorBuffersToCleanup.push_back(w->second.second);
                         }
                     } else {
-                        closeColorBufferLocked(w->second.second, forced);
+                        if (closeColorBufferLocked(w->second.second, forced)) {
+                            colorBuffersToCleanup.push_back(w->second.second);
+                        }
                     }
                     m_windows.erase(w);
                 }
@@ -1513,7 +1540,9 @@ std::vector<HandleType> FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, 
             auto procIte = m_procOwnedColorBuffers.find(puid);
             if (procIte != m_procOwnedColorBuffers.end()) {
                 for (auto cb : procIte->second) {
-                    closeColorBufferLocked(cb, forced);
+                    if (closeColorBufferLocked(cb, forced)) {
+                        colorBuffersToCleanup.push_back(cb);
+                    }
                 }
                 m_procOwnedColorBuffers.erase(procIte);
             }
@@ -1608,6 +1637,7 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
         else
             closeColorBufferLocked(w->second.second);
     }
+
     c->second.refcount++;
     (*w).second.second = p_colorbuffer;
 

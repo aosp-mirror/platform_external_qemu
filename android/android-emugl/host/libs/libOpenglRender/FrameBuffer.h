@@ -579,7 +579,8 @@ private:
     std::vector<HandleType> cleanupProcGLObjects_locked(uint64_t puid, bool forced = false);
 
     void markOpened(ColorBufferRef* cbRef);
-    void closeColorBufferLocked(HandleType p_colorbuffer, bool forced = false);
+    // Returns true if the color buffer was erased.
+    bool closeColorBufferLocked(HandleType p_colorbuffer, bool forced = false);
     // Returns true if this was the last ref and we need to destroy stuff.
     bool decColorBufferRefCountLocked(HandleType p_colorbuffer);
     // Close all expired color buffers for real.
@@ -734,6 +735,12 @@ private:
     // automatically closed by the kernel. We only need to do reference counting
     // for color buffers attached in window surface.
     bool m_refCountPipeEnabled = false;
+
+    // When this feature is enabled, and m_refCountPipeEnabled == false, color
+    // buffer close operations will immediately close the color buffer if host
+    // refcount hits 0. This is for use with guest kernels where the color
+    // buffer is already tied to a file descriptor in the guest kernel.
+    bool m_noDelayCloseColorBufferEnabled = false;
 
     // Posting
     enum class PostCmd {
