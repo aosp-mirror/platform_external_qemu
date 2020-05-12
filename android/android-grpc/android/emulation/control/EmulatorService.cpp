@@ -23,12 +23,12 @@
 #include <grpcpp/grpcpp.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <chrono>
 #include <cstdint>
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <ratio>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -37,11 +37,9 @@
 #include <vector>
 
 #include "android/base/Log.h"
-#include "android/base/Uuid.h"
+#include "android/base/Optional.h"
 #include "android/base/async/ThreadLooper.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/synchronization/Event.h"
+#include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
@@ -59,6 +57,7 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/utils/AudioUtils.h"
 #include "android/emulation/control/utils/EventWaiter.h"
 #include "android/emulation/control/utils/ScreenshotUtils.h"
 #include "android/emulation/control/utils/ServiceUtils.h"
@@ -69,6 +68,9 @@
 #include "android/hw-sensors.h"
 #include "android/opengles.h"
 #include "android/physics/Physics.h"
+#include "android/recording/Frame.h"
+#include "android/recording/Producer.h"
+#include "android/recording/audio/AudioProducer.h"
 #include "android/skin/rect.h"
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
@@ -375,6 +377,70 @@ public:
         return Status::OK;
     }
 
+    Status streamAudio(ServerContext* context,
+                       const AudioFormat* request,
+                       ServerWriter<AudioPacket>* writer) override {
+        // The source number of samples per audio frame in Qemu, 512 samples is
+        // fixed
+        constexpr int kSrcNumSamples = 512;
+
+        // Translate external settings to internal qemu settings.
+        auto sampleFormat = AudioUtils::getSampleFormat(*request);
+        int channels = AudioUtils::getChannels(*request);
+        int sampleRate = request->samplingrate();
+
+        // Set the default sample rate when it is not set.
+        if (sampleRate == 0) {
+            sampleRate = 44100;
+        }
+
+        AudioPacket packet;
+        AudioFormat* format = packet.mutable_format();
+        format->set_channels(request->channels());
+        format->set_format(request->format());
+        format->set_samplingrate(sampleRate);
+
+        constexpr int kMaxAudioFrames = 50;
+        using TimedAudioFrame = std::pair<System::Duration, std::string>;
+        android::base::MessageChannel<TimedAudioFrame, kMaxAudioFrames>
+                audioFrames;
+        auto audioProducer = android::recording::createAudioProducer(
+                sampleRate, kSrcNumSamples, sampleFormat, channels);
+
+        // Callback that is responsible for copying the incoming packets
+        // into the audioframe channel.
+        audioProducer->attachCallback(
+                [&audioFrames,
+                 &packet](const android::recording::Frame* frame) {
+                    auto audioFrame =
+                            std::make_pair<System::Duration, std::string>(
+                                    System::get()->getUnixTimeUs(),
+                                    std::string((char*)frame->dataVec.data(),
+                                                frame->dataVec.size()));
+                    return audioFrames.trySend(std::move(audioFrame));
+                });
+
+        audioProducer->start();
+
+        // Write out the incoming audio packets.
+        constexpr std::chrono::microseconds kTimeToWaitForAudioFrame =
+                std::chrono::milliseconds(125);
+        bool clientAlive = true;
+        do {
+            auto audioFrame =
+                    audioFrames.timedReceive(kTimeToWaitForAudioFrame.count());
+            if (audioFrame) {
+                packet.set_timestamp(audioFrame->first);
+                packet.set_audio(std::move(audioFrame->second));
+                clientAlive = writer->Write(packet);
+            }
+            clientAlive = clientAlive && !context->IsCancelled();
+        } while (clientAlive);
+
+        audioProducer->stop();
+        return Status::OK;
+    }
+
     Status streamScreenshot(ServerContext* context,
                             const ImageFormat* request,
                             ServerWriter<Image>* writer) override {
@@ -637,7 +703,7 @@ private:
 };
 
 grpc::Service* getEmulatorController(const AndroidConsoleAgents* agents) {
-    return  new EmulatorControllerImpl(agents);
+    return new EmulatorControllerImpl(agents);
 }
 
 }  // namespace control
