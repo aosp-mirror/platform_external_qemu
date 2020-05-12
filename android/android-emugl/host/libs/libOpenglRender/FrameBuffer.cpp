@@ -1350,12 +1350,17 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
 }
 
 void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
+    fprintf(stderr, "%s: enter\n", __func__);
     // When guest feature flag RefCountPipe is on, no reference counting is
     // needed.
-    if (m_refCountPipeEnabled)
+    if (m_refCountPipeEnabled) {
+    fprintf(stderr, "%s: enter, skip\n", __func__);
         return;
+    }
 
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
+
+    std::vector<HandleType> cleanupsTodo;
 
     AutoLock mutex(m_lock);
     uint64_t puid = tInfo->m_puid;
@@ -1365,20 +1370,35 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
             const auto& cb = ite->second.find(p_colorbuffer);
             if (cb != ite->second.end()) {
                 ite->second.erase(cb);
-                closeColorBufferLocked(p_colorbuffer);
+                fprintf(stderr, "%s: close through puid\n", __func__);
+                closeColorBufferLocked(p_colorbuffer, true);
+                cleanupsTodo.push_back(p_colorbuffer);
             }
         }
     } else {
-        closeColorBufferLocked(p_colorbuffer);
+                fprintf(stderr, "%s: close through non-puid\n", __func__);
+        closeColorBufferLocked(p_colorbuffer, true);
+                cleanupsTodo.push_back(p_colorbuffer);
     }
+
+    mutex.unlock();
+
+    for (auto handle : cleanupsTodo) {
+        fprintf(stderr, "%s: teardown vk for %u\n", __func__, handle);
+        goldfish_vk::teardownVkColorBuffer(handle);
+    }
+
 }
 
 void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
                                          bool forced) {
+    fprintf(stderr, "%s: enter\n", __func__);
     // When guest feature flag RefCountPipe is on, no reference counting is
     // needed.
     if (m_refCountPipeEnabled)
         return;
+
+    fprintf(stderr, "%s: do something cool to %u\n", __func__, p_colorbuffer);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -1395,7 +1415,10 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
     // So, we don't actually close the color buffer when refcount
     // reached zero, unless it has been opened at least once already.
     // Instead, put it on a 'delayed close' list to return to it later.
+    bool closeNow = false;
+
     if (--c->second.refcount == 0) {
+        fprintf(stderr, "%s: close now, refcount 0 for %u. forced? %d\n", __func__, p_colorbuffer, forced);
         if (forced) {
             eraseDelayedCloseColorBufferLocked(c->first, c->second.closedTs);
             m_colorbuffers.erase(c);
@@ -1407,6 +1430,10 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
     }
 
     performDelayedColorBufferCloseLocked(false);
+
+    // if (closeNow) {
+        // goldfish_vk::teardownVkColorBuffer(handle);
+    // }
 }
 
 void FrameBuffer::performDelayedColorBufferCloseLocked(bool forced) {
@@ -1791,7 +1818,7 @@ bool FrameBuffer::readColorBufferContents(
 }
 
 bool FrameBuffer::getColorBufferInfo(
-    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat) {
+    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat, uint32_t* currentRefcount) {
 
     AutoLock mutex(m_lock);
 
@@ -1806,6 +1833,7 @@ bool FrameBuffer::getColorBufferInfo(
     *width = cb->getWidth();
     *height = cb->getHeight();
     *internalformat = cb->getInternalFormat();
+    *currentRefcount = (*c).second.refcount;
 
     return true;
 }

@@ -759,6 +759,7 @@ static void rcOpenColorBuffer(uint32_t colorbuffer)
 
 static void rcCloseColorBuffer(uint32_t colorbuffer)
 {
+    fprintf(stderr, "%s: call. handle: %u\n", __func__, colorbuffer);
     AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {

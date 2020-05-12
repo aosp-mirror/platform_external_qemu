@@ -1171,11 +1171,14 @@ bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle) {
     int width;
     int height;
     GLint internalformat;
+    uint32_t refcount;
 
     if (!fb->getColorBufferInfo(colorBufferHandle, &width, &height,
-                                &internalformat)) {
+                                &internalformat, &refcount)) {
         return false;
     }
+
+    fprintf(stderr, "%s: refcount: %u\n", __func__, refcount);
 
     VkFormat vkFormat = glFormat2VkFormat(internalformat);
 
@@ -1207,11 +1210,14 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
     int width;
     int height;
     GLint internalformat;
+    uint32_t refcount;
 
     if (!fb->getColorBufferInfo(colorBufferHandle, &width, &height,
-                                &internalformat)) {
+                                &internalformat, &refcount)) {
         return false;
     }
+
+    fprintf(stderr, "%s: color buffer info: handle %u refcount: %u\n", __func__, colorBufferHandle, refcount);
 
     AutoLock lock(sVkEmulationLock);
 

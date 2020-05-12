@@ -2496,6 +2496,8 @@ public:
         const VkImportColorBufferGOOGLE* importCbInfoPtr =
             vk_find_struct<VkImportColorBufferGOOGLE>(pAllocateInfo);
 
+        bool isColorbuffer = importCbInfoPtr != nullptr;
+
 #ifdef _WIN32
         VkImportMemoryWin32HandleInfoKHR importInfo {
             VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR, 0,
@@ -2585,6 +2587,10 @@ public:
 
         mMapInfo[*pMemory] = MappedMemoryInfo();
         auto& mapInfo = mMapInfo[*pMemory];
+        mapInfo.isColorbuffer = isColorbuffer;
+
+        if (isColorbuffer) fprintf(stderr, "%s: import cb memory to: %p\n", __func__, (void*)(*pMemory));
+
         mapInfo.size = localAllocInfo.allocationSize;
         mapInfo.device = device;
         if (importCbInfoPtr && m_emu->instanceSupportsMoltenVK) {
@@ -2638,6 +2644,7 @@ public:
         }
 #endif
 
+        if (info->isColorbuffer) fprintf(stderr, "%s: delete cb imported memory: %p\n", __func__, (void*)memory);
         if (info->directMapped) {
             if (mLogMap) {
                 fprintf(stderr, "%s: unmap: %p, [0x%llx 0x%llx]\n", __func__,
@@ -5094,6 +5101,7 @@ private:
         uint64_t hostmemId = 0;
         VkDevice device = VK_NULL_HANDLE;
         IOSurfaceRef ioSurface = nullptr;
+        bool isColorbuffer = false;
     };
 
     struct InstanceInfo {

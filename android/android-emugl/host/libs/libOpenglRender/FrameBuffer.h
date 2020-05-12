@@ -382,7 +382,8 @@ public:
     bool getColorBufferInfo(HandleType p_colorbuffer,
                             int* width,
                             int* height,
-                            GLint* internalformat);
+                            GLint* internalformat,
+                            uint32_t* currentRefcount);
 
     // Display the content of a given ColorBuffer into the framebuffer's
     // sub-window. |p_colorbuffer| is a handle value.

@@ -56,6 +56,9 @@ int RefcountPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 
 int RefcountPipe::onGuestSend(const AndroidPipeBuffer* buffers,
                               int numBuffers) {
+
+    fprintf(stderr, "RefcountPipe::%s: call\n", __func__);
+
     int result = 0;
     char forRecv[4] = {};
 
@@ -68,6 +71,7 @@ int RefcountPipe::onGuestSend(const AndroidPipeBuffer* buffers,
 
     if (result == arraySize(forRecv)) {
         memcpy(&mHandle, forRecv, arraySize(forRecv));
+        fprintf(stderr, "RefcountPipe::%s: got the handle: %u\n", __func__, mHandle);
     }
 
     return result;

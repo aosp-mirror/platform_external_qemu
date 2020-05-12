@@ -993,7 +993,7 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::Vulkan, true);
                 fc::setIfNotOverriden(fc::GLDirectMem, true);
                 fc::setIfNotOverriden(fc::VirtioInput, true);
-                fc::setIfNotOverriden(fc::RefCountPipe, true);
+                fc::setIfNotOverriden(fc::RefCountPipe, false);
                 fc::setIfNotOverriden(fc::VulkanNullOptionalStrings, true);
                 fc::setIfNotOverriden(fc::VulkanIgnoredHandles, true);
 
