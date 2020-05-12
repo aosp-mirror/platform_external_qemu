@@ -279,6 +279,11 @@ public:
         }
     }
 
+    // Alias for get
+    const char* c_str() {
+        return get();
+    }
+
     // Enable casting to const char*
     operator const char*() { return get(); }
 

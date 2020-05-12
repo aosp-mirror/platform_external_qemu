@@ -12,9 +12,11 @@
 #include "android/base/files/PathUtils.h"
 
 #include <gtest/gtest.h>                      // for Message, Test, TestPart...
+#include <fstream>
 
 #include "android/base/system/System.h"       // for System, System::kProgra...
 #include "android/base/testing/TestSystem.h"  // for TestSystem
+
 
 #define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
 
@@ -563,5 +565,22 @@ TEST(PathUtils, relativeTo) {
     }
 }
 
+TEST(PathUtils, streams_use_unicode_paths) {
+    // If this test is green then you are able to open a UTF-8 encoded file path
+    // by calling the PathUtils::asUnicodePath translation function.
+    android::base::TestSystem testSystem("/", android::base::System::kProgramBitness);
+    std::string fname = u8"⺁⺶ɥǝןןo.txt";
+
+    auto testDir = testSystem.getTempRoot();
+    auto unicode_file = android::base::pj(testDir->path(), fname);
+
+    // Note that using the unicode_file directly on windows will fail
+    // std::ofstream out(unicode_file);
+    std::ofstream out(android::base::PathUtils::asUnicodePath(unicode_file).c_str());
+    out << "Hello there!";
+    out.close();
+
+    EXPECT_TRUE(android::base::System::get()->pathExists(unicode_file));
+}
 }  // namespace android
 }  // namespace base
