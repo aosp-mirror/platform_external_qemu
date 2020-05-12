@@ -993,9 +993,10 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::Vulkan, true);
                 fc::setIfNotOverriden(fc::GLDirectMem, true);
                 fc::setIfNotOverriden(fc::VirtioInput, true);
-                fc::setIfNotOverriden(fc::RefCountPipe, true);
+                fc::setEnabledOverride(fc::RefCountPipe, false);
                 fc::setIfNotOverriden(fc::VulkanNullOptionalStrings, true);
                 fc::setIfNotOverriden(fc::VulkanIgnoredHandles, true);
+                fc::setIfNotOverriden(fc::NoDelayCloseColorBuffer, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;

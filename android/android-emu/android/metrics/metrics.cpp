@@ -441,6 +441,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::CAR_ASSIST_BUTTON;
         case android::featurecontrol::HardwareDecoder:
             return android_studio::EmulatorFeatureFlagState::HARDWARE_DECODER;
+        case android::featurecontrol::NoDelayCloseColorBuffer:
+            return android_studio::EmulatorFeatureFlagState::NO_DELAY_CLOSE_COLOR_BUFFER;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
