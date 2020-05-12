@@ -29,6 +29,7 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <ratio>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -37,10 +38,7 @@
 #include <vector>
 
 #include "android/base/Log.h"
-#include "android/base/Uuid.h"
 #include "android/base/async/ThreadLooper.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
 #include "android/base/synchronization/Event.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
@@ -59,6 +57,7 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/utils/AudioUtils.h"
 #include "android/emulation/control/utils/EventWaiter.h"
 #include "android/emulation/control/utils/ScreenshotUtils.h"
 #include "android/emulation/control/utils/ServiceUtils.h"
@@ -69,10 +68,19 @@
 #include "android/hw-sensors.h"
 #include "android/opengles.h"
 #include "android/physics/Physics.h"
+#include "android/recording/Frame.h"
+#include "android/recording/Producer.h"
+#include "android/recording/audio/AudioProducer.h"
 #include "android/skin/rect.h"
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
+
+namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+}  // namespace android
 
 namespace google {
 namespace protobuf {
@@ -375,6 +383,63 @@ public:
         return Status::OK;
     }
 
+    Status streamAudio(ServerContext* context,
+                       const AudioFormat* request,
+                       ServerWriter<AudioPacket>* writer) override {
+        // The source number of samples per audio frame in Qemu, 512 samples is
+        // fixed
+        constexpr int kSrcNumSamples = 512;
+
+        // Translate external settings to qemu settings.
+        auto sampleFormat = AudioUtils::getSampleFormat(request);
+        int channels = AudioUtils::getChannels(request);
+        int sampleRate = request->samplingrate();
+
+        // Set the default sample rate when it is not set.
+        if (sampleRate == 0) {
+            sampleRate = 44100;
+        }
+
+        android::base::Event audioWaiter;
+        auto audioProducer = android::recording::createAudioProducer(
+                sampleRate, kSrcNumSamples, sampleFormat, channels);
+
+        // Callback that is responsible for writing out the actual frames.
+        audioProducer->attachCallback(
+                [request, &writer, &audioWaiter,
+                 sampleRate](const android::recording::Frame* frame) {
+                    AudioPacket packet;
+                    auto format = packet.mutable_format();
+                    format->set_channels(request->channels());
+                    format->set_format(request->format());
+                    format->set_samplingrate(sampleRate);
+
+                    packet.set_timestamp(System::get()->getUnixTimeUs());
+                    packet.set_audio(frame->dataVec.data(),
+                                     frame->dataVec.size());
+                    if (!writer->Write(packet)) {
+                        audioWaiter.signal();
+                        return false;
+                    }
+
+                    return true;
+                });
+
+        audioProducer->start();
+
+        // Wait until the receiver is gone, or we are shutting down.
+        constexpr std::chrono::microseconds kTimeToWaitForFrame =
+                std::chrono::milliseconds(125);
+        bool alive = false;
+        do {
+            bool producingFrames = !audioWaiter.timedWait(kTimeToWaitForFrame.count());
+            alive = !context->IsCancelled() && producingFrames;
+        } while (alive);
+
+        audioProducer->stop();
+        return Status::OK;
+    }
+
     Status streamScreenshot(ServerContext* context,
                             const ImageFormat* request,
                             ServerWriter<Image>* writer) override {
@@ -637,7 +702,7 @@ private:
 };
 
 grpc::Service* getEmulatorController(const AndroidConsoleAgents* agents) {
-    return  new EmulatorControllerImpl(agents);
+    return new EmulatorControllerImpl(agents);
 }
 
 }  // namespace control
