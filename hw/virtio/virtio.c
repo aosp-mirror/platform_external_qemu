@@ -2722,6 +2722,37 @@ bool virtio_device_ioeventfd_enabled(VirtIODevice *vdev)
     return virtio_bus_ioeventfd_enabled(vbus);
 }
 
+void vring_init(struct vring *vr, unsigned int num, void *p,
+                  unsigned long align)
+{
+    vr->num = num;
+    vr->desc = p;
+    vr->avail = p + num*sizeof(struct vring_desc);
+    vr->used = (void *)(((uintptr_t)&vr->avail->ring[num] + sizeof(__virtio16)
+        + align-1) & ~(align - 1));
+}
+
+unsigned vring_size(unsigned int num, unsigned long align)
+{
+    return ((sizeof(struct vring_desc) * num + sizeof(__virtio16) * (3 + num)
+         + align - 1) & ~(align - 1))
+        + sizeof(__virtio16) * 3 + sizeof(struct vring_used_elem) * num;
+}
+
+/* The following is used with USED_EVENT_IDX and AVAIL_EVENT_IDX */
+/* Assuming a given event_idx value from the other side, if
+ * we have just incremented index from old to new_idx,
+ * should we trigger an event? */
+int vring_need_event(uint16_t event_idx, uint16_t new_idx, uint16_t old)
+{
+    /* Note: Xen has similar logic for notification hold-off
+     * in include/xen/interface/io/ring.h with req_event and req_prod
+     * corresponding to event_idx + 1 and new_idx respectively.
+     * Note also that req_event and req_prod in Xen start at 1,
+     * event indexes in virtio start at 0. */
+    return (uint16_t)(new_idx - event_idx - 1) < (uint16_t)(new_idx - old);
+}
+
 static const TypeInfo virtio_device_info = {
     .name = TYPE_VIRTIO_DEVICE,
     .parent = TYPE_DEVICE,
