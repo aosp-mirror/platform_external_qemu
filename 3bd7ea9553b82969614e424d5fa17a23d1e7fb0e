@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b71b8e3f_b4e94e60",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/decoder.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2020-05-13T18:05:59Z",
+      "side": 1,
+      "message": "Is SwiftShader the only known case that currently requires this? I\u0027m not a huge fan of workarounds for things that can be fixed at the root.",
+      "range": {
+        "startLine": 547,
+        "startChar": 4,
+        "endLine": 548,
+        "endChar": 63
+      },
+      "revId": "3bd7ea9553b82969614e424d5fa17a23d1e7fb0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
