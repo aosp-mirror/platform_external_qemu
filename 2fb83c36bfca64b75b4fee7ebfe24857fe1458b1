@@ -22,6 +22,30 @@
       "revId": "2fb83c36bfca64b75b4fee7ebfe24857fe1458b1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3bf99d61_2ae9325f",
+        "filename": "hw/virtio/virtio.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2738,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-13T18:56:59Z",
+      "side": 1,
+      "message": "I am not very sure what we are trying to achieve here? Do you mean move the vring_size function or just what you have highlighted?",
+      "parentUuid": "c542860b_3d583b4e",
+      "range": {
+        "startLine": 2738,
+        "startChar": 9,
+        "endLine": 2738,
+        "endChar": 36
+      },
+      "revId": "2fb83c36bfca64b75b4fee7ebfe24857fe1458b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
