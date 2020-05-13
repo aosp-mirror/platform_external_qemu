@@ -229,11 +229,23 @@ bool translate(bool hostUsesCoreProfile,
         outShaderLinkInfo->esslVersion = esslVersion;
         size_t versionStart = origSrc.find("#version");
         size_t versionEnd = origSrc.find("\n", versionStart);
-        std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
-        std::string src2 =
-            versionPart + "precision highp atomic_uint;\n" +
-            origSrc.substr(versionEnd + 1, origSrc.size() - (versionEnd + 1));
-        *outObjCode = src2;
+
+        size_t extensionStart = origSrc.rfind("#extension");
+        size_t extensionEnd = origSrc.find("\n", extensionStart);
+
+        if (extensionStart == std::string::npos) {
+            std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
+            std::string src2 =
+                versionPart + "precision highp atomic_uint;\n" +
+                origSrc.substr(versionEnd + 1, origSrc.size() - (versionEnd + 1));
+            *outObjCode = src2;
+        } else {
+            std::string uptoExtensionPart = origSrc.substr(0, extensionEnd + 1);
+            std::string src2 =
+                uptoExtensionPart + "precision highp atomic_uint;\n" +
+                origSrc.substr(extensionEnd + 1, origSrc.size() - (extensionEnd + 1));
+            *outObjCode = src2;
+        }
         return true;
     }
 
