@@ -22,6 +22,30 @@
       "revId": "3bd7ea9553b82969614e424d5fa17a23d1e7fb0e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a37d2d4a_9f5aad10",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/decoder.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-13T18:09:45Z",
+      "side": 1,
+      "message": "So far, yes and fixing in Swiftshader would be the ideal solution (Not a fan of workarounds either). But it\u0027s not covered in CTS, so the least risky thing to do is assume this happens in other drivers too.\n\nWe could later add a path that disables the workaround based on drivers tested I suppose.",
+      "parentUuid": "b71b8e3f_b4e94e60",
+      "range": {
+        "startLine": 547,
+        "startChar": 4,
+        "endLine": 548,
+        "endChar": 63
+      },
+      "revId": "3bd7ea9553b82969614e424d5fa17a23d1e7fb0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
