@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c542860b_3d583b4e",
+        "filename": "hw/virtio/virtio.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2738,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-05-13T18:42:51Z",
+      "side": 1,
+      "message": "Please move this to a separate function if there no one yet.",
+      "range": {
+        "startLine": 2738,
+        "startChar": 9,
+        "endLine": 2738,
+        "endChar": 36
+      },
+      "revId": "2fb83c36bfca64b75b4fee7ebfe24857fe1458b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
