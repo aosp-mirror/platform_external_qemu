@@ -1429,6 +1429,7 @@ message EmulatorFeatureFlagState {
     CAR_VHAL_REPLAY = 58;
     CAR_ASSIST_BUTTON = 59;
     HARDWARE_DECODER = 60;
+    NO_DELAY_CLOSE_COLOR_BUFFER = 61;
     // Next tag: 61
   }
   // Which features were enabled by default or through the server-side config.
