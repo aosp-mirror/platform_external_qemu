@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8fd2409_912058cb",
+        "filename": "android-qemu2-glue/emulation/Frame.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-05-14T21:28:44Z",
+      "side": 1,
+      "message": "I don\u0027t think you need all these fields. You can can access them via mData.data(). With this you can copy Frame.",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 59,
+        "endChar": 40
+      },
+      "revId": "d030673a26ba762f0de9bee661eb261aa61091af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
