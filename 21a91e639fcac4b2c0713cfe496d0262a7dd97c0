@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "380eb57a_ece8b89b",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-05-14T02:42:21Z",
+      "side": 1,
+      "message": "nit: auto* so readers of code knows explicitly that it\u0027s a pointer?",
+      "range": {
+        "startLine": 398,
+        "startChar": 8,
+        "endLine": 398,
+        "endChar": 12
+      },
+      "revId": "21a91e639fcac4b2c0713cfe496d0262a7dd97c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0242aa43_5fabdee1",
+        "filename": "android/android-grpc/android/emulation/control/utils/AudioUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-05-14T02:42:21Z",
+      "side": 1,
+      "message": "nit: should we do null check for fmt? If we can guarantee fmt is not null, maybe pass const AudioFormat\u0026 to be explicit about it?",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 33
+      },
+      "revId": "21a91e639fcac4b2c0713cfe496d0262a7dd97c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1e9b525_fa3e34aa",
+        "filename": "android/android-grpc/android/emulation/control/utils/AudioUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-05-14T02:42:21Z",
+      "side": 1,
+      "message": "Same here.",
+      "range": {
+        "startLine": 34,
+        "startChar": 34,
+        "endLine": 34,
+        "endChar": 45
+      },
+      "revId": "21a91e639fcac4b2c0713cfe496d0262a7dd97c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
