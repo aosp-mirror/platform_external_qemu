@@ -15,6 +15,7 @@ android_add_library(
       dtb.cpp
       emulation/CharSerialLine.cpp
       emulation/DmaMap.cpp
+      emulation/Frame.cpp
       emulation/VmLock.cpp
       emulation/android_address_space_device.cpp
       emulation/android_pipe_device.cpp
@@ -59,7 +60,7 @@ if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
 target_link_libraries(libqemu2-glue PRIVATE android-emu GLIB2::GLIB2
-                                            PIXMAN::PIXMAN emulator-libdtb ssl)
+                                            PIXMAN::PIXMAN emulator-libdtb ssl hostapd)
 target_compile_definitions(libqemu2-glue INTERFACE "-DCONFIG_VIRGL")
 android_add_library(
   TARGET libqemu2-glue-vm-operations LICENSE Apache-2.0
