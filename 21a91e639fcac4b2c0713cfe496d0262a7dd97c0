@@ -68,6 +68,52 @@
       "revId": "21a91e639fcac4b2c0713cfe496d0262a7dd97c0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8121732_fc23666c",
+        "filename": "android/android-grpc/android/emulation/control/utils/AudioUtils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-05-14T05:27:46Z",
+      "side": 1,
+      "message": "2020",
+      "range": {
+        "startLine": 1,
+        "startChar": 19,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "21a91e639fcac4b2c0713cfe496d0262a7dd97c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "587fdcc7_c74851e9",
+        "filename": "android/android-grpc/docs/python/sample/recordAudio.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-05-14T05:27:46Z",
+      "side": 1,
+      "message": "2020",
+      "range": {
+        "startLine": 1,
+        "startChar": 19,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "21a91e639fcac4b2c0713cfe496d0262a7dd97c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
