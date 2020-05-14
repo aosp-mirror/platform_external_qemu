@@ -243,6 +243,7 @@ int ApiGen::genEntryPoints(const std::string & filename, SideType side)
     fprintf(fp, "#include <stdio.h>\n");
     fprintf(fp, "#include <stdlib.h>\n");
     fprintf(fp, "#include \"%s_%s_context.h\"\n", m_basename.c_str(), sideString(side));
+    fprintf(fp, "#include \"../../android-emu/android/base/Tracing.h\"\n");
     fprintf(fp, "\n");
 
     fprintf(fp, "extern \"C\" {\n");
@@ -269,6 +270,7 @@ int ApiGen::genEntryPoints(const std::string & filename, SideType side)
         e->print(fp);
         fprintf(fp, "{\n");
         fprintf(fp, "\tGET_CONTEXT;\n");
+        fprintf(fp, "AEMU_SCOPED_PROPERTY_GUARDED_TRACE(\"%s (guest)\");\n", e->name().c_str());
 
         bool shouldReturn = !e->retval().isVoid();
         bool shouldCallWithContext = (side == CLIENT_SIDE);
