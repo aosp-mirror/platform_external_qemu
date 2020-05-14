@@ -152,34 +152,15 @@ public:
     void initialize(bool forTesting);
 
     void* dlopen() {
-        bool sandbox = System::get()->envGet("ANDROID_EMU_SANDBOX") == "1";
-
         if (!mVulkanLoader) {
-            if (sandbox) {
-                mVulkanLoader = emugl::SharedLibrary::open(VULKAN_LOADER_FILENAME);
-            } else {
-                auto loaderPath = getLoaderPath(System::get()->getProgramDirectory(), mForTesting);
-                mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
-
-                if (!mVulkanLoader) {
-                    loaderPath = getLoaderPath(System::get()->getLauncherDirectory(), mForTesting);
-                    mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
-                }
-            }
+            mVulkanLoader = emugl::SharedLibrary::open(VULKAN_LOADER_FILENAME);
         }
 #ifdef __linux__
         // On Linux, it might not be called libvulkan.so.
         // Try libvulkan.so.1 if that doesn't work.
         if (!mVulkanLoader) {
-            if (sandbox) {
-                mVulkanLoader =
-                    emugl::SharedLibrary::open("libvulkan.so.1");
-            } else {
-                auto altPath = pj(System::get()->getLauncherDirectory(),
-                    "lib64", "vulkan", "libvulkan.so.1");
-                mVulkanLoader =
-                    emugl::SharedLibrary::open(altPath.c_str());
-            }
+            mVulkanLoader =
+                emugl::SharedLibrary::open("libvulkan.so.1");
         }
 #endif
         return (void*)mVulkanLoader;
