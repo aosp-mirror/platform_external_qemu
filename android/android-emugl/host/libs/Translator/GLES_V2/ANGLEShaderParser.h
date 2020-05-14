@@ -49,7 +49,8 @@ bool globalInitialize(
         int fragmentInputComponents,
         int minProgramTexelOffset,
         int maxProgramTexelOffset,
-        int maxDualSourceDrawBuffers);
+        int maxDualSourceDrawBuffers,
+        bool shaderFramebufferFetch);
 
 bool translate(bool hostUsesCoreProfile,
                const char* src, GLenum shaderType,

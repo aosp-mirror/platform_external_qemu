@@ -1047,6 +1047,50 @@ TEST_P(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
 //     eglDestroySyncKHR(mEGL.display, sync);
 // }
 
+// Test uniform upload rate. This is a perfgate benchmark
+TEST_P(CombinedGoldfishOpenglTest, FramebufferFetchShader) {
+
+    const char* extStr = (const char*)glGetString(GL_EXTENSIONS);
+    const char* rendererStr = (const char*)glGetString(GL_RENDERER);
+
+    EXPECT_NE(nullptr, extStr);
+    EXPECT_NE(nullptr, rendererStr);
+
+    bool supportsFramebufferFetch =
+        strstr(extStr, "GL_EXT_shader_framebuffer_fetch") != nullptr;
+
+    printf("Renderer: [%s] supports GL_EXT_shader_framebuffer_fetch? %d\n",
+           rendererStr,
+           supportsFramebufferFetch);
+
+    const char* fshaderSrc[] = {
+        R"(#version 300 es
+        #extension GL_EXT_shader_framebuffer_fetch : require
+        precision highp float;
+        in vec3 color_varying;
+        out vec4 fragColor;
+        void main() { fragColor = vec4(color_varying, 1.0); }
+        )",
+    };
+
+    GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    EXPECT_NE(0, shader);
+
+    glShaderSource(shader, 1, (const GLchar* const*)fshaderSrc, nullptr);
+    glCompileShader(shader);
+    GLint compileStatus;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+    if (supportsFramebufferFetch) {
+        EXPECT_EQ(GL_TRUE, compileStatus);
+    } else {
+        EXPECT_NE(GL_TRUE, compileStatus);
+    }
+
+    glDeleteShader(shader);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     MultipleTransports,
     CombinedGoldfishOpenglTest,

@@ -103,7 +103,8 @@ void initializeResources(
             int fragmentInputComponents,
             int minProgramTexelOffset,
             int maxProgramTexelOffset,
-            int maxDualSourceDrawBuffers) {
+            int maxDualSourceDrawBuffers,
+            bool shaderFramebufferFetch) {
     ShInitBuiltInResources(&kResources);
 
     kResources.MaxVertexAttribs = attribs; // Defaulted to 8
@@ -127,6 +128,7 @@ void initializeResources(
     kResources.OES_standard_derivatives = 1;
     kResources.OES_EGL_image_external = 0;
     kResources.EXT_gpu_shader5 = 1;
+    kResources.EXT_shader_framebuffer_fetch = shaderFramebufferFetch ? 1 : 0;
 }
 
 bool globalInitialize(
@@ -143,7 +145,8 @@ bool globalInitialize(
             int fragmentInputComponents,
             int minProgramTexelOffset,
             int maxProgramTexelOffset,
-            int maxDualSourceDrawBuffers) {
+            int maxDualSourceDrawBuffers,
+            bool shaderFramebufferFetch) {
 
     if (!ShInitialize()) {
         fprintf(stderr, "Global ANGLE shader compiler initialzation failed.\n");
@@ -164,7 +167,8 @@ bool globalInitialize(
             fragmentInputComponents,
             minProgramTexelOffset,
             maxProgramTexelOffset,
-            maxDualSourceDrawBuffers);
+            maxDualSourceDrawBuffers,
+            shaderFramebufferFetch);
 
     kInitialized = true;
     return true;
