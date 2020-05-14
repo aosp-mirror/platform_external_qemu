@@ -852,8 +852,8 @@ public:
 
         // First, get the dispatch table.
         VkDevice boxed = new_boxed_VkDevice(*pDevice, nullptr, true /* own dispatch */);
-        init_vulkan_dispatch_from_device(
-                vk, *pDevice,
+        init_vulkan_dispatch_from_device_with_backup(
+                vk, m_vk, *pDevice,
                 dispatch_VkDevice(boxed));
         deviceInfo.boxed = boxed;
 

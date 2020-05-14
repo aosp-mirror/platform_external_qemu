@@ -1802,6 +1802,2145 @@ void init_vulkan_dispatch_from_device(
 #endif
 }
 
+void init_vulkan_dispatch_from_device_with_backup(
+    VulkanDispatch* vk,
+    VulkanDispatch* backup,
+    VkDevice device,
+    VulkanDispatch* out)
+{
+    memset(out, 0x0, sizeof(VulkanDispatch));
+#ifdef VK_VERSION_1_0
+    out->vkDestroyInstance = (PFN_vkDestroyInstance)vk->vkGetDeviceProcAddr(device, "vkDestroyInstance");
+    if (!(out->vkDestroyInstance))
+    {
+        fprintf(stderr, "warning: vkDestroyInstance not found, falling back to loader's version\n");
+        out->vkDestroyInstance = backup->vkDestroyInstance;
+    }
+    out->vkEnumeratePhysicalDevices = (PFN_vkEnumeratePhysicalDevices)vk->vkGetDeviceProcAddr(device, "vkEnumeratePhysicalDevices");
+    if (!(out->vkEnumeratePhysicalDevices))
+    {
+        fprintf(stderr, "warning: vkEnumeratePhysicalDevices not found, falling back to loader's version\n");
+        out->vkEnumeratePhysicalDevices = backup->vkEnumeratePhysicalDevices;
+    }
+    out->vkGetPhysicalDeviceFeatures = (PFN_vkGetPhysicalDeviceFeatures)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceFeatures");
+    if (!(out->vkGetPhysicalDeviceFeatures))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceFeatures not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceFeatures = backup->vkGetPhysicalDeviceFeatures;
+    }
+    out->vkGetPhysicalDeviceFormatProperties = (PFN_vkGetPhysicalDeviceFormatProperties)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceFormatProperties");
+    if (!(out->vkGetPhysicalDeviceFormatProperties))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceFormatProperties not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceFormatProperties = backup->vkGetPhysicalDeviceFormatProperties;
+    }
+    out->vkGetPhysicalDeviceImageFormatProperties = (PFN_vkGetPhysicalDeviceImageFormatProperties)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceImageFormatProperties");
+    if (!(out->vkGetPhysicalDeviceImageFormatProperties))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceImageFormatProperties not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceImageFormatProperties = backup->vkGetPhysicalDeviceImageFormatProperties;
+    }
+    out->vkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceProperties");
+    if (!(out->vkGetPhysicalDeviceProperties))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceProperties not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceProperties = backup->vkGetPhysicalDeviceProperties;
+    }
+    out->vkGetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceQueueFamilyProperties");
+    if (!(out->vkGetPhysicalDeviceQueueFamilyProperties))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceQueueFamilyProperties not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceQueueFamilyProperties = backup->vkGetPhysicalDeviceQueueFamilyProperties;
+    }
+    out->vkGetPhysicalDeviceMemoryProperties = (PFN_vkGetPhysicalDeviceMemoryProperties)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceMemoryProperties");
+    if (!(out->vkGetPhysicalDeviceMemoryProperties))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceMemoryProperties not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceMemoryProperties = backup->vkGetPhysicalDeviceMemoryProperties;
+    }
+    out->vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)vk->vkGetDeviceProcAddr(device, "vkGetInstanceProcAddr");
+    if (!(out->vkGetInstanceProcAddr))
+    {
+        fprintf(stderr, "warning: vkGetInstanceProcAddr not found, falling back to loader's version\n");
+        out->vkGetInstanceProcAddr = backup->vkGetInstanceProcAddr;
+    }
+    out->vkCreateDevice = (PFN_vkCreateDevice)vk->vkGetDeviceProcAddr(device, "vkCreateDevice");
+    if (!(out->vkCreateDevice))
+    {
+        fprintf(stderr, "warning: vkCreateDevice not found, falling back to loader's version\n");
+        out->vkCreateDevice = backup->vkCreateDevice;
+    }
+    out->vkDestroyDevice = (PFN_vkDestroyDevice)vk->vkGetDeviceProcAddr(device, "vkDestroyDevice");
+    if (!(out->vkDestroyDevice))
+    {
+        fprintf(stderr, "warning: vkDestroyDevice not found, falling back to loader's version\n");
+        out->vkDestroyDevice = backup->vkDestroyDevice;
+    }
+    out->vkEnumerateDeviceExtensionProperties = (PFN_vkEnumerateDeviceExtensionProperties)vk->vkGetDeviceProcAddr(device, "vkEnumerateDeviceExtensionProperties");
+    if (!(out->vkEnumerateDeviceExtensionProperties))
+    {
+        fprintf(stderr, "warning: vkEnumerateDeviceExtensionProperties not found, falling back to loader's version\n");
+        out->vkEnumerateDeviceExtensionProperties = backup->vkEnumerateDeviceExtensionProperties;
+    }
+    out->vkEnumerateDeviceLayerProperties = (PFN_vkEnumerateDeviceLayerProperties)vk->vkGetDeviceProcAddr(device, "vkEnumerateDeviceLayerProperties");
+    if (!(out->vkEnumerateDeviceLayerProperties))
+    {
+        fprintf(stderr, "warning: vkEnumerateDeviceLayerProperties not found, falling back to loader's version\n");
+        out->vkEnumerateDeviceLayerProperties = backup->vkEnumerateDeviceLayerProperties;
+    }
+    out->vkCreateInstance = (PFN_vkCreateInstance)vk->vkGetDeviceProcAddr(device, "vkCreateInstance");
+    if (!(out->vkCreateInstance))
+    {
+        fprintf(stderr, "warning: vkCreateInstance not found, falling back to loader's version\n");
+        out->vkCreateInstance = backup->vkCreateInstance;
+    }
+    out->vkEnumerateInstanceExtensionProperties = (PFN_vkEnumerateInstanceExtensionProperties)vk->vkGetDeviceProcAddr(device, "vkEnumerateInstanceExtensionProperties");
+    if (!(out->vkEnumerateInstanceExtensionProperties))
+    {
+        fprintf(stderr, "warning: vkEnumerateInstanceExtensionProperties not found, falling back to loader's version\n");
+        out->vkEnumerateInstanceExtensionProperties = backup->vkEnumerateInstanceExtensionProperties;
+    }
+    out->vkEnumerateInstanceLayerProperties = (PFN_vkEnumerateInstanceLayerProperties)vk->vkGetDeviceProcAddr(device, "vkEnumerateInstanceLayerProperties");
+    if (!(out->vkEnumerateInstanceLayerProperties))
+    {
+        fprintf(stderr, "warning: vkEnumerateInstanceLayerProperties not found, falling back to loader's version\n");
+        out->vkEnumerateInstanceLayerProperties = backup->vkEnumerateInstanceLayerProperties;
+    }
+    out->vkGetDeviceProcAddr = (PFN_vkGetDeviceProcAddr)vk->vkGetDeviceProcAddr(device, "vkGetDeviceProcAddr");
+    if (!(out->vkGetDeviceProcAddr))
+    {
+        fprintf(stderr, "warning: vkGetDeviceProcAddr not found, falling back to loader's version\n");
+        out->vkGetDeviceProcAddr = backup->vkGetDeviceProcAddr;
+    }
+    out->vkGetPhysicalDeviceSparseImageFormatProperties = (PFN_vkGetPhysicalDeviceSparseImageFormatProperties)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSparseImageFormatProperties");
+    if (!(out->vkGetPhysicalDeviceSparseImageFormatProperties))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceSparseImageFormatProperties not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceSparseImageFormatProperties = backup->vkGetPhysicalDeviceSparseImageFormatProperties;
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    out->vkEnumerateInstanceVersion = (PFN_vkEnumerateInstanceVersion)vk->vkGetDeviceProcAddr(device, "vkEnumerateInstanceVersion");
+    if (!(out->vkEnumerateInstanceVersion))
+    {
+        fprintf(stderr, "warning: vkEnumerateInstanceVersion not found, falling back to loader's version\n");
+        out->vkEnumerateInstanceVersion = backup->vkEnumerateInstanceVersion;
+    }
+    out->vkEnumeratePhysicalDeviceGroups = (PFN_vkEnumeratePhysicalDeviceGroups)vk->vkGetDeviceProcAddr(device, "vkEnumeratePhysicalDeviceGroups");
+    if (!(out->vkEnumeratePhysicalDeviceGroups))
+    {
+        fprintf(stderr, "warning: vkEnumeratePhysicalDeviceGroups not found, falling back to loader's version\n");
+        out->vkEnumeratePhysicalDeviceGroups = backup->vkEnumeratePhysicalDeviceGroups;
+    }
+    out->vkGetPhysicalDeviceFeatures2 = (PFN_vkGetPhysicalDeviceFeatures2)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceFeatures2");
+    if (!(out->vkGetPhysicalDeviceFeatures2))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceFeatures2 not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceFeatures2 = backup->vkGetPhysicalDeviceFeatures2;
+    }
+    out->vkGetPhysicalDeviceProperties2 = (PFN_vkGetPhysicalDeviceProperties2)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceProperties2");
+    if (!(out->vkGetPhysicalDeviceProperties2))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceProperties2 not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceProperties2 = backup->vkGetPhysicalDeviceProperties2;
+    }
+    out->vkGetPhysicalDeviceFormatProperties2 = (PFN_vkGetPhysicalDeviceFormatProperties2)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceFormatProperties2");
+    if (!(out->vkGetPhysicalDeviceFormatProperties2))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceFormatProperties2 not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceFormatProperties2 = backup->vkGetPhysicalDeviceFormatProperties2;
+    }
+    out->vkGetPhysicalDeviceImageFormatProperties2 = (PFN_vkGetPhysicalDeviceImageFormatProperties2)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceImageFormatProperties2");
+    if (!(out->vkGetPhysicalDeviceImageFormatProperties2))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceImageFormatProperties2 not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceImageFormatProperties2 = backup->vkGetPhysicalDeviceImageFormatProperties2;
+    }
+    out->vkGetPhysicalDeviceQueueFamilyProperties2 = (PFN_vkGetPhysicalDeviceQueueFamilyProperties2)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceQueueFamilyProperties2");
+    if (!(out->vkGetPhysicalDeviceQueueFamilyProperties2))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceQueueFamilyProperties2 not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceQueueFamilyProperties2 = backup->vkGetPhysicalDeviceQueueFamilyProperties2;
+    }
+    out->vkGetPhysicalDeviceMemoryProperties2 = (PFN_vkGetPhysicalDeviceMemoryProperties2)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceMemoryProperties2");
+    if (!(out->vkGetPhysicalDeviceMemoryProperties2))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceMemoryProperties2 not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceMemoryProperties2 = backup->vkGetPhysicalDeviceMemoryProperties2;
+    }
+    out->vkGetPhysicalDeviceSparseImageFormatProperties2 = (PFN_vkGetPhysicalDeviceSparseImageFormatProperties2)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSparseImageFormatProperties2");
+    if (!(out->vkGetPhysicalDeviceSparseImageFormatProperties2))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceSparseImageFormatProperties2 not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceSparseImageFormatProperties2 = backup->vkGetPhysicalDeviceSparseImageFormatProperties2;
+    }
+    out->vkGetPhysicalDeviceExternalBufferProperties = (PFN_vkGetPhysicalDeviceExternalBufferProperties)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceExternalBufferProperties");
+    if (!(out->vkGetPhysicalDeviceExternalBufferProperties))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceExternalBufferProperties not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceExternalBufferProperties = backup->vkGetPhysicalDeviceExternalBufferProperties;
+    }
+    out->vkGetPhysicalDeviceExternalFenceProperties = (PFN_vkGetPhysicalDeviceExternalFenceProperties)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceExternalFenceProperties");
+    if (!(out->vkGetPhysicalDeviceExternalFenceProperties))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceExternalFenceProperties not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceExternalFenceProperties = backup->vkGetPhysicalDeviceExternalFenceProperties;
+    }
+    out->vkGetPhysicalDeviceExternalSemaphoreProperties = (PFN_vkGetPhysicalDeviceExternalSemaphoreProperties)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceExternalSemaphoreProperties");
+    if (!(out->vkGetPhysicalDeviceExternalSemaphoreProperties))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceExternalSemaphoreProperties not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceExternalSemaphoreProperties = backup->vkGetPhysicalDeviceExternalSemaphoreProperties;
+    }
+#endif
+#ifdef VK_KHR_surface
+    out->vkDestroySurfaceKHR = (PFN_vkDestroySurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkDestroySurfaceKHR");
+    if (!(out->vkDestroySurfaceKHR))
+    {
+        fprintf(stderr, "warning: vkDestroySurfaceKHR not found, falling back to loader's version\n");
+        out->vkDestroySurfaceKHR = backup->vkDestroySurfaceKHR;
+    }
+#endif
+#ifdef VK_KHR_swapchain
+    out->vkCreateSwapchainKHR = (PFN_vkCreateSwapchainKHR)vk->vkGetDeviceProcAddr(device, "vkCreateSwapchainKHR");
+    if (!(out->vkCreateSwapchainKHR))
+    {
+        fprintf(stderr, "warning: vkCreateSwapchainKHR not found, falling back to loader's version\n");
+        out->vkCreateSwapchainKHR = backup->vkCreateSwapchainKHR;
+    }
+    out->vkDestroySwapchainKHR = (PFN_vkDestroySwapchainKHR)vk->vkGetDeviceProcAddr(device, "vkDestroySwapchainKHR");
+    if (!(out->vkDestroySwapchainKHR))
+    {
+        fprintf(stderr, "warning: vkDestroySwapchainKHR not found, falling back to loader's version\n");
+        out->vkDestroySwapchainKHR = backup->vkDestroySwapchainKHR;
+    }
+    out->vkGetSwapchainImagesKHR = (PFN_vkGetSwapchainImagesKHR)vk->vkGetDeviceProcAddr(device, "vkGetSwapchainImagesKHR");
+    if (!(out->vkGetSwapchainImagesKHR))
+    {
+        fprintf(stderr, "warning: vkGetSwapchainImagesKHR not found, falling back to loader's version\n");
+        out->vkGetSwapchainImagesKHR = backup->vkGetSwapchainImagesKHR;
+    }
+    out->vkAcquireNextImageKHR = (PFN_vkAcquireNextImageKHR)vk->vkGetDeviceProcAddr(device, "vkAcquireNextImageKHR");
+    if (!(out->vkAcquireNextImageKHR))
+    {
+        fprintf(stderr, "warning: vkAcquireNextImageKHR not found, falling back to loader's version\n");
+        out->vkAcquireNextImageKHR = backup->vkAcquireNextImageKHR;
+    }
+    out->vkQueuePresentKHR = (PFN_vkQueuePresentKHR)vk->vkGetDeviceProcAddr(device, "vkQueuePresentKHR");
+    if (!(out->vkQueuePresentKHR))
+    {
+        fprintf(stderr, "warning: vkQueuePresentKHR not found, falling back to loader's version\n");
+        out->vkQueuePresentKHR = backup->vkQueuePresentKHR;
+    }
+#endif
+#ifdef VK_KHR_display
+    out->vkCreateDisplayPlaneSurfaceKHR = (PFN_vkCreateDisplayPlaneSurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkCreateDisplayPlaneSurfaceKHR");
+    if (!(out->vkCreateDisplayPlaneSurfaceKHR))
+    {
+        fprintf(stderr, "warning: vkCreateDisplayPlaneSurfaceKHR not found, falling back to loader's version\n");
+        out->vkCreateDisplayPlaneSurfaceKHR = backup->vkCreateDisplayPlaneSurfaceKHR;
+    }
+#endif
+#ifdef VK_KHR_xlib_surface
+    out->vkCreateXlibSurfaceKHR = (PFN_vkCreateXlibSurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkCreateXlibSurfaceKHR");
+    if (!(out->vkCreateXlibSurfaceKHR))
+    {
+        fprintf(stderr, "warning: vkCreateXlibSurfaceKHR not found, falling back to loader's version\n");
+        out->vkCreateXlibSurfaceKHR = backup->vkCreateXlibSurfaceKHR;
+    }
+    out->vkGetPhysicalDeviceXlibPresentationSupportKHR = (PFN_vkGetPhysicalDeviceXlibPresentationSupportKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceXlibPresentationSupportKHR");
+    if (!(out->vkGetPhysicalDeviceXlibPresentationSupportKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceXlibPresentationSupportKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceXlibPresentationSupportKHR = backup->vkGetPhysicalDeviceXlibPresentationSupportKHR;
+    }
+#endif
+#ifdef VK_KHR_xcb_surface
+    out->vkCreateXcbSurfaceKHR = (PFN_vkCreateXcbSurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkCreateXcbSurfaceKHR");
+    if (!(out->vkCreateXcbSurfaceKHR))
+    {
+        fprintf(stderr, "warning: vkCreateXcbSurfaceKHR not found, falling back to loader's version\n");
+        out->vkCreateXcbSurfaceKHR = backup->vkCreateXcbSurfaceKHR;
+    }
+    out->vkGetPhysicalDeviceXcbPresentationSupportKHR = (PFN_vkGetPhysicalDeviceXcbPresentationSupportKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceXcbPresentationSupportKHR");
+    if (!(out->vkGetPhysicalDeviceXcbPresentationSupportKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceXcbPresentationSupportKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceXcbPresentationSupportKHR = backup->vkGetPhysicalDeviceXcbPresentationSupportKHR;
+    }
+#endif
+#ifdef VK_KHR_wayland_surface
+    out->vkCreateWaylandSurfaceKHR = (PFN_vkCreateWaylandSurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkCreateWaylandSurfaceKHR");
+    if (!(out->vkCreateWaylandSurfaceKHR))
+    {
+        fprintf(stderr, "warning: vkCreateWaylandSurfaceKHR not found, falling back to loader's version\n");
+        out->vkCreateWaylandSurfaceKHR = backup->vkCreateWaylandSurfaceKHR;
+    }
+#endif
+#ifdef VK_KHR_mir_surface
+    out->vkCreateMirSurfaceKHR = (PFN_vkCreateMirSurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkCreateMirSurfaceKHR");
+    if (!(out->vkCreateMirSurfaceKHR))
+    {
+        fprintf(stderr, "warning: vkCreateMirSurfaceKHR not found, falling back to loader's version\n");
+        out->vkCreateMirSurfaceKHR = backup->vkCreateMirSurfaceKHR;
+    }
+#endif
+#ifdef VK_KHR_android_surface
+    out->vkCreateAndroidSurfaceKHR = (PFN_vkCreateAndroidSurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkCreateAndroidSurfaceKHR");
+    if (!(out->vkCreateAndroidSurfaceKHR))
+    {
+        fprintf(stderr, "warning: vkCreateAndroidSurfaceKHR not found, falling back to loader's version\n");
+        out->vkCreateAndroidSurfaceKHR = backup->vkCreateAndroidSurfaceKHR;
+    }
+#endif
+#ifdef VK_KHR_win32_surface
+    out->vkCreateWin32SurfaceKHR = (PFN_vkCreateWin32SurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkCreateWin32SurfaceKHR");
+    if (!(out->vkCreateWin32SurfaceKHR))
+    {
+        fprintf(stderr, "warning: vkCreateWin32SurfaceKHR not found, falling back to loader's version\n");
+        out->vkCreateWin32SurfaceKHR = backup->vkCreateWin32SurfaceKHR;
+    }
+    out->vkGetPhysicalDeviceWin32PresentationSupportKHR = (PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceWin32PresentationSupportKHR");
+    if (!(out->vkGetPhysicalDeviceWin32PresentationSupportKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceWin32PresentationSupportKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceWin32PresentationSupportKHR = backup->vkGetPhysicalDeviceWin32PresentationSupportKHR;
+    }
+#endif
+#ifdef VK_KHR_device_group_creation
+    out->vkEnumeratePhysicalDeviceGroupsKHR = (PFN_vkEnumeratePhysicalDeviceGroupsKHR)vk->vkGetDeviceProcAddr(device, "vkEnumeratePhysicalDeviceGroupsKHR");
+    if (!(out->vkEnumeratePhysicalDeviceGroupsKHR))
+    {
+        fprintf(stderr, "warning: vkEnumeratePhysicalDeviceGroupsKHR not found, falling back to loader's version\n");
+        out->vkEnumeratePhysicalDeviceGroupsKHR = backup->vkEnumeratePhysicalDeviceGroupsKHR;
+    }
+#endif
+#ifdef VK_EXT_debug_report
+    out->vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vk->vkGetDeviceProcAddr(device, "vkCreateDebugReportCallbackEXT");
+    if (!(out->vkCreateDebugReportCallbackEXT))
+    {
+        fprintf(stderr, "warning: vkCreateDebugReportCallbackEXT not found, falling back to loader's version\n");
+        out->vkCreateDebugReportCallbackEXT = backup->vkCreateDebugReportCallbackEXT;
+    }
+    out->vkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vk->vkGetDeviceProcAddr(device, "vkDestroyDebugReportCallbackEXT");
+    if (!(out->vkDestroyDebugReportCallbackEXT))
+    {
+        fprintf(stderr, "warning: vkDestroyDebugReportCallbackEXT not found, falling back to loader's version\n");
+        out->vkDestroyDebugReportCallbackEXT = backup->vkDestroyDebugReportCallbackEXT;
+    }
+    out->vkDebugReportMessageEXT = (PFN_vkDebugReportMessageEXT)vk->vkGetDeviceProcAddr(device, "vkDebugReportMessageEXT");
+    if (!(out->vkDebugReportMessageEXT))
+    {
+        fprintf(stderr, "warning: vkDebugReportMessageEXT not found, falling back to loader's version\n");
+        out->vkDebugReportMessageEXT = backup->vkDebugReportMessageEXT;
+    }
+#endif
+#ifdef VK_NN_vi_surface
+    out->vkCreateViSurfaceNN = (PFN_vkCreateViSurfaceNN)vk->vkGetDeviceProcAddr(device, "vkCreateViSurfaceNN");
+    if (!(out->vkCreateViSurfaceNN))
+    {
+        fprintf(stderr, "warning: vkCreateViSurfaceNN not found, falling back to loader's version\n");
+        out->vkCreateViSurfaceNN = backup->vkCreateViSurfaceNN;
+    }
+#endif
+#ifdef VK_MVK_ios_surface
+    out->vkCreateIOSSurfaceMVK = (PFN_vkCreateIOSSurfaceMVK)vk->vkGetDeviceProcAddr(device, "vkCreateIOSSurfaceMVK");
+    if (!(out->vkCreateIOSSurfaceMVK))
+    {
+        fprintf(stderr, "warning: vkCreateIOSSurfaceMVK not found, falling back to loader's version\n");
+        out->vkCreateIOSSurfaceMVK = backup->vkCreateIOSSurfaceMVK;
+    }
+#endif
+#ifdef VK_MVK_macos_surface
+    out->vkCreateMacOSSurfaceMVK = (PFN_vkCreateMacOSSurfaceMVK)vk->vkGetDeviceProcAddr(device, "vkCreateMacOSSurfaceMVK");
+    if (!(out->vkCreateMacOSSurfaceMVK))
+    {
+        fprintf(stderr, "warning: vkCreateMacOSSurfaceMVK not found, falling back to loader's version\n");
+        out->vkCreateMacOSSurfaceMVK = backup->vkCreateMacOSSurfaceMVK;
+    }
+#endif
+#ifdef VK_EXT_debug_utils
+    out->vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vk->vkGetDeviceProcAddr(device, "vkCreateDebugUtilsMessengerEXT");
+    if (!(out->vkCreateDebugUtilsMessengerEXT))
+    {
+        fprintf(stderr, "warning: vkCreateDebugUtilsMessengerEXT not found, falling back to loader's version\n");
+        out->vkCreateDebugUtilsMessengerEXT = backup->vkCreateDebugUtilsMessengerEXT;
+    }
+    out->vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vk->vkGetDeviceProcAddr(device, "vkDestroyDebugUtilsMessengerEXT");
+    if (!(out->vkDestroyDebugUtilsMessengerEXT))
+    {
+        fprintf(stderr, "warning: vkDestroyDebugUtilsMessengerEXT not found, falling back to loader's version\n");
+        out->vkDestroyDebugUtilsMessengerEXT = backup->vkDestroyDebugUtilsMessengerEXT;
+    }
+    out->vkSubmitDebugUtilsMessageEXT = (PFN_vkSubmitDebugUtilsMessageEXT)vk->vkGetDeviceProcAddr(device, "vkSubmitDebugUtilsMessageEXT");
+    if (!(out->vkSubmitDebugUtilsMessageEXT))
+    {
+        fprintf(stderr, "warning: vkSubmitDebugUtilsMessageEXT not found, falling back to loader's version\n");
+        out->vkSubmitDebugUtilsMessageEXT = backup->vkSubmitDebugUtilsMessageEXT;
+    }
+#endif
+#ifdef VK_VERSION_1_0
+    out->vkGetDeviceQueue = (PFN_vkGetDeviceQueue)vk->vkGetDeviceProcAddr(device, "vkGetDeviceQueue");
+    if (!(out->vkGetDeviceQueue))
+    {
+        fprintf(stderr, "warning: vkGetDeviceQueue not found, falling back to loader's version\n");
+        out->vkGetDeviceQueue = backup->vkGetDeviceQueue;
+    }
+    out->vkQueueSubmit = (PFN_vkQueueSubmit)vk->vkGetDeviceProcAddr(device, "vkQueueSubmit");
+    if (!(out->vkQueueSubmit))
+    {
+        fprintf(stderr, "warning: vkQueueSubmit not found, falling back to loader's version\n");
+        out->vkQueueSubmit = backup->vkQueueSubmit;
+    }
+    out->vkQueueWaitIdle = (PFN_vkQueueWaitIdle)vk->vkGetDeviceProcAddr(device, "vkQueueWaitIdle");
+    if (!(out->vkQueueWaitIdle))
+    {
+        fprintf(stderr, "warning: vkQueueWaitIdle not found, falling back to loader's version\n");
+        out->vkQueueWaitIdle = backup->vkQueueWaitIdle;
+    }
+    out->vkDeviceWaitIdle = (PFN_vkDeviceWaitIdle)vk->vkGetDeviceProcAddr(device, "vkDeviceWaitIdle");
+    if (!(out->vkDeviceWaitIdle))
+    {
+        fprintf(stderr, "warning: vkDeviceWaitIdle not found, falling back to loader's version\n");
+        out->vkDeviceWaitIdle = backup->vkDeviceWaitIdle;
+    }
+    out->vkAllocateMemory = (PFN_vkAllocateMemory)vk->vkGetDeviceProcAddr(device, "vkAllocateMemory");
+    if (!(out->vkAllocateMemory))
+    {
+        fprintf(stderr, "warning: vkAllocateMemory not found, falling back to loader's version\n");
+        out->vkAllocateMemory = backup->vkAllocateMemory;
+    }
+    out->vkFreeMemory = (PFN_vkFreeMemory)vk->vkGetDeviceProcAddr(device, "vkFreeMemory");
+    if (!(out->vkFreeMemory))
+    {
+        fprintf(stderr, "warning: vkFreeMemory not found, falling back to loader's version\n");
+        out->vkFreeMemory = backup->vkFreeMemory;
+    }
+    out->vkMapMemory = (PFN_vkMapMemory)vk->vkGetDeviceProcAddr(device, "vkMapMemory");
+    if (!(out->vkMapMemory))
+    {
+        fprintf(stderr, "warning: vkMapMemory not found, falling back to loader's version\n");
+        out->vkMapMemory = backup->vkMapMemory;
+    }
+    out->vkUnmapMemory = (PFN_vkUnmapMemory)vk->vkGetDeviceProcAddr(device, "vkUnmapMemory");
+    if (!(out->vkUnmapMemory))
+    {
+        fprintf(stderr, "warning: vkUnmapMemory not found, falling back to loader's version\n");
+        out->vkUnmapMemory = backup->vkUnmapMemory;
+    }
+    out->vkFlushMappedMemoryRanges = (PFN_vkFlushMappedMemoryRanges)vk->vkGetDeviceProcAddr(device, "vkFlushMappedMemoryRanges");
+    if (!(out->vkFlushMappedMemoryRanges))
+    {
+        fprintf(stderr, "warning: vkFlushMappedMemoryRanges not found, falling back to loader's version\n");
+        out->vkFlushMappedMemoryRanges = backup->vkFlushMappedMemoryRanges;
+    }
+    out->vkInvalidateMappedMemoryRanges = (PFN_vkInvalidateMappedMemoryRanges)vk->vkGetDeviceProcAddr(device, "vkInvalidateMappedMemoryRanges");
+    if (!(out->vkInvalidateMappedMemoryRanges))
+    {
+        fprintf(stderr, "warning: vkInvalidateMappedMemoryRanges not found, falling back to loader's version\n");
+        out->vkInvalidateMappedMemoryRanges = backup->vkInvalidateMappedMemoryRanges;
+    }
+    out->vkGetDeviceMemoryCommitment = (PFN_vkGetDeviceMemoryCommitment)vk->vkGetDeviceProcAddr(device, "vkGetDeviceMemoryCommitment");
+    if (!(out->vkGetDeviceMemoryCommitment))
+    {
+        fprintf(stderr, "warning: vkGetDeviceMemoryCommitment not found, falling back to loader's version\n");
+        out->vkGetDeviceMemoryCommitment = backup->vkGetDeviceMemoryCommitment;
+    }
+    out->vkBindBufferMemory = (PFN_vkBindBufferMemory)vk->vkGetDeviceProcAddr(device, "vkBindBufferMemory");
+    if (!(out->vkBindBufferMemory))
+    {
+        fprintf(stderr, "warning: vkBindBufferMemory not found, falling back to loader's version\n");
+        out->vkBindBufferMemory = backup->vkBindBufferMemory;
+    }
+    out->vkBindImageMemory = (PFN_vkBindImageMemory)vk->vkGetDeviceProcAddr(device, "vkBindImageMemory");
+    if (!(out->vkBindImageMemory))
+    {
+        fprintf(stderr, "warning: vkBindImageMemory not found, falling back to loader's version\n");
+        out->vkBindImageMemory = backup->vkBindImageMemory;
+    }
+    out->vkGetBufferMemoryRequirements = (PFN_vkGetBufferMemoryRequirements)vk->vkGetDeviceProcAddr(device, "vkGetBufferMemoryRequirements");
+    if (!(out->vkGetBufferMemoryRequirements))
+    {
+        fprintf(stderr, "warning: vkGetBufferMemoryRequirements not found, falling back to loader's version\n");
+        out->vkGetBufferMemoryRequirements = backup->vkGetBufferMemoryRequirements;
+    }
+    out->vkGetImageMemoryRequirements = (PFN_vkGetImageMemoryRequirements)vk->vkGetDeviceProcAddr(device, "vkGetImageMemoryRequirements");
+    if (!(out->vkGetImageMemoryRequirements))
+    {
+        fprintf(stderr, "warning: vkGetImageMemoryRequirements not found, falling back to loader's version\n");
+        out->vkGetImageMemoryRequirements = backup->vkGetImageMemoryRequirements;
+    }
+    out->vkGetImageSparseMemoryRequirements = (PFN_vkGetImageSparseMemoryRequirements)vk->vkGetDeviceProcAddr(device, "vkGetImageSparseMemoryRequirements");
+    if (!(out->vkGetImageSparseMemoryRequirements))
+    {
+        fprintf(stderr, "warning: vkGetImageSparseMemoryRequirements not found, falling back to loader's version\n");
+        out->vkGetImageSparseMemoryRequirements = backup->vkGetImageSparseMemoryRequirements;
+    }
+    out->vkQueueBindSparse = (PFN_vkQueueBindSparse)vk->vkGetDeviceProcAddr(device, "vkQueueBindSparse");
+    if (!(out->vkQueueBindSparse))
+    {
+        fprintf(stderr, "warning: vkQueueBindSparse not found, falling back to loader's version\n");
+        out->vkQueueBindSparse = backup->vkQueueBindSparse;
+    }
+    out->vkCreateFence = (PFN_vkCreateFence)vk->vkGetDeviceProcAddr(device, "vkCreateFence");
+    if (!(out->vkCreateFence))
+    {
+        fprintf(stderr, "warning: vkCreateFence not found, falling back to loader's version\n");
+        out->vkCreateFence = backup->vkCreateFence;
+    }
+    out->vkDestroyFence = (PFN_vkDestroyFence)vk->vkGetDeviceProcAddr(device, "vkDestroyFence");
+    if (!(out->vkDestroyFence))
+    {
+        fprintf(stderr, "warning: vkDestroyFence not found, falling back to loader's version\n");
+        out->vkDestroyFence = backup->vkDestroyFence;
+    }
+    out->vkResetFences = (PFN_vkResetFences)vk->vkGetDeviceProcAddr(device, "vkResetFences");
+    if (!(out->vkResetFences))
+    {
+        fprintf(stderr, "warning: vkResetFences not found, falling back to loader's version\n");
+        out->vkResetFences = backup->vkResetFences;
+    }
+    out->vkGetFenceStatus = (PFN_vkGetFenceStatus)vk->vkGetDeviceProcAddr(device, "vkGetFenceStatus");
+    if (!(out->vkGetFenceStatus))
+    {
+        fprintf(stderr, "warning: vkGetFenceStatus not found, falling back to loader's version\n");
+        out->vkGetFenceStatus = backup->vkGetFenceStatus;
+    }
+    out->vkWaitForFences = (PFN_vkWaitForFences)vk->vkGetDeviceProcAddr(device, "vkWaitForFences");
+    if (!(out->vkWaitForFences))
+    {
+        fprintf(stderr, "warning: vkWaitForFences not found, falling back to loader's version\n");
+        out->vkWaitForFences = backup->vkWaitForFences;
+    }
+    out->vkCreateSemaphore = (PFN_vkCreateSemaphore)vk->vkGetDeviceProcAddr(device, "vkCreateSemaphore");
+    if (!(out->vkCreateSemaphore))
+    {
+        fprintf(stderr, "warning: vkCreateSemaphore not found, falling back to loader's version\n");
+        out->vkCreateSemaphore = backup->vkCreateSemaphore;
+    }
+    out->vkDestroySemaphore = (PFN_vkDestroySemaphore)vk->vkGetDeviceProcAddr(device, "vkDestroySemaphore");
+    if (!(out->vkDestroySemaphore))
+    {
+        fprintf(stderr, "warning: vkDestroySemaphore not found, falling back to loader's version\n");
+        out->vkDestroySemaphore = backup->vkDestroySemaphore;
+    }
+    out->vkCreateEvent = (PFN_vkCreateEvent)vk->vkGetDeviceProcAddr(device, "vkCreateEvent");
+    if (!(out->vkCreateEvent))
+    {
+        fprintf(stderr, "warning: vkCreateEvent not found, falling back to loader's version\n");
+        out->vkCreateEvent = backup->vkCreateEvent;
+    }
+    out->vkDestroyEvent = (PFN_vkDestroyEvent)vk->vkGetDeviceProcAddr(device, "vkDestroyEvent");
+    if (!(out->vkDestroyEvent))
+    {
+        fprintf(stderr, "warning: vkDestroyEvent not found, falling back to loader's version\n");
+        out->vkDestroyEvent = backup->vkDestroyEvent;
+    }
+    out->vkGetEventStatus = (PFN_vkGetEventStatus)vk->vkGetDeviceProcAddr(device, "vkGetEventStatus");
+    if (!(out->vkGetEventStatus))
+    {
+        fprintf(stderr, "warning: vkGetEventStatus not found, falling back to loader's version\n");
+        out->vkGetEventStatus = backup->vkGetEventStatus;
+    }
+    out->vkSetEvent = (PFN_vkSetEvent)vk->vkGetDeviceProcAddr(device, "vkSetEvent");
+    if (!(out->vkSetEvent))
+    {
+        fprintf(stderr, "warning: vkSetEvent not found, falling back to loader's version\n");
+        out->vkSetEvent = backup->vkSetEvent;
+    }
+    out->vkResetEvent = (PFN_vkResetEvent)vk->vkGetDeviceProcAddr(device, "vkResetEvent");
+    if (!(out->vkResetEvent))
+    {
+        fprintf(stderr, "warning: vkResetEvent not found, falling back to loader's version\n");
+        out->vkResetEvent = backup->vkResetEvent;
+    }
+    out->vkCreateQueryPool = (PFN_vkCreateQueryPool)vk->vkGetDeviceProcAddr(device, "vkCreateQueryPool");
+    if (!(out->vkCreateQueryPool))
+    {
+        fprintf(stderr, "warning: vkCreateQueryPool not found, falling back to loader's version\n");
+        out->vkCreateQueryPool = backup->vkCreateQueryPool;
+    }
+    out->vkDestroyQueryPool = (PFN_vkDestroyQueryPool)vk->vkGetDeviceProcAddr(device, "vkDestroyQueryPool");
+    if (!(out->vkDestroyQueryPool))
+    {
+        fprintf(stderr, "warning: vkDestroyQueryPool not found, falling back to loader's version\n");
+        out->vkDestroyQueryPool = backup->vkDestroyQueryPool;
+    }
+    out->vkGetQueryPoolResults = (PFN_vkGetQueryPoolResults)vk->vkGetDeviceProcAddr(device, "vkGetQueryPoolResults");
+    if (!(out->vkGetQueryPoolResults))
+    {
+        fprintf(stderr, "warning: vkGetQueryPoolResults not found, falling back to loader's version\n");
+        out->vkGetQueryPoolResults = backup->vkGetQueryPoolResults;
+    }
+    out->vkCreateBuffer = (PFN_vkCreateBuffer)vk->vkGetDeviceProcAddr(device, "vkCreateBuffer");
+    if (!(out->vkCreateBuffer))
+    {
+        fprintf(stderr, "warning: vkCreateBuffer not found, falling back to loader's version\n");
+        out->vkCreateBuffer = backup->vkCreateBuffer;
+    }
+    out->vkDestroyBuffer = (PFN_vkDestroyBuffer)vk->vkGetDeviceProcAddr(device, "vkDestroyBuffer");
+    if (!(out->vkDestroyBuffer))
+    {
+        fprintf(stderr, "warning: vkDestroyBuffer not found, falling back to loader's version\n");
+        out->vkDestroyBuffer = backup->vkDestroyBuffer;
+    }
+    out->vkCreateBufferView = (PFN_vkCreateBufferView)vk->vkGetDeviceProcAddr(device, "vkCreateBufferView");
+    if (!(out->vkCreateBufferView))
+    {
+        fprintf(stderr, "warning: vkCreateBufferView not found, falling back to loader's version\n");
+        out->vkCreateBufferView = backup->vkCreateBufferView;
+    }
+    out->vkDestroyBufferView = (PFN_vkDestroyBufferView)vk->vkGetDeviceProcAddr(device, "vkDestroyBufferView");
+    if (!(out->vkDestroyBufferView))
+    {
+        fprintf(stderr, "warning: vkDestroyBufferView not found, falling back to loader's version\n");
+        out->vkDestroyBufferView = backup->vkDestroyBufferView;
+    }
+    out->vkCreateImage = (PFN_vkCreateImage)vk->vkGetDeviceProcAddr(device, "vkCreateImage");
+    if (!(out->vkCreateImage))
+    {
+        fprintf(stderr, "warning: vkCreateImage not found, falling back to loader's version\n");
+        out->vkCreateImage = backup->vkCreateImage;
+    }
+    out->vkDestroyImage = (PFN_vkDestroyImage)vk->vkGetDeviceProcAddr(device, "vkDestroyImage");
+    if (!(out->vkDestroyImage))
+    {
+        fprintf(stderr, "warning: vkDestroyImage not found, falling back to loader's version\n");
+        out->vkDestroyImage = backup->vkDestroyImage;
+    }
+    out->vkGetImageSubresourceLayout = (PFN_vkGetImageSubresourceLayout)vk->vkGetDeviceProcAddr(device, "vkGetImageSubresourceLayout");
+    if (!(out->vkGetImageSubresourceLayout))
+    {
+        fprintf(stderr, "warning: vkGetImageSubresourceLayout not found, falling back to loader's version\n");
+        out->vkGetImageSubresourceLayout = backup->vkGetImageSubresourceLayout;
+    }
+    out->vkCreateImageView = (PFN_vkCreateImageView)vk->vkGetDeviceProcAddr(device, "vkCreateImageView");
+    if (!(out->vkCreateImageView))
+    {
+        fprintf(stderr, "warning: vkCreateImageView not found, falling back to loader's version\n");
+        out->vkCreateImageView = backup->vkCreateImageView;
+    }
+    out->vkDestroyImageView = (PFN_vkDestroyImageView)vk->vkGetDeviceProcAddr(device, "vkDestroyImageView");
+    if (!(out->vkDestroyImageView))
+    {
+        fprintf(stderr, "warning: vkDestroyImageView not found, falling back to loader's version\n");
+        out->vkDestroyImageView = backup->vkDestroyImageView;
+    }
+    out->vkCreateShaderModule = (PFN_vkCreateShaderModule)vk->vkGetDeviceProcAddr(device, "vkCreateShaderModule");
+    if (!(out->vkCreateShaderModule))
+    {
+        fprintf(stderr, "warning: vkCreateShaderModule not found, falling back to loader's version\n");
+        out->vkCreateShaderModule = backup->vkCreateShaderModule;
+    }
+    out->vkDestroyShaderModule = (PFN_vkDestroyShaderModule)vk->vkGetDeviceProcAddr(device, "vkDestroyShaderModule");
+    if (!(out->vkDestroyShaderModule))
+    {
+        fprintf(stderr, "warning: vkDestroyShaderModule not found, falling back to loader's version\n");
+        out->vkDestroyShaderModule = backup->vkDestroyShaderModule;
+    }
+    out->vkCreatePipelineCache = (PFN_vkCreatePipelineCache)vk->vkGetDeviceProcAddr(device, "vkCreatePipelineCache");
+    if (!(out->vkCreatePipelineCache))
+    {
+        fprintf(stderr, "warning: vkCreatePipelineCache not found, falling back to loader's version\n");
+        out->vkCreatePipelineCache = backup->vkCreatePipelineCache;
+    }
+    out->vkDestroyPipelineCache = (PFN_vkDestroyPipelineCache)vk->vkGetDeviceProcAddr(device, "vkDestroyPipelineCache");
+    if (!(out->vkDestroyPipelineCache))
+    {
+        fprintf(stderr, "warning: vkDestroyPipelineCache not found, falling back to loader's version\n");
+        out->vkDestroyPipelineCache = backup->vkDestroyPipelineCache;
+    }
+    out->vkGetPipelineCacheData = (PFN_vkGetPipelineCacheData)vk->vkGetDeviceProcAddr(device, "vkGetPipelineCacheData");
+    if (!(out->vkGetPipelineCacheData))
+    {
+        fprintf(stderr, "warning: vkGetPipelineCacheData not found, falling back to loader's version\n");
+        out->vkGetPipelineCacheData = backup->vkGetPipelineCacheData;
+    }
+    out->vkMergePipelineCaches = (PFN_vkMergePipelineCaches)vk->vkGetDeviceProcAddr(device, "vkMergePipelineCaches");
+    if (!(out->vkMergePipelineCaches))
+    {
+        fprintf(stderr, "warning: vkMergePipelineCaches not found, falling back to loader's version\n");
+        out->vkMergePipelineCaches = backup->vkMergePipelineCaches;
+    }
+    out->vkCreateGraphicsPipelines = (PFN_vkCreateGraphicsPipelines)vk->vkGetDeviceProcAddr(device, "vkCreateGraphicsPipelines");
+    if (!(out->vkCreateGraphicsPipelines))
+    {
+        fprintf(stderr, "warning: vkCreateGraphicsPipelines not found, falling back to loader's version\n");
+        out->vkCreateGraphicsPipelines = backup->vkCreateGraphicsPipelines;
+    }
+    out->vkCreateComputePipelines = (PFN_vkCreateComputePipelines)vk->vkGetDeviceProcAddr(device, "vkCreateComputePipelines");
+    if (!(out->vkCreateComputePipelines))
+    {
+        fprintf(stderr, "warning: vkCreateComputePipelines not found, falling back to loader's version\n");
+        out->vkCreateComputePipelines = backup->vkCreateComputePipelines;
+    }
+    out->vkDestroyPipeline = (PFN_vkDestroyPipeline)vk->vkGetDeviceProcAddr(device, "vkDestroyPipeline");
+    if (!(out->vkDestroyPipeline))
+    {
+        fprintf(stderr, "warning: vkDestroyPipeline not found, falling back to loader's version\n");
+        out->vkDestroyPipeline = backup->vkDestroyPipeline;
+    }
+    out->vkCreatePipelineLayout = (PFN_vkCreatePipelineLayout)vk->vkGetDeviceProcAddr(device, "vkCreatePipelineLayout");
+    if (!(out->vkCreatePipelineLayout))
+    {
+        fprintf(stderr, "warning: vkCreatePipelineLayout not found, falling back to loader's version\n");
+        out->vkCreatePipelineLayout = backup->vkCreatePipelineLayout;
+    }
+    out->vkDestroyPipelineLayout = (PFN_vkDestroyPipelineLayout)vk->vkGetDeviceProcAddr(device, "vkDestroyPipelineLayout");
+    if (!(out->vkDestroyPipelineLayout))
+    {
+        fprintf(stderr, "warning: vkDestroyPipelineLayout not found, falling back to loader's version\n");
+        out->vkDestroyPipelineLayout = backup->vkDestroyPipelineLayout;
+    }
+    out->vkCreateSampler = (PFN_vkCreateSampler)vk->vkGetDeviceProcAddr(device, "vkCreateSampler");
+    if (!(out->vkCreateSampler))
+    {
+        fprintf(stderr, "warning: vkCreateSampler not found, falling back to loader's version\n");
+        out->vkCreateSampler = backup->vkCreateSampler;
+    }
+    out->vkDestroySampler = (PFN_vkDestroySampler)vk->vkGetDeviceProcAddr(device, "vkDestroySampler");
+    if (!(out->vkDestroySampler))
+    {
+        fprintf(stderr, "warning: vkDestroySampler not found, falling back to loader's version\n");
+        out->vkDestroySampler = backup->vkDestroySampler;
+    }
+    out->vkCreateDescriptorSetLayout = (PFN_vkCreateDescriptorSetLayout)vk->vkGetDeviceProcAddr(device, "vkCreateDescriptorSetLayout");
+    if (!(out->vkCreateDescriptorSetLayout))
+    {
+        fprintf(stderr, "warning: vkCreateDescriptorSetLayout not found, falling back to loader's version\n");
+        out->vkCreateDescriptorSetLayout = backup->vkCreateDescriptorSetLayout;
+    }
+    out->vkDestroyDescriptorSetLayout = (PFN_vkDestroyDescriptorSetLayout)vk->vkGetDeviceProcAddr(device, "vkDestroyDescriptorSetLayout");
+    if (!(out->vkDestroyDescriptorSetLayout))
+    {
+        fprintf(stderr, "warning: vkDestroyDescriptorSetLayout not found, falling back to loader's version\n");
+        out->vkDestroyDescriptorSetLayout = backup->vkDestroyDescriptorSetLayout;
+    }
+    out->vkCreateDescriptorPool = (PFN_vkCreateDescriptorPool)vk->vkGetDeviceProcAddr(device, "vkCreateDescriptorPool");
+    if (!(out->vkCreateDescriptorPool))
+    {
+        fprintf(stderr, "warning: vkCreateDescriptorPool not found, falling back to loader's version\n");
+        out->vkCreateDescriptorPool = backup->vkCreateDescriptorPool;
+    }
+    out->vkDestroyDescriptorPool = (PFN_vkDestroyDescriptorPool)vk->vkGetDeviceProcAddr(device, "vkDestroyDescriptorPool");
+    if (!(out->vkDestroyDescriptorPool))
+    {
+        fprintf(stderr, "warning: vkDestroyDescriptorPool not found, falling back to loader's version\n");
+        out->vkDestroyDescriptorPool = backup->vkDestroyDescriptorPool;
+    }
+    out->vkResetDescriptorPool = (PFN_vkResetDescriptorPool)vk->vkGetDeviceProcAddr(device, "vkResetDescriptorPool");
+    if (!(out->vkResetDescriptorPool))
+    {
+        fprintf(stderr, "warning: vkResetDescriptorPool not found, falling back to loader's version\n");
+        out->vkResetDescriptorPool = backup->vkResetDescriptorPool;
+    }
+    out->vkAllocateDescriptorSets = (PFN_vkAllocateDescriptorSets)vk->vkGetDeviceProcAddr(device, "vkAllocateDescriptorSets");
+    if (!(out->vkAllocateDescriptorSets))
+    {
+        fprintf(stderr, "warning: vkAllocateDescriptorSets not found, falling back to loader's version\n");
+        out->vkAllocateDescriptorSets = backup->vkAllocateDescriptorSets;
+    }
+    out->vkFreeDescriptorSets = (PFN_vkFreeDescriptorSets)vk->vkGetDeviceProcAddr(device, "vkFreeDescriptorSets");
+    if (!(out->vkFreeDescriptorSets))
+    {
+        fprintf(stderr, "warning: vkFreeDescriptorSets not found, falling back to loader's version\n");
+        out->vkFreeDescriptorSets = backup->vkFreeDescriptorSets;
+    }
+    out->vkUpdateDescriptorSets = (PFN_vkUpdateDescriptorSets)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSets");
+    if (!(out->vkUpdateDescriptorSets))
+    {
+        fprintf(stderr, "warning: vkUpdateDescriptorSets not found, falling back to loader's version\n");
+        out->vkUpdateDescriptorSets = backup->vkUpdateDescriptorSets;
+    }
+    out->vkCreateFramebuffer = (PFN_vkCreateFramebuffer)vk->vkGetDeviceProcAddr(device, "vkCreateFramebuffer");
+    if (!(out->vkCreateFramebuffer))
+    {
+        fprintf(stderr, "warning: vkCreateFramebuffer not found, falling back to loader's version\n");
+        out->vkCreateFramebuffer = backup->vkCreateFramebuffer;
+    }
+    out->vkDestroyFramebuffer = (PFN_vkDestroyFramebuffer)vk->vkGetDeviceProcAddr(device, "vkDestroyFramebuffer");
+    if (!(out->vkDestroyFramebuffer))
+    {
+        fprintf(stderr, "warning: vkDestroyFramebuffer not found, falling back to loader's version\n");
+        out->vkDestroyFramebuffer = backup->vkDestroyFramebuffer;
+    }
+    out->vkCreateRenderPass = (PFN_vkCreateRenderPass)vk->vkGetDeviceProcAddr(device, "vkCreateRenderPass");
+    if (!(out->vkCreateRenderPass))
+    {
+        fprintf(stderr, "warning: vkCreateRenderPass not found, falling back to loader's version\n");
+        out->vkCreateRenderPass = backup->vkCreateRenderPass;
+    }
+    out->vkDestroyRenderPass = (PFN_vkDestroyRenderPass)vk->vkGetDeviceProcAddr(device, "vkDestroyRenderPass");
+    if (!(out->vkDestroyRenderPass))
+    {
+        fprintf(stderr, "warning: vkDestroyRenderPass not found, falling back to loader's version\n");
+        out->vkDestroyRenderPass = backup->vkDestroyRenderPass;
+    }
+    out->vkGetRenderAreaGranularity = (PFN_vkGetRenderAreaGranularity)vk->vkGetDeviceProcAddr(device, "vkGetRenderAreaGranularity");
+    if (!(out->vkGetRenderAreaGranularity))
+    {
+        fprintf(stderr, "warning: vkGetRenderAreaGranularity not found, falling back to loader's version\n");
+        out->vkGetRenderAreaGranularity = backup->vkGetRenderAreaGranularity;
+    }
+    out->vkCreateCommandPool = (PFN_vkCreateCommandPool)vk->vkGetDeviceProcAddr(device, "vkCreateCommandPool");
+    if (!(out->vkCreateCommandPool))
+    {
+        fprintf(stderr, "warning: vkCreateCommandPool not found, falling back to loader's version\n");
+        out->vkCreateCommandPool = backup->vkCreateCommandPool;
+    }
+    out->vkDestroyCommandPool = (PFN_vkDestroyCommandPool)vk->vkGetDeviceProcAddr(device, "vkDestroyCommandPool");
+    if (!(out->vkDestroyCommandPool))
+    {
+        fprintf(stderr, "warning: vkDestroyCommandPool not found, falling back to loader's version\n");
+        out->vkDestroyCommandPool = backup->vkDestroyCommandPool;
+    }
+    out->vkResetCommandPool = (PFN_vkResetCommandPool)vk->vkGetDeviceProcAddr(device, "vkResetCommandPool");
+    if (!(out->vkResetCommandPool))
+    {
+        fprintf(stderr, "warning: vkResetCommandPool not found, falling back to loader's version\n");
+        out->vkResetCommandPool = backup->vkResetCommandPool;
+    }
+    out->vkAllocateCommandBuffers = (PFN_vkAllocateCommandBuffers)vk->vkGetDeviceProcAddr(device, "vkAllocateCommandBuffers");
+    if (!(out->vkAllocateCommandBuffers))
+    {
+        fprintf(stderr, "warning: vkAllocateCommandBuffers not found, falling back to loader's version\n");
+        out->vkAllocateCommandBuffers = backup->vkAllocateCommandBuffers;
+    }
+    out->vkFreeCommandBuffers = (PFN_vkFreeCommandBuffers)vk->vkGetDeviceProcAddr(device, "vkFreeCommandBuffers");
+    if (!(out->vkFreeCommandBuffers))
+    {
+        fprintf(stderr, "warning: vkFreeCommandBuffers not found, falling back to loader's version\n");
+        out->vkFreeCommandBuffers = backup->vkFreeCommandBuffers;
+    }
+    out->vkBeginCommandBuffer = (PFN_vkBeginCommandBuffer)vk->vkGetDeviceProcAddr(device, "vkBeginCommandBuffer");
+    if (!(out->vkBeginCommandBuffer))
+    {
+        fprintf(stderr, "warning: vkBeginCommandBuffer not found, falling back to loader's version\n");
+        out->vkBeginCommandBuffer = backup->vkBeginCommandBuffer;
+    }
+    out->vkEndCommandBuffer = (PFN_vkEndCommandBuffer)vk->vkGetDeviceProcAddr(device, "vkEndCommandBuffer");
+    if (!(out->vkEndCommandBuffer))
+    {
+        fprintf(stderr, "warning: vkEndCommandBuffer not found, falling back to loader's version\n");
+        out->vkEndCommandBuffer = backup->vkEndCommandBuffer;
+    }
+    out->vkResetCommandBuffer = (PFN_vkResetCommandBuffer)vk->vkGetDeviceProcAddr(device, "vkResetCommandBuffer");
+    if (!(out->vkResetCommandBuffer))
+    {
+        fprintf(stderr, "warning: vkResetCommandBuffer not found, falling back to loader's version\n");
+        out->vkResetCommandBuffer = backup->vkResetCommandBuffer;
+    }
+    out->vkCmdBindPipeline = (PFN_vkCmdBindPipeline)vk->vkGetDeviceProcAddr(device, "vkCmdBindPipeline");
+    if (!(out->vkCmdBindPipeline))
+    {
+        fprintf(stderr, "warning: vkCmdBindPipeline not found, falling back to loader's version\n");
+        out->vkCmdBindPipeline = backup->vkCmdBindPipeline;
+    }
+    out->vkCmdSetViewport = (PFN_vkCmdSetViewport)vk->vkGetDeviceProcAddr(device, "vkCmdSetViewport");
+    if (!(out->vkCmdSetViewport))
+    {
+        fprintf(stderr, "warning: vkCmdSetViewport not found, falling back to loader's version\n");
+        out->vkCmdSetViewport = backup->vkCmdSetViewport;
+    }
+    out->vkCmdSetScissor = (PFN_vkCmdSetScissor)vk->vkGetDeviceProcAddr(device, "vkCmdSetScissor");
+    if (!(out->vkCmdSetScissor))
+    {
+        fprintf(stderr, "warning: vkCmdSetScissor not found, falling back to loader's version\n");
+        out->vkCmdSetScissor = backup->vkCmdSetScissor;
+    }
+    out->vkCmdSetLineWidth = (PFN_vkCmdSetLineWidth)vk->vkGetDeviceProcAddr(device, "vkCmdSetLineWidth");
+    if (!(out->vkCmdSetLineWidth))
+    {
+        fprintf(stderr, "warning: vkCmdSetLineWidth not found, falling back to loader's version\n");
+        out->vkCmdSetLineWidth = backup->vkCmdSetLineWidth;
+    }
+    out->vkCmdSetDepthBias = (PFN_vkCmdSetDepthBias)vk->vkGetDeviceProcAddr(device, "vkCmdSetDepthBias");
+    if (!(out->vkCmdSetDepthBias))
+    {
+        fprintf(stderr, "warning: vkCmdSetDepthBias not found, falling back to loader's version\n");
+        out->vkCmdSetDepthBias = backup->vkCmdSetDepthBias;
+    }
+    out->vkCmdSetBlendConstants = (PFN_vkCmdSetBlendConstants)vk->vkGetDeviceProcAddr(device, "vkCmdSetBlendConstants");
+    if (!(out->vkCmdSetBlendConstants))
+    {
+        fprintf(stderr, "warning: vkCmdSetBlendConstants not found, falling back to loader's version\n");
+        out->vkCmdSetBlendConstants = backup->vkCmdSetBlendConstants;
+    }
+    out->vkCmdSetDepthBounds = (PFN_vkCmdSetDepthBounds)vk->vkGetDeviceProcAddr(device, "vkCmdSetDepthBounds");
+    if (!(out->vkCmdSetDepthBounds))
+    {
+        fprintf(stderr, "warning: vkCmdSetDepthBounds not found, falling back to loader's version\n");
+        out->vkCmdSetDepthBounds = backup->vkCmdSetDepthBounds;
+    }
+    out->vkCmdSetStencilCompareMask = (PFN_vkCmdSetStencilCompareMask)vk->vkGetDeviceProcAddr(device, "vkCmdSetStencilCompareMask");
+    if (!(out->vkCmdSetStencilCompareMask))
+    {
+        fprintf(stderr, "warning: vkCmdSetStencilCompareMask not found, falling back to loader's version\n");
+        out->vkCmdSetStencilCompareMask = backup->vkCmdSetStencilCompareMask;
+    }
+    out->vkCmdSetStencilWriteMask = (PFN_vkCmdSetStencilWriteMask)vk->vkGetDeviceProcAddr(device, "vkCmdSetStencilWriteMask");
+    if (!(out->vkCmdSetStencilWriteMask))
+    {
+        fprintf(stderr, "warning: vkCmdSetStencilWriteMask not found, falling back to loader's version\n");
+        out->vkCmdSetStencilWriteMask = backup->vkCmdSetStencilWriteMask;
+    }
+    out->vkCmdSetStencilReference = (PFN_vkCmdSetStencilReference)vk->vkGetDeviceProcAddr(device, "vkCmdSetStencilReference");
+    if (!(out->vkCmdSetStencilReference))
+    {
+        fprintf(stderr, "warning: vkCmdSetStencilReference not found, falling back to loader's version\n");
+        out->vkCmdSetStencilReference = backup->vkCmdSetStencilReference;
+    }
+    out->vkCmdBindDescriptorSets = (PFN_vkCmdBindDescriptorSets)vk->vkGetDeviceProcAddr(device, "vkCmdBindDescriptorSets");
+    if (!(out->vkCmdBindDescriptorSets))
+    {
+        fprintf(stderr, "warning: vkCmdBindDescriptorSets not found, falling back to loader's version\n");
+        out->vkCmdBindDescriptorSets = backup->vkCmdBindDescriptorSets;
+    }
+    out->vkCmdBindIndexBuffer = (PFN_vkCmdBindIndexBuffer)vk->vkGetDeviceProcAddr(device, "vkCmdBindIndexBuffer");
+    if (!(out->vkCmdBindIndexBuffer))
+    {
+        fprintf(stderr, "warning: vkCmdBindIndexBuffer not found, falling back to loader's version\n");
+        out->vkCmdBindIndexBuffer = backup->vkCmdBindIndexBuffer;
+    }
+    out->vkCmdBindVertexBuffers = (PFN_vkCmdBindVertexBuffers)vk->vkGetDeviceProcAddr(device, "vkCmdBindVertexBuffers");
+    if (!(out->vkCmdBindVertexBuffers))
+    {
+        fprintf(stderr, "warning: vkCmdBindVertexBuffers not found, falling back to loader's version\n");
+        out->vkCmdBindVertexBuffers = backup->vkCmdBindVertexBuffers;
+    }
+    out->vkCmdDraw = (PFN_vkCmdDraw)vk->vkGetDeviceProcAddr(device, "vkCmdDraw");
+    if (!(out->vkCmdDraw))
+    {
+        fprintf(stderr, "warning: vkCmdDraw not found, falling back to loader's version\n");
+        out->vkCmdDraw = backup->vkCmdDraw;
+    }
+    out->vkCmdDrawIndexed = (PFN_vkCmdDrawIndexed)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndexed");
+    if (!(out->vkCmdDrawIndexed))
+    {
+        fprintf(stderr, "warning: vkCmdDrawIndexed not found, falling back to loader's version\n");
+        out->vkCmdDrawIndexed = backup->vkCmdDrawIndexed;
+    }
+    out->vkCmdDrawIndirect = (PFN_vkCmdDrawIndirect)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndirect");
+    if (!(out->vkCmdDrawIndirect))
+    {
+        fprintf(stderr, "warning: vkCmdDrawIndirect not found, falling back to loader's version\n");
+        out->vkCmdDrawIndirect = backup->vkCmdDrawIndirect;
+    }
+    out->vkCmdDrawIndexedIndirect = (PFN_vkCmdDrawIndexedIndirect)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndexedIndirect");
+    if (!(out->vkCmdDrawIndexedIndirect))
+    {
+        fprintf(stderr, "warning: vkCmdDrawIndexedIndirect not found, falling back to loader's version\n");
+        out->vkCmdDrawIndexedIndirect = backup->vkCmdDrawIndexedIndirect;
+    }
+    out->vkCmdDispatch = (PFN_vkCmdDispatch)vk->vkGetDeviceProcAddr(device, "vkCmdDispatch");
+    if (!(out->vkCmdDispatch))
+    {
+        fprintf(stderr, "warning: vkCmdDispatch not found, falling back to loader's version\n");
+        out->vkCmdDispatch = backup->vkCmdDispatch;
+    }
+    out->vkCmdDispatchIndirect = (PFN_vkCmdDispatchIndirect)vk->vkGetDeviceProcAddr(device, "vkCmdDispatchIndirect");
+    if (!(out->vkCmdDispatchIndirect))
+    {
+        fprintf(stderr, "warning: vkCmdDispatchIndirect not found, falling back to loader's version\n");
+        out->vkCmdDispatchIndirect = backup->vkCmdDispatchIndirect;
+    }
+    out->vkCmdCopyBuffer = (PFN_vkCmdCopyBuffer)vk->vkGetDeviceProcAddr(device, "vkCmdCopyBuffer");
+    if (!(out->vkCmdCopyBuffer))
+    {
+        fprintf(stderr, "warning: vkCmdCopyBuffer not found, falling back to loader's version\n");
+        out->vkCmdCopyBuffer = backup->vkCmdCopyBuffer;
+    }
+    out->vkCmdCopyImage = (PFN_vkCmdCopyImage)vk->vkGetDeviceProcAddr(device, "vkCmdCopyImage");
+    if (!(out->vkCmdCopyImage))
+    {
+        fprintf(stderr, "warning: vkCmdCopyImage not found, falling back to loader's version\n");
+        out->vkCmdCopyImage = backup->vkCmdCopyImage;
+    }
+    out->vkCmdBlitImage = (PFN_vkCmdBlitImage)vk->vkGetDeviceProcAddr(device, "vkCmdBlitImage");
+    if (!(out->vkCmdBlitImage))
+    {
+        fprintf(stderr, "warning: vkCmdBlitImage not found, falling back to loader's version\n");
+        out->vkCmdBlitImage = backup->vkCmdBlitImage;
+    }
+    out->vkCmdCopyBufferToImage = (PFN_vkCmdCopyBufferToImage)vk->vkGetDeviceProcAddr(device, "vkCmdCopyBufferToImage");
+    if (!(out->vkCmdCopyBufferToImage))
+    {
+        fprintf(stderr, "warning: vkCmdCopyBufferToImage not found, falling back to loader's version\n");
+        out->vkCmdCopyBufferToImage = backup->vkCmdCopyBufferToImage;
+    }
+    out->vkCmdCopyImageToBuffer = (PFN_vkCmdCopyImageToBuffer)vk->vkGetDeviceProcAddr(device, "vkCmdCopyImageToBuffer");
+    if (!(out->vkCmdCopyImageToBuffer))
+    {
+        fprintf(stderr, "warning: vkCmdCopyImageToBuffer not found, falling back to loader's version\n");
+        out->vkCmdCopyImageToBuffer = backup->vkCmdCopyImageToBuffer;
+    }
+    out->vkCmdUpdateBuffer = (PFN_vkCmdUpdateBuffer)vk->vkGetDeviceProcAddr(device, "vkCmdUpdateBuffer");
+    if (!(out->vkCmdUpdateBuffer))
+    {
+        fprintf(stderr, "warning: vkCmdUpdateBuffer not found, falling back to loader's version\n");
+        out->vkCmdUpdateBuffer = backup->vkCmdUpdateBuffer;
+    }
+    out->vkCmdFillBuffer = (PFN_vkCmdFillBuffer)vk->vkGetDeviceProcAddr(device, "vkCmdFillBuffer");
+    if (!(out->vkCmdFillBuffer))
+    {
+        fprintf(stderr, "warning: vkCmdFillBuffer not found, falling back to loader's version\n");
+        out->vkCmdFillBuffer = backup->vkCmdFillBuffer;
+    }
+    out->vkCmdClearColorImage = (PFN_vkCmdClearColorImage)vk->vkGetDeviceProcAddr(device, "vkCmdClearColorImage");
+    if (!(out->vkCmdClearColorImage))
+    {
+        fprintf(stderr, "warning: vkCmdClearColorImage not found, falling back to loader's version\n");
+        out->vkCmdClearColorImage = backup->vkCmdClearColorImage;
+    }
+    out->vkCmdClearDepthStencilImage = (PFN_vkCmdClearDepthStencilImage)vk->vkGetDeviceProcAddr(device, "vkCmdClearDepthStencilImage");
+    if (!(out->vkCmdClearDepthStencilImage))
+    {
+        fprintf(stderr, "warning: vkCmdClearDepthStencilImage not found, falling back to loader's version\n");
+        out->vkCmdClearDepthStencilImage = backup->vkCmdClearDepthStencilImage;
+    }
+    out->vkCmdClearAttachments = (PFN_vkCmdClearAttachments)vk->vkGetDeviceProcAddr(device, "vkCmdClearAttachments");
+    if (!(out->vkCmdClearAttachments))
+    {
+        fprintf(stderr, "warning: vkCmdClearAttachments not found, falling back to loader's version\n");
+        out->vkCmdClearAttachments = backup->vkCmdClearAttachments;
+    }
+    out->vkCmdResolveImage = (PFN_vkCmdResolveImage)vk->vkGetDeviceProcAddr(device, "vkCmdResolveImage");
+    if (!(out->vkCmdResolveImage))
+    {
+        fprintf(stderr, "warning: vkCmdResolveImage not found, falling back to loader's version\n");
+        out->vkCmdResolveImage = backup->vkCmdResolveImage;
+    }
+    out->vkCmdSetEvent = (PFN_vkCmdSetEvent)vk->vkGetDeviceProcAddr(device, "vkCmdSetEvent");
+    if (!(out->vkCmdSetEvent))
+    {
+        fprintf(stderr, "warning: vkCmdSetEvent not found, falling back to loader's version\n");
+        out->vkCmdSetEvent = backup->vkCmdSetEvent;
+    }
+    out->vkCmdResetEvent = (PFN_vkCmdResetEvent)vk->vkGetDeviceProcAddr(device, "vkCmdResetEvent");
+    if (!(out->vkCmdResetEvent))
+    {
+        fprintf(stderr, "warning: vkCmdResetEvent not found, falling back to loader's version\n");
+        out->vkCmdResetEvent = backup->vkCmdResetEvent;
+    }
+    out->vkCmdWaitEvents = (PFN_vkCmdWaitEvents)vk->vkGetDeviceProcAddr(device, "vkCmdWaitEvents");
+    if (!(out->vkCmdWaitEvents))
+    {
+        fprintf(stderr, "warning: vkCmdWaitEvents not found, falling back to loader's version\n");
+        out->vkCmdWaitEvents = backup->vkCmdWaitEvents;
+    }
+    out->vkCmdPipelineBarrier = (PFN_vkCmdPipelineBarrier)vk->vkGetDeviceProcAddr(device, "vkCmdPipelineBarrier");
+    if (!(out->vkCmdPipelineBarrier))
+    {
+        fprintf(stderr, "warning: vkCmdPipelineBarrier not found, falling back to loader's version\n");
+        out->vkCmdPipelineBarrier = backup->vkCmdPipelineBarrier;
+    }
+    out->vkCmdBeginQuery = (PFN_vkCmdBeginQuery)vk->vkGetDeviceProcAddr(device, "vkCmdBeginQuery");
+    if (!(out->vkCmdBeginQuery))
+    {
+        fprintf(stderr, "warning: vkCmdBeginQuery not found, falling back to loader's version\n");
+        out->vkCmdBeginQuery = backup->vkCmdBeginQuery;
+    }
+    out->vkCmdEndQuery = (PFN_vkCmdEndQuery)vk->vkGetDeviceProcAddr(device, "vkCmdEndQuery");
+    if (!(out->vkCmdEndQuery))
+    {
+        fprintf(stderr, "warning: vkCmdEndQuery not found, falling back to loader's version\n");
+        out->vkCmdEndQuery = backup->vkCmdEndQuery;
+    }
+    out->vkCmdResetQueryPool = (PFN_vkCmdResetQueryPool)vk->vkGetDeviceProcAddr(device, "vkCmdResetQueryPool");
+    if (!(out->vkCmdResetQueryPool))
+    {
+        fprintf(stderr, "warning: vkCmdResetQueryPool not found, falling back to loader's version\n");
+        out->vkCmdResetQueryPool = backup->vkCmdResetQueryPool;
+    }
+    out->vkCmdWriteTimestamp = (PFN_vkCmdWriteTimestamp)vk->vkGetDeviceProcAddr(device, "vkCmdWriteTimestamp");
+    if (!(out->vkCmdWriteTimestamp))
+    {
+        fprintf(stderr, "warning: vkCmdWriteTimestamp not found, falling back to loader's version\n");
+        out->vkCmdWriteTimestamp = backup->vkCmdWriteTimestamp;
+    }
+    out->vkCmdCopyQueryPoolResults = (PFN_vkCmdCopyQueryPoolResults)vk->vkGetDeviceProcAddr(device, "vkCmdCopyQueryPoolResults");
+    if (!(out->vkCmdCopyQueryPoolResults))
+    {
+        fprintf(stderr, "warning: vkCmdCopyQueryPoolResults not found, falling back to loader's version\n");
+        out->vkCmdCopyQueryPoolResults = backup->vkCmdCopyQueryPoolResults;
+    }
+    out->vkCmdPushConstants = (PFN_vkCmdPushConstants)vk->vkGetDeviceProcAddr(device, "vkCmdPushConstants");
+    if (!(out->vkCmdPushConstants))
+    {
+        fprintf(stderr, "warning: vkCmdPushConstants not found, falling back to loader's version\n");
+        out->vkCmdPushConstants = backup->vkCmdPushConstants;
+    }
+    out->vkCmdBeginRenderPass = (PFN_vkCmdBeginRenderPass)vk->vkGetDeviceProcAddr(device, "vkCmdBeginRenderPass");
+    if (!(out->vkCmdBeginRenderPass))
+    {
+        fprintf(stderr, "warning: vkCmdBeginRenderPass not found, falling back to loader's version\n");
+        out->vkCmdBeginRenderPass = backup->vkCmdBeginRenderPass;
+    }
+    out->vkCmdNextSubpass = (PFN_vkCmdNextSubpass)vk->vkGetDeviceProcAddr(device, "vkCmdNextSubpass");
+    if (!(out->vkCmdNextSubpass))
+    {
+        fprintf(stderr, "warning: vkCmdNextSubpass not found, falling back to loader's version\n");
+        out->vkCmdNextSubpass = backup->vkCmdNextSubpass;
+    }
+    out->vkCmdEndRenderPass = (PFN_vkCmdEndRenderPass)vk->vkGetDeviceProcAddr(device, "vkCmdEndRenderPass");
+    if (!(out->vkCmdEndRenderPass))
+    {
+        fprintf(stderr, "warning: vkCmdEndRenderPass not found, falling back to loader's version\n");
+        out->vkCmdEndRenderPass = backup->vkCmdEndRenderPass;
+    }
+    out->vkCmdExecuteCommands = (PFN_vkCmdExecuteCommands)vk->vkGetDeviceProcAddr(device, "vkCmdExecuteCommands");
+    if (!(out->vkCmdExecuteCommands))
+    {
+        fprintf(stderr, "warning: vkCmdExecuteCommands not found, falling back to loader's version\n");
+        out->vkCmdExecuteCommands = backup->vkCmdExecuteCommands;
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    out->vkBindBufferMemory2 = (PFN_vkBindBufferMemory2)vk->vkGetDeviceProcAddr(device, "vkBindBufferMemory2");
+    if (!(out->vkBindBufferMemory2))
+    {
+        fprintf(stderr, "warning: vkBindBufferMemory2 not found, falling back to loader's version\n");
+        out->vkBindBufferMemory2 = backup->vkBindBufferMemory2;
+    }
+    out->vkBindImageMemory2 = (PFN_vkBindImageMemory2)vk->vkGetDeviceProcAddr(device, "vkBindImageMemory2");
+    if (!(out->vkBindImageMemory2))
+    {
+        fprintf(stderr, "warning: vkBindImageMemory2 not found, falling back to loader's version\n");
+        out->vkBindImageMemory2 = backup->vkBindImageMemory2;
+    }
+    out->vkGetDeviceGroupPeerMemoryFeatures = (PFN_vkGetDeviceGroupPeerMemoryFeatures)vk->vkGetDeviceProcAddr(device, "vkGetDeviceGroupPeerMemoryFeatures");
+    if (!(out->vkGetDeviceGroupPeerMemoryFeatures))
+    {
+        fprintf(stderr, "warning: vkGetDeviceGroupPeerMemoryFeatures not found, falling back to loader's version\n");
+        out->vkGetDeviceGroupPeerMemoryFeatures = backup->vkGetDeviceGroupPeerMemoryFeatures;
+    }
+    out->vkCmdSetDeviceMask = (PFN_vkCmdSetDeviceMask)vk->vkGetDeviceProcAddr(device, "vkCmdSetDeviceMask");
+    if (!(out->vkCmdSetDeviceMask))
+    {
+        fprintf(stderr, "warning: vkCmdSetDeviceMask not found, falling back to loader's version\n");
+        out->vkCmdSetDeviceMask = backup->vkCmdSetDeviceMask;
+    }
+    out->vkCmdDispatchBase = (PFN_vkCmdDispatchBase)vk->vkGetDeviceProcAddr(device, "vkCmdDispatchBase");
+    if (!(out->vkCmdDispatchBase))
+    {
+        fprintf(stderr, "warning: vkCmdDispatchBase not found, falling back to loader's version\n");
+        out->vkCmdDispatchBase = backup->vkCmdDispatchBase;
+    }
+    out->vkGetImageMemoryRequirements2 = (PFN_vkGetImageMemoryRequirements2)vk->vkGetDeviceProcAddr(device, "vkGetImageMemoryRequirements2");
+    if (!(out->vkGetImageMemoryRequirements2))
+    {
+        fprintf(stderr, "warning: vkGetImageMemoryRequirements2 not found, falling back to loader's version\n");
+        out->vkGetImageMemoryRequirements2 = backup->vkGetImageMemoryRequirements2;
+    }
+    out->vkGetBufferMemoryRequirements2 = (PFN_vkGetBufferMemoryRequirements2)vk->vkGetDeviceProcAddr(device, "vkGetBufferMemoryRequirements2");
+    if (!(out->vkGetBufferMemoryRequirements2))
+    {
+        fprintf(stderr, "warning: vkGetBufferMemoryRequirements2 not found, falling back to loader's version\n");
+        out->vkGetBufferMemoryRequirements2 = backup->vkGetBufferMemoryRequirements2;
+    }
+    out->vkGetImageSparseMemoryRequirements2 = (PFN_vkGetImageSparseMemoryRequirements2)vk->vkGetDeviceProcAddr(device, "vkGetImageSparseMemoryRequirements2");
+    if (!(out->vkGetImageSparseMemoryRequirements2))
+    {
+        fprintf(stderr, "warning: vkGetImageSparseMemoryRequirements2 not found, falling back to loader's version\n");
+        out->vkGetImageSparseMemoryRequirements2 = backup->vkGetImageSparseMemoryRequirements2;
+    }
+    out->vkTrimCommandPool = (PFN_vkTrimCommandPool)vk->vkGetDeviceProcAddr(device, "vkTrimCommandPool");
+    if (!(out->vkTrimCommandPool))
+    {
+        fprintf(stderr, "warning: vkTrimCommandPool not found, falling back to loader's version\n");
+        out->vkTrimCommandPool = backup->vkTrimCommandPool;
+    }
+    out->vkGetDeviceQueue2 = (PFN_vkGetDeviceQueue2)vk->vkGetDeviceProcAddr(device, "vkGetDeviceQueue2");
+    if (!(out->vkGetDeviceQueue2))
+    {
+        fprintf(stderr, "warning: vkGetDeviceQueue2 not found, falling back to loader's version\n");
+        out->vkGetDeviceQueue2 = backup->vkGetDeviceQueue2;
+    }
+    out->vkCreateSamplerYcbcrConversion = (PFN_vkCreateSamplerYcbcrConversion)vk->vkGetDeviceProcAddr(device, "vkCreateSamplerYcbcrConversion");
+    if (!(out->vkCreateSamplerYcbcrConversion))
+    {
+        fprintf(stderr, "warning: vkCreateSamplerYcbcrConversion not found, falling back to loader's version\n");
+        out->vkCreateSamplerYcbcrConversion = backup->vkCreateSamplerYcbcrConversion;
+    }
+    out->vkDestroySamplerYcbcrConversion = (PFN_vkDestroySamplerYcbcrConversion)vk->vkGetDeviceProcAddr(device, "vkDestroySamplerYcbcrConversion");
+    if (!(out->vkDestroySamplerYcbcrConversion))
+    {
+        fprintf(stderr, "warning: vkDestroySamplerYcbcrConversion not found, falling back to loader's version\n");
+        out->vkDestroySamplerYcbcrConversion = backup->vkDestroySamplerYcbcrConversion;
+    }
+    out->vkCreateDescriptorUpdateTemplate = (PFN_vkCreateDescriptorUpdateTemplate)vk->vkGetDeviceProcAddr(device, "vkCreateDescriptorUpdateTemplate");
+    if (!(out->vkCreateDescriptorUpdateTemplate))
+    {
+        fprintf(stderr, "warning: vkCreateDescriptorUpdateTemplate not found, falling back to loader's version\n");
+        out->vkCreateDescriptorUpdateTemplate = backup->vkCreateDescriptorUpdateTemplate;
+    }
+    out->vkDestroyDescriptorUpdateTemplate = (PFN_vkDestroyDescriptorUpdateTemplate)vk->vkGetDeviceProcAddr(device, "vkDestroyDescriptorUpdateTemplate");
+    if (!(out->vkDestroyDescriptorUpdateTemplate))
+    {
+        fprintf(stderr, "warning: vkDestroyDescriptorUpdateTemplate not found, falling back to loader's version\n");
+        out->vkDestroyDescriptorUpdateTemplate = backup->vkDestroyDescriptorUpdateTemplate;
+    }
+    out->vkUpdateDescriptorSetWithTemplate = (PFN_vkUpdateDescriptorSetWithTemplate)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSetWithTemplate");
+    if (!(out->vkUpdateDescriptorSetWithTemplate))
+    {
+        fprintf(stderr, "warning: vkUpdateDescriptorSetWithTemplate not found, falling back to loader's version\n");
+        out->vkUpdateDescriptorSetWithTemplate = backup->vkUpdateDescriptorSetWithTemplate;
+    }
+    out->vkGetDescriptorSetLayoutSupport = (PFN_vkGetDescriptorSetLayoutSupport)vk->vkGetDeviceProcAddr(device, "vkGetDescriptorSetLayoutSupport");
+    if (!(out->vkGetDescriptorSetLayoutSupport))
+    {
+        fprintf(stderr, "warning: vkGetDescriptorSetLayoutSupport not found, falling back to loader's version\n");
+        out->vkGetDescriptorSetLayoutSupport = backup->vkGetDescriptorSetLayoutSupport;
+    }
+#endif
+#ifdef VK_KHR_surface
+    out->vkGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfaceSupportKHR");
+    if (!(out->vkGetPhysicalDeviceSurfaceSupportKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceSurfaceSupportKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceSurfaceSupportKHR = backup->vkGetPhysicalDeviceSurfaceSupportKHR;
+    }
+    out->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+    if (!(out->vkGetPhysicalDeviceSurfaceCapabilitiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceSurfaceCapabilitiesKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = backup->vkGetPhysicalDeviceSurfaceCapabilitiesKHR;
+    }
+    out->vkGetPhysicalDeviceSurfaceFormatsKHR = (PFN_vkGetPhysicalDeviceSurfaceFormatsKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+    if (!(out->vkGetPhysicalDeviceSurfaceFormatsKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceSurfaceFormatsKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceSurfaceFormatsKHR = backup->vkGetPhysicalDeviceSurfaceFormatsKHR;
+    }
+    out->vkGetPhysicalDeviceSurfacePresentModesKHR = (PFN_vkGetPhysicalDeviceSurfacePresentModesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfacePresentModesKHR");
+    if (!(out->vkGetPhysicalDeviceSurfacePresentModesKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceSurfacePresentModesKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceSurfacePresentModesKHR = backup->vkGetPhysicalDeviceSurfacePresentModesKHR;
+    }
+#endif
+#ifdef VK_KHR_swapchain
+    out->vkGetDeviceGroupPresentCapabilitiesKHR = (PFN_vkGetDeviceGroupPresentCapabilitiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetDeviceGroupPresentCapabilitiesKHR");
+    if (!(out->vkGetDeviceGroupPresentCapabilitiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetDeviceGroupPresentCapabilitiesKHR not found, falling back to loader's version\n");
+        out->vkGetDeviceGroupPresentCapabilitiesKHR = backup->vkGetDeviceGroupPresentCapabilitiesKHR;
+    }
+    out->vkGetDeviceGroupSurfacePresentModesKHR = (PFN_vkGetDeviceGroupSurfacePresentModesKHR)vk->vkGetDeviceProcAddr(device, "vkGetDeviceGroupSurfacePresentModesKHR");
+    if (!(out->vkGetDeviceGroupSurfacePresentModesKHR))
+    {
+        fprintf(stderr, "warning: vkGetDeviceGroupSurfacePresentModesKHR not found, falling back to loader's version\n");
+        out->vkGetDeviceGroupSurfacePresentModesKHR = backup->vkGetDeviceGroupSurfacePresentModesKHR;
+    }
+    out->vkGetPhysicalDevicePresentRectanglesKHR = (PFN_vkGetPhysicalDevicePresentRectanglesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDevicePresentRectanglesKHR");
+    if (!(out->vkGetPhysicalDevicePresentRectanglesKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDevicePresentRectanglesKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDevicePresentRectanglesKHR = backup->vkGetPhysicalDevicePresentRectanglesKHR;
+    }
+    out->vkAcquireNextImage2KHR = (PFN_vkAcquireNextImage2KHR)vk->vkGetDeviceProcAddr(device, "vkAcquireNextImage2KHR");
+    if (!(out->vkAcquireNextImage2KHR))
+    {
+        fprintf(stderr, "warning: vkAcquireNextImage2KHR not found, falling back to loader's version\n");
+        out->vkAcquireNextImage2KHR = backup->vkAcquireNextImage2KHR;
+    }
+#endif
+#ifdef VK_KHR_display
+    out->vkGetPhysicalDeviceDisplayPropertiesKHR = (PFN_vkGetPhysicalDeviceDisplayPropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceDisplayPropertiesKHR");
+    if (!(out->vkGetPhysicalDeviceDisplayPropertiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceDisplayPropertiesKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceDisplayPropertiesKHR = backup->vkGetPhysicalDeviceDisplayPropertiesKHR;
+    }
+    out->vkGetPhysicalDeviceDisplayPlanePropertiesKHR = (PFN_vkGetPhysicalDeviceDisplayPlanePropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceDisplayPlanePropertiesKHR");
+    if (!(out->vkGetPhysicalDeviceDisplayPlanePropertiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceDisplayPlanePropertiesKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceDisplayPlanePropertiesKHR = backup->vkGetPhysicalDeviceDisplayPlanePropertiesKHR;
+    }
+    out->vkGetDisplayPlaneSupportedDisplaysKHR = (PFN_vkGetDisplayPlaneSupportedDisplaysKHR)vk->vkGetDeviceProcAddr(device, "vkGetDisplayPlaneSupportedDisplaysKHR");
+    if (!(out->vkGetDisplayPlaneSupportedDisplaysKHR))
+    {
+        fprintf(stderr, "warning: vkGetDisplayPlaneSupportedDisplaysKHR not found, falling back to loader's version\n");
+        out->vkGetDisplayPlaneSupportedDisplaysKHR = backup->vkGetDisplayPlaneSupportedDisplaysKHR;
+    }
+    out->vkGetDisplayModePropertiesKHR = (PFN_vkGetDisplayModePropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetDisplayModePropertiesKHR");
+    if (!(out->vkGetDisplayModePropertiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetDisplayModePropertiesKHR not found, falling back to loader's version\n");
+        out->vkGetDisplayModePropertiesKHR = backup->vkGetDisplayModePropertiesKHR;
+    }
+    out->vkCreateDisplayModeKHR = (PFN_vkCreateDisplayModeKHR)vk->vkGetDeviceProcAddr(device, "vkCreateDisplayModeKHR");
+    if (!(out->vkCreateDisplayModeKHR))
+    {
+        fprintf(stderr, "warning: vkCreateDisplayModeKHR not found, falling back to loader's version\n");
+        out->vkCreateDisplayModeKHR = backup->vkCreateDisplayModeKHR;
+    }
+    out->vkGetDisplayPlaneCapabilitiesKHR = (PFN_vkGetDisplayPlaneCapabilitiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetDisplayPlaneCapabilitiesKHR");
+    if (!(out->vkGetDisplayPlaneCapabilitiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetDisplayPlaneCapabilitiesKHR not found, falling back to loader's version\n");
+        out->vkGetDisplayPlaneCapabilitiesKHR = backup->vkGetDisplayPlaneCapabilitiesKHR;
+    }
+#endif
+#ifdef VK_KHR_display_swapchain
+    out->vkCreateSharedSwapchainsKHR = (PFN_vkCreateSharedSwapchainsKHR)vk->vkGetDeviceProcAddr(device, "vkCreateSharedSwapchainsKHR");
+    if (!(out->vkCreateSharedSwapchainsKHR))
+    {
+        fprintf(stderr, "warning: vkCreateSharedSwapchainsKHR not found, falling back to loader's version\n");
+        out->vkCreateSharedSwapchainsKHR = backup->vkCreateSharedSwapchainsKHR;
+    }
+#endif
+#ifdef VK_KHR_wayland_surface
+    out->vkGetPhysicalDeviceWaylandPresentationSupportKHR = (PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceWaylandPresentationSupportKHR");
+    if (!(out->vkGetPhysicalDeviceWaylandPresentationSupportKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceWaylandPresentationSupportKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceWaylandPresentationSupportKHR = backup->vkGetPhysicalDeviceWaylandPresentationSupportKHR;
+    }
+#endif
+#ifdef VK_KHR_mir_surface
+    out->vkGetPhysicalDeviceMirPresentationSupportKHR = (PFN_vkGetPhysicalDeviceMirPresentationSupportKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceMirPresentationSupportKHR");
+    if (!(out->vkGetPhysicalDeviceMirPresentationSupportKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceMirPresentationSupportKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceMirPresentationSupportKHR = backup->vkGetPhysicalDeviceMirPresentationSupportKHR;
+    }
+#endif
+#ifdef VK_KHR_get_physical_device_properties2
+    out->vkGetPhysicalDeviceFeatures2KHR = (PFN_vkGetPhysicalDeviceFeatures2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceFeatures2KHR");
+    if (!(out->vkGetPhysicalDeviceFeatures2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceFeatures2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceFeatures2KHR = backup->vkGetPhysicalDeviceFeatures2KHR;
+    }
+    out->vkGetPhysicalDeviceProperties2KHR = (PFN_vkGetPhysicalDeviceProperties2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceProperties2KHR");
+    if (!(out->vkGetPhysicalDeviceProperties2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceProperties2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceProperties2KHR = backup->vkGetPhysicalDeviceProperties2KHR;
+    }
+    out->vkGetPhysicalDeviceFormatProperties2KHR = (PFN_vkGetPhysicalDeviceFormatProperties2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceFormatProperties2KHR");
+    if (!(out->vkGetPhysicalDeviceFormatProperties2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceFormatProperties2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceFormatProperties2KHR = backup->vkGetPhysicalDeviceFormatProperties2KHR;
+    }
+    out->vkGetPhysicalDeviceImageFormatProperties2KHR = (PFN_vkGetPhysicalDeviceImageFormatProperties2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceImageFormatProperties2KHR");
+    if (!(out->vkGetPhysicalDeviceImageFormatProperties2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceImageFormatProperties2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceImageFormatProperties2KHR = backup->vkGetPhysicalDeviceImageFormatProperties2KHR;
+    }
+    out->vkGetPhysicalDeviceQueueFamilyProperties2KHR = (PFN_vkGetPhysicalDeviceQueueFamilyProperties2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceQueueFamilyProperties2KHR");
+    if (!(out->vkGetPhysicalDeviceQueueFamilyProperties2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceQueueFamilyProperties2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceQueueFamilyProperties2KHR = backup->vkGetPhysicalDeviceQueueFamilyProperties2KHR;
+    }
+    out->vkGetPhysicalDeviceMemoryProperties2KHR = (PFN_vkGetPhysicalDeviceMemoryProperties2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceMemoryProperties2KHR");
+    if (!(out->vkGetPhysicalDeviceMemoryProperties2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceMemoryProperties2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceMemoryProperties2KHR = backup->vkGetPhysicalDeviceMemoryProperties2KHR;
+    }
+    out->vkGetPhysicalDeviceSparseImageFormatProperties2KHR = (PFN_vkGetPhysicalDeviceSparseImageFormatProperties2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSparseImageFormatProperties2KHR");
+    if (!(out->vkGetPhysicalDeviceSparseImageFormatProperties2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceSparseImageFormatProperties2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceSparseImageFormatProperties2KHR = backup->vkGetPhysicalDeviceSparseImageFormatProperties2KHR;
+    }
+#endif
+#ifdef VK_KHR_device_group
+    out->vkGetDeviceGroupPeerMemoryFeaturesKHR = (PFN_vkGetDeviceGroupPeerMemoryFeaturesKHR)vk->vkGetDeviceProcAddr(device, "vkGetDeviceGroupPeerMemoryFeaturesKHR");
+    if (!(out->vkGetDeviceGroupPeerMemoryFeaturesKHR))
+    {
+        fprintf(stderr, "warning: vkGetDeviceGroupPeerMemoryFeaturesKHR not found, falling back to loader's version\n");
+        out->vkGetDeviceGroupPeerMemoryFeaturesKHR = backup->vkGetDeviceGroupPeerMemoryFeaturesKHR;
+    }
+    out->vkCmdSetDeviceMaskKHR = (PFN_vkCmdSetDeviceMaskKHR)vk->vkGetDeviceProcAddr(device, "vkCmdSetDeviceMaskKHR");
+    if (!(out->vkCmdSetDeviceMaskKHR))
+    {
+        fprintf(stderr, "warning: vkCmdSetDeviceMaskKHR not found, falling back to loader's version\n");
+        out->vkCmdSetDeviceMaskKHR = backup->vkCmdSetDeviceMaskKHR;
+    }
+    out->vkCmdDispatchBaseKHR = (PFN_vkCmdDispatchBaseKHR)vk->vkGetDeviceProcAddr(device, "vkCmdDispatchBaseKHR");
+    if (!(out->vkCmdDispatchBaseKHR))
+    {
+        fprintf(stderr, "warning: vkCmdDispatchBaseKHR not found, falling back to loader's version\n");
+        out->vkCmdDispatchBaseKHR = backup->vkCmdDispatchBaseKHR;
+    }
+#endif
+#ifdef VK_KHR_maintenance1
+    out->vkTrimCommandPoolKHR = (PFN_vkTrimCommandPoolKHR)vk->vkGetDeviceProcAddr(device, "vkTrimCommandPoolKHR");
+    if (!(out->vkTrimCommandPoolKHR))
+    {
+        fprintf(stderr, "warning: vkTrimCommandPoolKHR not found, falling back to loader's version\n");
+        out->vkTrimCommandPoolKHR = backup->vkTrimCommandPoolKHR;
+    }
+#endif
+#ifdef VK_KHR_external_memory_capabilities
+    out->vkGetPhysicalDeviceExternalBufferPropertiesKHR = (PFN_vkGetPhysicalDeviceExternalBufferPropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceExternalBufferPropertiesKHR");
+    if (!(out->vkGetPhysicalDeviceExternalBufferPropertiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceExternalBufferPropertiesKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceExternalBufferPropertiesKHR = backup->vkGetPhysicalDeviceExternalBufferPropertiesKHR;
+    }
+#endif
+#ifdef VK_KHR_external_memory_win32
+    out->vkGetMemoryWin32HandleKHR = (PFN_vkGetMemoryWin32HandleKHR)vk->vkGetDeviceProcAddr(device, "vkGetMemoryWin32HandleKHR");
+    if (!(out->vkGetMemoryWin32HandleKHR))
+    {
+        fprintf(stderr, "warning: vkGetMemoryWin32HandleKHR not found, falling back to loader's version\n");
+        out->vkGetMemoryWin32HandleKHR = backup->vkGetMemoryWin32HandleKHR;
+    }
+    out->vkGetMemoryWin32HandlePropertiesKHR = (PFN_vkGetMemoryWin32HandlePropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetMemoryWin32HandlePropertiesKHR");
+    if (!(out->vkGetMemoryWin32HandlePropertiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetMemoryWin32HandlePropertiesKHR not found, falling back to loader's version\n");
+        out->vkGetMemoryWin32HandlePropertiesKHR = backup->vkGetMemoryWin32HandlePropertiesKHR;
+    }
+#endif
+#ifdef VK_KHR_external_memory_fd
+    out->vkGetMemoryFdKHR = (PFN_vkGetMemoryFdKHR)vk->vkGetDeviceProcAddr(device, "vkGetMemoryFdKHR");
+    if (!(out->vkGetMemoryFdKHR))
+    {
+        fprintf(stderr, "warning: vkGetMemoryFdKHR not found, falling back to loader's version\n");
+        out->vkGetMemoryFdKHR = backup->vkGetMemoryFdKHR;
+    }
+    out->vkGetMemoryFdPropertiesKHR = (PFN_vkGetMemoryFdPropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetMemoryFdPropertiesKHR");
+    if (!(out->vkGetMemoryFdPropertiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetMemoryFdPropertiesKHR not found, falling back to loader's version\n");
+        out->vkGetMemoryFdPropertiesKHR = backup->vkGetMemoryFdPropertiesKHR;
+    }
+#endif
+#ifdef VK_KHR_external_semaphore_capabilities
+    out->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR = (PFN_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceExternalSemaphorePropertiesKHR");
+    if (!(out->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceExternalSemaphorePropertiesKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR = backup->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR;
+    }
+#endif
+#ifdef VK_KHR_external_semaphore_win32
+    out->vkImportSemaphoreWin32HandleKHR = (PFN_vkImportSemaphoreWin32HandleKHR)vk->vkGetDeviceProcAddr(device, "vkImportSemaphoreWin32HandleKHR");
+    if (!(out->vkImportSemaphoreWin32HandleKHR))
+    {
+        fprintf(stderr, "warning: vkImportSemaphoreWin32HandleKHR not found, falling back to loader's version\n");
+        out->vkImportSemaphoreWin32HandleKHR = backup->vkImportSemaphoreWin32HandleKHR;
+    }
+    out->vkGetSemaphoreWin32HandleKHR = (PFN_vkGetSemaphoreWin32HandleKHR)vk->vkGetDeviceProcAddr(device, "vkGetSemaphoreWin32HandleKHR");
+    if (!(out->vkGetSemaphoreWin32HandleKHR))
+    {
+        fprintf(stderr, "warning: vkGetSemaphoreWin32HandleKHR not found, falling back to loader's version\n");
+        out->vkGetSemaphoreWin32HandleKHR = backup->vkGetSemaphoreWin32HandleKHR;
+    }
+#endif
+#ifdef VK_KHR_external_semaphore_fd
+    out->vkImportSemaphoreFdKHR = (PFN_vkImportSemaphoreFdKHR)vk->vkGetDeviceProcAddr(device, "vkImportSemaphoreFdKHR");
+    if (!(out->vkImportSemaphoreFdKHR))
+    {
+        fprintf(stderr, "warning: vkImportSemaphoreFdKHR not found, falling back to loader's version\n");
+        out->vkImportSemaphoreFdKHR = backup->vkImportSemaphoreFdKHR;
+    }
+    out->vkGetSemaphoreFdKHR = (PFN_vkGetSemaphoreFdKHR)vk->vkGetDeviceProcAddr(device, "vkGetSemaphoreFdKHR");
+    if (!(out->vkGetSemaphoreFdKHR))
+    {
+        fprintf(stderr, "warning: vkGetSemaphoreFdKHR not found, falling back to loader's version\n");
+        out->vkGetSemaphoreFdKHR = backup->vkGetSemaphoreFdKHR;
+    }
+#endif
+#ifdef VK_KHR_push_descriptor
+    out->vkCmdPushDescriptorSetKHR = (PFN_vkCmdPushDescriptorSetKHR)vk->vkGetDeviceProcAddr(device, "vkCmdPushDescriptorSetKHR");
+    if (!(out->vkCmdPushDescriptorSetKHR))
+    {
+        fprintf(stderr, "warning: vkCmdPushDescriptorSetKHR not found, falling back to loader's version\n");
+        out->vkCmdPushDescriptorSetKHR = backup->vkCmdPushDescriptorSetKHR;
+    }
+    out->vkCmdPushDescriptorSetWithTemplateKHR = (PFN_vkCmdPushDescriptorSetWithTemplateKHR)vk->vkGetDeviceProcAddr(device, "vkCmdPushDescriptorSetWithTemplateKHR");
+    if (!(out->vkCmdPushDescriptorSetWithTemplateKHR))
+    {
+        fprintf(stderr, "warning: vkCmdPushDescriptorSetWithTemplateKHR not found, falling back to loader's version\n");
+        out->vkCmdPushDescriptorSetWithTemplateKHR = backup->vkCmdPushDescriptorSetWithTemplateKHR;
+    }
+#endif
+#ifdef VK_KHR_descriptor_update_template
+    out->vkCreateDescriptorUpdateTemplateKHR = (PFN_vkCreateDescriptorUpdateTemplateKHR)vk->vkGetDeviceProcAddr(device, "vkCreateDescriptorUpdateTemplateKHR");
+    if (!(out->vkCreateDescriptorUpdateTemplateKHR))
+    {
+        fprintf(stderr, "warning: vkCreateDescriptorUpdateTemplateKHR not found, falling back to loader's version\n");
+        out->vkCreateDescriptorUpdateTemplateKHR = backup->vkCreateDescriptorUpdateTemplateKHR;
+    }
+    out->vkDestroyDescriptorUpdateTemplateKHR = (PFN_vkDestroyDescriptorUpdateTemplateKHR)vk->vkGetDeviceProcAddr(device, "vkDestroyDescriptorUpdateTemplateKHR");
+    if (!(out->vkDestroyDescriptorUpdateTemplateKHR))
+    {
+        fprintf(stderr, "warning: vkDestroyDescriptorUpdateTemplateKHR not found, falling back to loader's version\n");
+        out->vkDestroyDescriptorUpdateTemplateKHR = backup->vkDestroyDescriptorUpdateTemplateKHR;
+    }
+    out->vkUpdateDescriptorSetWithTemplateKHR = (PFN_vkUpdateDescriptorSetWithTemplateKHR)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSetWithTemplateKHR");
+    if (!(out->vkUpdateDescriptorSetWithTemplateKHR))
+    {
+        fprintf(stderr, "warning: vkUpdateDescriptorSetWithTemplateKHR not found, falling back to loader's version\n");
+        out->vkUpdateDescriptorSetWithTemplateKHR = backup->vkUpdateDescriptorSetWithTemplateKHR;
+    }
+#endif
+#ifdef VK_KHR_create_renderpass2
+    out->vkCreateRenderPass2KHR = (PFN_vkCreateRenderPass2KHR)vk->vkGetDeviceProcAddr(device, "vkCreateRenderPass2KHR");
+    if (!(out->vkCreateRenderPass2KHR))
+    {
+        fprintf(stderr, "warning: vkCreateRenderPass2KHR not found, falling back to loader's version\n");
+        out->vkCreateRenderPass2KHR = backup->vkCreateRenderPass2KHR;
+    }
+    out->vkCmdBeginRenderPass2KHR = (PFN_vkCmdBeginRenderPass2KHR)vk->vkGetDeviceProcAddr(device, "vkCmdBeginRenderPass2KHR");
+    if (!(out->vkCmdBeginRenderPass2KHR))
+    {
+        fprintf(stderr, "warning: vkCmdBeginRenderPass2KHR not found, falling back to loader's version\n");
+        out->vkCmdBeginRenderPass2KHR = backup->vkCmdBeginRenderPass2KHR;
+    }
+    out->vkCmdNextSubpass2KHR = (PFN_vkCmdNextSubpass2KHR)vk->vkGetDeviceProcAddr(device, "vkCmdNextSubpass2KHR");
+    if (!(out->vkCmdNextSubpass2KHR))
+    {
+        fprintf(stderr, "warning: vkCmdNextSubpass2KHR not found, falling back to loader's version\n");
+        out->vkCmdNextSubpass2KHR = backup->vkCmdNextSubpass2KHR;
+    }
+    out->vkCmdEndRenderPass2KHR = (PFN_vkCmdEndRenderPass2KHR)vk->vkGetDeviceProcAddr(device, "vkCmdEndRenderPass2KHR");
+    if (!(out->vkCmdEndRenderPass2KHR))
+    {
+        fprintf(stderr, "warning: vkCmdEndRenderPass2KHR not found, falling back to loader's version\n");
+        out->vkCmdEndRenderPass2KHR = backup->vkCmdEndRenderPass2KHR;
+    }
+#endif
+#ifdef VK_KHR_shared_presentable_image
+    out->vkGetSwapchainStatusKHR = (PFN_vkGetSwapchainStatusKHR)vk->vkGetDeviceProcAddr(device, "vkGetSwapchainStatusKHR");
+    if (!(out->vkGetSwapchainStatusKHR))
+    {
+        fprintf(stderr, "warning: vkGetSwapchainStatusKHR not found, falling back to loader's version\n");
+        out->vkGetSwapchainStatusKHR = backup->vkGetSwapchainStatusKHR;
+    }
+#endif
+#ifdef VK_KHR_external_fence_capabilities
+    out->vkGetPhysicalDeviceExternalFencePropertiesKHR = (PFN_vkGetPhysicalDeviceExternalFencePropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceExternalFencePropertiesKHR");
+    if (!(out->vkGetPhysicalDeviceExternalFencePropertiesKHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceExternalFencePropertiesKHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceExternalFencePropertiesKHR = backup->vkGetPhysicalDeviceExternalFencePropertiesKHR;
+    }
+#endif
+#ifdef VK_KHR_external_fence_win32
+    out->vkImportFenceWin32HandleKHR = (PFN_vkImportFenceWin32HandleKHR)vk->vkGetDeviceProcAddr(device, "vkImportFenceWin32HandleKHR");
+    if (!(out->vkImportFenceWin32HandleKHR))
+    {
+        fprintf(stderr, "warning: vkImportFenceWin32HandleKHR not found, falling back to loader's version\n");
+        out->vkImportFenceWin32HandleKHR = backup->vkImportFenceWin32HandleKHR;
+    }
+    out->vkGetFenceWin32HandleKHR = (PFN_vkGetFenceWin32HandleKHR)vk->vkGetDeviceProcAddr(device, "vkGetFenceWin32HandleKHR");
+    if (!(out->vkGetFenceWin32HandleKHR))
+    {
+        fprintf(stderr, "warning: vkGetFenceWin32HandleKHR not found, falling back to loader's version\n");
+        out->vkGetFenceWin32HandleKHR = backup->vkGetFenceWin32HandleKHR;
+    }
+#endif
+#ifdef VK_KHR_external_fence_fd
+    out->vkImportFenceFdKHR = (PFN_vkImportFenceFdKHR)vk->vkGetDeviceProcAddr(device, "vkImportFenceFdKHR");
+    if (!(out->vkImportFenceFdKHR))
+    {
+        fprintf(stderr, "warning: vkImportFenceFdKHR not found, falling back to loader's version\n");
+        out->vkImportFenceFdKHR = backup->vkImportFenceFdKHR;
+    }
+    out->vkGetFenceFdKHR = (PFN_vkGetFenceFdKHR)vk->vkGetDeviceProcAddr(device, "vkGetFenceFdKHR");
+    if (!(out->vkGetFenceFdKHR))
+    {
+        fprintf(stderr, "warning: vkGetFenceFdKHR not found, falling back to loader's version\n");
+        out->vkGetFenceFdKHR = backup->vkGetFenceFdKHR;
+    }
+#endif
+#ifdef VK_KHR_get_surface_capabilities2
+    out->vkGetPhysicalDeviceSurfaceCapabilities2KHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilities2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfaceCapabilities2KHR");
+    if (!(out->vkGetPhysicalDeviceSurfaceCapabilities2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceSurfaceCapabilities2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceSurfaceCapabilities2KHR = backup->vkGetPhysicalDeviceSurfaceCapabilities2KHR;
+    }
+    out->vkGetPhysicalDeviceSurfaceFormats2KHR = (PFN_vkGetPhysicalDeviceSurfaceFormats2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfaceFormats2KHR");
+    if (!(out->vkGetPhysicalDeviceSurfaceFormats2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceSurfaceFormats2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceSurfaceFormats2KHR = backup->vkGetPhysicalDeviceSurfaceFormats2KHR;
+    }
+#endif
+#ifdef VK_KHR_get_display_properties2
+    out->vkGetPhysicalDeviceDisplayProperties2KHR = (PFN_vkGetPhysicalDeviceDisplayProperties2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceDisplayProperties2KHR");
+    if (!(out->vkGetPhysicalDeviceDisplayProperties2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceDisplayProperties2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceDisplayProperties2KHR = backup->vkGetPhysicalDeviceDisplayProperties2KHR;
+    }
+    out->vkGetPhysicalDeviceDisplayPlaneProperties2KHR = (PFN_vkGetPhysicalDeviceDisplayPlaneProperties2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceDisplayPlaneProperties2KHR");
+    if (!(out->vkGetPhysicalDeviceDisplayPlaneProperties2KHR))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceDisplayPlaneProperties2KHR not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceDisplayPlaneProperties2KHR = backup->vkGetPhysicalDeviceDisplayPlaneProperties2KHR;
+    }
+    out->vkGetDisplayModeProperties2KHR = (PFN_vkGetDisplayModeProperties2KHR)vk->vkGetDeviceProcAddr(device, "vkGetDisplayModeProperties2KHR");
+    if (!(out->vkGetDisplayModeProperties2KHR))
+    {
+        fprintf(stderr, "warning: vkGetDisplayModeProperties2KHR not found, falling back to loader's version\n");
+        out->vkGetDisplayModeProperties2KHR = backup->vkGetDisplayModeProperties2KHR;
+    }
+    out->vkGetDisplayPlaneCapabilities2KHR = (PFN_vkGetDisplayPlaneCapabilities2KHR)vk->vkGetDeviceProcAddr(device, "vkGetDisplayPlaneCapabilities2KHR");
+    if (!(out->vkGetDisplayPlaneCapabilities2KHR))
+    {
+        fprintf(stderr, "warning: vkGetDisplayPlaneCapabilities2KHR not found, falling back to loader's version\n");
+        out->vkGetDisplayPlaneCapabilities2KHR = backup->vkGetDisplayPlaneCapabilities2KHR;
+    }
+#endif
+#ifdef VK_KHR_get_memory_requirements2
+    out->vkGetImageMemoryRequirements2KHR = (PFN_vkGetImageMemoryRequirements2KHR)vk->vkGetDeviceProcAddr(device, "vkGetImageMemoryRequirements2KHR");
+    if (!(out->vkGetImageMemoryRequirements2KHR))
+    {
+        fprintf(stderr, "warning: vkGetImageMemoryRequirements2KHR not found, falling back to loader's version\n");
+        out->vkGetImageMemoryRequirements2KHR = backup->vkGetImageMemoryRequirements2KHR;
+    }
+    out->vkGetBufferMemoryRequirements2KHR = (PFN_vkGetBufferMemoryRequirements2KHR)vk->vkGetDeviceProcAddr(device, "vkGetBufferMemoryRequirements2KHR");
+    if (!(out->vkGetBufferMemoryRequirements2KHR))
+    {
+        fprintf(stderr, "warning: vkGetBufferMemoryRequirements2KHR not found, falling back to loader's version\n");
+        out->vkGetBufferMemoryRequirements2KHR = backup->vkGetBufferMemoryRequirements2KHR;
+    }
+    out->vkGetImageSparseMemoryRequirements2KHR = (PFN_vkGetImageSparseMemoryRequirements2KHR)vk->vkGetDeviceProcAddr(device, "vkGetImageSparseMemoryRequirements2KHR");
+    if (!(out->vkGetImageSparseMemoryRequirements2KHR))
+    {
+        fprintf(stderr, "warning: vkGetImageSparseMemoryRequirements2KHR not found, falling back to loader's version\n");
+        out->vkGetImageSparseMemoryRequirements2KHR = backup->vkGetImageSparseMemoryRequirements2KHR;
+    }
+#endif
+#ifdef VK_KHR_sampler_ycbcr_conversion
+    out->vkCreateSamplerYcbcrConversionKHR = (PFN_vkCreateSamplerYcbcrConversionKHR)vk->vkGetDeviceProcAddr(device, "vkCreateSamplerYcbcrConversionKHR");
+    if (!(out->vkCreateSamplerYcbcrConversionKHR))
+    {
+        fprintf(stderr, "warning: vkCreateSamplerYcbcrConversionKHR not found, falling back to loader's version\n");
+        out->vkCreateSamplerYcbcrConversionKHR = backup->vkCreateSamplerYcbcrConversionKHR;
+    }
+    out->vkDestroySamplerYcbcrConversionKHR = (PFN_vkDestroySamplerYcbcrConversionKHR)vk->vkGetDeviceProcAddr(device, "vkDestroySamplerYcbcrConversionKHR");
+    if (!(out->vkDestroySamplerYcbcrConversionKHR))
+    {
+        fprintf(stderr, "warning: vkDestroySamplerYcbcrConversionKHR not found, falling back to loader's version\n");
+        out->vkDestroySamplerYcbcrConversionKHR = backup->vkDestroySamplerYcbcrConversionKHR;
+    }
+#endif
+#ifdef VK_KHR_bind_memory2
+    out->vkBindBufferMemory2KHR = (PFN_vkBindBufferMemory2KHR)vk->vkGetDeviceProcAddr(device, "vkBindBufferMemory2KHR");
+    if (!(out->vkBindBufferMemory2KHR))
+    {
+        fprintf(stderr, "warning: vkBindBufferMemory2KHR not found, falling back to loader's version\n");
+        out->vkBindBufferMemory2KHR = backup->vkBindBufferMemory2KHR;
+    }
+    out->vkBindImageMemory2KHR = (PFN_vkBindImageMemory2KHR)vk->vkGetDeviceProcAddr(device, "vkBindImageMemory2KHR");
+    if (!(out->vkBindImageMemory2KHR))
+    {
+        fprintf(stderr, "warning: vkBindImageMemory2KHR not found, falling back to loader's version\n");
+        out->vkBindImageMemory2KHR = backup->vkBindImageMemory2KHR;
+    }
+#endif
+#ifdef VK_KHR_maintenance3
+    out->vkGetDescriptorSetLayoutSupportKHR = (PFN_vkGetDescriptorSetLayoutSupportKHR)vk->vkGetDeviceProcAddr(device, "vkGetDescriptorSetLayoutSupportKHR");
+    if (!(out->vkGetDescriptorSetLayoutSupportKHR))
+    {
+        fprintf(stderr, "warning: vkGetDescriptorSetLayoutSupportKHR not found, falling back to loader's version\n");
+        out->vkGetDescriptorSetLayoutSupportKHR = backup->vkGetDescriptorSetLayoutSupportKHR;
+    }
+#endif
+#ifdef VK_KHR_draw_indirect_count
+    out->vkCmdDrawIndirectCountKHR = (PFN_vkCmdDrawIndirectCountKHR)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndirectCountKHR");
+    if (!(out->vkCmdDrawIndirectCountKHR))
+    {
+        fprintf(stderr, "warning: vkCmdDrawIndirectCountKHR not found, falling back to loader's version\n");
+        out->vkCmdDrawIndirectCountKHR = backup->vkCmdDrawIndirectCountKHR;
+    }
+    out->vkCmdDrawIndexedIndirectCountKHR = (PFN_vkCmdDrawIndexedIndirectCountKHR)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndexedIndirectCountKHR");
+    if (!(out->vkCmdDrawIndexedIndirectCountKHR))
+    {
+        fprintf(stderr, "warning: vkCmdDrawIndexedIndirectCountKHR not found, falling back to loader's version\n");
+        out->vkCmdDrawIndexedIndirectCountKHR = backup->vkCmdDrawIndexedIndirectCountKHR;
+    }
+#endif
+#ifdef VK_ANDROID_native_buffer
+    out->vkGetSwapchainGrallocUsageANDROID = (PFN_vkGetSwapchainGrallocUsageANDROID)vk->vkGetDeviceProcAddr(device, "vkGetSwapchainGrallocUsageANDROID");
+    if (!(out->vkGetSwapchainGrallocUsageANDROID))
+    {
+        fprintf(stderr, "warning: vkGetSwapchainGrallocUsageANDROID not found, falling back to loader's version\n");
+        out->vkGetSwapchainGrallocUsageANDROID = backup->vkGetSwapchainGrallocUsageANDROID;
+    }
+    out->vkAcquireImageANDROID = (PFN_vkAcquireImageANDROID)vk->vkGetDeviceProcAddr(device, "vkAcquireImageANDROID");
+    if (!(out->vkAcquireImageANDROID))
+    {
+        fprintf(stderr, "warning: vkAcquireImageANDROID not found, falling back to loader's version\n");
+        out->vkAcquireImageANDROID = backup->vkAcquireImageANDROID;
+    }
+    out->vkQueueSignalReleaseImageANDROID = (PFN_vkQueueSignalReleaseImageANDROID)vk->vkGetDeviceProcAddr(device, "vkQueueSignalReleaseImageANDROID");
+    if (!(out->vkQueueSignalReleaseImageANDROID))
+    {
+        fprintf(stderr, "warning: vkQueueSignalReleaseImageANDROID not found, falling back to loader's version\n");
+        out->vkQueueSignalReleaseImageANDROID = backup->vkQueueSignalReleaseImageANDROID;
+    }
+#endif
+#ifdef VK_EXT_debug_marker
+    out->vkDebugMarkerSetObjectTagEXT = (PFN_vkDebugMarkerSetObjectTagEXT)vk->vkGetDeviceProcAddr(device, "vkDebugMarkerSetObjectTagEXT");
+    if (!(out->vkDebugMarkerSetObjectTagEXT))
+    {
+        fprintf(stderr, "warning: vkDebugMarkerSetObjectTagEXT not found, falling back to loader's version\n");
+        out->vkDebugMarkerSetObjectTagEXT = backup->vkDebugMarkerSetObjectTagEXT;
+    }
+    out->vkDebugMarkerSetObjectNameEXT = (PFN_vkDebugMarkerSetObjectNameEXT)vk->vkGetDeviceProcAddr(device, "vkDebugMarkerSetObjectNameEXT");
+    if (!(out->vkDebugMarkerSetObjectNameEXT))
+    {
+        fprintf(stderr, "warning: vkDebugMarkerSetObjectNameEXT not found, falling back to loader's version\n");
+        out->vkDebugMarkerSetObjectNameEXT = backup->vkDebugMarkerSetObjectNameEXT;
+    }
+    out->vkCmdDebugMarkerBeginEXT = (PFN_vkCmdDebugMarkerBeginEXT)vk->vkGetDeviceProcAddr(device, "vkCmdDebugMarkerBeginEXT");
+    if (!(out->vkCmdDebugMarkerBeginEXT))
+    {
+        fprintf(stderr, "warning: vkCmdDebugMarkerBeginEXT not found, falling back to loader's version\n");
+        out->vkCmdDebugMarkerBeginEXT = backup->vkCmdDebugMarkerBeginEXT;
+    }
+    out->vkCmdDebugMarkerEndEXT = (PFN_vkCmdDebugMarkerEndEXT)vk->vkGetDeviceProcAddr(device, "vkCmdDebugMarkerEndEXT");
+    if (!(out->vkCmdDebugMarkerEndEXT))
+    {
+        fprintf(stderr, "warning: vkCmdDebugMarkerEndEXT not found, falling back to loader's version\n");
+        out->vkCmdDebugMarkerEndEXT = backup->vkCmdDebugMarkerEndEXT;
+    }
+    out->vkCmdDebugMarkerInsertEXT = (PFN_vkCmdDebugMarkerInsertEXT)vk->vkGetDeviceProcAddr(device, "vkCmdDebugMarkerInsertEXT");
+    if (!(out->vkCmdDebugMarkerInsertEXT))
+    {
+        fprintf(stderr, "warning: vkCmdDebugMarkerInsertEXT not found, falling back to loader's version\n");
+        out->vkCmdDebugMarkerInsertEXT = backup->vkCmdDebugMarkerInsertEXT;
+    }
+#endif
+#ifdef VK_AMD_draw_indirect_count
+    out->vkCmdDrawIndirectCountAMD = (PFN_vkCmdDrawIndirectCountAMD)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndirectCountAMD");
+    if (!(out->vkCmdDrawIndirectCountAMD))
+    {
+        fprintf(stderr, "warning: vkCmdDrawIndirectCountAMD not found, falling back to loader's version\n");
+        out->vkCmdDrawIndirectCountAMD = backup->vkCmdDrawIndirectCountAMD;
+    }
+    out->vkCmdDrawIndexedIndirectCountAMD = (PFN_vkCmdDrawIndexedIndirectCountAMD)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndexedIndirectCountAMD");
+    if (!(out->vkCmdDrawIndexedIndirectCountAMD))
+    {
+        fprintf(stderr, "warning: vkCmdDrawIndexedIndirectCountAMD not found, falling back to loader's version\n");
+        out->vkCmdDrawIndexedIndirectCountAMD = backup->vkCmdDrawIndexedIndirectCountAMD;
+    }
+#endif
+#ifdef VK_AMD_shader_info
+    out->vkGetShaderInfoAMD = (PFN_vkGetShaderInfoAMD)vk->vkGetDeviceProcAddr(device, "vkGetShaderInfoAMD");
+    if (!(out->vkGetShaderInfoAMD))
+    {
+        fprintf(stderr, "warning: vkGetShaderInfoAMD not found, falling back to loader's version\n");
+        out->vkGetShaderInfoAMD = backup->vkGetShaderInfoAMD;
+    }
+#endif
+#ifdef VK_NV_external_memory_capabilities
+    out->vkGetPhysicalDeviceExternalImageFormatPropertiesNV = (PFN_vkGetPhysicalDeviceExternalImageFormatPropertiesNV)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceExternalImageFormatPropertiesNV");
+    if (!(out->vkGetPhysicalDeviceExternalImageFormatPropertiesNV))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceExternalImageFormatPropertiesNV not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceExternalImageFormatPropertiesNV = backup->vkGetPhysicalDeviceExternalImageFormatPropertiesNV;
+    }
+#endif
+#ifdef VK_NV_external_memory_win32
+    out->vkGetMemoryWin32HandleNV = (PFN_vkGetMemoryWin32HandleNV)vk->vkGetDeviceProcAddr(device, "vkGetMemoryWin32HandleNV");
+    if (!(out->vkGetMemoryWin32HandleNV))
+    {
+        fprintf(stderr, "warning: vkGetMemoryWin32HandleNV not found, falling back to loader's version\n");
+        out->vkGetMemoryWin32HandleNV = backup->vkGetMemoryWin32HandleNV;
+    }
+#endif
+#ifdef VK_EXT_conditional_rendering
+    out->vkCmdBeginConditionalRenderingEXT = (PFN_vkCmdBeginConditionalRenderingEXT)vk->vkGetDeviceProcAddr(device, "vkCmdBeginConditionalRenderingEXT");
+    if (!(out->vkCmdBeginConditionalRenderingEXT))
+    {
+        fprintf(stderr, "warning: vkCmdBeginConditionalRenderingEXT not found, falling back to loader's version\n");
+        out->vkCmdBeginConditionalRenderingEXT = backup->vkCmdBeginConditionalRenderingEXT;
+    }
+    out->vkCmdEndConditionalRenderingEXT = (PFN_vkCmdEndConditionalRenderingEXT)vk->vkGetDeviceProcAddr(device, "vkCmdEndConditionalRenderingEXT");
+    if (!(out->vkCmdEndConditionalRenderingEXT))
+    {
+        fprintf(stderr, "warning: vkCmdEndConditionalRenderingEXT not found, falling back to loader's version\n");
+        out->vkCmdEndConditionalRenderingEXT = backup->vkCmdEndConditionalRenderingEXT;
+    }
+#endif
+#ifdef VK_NVX_device_generated_commands
+    out->vkCmdProcessCommandsNVX = (PFN_vkCmdProcessCommandsNVX)vk->vkGetDeviceProcAddr(device, "vkCmdProcessCommandsNVX");
+    if (!(out->vkCmdProcessCommandsNVX))
+    {
+        fprintf(stderr, "warning: vkCmdProcessCommandsNVX not found, falling back to loader's version\n");
+        out->vkCmdProcessCommandsNVX = backup->vkCmdProcessCommandsNVX;
+    }
+    out->vkCmdReserveSpaceForCommandsNVX = (PFN_vkCmdReserveSpaceForCommandsNVX)vk->vkGetDeviceProcAddr(device, "vkCmdReserveSpaceForCommandsNVX");
+    if (!(out->vkCmdReserveSpaceForCommandsNVX))
+    {
+        fprintf(stderr, "warning: vkCmdReserveSpaceForCommandsNVX not found, falling back to loader's version\n");
+        out->vkCmdReserveSpaceForCommandsNVX = backup->vkCmdReserveSpaceForCommandsNVX;
+    }
+    out->vkCreateIndirectCommandsLayoutNVX = (PFN_vkCreateIndirectCommandsLayoutNVX)vk->vkGetDeviceProcAddr(device, "vkCreateIndirectCommandsLayoutNVX");
+    if (!(out->vkCreateIndirectCommandsLayoutNVX))
+    {
+        fprintf(stderr, "warning: vkCreateIndirectCommandsLayoutNVX not found, falling back to loader's version\n");
+        out->vkCreateIndirectCommandsLayoutNVX = backup->vkCreateIndirectCommandsLayoutNVX;
+    }
+    out->vkDestroyIndirectCommandsLayoutNVX = (PFN_vkDestroyIndirectCommandsLayoutNVX)vk->vkGetDeviceProcAddr(device, "vkDestroyIndirectCommandsLayoutNVX");
+    if (!(out->vkDestroyIndirectCommandsLayoutNVX))
+    {
+        fprintf(stderr, "warning: vkDestroyIndirectCommandsLayoutNVX not found, falling back to loader's version\n");
+        out->vkDestroyIndirectCommandsLayoutNVX = backup->vkDestroyIndirectCommandsLayoutNVX;
+    }
+    out->vkCreateObjectTableNVX = (PFN_vkCreateObjectTableNVX)vk->vkGetDeviceProcAddr(device, "vkCreateObjectTableNVX");
+    if (!(out->vkCreateObjectTableNVX))
+    {
+        fprintf(stderr, "warning: vkCreateObjectTableNVX not found, falling back to loader's version\n");
+        out->vkCreateObjectTableNVX = backup->vkCreateObjectTableNVX;
+    }
+    out->vkDestroyObjectTableNVX = (PFN_vkDestroyObjectTableNVX)vk->vkGetDeviceProcAddr(device, "vkDestroyObjectTableNVX");
+    if (!(out->vkDestroyObjectTableNVX))
+    {
+        fprintf(stderr, "warning: vkDestroyObjectTableNVX not found, falling back to loader's version\n");
+        out->vkDestroyObjectTableNVX = backup->vkDestroyObjectTableNVX;
+    }
+    out->vkRegisterObjectsNVX = (PFN_vkRegisterObjectsNVX)vk->vkGetDeviceProcAddr(device, "vkRegisterObjectsNVX");
+    if (!(out->vkRegisterObjectsNVX))
+    {
+        fprintf(stderr, "warning: vkRegisterObjectsNVX not found, falling back to loader's version\n");
+        out->vkRegisterObjectsNVX = backup->vkRegisterObjectsNVX;
+    }
+    out->vkUnregisterObjectsNVX = (PFN_vkUnregisterObjectsNVX)vk->vkGetDeviceProcAddr(device, "vkUnregisterObjectsNVX");
+    if (!(out->vkUnregisterObjectsNVX))
+    {
+        fprintf(stderr, "warning: vkUnregisterObjectsNVX not found, falling back to loader's version\n");
+        out->vkUnregisterObjectsNVX = backup->vkUnregisterObjectsNVX;
+    }
+    out->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX = (PFN_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX");
+    if (!(out->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX = backup->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX;
+    }
+#endif
+#ifdef VK_NV_clip_space_w_scaling
+    out->vkCmdSetViewportWScalingNV = (PFN_vkCmdSetViewportWScalingNV)vk->vkGetDeviceProcAddr(device, "vkCmdSetViewportWScalingNV");
+    if (!(out->vkCmdSetViewportWScalingNV))
+    {
+        fprintf(stderr, "warning: vkCmdSetViewportWScalingNV not found, falling back to loader's version\n");
+        out->vkCmdSetViewportWScalingNV = backup->vkCmdSetViewportWScalingNV;
+    }
+#endif
+#ifdef VK_EXT_direct_mode_display
+    out->vkReleaseDisplayEXT = (PFN_vkReleaseDisplayEXT)vk->vkGetDeviceProcAddr(device, "vkReleaseDisplayEXT");
+    if (!(out->vkReleaseDisplayEXT))
+    {
+        fprintf(stderr, "warning: vkReleaseDisplayEXT not found, falling back to loader's version\n");
+        out->vkReleaseDisplayEXT = backup->vkReleaseDisplayEXT;
+    }
+#endif
+#ifdef VK_EXT_acquire_xlib_display
+    out->vkAcquireXlibDisplayEXT = (PFN_vkAcquireXlibDisplayEXT)vk->vkGetDeviceProcAddr(device, "vkAcquireXlibDisplayEXT");
+    if (!(out->vkAcquireXlibDisplayEXT))
+    {
+        fprintf(stderr, "warning: vkAcquireXlibDisplayEXT not found, falling back to loader's version\n");
+        out->vkAcquireXlibDisplayEXT = backup->vkAcquireXlibDisplayEXT;
+    }
+    out->vkGetRandROutputDisplayEXT = (PFN_vkGetRandROutputDisplayEXT)vk->vkGetDeviceProcAddr(device, "vkGetRandROutputDisplayEXT");
+    if (!(out->vkGetRandROutputDisplayEXT))
+    {
+        fprintf(stderr, "warning: vkGetRandROutputDisplayEXT not found, falling back to loader's version\n");
+        out->vkGetRandROutputDisplayEXT = backup->vkGetRandROutputDisplayEXT;
+    }
+#endif
+#ifdef VK_EXT_display_surface_counter
+    out->vkGetPhysicalDeviceSurfaceCapabilities2EXT = (PFN_vkGetPhysicalDeviceSurfaceCapabilities2EXT)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfaceCapabilities2EXT");
+    if (!(out->vkGetPhysicalDeviceSurfaceCapabilities2EXT))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceSurfaceCapabilities2EXT not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceSurfaceCapabilities2EXT = backup->vkGetPhysicalDeviceSurfaceCapabilities2EXT;
+    }
+#endif
+#ifdef VK_EXT_display_control
+    out->vkDisplayPowerControlEXT = (PFN_vkDisplayPowerControlEXT)vk->vkGetDeviceProcAddr(device, "vkDisplayPowerControlEXT");
+    if (!(out->vkDisplayPowerControlEXT))
+    {
+        fprintf(stderr, "warning: vkDisplayPowerControlEXT not found, falling back to loader's version\n");
+        out->vkDisplayPowerControlEXT = backup->vkDisplayPowerControlEXT;
+    }
+    out->vkRegisterDeviceEventEXT = (PFN_vkRegisterDeviceEventEXT)vk->vkGetDeviceProcAddr(device, "vkRegisterDeviceEventEXT");
+    if (!(out->vkRegisterDeviceEventEXT))
+    {
+        fprintf(stderr, "warning: vkRegisterDeviceEventEXT not found, falling back to loader's version\n");
+        out->vkRegisterDeviceEventEXT = backup->vkRegisterDeviceEventEXT;
+    }
+    out->vkRegisterDisplayEventEXT = (PFN_vkRegisterDisplayEventEXT)vk->vkGetDeviceProcAddr(device, "vkRegisterDisplayEventEXT");
+    if (!(out->vkRegisterDisplayEventEXT))
+    {
+        fprintf(stderr, "warning: vkRegisterDisplayEventEXT not found, falling back to loader's version\n");
+        out->vkRegisterDisplayEventEXT = backup->vkRegisterDisplayEventEXT;
+    }
+    out->vkGetSwapchainCounterEXT = (PFN_vkGetSwapchainCounterEXT)vk->vkGetDeviceProcAddr(device, "vkGetSwapchainCounterEXT");
+    if (!(out->vkGetSwapchainCounterEXT))
+    {
+        fprintf(stderr, "warning: vkGetSwapchainCounterEXT not found, falling back to loader's version\n");
+        out->vkGetSwapchainCounterEXT = backup->vkGetSwapchainCounterEXT;
+    }
+#endif
+#ifdef VK_GOOGLE_display_timing
+    out->vkGetRefreshCycleDurationGOOGLE = (PFN_vkGetRefreshCycleDurationGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetRefreshCycleDurationGOOGLE");
+    if (!(out->vkGetRefreshCycleDurationGOOGLE))
+    {
+        fprintf(stderr, "warning: vkGetRefreshCycleDurationGOOGLE not found, falling back to loader's version\n");
+        out->vkGetRefreshCycleDurationGOOGLE = backup->vkGetRefreshCycleDurationGOOGLE;
+    }
+    out->vkGetPastPresentationTimingGOOGLE = (PFN_vkGetPastPresentationTimingGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetPastPresentationTimingGOOGLE");
+    if (!(out->vkGetPastPresentationTimingGOOGLE))
+    {
+        fprintf(stderr, "warning: vkGetPastPresentationTimingGOOGLE not found, falling back to loader's version\n");
+        out->vkGetPastPresentationTimingGOOGLE = backup->vkGetPastPresentationTimingGOOGLE;
+    }
+#endif
+#ifdef VK_EXT_discard_rectangles
+    out->vkCmdSetDiscardRectangleEXT = (PFN_vkCmdSetDiscardRectangleEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetDiscardRectangleEXT");
+    if (!(out->vkCmdSetDiscardRectangleEXT))
+    {
+        fprintf(stderr, "warning: vkCmdSetDiscardRectangleEXT not found, falling back to loader's version\n");
+        out->vkCmdSetDiscardRectangleEXT = backup->vkCmdSetDiscardRectangleEXT;
+    }
+#endif
+#ifdef VK_EXT_hdr_metadata
+    out->vkSetHdrMetadataEXT = (PFN_vkSetHdrMetadataEXT)vk->vkGetDeviceProcAddr(device, "vkSetHdrMetadataEXT");
+    if (!(out->vkSetHdrMetadataEXT))
+    {
+        fprintf(stderr, "warning: vkSetHdrMetadataEXT not found, falling back to loader's version\n");
+        out->vkSetHdrMetadataEXT = backup->vkSetHdrMetadataEXT;
+    }
+#endif
+#ifdef VK_EXT_debug_utils
+    out->vkSetDebugUtilsObjectNameEXT = (PFN_vkSetDebugUtilsObjectNameEXT)vk->vkGetDeviceProcAddr(device, "vkSetDebugUtilsObjectNameEXT");
+    if (!(out->vkSetDebugUtilsObjectNameEXT))
+    {
+        fprintf(stderr, "warning: vkSetDebugUtilsObjectNameEXT not found, falling back to loader's version\n");
+        out->vkSetDebugUtilsObjectNameEXT = backup->vkSetDebugUtilsObjectNameEXT;
+    }
+    out->vkSetDebugUtilsObjectTagEXT = (PFN_vkSetDebugUtilsObjectTagEXT)vk->vkGetDeviceProcAddr(device, "vkSetDebugUtilsObjectTagEXT");
+    if (!(out->vkSetDebugUtilsObjectTagEXT))
+    {
+        fprintf(stderr, "warning: vkSetDebugUtilsObjectTagEXT not found, falling back to loader's version\n");
+        out->vkSetDebugUtilsObjectTagEXT = backup->vkSetDebugUtilsObjectTagEXT;
+    }
+    out->vkQueueBeginDebugUtilsLabelEXT = (PFN_vkQueueBeginDebugUtilsLabelEXT)vk->vkGetDeviceProcAddr(device, "vkQueueBeginDebugUtilsLabelEXT");
+    if (!(out->vkQueueBeginDebugUtilsLabelEXT))
+    {
+        fprintf(stderr, "warning: vkQueueBeginDebugUtilsLabelEXT not found, falling back to loader's version\n");
+        out->vkQueueBeginDebugUtilsLabelEXT = backup->vkQueueBeginDebugUtilsLabelEXT;
+    }
+    out->vkQueueEndDebugUtilsLabelEXT = (PFN_vkQueueEndDebugUtilsLabelEXT)vk->vkGetDeviceProcAddr(device, "vkQueueEndDebugUtilsLabelEXT");
+    if (!(out->vkQueueEndDebugUtilsLabelEXT))
+    {
+        fprintf(stderr, "warning: vkQueueEndDebugUtilsLabelEXT not found, falling back to loader's version\n");
+        out->vkQueueEndDebugUtilsLabelEXT = backup->vkQueueEndDebugUtilsLabelEXT;
+    }
+    out->vkQueueInsertDebugUtilsLabelEXT = (PFN_vkQueueInsertDebugUtilsLabelEXT)vk->vkGetDeviceProcAddr(device, "vkQueueInsertDebugUtilsLabelEXT");
+    if (!(out->vkQueueInsertDebugUtilsLabelEXT))
+    {
+        fprintf(stderr, "warning: vkQueueInsertDebugUtilsLabelEXT not found, falling back to loader's version\n");
+        out->vkQueueInsertDebugUtilsLabelEXT = backup->vkQueueInsertDebugUtilsLabelEXT;
+    }
+    out->vkCmdBeginDebugUtilsLabelEXT = (PFN_vkCmdBeginDebugUtilsLabelEXT)vk->vkGetDeviceProcAddr(device, "vkCmdBeginDebugUtilsLabelEXT");
+    if (!(out->vkCmdBeginDebugUtilsLabelEXT))
+    {
+        fprintf(stderr, "warning: vkCmdBeginDebugUtilsLabelEXT not found, falling back to loader's version\n");
+        out->vkCmdBeginDebugUtilsLabelEXT = backup->vkCmdBeginDebugUtilsLabelEXT;
+    }
+    out->vkCmdEndDebugUtilsLabelEXT = (PFN_vkCmdEndDebugUtilsLabelEXT)vk->vkGetDeviceProcAddr(device, "vkCmdEndDebugUtilsLabelEXT");
+    if (!(out->vkCmdEndDebugUtilsLabelEXT))
+    {
+        fprintf(stderr, "warning: vkCmdEndDebugUtilsLabelEXT not found, falling back to loader's version\n");
+        out->vkCmdEndDebugUtilsLabelEXT = backup->vkCmdEndDebugUtilsLabelEXT;
+    }
+    out->vkCmdInsertDebugUtilsLabelEXT = (PFN_vkCmdInsertDebugUtilsLabelEXT)vk->vkGetDeviceProcAddr(device, "vkCmdInsertDebugUtilsLabelEXT");
+    if (!(out->vkCmdInsertDebugUtilsLabelEXT))
+    {
+        fprintf(stderr, "warning: vkCmdInsertDebugUtilsLabelEXT not found, falling back to loader's version\n");
+        out->vkCmdInsertDebugUtilsLabelEXT = backup->vkCmdInsertDebugUtilsLabelEXT;
+    }
+#endif
+#ifdef VK_ANDROID_external_memory_android_hardware_buffer
+    out->vkGetAndroidHardwareBufferPropertiesANDROID = (PFN_vkGetAndroidHardwareBufferPropertiesANDROID)vk->vkGetDeviceProcAddr(device, "vkGetAndroidHardwareBufferPropertiesANDROID");
+    if (!(out->vkGetAndroidHardwareBufferPropertiesANDROID))
+    {
+        fprintf(stderr, "warning: vkGetAndroidHardwareBufferPropertiesANDROID not found, falling back to loader's version\n");
+        out->vkGetAndroidHardwareBufferPropertiesANDROID = backup->vkGetAndroidHardwareBufferPropertiesANDROID;
+    }
+    out->vkGetMemoryAndroidHardwareBufferANDROID = (PFN_vkGetMemoryAndroidHardwareBufferANDROID)vk->vkGetDeviceProcAddr(device, "vkGetMemoryAndroidHardwareBufferANDROID");
+    if (!(out->vkGetMemoryAndroidHardwareBufferANDROID))
+    {
+        fprintf(stderr, "warning: vkGetMemoryAndroidHardwareBufferANDROID not found, falling back to loader's version\n");
+        out->vkGetMemoryAndroidHardwareBufferANDROID = backup->vkGetMemoryAndroidHardwareBufferANDROID;
+    }
+#endif
+#ifdef VK_EXT_sample_locations
+    out->vkCmdSetSampleLocationsEXT = (PFN_vkCmdSetSampleLocationsEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetSampleLocationsEXT");
+    if (!(out->vkCmdSetSampleLocationsEXT))
+    {
+        fprintf(stderr, "warning: vkCmdSetSampleLocationsEXT not found, falling back to loader's version\n");
+        out->vkCmdSetSampleLocationsEXT = backup->vkCmdSetSampleLocationsEXT;
+    }
+    out->vkGetPhysicalDeviceMultisamplePropertiesEXT = (PFN_vkGetPhysicalDeviceMultisamplePropertiesEXT)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceMultisamplePropertiesEXT");
+    if (!(out->vkGetPhysicalDeviceMultisamplePropertiesEXT))
+    {
+        fprintf(stderr, "warning: vkGetPhysicalDeviceMultisamplePropertiesEXT not found, falling back to loader's version\n");
+        out->vkGetPhysicalDeviceMultisamplePropertiesEXT = backup->vkGetPhysicalDeviceMultisamplePropertiesEXT;
+    }
+#endif
+#ifdef VK_EXT_validation_cache
+    out->vkCreateValidationCacheEXT = (PFN_vkCreateValidationCacheEXT)vk->vkGetDeviceProcAddr(device, "vkCreateValidationCacheEXT");
+    if (!(out->vkCreateValidationCacheEXT))
+    {
+        fprintf(stderr, "warning: vkCreateValidationCacheEXT not found, falling back to loader's version\n");
+        out->vkCreateValidationCacheEXT = backup->vkCreateValidationCacheEXT;
+    }
+    out->vkDestroyValidationCacheEXT = (PFN_vkDestroyValidationCacheEXT)vk->vkGetDeviceProcAddr(device, "vkDestroyValidationCacheEXT");
+    if (!(out->vkDestroyValidationCacheEXT))
+    {
+        fprintf(stderr, "warning: vkDestroyValidationCacheEXT not found, falling back to loader's version\n");
+        out->vkDestroyValidationCacheEXT = backup->vkDestroyValidationCacheEXT;
+    }
+    out->vkMergeValidationCachesEXT = (PFN_vkMergeValidationCachesEXT)vk->vkGetDeviceProcAddr(device, "vkMergeValidationCachesEXT");
+    if (!(out->vkMergeValidationCachesEXT))
+    {
+        fprintf(stderr, "warning: vkMergeValidationCachesEXT not found, falling back to loader's version\n");
+        out->vkMergeValidationCachesEXT = backup->vkMergeValidationCachesEXT;
+    }
+    out->vkGetValidationCacheDataEXT = (PFN_vkGetValidationCacheDataEXT)vk->vkGetDeviceProcAddr(device, "vkGetValidationCacheDataEXT");
+    if (!(out->vkGetValidationCacheDataEXT))
+    {
+        fprintf(stderr, "warning: vkGetValidationCacheDataEXT not found, falling back to loader's version\n");
+        out->vkGetValidationCacheDataEXT = backup->vkGetValidationCacheDataEXT;
+    }
+#endif
+#ifdef VK_EXT_external_memory_host
+    out->vkGetMemoryHostPointerPropertiesEXT = (PFN_vkGetMemoryHostPointerPropertiesEXT)vk->vkGetDeviceProcAddr(device, "vkGetMemoryHostPointerPropertiesEXT");
+    if (!(out->vkGetMemoryHostPointerPropertiesEXT))
+    {
+        fprintf(stderr, "warning: vkGetMemoryHostPointerPropertiesEXT not found, falling back to loader's version\n");
+        out->vkGetMemoryHostPointerPropertiesEXT = backup->vkGetMemoryHostPointerPropertiesEXT;
+    }
+#endif
+#ifdef VK_AMD_buffer_marker
+    out->vkCmdWriteBufferMarkerAMD = (PFN_vkCmdWriteBufferMarkerAMD)vk->vkGetDeviceProcAddr(device, "vkCmdWriteBufferMarkerAMD");
+    if (!(out->vkCmdWriteBufferMarkerAMD))
+    {
+        fprintf(stderr, "warning: vkCmdWriteBufferMarkerAMD not found, falling back to loader's version\n");
+        out->vkCmdWriteBufferMarkerAMD = backup->vkCmdWriteBufferMarkerAMD;
+    }
+#endif
+#ifdef VK_NV_device_diagnostic_checkpoints
+    out->vkCmdSetCheckpointNV = (PFN_vkCmdSetCheckpointNV)vk->vkGetDeviceProcAddr(device, "vkCmdSetCheckpointNV");
+    if (!(out->vkCmdSetCheckpointNV))
+    {
+        fprintf(stderr, "warning: vkCmdSetCheckpointNV not found, falling back to loader's version\n");
+        out->vkCmdSetCheckpointNV = backup->vkCmdSetCheckpointNV;
+    }
+    out->vkGetQueueCheckpointDataNV = (PFN_vkGetQueueCheckpointDataNV)vk->vkGetDeviceProcAddr(device, "vkGetQueueCheckpointDataNV");
+    if (!(out->vkGetQueueCheckpointDataNV))
+    {
+        fprintf(stderr, "warning: vkGetQueueCheckpointDataNV not found, falling back to loader's version\n");
+        out->vkGetQueueCheckpointDataNV = backup->vkGetQueueCheckpointDataNV;
+    }
+#endif
+#ifdef VK_GOOGLE_address_space
+    out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetDeviceProcAddr(device, "vkMapMemoryIntoAddressSpaceGOOGLE");
+    if (!(out->vkMapMemoryIntoAddressSpaceGOOGLE))
+    {
+        fprintf(stderr, "warning: vkMapMemoryIntoAddressSpaceGOOGLE not found, falling back to loader's version\n");
+        out->vkMapMemoryIntoAddressSpaceGOOGLE = backup->vkMapMemoryIntoAddressSpaceGOOGLE;
+    }
+#endif
+#ifdef VK_GOOGLE_color_buffer
+    out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterImageColorBufferGOOGLE");
+    if (!(out->vkRegisterImageColorBufferGOOGLE))
+    {
+        fprintf(stderr, "warning: vkRegisterImageColorBufferGOOGLE not found, falling back to loader's version\n");
+        out->vkRegisterImageColorBufferGOOGLE = backup->vkRegisterImageColorBufferGOOGLE;
+    }
+    out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterBufferColorBufferGOOGLE");
+    if (!(out->vkRegisterBufferColorBufferGOOGLE))
+    {
+        fprintf(stderr, "warning: vkRegisterBufferColorBufferGOOGLE not found, falling back to loader's version\n");
+        out->vkRegisterBufferColorBufferGOOGLE = backup->vkRegisterBufferColorBufferGOOGLE;
+    }
+#endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+    out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
+    if (!(out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE))
+    {
+        fprintf(stderr, "warning: vkUpdateDescriptorSetWithTemplateSizedGOOGLE not found, falling back to loader's version\n");
+        out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = backup->vkUpdateDescriptorSetWithTemplateSizedGOOGLE;
+    }
+#endif
+#ifdef VK_GOOGLE_async_command_buffers
+    out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkBeginCommandBufferAsyncGOOGLE");
+    if (!(out->vkBeginCommandBufferAsyncGOOGLE))
+    {
+        fprintf(stderr, "warning: vkBeginCommandBufferAsyncGOOGLE not found, falling back to loader's version\n");
+        out->vkBeginCommandBufferAsyncGOOGLE = backup->vkBeginCommandBufferAsyncGOOGLE;
+    }
+    out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkEndCommandBufferAsyncGOOGLE");
+    if (!(out->vkEndCommandBufferAsyncGOOGLE))
+    {
+        fprintf(stderr, "warning: vkEndCommandBufferAsyncGOOGLE not found, falling back to loader's version\n");
+        out->vkEndCommandBufferAsyncGOOGLE = backup->vkEndCommandBufferAsyncGOOGLE;
+    }
+    out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkResetCommandBufferAsyncGOOGLE");
+    if (!(out->vkResetCommandBufferAsyncGOOGLE))
+    {
+        fprintf(stderr, "warning: vkResetCommandBufferAsyncGOOGLE not found, falling back to loader's version\n");
+        out->vkResetCommandBufferAsyncGOOGLE = backup->vkResetCommandBufferAsyncGOOGLE;
+    }
+    out->vkCommandBufferHostSyncGOOGLE = (PFN_vkCommandBufferHostSyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCommandBufferHostSyncGOOGLE");
+    if (!(out->vkCommandBufferHostSyncGOOGLE))
+    {
+        fprintf(stderr, "warning: vkCommandBufferHostSyncGOOGLE not found, falling back to loader's version\n");
+        out->vkCommandBufferHostSyncGOOGLE = backup->vkCommandBufferHostSyncGOOGLE;
+    }
+#endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+    out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCreateImageWithRequirementsGOOGLE");
+    if (!(out->vkCreateImageWithRequirementsGOOGLE))
+    {
+        fprintf(stderr, "warning: vkCreateImageWithRequirementsGOOGLE not found, falling back to loader's version\n");
+        out->vkCreateImageWithRequirementsGOOGLE = backup->vkCreateImageWithRequirementsGOOGLE;
+    }
+    out->vkCreateBufferWithRequirementsGOOGLE = (PFN_vkCreateBufferWithRequirementsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCreateBufferWithRequirementsGOOGLE");
+    if (!(out->vkCreateBufferWithRequirementsGOOGLE))
+    {
+        fprintf(stderr, "warning: vkCreateBufferWithRequirementsGOOGLE not found, falling back to loader's version\n");
+        out->vkCreateBufferWithRequirementsGOOGLE = backup->vkCreateBufferWithRequirementsGOOGLE;
+    }
+#endif
+#ifdef VK_GOOGLE_address_space_info
+    out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetMemoryHostAddressInfoGOOGLE");
+    if (!(out->vkGetMemoryHostAddressInfoGOOGLE))
+    {
+        fprintf(stderr, "warning: vkGetMemoryHostAddressInfoGOOGLE not found, falling back to loader's version\n");
+        out->vkGetMemoryHostAddressInfoGOOGLE = backup->vkGetMemoryHostAddressInfoGOOGLE;
+    }
+#endif
+#ifdef VK_GOOGLE_free_memory_sync
+    out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkFreeMemorySyncGOOGLE");
+    if (!(out->vkFreeMemorySyncGOOGLE))
+    {
+        fprintf(stderr, "warning: vkFreeMemorySyncGOOGLE not found, falling back to loader's version\n");
+        out->vkFreeMemorySyncGOOGLE = backup->vkFreeMemorySyncGOOGLE;
+    }
+#endif
+}
+
 bool vulkan_dispatch_check_instance_VK_VERSION_1_0(
     const VulkanDispatch* vk)
 

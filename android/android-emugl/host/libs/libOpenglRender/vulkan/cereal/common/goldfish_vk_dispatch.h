@@ -58,6 +58,13 @@ void init_vulkan_dispatch_from_device(
     VulkanDispatch* dispatch_out);
 
 
+void init_vulkan_dispatch_from_device_with_backup(
+    VulkanDispatch* dvk,
+    VulkanDispatch* gvk,
+    VkDevice device,
+    VulkanDispatch* dispatch_out);
+
+
 bool vulkan_dispatch_check_instance_VK_VERSION_1_0(
     const VulkanDispatch* vk);
 

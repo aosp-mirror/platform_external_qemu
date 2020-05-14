@@ -162,6 +162,14 @@ void init_vulkan_dispatch_from_device(
     VulkanDispatch* dispatch_out);
 """)
 
+        self.cgenHeader.line("""
+void init_vulkan_dispatch_from_device_with_backup(
+    VulkanDispatch* dvk,
+    VulkanDispatch* gvk,
+    VkDevice device,
+    VulkanDispatch* dispatch_out);
+""")
+
         # After populating a VulkanDispatch with the above methods,
         # it can be useful to check whether the Vulkan 1.0 or 1.1 methods
         # are all there.
@@ -294,6 +302,37 @@ void init_vulkan_dispatch_from_device(
             self.syncFeature(self.cgenImpl, feature)
             self.makeGetDeviceProcAddrCall(
                 self.cgenImpl, "vk", "device", vulkanApi.name, typeDecl)
+
+        self.syncFeature(self.cgenImpl, "")
+        self.cgenImpl.endBlock()
+
+        # Getting device dispatch tables with backup
+        self.cgenImpl.line("""
+void init_vulkan_dispatch_from_device_with_backup(
+    VulkanDispatch* vk,
+    VulkanDispatch* backup,
+    VkDevice device,
+    VulkanDispatch* out)""")
+
+        self.cgenImpl.beginBlock()
+
+        self.cgenImpl.stmt("memset(out, 0x0, sizeof(VulkanDispatch))")
+
+        apis = \
+            self.apisToGet["global"] + \
+            self.apisToGet["global-instance"] + \
+            self.apisToGet["instance"] + \
+            self.apisToGet["device"]
+
+        for vulkanApi, typeDecl, feature in apis:
+            self.syncFeature(self.cgenImpl, feature)
+            self.makeGetDeviceProcAddrCall(
+                self.cgenImpl, "vk", "device", vulkanApi.name, typeDecl)
+            self.cgenImpl.beginIf("!(out->%s)" % vulkanApi.name)
+            self.cgenImpl.stmt("fprintf(stderr, \"warning: %s not found, falling back to loader's version\\n\")" % vulkanApi.name)
+            self.cgenImpl.stmt("out->%s = backup->%s" % (vulkanApi.name, vulkanApi.name))
+            self.cgenImpl.endIf()
+
 
         self.syncFeature(self.cgenImpl, "")
         self.cgenImpl.endBlock()

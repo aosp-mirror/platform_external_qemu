@@ -739,8 +739,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     // device created; populate dispatch table
     sVkEmulation->dvk = new VulkanDispatch;
-    init_vulkan_dispatch_from_device(
-        ivk, sVkEmulation->device, sVkEmulation->dvk);
+    init_vulkan_dispatch_from_device_with_backup(
+        ivk, gvk, sVkEmulation->device, sVkEmulation->dvk);
 
     auto dvk = sVkEmulation->dvk;
 
