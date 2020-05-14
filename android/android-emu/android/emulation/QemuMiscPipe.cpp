@@ -39,6 +39,8 @@ static std::atomic<int> restart_when_stalled {};
 static std::atomic<int> num_watchdog {};
 static std::atomic<int> num_hostcts_watchdog {};
 
+static int64_t s_reset_request_uptime_ms;
+
 extern "C" int get_host_cts_heart_beat_count(void);
 extern "C" bool android_op_wipe_data;
 
@@ -144,7 +146,9 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
         printf("emulator: INFO: boot completed\n");
         // bug: 152636877
 #ifndef _WIN32
-        printf("emulator: INFO: boot time %lld ms\n", (long long)get_uptime_ms());
+        printf(
+            "emulator: INFO: boot time %lld ms\n",
+            (long long)(get_uptime_ms() - s_reset_request_uptime_ms));
 #endif
         fflush(stdout);
 
