@@ -1047,6 +1047,41 @@ TEST_P(CombinedGoldfishOpenglTest, DISABLED_FboBlitTextureLayer) {
 //     eglDestroySyncKHR(mEGL.display, sync);
 // }
 
+// Test uniform upload rate. This is a perfgate benchmark
+TEST_P(CombinedGoldfishOpenglTest, FramebufferFetchShader) {
+
+    fprintf(stderr, "%s: exts: %s\n", __func__, glGetString(GL_EXTENSIONS));
+        constexpr char vshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    layout (location = 0) in vec2 pos;
+    layout (location = 1) in vec3 color;
+
+    uniform mat4 transform;
+
+    out vec3 color_varying;
+
+    void main() {
+        gl_Position = transform * vec4(pos, 0.0, 1.0);
+        color_varying = (transform * vec4(color, 1.0)).xyz;
+    }
+    )";
+    constexpr char fshaderSrc[] = R"(#version 300 es
+    #extension GL_EXT_shader_framebuffer_fetch : require
+    precision highp float;
+
+    in vec3 color_varying;
+
+    out vec4 fragColor;
+
+    void main() {
+        fragColor = vec4(color_varying, 1.0);
+    }
+    )";
+
+    GLuint program = compileAndLinkShaderProgram(vshaderSrc, fshaderSrc);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     MultipleTransports,
     CombinedGoldfishOpenglTest,

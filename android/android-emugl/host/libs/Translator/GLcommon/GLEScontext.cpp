@@ -1764,7 +1764,10 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
         s_glSupport.ext_GL_EXT_color_buffer_half_float = true;
 
     if (strstr(cstring,"GL_EXT_shader_framebuffer_fetch")!=NULL) {
+        fprintf(stderr, "%s: host supports framebuffer fetch\n", __func__);
         s_glSupport.ext_GL_EXT_shader_framebuffer_fetch = true;
+    } else {
+        fprintf(stderr, "%s: host does NOT framebuffer fetch\n", __func__);
     }
 
     if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
