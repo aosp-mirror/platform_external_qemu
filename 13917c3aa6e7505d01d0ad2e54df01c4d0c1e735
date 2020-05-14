@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cdd2a55a_029b8e8c",
+        "filename": "android-qemu2-glue/emulation/Frame.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-05-14T21:32:02Z",
+      "side": 1,
+      "message": "nit: Maybe choose a more descriptive name (and also perhaps move this file into another subdirectory, like \u0027network/\u0027), since we have some other \u0027Frame\u0027 classes.",
+      "range": {
+        "startLine": 30,
+        "startChar": 6,
+        "endLine": 30,
+        "endChar": 12
+      },
+      "revId": "13917c3aa6e7505d01d0ad2e54df01c4d0c1e735",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
