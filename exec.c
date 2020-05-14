@@ -2377,14 +2377,85 @@ RAMBlock *qemu_ram_alloc_user_backed(ram_addr_t size, MemoryRegion *mr,
     return new_block;
 }
 
+#define TCG_MAX_USER_RAM_SLOTS 1024
+
+struct TcgUserRamSlotInfo {
+    int used;
+    MemoryRegion mr;
+    uint64_t gpa;
+};
+
+struct TcgUserRamTable {
+    struct TcgUserRamSlotInfo slots[TCG_MAX_USER_RAM_SLOTS];
+};
+
+static struct TcgUserRamTable* tcg_user_ram_table_get(void) {
+    static struct TcgUserRamTable* s_table;
+    if (!s_table) {
+        struct TcgUserRamTable* table =
+            (struct TcgUserRamTable*)malloc(sizeof(*table));
+        memset(table, 0, sizeof(*table));
+        s_table = table;
+    }
+    return s_table;
+}
+
+static struct TcgUserRamSlotInfo* s_tcg_user_ram_slot_infos = NULL;
+
+static int tcg_user_ram_slot_infos_first_free_slot() {
+    struct TcgUserRamTable* table = tcg_user_ram_table_get();
+
+    for (int i = 0; i < TCG_MAX_USER_RAM_SLOTS; ++i) {
+        if (0 == table->slots[i].used) return i;
+    }
+    return -1;
+}
+
+static void tcg_user_ram_slot_map(
+    uint64_t gpa, void *hva, uint64_t size, int flags) {
+
+    struct TcgUserRamTable* table = tcg_user_ram_table_get();
+    int slot = tcg_user_ram_slot_infos_first_free_slot();
+    MemoryRegion* mr = &(table->slots[slot].mr);
+
+    if (slot < 0) {
+        fprintf(stderr, "%s: error: no free slots to "
+                "map hva %p -> gpa [0x%llx 0x%llx)\n", __func__,
+                hva, (unsigned long long)gpa, (unsigned long long)gpa + size);
+        return;
+    }
+
+    memory_region_init_ram_ptr(
+        mr, 0 /* unattached */, "tcg-user-backed", size, hva);
+    memory_region_add_subregion(system_memory, gpa, mr);
+
+    table->slots[slot].gpa = gpa;
+    table->slots[slot].used = 1;
+}
+
+static void tcg_user_ram_slot_unmap(
+    uint64_t gpa, uint64_t size) {
+
+    struct TcgUserRamTable* table = tcg_user_ram_table_get();
+
+    for (int i = 0; i < TCG_MAX_USER_RAM_SLOTS; ++i) {
+        if (0 == table->slots[i].used) continue;
+        if (gpa != table->slots[i].gpa) continue;
+
+        memory_region_del_subregion(system_memory, &(table->slots[i].mr));
+        table->slots[i].used = 0;
+        return;
+    }
+}
+
 void qemu_user_backed_ram_map_empty(uint64_t gpa, void *hva, uint64_t size, int flags)
 {
-    qemu_abort("FATAL: Did not set ram map function before mapping");
+    tcg_user_ram_slot_map(gpa, hva, size, flags);
 }
 
 void qemu_user_backed_ram_unmap_empty(uint64_t gpa, uint64_t size)
 {
-    qemu_abort("FATAL: Did not set ram unmap function before unmapping");
+    tcg_user_ram_slot_unmap(gpa, size);
 }
 
 static QemuUserBackedRamMapFunc s_user_backed_ram_map = &qemu_user_backed_ram_map_empty;

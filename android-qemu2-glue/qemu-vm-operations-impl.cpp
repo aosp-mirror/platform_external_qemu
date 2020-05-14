@@ -691,6 +691,12 @@ static const QEMUFileHooks sLoadHooks = {
             return 0;
         }};
 
+static void* tcg_gpa2hva(uint64_t gpa, bool *found) {
+    void* res = cpu_physical_memory_get_addr(gpa);
+    if (res != nullptr) *found = true;
+    return res;
+}
+
 static void set_skip_snapshot_save(bool used);
 static void set_snapshot_callbacks(void* opaque,
                                    const SnapshotCallbacks* callbacks) {
@@ -726,10 +732,15 @@ static void set_snapshot_callbacks(void* opaque,
             case android::CPU_ACCELERATOR_GVM:
                 set_address_translation_funcs(gvm_hva2gpa, gvm_gpa2hva);
                 break;
-            default:  // KVM
+            case android::CPU_ACCELERATOR_KVM:
 #ifdef __linux__
                 set_address_translation_funcs(0, kvm_gpa2hva);
+#else
+                set_address_translation_funcs(0, tcg_gpa2hva);
 #endif
+                break;
+            default:  // No acceleration
+                set_address_translation_funcs(0, tcg_gpa2hva);
                 break;
         }
 
