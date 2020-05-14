@@ -69,6 +69,30 @@
       "revId": "d030673a26ba762f0de9bee661eb261aa61091af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "faef5b91_d01bf889",
+        "filename": "android/android-emu/android/network/MacAddress.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-14T21:33:41Z",
+      "side": 1,
+      "message": "Good call.",
+      "parentUuid": "6b2c41e9_c03faa9c",
+      "range": {
+        "startLine": 59,
+        "startChar": 10,
+        "endLine": 59,
+        "endChar": 18
+      },
+      "revId": "d030673a26ba762f0de9bee661eb261aa61091af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
