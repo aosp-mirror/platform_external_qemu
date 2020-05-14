@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b840a03d_deed07dd",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 694,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-14T18:00:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a8734e31_81615c24",
+      "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b68013f_9c02d5bc",
         "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
         "patchSetId": 5
@@ -33,6 +51,24 @@
       "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "07a871ac_33a59524",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 696,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-14T18:00:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b68013f_9c02d5bc",
+      "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "0812b5d0_f84779c9",
+        "filename": "exec.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2388,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-14T18:00:21Z",
+      "side": 1,
+      "message": "Thanks David for this idea and setup! I like it too, less global-y. Added.",
+      "parentUuid": "788cafa9_4b19d926",
+      "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cd9ef58d_606636d3",
         "filename": "exec.c",
         "patchSetId": 5
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "88a5b46b_d1fdf76a",
+        "filename": "exec.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2390,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-14T18:00:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cd9ef58d_606636d3",
+      "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f91942c8_dbdc89a6",
         "filename": "exec.c",
         "patchSetId": 5
@@ -84,6 +156,24 @@
       "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab35b3f9_75f67ae3",
+        "filename": "exec.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2408,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-14T18:00:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f91942c8_dbdc89a6",
+      "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
