@@ -155,33 +155,41 @@ public:
         bool sandbox = System::get()->envGet("ANDROID_EMU_SANDBOX") == "1";
 
         if (!mVulkanLoader) {
-            if (sandbox) {
-                mVulkanLoader = emugl::SharedLibrary::open(VULKAN_LOADER_FILENAME);
-            } else {
-                auto loaderPath = getLoaderPath(System::get()->getProgramDirectory(), mForTesting);
-                mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
-
-                if (!mVulkanLoader) {
-                    loaderPath = getLoaderPath(System::get()->getLauncherDirectory(), mForTesting);
-                    mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
-                }
-            }
+            mVulkanLoader = emugl::SharedLibrary::open(VULKAN_LOADER_FILENAME);
         }
 #ifdef __linux__
         // On Linux, it might not be called libvulkan.so.
         // Try libvulkan.so.1 if that doesn't work.
         if (!mVulkanLoader) {
-            if (sandbox) {
-                mVulkanLoader =
-                    emugl::SharedLibrary::open("libvulkan.so.1");
-            } else {
-                auto altPath = pj(System::get()->getLauncherDirectory(),
-                    "lib64", "vulkan", "libvulkan.so.1");
-                mVulkanLoader =
-                    emugl::SharedLibrary::open(altPath.c_str());
-            }
+            mVulkanLoader =
+                emugl::SharedLibrary::open("libvulkan.so.1");
         }
 #endif
+
+        if (sandbox) return (void*)mVulkanLoader;
+
+        // If we still don't have a loader and are not in sandbox mode,
+        // use the prebuilt loader still.
+#ifndef __APPLE__ // We always expect this on macOS
+        printf("%s: using prebuilt Vulkan loader\n", __func__);
+#endif
+        if (!mVulkanLoader) {
+            auto loaderPath = getLoaderPath(System::get()->getProgramDirectory(), mForTesting);
+            mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
+
+            if (!mVulkanLoader) {
+                loaderPath = getLoaderPath(System::get()->getLauncherDirectory(), mForTesting);
+                mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
+            }
+        }
+
+        if (!mVulkanLoader) {
+            auto altPath = pj(System::get()->getLauncherDirectory(),
+                "lib64", "vulkan", "libvulkan.so.1");
+            mVulkanLoader =
+                emugl::SharedLibrary::open(altPath.c_str());
+        }
+
         return (void*)mVulkanLoader;
     }
 
