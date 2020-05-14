@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "7b938a8b_c86c67b4",
+        "filename": "android-qemu2-glue/emulation/Frame.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-14T21:36:04Z",
+      "side": 1,
+      "message": "Yes. My question is should I allow copy constructor? I have seen DISALLOW_COPY_ASSIGN_AND_MOVE\nused extensively in our codebase. So I wonder if it is a good idea to disable copy constructor.",
+      "parentUuid": "eafd8d12_251478d8",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 59,
+        "endChar": 40
+      },
+      "revId": "d030673a26ba762f0de9bee661eb261aa61091af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6b2c41e9_c03faa9c",
         "filename": "android/android-emu/android/network/MacAddress.h",
         "patchSetId": 1
