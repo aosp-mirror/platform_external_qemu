@@ -726,6 +726,102 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     return false;
 }
 
+bool handleCpuAccelerationForMinConfig(int argc, char** argv,
+        CpuAccelMode* accel_mode, char** accel_status) {
+
+    printf("%s: configure CPU acceleration\n", __func__);
+
+    int hasEnableKvm = 0;
+    int hasEnableHax = 0;
+    int hasEnableHvf = 0;
+    int hasEnableWhpx = 0;
+    int hasEnableGvm = 0;
+
+    for (int i = 0; i < argc; i++) {
+        if (!strcmp(argv[i], "-enable-kvm")) {
+            hasEnableKvm = 1;
+        } else if (!strcmp(argv[i], "-enable-hax")) {
+            hasEnableHax = 1;
+        } else if (!strcmp(argv[i], "-enable-hvf")) {
+            hasEnableHvf = 1;
+        } else if (!strcmp(argv[i], "-enable-whpx")) {
+            hasEnableWhpx = 1;
+        } else if (!strcmp(argv[i], "-enable-gvm")) {
+            hasEnableGvm = 1;
+        }
+    }
+
+    int totalEnabled =
+        hasEnableKvm +
+        hasEnableHax +
+        hasEnableHvf +
+        hasEnableWhpx +
+        hasEnableGvm;
+
+    if (totalEnabled > 1) {
+        fprintf(stderr, "%s: ERROR: tried to enable more than once acceleration mode. "
+                "Attempted enables: kvm %d haxm %d hvf %d whpx %d gvm %d\n", __func__,
+                hasEnableKvm,
+                hasEnableHax,
+                hasEnableHvf,
+                hasEnableWhpx,
+                hasEnableGvm);
+        exit(1);
+    }
+
+    printf("%s: Checking CPU acceleration capability on host...\n", __func__);
+
+    // Check acceleration capabilities on the host.
+    AndroidCpuAcceleration accel_capability =
+        androidCpuAcceleration_getStatus(accel_status);
+    bool accel_ok =
+        (accel_capability == ANDROID_CPU_ACCELERATION_READY);
+
+    // Print the current status.
+    if (accel_ok) {
+        printf("%s: Host can use CPU acceleration\n", __func__);
+    } else {
+        printf("%s: Host cannot use CPU acceleration\n", __func__);
+    }
+
+    printf("%s: Host CPU acceleration capability status string: [%s]\n",
+           __func__, *accel_status);
+
+    if (0 == totalEnabled) {
+        printf("%s: CPU acceleration disabled by user (no enabled hypervisors)\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_NONE);
+        *accel_mode = ACCEL_OFF;
+        return true;
+    }
+
+    *accel_mode = ACCEL_ON;
+
+    if (hasEnableKvm) {
+        printf("%s: Selecting KVM for CPU acceleration\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_KVM);
+    } else if (hasEnableHax) {
+        printf("%s: Selecting HAXM for CPU acceleration\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_HAX);
+    } else if (hasEnableHvf) {
+        printf("%s: Selecting HVF for CPU acceleration\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_HVF);
+    } else if (hasEnableWhpx) {
+        printf("%s: Selecting WHPX for CPU acceleration\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_WHPX);
+    } else if (hasEnableGvm) {
+        printf("%s: Selecting GVM for CPU acceleration\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_GVM);
+    }
+
+    return true;
+}
+
 static int startEmulatorWithMinConfig(
     int argc,
     char** argv,
@@ -838,9 +934,8 @@ static int startEmulatorWithMinConfig(
 
     char* accel_status = NULL;
     CpuAccelMode accel_mode = ACCEL_AUTO;
-    // bug: handle fuchsia accel opt here
-    // const bool accel_ok =
-    // handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
+
+    handleCpuAccelerationForMinConfig(argc, argv, &accel_mode, &accel_status);
 
     // Feature flags-related last-microsecond renderer changes
     {
@@ -907,7 +1002,7 @@ static int startEmulatorWithMinConfig(
 
     // Generate a hardware-qemu.ini for this AVD.
     if (VERBOSE_CHECK(init)) {
-        printf("QEMU options list:\n");
+        printf("QEMU options list (startEmulatorWithMinConfig):\n");
         for (int i = 0; i < argc; i++) {
             printf("emulator: argv[%02d] = \"%s\"\n", i, argv[i]);
         }
