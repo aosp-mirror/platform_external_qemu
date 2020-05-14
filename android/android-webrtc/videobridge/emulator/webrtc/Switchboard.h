@@ -13,25 +13,29 @@
 // limitations under the License.
 #pragma once
 
+#include <api/peer_connection_interface.h>
+#include <rtc_base/critical_section.h>  // for CritS...
+#include <rtc_base/thread.h>            // for Thread
+
 #include "emulator/net/JsonProtocol.h"     // for JsonProtocol (ptr only)
 #include "emulator/net/SocketTransport.h"  // for SocketTransport (ptr only)
-#include <rtc_base/criticalsection.h>                           // for CritS...
-#include <rtc_base/refcountedobject.h>                          // for RefCo...
-#include <rtc_base/thread.h>                                    // for Thread
-#include <api/peerconnectioninterface.h>                        // for PeerC...
+#include "emulator/webrtc/capture/VideoCapturerFactory.h"
+
 namespace emulator {
 
 namespace net {
 class AsyncSocketAdapter;
 class EmulatorConnection;
 
+class AsyncSocketAdapter;
 class EmulatorConnection;
-}
+
+class EmulatorConnection;
+}  // namespace net
 
 namespace webrtc {
 
 class Participant;
-
 
 using net::AsyncSocketAdapter;
 using net::EmulatorConnection;
@@ -70,6 +74,8 @@ public:
     // due to a dropped connection.
     void finalizeConnections();
 
+    VideoCapturerFactory* getVideoCaptureFactory() { return &mCaptureFactory; }
+
     static std::string BRIDGE_RECEIVER;
 
 private:
@@ -87,6 +93,7 @@ private:
             mTurnConfig;  // Process to invoke to retrieve turn config.
     int32_t mFps = 24;    // Desired fps
 
+    VideoCapturerFactory mCaptureFactory;
     // Worker threads for all the participants.
     std::unique_ptr<rtc::Thread> mWorker;
     std::unique_ptr<rtc::Thread> mSignaling;

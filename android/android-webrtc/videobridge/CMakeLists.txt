@@ -8,9 +8,9 @@ android_add_executable(
       emulator/net/RtcAsyncSocketAdapter.cpp
       emulator/webrtc/Participant.cpp
       emulator/webrtc/Switchboard.cpp
-      emulator/webrtc/capture/VideoShareCapture.cpp
-      emulator/webrtc/capture/VideoShareFactory.cpp
-      emulator/webrtc/capture/VideoShareInfo.cpp)
+      emulator/webrtc/capture/VideoShareCapturer.cpp
+      emulator/webrtc/capture/VideoCapturerFactory.cpp
+      emulator/webrtc/capture/VideoTrackSource.cpp)
 
 android_target_compile_options(goldfish-webrtc-bridge darwin-x86_64
                                PRIVATE "-fvisibility=hidden")
@@ -27,7 +27,7 @@ android_target_compile_definitions(
 # careful linking any of the android emulator libraries against it
 target_link_libraries(
   goldfish-webrtc-bridge PRIVATE WebRTC::WebRTC Threads::Threads android-net
-                                 nlohmann_json::nlohmann_json android-emu-base)
+                                 nlohmann_json::nlohmann_json android-emu ssl android-grpc)
 target_include_directories(goldfish-webrtc-bridge PRIVATE .)
 
 # The linker dependencies, mainly needed to keep the encoders/decoders happy..

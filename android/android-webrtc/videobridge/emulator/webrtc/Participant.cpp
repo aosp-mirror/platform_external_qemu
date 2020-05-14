@@ -13,25 +13,24 @@
 // limitations under the License.
 #include "Participant.h"
 
-#include <absl/types/optional.h>                        // for optional
-#include <api/mediastreaminterface.h>                   // for MediaStreamTr...
-#include <api/rtcerror.h>                               // for RTCError, RTC...
-#include <api/rtpsenderinterface.h>                     // for RtpSenderInte...
-#include <emulator/webrtc/capture/VideoShareFactory.h>  // for VideoShareFac...
-#include <media/base/device.h>                          // for Device
-#include <media/base/videocapturer.h>                   // for VideoCapturer
-#include <media/engine/webrtcvideocapturer.h>           // for WebRtcVideoCa...
-#include <p2p/base/portallocator.h>                     // for PortAllocator
-#include <rtc_base/checks.h>                            // for FatalLogCall
-#include <rtc_base/copyonwritebuffer.h>                 // for CopyOnWriteBu...
-#include <rtc_base/logging.h>                           // for RTC_LOG
-#include <rtc_base/refcountedobject.h>                  // for RefCountedObject
-#include <rtc_base/rtccertificategenerator.h>           // for RTCCertificat...
-#include <utility>                                      // for move, pair
+#include <absl/types/optional.h>                 // for optional
+#include <api/media_stream_interface.h>          // for MediaStreamTra...
+#include <api/rtc_error.h>                       // for RTCError, RTCE...
+#include <api/rtp_sender_interface.h>            // for RtpSenderInter...
+#include <p2p/base/port_allocator.h>             // for PortAllocator
+#include <rtc_base/checks.h>                     // for FatalLogCall
+#include <rtc_base/copy_on_write_buffer.h>       // for CopyOnWriteBuffer
+#include <rtc_base/logging.h>                    // for RTC_LOG
+#include <rtc_base/ref_counted_object.h>         // for RefCountedObject
+#include <rtc_base/rtc_certificate_generator.h>  // for RTCCertificate...
+#include <rtc_base/third_party/base64/base64.h>  // for Base64
 
-#include "emulator/webrtc/Switchboard.h"                // for Switchboard
-#include "nlohmann/json.hpp"                            // for basic_json<>:...
-#include "rtc_base/third_party/base64/base64.h"         // for Base64
+#include <utility>  // for pair
+
+#include "emulator/webrtc/Switchboard.h"               // for Switchboard
+#include "emulator/webrtc/capture/VideoCapturer.h"     // for VideoCapturer
+#include "emulator/webrtc/capture/VideoTrackSource.h"  // for VideoTrackSource
+#include "nlohmann/json.hpp"                           // for basic_json<>::...
 
 using json = nlohmann::json;
 using MediaStreamPair =
@@ -49,7 +48,7 @@ public:
         return new rtc::RefCountedObject<DummySetSessionDescriptionObserver>();
     }
     virtual void OnSuccess() {}
-    virtual void OnFailure(const std::string& error) {}
+    virtual void OnFailure(::webrtc::RTCError error){};
 
 protected:
     DummySetSessionDescriptionObserver() {}
@@ -239,44 +238,22 @@ void Participant::OnSuccess(::webrtc::SessionDescriptionInterface* desc) {
     SendMessage(jmessage);
 }
 
-void Participant::OnFailure(const std::string& error) {
-    RTC_LOG(LERROR) << error;
-}
-
 void Participant::OnFailure(::webrtc::RTCError error) {
     RTC_LOG(LERROR) << ToString(error.type()) << ": " << error.message();
 }
 
-cricket::VideoCapturer* Participant::OpenVideoCaptureDevice(
-        const std::string& handle) {
-    videocapturemodule::VideoShareFactory* factory =
-            new videocapturemodule::VideoShareFactory(handle, kFps);
-    std::unique_ptr<cricket::WebRtcVideoCapturer> capturer(
-            new cricket::WebRtcVideoCapturer(factory));
-    cricket::Device default_device(handle, 0);
-    if (!capturer->Init(default_device)) {
-        RTC_LOG(LERROR) << "unable to initialize device on handle: " << handle;
-        return nullptr;
-    }
-    return capturer.release();
-}
-
-bool Participant::AddVideoTrack(const std::string& handle) {
-    std::unique_ptr<cricket::VideoCapturer> device(
-            OpenVideoCaptureDevice(handle));
-    if (!device) {
-        return false;
-    }
-
+bool Participant::AddVideoTrack(std::string handle) {
     if (mActiveVideoTracks.count(handle) != 0) {
         RTC_LOG(LS_ERROR) << "Track " << handle
                           << " already active, not adding again.";
     }
 
+    RTC_LOG(INFO) << "Adding track: [" << handle << "]";
+    auto capturer = mSwitchboard->getVideoCaptureFactory()->getVideoCapturer(handle);
+    auto track = new rtc::RefCountedObject<emulator::webrtc::VideoTrackSource>(
+            capturer);
     scoped_refptr<::webrtc::VideoTrackInterface> video_track(
-            mPeerConnectionFactory->CreateVideoTrack(
-                    handle, mPeerConnectionFactory->CreateVideoSource(
-                                    std::move(device), nullptr)));
+            mPeerConnectionFactory->CreateVideoTrack(handle, track));
 
     auto result = mPeerConnection->AddTrack(video_track, {handle});
     if (!result.ok()) {
@@ -295,7 +272,7 @@ void Participant::CreateOffer() {
             this, ::webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
 }
 
-bool Participant::RemoveVideoTrack(const std::string& handle) {
+bool Participant::RemoveVideoTrack(std::string handle) {
     if (mActiveVideoTracks.count(handle) == 0) {
         RTC_LOG(LS_ERROR) << "Track " << handle
                           << " not active, no need to remove.";

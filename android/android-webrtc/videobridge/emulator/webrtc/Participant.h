@@ -13,22 +13,26 @@
 // limitations under the License.
 #pragma once
 
-#include <api/datachannelinterface.h>     // for DataChannelInterface (ptr o...
-#include <api/jsep.h>                     // for IceCandidateInterface (ptr ...
-#include <api/peerconnectioninterface.h>  // for PeerConnectionInterface
-#include <api/scoped_refptr.h>            // for scoped_refptr
-#include <stdint.h>                       // for uint32_t, uint8_t
-#include <memory>                         // for unique_ptr
-#include <string>                         // for string, basic_string
-#include <unordered_map>                  // for unordered_map
-#include <unordered_set>                  // for unordered_set
-#include <vector>                         // for vector
+#include <api/data_channel_interface.h>     // for DataChannelInterface (ptr...
+// #include <api/datachannelinterface.h>     // for DataChannelInterface (ptr o...
+#include <api/jsep.h>                       // for IceCandidateInterface (pt...
+#include <api/peer_connection_interface.h>  // for PeerConnectionInterface
+#include <api/scoped_refptr.h>              // for scoped_refptr
+#include <stdint.h>                         // for uint32_t, uint8_t
+#include <memory>                           // for unique_ptr
+#include <string>                           // for string, basic_string, ope...
+#include <unordered_map>                    // for unordered_map
+#include <unordered_set>                    // for unordered_set
+#include <vector>                           // for vector
 
-#include "nlohmann/json.hpp"              // for json
+#include "nlohmann/json.hpp"                // for json
 
-namespace cricket {
+namespace emulator {
+namespace webrtc {
 class VideoCapturer;
-}  // namespace cricket
+}  // namespace webrtc
+}  // namespace emulator
+
 namespace webrtc {
 class MediaStreamInterface;
 class RTCError;
@@ -37,7 +41,6 @@ class RtpSenderInterface;
 class VideoTrackInterface;
 }  // namespace webrtc
 
-using cricket::VideoCapturer;
 using json = nlohmann::json;
 using rtc::scoped_refptr;
 using webrtc::PeerConnectionInterface;
@@ -124,13 +127,13 @@ public:
     // default implementation. If both versions are unimplemented, the¶
     // result will be a runtime error (stack overflow). This is intentional.¶
     void OnFailure(::webrtc::RTCError error) override;
-    void OnFailure(const std::string& error) override;
+    //void OnFailure(const std::string& error) override;
     void OnIceConnectionChange(
             ::webrtc::PeerConnectionInterface::IceConnectionState new_state)
             override;
     void IncomingMessage(json msg);
-    bool AddVideoTrack(const std::string& memoryHandle);
-    bool RemoveVideoTrack(const std::string& memoryHandle);
+    bool AddVideoTrack(std::string handle);
+    bool RemoveVideoTrack(std::string handle);
     bool Initialize();
     inline const std::string GetPeerId() const { return mPeerId; };
     void SendToBridge(json msg);
