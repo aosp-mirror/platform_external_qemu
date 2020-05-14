@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8734e31_81615c24",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 694,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-05-14T10:30:47Z",
+      "side": 1,
+      "message": "Is there any reason why this function is not static, since it\u0027s only used in this source file?",
+      "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b68013f_9c02d5bc",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 696,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-05-14T10:30:47Z",
+      "side": 1,
+      "message": "nit: Since this is a C++ source file, prefer comparing res to nullptr instead?",
+      "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "788cafa9_4b19d926",
+        "filename": "exec.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2388,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-05-14T10:30:47Z",
+      "side": 1,
+      "message": "I know this isn\u0027t the QEMU way, but it might be cleaner and more understandable to avoid global variables access from multiple places by defining a type for the table and proper methods, as in:\n\n  struct TcgUserRamTable {\n     TcgUserRamSlotInfo* slots;\n  };\n\n  static TcgUserRamTable* tcg_user_ram_table_get(void) {\n    static TcgUserRamTable* s_table;\n    if (!s_table) {\n       TcgUserRamTable* table \u003d (TcgUserRamTable *)malloc(sizeof(*table));\n       memset(table, 0, sizeof(*table));\n       s_table \u003d table;\n    }\n    return s_table;\n  }\n\n  static TcgUserRamInfo* tcg_user_ram_table_find_first_free_slot(TvgUserRamTable* table) {\n     ...\n  }\n\n  static void tcg_user_ram_table_map(TcgUserRamTable* table, ...) {\n    ...\n  }\n\n  static void tcg_user_ram_table_unmap(TcgUserRamTable* table, ...) {\n    ...\n  }\n\nI\u0027m mentioning this because when I was working on QEMU, the \"global variables are accessed from any place\" coding-style drove me mad and resulted in lots of surprises (though there were a few instances where it is necessary, e.g. inside TCG).",
+      "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd9ef58d_606636d3",
+        "filename": "exec.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2390,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-05-14T10:30:47Z",
+      "side": 1,
+      "message": "Again, all these functions seem to be local to this source file, can they be turned static?",
+      "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f91942c8_dbdc89a6",
+        "filename": "exec.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2408,
+      "author": {
+        "id": 1000411
+      },
+      "writtenOn": "2020-05-14T10:30:47Z",
+      "side": 1,
+      "message": "nit: Missing error check after this call will result in out-of-bounds buffer access.",
+      "revId": "23576b90bf8e49123b6b7018c2b800f077b1c33e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
