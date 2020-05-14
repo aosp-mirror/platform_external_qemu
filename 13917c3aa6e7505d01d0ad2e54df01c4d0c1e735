@@ -22,6 +22,30 @@
       "revId": "13917c3aa6e7505d01d0ad2e54df01c4d0c1e735",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29e77b63_2da3fd56",
+        "filename": "android-qemu2-glue/emulation/Frame.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-14T21:32:42Z",
+      "side": 1,
+      "message": "Good idea. I will change it to IEEE80211_Frame",
+      "parentUuid": "cdd2a55a_029b8e8c",
+      "range": {
+        "startLine": 30,
+        "startChar": 6,
+        "endLine": 30,
+        "endChar": 12
+      },
+      "revId": "13917c3aa6e7505d01d0ad2e54df01c4d0c1e735",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
