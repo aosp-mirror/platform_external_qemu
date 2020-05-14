@@ -691,6 +691,14 @@ static const QEMUFileHooks sLoadHooks = {
             return 0;
         }};
 
+void* tcg_gpa2hva(uint64_t gpa, bool *found) {
+    fprintf(stderr, "%s: gpa: 0x%llx\n", __func__, (unsigned long long)gpa);
+    void* res = cpu_physical_memory_get_addr(gpa);
+    fprintf(stderr, "%s: res: %p\n", __func__, res);
+    if (res != 0) *found = true;
+    return res;
+}
+
 static void set_skip_snapshot_save(bool used);
 static void set_snapshot_callbacks(void* opaque,
                                    const SnapshotCallbacks* callbacks) {
@@ -726,10 +734,13 @@ static void set_snapshot_callbacks(void* opaque,
             case android::CPU_ACCELERATOR_GVM:
                 set_address_translation_funcs(gvm_hva2gpa, gvm_gpa2hva);
                 break;
-            default:  // KVM
-#ifdef __linux__
+            case android::CPU_ACCELERATOR_KVM:
+                fprintf(stderr, "%s: detected KVM\n", __func__);
                 set_address_translation_funcs(0, kvm_gpa2hva);
-#endif
+                break;
+            default:  // KVM
+                fprintf(stderr, "%s: fall through. accelerator: 0x%x\n", __func__, android::GetCurrentCpuAccelerator());
+                set_address_translation_funcs(0, tcg_gpa2hva);
                 break;
         }
 
@@ -738,6 +749,7 @@ static void set_snapshot_callbacks(void* opaque,
 }
 
 static void map_user_backed_ram(uint64_t gpa, void* hva, uint64_t size) {
+    fprintf(stderr, "%s: call\n", __func__);
     android::RecursiveScopedVmLock vmlock;
     qemu_user_backed_ram_map(
             gpa, hva, size,
@@ -745,6 +757,7 @@ static void map_user_backed_ram(uint64_t gpa, void* hva, uint64_t size) {
 }
 
 static void unmap_user_backed_ram(uint64_t gpa, uint64_t size) {
+    fprintf(stderr, "%s: call\n", __func__);
     android::RecursiveScopedVmLock vmlock;
     qemu_user_backed_ram_unmap(gpa, size);
 }

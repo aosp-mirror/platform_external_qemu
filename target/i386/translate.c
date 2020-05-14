@@ -8327,6 +8327,7 @@ static target_ulong disas_insn(DisasContext *s, CPUState *cpu)
 
 void tcg_x86_init(void)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     static const char reg_names[CPU_NB_REGS][4] = {
 #ifdef TARGET_X86_64
         [R_EAX] = "rax",

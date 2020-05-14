@@ -65,6 +65,8 @@ static int tcg_init(MachineState *ms)
 {
     tcg_exec_init(tcg_tb_size * 1024 * 1024);
     cpu_interrupt_handler = tcg_handle_interrupt;
+    fprintf(stderr, "%s: cal\n", __func__);
+    // qemu_set_user_backed_mapping_funcs(0, 0);
     return 0;
 }
 

@@ -34,7 +34,7 @@ void goldfish_address_space_set_service_ops(const GoldfishAddressSpaceOps *ops) 
 #define ANDROID_EMU_ADDRESS_SPACE_REALLOC_FUNC g_realloc
 #define ANDROID_EMU_ADDRESS_SPACE_FREE_FUNC g_free
 
-#define AS_DEBUG 0
+#define AS_DEBUG 1
 
 #if AS_DEBUG
 #define AS_DPRINT(fmt,...) fprintf(stderr, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
@@ -603,6 +603,7 @@ static void address_space_control_write_locked(void *opaque,
 
     switch ((enum address_space_register_id)offset) {
     case ADDRESS_SPACE_REGISTER_COMMAND:
+        fprintf(stderr, "%s: call: command\n", __func__);
         state->registers.status =
             address_space_run_command(state, (enum address_space_command_id)val);
         qemu_irq_pulse(state->irq);

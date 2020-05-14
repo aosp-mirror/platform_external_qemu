@@ -2377,14 +2377,69 @@ RAMBlock *qemu_ram_alloc_user_backed(ram_addr_t size, MemoryRegion *mr,
     return new_block;
 }
 
+#define TCG_MAX_USER_RAM_SLOTS 1024
+
+struct TcgUserRamSlotInfo {
+    int used;
+    MemoryRegion mr;
+    uint64_t gpa;
+};
+
+static struct TcgUserRamSlotInfo* s_tcg_user_ram_slot_infos = NULL;
+
+void tcg_user_ram_slot_infos_ensure() {
+    if (!s_tcg_user_ram_slot_infos) {
+        s_tcg_user_ram_slot_infos = (struct TcgUserRamSlotInfo*)malloc(TCG_MAX_USER_RAM_SLOTS * sizeof(struct TcgUserRamSlotInfo));
+        memset(s_tcg_user_ram_slot_infos, 0, TCG_MAX_USER_RAM_SLOTS * sizeof(struct TcgUserRamSlotInfo));
+    }
+}
+
+int tcg_user_ram_slot_infos_first_free_slot() {
+    tcg_user_ram_slot_infos_ensure();
+    for (int i = 0; i < TCG_MAX_USER_RAM_SLOTS; ++i) {
+        if (0 == s_tcg_user_ram_slot_infos[i].used) return i;
+    }
+    return -1;
+}
+
+void tcg_user_ram_slot_map(uint64_t gpa, void *hva, uint64_t size, int flags) {
+    tcg_user_ram_slot_infos_ensure();
+
+    int slot = tcg_user_ram_slot_infos_first_free_slot();
+
+    MemoryRegion* mr = &s_tcg_user_ram_slot_infos[slot].mr;
+
+    memory_region_init_ram_ptr(mr, 0 /* unattached */, "tcg-user-backed", size, hva);
+    memory_region_add_subregion(system_memory, gpa, mr);
+
+    s_tcg_user_ram_slot_infos[slot].gpa = gpa;
+    s_tcg_user_ram_slot_infos[slot].used = 1;
+
+    void* checkres = cpu_physical_memory_get_addr(gpa);
+    fprintf(stderr, "%s: on map: check: input hva %p out hva %p\n", __func__, hva, checkres);
+}
+
+void tcg_user_ram_slot_unmap(uint64_t gpa, uint64_t size) {
+    for (int i = 0; i < TCG_MAX_USER_RAM_SLOTS; ++i) {
+        if (0 == s_tcg_user_ram_slot_infos[i].used) continue;
+        if (gpa != s_tcg_user_ram_slot_infos[i].gpa) continue;
+
+        memory_region_del_subregion(system_memory, &s_tcg_user_ram_slot_infos[i].mr);
+        s_tcg_user_ram_slot_infos[i].used = 0;
+        return;
+    }
+}
+
 void qemu_user_backed_ram_map_empty(uint64_t gpa, void *hva, uint64_t size, int flags)
 {
-    qemu_abort("FATAL: Did not set ram map function before mapping");
+    fprintf(stderr, "%s: FATAL: Did not set ram map function before mapping\n", __func__);
+    tcg_user_ram_slot_map(gpa, hva, size, flags);
 }
 
 void qemu_user_backed_ram_unmap_empty(uint64_t gpa, uint64_t size)
 {
-    qemu_abort("FATAL: Did not set ram unmap function before unmapping");
+    fprintf(stderr, "%s: FATAL: Did not set ram unmap function before mapping\n", __func__);
+    tcg_user_ram_slot_unmap(gpa, size);
 }
 
 static QemuUserBackedRamMapFunc s_user_backed_ram_map = &qemu_user_backed_ram_map_empty;
@@ -2393,17 +2448,20 @@ static QemuUserBackedRamUnmapFunc s_user_backed_ram_unmap = &qemu_user_backed_ra
 void qemu_set_user_backed_mapping_funcs(QemuUserBackedRamMapFunc mapFunc,
                                         QemuUserBackedRamUnmapFunc unmapFunc)
 {
+    fprintf(stderr, "%s: call================================================================================\n", __func__);
     s_user_backed_ram_map = mapFunc;
     s_user_backed_ram_unmap = unmapFunc;
 }
 
 void qemu_user_backed_ram_map(uint64_t gpa, void *hva, uint64_t size, int flags)
 {
+    fprintf(stderr, "%s: call================================================================================\n", __func__);
     s_user_backed_ram_map(gpa, hva, size, flags);
 }
 
 void qemu_user_backed_ram_unmap(uint64_t gpa, uint64_t size)
 {
+    fprintf(stderr, "%s: call================================================================================\n", __func__);
     s_user_backed_ram_unmap(gpa, size);
 }
 
