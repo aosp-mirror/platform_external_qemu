@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7324dd64_3042f633",
+        "filename": "android-qemu2-glue/emulation/Ieee80211Frame.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-05-14T22:09:05Z",
+      "side": 1,
+      "message": "Please move it to a dedicated method and then just\n\nconst struct ieee80211_hdr\u0026 hdr() const;",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 68
+      },
+      "revId": "76ea2ac1f64cf3ee43b215b39493e53c402c0767",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
