@@ -54,6 +54,7 @@ android_add_library(
       android/emulation/control/snapshot/SnapshotService.cpp
       android/emulation/control/snapshot/TarStream.cpp
       android/emulation/control/utils/EventWaiter.cpp
+      android/emulation/control/utils/AudioUtils.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp
       android/emulation/control/utils/ServiceUtils.cpp
       android/emulation/control/waterfall/WaterfallFactory.cpp)
