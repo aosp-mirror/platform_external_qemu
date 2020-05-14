@@ -1848,7 +1848,6 @@ static uint32_t wakeup_reason_mask = ~(1 << QEMU_WAKEUP_REASON_NONE);
 
 #ifdef CONFIG_ANDROID
 static int64_t s_shutdown_request_uptime_ms;
-static int64_t s_reset_request_uptime_ms;
 #endif
 
 static void set_shutdown_requested(void) {
@@ -2001,8 +2000,8 @@ void qemu_system_reset_request(ShutdownCause reason)
         shutdown_requested = reason;
     } else {
         reset_requested = reason;
-#ifdef CONFIG_ANDROID
-        s_reset_request_uptime_ms = get_uptime_ms();
+#if defined(CONFIG_ANDROID) && !defined(_WIN32)
+        signal_system_reset_was_requested();
 #endif
     }
     cpu_stop_current();
