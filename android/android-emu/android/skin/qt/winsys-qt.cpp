@@ -249,10 +249,14 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
 #elif defined(__APPLE__)
     D("skin_winsys_get_monitor_rect: macOS: CGMainDisplayID()\n");
     int displayId = CGMainDisplayID();
-    D("skin_winsys_get_monitor_rect: macOS: CGDisplayPixelsWide()\n");
-    rect->size.w = CGDisplayPixelsWide(displayId);
-    D("skin_winsys_get_monitor_rect: macOS: CGDisplayPixelsHigh()\n");
-    rect->size.h = CGDisplayPixelsHigh(displayId);
+    D("skin_winsys_get_monitor_rect: macOS: CGDisplayCopyDisplayMode()\n");
+    CGDisplayModeRef modeRef = CGDisplayCopyDisplayMode(displayId);
+    D("skin_winsys_get_monitor_rect: macOS: CGDisplayModeGetPixelWidth()\n");
+    rect->size.w = CGDisplayModeGetPixelWidth(modeRef);
+    D("skin_winsys_get_monitor_rect: macOS: CGDisplayModeGetPixelHeight()\n");
+    rect->size.h = CGDisplayModeGetPixelHeight(modeRef);
+    D("skin_winsys_get_monitor_rect: macOS: CGDisplayModeRelease()\n");
+    CGDisplayModeRelease(modeRef);
 #else // Linux
     D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL)\n");
     if (!s_display) {
