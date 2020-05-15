@@ -48,9 +48,10 @@ std::unordered_map<std::string, std::string> getQemuConfig() {
     return cfg;
 }
 
+static Lock sBootCompletedLock;
+
 bool bootCompleted() {
-    Lock lock;
-    AutoLock aLock(lock);
+    AutoLock aLock(sBootCompletedLock);
     ConditionVariable cv;
     bool adbResults = false;
 
@@ -69,8 +70,8 @@ bool bootCompleted() {
                 {"shell", "getprop", "dev.bootcomplete"},
                 //[&cv](const OptionalAdbCommandResult& res) {});
                 [&cv, &adbResults,
-                 &lock](const OptionalAdbCommandResult& result) {
-                    AutoLock aLock(lock);
+                 &sBootCompletedLock](const OptionalAdbCommandResult& result) {
+                    AutoLock aLock(sBootCompletedLock);
                     if (result) {
                         std::string output(
                                 std::istreambuf_iterator<char>(*result->output),
@@ -83,7 +84,7 @@ bool bootCompleted() {
                     cv.signal();
                 });
         if (!adbResults) {
-            cv.timedWait(&lock,
+            cv.timedWait(&sBootCompletedLock,
                          base::System::get()->getUnixTimeUs() + k2SecondsUs);
         }
     }
