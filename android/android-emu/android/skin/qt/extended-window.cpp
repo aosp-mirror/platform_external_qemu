@@ -114,6 +114,10 @@ ExtendedWindow::ExtendedWindow(
         this, SLOT(switchFrameAlways(bool)));
 
     connect(
+        mExtendedUi->settingsPage, SIGNAL(disableDeviceFrameChanged(bool)),
+        this, SLOT(switchDisableDeviceFrame(bool)));
+
+    connect(
         mExtendedUi->settingsPage, SIGNAL(onTopChanged(bool)),
         this, SLOT(switchOnTop(bool)));
 
@@ -435,6 +439,15 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
 void ExtendedWindow::switchFrameAlways(bool showFrame)
 {
     mEmulatorWindow->setFrameAlways(showFrame);
+}
+
+void ExtendedWindow::switchDisableDeviceFrame(bool disableDeviceFrame)
+{
+    if (disableDeviceFrame) {
+        mEmulatorWindow->setNoSkin();
+    } else {
+        mEmulatorWindow->restoreSkin();
+    }
 }
 
 void ExtendedWindow::switchOnTop(bool isOnTop) {
