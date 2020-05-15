@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "783e7abf_28b7bf2b",
+        "filename": "android/android-grpc/android/emulation/control/utils/ServiceUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-05-15T02:07:45Z",
+      "side": 1,
+      "message": "Maybe we want to add \n\nstruct State {\n  Lock lock;\n  ConditionVariable cv;\n};\n\nauto state \u003d std::make_shared\u003cState\u003e();\n\n[state](...) {}\n\nstate-\u003ecv.timedWait(...)\n\nShould we prefer to avoid global variables?",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 42
+      },
+      "revId": "6f89e26d645e94e13914195dd8af315d8301955b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
