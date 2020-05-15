@@ -16,6 +16,7 @@
 #include "android/emulation/control/utils/ServiceUtils.h"
 
 #include <istream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -48,11 +49,16 @@ std::unordered_map<std::string, std::string> getQemuConfig() {
     return cfg;
 }
 
-bool bootCompleted() {
+struct BootCompletedSyncState {
     Lock lock;
-    AutoLock aLock(lock);
     ConditionVariable cv;
-    bool adbResults = false;
+    bool results = false;
+};
+
+bool bootCompleted() {
+    auto state = std::make_shared<BootCompletedSyncState>();
+
+    AutoLock aLock(state->lock);
 
     auto adbInterface = emulation::AdbInterface::getGlobal();
     if (!adbInterface) {
@@ -67,10 +73,8 @@ bool bootCompleted() {
     if (!guest_boot_completed && apiLevel < 28) {
         adbInterface->enqueueCommand(
                 {"shell", "getprop", "dev.bootcomplete"},
-                //[&cv](const OptionalAdbCommandResult& res) {});
-                [&cv, &adbResults,
-                 &lock](const OptionalAdbCommandResult& result) {
-                    AutoLock aLock(lock);
+                [state](const OptionalAdbCommandResult& result) {
+                    AutoLock aLock(state->lock);
                     if (result) {
                         std::string output(
                                 std::istreambuf_iterator<char>(*result->output),
@@ -79,12 +83,13 @@ bool bootCompleted() {
                                 guest_boot_completed ||
                                 output.find("1") != std::string::npos;
                     }
-                    adbResults = true;
-                    cv.signal();
+                    state->results = true;
+                    state->cv.signal();
                 });
-        if (!adbResults) {
-            cv.timedWait(&lock,
-                         base::System::get()->getUnixTimeUs() + k2SecondsUs);
+        if (!state->results) {
+            state->cv.timedWait(
+                &state->lock,
+                base::System::get()->getUnixTimeUs() + k2SecondsUs);
         }
     }
     return guest_boot_completed;
