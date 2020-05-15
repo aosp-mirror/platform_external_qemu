@@ -46,6 +46,29 @@
       "revId": "6f89e26d645e94e13914195dd8af315d8301955b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "587efd99_a5f5daeb",
+        "filename": "android/android-grpc/android/emulation/control/utils/ServiceUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-05-15T02:09:31Z",
+      "side": 1,
+      "message": "need to remove these two.",
+      "range": {
+        "startLine": 71,
+        "startChar": 18,
+        "endLine": 72,
+        "endChar": 36
+      },
+      "revId": "6f89e26d645e94e13914195dd8af315d8301955b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
