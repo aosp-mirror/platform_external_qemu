@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "86bbf751_18786fb7",
+        "filename": "android/android-grpc/android/emulation/control/utils/ServiceUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-15T02:16:31Z",
+      "side": 1,
+      "message": "cool; made it shared",
+      "parentUuid": "81b067eb_b8f887e1",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 42
+      },
+      "revId": "6f89e26d645e94e13914195dd8af315d8301955b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "587efd99_a5f5daeb",
         "filename": "android/android-grpc/android/emulation/control/utils/ServiceUtils.cpp",
         "patchSetId": 2
@@ -117,6 +141,30 @@
       "revId": "6f89e26d645e94e13914195dd8af315d8301955b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ddb0bae5_0b0e61d8",
+        "filename": "android/android-grpc/android/emulation/control/utils/ServiceUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-15T02:16:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "587efd99_a5f5daeb",
+      "range": {
+        "startLine": 71,
+        "startChar": 18,
+        "endLine": 72,
+        "endChar": 36
+      },
+      "revId": "6f89e26d645e94e13914195dd8af315d8301955b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
