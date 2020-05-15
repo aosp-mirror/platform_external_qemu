@@ -48,10 +48,11 @@ std::unordered_map<std::string, std::string> getQemuConfig() {
     return cfg;
 }
 
+static Lock sBootCompletedLock;
+static ConditionVariable sBootCompletedCv;
+
 bool bootCompleted() {
-    Lock lock;
-    AutoLock aLock(lock);
-    ConditionVariable cv;
+    AutoLock aLock(sBootCompletedLock);
     bool adbResults = false;
 
     auto adbInterface = emulation::AdbInterface::getGlobal();
@@ -67,10 +68,9 @@ bool bootCompleted() {
     if (!guest_boot_completed && apiLevel < 28) {
         adbInterface->enqueueCommand(
                 {"shell", "getprop", "dev.bootcomplete"},
-                //[&cv](const OptionalAdbCommandResult& res) {});
-                [&cv, &adbResults,
-                 &lock](const OptionalAdbCommandResult& result) {
-                    AutoLock aLock(lock);
+                [&sBootCompletedCv, &adbResults,
+                 &sBootCompletedLock](const OptionalAdbCommandResult& result) {
+                    AutoLock aLock(sBootCompletedLock);
                     if (result) {
                         std::string output(
                                 std::istreambuf_iterator<char>(*result->output),
@@ -80,11 +80,11 @@ bool bootCompleted() {
                                 output.find("1") != std::string::npos;
                     }
                     adbResults = true;
-                    cv.signal();
+                    sBootCompletedCv.signal();
                 });
         if (!adbResults) {
-            cv.timedWait(&lock,
-                         base::System::get()->getUnixTimeUs() + k2SecondsUs);
+            sBootCompletedCv.timedWait(&sBootCompletedLock,
+                base::System::get()->getUnixTimeUs() + k2SecondsUs);
         }
     }
     return guest_boot_completed;
