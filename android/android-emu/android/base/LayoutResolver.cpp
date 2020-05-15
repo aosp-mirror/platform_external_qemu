@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <stdint.h>
 #include <vector>
 
 namespace android {
