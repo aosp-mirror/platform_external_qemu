@@ -221,9 +221,21 @@ bool translate(bool hostUsesCoreProfile,
                ShaderLinkInfo* outShaderLinkInfo) {
     int esslVersion = detectShaderESSLVersion(&src);
 
+    bool hasInout = src && strstr(src, "inout ");
+
+    // Temp workaround to get GL_EXT_shader_framebuffer_fetch
+    // to work
+    // (TODO: rebase ANGLE shader compiler)
+    bool avoidingAngleForInout =
+        hostUsesCoreProfile &&
+        (GL_FRAGMENT_SHADER == shaderType) &&
+        (esslVersion == 300) &&
+        hasInout &&
+        kResources.EXT_shader_framebuffer_fetch == 1;
+
     // Leverage ARB_ES3_1_compatibility for ESSL 310 for now.
     // Use translator after rest of dEQP-GLES31.functional is in a better state.
-    if (esslVersion == 310) {
+    if (esslVersion == 310 || avoidingAngleForInout) {
         // Don't try to get obj code just yet.
         // At least on NVIDIA Quadro K2200 Linux (361.xx),
         // ARB_ES3_1_compatibility seems to assume incorrectly
@@ -237,16 +249,29 @@ bool translate(bool hostUsesCoreProfile,
         size_t extensionStart = origSrc.rfind("#extension");
         size_t extensionEnd = origSrc.find("\n", extensionStart);
 
+        bool addAtomicUintPrecisionQualifier = esslVersion >= 310;
+
+        bool needChangeVersionToCore = avoidingAngleForInout;
+
+        std::string additionalPreamble;
+        if (addAtomicUintPrecisionQualifier) {
+            additionalPreamble += "precision highp atomic_uint;\n";
+        }
+
         if (extensionStart == std::string::npos) {
             std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
+            if (needChangeVersionToCore) versionPart = "#version 330 core\n";
             std::string src2 =
-                versionPart + "precision highp atomic_uint;\n" +
+                versionPart + additionalPreamble +
                 origSrc.substr(versionEnd + 1, origSrc.size() - (versionEnd + 1));
             *outObjCode = src2;
         } else {
-            std::string uptoExtensionPart = origSrc.substr(0, extensionEnd + 1);
+            std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
+            if (needChangeVersionToCore) versionPart = "#version 330 core\n";
+
+            std::string uptoExtensionPart = origSrc.substr(versionEnd, extensionEnd - versionEnd + 1);
             std::string src2 =
-                uptoExtensionPart + "precision highp atomic_uint;\n" +
+                versionPart + uptoExtensionPart + additionalPreamble +
                 origSrc.substr(extensionEnd + 1, origSrc.size() - (extensionEnd + 1));
             *outObjCode = src2;
         }
