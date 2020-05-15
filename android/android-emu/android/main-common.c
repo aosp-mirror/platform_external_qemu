@@ -1469,6 +1469,11 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
 
         AFREE(abi);
     }
+
+    if (*accel_mode == ACCEL_OFF) {
+        androidCpuAcceleration_resetCpuAccelerator(ANDROID_CPU_ACCELERATOR_NONE);
+    }
+
     return accel_ok;
 }
 
