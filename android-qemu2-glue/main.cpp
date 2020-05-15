@@ -1085,8 +1085,8 @@ extern "C" int main(int argc, char** argv) {
                 }
 
                 fc::setIfNotOverriden(fc::HVF, true);
-                fc::setIfNotOverriden(fc::Vulkan, true);
-                fc::setIfNotOverriden(fc::GLDirectMem, true);
+                fc::setEnabledOverride(fc::Vulkan, true);
+                fc::setEnabledOverride(fc::GLDirectMem, true);
                 fc::setIfNotOverriden(fc::VirtioInput, true);
                 fc::setEnabledOverride(fc::RefCountPipe, false);
                 fc::setIfNotOverriden(fc::VulkanNullOptionalStrings, true);
