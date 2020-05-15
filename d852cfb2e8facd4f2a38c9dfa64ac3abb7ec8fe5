@@ -22,6 +22,30 @@
       "revId": "d852cfb2e8facd4f2a38c9dfa64ac3abb7ec8fe5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0e594a8_0d91e74d",
+        "filename": "android/android-grpc/android/emulation/control/utils/ServiceUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-15T02:04:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "194612f4_481310f2",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 24
+      },
+      "revId": "d852cfb2e8facd4f2a38c9dfa64ac3abb7ec8fe5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
