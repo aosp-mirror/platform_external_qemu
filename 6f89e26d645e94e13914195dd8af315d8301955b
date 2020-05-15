@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "81b067eb_b8f887e1",
+        "filename": "android/android-grpc/android/emulation/control/utils/ServiceUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-05-15T02:09:54Z",
+      "side": 1,
+      "message": "LazyInstance is the same global variable. If we go with globals I prefer two static ones.",
+      "parentUuid": "5f125d90_84d71612",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 42
+      },
+      "revId": "6f89e26d645e94e13914195dd8af315d8301955b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "587efd99_a5f5daeb",
         "filename": "android/android-grpc/android/emulation/control/utils/ServiceUtils.cpp",
         "patchSetId": 2
