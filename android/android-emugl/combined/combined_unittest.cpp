@@ -1068,9 +1068,10 @@ TEST_P(CombinedGoldfishOpenglTest, FramebufferFetchShader) {
         #extension GL_EXT_shader_framebuffer_fetch : require
         precision highp float;
         in vec3 color_varying;
-        out vec4 fragColor;
-        void main() { fragColor = vec4(color_varying, 1.0); }
-        )",
+        inout vec4 fragColor;
+        void main() {
+            fragColor = mix(fragColor, vec4(color_varying, 1.0), 0.5);
+        })",
     };
 
     GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -1086,6 +1087,14 @@ TEST_P(CombinedGoldfishOpenglTest, FramebufferFetchShader) {
         EXPECT_EQ(GL_TRUE, compileStatus);
     } else {
         EXPECT_NE(GL_TRUE, compileStatus);
+    }
+
+    if (GL_TRUE != compileStatus) {
+        GLsizei infoLogLength = 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> infoLog(infoLogLength + 1, 0);
+        glGetShaderInfoLog(shader, infoLogLength, nullptr, infoLog.data());
+        fprintf(stderr, "Failed to compile shader. Info log: [%s]\n", infoLog.data());
     }
 
     glDeleteShader(shader);
