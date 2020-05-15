@@ -460,6 +460,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         FramelessDetector::isFramelessOk() ?
             settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true;
     mPreviouslyFramed = mFrameAlways;
+    mDisableDeviceFrame =
+        settings.value(Ui::Settings::DISABLE_DEVICE_FRAME, false).toBool();
 
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
                                  mUserActionsCounter);
@@ -620,6 +622,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             });
 
     setFrameAlways(mFrameAlways);
+
+    if (mDisableDeviceFrame) { setNoSkin(); }
 
     mWheelScrollTimer.setInterval(100);
     mWheelScrollTimer.setSingleShot(true);
@@ -2882,7 +2886,7 @@ void EmulatorQtWindow::setNoSkin() {
         if (skinDir != NULL) {
             SkinEvent* event = new SkinEvent();
             event->type = kEventSetNoSkin;
-            skin_event_add(event);
+            queueSkinEvent(event);
         }
         mToolWindow->hideRotationButton(true);
         setFrameAlways(true);
@@ -2896,7 +2900,7 @@ void EmulatorQtWindow::restoreSkin() {
         if (skinDir != NULL) {
             SkinEvent* event = new SkinEvent();
             event->type = kEventRestoreSkin;
-            skin_event_add(event);
+            queueSkinEvent(event);
         }
         mToolWindow->hideRotationButton(false);
         setFrameAlways(false);

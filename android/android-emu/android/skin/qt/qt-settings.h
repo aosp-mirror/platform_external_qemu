@@ -51,6 +51,7 @@ constexpr char FRAME_ALWAYS[] = "set/frameAlways4"; // Do not use "set/frameAlwa
                                                     // version is 4
                                                     // (for canary, default with frame ON for Wear
                                                     // devices, default OFF for everything else)
+constexpr char DISABLE_DEVICE_FRAME[] = "set/disableDeviceFrame";
 constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
 constexpr char DISABLE_MOUSE_WHEEL[] = "set/disableMouseWheel";

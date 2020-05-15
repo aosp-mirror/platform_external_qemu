@@ -128,6 +128,10 @@ SettingsPage::SettingsPage(QWidget* parent)
         FramelessDetector::isFramelessOk() ?
             settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true);
 
+    // Disable the skin?
+    mUi->set_disableDeviceFrame->setChecked(
+        settings.value(Ui::Settings::DISABLE_DEVICE_FRAME, false).toBool());
+
 #ifdef __linux__
     // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)
     // Make the control invisible
@@ -503,6 +507,12 @@ void SettingsPage::on_set_frameAlways_toggled(bool checked) {
         settings.setValue(Ui::Settings::FRAME_ALWAYS, checked);
         emit(frameAlwaysChanged(checked));
     }
+}
+
+void SettingsPage::on_set_disableDeviceFrame_toggled(bool checked) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::DISABLE_DEVICE_FRAME, checked);
+    emit(disableDeviceFrameChanged(checked));
 }
 
 void SettingsPage::on_set_autoFindAdb_toggled(bool checked) {
