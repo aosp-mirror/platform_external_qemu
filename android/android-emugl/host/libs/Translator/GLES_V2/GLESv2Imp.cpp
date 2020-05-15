@@ -1097,6 +1097,9 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
 
         GLint maxDualSourceDrawBuffers = 1;
 
+        bool shaderFramebufferFetch =
+            GLEScontext::shaderFramebufferFetchSupported();
+
         ANGLEShaderParser::globalInitialize(
                 maxVertexAttribs,
                 maxVertexUniformVectors,
@@ -1111,7 +1114,8 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
                 maxFragmentInputVectors,
                 minProgramTexelOffset,
                 maxProgramTexelOffset,
-                maxDualSourceDrawBuffers);
+                maxDualSourceDrawBuffers,
+                shaderFramebufferFetch);
     }
     RET_AND_SET_ERROR_IF(!GLESv2Validate::shaderType(ctx, type), GL_INVALID_ENUM, 0);
     if(ctx->shareGroup().get()) {

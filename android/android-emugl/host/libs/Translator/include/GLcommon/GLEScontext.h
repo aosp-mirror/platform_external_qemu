@@ -281,6 +281,9 @@ public:
         return s_glSupport.ext_GL_EXT_memory_object &&
                s_glSupport.ext_GL_EXT_semaphore;
     }
+    static bool shaderFramebufferFetchSupported() {
+        return s_glSupport.ext_GL_EXT_shader_framebuffer_fetch;
+    }
     virtual ~GLEScontext();
     virtual int getMaxTexUnits() = 0;
     virtual int getMaxCombinedTexUnits() { return getMaxTexUnits(); }
