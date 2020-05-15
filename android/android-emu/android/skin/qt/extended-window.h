@@ -65,6 +65,7 @@ public:
 
 private slots:
     void switchFrameAlways(bool showFrame);
+    void switchDisableDeviceFrame(bool showFrame);
     void switchOnTop(bool isOntop);
     void switchToTheme(SettingsTheme theme);
     void disableMouseWheel(bool disabled);

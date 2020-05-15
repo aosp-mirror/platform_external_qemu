@@ -54,10 +54,12 @@ signals:
     void themeChanged(SettingsTheme new_theme);
     void enableClipboardSharingChanged(bool enabled);
     void disableMouseWheelChanged(bool disabled);
+    void disableDeviceFrameChanged(bool disabled);
 
 private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
     void on_set_frameAlways_toggled(bool checked);
+    void on_set_disableDeviceFrame_toggled(bool checked);
     void on_set_onTop_toggled(bool checked);
     void on_set_autoFindAdb_toggled(bool checked);
     void on_set_saveLocBox_textEdited(const QString&);
