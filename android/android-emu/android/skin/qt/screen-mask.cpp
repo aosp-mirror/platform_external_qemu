@@ -132,6 +132,8 @@ AConfig* getForegroundConfig() {
 // Handle the screen mask. This includes the mask image itself
 // and any associated cutout and padding offset.
 void loadMask() {
+    fprintf(stderr, "%s: call\n", __func__);
+
     char* skinName;
     char* skinDir;
 
@@ -143,6 +145,7 @@ void loadMask() {
 }
 
 void setAndroidOverlay(AdbInterface* adbInterface) {
+    fprintf(stderr, "%s: call\n", __func__);
     AConfig* foregroundConfig = getForegroundConfig();
     if (foregroundConfig != nullptr) {
         setPaddingAndCutout(adbInterface, foregroundConfig);
