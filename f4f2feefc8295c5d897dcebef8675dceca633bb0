@@ -22,6 +22,30 @@
       "revId": "f4f2feefc8295c5d897dcebef8675dceca633bb0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c131eb7_cd30cbc4",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-16T18:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d25ca0dc_eb0e762e",
+      "range": {
+        "startLine": 65,
+        "startChar": 12,
+        "endLine": 65,
+        "endChar": 31
+      },
+      "revId": "f4f2feefc8295c5d897dcebef8675dceca633bb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
