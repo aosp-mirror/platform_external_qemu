@@ -1727,7 +1727,7 @@ void EmulatorQtWindow::slot_setWindowTitle(QString title,
     (*mAdbInterface)->setSerialNumberPort(android_serial_number_port);
 
     // Using adb when adb port number is configured
-    ScreenMask::setAndroidOverlay((*mAdbInterface));
+    // ScreenMask::setAndroidOverlay((*mAdbInterface));
 }
 
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
