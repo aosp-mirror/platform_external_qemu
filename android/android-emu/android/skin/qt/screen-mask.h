@@ -9,7 +9,6 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  */
-
 #pragma once
 
 namespace android {
@@ -19,8 +18,5 @@ class AdbInterface;
 }  // namespace android
 
 namespace ScreenMask {
-
     void loadMask();
-    void setAndroidOverlay(android::emulation::AdbInterface* adbInterface);
-
 };
