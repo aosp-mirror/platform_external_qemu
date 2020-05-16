@@ -142,10 +142,4 @@ void loadMask() {
     }
 }
 
-void setAndroidOverlay(AdbInterface* adbInterface) {
-    AConfig* foregroundConfig = getForegroundConfig();
-    if (foregroundConfig != nullptr) {
-        setPaddingAndCutout(adbInterface, foregroundConfig);
-    }
-}
-}
+} // namespace ScreenMask
