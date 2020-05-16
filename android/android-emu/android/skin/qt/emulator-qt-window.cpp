@@ -1729,9 +1729,6 @@ void EmulatorQtWindow::slot_setWindowTitle(QString title,
     // has been set. This port ensures AdbInterface can identify the correct
     // device if there is more than one.
     (*mAdbInterface)->setSerialNumberPort(android_serial_number_port);
-
-    // Using adb when adb port number is configured
-    ScreenMask::setAndroidOverlay((*mAdbInterface));
 }
 
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
