@@ -234,6 +234,12 @@ static GLEScontext* createGLESxContext(int maj, int min,
 }
 
 static bool shaderParserInitialized = false;
+static bool sDebugPrintShaders = false;
+
+#define SHADER_DEBUG_PRINT(fmt,...) \
+    if (sDebugPrintShaders) { \
+        printf("shader_debug: %s: " fmt "\n", __func__, ##__VA_ARGS__); \
+    } \
 
 static void initGLESx(bool isGles2Gles) {
     setGles2Gles(isGles2Gles);
@@ -442,6 +448,9 @@ GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
         SET_ERROR_IF((pData->getAttachedShader(shaderType)!=0), GL_INVALID_OPERATION);
         pData->attachShader(shader, (ShaderParser*)shaderData, shaderType);
         s_attachShader(ctx, program, shader, (ShaderParser*)shaderData);
+
+        SHADER_DEBUG_PRINT(
+            "attach shader %u to program %u", shader, program);
         ctx->dispatcher().glAttachShader(globalProgramName,globalShaderName);
     }
 }
@@ -1075,6 +1084,9 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
     // Lazy init so we can catch the caps.
     if (!shaderParserInitialized) {
         shaderParserInitialized = true;
+        sDebugPrintShaders =
+            android::base::System::getEnvironmentVariable(
+                "ANDROID_EMUGL_SHADER_PRINT") == "1";
 
         GLint maxVertexAttribs; ctx->dispatcher().glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
         GLint maxVertexUniformVectors; ctx->dispatcher().glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &maxVertexUniformVectors);
@@ -1386,6 +1398,9 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 
 // s_glDrawPre/Post() are for draw calls' fast paths.
 static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
+
+    SHADER_DEBUG_PRINT("draw with program %u", ctx->getCurrentProgram());
+
     if (isGles2Gles()) {
         return;
     }
@@ -3288,9 +3303,29 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         ShaderParser* sp = (ShaderParser*)objData;
         sp->setSrc(count, string, length);
         if (isGles2Gles()) {
+            if (sDebugPrintShaders) { // save repeated checks
+                for (GLsizei i = 0; i < count; ++i) {
+                    SHADER_DEBUG_PRINT(
+                        "(GLES->GLES) shader "
+                        "%u source %d of %d: [%s]\n",
+                        shader,
+                        i, count,
+                        string[i]);
+                }
+            }
             ctx->dispatcher().glShaderSource(globalShaderName, count, string,
                                          length);
         } else {
+            if (sDebugPrintShaders) { // save repeated checks
+                for (GLsizei i = 0; i < 1; ++i) {
+                    SHADER_DEBUG_PRINT(
+                        "(GLES->GL translated) "
+                        "shader %u source %d of %d: [%s]\n",
+                        shader,
+                        i, count,
+                        sp->parsedLines()[i]);
+                }
+            }
             ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
                                          NULL);
         }
@@ -3758,6 +3793,8 @@ GL_APICALL void  GL_APIENTRY glUseProgram(GLuint program){
         if (programData) programData->setInUse(true);
 
         ctx->setUseProgram(program, objData);
+        SHADER_DEBUG_PRINT("use program %u", program);
+
         ctx->dispatcher().glUseProgram(globalProgramName);
     }
 }
