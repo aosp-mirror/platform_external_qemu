@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b8cd314_acbd51e6",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-05-18T18:05:03Z",
+      "side": 1,
+      "message": "I\u0027m not sure this warning is useful. It has potential to do more harm than good.",
+      "range": {
+        "startLine": 245,
+        "startChar": 25,
+        "endLine": 245,
+        "endChar": 33
+      },
+      "revId": "3bab3459f44fea399bb23f97c99e72c604370ece",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ea2f2ce_95136fa3",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-05-18T18:05:03Z",
+      "side": 1,
+      "message": "Android Studio",
+      "range": {
+        "startLine": 246,
+        "startChar": 26,
+        "endLine": 246,
+        "endChar": 40
+      },
+      "revId": "3bab3459f44fea399bb23f97c99e72c604370ece",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da303de9_0a5aea04",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-05-18T18:05:03Z",
+      "side": 1,
+      "message": "This is misleading since the fix in Chrome hasn\u0027t been released yet.",
+      "range": {
+        "startLine": 249,
+        "startChar": 20,
+        "endLine": 249,
+        "endChar": 64
+      },
+      "revId": "3bab3459f44fea399bb23f97c99e72c604370ece",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
