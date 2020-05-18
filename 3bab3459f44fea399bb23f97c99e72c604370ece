@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "69515878_94b6c3f6",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-18T19:07:13Z",
+      "side": 1,
+      "message": "How so? This alerts users that their current situation is abnormal and XDG_RUNTIME_DIR should be configured. Other parts of Studio and other apps will rely on XDG_RUNTIME_DIR, so this could also be useful for them to debug why their other apps aren\u0027t working too.",
+      "parentUuid": "3b8cd314_acbd51e6",
+      "range": {
+        "startLine": 245,
+        "startChar": 25,
+        "endLine": 245,
+        "endChar": 33
+      },
+      "revId": "3bab3459f44fea399bb23f97c99e72c604370ece",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8ea2f2ce_95136fa3",
         "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
         "patchSetId": 1
