@@ -71,6 +71,12 @@ public:
     // |token| Token to use.
     Builder& withAuthToken(std::string token);
 
+    // True to enable verbose logging.
+    // Verbose logging will connect the gRPC logging engine to the
+    // android emulator log engine. Setting this to false will
+    // disable all logging.
+    Builder& withVerboseLogging(bool verbose);
+
     // Enables the gRPC service that binds on the given address on the first
     // port available in the port range [startPart, endPort).
     //
@@ -108,6 +114,7 @@ private:
     std::string mCertfile;
     std::string mAuthToken;
     bool mValid{true};
+    bool mVerbose{false};
 };
 
 }  // namespace control
