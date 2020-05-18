@@ -26,6 +26,20 @@
 
 #include <string>
 
+typedef enum {
+    SVC_ERROR_OPENSCMANAGER = -3,
+    SVC_ERROR_OPENSERVICE = -2,
+    SVC_ERROR_QUERYSERVICE = -1,
+    SVC_NOT_FOUND = 0,
+    SVC_STOPPED = SERVICE_STOPPED,
+    SVC_START_PENDING = SERVICE_START_PENDING,
+    SVC_STOP_PENDING = SERVICE_STOP_PENDING,
+    SVC_RUNNING = SERVICE_RUNNING,
+    SVC_CONTINUE_PENDING = SERVICE_CONTINUE_PENDING,
+    SVC_PAUSE_PENDING = SERVICE_PAUSE_PENDING,
+    SVC_PAUSED = SERVICE_PAUSED,
+} ServiceStatus;
+
 namespace android {
 namespace base {
 
@@ -69,6 +83,12 @@ public:
         void operator()(HANDLE h) const { ::CloseHandle(h); }
     };
     using ScopedHandle = std::unique_ptr<void, HandleCloser>;
+
+    // This functions returns the service status givin the service name
+    // negative values means error in calling related Win32 APIs.
+    // 0 means the service does not exist
+    // positive values are what one would expect from "sc query srcName"
+    static ServiceStatus getServiceStatus(const char *srcName);
 };
 
 }  // namespace base

@@ -110,6 +110,39 @@ Optional<_OSVERSIONINFOEXW> Win32Utils::getWindowsVersion() {
     return ver;
 }
 
+ServiceStatus Win32Utils::getServiceStatus(const char *srcName) {
+    SC_HANDLE hsrc, hscm;
+    SERVICE_STATUS_PROCESS ssStatus;
+    DWORD dwBytesNeeded, ec;
+    int result;
+
+    hscm = OpenSCManager(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
+    if (!hscm) {
+        return SVC_ERROR_OPENSCMANAGER;
+    }
+
+    hsrc = OpenService(hscm, srcName, SERVICE_QUERY_STATUS);
+    if (!hsrc) {
+        ec = GetLastError();
+        CloseServiceHandle(hscm);
+        if (ec == ERROR_SERVICE_DOES_NOT_EXIST)
+            return SVC_NOT_FOUND;
+        return SVC_ERROR_OPENSERVICE;
+    }
+
+    result = QueryServiceStatusEx(hsrc, SC_STATUS_PROCESS_INFO,
+        (LPBYTE)&ssStatus, sizeof(ssStatus), &dwBytesNeeded);
+
+    CloseServiceHandle(hsrc);
+    CloseServiceHandle(hscm);
+
+    if (result == 0) {
+        return SVC_ERROR_QUERYSERVICE;
+    }
+
+    return static_cast<ServiceStatus>(ssStatus.dwCurrentState);
+}
+
 
 }  // namespace base
 }  // namespace android
