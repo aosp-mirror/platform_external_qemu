@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "6b6efdee_43bbd6cb",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-05-18T19:38:53Z",
+      "side": 1,
+      "message": "With this change we won\u0027t depend on XDG_RUNTIME_DIR being set.",
+      "parentUuid": "69515878_94b6c3f6",
+      "range": {
+        "startLine": 245,
+        "startChar": 25,
+        "endLine": 245,
+        "endChar": 33
+      },
+      "revId": "3bab3459f44fea399bb23f97c99e72c604370ece",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8ea2f2ce_95136fa3",
         "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
         "patchSetId": 1
