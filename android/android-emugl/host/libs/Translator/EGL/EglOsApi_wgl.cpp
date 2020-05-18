@@ -19,6 +19,7 @@
 
 #include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/shared_library.h"
 #include "emugl/common/thread_store.h"
 #include "GLcommon/GLLibrary.h"
@@ -52,6 +53,11 @@
 #else
 #define D(...)  ((void)0)
 #endif
+
+#define WGL_ERR(...)  do { \
+    fprintf(stderr, __VA_ARGS__); \
+    GL_LOG(__VA_ARGS__); \
+} while(0) \
 
 // TODO: Replace with latency tracker.
 #define PROFILE_SLOW(tag)
@@ -188,7 +194,7 @@ struct WglBaseDispatch {
             return_type (GL_APIENTRY*) signature>( \
                     glLib->findSymbol(#function_name)); \
     if (!this->function_name) { \
-        ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
+        WGL_ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
                 #function_name); \
         result = false; \
     }
@@ -198,7 +204,7 @@ struct WglBaseDispatch {
             return_type (GL_APIENTRY*) signature>( \
                     GetProcAddress(gdi32, #function_name)); \
     if (!this->function_name) { \
-        ERR("%s: Could not find %s in GDI32 library\n", __FUNCTION__, \
+        WGL_ERR("%s: Could not find %s in GDI32 library\n", __FUNCTION__, \
                 #function_name); \
         result = false; \
     }
@@ -208,7 +214,7 @@ struct WglBaseDispatch {
             return_type (GL_APIENTRY*) signature>( \
                     glLib->findSymbol("wgl" #function_name)); \
     if (!this->function_name) { \
-        ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
+        WGL_ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
                 "wgl" #function_name); \
         result = false; \
     }
@@ -358,7 +364,7 @@ public:
         }
         // Both failed, suicide.
         if (!extensionList || !strcmp(extensionList, "")) {
-            ERR("%s: Could not find wglGetExtensionsString!\n",
+            WGL_ERR("%s: Could not find wglGetExtensionsString!\n",
                 __FUNCTION__);
             return false;
         }
@@ -374,7 +380,7 @@ public:
                         this->findFunction(#function_name "EXT")); \
     } \
     if (!this->function_name) { \
-        ERR("ERROR: %s: Missing extension function %s\n", __FUNCTION__, \
+        WGL_ERR("ERROR: %s: Missing extension function %s\n", __FUNCTION__, \
             #function_name); \
         result = false; \
     }
@@ -384,7 +390,7 @@ public:
         supportsExtension("WGL_EXT_" #extension, extensionList)) { \
         LIST_##extension##_FUNCTIONS(LOAD_WGL_EXTENSION_FUNCTION) \
     } else { \
-        ERR("WARNING: %s: Missing WGL extension %s\n", __FUNCTION__, #extension); \
+        WGL_ERR("WARNING: %s: Missing WGL extension %s\n", __FUNCTION__, #extension); \
     }
 
         LOAD_WGL_EXTENSION(pixel_format)
@@ -406,7 +412,8 @@ const WglExtensionsDispatch* initExtensionsDispatch(
     HWND hwnd = createDummyWindow();
     HDC hdc =  GetDC(hwnd);
     if (!hwnd || !hdc){
-        fprintf(stderr,"error while getting DC\n");
+        int err = GetLastError();
+        WGL_ERR("error while getting DC: 0x%x\n", err);
         return NULL;
     }
     PIXELFORMATDESCRIPTOR pfd = {
@@ -433,12 +440,12 @@ const WglExtensionsDispatch* initExtensionsDispatch(
     int iPixelFormat = dispatch->ChoosePixelFormat(hdc, &pfd);
     if (iPixelFormat <= 0) {
         int err = GetLastError();
-        fprintf(stderr,"error while choosing pixel format 0x%x\n", err);
+        WGL_ERR("error while choosing pixel format 0x%x\n", err);
         return NULL;
     }
     if (!dispatch->SetPixelFormat(hdc, iPixelFormat, &pfd)) {
         int err = GetLastError();
-        fprintf(stderr,"error while setting pixel format 0x%x\n", err);
+        WGL_ERR("error while setting pixel format 0x%x\n", err);
         return NULL;
     }
 
@@ -446,11 +453,11 @@ const WglExtensionsDispatch* initExtensionsDispatch(
     HGLRC ctx = dispatch->wglCreateContext(hdc);
     if (!ctx) {
         err =  GetLastError();
-        fprintf(stderr,"error while creating dummy context %d\n", err);
+        WGL_ERR("error while creating dummy context: 0x%x\n", err);
     }
     if (!dispatch->wglMakeCurrent(hdc, ctx)) {
         err =  GetLastError();
-        fprintf(stderr,"error while making dummy context current %d\n", err);
+        WGL_ERR("error while making dummy context current: 0x%x\n", err);
     }
 
     WglExtensionsDispatch* result = new WglExtensionsDispatch(*dispatch);
@@ -561,7 +568,7 @@ public:
     ~WinContext() {
         android::base::AutoLock lock(sGlobalLock);
         if (!mDispatch->wglDeleteContext(mCtx)) {
-            fprintf(stderr, "error deleting WGL context! error 0x%x\n",
+            WGL_ERR("error deleting WGL context! error 0x%x\n",
                     (unsigned)GetLastError());
         }
     }
@@ -921,6 +928,11 @@ public:
         int maxFormat = mDispatch->DescribePixelFormat(
                 dpy, 1, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
+        if (0 == maxFormat) {
+            WGL_ERR("No pixel formats found from wglDescribePixelFormat! "
+                    "error: 0x%x\n", GetLastError());
+        }
+
         // Inserting rest of formats. Try to map each one to an EGL Config.
         for (int configId = 1; configId <= maxFormat; configId++) {
             mDispatch->DescribePixelFormat(
@@ -1142,6 +1154,7 @@ private:
         mCoreProfileSupported = false;
 
         if (!mDispatch->wglCreateContextAttribs) {
+            WGL_ERR("OpenGL Core Profile not supported.\n");
             // Not supported, don't even try.
             return;
         }
@@ -1257,18 +1270,18 @@ WinEngine::WinEngine() :
         isSystemLib = false;
     }
     char error[256];
-    D("%s: Trying to load %s\n", __FUNCTION__, kLibName);
+    GL_LOG("%s: Trying to load %s\n", __FUNCTION__, kLibName);
     mLib = SharedLibrary::open(kLibName, error, sizeof(error));
     if (!mLib) {
-        ERR("ERROR: %s: Could not open %s: %s\n", __FUNCTION__,
-            kLibName, error);
+        WGL_ERR("ERROR: %s: Could not open %s: %s\n", __FUNCTION__,
+                kLibName, error);
         exit(1);
     }
 
-    D("%s: Library loaded at %p\n", __FUNCTION__, mLib);
+    GL_LOG("%s: Library loaded at %p\n", __FUNCTION__, mLib);
     mBaseDispatch.init(mLib, isSystemLib);
     mDispatch = initExtensionsDispatch(&mBaseDispatch);
-    D("%s: Dispatch initialized\n", __FUNCTION__);
+    GL_LOG("%s: Dispatch initialized\n", __FUNCTION__);
 }
 
 emugl::LazyInstance<WinEngine> sHostEngine = LAZY_INSTANCE_INIT;
