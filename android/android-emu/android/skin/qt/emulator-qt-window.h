@@ -293,6 +293,9 @@ public slots:
 
 private slots:
     void slot_adbWarningMessageAccepted();
+#ifdef _WIN32
+    void slot_vgkWarningMessageAccepted();
+#endif
     void slot_blit(SkinSurfaceBitmap* src,
                    QRect srcRect,
                    SkinSurfaceBitmap* dst,
@@ -391,6 +394,9 @@ private:
     void showAvdArchWarning();
     void checkShouldShowGpuWarning();
     void showGpuWarning();
+#ifdef _WIN32
+    void checkVgkAndWarn();
+#endif
 
     bool mouseInside();
     SkinMouseButtonType getSkinMouseButton(QMouseEvent* event) const;
@@ -485,6 +491,9 @@ private:
     OnDemandMessageBox mAvdWarningBox;
     OnDemandMessageBox mGpuWarningBox;
     OnDemandMessageBox mAdbWarningBox;
+#ifdef _WIN32
+    OnDemandMessageBox mVgkWarningBox;
+#endif
 
     // First-show related warning messages state
     bool mGpuBlacklisted = false;

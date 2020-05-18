@@ -21,6 +21,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
+#include "android/base/system/Win32Utils.h"
 #include "android/base/threads/Async.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
@@ -380,6 +381,17 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      tr(""),
                      QMessageBox::Ok,
                      this),
+#ifdef _WIN32
+      mVgkWarningBox(QMessageBox::Information,
+                     tr("Incompatible Software Detected"),
+                     tr("Vanguard anti-cheat software is deteced on your "
+                        "system. It is known to have compatibility issues "
+                        "with Android emulator. It is recommended to uninstall "
+                        "or deactivate Vanguard anti-cheat software while "
+                        "running Android emulator."),
+                     QMessageBox::Ok,
+                     this),
+#endif
       mEventLogger(
               std::make_shared<UIEventRecorder<android::base::CircularBuffer>>(
                       &mEventCapturer,
@@ -1796,6 +1808,9 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
         checkShouldShowGpuWarning();
         showGpuWarning();
         checkAdbVersionAndWarn();
+#ifdef _WIN32
+        checkVgkAndWarn();
+#endif
         mFirstShowWindowCall = false;
     }
 }
@@ -2756,6 +2771,40 @@ void EmulatorQtWindow::runAdbShellPowerDownAndQuit() {
             },
             5000); // for qemu1, reboot -p will shutdown guest but hangs, allow 5s
 }
+
+#ifdef _WIN32
+void EmulatorQtWindow::checkVgkAndWarn() {
+    AndroidCpuAccelerator accelerator = androidCpuAcceleration_getAccelerator();
+
+    if (accelerator != ANDROID_CPU_ACCELERATOR_HAX &&
+        accelerator != ANDROID_CPU_ACCELERATOR_GVM)
+        return;
+
+    if (::android::base::Win32Utils::getServiceStatus("vgk") <= SVC_NOT_FOUND)
+        return;
+
+    QSettings settings;
+    if (settings.value(Ui::Settings::SHOW_VGK_WARNING, true).toBool()) {
+        QObject::connect(mVgkWarningBox.ptr(),
+                         SIGNAL(buttonClicked(QAbstractButton*)), this,
+                         SLOT(slot_vgkWarningMessageAccepted()));
+
+        QCheckBox* checkbox = new QCheckBox(tr("Never show this again."));
+        checkbox->setCheckState(Qt::Unchecked);
+        mVgkWarningBox->setWindowModality(Qt::NonModal);
+        mVgkWarningBox->setCheckBox(checkbox);
+        mVgkWarningBox->show();
+    }
+}
+
+void EmulatorQtWindow::slot_vgkWarningMessageAccepted() {
+    QCheckBox* checkbox = mVgkWarningBox->checkBox();
+    if (checkbox->checkState() == Qt::Checked) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::SHOW_VGK_WARNING, false);
+    }
+}
+#endif
 
 void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     // Hack. Notify the parent container that we're rotating, so it doesn't
