@@ -227,9 +227,10 @@ discovery_dir discovery{"HOME", "Library/Caches/TemporaryItems"};
 
 static std::string getAlternativeRoot() {
 #ifdef __linux__
-    auto discovery = PathUtils::pathWithEnvSubstituted("/run/user/${UID}");
-    if (discovery && System::get()->pathExists(*discovery)) {
-        return *discovery;
+    auto uid =  getuid();
+    auto discovery = pj("/run/user/", std::to_string(uid));
+    if (System::get()->pathExists(discovery)) {
+        return discovery;
     }
 #endif
 
@@ -240,6 +241,13 @@ static std::string getAlternativeRoot() {
 std::string ConfigDirs::getDiscoveryDirectory() {
     auto root = System::get()->getEnvironmentVariable(discovery.root_env);
     if (root.empty()) {
+#ifdef __linux__
+        fprintf(stderr, "WARNING! The environment variable XDG_RUNTIME_DIR is not set, this might "
+               "result in android studio not discovering the current running emulator.\n"
+               "If you are chromoting you might experience: \n"
+               "https://bugs.chromium.org/p/chromium/issues/detail?id=1077449 "
+               "and might need to update your chromoting install.\n");
+#endif
         // Reverting to the alternative root if these environment variables do
         // not exist.
         root = getAlternativeRoot();
