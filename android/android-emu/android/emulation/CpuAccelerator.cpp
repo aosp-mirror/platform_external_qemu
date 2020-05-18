@@ -1031,8 +1031,13 @@ AndroidCpuAcceleration ProbeGVMCpu(std::string* status) {
     return ANDROID_CPU_ACCELERATION_READY;
 }
 
+#include "android/base/system/Win32Utils.h"
 AndroidCpuAcceleration ProbeGVM(std::string* status) {
     status->clear();
+
+    int st = ::android::base::Win32Utils::getServiceStatus("gvm");
+
+    fprintf(stderr, "service status %d\n", st);
 
     AndroidCpuAcceleration cpu = ProbeGVMCpu(status);
     if (cpu != ANDROID_CPU_ACCELERATION_READY)
