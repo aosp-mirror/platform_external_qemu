@@ -231,6 +231,9 @@ if(LINUX_X86_64)
   add_c_flag("-Wno-deprecated-declarations") # Protobuf generates deprecation warnings for deprecated enums
   # And the asm type if we are compiling with yasm
   set(ANDROID_NASM_TYPE elf64)
+  # This should make sure we have sufficient information left to properly print std::string etc.
+  # see b/156534499 for details.
+  add_c_flag("-fno-limit-debug-info")
 elseif(LINUX_AARCH64)
   set(ANDROID_NASM_TYPE elf64)
 elseif(WINDOWS_MSVC_X86_64)
