@@ -12,6 +12,11 @@
 
 #include "android/main-common-ui.h"
 
+#ifdef __APPLE__
+#include <ApplicationServices/ApplicationServices.h>
+#endif
+
+
 #include "android/avd/util.h"
 #include "android/boot-properties.h"
 #include "android/emulation/bufprint_config_dirs.h"
@@ -45,6 +50,7 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
+
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -513,6 +519,11 @@ ui_init(const AConfig* skinConfig,
         */
         signal(SIGTTIN, SIG_IGN);
         signal(SIGTTOU, SIG_IGN);
+#endif
+#ifdef __APPLE__
+    /** Make sure we don't accidentally display an icon b/156675899 */
+    ProcessSerialNumber psn = {0, kCurrentProcess};
+    TransformProcessType(&psn, kProcessTransformToBackgroundApplication);
 #endif
     } else {
         // NOTE: On Windows, the program icon is embedded as a resource inside
