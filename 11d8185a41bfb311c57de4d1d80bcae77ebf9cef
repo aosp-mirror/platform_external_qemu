@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "383233c4_3b2a4215",
+        "filename": "android/android-emu/android/hw-sensors.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1157,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-18T16:41:27Z",
+      "side": 1,
+      "message": "Can we have a unit test for |parse_for_tokens| ?",
+      "revId": "11d8185a41bfb311c57de4d1d80bcae77ebf9cef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a2d123a0_4e0fb8ee",
+        "filename": "android/android-emu/android/hw-sensors.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1189,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-18T16:41:27Z",
+      "side": 1,
+      "message": "unit test for foldable config strings -\u003e foldable state as well",
+      "revId": "11d8185a41bfb311c57de4d1d80bcae77ebf9cef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
