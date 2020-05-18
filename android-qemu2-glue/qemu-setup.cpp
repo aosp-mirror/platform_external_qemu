@@ -320,6 +320,7 @@ int qemu_setup_grpc() {
                            .withCertAndKey(android_cmdLineOptions->grpc_tls_cer,
                                            android_cmdLineOptions->grpc_tls_key,
                                            android_cmdLineOptions->grpc_tls_ca)
+                           .withVerboseLogging(android_verbose)
                            .withAddress(address)
                            .withService(emulator)
                            .withService(h2o)

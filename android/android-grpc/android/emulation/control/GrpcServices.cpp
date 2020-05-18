@@ -20,7 +20,6 @@
 #include <assert.h>
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/security/server_credentials_impl.h>
-
 #include <chrono>
 #include <fstream>
 #include <iterator>
@@ -37,6 +36,7 @@
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/interceptor/MetricsInterceptor.h"
 #include "android/emulation/control/secure/BasicTokenAuth.h"
+#include "android/emulation/control/utils/GrpcAndroidLogAdapter.h"
 #include "grpc/grpc_security_constants.h"
 #include "grpcpp/server_builder_impl.h"
 #include "grpcpp/server_impl.h"
@@ -161,6 +161,11 @@ Builder& Builder::withCertAndKey(const char* certfile,
     return *this;
 }
 
+Builder& Builder::withVerboseLogging(bool verbose) {
+    mVerbose = verbose;
+    return *this;
+}
+
 Builder& Builder::withAddress(std::string address) {
     mBindAddress = address;
     return *this;
@@ -205,6 +210,13 @@ tstream& operator<<(tstream& out, const Builder::Security value) {
 }
 
 std::unique_ptr<EmulatorControllerService> Builder::build() {
+    // Setup a log redirector.
+    if (mVerbose) {
+        gpr_set_log_function(&gpr_log_to_android_log);
+    } else {
+        gpr_set_log_function(&gpr_null_logger);
+    }
+
     if (mPort == -1) {
         // No agents, or no port was found.
         LOG(INFO) << "No agents, or valid port was found";
