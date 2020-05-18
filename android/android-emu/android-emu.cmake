@@ -663,6 +663,7 @@ android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)
 android_target_link_libraries(
   android-emu-shared darwin-x86_64
   PRIVATE "-framework AppKit"
+          "-framework ApplicationServices" # To control icon
           "-framework AVFoundation" # For camera-capture-mac.m
           "-framework Accelerate" # Of course, our camera needs it!
           "-framework CoreMedia" # Also for the camera.
