@@ -69,6 +69,12 @@ public:
         void operator()(HANDLE h) const { ::CloseHandle(h); }
     };
     using ScopedHandle = std::unique_ptr<void, HandleCloser>;
+
+    // This functions returns the service status givin the service name
+    // negative values means error in calling related Win32 APIs.
+    // 0 means the service does not exist
+    // positive values are what one would expect from "sc query srcName"
+    static int getServiceStatus(char *srcName);
 };
 
 }  // namespace base
