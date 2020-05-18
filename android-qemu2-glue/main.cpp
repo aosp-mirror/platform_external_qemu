@@ -18,6 +18,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/base/system/Win32Utils.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
 #include "android/camera/camera-virtualscene.h"
@@ -1702,6 +1703,18 @@ extern "C" int main(int argc, char** argv) {
        // KVM on Mac, etc.)
 
     AFREE(accel_status);
+
+#ifdef _WIN32
+    if ((accelerator == ANDROID_CPU_ACCELERATOR_HAX ||
+         accelerator == ANDROID_CPU_ACCELERATOR_GVM) &&
+         ::android::base::Win32Utils::getServiceStatus("vgk") > SVC_NOT_FOUND) {
+        dwarning("Vanguard anti-cheat software is deteced on your system. "
+                 "It is known to have compatibility issues with Android "
+                 "emulator. It is recommended to uninstall or deactivate "
+                 "Vanguard anti-cheat software while running Android "
+                 "emulator.");
+    }
+#endif  // _WIN32
 #else   // !TARGET_X86_64 && !TARGET_I386
     args.add2("-machine", "type=ranchu");
 #endif  // !TARGET_X86_64 && !TARGET_I386
