@@ -359,7 +359,7 @@ public:
                               EglOS::AddConfigCallback* addConfigFunc,
                               void* addConfigOpaque) {
         int n;
-        GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
+        GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, DefaultScreen(mDisplay), &n);
         if (frmtList) {
             mFBConfigs.assign(frmtList, frmtList + n);
             for(int i = 0; i < n; i++) {
@@ -684,7 +684,15 @@ private:
 class GlxEngine : public EglOS::Engine {
 public:
     virtual EglOS::Display* getDefaultDisplay() {
-        return new GlxDisplay(XOpenDisplay(0));
+        Display* disp =
+            XOpenDisplay(0 /* default display or $DISPLAY env var */);
+        if (!disp) {
+            fprintf(stderr,
+                    "GlxEngine%s: Failed to open display 0. DISPLAY: [%s]\n",
+                    __func__, getenv("DISPLAY"));
+            return nullptr;
+        }
+        return new GlxDisplay(disp);
     }
 
     virtual GlLibrary* getGlLibrary() {
