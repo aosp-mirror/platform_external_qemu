@@ -51,6 +51,7 @@
 #include "android/snapshot/PathUtils.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
+#include "android_modem_v2.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
@@ -1570,7 +1571,7 @@ do_gsm_call( ControlClient  client, char*  args )
         control_write( client, "KO: modem emulation not running\r\n" );
         return -1;
     }
-    amodem_add_inbound_call( android_modem_get(), args );
+    amodem_add_inbound_call_vx(android_modem_get(), args);
     return 0;
 }
 
@@ -1776,7 +1777,7 @@ do_gsm_signal_profile( ControlClient  client, char*  args )
         return -1;
     }
 
-    amodem_set_signal_strength_profile( android_modem_get(), val );
+    amodem_set_signal_strength_profile_vx( android_modem_get(), val );
 
     return 0;
 }
@@ -1938,8 +1939,9 @@ do_sms_send( ControlClient  client, char*  args )
         return -1;
     }
 
-    for (nn = 0; pdus[nn] != NULL; nn++)
-        amodem_receive_sms( android_modem_get(), pdus[nn] );
+    for (nn = 0; pdus[nn] != NULL; nn++) {
+        amodem_receive_sms_vx( android_modem_get(), pdus[nn] );
+    }
 
     smspdu_free_list( pdus );
     return 0;
