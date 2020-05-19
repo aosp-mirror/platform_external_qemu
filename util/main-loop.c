@@ -212,6 +212,7 @@ static void glib_pollfds_fill(int64_t *cur_timeout)
         timeout_ns = (int64_t)timeout * (int64_t)SCALE_MS;
     }
 
+    fprintf(stderr, "priority %d too many fds %d \n", max_priority, n);
     *cur_timeout = qemu_soonest_timeout(timeout_ns, *cur_timeout);
 }
 
@@ -475,6 +476,10 @@ static int os_host_main_loop_wait(int64_t timeout)
     qemu_mutex_unlock_iothread();
 
     replay_mutex_unlock();
+
+    if (n_poll_fds + w->num > 64) {
+       // fprintf(stderr, "priority %d too many fds %d %d nfds %d, polled_count  %d\n", max_priority, n_poll_fds, w->num, nfds, polled_count);
+    }
 
     g_poll_ret = qemu_poll_ns(poll_fds, n_poll_fds + w->num, poll_timeout_ns);
 
