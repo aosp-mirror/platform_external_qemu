@@ -460,8 +460,22 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         FramelessDetector::isFramelessOk() ?
             settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true;
     mPreviouslyFramed = mFrameAlways;
-    mDisableDeviceFrame =
-        settings.value(Ui::Settings::DISABLE_DEVICE_FRAME, false).toBool();
+
+    mDisableDeviceFrame = false;
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        // Setting for where there's an AVD
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        mDisableDeviceFrame =
+            avdSpecificSettings.value(
+                Ui::Settings::PER_AVD_DISABLE_DEVICE_FRAME, false).toBool();
+    } else {
+        // Use the global setting
+        mDisableDeviceFrame =
+            settings.value(Ui::Settings::DISABLE_DEVICE_FRAME, false).toBool();
+    }
 
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
                                  mUserActionsCounter);

@@ -128,9 +128,25 @@ SettingsPage::SettingsPage(QWidget* parent)
         FramelessDetector::isFramelessOk() ?
             settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true);
 
+    bool disableDeviceFrame = false;
+
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        // Setting for where there's an AVD
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        disableDeviceFrame =
+            avdSpecificSettings.value(
+                Ui::Settings::PER_AVD_DISABLE_DEVICE_FRAME, false).toBool();
+    } else {
+        // Use the global setting
+        disableDeviceFrame =
+            settings.value(Ui::Settings::DISABLE_DEVICE_FRAME, false).toBool();
+    }
+
     // Disable the skin?
-    mUi->set_disableDeviceFrame->setChecked(
-        settings.value(Ui::Settings::DISABLE_DEVICE_FRAME, false).toBool());
+    mUi->set_disableDeviceFrame->setChecked(disableDeviceFrame);
 
 #ifdef __linux__
     // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)
@@ -510,8 +526,18 @@ void SettingsPage::on_set_frameAlways_toggled(bool checked) {
 }
 
 void SettingsPage::on_set_disableDeviceFrame_toggled(bool checked) {
-    QSettings settings;
-    settings.setValue(Ui::Settings::DISABLE_DEVICE_FRAME, checked);
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        // Setting for where there's an AVD
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        avdSpecificSettings.setValue(
+            Ui::Settings::PER_AVD_DISABLE_DEVICE_FRAME, checked);
+    } else {
+        QSettings settings;
+        settings.setValue(Ui::Settings::DISABLE_DEVICE_FRAME, checked);
+    }
     emit(disableDeviceFrameChanged(checked));
 }
 
