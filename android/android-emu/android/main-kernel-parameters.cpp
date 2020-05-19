@@ -209,6 +209,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         }
     }
 
+    if (opts->modem_simulator_port) {
+        params.addFormat("qemu.modem.port=%s", opts->modem_simulator_port);
+    }
+
     const bool isDynamicPartition = android::featurecontrol::isEnabled(android::featurecontrol::DynamicPartition);
     if (isQemu2 && isX86ish && !isDynamicPartition) {
         // x86 and x86_64 platforms use an alternative Android DT directory that
