@@ -75,6 +75,9 @@
 
 #include "config-target.h"
 
+// modem simulator
+#include "modem_main.h"
+
 extern "C" {
 #include "android/skin/charmap.h"
 #include "hw/misc/goldfish_pstore.h"
@@ -104,6 +107,7 @@ extern "C" {
 #include <unistd.h>
 #endif
 #include <algorithm>
+#include <string>
 
 #include "android/version.h"
 #define D(...)                   \
@@ -694,6 +698,28 @@ static void enter_qemu_main_loop(int argc, char** argv) {
 #define main qt_main
 #endif // windows
 #endif // !CONFIG_HEADLESS
+
+static void create_modem_simulator_configs_if_needed(AndroidHwConfig* hw) {
+    ScopedCPtr<char> avd_dir(path_dirname(hw->disk_dataPartition_path));
+    if (!avd_dir) {
+        return;
+    }
+
+    std::string modem_config_dir = PathUtils::join(avd_dir.get(), "modem_simulator");
+    std::string iccprofile_path = PathUtils::join(modem_config_dir.c_str(), "iccprofile_for_sim0.xml");
+    if (android_op_wipe_data) {
+        path_delete_file(iccprofile_path.c_str());
+    }
+
+    if (path_exists(iccprofile_path.c_str())) {
+        return;
+    }
+
+    ScopedCPtr<char> sysimg_dir(path_dirname(hw->disk_ramdisk_path));
+    std::string org_modem_config_dir = PathUtils::join(sysimg_dir.get(), "data", "misc", "modem_simulator");
+
+    path_copy_dir(modem_config_dir.c_str(), org_modem_config_dir.c_str());
+}
 
 static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
@@ -1450,6 +1476,7 @@ extern "C" int main(int argc, char** argv) {
 
     args.add2If("-android-wifi-client-port", opts->wifi_client_port);
     args.add2If("-android-wifi-server-port", opts->wifi_server_port);
+    args.add2If("-android-modem-simulator-port", opts->modem_simulator_port);
 
     args.add2If("-android-ports", opts->ports);
     if (opts->port) {
@@ -1847,6 +1874,27 @@ extern "C" int main(int argc, char** argv) {
     }
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
+
+    if (opts->modem_simulator_port) {
+        // create the modem_simulator sub folder on the host
+        // the radio configs come from the image/<arch>/data/misc/modem_simulator
+        // folder, make a copy of that folder to avd/modem_simulator/ and create
+        // the necessary dir strucutres that modem simulator expects
+        create_modem_simulator_configs_if_needed(hw);
+
+        args.add("-device");
+        args.add("virtio-serial");
+        args.add("-chardev");
+        args.addFormat(
+                "socket,port=%s,host=localhost,nowait,nodelay,ipv6,id=modem",
+                opts->modem_simulator_port);
+        args.add("-device");
+        args.add("virtserialport,chardev=modem,name=modem");
+
+        // start modem now, so qemu can proceed with virtioport setup
+        cvd::start_android_modem_simulator_detached(
+                std::string(opts->modem_simulator_port));
+    }
 
     // rng
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
