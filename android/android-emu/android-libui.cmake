@@ -5,6 +5,9 @@ prebuilt(FFMPEG)
 set(ANDROID_LIBUI_HEADLESS_SRC_FILES
     # cmake-format: sortable
     android/emulation/control/ScreenCapturer.cpp
+    android/emulation/MultiDisplay.cpp
+    android/qemu-setup.cpp
+    android/emulation/MultiDisplayPipe.cpp
     android/emulator-window.c
     android/gpu_frame.cpp
     android/main-common-ui.c
@@ -51,6 +54,9 @@ set(ANDROID_LIBUI_HEADLESS_SRC_FILES
 set(ANDROID_LIBUI_SRC_FILES
     # cmake-format: sortable
     android/emulation/control/ScreenCapturer.cpp
+    android/emulation/MultiDisplay.cpp
+    android/qemu-setup.cpp
+    android/emulation/MultiDisplayPipe.cpp
     android/emulator-window.c
     android/gpu_frame.cpp
     android/main-common-ui.c

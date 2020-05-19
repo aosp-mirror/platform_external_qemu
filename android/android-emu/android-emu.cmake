@@ -110,8 +110,6 @@ set(android-emu-common
     android/emulation/MediaVideoHelper.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
-    android/emulation/MultiDisplay.cpp
-    android/emulation/MultiDisplayPipe.cpp
     android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp
     android/emulation/qemud/android_qemud_client.cpp
@@ -295,7 +293,6 @@ set(android_emu_dependent_src
     android/physics/AmbientEnvironment.cpp
     android/physics/InertialModel.cpp
     android/physics/PhysicalModel.cpp
-    android/qemu-setup.cpp
     android/sensors-port.c
     android/snapshot/SnapshotAPI.cpp
     android/snapshot/Icebox.cpp
@@ -375,6 +372,7 @@ target_link_libraries(
          emulator-tinyobjloader
          emulator-libkeymaster3
          emulator-murmurhash
+         modem_simulator_lib
          emulator-tinyepoxy
          emulator-libyuv
          picosha2
