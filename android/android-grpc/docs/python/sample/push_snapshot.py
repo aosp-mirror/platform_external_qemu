@@ -18,7 +18,7 @@ import sys
 
 import proto.snapshot_service_pb2
 import proto.snapshot_service_pb2_grpc
-from channel_provider import getEmulatorChannel
+from channel.channel_provider import getEmulatorChannel
 
 if len(sys.argv) != 2:
     print("You need to provide the id of the snapshot to push")

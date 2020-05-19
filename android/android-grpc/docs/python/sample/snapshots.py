@@ -16,7 +16,7 @@ from google.protobuf import empty_pb2
 
 import proto.snapshot_service_pb2
 import proto.snapshot_service_pb2_grpc
-from channel_provider import getEmulatorChannel
+from channel.channel_provider import getEmulatorChannel
 
 _EMPTY_ = empty_pb2.Empty()
 
