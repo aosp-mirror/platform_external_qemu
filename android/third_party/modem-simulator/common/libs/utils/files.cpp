@@ -1,0 +1,91 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "files.h"
+
+#include "android/utils/file_io.h"
+
+#include <array>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
+
+namespace cvd {
+
+bool FileExists(const std::string& path) {
+  struct stat st;
+  return stat(path.c_str(), &st) == 0;
+}
+
+bool FileHasContent(const std::string& path) {
+  return FileSize(path) > 0;
+}
+
+bool DirectoryExists(const std::string& path) {
+  struct stat st;
+  if (stat(path.c_str(), &st) == -1) {
+    return false;
+  }
+  if ((st.st_mode & S_IFMT) != S_IFDIR) {
+    return false;
+  }
+  return true;
+}
+
+
+std::string AbsolutePath(const std::string& path) {
+  if (path.empty()) {
+    return {};
+  }
+  if (path[0] == '/') {
+    return path;
+  }
+
+  std::array<char, PATH_MAX> buffer{};
+  if (!realpath(".", buffer.data())) {
+    return {};
+  }
+  return std::string{buffer.data()} + "/" + path;
+}
+
+off_t FileSize(const std::string& path) {
+  struct stat st;
+  if (stat(path.c_str(), &st) == -1) {
+    return 0;
+  }
+  return st.st_size;
+}
+
+
+
+std::string ReadFile(const std::string& file) {
+  std::string contents;
+  std::ifstream in(file, std::ios::in | std::ios::binary);
+  in.seekg(0, std::ios::end);
+  contents.resize(in.tellg());
+  in.seekg(0, std::ios::beg);
+  in.read(&contents[0], contents.size());
+  in.close();
+  return(contents);
+}
+
+
+}  // namespace cvd
