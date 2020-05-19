@@ -147,5 +147,8 @@ constexpr char PER_AVD_CELLULAR_NETWORK_TYPE[]    = "perAvd/cell/network_type";
 constexpr char PER_AVD_CELLULAR_SIGNAL_STRENGTH[] = "perAvd/cell/signal_strength";
 constexpr char PER_AVD_CELLULAR_VOICE_STATUS[]    = "perAvd/cell/voice_status";
 constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
+
+constexpr char PER_AVD_DISABLE_DEVICE_FRAME[] = "perAvd/set/disableDeviceFrame";
+
 }  // namespace Settings
 }  // namespace Ui
