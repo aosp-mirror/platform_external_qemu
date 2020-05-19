@@ -57,6 +57,7 @@
 #include "android/utils/stralloc.h"
 #include "android/utils/string.h"
 #include "android/utils/utf8_utils.h"
+#include "modem_main.h"
 
 #include "config-host.h"
 
@@ -1893,8 +1894,15 @@ do_sms_send( ControlClient  client, char*  args )
         return -1;
     }
 
-    for (nn = 0; pdus[nn] != NULL; nn++)
+    for (nn = 0; pdus[nn] != NULL; nn++) {
         amodem_receive_sms( android_modem_get(), pdus[nn] );
+        fprintf(stderr, "sending sms message...\n");
+        //#ifdef CONFIG_ANDROID
+        fprintf(stderr, "2 sending sms message...\n");
+        cvd::send_sms_msg(std::string(
+                amodem_sms_to_string(android_modem_get(), pdus[nn])));
+        //#endif
+    }
 
     smspdu_free_list( pdus );
     return 0;
