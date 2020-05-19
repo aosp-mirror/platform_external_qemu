@@ -4703,6 +4703,18 @@ acting as a client and one as a server. The decision which is the
 server and which is the client does not affect WiFi functionality
 ETEXI
 
+DEF("android-modem-simulator-port", HAS_ARG, QEMU_OPTION_android_modem_simulator_port,
+    "-android-modem-simulator-port <modem simulator port>"
+    "TCP port to listen on that another emulator can connect to as a modem port\n"
+    "client. This allows modem traffic to pass between two emulators\n"
+    QEMU_ARCH_ALL)
+STEXI
+@item -android-modem-simulator-port @var{modem simulator port}
+@findex -android-modem-simulator-port
+TCP port to listen on that another emulator can connect to as a modem port
+client. This allows modem traffic to pass between two emulators
+ETEXI
+
 DEF("android-report-console", HAS_ARG, QEMU_OPTION_android_report_console, \
     "-android-report-console <socket>"
     " report console port to remote socket\n", QEMU_ARCH_ALL)
