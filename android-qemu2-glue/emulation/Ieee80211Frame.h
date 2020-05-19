@@ -19,6 +19,7 @@
 #include "android/base/Compiler.h"
 #include "android/network/MacAddress.h"
 
+#include <string>
 typedef struct ieee80211_hdr ieee80211_hdr;
 
 namespace android {
@@ -32,6 +33,7 @@ public:
     Ieee80211Frame(const uint8_t* data, size_t size);
 
     size_t size() const { return mData.size(); }
+    size_t hdrLength() const;
     const uint8_t* data() const { return mData.data(); }
     uint8_t* data() { return mData.data(); }
     uint8_t* frameBody();
@@ -40,7 +42,7 @@ public:
     const android::network::MacAddress& addr2() const { return mAddr2; }
     const android::network::MacAddress& addr3() const { return mAddr3; }
     const android::network::MacAddress& addr4() const { return mAddr4; }
-
+    std::string toStr();
     bool isData() const;
     bool isMgmt() const;
     bool isDataQoS() const;
@@ -50,6 +52,7 @@ public:
     bool isFromDS() const;
     bool uses4Addresses() const;
     uint16_t getQoSControl() const;
+    static const size_t MAX_FRAME_LEN = 2352;
 
 private:
     std::vector<uint8_t> mData;
