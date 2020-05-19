@@ -23,7 +23,7 @@ import wave
 import proto.emulator_controller_pb2 as p
 import proto.emulator_controller_pb2_grpc
 import google.protobuf.text_format
-from channel_provider import getEmulatorChannel
+from channel.channel_provider import getEmulatorChannel
 from google.protobuf import empty_pb2
 
 def streamAudioToWave(wavefile, bitrate=44100):
