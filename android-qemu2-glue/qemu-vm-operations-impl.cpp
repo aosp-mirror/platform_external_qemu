@@ -440,6 +440,11 @@ static bool qemu_snapshot_load(const char* name,
         }
     }
 
+    if (!failed) {
+        extern int guest_boot_completed;
+        guest_boot_completed = 1;
+    }
+
     return !failed;
 }
 
