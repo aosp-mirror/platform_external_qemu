@@ -239,6 +239,13 @@ LogStream& LogStream::operator<<(android::base::StringView v) {
     return *this;
 }
 
+LogStream& LogStream::operator<<(const std::string& v) {
+    if (!v.empty()) {
+        append(v.data(), v.size());
+    }
+    return *this;
+}
+
 void LogStream::append(const char* str) {
     if (str && str[0])
         append(str, strlen(str));
