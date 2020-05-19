@@ -106,10 +106,10 @@ set(android-emu-common
     android/emulation/MediaSnapshotState.cpp
     android/emulation/MediaSnapshotHelper.cpp
     android/emulation/MediaVideoHelper.cpp
-    android/emulation/hostdevices/HostAddressSpace.cpp
-    android/emulation/LogcatPipe.cpp
     android/emulation/MultiDisplay.cpp
     android/emulation/MultiDisplayPipe.cpp
+    android/emulation/hostdevices/HostAddressSpace.cpp
+    android/emulation/LogcatPipe.cpp
     android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp
     android/emulation/qemud/android_qemud_client.cpp
@@ -380,6 +380,7 @@ target_link_libraries(
          emulator-tinyobjloader
          emulator-libkeymaster3
          emulator-murmurhash
+         modem_simulator_lib
          emulator-tinyepoxy
          emulator-libyuv
          picosha2
