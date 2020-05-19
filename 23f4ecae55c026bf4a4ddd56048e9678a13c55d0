@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "84f132b5_5a7c145f",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 696,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-05-19T19:28:34Z",
+      "side": 1,
+      "message": "return Status::OK;",
+      "range": {
+        "startLine": 696,
+        "startChar": 11,
+        "endLine": 696,
+        "endChar": 61
+      },
+      "revId": "23f4ecae55c026bf4a4ddd56048e9678a13c55d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
