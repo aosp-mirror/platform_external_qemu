@@ -104,6 +104,7 @@ extern "C" {
 #include <unistd.h>
 #endif
 #include <algorithm>
+#include <string>
 
 #include "android/version.h"
 #define D(...)                   \
@@ -1450,6 +1451,7 @@ extern "C" int main(int argc, char** argv) {
 
     args.add2If("-android-wifi-client-port", opts->wifi_client_port);
     args.add2If("-android-wifi-server-port", opts->wifi_server_port);
+    args.add2If("-android-modem-simulator-port", opts->modem_simulator_port);
 
     args.add2If("-android-ports", opts->ports);
     if (opts->port) {
@@ -1848,6 +1850,16 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
+    if (opts->modem_simulator_port) {
+        args.add("-device");
+        args.add("virtio-serial");
+        args.add("-chardev");
+        args.addFormat(
+                "socket,port=%s,host=localhost,nowait,nodelay,ipv6,id=modem",
+                opts->modem_simulator_port);
+        args.add("-device");
+        args.add("virtserialport,chardev=modem,name=modem");
+    }
     // rng
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     args.add("-device");
