@@ -35,6 +35,7 @@
 #include "android/telephony/modem.h"                    // for amodem_get_ra...
 #include "android/telephony/sms.h"                      // for SmsPDU, is_in...
 #include "ui_telephony-page.h"                          // for TelephonyPage
+#include "android_modem_v2.h"                          // for TelephonyPage
 
 class QString;
 class QWidget;
@@ -365,14 +366,8 @@ void TelephonyPage::on_sms_sendButton_clicked()
                 return;
             }
 
-            if (amodem_get_radio_state(modem) == A_RADIO_STATE_OFF) {
-                showErrorDialog(tr("Cannot send message, radio is off."),
-                                tr("SMS"));
-                return;
-            }
-
             for (int idx = 0; pdus[idx] != NULL; idx++) {
-                amodem_receive_sms(modem, pdus[idx]);
+                amodem_receive_sms_vx(modem, pdus[idx]);
             }
         }
     }

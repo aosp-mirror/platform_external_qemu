@@ -537,7 +537,7 @@ gint g_poll(GPollFD *fds, guint nfds, gint timeout)
 
             if (i == nhandles) {
                 if (nhandles == MAXIMUM_WAIT_OBJECTS) {
-                    g_warning("Too many handles to wait for!\n");
+                    g_warning("Too many handles to wait for! nfds %d %d\n", nfds, nhandles);
                     break;
                 } else {
                     handles[nhandles++] = (HANDLE) f->fd;
