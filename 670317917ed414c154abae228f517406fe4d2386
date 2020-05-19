@@ -22,6 +22,30 @@
       "revId": "670317917ed414c154abae228f517406fe4d2386",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e26098d_1bf322ea",
+        "filename": "android-qemu2-glue/emulation/Ieee80211Frame.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-19T17:57:19Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "afba6c6e_03a1052f",
+      "range": {
+        "startLine": 45,
+        "startChar": 23,
+        "endLine": 45,
+        "endChar": 24
+      },
+      "revId": "670317917ed414c154abae228f517406fe4d2386",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
