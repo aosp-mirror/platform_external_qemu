@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e657061d_e5b1ce3a",
+        "filename": "android/android-emu/android/base/system/Win32Utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-05-19T03:54:51Z",
+      "side": 1,
+      "message": "sizeof(ssStatus) is safer",
+      "range": {
+        "startLine": 134,
+        "startChar": 34,
+        "endLine": 134,
+        "endChar": 56
+      },
+      "revId": "cf18fc9dcad95b00bd9db895214d19a4a1a66762",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4bca1c1f_5a348d08",
+        "filename": "android/android-emu/android/base/system/Win32Utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-05-19T03:54:51Z",
+      "side": 1,
+      "message": "const char*",
+      "range": {
+        "startLine": 77,
+        "startChar": 32,
+        "endLine": 77,
+        "endChar": 38
+      },
+      "revId": "cf18fc9dcad95b00bd9db895214d19a4a1a66762",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e78a1d3_388ffcdf",
+        "filename": "android/android-emu/android/base/system/Win32Utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-05-19T03:54:51Z",
+      "side": 1,
+      "message": "nit: an enum here would make calling this API much easier",
+      "range": {
+        "startLine": 77,
+        "startChar": 11,
+        "endLine": 77,
+        "endChar": 14
+      },
+      "revId": "cf18fc9dcad95b00bd9db895214d19a4a1a66762",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
