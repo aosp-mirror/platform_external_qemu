@@ -28,6 +28,7 @@ class LogStreamVoidify;
 class StringView;
 
 enum LogSeverity {
+    LOG_DEBUG = -2,
     LOG_VERBOSE = -1,
     LOG_INFO = 0,
     LOG_WARNING = 1,
