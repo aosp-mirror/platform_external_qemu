@@ -138,11 +138,11 @@ struct vring {
 #define vring_used_event(vr) ((vr)->avail->ring[(vr)->num])
 #define vring_avail_event(vr) (*(__virtio16 *)&(vr)->used->ring[(vr)->num])
 
-void vring_init(struct vring *vr, unsigned int num, void *p,
+__attribute__((always_inline)) void vring_init(struct vring *vr, unsigned int num, void *p,
 			      unsigned long align);
 
-unsigned vring_size(unsigned int num, unsigned long align);
+__attribute__((always_inline)) unsigned vring_size(unsigned int num, unsigned long align);
 
-int vring_need_event(uint16_t event_idx, uint16_t new_idx, uint16_t old);
+__attribute__((always_inline)) int vring_need_event(uint16_t event_idx, uint16_t new_idx, uint16_t old);
 
 #endif /* _LINUX_VIRTIO_RING_H */
