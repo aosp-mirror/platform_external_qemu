@@ -16,7 +16,7 @@ from google.protobuf import empty_pb2
 
 import proto.emulator_controller_pb2 as p
 import proto.emulator_controller_pb2_grpc
-from channel_provider import getEmulatorChannel
+from channel.channel_provider import getEmulatorChannel
 import time
 
 # Open a grpc channel
