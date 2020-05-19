@@ -18,6 +18,7 @@
 #include "android/network/globals.h"
 #include "android/shaper.h"
 #include "android/telephony/modem_driver.h"
+#include "android_modem_v2.h"
 
 static void cellular_setSimPresent(bool isPresent)
 {
@@ -49,7 +50,7 @@ static void cellular_setSignalStrengthProfile(enum CellularSignal signal)
             case Cellular_Signal_Great: signalQuality = 4; break;
         }
         if (signalQuality >= 0) {
-            amodem_set_signal_strength_profile(android_modem, signalQuality);
+            amodem_set_signal_strength_profile_vx(android_modem, signalQuality);
         }
     }
 }
@@ -139,7 +140,7 @@ static void cellular_setStandard(enum CellularStandard cStandard)
 
     if (android_modem) {
         // Tell the guest about the new network type.
-        amodem_set_data_network_type(android_modem,
+        amodem_set_data_network_type_vx(android_modem,
                                      android_parse_network_type(speedName));
     }
 }
