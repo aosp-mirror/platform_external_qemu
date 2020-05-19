@@ -854,6 +854,10 @@ help_wifi_client_port(stralloc_t* out)
     "  connection once more.\n\n" );
 }
 
+static void help_modem_simulator_port(stralloc_t* out) {
+    PRINTF("a port for modem simulator\n");
+}
+
 static void
 help_wifi_server_port(stralloc_t* out)
 {
