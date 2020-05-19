@@ -22,6 +22,30 @@
       "revId": "e77d0e6e9f3fe23d0becea8b23cbe628f847d9a6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3f1da5c_085ed61d",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1720,
+      "author": {
+        "id": 1129123
+      },
+      "writtenOn": "2020-05-19T15:56:11Z",
+      "side": 1,
+      "message": "Let me wait and see if anyone else has comments before I can address the comment here. For example, the conclusion might be popping up a message and exit immediately since allowing to continue may simply bring a BSOD.",
+      "parentUuid": "617f5500_edd85ed4",
+      "range": {
+        "startLine": 1711,
+        "startChar": 0,
+        "endLine": 1720,
+        "endChar": 66
+      },
+      "revId": "e77d0e6e9f3fe23d0becea8b23cbe628f847d9a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
