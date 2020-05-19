@@ -143,6 +143,9 @@ OPT_PARAM( dpi_device, "<dpi>", "specify device's resolution in dpi (default "
             STRINGIFY(DEFAULT_DEVICE_DPI) ")" )
 OPT_PARAM( scale, "<scale>", "scale emulator window (deprecated)" )
 
+OPT_PARAM(modem_simulator_port,
+          "<port>",
+          "connect to this port for modem simulabor")
 OPT_PARAM( wifi_client_port, "<port>", "connect to other emulator for WiFi forwarding" )
 OPT_PARAM( wifi_server_port, "<port>", "listen to other emulator for WiFi forwarding" )
 OPT_PARAM( http_proxy, "<proxy>", "make TCP connections through a HTTP/HTTPS proxy" )
