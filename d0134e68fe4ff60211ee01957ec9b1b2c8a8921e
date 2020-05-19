@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9db4f0f6_ed02183d",
+        "filename": "android-qemu2-glue/emulation/Ieee80211Frame.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-19T21:00:33Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f51318c8_8a0f1de7",
+      "range": {
+        "startLine": 234,
+        "startChar": 1,
+        "endLine": 236,
+        "endChar": 7
+      },
+      "revId": "d0134e68fe4ff60211ee01957ec9b1b2c8a8921e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "047ac736_91617207",
         "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
         "patchSetId": 5
@@ -39,6 +63,24 @@
       "revId": "d0134e68fe4ff60211ee01957ec9b1b2c8a8921e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae82948d_9f5a50b8",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-19T21:00:33Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "047ac736_91617207",
+      "revId": "d0134e68fe4ff60211ee01957ec9b1b2c8a8921e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -90,6 +132,24 @@
       "revId": "d0134e68fe4ff60211ee01957ec9b1b2c8a8921e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ef36f1ba_410ba691",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-19T21:00:33Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c072a31b_62674d97",
+      "revId": "d0134e68fe4ff60211ee01957ec9b1b2c8a8921e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
