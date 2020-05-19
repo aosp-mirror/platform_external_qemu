@@ -104,6 +104,8 @@ int android_serial_number_port;
 uint16_t android_wifi_server_port = 0;
 /* The port to use for WiFi forwarding as a client */
 uint16_t android_wifi_client_port = 0;
+/* The port to use for modem simulator */
+uint16_t android_modem_simulator_port = 0;
 }
 
 // The following code is used to support the -report-console option,
