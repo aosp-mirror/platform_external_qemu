@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f51318c8_8a0f1de7",
+        "filename": "android-qemu2-glue/emulation/Ieee80211Frame.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-19T20:36:38Z",
+      "side": 1,
+      "message": "nit: delete or put into a debug macro",
+      "range": {
+        "startLine": 234,
+        "startChar": 1,
+        "endLine": 236,
+        "endChar": 7
+      },
+      "revId": "d0134e68fe4ff60211ee01957ec9b1b2c8a8921e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "047ac736_91617207",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-19T20:36:38Z",
+      "side": 1,
+      "message": "thios looks like it could use a unit test as well",
+      "revId": "d0134e68fe4ff60211ee01957ec9b1b2c8a8921e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "85e7dbce_1567d2e4",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-19T20:36:38Z",
+      "side": 1,
+      "message": "need unit test for this part",
+      "revId": "d0134e68fe4ff60211ee01957ec9b1b2c8a8921e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bcffedb9_780b0a79",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-19T20:36:38Z",
+      "side": 1,
+      "message": "Not really sure how to test this part as WifiForwardPeer has lots of sockets stuff going on, but might be doable as a separate CL, basing it on other tests that open sockets / use loopers",
+      "revId": "d0134e68fe4ff60211ee01957ec9b1b2c8a8921e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c072a31b_62674d97",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-19T20:36:38Z",
+      "side": 1,
+      "message": "need unit test for this function",
+      "revId": "d0134e68fe4ff60211ee01957ec9b1b2c8a8921e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
