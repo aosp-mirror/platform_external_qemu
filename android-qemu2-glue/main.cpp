@@ -932,6 +932,13 @@ static int startEmulatorWithMinConfig(
     }
 #endif
 
+    // BUG: 148804702: angle9 has been removed
+    // BUG: 156911788: potential other way to end up with gl config failure
+    if (uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE9) {
+        skin_winsys_set_preferred_gles_backend(
+            WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+    }
+
     char* accel_status = NULL;
     CpuAccelMode accel_mode = ACCEL_AUTO;
 
