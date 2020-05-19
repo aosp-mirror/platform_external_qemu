@@ -69,6 +69,7 @@
 #include "android/utils/system.h"                             // for sleep_ms
 #include "android/utils/timezone.h"                           // for bufprin...
 #include "android/videoinjection/VideoInjectionController.h"  // for VideoIn...
+#include "modem_main.h"                                       // for modem code
 
 #define D(...)                   \
     do {                         \
@@ -104,6 +105,8 @@ int android_serial_number_port;
 uint16_t android_wifi_server_port = 0;
 /* The port to use for WiFi forwarding as a client */
 uint16_t android_wifi_client_port = 0;
+/* The port to use for modem simulator */
+uint16_t android_modem_simulator_port = 0;
 }
 
 // The following code is used to support the -report-console option,
@@ -486,6 +489,13 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     }
 
     agents->telephony->initModem(android_base_port);
+
+    // new modem code
+    if (android_modem_simulator_port > 0) {
+        cvd::modem_simulator_run_detach(
+                std::to_string(android_modem_simulator_port),
+                std::to_string(android_modem_simulator_port + 1));
+    }
 
     /* setup the http proxy, if any */
     if (!op_http_proxy) {
