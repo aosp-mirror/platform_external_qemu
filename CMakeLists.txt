@@ -677,7 +677,23 @@ else()
     set(ASM_DIR_TARGET "../linux-headers/asm-x86" )
 endif()
 
-if (NOT EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm)
+set(NEED_RELINK_ASM FALSE)
+if (EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm)
+  # check the link is correct
+  if (LINUX_AARCH64)
+    if (EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm/unistd_x32.h)
+    set(NEED_RELINK_ASM TRUE)
+    endif()
+  else()
+    if (NOT EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm/unistd_x32.h)
+    set(NEED_RELINK_ASM TRUE)
+    endif()
+  endif()
+else()
+  set(NEED_RELINK_ASM TRUE)
+endif()
+
+if (NEED_RELINK_ASM)
 message("create_symlink ${ASM_DIR_TARGET} ${ANDROID_AUTOGEN}/asm")
 execute_process(
         COMMAND ${CMAKE_COMMAND} -E create_symlink "${ASM_DIR_TARGET}" "${ANDROID_AUTOGEN}/asm"
