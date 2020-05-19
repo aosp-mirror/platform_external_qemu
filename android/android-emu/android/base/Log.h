@@ -26,6 +26,7 @@ namespace base {
 class StringView;
 
 enum LogSeverity {
+    LOG_DEBUG = -2,
     LOG_VERBOSE = -1,
     LOG_INFO = 0,
     LOG_WARNING = 1,
@@ -321,6 +322,7 @@ public:
     LogStream& operator<<(float v);
     LogStream& operator<<(double v);
     LogStream& operator<<(android::base::StringView v);
+    LogStream& operator<<(const std::string& v);
 
     const char* string() const { return mString ? mString : ""; }
     size_t size() const { return mSize; }
