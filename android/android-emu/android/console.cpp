@@ -47,6 +47,7 @@
 #include "android/snapshot/Icebox.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
+#include "android_modem_v2.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
@@ -1934,8 +1935,15 @@ do_sms_send( ControlClient  client, char*  args )
         return -1;
     }
 
-    for (nn = 0; pdus[nn] != NULL; nn++)
-        amodem_receive_sms( android_modem_get(), pdus[nn] );
+    for (nn = 0; pdus[nn] != NULL; nn++) {
+        //amodem_receive_sms( android_modem_get(), pdus[nn] );
+        fprintf(stderr, "sending sms message...\n");
+        //#ifdef CONFIG_ANDROID
+        amodem_receive_sms_vx( android_modem_get(), pdus[nn] );
+        fprintf(stderr, "2 sending sms message...\n");
+        //cvd::send_sms_msg(std::string( amodem_sms_to_string(android_modem_get(), pdus[nn])));
+        //#endif
+    }
 
     smspdu_free_list( pdus );
     return 0;
