@@ -48,6 +48,8 @@ set (android-qemu2-glue_src
 if (NOT OPTION_GFXSTREAM_BACKEND AND NOT LINUX_AARCH64)
   list(APPEND android-qemu2-glue_src
       "emulation/Ieee80211Frame.cpp")
+  list(APPEND android-qemu2-glue_src
+      "emulation/VirtioWifiForwarder.cpp")
 endif()
 
 android_add_library(
