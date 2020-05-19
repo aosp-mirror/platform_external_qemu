@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "617f5500_edd85ed4",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1720,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2020-05-19T03:58:10Z",
+      "side": 1,
+      "message": "headless emulator should only show a console warning instead of a message box. Also, there are already some examples of using Qt message boxes that allow users to never show them again. Can you try using one of those, or add a command line parameter to hide this? If users can\u0027t uninstall the software but still need to run emulator having a modal message box will be a horrible UX",
+      "range": {
+        "startLine": 1711,
+        "startChar": 0,
+        "endLine": 1720,
+        "endChar": 66
+      },
+      "revId": "e77d0e6e9f3fe23d0becea8b23cbe628f847d9a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
