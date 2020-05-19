@@ -382,6 +382,7 @@ target_link_libraries(
          emulator-tinyobjloader
          emulator-libkeymaster3
          emulator-murmurhash
+         modem_simulator_lib
          emulator-tinyepoxy
          emulator-libyuv
          picosha2
