@@ -27,10 +27,11 @@ class StringView;
 
 enum LogSeverity {
     LOG_VERBOSE = -1,
-    LOG_INFO = 0,
-    LOG_WARNING = 1,
-    LOG_ERROR = 2,
-    LOG_FATAL = 3,
+    LOG_DEBUG = 0,
+    LOG_INFO = 1,
+    LOG_WARNING = 2,
+    LOG_ERROR = 3,
+    LOG_FATAL = 4,
     LOG_NUM_SEVERITIES,
 
 // DFATAL will be ERROR in release builds, and FATAL in debug ones.
@@ -321,6 +322,7 @@ public:
     LogStream& operator<<(float v);
     LogStream& operator<<(double v);
     LogStream& operator<<(android::base::StringView v);
+    LogStream& operator<<(std::string v);
 
     const char* string() const { return mString ? mString : ""; }
     size_t size() const { return mSize; }
