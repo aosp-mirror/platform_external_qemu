@@ -277,6 +277,7 @@ extern char* android_op_report_console;
 static const char* android_hw_file = NULL;
 extern uint16_t android_wifi_server_port;
 extern uint16_t android_wifi_client_port;
+extern uint16_t android_modem_simulator_port;
 #endif  // CONFIG_ANDROID
 const char *watchdog;
 QEMUOptionRom option_rom[MAX_OPTION_ROMS];
@@ -4574,6 +4575,18 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                         return 1;
                     }
                     android_wifi_server_port = port;
+                }
+                break;
+            case QEMU_OPTION_android_modem_simulator_port:
+                {
+                    int port = strtol(optarg, (char **) &optarg, 10);
+                    if (port < 1 || port > USHRT_MAX) {
+                        fprintf(stderr, "emulator: invalid modem simulator port "
+                                "number %d, must be in the range 1-%d",
+                                port, USHRT_MAX);
+                        return 1;
+                    }
+                    android_modem_simulator_port = port;
                 }
                 break;
             case QEMU_OPTION_android_report_console:
