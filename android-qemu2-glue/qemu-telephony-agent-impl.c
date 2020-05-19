@@ -12,8 +12,9 @@
 
 #include "android-qemu2-glue/qemu-control-impl.h"
 
-#include "android/telephony/modem_driver.h"
 #include "android-qemu2-glue/telephony/modem_init.h"
+#include "android/telephony/modem_driver.h"
+#include "android_modem_v2.h"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -37,7 +38,7 @@ static TelephonyResponse telephony_telephonyCmd(TelephonyOperation op,
                 return Tel_Resp_Action_Failed;
             }
 
-            resp = amodem_add_inbound_call(android_modem, phoneNumber);
+            resp = amodem_add_inbound_call_vx(android_modem, phoneNumber);
             if (resp == A_CALL_RADIO_OFF) {
                 return Tel_Resp_Radio_Off;
             } else if (resp == A_CALL_EXCEED_MAX_NUM) {
@@ -61,7 +62,7 @@ static TelephonyResponse telephony_telephonyCmd(TelephonyOperation op,
                 return Tel_Resp_Action_Failed;
             }
 
-            resp = amodem_disconnect_call(android_modem, phoneNumber);
+            resp = amodem_disconnect_call_vx(android_modem, phoneNumber);
             return (resp < 0) ? Tel_Resp_Invalid_Action : Tel_Resp_OK;
 
         case Tel_Op_Place_Call_On_Hold:
@@ -76,7 +77,7 @@ static TelephonyResponse telephony_telephonyCmd(TelephonyOperation op,
             }
 
             holdCommand = (op == Tel_Op_Place_Call_On_Hold) ? A_CALL_HELD : A_CALL_ACTIVE;
-            resp = amodem_update_call(android_modem, phoneNumber, holdCommand);
+            resp = amodem_update_call_vx(android_modem, phoneNumber, holdCommand);
 
             return (resp < 0) ? Tel_Resp_Invalid_Action : Tel_Resp_OK;
 
