@@ -46,6 +46,9 @@ extern const char*  amodem_send( AModem  modem, const char*  cmd );
 /* simulate the receipt on an incoming SMS message */
 extern void         amodem_receive_sms( AModem  modem, SmsPDU  pdu );
 
+/* convert the pdu to c-string; returns NULL if failed */
+extern const char* amodem_sms_to_string(AModem modem, SmsPDU pdu);
+
 /** RADIO STATE
  **/
 typedef enum {
