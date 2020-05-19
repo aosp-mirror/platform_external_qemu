@@ -41,6 +41,7 @@
 #include <sys/prctl.h>
 #endif
 
+#include <time.h>
 /***********************************************************/
 /* timers */
 
@@ -334,7 +335,27 @@ int qemu_poll_ns(GPollFD *fds, guint nfds, int64_t timeout)
         return ppoll((struct pollfd *)fds, nfds, &ts, NULL);
     }
 #else
-    return g_poll(fds, nfds, qemu_timeout_ns_to_ms(timeout));
+__int64 countspersec = 0;
+double secpercount = 0.0;
+__int64 starttime = 0;
+__int64 curtime = 0;
+
+    QueryPerformanceCounter((LARGE_INTEGER*)&starttime);
+    QueryPerformanceFrequency((LARGE_INTEGER*)&countspersec);
+    secpercount = 1.0/(double)countspersec;
+
+    if (nfds >= 64) {
+        //fprintf(stderr, "nfds %d is too big\n", nfds);
+    }
+    gint wtimeout = qemu_timeout_ns_to_ms(timeout);
+    clock_t t = clock();
+    int ret = g_poll(fds, nfds, wtimeout);
+
+    QueryPerformanceCounter((LARGE_INTEGER*)&curtime);
+
+    int timediff = clock() - t;
+    fprintf(stderr, "fd %d timeout %d ms, calltime %g ms\n", nfds, wtimeout, 1000.0 * (curtime-starttime)*secpercount);
+    return ret;
 #endif
 }
 
