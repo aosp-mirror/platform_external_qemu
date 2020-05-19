@@ -506,6 +506,23 @@ amodem_receive_sms( AModem  modem, SmsPDU  sms )
     }
 }
 
+const char* amodem_sms_to_string(AModem modem, SmsPDU sms) {
+#define SMS_UNSOL_HEADER_2 "+CMT: 0\r"
+    int len, max;
+    char* p;
+
+    strcpy(modem->out_buff, SMS_UNSOL_HEADER_2);
+    p = modem->out_buff + (sizeof(SMS_UNSOL_HEADER_2) - 1);
+    max = sizeof(modem->out_buff) - 2 - (sizeof(SMS_UNSOL_HEADER_2) - 1);
+    len = smspdu_to_hex(sms, p, max);
+    if (len > max) /* too long */
+        return NULL;
+    p[len] = '\r';
+    p[len + 1] = 0;
+
+    return modem->out_buff;
+}
+
 static const char*
 amodem_printf( AModem  modem, const char*  format, ... )
 {
