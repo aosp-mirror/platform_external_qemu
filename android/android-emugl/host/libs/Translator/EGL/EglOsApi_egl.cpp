@@ -16,6 +16,7 @@
 
 #include "EglOsApi.h"
 
+#include "android/base/system/System.h"
 #include "GLcommon/GLLibrary.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 #include "emugl/common/lazy_instance.h"
@@ -47,10 +48,12 @@ static const char* kGLES2LibName = "libGLESv2.dll";
 
 #elif defined(__linux__)
 
-#include <X11/Xlib.h>
 
 static const char* kEGLLibName = "libEGL.so";
 static const char* kGLES2LibName = "libGLESv2.so";
+
+static const char* kEGLLibNameAlt = "libEGL.so.1";
+static const char* kGLES2LibNameAlt = "libGLESv2.so.2";
 
 #else // __APPLE__
 
@@ -63,6 +66,16 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
 
 // List of EGL functions of interest to probe with GetProcAddress()
 #define LIST_EGL_FUNCTIONS(X)                                                  \
+    X(EGLBoolean, eglGetProcAddress,                                           \
+      (const char* procname))                                                  \
+    X(const char*, eglQueryString,                                             \
+      (EGLDisplay dpy, EGLint id))                                             \
+    X(EGLDisplay, eglGetPlatformDisplay,                                    \
+      (EGLenum platform, void *native_display, const EGLint *attrib_list))     \
+    X(EGLDisplay, eglGetPlatformDisplayEXT,                                    \
+      (EGLenum platform, void *native_display, const EGLint *attrib_list))     \
+    X(EGLBoolean, eglBindAPI,                                    \
+      (EGLenum api)) \
     X(EGLBoolean, eglChooseConfig,                                             \
       (EGLDisplay display, EGLint const* attrib_list, EGLConfig* configs,      \
        EGLint config_size, EGLint* num_config))                                \
@@ -88,6 +101,8 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
       (EGLDisplay display, EGLConfig config,                                   \
        EGLNativeWindowType native_window, EGLint const* attrib_list))
 
+using android::base::System;
+
 namespace {
 using namespace EglOS;
 
@@ -102,20 +117,47 @@ public:
         char error[256];
         mLib = emugl::SharedLibrary::open(kEGLLibName, error, sizeof(error));
         if (!mLib) {
+#ifdef __linux__
+            ERR("%s: Could not open EGL library %s [%s]. Trying again with [%s]\n", __FUNCTION__,
+                kEGLLibName, error, kEGLLibNameAlt);
+            mLib = emugl::SharedLibrary::open(kEGLLibNameAlt, error, sizeof(error));
+            if (!mLib) {
+                ERR("%s: Could not open EGL library %s [%s]\n", __FUNCTION__,
+                    kEGLLibNameAlt, error);
+            }
+#else
             ERR("%s: Could not open EGL library %s [%s]\n", __FUNCTION__,
                 kEGLLibName, error);
+#endif
         }
 
-#define LOAD_EGL_POINTER(return_type, function_name, signature)    \
-    this->function_name =                                          \
-            reinterpret_cast<return_type(GL_APIENTRY*) signature>( \
-                    mLib->findSymbol(#function_name));             \
-    if (!this->function_name) {                                    \
-        ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
-            #function_name);                                       \
-    }
+#define LOAD_EGL_POINTER(return_type, function_name, signature)        \
+        this->function_name =                                          \
+                reinterpret_cast<return_type(GL_APIENTRY*) signature>( \
+                        mLib->findSymbol(#function_name));             \
+    if (!this->function_name) {                                        \
+        this->function_name =                                          \
+                reinterpret_cast<return_type(GL_APIENTRY*) signature>( \
+                        this->eglGetProcAddress(#function_name));      \
+    } \
+    if (!this->function_name) {                                        \
+        ERR("%s: Could not find %s in underlying EGL library\n",       \
+            __FUNCTION__,                                              \
+            #function_name);                                           \
+    } else { fprintf(stderr, "%s: found %s\n", __func__, #function_name); } 
 
         LIST_EGL_FUNCTIONS(LOAD_EGL_POINTER);
+
+            if (this->eglQueryString) {
+                fprintf(stderr, "%s: has eglQueryString\n", __func__);
+                fprintf(stderr, "%s: has display: %p\n", __func__, this->eglGetDisplay(EGL_DEFAULT_DISPLAY));
+                this->eglInitialize(this->eglGetDisplay(EGL_DEFAULT_DISPLAY), 0, 0);
+        fprintf(stderr, "%s: base extensions: [%s]\n", __func__,
+                this->eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS));
+
+            } else {
+        fprintf(stderr, "%s: no eglQueryString\n", __func__);
+            }
     }
     ~EglOsEglDispatcher() = default;
 
@@ -129,8 +171,18 @@ public:
         char error[256];
         mLib = emugl::SharedLibrary::open(kGLES2LibName, error, sizeof(error));
         if (!mLib) {
+#ifdef __linux__
+            ERR("%s: Could not open GL library %s [%s]. Trying again with [%s]\n", __FUNCTION__,
+                kGLES2LibName, error, kGLES2LibNameAlt);
+            mLib = emugl::SharedLibrary::open(kGLES2LibNameAlt, error, sizeof(error));
+            if (!mLib) {
+                ERR("%s: Could not open GL library %s [%s]\n", __FUNCTION__,
+                    kGLES2LibNameAlt, error);
+            }
+#else
             ERR("%s: Could not open GL library %s [%s]\n", __FUNCTION__,
                 kGLES2LibName, error);
+#endif
         }
     }
     GlFunctionPointer findSymbol(const char* name) {
@@ -229,6 +281,7 @@ public:
 private:
     EGLDisplay mDisplay;
     EglOsEglDispatcher mDispatcher;
+    bool mHeadless = false;
 
 #ifdef __linux__
     ::Display* mGlxDisplay = nullptr;
@@ -236,17 +289,45 @@ private:
 };
 
 EglOsEglDisplay::EglOsEglDisplay() {
-    mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
+        mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
+    auto baseExts = mDispatcher.eglQueryString(EGL_NO_DISPLAY, EGL_EXTENSIONS);
+    if (strstr(baseExts, "EGL_EXT_platform_base") && mDispatcher.eglGetPlatformDisplayEXT) {
+        fprintf(stderr, "%s: has get platform display. get the headless\n", __func__);
+
+#define EGL_PLATFORM_SURFACELESS_MESA 0x31DD
+
+        fprintf(stderr, "%s: before eglGetPlatformDisplayEXT\n", __func__);
+        mDisplay = mDispatcher.eglGetPlatformDisplay(
+                EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY, NULL);
+        fprintf(stderr, "%s: after eglGetPlatformDisplayEXT\n", __func__);
+
+        mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
+        fprintf(stderr, "%s: initialized headless\n", __func__);
+    } else {
+        mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
+        fprintf(stderr, "%s: initialized headful\n", __func__);
+    }
+
+    fprintf(stderr, "%s: bind gles api\n", __func__);
+    mDispatcher.eglBindAPI(EGL_OPENGL_ES_API);
+
     CHECK_EGL_ERR
+
+    mHeadless = System::getEnvironmentVariable("ANDROID_EMU_HEADLESS") == "1";     
+
 #ifdef __linux__
-    mGlxDisplay = XOpenDisplay(0);
+    fprintf(stderr, "%s: open display\n", __func__);
+    if (mHeadless) mGlxDisplay = nullptr;
+    else mGlxDisplay = XOpenDisplay(0);
 #endif // __linux__
 };
 
 EglOsEglDisplay::~EglOsEglDisplay() {
 #ifdef __linux__
-    XCloseDisplay(mGlxDisplay);
+    fprintf(stderr, "%s: close display\n", __func__);
+    if (mGlxDisplay) XCloseDisplay(mGlxDisplay);
 #endif // __linux__
 }
 
@@ -271,6 +352,8 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
     mDispatcher.eglChooseConfig(mDisplay, attribList, configs.get(), numConfigs,
                                 &numConfigs);
     CHECK_EGL_ERR
+
+    fprintf(stderr, "%s: num configs: %d\n", __func__, numConfigs);
     for (int i = 0; i < numConfigs; i++) {
         const EGLConfig cfg = configs.get()[i];
         ConfigInfo configInfo;
@@ -370,33 +453,34 @@ EglOsEglDisplay::createContext(EGLint profileMask,
 
 Surface* EglOsEglDisplay::createPbufferSurface(const PixelFormat* pixelFormat,
                                                const PbufferInfo* info) {
-    D("%s\n", __FUNCTION__);
-    const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
-    EGLint attrib[] = {EGL_WIDTH,
-                       info->width,
-                       EGL_HEIGHT,
-                       info->height,
-                       EGL_LARGEST_PBUFFER,
-                       info->largest,
-                       EGL_TEXTURE_FORMAT,
-                       info->format,
-                       EGL_TEXTURE_TARGET,
-                       info->target,
-                       EGL_MIPMAP_TEXTURE,
-                       info->hasMipmap,
-                       EGL_NONE};
-    EGLSurface surface = mDispatcher.eglCreatePbufferSurface(
-            mDisplay, format->mConfigId, attrib);
-    CHECK_EGL_ERR
-    if (surface == EGL_NO_SURFACE) {
-        D("create pbuffer surface failed\n");
-        return nullptr;
-    }
-    return new EglOsEglSurface(EglOS::Surface::PBUFFER, surface);
+    // D("%s\n", __FUNCTION__);
+    // const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
+    // EGLint attrib[] = {EGL_WIDTH,
+    //                    info->width,
+    //                    EGL_HEIGHT,
+    //                    info->height,
+    //                    EGL_LARGEST_PBUFFER,
+    //                    info->largest,
+    //                    EGL_TEXTURE_FORMAT,
+    //                    info->format,
+    //                    EGL_TEXTURE_TARGET,
+    //                    info->target,
+    //                    EGL_MIPMAP_TEXTURE,
+    //                    info->hasMipmap,
+    //                    EGL_NONE};
+    // EGLSurface surface = mDispatcher.eglCreatePbufferSurface(
+    //         mDisplay, format->mConfigId, attrib);
+    // CHECK_EGL_ERR
+    // if (surface == EGL_NO_SURFACE) {
+    //     D("create pbuffer surface failed\n");
+    //     return nullptr;
+    // }
+    return new EglOsEglSurface(EglOS::Surface::PBUFFER, 0);
 }
 
 Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
                                               EGLNativeWindowType win) {
+    fprintf(stderr, "EglOsEglDisplay::createWindowSurface\n");
     D("%s\n", __FUNCTION__);
     EGLSurface surface = mDispatcher.eglCreateWindowSurface(
             mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, win, nullptr);
@@ -465,6 +549,7 @@ bool EglOsEglDisplay::isValidNativeWin(EGLNativeWindowType win) {
     Window root;
     int t;
     unsigned int u;
+    fprintf(stderr, "%s: check if native win\n", __func__);
     return XGetGeometry(mGlxDisplay, win, &root, &t, &t, &u, &u, &u, &u) != 0;
 #else // __APPLE__
     unsigned int width, height;
@@ -489,6 +574,7 @@ bool EglOsEglDisplay::checkWindowPixelFormatMatch(EGLNativeWindowType win,
     unsigned int depth, border;
     int x, y;
     Window root;
+    fprintf(stderr, "%s: check pix fmt match\n", __func__);
     return XGetGeometry(
             mGlxDisplay, win, &root, &x, &y, width, height, &border, &depth);
 #else // __APPLE__
@@ -523,6 +609,7 @@ public:
     virtual EglOS::Surface* createWindowSurface(PixelFormat* pf,
                                                 EGLNativeWindowType wnd) {
         D("%s\n", __FUNCTION__);
+        fprintf(stderr, "EglEngine::%s call\n", __func__);
         return sHostDisplay->createWindowSurface(pf, wnd);
     }
 
