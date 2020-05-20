@@ -1430,7 +1430,8 @@ message EmulatorFeatureFlagState {
     CAR_ASSIST_BUTTON = 59;
     HARDWARE_DECODER = 60;
     NO_DELAY_CLOSE_COLOR_BUFFER = 61;
-    // Next tag: 61
+    NO_DEVICE_FRAME = 62;
+    // Next tag: 63
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
