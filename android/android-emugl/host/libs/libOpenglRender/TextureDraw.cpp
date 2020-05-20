@@ -368,6 +368,7 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
         s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    fprintf(stderr, "%s: call\n", __func__);
         s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mMaskWidth, mMaskHeight, 0,
                              GL_RGBA, GL_UNSIGNED_BYTE, mMaskPixels);
 

@@ -490,6 +490,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             moltenVKInstanceExtNames.data();
    }
 
+        LOG(ERROR) << "creating vk instance";
     VkResult res = gvk->vkCreateInstance(&instCi, nullptr, &sVkEmulation->instance);
 
     if (res != VK_SUCCESS) {
@@ -497,6 +498,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         return sVkEmulation;
     }
 
+        LOG(ERROR) << "crated vk instance";
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     sVkEmulation->instanceSupportsExternalMemoryCapabilities =
         externalMemoryCapabilitiesSupported;
     sVkEmulation->instanceSupportsMoltenVK = moltenVKSupported;
@@ -586,8 +589,11 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             physdevs[i], nullptr, &deviceExtensionCount, deviceExts.data());
 
         deviceInfos[i].supportsExternalMemory = false;
-        deviceInfos[i].glInteropSupported =
-            FrameBuffer::getFB()->isVulkanInteropSupported();
+        deviceInfos[i].glInteropSupported = 0;
+            // FrameBuffer::getFB()->isVulkanInteropSupported();
+
+        LOG(VERBOSE) << "Vulkan interop supported? " <<
+            deviceInfos[i].glInteropSupported;
 
         if (sVkEmulation->instanceSupportsExternalMemoryCapabilities) {
             deviceInfos[i].supportsExternalMemory = extensionsSupported(

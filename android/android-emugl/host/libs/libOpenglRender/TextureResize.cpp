@@ -351,12 +351,14 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
 
     // Update the framebuffer sizes to match the new factor.
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
+    fprintf(stderr, "%s: call\n", __func__);
     s_gles2.glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight, 0, GL_RGB,
                 mTextureDataType, nullptr);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBHeight.texture);
+    fprintf(stderr, "%s: call\n", __func__);
     s_gles2.glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight / factor, 0, GL_RGB,
                 mTextureDataType, nullptr);
@@ -538,6 +540,7 @@ GLuint TextureResize::GenericResizer::draw(GLuint texture, int width, int height
         mWidth = width;
         mHeight = height;
         s_gles2.glBindTexture(GL_TEXTURE_2D, mFrameBuffer.texture);
+    fprintf(stderr, "%s: call\n", __func__);
         s_gles2.glTexImage2D(
             GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 0, GL_RGB,
             GL_UNSIGNED_BYTE, nullptr);

@@ -191,6 +191,10 @@ static bool sGetFormatParameters(
     }
 }
 
+#define GL_ERR_CHECK do { \
+    GLint err = s_gles2.glGetError(); if (err) fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err); \
+} while(0) \
+
 // static
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,
@@ -237,15 +241,23 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
 
     GLint prevUnpackAlignment;
+    GL_ERR_CHECK;
     s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
+    GL_ERR_CHECK;
     s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    GL_ERR_CHECK;
 
     s_gles2.glGenTextures(1, &cb->m_tex);
+    GL_ERR_CHECK;
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
+    GL_ERR_CHECK;
 
+    fprintf(stderr, "%s: call\n", __func__);
+    GL_ERR_CHECK;
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
                          0, texFormat, pixelType,
                          initialImage.get());
+    GL_ERR_CHECK;
     initialImage.reset();
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -258,8 +270,12 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     //
     s_gles2.glGenTextures(1, &cb->m_blitTex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
+    GL_ERR_CHECK;
+    fprintf(stderr, "%s: call\n", __func__);
+    GL_ERR_CHECK;
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
                          0, texFormat, pixelType, NULL);
+    GL_ERR_CHECK;
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -450,10 +466,12 @@ void ColorBuffer::reformat(GLint internalformat, GLenum type) {
     }
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    fprintf(stderr, "%s: call\n", __func__);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
                          0, texFormat, pixelType, nullptr);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_blitTex);
+    fprintf(stderr, "%s: call\n", __func__);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
                          0, texFormat, pixelType, nullptr);
 

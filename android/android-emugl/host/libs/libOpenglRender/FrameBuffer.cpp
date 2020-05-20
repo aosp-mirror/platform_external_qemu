@@ -267,6 +267,7 @@ void FrameBuffer::finalize() {
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         bool egl2egl) {
+
     GL_LOG("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
         return true;
@@ -283,6 +284,18 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         return false;
     }
 
+    // Start up Vulkan emulation info
+    if (emugl::emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
+        auto dispatch = emugl::vkDispatch(false /* not for testing */);
+        auto emu = goldfish_vk::createOrGetGlobalVkEmulation(dispatch);
+        bool useDeferredCommands =
+            android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_DEFERRED_COMMANDS").empty();
+        bool useCreateResourcesWithRequirements =
+            android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_USE_CREATE_RESOURCES_WITH_REQUIREMENTS").empty();
+        goldfish_vk::setUseDeferredCommands(emu, useDeferredCommands);
+        goldfish_vk::setUseCreateResourcesWithRequirements(emu, useCreateResourcesWithRequirements);
+    }
+
     if (s_egl.eglUseOsEglApi)
         s_egl.eglUseOsEglApi(egl2egl);
     //
@@ -296,6 +309,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     GL_LOG("call eglInitialize");
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (!s_egl.eglInitialize(fb->m_eglDisplay, &fb->m_caps.eglMajor,
                              &fb->m_caps.eglMinor)) {
         GL_LOG("Failed to eglInitialize");
@@ -303,13 +317,17 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         return false;
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     DBG("egl: %d %d\n", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
     GL_LOG("egl: %d %d", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     s_egl.eglBindAPI(EGL_OPENGL_ES_API);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
     GLESDispatchMaxVersion dispatchMaxVersion =
             calcMaxVersionFromDispatch(fb->m_eglDisplay);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     FrameBuffer::setMaxGLESVersion(dispatchMaxVersion);
     if (s_egl.eglSetMaxGLESVersion) {
         // eglSetMaxGLESVersion must be called before any context binding
@@ -320,9 +338,11 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     int glesMaj, glesMin;
     emugl::getGlesVersion(&glesMaj, &glesMin);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     DBG("gles version: %d %d\n", glesMaj, glesMin);
     GL_LOG("gles version: %d %d\n", glesMaj, glesMin);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     fb->m_asyncReadbackSupported = glesMaj > 2;
     if (fb->m_asyncReadbackSupported) {
         DBG("Async readback supported\n");
@@ -370,14 +390,18 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             EGL_SURFACE_TYPE,   surfaceType,   EGL_RENDERABLE_TYPE,
             EGL_OPENGL_ES2_BIT, EGL_NONE};
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     EGLint total_num_configs = 0;
     s_egl.eglGetConfigs(fb->m_eglDisplay, NULL, 0, &total_num_configs);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
     std::vector<EGLConfig> all_configs(total_num_configs);
     EGLint total_egl_compatible_configs = 0;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     s_egl.eglChooseConfig(fb->m_eglDisplay, configAttribs, &all_configs[0],
                           total_num_configs, &total_egl_compatible_configs);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     EGLint exact_match_index = -1;
     for (EGLint i = 0; i < total_egl_compatible_configs; i++) {
         EGLint r, g, b;
@@ -401,14 +425,17 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     fb->m_eglConfig = all_configs[exact_match_index];
 
     GL_LOG("attempting to create egl context");
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     fb->m_eglContext = s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
                                               EGL_NO_CONTEXT, getGlesMaxContextAttribs());
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (fb->m_eglContext == EGL_NO_CONTEXT) {
         GL_LOG("Failed to create context 0x%x", s_egl.eglGetError());
         ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
         return false;
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     GL_LOG("attempting to create egl pbuffer context");
     //
     // Create another context which shares with the eglContext to be used
@@ -418,9 +445,11 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // on Mac platform when switching binded drawable for a context however
     // it is more efficient on other platforms as well.
     //
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     fb->m_pbufContext =
             s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
                                    fb->m_eglContext, getGlesMaxContextAttribs());
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (fb->m_pbufContext == EGL_NO_CONTEXT) {
         GL_LOG("Failed to create Pbuffer Context 0x%x", s_egl.eglGetError());
         ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
@@ -435,8 +464,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     static const EGLint pbufAttribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     fb->m_pbufSurface = s_egl.eglCreatePbufferSurface(
             fb->m_eglDisplay, fb->m_eglConfig, pbufAttribs);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (fb->m_pbufSurface == EGL_NO_SURFACE) {
         GL_LOG("Failed to create pbuf surface for FB 0x%x", s_egl.eglGetError());
         ERR("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
@@ -473,6 +504,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         }
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     //
     // Fail initialization if not all of the following extensions
     // exist:
@@ -542,7 +574,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     GL_LOG("GL Renderer %s", fb->m_glRenderer.c_str());
     GL_LOG("GL Extensions %s", fb->m_glVersion.c_str());
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     fb->m_textureDraw = new TextureDraw();
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (!fb->m_textureDraw) {
         GL_LOG("Failed: creation of TextureDraw instance");
         ERR("Failed: creation of TextureDraw instance\n");
@@ -550,11 +584,13 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (s_egl.eglQueryVulkanInteropSupportANDROID) {
         fb->m_vulkanInteropSupported =
             s_egl.eglQueryVulkanInteropSupportANDROID();
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     // TODO: 0-copy gl interop on swiftshader vk
     if (System::get()->envGet("ANDROID_EMU_VK_ICD") == "swiftshader") {
         fb->m_vulkanInteropSupported = false;
@@ -563,6 +599,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     // Keep the singleton framebuffer pointer
     //
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     s_theFrameBuffer = fb.release();
     {
         AutoLock lock(sGlobals->lock);
@@ -570,22 +607,14 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         sGlobals->condVar.broadcastAndUnlock(&lock);
     }
 
-    // Start up Vulkan emulation info
-    if (emugl::emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
-        auto dispatch = emugl::vkDispatch(false /* not for testing */);
-        auto emu = goldfish_vk::createOrGetGlobalVkEmulation(dispatch);
-        bool useDeferredCommands =
-            android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_DEFERRED_COMMANDS").empty();
-        bool useCreateResourcesWithRequirements =
-            android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_USE_CREATE_RESOURCES_WITH_REQUIREMENTS").empty();
-        goldfish_vk::setUseDeferredCommands(emu, useDeferredCommands);
-        goldfish_vk::setUseCreateResourcesWithRequirements(emu, useCreateResourcesWithRequirements);
-    }
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
     // Start up the single sync thread if GLAsyncSwap enabled
     if (emugl::emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap)) {
         SyncThread::get();
     }
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
     GL_LOG("basic EGL initialization successful");
 
