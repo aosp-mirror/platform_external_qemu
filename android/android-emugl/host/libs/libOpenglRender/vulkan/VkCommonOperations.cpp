@@ -589,6 +589,9 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         deviceInfos[i].glInteropSupported =
             FrameBuffer::getFB()->isVulkanInteropSupported();
 
+        LOG(VERBOSE) << "Vulkan interop supported? " <<
+            deviceInfos[i].glInteropSupported;
+
         if (sVkEmulation->instanceSupportsExternalMemoryCapabilities) {
             deviceInfos[i].supportsExternalMemory = extensionsSupported(
                     deviceExts, externalMemoryDeviceExtNames);
