@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+ cmake_minimum_required(VERSION 3.0)
 project(libwebrtc)
 
 set(_OBJ_EXT ${CMAKE_CXX_OUTPUT_EXTENSION})
@@ -17,8 +17,9 @@ file(GLOB_RECURSE _OBJ_EXCLUDED
      ${WEBRTC_OUTPUT_DIR}/obj/third_party/yasm/gen*/*${_OBJ_EXT}
      ${WEBRTC_OUTPUT_DIR}/obj/third_party/yasm/re2c/*${_OBJ_EXT}
      ${WEBRTC_OUTPUT_DIR}/obj/third_party/yasm/yasm/*${_OBJ_EXT}
-     ${WEBRTC_OUTPUT_DIR}/obj/third_party/protobuf/protoc/*${_OBJ_EXT}
-     ${WEBRTC_OUTPUT_DIR}/obj/third_party/protobuf/protobuf_lite/*${_OBJ_EXT}
+     ${WEBRTC_OUTPUT_DIR}/obj/third_party/protobuf/*/*${_OBJ_EXT}
+     ${WEBRTC_OUTPUT_DIR}/obj/third_party/boringssl/boringssl*/*${_OBJ_EXT}
+     ${WEBRTC_OUTPUT_DIR}/obj/third_party/zlib/zlib*/*${_OBJ_EXT}
      ${WEBRTC_OUTPUT_DIR}/obj/examples/*${_OBJ_EXT}
      ${WEBRTC_OUTPUT_DIR}/obj/tools/*${_OBJ_EXT}
      ${WEBRTC_OUTPUT_DIR}/obj/modules/video_capture/video_capture/video_capture_external${_OBJ_EXT}
@@ -43,9 +44,13 @@ set_target_properties(webrtc PROPERTIES
 foreach(SRC_DIR api rtc_base modules third_party/abseil-cpp/absl logging media call p2p common_video common_audio)
         install(DIRECTORY ${WEBRTC_SOURCE_DIR}/${SRC_DIR}
                 DESTINATION "include"
-                FILES_MATCHING PATTERN "*.h")
+                FILES_MATCHING PATTERN "*.h" PATTERN "*.inc")
 endforeach()
 install(FILES ${WEBRTC_SOURCE_DIR}/common_types.h DESTINATION "include")
+install(DIRECTORY ${WEBRTC_SOURCE_DIR}/system_wrappers/include
+    DESTINATION "include/system_wrappers"
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.inc")
+
 #
 # Install library
 install(TARGETS webrtc
