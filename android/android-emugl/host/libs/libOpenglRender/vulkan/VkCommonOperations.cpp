@@ -586,8 +586,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             physdevs[i], nullptr, &deviceExtensionCount, deviceExts.data());
 
         deviceInfos[i].supportsExternalMemory = false;
-        deviceInfos[i].glInteropSupported =
-            FrameBuffer::getFB()->isVulkanInteropSupported();
+        deviceInfos[i].glInteropSupported = 0; // set later
 
         if (sVkEmulation->instanceSupportsExternalMemoryCapabilities) {
             deviceInfos[i].supportsExternalMemory = extensionsSupported(
@@ -906,6 +905,16 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
     sVkEmulation->live = true;
 
     return sVkEmulation;
+}
+
+void setGlInteropSupported(bool supported) {
+    if (!sVkEmulation) {
+        LOG(VERBOSE) << "Not setting vk/gl interop support, Vulkan not enabled";
+        return;
+    }
+
+    LOG(VERBOSE) << "Setting gl interop support for Vk to: " << supported;
+    sVkEmulation->deviceInfo.glInteropSupported = supported;
 }
 
 void setUseDeferredCommands(VkEmulation* emu, bool useDeferredCommands) {
