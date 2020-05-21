@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c62e7fb3_57c1011c",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-21T20:26:07Z",
+      "side": 1,
+      "message": "Oh, I left it in here to maintain backward compat for users of gfxstream_backend_set_flags. I will remove it in a future CL once we verify this one",
+      "parentUuid": "e677e621_d871e89a",
+      "revId": "1036732b2b6a1ea5c49a99f34b0815c2bf2af792",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8aed6db9_0f0c1a0e",
         "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2020-05-21T20:24:16Z",
       "side": 1,
       "message": "Is it OK to remove the sBackendFlags completely?",
+      "revId": "1036732b2b6a1ea5c49a99f34b0815c2bf2af792",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "127c76b6_f5d16594",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-21T20:26:07Z",
+      "side": 1,
+      "message": "Yes, but would prefer to do it in a future CL (deprecation -\u003e removal phases)",
+      "parentUuid": "8aed6db9_0f0c1a0e",
       "revId": "1036732b2b6a1ea5c49a99f34b0815c2bf2af792",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
