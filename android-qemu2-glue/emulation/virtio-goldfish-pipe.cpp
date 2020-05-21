@@ -830,6 +830,7 @@ public:
 
     int transferReadIov(int resId, uint64_t offset, virgl_box* box) {
         AutoLock lock(mLock);
+        fprintf(stderr, "%s: call\n", __func__);
 
         VGPLOG("resid: %d offset: 0x%llx. box: %u %u %u %u", resId,
                (unsigned long long)offset,
@@ -843,6 +844,15 @@ public:
 
         auto& entry = it->second;
 
+        char* linear = (char*)(entry.linear);
+
+        // partial read mode
+        struct PartialReadView {
+            uint32_t wantedBytes;
+            uint32_t hostProcessedBytes;
+            unsigned char data[];
+        };
+
         if (handleTransferReadGraphicsUsage(
             &entry, offset, box)) {
             // Do the pipe service op here, if there is an associated hostpipe.
@@ -854,19 +864,30 @@ public:
             size_t readBytes = 0;
             size_t wantedBytes = readBytes + (size_t)box->w;
 
-            while (readBytes < wantedBytes) {
+            PartialReadView* partialReadView = (PartialReadView*)linear; 
+            fprintf(stderr, "%s: partial read.\n", __func__);
+
+            // while (readBytes < wantedBytes) {
                 GoldfishPipeBuffer buf = {
-                    ((char*)entry.linear) + box->x + readBytes,
+                    (partialReadView->data) + box->x + readBytes,
                     wantedBytes - readBytes,
                 };
                 auto status = ops->guest_recv(hostPipe, &buf, 1);
 
                 if (status > 0) {
                     readBytes += status;
+                    partialReadView->hostProcessedBytes = readBytes;
+                    fprintf(stderr, "%s: host processed %zu\n", __func__, readBytes);
                 } else if (status != kPipeTryAgain) {
                     return EIO;
+                } else {
+                    fprintf(stderr, "%s: host processed nothing\n", __func__);
+                    partialReadView->hostProcessedBytes = 0;
                 }
-            }
+
+                // break;
+            // }
+            return 0;
         }
 
         VGPLOG("Linear first word: %d", *(int*)(entry.linear));
