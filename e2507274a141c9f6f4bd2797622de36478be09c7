@@ -22,6 +22,30 @@
       "revId": "e2507274a141c9f6f4bd2797622de36478be09c7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a54d728_de7714e1",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-05-21T20:17:11Z",
+      "side": 1,
+      "message": "Done; they now match except also having a NO_VK_BIT option for if we want to disable vk passthrough.\n\nNote that at the crosvm level it is still hardcoded to ignore the incoming flags so we\u0027ll need to fix it up there too.",
+      "parentUuid": "11cb359e_fef27502",
+      "range": {
+        "startLine": 262,
+        "startChar": 4,
+        "endLine": 262,
+        "endChar": 40
+      },
+      "revId": "e2507274a141c9f6f4bd2797622de36478be09c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
