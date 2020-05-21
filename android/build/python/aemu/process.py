@@ -63,6 +63,8 @@ def get_system_env():
         vs = get_visual_studio()
         env_lines = subprocess.check_output([vs, "&&",  "set"]).splitlines()
         for env_line in env_lines:
+            if isinstance(env_line, bytes):
+                env_line = str(env_line, 'utf-8')
             if '=' in env_line:
                 env = env_line.split('=')
                 # Variables in windows are case insensitive, but not in python dict!
