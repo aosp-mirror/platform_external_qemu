@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11cb359e_fef27502",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1561731
+      },
+      "writtenOn": "2020-05-21T19:23:36Z",
+      "side": 1,
+      "message": "Would you rather make these gfxstream backend flags match the gpu flags available in Crosvm?\n\nGFXSTREAM_BACKEND_FLAGS_EGL_BIT\nGFXSTREAM_BACKEND_FLAGS_GLES_BIT\nGFXSTREAM_BACKEND_FLAGS_GLX_BIT\nGFXSTREAM_BACKEND_FLAGS_SURFACELESS_BIT\n\n(https://chromium.googlesource.com/chromiumos/platform/crosvm/+/refs/heads/master/src/main.rs#162)\n\nor just keep as is and map the crosvm gpu flags to gfxstream backend flags inside of virtio_gfxstream_backend.rs ?",
+      "range": {
+        "startLine": 262,
+        "startChar": 4,
+        "endLine": 262,
+        "endChar": 40
+      },
+      "revId": "e2507274a141c9f6f4bd2797622de36478be09c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
