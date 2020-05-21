@@ -1,8 +1,6 @@
 # This file defines android-emu library
 prebuilt(VPX)
 prebuilt(FFMPEG)
-# Add darwinn external libraries and includes
-include(android/darwinn/darwinn.cmake)
 
 # This is the set of sources that are common in both the shared libary and the
 # archive. We currently have to split them up due to dependencies on external
@@ -418,7 +416,7 @@ android_target_link_libraries(
          iphlpapi::iphlpapi)
 
 # These are the libs needed for android-emu on linux.
-android_target_link_libraries(android-emu linux-x86_64 PUBLIC darwinn -lrt
+android_target_link_libraries(android-emu linux-x86_64 PUBLIC -lrt
                                                               -lc++)
 
 # Here are the darwin library and link dependencies. They are public and will
