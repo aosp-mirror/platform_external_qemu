@@ -132,11 +132,12 @@ QemuParameters* qemu_parameters_create(const char* argv0,
         }
     }
 
-    if (opts->prop != NULL) {
-        ParamList*  pl = opts->prop;
-        for ( ; pl != NULL; pl = pl->next ) {
-            params.add2("-boot-property", pl->param);
+    for (const ParamList* pl = opts->prop; pl != NULL; pl = pl->next) {
+        if (strncmp(pl->param, "qemu.", 5)) {
+            fprintf(stderr, "WARNING: unexpected '-prop' value ('%s'), only "
+                            "'qemu.*' properties are supported\n", pl->param);
         }
+        params.add2("-boot-property", pl->param);
     }
 
     params.add2If("-wifi-client-port", opts->wifi_client_port);
