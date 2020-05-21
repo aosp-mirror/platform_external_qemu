@@ -277,6 +277,7 @@ struct VkEmulation {
 };
 
 VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk);
+void setGlInteropSupported(bool supported);
 void setUseDeferredCommands(VkEmulation* emu, bool useDeferred);
 void setUseCreateResourcesWithRequirements(VkEmulation* emu, bool useCreateResourcesWithRequirements);
 

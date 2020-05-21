@@ -259,6 +259,17 @@ uint32_t sBackendFlags = 0;
 
 enum BackendFlags {
     GFXSTREAM_BACKEND_FLAGS_NO_VK_BIT = 1 << 0,
+    GFXSTREAM_BACKEND_FLAGS_EGL2EGL_BIT = 1 << 1,
+};
+
+// based on VIRGL_RENDERER_USE* and friends
+enum RendererFlags {
+    GFXSTREAM_RENDERER_FLAGS_USE_EGL_BIT = 1 << 0,
+    GFXSTREAM_RENDERER_FLAGS_THREAD_SYNC = 1 << 1,
+    GFXSTREAM_RENDERER_FLAGS_USE_GLX_BIT = 1 << 2,
+    GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT = 1 << 3,
+    GFXSTREAM_RENDERER_FLAGS_USE_GLES_BIT = 1 << 4,
+    GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT = 1 << 5, // for disabling vk
 };
 
 // Sets backend flags for different kinds of initialization.
@@ -276,7 +287,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     int renderer_flags,
     struct virgl_renderer_callbacks* virglrenderer_callbacks) {
 
-    GFXS_LOG("start. display dimensions: width %u height %u", display_width, display_height);
+    GFXS_LOG("start. display dimensions: width %u height %u. backend flags: 0x%x renderer flags: 0x%x",
+             display_width, display_height, sBackendFlags, renderer_flags);
 
     AvdInfo** avdInfoPtr = aemu_get_android_avdInfoPtr();
 
@@ -288,13 +300,36 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
         true /* is google APIs */,
         AVD_PHONE);
 
+    // Flags processing
+
+    // TODO: hook up "gfxstream egl" to the renderer flags
+    // GFXSTREAM_RENDERER_FLAGS_USE_EGL_BIT in crosvm
+    // as it's specified from launch_cvd.
+    // At the moment, use ANDROID_GFXSTREAM_EGL=1
+    // For test on GCE
+    if (System::getEnvironmentVariable("ANDROID_GFXSTREAM_EGL") == "1") {
+        System::setEnvironmentVariable("ANDROID_EGL_ON_EGL", "1");
+        System::setEnvironmentVariable("ANDROID_EMUGL_LOG_PRINT", "1");
+        System::setEnvironmentVariable("ANDROID_EMUGL_VERBOSE", "1");
+    }
+    // end for test on GCE
+
+    System::setEnvironmentVariable("ANDROID_EMU_HEADLESS", "1");
     System::setEnvironmentVariable("ANDROID_EMU_SANDBOX", "1");
     System::setEnvironmentVariable("ANDROID_EMUGL_FIXED_BACKEND_LIST", "1");
     bool vkDisabledByEnv = System::getEnvironmentVariable("ANDROID_EMU_DISABLE_VULKAN") == "1";
-    bool vkDisabledByFlag = sBackendFlags & GFXSTREAM_BACKEND_FLAGS_NO_VK_BIT;
+    bool vkDisabledByFlag =
+        (sBackendFlags & GFXSTREAM_BACKEND_FLAGS_NO_VK_BIT) ||
+        (renderer_flags & GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT);
     bool enableVk = !vkDisabledByEnv && !vkDisabledByFlag;
 
+    bool egl2eglByEnv = System::getEnvironmentVariable("ANDROID_EGL_ON_EGL") == "1";
+    bool egl2eglByFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_USE_EGL_BIT;
+    bool enable_egl2egl = egl2eglByFlag || egl2eglByEnv;
+    if (enable_egl2egl) System::setEnvironmentVariable("ANDROID_EGL_ON_EGL", "1");
+
     GFXS_LOG("Vulkan enabled? %d", enableVk);
+    GFXS_LOG("egl2egl enabled? %d", enable_egl2egl);
 
     // Need to manually set the GLES backend paths in gfxstream environment
     // because the library search paths are not automatically set to include
@@ -349,7 +384,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     EmuglConfig config;
 
     emuglConfig_init(&config, true /* gpu enabled */, "auto",
-                     "host",
+                     enable_egl2egl ? "swiftshader_indirect" : "host",
                      64,                     /* bitness */
                      true,                   /* no window */
                      false,                  /* blacklisted */
