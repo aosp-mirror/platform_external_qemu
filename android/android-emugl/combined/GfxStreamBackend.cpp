@@ -422,6 +422,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     }
 
     android_init_opengles_pipe();
+    android_opengles_pipe_set_recv_mode(2 /* virtio-gpu */);
     android_init_refcount_pipe();
     android_pipe_set_hw_virtio_funcs(&android_pipe_hw_virtio_funcs);
 
