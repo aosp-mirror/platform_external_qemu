@@ -1444,7 +1444,11 @@ extern "C" int main(int argc, char** argv) {
         }
     }
 
-    for (ParamList* pl = opts->prop; pl != NULL; pl = pl->next) {
+    for (const ParamList* pl = opts->prop; pl != NULL; pl = pl->next) {
+        if (strncmp(pl->param, "qemu.", 5)) {
+            fprintf(stderr, "WARNING: unexpected '-prop' value ('%s'), only "
+                            "'qemu.*' properties are supported\n", pl->param);
+        }
         args.add2("-boot-property", pl->param);
     }
 
