@@ -62,11 +62,11 @@ if(WIN32)
   set(ANDROID_LLVM_SYMBOLIZER "${CLANG_DIR}/bin/llvm-symbolizer.exe")
   # Set the debug flags, erasing whatever cmake stuffs in there.
   # We are going to produce "fat" binaries with all debug information in there.
-  set(CMAKE_CXX_FLAGS_DEBUG "-MD -Z7 -Xlinker -ignore:4099")
-  set(CMAKE_C_FLAGS_DEBUG "-MD -Z7 -Xlinker -ignore:4099")
+  set(CMAKE_CXX_FLAGS_DEBUG "/MD /Z7")
+  set(CMAKE_C_FLAGS_DEBUG "/MD /Z7")
   # Set release flags such that we create pdbs..
-  set(CMAKE_C_FLAGS_RELEASE "-MD -Zi -Xlinker -ignore:4099")
-  set(CMAKE_CXX_FLAGS_RELEASE "-MD -Zi -Xlinker -ignore:4099")
+  set(CMAKE_C_FLAGS_RELEASE "/MD /Zi")
+  set(CMAKE_CXX_FLAGS_RELEASE "/MD /Zi")
 
   # Add compiler definition for Win7>
   add_definitions("-D_WIN32_WINNT=0x0601")
@@ -76,10 +76,10 @@ if(WIN32)
   set(CMAKE_LINKER "${CLANG_DIR}/bin/lld-link.exe"  CACHE STRING ""  FORCE)
 
   # See https://www.wintellect.com/correctly-creating-native-c-release-build-pdbs/
-  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/IGNORE:4099 -DEBUG -NODEFAULTLIB:LIBCMT -OPT:REF -OPT:ICF"
+  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT /OPT:REF /OPT:ICF"
       CACHE STRING ""
       FORCE)
-   set(CMAKE_EXE_LINKER_FLAGS "/IGNORE:4099 -DEBUG -NODEFAULTLIB:LIBCMT")
+   set(CMAKE_EXE_LINKER_FLAGS "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT")
 
   # The Mt.exe file is a tool that generates signed files and catalogs. This normally gets invoked at the end of
   # executable creation, however anti virus software can easily interfer resulting in build breaks, so lets just not do
