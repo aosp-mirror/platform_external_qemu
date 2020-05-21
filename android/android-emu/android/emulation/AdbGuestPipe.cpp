@@ -437,39 +437,50 @@ void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
 }
 
 unsigned AdbGuestPipe::onGuestPoll() const {
+    fprintf(stderr, "AdbGuestPipe::%s: call\n", __func__);
+
     D("%s: [%p]", __func__, this);
     unsigned result = 0;
     switch (mState) {
         case State::WaitingForGuestAcceptCommand:
         case State::WaitingForGuestStartCommand:
+            fprintf(stderr, "AdbGuestPipe::%s: return OUT\n", __func__);
             result = PIPE_POLL_OUT;
             break;
 
         case State::SendingAcceptReplyOk:
+            fprintf(stderr, "AdbGuestPipe::%s: return OUT\n", __func__);
             result = PIPE_POLL_IN;
             break;
 
         case State::ProxyingData: {
+            fprintf(stderr, "AdbGuestPipe::%s: proxData case\n", __func__);
             if (needsHubTranslation()) {
                 result = mAdbHub->onGuestPoll();
+                fprintf(stderr, "AdbGuestPipe::%s: proxData case, poll for hub translation. res: 0x%x\n", __func__, result);
             } else {
                 unsigned flags = mFdWatcher->poll();
                 if (flags & FdWatch::kEventRead) {
                     result |= PIPE_POLL_IN;
+                    fprintf(stderr, "AdbGuestPipe::%s: proxData case, poll for no hub translation. fd watch has aviail read. res: 0x%x\n", __func__, result);
                 }
                 if (flags & FdWatch::kEventWrite) {
                     result |= PIPE_POLL_OUT;
+                    fprintf(stderr, "AdbGuestPipe::%s: proxData case, poll for no hub translation. fd watch has aviail write. res: 0x%x\n", __func__, result);
                 }
+                fprintf(stderr, "AdbGuestPipe::%s: proxData case, poll for no hub translation. res: 0x%x\n", __func__, result);
             }
             break;
         }
 
         case State::ClosedByHost:
             result |= PIPE_POLL_HUP;
+                fprintf(stderr, "AdbGuestPipe::%s: proxData case, poll for no hub translation. poll hup\n", __func__);
             break;
 
         default:;
     }
+    fprintf(stderr, "AdbGuestPipe::%s: call (end). res: 0x%x\n", __func__, result);
     return result;
 }
 
@@ -563,6 +574,7 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
 
 void AdbGuestPipe::onGuestWantWakeOn(int flags) {
     DD("%s: [%p] flags=%x (%d)", __func__, this, (unsigned)flags, flags);
+    fprintf(stderr, "%s: [%p] flags=%x (%d)\n", __func__, this, (unsigned)flags, flags);
     if (!mHostSocket.valid()) {
         return;
     }

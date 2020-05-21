@@ -830,6 +830,7 @@ public:
 
     int transferReadIov(int resId, uint64_t offset, virgl_box* box) {
         AutoLock lock(mLock);
+        // fprintf(stderr, "%s: call\n", __func__);
 
         VGPLOG("resid: %d offset: 0x%llx. box: %u %u %u %u", resId,
                (unsigned long long)offset,
@@ -843,6 +844,17 @@ public:
 
         auto& entry = it->second;
 
+        auto hmmmmmmmm = sync_iov(&entry, offset, box, IOV_TO_LINEAR);
+
+        char* linear = (char*)(entry.linear) + box->x;
+
+        // partial read mode
+        struct PartialReadView {
+            uint32_t wantedBytes;
+            uint32_t hostProcessedBytes;
+            unsigned char data[];
+        };
+
         if (handleTransferReadGraphicsUsage(
             &entry, offset, box)) {
             // Do the pipe service op here, if there is an associated hostpipe.
@@ -851,25 +863,43 @@ public:
 
             auto ops = ensureAndGetServiceOps();
 
-            size_t readBytes = 0;
-            size_t wantedBytes = readBytes + (size_t)box->w;
+            PartialReadView* partialReadView = (PartialReadView*)linear; 
 
-            while (readBytes < wantedBytes) {
+            size_t readBytes = 0;
+            // size_t wantedBytes = readBytes + (size_t)box->w;
+            size_t wantedBytes = readBytes + partialReadView->wantedBytes;
+
+            // fprintf(stderr, "%s: partial read. guestWant: %zu\n", __func__, (size_t)partialReadView->wantedBytes);
+            // fprintf(stderr, "%s: partial read. want: %zu\n", __func__, wantedBytes - readBytes);
+
+            // while (readBytes < wantedBytes) {
                 GoldfishPipeBuffer buf = {
-                    ((char*)entry.linear) + box->x + readBytes,
+                    (partialReadView->data) + readBytes,
                     wantedBytes - readBytes,
                 };
                 auto status = ops->guest_recv(hostPipe, &buf, 1);
 
                 if (status > 0) {
                     readBytes += status;
+                    partialReadView->hostProcessedBytes = readBytes;
+                    // fprintf(stderr, "%s: host processed %zu\n", __func__, readBytes);
                 } else if (status != kPipeTryAgain) {
+                    // fprintf(stderr, "%s: EIO\n", __func__);
                     return EIO;
+                } else {
+                    // fprintf(stderr, "%s: host processed nothing\n", __func__);
+                    partialReadView->hostProcessedBytes = 0;
                 }
-            }
+
+                // break;
+            // }
         }
 
-        VGPLOG("Linear first word: %d", *(int*)(entry.linear));
+        // VGPLOG("Linear first word: %d", *(int*)(entry.linear));
+        // VGPLOG("Linear first word: %d", *(((int*)(entry.linear)) + 1));
+
+        // fprintf(stderr, "Linear first word: %d\n", *(int*)(entry.linear));
+        // fprintf(stderr, "Linear second word: %d\n", *(((int*)(entry.linear)) + 1));
 
         auto syncRes = sync_iov(&entry, offset, box, LINEAR_TO_IOV);
         mLastSubmitCmdCtxExists = true;
