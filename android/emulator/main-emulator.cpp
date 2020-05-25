@@ -32,14 +32,15 @@
 #include <fstream>
 #include <streambuf>
 
+#include "android/HostHwInfo.h"
 #include "android/avd/info.h"
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
 #include "android/base/ArraySize.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
-#include "android/base/ProcessControl.h"
 #include "android/base/system/System.h"
 #include "android/camera/camera-list.h"
 #include "android/emulation/ConfigDirs.h"
@@ -47,13 +48,13 @@
 #include "android/main-help.h"
 #include "android/opengl/emugl_config.h"
 #include "android/qt/qt_setup.h"
+#include "android/utils/bufprint.h"
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 #include "android/utils/exec.h"
 #include "android/utils/host_bitness.h"
 #include "android/utils/panic.h"
 #include "android/utils/path.h"
-#include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/version.h"
 
@@ -61,6 +62,12 @@
 
 #ifdef __linux__
 #include <fcntl.h>
+#if defined(__aarch64__)
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <sched.h>
+#endif
 #endif  // __linux__
 
 #ifdef _WIN32
@@ -238,6 +245,24 @@ static bool checkOsVersion() {
 #endif  // _WIN32
 }
 
+#ifdef __linux__
+#if defined(__aarch64__)
+static void setupCpuAffinity(
+        const android::HostHwInfo::ArmCpuInfo& armCpuInfo) {
+    cpu_set_t mycpus;
+    CPU_ZERO(&mycpus);
+    CPU_SET(0, &mycpus);
+    for (size_t i = 1; i < armCpuInfo.cpumodels.size(); ++i) {
+        if (armCpuInfo.cpumodels[i] != armCpuInfo.cpumodels[0]) {
+            break;
+        }
+        CPU_SET(i, &mycpus);
+    }
+    sched_setaffinity(getpid(), sizeof(mycpus), &mycpus);
+}
+#endif
+#endif
+
 static void doLauncherTest(const char* launcherTestArg);
 
 /* Main routine */
@@ -338,6 +363,17 @@ int main(int argc, char** argv)
         useSystemLibs = true;
     }
     const char* stdouterr_file = nullptr;
+
+#if defined(__aarch64__)
+    // check big-little
+    const android::HostHwInfo::ArmCpuInfo& armCpuInfo =
+            android::HostHwInfo::queryArmCpuInfo();
+    if (android::HostHwInfo::queryArmCpuInfo().is_big_little) {
+        // set up cpu affinity
+        setupCpuAffinity(armCpuInfo);
+    }
+#endif
+
 #endif  // __linux__
 
     /* Parse command-line and look for
