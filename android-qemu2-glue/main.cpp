@@ -174,7 +174,11 @@ const TargetInfo kTarget = {
 #ifdef TARGET_ARM64
         "arm64",
         "aarch64",
+#if defined(__aarch64__)
+        "host",
+#else
         "cortex-a57",
+#endif
         "ttyAMA",
         "virtio-blk-device",
         "virtio-net-device",
@@ -1714,7 +1718,24 @@ extern "C" int main(int argc, char** argv) {
 
     AFREE(accel_status);
 #else   // !TARGET_X86_64 && !TARGET_I386
+#if defined(__aarch64__)
+    args.add2("-machine", "type=virt");
+    char* accel_status = NULL;
+    CpuAccelMode accel_mode = ACCEL_AUTO;
+    const bool accel_ok =
+            handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
+    if (accel_ok) {
+        args.add("-enable-kvm");
+        if (hw->hw_cpu_ncore > 1) {
+            args.add("-smp");
+            args.addFormat("cores=%d", hw->hw_cpu_ncore);
+        }
+    } else {
+        dwarning("kvm is not enabled on this aarch64 host.");
+    }
+#else
     args.add2("-machine", "type=ranchu");
+#endif
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
