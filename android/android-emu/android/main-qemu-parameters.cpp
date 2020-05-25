@@ -164,9 +164,17 @@ QemuParameters* qemu_parameters_create(const char* argv0,
         params.add2("-net", "socket,vlan=1,mcast=230.0.0.10:1234");
     }
 
+    bool isArm64OnArm64Host = false;
+#if defined(__aarch64__)
+    isArm64OnArm64Host = true;
+    if (targetArch && (!strcmp(targetArch, "arm64"))) {
+        isArm64OnArm64Host = true;
+    }
+#endif
+
     if (targetArch &&
-        (!strcmp(targetArch, "x86") ||
-         !strcmp(targetArch, "x86_64"))) {
+                (!strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64")) ||
+        isArm64OnArm64Host) {
         char* accel_status = NULL;
         CpuAccelMode accel_mode = ACCEL_AUTO;
         bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
