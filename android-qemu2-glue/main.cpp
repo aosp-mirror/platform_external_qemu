@@ -174,7 +174,11 @@ const TargetInfo kTarget = {
 #ifdef TARGET_ARM64
         "arm64",
         "aarch64",
+#if defined(__aarch64__)
+        "host",
+#else
         "cortex-a57",
+#endif
         "ttyAMA",
         "virtio-blk-device",
         "virtio-net-device",
@@ -1714,7 +1718,11 @@ extern "C" int main(int argc, char** argv) {
 
     AFREE(accel_status);
 #else   // !TARGET_X86_64 && !TARGET_I386
+#if defined(__aarch64__)
+    args.add2("-machine", "type=virt");
+#else
     args.add2("-machine", "type=ranchu");
+#endif
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
