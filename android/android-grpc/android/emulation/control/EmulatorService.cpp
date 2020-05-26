@@ -399,6 +399,7 @@ public:
     Status getStatus(ServerContext* context,
                      const Empty* request,
                      EmulatorStatus* reply) override {
+        LOG(INFO) << context->peer();
         ::VmConfiguration config;
         mAgents->vm->getVmConfiguration(&config);
         reply->mutable_vmconfig()->set_hypervisortype(

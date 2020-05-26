@@ -38,6 +38,7 @@ static bool FLAG_help = false;
 static bool FLAG_verbose = true;
 static std::string FLAG_handle("video0");
 static int FLAG_port = 5557;
+static std::string FLAG_disc("");
 static bool FLAG_daemon = false;
 
 static struct option long_options[] = {{"logdir", required_argument, 0, 'l'},
@@ -48,6 +49,7 @@ static struct option long_options[] = {{"logdir", required_argument, 0, 'l'},
                                        {"verbose", no_argument, 0, 'v'},
                                        {"port", required_argument, 0, 'p'},
                                        {"daemon", no_argument, 0, 'd'},
+                                       {"discovery", required_argument, 0, 'i'},
                                        {0, 0, 0, 0}};
 
 using android::base::SharedMemory;
@@ -63,6 +65,7 @@ static void printUsage() {
            "--handle (The memory handle to read frames from)  type: string  "
            "default: video0\n"
            "--port (The port to connect to.)  type: int  default: 5557\n"
+           "--disc (The discoveryfile.) type: string, required\n"
            "--server (The server to connect to.)  type: string  default: "
            "127.0.0.1\n"
            "--help (Prints this message)  type: bool  default: false\n");
@@ -90,6 +93,9 @@ static void parseArgs(int argc, char** argv) {
                 break;
             case 'p':
                 FLAG_port = atoi(optarg);
+                break;
+            case 'i':
+                FLAG_disc = optarg;
                 break;
             case 'd':
                 FLAG_daemon = true;
@@ -156,7 +162,7 @@ int main(int argc, char* argv[]) {
 
     rtc::InitializeSSL();
     bool deamon = FLAG_daemon;
-    emulator::net::EmulatorConnection server(FLAG_port, FLAG_handle, FLAG_turn);
+    emulator::net::EmulatorConnection server(FLAG_port, FLAG_disc, FLAG_handle, FLAG_turn);
     int status = server.listen(deamon) ? 0 : 1;
     RTC_LOG(INFO) << "Finished, status: " << status;
     rtc::CleanupSSL();
