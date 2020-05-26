@@ -45,6 +45,54 @@
       "revId": "74aecfe6b052a9b1648c8d5efb517f5adb316597",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bb95605_9771f899",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-26T20:41:54Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a0e3603d_26e3b88e",
+      "range": {
+        "startLine": 247,
+        "startChar": 50,
+        "endLine": 247,
+        "endChar": 64
+      },
+      "revId": "74aecfe6b052a9b1648c8d5efb517f5adb316597",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d8943be_8069c8f9",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-26T20:41:54Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "67397d1f_0c580319",
+      "range": {
+        "startLine": 247,
+        "startChar": 24,
+        "endLine": 247,
+        "endChar": 25
+      },
+      "revId": "74aecfe6b052a9b1648c8d5efb517f5adb316597",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
