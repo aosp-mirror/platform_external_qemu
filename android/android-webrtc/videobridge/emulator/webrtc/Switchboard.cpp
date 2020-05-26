@@ -89,11 +89,13 @@ void Switchboard::stateConnectionChange(SocketTransport* connection,
 
 Switchboard::~Switchboard() {}
 
-Switchboard::Switchboard(const std::string handle,
+Switchboard::Switchboard(const std::string& discoveryFile,
+                         const std::string& handle,
                          const std::string& turnConfig,
                          AsyncSocketAdapter* connection,
                          net::EmulatorConnection* parent)
-    : mHandle(handle),
+    : mDiscoveryFile(discoveryFile),
+      mHandle(handle),
 
       mNetwork(rtc::Thread::CreateWithSocketServer()),
       mWorker(rtc::Thread::Create()),
@@ -112,10 +114,10 @@ Switchboard::Switchboard(const std::string handle,
             mNetwork.get() /* network_thread */,
             mWorker.get() /* worker_thread */,
             mSignaling.get() /* signaling_thread */, nullptr /* default_adm */,
-           ::webrtc::CreateBuiltinAudioEncoderFactory(),
-           ::webrtc::CreateBuiltinAudioDecoderFactory(),
-           ::webrtc::CreateBuiltinVideoEncoderFactory(),
-           ::webrtc::CreateBuiltinVideoDecoderFactory(),
+            ::webrtc::CreateBuiltinAudioEncoderFactory(),
+            ::webrtc::CreateBuiltinAudioDecoderFactory(),
+            ::webrtc::CreateBuiltinVideoEncoderFactory(),
+            ::webrtc::CreateBuiltinVideoDecoderFactory(),
             nullptr /* audio_mixer */, nullptr /* audio_processing */);
 
     split(turnConfig, " ", [this](StringView str) {
@@ -229,6 +231,7 @@ void Switchboard::received(SocketTransport* transport, const json object) {
             for (const std::string& handle : handles) {
                 stream->AddVideoTrack(handle);
             }
+            stream->AddAudioTrack(mDiscoveryFile);
             stream->CreateOffer();
         }
         return;

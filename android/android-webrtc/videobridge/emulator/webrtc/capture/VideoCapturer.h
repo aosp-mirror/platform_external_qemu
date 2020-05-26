@@ -14,6 +14,9 @@
 #pragma once
 #include <absl/types/optional.h>
 #include <api/video/video_frame.h>
+
+#include <memory>
+
 #include "android/base/Compiler.h"
 
 namespace emulator {
