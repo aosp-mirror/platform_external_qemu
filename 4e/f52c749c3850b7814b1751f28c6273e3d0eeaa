@@ -1,0 +1,8 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+1: John Joseph <jnjoseph@google.com>
+Code-Review+2: Guru Nagarajan <gurunagarajan@google.com>
+Submitted-by: Erwin Jansen <jansene@google.com>
+Submitted-at: Tue, 26 May 2020 16:53:45 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1316343
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
