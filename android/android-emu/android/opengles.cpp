@@ -506,18 +506,6 @@ void android_cleanupProcGLObjects(uint64_t puid) {
     }
 }
 
-void android_setMultiDisplay(uint32_t id,
-                             int32_t x,
-                             int32_t y,
-                             uint32_t w,
-                             uint32_t h,
-                             uint32_t dpi,
-                             bool add) {
-    if (sRenderer) {
-       sRenderer->setMultiDisplay(id, x, y, w, h, dpi, add);
-    }
-}
-
 static void* sContext, * sRenderContext, * sSurface;
 static EGLint s_gles_attr[5];
 
