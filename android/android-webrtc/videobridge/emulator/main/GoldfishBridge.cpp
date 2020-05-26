@@ -11,27 +11,90 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <rtc_base/flags.h>                    // for FlagList
-#include <stdio.h>                             // for fprintf, printf, NULL
-#include <memory>                              // for unique_ptr
-#include <string>                              // for string, operator!=
+#include <getopt.h>                // for optarg, required_argument
+#include <rtc_base/log_sinks.h>    // for FileRotatingLogSink
+#include <rtc_base/logging.h>      // for LogSink, RTC_LOG, INFO
+#include <rtc_base/ssl_adapter.h>  // for CleanupSSL, InitializeSSL
+#include <stdio.h>                 // for printf, fprintf, stderr
+#include <stdlib.h>                // for atoi, exit, EXIT_FAILURE
+
+#include <memory>  // for unique_ptr
+#include <string>  // for string, operator!=
 
 #include "android/base/StringView.h"           // for StringView
 #include "android/base/memory/SharedMemory.h"  // for SharedMemory, SharedMe...
-#include "emulator/main/flagdefs.h"            // for FLAG_handle, FLAG_port
 #include "emulator/net/EmulatorConnection.h"   // for EmulatorConnection
-#include "rtc_base/logging.h"                  // for LogSink, RTC_LOG, INFO
-#include "rtc_base/logsinks.h"                 // for FileRotatingLogSink
-#include "rtc_base/ssladapter.h"               // for CleanupSSL, InitializeSSL
 
-namespace emulator {
-namespace webrtc {
-class Switchboard;
-}  // namespace webrtc
-}  // namespace emulator
+static std::string FLAG_logdir("");
+static std::string FLAG_server("127.0.0.1");
+static std::string FLAG_turn("");
+static bool FLAG_help = false;
+static bool FLAG_verbose = true;
+static std::string FLAG_handle("video0");
+static int FLAG_port = 5557;
+static bool FLAG_daemon = false;
+
+static struct option long_options[] = {{"logdir", required_argument, 0, 'l'},
+                                       {"server", required_argument, 0, 's'},
+                                       {"turn", required_argument, 0, 't'},
+                                       {"handle", required_argument, 0, 'e'},
+                                       {"help", no_argument, 0, 'h'},
+                                       {"verbose", no_argument, 0, 'v'},
+                                       {"port", required_argument, 0, 'p'},
+                                       {"daemon", no_argument, 0, 'd'},
+                                       {0, 0, 0, 0}};
 
 using android::base::SharedMemory;
-using emulator::webrtc::Switchboard;
+
+static void printUsage() {
+    printf("--logdir (Directory to log files to, or empty when unused)  type: "
+           "string  default:\n"
+           "--turn (Process that will be invoked to retrieve TURN json "
+           "configuration.)  type: string  default:\n"
+           "--daemon (Run as a deamon, will print PID of deamon upon exit)  "
+           "type: bool  default: false\n"
+           "--verbose (Enables logging to stdout)  type: bool  default: false\n"
+           "--handle (The memory handle to read frames from)  type: string  "
+           "default: video0\n"
+           "--port (The port to connect to.)  type: int  default: 5557\n"
+           "--server (The server to connect to.)  type: string  default: "
+           "127.0.0.1\n"
+           "--help (Prints this message)  type: bool  default: false\n");
+}
+
+static void parseArgs(int argc, char** argv) {
+    int long_index = 0;
+    int opt = 0;
+    while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) !=
+           -1) {
+        switch (opt) {
+            case 'l':
+                FLAG_logdir = optarg;
+                break;
+            case 'e':
+                FLAG_handle = optarg;
+            case 's':
+                FLAG_server = optarg;
+                break;
+            case 't':
+                FLAG_turn = optarg;
+                break;
+            case 'v':
+                FLAG_verbose = true;
+                break;
+            case 'p':
+                FLAG_port = atoi(optarg);
+                break;
+            case 'd':
+                FLAG_daemon = true;
+                break;
+            case 'h':
+            default:
+                printUsage();
+                exit(EXIT_FAILURE);
+        }
+    }
+}
 
 const int kMaxFileLogSizeInBytes = 64 * 1024 * 1024;
 
@@ -42,21 +105,17 @@ public:
     ~StdLogSink() override {}
 
     void OnLogMessage(const std::string& message) override {
-        fprintf(stderr, "%s", message.c_str());
+        fprintf(stderr, "Log: %s", message.c_str());
     }
 };
 
 int main(int argc, char* argv[]) {
-    rtc::FlagList::SetFlagsFromCommandLine(&argc, argv, true);
+    parseArgs(argc, argv);
+
     std::unique_ptr<rtc::LogSink> log_sink = nullptr;
 
-    if (FLAG_help) {
-        rtc::FlagList::Print(NULL, false);
-        return 0;
-    }
-
     // Configure our loggers, we will log at most 1
-    if (FLAG_logdir != std::string("")) {
+    if (FLAG_logdir != "") {
         rtc::FileRotatingLogSink* frl = new rtc::FileRotatingLogSink(
                 FLAG_logdir, "goldfish_rtc", kMaxFileLogSizeInBytes, 2);
         frl->Init();
