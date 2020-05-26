@@ -1,4 +1,8 @@
 set(_GEN_ARGS use_gold=false target_cpu=\\"${TARGET_CPU}\\" target_os=\\"${TARGET_OS}\\" is_component_build=false)
+# Let's not bring in protobuf, as it prevents us from using grpc.
+# We also must make sure we are not using the unstable libcxx, lest you want
+# your std::strings be broken.
+set(_GEN_ARGS ${_GEN_ARGS} rtc_enable_protobuf=false libcxx_abi_unstable=false)
 
 if (MSVC OR XCODE)
   set(_GEN_ARGS ${_GEN_ARGS} is_debug=$<$<CONFIG:Debug>:true>$<$<CONFIG:Release>:false>$<$<CONFIG:RelWithDebInfo>:false>$<$<CONFIG:MinSizeRel>:false>)

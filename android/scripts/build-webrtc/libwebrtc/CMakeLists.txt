@@ -5,8 +5,7 @@ project(libwebrtc)
 # Allow the use of IN_LIST operand
 cmake_policy(SET CMP0057 NEW)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${PROJECT_SOURCE_DIR}/CMakeModules)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMakeModules)
 
 find_package(Git REQUIRED)
 
@@ -15,40 +14,38 @@ include(Version)
 include(Options)
 include(TargetOsAndCpu)
 
-if (HAS_OWN_DEPOT_TOOLS)
+if(HAS_OWN_DEPOT_TOOLS)
   find_package(DepotTools REQUIRED)
-endif (HAS_OWN_DEPOT_TOOLS)
+endif(HAS_OWN_DEPOT_TOOLS)
 
-if (NOT WIN32)
+if(NOT WIN32)
   find_package(PythonInterp 2.7 REQUIRED)
-endif (NOT WIN32)
+endif(NOT WIN32)
 
 include(ExternalProject)
 
-if (NOT HAS_OWN_DEPOT_TOOLS)
-  if (WIN32)
-    set(GCLIENT_EXECUTABLE ${PROJECT_BINARY_DIR}/depot_tools/src/depot-tools/gclient.bat)
-  else (WIN32)
-    set(GCLIENT_EXECUTABLE ${PROJECT_BINARY_DIR}/depot_tools/src/depot-tools/gclient)
-  endif (WIN32)
+if(NOT HAS_OWN_DEPOT_TOOLS)
+  if(WIN32)
+    set(GCLIENT_EXECUTABLE
+        ${PROJECT_BINARY_DIR}/depot_tools/src/depot-tools/gclient.bat)
+  else(WIN32)
+    set(GCLIENT_EXECUTABLE
+        ${PROJECT_BINARY_DIR}/depot_tools/src/depot-tools/gclient)
+  endif(WIN32)
 
-  ExternalProject_Add(
-      depot-tools
-
-      GIT_REPOSITORY https://chromium.googlesource.com/chromium/tools/depot_tools
-
-      PREFIX ${PROJECT_BINARY_DIR}/depot_tools
-
-      CONFIGURE_COMMAND ""
-      UPDATE_COMMAND ""
-      PATCH_COMMAND ""
-      BUILD_COMMAND ""
-      INSTALL_COMMAND ""
-  )
+  externalproject_add(
+    depot-tools
+    GIT_REPOSITORY https://chromium.googlesource.com/chromium/tools/depot_tools
+    PREFIX ${PROJECT_BINARY_DIR}/depot_tools
+    CONFIGURE_COMMAND ""
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND "")
 
   set(_NEXT_DEPENDS depot-tools)
   set(DEPOT_TOOLS_PATH ${PROJECT_BINARY_DIR}/depot_tools/src/depot-tools)
-endif (NOT HAS_OWN_DEPOT_TOOLS)
+endif(NOT HAS_OWN_DEPOT_TOOLS)
 
 set(_WEBRTC_CMAKE_ARGS
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -60,76 +57,67 @@ set(_WEBRTC_CMAKE_ARGS
     -DTARGET_OS=${TARGET_OS}
     -DWEBRTC_PARENT_DIR:PATH=${PROJECT_BINARY_DIR}/webrtc)
 
-if (BUILD_TESTS)
+if(BUILD_TESTS)
   set(_WEBRTC_CMAKE_ARGS ${_WEBRTC_CMAKE_ARGS} -DBUILD_TESTS=${BUILD_TESTS})
-endif (BUILD_TESTS)
+endif(BUILD_TESTS)
 
-if (WEBRTC_BRANCH_HEAD)
-  set(_WEBRTC_CMAKE_ARGS ${_WEBRTC_CMAKE_ARGS} -DWEBRTC_BRANCH_HEAD=${WEBRTC_BRANCH_HEAD})
-endif (WEBRTC_BRANCH_HEAD)
+if(WEBRTC_BRANCH_HEAD)
+  set(_WEBRTC_CMAKE_ARGS ${_WEBRTC_CMAKE_ARGS}
+                         -DWEBRTC_BRANCH_HEAD=${WEBRTC_BRANCH_HEAD})
+endif(WEBRTC_BRANCH_HEAD)
 
-if (WEBRTC_REVISION)
-  set(_WEBRTC_CMAKE_ARGS ${_WEBRTC_CMAKE_ARGS} -DWEBRTC_REVISION=${WEBRTC_REVISION})
-endif (WEBRTC_REVISION)
+if(WEBRTC_REVISION)
+  set(_WEBRTC_CMAKE_ARGS ${_WEBRTC_CMAKE_ARGS}
+                         -DWEBRTC_REVISION=${WEBRTC_REVISION})
+endif(WEBRTC_REVISION)
 
-ExternalProject_Add(
-    webrtc-src
+externalproject_add(
+  webrtc-src
+  DEPENDS ${_NEXT_DEPENDS}
+  GIT_REPOSITORY https://chromium.googlesource.com/external/webrtc
+  PREFIX ${PROJECT_BINARY_DIR}/webrtc
+  BINARY_DIR ${PROJECT_BINARY_DIR}/webrtc/build
+  DOWNLOAD_DIR ${PROJECT_BINARY_DIR}/webrtc/src
+  SOURCE_DIR ${PROJECT_BINARY_DIR}/webrtc/src
+  STAMP_DIR ${PROJECT_BINARY_DIR}/webrtc/stamp
+  TMP_DIR ${PROJECT_BINARY_DIR}/webrtc/tmp
+  PATCH_COMMAND
+    ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/webrtc/CMakeLists.txt.in
+    ${PROJECT_BINARY_DIR}/webrtc/src/CMakeLists.txt
+  UPDATE_COMMAND ""
+  INSTALL_COMMAND ""
+  CMAKE_ARGS ${_WEBRTC_CMAKE_ARGS})
 
-    DEPENDS ${_NEXT_DEPENDS}
-    GIT_REPOSITORY https://chromium.googlesource.com/external/webrtc
-
-    PREFIX ${PROJECT_BINARY_DIR}/webrtc
-    BINARY_DIR ${PROJECT_BINARY_DIR}/webrtc/build
-    DOWNLOAD_DIR ${PROJECT_BINARY_DIR}/webrtc/src
-    SOURCE_DIR ${PROJECT_BINARY_DIR}/webrtc/src
-    STAMP_DIR ${PROJECT_BINARY_DIR}/webrtc/stamp
-    TMP_DIR ${PROJECT_BINARY_DIR}/webrtc/tmp
-
-    PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/webrtc/CMakeLists.txt.in ${PROJECT_BINARY_DIR}/webrtc/src/CMakeLists.txt
-    UPDATE_COMMAND ""
-    INSTALL_COMMAND ""
-
-    CMAKE_ARGS
-    ${_WEBRTC_CMAKE_ARGS}
-)
-
-if (MSVC OR XCODE)
-  set(_CONFIG $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RelWithDebInfo>:Release>$<$<CONFIG:MinSizeRel>:Release>)
-elseif (CMAKE_BUILD_TYPE MATCHES Debug)
+if(MSVC OR XCODE)
+  set(_CONFIG
+      $<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RelWithDebInfo>:Release>$<$<CONFIG:MinSizeRel>:Release>
+  )
+elseif(CMAKE_BUILD_TYPE MATCHES Debug)
   set(_CONFIG Debug)
-else (MSVC OR XCODE)
+else(MSVC OR XCODE)
   set(_CONFIG Release)
-endif (MSVC OR XCODE)
+endif(MSVC OR XCODE)
 
-ExternalProject_Add(
-    libwebrtc
-    DEPENDS webrtc-src
-
-    INSTALL_DIR ${PROJECT_BINARY_DIR}
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/libwebrtc
-    BINARY_DIR ${PROJECT_BINARY_DIR}/libwebrtc
-
-    CMAKE_ARGS
+externalproject_add(
+  libwebrtc
+  DEPENDS webrtc-src
+  INSTALL_DIR ${PROJECT_BINARY_DIR}
+  SOURCE_DIR ${PROJECT_SOURCE_DIR}/libwebrtc
+  BINARY_DIR ${PROJECT_BINARY_DIR}/libwebrtc
+  CMAKE_ARGS
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX:PATH=${PROJECT_BINARY_DIR}
     -DCMAKE_MODULE_PATH:PATH=${CMAKE_MODULE_PATH}
     -DINSTALL_CMAKE_DIR:PATH=${PROJECT_BINARY_DIR}/lib/cmake/LibWebRTC
     -DTARGET_OS:STRING=${TARGET_OS}
     -DWEBRTC_OUTPUT_DIR:PATH=${PROJECT_BINARY_DIR}/webrtc/src/out/${_CONFIG}
-    -DWEBRTC_SOURCE_DIR:PATH=${PROJECT_BINARY_DIR}/webrtc/src
-)
+    -DWEBRTC_SOURCE_DIR:PATH=${PROJECT_BINARY_DIR}/webrtc/src)
 
-if (BUILD_SAMPLE)
-  ExternalProject_Add(
-      sample
-      DEPENDS libwebrtc
-      SOURCE_DIR ${PROJECT_SOURCE_DIR}/sample
-      INSTALL_COMMAND ""
-
-      CMAKE_ARGS
-      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-  )
-endif (BUILD_SAMPLE)
+if(BUILD_SAMPLE)
+  externalproject_add(
+    sample DEPENDS libwebrtc SOURCE_DIR ${PROJECT_SOURCE_DIR}/sample
+    INSTALL_COMMAND "" CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+endif(BUILD_SAMPLE)
 
 include(Install)
 include(Package)
