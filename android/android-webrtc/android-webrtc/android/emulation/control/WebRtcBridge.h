@@ -14,13 +14,11 @@
 
 #pragma once
 
-#include <stdint.h>  // for uint16_t
-
-#include <condition_variable>  // std::condition_variable
-#include <map>                 // for map
-#include <memory>              // for shared_ptr
-#include <mutex>               // std::mutex, std::unique_lock
-#include <string>              // for string
+#include <stdint.h>                                         // for uint16_t
+#include <map>                                              // for map
+#include <memory>                                           // for shared_ptr
+#include <mutex>                                            // for condition...
+#include <string>                                           // for string
 
 #include "android/base/containers/BufferQueue.h"            // for BufferQueue
 #include "android/base/synchronization/Lock.h"              // for Lock (ptr...
@@ -31,7 +29,6 @@
 #include "android/emulation/control/record_screen_agent.h"  // for QAndroidR...
 #include "emulator/net/JsonProtocol.h"                      // for JsonProtocol
 #include "emulator/net/SocketTransport.h"                   // for SocketTra...
-#include "android/base/async/ThreadLooper.h"    // for ThreadLooper
 
 namespace emulator {
 namespace net {
@@ -40,6 +37,10 @@ class AsyncSocketAdapter;
 }  // namespace emulator
 
 namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+
 namespace emulation {
 namespace control {
 

@@ -26,11 +26,6 @@ namespace emulator {
 namespace net {
 class AsyncSocketAdapter;
 class EmulatorConnection;
-
-class AsyncSocketAdapter;
-class EmulatorConnection;
-
-class EmulatorConnection;
 }  // namespace net
 
 namespace webrtc {
@@ -52,7 +47,8 @@ using net::State;
 // 4. Participants that are no longer streaming need to be finalized.
 class Switchboard : public JsonReceiver {
 public:
-    Switchboard(const std::string handle,
+    Switchboard(const std::string& discoveryFile,
+                const std::string& handle,
                 const std::string& turnconfig,
                 AsyncSocketAdapter* connection,
                 EmulatorConnection* parent);
@@ -89,6 +85,7 @@ private:
                                                    // be garbage collected.
     std::vector<std::string> mClosedConnections;
     const std::string mHandle = "video0";  // Handle to shared memory region
+    const std::string mDiscoveryFile;      // Emulator discovery file.
     std::vector<std::string>
             mTurnConfig;  // Process to invoke to retrieve turn config.
     int32_t mFps = 24;    // Desired fps
@@ -98,6 +95,7 @@ private:
     std::unique_ptr<rtc::Thread> mWorker;
     std::unique_ptr<rtc::Thread> mSignaling;
     std::unique_ptr<rtc::Thread> mNetwork;
+    std::unique_ptr<::webrtc::TaskQueueFactory> mTaskFactory;
 
     rtc::scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
             mConnectionFactory;
