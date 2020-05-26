@@ -96,14 +96,6 @@ AEMU_EXPORT void android_setOpenglesTranslation(float px, float py);
 
 AEMU_EXPORT void android_setOpenglesScreenMask(int width, int height, const unsigned char* rgbaData);
 
-AEMU_EXPORT void android_setMultiDisplay(uint32_t id,
-                                         int32_t x,
-                                         int32_t y,
-                                         uint32_t w,
-                                         uint32_t h,
-                                         uint32_t dpi,
-                                         bool add);
-
 AEMU_EXPORT void android_redrawOpenglesWindow(void);
 
 AEMU_EXPORT bool android_hasGuestPostedAFrame(void);
