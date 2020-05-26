@@ -64,6 +64,7 @@ namespace opengl {
 enum class RecvMode {
     Android = 0,
     Fuchsia = 1,
+    VirtioGpu = 2,
 };
 
 static RecvMode recvMode = RecvMode::Android;
@@ -353,7 +354,7 @@ public:
                         DD("%s: returning PIPE_ERROR_AGAIN", __func__);
                         return PIPE_ERROR_AGAIN;
                     }
-                } else { // Fuchsia, default (Not using switch because of break; overload)
+                } else if (android::opengl::recvMode == android::opengl::RecvMode::Fuchsia) {
                     // No data left, return if we already received some data,
                     // otherwise read a new chunk from the channel.
                     if (len > 0) {
@@ -373,6 +374,47 @@ public:
                     const RenderChannel::Duration kBlockAtMostUs = 100;
                     auto currTime = android::base::System::get()->getUnixTimeUs();
                     auto result = mChannel->readBefore(&mDataForReading, currTime + kBlockAtMostUs);
+
+                    if (result != IoResult::Ok) {
+                        DD("%s: tryRead() failed with %d", __func__, (int)result);
+                        // This failed either because the channel was stopped
+                        // from the host, or if there was no data yet in the
+                        // channel.
+                        if (len > 0) {
+                            DD("%s: returning %d bytes", __func__, (int)len);
+                            return len;
+                        }
+                        if (result == IoResult::Error) {
+                            return PIPE_ERROR_IO;
+                        }
+
+                        DD("%s: returning PIPE_ERROR_AGAIN", __func__);
+                        return PIPE_ERROR_AGAIN;
+                    }
+                    mDataForReadingLeft = mDataForReading.size();
+                } else { // Virtio-gpu
+                    // No data left, return if we already received some data,
+                    // otherwise read a new chunk from the channel.
+                    if (len > 0) {
+                        DD("%s: returning %d bytes", __func__, (int)len);
+                        return len;
+                    }
+                    // Block a little before declaring there is nothing
+                    // to read. This gives the render thread a chance to
+                    // process pending data before we return control to
+                    // the guest. The amount of time we block here should
+                    // be kept at a minimum. It's preferred to instead have
+                    // the guest block on work that takes a significant
+                    // amount of time.
+
+                    static constexpr android::base::System::Duration kBlockReportIntervalUs = 1000000ULL;
+
+                    auto currUs = android::base::System::get()->getHighResTimeUs();
+
+                    const RenderChannel::Duration kBlockAtMostUs = 10000;
+                    auto currTime = android::base::System::get()->getUnixTimeUs();
+                    auto result = mChannel->readBefore(&mDataForReading, currTime + kBlockAtMostUs);
+                    auto nextUs = android::base::System::get()->getHighResTimeUs();
 
                     if (result != IoResult::Ok) {
                         DD("%s: tryRead() failed with %d", __func__, (int)result);
