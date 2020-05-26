@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "67397d1f_0c580319",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-05-26T20:18:30Z",
+      "side": 1,
+      "message": "Remove the bang.",
+      "range": {
+        "startLine": 247,
+        "startChar": 24,
+        "endLine": 247,
+        "endChar": 25
+      },
+      "revId": "74aecfe6b052a9b1648c8d5efb517f5adb316597",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0e3603d_26e3b88e",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-05-26T20:18:30Z",
+      "side": 1,
+      "message": "android studio emulator detection -\u003e the emulator registration directory",
+      "range": {
+        "startLine": 247,
+        "startChar": 50,
+        "endLine": 247,
+        "endChar": 64
+      },
+      "revId": "74aecfe6b052a9b1648c8d5efb517f5adb316597",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
