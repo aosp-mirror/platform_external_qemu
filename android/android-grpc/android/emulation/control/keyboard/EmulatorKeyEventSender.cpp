@@ -1,14 +1,15 @@
 #include "android/emulation/control/keyboard/EmulatorKeyEventSender.h"
 
-#include <codecvt>     // for codecvt_utf8
+#include <assert.h>  // for assert
+
 #include <cstdint>     // for uint32_t
 #include <functional>  // for __base
-#include <locale>      // for wstring_convert
 #include <string>      // for string, oper...
+#include <vector>      // for vector
 
-#include "android/base/ArraySize.h"  // for ARRAY_SIZE
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"             // for ThreadLo...
+#include "android/base/ArraySize.h"                      // for ARRAY_SIZE
+#include "android/base/async/Looper.h"                   // for Looper
+#include "android/base/async/ThreadLooper.h"             // for ThreadLooper
 #include "android/console.h"                             // for AndroidConso...
 #include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
 #include "android/emulation/control/libui_agent.h"       // for LibuiKeyCode...
@@ -279,14 +280,9 @@ void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
         }
     }
     if (request->text().size() > 0) {
-        DD("sendUtf8String: %s", request->text().c_str());
-        for (auto evdev : convertUtf8ToEvDev(request->text())) {
-            DD("Press %s -> evdev %d", request->ShortDebugString().c_str(),
-               evdev);
-            mAgents->user_event->sendKeyCode(evdev | 0x400);
-            mAgents->user_event->sendKeyCode(evdev);
-        }
+        sendUtf8String(request->text());
     }
+
     if (request->keycode() > 0) {
         DD("keycode: %d, codetype:%d, eventtype:%d", request->keycode(),
            request->codetype(), request->eventtype());
@@ -294,6 +290,45 @@ void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
                     request->eventtype());
     }
 }
+
+void EmulatorKeyEventSender::sendUtf8String(const std::string& utf8) {
+    DD("sendUtf8String: %s", utf8.c_str());
+    // We need to convert every individual character to a sequence of evdev
+    // events. This is due to the fact that a single character can be
+    // translated into multiple ev dev events in case a modifier is needed.
+    // For example: 'e' -> gives one ev dev event [18]. 'E' ->  gives two
+    // [42, 18] (shift + e). The end result is that the sequence "Ee" will be
+    // translated as [42, 18, 18]. If we deliver this sequence as down + up, we
+    // would see "EE" in android. By splitting this up in individual chars we
+    // guarantee that this doesn't happen.
+    const char* start = utf8.c_str();  // Guaranteed 0 terminated.
+    const char* end = utf8.c_str();
+    while (*end != '\0') {
+        char ch = *end;
+        end++;  // Can point to \0, but not beyond \0
+
+        // For utf-8 we have that if the two high bits set to 10, it's a
+        // continuation byte. What we are doing here is checking if the first
+        // two bits are not 10 and hence indicate a new character. This means
+        // we have found a single utf-8 char between start and end (of at most 4
+        // bytes).
+        if ((ch & 0xc0) != 0x80) {
+            assert(start < end);
+            assert(end - start <= 4);
+            auto evdevs = convertUtf8ToEvDev(start, end - start);
+            // Send down.
+            for (auto evdev : evdevs) {
+                mAgents->user_event->sendKeyCode(evdev | 0x400);
+            }
+            // Send up.
+            for (auto evdev : evdevs) {
+                mAgents->user_event->sendKeyCode(evdev);
+            }
+            start = end;
+        }
+    }
+}
+
 DomCode EmulatorKeyEventSender::domKeyAsNonPrintableDomCode(DomKey key) {
     for (size_t i = 0; i < kNonPrintableCodeEntries; ++i) {
         if (kNonPrintableCodeMap[i].dom_key == key) {
@@ -312,16 +347,17 @@ uint32_t EmulatorKeyEventSender::domCodeToEvDevKeycode(DomCode key) {
     return 0;
 }
 
-static std::string to_utf8(const std::u32string& s) {
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
-    return conv.to_bytes(s);
+std::vector<uint32_t> EmulatorKeyEventSender::convertUtf8ToEvDev(
+        const std::string& utf8) {
+    return convertUtf8ToEvDev((const char*)utf8.c_str(), utf8.size());
 }
 
 std::vector<uint32_t> EmulatorKeyEventSender::convertUtf8ToEvDev(
-        std::string utf8) {
+        const char* utf8,
+        const size_t cnt) {
     std::vector<uint32_t> evdevs;
     mAgents->libui->convertUtf8ToKeyCodeEvents(
-            (const unsigned char*)utf8.c_str(), utf8.size(),
+            (const uint8_t*)utf8, cnt,
             (LibuiKeyCodeSendFunc)[](int* codes, int count, void* context) {
                 auto evdevs = reinterpret_cast<std::vector<uint32_t>*>(context);
                 for (int i = 0; i < count; i++) {
