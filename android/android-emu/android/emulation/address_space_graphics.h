@@ -38,6 +38,7 @@ struct Allocation {
 class AddressSpaceGraphicsContext : public AddressSpaceDeviceContext {
 public:
     AddressSpaceGraphicsContext();
+    AddressSpaceGraphicsContext(void* ringAndBufferStorage);
     ~AddressSpaceGraphicsContext();
 
     static void setConsumer(ConsumerInterface);
@@ -77,6 +78,8 @@ private:
     uint32_t mExiting = 0;
     // For onUnavailableRead
     uint32_t mUnavailableReadCount = 0;
+
+    bool mOwnsStorage = true;
 };
 
 }  // namespace asg
