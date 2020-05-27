@@ -210,6 +210,9 @@ static constexpr android::base::StringView kHasSharedSlotsHostMemoryAllocator = 
 // vulkan free memory sync
 static constexpr android::base::StringView kVulkanFreeMemorySync = "ANDROID_EMU_vulkan_free_memory_sync";
 
+// virtio-gpu native sync
+static constexpr android::base::StringView kVirtioGpuNativeSync = "ANDROID_EMU_virtio_gpu_native_sync";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -274,6 +277,10 @@ static bool shouldEnableAsyncSwap() {
     return emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
            emugl_sync_device_exists() && (isPhone || playStoreImage) &&
            sizeof(void*) == 8;
+}
+
+static bool shouldEnableVirtioGpuNativeSync() {
+    return emugl_feature_is_enabled(android::featurecontrol::VirtioGpuNativeSync);
 }
 
 static bool shouldEnableHostComposition() {
@@ -401,6 +408,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     bool isChecksumEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
     bool asyncSwapEnabled = shouldEnableAsyncSwap();
+    bool virtioGpuNativeSyncEnabled = shouldEnableVirtioGpuNativeSync();
     bool dma1Enabled =
         emugl_feature_is_enabled(android::featurecontrol::GLDMA);
     bool dma2Enabled =
@@ -523,6 +531,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (vulkanFreeMemorySyncEnabled && name == GL_EXTENSIONS) {
         glStr += kVulkanFreeMemorySync;
+        glStr += " ";
+    }
+
+    if (virtioGpuNativeSyncEnabled && name == GL_EXTENSIONS) {
+        glStr += kVirtioGpuNativeSync;
         glStr += " ";
     }
 
