@@ -445,6 +445,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::NO_DELAY_CLOSE_COLOR_BUFFER;
         case android::featurecontrol::NoDeviceFrame:
             return android_studio::EmulatorFeatureFlagState::NO_DEVICE_FRAME;
+        case android::featurecontrol::VirtioGpuNativeSync:
+            return android_studio::EmulatorFeatureFlagState::VIRTIO_GPU_NATIVE_SYNC;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
