@@ -69,6 +69,7 @@ struct DomKeyMapEntry {
 #undef DOM_KEY_UNI
 
 using KeyEventQueue = base::BufferQueue<KeyboardEvent>;
+
 class EmulatorKeyEventSender {
 public:
     EmulatorKeyEventSender(const AndroidConsoleAgents* const consoleAgents);
@@ -93,7 +94,9 @@ private:
 
     // Translates a string with one or more Utf8 characters to a sequence of
     // evdev values.
-    std::vector<uint32_t> convertUtf8ToEvDev(const std::string);
+    std::vector<uint32_t> convertUtf8ToEvDev(const std::string& utf8str);
+    std::vector<uint32_t> convertUtf8ToEvDev(const char* utf8, const size_t cnt);
+    void sendUtf8String(const std::string& keys);
 
     int mOffset[KeyboardEvent::KeyCodeType_MAX + 1] = {
             offsetof(KeycodeMapEntry, usb), offsetof(KeycodeMapEntry, evdev),
