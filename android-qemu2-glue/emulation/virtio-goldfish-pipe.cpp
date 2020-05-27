@@ -11,8 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include "android/base/AlignedBuf.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/emulation/AddressSpaceService.h"
+#include "android/emulation/address_space_device.h"
 #include "android/emulation/android_pipe_common.h"
 #include "android/emulation/HostmemIdMapping.h"
 #include "android/opengles.h"
@@ -461,6 +464,23 @@ static int sync_iov(PipeResEntry* res, uint64_t offset, const virgl_box* box, Io
     return 0;
 }
 
+// Our commands
+// kVirtioGpuAddressSpaceHostmemAlloc | resp_resid | size | out: hostmemid_lo | out: hostmemid_hi | out: error
+const uint32_t kVirtioGpuAddressSpaceHostmemAlloc = 0x1000;
+
+// kVirtioGpuAddressSpaceContextCreateWithSubdeviceAndHostmemId | resp_resid | subdeviceType | hostmemId | >handle | >error
+const uint32_t kVirtioGpuAddressSpaceContextCreateWithSubdeviceAndHostmemId = 0x1001;
+
+// kVirtioGpuAddressSpacePing | offset_lo | offset_hi | metadata_lo | metadata_hi | version | wait_fd | wait_flags | direction
+// no output
+const uint32_t kVirtioGpuAddressSpacePing = 0x1002;
+
+// kVirtioGpuAddressSpacePingWithResponse | resp_resid | offset_lo | offset_hi | metadata_lo | metadata_hi | version | wait_fd | wait_flags | direction
+// out: same as input then | out: error
+const uint32_t kVirtioGpuAddressSpacePingWithResponse = 0x1003;
+
+const uint32_t kVirtioGpuNativeSyncCreateExportFd = 0x9000;
+const uint32_t kVirtioGpuNativeSyncCreateImportFd = 0x9001;
 
 class PipeVirglRenderer {
 public:
@@ -477,6 +497,10 @@ public:
         mReadPixelsFunc = android_getReadPixelsFunc();
         if (!mReadPixelsFunc) {
             VGP_FATAL("Could not get read pixels func!");
+        }
+        mAddressSpaceDeviceControlOps = get_address_space_device_control_ops();
+        if (!mAddressSpaceDeviceControlOps) {
+            VGP_FATAL("Could not get address space device control ops!");
         }
         VGPLOG("done");
         return 0;
@@ -562,12 +586,100 @@ public:
         return 0;
     }
 
+    void writeWordsToFirstIovPageLocked(uint32_t* dwords, size_t dwordCount, uint32_t resId) {
+
+        auto resEntryIt = mResources.find(resId);
+        if (resEntryIt == mResources.end()) {
+            fprintf(stderr, "%s: fatal: kVirtioGpuAddressSpaceHostmemAlloc: resp_resid %u not found\n", __func__, resId);
+            abort();
+        }
+
+        auto& resEntry = resEntryIt->second;
+
+        if (!resEntry.iov) {
+            fprintf(stderr, "%s: fatal: kVirtioGpuAddressSpaceHostmemAlloc: resp_resid %u had empty iov\n", __func__, resId);
+            abort();
+        }
+
+        uint32_t* iovWords = (uint32_t*)(resEntry.iov[0].iov_base);
+        memcpy(iovWords, dwords, sizeof(uint32_t) * dwordCount);
+    }
+
+    void addressSpaceProcessCmd(VirglCtxId ctxId, uint32_t* dwords, int dwordCount) {
+        uint32_t opcode = dwords[0];
+
+        switch (opcode) {
+            case kVirtioGpuAddressSpaceHostmemAlloc: {
+                uint32_t resp_resid = dwords[1];
+                uint32_t size = dwords[2];
+                // alloc something page aligned here
+                void* buf = android::aligned_buf_alloc(4096, size);
+                // assign hostmem id
+                uint64_t newId = HostmemIdMapping::get()->add((uint64_t)(uintptr_t)buf, (uint64_t)size);
+                uint32_t error = 0;
+
+                uint32_t response[] = {
+                    (uint32_t)(newId), // hostmemid_lo
+                    (uint32_t)(newId >> 32), // hostmemid_hi
+                    0, // error
+                };
+
+                AutoLock lock(mLock);
+                writeWordsToFirstIovPageLocked(
+                    response,
+                    sizeof(response) / sizeof(uint32_t),
+                    resp_resid);
+
+                break;
+            }
+            case kVirtioGpuAddressSpaceContextCreateWithSubdeviceAndHostmemId: {
+                uint32_t resp_resid = dwords[1];
+                uint32_t subdevice_type = dwords[2];
+                uint32_t hostmemIdArg = dwords[3];
+
+                // use phys addr as hva
+                auto entry = HostmemIdMapping::get()->get(hostmemIdArg);
+
+                if (!entry.hva) {
+                    fprintf(stderr, "%s: fatal: kVirtioGpuAddressSpaceContextCreateWithSubdeviceAndHostmemId: hostmem id %u has no allocated hva\n", __func__,
+                            hostmemIdArg);
+                    abort();
+                }
+
+                uint32_t handle = mAddressSpaceDeviceControlOps->gen_handle();
+
+                struct android::emulation::AddressSpaceDevicePingInfo pingInfo = {
+                    .phys_addr = (uint64_t)(uintptr_t)(entry.hva),
+                    .metadata = (uint64_t)subdevice_type,
+                };
+
+                mAddressSpaceDeviceControlOps->ping_at_hva(handle, &pingInfo);
+
+                uint32_t response[] = {
+                    (uint32_t)(handle),
+                    0, // error
+                };
+
+                AutoLock lock(mLock);
+                writeWordsToFirstIovPageLocked(
+                    response,
+                    sizeof(response) / sizeof(uint32_t),
+                    resp_resid);
+                break;
+            }
+            case kVirtioGpuAddressSpacePing: {
+                break;
+            }
+            case kVirtioGpuAddressSpacePingWithResponse: {
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
     int submitCmd(VirglCtxId ctxId, void* buffer, int dwordCount) {
         VGPLOG("ctxid: %u buffer: %p dwords: %d", ctxId, buffer, dwordCount);
-
-        // Our commands
-        const uint32_t kVirtioGpuNativeSyncCreateExportFd = 0x9000;
-        const uint32_t kVirtioGpuNativeSyncCreateImportFd = 0x9001;
 
         if (!buffer) {
             fprintf(stderr, "%s: error: buffer null\n", __func__);
@@ -585,6 +697,12 @@ public:
         uint32_t opcode = dwords[0];
 
         switch (opcode) {
+            case kVirtioGpuAddressSpaceHostmemAlloc:
+            case kVirtioGpuAddressSpaceContextCreateWithSubdeviceAndHostmemId:
+            case kVirtioGpuAddressSpacePing:
+            case kVirtioGpuAddressSpacePingWithResponse:
+                addressSpaceProcessCmd(ctxId, dwords, dwordCount);
+                break;
             case kVirtioGpuNativeSyncCreateExportFd:
             case kVirtioGpuNativeSyncCreateImportFd: {
                 uint32_t sync_handle_lo = dwords[1];
@@ -1171,6 +1289,8 @@ private:
     virgl_renderer_callbacks mVirglRendererCallbacks;
     AndroidVirtioGpuOps* mVirtioGpuOps = nullptr;
     ReadPixelsFunc mReadPixelsFunc = nullptr;
+    struct address_space_device_control_ops* mAddressSpaceDeviceControlOps =
+        nullptr;
 
     uint32_t mNextHwPipe = 1;
     const GoldfishPipeServiceOps* mServiceOps = nullptr;

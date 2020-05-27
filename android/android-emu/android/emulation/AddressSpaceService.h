@@ -38,6 +38,7 @@ enum AddressSpaceDeviceType {
     GenericPipe = 4,
     HostMemoryAllocator = 5,
     SharedSlotsHostMemoryAllocator = 6,
+    VirtioGpuGraphics = 10,
 };
 
 struct AddressSpaceDevicePingInfo {
@@ -45,7 +46,7 @@ struct AddressSpaceDevicePingInfo {
     uint64_t size;
     uint64_t metadata;
     uint64_t wait_phys_addr;
-    uint32_t wait_flags;
+    uint32_t wait_flags; // aka arg for subdevice creation
     uint32_t direction;
 };
 
