@@ -556,6 +556,9 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
         .get_global_egl_context = []() {
             return FrameBuffer::getFB()->getGlobalEGLContext();
         },
+        .wait_for_gpu = [](uint64_t eglsync) {
+            FrameBuffer::getFB()->waitForGpu(eglsync);
+        },
 };
 
 struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {

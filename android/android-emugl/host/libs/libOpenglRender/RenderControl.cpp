@@ -210,6 +210,9 @@ static constexpr android::base::StringView kHasSharedSlotsHostMemoryAllocator = 
 // vulkan free memory sync
 static constexpr android::base::StringView kVulkanFreeMemorySync = "ANDROID_EMU_vulkan_free_memory_sync";
 
+// virtio-gpu native sync
+static constexpr android::base::StringView kVirtioGpuNativeSync = "ANDROID_EMU_virtio_gpu_native_sync";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -550,6 +553,10 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         }
 
         glStr += maxVersionToFeatureString(guestExtVer);
+        glStr += " ";
+
+        // Always enable virtio-gpu native sync
+        glStr += kVirtioGpuNativeSync;
         glStr += " ";
     }
 
@@ -1074,6 +1081,8 @@ static void rcCreateSyncKHR(EGLenum type,
         uint64_t res = (uint64_t)(uintptr_t)fenceSync;
         *eglsync_out = res;
         EGLSYNC_DPRINT("send out eglsync 0x%llx", res);
+    fprintf(stderr, "%s: sync handle: 0x%llx\n", __func__,
+            (unsigned long long)res);
     }
 }
 
