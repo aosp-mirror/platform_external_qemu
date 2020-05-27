@@ -681,6 +681,9 @@ void SettingsPage::on_set_resetNotifications_pressed() {
     settings.remove(Ui::Settings::SHOW_GPU_WARNING);
     settings.remove(Ui::Settings::SHOW_ADB_WARNING);
     settings.remove(Ui::Settings::SHOW_VIRTUALSCENE_INFO);
+#ifdef _WIN32
+    settings.remove(Ui::Settings::SHOW_VGK_WARNING);
+#endif
 }
 
 void SettingsPage::on_perfstatsButton_pressed() {
