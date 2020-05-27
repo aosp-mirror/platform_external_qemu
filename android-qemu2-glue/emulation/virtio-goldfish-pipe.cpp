@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "android/base/synchronization/Lock.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/emulation/address_space_device.h"
 #include "android/emulation/android_pipe_common.h"
 #include "android/emulation/HostmemIdMapping.h"
 #include "android/opengles.h"

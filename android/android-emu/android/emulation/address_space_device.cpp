@@ -121,6 +121,14 @@ public:
         return contextDesc.device_context.get();
     }
 
+    uint64_t hostmemRegister(uint64_t hva, uint64_t size) {
+        return sVmOps->hostmemRegister(hva, size);
+    }
+
+    void hostmemUnregister(uint64_t id) {
+        sVmOps->hostmemUnregister(id);
+    }
+
     void save(Stream* stream) const {
         AddressSpaceSharedSlotsHostMemoryAllocatorContext::globalStateSave(stream);
 
@@ -363,6 +371,14 @@ static void sAddressSpaceDeviceClear() {
     sAddressSpaceDeviceState->clear();
 }
 
+static uint64_t sAddressSpaceDeviceHostmemRegister(uint64_t hva, uint64_t size) {
+    return sAddressSpaceDeviceState->hostmemRegister(hva, size);
+}
+
+static void sAddressSpaceDeviceHostmemUnregister(uint64_t id) {
+    sAddressSpaceDeviceState->hostmemUnregister(id);
+}
+
 } // namespace
 
 extern "C" {
@@ -377,6 +393,8 @@ static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
     &sAddressSpaceDeviceGetHostPtr,          // get_host_ptr
     &sAddressSpaceHandleToContext,           // handle_to_context
     &sAddressSpaceDeviceClear,               // clear
+    &sAddressSpaceDeviceHostmemRegister,     // hostmem register
+    &sAddressSpaceDeviceHostmemUnregister,   // hostmem unregister
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
