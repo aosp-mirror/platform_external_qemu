@@ -13,6 +13,8 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/export.h"
+
 #include <inttypes.h>
 
 extern "C" {
@@ -26,6 +28,10 @@ typedef int (*address_space_device_remove_memory_mapping_t)(uint64_t gpa, void *
 typedef void* (*address_space_device_get_host_ptr_t)(uint64_t gpa);
 typedef void* (*address_space_device_handle_to_context_t)(uint32_t handle);
 typedef void (*address_space_device_clear_t)(void);
+// virtio-gpu-next
+typedef uint64_t (*address_space_device_hostmem_register_t)(uint64_t hva, uint64_t size);
+typedef void (*address_space_device_hostmem_unregister_t)(uint64_t id);
+typedef void (*address_space_device_ping_at_hva_t)(uint32_t handle, void* hva);
 
 struct address_space_device_control_ops {
     address_space_device_gen_handle_t gen_handle;
@@ -37,10 +43,16 @@ struct address_space_device_control_ops {
     address_space_device_get_host_ptr_t get_host_ptr;
     address_space_device_handle_to_context_t handle_to_context;
     address_space_device_clear_t clear;
+    address_space_device_hostmem_register_t hostmem_register;
+    address_space_device_hostmem_unregister_t hostmem_unregister;
+    address_space_device_ping_at_hva_t ping_at_hva;
 };
 
-struct address_space_device_control_ops*
+AEMU_EXPORT struct address_space_device_control_ops*
 get_address_space_device_control_ops(void);
+
+struct QAndroidVmOperations;
+AEMU_EXPORT void address_space_set_vm_operations(const QAndroidVmOperations* vmops);
 
 struct AddressSpaceHwFuncs {
     /* Called by the host to reserve a shared region. Guest users can then

@@ -49,12 +49,14 @@ struct Block {
     uint64_t offsetIntoPhys = 0; // guest claimShared/mmap uses this
     // size: implicitly ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE
     bool isEmpty = true;
+    bool dedicated = false;
+    bool usesVirtioGpuHostmem = false;
+    uint64_t hostmemId = 0;
 };
 
 class Globals {
 public:
     Globals() :
-        mPerContextRingStorageSize(sizeof(struct asg_ring_storage)),
         mPerContextBufferSize(
                 android_hw->hw_gltransport_asg_writeBufferSize) { }
 
@@ -95,7 +97,9 @@ public:
 
     Allocation newAllocation(
         uint64_t wantedSize,
-        std::vector<Block>& existingBlocks) {
+        std::vector<Block>& existingBlocks,
+        bool dedicated = false,
+        bool usesVirtioGpuHostmem = false) {
 
         AutoLock lock(mLock);
 
@@ -113,8 +117,14 @@ public:
 
         for (auto& block : existingBlocks) {
 
+            uint64_t hostmemId;
             if (block.isEmpty) {
-                fillBlockLocked(block);
+                fillBlockLocked(
+                        block,
+                        dedicated,
+                        wantedSize,
+                        usesVirtioGpuHostmem,
+                        &hostmemId);
             }
 
             auto buf = block.subAlloc->alloc(wantedSize);
@@ -126,6 +136,8 @@ public:
                     block.offsetIntoPhys +
                     block.subAlloc->getOffset(buf);
                 res.size = wantedSize;
+                res.dedicated = dedicated;
+                res.hostmemId = hostmemId;
                 return res;
             } else {
                 // block full
@@ -134,8 +146,14 @@ public:
             ++index;
         }
 
+        uint64_t hostmemId;
         Block newBlock;
-        fillBlockLocked(newBlock);
+        fillBlockLocked(
+            newBlock,
+            dedicated,
+            wantedSize,
+            usesVirtioGpuHostmem,
+            &hostmemId);
 
         auto buf = newBlock.subAlloc->alloc(wantedSize);
 
@@ -154,10 +172,15 @@ public:
             newBlock.offsetIntoPhys +
             newBlock.subAlloc->getOffset(buf);
         res.size = wantedSize;
+        res.dedicated = dedicated;
+        res.hostmemId = hostmemId;
+
         return res;
     }
 
     void deleteAllocation(const Allocation& alloc, std::vector<Block>& existingBlocks) {
+        if (!alloc.buffer) return;
+
         AutoLock lock(mLock);
 
         if (existingBlocks.size() <= alloc.blockIndex) {
@@ -167,6 +190,11 @@ public:
         }
 
         auto& block = existingBlocks[alloc.blockIndex];
+
+        if (block.dedicated) {
+            destroyBlockLocked(block);
+            return;
+        }
 
         if (!block.subAlloc->free(alloc.buffer)) {
             crashhandler_die(
@@ -182,10 +210,11 @@ public:
 
     Allocation allocRingStorage() {
         return newAllocation(
-            mPerContextRingStorageSize, mRingBlocks);
+            sizeof(struct asg_ring_storage), mRingBlocks);
     }
 
     void freeRingStorage(const Allocation& alloc) {
+        if (alloc.isView) return;
         deleteAllocation(alloc, mRingBlocks);
     }
 
@@ -195,9 +224,37 @@ public:
     }
 
     void freeBuffer(const Allocation& alloc) {
+        if (alloc.isView) return;
         deleteAllocation(alloc, mBufferBlocks);
     }
 
+    Allocation allocRingAndBufferStorageDedicated() {
+        return newAllocation(
+            sizeof(struct asg_ring_storage) + mPerContextBufferSize,
+            mCombinedBlocks,
+            true /* dedicated */,
+            true /* virtio-gpu hostmem id mode */);
+    }
+
+    Allocation allocRingViewIntoCombined(const Allocation& alloc) {
+        Allocation res = alloc;
+        res.buffer = alloc.buffer;
+        res.size = sizeof(struct asg_ring_storage);
+        res.isView = true;
+        return res;
+    }
+
+    Allocation allocBufferViewIntoCombined(const Allocation& alloc) {
+        Allocation res = alloc;
+        res.buffer = alloc.buffer + sizeof(asg_ring_storage);
+        res.size = mPerContextBufferSize;
+        res.isView = true;
+        return res;
+    }
+
+    void freeRingAndBuffer(const Allocation& alloc) {
+        deleteAllocation(alloc, mCombinedBlocks);
+    }
 
     void save(base::Stream* stream) {
         // mSubAllocator->save(stream);
@@ -211,47 +268,93 @@ public:
 
 private:
 
-    void fillBlockLocked(Block& block) {
-        uint64_t offsetIntoPhys;
-        int allocRes = get_address_space_device_hw_funcs()->
-            allocSharedHostRegionLocked(
-                ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE, &offsetIntoPhys);
+    void fillBlockLocked(
+        Block& block,
+        bool dedicated = false,
+        size_t dedicatedSize = 0,
+        bool usesVirtioGpuHostmem = false,
+        uint64_t* hostmemIdOut = nullptr) {
 
-        if (allocRes) {
-            crashhandler_die(
-                "Failed to allocate physical address graphics backing memory.");
+        if (dedicated) {
+            if (usesVirtioGpuHostmem) {
+                void* buf =
+                    aligned_buf_alloc(
+                        ADDRESS_SPACE_GRAPHICS_PAGE_SIZE,
+                        dedicatedSize);
+
+                uint64_t hostmemId = mControlOps->hostmem_register(
+                    (uint64_t)(uintptr_t)buf,
+                    dedicatedSize);
+
+                if (hostmemIdOut) *hostmemIdOut = hostmemId;
+
+                block.buffer = (char*)buf;
+                block.subAlloc =
+                    new SubAllocator(
+                        buf, dedicatedSize,
+                        ADDRESS_SPACE_GRAPHICS_PAGE_SIZE);
+                block.offsetIntoPhys = 0;
+
+                block.isEmpty = false;
+                block.usesVirtioGpuHostmem = usesVirtioGpuHostmem;
+                block.hostmemId = hostmemId;
+                block.dedicated = true;
+
+            } else {
+                crashhandler_die(
+                    "Cannot use dedicated allocation without virtio-gpu hostmem id");
+            }
+        } else {
+            if (usesVirtioGpuHostmem) {
+                crashhandler_die(
+                    "Only dedicated allocation allowed in virtio-gpu hostmem id path");
+            } else {
+                uint64_t offsetIntoPhys;
+                int allocRes = get_address_space_device_hw_funcs()->
+                    allocSharedHostRegionLocked(
+                        ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE, &offsetIntoPhys);
+
+                if (allocRes) {
+                    crashhandler_die(
+                        "Failed to allocate physical address graphics backing memory.");
+                }
+
+                void* buf =
+                    aligned_buf_alloc(
+                        ADDRESS_SPACE_GRAPHICS_PAGE_SIZE,
+                        ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
+
+                mControlOps->add_memory_mapping(
+                    get_address_space_device_hw_funcs()->getPhysAddrStartLocked() +
+                        offsetIntoPhys, buf,
+                    ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
+
+                block.buffer = (char*)buf;
+                block.subAlloc =
+                    new SubAllocator(
+                        buf, ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE,
+                        ADDRESS_SPACE_GRAPHICS_PAGE_SIZE);
+                block.offsetIntoPhys = offsetIntoPhys;
+
+                block.isEmpty = false;
+            }
         }
-
-        void* buf =
-            aligned_buf_alloc(
-                ADDRESS_SPACE_GRAPHICS_PAGE_SIZE,
-                ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
-
-        mControlOps->add_memory_mapping(
-            get_address_space_device_hw_funcs()->getPhysAddrStartLocked() +
-                offsetIntoPhys, buf,
-            ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
-
-        block.buffer = (char*)buf;
-        block.subAlloc =
-            new SubAllocator(
-                buf, ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE,
-                ADDRESS_SPACE_GRAPHICS_PAGE_SIZE);
-        block.offsetIntoPhys = offsetIntoPhys;
-
-        block.isEmpty = false;
     }
 
     void destroyBlockLocked(Block& block) {
 
-        mControlOps->remove_memory_mapping(
-            get_address_space_device_hw_funcs()->getPhysAddrStartLocked() +
-                block.offsetIntoPhys,
-            block.buffer,
-            ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
+        if (block.usesVirtioGpuHostmem) {
+            mControlOps->hostmem_unregister(block.hostmemId);
+        } else {
+            mControlOps->remove_memory_mapping(
+                get_address_space_device_hw_funcs()->getPhysAddrStartLocked() +
+                    block.offsetIntoPhys,
+                block.buffer,
+                ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
 
-        get_address_space_device_hw_funcs()->freeSharedHostRegionLocked(
-            block.offsetIntoPhys);
+            get_address_space_device_hw_funcs()->freeSharedHostRegionLocked(
+                block.offsetIntoPhys);
+        }
 
         delete block.subAlloc;
 
@@ -265,13 +368,13 @@ private:
     }
 
     Lock mLock;
-    uint64_t mPerContextRingStorageSize;
     uint64_t mPerContextBufferSize;
     bool mInitialized = false;
     const address_space_device_control_ops* mControlOps = 0;
     ConsumerInterface mConsumerInterface;
     std::vector<Block> mRingBlocks;
     std::vector<Block> mBufferBlocks;
+    std::vector<Block> mCombinedBlocks;
 };
 
 static LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
@@ -292,17 +395,24 @@ void AddressSpaceGraphicsContext::setConsumer(
     sGlobals->setConsumer(interface);
 }
 
-AddressSpaceGraphicsContext::AddressSpaceGraphicsContext() :
+AddressSpaceGraphicsContext::AddressSpaceGraphicsContext(bool isVirtio) :
     mConsumerCallbacks((ConsumerCallbacks){
         [this] { return onUnavailableRead(); },
         [](uint64_t physAddr) {
             return (char*)sGlobals->controlOps()->get_host_ptr(physAddr);
         },
     }),
-    mConsumerInterface(sGlobals->getConsumerInterface()) {
+    mConsumerInterface(sGlobals->getConsumerInterface()),
+    mIsVirtio(isVirtio) {
 
-    mRingAllocation = sGlobals->allocRingStorage();
-    mBufferAllocation = sGlobals->allocBuffer();
+    if (mIsVirtio) {
+        mCombinedAllocation = sGlobals->allocRingAndBufferStorageDedicated();
+        mRingAllocation = sGlobals->allocRingViewIntoCombined(mCombinedAllocation);
+        mBufferAllocation = sGlobals->allocBufferViewIntoCombined(mCombinedAllocation);
+    } else {
+        mRingAllocation = sGlobals->allocRingStorage();
+        mBufferAllocation = sGlobals->allocBuffer();
+    }
 
     if (!mRingAllocation.buffer) {
         crashhandler_die(
@@ -326,6 +436,8 @@ AddressSpaceGraphicsContext::AddressSpaceGraphicsContext() :
     mHostContext.ring_config->transfer_mode = 1;
     mHostContext.ring_config->transfer_size = 0;
     mHostContext.ring_config->in_error = 0;
+
+    mSavedConfig = *mHostContext.ring_config;
 }
 
 AddressSpaceGraphicsContext::~AddressSpaceGraphicsContext() {
@@ -335,8 +447,10 @@ AddressSpaceGraphicsContext::~AddressSpaceGraphicsContext() {
         mConsumerMessages.send(ConsumerCommand::Exit);
         mConsumerInterface.destroy(mCurrentConsumer);
     }
+
     sGlobals->freeBuffer(mBufferAllocation);
     sGlobals->freeRingStorage(mRingAllocation);
+    sGlobals->freeRingAndBuffer(mCombinedAllocation);
 }
 
 void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo* info) {
@@ -355,10 +469,18 @@ void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo* info) {
         mVersion = (uint32_t)info->size;
         mCurrentConsumer = mConsumerInterface.create(
             mHostContext, mConsumerCallbacks);
+
+        if (mIsVirtio) {
+            info->metadata = mCombinedAllocation.hostmemId;
+        }
         break;
     }
     case ASG_NOTIFY_AVAILABLE:
         mConsumerMessages.trySend(ConsumerCommand::Wakeup);
+        info->metadata = 0;
+        break;
+    case ASG_GET_CONFIG:
+        *mHostContext.ring_config = mSavedConfig;
         info->metadata = 0;
         break;
     }

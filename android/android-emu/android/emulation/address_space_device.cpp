@@ -113,12 +113,47 @@ public:
         }
     }
 
+    void pingAtHva(uint32_t handle, AddressSpaceDevicePingInfo* pingInfo) {
+        AutoLock lock(mContextsLock);
+        auto& contextDesc = mContexts[handle];
+
+        const uint64_t phys_addr = pingInfo->phys_addr;
+        const uint64_t size = pingInfo->size;
+        const uint64_t metadata = pingInfo->metadata;
+
+        AS_DEVICE_DPRINT(
+                "handle %u data 0x%llx -> %p size %llu meta 0x%llx\n", handle,
+                (unsigned long long)phys_addr,
+                sVmOps->physicalMemoryGetAddr(phys_addr),
+                (unsigned long long)size, (unsigned long long)metadata);
+
+        AddressSpaceDeviceContext *device_context = contextDesc.device_context.get();
+        if (device_context) {
+            device_context->perform(pingInfo);
+        } else {
+            // The first ioctl establishes the device type
+            const AddressSpaceDeviceType device_type =
+                static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
+
+            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr, false);
+            pingInfo->metadata = contextDesc.device_context ? 0 : -1;
+        }
+    }
+
     AddressSpaceDeviceContext* handleToContext(uint32_t handle) {
         AutoLock lock(mContextsLock);
         if (mContexts.find(handle) == mContexts.end()) return nullptr;
 
         auto& contextDesc = mContexts[handle];
         return contextDesc.device_context.get();
+    }
+
+    uint64_t hostmemRegister(uint64_t hva, uint64_t size) {
+        return sVmOps->hostmemRegister(hva, size);
+    }
+
+    void hostmemUnregister(uint64_t id) {
+        sVmOps->hostmemUnregister(id);
     }
 
     void save(Stream* stream) const {
@@ -186,8 +221,12 @@ public:
 
             auto &desc = contexts[handle];
             desc.pingInfoGpa = pingInfoGpa;
-            desc.pingInfo = (AddressSpaceDevicePingInfo*)
-                sVmOps->physicalMemoryGetAddr(pingInfoGpa);
+            if (desc.pingInfoGpa == ~0ULL) {
+                fprintf(stderr, "%s: warning: restoring hva-only ping\n", __func__);
+            } else {
+                desc.pingInfo = (AddressSpaceDevicePingInfo*)
+                    sVmOps->physicalMemoryGetAddr(pingInfoGpa);
+            }
             desc.device_context = std::move(context);
         }
 
@@ -266,6 +305,10 @@ private:
             return DeviceContextPtr(new AddressSpaceSharedSlotsHostMemoryAllocatorContext(
                 get_address_space_device_control_ops(),
                 get_address_space_device_hw_funcs()));
+
+        case AddressSpaceDeviceType::VirtioGpuGraphics:
+            asg::AddressSpaceGraphicsContext::init(get_address_space_device_control_ops());
+            return DeviceContextPtr(new asg::AddressSpaceGraphicsContext(true /* is virtio */));
 
         default:
             AS_DEVICE_DPRINT("Bad device type");
@@ -363,6 +406,19 @@ static void sAddressSpaceDeviceClear() {
     sAddressSpaceDeviceState->clear();
 }
 
+static uint64_t sAddressSpaceDeviceHostmemRegister(uint64_t hva, uint64_t size) {
+    return sAddressSpaceDeviceState->hostmemRegister(hva, size);
+}
+
+static void sAddressSpaceDeviceHostmemUnregister(uint64_t id) {
+    sAddressSpaceDeviceState->hostmemUnregister(id);
+}
+
+static void sAddressSpaceDevicePingAtHva(uint32_t handle, void* hva) {
+    sAddressSpaceDeviceState->pingAtHva(
+        handle, (AddressSpaceDevicePingInfo*)hva);
+}
+
 } // namespace
 
 extern "C" {
@@ -377,6 +433,9 @@ static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
     &sAddressSpaceDeviceGetHostPtr,          // get_host_ptr
     &sAddressSpaceHandleToContext,           // handle_to_context
     &sAddressSpaceDeviceClear,               // clear
+    &sAddressSpaceDeviceHostmemRegister,     // hostmem register
+    &sAddressSpaceDeviceHostmemUnregister,   // hostmem unregister
+    &sAddressSpaceDevicePingAtHva,           // ping_at_hva
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
@@ -394,6 +453,10 @@ const struct AddressSpaceHwFuncs* address_space_set_hw_funcs(
 
 const struct AddressSpaceHwFuncs* get_address_space_device_hw_funcs(void) {
     return sAddressSpaceHwFuncs;
+}
+
+void address_space_set_vm_operations(const QAndroidVmOperations* vmops) {
+    sVmOps = vmops;
 }
 
 } // extern "C"
