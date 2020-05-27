@@ -371,6 +371,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::VulkanIgnoredHandles, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VirtioGpuNext, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VirtioGpuNativeSync, true);
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
