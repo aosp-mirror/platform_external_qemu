@@ -14,14 +14,15 @@
 #pragma once
 
 #include "android/utils/stream.h"
+#include "android/base/export.h"
 
 struct QAndroidVmOperations;
 
 namespace android {
 namespace emulation {
 
-void goldfish_address_space_set_vm_operations(const QAndroidVmOperations* vmops);
-const QAndroidVmOperations* goldfish_address_space_get_vm_operations();
+AEMU_EXPORT void goldfish_address_space_set_vm_operations(const QAndroidVmOperations* vmops);
+AEMU_EXPORT const QAndroidVmOperations* goldfish_address_space_get_vm_operations();
 
 int goldfish_address_space_memory_state_load(android::base::Stream *stream);
 int goldfish_address_space_memory_state_save(android::base::Stream *stream);

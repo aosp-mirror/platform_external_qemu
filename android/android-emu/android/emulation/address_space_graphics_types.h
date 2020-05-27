@@ -349,6 +349,9 @@ enum asg_command {
     // Ping(notiy_available): Wakes up the consumer from sleep so it
     // can read data via toHost
     ASG_NOTIFY_AVAILABLE = 3,
+
+    // Retrieve the config.
+    ASG_GET_CONFIG = 4,
 };
 
 } // extern "C"
