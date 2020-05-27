@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7bff889e_78e71d00",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-05-27T20:46:15Z",
+      "side": 1,
+      "message": "If we ever want to support Unicode, or at least accented European characters, we should convert  UTF8 to UTF32 before converting to evdev.",
+      "range": {
+        "startLine": 304,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 18
+      },
+      "revId": "87ae67cf1b356e02d28cd869ec7b86b284aa722a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
