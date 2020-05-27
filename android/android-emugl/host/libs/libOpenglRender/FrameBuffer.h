@@ -567,6 +567,7 @@ public:
 
     EGLContext getGlobalEGLContext() { return m_pbufContext; }
     HandleType getLastPostedColorBuffer() { return m_lastPostedColorBuffer; }
+    void waitForGpu(uint64_t eglsync);
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
