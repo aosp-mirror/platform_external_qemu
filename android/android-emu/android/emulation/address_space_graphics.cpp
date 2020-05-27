@@ -299,10 +299,66 @@ AddressSpaceGraphicsContext::AddressSpaceGraphicsContext() :
             return (char*)sGlobals->controlOps()->get_host_ptr(physAddr);
         },
     }),
-    mConsumerInterface(sGlobals->getConsumerInterface()) {
+    mConsumerInterface(sGlobals->getConsumerInterface()),
+    mOwnsStorage(true) {
 
     mRingAllocation = sGlobals->allocRingStorage();
     mBufferAllocation = sGlobals->allocBuffer();
+
+    if (!mRingAllocation.buffer) {
+        crashhandler_die(
+            "Failed to allocate ring for ASG context");
+    }
+
+    if (!mBufferAllocation.buffer) {
+        crashhandler_die(
+            "Failed to allocate buffer for ASG context");
+    }
+
+    mHostContext = asg_context_create(
+        mRingAllocation.buffer,
+        mBufferAllocation.buffer,
+        sGlobals->perContextBufferSize());
+    mHostContext.ring_config->buffer_size =
+        sGlobals->perContextBufferSize();
+    mHostContext.ring_config->flush_interval =
+        android_hw->hw_gltransport_asg_writeStepSize;
+    mHostContext.ring_config->host_consumed_pos = 0;
+    mHostContext.ring_config->transfer_mode = 1;
+    mHostContext.ring_config->transfer_size = 0;
+    mHostContext.ring_config->in_error = 0;
+}
+
+AddressSpaceGraphicsContext::AddressSpaceGraphicsContext(void* ringAndBufferStorage) :
+    mConsumerCallbacks((ConsumerCallbacks){
+        [this] { return onUnavailableRead(); },
+    }),
+    mConsumerInterface(sGlobals->getConsumerInterface()),
+    mOwnsStorage(false) {
+
+    char* ringAndBufferStorageBytes = (char*)ringAndBufferStorage;
+
+    Allocation ringAlloc;
+    ringAlloc.buffer = ringAndBufferStorageBytes;
+    ringAlloc.blockIndex = ~0UL;
+    ringAlloc.offsetIntoPhys = 0;
+    ringAlloc.size = sizeof(struct asg_ring_storage);
+
+    Allocation bufferAlloc;
+    bufferAlloc.buffer = ringAndBufferStorageBytes + sizeof(struct asg_ring_storage);
+    bufferAlloc.blockIndex = ~0UL;
+    bufferAlloc.offsetIntoPhys = 0;
+    bufferAlloc.size = sGlobals->perContextBufferSize();
+
+    char* bufStart = bufferAlloc.buffer;
+
+    mConsumerCallbacks.getPtr =
+        [bufStart](uint64_t offset) {
+        return bufStart + offset;
+    };
+
+    mRingAllocation = ringAlloc;
+    mBufferAllocation = bufferAlloc;
 
     if (!mRingAllocation.buffer) {
         crashhandler_die(
@@ -335,8 +391,11 @@ AddressSpaceGraphicsContext::~AddressSpaceGraphicsContext() {
         mConsumerMessages.send(ConsumerCommand::Exit);
         mConsumerInterface.destroy(mCurrentConsumer);
     }
-    sGlobals->freeBuffer(mBufferAllocation);
-    sGlobals->freeRingStorage(mRingAllocation);
+
+    if (mOwnsStorage) {
+        sGlobals->freeBuffer(mBufferAllocation);
+        sGlobals->freeRingStorage(mRingAllocation);
+    }
 }
 
 void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo* info) {
