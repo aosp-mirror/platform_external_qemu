@@ -13,6 +13,7 @@
 # limitations under the License.
 
 # -*- coding: utf-8 -*-
+import sys
 import time
 
 from google.protobuf import empty_pb2
@@ -29,7 +30,7 @@ channel = getEmulatorChannel()
 stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
 
 # Let's type some text..
-for l in "Hello World":
+for l in sys.argv[1]:
     textEvent = proto.emulator_controller_pb2.KeyboardEvent(text=l)
     print("Typing: {}".format(l))
     response = stub.sendKey(textEvent)
