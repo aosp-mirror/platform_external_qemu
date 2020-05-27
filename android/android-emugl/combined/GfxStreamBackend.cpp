@@ -270,6 +270,8 @@ enum RendererFlags {
     GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT = 1 << 3,
     GFXSTREAM_RENDERER_FLAGS_USE_GLES_BIT = 1 << 4,
     GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT = 1 << 5, // for disabling vk
+
+    GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT = 1 << 20, // for disabling syncfd
 };
 
 // Sets backend flags for different kinds of initialization.
@@ -328,8 +330,11 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     bool enable_egl2egl = egl2eglByFlag || egl2eglByEnv;
     if (enable_egl2egl) System::setEnvironmentVariable("ANDROID_EGL_ON_EGL", "1");
 
+    bool syncFdDisabledByFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT;
+
     GFXS_LOG("Vulkan enabled? %d", enableVk);
     GFXS_LOG("egl2egl enabled? %d", enable_egl2egl);
+    GFXS_LOG("syncfd enabled? %d", !syncFdDisabledByFlag);
 
     // Need to manually set the GLES backend paths in gfxstream environment
     // because the library search paths are not automatically set to include
@@ -371,6 +376,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::VulkanIgnoredHandles, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VirtioGpuNext, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VirtioGpuNativeSync, !syncFdDisabledByFlag);
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
