@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
+#include "android-qemu2-glue/emulation/virtio-input-rotary.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/multitouch-screen.h"
@@ -69,7 +70,7 @@ static void user_event_keycodes(int* kcodes, int count) {
 
 /*
  * Both goldfish_events and virtio_input_multi_touch are maintained in order to
- * be backward compatible. When feature Virtio is enabled, makes sure
+ * be backward compatible. When feature   is enabled, makes sure
  * multi-touch events (type == EV_ABS or type == EV_SYN) are sent to virtio
  * input multi touch device. For qemu2 and API 10+, multi-touch is always
  * supported by default.
@@ -77,11 +78,13 @@ static void user_event_keycodes(int* kcodes, int count) {
 static void user_event_generic(SkinGenericEventCode event) {
     bool sent = false;
     if (feature_is_enabled(kFeature_VirtioInput)) {
+      printf("VIRTIO\n");
         sent = android_virtio_input_send(event.type, event.code, event.value,
                                          event.displayId);
     }
 
     if (!sent) {
+      printf("GOLDFISH_FALLBACK\n");
         goldfish_event_send(event.type, event.code, event.value);
     }
 }
@@ -109,7 +112,11 @@ static void user_event_mouse(int dx,
 static void user_event_rotary(int delta) {
     VERBOSE_PRINT(keys, ">> ROTARY [%d]\n", delta);
 
-    goldfish_rotary_send_rotate(delta);
+    if (feature_is_enabled(kFeature_VirtioInput)) {
+        virtio_send_rotary_event(delta);
+    } else {
+        goldfish_rotary_send_rotate(delta);
+    }
 }
 
 static void on_new_event(void) {
