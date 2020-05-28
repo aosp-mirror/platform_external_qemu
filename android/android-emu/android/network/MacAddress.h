@@ -25,12 +25,12 @@
 // Format macros for printf, e.g. printf("MAC address: " PRIMAC, MACARG(mac))
 #define PRIMAC "%02x:%02x:%02x:%02x:%02x:%02x"
 #define MACARG(x) (x)[0], (x)[1], (x)[2], (x)[3], (x)[4], (x)[5]
+#define ETH_ALEN 6
 
 namespace android {
 namespace network {
 
-class MacAddress {
-public:
+struct MacAddress {
     MacAddress() { memset(mAddr, 0, sizeof(mAddr)); }
     MacAddress(uint8_t b1,
                uint8_t b2,
@@ -45,9 +45,6 @@ public:
         mAddr[4] = b5;
         mAddr[5] = b6;
     }
-    MacAddress(const uint8_t* addr) {
-        MacAddress(addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
-    }
     bool isBroadcast() const {
         return memcmp(mAddr, "\xFF\xFF\xFF\xFF\xFF\xFF", ETH_ALEN) == 0;
     }
@@ -60,9 +57,7 @@ public:
     bool operator==(const MacAddress& right) const {
         return memcmp(mAddr, right.mAddr, ETH_ALEN) == 0;
     }
-    static const size_t ETH_ALEN = 6;
-
-private:
+    bool operator!=(const MacAddress& right) const { return !(*this == right); }
     uint8_t mAddr[ETH_ALEN];
 };
 
