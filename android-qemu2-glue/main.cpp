@@ -84,6 +84,7 @@ extern "C" {
 #include "android-qemu2-glue/dtb.h"
 #include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
+#include "android-qemu2-glue/emulation/virtio-input-rotary.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android/ui-emu-agent.h"
@@ -622,6 +623,11 @@ static void initialize_virtio_input_devs(android::ParameterList& args, AndroidHw
                 args.add("-device");
                 args.add(StringFormat("virtio_input_multi_touch_pci_%d", id).c_str());
             }
+        }
+
+        if (hw->hw_rotaryInput) {
+            args.add("-device");
+            args.add("virtio_input_rotary_pci");
         }
 
         if (hw->hw_keyboard) {
