@@ -17,12 +17,14 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/IOVector.h"
 #include "android/network/MacAddress.h"
 
+#include <string>
 typedef struct ieee80211_hdr ieee80211_hdr;
 
 namespace android {
-namespace qemu2 {
+namespace network {
 
 // Provide a simple wrapper on top of the IEEE80211 Ieee80211Frame header
 // and its underlying data.
@@ -30,17 +32,20 @@ namespace qemu2 {
 class Ieee80211Frame {
 public:
     Ieee80211Frame(const uint8_t* data, size_t size);
-
+    Ieee80211Frame(size_t size);
+    Ieee80211Frame(const std::vector<uint8_t>& ethernet, MacAddress bssid);
     size_t size() const { return mData.size(); }
+    size_t hdrLength() const;
     const uint8_t* data() const { return mData.data(); }
     uint8_t* data() { return mData.data(); }
     uint8_t* frameBody();
+    const uint8_t* frameBody() const;
     const ieee80211_hdr& hdr() const;
-    const android::network::MacAddress& addr1() const { return mAddr1; }
-    const android::network::MacAddress& addr2() const { return mAddr2; }
-    const android::network::MacAddress& addr3() const { return mAddr3; }
-    const android::network::MacAddress& addr4() const { return mAddr4; }
-
+    MacAddress addr1() const;
+    MacAddress addr2() const;
+    MacAddress addr3() const;
+    MacAddress addr4() const;
+    std::string toStr();
     bool isData() const;
     bool isMgmt() const;
     bool isDataQoS() const;
@@ -50,14 +55,13 @@ public:
     bool isFromDS() const;
     bool uses4Addresses() const;
     uint16_t getQoSControl() const;
+    const android::base::IOVector toEthernet();
+    static const size_t MAX_FRAME_LEN = 2352;
+    static bool validEtherType(uint16_t ethertype);
 
 private:
     std::vector<uint8_t> mData;
-    android::network::MacAddress mAddr1;
-    android::network::MacAddress mAddr2;
-    android::network::MacAddress mAddr3;
-    android::network::MacAddress mAddr4;
 };
 
-}  // namespace qemu2
+}  // namespace network
 }  // namespace android

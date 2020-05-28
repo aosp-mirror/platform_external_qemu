@@ -318,6 +318,11 @@ set(android_emu_dependent_src
 # are not circular
 list(APPEND android-emu_src ${android-emu-common} ${android_emu_dependent_src})
 
+if (NOT OPTION_GFXSTREAM_BACKEND AND NOT LINUX_AARCH64)
+  list(APPEND android-emu_src
+      "android/network/Ieee80211Frame.cpp")
+endif()
+
 android_add_library(
   TARGET android-emu
   LICENSE Apache-2.0
@@ -398,6 +403,11 @@ target_link_libraries(
          lz4
          zlib
          android-hw-config)
+
+if (NOT OPTION_GFXSTREAM_BACKEND AND NOT LINUX_AARCH64)
+  target_link_libraries(android-emu PRIVATE hostapd)
+endif()
+
 
 # Here are the windows library and link dependencies. They are public and will
 # propagate onwards to others that depend on android-emu
@@ -771,6 +781,7 @@ android_add_test(
       android/base/files/Stream_unittest.cpp
       android/base/files/StreamSerializing_unittest.cpp
       android/base/FunctionView_unittest.cpp
+      android/base/IOVector_unittest.cpp
       android/base/JsonWriter_unittest.cpp
       android/base/Log_unittest.cpp
       android/base/LayoutResolver_unittest.cpp
@@ -887,6 +898,8 @@ android_add_test(
       android/location/MapsKeyFileParser_unittest.cpp
       android/location/Point_unittest.cpp
       android/location/Route_unittest.cpp
+      android/network/Ieee80211Frame_unittest.cpp
+      android/network/MacAddress_unittest.cpp
       android/network/control_unittest.cpp
       android/network/constants_unittest.cpp
       android/offworld/OffworldPipe_unittest.cpp
