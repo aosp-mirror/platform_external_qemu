@@ -22,6 +22,30 @@
       "revId": "87ae67cf1b356e02d28cd869ec7b86b284aa722a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5342624f_91fa6dfa",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-05-28T17:10:24Z",
+      "side": 1,
+      "message": "The convertUtf8ToEvDev takes a utf8 encoded string and turns it into a sequence of evdev events. This snippet assures that the method will only receive one unicode character (that can consist of multiple bytes).\n\nThe translation engine has very little support for actually translating characters, as this turns out to be a very difficult problem. We could try making this better by creating a special keymapping file in a system image: https://source.android.com/devices/input/key-character-map-files.html",
+      "parentUuid": "7bff889e_78e71d00",
+      "range": {
+        "startLine": 304,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 18
+      },
+      "revId": "87ae67cf1b356e02d28cd869ec7b86b284aa722a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
