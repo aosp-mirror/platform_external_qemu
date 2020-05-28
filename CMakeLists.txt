@@ -724,7 +724,6 @@ target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 if (NOT OPTION_AEMU_LIBS_ONLY)
 
   # Not allowed to have libraries without source files.
-if (NOT LINUX_AARCH64)
   android_add_library(
     TARGET headless-paaudio
     LICENSE "GPL-2.0-only"
@@ -737,6 +736,12 @@ if (NOT LINUX_AARCH64)
     SRC # cmake-format: sortable
         audio/paaudio-headless-impl-placeholder.c
     LINUX audio/paaudio-headless-impl.c)
+if (LINUX_AARCH64)
+  target_include_directories(
+        headless-paaudio
+        PUBLIC
+        ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-aarch64/include
+        )
 endif()
 
   android_add_interface(
@@ -761,6 +766,9 @@ endif()
     REPO "${ANDROID_QEMU2_TOP_DIR}"
     NOTICE "REPO/LICENSE")
   android_target_link_libraries(android-qemu-deps-headless linux-x86_64 INTERFACE
+                                headless-paaudio)
+
+  android_target_link_libraries(android-qemu-deps-headless linux-aarch64 INTERFACE
                                 headless-paaudio)
 
   android_add_library(
