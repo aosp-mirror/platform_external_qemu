@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "78f734f8_9a471262",
+        "filename": "android/android-emu/android/network/Ieee80211Frame.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-28T22:32:44Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3a6e9441_698e0807",
+      "range": {
+        "startLine": 60,
+        "startChar": 4,
+        "endLine": 60,
+        "endChar": 14
+      },
+      "revId": "650bfc605004ef282114748a0e7acf863a34bec4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2da9cad0_9fa2bd6f",
         "filename": "android/android-emu/android/network/Ieee80211Frame.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2020-05-28T21:45:00Z",
       "side": 1,
       "message": "missing \"-skippedBytes\"?",
+      "range": {
+        "startLine": 87,
+        "startChar": 33,
+        "endLine": 87,
+        "endChar": 50
+      },
+      "revId": "650bfc605004ef282114748a0e7acf863a34bec4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee423a3b_696835d8",
+        "filename": "android/android-emu/android/network/Ieee80211Frame.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-28T22:32:44Z",
+      "side": 1,
+      "message": "std::vector insert() takes three params. The last two are just iterator for start and end. The end is always the ethernet.data() + ethernet.size().  Maybe another way is to do it is to pass in (ethernet.begin() + skippedBytes, ethernet.end())",
+      "parentUuid": "2da9cad0_9fa2bd6f",
       "range": {
         "startLine": 87,
         "startChar": 33,
