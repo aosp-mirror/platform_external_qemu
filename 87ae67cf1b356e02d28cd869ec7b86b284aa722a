@@ -46,6 +46,30 @@
       "revId": "87ae67cf1b356e02d28cd869ec7b86b284aa722a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d091a114_4553db0b",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-05-28T18:09:08Z",
+      "side": 1,
+      "message": "The description of convertUtf8ToEvDev says: \"Translates a string with one or more Utf8 characters to a sequence of evdev values\". Does it not work correctly when given more than one character?",
+      "parentUuid": "5342624f_91fa6dfa",
+      "range": {
+        "startLine": 304,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 18
+      },
+      "revId": "87ae67cf1b356e02d28cd869ec7b86b284aa722a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
