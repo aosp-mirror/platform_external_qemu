@@ -103,13 +103,29 @@ void android_get_x86_cpuid_vendor_id(char* buf, size_t buf_len)
 
 void android_get_x86_cpuid_vmhost_vendor_id(char* buf, size_t buf_len)
 {
+    char _buf[13] = { 0 };
+
     memset(buf, 0, buf_len);
     if (buf_len < 13)
     {
         return;
     }
+    // Check hypervisor flags before querying leaf 0x40000x00
+    // Some platform will return garbage for leaf 0x400000x00
+    if (!android_get_x86_cpuid_is_vcpu())
+    {
+        return;
+    }
     android_get_x86_cpuid(0x40000000, 0,
             0, (uint32_t*)buf, (uint32_t*)(buf+4), (uint32_t*)(buf+8));
+    // KVM/Xen with Hyper-V enlightenment will present "Microsoft Hv"
+    // on leaf 0x40000000. Get id from 0x40000100
+    if (strcmp(buf, "Microsoft Hv") == 0) {
+        android_get_x86_cpuid(0x40000100, 0,
+                NULL, (uint32_t*)_buf, (uint32_t*)(_buf+4), (uint32_t*)(_buf+8));
+	if (_buf[0])
+            memcpy(buf, _buf, 13);
+    }
 }
 
 CpuVendorIdType android_get_x86_cpuid_vendor_id_type(const char* vendor_id)
