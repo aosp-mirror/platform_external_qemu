@@ -22,6 +22,7 @@ android_add_library(
       android/base/CpuUsage.cpp
       android/base/Debug.cpp
       android/base/GLObjectCounter.cpp
+      android/base/IOVector.cpp
       android/base/JsonWriter.cpp
       android/base/LayoutResolver.cpp
       android/base/Log.cpp

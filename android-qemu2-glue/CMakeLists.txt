@@ -45,11 +45,6 @@ set (android-qemu2-glue_src
     telephony/modem_init.c
     utils/stream.cpp)
 
-if (NOT OPTION_GFXSTREAM_BACKEND AND NOT LINUX_AARCH64)
-  list(APPEND android-qemu2-glue_src
-      "emulation/Ieee80211Frame.cpp")
-endif()
-
 android_add_library(
   TARGET libqemu2-glue
   LICENSE Apache-2.0
