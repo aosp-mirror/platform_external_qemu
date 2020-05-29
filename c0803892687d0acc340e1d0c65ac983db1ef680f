@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7caae9d5_4b2f0fc6",
+        "filename": "android/android-emu/android/base/IOVector.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-05-29T17:28:36Z",
+      "side": 1,
+      "message": "I don\u0027t think you need any of these. Maybe you don\u0027t even need the class, just a typedef and few functions.",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 18
+      },
+      "revId": "c0803892687d0acc340e1d0c65ac983db1ef680f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
