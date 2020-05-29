@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "93b6b9b2_0182bd25",
+        "filename": "android-qemu2-glue/qemu-user-event-agent-impl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2020-05-29T09:04:00Z",
+      "side": 0,
+      "message": "Not sure if this was intentionally removed.",
+      "range": {
+        "startLine": 72,
+        "startChar": 40,
+        "endLine": 72,
+        "endChar": 46
+      },
+      "revId": "10c6654c2e02d9ebe04658d37ae50589cfc43ddc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

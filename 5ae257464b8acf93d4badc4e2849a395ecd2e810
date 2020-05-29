@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "298a0e77_cdf41bdf",
+        "filename": "android-qemu2-glue/qemu-user-event-agent-impl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2020-05-29T09:04:00Z",
+      "side": 1,
+      "message": "Are these debug logs?",
+      "range": {
+        "startLine": 81,
+        "startChar": 6,
+        "endLine": 81,
+        "endChar": 25
+      },
+      "revId": "5ae257464b8acf93d4badc4e2849a395ecd2e810",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d2e0bd08_6e22b81b",
+        "filename": "android-qemu2-glue/qemu-user-event-agent-impl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2020-05-29T09:04:00Z",
+      "side": 1,
+      "message": "also here.",
+      "range": {
+        "startLine": 87,
+        "startChar": 6,
+        "endLine": 87,
+        "endChar": 36
+      },
+      "revId": "5ae257464b8acf93d4badc4e2849a395ecd2e810",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
