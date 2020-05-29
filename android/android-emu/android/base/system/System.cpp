@@ -55,7 +55,6 @@
 #include <spawn.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
-#include <CoreFoundation/CoreFoundation.h>
 
 // Instead of including this private header let's copy its important
 // definitions in.
@@ -2424,14 +2423,9 @@ std::string System::getProgramDirectoryFromPlatform() {
         }
     }
 #elif defined(__APPLE__)
-    ProcessSerialNumber psn;
-    GetCurrentProcess(&psn);
-    CFDictionaryRef dict =
-            ProcessInformationCopyDictionary(&psn, 0xffffffff);
-    CFStringRef value = (CFStringRef)CFDictionaryGetValue(
-            dict, CFSTR("CFBundleExecutable"));
     char s[PATH_MAX];
-    CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
+    auto pid = getpid();
+    proc_pidpath(pid, s, sizeof(s));
     char* x = ::strrchr(s, '/');
     if (x) {
         // skip all slashes - there might be more than one
