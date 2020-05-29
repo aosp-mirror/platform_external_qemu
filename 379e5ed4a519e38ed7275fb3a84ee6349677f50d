@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6a0164b7_5ab8c30f",
+        "filename": "android-qemu2-glue/emulation/virtio-input-rotary.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1670692
+      },
+      "writtenOn": "2020-05-29T09:13:47Z",
+      "side": 1,
+      "message": "BTW, what should these licenses be? I mostly copied this from virtio-input-multi-touch which is Apache2, but I see that most of the rest of the files in this repo are GPL2.0.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 0
+      },
+      "revId": "379e5ed4a519e38ed7275fb3a84ee6349677f50d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
