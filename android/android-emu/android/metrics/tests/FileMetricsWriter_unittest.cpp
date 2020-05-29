@@ -20,8 +20,8 @@
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/base/Uuid.h"
-#include "android/metrics/proto/google_logs_publishing.pb.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "google_logs_publishing.pb.h"
+#include "studio_stats.pb.h"
 #include "android/protobuf/DelimitedSerialization.h"
 #include "android/utils/path.h"
 

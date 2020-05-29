@@ -18,8 +18,8 @@
 #include <memory>                                // for shared_ptr
 
 #include "android/automation/EventSource.h"      // for DurationNs, EventSource
-#include "android/offworld/proto/offworld.pb.h"  // for DatasetInfo
-#include "android/automation/proto/automation.pb.h"                       // for RecordedEvent
+#include "offworld.pb.h"  // for DatasetInfo
+#include "automation.pb.h"                       // for RecordedEvent
 
 extern "C" {
 #include "libavcodec/avcodec.h"                  // for AVPacket

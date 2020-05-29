@@ -20,7 +20,7 @@
 #include "android/base/files/PathUtils.h"        // for PathUtils
 #include "android/base/system/System.h"          // for System
 #include "android/hw-sensors.h"                  // for ANDROID_SENSOR_ACCEL...
-#include "android/offworld/proto/offworld.pb.h"  // for DataStreamInfo
+#include "offworld.pb.h"  // for DataStreamInfo
 
 using namespace android::mp4;
 

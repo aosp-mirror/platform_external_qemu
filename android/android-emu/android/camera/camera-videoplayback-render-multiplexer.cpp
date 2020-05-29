@@ -24,7 +24,7 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/base/misc/FileUtils.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "offworld.pb.h"
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 
 namespace android {

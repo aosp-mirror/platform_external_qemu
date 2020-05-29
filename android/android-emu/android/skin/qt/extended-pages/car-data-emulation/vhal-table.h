@@ -31,7 +31,7 @@
 #include <memory>
 #include <vector>
 
-#include "android/emulation/proto/VehicleHalProto.pb.h"
+#include "VehicleHalProto.pb.h"
 
 class QHideEvent;
 class QLabel;

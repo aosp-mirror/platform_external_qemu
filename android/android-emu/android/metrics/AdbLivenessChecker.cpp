@@ -21,7 +21,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/globals.h"
 
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 
 #include <istream>
 

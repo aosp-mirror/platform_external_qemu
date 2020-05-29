@@ -33,7 +33,7 @@
 #include "android/globals.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/metrics.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"

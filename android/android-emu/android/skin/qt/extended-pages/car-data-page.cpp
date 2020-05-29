@@ -20,7 +20,7 @@
 // TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this, since it is
 // defined in windows.h & redefined in VehicleHalProto.proto, causing conflicts.
 #undef ERROR_INVALID_OPERATION
-#include "android/emulation/proto/VehicleHalProto.pb.h"
+#include "VehicleHalProto.pb.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/utils/debug.h"
 #include "ui_car-data-page.h"
