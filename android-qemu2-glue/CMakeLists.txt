@@ -69,7 +69,7 @@ endif()
 target_link_libraries(libqemu2-glue PRIVATE android-emu GLIB2::GLIB2
                                             PIXMAN::PIXMAN emulator-libdtb ssl)
 
-if (NOT OPTION_GFXSTREAM_BACKEND AND NOT LINUX_AARCH64)
+if (NOT OPTION_GFXSTREAM_BACKEND)
   target_link_libraries(libqemu2-glue PRIVATE hostapd)
 endif()
                                        
