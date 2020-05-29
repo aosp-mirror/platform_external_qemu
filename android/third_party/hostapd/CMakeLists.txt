@@ -175,11 +175,13 @@ target_compile_definitions(hostapd PRIVATE -DWPA_IGNORE_CONFIG_ERRORS
 
 android_target_compile_definitions(hostapd windows PRIVATE -DCONFIG_NATIVE_WINDOWS)
 
+if(NOT LINUX_AARCH64)
 target_compile_options(hostapd PRIVATE -Wall
                                        -Werror
                                        -Wno-error-deprecated-declarations
                                        -Wno-unused-parameter
                                        -Wno-unused-variable
                                        -Wno-macro-redefined)
+endif()
 
 target_link_libraries(hostapd PUBLIC ssl android-emu)
