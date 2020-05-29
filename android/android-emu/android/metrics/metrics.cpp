@@ -38,7 +38,7 @@
 #include "android/utils/file_io.h"
 #include "android/utils/x86_cpuid.h"
 
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 
 #include <utility>
 

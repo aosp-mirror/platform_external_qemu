@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/offworld/proto/offworld.pb.h"
+#include "offworld.pb.h"
 
 namespace android {
 namespace mp4 {

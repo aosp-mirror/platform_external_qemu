@@ -22,7 +22,7 @@
 #include <unordered_map>                            // for unordered_map
 #include <vector>                                   // for vector
 
-#include "android/metrics/proto/studio_stats.pb.h"  // for EmulatorAutomatio...
+#include "studio_stats.pb.h"  // for EmulatorAutomatio...
 
 class CCListItem;
 class QHideEvent;

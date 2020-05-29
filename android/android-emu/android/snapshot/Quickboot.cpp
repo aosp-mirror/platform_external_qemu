@@ -24,7 +24,7 @@
 #include "android/metrics/MetricsReporter.h"
 
 #if SNAPSHOT_METRICS
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 #endif
 
 #include "android/opengl/emugl_config.h"

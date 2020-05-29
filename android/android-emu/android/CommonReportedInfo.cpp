@@ -16,7 +16,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 
 using android::base::AutoLock;
 using android::base::Lock;

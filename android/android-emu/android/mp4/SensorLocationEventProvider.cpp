@@ -26,7 +26,7 @@
 #include "android/base/synchronization/Lock.h"   // for Lock
 #include "android/hw-sensors.h"                  // for ANDROID_SENSOR_ACCEL...
 #include "android/mp4/FieldDecodeInfo.h"         // for FieldDecodeInfo
-#include "android/offworld/proto/offworld.pb.h"  // for SensorDataPacketInfo
+#include "offworld.pb.h"  // for SensorDataPacketInfo
 
 extern "C" {
 #include "libavcodec/avcodec.h"                  // for AVPacket

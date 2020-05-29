@@ -21,7 +21,7 @@
 
 #include "android/base/Log.h"                    // for LogMessage, LOG, CHECK
 #include "android/mp4/FieldDecodeInfo.h"         // for FieldDecodeInfo
-#include "android/offworld/proto/offworld.pb.h"  // for DataStreamInfo, Fiel...
+#include "offworld.pb.h"  // for DataStreamInfo, Fiel...
 
 namespace android {
 namespace mp4 {

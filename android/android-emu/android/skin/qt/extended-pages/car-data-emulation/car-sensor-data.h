@@ -23,7 +23,7 @@
 #include <memory>      // for unique_ptr
 #include <string>      // for string
 
-#include "android/emulation/proto/VehicleHalProto.pb.h"  // for EmulatorMessage
+#include "VehicleHalProto.pb.h"  // for EmulatorMessage
 #include "ui_car-sensor-data.h"                          // for CarSensorData
 
 class QObject;

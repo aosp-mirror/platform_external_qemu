@@ -16,7 +16,7 @@
 
 #include <chrono>
 
-#include "android/automation/proto/automation.pb.h"
+#include "automation.pb.h"
 #include "android/base/async/Looper.h"
 
 namespace android {

@@ -364,6 +364,7 @@ android_target_compile_options(
           "-Wno-deprecated-declarations" "-Wno-inconsistent-missing-override"
           "-Wno-return-type-c-linkage" "-Wno-invalid-constexpr")
 
+target_include_directories(emulator-libui PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 # dependencies will remain internal, we should not be leaking out internal
 # headers and defines.
 target_link_libraries(

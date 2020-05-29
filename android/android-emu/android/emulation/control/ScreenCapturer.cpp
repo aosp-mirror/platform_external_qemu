@@ -19,7 +19,7 @@
 #include "android/base/system/System.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/window_agent.h"
-#include "android/emulation/proto/observation.pb.h"
+#include "observation.pb.h"
 #include "android/emulator-window.h"
 #include "android/loadpng.h"
 #include "android/opengles.h"

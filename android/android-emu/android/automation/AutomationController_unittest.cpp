@@ -20,7 +20,7 @@
 #include "android/base/testing/TestMemoryOutputStream.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "offworld.pb.h"
 #include "android/physics/PhysicalModel.h"
 
 #include <gmock/gmock.h>

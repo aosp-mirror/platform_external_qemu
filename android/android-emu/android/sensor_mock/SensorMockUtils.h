@@ -14,8 +14,8 @@
 
 #pragma once
 
-#include "android/automation/proto/automation.pb.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "automation.pb.h"
+#include "offworld.pb.h"
 
 namespace android {
 namespace sensor_mock {

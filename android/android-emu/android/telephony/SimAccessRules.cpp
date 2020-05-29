@@ -16,7 +16,7 @@
 #include "android/cmdline-option.h"
 #include "android/telephony/SimAccessRules.h"
 #include "android/telephony/TagLengthValue.h"
-#include "android/telephony/proto/sim_access_rules.pb.h"
+#include "sim_access_rules.pb.h"
 #include "android/utils/debug.h"
 
 #include "google/protobuf/io/zero_copy_stream_impl.h"

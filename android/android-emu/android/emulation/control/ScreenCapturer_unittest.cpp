@@ -21,7 +21,7 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
-#include "android/emulation/proto/observation.pb.h"
+#include "observation.pb.h"
 #include "android/loadpng.h"
 
 #include <cstdio>

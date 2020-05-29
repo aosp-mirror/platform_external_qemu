@@ -21,7 +21,7 @@
 #include "android/base/Uuid.h"
 #include "android/metrics/metrics.h"
 #include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"

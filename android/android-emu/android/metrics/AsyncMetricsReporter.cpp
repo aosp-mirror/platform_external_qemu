@@ -12,7 +12,7 @@
 #include "android/metrics/AsyncMetricsReporter.h"
 
 #include "android/metrics/MetricsLogging.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 
 namespace android {
 namespace metrics {

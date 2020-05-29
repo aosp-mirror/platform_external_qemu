@@ -33,8 +33,8 @@
 #include "android/base/testing/TestSystem.h"
 #include "android/curl-support.h"
 #include "android/metrics/MetricsLogging.h"
-#include "android/metrics/proto/google_logs_publishing.pb.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "google_logs_publishing.pb.h"
+#include "studio_stats.pb.h"
 
 using namespace android;
 using namespace android::base;

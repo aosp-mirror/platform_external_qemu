@@ -51,7 +51,7 @@
 #include "android/mp4/MP4Demuxer.h"
 #include "android/mp4/SensorLocationEventProvider.h"
 #include "android/mp4/VideoMetadataProvider.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "offworld.pb.h"
 #include "android/recording/AVScopedPtr.h"
 #include "android/recording/video/player/Clock.h"
 #include "android/recording/video/player/FrameQueue.h"

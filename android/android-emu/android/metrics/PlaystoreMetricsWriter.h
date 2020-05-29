@@ -17,7 +17,7 @@
 #include <string>                           // for string
 
 #include "android/metrics/MetricsWriter.h"  // for MetricsWriter
-#include "android/metrics/proto/google_logs_publishing.pb.h" // IWYU pragma: keep
+#include "google_logs_publishing.pb.h" // IWYU pragma: keep
 
 #ifdef NDEBUG
 #define PLAYURL "https://play.googleapis.com/log"

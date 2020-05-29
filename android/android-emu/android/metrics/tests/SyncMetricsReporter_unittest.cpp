@@ -14,7 +14,7 @@
 
 #include "android/metrics/SyncMetricsReporter.h"
 
-#include "android/metrics/proto/google_logs_publishing.pb.h"
+#include "google_logs_publishing.pb.h"
 #include "android/metrics/tests/MockMetricsWriter.h"
 #include "android/utils/system.h"
 

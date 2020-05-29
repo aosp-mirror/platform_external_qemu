@@ -23,7 +23,7 @@
 #ifdef __cplusplus
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 #endif  // __cplusplus
 #include "android/camera/camera-common.h"
 #include "android/utils/compiler.h"

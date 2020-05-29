@@ -449,7 +449,6 @@ target_include_directories(
     ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
     # If you use our library, you get access to our headers.
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
     ${DARWINN_INCLUDE_DIRS})
 
 android_target_compile_options(

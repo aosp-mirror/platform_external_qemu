@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "android/featurecontrol/HWMatching.h"
-#include "android/featurecontrol/proto/emulator_feature_patterns.pb.h"
+#include "emulator_feature_patterns.pb.h"
 #include "google/protobuf/text_format.h"
 
 #include <gtest/gtest.h>

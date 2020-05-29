@@ -17,7 +17,7 @@
 #include "android/base/Optional.h"
 #include "android/base/Result.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "offworld.pb.h"
 #include <string>
 
 namespace android {

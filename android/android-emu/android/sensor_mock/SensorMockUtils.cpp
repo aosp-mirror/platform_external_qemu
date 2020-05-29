@@ -15,7 +15,7 @@
 #include "android/sensor_mock/SensorMockUtils.h"
 
 #include "android/base/Log.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "offworld.pb.h"
 
 namespace android {
 namespace sensor_mock {

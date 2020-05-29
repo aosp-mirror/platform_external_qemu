@@ -3,7 +3,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/cmdline-option.h"
-#include "android/telephony/proto/sim_access_rules.pb.h"
+#include "sim_access_rules.pb.h"
 #include "android/telephony/SimAccessRules.h"
 
 #include "google/protobuf/io/zero_copy_stream_impl.h"

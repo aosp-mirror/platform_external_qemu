@@ -1511,8 +1511,8 @@ _EOF_KIND = 7                     # used at eof
 
 
 def _IsSystemInclude(line_info):
-  """Given a line-info, return true iff the line is a <>-style #include."""
-  # The key for #includes includes the <> or "", so this is easy. :-)
+  """Given a line-info, return true iff the line is a <>-style #include.""
+  # The key for #includes includes the <> or ", so this is easy. :-)
   return line_info.type == _INCLUDE_RE and line_info.key[0] == '<'
 
 

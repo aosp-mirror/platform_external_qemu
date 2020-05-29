@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/automation/proto/automation.pb.h"
+#include "automation.pb.h"
 #include "android/base/Compiler.h"
 #include "android/base/async/Looper.h"
 #include "android/base/files/Stream.h"

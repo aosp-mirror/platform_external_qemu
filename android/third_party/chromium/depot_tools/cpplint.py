@@ -4328,7 +4328,7 @@ def _ClassifyInclude(fileinfo, include, is_system):
   Args:
     fileinfo: The current file cpplint is running over. A FileInfo instance.
     include: The path to a #included file.
-    is_system: True if the #include used <> rather than "".
+    is_system: True if the #include used <> rather than ".
 
   Returns:
     One of the _XXX_HEADER constants.

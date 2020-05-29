@@ -36,7 +36,7 @@
 #include "android/globals.h"                          // for android_avdInfo
 #include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
 #include "android/metrics/PeriodicReporter.h"         // for PeriodicReporter
-#include "android/metrics/proto/studio_stats.pb.h"    // for AndroidStudioEvent
+#include "studio_stats.pb.h"    // for AndroidStudioEvent
 #include "android/physics/GlmHelpers.h"               // for vecNearEqual
 #include "android/skin/qt/device-3d-widget.h"         // for Device3D...
 #include "android/skin/qt/editable-slider-widget.h"   // for EditableSliderW...
@@ -587,7 +587,7 @@ void VirtualSensorsPage::propagateSlidersChange(bool updateHinge, int hingeIndex
                 android_foldable_set_hinge_degrees(2, mUi->hinge2Slider->getValue());
                 break;
             default: ;
-        } 
+        }
     }
 }
 

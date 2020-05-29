@@ -14,7 +14,7 @@
 
 #include "android/mp4/VideoMetadataProvider.h"
 
-#include "android/offworld/proto/offworld.pb.h"
+#include "offworld.pb.h"
 
 extern "C" {
 #include "libavcodec/avcodec.h"

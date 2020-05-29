@@ -26,7 +26,7 @@
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 #include "android/settings-agent.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
@@ -425,7 +425,7 @@ void LocationPage::onConnectivityStateChanged(NetworkConnectivityManager::State 
     // qCDebug(emu) << str;
 }
 
-void LocationPage::onConnectivityOffline() {    
+void LocationPage::onConnectivityOffline() {
     // do nothing
 }
 
