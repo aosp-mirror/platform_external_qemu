@@ -46,6 +46,30 @@
       "revId": "c0803892687d0acc340e1d0c65ac983db1ef680f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e8e64dbf_cb361bc7",
+        "filename": "android/android-emu/android/base/IOVector.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-29T18:39:28Z",
+      "side": 1,
+      "message": "I agree that the highlighted part is unnecessary. Thanks for pointing out.",
+      "parentUuid": "d86aabb1_0cc68cf3",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 18
+      },
+      "revId": "c0803892687d0acc340e1d0c65ac983db1ef680f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
