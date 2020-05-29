@@ -28,7 +28,7 @@
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/filelock.h"
 
-#include "android/featurecontrol/proto/emulator_feature_patterns.pb.h"
+#include "emulator_feature_patterns.pb.h"
 #include "google/protobuf/io/zero_copy_stream.h"
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/text_format.h"

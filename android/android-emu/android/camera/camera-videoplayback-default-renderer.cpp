@@ -19,7 +19,7 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "offworld.pb.h"
 
 namespace android {
 namespace videoplayback {

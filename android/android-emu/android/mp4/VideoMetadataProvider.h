@@ -17,7 +17,7 @@
 #include <stdint.h>                              // for int32_t, uint64_t
 #include <memory>                                // for unique_ptr
 
-#include "android/offworld/proto/offworld.pb.h"  // for DatasetInfo
+#include "offworld.pb.h"  // for DatasetInfo
 
 extern "C" {
 #include "libavcodec/avcodec.h"                  // for AVPacket

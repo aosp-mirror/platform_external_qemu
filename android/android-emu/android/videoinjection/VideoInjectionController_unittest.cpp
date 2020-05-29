@@ -17,7 +17,7 @@
 #include "android/base/testing/ResultMatchers.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "offworld.pb.h"
 
 #include <gmock/gmock.h>
 #include <google/protobuf/text_format.h>

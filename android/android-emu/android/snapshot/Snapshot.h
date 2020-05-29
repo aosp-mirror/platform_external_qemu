@@ -17,7 +17,7 @@
 #include "android/base/system/System.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/snapshot/common.h"
-#include "android/snapshot/proto/snapshot.pb.h"
+#include "snapshot.pb.h"
 
 #include <string>
 #include <vector>

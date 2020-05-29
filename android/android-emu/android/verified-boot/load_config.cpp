@@ -12,7 +12,7 @@
 #include "android/verified-boot/load_config.h"
 
 #include "android/base/Log.h"
-#include "android/verified-boot/proto/verified_boot_config.pb.h"
+#include "verified_boot_config.pb.h"
 
 #include <google/protobuf/io/tokenizer.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>

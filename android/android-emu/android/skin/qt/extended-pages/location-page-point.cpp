@@ -18,7 +18,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/location/Point.h"
 #include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/logging-category.h"
 #include "android/utils/path.h"

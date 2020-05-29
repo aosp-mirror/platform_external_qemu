@@ -20,8 +20,8 @@
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 
-#include "android/metrics/proto/google_logs_publishing.pb.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "google_logs_publishing.pb.h"
+#include "studio_stats.pb.h"
 
 #include <assert.h>
 #include <sys/types.h>

@@ -12,7 +12,7 @@
 #pragma once
 
 #include "android/base/StringView.h"
-#include "android/location/proto/route.pb.h"
+#include "route.pb.h"
 
 namespace android {
 namespace location {

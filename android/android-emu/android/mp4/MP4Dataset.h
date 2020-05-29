@@ -18,7 +18,7 @@
 #include <string>                                // for string
 
 #include "android/hw-sensors.h"                  // for AndroidSensor
-#include "android/offworld/proto/offworld.pb.h"  // for DatasetInfo
+#include "offworld.pb.h"  // for DatasetInfo
 
 extern "C" {
 #include "libavformat/avformat.h"                // for AVFormatContext

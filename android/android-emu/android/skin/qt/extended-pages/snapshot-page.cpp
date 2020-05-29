@@ -81,7 +81,7 @@
 #include "android/globals.h"                         // for android_avdParams
 #include "android/metrics/MetricsReporter.h"         // for MetricsReporter
 #include "android/metrics/MetricsWriter.h"           // for android_studio
-#include "android/metrics/proto/studio_stats.pb.h"   // for EmulatorSnapshot...
+#include "studio_stats.pb.h"   // for EmulatorSnapshot...
 #include "android/settings-agent.h"                  // for SettingsTheme
 #include "android/skin/qt/error-dialog.h"            // for showErrorDialog
 #include "android/skin/qt/extended-pages/common.h"   // for setButtonEnabled
@@ -91,7 +91,7 @@
 #include "android/snapshot/Quickboot.h"              // for Quickboot, Quick...
 #include "android/snapshot/Snapshot.h"               // for Snapshot
 #include "android/snapshot/interface.h"              // for androidSnapshot_...
-#include "android/snapshot/proto/snapshot.pb.h"      // for Snapshot
+#include "snapshot.pb.h"      // for Snapshot
 
 class QCheckBox;
 class QCloseEvent;

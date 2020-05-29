@@ -13,7 +13,7 @@
 
 #include <cassert>
 
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 
 namespace android {
 namespace metrics {
