@@ -22,6 +22,30 @@
       "revId": "c0803892687d0acc340e1d0c65ac983db1ef680f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d86aabb1_0cc68cf3",
+        "filename": "android/android-emu/android/base/IOVector.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-05-29T18:15:38Z",
+      "side": 1,
+      "message": "I think what you are suggesting is: Instead of having a class, just use std::vector\u003cstruct iov\u003e and keep these functions not defined in std::vector: copyTo, copyFrom, appendEntriesTo, summedLength, and lookup_iovec? It is clearly doable. But in case we want to add more functions, it might be a little clumsy. I am referencing https://source.corp.google.com/piper///depot/google3/third_party/qemu/util/iov.c;l\u003d1?q\u003dfile:iov.c\u0026sq\u003dpackage:piper%20file:%2F%2Fdepot%2Fgoogle3%20-file:google3%2Fexperimental",
+      "parentUuid": "7caae9d5_4b2f0fc6",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 18
+      },
+      "revId": "c0803892687d0acc340e1d0c65ac983db1ef680f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
