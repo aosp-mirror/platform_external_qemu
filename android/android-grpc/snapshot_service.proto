@@ -182,6 +182,10 @@ message IceboxTarget {
 
   // [Output Only] Detailed error message that might provide more information.
   string err = 5;
+
+  // Setp to true to skip taking snapshot. This usually happens when the number
+  // of snapshots reaches the limit set by users.
+  bool skip_snapshot = 6;
 }
 
 
