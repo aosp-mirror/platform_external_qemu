@@ -14,9 +14,10 @@
 #define CONFIG_SMBD_COMMAND "/usr/sbin/smbd"
 #define CONFIG_L2TPV3 1
 #define CONFIG_AUDIO_DRIVERS \
-    "oss",\
+    "pa",\
 
-#define CONFIG_AUDIO_OSS m
+#define CONFIG_AUDIO_PA m
+#define CONFIG_AUDIO_PT_INT 1
 #define CONFIG_BDRV_RW_WHITELIST\
     NULL
 #define CONFIG_BDRV_RO_WHITELIST\
