@@ -114,6 +114,10 @@ public:
     static void setEgl2Egl(EGLBoolean enable);
     static bool isEgl2Egl();
 
+    // isEgl2EglSyncSafeToUse
+    static void setEgl2EglSyncSafeToUse(EGLBoolean enable);
+    static bool isEgl2EglSyncSafeToUse();
+
 private:
     EglGlobalInfo();
     ~EglGlobalInfo();
@@ -131,6 +135,7 @@ private:
     const EGLiface*                m_eglIface = nullptr;
     bool                           m_gles_extFuncs_inited[MAX_GLES_VERSION] = {};
     mutable emugl::Mutex           m_lock;
+    bool                           m_egl2eglSyncSafeToUse = false;
 };
 
 #endif

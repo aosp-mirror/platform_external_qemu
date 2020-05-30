@@ -48,6 +48,16 @@ bool EglGlobalInfo::isEgl2Egl() {
     return isGles2Gles();
 }
 
+void EglGlobalInfo::setEgl2EglSyncSafeToUse(EGLBoolean enable) {
+    if (sSingleton.hasInstance()) {
+        sSingleton->m_egl2eglSyncSafeToUse = enable == EGL_TRUE ? true : false;
+    }
+}
+
+bool EglGlobalInfo::isEgl2EglSyncSafeToUse() {
+    return !isGles2Gles() || sSingleton->m_egl2eglSyncSafeToUse;
+}
+
 // static
 EglGlobalInfo* EglGlobalInfo::getInstance() {
     return sSingleton.ptr();

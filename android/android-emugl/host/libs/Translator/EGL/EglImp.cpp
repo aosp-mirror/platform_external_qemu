@@ -27,6 +27,7 @@
 #include "OpenglCodecCommon/ErrorLog.h"
 #include "ThreadInfo.h"
 #include "android/base/files/Stream.h"
+#include "android/base/system/System.h"
 #include "emugl/common/shared_library.h"
 
 #include "EglWindowSurface.h"
@@ -1413,7 +1414,7 @@ EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, con
     // swiftshader_indirect does not work with eglCreateSyncKHR
     // Disable it before we figure out a proper fix in swiftshader
     // BUG: 65587659
-    if (g_eglInfo->isEgl2Egl()) {
+    if (!g_eglInfo->isEgl2EglSyncSafeToUse()) {
         return (EGLSyncKHR)0x42;
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
@@ -1424,7 +1425,7 @@ EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, con
 EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout) {
     MEM_TRACE("EMUGL");
     emugl::Mutex::AutoLock mutex(s_eglLock);
-    if (g_eglInfo->isEgl2Egl()) {
+    if (g_eglInfo->isEgl2EglSyncSafeToUse()) {
         return EGL_CONDITION_SATISFIED_KHR;
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
@@ -1451,7 +1452,7 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, 
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) {
     MEM_TRACE("EMUGL");
-    if (g_eglInfo->isEgl2Egl()) {
+    if (g_eglInfo->isEgl2EglSyncSafeToUse()) {
         return EGL_TRUE;
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
@@ -1464,7 +1465,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglGetSyncAttribKHR(
     EGLint attribute, EGLint *value) {
     MEM_TRACE("EMUGL");
 
-    if (g_eglInfo->isEgl2Egl()) {
+    if (!g_eglInfo->isEgl2EglSyncSafeToUse()) {
         switch (attribute) {
             case EGL_SYNC_TYPE_KHR:
                 *value = EGL_SYNC_FENCE_KHR;
@@ -1523,7 +1524,7 @@ EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display) {
 
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
     MEM_TRACE("EMUGL");
-    if (g_eglInfo->isEgl2Egl()) {
+    if (!g_eglInfo->isEgl2EglSyncSafeToUse()) {
         return EGL_TRUE;
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
@@ -1675,6 +1676,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
 EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable) {
     MEM_TRACE("EMUGL");
     EglGlobalInfo::setEgl2Egl(enable);
+    EglGlobalInfo::setEgl2EglSyncSafeToUse(
+        android::base::System::getEnvironmentVariable("ANDROID_GFXSTREAM_EGL") == "1");
 }
 
 EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
