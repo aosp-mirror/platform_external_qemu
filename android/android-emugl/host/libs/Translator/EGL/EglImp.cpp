@@ -1413,9 +1413,9 @@ EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, con
     // swiftshader_indirect does not work with eglCreateSyncKHR
     // Disable it before we figure out a proper fix in swiftshader
     // BUG: 65587659
-    if (g_eglInfo->isEgl2Egl()) {
-        return (EGLSyncKHR)0x42;
-    }
+    // if (g_eglInfo->isEgl2Egl()) {
+        // return (EGLSyncKHR)0x42;
+    // }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     GLsync res = iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     return (EGLSyncKHR)res;
@@ -1424,9 +1424,9 @@ EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, con
 EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout) {
     MEM_TRACE("EMUGL");
     emugl::Mutex::AutoLock mutex(s_eglLock);
-    if (g_eglInfo->isEgl2Egl()) {
-        return EGL_CONDITION_SATISFIED_KHR;
-    }
+    // if (g_eglInfo->isEgl2Egl()) {
+        // return EGL_CONDITION_SATISFIED_KHR;
+    // }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     GLenum gl_wait_result =
         iface->clientWaitSync((GLsync)sync, GL_SYNC_FLUSH_COMMANDS_BIT, timeout);
@@ -1451,9 +1451,9 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, 
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) {
     MEM_TRACE("EMUGL");
-    if (g_eglInfo->isEgl2Egl()) {
-        return EGL_TRUE;
-    }
+    // if (g_eglInfo->isEgl2Egl()) {
+        // return EGL_TRUE;
+    // }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->deleteSync((GLsync)sync);
     return EGL_TRUE;
@@ -1464,23 +1464,23 @@ EGLAPI EGLBoolean EGLAPIENTRY eglGetSyncAttribKHR(
     EGLint attribute, EGLint *value) {
     MEM_TRACE("EMUGL");
 
-    if (g_eglInfo->isEgl2Egl()) {
-        switch (attribute) {
-            case EGL_SYNC_TYPE_KHR:
-                *value = EGL_SYNC_FENCE_KHR;
-                break;
-            case EGL_SYNC_CONDITION_KHR:
-                *value = EGL_SYNC_PRIOR_COMMANDS_COMPLETE_KHR;
-                break;
-            case EGL_SYNC_STATUS_KHR: {
-                *value = EGL_SIGNALED_KHR;
-                break;
-            default:
-                return EGL_FALSE;
-            }
-        }
-        return EGL_TRUE;
-    }
+    // if (g_eglInfo->isEgl2Egl()) {
+    //     switch (attribute) {
+    //         case EGL_SYNC_TYPE_KHR:
+    //             *value = EGL_SYNC_FENCE_KHR;
+    //             break;
+    //         case EGL_SYNC_CONDITION_KHR:
+    //             *value = EGL_SYNC_PRIOR_COMMANDS_COMPLETE_KHR;
+    //             break;
+    //         case EGL_SYNC_STATUS_KHR: {
+    //             *value = EGL_SIGNALED_KHR;
+    //             break;
+    //         default:
+    //             return EGL_FALSE;
+    //         }
+    //     }
+    //     return EGL_TRUE;
+    // }
 
     switch (attribute) {
         // Guest doesn't care about sync type (handled in guest),
@@ -1523,9 +1523,9 @@ EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display) {
 
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
     MEM_TRACE("EMUGL");
-    if (g_eglInfo->isEgl2Egl()) {
-        return EGL_TRUE;
-    }
+    // if (g_eglInfo->isEgl2Egl()) {
+    //     return EGL_TRUE;
+    // }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->waitSync((GLsync)sync, 0, -1);
     return EGL_TRUE;
