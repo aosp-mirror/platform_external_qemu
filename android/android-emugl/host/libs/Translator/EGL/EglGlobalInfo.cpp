@@ -29,6 +29,8 @@ namespace {
 // Use a LazyInstance to ensure thread-safe initialization.
 emugl::LazyInstance<EglGlobalInfo> sSingleton = LAZY_INSTANCE_INIT;
 
+static bool sEgl2EglSyncSafeToUse = false;
+
 }  // namespace
 
 void EglGlobalInfo::setEgl2Egl(EGLBoolean enable) {
@@ -46,6 +48,14 @@ void EglGlobalInfo::setEgl2Egl(EGLBoolean enable) {
 
 bool EglGlobalInfo::isEgl2Egl() {
     return isGles2Gles();
+}
+
+void EglGlobalInfo::setEgl2EglSyncSafeToUse(EGLBoolean enable) {
+    sEgl2EglSyncSafeToUse = enable == EGL_TRUE ? true : false;
+}
+
+bool EglGlobalInfo::isEgl2EglSyncSafeToUse() {
+    return !isGles2Gles() || sEgl2EglSyncSafeToUse;
 }
 
 // static

@@ -328,7 +328,10 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     bool egl2eglByEnv = System::getEnvironmentVariable("ANDROID_EGL_ON_EGL") == "1";
     bool egl2eglByFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_USE_EGL_BIT;
     bool enable_egl2egl = egl2eglByFlag || egl2eglByEnv;
-    if (enable_egl2egl) System::setEnvironmentVariable("ANDROID_EGL_ON_EGL", "1");
+    if (enable_egl2egl) {
+        System::setEnvironmentVariable("ANDROID_GFXSTREAM_EGL", "1");
+        System::setEnvironmentVariable("ANDROID_EGL_ON_EGL", "1");
+    }
 
     bool syncFdDisabledByFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT;
 
