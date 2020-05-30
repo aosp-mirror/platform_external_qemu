@@ -174,6 +174,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     if (!isFoldableConfigured()) {
         mToolsUi->fold_switch->hide();
         mToolsUi->fold_switch->setEnabled(false);
+    } else {
+        mToolsUi->zoom_button->hide();
+        mToolsUi->zoom_button->setEnabled(false);
     }
 
     // Get the latest user selections from the user-config code.
