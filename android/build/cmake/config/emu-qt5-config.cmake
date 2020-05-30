@@ -384,6 +384,14 @@ elseif(LINUX)
     )
   endif()
 
+  if (LINUX_AARCH64)
+    list(
+    APPEND
+    QT5_SHARED_DEPENDENCIES
+    ${PREBUILT_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6
+    )
+  endif()
+
 endif()
 
 set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5WidgetsAndroidEmu -lQt5GuiAndroidEmu
