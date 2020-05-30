@@ -59,7 +59,11 @@ int RingStream::commitBuffer(size_t size) {
     size_t sent = 0;
     auto data = mWriteBuffer.data();
 
+    size_t iters = 0;
+    size_t backedOffIters = 0;
+    const size_t kBackoffIters = 10000000ULL;
     while (sent < size) {
+        ++iters;
         auto avail = ring_buffer_available_write(
             mContext.from_host_large_xfer.ring,
             &mContext.from_host_large_xfer.view);
@@ -70,6 +74,10 @@ int RingStream::commitBuffer(size_t size) {
                 return sent;
             } else {
                 ring_buffer_yield();
+                if (iters > kBackoffIters) {
+                    System::get()->sleepUs(10);
+                    ++backedOffIters;
+                }
             }
             continue;
         }
@@ -85,6 +93,11 @@ int RingStream::commitBuffer(size_t size) {
         sent += todo;
     }
 
+    if (backedOffIters > 0) {
+        fprintf(stderr, "%s: warning: backed off %zu times due to guest slowness.\n",
+                __func__,
+                backedOffIters);
+    }
     return sent;
 }
 
