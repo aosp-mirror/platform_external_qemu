@@ -684,6 +684,7 @@ void SettingsPage::on_set_resetNotifications_pressed() {
 #ifdef _WIN32
     settings.remove(Ui::Settings::SHOW_VGK_WARNING);
 #endif
+    settings.remove(Ui::Settings::SHOW_NESTED_WARNING);
 }
 
 void SettingsPage::on_perfstatsButton_pressed() {
