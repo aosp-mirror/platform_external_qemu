@@ -493,80 +493,7 @@ AndroidCpuAcceleration ProbeHaxCpu(std::string* status) {
     char vendor_id[16];
     android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
 
-    if (android_get_x86_cpuid_vendor_id_is_vmhost(vendor_id)) {
-        StringAppendFormat(status,
-                           "Android Emulator does not support nested virtualization.  "
-                           "Your CPU: '%s'",
-                           vendor_id);
-        return ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED;
-    }
-
-    /* HAXM only supports GenuineIntel processors */
-    if (android_get_x86_cpuid_vendor_id_type(vendor_id) != VENDOR_ID_INTEL) {
-        StringAppendFormat(status,
-                           "Android Emulator requires an Intel processor with "
-                           "VT-x and NX support.  Your CPU: '%s'",
-                           vendor_id);
-        return ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
-    }
-
     if (!android_get_x86_cpuid_vmx_support()) {
-        if (android_get_x86_cpuid_is_vcpu()) {
-            // Try asking the hypervisor directly.
-            char hv_vendor_id[16] = {};
-            android_get_x86_cpuid_vmhost_vendor_id(hv_vendor_id,
-                                                   sizeof(hv_vendor_id));
-#ifdef _WIN32
-            auto vmhost = android_get_x86_cpuid_vendor_vmhost_type(hv_vendor_id);
-            if (vmhost == VENDOR_VM_HYPERV) {
-                // Last part: check if this is the host or guest Hyper-V system.
-                auto hvStatus = GetHyperVStatus();
-                if (hvStatus.first == ANDROID_HYPERV_RUNNING) {
-                    // Host
-                    status->assign("Please disable Hyper-V before using the Android Emulator.  "
-                                   "Start a command prompt as Administrator, run 'bcdedit /set "
-                                   "hypervisorlaunchtype off', reboot.");
-#if HAVE_WHPX
-                    if (isOkToTryWHPX()) {
-                        status->assign("Hyper-V detected and Windows Hypervisor Platform is available. "
-                                       "Please ensure that you are running Windows 10 April 2018 release or later "
-                                       "with both the \"Hyper-V\" and \"Windows Hypervisor Platform\" "
-                                       "features enabled in \"Turn Windows features on or off\".");
-                        return ANDROID_CPU_ACCELERATION_READY;
-                    } else {
-                        return ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
-                    }
-#else
-                    return ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
-#endif
-                } else {
-                    // Guest
-                    StringAppendFormat(status,
-                                       "Android Emulator does not support nested virtualization.  "
-                                       "Your VM host: '%s' (Hyper-V)",
-                                       hv_vendor_id);
-                    return ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED;
-                }
-            } else if (vmhost != VENDOR_VM_NOTVM) {
-                StringAppendFormat(status,
-                                   "Android Emulator does not support nested virtualization.  "
-                                   "Your VM host: '%s'",
-                                   hv_vendor_id);
-                return ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED;
-            } else {
-                StringAppendFormat(status,
-                                   "Android Emulator does not support nested virtualization.  "
-                                   "Your VM host doesn't disclose its name.");
-                return ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED;
-            }
-#else // OSX
-            StringAppendFormat(status,
-                               "Android Emulator does not support nested virtualization.  "
-                               "Your CPU: '%s', VM host: '%s'",
-                               vendor_id, hv_vendor_id);
-            return ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED;
-#endif
-        }
         status->assign(
             "Android Emulator requires an Intel processor with VT-x and NX support.  "
             "(VT-x is not supported)");
@@ -974,57 +901,13 @@ AndroidCpuAcceleration ProbeGVMCpu(std::string* status) {
     char vendor_id[16];
     android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
 
-    // By default, GVM is only enabled for AMD platform, however, a switch
-    // is provided for testing purpose.
-    std::string IfGvmIntel = System::get()->envGet("GVM_ENABLE_INTEL");
-    int gvm_intel = !IfGvmIntel.compare("1");
-
-    if (android_get_x86_cpuid_vendor_id_type(vendor_id) != VENDOR_ID_AMD &&
-        (!gvm_intel || android_get_x86_cpuid_vendor_id_type(vendor_id) != VENDOR_ID_INTEL)) {
-        StringAppendFormat(status,
-                           "Android Emulator requires an %s processor with "
-                           "virtualization extension support.  Your CPU: '%s'",
-                           gvm_intel ? "Intel/AMD": "AMD",
-                           vendor_id);
-        return ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
-    }
-
-    if (android_get_x86_cpuid_is_vcpu()) {
-        // Try asking the hypervisor directly.
-        char hv_vendor_id[16] = {};
-        android_get_x86_cpuid_vmhost_vendor_id(hv_vendor_id,
-                                               sizeof(hv_vendor_id));
-        auto vmhost = android_get_x86_cpuid_vendor_vmhost_type(hv_vendor_id);
-        if (vmhost == VENDOR_VM_HYPERV) {
-            // Last part: check if this is the host or guest Hyper-V system.
-            auto hvStatus = GetHyperVStatus();
-            if (hvStatus.first == ANDROID_HYPERV_RUNNING) {
-                // Host
-                status->assign("Please disable Hyper-V before using the Android Emulator.  "
-                               "Start a command prompt as Administrator, run 'bcdedit /set "
-                               "hypervisorlaunchtype off', reboot.");
-#if HAVE_WHPX
-                if (isOkToTryWHPX()) {
-                    status->assign("Hyper-V detected and Windows Hypervisor Platform is available. "
-                                   "Please ensure that you are running Windows 10 April 2018 release or later "
-                                   "with both the \"Hyper-V\" and \"Windows Hypervisor Platform\" "
-                                   "features enabled in \"Turn Windows features on or off\".");
-                    return ANDROID_CPU_ACCELERATION_READY;
-                } else {
-                    return ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
-                }
-#else
-                return ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
-#endif
-            }
-        }
-    }
-
-    if (!android_get_x86_cpuid_svm_support() &&
-        (!gvm_intel || !android_get_x86_cpuid_vmx_support())) {
+    auto cpu_vendor_type = android_get_x86_cpuid_vendor_id_type(vendor_id);
+    if (cpu_vendor_type == VENDOR_ID_AMD && !android_get_x86_cpuid_svm_support() ||
+        cpu_vendor_type == VENDOR_ID_INTEL && !android_get_x86_cpuid_vmx_support()) {
         status->assign(
             "Android Emulator requires an %s processor with virtualization extension support.  "
-            "(Virtualization extension is not supported)", gvm_intel ? "Intel/AMD" : "AMD");
+            "(Virtualization extension is not supported)",
+            (System::get()->envGet("GVM_ENABLE_INTEL") == "1") ? "Intel/AMD" : "AMD");
         return ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
     }
 
@@ -1103,6 +986,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
     g->supported_accelerators = {};
 
     std::string status;
+    AndroidCpuAcceleration status_code = ANDROID_CPU_ACCELERATION_ERROR;
 
 #if !HAVE_KVM
     if (!android::hasModernX86VirtualizationFeatures()) {
@@ -1116,85 +1000,96 @@ CpuAccelerator GetCurrentCpuAccelerator() {
 #endif
 
 #if HAVE_KVM
-    AndroidCpuAcceleration status_code = ProbeKVM(&status);
+    status_code = ProbeKVM(&status);
     if (status_code == ANDROID_CPU_ACCELERATION_READY) {
         g->accel = CPU_ACCELERATOR_KVM;
         g->supported_accelerators[CPU_ACCELERATOR_KVM] = true;
     }
 #elif HAVE_HAX || HAVE_HVF || HAVE_WHPX || HAVE_GVM
-    AndroidCpuAcceleration status_code = ProbeHAX(&status);
-    if (status_code == ANDROID_CPU_ACCELERATION_READY) {
-        g->accel = CPU_ACCELERATOR_HAX;
-        g->supported_accelerators[CPU_ACCELERATOR_HAX] = true;
-    }
-#if HAVE_GVM
-    char cpu_vendor[16];
-    android_get_x86_cpuid_vendor_id(cpu_vendor, sizeof(cpu_vendor));
-    std::string statusGvm;
-    AndroidCpuAcceleration status_code_gvm = ProbeGVM(&statusGvm);
-    if (status_code_gvm == ANDROID_CPU_ACCELERATION_READY) {
-        g->accel = CPU_ACCELERATOR_GVM;
-        g->supported_accelerators[CPU_ACCELERATOR_GVM] = true;
-        status_code = status_code_gvm;
-        status = std::move(statusGvm);
-    } else if (android_get_x86_cpuid_vendor_id_type(cpu_vendor) == VENDOR_ID_AMD) {
-        // For AMD, let us return error message from GVM
-        status_code = status_code_gvm;
-        status = std::move(statusGvm);
-    }
-#endif
+    auto hvStatus = GetHyperVStatus();
+    if (hvStatus.first == ANDROID_HYPERV_RUNNING) {
+        status = "Please disable Hyper-V before using the Android Emulator.  "
+                 "Start a command prompt as Administrator, run 'bcdedit /set "
+                 "hypervisorlaunchtype off', reboot.";
+        status_code = ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
 #if HAVE_WHPX
-    // WHPX feature enablement:
-    // - Flag needs to be on
-    if (isOkToTryWHPX()) {
-        // WHPX will supersede HAX, if available.
-        std::string statusWHPX;
-        AndroidCpuAcceleration status_code_WHPX = ProbeWHPX(&statusWHPX);
-        if (status_code_WHPX == ANDROID_CPU_ACCELERATION_READY) {
-            g->accel = CPU_ACCELERATOR_WHPX;
-            g->supported_accelerators[CPU_ACCELERATOR_WHPX] = true;
-            status_code = status_code_WHPX;
-            status = std::move(statusWHPX);
-        }
-
-#ifdef _WIN32
-        // If this is the 32-bit emulator check calling this
-        // function, and HAXM is not installed, and it is OK
-        // to try WHPX, let's assume WHPX is available;
-        // the WHPX dll is 64-bit, so we cannot meaningfully
-        // query it here.
-        if (android::base::System::kProgramBitness == 32 &&
-            status_code != ANDROID_CPU_ACCELERATION_READY) {
-            g->accel = CPU_ACCELERATOR_WHPX;
-            g->supported_accelerators[CPU_ACCELERATOR_WHPX] = true;
-            status_code = ANDROID_CPU_ACCELERATION_READY;
-            status =
-                "HAXM is not installed, "
-                "but Windows Hypervisor Platform is available.";
-        }
-#endif
-
-    }
-#endif // HAVE_WHPX
-#if HAVE_HVF
-    if (featurecontrol::isEnabled(featurecontrol::HVF)) {
-        std::string statusHvf;
-        AndroidCpuAcceleration status_code_HVF = ProbeHVF(&statusHvf);
-        if (status_code_HVF == ANDROID_CPU_ACCELERATION_READY) {
-            g->supported_accelerators[CPU_ACCELERATOR_HVF] = true;
-            // TODO: Switch to HVF as default option if/when appropriate.
-            if (status_code != ANDROID_CPU_ACCELERATION_READY) {
-                g->accel = CPU_ACCELERATOR_HVF;
-                status_code = status_code_HVF;
-                status = std::move(statusHvf);
+        auto ver = android::base::Win32Utils::getWindowsVersion();
+        if (isOkToTryWHPX()) {
+            if (ver && ver->dwMajorVersion >= 10 && ver->dwBuildNumber >= 17134)  {
+                status_code = ProbeWHPX(&status);
+                if (status_code == ANDROID_CPU_ACCELERATION_READY) {
+                    g->accel = CPU_ACCELERATOR_WHPX;
+                    g->supported_accelerators[CPU_ACCELERATOR_WHPX] = true;
+                } else {
+                    status = "Hyper-V detected and Windows Hypervisor Platform is available. "
+                             "Please ensure both the \"Hyper-V\" and \"Windows Hypervisor Platform\" "
+                             "features enabled in \"Turn Windows features on or off\".";
+                }
+            } else {
+                status = "Hyper-V detected and Windows Hypervisor Platform is not available. "
+                         "Please either disable Hyper-V or upgrade to Windows 10 1803 or later. "
+                         "To disable Hyper-V, start a command prompt as Administrator, run "
+                         "'bcdedit /set hypervisorlaunchtype off', reboot. "
+                         "If upgrading OS to Windows 10 1803 or later, please ensure both "
+                         "the \"Hyper-V\" and \"Windows Hypervisor Platform\" features enabled "
+                         "in \"Turn Windows features on or off\".";
+                status_code = ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
             }
         }
-    }
-#endif  // HAVE_HFV
+#endif
+    } else {
+        char vendor_id[16];
+        android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
 
-#else  // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF)
+        switch (android_get_x86_cpuid_vendor_id_type(vendor_id)) {
+#if HAVE_HAX
+        case VENDOR_ID_INTEL:
+            status_code = ProbeHAX(&status);
+            if (status_code == ANDROID_CPU_ACCELERATION_READY) {
+                g->accel = CPU_ACCELERATOR_HAX;
+                g->supported_accelerators[CPU_ACCELERATOR_HAX] = true;
+            }
+#ifdef _WIN32
+            if (System::get()->envGet("GVM_ENABLE_INTEL") != "1")
+#endif
+                break;
+#endif
+#if HAVE_GVM
+        case VENDOR_ID_AMD:
+            status_code = ProbeGVM(&status);
+            if (status_code == ANDROID_CPU_ACCELERATION_READY) {
+                g->accel = CPU_ACCELERATOR_GVM;
+                g->supported_accelerators[CPU_ACCELERATOR_GVM] = true;
+            }
+            break;
+#endif
+        default:
+            StringAppendFormat(&status,
+                               "Android Emulator requires an Intel or AMD processor with "
+                               "virtualization extension support.  Your CPU: '%s'",
+                               vendor_id);
+            status_code = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
+        }
+
+#if HAVE_HVF
+        if (featurecontrol::isEnabled(featurecontrol::HVF)) {
+            std::string statusHvf;
+            AndroidCpuAcceleration status_code_HVF = ProbeHVF(&statusHvf);
+            if (status_code_HVF == ANDROID_CPU_ACCELERATION_READY) {
+                g->supported_accelerators[CPU_ACCELERATOR_HVF] = true;
+                // TODO: Switch to HVF as default option if/when appropriate.
+                if (status_code != ANDROID_CPU_ACCELERATION_READY) {
+                    g->accel = CPU_ACCELERATOR_HVF;
+                    status_code = status_code_HVF;
+                    status = std::move(statusHvf);
+                }
+            }
+        }
+#endif  // HAVE_HVF
+    }
+#else  // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF || HAVE_GVM || HAVE_WHPX)
     status = "This system does not support CPU acceleration.";
-#endif  // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF)
+#endif  // !HAVE_KVM && !(HAVE_HAX || HAVE_HVF || HAVE_GVM || HAVE_WHPX)
 
     // cache status
     g->probed = true;
