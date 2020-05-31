@@ -10,33 +10,37 @@
 
 #include "android/skin/qt/device-3d-widget.h"
 
-#include "android/opengles.h"
+#include <assert.h>            // for assert
+#include <qimage.h>            // for QImage::Format_...
+#include <qiodevice.h>         // for operator|, QIOD...
+#include <qloggingcategory.h>  // for qCWarning
+#include <qnamespace.h>        // for ClickFocus
 
-#include <assert.h>                                   // for assert
-#include <glm/gtc/quaternion.hpp>                     // for tquat
-#include <qimage.h>                                   // for QImage::Format_...
-#include <qiodevice.h>                                // for operator|, QIOD...
-#include <qloggingcategory.h>                         // for qCWarning
-#include <qnamespace.h>                               // for ClickFocus
-#include <QByteArray>                                 // for QByteArray
-#include <QFile>                                      // for QFile
-#include <QImage>                                     // for QImage
-#include <QMouseEvent>                                // for QMouseEvent
-#include <QPoint>                                     // for QPoint
-#include <QTextStream>                                // for QTextStream
-#include <QWheelEvent>                                // for QWheelEvent
-#include <algorithm>                                  // for max, min
-#include <vector>                                     // for vector
+#include <QBitmap>
+#include <QByteArray>   // for QByteArray
+#include <QFile>        // for QFile
+#include <QImage>       // for QImage
+#include <QMouseEvent>  // for QMouseEvent
+#include <QPixmap>
+#include <QPoint>                  // for QPoint
+#include <QTextStream>             // for QTextStream
+#include <QWheelEvent>             // for QWheelEvent
+#include <algorithm>               // for max, min
+#include <glm/gtc/quaternion.hpp>  // for tquat
+#include <vector>                  // for vector
 
-#include "OpenGLESDispatch/GLESv2Dispatch.h"          // for GLESv2Dispatch
+#include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
+#include "android/base/files/PathUtils.h"
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/globals.h"                          // for QAndroidSensors...
 #include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
-#include "android/physics/GlmHelpers.h"               // for fromEulerAnglesXYZ
-#include "android/physics/Physics.h"                  // for PARAMETER_VALUE...
-#include "android/skin/qt/gl-common.h"                // for createShader
-#include "android/skin/qt/logging-category.h"         // for emu
-#include "android/skin/qt/wavefront-obj-parser.h"     // for parseWavefrontOBJ
+#include "android/opengles.h"
+#include "android/physics/GlmHelpers.h"  // for fromEulerAnglesXYZ
+#include "android/physics/Physics.h"     // for PARAMETER_VALUE...
+#include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/gl-common.h"             // for createShader
+#include "android/skin/qt/logging-category.h"      // for emu
+#include "android/skin/qt/wavefront-obj-parser.h"  // for parseWavefrontOBJ
 
 using android::base::System;
 
@@ -45,28 +49,23 @@ class QWheelEvent;
 class QWidget;
 
 static glm::vec3 clampPosition(glm::vec3 position) {
-    return glm::clamp(
-            position,
-            glm::vec3(Device3DWidget::MinX, Device3DWidget::MinY,
-                      Device3DWidget::MinZ),
-            glm::vec3(Device3DWidget::MaxX, Device3DWidget::MaxY,
-                      Device3DWidget::MaxZ));
+    return glm::clamp(position,
+                      glm::vec3(Device3DWidget::MinX, Device3DWidget::MinY,
+                                Device3DWidget::MinZ),
+                      glm::vec3(Device3DWidget::MaxX, Device3DWidget::MaxY,
+                                Device3DWidget::MaxZ));
 }
 
 static constexpr int kAnimationIntervalMs = 33;
 
 Device3DWidget::Device3DWidget(QWidget* parent)
-    : GLWidget(parent),
-      mUseAbstractDevice(
-          android_hw->hw_sensor_hinge) {
-
+    : GLWidget(parent), mUseAbstractDevice(android_hw->hw_sensor_hinge) {
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
 
     if (mUseAbstractDevice) {
         mCurrentFoldableStatePtr = android_foldable_get_state_ptr();
-        connect(&mAnimationTimer, SIGNAL(timeout()),
-                this, SLOT(animate()));
+        connect(&mAnimationTimer, SIGNAL(timeout()), this, SLOT(animate()));
         mAnimationTimer.setInterval(kAnimationIntervalMs);
         mAnimationTimer.start();
     }
@@ -82,14 +81,16 @@ Device3DWidget::~Device3DWidget() {
         return;
     }
     if (readyForRendering()) {
-        if(makeContextCurrent()) {
+        if (makeContextCurrent()) {
             mGLES2->glDeleteProgram(mProgram);
             mGLES2->glDeleteBuffers(1, &mVertexDataBuffer);
             mGLES2->glDeleteBuffers(1, &mVertexIndexBuffer);
-            mGLES2->glDeleteTextures(1, &mGlossMap);
             mGLES2->glDeleteTextures(1, &mDiffuseMap);
             mGLES2->glDeleteTextures(1, &mSpecularMap);
-            mGLES2->glDeleteTextures(1, &mEnvMap);
+            if (!mUseAbstractDevice) {
+                mGLES2->glDeleteTextures(1, &mGlossMap);
+                mGLES2->glDeleteTextures(1, &mEnvMap);
+            }
         }
     }
 }
@@ -116,22 +117,16 @@ static bool loadTexture(const GLESv2Dispatch* gles2,
                         GLenum target,
                         GLenum format) {
     QImage image =
-        QImage(source_filename).convertToFormat(format == GL_RGBA ?
-                                                    QImage::Format_RGBA8888 :
-                                                    QImage::Format_Grayscale8);
+            QImage(source_filename)
+                    .convertToFormat(format == GL_RGBA
+                                             ? QImage::Format_RGBA8888
+                                             : QImage::Format_Grayscale8);
     if (image.isNull()) {
         qCWarning(emu, "Failed to load image \"%s\"", source_filename);
         return false;
     }
-    gles2->glTexImage2D(target,
-                        0,
-                        format,
-                        image.width(),
-                        image.height(),
-                        0,
-                        format,
-                        GL_UNSIGNED_BYTE,
-                        image.bits());
+    gles2->glTexImage2D(target, 0, format, image.width(), image.height(), 0,
+                        format, GL_UNSIGNED_BYTE, image.bits());
     return gles2->glGetError() == GL_NO_ERROR;
 }
 
@@ -144,25 +139,21 @@ static GLuint create2DTexture(const GLESv2Dispatch* gles2,
                               GLenum min_filter = GL_LINEAR,
                               GLenum mag_filter = GL_LINEAR,
                               GLenum wrap_s = GL_CLAMP_TO_EDGE,
-                              GLenum wrap_t = GL_CLAMP_TO_EDGE) {
+                              GLenum wrap_t = GL_CLAMP_TO_EDGE,
+                              uint32_t color = 0) {
     GLuint texture = 0;
     gles2->glGenTextures(1, &texture);
 
     // Upload texture data and set parameters.
     gles2->glBindTexture(GL_TEXTURE_2D, texture);
 
-    // If blank, have a blank texture (black)
+    // If blank, have a blank texture (black by default)
     if (!source_filename) {
-        uint32_t black = 0;
-        gles2->glTexImage2D(
-            GL_TEXTURE_2D,
-            0, format, 1, 1, 0,
-            format, GL_UNSIGNED_BYTE, &black);
+        gles2->glTexImage2D(GL_TEXTURE_2D, 0, format, 1, 1, 0, format,
+                            GL_UNSIGNED_BYTE, &color);
     } else {
-        if(!loadTexture(gles2,
-                        source_filename,
-                        target,
-                        format)) return 0;
+        if (!loadTexture(gles2, source_filename, target, format))
+            return 0;
     }
 
     gles2->glTexParameteri(target, GL_TEXTURE_MIN_FILTER, min_filter);
@@ -200,14 +191,13 @@ bool Device3DWidget::initGL() {
 
     // Set up the camera transformation.
     mCameraTransform = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, CameraDistance), // Camera position
-        glm::vec3(0.0f, 0.0f, 0.0f), // Point at which the camera is looking
-        glm::vec3(0.0f, 1.0f, 0.0f)); // "up" vector
+            glm::vec3(0.0f, 0.0f, CameraDistance),  // Camera position
+            glm::vec3(0.0f, 0.0f,
+                      0.0f),  // Point at which the camera is looking
+            glm::vec3(0.0f, 1.0f, 0.0f));  // "up" vector
     mCameraTransformInverse = glm::inverse(mCameraTransform);
 
-    if (!initProgram() ||
-        !initModel() ||
-        !initTextures()) {
+    if (!initProgram() || !initModel() || !initTextures()) {
         return false;
     }
 
@@ -218,15 +208,18 @@ bool Device3DWidget::initGL() {
 bool Device3DWidget::initProgram() {
     // Compile & link shaders.
     QFile vertex_shader_file(":/phone-model/vert.glsl");
-    QFile fragment_shader_file(":/phone-model/frag.glsl");
+    QString shader_file_name =
+            mUseAbstractDevice ? ":/phone-model/frag-abstract-device.glsl"
+                               : ":/phone-model/frag.glsl";
+    QFile fragment_shader_file(shader_file_name);
     vertex_shader_file.open(QFile::ReadOnly | QFile::Text);
     fragment_shader_file.open(QFile::ReadOnly | QFile::Text);
     QByteArray vertex_shader_code = vertex_shader_file.readAll();
     QByteArray fragment_shader_code = fragment_shader_file.readAll();
-    GLuint vertex_shader =
-        createShader(mGLES2, GL_VERTEX_SHADER, vertex_shader_code.constData());
-    GLuint fragment_shader =
-        createShader(mGLES2, GL_FRAGMENT_SHADER, fragment_shader_code.constData());
+    GLuint vertex_shader = createShader(mGLES2, GL_VERTEX_SHADER,
+                                        vertex_shader_code.constData());
+    GLuint fragment_shader = createShader(mGLES2, GL_FRAGMENT_SHADER,
+                                          fragment_shader_code.constData());
     if (vertex_shader == 0 || fragment_shader == 0) {
         return false;
     }
@@ -252,72 +245,7 @@ bool Device3DWidget::initProgram() {
 
 bool Device3DWidget::initModel() {
     if (mUseAbstractDevice) {
-        // Create an abstract parameterized model
-        // std::vector<float> model_vertex_data;
-        // std::vector<GLuint> indices;
-
-        // Size it to the aspect ratio
-        float aspect =
-            (float)(android_hw->hw_lcd_width) /
-            (float)(android_hw->hw_lcd_height);
-
-        std::vector<float> pos = {
-            -1.0, -1.0, 0.0,
-            +1.0, -1.0, 0.0,
-            +1.0, +1.0, 0.0,
-            -1.0, -1.0, 0.0,
-            +1.0, +1.0, 0.0,
-            -1.0, +1.0, 0.0,
-        };
-
-        for (size_t i = 0; i < pos.size(); ++i) {
-            if (i % 3 == 1) {
-                pos[i] *= 1.0f / aspect;
-            }
-            pos[i] *= 2.0f;
-        }
-
-        std::vector<float> model_vertex_data = {
-            pos[0], pos[1], pos[2],    0.0, 0.0, 1.0,    0.0, 0.0,
-            pos[3], pos[4], pos[5],    0.0, 0.0, 1.0,    1.0, 0.0,
-            pos[6], pos[7], pos[8],    0.0, 0.0, 1.0,    1.0, 1.0,
-            pos[9], pos[10], pos[11],    0.0, 0.0, 1.0,    0.0, 0.0,
-            pos[12], pos[13], pos[14],    0.0, 0.0, 1.0,    1.0, 1.0,
-            pos[15], pos[16], pos[17],    0.0, 0.0, 1.0,    0.0, 1.0,
-        };
-
-        std::vector<GLuint> indices = {
-            0, 1, 2, 3, 4, 5,
-        };
-
-
-        mElementsCount = indices.size();
-
-        mVertexPositionAttribute = mGLES2->glGetAttribLocation(mProgram, "vtx_pos");
-        mVertexNormalAttribute   = mGLES2->glGetAttribLocation(mProgram, "vtx_normal");
-        mVertexUVAttribute   = mGLES2->glGetAttribLocation(mProgram, "vtx_uv");
-        mGLES2->glGenBuffers(1, &mVertexDataBuffer);
-        mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
-        mGLES2->glBufferData(GL_ARRAY_BUFFER,
-                             model_vertex_data.size() * sizeof(float),
-                             &model_vertex_data[0],
-                             GL_STATIC_DRAW);
-        mGLES2->glGenBuffers(1, &mVertexIndexBuffer);
-        mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
-        mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                             mElementsCount * sizeof(GLuint),
-                             &indices[0],
-                             GL_STATIC_DRAW);
-
-        mCachedFoldableState = *mCurrentFoldableStatePtr;
-        std::pair<std::vector<float>, std::vector<uint32_t>> newData = 
-            generateModelVerticesFromFoldableState(mCachedFoldableState);
-        updateModelVertices(
-            newData.first.data(), newData.first.size() * sizeof(float),
-            newData.second.data(), newData.second.size() * sizeof(uint32_t));
-
-        CHECK_GL_ERROR_RETURN("Failed to load model", false);
-        return true;
+        return initAbstractDeviceModel();
     } else {
         // Load the model and set up buffers.
         std::vector<float> model_vertex_data;
@@ -325,7 +253,7 @@ bool Device3DWidget::initModel() {
         QFile model_file(":/phone-model/model.obj");
         if (model_file.open(QFile::ReadOnly)) {
             QTextStream file_stream(&model_file);
-            if(!parseWavefrontOBJ(file_stream, model_vertex_data, indices)) {
+            if (!parseWavefrontOBJ(file_stream, model_vertex_data, indices)) {
                 qCWarning(emu, "Failed to load model");
                 return false;
             }
@@ -335,162 +263,325 @@ bool Device3DWidget::initModel() {
         }
         mElementsCount = indices.size();
 
-        mVertexPositionAttribute = mGLES2->glGetAttribLocation(mProgram, "vtx_pos");
-        mVertexNormalAttribute   = mGLES2->glGetAttribLocation(mProgram, "vtx_normal");
-        mVertexUVAttribute   = mGLES2->glGetAttribLocation(mProgram, "vtx_uv");
+        mVertexPositionAttribute =
+                mGLES2->glGetAttribLocation(mProgram, "vtx_pos");
+        mVertexNormalAttribute =
+                mGLES2->glGetAttribLocation(mProgram, "vtx_normal");
+        mVertexUVAttribute = mGLES2->glGetAttribLocation(mProgram, "vtx_uv");
         mGLES2->glGenBuffers(1, &mVertexDataBuffer);
         mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
         mGLES2->glBufferData(GL_ARRAY_BUFFER,
                              model_vertex_data.size() * sizeof(float),
-                             &model_vertex_data[0],
-                             GL_STATIC_DRAW);
+                             &model_vertex_data[0], GL_STATIC_DRAW);
         mGLES2->glGenBuffers(1, &mVertexIndexBuffer);
         mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
         mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                             mElementsCount * sizeof(GLuint),
-                             &indices[0],
+                             mElementsCount * sizeof(GLuint), &indices[0],
                              GL_STATIC_DRAW);
         CHECK_GL_ERROR_RETURN("Failed to load model", false);
         return true;
     }
 }
 
-bool Device3DWidget::initTextures() {
-    // Create textures.
-    mDiffuseMap = create2DTexture(mGLES2,
-                                  ":/phone-model/diffuse-map.png",
-                                  GL_TEXTURE_2D,
-                                  GL_RGBA,
-                                  GL_LINEAR_MIPMAP_LINEAR);
-    if (mUseAbstractDevice) {
-        mSpecularMap = create2DTexture(
-            mGLES2, nullptr /* blank */, GL_TEXTURE_2D, GL_LUMINANCE);
-        mGlossMap = create2DTexture(
-            mGLES2, nullptr /* blank */, GL_TEXTURE_2D, GL_LUMINANCE);
-    } else {
-        mSpecularMap = create2DTexture(mGLES2,
-                                       ":/phone-model/specular-map.png",
-                                       GL_TEXTURE_2D,
-                                       GL_LUMINANCE);
-        mGlossMap = create2DTexture(mGLES2,
-                                    ":/phone-model/gloss-map.png",
-                                    GL_TEXTURE_2D,
-                                    GL_LUMINANCE);
+bool Device3DWidget::initAbstractDeviceModel() {
+    // Create an abstract parameterized model
+    // std::vector<float> model_vertex_data;
+    // std::vector<GLuint> indices;
+    struct FoldableConfig config = mCurrentFoldableStatePtr->config;
+    bool hSplit = (config.hingesType == ANDROID_FOLDABLE_HORIZONTAL_SPLIT)
+                          ? true
+                          : false;
+    int32_t displayW =
+            hSplit ? android_hw->hw_lcd_width : android_hw->hw_lcd_height;
+    int32_t displayH =
+            hSplit ? android_hw->hw_lcd_height : android_hw->hw_lcd_width;
+    int32_t centerX = displayW / 2;
+    int32_t centerY = displayH / 2;
+    if (!hSplit) {
+        // rotate 90 degree for vertical split, the result is horizontal split
+        for (uint32_t i = 0; i < config.numHinges; i++) {
+            std::swap(config.hingeParams[i].x, config.hingeParams[i].y);
+            std::swap(config.hingeParams[i].width,
+                      config.hingeParams[i].height);
+        }
     }
-    if (!mDiffuseMap || !mSpecularMap || !mGlossMap) {
-        return false;
+    int32_t x = 0, y = 0;
+    int32_t l = x - centerX;
+    int32_t r = -l;
+    int32_t t, b;
+    struct FoldableHingeParameters* p = config.hingeParams;
+    for (int i = 0; i < config.numHinges; i++) {
+        // NOTE: fold default display only
+        if (p[i].displayId != 0) {
+            continue;
+        }
+        // Re-position the display segments in the 2D space. Put (centerX,
+        // centerY) at point (0, 0).
+        t = centerY - y;
+        b = centerY - p[i].y;
+        // display segement above the hinge
+        mDisplaySegments.push_back(
+                {l, r, t, b, false, 0.0f, 0.0f, glm::mat4()});
+        // hinge
+        t = centerY - p[i].y;
+        b = t - p[i].height;
+        mDisplaySegments.push_back({p[i].x - centerX,
+                                    p[i].x - centerX + p[i].width, t, b, true,
+                                    0.0f, 0.0f, glm::mat4()});
+        y = p[i].y + p[i].height;
     }
-    mGLES2->glGenTextures(1, &mEnvMap);
-    mGLES2->glBindTexture(GL_TEXTURE_CUBE_MAP, mEnvMap);
-    loadTexture(mGLES2, ":/phone-model/env-map-front.png", GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_RGBA);
-    loadTexture(mGLES2, ":/phone-model/env-map-back.png", GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, GL_RGBA);
-    loadTexture(mGLES2, ":/phone-model/env-map-right.png", GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_RGBA);
-    loadTexture(mGLES2, ":/phone-model/env-map-left.png", GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_RGBA);
-    loadTexture(mGLES2, ":/phone-model/env-map-top.png", GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_RGBA);
-    loadTexture(mGLES2, ":/phone-model/env-map-bottom.png", GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_RGBA);
-    mGLES2->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    mGLES2->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    mGLES2->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    mGLES2->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    mGLES2->glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-    CHECK_GL_ERROR_RETURN("Failed to initialize cubemap", false);
+    // last display segment
+    t = centerY - y;
+    b = -centerY;
+    mDisplaySegments.push_back({l, r, t, b, false, 0.0f, 0.0f, glm::mat4()});
+
+    // Find display segment in the middle of the whole display,
+    // which will be always placed perpendicular to Z axis
+    for (uint32_t i = 0; i < mDisplaySegments.size(); i++) {
+        if (mDisplaySegments[i].t >= 0 && mDisplaySegments[i].b < 0) {
+            if (mDisplaySegments[i].isHinge) {
+                mCenterIndex = i + 1;
+            } else {
+                mCenterIndex = i;
+            }
+            break;
+        }
+    }
+    mDisplaySegments[mCenterIndex].rotate = 0;
+
+    // Translate display segments into a new 3D space, ranging [-4, 4] in x and
+    // y axis. This will grarantee the phone occpuied the whole widget screen.
+    int32_t length = (displayW > displayH) ? displayW : displayH;
+    mFactor = 7.9f / (float)length;
+    float d = mDepth;
+    std::vector<float> attribs;
+    std::vector<GLuint> indices;
+    std::vector<GLuint> indice = {
+            0,  1,  2,  1,  3,  2,  4,  5,  6,  5,  7,  6,
+            8,  9,  10, 9,  11, 10, 12, 13, 14, 13, 15, 14,
+            16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22,
+    };
+    // Construct a cuboid for each segment.
+    for (uint32_t idx = 0, j = 0; idx < mDisplaySegments.size(); idx++) {
+        const auto i = mDisplaySegments[idx];
+        if (i.t == i.b) {
+            // do not draw zero-height hinge
+            continue;
+        }
+        float l = i.l * mFactor;
+        float r = i.r * mFactor;
+        float t = (idx <= mCenterIndex) ? (i.t - i.b) * mFactor : 0.0f;
+        float b = (idx <= mCenterIndex) ? 0.0f : (i.b - i.t) * mFactor;
+        float ul = (hSplit) ? 0.0f : float(centerY - i.t) / float(displayH);
+        float ur = (hSplit) ? 1.0f : float(centerY - i.b) / float(displayH);
+        float ub = (hSplit) ? float(i.b + centerY) / float(displayH) : 0.0f;
+        float ut = (hSplit) ? float(i.t + centerY) / float(displayH) : 1.0f;
+        std::vector<float> attribFront;
+        if (hSplit) {
+            attribFront = {
+                    l, b, 0.0, 0.0, 0.0, +1.0, ul, ub,  // front
+                    r, b, 0.0, 0.0, 0.0, +1.0, ur, ub,
+                    l, t, 0.0, 0.0, 0.0, +1.0, ul, ut,
+                    r, t, 0.0, 0.0, 0.0, +1.0, ur, ut,
+            };
+        } else {
+            // rotate 90 degree for vertical split texture sampling 
+            attribFront = {
+                    l, b, 0.0, 0.0, 0.0, +1.0, ur, ub,  // front
+                    r, b, 0.0, 0.0, 0.0, +1.0, ur, ut,
+                    l, t, 0.0, 0.0, 0.0, +1.0, ul, ub,
+                    r, t, 0.0, 0.0, 0.0, +1.0, ul, ut,
+            };
+        }
+        std::vector<float> attribCommon = {
+                l, b, -d,  0.0,  0.0,  -1.0, 0.0, 0.0,  // back
+                r, b, -d,  0.0,  0.0,  -1.0, 1.0, 0.0,
+                l, t, -d,  0.0,  0.0,  -1.0, 0.0, 1.0,
+                r, t, -d,  0.0,  0.0,  -1.0, 1.0, 1.0,
+                l, b, -d,  -1.0, 0.0,  0.0,  0.0, 0.0,  // left
+                l, b, 0.0, -1.0, 0.0,  0.0,  1.0, 0.0,
+                l, t, -d,  -1.0, 0.0,  0.0,  0.0, 1.0,
+                l, t, 0.0, -1.0, 0.0,  0.0,  1.0, 1.0,
+                r, b, -d,  +1.0, 0.0,  0.0,  0.0, 0.0,  // right
+                r, b, 0.0, +1.0, 0.0,  0.0,  1.0, 0.0,
+                r, t, -d,  +1.0, 0.0,  0.0,  0.0, 1.0,
+                r, t, 0.0, +1.0, 0.0,  0.0,  1.0, 1.0,
+                l, t, 0.0, 0.0,  +1.0, 0.0,  0.0, 0.0,  // top
+                r, t, 0.0, 0.0,  +1.0, 0.0,  1.0, 0.0,
+                l, t, -d,  0.0,  +1.0, 0.0,  0.0, 1.0,
+                r, t, -d,  0.0,  +1.0, 0.0,  1.0, 1.0,
+                l, b, 0.0, 0.0,  -1.0, 0.0,  0.0, 0.0,  // bottom
+                r, b, 0.0, 0.0,  -1.0, 0.0,  1.0, 0.0,
+                l, b, -d,  0.0,  -1.0, 0.0,  0.0, 1.0,
+                r, b, -d,  0.0,  -1.0, 0.0,  1.0, 1.0,
+        };
+        attribs.insert(attribs.end(), attribFront.begin(), attribFront.end());
+        attribs.insert(attribs.end(), attribCommon.begin(), attribCommon.end());
+        for (auto iter : indice) {
+            indices.push_back(iter + j * 24);
+        }
+        j++;
+    }
+
+    mDisplaySegments[mCenterIndex].hingeModelTransfrom = glm::translate(
+            glm::mat4(),
+            glm::vec3(0, mDisplaySegments[mCenterIndex].b * mFactor, 0));
+
+    mVertexPositionAttribute = mGLES2->glGetAttribLocation(mProgram, "vtx_pos");
+    mVertexNormalAttribute =
+            mGLES2->glGetAttribLocation(mProgram, "vtx_normal");
+    mVertexUVAttribute = mGLES2->glGetAttribLocation(mProgram, "vtx_uv");
+    mGLES2->glGenBuffers(1, &mVertexDataBuffer);
+    mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
+    mGLES2->glBufferData(GL_ARRAY_BUFFER, attribs.size() * sizeof(float),
+                         attribs.data(), GL_STATIC_DRAW);
+    mGLES2->glGenBuffers(1, &mVertexIndexBuffer);
+    mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
+    mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                         indices.size() * sizeof(GLuint), indices.data(),
+                         GL_STATIC_DRAW);
+    mElementsCount = indices.size();
+
+    CHECK_GL_ERROR_RETURN("Failed to load model", false);
     return true;
 }
 
-void Device3DWidget::updateModelVertices(
-    const void* vertexData, size_t vertexDataBytes,
-    const void* indexData, size_t indexDataBytes) {
+static bool getVisibleArea(const QPixmap* pixMap, QRect& rect) {
+    if (!pixMap)
+        return false;
 
-    if (vertexDataBytes == 0) return;
-
-    mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
-    mGLES2->glBufferData(GL_ARRAY_BUFFER,
-                         vertexDataBytes,
-                         vertexData,
-                         GL_STATIC_DRAW);
-    mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
-    mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                         indexDataBytes,
-                         indexData,
-                         GL_STATIC_DRAW);
-    mElementsCount = indexDataBytes / sizeof(uint32_t);
+    const QBitmap bitMap = pixMap->mask();
+    QImage bitImage = bitMap.toImage();
+    int topVisible = -1;
+    for (int row = 0; row < bitImage.height() && topVisible < 0; row++) {
+        for (int col = 0; col < bitImage.width(); col++) {
+            if (bitImage.pixelColor(col, row) != Qt::color0) {
+                topVisible = row;
+                break;
+            }
+        }
+    }
+    if (topVisible < 0) {
+        return false;
+    }
+    int bottomVisible = -1;
+    for (int row = bitImage.height() - 1; row >= 0 && bottomVisible < 0;
+         row--) {
+        for (int col = 0; col < bitImage.width(); col++) {
+            if (bitImage.pixelColor(col, row) != Qt::color0) {
+                bottomVisible = row;
+                break;
+            }
+        }
+    }
+    if (bottomVisible < 0) {
+        return false;
+    }
+    int leftVisible = -1;
+    for (int col = 0; col < bitImage.width() && leftVisible < 0; col++) {
+        for (int row = 0; row < bitImage.height(); row++) {
+            if (bitImage.pixelColor(col, row) != Qt::color0) {
+                leftVisible = col;
+                break;
+            }
+        }
+    }
+    if (leftVisible < 0) {
+        return false;
+    }
+    int rightVisible = -1;
+    for (int col = bitImage.width() - 1; col >= 0 && rightVisible < 0; col--) {
+        for (int row = 0; row < bitImage.height(); row++) {
+            if (bitImage.pixelColor(col, row) != Qt::color0) {
+                rightVisible = col;
+                break;
+            }
+        }
+    }
+    if (rightVisible < 0) {
+        return false;
+    }
+    rect.setRect(leftVisible, topVisible, rightVisible - leftVisible,
+                 bottomVisible - topVisible);
+    return true;
 }
 
-std::pair<
-    std::vector<float>,
-    std::vector<uint32_t>>
-Device3DWidget::generateModelVerticesFromFoldableState(const FoldableState& state) {
-
-    // TODO: Generalize
-    // Assume split 0.5 for now, with 1 hinge
-    if (state.config.numHinges < 1) return {};
-
-    float hingeRadians = state.currentHingeDegrees[0] * M_PI / 180.0f;
-
-    float swingy = cos(hingeRadians - M_PI);
-    float swingz = sin(hingeRadians - M_PI);
-
-    float swingyn = cos(hingeRadians - M_PI * 0.5f);
-    float swingzn = sin(hingeRadians - M_PI * 0.5f);
-
-    std::vector<float> attribs = {
-        -1.0, -1.0, 0.0,   0.0, 0.0, 1.0,  0.0, 0.0, // 0
-        +1.0, -1.0, 0.0,   0.0, 0.0, 1.0,  1.0, 0.0, // 1
-        // Hinge, attached to non-swinging part
-        -1.0, 0.0, 0.0,   0.0, 0.0, 1.0,  0.0, 0.5, // 2
-        +1.0, 0.0, 0.0,   0.0, 0.0, 1.0,  1.0, 0.5, // 3
-        // Hinge, attached to swinging part
-        -1.0, 0.0, 0.0,   0.0, swingyn, swingzn,  0.0, 0.5, // 4
-        +1.0, 0.0, 0.0,   0.0, swingyn, swingzn,  1.0, 0.5, // 5
-        // Swinging part
-        +1.0, 1.0, 0.0,   0.0, swingyn, swingzn,  1.0, 1.0, // 6
-        -1.0, 1.0, 0.0,   0.0, swingyn, swingzn,  0.0, 1.0, // 7
-    };
-
-    // Size it to the aspect ratio
-    float aspect =
-        (float)(android_hw->hw_lcd_width) /
-        (float)(android_hw->hw_lcd_height);
-
-    float yheight = 1.0f;
-
-    // TODO: Remove hacky computation for the swung-out part
-    for (size_t i = 0; i < attribs.size(); ++i) {
-        if (i % 8 == 1) {
-            attribs[i] *= 1.0f / aspect;
-        }
-        if (i % 8 < 4) {
-            attribs[i] *= 2.0f;
-        }
-
-        if (i >= 6 * 8 && i < 8 * 8) {
-            if (i % 8 == 1) {
-                yheight = attribs[i];
-            }
+GLuint Device3DWidget::createSkinTexture() {
+    const QPixmap* pixMap = EmulatorQtWindow::getInstance()->getRawSkinPixmap();
+    if (pixMap != nullptr) {
+        QRect rect;
+        if (getVisibleArea(pixMap, rect)) {
+            QImage image = pixMap->copy(rect).toImage();
+            GLuint texture = 0;
+            mGLES2->glGenTextures(1, &texture);
+            mGLES2->glBindTexture(GL_TEXTURE_2D, texture);
+            mGLES2->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(),
+                                 image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                                 image.bits());
+            mGLES2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                                    GL_LINEAR);
+            mGLES2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                                    GL_LINEAR);
+            mGLES2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                                    GL_CLAMP_TO_EDGE);
+            mGLES2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+                                    GL_CLAMP_TO_EDGE);
+            return texture;
         }
     }
+    return create2DTexture(mGLES2, nullptr, GL_TEXTURE_2D, GL_RGBA);
+}
 
-    for (size_t i = 0; i < attribs.size(); ++i) {
-        if (i >= 6 * 8 && i < 8 * 8) {
-
-            if (i % 8 == 2) {
-                attribs[i] = sin(hingeRadians - M_PI) * yheight;
-            }
-            if (i % 8 == 1) {
-                attribs[i] = cos(hingeRadians - M_PI) * yheight;
-            }
+bool Device3DWidget::initTextures() {
+    if (mUseAbstractDevice) {
+        mSpecularMap = create2DTexture(mGLES2, nullptr, GL_TEXTURE_2D, GL_RGBA,
+                                       GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE,
+                                       GL_CLAMP_TO_EDGE, 0xff2f2f2f);
+        mDiffuseMap = create2DTexture(mGLES2, nullptr, GL_TEXTURE_2D, GL_RGBA,
+                                      GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE,
+                                      GL_CLAMP_TO_EDGE, 0xff2f2f2f);
+        if (!mSpecularMap || !mDiffuseMap) {
+            return false;
         }
+    } else {
+        // Create textures.
+        mDiffuseMap = create2DTexture(mGLES2, ":/phone-model/diffuse-map.png",
+                                      GL_TEXTURE_2D, GL_RGBA,
+                                      GL_LINEAR_MIPMAP_LINEAR);
+        mSpecularMap = create2DTexture(mGLES2, ":/phone-model/specular-map.png",
+                                       GL_TEXTURE_2D, GL_LUMINANCE);
+        mGlossMap = create2DTexture(mGLES2, ":/phone-model/gloss-map.png",
+                                    GL_TEXTURE_2D, GL_LUMINANCE);
 
+        if (!mDiffuseMap || !mSpecularMap || !mGlossMap) {
+            return false;
+        }
+        mGLES2->glGenTextures(1, &mEnvMap);
+        mGLES2->glBindTexture(GL_TEXTURE_CUBE_MAP, mEnvMap);
+        loadTexture(mGLES2, ":/phone-model/env-map-front.png",
+                    GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_RGBA);
+        loadTexture(mGLES2, ":/phone-model/env-map-back.png",
+                    GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, GL_RGBA);
+        loadTexture(mGLES2, ":/phone-model/env-map-right.png",
+                    GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_RGBA);
+        loadTexture(mGLES2, ":/phone-model/env-map-left.png",
+                    GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_RGBA);
+        loadTexture(mGLES2, ":/phone-model/env-map-top.png",
+                    GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_RGBA);
+        loadTexture(mGLES2, ":/phone-model/env-map-bottom.png",
+                    GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_RGBA);
+        mGLES2->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER,
+                                GL_LINEAR_MIPMAP_LINEAR);
+        mGLES2->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER,
+                                GL_LINEAR);
+        mGLES2->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S,
+                                GL_CLAMP_TO_EDGE);
+        mGLES2->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T,
+                                GL_CLAMP_TO_EDGE);
+        mGLES2->glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+        CHECK_GL_ERROR_RETURN("Failed to initialize cubemap", false);
     }
-
-    std::vector<uint32_t> indices = {
-        0, 1, 2,
-        1, 3, 2,
-        4, 5, 7,
-        7, 6, 5,
-    };
-
-    return {attribs, indices};
+    return true;
 }
 
 void Device3DWidget::resizeGL(int w, int h) {
@@ -503,12 +594,12 @@ void Device3DWidget::resizeGL(int w, int h) {
 
     float aspect_ratio = static_cast<float>(w) / static_cast<float>(h);
     float min_move_aspect_ratio = (MaxX - MinX) / (MaxY - MinY);
-    float plane_width = aspect_ratio > min_move_aspect_ratio ?
-            (MaxY - MinY) * aspect_ratio :
-            MaxX - MinY;
-    float plane_height = aspect_ratio > min_move_aspect_ratio ?
-            MaxY - MinY :
-            (MaxX - MinX) / min_move_aspect_ratio;
+    float plane_width = aspect_ratio > min_move_aspect_ratio
+                                ? (MaxY - MinY) * aspect_ratio
+                                : MaxX - MinY;
+    float plane_height = aspect_ratio > min_move_aspect_ratio
+                                 ? MaxY - MinY
+                                 : (MaxX - MinX) / min_move_aspect_ratio;
 
     // Moving the phone should not clip the near/far planes.  Note that the
     // camera is looking in the -z direction so MinZ is the farthest the phone
@@ -517,13 +608,12 @@ void Device3DWidget::resizeGL(int w, int h) {
     assert(FarClip > CameraDistance - MinZ);
 
     // Recompute the perspective projection transform.
-    mPerspective = glm::frustum(
-            -plane_width * NearClip / (2.0f * CameraDistance),
-            plane_width * NearClip / (2.0f * CameraDistance),
-            -plane_height * NearClip / (2.0f * CameraDistance),
-            plane_height * NearClip / (2.0f * CameraDistance),
-            NearClip,
-            FarClip);
+    mPerspective =
+            glm::frustum(-plane_width * NearClip / (2.0f * CameraDistance),
+                         plane_width * NearClip / (2.0f * CameraDistance),
+                         -plane_height * NearClip / (2.0f * CameraDistance),
+                         plane_height * NearClip / (2.0f * CameraDistance),
+                         NearClip, FarClip);
     mPerspectiveInverse = glm::inverse(mPerspective);
 }
 
@@ -555,18 +645,6 @@ void Device3DWidget::repaintGL() {
         rotation = glm::mat4(fromEulerAnglesXYZ(glm::radians(eulerDegrees)));
     }
 
-    // Upload new vertex data from foldable state, if necessary
-    if (mUseAbstractDevice) {
-        if (memcmp(&mCachedFoldableState, mCurrentFoldableStatePtr, sizeof(FoldableState))) {
-            mCachedFoldableState = *mCurrentFoldableStatePtr;
-            std::pair<std::vector<float>, std::vector<uint32_t>> newData = 
-                generateModelVerticesFromFoldableState(mCachedFoldableState);
-            updateModelVertices(
-                newData.first.data(), newData.first.size() * sizeof(float),
-                newData.second.data(), newData.second.size() * sizeof(uint32_t));
-        }
-    }
-
     if (mOperationMode == OperationMode::Rotate &&
         quaternionNearEqual(mLastTargetRotation, mTargetRotation)) {
         rotation = glm::mat4_cast(mLastTargetRotation);
@@ -575,92 +653,285 @@ void Device3DWidget::repaintGL() {
         position = mLastTargetPosition;
     }
 
-    // Recompute the model transformation matrix using the given rotations.
-    const glm::mat4 model_transform =
-            glm::translate(glm::mat4(), position) * rotation;
-    const glm::mat4 model_view_transform =
-            mCameraTransform * model_transform;
-
-    // Normals need to be transformed using the inverse transpose of modelview matrix.
-    glm::mat4 normal_transform = glm::transpose(glm::inverse(model_view_transform));
-
-    // Recompute the model-view-projection matrix using the new model transform.
-    glm::mat4 model_view_projection = mPerspective * model_view_transform;
-
     // Give the new MVP matrix to the shader.
     mGLES2->glUseProgram(mProgram);
+    GLint mv_matrix_uniform =
+            mGLES2->glGetUniformLocation(mProgram, "model_view");
+    GLint mvit_matrix_uniform = mGLES2->glGetUniformLocation(
+            mProgram, "model_view_inverse_transpose");
+    GLint mvp_matrix_uniform =
+            mGLES2->glGetUniformLocation(mProgram, "model_view_projection");
+    GLint no_light_uniform = mGLES2->glGetUniformLocation(mProgram, "no_light");
+    mGLES2->glUniform1f(no_light_uniform, 0.0f);
 
-    // Upload matrices.
-    GLuint mv_matrix_uniform = mGLES2->glGetUniformLocation(mProgram, "model_view");
-    mGLES2->glUniformMatrix4fv(mv_matrix_uniform, 1, GL_FALSE, &model_view_transform[0][0]);
-
-    GLuint mvit_matrix_uniform = mGLES2->glGetUniformLocation(mProgram, "model_view_inverse_transpose");
-    mGLES2->glUniformMatrix4fv(mvit_matrix_uniform, 1, GL_FALSE, &normal_transform[0][0]);
-
-    GLuint mvp_matrix_uniform = mGLES2->glGetUniformLocation(mProgram, "model_view_projection");
-    mGLES2->glUniformMatrix4fv(mvp_matrix_uniform, 1, GL_FALSE, &model_view_projection[0][0]);
-
-    // Set textures.
-    mGLES2->glActiveTexture(GL_TEXTURE0);
-    mGLES2->glBindTexture(GL_TEXTURE_2D, mDiffuseMap);
-
-    // Replace the current diffuse map w/ screen contents
-    // if we are using the abstract device
     if (mUseAbstractDevice) {
+        glm::mat4 rotateLocal =
+                (mCurrentFoldableStatePtr->config.hingesType ==
+                 ANDROID_FOLDABLE_HORIZONTAL_SPLIT)
+                        ? glm::mat4()
+                        : glm::rotate(glm::mat4(), glm::radians(90.0f),
+                                      glm::vec3(0.0, 0.0, 1.0));
+        if (memcmp(&mCachedFoldableState, mCurrentFoldableStatePtr,
+                   sizeof(FoldableState))) {
+            mCachedFoldableState = *mCurrentFoldableStatePtr;
+
+            for (int32_t i = 0, j = 0; i < mDisplaySegments.size(); i++) {
+                if (mDisplaySegments[i].isHinge) {
+                    mDisplaySegments[i].hingeAngle =
+                            180 -
+                            mCurrentFoldableStatePtr->currentHingeDegrees[j++];
+                } else {
+                    mDisplaySegments[i].hingeAngle = 0;
+                }
+            }
+
+            // Calculate transform matrix for folding each segment
+            for (int32_t i = mCenterIndex - 1; i >= 0; i--) {
+                mDisplaySegments[i].rotate = mDisplaySegments[i + 1].rotate +
+                                             mDisplaySegments[i].hingeAngle;
+                if (mDisplaySegments[i].hingeAngle >= 0) {
+                    glm::vec4 v = mDisplaySegments[i + 1].hingeModelTransfrom *
+                                  glm::vec4(0.0,
+                                            (mDisplaySegments[i + 1].t -
+                                             mDisplaySegments[i + 1].b) *
+                                                    mFactor,
+                                            0.0, 1.0);
+                    glm::mat4 translate = glm::translate(
+                            glm::mat4(), glm::vec3(v.x, v.y, v.z));
+                    mDisplaySegments[i].hingeModelTransfrom = glm::rotate(
+                            translate,
+                            glm::radians(float(mDisplaySegments[i].rotate)),
+                            glm::vec3(1.0, 0.0, 0.0));
+                } else {
+                    glm::vec4 v = mDisplaySegments[i + 1].hingeModelTransfrom *
+                                  glm::vec4(0.0,
+                                            (mDisplaySegments[i + 1].t -
+                                             mDisplaySegments[i + 1].b) *
+                                                    mFactor,
+                                            -mDepth, 1.0);
+                    glm::mat4 translate = glm::translate(
+                            glm::mat4(), glm::vec3(v.x, v.y, v.z));
+                    glm::mat4 rotate = glm::rotate(
+                            translate,
+                            glm::radians(float(mDisplaySegments[i].rotate)),
+                            glm::vec3(1.0, 0.0, 0.0));
+                    mDisplaySegments[i].hingeModelTransfrom =
+                            glm::translate(rotate, glm::vec3(0.0, 0.0, mDepth));
+                }
+            }
+
+            for (int32_t i = mCenterIndex + 1; i < mDisplaySegments.size();
+                 i++) {
+                mDisplaySegments[i].rotate = mDisplaySegments[i - 1].rotate +
+                                             mDisplaySegments[i].hingeAngle;
+                if (mDisplaySegments[i].hingeAngle >= 0) {
+                    glm::vec4 v =
+                            (i == mCenterIndex + 1)
+                                    ? mDisplaySegments[i - 1]
+                                                      .hingeModelTransfrom *
+                                              glm::vec4(0.0, 0.0, 0.0, 1.0)
+                                    : mDisplaySegments[i - 1]
+                                                      .hingeModelTransfrom *
+                                              glm::vec4(0.0,
+                                                        (mDisplaySegments[i - 1]
+                                                                 .b -
+                                                         mDisplaySegments[i - 1]
+                                                                 .t) *
+                                                                mFactor,
+                                                        0.0, 1.0);
+                    glm::mat4 translate = glm::translate(
+                            glm::mat4(), glm::vec3(v.x, v.y, v.z));
+                    mDisplaySegments[i].hingeModelTransfrom = glm::rotate(
+                            translate,
+                            glm::radians(float(mDisplaySegments[i].rotate)),
+                            glm::vec3(-1.0, 0.0, 0.0));
+                } else {
+                    glm::vec4 v =
+                            (i == mCenterIndex + 1)
+                                    ? mDisplaySegments[i - 1]
+                                                      .hingeModelTransfrom *
+                                              glm::vec4(0.0, 0.0, -mDepth, 1.0)
+                                    : mDisplaySegments[i - 1]
+                                                      .hingeModelTransfrom *
+                                              glm::vec4(0.0,
+                                                        (mDisplaySegments[i - 1]
+                                                                 .b -
+                                                         mDisplaySegments[i - 1]
+                                                                 .t) *
+                                                                mFactor,
+                                                        -mDepth, 1.0);
+                    glm::mat4 translate = glm::translate(
+                            glm::mat4(), glm::vec3(v.x, v.y, v.z));
+                    glm::mat4 rotate = glm::rotate(
+                            translate,
+                            glm::radians(float(mDisplaySegments[i].rotate)),
+                            glm::vec3(-1.0, 0.0, 0.0));
+                    mDisplaySegments[i].hingeModelTransfrom =
+                            glm::translate(rotate, glm::vec3(0.0, 0.0, mDepth));
+                }
+            }
+        }
+        mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
+        mGLES2->glEnableVertexAttribArray(mVertexPositionAttribute);
+        mGLES2->glEnableVertexAttribArray(mVertexNormalAttribute);
+        mGLES2->glEnableVertexAttribArray(mVertexUVAttribute);
+        mGLES2->glVertexAttribPointer(mVertexPositionAttribute, 3, GL_FLOAT,
+                                      GL_FALSE, sizeof(float) * 8, 0);
+        mGLES2->glVertexAttribPointer(mVertexNormalAttribute, 3, GL_FLOAT,
+                                      GL_FALSE, sizeof(float) * 8,
+                                      (void*)(sizeof(float) * 3));
+        mGLES2->glVertexAttribPointer(mVertexUVAttribute, 2, GL_FLOAT, GL_FALSE,
+                                      sizeof(float) * 8,
+                                      (void*)(sizeof(float) * 6));
+        mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
+        mGLES2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Draw 5 non-front sides of each display segment cuboid
+        mGLES2->glActiveTexture(GL_TEXTURE0);
+        mGLES2->glBindTexture(GL_TEXTURE_2D, mSpecularMap);
+        GLuint diffuse_map_uniform =
+                mGLES2->glGetUniformLocation(mProgram, "diffuse_map");
+        mGLES2->glUniform1i(diffuse_map_uniform, 0);
+        uint32_t i = 0;
+        for (auto iter : mDisplaySegments) {
+            if (iter.t == iter.b) {
+                continue;
+            }
+            const glm::mat4 model_transform =
+                    glm::translate(glm::mat4(), position) * rotation *
+                    rotateLocal * iter.hingeModelTransfrom;
+            const glm::mat4 model_view_transform =
+                    mCameraTransform * model_transform;
+            glm::mat4 normal_transform =
+                    glm::transpose(glm::inverse(model_transform));
+            glm::mat4 model_view_projection =
+                    mPerspective * model_view_transform;
+            mGLES2->glUniformMatrix4fv(mv_matrix_uniform, 1, GL_FALSE,
+                                       &model_transform[0][0]);
+            mGLES2->glUniformMatrix4fv(mvit_matrix_uniform, 1, GL_FALSE,
+                                       &normal_transform[0][0]);
+            mGLES2->glUniformMatrix4fv(mvp_matrix_uniform, 1, GL_FALSE,
+                                       &model_view_projection[0][0]);
+            if (iter.isHinge) {
+                mGLES2->glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,
+                                       (void*)(i * 36 * sizeof(GLuint)));
+            } else {
+                mGLES2->glDrawElements(GL_TRIANGLES, 30, GL_UNSIGNED_INT,
+                                       (void*)((i * 36 + 6) * sizeof(GLuint)));
+            }
+            i++;
+        }
+
+        // Draw front side (android display) of each display segment
+        mGLES2->glActiveTexture(GL_TEXTURE0);
+        mGLES2->glBindTexture(GL_TEXTURE_2D, mDiffuseMap);
         struct AndroidVirtioGpuOps* ops = android_getVirtioGpuOps();
         ops->bind_color_buffer_to_texture(ops->get_last_posted_color_buffer());
-    }
-
-    mGLES2->glActiveTexture(GL_TEXTURE1);
-    mGLES2->glBindTexture(GL_TEXTURE_2D, mSpecularMap);
-    mGLES2->glActiveTexture(GL_TEXTURE2);
-    mGLES2->glBindTexture(GL_TEXTURE_2D, mGlossMap);
-    mGLES2->glActiveTexture(GL_TEXTURE3);
-    mGLES2->glBindTexture(GL_TEXTURE_CUBE_MAP, mEnvMap);
-
-    GLuint diffuse_map_uniform = mGLES2->glGetUniformLocation(mProgram, "diffuse_map");
-    mGLES2->glUniform1i(diffuse_map_uniform, 0);
-    GLuint specular_map_uniform = mGLES2->glGetUniformLocation(mProgram, "specular_map");
-    mGLES2->glUniform1i(specular_map_uniform, 1);
-    GLuint gloss_map_uniform = mGLES2->glGetUniformLocation(mProgram, "gloss_map");
-    mGLES2->glUniform1i(gloss_map_uniform, 2);
-    GLuint env_map_uniform = mGLES2->glGetUniformLocation(mProgram, "env_map");
-    mGLES2->glUniform1i(env_map_uniform, 3);
-    GLuint no_light_uniform = mGLES2->glGetUniformLocation(mProgram, "no_light");
-    if (mUseAbstractDevice) {
-        mGLES2->glUniform1f(no_light_uniform, 1.0f);
+        i = 0;
+        for (auto iter : mDisplaySegments) {
+            if (iter.t == iter.b) {
+                continue;
+            }
+            if (iter.isHinge) {
+                i++;
+                continue;
+            }
+            const glm::mat4 model_transform =
+                    glm::translate(glm::mat4(), position) * rotation *
+                    rotateLocal * iter.hingeModelTransfrom;
+            const glm::mat4 model_view_transform =
+                    mCameraTransform * model_transform;
+            glm::mat4 normal_transform =
+                    glm::transpose(glm::inverse(model_transform));
+            glm::mat4 model_view_projection =
+                    mPerspective * model_view_transform;
+            mGLES2->glUniformMatrix4fv(mv_matrix_uniform, 1, GL_FALSE,
+                                       &model_transform[0][0]);
+            mGLES2->glUniformMatrix4fv(mvit_matrix_uniform, 1, GL_FALSE,
+                                       &normal_transform[0][0]);
+            mGLES2->glUniformMatrix4fv(mvp_matrix_uniform, 1, GL_FALSE,
+                                       &model_view_projection[0][0]);
+            mGLES2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
+                                   (void*)(i * 36 * sizeof(GLuint)));
+            i++;
+        }
     } else {
-        mGLES2->glUniform1f(no_light_uniform, 0.0f);
+        // Recompute the model transformation matrix using the given rotations.
+        const glm::mat4 model_transform =
+                glm::translate(glm::mat4(), position) * rotation;
+        const glm::mat4 model_view_transform =
+                mCameraTransform * model_transform;
+
+        // Normals need to be transformed using the inverse transpose of
+        // modelview matrix.
+        glm::mat4 normal_transform =
+                glm::transpose(glm::inverse(model_view_transform));
+
+        // Recompute the model-view-projection matrix using the new model
+        // transform.
+        glm::mat4 model_view_projection = mPerspective * model_view_transform;
+
+        // Upload matrices.
+        GLuint mv_matrix_uniform =
+                mGLES2->glGetUniformLocation(mProgram, "model_view");
+        mGLES2->glUniformMatrix4fv(mv_matrix_uniform, 1, GL_FALSE,
+                                   &model_view_transform[0][0]);
+
+        GLuint mvit_matrix_uniform = mGLES2->glGetUniformLocation(
+                mProgram, "model_view_inverse_transpose");
+        mGLES2->glUniformMatrix4fv(mvit_matrix_uniform, 1, GL_FALSE,
+                                   &normal_transform[0][0]);
+
+        GLuint mvp_matrix_uniform =
+                mGLES2->glGetUniformLocation(mProgram, "model_view_projection");
+        mGLES2->glUniformMatrix4fv(mvp_matrix_uniform, 1, GL_FALSE,
+                                   &model_view_projection[0][0]);
+
+        // Set textures.
+        mGLES2->glActiveTexture(GL_TEXTURE0);
+        mGLES2->glBindTexture(GL_TEXTURE_2D, mDiffuseMap);
+        mGLES2->glActiveTexture(GL_TEXTURE1);
+        mGLES2->glBindTexture(GL_TEXTURE_2D, mSpecularMap);
+        mGLES2->glActiveTexture(GL_TEXTURE2);
+        mGLES2->glBindTexture(GL_TEXTURE_2D, mGlossMap);
+        mGLES2->glActiveTexture(GL_TEXTURE3);
+        mGLES2->glBindTexture(GL_TEXTURE_CUBE_MAP, mEnvMap);
+
+        GLuint diffuse_map_uniform =
+                mGLES2->glGetUniformLocation(mProgram, "diffuse_map");
+        mGLES2->glUniform1i(diffuse_map_uniform, 0);
+        GLuint specular_map_uniform =
+                mGLES2->glGetUniformLocation(mProgram, "specular_map");
+        mGLES2->glUniform1i(specular_map_uniform, 1);
+        GLuint gloss_map_uniform =
+                mGLES2->glGetUniformLocation(mProgram, "gloss_map");
+        mGLES2->glUniform1i(gloss_map_uniform, 2);
+        GLuint env_map_uniform =
+                mGLES2->glGetUniformLocation(mProgram, "env_map");
+        mGLES2->glUniform1i(env_map_uniform, 3);
+        GLuint no_light_uniform =
+                mGLES2->glGetUniformLocation(mProgram, "no_light");
+
+        // Set up attribute pointers.
+        mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
+        mGLES2->glEnableVertexAttribArray(mVertexPositionAttribute);
+        mGLES2->glEnableVertexAttribArray(mVertexNormalAttribute);
+        mGLES2->glEnableVertexAttribArray(mVertexUVAttribute);
+        mGLES2->glVertexAttribPointer(mVertexPositionAttribute, 3, GL_FLOAT,
+                                      GL_FALSE, sizeof(float) * 8, 0);
+        mGLES2->glVertexAttribPointer(mVertexNormalAttribute, 3, GL_FLOAT,
+                                      GL_FALSE, sizeof(float) * 8,
+                                      (void*)(sizeof(float) * 3));
+        mGLES2->glVertexAttribPointer(mVertexUVAttribute, 2, GL_FLOAT, GL_FALSE,
+                                      sizeof(float) * 8,
+                                      (void*)(sizeof(float) * 6));
+        mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
+
+        // Draw the model.
+        mGLES2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        mGLES2->glDrawElements(GL_TRIANGLES, mElementsCount, GL_UNSIGNED_INT,
+                               0);
     }
-
-    // Set up attribute pointers.
-    mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
-    mGLES2->glEnableVertexAttribArray(mVertexPositionAttribute);
-    mGLES2->glEnableVertexAttribArray(mVertexNormalAttribute);
-    mGLES2->glEnableVertexAttribArray(mVertexUVAttribute);
-    mGLES2->glVertexAttribPointer(mVertexPositionAttribute,
-                                  3,
-                                  GL_FLOAT,
-                                  GL_FALSE,
-                                  sizeof(float) * 8,
-                                  0);
-    mGLES2->glVertexAttribPointer(mVertexNormalAttribute,
-                                  3,
-                                  GL_FLOAT,
-                                  GL_FALSE,
-                                  sizeof(float) * 8,
-                                  (void*)(sizeof(float) * 3));
-    mGLES2->glVertexAttribPointer(mVertexUVAttribute,
-                                  2,
-                                  GL_FLOAT,
-                                  GL_FALSE,
-                                  sizeof(float) * 8,
-                                  (void*)(sizeof(float) * 6));
-    mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
-
-    // Draw the model.
-    mGLES2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    mGLES2->glDrawElements(GL_TRIANGLES, mElementsCount, GL_UNSIGNED_INT, 0);
 }
 
 static float clamp(float a, float b, float x) {
@@ -672,9 +943,9 @@ void Device3DWidget::mouseMoveEvent(QMouseEvent* event) {
         float diff_x = event->x() - mPrevMouseX,
               diff_y = event->y() - mPrevMouseY;
         const glm::quat q = glm::angleAxis(glm::radians(diff_y),
-                                     glm::vec3(1.0f, 0.0f, 0.0f)) *
-                      glm::angleAxis(glm::radians(diff_x),
-                                     glm::vec3(0.0f, 1.0f, 0.0f));
+                                           glm::vec3(1.0f, 0.0f, 0.0f)) *
+                            glm::angleAxis(glm::radians(diff_x),
+                                           glm::vec3(0.0f, 1.0f, 0.0f));
         mTargetRotation = q * mTargetRotation;
         mLastTargetRotation = mTargetRotation;
         renderFrame();
@@ -724,10 +995,9 @@ void Device3DWidget::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 glm::vec3 Device3DWidget::screenToWorldCoordinate(int x, int y) const {
-    const glm::vec4 screenSpace((2.0f * x / static_cast<float>(width())) - 1.0f,
-                  1.0f - (2.0f * y / static_cast<float>(height())),
-                  -1.f,
-                  1.f);
+    const glm::vec4 screenSpace(
+            (2.0f * x / static_cast<float>(width())) - 1.0f,
+            1.0f - (2.0f * y / static_cast<float>(height())), -1.f, 1.f);
 
     // Now, by applying the inverse perspective transform, move vec into camera
     // space.

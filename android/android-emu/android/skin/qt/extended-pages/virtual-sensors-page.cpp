@@ -151,8 +151,9 @@ void VirtualSensorsPage::setupHingeSensorUI() {
     mUi->hinge0Slider->setHidden(true);
     mUi->hinge1Slider->setHidden(true);
     mUi->hinge2Slider->setHidden(true);
-    int yOffset = 90;
+    mUi->accelModeFold->setHidden(true);
     if (android_hw->hw_sensor_hinge) {
+        mUi->accelModeFold->setHidden(false);
         struct FoldableState* foldableState = android_foldable_get_state_ptr();
         switch (foldableState->config.numHinges) {
             case 3:
@@ -164,7 +165,6 @@ void VirtualSensorsPage::setupHingeSensorUI() {
                         foldableState->currentHingeDegrees[2]);
                 mUi->hinge2Label->setHidden(false);
                 mUi->hinge2Slider->setHidden(false);
-                yOffset -= 30;
             case 2:
                 mUi->hinge1Slider->setRange(
                         foldableState->config.hingeParams[1].minDegrees,
@@ -174,7 +174,6 @@ void VirtualSensorsPage::setupHingeSensorUI() {
                         foldableState->currentHingeDegrees[1]);
                 mUi->hinge1Label->setHidden(false);
                 mUi->hinge1Slider->setHidden(false);
-                yOffset -= 30;
             case 1:
                 mUi->hinge0Slider->setRange(
                         foldableState->config.hingeParams[0].minDegrees,
@@ -184,60 +183,8 @@ void VirtualSensorsPage::setupHingeSensorUI() {
                         foldableState->currentHingeDegrees[0]);
                 mUi->hinge0Label->setHidden(false);
                 mUi->hinge0Slider->setHidden(false);
-                yOffset -= 30;
             default:;
         }
-    }
-    // Realign the positions of slider bars for x, y, z, and hinges.
-    QPoint p;
-    switch (yOffset) {
-        case 90:
-            p = mUi->zRotLabel->pos();
-            mUi->zRotLabel->move(p.x(), p.y() + 10);
-            p = mUi->zRotSlider->pos();
-            mUi->zRotSlider->move(p.x(), p.y() + 10);
-            p = mUi->xRotLabel->pos();
-            mUi->xRotLabel->move(p.x(), p.y() + 40);
-            p = mUi->xRotSlider->pos();
-            mUi->xRotSlider->move(p.x(), p.y() + 40);
-            p = mUi->yRotLabel->pos();
-            mUi->yRotLabel->move(p.x(), p.y() + 70);
-            p = mUi->yRotSlider->pos();
-            mUi->yRotSlider->move(p.x(), p.y() + 70);
-            break;
-        case 60:
-            p = mUi->xRotLabel->pos();
-            mUi->xRotLabel->move(p.x(), p.y() + 15);
-            p = mUi->xRotSlider->pos();
-            mUi->xRotSlider->move(p.x(), p.y() + 15);
-            p = mUi->yRotLabel->pos();
-            mUi->yRotLabel->move(p.x(), p.y() + 30);
-            p = mUi->yRotSlider->pos();
-            mUi->yRotSlider->move(p.x(), p.y() + 30);
-            p = mUi->hinge0Label->pos();
-            mUi->hinge0Label->move(p.x(), p.y() + 45);
-            p = mUi->hinge0Slider->pos();
-            mUi->hinge0Slider->move(p.x(), p.y() + 45);
-            break;
-        case 30:
-            p = mUi->xRotLabel->pos();
-            mUi->xRotLabel->move(p.x(), p.y() + 7);
-            p = mUi->xRotSlider->pos();
-            mUi->xRotSlider->move(p.x(), p.y() + 7);
-            p = mUi->yRotLabel->pos();
-            mUi->yRotLabel->move(p.x(), p.y() + 14);
-            p = mUi->yRotSlider->pos();
-            mUi->yRotSlider->move(p.x(), p.y() + 14);
-            p = mUi->hinge0Label->pos();
-            mUi->hinge0Label->move(p.x(), p.y() + 21);
-            p = mUi->hinge0Slider->pos();
-            mUi->hinge0Slider->move(p.x(), p.y() + 21);
-            p = mUi->hinge1Label->pos();
-            mUi->hinge1Label->move(p.x(), p.y() + 28);
-            p = mUi->hinge1Slider->pos();
-            mUi->hinge1Slider->move(p.x(), p.y() + 28);
-            break;
-        default:;
     }
 }
 
@@ -792,6 +739,14 @@ void VirtualSensorsPage::on_accelModeMove_toggled() {
     if (mUi->accelModeMove->isChecked()) {
         mUi->accelWidget->setOperationMode(Device3DWidget::OperationMode::Move);
         mUi->accelerometerSliders->setCurrentIndex(1);
+    }
+}
+
+void VirtualSensorsPage::on_accelModeFold_toggled() {
+    reportVirtualSensorsInteraction();
+    if (mUi->accelModeFold->isChecked()) {
+        mUi->accelWidget->setOperationMode(Device3DWidget::OperationMode::Rotate);
+        mUi->accelerometerSliders->setCurrentIndex(2);
     }
 }
 

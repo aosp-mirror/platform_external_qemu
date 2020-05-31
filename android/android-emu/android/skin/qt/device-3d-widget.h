@@ -22,12 +22,21 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include <vector>
+
 class QMouseEvent;
 class QObject;
 class QWheelEvent;
 class QWidget;
 struct QAndroidSensorsAgent;
 
+struct DisplaySegment {
+    int32_t l, r, t, b;     // left, right, top, bottom
+    bool isHinge;
+    float hingeAngle;
+    float rotate;     // rotation relative to Y axis
+    glm::mat4 hingeModelTransfrom;
+};
 // A widget that displays a 3D model of a device and lets the user
 // manipulate its rotation and position.
 // The changes in rotation and position can be used to
@@ -117,16 +126,12 @@ private:
     bool initProgram();
     bool initModel();
     bool initTextures();
-    void updateModelVertices(
-            const void* vertexData, size_t vertexDataBytes,
-            const void* indexData, size_t indexDataBytes);
-    std::pair<std::vector<float>, std::vector<uint32_t>>
-        generateModelVerticesFromFoldableState(
-            const FoldableState& state);
 
     // Returns the world coordinates of a point on the XY plane
     // that corresponds to the given point on the screen.
     glm::vec3 screenToWorldCoordinate(int x, int y) const;
+    bool initAbstractDeviceModel();
+    GLuint createSkinTexture();
 
     const QAndroidSensorsAgent* mSensorsAgent = nullptr;
 
@@ -165,4 +170,8 @@ private:
     bool mUseAbstractDevice = false;
     struct FoldableState* mCurrentFoldableStatePtr;
     struct FoldableState mCachedFoldableState;
+    std::vector<DisplaySegment> mDisplaySegments;
+    float mFactor;
+    uint32_t mCenterIndex = 0;
+    float mDepth = 0.1;
 };
