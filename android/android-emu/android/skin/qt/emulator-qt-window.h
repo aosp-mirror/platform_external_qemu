@@ -285,6 +285,7 @@ public:
                                    uint32_t dpi, uint32_t flag);
     void updateUIMultiDisplayPage(uint32_t id);
     void setUIDisplayRegion(int x, int y, int w, int h);
+    const QPixmap* getRawSkinPixmap() { getSkinPixmap(); return mRawSkinPixmap; }
 
     static bool sClosed;
 

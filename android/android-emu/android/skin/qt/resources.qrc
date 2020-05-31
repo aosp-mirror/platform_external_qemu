@@ -333,6 +333,7 @@
         <file alias="env-map-top.png">phone-model/env-map-top.png</file>
         <file alias="diffuse-map.png">phone-model/model-diffuse-map.png</file>
         <file alias="frag.glsl">phone-model/frag.glsl</file>
+        <file alias="frag-abstract-device.glsl">phone-model/frag-abstract-device.glsl</file>
         <file alias="vert.glsl">phone-model/vert.glsl</file>
     </qresource>
     <qresource prefix="/virtualscene">

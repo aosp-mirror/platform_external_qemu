@@ -9,28 +9,39 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/hw-sensors.h"
+
 #include <gtest/gtest.h>
 
-#include "android/hw-sensors.h"
 #include "android/globals.h"
 
 TEST(Hw_sensors, android_foldable_initialize) {
     static const struct FoldableState* ret;
 
-    android_hw->hw_sensor_hinge =  true;
+    android_hw->hw_sensor_hinge = true;
     android_hw->hw_sensor_hinge_count = 2;
     android_hw->hw_sensor_hinge_type = 0;
     android_hw->hw_sensor_hinge_ranges = (char*)"45- 360, 0-180";
     android_hw->hw_sensor_hinge_defaults = (char*)"180,90";
+    android_hw->hw_sensor_hinge_areas = (char*)"0-600-1260-10, 0-1200-1260-10";
     ret = android_foldable_initialize(nullptr);
 
     EXPECT_EQ(180, ret->currentHingeDegrees[0]);
     EXPECT_EQ(90, ret->currentHingeDegrees[1]);
     EXPECT_EQ(2, ret->config.numHinges);
-    EXPECT_EQ(0, ret->config.displayId);
     EXPECT_EQ(ANDROID_FOLDABLE_HORIZONTAL_SPLIT, ret->config.hingesType);
+    EXPECT_EQ(0, ret->config.hingeParams[0].displayId);
+    EXPECT_EQ(0, ret->config.hingeParams[0].x);
+    EXPECT_EQ(600, ret->config.hingeParams[0].y);
+    EXPECT_EQ(1260, ret->config.hingeParams[0].width);
+    EXPECT_EQ(10, ret->config.hingeParams[0].height);
     EXPECT_EQ(45, ret->config.hingeParams[0].minDegrees);
     EXPECT_EQ(360, ret->config.hingeParams[0].maxDegrees);
+    EXPECT_EQ(0, ret->config.hingeParams[1].displayId);
+    EXPECT_EQ(0, ret->config.hingeParams[1].x);
+    EXPECT_EQ(1200, ret->config.hingeParams[1].y);
+    EXPECT_EQ(1260, ret->config.hingeParams[1].width);
+    EXPECT_EQ(10, ret->config.hingeParams[1].height);
     EXPECT_EQ(0, ret->config.hingeParams[1].minDegrees);
     EXPECT_EQ(180, ret->config.hingeParams[1].maxDegrees);
     EXPECT_EQ(180, ret->config.hingeParams[0].defaultDegrees);

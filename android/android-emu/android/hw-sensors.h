@@ -242,7 +242,8 @@ enum FoldableDisplayType {
 };
 
 struct FoldableHingeParameters {
-    float percentAlongDisplay; // % of display height (horiz. hinge) or display width (vertical hinge) where the hinge occurrs
+    int x, y, width, height;
+    int displayId;
     float minDegrees;
     float maxDegrees;
     float defaultDegrees;
@@ -261,7 +262,6 @@ struct FoldableConfig {
     // Display id where the folding occurs.  TODO: account for multiple
     // displays that are related by a hinge, perhaps via folding (heh)
     // displayId into hingeParams
-    int displayId;
 
     // For hinges only
     int numHinges;

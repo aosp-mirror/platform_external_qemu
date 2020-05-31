@@ -12,6 +12,16 @@
 
 #include "android/hw-sensors.h"
 
+#include <assert.h>
+#include <errno.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <string>
+#include <vector>
+
 #include "android/automation/AutomationController.h"
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"
@@ -22,16 +32,6 @@
 #include "android/utils/misc.h"
 #include "android/utils/stream.h"
 #include "android/utils/system.h"
-
-#include <assert.h>
-#include <errno.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <string>
-#include <vector>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -1209,34 +1209,43 @@ FoldableState* android_foldable_initialize(
         }
         struct FoldableConfig defaultConfig = {
                 .hingesType = type,
-                .displayId = 0,
                 .numHinges = numHinge,
         };
         // hinge angle ranges and defaults
         std::string hingeAngleRanges(android_hw->hw_sensor_hinge_ranges);
         std::string hingeAngleDefaults(android_hw->hw_sensor_hinge_defaults);
-        std::vector<std::string> hingeAngleRangeTokens, hingeAngleDefaultTokens;
+        std::string hingeAreas(android_hw->hw_sensor_hinge_areas);
+        std::vector<std::string> hingeAngleRangeTokens, hingeAngleDefaultTokens,
+                hingeAreaTokens;
         if (!parse_for_tokens(hingeAngleRanges, &hingeAngleRangeTokens, ',') ||
             !parse_for_tokens(hingeAngleDefaults, &hingeAngleDefaultTokens,
                               ',') ||
+            !parse_for_tokens(hingeAreas, &hingeAreaTokens, ',') ||
             hingeAngleRangeTokens.size() != numHinge ||
-            hingeAngleDefaultTokens.size() != numHinge) {
-            E("Incorrect hinge angle configs for ranges %s or defaults %s\n",
-                hingeAngleRanges.c_str(), hingeAngleDefaults.c_str());
+            hingeAngleDefaultTokens.size() != numHinge ||
+            hingeAreaTokens.size() != numHinge) {
+            E("Incorrect hinge angle configs for ranges %s, defaults %s, or "
+              "areas\n",
+              hingeAngleRanges.c_str(), hingeAngleDefaults.c_str(),
+              hingeAreas.c_str());
         } else {
             for (int i = 0; i < numHinge; i++) {
-                std::vector<std::string> angleTokens;
-                if (!parse_for_tokens(hingeAngleRangeTokens[i], &angleTokens,
-                                      '-') ||
-                    angleTokens.size() != 2) {
-                    E("Incorrect hinge angle ranges %s\n",
-                      android_hw->hw_sensor_hinge_ranges);
+                std::vector<std::string> angles, area;
+                if (!parse_for_tokens(hingeAngleRangeTokens[i], &angles, '-') ||
+                    !parse_for_tokens(hingeAreaTokens[i], &area, '-') ||
+                    angles.size() != 2 || area.size() != 4) {
+                    E("Incorrect hinge angle range %s or area %s\n",
+                      hingeAngleRangeTokens[i].c_str(),
+                      hingeAreaTokens[i].c_str());
                 } else {
                     defaultConfig.hingeParams[i] = {
-                            .percentAlongDisplay =
-                                    0.5f,  // TODO: calculate from hinge area
-                            .minDegrees = std::stof(angleTokens[0]),
-                            .maxDegrees = std::stof(angleTokens[1]),
+                            .x = std::stoi(area[0]),
+                            .y = std::stoi(area[1]),
+                            .width = std::stoi(area[2]),
+                            .height = std::stoi(area[3]),
+                            .displayId = 0,  // TODO: put 0 for now
+                            .minDegrees = std::stof(angles[0]),
+                            .maxDegrees = std::stof(angles[1]),
                             .defaultDegrees =
                                     std::stof(hingeAngleDefaultTokens[i]),
                     };
@@ -1254,8 +1263,8 @@ FoldableState* android_foldable_initialize(
                     _foldableState->config.hingeParams[i].defaultDegrees;
         }
         android_sensors_override_set(ANDROID_SENSOR_HINGE_ANGLE0 + i,
-                                    _foldableState->currentHingeDegrees[i], 0.0,
-                                    0.0);
+                                     _foldableState->currentHingeDegrees[i],
+                                     0.0, 0.0);
     }
     return _foldableState;
 }
