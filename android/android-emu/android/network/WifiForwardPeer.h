@@ -32,14 +32,14 @@ public:
         size_t offset;
     };
 
-    using OnDataAvailableCallback = std::function<void (const uint8_t* data,
-                                                        size_t size)>;
+    using OnDataAvailableCallback =
+            std::function<size_t(const uint8_t* data, size_t size)>;
 
     explicit WifiForwardPeer(OnDataAvailableCallback onDataAvailable);
     virtual ~WifiForwardPeer() = default;
 
     bool init();
-
+    bool initForTesting(android::base::Looper* looper, int fd);
     void run();
     void stop();
 
@@ -83,6 +83,8 @@ private:
     OnDataAvailableCallback mOnDataAvailable;
 
     std::vector<uint8_t> mReceiveBuffer;
+    size_t mAvailableDataFromPeers = 0;
+
     std::vector<uint8_t> mTransmitBuffer;
     size_t mTransmitQueuePos = 0;
     size_t mTransmitSendPos = 0;

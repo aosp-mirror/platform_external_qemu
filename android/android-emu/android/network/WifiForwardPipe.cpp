@@ -50,9 +50,8 @@ public:
         Service(WifiForwardMode mode, uint16_t port) :
             android::AndroidPipe::Service(kWifiForwardPipeName),
             mPipe(nullptr) {
-
             auto onData = [this](const uint8_t* data, size_t size) {
-                this->onDataAvailable(data, size);
+                return this->onDataAvailable(data, size);
             };
 
             switch (mode) {
@@ -97,9 +96,11 @@ public:
         }
 
     private:
-        void onDataAvailable(const uint8_t* data, size_t size) {
+        size_t onDataAvailable(const uint8_t* data, size_t size) {
             if (mPipe) {
-                mPipe->onDataAvailable(data, size);
+                return mPipe->onDataAvailable(data, size);
+            } else {
+                return 0;
             }
         }
 
@@ -192,8 +193,9 @@ public:
     void onGuestWantWakeOn(int flags) override {
     }
 
-    void onDataAvailable(const uint8_t* data, size_t size) {
+    size_t onDataAvailable(const uint8_t* data, size_t size) {
         android::base::AutoLock lock(mReceiveBufferLock);
+        size_t ret = 0;
         if (mReceivePos >= mForwardPos) {
             // We're receiving at the end of the buffer and possibly at the
             // beginning after that.
@@ -212,6 +214,7 @@ public:
                 // Update source data info for copying to front of buffer
                 data += bytes;
                 size -= bytes;
+                ret += bytes;
             }
         }
         // This conditional might be true after the previous one was true as
@@ -226,11 +229,13 @@ public:
                 mReceivePos = addAndWrap(mReceivePos,
                                          bytes,
                                          mReceiveBuffer.size());
+                ret += bytes;
             }
         }
         mDataAvailable = mForwardPos != mReceivePos;
         lock.unlock();
         signalWake(PIPE_WAKE_READ);
+        return ret;
     }
 
 private:
