@@ -444,7 +444,7 @@ void ExtendedWindow::switchFrameAlways(bool showFrame)
 void ExtendedWindow::switchDisableDeviceFrame(bool disableDeviceFrame)
 {
     if (disableDeviceFrame) {
-        mEmulatorWindow->setNoSkin();
+        mEmulatorWindow->setNoSkin(false /* keep rotation button state */);
     } else {
         mEmulatorWindow->restoreSkin();
     }
