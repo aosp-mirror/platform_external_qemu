@@ -885,10 +885,10 @@ function(android_build_qemu_variant)
       ${qemu_build_EXE}
       PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}"
     )
     android_install_exe(${qemu_build_EXE}
-                        "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
+                        "./qemu/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}")
   endif()
 endfunction()
 

@@ -1038,7 +1038,11 @@ static char* getQemuExecutablePath(const char* progDir,
 #elif defined(_WIN32)
     static const char kHostOs[] = "windows";
 #endif
+#if defined(__aarch64__)
+    const char* hostArch = "aarch64";
+#else
     const char* hostArch = (wantedBitness == 64) ? "x86_64" : "x86";
+#endif
     const char* qemuArch = getQemuArch(avdArch, force64bitTarget);
     if (!qemuArch) {
         APANIC("QEMU2 emulator does not support %s CPU architecture", avdArch);
