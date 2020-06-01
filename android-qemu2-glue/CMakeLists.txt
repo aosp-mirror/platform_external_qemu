@@ -46,12 +46,18 @@ set (android-qemu2-glue_src
     telephony/modem_init.c
     utils/stream.cpp)
 
+if (NOT OPTION_GFXSTREAM_BACKEND)
+    list(APPEND android-qemu2-glue_src
+        "emulation/VirtioWifiForwarder.cpp")
+endif()
+
 android_add_library(
   TARGET libqemu2-glue
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       ${android-qemu2-glue_src}
 )
+
 target_include_directories(
   libqemu2-glue
   PRIVATE .. ../include ../qemu2-auto-generated ../slirp
