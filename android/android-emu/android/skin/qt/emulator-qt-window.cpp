@@ -656,7 +656,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     setFrameAlways(mFrameAlways);
 
-    if (mDisableDeviceFrame) { setNoSkin(); }
+    if (mDisableDeviceFrame) { setNoSkin(false /* keep rotation buttons */); }
 
     mWheelScrollTimer.setInterval(100);
     mWheelScrollTimer.setSingleShot(true);
@@ -2946,8 +2946,8 @@ bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
     return true;
 }
 
-void EmulatorQtWindow::setNoSkin() {
-    runOnUiThread([this]() {
+void EmulatorQtWindow::setNoSkin(bool hideRotationButtons) {
+    runOnUiThread([this, hideRotationButtons]() {
         char *skinName, *skinDir;
         avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
         if (skinDir != NULL) {
@@ -2955,7 +2955,9 @@ void EmulatorQtWindow::setNoSkin() {
             event->type = kEventSetNoSkin;
             queueSkinEvent(event);
         }
-        mToolWindow->hideRotationButton(true);
+        if (hideRotationButtons) {
+            mToolWindow->hideRotationButton(true);
+        }
         setFrameAlways(true);
     });
 }
