@@ -55,6 +55,13 @@ bool WifiForwardPeer::init() {
     return true;
 }
 
+bool WifiForwardPeer::initForTesting(android::base::Looper* looper, int fd) {
+    mLooper = looper;
+    if (!onConnect(fd))
+        return false;
+    return init();
+}
+
 void WifiForwardPeer::run() {
     if (mThread) {
         return;
@@ -70,6 +77,18 @@ void WifiForwardPeer::stop() {
     sendWakeCommand(WakePipeCommand::Quit);
     mThread->join();
     mThread.reset();
+}
+
+const void* WifiForwardPeer::data() const {
+    return mReceiveBuffer.data();
+}
+// The size of the available data from peers.
+size_t WifiForwardPeer::size() const {
+    return mAvailableDataFromPeers;
+}
+
+void WifiForwardPeer::clear() {
+    mAvailableDataFromPeers = 0;
 }
 
 size_t WifiForwardPeer::queue(const uint8_t* data, size_t size) {
@@ -210,12 +229,16 @@ void WifiForwardPeer::onFdEvent(int fd, unsigned events) {
         // Not interested in this event
         return;
     }
-
     // Data available, read it
-    size_t size = receive(mReceiveBuffer.data(), mReceiveBuffer.size());
+    size_t size = mAvailableDataFromPeers;
+    size += receive(mReceiveBuffer.data() + mAvailableDataFromPeers,
+                    mReceiveBuffer.size() - mAvailableDataFromPeers);
 
     if (size > 0) {
-        mOnDataAvailable(mReceiveBuffer.data(), size);
+        size_t consumed = mOnDataAvailable(mReceiveBuffer.data(), size);
+        mAvailableDataFromPeers = size - consumed;
+        memcpy(mReceiveBuffer.data(), mReceiveBuffer.data() + consumed,
+               mAvailableDataFromPeers);
     }
 }
 
