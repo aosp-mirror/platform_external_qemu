@@ -448,7 +448,7 @@ struct iovec {
 
 ssize_t readv(int fd, const struct iovec *iov, int iov_cnt);
 ssize_t writev(int fd, const struct iovec *iov, int iov_cnt);
-#else
+#elif !defined(_WIN32)
 #include <sys/uio.h>
 #endif
 
