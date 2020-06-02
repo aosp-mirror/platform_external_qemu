@@ -71,7 +71,13 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .updateUIMultiDisplayPage =
                 [](uint32_t id) {
                     printf("updateMultiDisplayPage\n");
-                }
+                },
+        .getMonitorRect =
+                [](uint32_t* w, uint32_t* h) {
+                    if (w) *w = 2500;
+                    if (h) *h = 1600;
+                    return true;
+                },
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

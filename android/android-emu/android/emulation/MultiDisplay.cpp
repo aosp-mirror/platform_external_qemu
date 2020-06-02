@@ -40,9 +40,12 @@ MultiDisplay::MultiDisplay(const QAndroidEmulatorWindowAgent* const windowAgent,
     : mWindowAgent(windowAgent),
       mRecordAgent(recordAgent),
       mGuestMode(isGuestMode) {
-    SkinRect monitor;
-    skin_winsys_get_monitor_rect(&monitor);
-    m_monitorAspectRatio = (double) monitor.size.h / (double) monitor.size.w;
+    uint32_t monitorWidth, monitorHeight;
+    if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
+        LOG(ERROR) << "Fail to get monitor width and height";
+    } else {
+        m_monitorAspectRatio = (double) monitorHeight / (double) monitorWidth;
+    }
 }
 
 //static
