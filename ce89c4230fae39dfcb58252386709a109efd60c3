@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "183f698e_2c19a91b",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-06-02T17:10:18Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 579,
+        "startChar": 0,
+        "endLine": 579,
+        "endChar": 8
+      },
+      "revId": "ce89c4230fae39dfcb58252386709a109efd60c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "116521a4_b91f0be9",
+        "filename": "android/android-emu/android/metrics/proto/studio_stats.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 1434,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-06-02T17:10:18Z",
+      "side": 1,
+      "message": "I am wondering if this should be 63 and the next tag should be 64?",
+      "range": {
+        "startLine": 1434,
+        "startChar": 29,
+        "endLine": 1434,
+        "endChar": 31
+      },
+      "revId": "ce89c4230fae39dfcb58252386709a109efd60c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
