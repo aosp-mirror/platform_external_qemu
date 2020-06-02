@@ -5,6 +5,8 @@ prebuilt(FFMPEG)
 set(ANDROID_LIBUI_HEADLESS_SRC_FILES
     # cmake-format: sortable
     android/emulation/control/ScreenCapturer.cpp
+    android/emulation/MultiDisplay.cpp
+    android/emulation/MultiDisplayPipe.cpp
     android/emulator-window.c
     android/gpu_frame.cpp
     android/main-common-ui.c
@@ -12,6 +14,7 @@ set(ANDROID_LIBUI_HEADLESS_SRC_FILES
     android/mp4/MP4Demuxer.cpp
     android/mp4/SensorLocationEventProvider.cpp
     android/mp4/VideoMetadataProvider.cpp
+    android/qemu-setup.cpp
     android/recording/audio/AudioProducer.cpp
     android/recording/codecs/audio/VorbisCodec.cpp
     android/recording/codecs/video/VP9Codec.cpp
@@ -51,6 +54,8 @@ set(ANDROID_LIBUI_HEADLESS_SRC_FILES
 set(ANDROID_LIBUI_SRC_FILES
     # cmake-format: sortable
     android/emulation/control/ScreenCapturer.cpp
+    android/emulation/MultiDisplay.cpp
+    android/emulation/MultiDisplayPipe.cpp
     android/emulator-window.c
     android/gpu_frame.cpp
     android/main-common-ui.c
@@ -58,6 +63,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/mp4/MP4Demuxer.cpp
     android/mp4/SensorLocationEventProvider.cpp
     android/mp4/VideoMetadataProvider.cpp
+    android/qemu-setup.cpp
     android/recording/audio/AudioProducer.cpp
     android/recording/codecs/audio/VorbisCodec.cpp
     android/recording/codecs/video/VP9Codec.cpp
