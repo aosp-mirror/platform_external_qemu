@@ -153,6 +153,14 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         win->updateUIMultiDisplayPage(id);
                     }
+                },
+        .getMonitorRect =
+                [](uint32_t* w, uint32_t* h) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        return win->getMonitorRect(w, h);
+                    } else {
+                        return false;
+                    }
                 }
 };
 
