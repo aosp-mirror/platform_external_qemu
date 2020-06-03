@@ -114,7 +114,6 @@ private:
     bool mGuestMode;
     std::map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mLock;
-    double m_monitorAspectRatio = 1.0;
 
     void recomputeLayoutLocked();
     void getCombinedDisplaySizeLocked(uint32_t* w, uint32_t* h);
