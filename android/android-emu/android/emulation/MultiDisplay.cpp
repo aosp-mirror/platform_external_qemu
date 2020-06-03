@@ -39,14 +39,7 @@ MultiDisplay::MultiDisplay(const QAndroidEmulatorWindowAgent* const windowAgent,
                            bool isGuestMode)
     : mWindowAgent(windowAgent),
       mRecordAgent(recordAgent),
-      mGuestMode(isGuestMode) {
-    uint32_t monitorWidth, monitorHeight;
-    if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
-        LOG(ERROR) << "Fail to get monitor width and height";
-    } else {
-        m_monitorAspectRatio = (double) monitorHeight / (double) monitorWidth;
-    }
-}
+      mGuestMode(isGuestMode) { }
 
 //static
 MultiDisplay* MultiDisplay::getInstance() {
@@ -540,6 +533,13 @@ int MultiDisplay::getNumberActiveMultiDisplaysLocked() {
  * overwrite the specified pos_x/pos_y in setDisplayPos();
  */
 void MultiDisplay::recomputeLayoutLocked() {
+    uint32_t monitorWidth, monitorHeight;
+    double monitorAspectRatio = 1.0;
+    if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
+        LOG(WARNING) << "Fail to get monitor width and height, use default ratio 1.0";
+    } else {
+        monitorAspectRatio = (double) monitorHeight / (double) monitorWidth;
+    }
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
     for (const auto& iter : mMultiDisplay) {
         if (iter.first == 0 || iter.second.cb != 0) {
@@ -548,7 +548,7 @@ void MultiDisplay::recomputeLayoutLocked() {
         }
     }
     for (const auto& iter :
-        android::base::resolveLayout(rectangles, m_monitorAspectRatio)) {
+        android::base::resolveLayout(rectangles, monitorAspectRatio)) {
         mMultiDisplay[iter.first].pos_x = iter.second.first;
         mMultiDisplay[iter.first].pos_y = iter.second.second;
     }
