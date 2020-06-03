@@ -54,6 +54,7 @@ private slots:
     void on_humiditySensorValueWidget_valueChanged(double value);
     void on_accelModeRotate_toggled();
     void on_accelModeMove_toggled();
+    void on_accelModeFold_toggled();
 
     void on_magNorthWidget_valueChanged(double value);
     void on_magEastWidget_valueChanged(double value);
