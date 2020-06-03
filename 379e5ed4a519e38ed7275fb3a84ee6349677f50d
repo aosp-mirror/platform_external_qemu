@@ -46,6 +46,30 @@
       "revId": "379e5ed4a519e38ed7275fb3a84ee6349677f50d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32d78b0b_b03a3a8b",
+        "filename": "android-qemu2-glue/emulation/virtio-input-rotary.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1670692
+      },
+      "writtenOn": "2020-06-03T08:45:50Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "29b599fe_fc0720a9",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 0
+      },
+      "revId": "379e5ed4a519e38ed7275fb3a84ee6349677f50d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
