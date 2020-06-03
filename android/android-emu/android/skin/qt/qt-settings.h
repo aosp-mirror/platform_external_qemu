@@ -41,6 +41,7 @@ constexpr char SHOW_VIRTUALSCENE_INFO[] = "showVirtualSceneInfo";
 #ifdef _WIN32
 constexpr char SHOW_VGK_WARNING[] = "showVgkWarning";
 #endif
+constexpr char SHOW_NESTED_WARNING[] = "showNestedWarning";
 
 // Note: The "set/" here is because these settings are
 //       associated with "settings-page", not because

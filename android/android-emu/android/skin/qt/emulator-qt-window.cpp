@@ -55,6 +55,7 @@
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
+#include "android/utils/x86_cpuid.h"
 #include "android/virtualscene/TextureUtils.h"
 
 #define DEBUG 1
@@ -392,6 +393,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      QMessageBox::Ok,
                      this),
 #endif
+      mNestedWarningBox(QMessageBox::Information,
+                     tr("Emulator Running in Nested Virtualization"),
+                     tr("Emulator is running using nested virtualization. "
+                        "This is not recommended. It may not work at all. "
+                        "And typically the performance is not quite good."),
+                     QMessageBox::Ok,
+                     this),
       mEventLogger(
               std::make_shared<UIEventRecorder<android::base::CircularBuffer>>(
                       &mEventCapturer,
@@ -1832,6 +1840,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
 #ifdef _WIN32
         checkVgkAndWarn();
 #endif
+        checkNestedAndWarn();
         mFirstShowWindowCall = false;
     }
 }
@@ -2826,6 +2835,55 @@ void EmulatorQtWindow::slot_vgkWarningMessageAccepted() {
     }
 }
 #endif
+
+void EmulatorQtWindow::checkNestedAndWarn() {
+    char hv_vendor_id[16] = {};
+    android_get_x86_cpuid_vmhost_vendor_id(hv_vendor_id, sizeof(hv_vendor_id));
+    auto vmhost = android_get_x86_cpuid_vendor_vmhost_type(hv_vendor_id);
+    // Emulator running on native HW
+    if (vmhost == VENDOR_VM_NOTVM) {
+        return;
+    }
+    // Emulator running with software emulation
+    AndroidCpuAccelerator accelerator = androidCpuAcceleration_getAccelerator();
+    if (accelerator == ANDROID_CPU_ACCELERATOR_NONE) {
+        return;
+    }
+    /* Emulator running on hyper-v hypervisor
+     * Typically, when hypervisor is detected, emulator will run nested
+     * virtualization. However, for type-1 hypervisor, detecting hypervisor
+     * could only mean we are on an "admin" guest (or host as is usually
+     * called). In these cases, emulator may actually create a "non-admin"
+     * guest and run with it. This is NOT nested virtualization.
+     *
+     * TODO: Xen??
+     */
+    if (vmhost == VENDOR_VM_HYPERV &&
+        accelerator == ANDROID_CPU_ACCELERATOR_WHPX) {
+        return;
+    }
+
+    QSettings settings;
+    if (settings.value(Ui::Settings::SHOW_NESTED_WARNING, true).toBool()) {
+        QObject::connect(mNestedWarningBox.ptr(),
+                         SIGNAL(buttonClicked(QAbstractButton*)), this,
+                         SLOT(slot_nestedWarningMessageAccepted()));
+
+        QCheckBox* checkbox = new QCheckBox(tr("Never show this again."));
+        checkbox->setCheckState(Qt::Unchecked);
+        mNestedWarningBox->setWindowModality(Qt::NonModal);
+        mNestedWarningBox->setCheckBox(checkbox);
+        mNestedWarningBox->show();
+    }
+}
+
+void EmulatorQtWindow::slot_nestedWarningMessageAccepted() {
+    QCheckBox* checkbox = mNestedWarningBox->checkBox();
+    if (checkbox->checkState() == Qt::Checked) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::SHOW_NESTED_WARNING, false);
+    }
+}
 
 void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     // Hack. Notify the parent container that we're rotating, so it doesn't

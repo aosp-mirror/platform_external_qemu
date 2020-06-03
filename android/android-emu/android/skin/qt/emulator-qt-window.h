@@ -296,6 +296,7 @@ private slots:
 #ifdef _WIN32
     void slot_vgkWarningMessageAccepted();
 #endif
+    void slot_nestedWarningMessageAccepted();
     void slot_blit(SkinSurfaceBitmap* src,
                    QRect srcRect,
                    SkinSurfaceBitmap* dst,
@@ -397,6 +398,7 @@ private:
 #ifdef _WIN32
     void checkVgkAndWarn();
 #endif
+    void checkNestedAndWarn();
 
     bool mouseInside();
     SkinMouseButtonType getSkinMouseButton(QMouseEvent* event) const;
@@ -494,6 +496,7 @@ private:
 #ifdef _WIN32
     OnDemandMessageBox mVgkWarningBox;
 #endif
+    OnDemandMessageBox mNestedWarningBox;
 
     // First-show related warning messages state
     bool mGpuBlacklisted = false;
