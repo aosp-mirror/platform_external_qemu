@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
+#include "android-qemu2-glue/emulation/virtio-input-rotary.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/multitouch-screen.h"
@@ -109,7 +110,11 @@ static void user_event_mouse(int dx,
 static void user_event_rotary(int delta) {
     VERBOSE_PRINT(keys, ">> ROTARY [%d]\n", delta);
 
-    goldfish_rotary_send_rotate(delta);
+    if (feature_is_enabled(kFeature_VirtioInput)) {
+        virtio_send_rotary_event(delta);
+    } else {
+        goldfish_rotary_send_rotate(delta);
+    }
 }
 
 static void on_new_event(void) {
