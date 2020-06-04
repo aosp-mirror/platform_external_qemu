@@ -154,33 +154,41 @@ void VirtualSensorsPage::setupHingeSensorUI() {
     mUi->accelModeFold->setHidden(true);
     if (android_hw->hw_sensor_hinge) {
         mUi->accelModeFold->setHidden(false);
-        struct FoldableState* foldableState = android_foldable_get_state_ptr();
-        switch (foldableState->config.numHinges) {
+        mUi->accelModeFold->setChecked(true);
+        mUi->accelModeRotate->setChecked(false);
+        mUi->accelerometerSliders->setCurrentIndex(2);
+        connect(mUi->posture, SIGNAL(activated(int)),
+                this, SLOT(on_posture_valueChanged(int)));
+        struct FoldableState foldableState = *android_foldable_get_state_ptr();
+        mUi->posture->addItems({"Unknown", "Closed", "Half open", "Open", "Flipped"});
+        mCurrentPosture = foldableState.currentPosture;
+        mUi->posture->setCurrentIndex(foldableState.currentPosture);
+        switch (foldableState.config.numHinges) {
             case 3:
                 mUi->hinge2Slider->setRange(
-                        foldableState->config.hingeParams[2].minDegrees,
-                        foldableState->config.hingeParams[2].maxDegrees, false);
+                        foldableState.config.hingeParams[2].minDegrees,
+                        foldableState.config.hingeParams[2].maxDegrees, false);
                 mUi->hinge2Slider->setSteps(200);
                 mUi->hinge2Slider->setValue(
-                        foldableState->currentHingeDegrees[2]);
+                        foldableState.currentHingeDegrees[2]);
                 mUi->hinge2Label->setHidden(false);
                 mUi->hinge2Slider->setHidden(false);
             case 2:
                 mUi->hinge1Slider->setRange(
-                        foldableState->config.hingeParams[1].minDegrees,
-                        foldableState->config.hingeParams[1].maxDegrees, false);
+                        foldableState.config.hingeParams[1].minDegrees,
+                        foldableState.config.hingeParams[1].maxDegrees, false);
                 mUi->hinge1Slider->setSteps(200);
                 mUi->hinge1Slider->setValue(
-                        foldableState->currentHingeDegrees[1]);
+                        foldableState.currentHingeDegrees[1]);
                 mUi->hinge1Label->setHidden(false);
                 mUi->hinge1Slider->setHidden(false);
             case 1:
                 mUi->hinge0Slider->setRange(
-                        foldableState->config.hingeParams[0].minDegrees,
-                        foldableState->config.hingeParams[0].maxDegrees, false);
+                        foldableState.config.hingeParams[0].minDegrees,
+                        foldableState.config.hingeParams[0].maxDegrees, false);
                 mUi->hinge0Slider->setSteps(200);
                 mUi->hinge0Slider->setValue(
-                        foldableState->currentHingeDegrees[0]);
+                        foldableState.currentHingeDegrees[0]);
                 mUi->hinge0Label->setHidden(false);
                 mUi->hinge0Slider->setHidden(false);
             default:;
@@ -535,6 +543,10 @@ void VirtualSensorsPage::propagateSlidersChange(bool updateHinge, int hingeIndex
                 break;
             default: ;
         }
+        if (mCurrentPosture != android_foldable_get_posture()) {
+            mCurrentPosture = android_foldable_get_posture();
+            mUi->posture->setCurrentIndex(mCurrentPosture);
+        }
     }
 }
 
@@ -748,6 +760,17 @@ void VirtualSensorsPage::on_accelModeFold_toggled() {
         mUi->accelWidget->setOperationMode(Device3DWidget::OperationMode::Rotate);
         mUi->accelerometerSliders->setCurrentIndex(2);
     }
+}
+
+void VirtualSensorsPage::on_posture_valueChanged(int index) {
+    if (mCurrentPosture == (enum FoldablePostures)index) {
+        return;
+    }
+    mCurrentPosture = (enum FoldablePostures)index;
+    android_foldable_set_posture(index);
+    mUi->hinge0Slider->setValue(android_foldable_get_hinge_degrees(0));
+    mUi->hinge1Slider->setValue(android_foldable_get_hinge_degrees(1));
+    mUi->hinge2Slider->setValue(android_foldable_get_hinge_degrees(2));
 }
 
 void VirtualSensorsPage::on_helpMagneticField_clicked() {
