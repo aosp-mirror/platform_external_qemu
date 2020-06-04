@@ -227,9 +227,10 @@ discovery_dir discovery{"HOME", "Library/Caches/TemporaryItems"};
 
 static std::string getAlternativeRoot() {
 #ifdef __linux__
-    auto discovery = PathUtils::pathWithEnvSubstituted("/run/user/${UID}");
-    if (discovery && System::get()->pathExists(*discovery)) {
-        return *discovery;
+    auto uid = getuid();
+    auto discovery = pj("/run/user/", std::to_string(uid));
+    if (System::get()->pathExists(discovery)) {
+        return discovery;
     }
 #endif
 
@@ -242,6 +243,9 @@ std::string ConfigDirs::getDiscoveryDirectory() {
     if (root.empty()) {
         // Reverting to the alternative root if these environment variables do
         // not exist.
+        fprintf(stderr,
+                "WARNING. Using fallback path for the emulator registration "
+                "directory.\n");
         root = getAlternativeRoot();
     } else {
         root = pj(root, discovery.subdir);
