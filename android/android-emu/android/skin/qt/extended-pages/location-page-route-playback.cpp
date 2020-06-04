@@ -37,8 +37,9 @@ void LocationPage::on_loc_playRouteButton_clicked() {
         } else {
             mSavedRoutePlayingItem = nullptr;
         }
-        if (parsePointsFromJson()) {
-            locationPlaybackStart_v2();
+        bool isGpxKml = false;
+        if (parsePointsFromJson(&isGpxKml)) {
+            locationPlaybackStart_v2(isGpxKml);
         }
     }
     ++mPlayRouteCount;
@@ -72,7 +73,7 @@ void LocationPage::playRouteStateChanged(bool stopped) {
     }
 }
 
-bool LocationPage::parsePointsFromJson() {
+bool LocationPage::parsePointsFromJson(bool* isGpxKml) {
     QString jsonString;
     QString titleString;
     QString description;
@@ -113,8 +114,10 @@ bool LocationPage::parsePointsFromJson() {
 
     switch (jsonFormat) {
     case emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS:
+        *isGpxKml = false;
         return parseGoogleMapsJson(routeDoc);
     case emulator_location::RouteMetadata_JsonFormat_GPXKML:
+        *isGpxKml = true;
         return parseGpxKmlJson(routeDoc, description);
     default:
         LOG(ERROR) << "The Json for the route is in an unknown format (" << jsonFormat << ")";
@@ -247,12 +250,18 @@ bool LocationPage::parseGpxKmlJson(const QJsonDocument& jsonDoc,
     mUi->loc_routePlayingTitleItem->setSubtitle(description);
     mUi->loc_routePlayingTitleItem->showFileIcon();
 
-    for (int i = 0; i < pathArray.size(); ++i) {
+    for (size_t i = 0; i < pathArray.size(); ++i) {
         QJsonObject thisPoint = pathArray.at(i).toObject();
         double lat = thisPoint.value("lat").toDouble();
         double lng = thisPoint.value("lng").toDouble();
         double elevation = thisPoint.value("elevation").toDouble();
         double delay_sec = thisPoint.value("delay_sec").toDouble();
+        // Gpx/kml json's delay value is the delay from the first point.
+        // But we want the delay from the previous point.
+        if (i > 0) {
+            QJsonObject prevPoint = pathArray.at(i - 1).toObject();
+            delay_sec -= prevPoint.value("delay_sec").toDouble();
+        }
         mPlaybackElements.push_back({lat, lng, elevation, delay_sec}); // Zero delay for the first point
 
         if (i == 0) {
@@ -278,14 +287,14 @@ bool LocationPage::parseGpxKmlJson(const QJsonDocument& jsonDoc,
     return true;
 }
 
-void LocationPage::locationPlaybackStart_v2()
-{
+void LocationPage::locationPlaybackStart_v2(bool isGpxKml) {
     if (mRouteNumPoints <= 0) {
         mUi->loc_playRouteButton->setText(tr("PLAY ROUTE"));
         mUi->loc_playRouteButton->setEnabled(false);
         return;
     }
 
+    mIsGpxKmlPlayback = isGpxKml;
     mNextRoutePointIdx = 0;
     mSegmentDurationMs = 0.0;
     mMsIntoSegment = mSegmentDurationMs + 1.0; // Force us to advance to the [0,1] segment
@@ -296,7 +305,6 @@ void LocationPage::locationPlaybackStart_v2()
     mTimer.start();
     mNowPlaying = true;
 }
-
 
 // Determine the distance between two locations on earth.
 // All inputs are in degrees.
@@ -336,8 +344,10 @@ double LocationPage::getDistanceMeters(double startLat, double startLng, double 
 
 #else // USE_WEBENGINE
 void LocationPage::on_loc_playRouteButton_clicked() { }
-bool LocationPage::parsePointsFromJson() { return true; }
-void LocationPage::locationPlaybackStart_v2() { }
+bool LocationPage::parsePointsFromJson(bool* isGpxKml) {
+    return true;
+}
+void LocationPage::locationPlaybackStart_v2(bool isGpxKml) { }
 double LocationPage::getDistanceNm(double startLat, double startLng, double endLat, double endLng) { return 0.0; }
 double LocationPage::getDistanceMeters(double startLat, double startLng, double endLat, double endLng) { return 0.0; }
 void LocationPage::playRouteStateChanged(bool stopped) { }
