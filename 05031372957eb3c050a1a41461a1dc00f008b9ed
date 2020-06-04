@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd3786ab_5337084b",
+        "filename": "android/android-emu/android/hw-sensors.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1193,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-06-04T15:51:46Z",
+      "side": 1,
+      "message": "looks like we\u0027re using parse for tokens a lot; this seems similar to splitBy in android/android-emu/android/base/misc/StringUtils.h but also handles whitespace. Could we refactor to use splitBy and add an additional function in StringUtils.h to strip whitespace? that is, first the string is split by the token, and then the whitespace in each string is removed. Then the logic of the parsing is easier to reason about and it can be used in other places.",
+      "revId": "05031372957eb3c050a1a41461a1dc00f008b9ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3940b7b_f3817cff",
+        "filename": "android/android-emu/android/hw-sensors_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-06-04T15:51:46Z",
+      "side": 1,
+      "message": "nit: trailing whitespace",
+      "revId": "05031372957eb3c050a1a41461a1dc00f008b9ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
