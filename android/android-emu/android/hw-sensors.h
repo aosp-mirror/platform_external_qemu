@@ -208,6 +208,23 @@ extern int android_physical_model_stop_recording();
 
 #define ANDROID_FOLDABLE_MAX_HINGES 3
 
+enum FoldablePostures {
+    POSTURE_UNKNOWN = 0,
+    POSTURE_CLOSED = 1,
+    POSTURE_HALF_OPENED = 2,
+    POSTURE_OPENED = 3,
+    POSTURE_FLIPPED = 4,
+    POSTURE_MAX
+};
+
+struct AnglesToPosture {
+    struct {
+        float left;
+        float right;
+    } angles[ANDROID_FOLDABLE_MAX_HINGES];
+    enum FoldablePostures posture;
+};
+
 enum FoldableDisplayType {
     // Horizontal split means something like a laptop, i.e.
     // |-----| Camera is here
@@ -274,13 +291,14 @@ struct FoldableState {
     struct FoldableConfig config;
     float currentHingeDegrees[ANDROID_FOLDABLE_MAX_HINGES];
     float percentRolled;
+    enum FoldablePostures currentPosture;
 };
 
 struct FoldableState* android_foldable_initialize(const struct FoldableConfig* config);
 void android_foldable_set_hinge_degrees(unsigned int hinge_index, float degrees);
 float android_foldable_get_hinge_degrees(unsigned int hinge_index);
-float android_foldable_get_with_1d_parameter();
-void android_foldable_set_with_1d_parameter(float t);
+enum FoldablePostures android_foldable_get_posture();
+void android_foldable_set_posture(int index);
 struct FoldableState* android_foldable_get_state_ptr();
 
 ANDROID_END_HEADER

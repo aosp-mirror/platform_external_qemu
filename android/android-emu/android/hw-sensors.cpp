@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "android/automation/AutomationController.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"
 #include "android/physics/PhysicalModel.h"
@@ -1149,39 +1150,43 @@ extern int android_physical_model_stop_recording() {
 
 // Foldable
 static FoldableState _foldableState[1] = {};
+// Postures
+static std::vector<struct AnglesToPosture> _anglesToPostures;
 
-// Parse the |input| string as a list of tokens seperated by seperator.
-#define WHITESPACE " \t\n"
-static bool parse_for_tokens(const std::string& input,
-                             std::vector<std::string>* out,
-                             const char seperator) {
-    out->clear();
-    size_t pos = 0U;
-
-    // Parse all tokens in the input, treat '*' as a single token.
-    // I.e.
-    for (;;) {
-        // skip leading whitespace.
-        pos = input.find_first_not_of(WHITESPACE, pos);
-        if (pos == std::string::npos) {
-            break;  // end of parse.
+static enum FoldablePostures calculate_posture() {
+    std::vector<uint32_t> entries;
+    for (uint32_t i = 0; i < _anglesToPostures.size(); i++) {
+        if (_anglesToPostures[i].angles[0].left >
+            _foldableState->currentHingeDegrees[0]) {
+            break;
         }
-
-        // find end of type/token.
-        size_t end = input.find_first_of(seperator, pos);
-        if (end == std::string::npos) {
-            end = input.size();
+        if (_anglesToPostures[i].angles[0].left <=
+                    _foldableState->currentHingeDegrees[0] &&
+            _anglesToPostures[i].angles[0].right >
+                    _foldableState->currentHingeDegrees[0]) {
+            entries.push_back(i);
         }
-        std::string str = input.substr(pos, end - pos);
-        if (str.size() == 0) {
-            return false;
-        }
-
-        out->push_back(str);
-        pos = end + 1;
     }
+    for (const auto i : entries) {
+        bool found = true;
+        for (uint32_t j = 1; j < _foldableState->config.numHinges; j++) {
+            if (_anglesToPostures[i].angles[j].left >
+                        _foldableState->currentHingeDegrees[j] ||
+                _anglesToPostures[i].angles[j].right <=
+                        _foldableState->currentHingeDegrees[j]) {
+                found = false;
+                break;
+            }
+        }
+        if (found) {
+            return _anglesToPostures[i].posture;
+        }
+    }
+    return POSTURE_UNKNOWN;
+}
 
-    return true;
+static bool compareAnglesToPosture(AnglesToPosture v1, AnglesToPosture v2) {
+    return (v1.angles[0].left < v2.angles[0].left);
 }
 
 FoldableState* android_foldable_initialize(
@@ -1217,23 +1222,22 @@ FoldableState* android_foldable_initialize(
         std::string hingeAreas(android_hw->hw_sensor_hinge_areas);
         std::vector<std::string> hingeAngleRangeTokens, hingeAngleDefaultTokens,
                 hingeAreaTokens;
-        if (!parse_for_tokens(hingeAngleRanges, &hingeAngleRangeTokens, ',') ||
-            !parse_for_tokens(hingeAngleDefaults, &hingeAngleDefaultTokens,
-                              ',') ||
-            !parse_for_tokens(hingeAreas, &hingeAreaTokens, ',') ||
-            hingeAngleRangeTokens.size() != numHinge ||
+        android::base::splitTokens(hingeAngleRanges, &hingeAngleRangeTokens, ",");
+        android::base::splitTokens(hingeAngleDefaults, &hingeAngleDefaultTokens, ",");
+        android::base::splitTokens(hingeAreas, &hingeAreaTokens, ",");
+        if (hingeAngleRangeTokens.size() != numHinge ||
             hingeAngleDefaultTokens.size() != numHinge ||
             hingeAreaTokens.size() != numHinge) {
             E("Incorrect hinge angle configs for ranges %s, defaults %s, or "
-              "areas\n",
+              "areas %s\n",
               hingeAngleRanges.c_str(), hingeAngleDefaults.c_str(),
               hingeAreas.c_str());
         } else {
             for (int i = 0; i < numHinge; i++) {
                 std::vector<std::string> angles, area;
-                if (!parse_for_tokens(hingeAngleRangeTokens[i], &angles, '-') ||
-                    !parse_for_tokens(hingeAreaTokens[i], &area, '-') ||
-                    angles.size() != 2 || area.size() != 4) {
+                android::base::splitTokens(hingeAngleRangeTokens[i], &angles, "-");
+                android::base::splitTokens(hingeAreaTokens[i], &area, "-");
+                if (angles.size() != 2 || area.size() != 4) {
                     E("Incorrect hinge angle range %s or area %s\n",
                       hingeAngleRangeTokens[i].c_str(),
                       hingeAreaTokens[i].c_str());
@@ -1257,6 +1261,46 @@ FoldableState* android_foldable_initialize(
         _foldableState->config = *config;
     }
 
+    // hinge angles to posture mapping
+    std::string postureList(android_hw->hw_sensor_posture_list);
+    std::string postureAngles(
+            android_hw->hw_sensor_hinge_angles_posture_definitions);
+    std::vector<std::string> postureListTokens, postureAnglesTokens;
+    android::base::splitTokens(postureList, &postureListTokens, ",");
+    android::base::splitTokens(postureAngles, &postureAnglesTokens, ",");
+    if (postureList.empty() || postureAngles.empty() ||
+        postureListTokens.size() != postureAnglesTokens.size()) {
+        E("Incorrect posture_list %s or hinge_angles_posture_definitions %s\n",
+          postureList.c_str(), postureAngles.c_str());
+    } else {
+        std::vector<std::string> anglesToken;
+        for (int i = 0; i < postureListTokens.size(); i++) {
+            android::base::splitTokens(postureAnglesTokens[i], &anglesToken, "&");
+            if (anglesToken.size() != _foldableState->config.numHinges) {
+                E("Incorrect hinge_angles_posture_definition %s\n",
+                  postureAnglesTokens[i].c_str());
+            } else {
+                std::vector<std::string> angles;
+                struct AnglesToPosture anglesToPosture;
+                for (int j = 0; j < anglesToken.size(); j++) {
+                    android::base::splitTokens(anglesToken[j], &angles, "-");
+                    if (angles.size() != 2) {
+                        E("Incorrect hinge_angles_posture_definition %s\n",
+                          anglesToken[j].c_str());
+                    } else {
+                        anglesToPosture.angles[j].left = std::stof(angles[0]);
+                        anglesToPosture.angles[j].right = std::stof(angles[1]);
+                    }
+                }
+                anglesToPosture.posture =
+                        (FoldablePostures)std::stoi(postureListTokens[i]);
+                _anglesToPostures.push_back(anglesToPosture);
+                std::sort(_anglesToPostures.begin(), _anglesToPostures.end(),
+                          compareAnglesToPosture);
+            }
+        }
+    }
+
     for (unsigned int i = 0; i < _foldableState->config.numHinges; ++i) {
         if (needDefaultConfig) {
             _foldableState->currentHingeDegrees[i] =
@@ -1266,19 +1310,26 @@ FoldableState* android_foldable_initialize(
                                      _foldableState->currentHingeDegrees[i],
                                      0.0, 0.0);
     }
+    _foldableState->currentPosture = calculate_posture();
     return _foldableState;
 }
 
+static const float kHingeAngleEpsilon = 0.001f;
 void android_foldable_set_hinge_degrees(unsigned int hinge_index,
                                         float degrees) {
     if (hinge_index >= ANDROID_FOLDABLE_MAX_HINGES)
         return;
     if (hinge_index >= _foldableState->config.numHinges)
         return;
+    if (abs(_foldableState->currentHingeDegrees[hinge_index] - degrees) <
+        kHingeAngleEpsilon) {
+        return;
+    }
 
     _foldableState->currentHingeDegrees[hinge_index] = degrees;
     android_sensors_override_set(ANDROID_SENSOR_HINGE_ANGLE0 + hinge_index,
                                  degrees, 0.0, 0.0);
+    _foldableState->currentPosture = calculate_posture();
 }
 
 float android_foldable_get_hinge_degrees(unsigned int hinge_index) {
@@ -1290,30 +1341,23 @@ float android_foldable_get_hinge_degrees(unsigned int hinge_index) {
     return _foldableState->currentHingeDegrees[hinge_index];
 }
 
-float android_foldable_get_with_1d_parameter() {
-    // Use hinge 0
-    if (_foldableState->config.numHinges < 1)
-        return 0.0;
-    return (_foldableState->currentHingeDegrees[0] -
-            _foldableState->config.hingeParams[0].minDegrees) /
-           (_foldableState->config.hingeParams[0].maxDegrees -
-            _foldableState->config.hingeParams[0].minDegrees);
+enum FoldablePostures android_foldable_get_posture() {
+    return _foldableState->currentPosture;
 }
 
-void android_foldable_set_with_1d_parameter(float t) {
-    if (_foldableState->config.numHinges < 1)
+void android_foldable_set_posture(int index) {
+    if (_foldableState->currentPosture == (enum FoldablePostures)index) {
         return;
-
-    // Many different parameterizations are possible, just pick a crappy one for
-    // now (all hinges done at the same rate)
-    for (unsigned int i = 0; i < _foldableState->config.numHinges; ++i) {
-        _foldableState->currentHingeDegrees[i] =
-                _foldableState->config.hingeParams[i].minDegrees +
-                t * (_foldableState->config.hingeParams[i].maxDegrees -
-                     _foldableState->config.hingeParams[i].minDegrees);
-        android_sensors_override_set(ANDROID_SENSOR_HINGE_ANGLE0 + i,
-                                     _foldableState->currentHingeDegrees[i],
-                                     0.0, 0.0);
+    }
+    _foldableState->currentPosture = (enum FoldablePostures)index;
+    // Update the hinge angles
+    for (const auto i : _anglesToPostures) {
+        if (i.posture == _foldableState->currentPosture) {
+            for (uint32_t j = 0; j < _foldableState->config.numHinges; j++) {
+                _foldableState->currentHingeDegrees[j] =
+                        (i.angles[j].left + i.angles[j].right) / 2.0f;
+            }
+        }
     }
 }
 
