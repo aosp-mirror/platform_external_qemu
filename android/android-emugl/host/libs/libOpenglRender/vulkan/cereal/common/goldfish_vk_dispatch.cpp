@@ -1809,6 +1809,10 @@ void init_vulkan_dispatch_from_device_with_backup(
     VulkanDispatch* out)
 {
     memset(out, 0x0, sizeof(VulkanDispatch));
+
+    // this vk is instance, replace its vkGetDeviceProcAddr with vkGetDeviceProcAddr from the device
+    vk->vkGetDeviceProcAddr = (PFN_vkGetDeviceProcAddr)(vk->vkGetDeviceProcAddr(device, "vkGetDeviceProcAddr"));
+
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)vk->vkGetDeviceProcAddr(device, "vkDestroyInstance");
     if (!(out->vkDestroyInstance))

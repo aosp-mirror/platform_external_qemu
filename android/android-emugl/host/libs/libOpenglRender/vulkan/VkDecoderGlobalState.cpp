@@ -228,6 +228,15 @@ public:
         // bug: 155795731 (see below)
         AutoLock lock(mLock);
 
+       
+        VkApplicationInfo appInfo = {
+            VK_STRUCTURE_TYPE_APPLICATION_INFO, 0,
+            "AEMUguest", 1, "AEMUguest", 1,
+            VK_MAKE_VERSION(1, 1, 0),
+        };
+
+        createInfoFiltered.pApplicationInfo = &appInfo;
+
         VkResult res = m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
 
         if (res != VK_SUCCESS) return res;

@@ -490,6 +490,15 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             moltenVKInstanceExtNames.data();
    }
 
+    VkApplicationInfo appInfo = {
+        VK_STRUCTURE_TYPE_APPLICATION_INFO, 0,
+        "AEMU", 1,
+        "AEMU", 1,
+        VK_MAKE_VERSION(1, 1, 0),
+    };
+
+    instCi.pApplicationInfo = &appInfo;
+
     VkResult res = gvk->vkCreateInstance(&instCi, nullptr, &sVkEmulation->instance);
 
     if (res != VK_SUCCESS) {
