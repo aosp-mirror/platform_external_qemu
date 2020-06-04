@@ -488,7 +488,35 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             moltenVKInstanceExtNames.size();
         instCi.ppEnabledExtensionNames =
             moltenVKInstanceExtNames.data();
-   }
+    }
+
+    VkApplicationInfo appInfo = {
+        VK_STRUCTURE_TYPE_APPLICATION_INFO, 0,
+        "AEMU", 1,
+        "AEMU", 1,
+        VK_MAKE_VERSION(1, 0, 0),
+    };
+
+    instCi.pApplicationInfo = &appInfo;
+
+    // Can we know instance version early?
+    if (gvk->vkEnumerateInstanceVersion) {
+        LOG(VERBOSE) << "global loader has vkEnumerateInstanceVersion.";
+        uint32_t instanceVersion;
+        VkResult res = gvk->vkEnumerateInstanceVersion(&instanceVersion);
+        if (VK_SUCCESS == res) {
+            if (instanceVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+                LOG(VERBOSE) << "global loader has vkEnumerateInstanceVersion returning >= 1.1.";
+                appInfo.apiVersion = VK_MAKE_VERSION(1, 1, 0);
+            }
+        }
+    }
+
+    LOG(VERBOSE) << "Creating instance, asking for version " << 
+        VK_VERSION_MAJOR(appInfo.apiVersion) << "." <<
+        VK_VERSION_MINOR(appInfo.apiVersion) << "." <<
+        VK_VERSION_PATCH(appInfo.apiVersion) << " ...";
+
 
     VkResult res = gvk->vkCreateInstance(&instCi, nullptr, &sVkEmulation->instance);
 
@@ -496,12 +524,6 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         LOG(ERROR) << "Failed to create Vulkan instance.";
         return sVkEmulation;
     }
-
-    sVkEmulation->instanceSupportsExternalMemoryCapabilities =
-        externalMemoryCapabilitiesSupported;
-    sVkEmulation->instanceSupportsMoltenVK = moltenVKSupported;
-
-    // Postcondition: sVkEmulation instance has been created and ext memory caps known.
 
     // Create instance level dispatch.
     sVkEmulation->ivk = new VulkanDispatch;
@@ -517,12 +539,41 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
     if (ivk->vkEnumerateInstanceVersion) {
         uint32_t instanceVersion;
         VkResult enumInstanceRes = ivk->vkEnumerateInstanceVersion(&instanceVersion);
-        if (enumInstanceRes >= VK_MAKE_VERSION(1, 1, 0)) {
+        if ((VK_SUCCESS == enumInstanceRes) &&
+            instanceVersion >= VK_MAKE_VERSION(1, 1, 0)) {
             if (!vulkan_dispatch_check_instance_VK_VERSION_1_1(ivk)) {
-                fprintf(stderr, "%s: Warning: Vulkan 1.1 APIs missing from instance\n", __func__);
+                fprintf(stderr, "%s: Warning: Vulkan 1.1 APIs missing from instance (1st try)\n", __func__);
+            }
+        }
+
+        if (appInfo.apiVersion < VK_MAKE_VERSION(1, 1, 0) &&
+            instanceVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+            LOG(VERBOSE) << "Found out that we can create a higher version instance.";
+            appInfo.apiVersion = VK_MAKE_VERSION(1, 1, 0);
+
+            gvk->vkDestroyInstance(sVkEmulation->instance, nullptr);
+
+            VkResult res = gvk->vkCreateInstance(&instCi, nullptr, &sVkEmulation->instance);
+
+            if (res != VK_SUCCESS) {
+                LOG(ERROR) << "Failed to create Vulkan 1.1 instance.";
+                return sVkEmulation;
+            }
+
+            init_vulkan_dispatch_from_instance(
+                vk, sVkEmulation->instance, sVkEmulation->ivk);
+
+            LOG(VERBOSE) << "Created Vulkan 1.1 instance on second try.";
+
+            if (!vulkan_dispatch_check_instance_VK_VERSION_1_1(ivk)) {
+                fprintf(stderr, "%s: Warning: Vulkan 1.1 APIs missing from instance (2nd try)\n", __func__);
             }
         }
     }
+
+    sVkEmulation->instanceSupportsExternalMemoryCapabilities =
+        externalMemoryCapabilitiesSupported;
+    sVkEmulation->instanceSupportsMoltenVK = moltenVKSupported;
 
     if (sVkEmulation->instanceSupportsExternalMemoryCapabilities) {
         sVkEmulation->getImageFormatProperties2Func = reinterpret_cast<
