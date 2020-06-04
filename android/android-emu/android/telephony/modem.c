@@ -1421,7 +1421,7 @@ handleTech( const char*  cmd, AModem  modem )
     }
     amodem_begin_line( modem );
     if (!strcmp( cmd, "=?")) {
-        return amodem_printf( modem, "+CTEC: 0,1,2,3" );
+        return amodem_printf( modem, "+CTEC: 0,1,2,3,4,5,6" );
     }
     else if (cmd[0] == '=') {
         switch (cmd[1]) {
@@ -2874,7 +2874,7 @@ static const struct {
     { "+CFUN=0", NULL, handleRadioPower },
     { "+CFUN=1", NULL, handleRadioPower },
 
-    { "+CTEC=?", "+CTEC: 0,1,2,3", NULL }, /* Query available Techs */
+    { "+CTEC=?", "+CTEC: 0,1,2,3,4,5,6", NULL }, /* Query available Techs */
     { "!+CTEC", NULL, handleTech }, /* Set/get current Technology and preferred mode */
 
     { "+WRMP=?", "+WRMP: 0,1,2", NULL }, /* Query Roam Preference */
