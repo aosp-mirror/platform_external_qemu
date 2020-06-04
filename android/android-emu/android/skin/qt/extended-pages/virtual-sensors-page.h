@@ -108,6 +108,7 @@ private slots:
     void on_hinge0Slider_valueChanged(double);
     void on_hinge1Slider_valueChanged(double);
     void on_hinge2Slider_valueChanged(double);
+    void on_posture_valueChanged(int);
 
     void updateResultingValues(glm::vec3 acceleration,
                                glm::vec3 gyroscope,
@@ -158,4 +159,5 @@ private:
     bool mBypassOrientationChecks = false;
     bool mVirtualSceneControlsEngaged = false;
     QElapsedTimer mLastInteractionElapsed;
+    enum FoldablePostures mCurrentPosture = POSTURE_UNKNOWN;
 };
