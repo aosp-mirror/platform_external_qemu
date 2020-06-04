@@ -77,5 +77,16 @@ bool endsWith(StringView string, StringView suffix) {
                    suffix.data(), suffix.size()) == 0;
 }
 
+void splitTokens(const std::string& input,
+                 std::vector<std::string>* out,
+                 StringView splitBy) {
+    auto removeWhiteSpace = [out](StringView strView) {
+        std::string s = strView.str();
+        s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
+        out->push_back(s);
+    };
+    out->clear();
+    split(input, splitBy, removeWhiteSpace);
+}
 }  // namespace base
 }  // namespace android

@@ -19,6 +19,7 @@
 #include <functional>
 #include <iterator>
 #include <sstream>
+#include <vector>
 
 #include <stddef.h>
 
@@ -95,6 +96,15 @@ void split(StringView str, StringView splitBy, Func func) {
         end = str.find(splitBy, begin);
     }
 }
+
+// Tokenlize a string using |splitBy| as a delimiter.
+// |splitBy| must be a nonempty string well, or it's a no-op.
+// Whitespace is removed.
+// Note: make sure out is an empty vector. It will be cleared
+// before store the result tokens
+void splitTokens(const std::string& input,
+                 std::vector<std::string>* out,
+                 StringView splitBy);
 
 }  // namespace base
 }  // namespace android
