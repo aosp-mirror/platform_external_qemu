@@ -21,9 +21,11 @@ TEST(Hw_sensors, android_foldable_initialize) {
     android_hw->hw_sensor_hinge = true;
     android_hw->hw_sensor_hinge_count = 2;
     android_hw->hw_sensor_hinge_type = 0;
-    android_hw->hw_sensor_hinge_ranges = (char*)"45- 360, 0-180";
+    android_hw->hw_sensor_hinge_ranges = (char*)"0- 360, 0-180";
     android_hw->hw_sensor_hinge_defaults = (char*)"180,90";
     android_hw->hw_sensor_hinge_areas = (char*)"0-600-1260-10, 0-1200-1260-10";
+    android_hw->hw_sensor_posture_list = (char*)"1, 2,3 ,  4";
+    android_hw->hw_sensor_hinge_angles_posture_definitions = (char*)"0-30&0-15,  30-150 & 15-75,150-330&75-165, 330-360&165-180";
     ret = android_foldable_initialize(nullptr);
 
     EXPECT_EQ(180, ret->currentHingeDegrees[0]);
@@ -35,7 +37,7 @@ TEST(Hw_sensors, android_foldable_initialize) {
     EXPECT_EQ(600, ret->config.hingeParams[0].y);
     EXPECT_EQ(1260, ret->config.hingeParams[0].width);
     EXPECT_EQ(10, ret->config.hingeParams[0].height);
-    EXPECT_EQ(45, ret->config.hingeParams[0].minDegrees);
+    EXPECT_EQ(0, ret->config.hingeParams[0].minDegrees);
     EXPECT_EQ(360, ret->config.hingeParams[0].maxDegrees);
     EXPECT_EQ(0, ret->config.hingeParams[1].displayId);
     EXPECT_EQ(0, ret->config.hingeParams[1].x);
@@ -46,4 +48,5 @@ TEST(Hw_sensors, android_foldable_initialize) {
     EXPECT_EQ(180, ret->config.hingeParams[1].maxDegrees);
     EXPECT_EQ(180, ret->config.hingeParams[0].defaultDegrees);
     EXPECT_EQ(90, ret->config.hingeParams[1].defaultDegrees);
+    EXPECT_EQ(3, ret->currentPosture);
 }
