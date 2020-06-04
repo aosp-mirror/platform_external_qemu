@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5b74bfbc_465e5c8d",
+        "filename": "android/android-emu/android/hw-sensors.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1193,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-06-04T20:31:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cd3786ab_5337084b",
+      "revId": "05031372957eb3c050a1a41461a1dc00f008b9ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e3940b7b_f3817cff",
         "filename": "android/android-emu/android/hw-sensors_unittest.cpp",
         "patchSetId": 7
@@ -33,6 +51,24 @@
       "revId": "05031372957eb3c050a1a41461a1dc00f008b9ed",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a7db9197_815d9d3c",
+        "filename": "android/android-emu/android/hw-sensors_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-06-04T20:31:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3940b7b_f3817cff",
+      "revId": "05031372957eb3c050a1a41461a1dc00f008b9ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
