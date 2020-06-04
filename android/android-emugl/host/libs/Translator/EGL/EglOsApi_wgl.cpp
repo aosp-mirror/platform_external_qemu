@@ -350,22 +350,53 @@ public:
         GetExtensionsStringFunc wglGetExtensionsString =
                 reinterpret_cast<GetExtensionsStringFunc>(
                         this->findFunction("wglGetExtensionsStringARB"));
+
+        bool foundArb = wglGetExtensionsString != nullptr;
+
         if (wglGetExtensionsString) {
             extensionList = wglGetExtensionsString(hdc);
         }
+
+        bool extensionListArbNull = extensionList == nullptr;
+        bool extensionListArbEmpty = !strcmp(extensionList, "");
+
+        bool foundExt = false;
+        bool extensionListExtNull = false;
+        bool extensionListExtEmpty = false;
+
         // wglGetExtensionsStringARB failed, try wglGetExtensionsStringEXT.
         if (!extensionList || !strcmp(extensionList, "")) {
             wglGetExtensionsString =
                 reinterpret_cast<GetExtensionsStringFunc>(
                         this->findFunction("wglGetExtensionsStringEXT"));
+
+            foundExt = wglGetExtensionsString != nullptr;
+
             if (wglGetExtensionsString) {
                 extensionList = wglGetExtensionsString(hdc);
             }
         }
+
+        extensionListExtNull = extensionList == nullptr;
+        extensionListExtEmpty = !strcmp(extensionList, "");
+
         // Both failed, suicide.
         if (!extensionList || !strcmp(extensionList, "")) {
-            WGL_ERR("%s: Could not find wglGetExtensionsString!\n",
-                __FUNCTION__);
+            bool isRemoteSession = GetSystemMetrics(SM_REMOTESESSION);
+
+            WGL_ERR(
+                "%s: Could not find wglGetExtensionsString! "
+                "arbFound %d listarbNull/empty %d %d "
+                "extFound %d extNull/empty %d %d remote %d\n",
+                __FUNCTION__,
+                foundArb,
+                extensionListArbNull,
+                extensionListArbEmpty,
+                foundExt,
+                extensionListExtNull,
+                extensionListExtEmpty,
+                isRemoteSession);
+
             return false;
         }
 
