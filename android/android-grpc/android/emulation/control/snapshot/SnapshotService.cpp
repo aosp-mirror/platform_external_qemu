@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/Stopwatch.h"
@@ -306,9 +307,15 @@ public:
         }
 
         SnapshotLineConsumer slc(reply);
-        if (!gQAndroidVmOperations->snapshotLoad(snapshot->name().data(),
-                                                 slc.opaque(),
-                                                 LineConsumer::Callback)) {
+        bool snapshot_success = false;
+
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [&snapshot_success, &slc, &snapshot]() {
+                    snapshot_success = gQAndroidVmOperations->snapshotLoad(
+                            snapshot->name().data(), slc.opaque(),
+                            LineConsumer::Callback);
+                });
+        if (!snapshot_success) {
             slc.error();
             return Status::OK;
         }
@@ -333,9 +340,14 @@ public:
         }
 
         SnapshotLineConsumer slc(reply);
-        if (!gQAndroidVmOperations->snapshotSave(request->snapshot_id().c_str(),
-                                                 slc.opaque(),
-                                                 LineConsumer::Callback)) {
+        bool snapshot_success = false;
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [&snapshot_success, &slc, &request]() {
+                    snapshot_success = gQAndroidVmOperations->snapshotSave(
+                            request->snapshot_id().c_str(), slc.opaque(),
+                            LineConsumer::Callback);
+                });
+        if (!snapshot_success) {
             slc.error();
             return Status::OK;
         }
