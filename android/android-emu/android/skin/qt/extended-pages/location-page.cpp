@@ -53,6 +53,8 @@
 #endif
 #include <math.h>
 
+#define DEBUG_PLAYBACK 0
+
 using android::base::AutoLock;
 using android::base::LazyInstance;
 
@@ -743,7 +745,7 @@ void LocationPage::timeout_v2() {
             if (mUi->loc_repeatRoute->isChecked()) {
                 // We are at the end and should repeat
                 mTimer.stop();
-                locationPlaybackStart_v2();
+                locationPlaybackStart_v2(mIsGpxKmlPlayback);
             } else {
                 // We are at the end and should stop
                 locationPlaybackStop_v2();
@@ -801,8 +803,18 @@ void LocationPage::timeout_v2() {
     emit mMapBridge->locationChanged(QString::number(latNow, 'g', 12), QString::number(lngNow, 'g', 12));
     emit targetHeadingChanged(mHeadingOnRoute); // Update the magnetometer repeatedly
 
-    int sleepTime = mSegmentDurationMs - mMsIntoSegment;
-    mTimer.setInterval(std::min((int)UPDATE_INTERVAL, sleepTime));
+    if (mIsGpxKmlPlayback) {
+        // Don't interpolate between gpx/kml points.
+        mMsIntoSegment = mSegmentDurationMs;
+        mTimer.setInterval(mSegmentDurationMs);
+#if DEBUG_PLAYBACK
+        qDebug() << "Gpx point #" << mNextRoutePointIdx - 1 << ": next pt in "
+                 << mSegmentDurationMs << " ms";
+#endif
+    } else {
+        int sleepTime = mSegmentDurationMs - mMsIntoSegment;
+        mTimer.setInterval(std::min((int)UPDATE_INTERVAL, sleepTime));
+    }
     mTimer.start();
 }
 

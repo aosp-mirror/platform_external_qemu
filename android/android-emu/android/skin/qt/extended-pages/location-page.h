@@ -195,7 +195,7 @@ private slots:
     void locationPlaybackStop();
     void timeout();
 
-    void locationPlaybackStart_v2();
+    void locationPlaybackStart_v2(bool isGpxKml);
     void locationPlaybackStop_v2();
     void timeout_v2();
 
@@ -259,7 +259,7 @@ private:
     void writeRouteProtobufFullPath(const QString& protoFullPath,
                                     const emulator_location::RouteMetadata& protobuf);
     static QString readRouteJsonFile(const QString& pathOfProtoFile);
-    bool parsePointsFromJson();
+    bool parsePointsFromJson(bool* isGpxKml);
 
     bool parseGoogleMapsJson(const QJsonDocument& jsonDoc);
     bool parseGpxKmlJson(const QJsonDocument& jsonDoc, const QString& description);
@@ -335,6 +335,7 @@ private:
     UiState mPointState = UiState::Default;
     UiState mRouteState = UiState::Default;
     QListWidgetItem* mSavedRoutePlayingItem = nullptr;
+    bool mIsGpxKmlPlayback = false;
     friend class RouteSenderThread;
 #ifdef USE_WEBENGINE
     bool mShouldRefreshPageOnReconnect;
@@ -573,7 +574,6 @@ public:
 private:
     static constexpr int kIconSize = 20;
     QString mGpxKmlFilename;
-    bool mIsGpxKml = false;
     LocationPage::RouteListElement mRouteElement;
     QListWidgetItem* mListItem;
     QListWidget* const mListWidget;
