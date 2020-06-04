@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/Stopwatch.h"
@@ -30,6 +31,8 @@
 #include "android/base/files/GzipStreambuf.h"
 #include "android/base/files/PathUtils.h"                          // for pj
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/LineConsumer.h"
 #include "android/emulation/control/adb/AdbShellStream.h"
@@ -306,9 +309,26 @@ public:
         }
 
         SnapshotLineConsumer slc(reply);
-        if (!gQAndroidVmOperations->snapshotLoad(snapshot->name().data(),
-                                                 slc.opaque(),
-                                                 LineConsumer::Callback)) {
+        bool snapshot_done = false;
+        bool snapshot_success = false;
+        android::base::ConditionVariable snapshot_signal;
+        android::base::Lock snapshot_lock;
+
+        android::base::ThreadLooper::runOnMainLooper(
+                [&snapshot_done, &snapshot_signal, &snapshot_lock,
+                 &snapshot_success, &slc, &snapshot]() {
+                    snapshot_success = gQAndroidVmOperations->snapshotLoad(
+                            snapshot->name().data(), slc.opaque(),
+                            LineConsumer::Callback);
+                    snapshot_lock.lock();
+                    snapshot_done = true;
+                    snapshot_signal.broadcastAndUnlock(&snapshot_lock);
+                });
+        snapshot_lock.lock();
+        snapshot_signal.wait(&snapshot_lock,
+                             [&snapshot_done]() { return snapshot_done; });
+        snapshot_lock.unlock();
+        if (!snapshot_success) {
             slc.error();
             return Status::OK;
         }
@@ -333,9 +353,26 @@ public:
         }
 
         SnapshotLineConsumer slc(reply);
-        if (!gQAndroidVmOperations->snapshotSave(request->snapshot_id().c_str(),
-                                                 slc.opaque(),
-                                                 LineConsumer::Callback)) {
+        bool snapshot_done = false;
+        bool snapshot_success = false;
+        android::base::ConditionVariable snapshot_signal;
+        android::base::Lock snapshot_lock;
+
+        android::base::ThreadLooper::runOnMainLooper(
+                [&snapshot_done, &snapshot_signal, &snapshot_lock,
+                 &snapshot_success, &slc, &snapshot]() {
+                    snapshot_success = gQAndroidVmOperations->snapshotSave(
+                            snapshot->name().data(), slc.opaque(),
+                            LineConsumer::Callback);
+                    snapshot_lock.lock();
+                    snapshot_done = true;
+                    snapshot_signal.broadcastAndUnlock(&snapshot_lock);
+                });
+        snapshot_lock.lock();
+        snapshot_signal.wait(&snapshot_lock,
+                             [&snapshot_done]() { return snapshot_done; });
+        snapshot_lock.unlock();
+        if (!snapshot_success) {
             slc.error();
             return Status::OK;
         }
