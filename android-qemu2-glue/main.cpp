@@ -1902,7 +1902,8 @@ extern "C" int main(int argc, char** argv) {
 #endif
     args.add("-show-cursor");
 
-    if (!strcmp(hw->hw_gltransport, "virtio-gpu") ||
+    if (fc::isEnabled(fc::VirtioGpuNativeSync) ||
+        !strcmp(hw->hw_gltransport, "virtio-gpu") ||
         !strcmp(hw->hw_gltransport, "virtio-gpu-pipe")) {
         args.add("-device");
         args.add("virtio-gpu-pci");

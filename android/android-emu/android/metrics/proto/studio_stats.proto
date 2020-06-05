@@ -1431,7 +1431,8 @@ message EmulatorFeatureFlagState {
     HARDWARE_DECODER = 60;
     NO_DELAY_CLOSE_COLOR_BUFFER = 61;
     NO_DEVICE_FRAME = 62;
-    // Next tag: 63
+    VIRTIO_GPU_NATIVE_SYNC = 63;
+    // Next tag: 64
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

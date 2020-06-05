@@ -114,6 +114,10 @@ public:
     static void setEgl2Egl(EGLBoolean enable);
     static bool isEgl2Egl();
 
+    // isEgl2EglSyncSafeToUse
+    static void setEgl2EglSyncSafeToUse(EGLBoolean enable);
+    static bool isEgl2EglSyncSafeToUse();
+
 private:
     EglGlobalInfo();
     ~EglGlobalInfo();

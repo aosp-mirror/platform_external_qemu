@@ -562,34 +562,41 @@ public:
         return 0;
     }
 
-    int write(VirglCtxId ctxId, void* buffer, int bytes) {
-        VGPLOG("ctxid: %u buffer: %p bytes: %d", ctxId, buffer, bytes);
+    int submitCmd(VirglCtxId ctxId, void* buffer, int dwordCount) {
+        VGPLOG("ctxid: %u buffer: %p dwords: %d", ctxId, buffer, dwordCount);
+
+        // Our commands
+        const uint32_t kVirtioGpuNativeSyncCreateExportFd = 0x9000;
+        const uint32_t kVirtioGpuNativeSyncCreateImportFd = 0x9001;
 
         if (!buffer) {
             fprintf(stderr, "%s: error: buffer null\n", __func__);
             return -1;
         }
-        AutoLock lock(mLock);
-        auto ops = ensureAndGetServiceOps();
-        auto it = mContexts.find(ctxId);
 
-        GoldfishPipeBuffer buf = {
-            buffer, (size_t)bytes,
-        };
+        // Parse command from buffer
+        uint32_t* dwords = (uint32_t*)buffer;
 
-        auto hostPipe = it->second.hostPipe;
+        if (dwordCount < 1) {
+            fprintf(stderr, "%s: error: not enough dwords (got %d)\n", __func__, dwordCount);
+            return -1;
+        }
 
-        size_t writtenBytes = 0;
-        size_t wantedBytes = bytes;
+        uint32_t opcode = dwords[0];
 
-        while (writtenBytes < wantedBytes) {
-            auto status = ops->guest_send(hostPipe, &buf, 1);
-
-            if (status > 0) {
-                writtenBytes += status;
-            } else if (status != kPipeTryAgain) {
-                return EIO;
+        switch (opcode) {
+            case kVirtioGpuNativeSyncCreateExportFd:
+            case kVirtioGpuNativeSyncCreateImportFd: {
+                uint32_t sync_handle_lo = dwords[1];
+                uint32_t sync_handle_hi = dwords[2];
+                uint64_t sync_handle =
+                    (((uint64_t)sync_handle_hi) << 32) |
+                    ((uint64_t)sync_handle_lo);
+                mVirtioGpuOps->wait_for_gpu(sync_handle);
+                break;
             }
+            default:
+                return -1;
         }
 
         mLastSubmitCmdCtxExists = true;
@@ -1220,8 +1227,8 @@ VG_EXPORT void pipe_virgl_renderer_context_destroy(uint32_t handle) {
 
 VG_EXPORT int pipe_virgl_renderer_submit_cmd(void *buffer,
                                           int ctx_id,
-                                          int bytes) {
-    return sRenderer->write(ctx_id, buffer, bytes);
+                                          int dwordCount) {
+    return sRenderer->submitCmd(ctx_id, buffer, dwordCount);
 }
 
 VG_EXPORT int pipe_virgl_renderer_transfer_read_iov(
