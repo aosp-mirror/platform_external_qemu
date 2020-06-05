@@ -22,7 +22,7 @@ namespace android {
 namespace base {
 
 template <size_t maxIndex,
-          class IndexType, // must be castable to uint32_t
+          class IndexType, // must be castable to uint64_t
           class Data>
 class HybridComponentManager {
 public:
@@ -33,12 +33,12 @@ public:
     using Handle = typename EM::EntityHandle;
 
     void add(IndexType index, const Data& data) {
-        uint32_t index_u32 = (uint32_t)index;
-        if (index_u32 <= maxIndex) {
-            auto internal_handle = index2Handle(index_u32);
+        uint64_t index_u64 = (uint64_t)index;
+        if (index_u64 <= maxIndex) {
+            auto internal_handle = index2Handle(index_u64);
             mComponentManager.add(internal_handle, data);
         } else {
-            mMap[index_u32] = data;
+            mMap[index] = data;
         }
 
     }
@@ -49,32 +49,32 @@ public:
     }
 
     void remove(IndexType index) {
-        uint32_t index_u32 = (uint32_t)index;
-        if (index_u32 < maxIndex) {
-            auto internal_handle = index2Handle(index_u32);
+        uint64_t index_u64 = (uint64_t)index;
+        if (index_u64 < maxIndex) {
+            auto internal_handle = index2Handle(index_u64);
             mComponentManager.remove(internal_handle);
         } else {
-            mMap.erase(index_u32);
+            mMap.erase(index);
         }
     }
 
     Data* get(IndexType index) {
-        uint32_t index_u32 = (uint32_t)index;
-        if (index_u32 < maxIndex) {
-            auto internal_handle = index2Handle(index_u32);
+        uint64_t index_u64 = (uint64_t)index;
+        if (index_u64 < maxIndex) {
+            auto internal_handle = index2Handle(index_u64);
             return mComponentManager.get(internal_handle);
         } else {
-            return android::base::find(mMap, index_u32);
+            return android::base::find(mMap, index);
         }
     }
 
     const Data* get_const(IndexType index) const {
-        uint32_t index_u32 = (uint32_t)index;
-        if (index_u32 < maxIndex) {
-            auto internal_handle = index2Handle(index_u32);
+        uint64_t index_u64 = (uint64_t)index;
+        if (index_u64 < maxIndex) {
+            auto internal_handle = index2Handle(index_u64);
             return mComponentManager.get_const(internal_handle);
         } else {
-            return android::base::find(mMap, index_u32);
+            return android::base::find(mMap, index);
         }
     }
 
@@ -82,7 +82,7 @@ public:
         mComponentManager.forEach(func);
 
         for (auto it : mMap) {
-            auto handle = index2Handle((uint32_t)it.first);
+            auto handle = index2Handle(it.first);
             func(true /* live */, handle, handle, it.second);
         }
     }
@@ -91,7 +91,7 @@ public:
         mComponentManager.forEachLive(func);
 
         for (auto it : mMap) {
-            auto handle = index2Handle((uint32_t)it.first);
+            auto handle = index2Handle(it.first);
             func(true /* live */, handle, handle, it.second);
         }
     }
@@ -100,18 +100,18 @@ public:
         mComponentManager.forEachLive_const(func);
 
         for (const auto it : mMap) {
-            auto handle = index2Handle((uint32_t)it.first);
+            auto handle = index2Handle(it.first);
             func(true /* live */, handle, handle, it.second);
         }
     }
 
 private:
-    static Handle index2Handle(uint32_t index) {
-        return EM::makeHandle(index, 1, 1);
+    static Handle index2Handle(uint64_t index) {
+        return EM::makeHandle((uint32_t)index, 1, 1);
     }
 
     UCM mComponentManager;
-    std::unordered_map<uint32_t, Data> mMap;
+    std::unordered_map<IndexType, Data> mMap;
 };
 
 } // namespace android
