@@ -31,9 +31,7 @@
 
 typedef android::base::HybridComponentManager<10000, ObjectLocalName, NamedObjectPtr> NamesMap;
 typedef std::unordered_map<ObjectLocalName, ObjectDataPtr> ObjectDataMap;
-
 typedef android::base::HybridComponentManager<10000, unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
-
 typedef android::base::HybridComponentManager<10000, ObjectLocalName, bool> BoundAtLeastOnceMap;
 
 class GlobalNameSpace;

@@ -74,5 +74,37 @@ TEST(HybridComponentManager, SuperHighIndex) {
     EXPECT_EQ(1, *m.get_const(highIndex));
 }
 
+// Tests getExceptZero.
+TEST(HybridComponentManager, GetExceptZero) {
+    TestHCM m;
+
+    constexpr uint64_t highIndex = ~0ULL;
+
+    m.add(0, 1);
+    m.add(2, 0);
+    m.add(highIndex, 1);
+    m.add(highIndex - 1, 0);
+
+    EXPECT_NE(nullptr, m.get(0));
+    EXPECT_NE(nullptr, m.get_const(0));
+    EXPECT_EQ(1, *m.get(0));
+    EXPECT_EQ(1, *m.get_const(0));
+    EXPECT_NE(nullptr, m.getExceptZero(0));
+    EXPECT_EQ(1, *m.getExceptZero_const(0));
+
+    EXPECT_NE(nullptr, m.get(2));
+    EXPECT_NE(nullptr, m.get_const(2));
+    EXPECT_EQ(0, *m.get(2));
+    EXPECT_EQ(0, *m.get_const(2));
+    EXPECT_EQ(nullptr, m.getExceptZero(2));
+    EXPECT_EQ(nullptr, m.getExceptZero_const(2));
+
+    EXPECT_EQ(1, *m.get(highIndex));
+    EXPECT_EQ(0, *m.get_const(highIndex - 1));
+    EXPECT_EQ(nullptr, m.getExceptZero_const(highIndex - 1));
+    EXPECT_NE(nullptr, m.getExceptZero_const(highIndex));
+    EXPECT_EQ(nullptr, m.getExceptZero_const(2));
+}
+
 } // namespace android
 } // namespace base
