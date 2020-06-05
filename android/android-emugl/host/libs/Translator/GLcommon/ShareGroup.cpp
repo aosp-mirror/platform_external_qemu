@@ -315,6 +315,63 @@ ObjectDataPtr ShareGroup::getObjectDataPtr(NamedObjectType p_type,
     return getObjectDataPtrNoLock(p_type, p_localName);
 }
 
+#ifdef __cplusplus
+#   define CC_LIKELY( exp )    (__builtin_expect( !!(exp), true ))
+#   define CC_UNLIKELY( exp )  (__builtin_expect( !!(exp), false ))
+#else
+#   define CC_LIKELY( exp )    (__builtin_expect( !!(exp), 1 ))
+#   define CC_UNLIKELY( exp )  (__builtin_expect( !!(exp), 0 ))
+#endif
+
+unsigned int ShareGroup::ensureObjectOnBind(NamedObjectType p_type, ObjectLocalName p_localName) {
+    emugl::Mutex::AutoLock lock(m_namespaceLock);
+
+    auto ns = m_nameSpace[toIndex(p_type)];
+
+    bool isObj;
+    unsigned int globalName = ns->getGlobalName(p_localName, &isObj);
+
+    if (CC_LIKELY(isObj)) {
+        bool everBound = ns->everBound(p_localName);
+        if (CC_LIKELY(everBound)) return globalName;
+
+        auto ptr = ns->getObjectDataPtr(p_localName);
+
+        if (ptr) {
+            switch (p_type) {
+                default:
+                case NamedObjectType::VERTEXBUFFER: {
+                    auto vbo = ((GLESbuffer*)(ptr.get()));
+                    vbo->setBinded();
+                    break;
+                }
+            }
+        }
+
+        ns->setBoundAtLeastOnce(p_localName);
+        return globalName;
+    }
+
+    // No such object, generate one and bind it
+    bool genLocal = false;
+    auto gi = GenNameInfo(p_type);
+    ObjectLocalName localName =
+            ns->genName( gi, p_localName, genLocal);
+
+    switch (p_type) {
+        default:
+        case NamedObjectType::VERTEXBUFFER: {
+            auto vbo = new GLESbuffer;
+            vbo->setBinded();
+            ns->setObjectData(p_localName, ObjectDataPtr(vbo));
+            break;
+        }
+    }
+
+    ns->setBoundAtLeastOnce(p_localName);
+    return (uint32_t)(ns->getGlobalName(p_localName));
+}
+
 ObjectNameManager::ObjectNameManager(GlobalNameSpace *globalNameSpace) :
     m_globalNameSpace(globalNameSpace) {}
 
