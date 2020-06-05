@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bf535839_3a9c83b8",
+        "filename": "android/android-grpc/android/emulation/control/snapshot/SnapshotService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-06-05T18:44:33Z",
+      "side": 1,
+      "message": "should we use runOnMainLooperAndWaitForCompletion",
+      "range": {
+        "startLine": 317,
+        "startChar": 37,
+        "endLine": 317,
+        "endChar": 52
+      },
+      "revId": "d5de4b0f39aab15254c0ea1550d997063bfdf73f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
