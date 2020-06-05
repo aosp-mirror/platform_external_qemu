@@ -480,24 +480,9 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
 GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
-    //if buffer wasn't generated before,generate one
-    if (buffer && ctx->shareGroup().get() &&
-        !ctx->shareGroup()->isObject(NamedObjectType::VERTEXBUFFER, buffer)) {
-        ctx->shareGroup()->genName(NamedObjectType::VERTEXBUFFER, buffer);
-        ctx->shareGroup()->setObjectData(NamedObjectType::VERTEXBUFFER, buffer,
-                                         ObjectDataPtr(new GLESbuffer()));
-    }
-    ctx->bindBuffer(target,buffer);
-    if (buffer) {
-        GLESbuffer* vbo =
-                (GLESbuffer*)ctx->shareGroup()
-                        ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
-        vbo->setBinded();
-        const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
-        ctx->dispatcher().glBindBuffer(target, globalBufferName);
-    } else {
-        ctx->dispatcher().glBindBuffer(target, 0);
-    }
+
+    GLuint globalBufferName = ctx->bindBuffer(target,buffer);
+    ctx->dispatcher().glBindBuffer(target, globalBufferName);
 }
 
 static bool sIsFboTextureTarget(GLenum target) {
