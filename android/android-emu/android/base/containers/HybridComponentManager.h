@@ -78,6 +78,20 @@ public:
         }
     }
 
+    Data* getExceptZero(IndexType index) {
+        Data* res = get(index);
+        if (!res) return nullptr;
+        if (!(*res)) return nullptr;
+        return res;
+    }
+
+    const Data* getExceptZero_const(IndexType index) const {
+        const Data* res = get_const(index);
+        if (!res) return nullptr;
+        if (!(*res)) return nullptr;
+        return res;
+    }
+
     void forEach(IterFunc func) {
         mComponentManager.forEach(func);
 
