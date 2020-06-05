@@ -41,4 +41,8 @@ extern char* bufprint_config_file(char* buffer,
                                   char* buffend,
                                   const char* suffix);
 
+extern char* bufprint_per_avd_config_file(char* buff,
+                                          char* end,
+                                          const char* suffix);
+
 ANDROID_END_HEADER

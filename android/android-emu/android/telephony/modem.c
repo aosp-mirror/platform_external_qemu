@@ -769,10 +769,8 @@ amodem_create( int  base_port, AModemUnsolFunc  unsol_func, int sim_present, voi
     char nvfname[MAX_PATH];
     char *start = nvfname;
     char *end = start + sizeof(nvfname);
-
     modem->base_port    = base_port;
-    start = bufprint_config_file( start, end, "modem-nv-ram-" );
-    start = bufprint( start, end, "%d", modem->base_port );
+    start = bufprint_per_avd_config_file(start, end, "modem-nv-ram.ini");
     modem->nvram_config_filename = strdup( nvfname );
 
     amodem_reset( modem );

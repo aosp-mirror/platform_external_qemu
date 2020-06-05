@@ -14,10 +14,15 @@
 
 #include "android/emulation/bufprint_config_dirs.h"
 
+#include "android/avd/util.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/globals.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
+#include "android/utils/path.h"
+#include "android/utils/system.h"
 
 #include <limits.h>
 #include <stdio.h>
@@ -46,5 +51,13 @@ char* bufprint_config_path(char* buff, char* end) {
 char* bufprint_config_file(char* buff, char* end, const char* suffix) {
     char* p = bufprint_config_path(buff, end);
     p = bufprint(p, end, "%c%s", System::kDirSeparator, suffix);
+    return p;
+}
+
+char* bufprint_per_avd_config_file(char* buff, char* end, const char* suffix) {
+    char* avdPath(path_dirname(android_hw->disk_dataPartition_path));
+    char* p = bufprint(buff, end, "%s%c%s", avdPath, System::kDirSeparator,
+                       suffix);
+    AFREE(avdPath);
     return p;
 }
