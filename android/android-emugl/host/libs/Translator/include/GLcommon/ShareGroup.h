@@ -65,6 +65,7 @@ public:
     //                 object does not exist.
     //
     unsigned int getGlobalName(NamedObjectType p_type, ObjectLocalName p_localName);
+    unsigned int getGlobalNameNoLock(NamedObjectType p_type, ObjectLocalName p_localName);
 
     //
     // getLocalName - retrieves the "local" name of an object or 0 if the
@@ -99,6 +100,11 @@ public:
     //
     void setObjectData(NamedObjectType p_type, ObjectLocalName p_localName,
             ObjectDataPtr data);
+
+    //
+    // If the object doesn't exist, create it with that name
+    //
+    unsigned int ensureObjectOnBind(NamedObjectType p_type, ObjectLocalName p_localName);
 
     //
     // Retrieve object global data
