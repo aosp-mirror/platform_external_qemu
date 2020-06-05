@@ -49,5 +49,4 @@ private:
     bool           m_wasBound = false;
 };
 
-typedef emugl::SmartPtr<GLESbuffer> GLESbufferPtr;
 #endif

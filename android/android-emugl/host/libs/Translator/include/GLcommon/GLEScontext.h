@@ -249,7 +249,7 @@ public:
                                                   GLenum format, GLenum type,
                                                   GLint* internalformat_out, GLenum* format_out);
 
-    void bindBuffer(GLenum target,GLuint buffer);
+    GLuint bindBuffer(GLenum target,GLuint buffer); // returns global name for dispatcher
     virtual void bindIndexedBuffer(GLenum target,
                                    GLuint index,
                                    GLuint buffer,

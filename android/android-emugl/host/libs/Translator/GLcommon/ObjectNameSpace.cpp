@@ -188,15 +188,17 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
 
 
 unsigned int
-NameSpace::getGlobalName(ObjectLocalName p_localName)
+NameSpace::getGlobalName(ObjectLocalName p_localName, bool* found)
 {
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
+        if (found) *found = true;
         // object found - return its global name map
         return (*n).second->getGlobalName();
     }
 
     // object does not exist;
+    if (found) *found = false;
     return 0;
 }
 
@@ -229,6 +231,7 @@ NameSpace::deleteName(ObjectLocalName p_localName)
         m_localToGlobalMap.erase(n);
     }
     m_objectDataMap.erase(p_localName);
+    m_boundMap.remove(p_localName);
 }
 
 bool
@@ -260,6 +263,18 @@ NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
         (*n).second = p_namedObject;
         m_globalToLocalMap[p_namedObject->getGlobalName()] = p_localName;
     }
+}
+
+// sets that the local name has been bound at least once, to save time later
+void NameSpace::setBoundAtLeastOnce(ObjectLocalName p_localName) {
+    m_boundMap.add(p_localName, true);
+}
+
+// sets that the local name has been bound at least once, to save time later
+bool NameSpace::everBound(ObjectLocalName p_localName) const {
+    const bool* boundPtr = m_boundMap.get_const(p_localName);
+    if (!boundPtr) return false;
+    return *boundPtr;
 }
 
 ObjectDataMap::const_iterator NameSpace::objDataMapBegin() const {
