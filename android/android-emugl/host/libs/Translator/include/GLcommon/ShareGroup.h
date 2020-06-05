@@ -101,6 +101,11 @@ public:
             ObjectDataPtr data);
 
     //
+    // If the object doesn't exist, create it with that name
+    //
+    unsigned int ensureObjectOnBind(NamedObjectType p_type, ObjectLocalName p_localName);
+
+    //
     // Retrieve object global data
     //
     ObjectData* getObjectData(NamedObjectType p_type, ObjectLocalName p_localName);
