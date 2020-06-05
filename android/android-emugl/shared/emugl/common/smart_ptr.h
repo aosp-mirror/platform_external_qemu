@@ -20,4 +20,7 @@ namespace emugl {
 template <class T>
 using SmartPtr = std::shared_ptr<T>;
 
+template <class T>
+using SmartUniquePtr = std::unique_ptr<T>;
+
 }  // namespace emugl
