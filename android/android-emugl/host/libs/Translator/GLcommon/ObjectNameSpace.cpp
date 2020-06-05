@@ -174,12 +174,11 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
         do {
             localName = ++m_nextName;
         } while(localName == 0 ||
-                m_localToGlobalMap.find(localName) !=
-                        m_localToGlobalMap.end() );
+                (nullptr != m_localToGlobalMap.get_const(localName)));
     }
 
     auto newObjPtr = NamedObjectPtr( new NamedObject(genNameInfo, m_globalNameSpace));
-    m_localToGlobalMap[localName] = newObjPtr;
+    m_localToGlobalMap.add(localName, newObjPtr);
 
     unsigned int globalName = newObjPtr->getGlobalName();
     m_globalToLocalMap[globalName] = localName;
@@ -190,16 +189,15 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
 unsigned int
 NameSpace::getGlobalName(ObjectLocalName p_localName, bool* found)
 {
-    NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
-    if (n != m_localToGlobalMap.end()) {
-        if (found) *found = true;
-        // object found - return its global name map
-        return (*n).second->getGlobalName();
+    auto objPtrPtr = m_localToGlobalMap.get_const(p_localName);
+
+    if (!objPtrPtr) {
+        if (found) *found = false;
+        return 0;
     }
 
-    // object does not exist;
-    if (found) *found = false;
-    return 0;
+    if (found) *found = true;
+    return (*objPtrPtr)->getGlobalName();
 }
 
 ObjectLocalName
@@ -214,22 +212,24 @@ NameSpace::getLocalName(unsigned int p_globalName)
 }
 
 NamedObjectPtr NameSpace::getNamedObject(ObjectLocalName p_localName) {
-    auto it = m_localToGlobalMap.find(p_localName);
-    if (it != m_localToGlobalMap.end()) {
-        return it->second;
-    }
-
-    return nullptr;
+    auto objPtrPtr = m_localToGlobalMap.get_const(p_localName);
+    if (!objPtrPtr) return nullptr;
+    return *objPtrPtr;
 }
+
+static android::base::LazyInstance<ObjectDataPtr> nullObjectData = {};
+static android::base::LazyInstance<NamedObjectPtr> nullNamedObject = {};
 
 void
 NameSpace::deleteName(ObjectLocalName p_localName)
 {
-    NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
-    if (n != m_localToGlobalMap.end()) {
-        m_globalToLocalMap.erase(n->second->getGlobalName());
-        m_localToGlobalMap.erase(n);
+    auto objPtrPtr = m_localToGlobalMap.get(p_localName);
+    if (objPtrPtr) {
+        m_globalToLocalMap.erase((*objPtrPtr)->getGlobalName());
+        m_localToGlobalMap.remove(p_localName);
+        *objPtrPtr = nullNamedObject.get();
     }
+
     m_objectDataMap.erase(p_localName);
     m_boundMap.remove(p_localName);
 }
@@ -237,19 +237,22 @@ NameSpace::deleteName(ObjectLocalName p_localName)
 bool
 NameSpace::isObject(ObjectLocalName p_localName)
 {
-    return (m_localToGlobalMap.find(p_localName) != m_localToGlobalMap.end() );
+    return nullptr != m_localToGlobalMap.get_const(p_localName);
 }
 
 void
 NameSpace::setGlobalObject(ObjectLocalName p_localName,
                                NamedObjectPtr p_namedObject) {
-    NamesMap::iterator n(m_localToGlobalMap.find(p_localName));
-    if (n != m_localToGlobalMap.end()) {
-        m_globalToLocalMap.erase(n->second->getGlobalName());
-        (*n).second = p_namedObject;
+
+    auto objPtrPtr = m_localToGlobalMap.get(p_localName);
+    if (objPtrPtr) {
+        m_globalToLocalMap.erase((*objPtrPtr)->getGlobalName());
+        m_localToGlobalMap.remove(p_localName);
+        *objPtrPtr = p_namedObject;
     } else {
-        m_localToGlobalMap.emplace(p_localName, p_namedObject);
+        m_localToGlobalMap.add(p_localName, p_namedObject);
     }
+
     m_globalToLocalMap[p_namedObject->getGlobalName()] = p_localName;
 }
 
@@ -257,10 +260,10 @@ void
 NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
                                NamedObjectPtr p_namedObject)
 {
-    NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
-    if (n != m_localToGlobalMap.end()) {
-        m_globalToLocalMap.erase(n->second->getGlobalName());
-        (*n).second = p_namedObject;
+    auto objPtrPtr = m_localToGlobalMap.get(p_localName);
+    if (objPtrPtr) {
+        m_globalToLocalMap.erase((*objPtrPtr)->getGlobalName());
+        *objPtrPtr = p_namedObject;
         m_globalToLocalMap[p_namedObject->getGlobalName()] = p_localName;
     }
 }
@@ -284,8 +287,6 @@ ObjectDataMap::const_iterator NameSpace::objDataMapBegin() const {
 ObjectDataMap::const_iterator NameSpace::objDataMapEnd() const {
     return m_objectDataMap.end();
 }
-
-static android::base::LazyInstance<ObjectDataPtr> nullObjectData = {};
 
 const ObjectDataPtr& NameSpace::getObjectDataPtr(
         ObjectLocalName p_localName) {

@@ -29,8 +29,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-typedef std::unordered_map<ObjectLocalName, NamedObjectPtr> NamesMap;
-// typedef android::base::HybridComponentManager<10000, ObjectLocalName, NamedObjectPtr> NamesMap;
+// typedef std::unordered_map<ObjectLocalName, NamedObjectPtr> NamesMap;
+typedef android::base::HybridComponentManager<10000, ObjectLocalName, NamedObjectPtr> NamesMap;
 typedef std::unordered_map<ObjectLocalName, ObjectDataPtr> ObjectDataMap;
 typedef std::unordered_map<unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
 
