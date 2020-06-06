@@ -487,8 +487,9 @@ public:
 
         size_t index = indexOfEntity(h);
 
-        if (index + 1 > mItems.size()) {
+        if (index + 1 > mSize) {
             mItems.resize((index + 1) * 2);
+            mSize = mItems.size();
         }
 
         mItems[index].live = true;
@@ -500,6 +501,7 @@ public:
 
     void clear() {
         mItems.clear();
+        mSize = 0;
     }
 
     void remove(EntityHandle h) {
@@ -513,8 +515,9 @@ public:
     Data* get(EntityHandle h) {
         size_t index = indexOfEntity(h);
 
-        if (index + 1 > mItems.size()) {
+        if (index + 1 > mSize) {
             mItems.resize((index + 1) * 2);
+            mSize = mItems.size();
         }
 
         auto item = mItems.data() + indexOfEntity(h);
@@ -525,7 +528,7 @@ public:
     const Data* get_const(EntityHandle h) const {
         size_t index = indexOfEntity(h);
 
-        if (index + 1 > mItems.size()) {
+        if (index + 1 > mSize) {
             return nullptr;
         }
 
@@ -564,6 +567,7 @@ private:
     };
 
     std::vector<InternalItem> mItems;
+    size_t mSize = 0;
 };
 
 } // namespace android
