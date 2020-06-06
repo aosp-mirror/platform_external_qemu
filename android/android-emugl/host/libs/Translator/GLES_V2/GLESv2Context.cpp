@@ -236,6 +236,7 @@ void GLESv2Context::postLoadRestoreCtx() {
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     m_useProgramData = shareGroup()->getObjectDataPtr(
             NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
+    m_useProgramDataPtr = (ProgramData*)(m_useProgramData.get());
     const GLuint globalProgramName = shareGroup()->getGlobalName(
             NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
     dispatcher.glUseProgram(globalProgramName);
@@ -707,6 +708,7 @@ void GLESv2Context::setUseProgram(GLuint program,
     assert(!programData ||
             programData->getDataType() == ObjectDataType::PROGRAM_DATA);
     m_useProgramData = programData;
+    m_useProgramDataPtr = (ProgramData*)(m_useProgramData.get());
 }
 
 GLuint GLESv2Context::getCurrentProgram() const {
@@ -714,7 +716,7 @@ GLuint GLESv2Context::getCurrentProgram() const {
 }
 
 ProgramData* GLESv2Context::getUseProgram() {
-    return (ProgramData*)m_useProgramData.get();
+    return (ProgramData*)m_useProgramDataPtr;
 }
 
 void GLESv2Context::initExtensionString() {
