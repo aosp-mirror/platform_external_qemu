@@ -85,16 +85,20 @@ void ThreadInfo::updateInfo(ContextPtr eglCtx,
 
 static ::emugl::LazyInstance<ThreadInfoStore> s_tls = LAZY_INSTANCE_INIT;
 
+static thread_local ThreadInfo s_threadInfo;
+
 ThreadInfo *getThreadInfo()
 {
-    ThreadInfo *ti = static_cast<ThreadInfo*>(s_tls->get());
-    if (!ti) {
-        ti = new ThreadInfo();
-        s_tls->set(ti);
-#if TRACE_THREADINFO
-        LOG_THREADINFO("%s: EGL %p (%d instances)\n", __FUNCTION__,
-                       ti, (int)ThreadInfoStore::getInstanceCount());
-#endif
-    }
-    return ti;
+    return &s_threadInfo;
+
+//     ThreadInfo *ti = static_cast<ThreadInfo*>(s_tls->get());
+//     if (!ti) {
+//         ti = new ThreadInfo();
+//         s_tls->set(ti);
+// #if TRACE_THREADINFO
+//         LOG_THREADINFO("%s: EGL %p (%d instances)\n", __FUNCTION__,
+//                        ti, (int)ThreadInfoStore::getInstanceCount());
+// #endif
+//     }
+//     return ti;
 }

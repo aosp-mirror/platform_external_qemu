@@ -21,29 +21,27 @@
 
 namespace {
 
-class EglThreadInfoStore : public emugl::ThreadStore {
-public:
-    EglThreadInfoStore() : emugl::ThreadStore(&destructor) {}
-private:
-    static void destructor(void* value) {
-        delete static_cast<EglThreadInfo*>(value);
-    }
-};
+// class EglThreadInfoStore : public emugl::ThreadStore {
+// public:
+//     EglThreadInfoStore() : emugl::ThreadStore(&destructor) {}
+// private:
+//     static void destructor(void* value) {
+//         delete static_cast<EglThreadInfo*>(value);
+//     }
+// };
 
 }  // namespace
+
+
+// static emugl::LazyInstance<EglThreadInfoStore> s_tls = LAZY_INSTANCE_INIT;
+
+static thread_local EglThreadInfo thread_eglInfo;
 
 EglThreadInfo::EglThreadInfo() :
         m_err(EGL_SUCCESS), m_api(EGL_OPENGL_ES_API) {}
 
-static emugl::LazyInstance<EglThreadInfoStore> s_tls = LAZY_INSTANCE_INIT;
-
 EglThreadInfo* EglThreadInfo::get(void)
 {
-    EglThreadInfo *ti = static_cast<EglThreadInfo*>(s_tls->get());
-    if (!ti) {
-        ti = new EglThreadInfo();
-        s_tls->set(ti);
-    }
-    return ti;
+    return &thread_eglInfo;
 }
 
