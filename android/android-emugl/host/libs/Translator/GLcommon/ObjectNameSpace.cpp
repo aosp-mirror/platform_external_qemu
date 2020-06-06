@@ -181,7 +181,7 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
     m_localToGlobalMap.add(localName, newObjPtr);
 
     unsigned int globalName = newObjPtr->getGlobalName();
-    m_globalToLocalMap[globalName] = localName;
+    m_globalToLocalMap.add(globalName, localName);
     return localName;
 }
 
@@ -203,12 +203,9 @@ NameSpace::getGlobalName(ObjectLocalName p_localName, bool* found)
 ObjectLocalName
 NameSpace::getLocalName(unsigned int p_globalName)
 {
-    const auto it = m_globalToLocalMap.find(p_globalName);
-    if (it != m_globalToLocalMap.end()) {
-        return it->second;
-    }
-
-    return 0;
+    auto localPtr = m_globalToLocalMap.get_const(p_globalName);
+    if (!localPtr) return 0;
+    return *localPtr;
 }
 
 NamedObjectPtr NameSpace::getNamedObject(ObjectLocalName p_localName) {
@@ -225,7 +222,7 @@ NameSpace::deleteName(ObjectLocalName p_localName)
 {
     auto objPtrPtr = m_localToGlobalMap.get(p_localName);
     if (objPtrPtr) {
-        m_globalToLocalMap.erase((*objPtrPtr)->getGlobalName());
+        m_globalToLocalMap.remove((*objPtrPtr)->getGlobalName());
         m_localToGlobalMap.remove(p_localName);
         *objPtrPtr = nullNamedObject.get();
     }
@@ -246,14 +243,14 @@ NameSpace::setGlobalObject(ObjectLocalName p_localName,
 
     auto objPtrPtr = m_localToGlobalMap.get(p_localName);
     if (objPtrPtr) {
-        m_globalToLocalMap.erase((*objPtrPtr)->getGlobalName());
+        m_globalToLocalMap.remove((*objPtrPtr)->getGlobalName());
         m_localToGlobalMap.remove(p_localName);
         *objPtrPtr = p_namedObject;
     } else {
         m_localToGlobalMap.add(p_localName, p_namedObject);
     }
 
-    m_globalToLocalMap[p_namedObject->getGlobalName()] = p_localName;
+    m_globalToLocalMap.add(p_namedObject->getGlobalName(), p_localName);
 }
 
 void
@@ -262,9 +259,9 @@ NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
 {
     auto objPtrPtr = m_localToGlobalMap.get(p_localName);
     if (objPtrPtr) {
-        m_globalToLocalMap.erase((*objPtrPtr)->getGlobalName());
+        m_globalToLocalMap.remove((*objPtrPtr)->getGlobalName());
         *objPtrPtr = p_namedObject;
-        m_globalToLocalMap[p_namedObject->getGlobalName()] = p_localName;
+        m_globalToLocalMap.add(p_namedObject->getGlobalName(), p_localName);
     }
 }
 
