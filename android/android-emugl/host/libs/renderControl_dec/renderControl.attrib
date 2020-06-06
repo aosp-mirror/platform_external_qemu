@@ -94,3 +94,6 @@ rcGetDisplayPose
 rcCreateSyncKHR2
     dir attribs in
     len attribs num_attribs
+
+rcMakeCurrentAsync
+    flag flushOnEncode
