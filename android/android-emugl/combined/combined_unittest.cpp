@@ -106,6 +106,7 @@ protected:
         // Only to force a sweep of color buffers
         EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, EGL_NO_SURFACE,
                                            EGL_NO_SURFACE, EGL_NO_CONTEXT));
+        teardownEGL();
         if (!mDisableLeakCheck) {
             mAfterTest = android::base::GLObjectCounter::get()->getCounts();
             for (int i = 0; i < mBeforeTest.size(); i++) {
@@ -113,7 +114,6 @@ protected:
                     "Leaked objects of type " << i << "; before: " << mBeforeTest[i] << " after: " << mAfterTest[i];
             }
         }
-        teardownEGL();
         teardownGralloc();
 
         mDisableLeakCheck = false;

@@ -1398,6 +1398,15 @@ static int32_t rcMapGpaToBufferHandle2(uint32_t bufferHandle,
     return result;
 }
 
+static void rcMakeCurrentAsync(uint32_t context, uint32_t drawSurf, uint32_t readSurf)
+{
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) { return; }
+
+    fb->bindContext(context, drawSurf, readSurf);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1455,4 +1464,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcSetColorBufferVulkanMode2 = rcSetColorBufferVulkanMode2;
     dec->rcMapGpaToBufferHandle = rcMapGpaToBufferHandle;
     dec->rcMapGpaToBufferHandle2 = rcMapGpaToBufferHandle2;
+    dec->rcMakeCurrentAsync = rcMakeCurrentAsync;
 }
