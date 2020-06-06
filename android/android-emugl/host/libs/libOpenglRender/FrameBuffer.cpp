@@ -218,6 +218,7 @@ void FrameBuffer::waitUntilInitialized() {
 }
 
 void FrameBuffer::finalize() {
+    fprintf(stderr, "%s: call\n", __func__);
     AutoLock lock(sGlobals->lock);
     sInitialized.store(true, std::memory_order_relaxed);
     sGlobals->condVar.broadcastAndUnlock(&lock);
@@ -1524,7 +1525,9 @@ std::vector<HandleType> FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, 
             auto procIte = m_procOwnedWindowSurfaces.find(puid);
             if (procIte != m_procOwnedWindowSurfaces.end()) {
                 for (auto whndl : procIte->second) {
+                    fprintf(stderr, "%s: this %p\n", __func__, this);
                     auto w = m_windows.find(whndl);
+                    fprintf(stderr, "%s: after\n", __func__);
                     if (m_refCountPipeEnabled) {
                         if (decColorBufferRefCountLocked(w->second.second)) {
                             colorBuffersToCleanup.push_back(w->second.second);
@@ -1536,6 +1539,7 @@ std::vector<HandleType> FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, 
                     }
                     m_windows.erase(w);
                 }
+                fprintf(stderr, "%s: procIte erase\n", __func__);
                 m_procOwnedWindowSurfaces.erase(procIte);
             }
         }
@@ -2639,6 +2643,7 @@ bool FrameBuffer::onLoad(Stream* stream,
             std::vector<HandleType> colorBuffersToCleanup;
 
             while (m_procOwnedWindowSurfaces.size()) {
+                fprintf(stderr, "%s: do cleanup\n", __func__);
                 auto cleanupHandles = cleanupProcGLObjects_locked(
                         m_procOwnedWindowSurfaces.begin()->first, true);
                 colorBuffersToCleanup.insert(colorBuffersToCleanup.end(),
