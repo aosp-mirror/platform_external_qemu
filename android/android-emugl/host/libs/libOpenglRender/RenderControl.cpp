@@ -1390,6 +1390,14 @@ static void rcSetTracingForPuid(uint64_t puid, uint32_t enable, uint64_t time) {
     }
 }
 
+static void rcMakeCurrentAsync(uint32_t context, uint32_t drawSurf, uint32_t readSurf) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) { return; }
+
+    fb->bindContext(context, drawSurf, readSurf);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1449,4 +1457,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcMapGpaToBufferHandle2 = rcMapGpaToBufferHandle2;
     dec->rcFlushWindowColorBufferAsyncWithFrameNumber = rcFlushWindowColorBufferAsyncWithFrameNumber;
     dec->rcSetTracingForPuid = rcSetTracingForPuid;
+    dec->rcMakeCurrentAsync = rcMakeCurrentAsync;
 }
