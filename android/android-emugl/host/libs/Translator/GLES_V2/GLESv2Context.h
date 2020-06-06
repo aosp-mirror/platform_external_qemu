@@ -137,6 +137,7 @@ private:
     bool m_att0NeedsDisable = false;
 
     ObjectDataPtr m_useProgramData = {};
+    ProgramData* m_useProgramDataPtr = nullptr;
     std::unordered_map<GLuint, GLuint> m_bindSampler;
 
     std::vector<GLuint> m_emulatedClientVBOs;
