@@ -18,6 +18,7 @@
 
 #include "ShaderParser.h"
 
+#include "android/base/containers/HybridComponentManager.h"
 #include "android/base/StringView.h"
 
 #include <memory>
@@ -148,7 +149,7 @@ private:
             std::unordered_map<GLuint, GLUniformDesc> &uniformsOnSave) const;
 
     std::unordered_map<std::string, int> mUniNameToGuestLoc;
-    std::unordered_map<int, int> mGuestLocToHostLoc;
+    android::base::HybridComponentManager<10000, int, int> mGuestLocToHostLoc;
 
     int mCurrUniformBaseLoc = 0;
     bool mUseUniformLocationVirtualization = true;
