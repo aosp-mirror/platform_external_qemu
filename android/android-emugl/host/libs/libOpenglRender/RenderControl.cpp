@@ -1548,6 +1548,15 @@ static int rcIsSyncSignaled2(uint64_t syncid) {
     return fenceSync->isSignaled() ? 1 : 0;
 }
 
+static void rcMakeCurrentAsync(uint32_t context, uint32_t drawSurf, uint32_t readSurf)
+{
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) { return; }
+
+    fb->bindContext(context, drawSurf, readSurf);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1610,4 +1619,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcClientWaitSyncKHR2 = rcClientWaitSyncKHR2;
     dec->rcWaitSyncKHR2 = rcWaitSyncKHR2;
     dec->rcIsSyncSignaled2 = rcIsSyncSignaled2;
+    dec->rcMakeCurrentAsync = rcMakeCurrentAsync;
 }

@@ -58,3 +58,4 @@ GL_ENTRY(void, rcDestroySyncKHR2, uint64_t syncid)
 GL_ENTRY(EGLint, rcClientWaitSyncKHR2, uint64_t syncid, EGLint flags, uint64_t timeout)
 GL_ENTRY(void, rcWaitSyncKHR2, uint64_t syncid, EGLint flags);
 GL_ENTRY(int, rcIsSyncSignaled2, uint64_t syncid)
+GL_ENTRY(void, rcMakeCurrentAsync, uint32_t context, uint32_t drawSurf, uint32_t readSurf)
