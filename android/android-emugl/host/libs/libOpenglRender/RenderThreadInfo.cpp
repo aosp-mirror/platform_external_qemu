@@ -29,30 +29,22 @@
 
 using android::base::Stream;
 
-namespace {
-
-class ThreadInfoStore : public ::emugl::ThreadStore {
-public:
-    ThreadInfoStore() : ::emugl::ThreadStore(NULL) {}
-};
-
-}  // namespace
-
-static ::emugl::LazyInstance<ThreadInfoStore> s_tls = LAZY_INSTANCE_INIT;
+static thread_local RenderThreadInfo s_threadInfo;
 
 RenderThreadInfo::RenderThreadInfo() {
-    s_tls->set(this);
+    fprintf(stderr, "RenderThreadInfo::%s: call\n", __func__);
 }
 
 RenderThreadInfo::~RenderThreadInfo() {
-    s_tls->set(NULL);
+    fprintf(stderr, "RenderThreadInfo::%s: call\n", __func__);
 }
 
 RenderThreadInfo* RenderThreadInfo::get() {
-    return static_cast<RenderThreadInfo*>(s_tls->get());
+    return &s_threadInfo;
 }
 
 void RenderThreadInfo::onSave(Stream* stream) {
+    fprintf(stderr, "%s: call\n", __func__);
     if (currContext) {
         stream->putBe32(currContext->getHndl());
     } else {
@@ -86,6 +78,10 @@ void RenderThreadInfo::onSave(Stream* stream) {
 }
 
 bool RenderThreadInfo::onLoad(Stream* stream) {
+    fprintf(stderr, "%s: call\n", __func__);
+    m_contextSet.clear();
+    m_windowSet.clear();
+
     FrameBuffer* fb = FrameBuffer::getFB();
     assert(fb);
     HandleType ctxHndl = stream->getBe32();
