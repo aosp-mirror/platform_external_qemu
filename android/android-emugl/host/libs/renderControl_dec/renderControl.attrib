@@ -90,3 +90,14 @@ rcGetDisplayPose
     len w sizeof(uint32_t)
     dir h out
     len h sizeof(uint32_t)
+
+rcMakeCurrentAsync
+    flag flushOnEncode
+
+rcComposeAsync
+    dir buffer in
+    len buffer bufferSize
+    flag flushOnEncode
+
+rcDestroySyncKHRAsync
+    flag flushOnEncode
