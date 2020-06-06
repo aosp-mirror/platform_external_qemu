@@ -39,8 +39,8 @@ public:
     // Get the current API value.
     EGLenum getApi() const { return m_api; }
 
-private:
     EglThreadInfo();
+private:
 
     EGLint m_err;
     EGLenum m_api;
