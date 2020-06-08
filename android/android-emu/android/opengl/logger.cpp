@@ -70,6 +70,7 @@ private:
 
     Lock mLock;
     AndroidOpenglLoggerFlags mLoggerFlags = OPENGL_LOGGER_NONE;
+    uint64_t mPrevTimeUs = 0;
     std::string mFileName;
     std::ofstream mFileHandle;
     std::string mFineLogFileName;
@@ -137,18 +138,22 @@ void OpenGLLogger::writeFineTimestamped(const char* str) {
         uint64_t curr_micros = (tv.tv_usec) % 1000;
         uint64_t curr_millis = (tv.tv_usec / 1000) % 1000;
         uint64_t curr_secs = tv.tv_sec;
+        uint64_t curr_us = tv.tv_sec * 1000000ULL + tv.tv_usec;
         snprintf(buf, sizeof(buf) - 1,
                 "time_us="
                 "%" PRIu64 " s "
                 "%" PRIu64 " ms "
-                "%" PRIu64 " us | %s",
+                "%" PRIu64 " us deltaUs "
+                "%" PRIu64 " | %s",
                 curr_secs,
                 curr_millis,
                 curr_micros,
+                curr_us - mPrevTimeUs,
                 str);
         AutoLock lock(mLock);
         writeFineLocked(curr_micros + 1000ULL * curr_millis +
                   1000ULL * 1000ULL * curr_secs, buf);
+        mPrevTimeUs = curr_us;
     }
 }
 
