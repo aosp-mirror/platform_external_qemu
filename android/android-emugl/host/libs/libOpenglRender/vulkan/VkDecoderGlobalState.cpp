@@ -97,7 +97,7 @@ public:
             emugl::emugl_feature_is_enabled(
                 android::featurecontrol::VulkanSnapshots);
         mVkCleanupEnabled = System::get()->envGet("ANDROID_EMU_VK_NO_CLEANUP") != "1";
-        mLogMap = System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1";
+        mLogging = System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1";
     }
 
     ~Impl() = default;
@@ -773,6 +773,10 @@ public:
             const VkAllocationCallbacks* pAllocator,
             VkDevice* pDevice) {
 
+        if (mLogging) {
+            fprintf(stderr, "%s: begin\n", __func__);
+        }
+
         auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
         auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
 
@@ -829,12 +833,29 @@ public:
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
 
         // bug: 155795731 (see below)
+        if (mLogging) {
+            fprintf(stderr, "%s: acquire lock\n", __func__);
+        }
+
         AutoLock lock(mLock);
+
+        if (mLogging) {
+            fprintf(stderr, "%s: got lock, calling host\n", __func__);
+        }
+
         VkResult result =
             vk->vkCreateDevice(
                     physicalDevice, &createInfoFiltered, pAllocator, pDevice);
 
+        if (mLogging) {
+            fprintf(stderr, "%s: host returned. result: %d\n", __func__, result);
+        }
+
         if (result != VK_SUCCESS) return result;
+
+        if (mLogging) {
+            fprintf(stderr, "%s: track the new device (begin)\n", __func__);
+        }
 
         // bug: 155795731 we should protect vkCreateDevice in the driver too
         // because, at least w/ tcmalloc, there is a flaky crash on loading its
@@ -852,9 +873,19 @@ public:
 
         // First, get the dispatch table.
         VkDevice boxed = new_boxed_VkDevice(*pDevice, nullptr, true /* own dispatch */);
+
+        if (mLogging) {
+            fprintf(stderr, "%s: init vulkan dispatch from device\n", __func__);
+        }
+
         init_vulkan_dispatch_from_device(
                 vk, *pDevice,
                 dispatch_VkDevice(boxed));
+
+        if (mLogging) {
+            fprintf(stderr, "%s: init vulkan dispatch from device (end)\n", __func__);
+        }
+
         deviceInfo.boxed = boxed;
 
         // Next, get information about the queue families used by this device.
@@ -878,8 +909,18 @@ public:
             auto& queues = deviceInfo.queues[index];
             for (uint32_t i = 0; i < count; ++i) {
                 VkQueue queueOut;
+
+                if (mLogging) {
+                    fprintf(stderr, "%s: get device queue (begin)\n", __func__);
+                }
+
                 vk->vkGetDeviceQueue(
                         *pDevice, index, i, &queueOut);
+
+                if (mLogging) {
+                    fprintf(stderr, "%s: get device queue (end)\n", __func__);
+                }
+
                 queues.push_back(queueOut);
                 mQueueInfo[queueOut].device = *pDevice;
                 mQueueInfo[queueOut].queueFamilyIndex = index;
@@ -891,6 +932,11 @@ public:
 
         // Box the device.
         *pDevice = (VkDevice)deviceInfo.boxed;
+
+        if (mLogging) {
+            fprintf(stderr, "%s: (end)\n", __func__);
+        }
+
         return VK_SUCCESS;
     }
 
@@ -2380,7 +2426,7 @@ public:
             ((info->size + pageOffset + kPageSize - 1) >>
              kPageBits) << kPageBits;
 
-        if (mLogMap) {
+        if (mLogging) {
             fprintf(stderr, "%s: map: %p, %p -> [0x%llx 0x%llx]\n", __func__,
                     info->ptr,
                     info->pageAlignedHva,
@@ -2639,7 +2685,7 @@ public:
 #endif
 
         if (info->directMapped) {
-            if (mLogMap) {
+            if (mLogging) {
                 fprintf(stderr, "%s: unmap: %p, [0x%llx 0x%llx]\n", __func__,
                         info->ptr,
                         (unsigned long long)info->guestPhysAddr,
@@ -2654,7 +2700,7 @@ public:
         }
 
         if (info->virtioGpuMapped) {
-            if (mLogMap) {
+            if (mLogging) {
                 fprintf(stderr, "%s: unmap hostmem %p id 0x%llx\n", __func__,
                         info->ptr,
                         (unsigned long long)info->hostmemId);
@@ -2909,7 +2955,7 @@ public:
 
         auto info = android::base::find(mMapInfo, memory);
 
-        if (mLogMap) {
+        if (mLogging) {
             fprintf(stderr, "%s: deviceMemory: 0x%llx pAddress: 0x%llx\n", __func__,
                     (unsigned long long)memory,
                     (unsigned long long)(*pAddress));
@@ -5237,7 +5283,7 @@ private:
     VkEmulation* m_emu;
     bool mSnapshotsEnabled = false;
     bool mVkCleanupEnabled = true;
-    bool mLogMap = false;
+    bool mLogging = false;
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
