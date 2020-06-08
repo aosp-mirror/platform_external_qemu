@@ -43,6 +43,8 @@
 namespace android {
 namespace emulation {
 
+using TextureFrame = MediaHostRenderer::TextureFrame;
+
 namespace {
 
 bool canUseCudaDecoder() {
@@ -239,9 +241,24 @@ void MediaVpxDecoderGeneric::getImage(void* ptr) {
     if (mParser.version() == 200) {
         VPX_DPRINT("calling rendering to host side color buffer with id %d",
                    param.hostColorBufferId);
-        mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
-                                          pFrame->width, pFrame->height,
-                                          pFrame->data.data());
+        if (mUseGpuTexture && pFrame->texture[0] > 0 && pFrame->texture[1] > 0) {
+            VPX_DPRINT(
+                    "calling rendering to host side color buffer with id %d "
+                    "(gpu texture mode: textures %u %u)",
+                    param.hostColorBufferId,
+                    pFrame->texture[0],
+                    pFrame->texture[1]);
+            mRenderer.renderToHostColorBufferWithTextures(
+                    param.hostColorBufferId, pFrame->width, pFrame->height,
+                    TextureFrame{pFrame->texture[0], pFrame->texture[1]});
+        } else {
+            VPX_DPRINT(
+                    "calling rendering to host side color buffer with id %d",
+                    param.hostColorBufferId);
+            mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
+                                              pFrame->width, pFrame->height,
+                                              pFrame->data.data());
+        }
     } else {
         memcpy(param.p_dst, pFrame->data.data(),
                pFrame->width * pFrame->height * 3 / 2);
