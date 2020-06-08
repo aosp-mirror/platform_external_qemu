@@ -62,7 +62,7 @@
 
 #define  OPERATOR_HOME_INDEX 0
 #define  OPERATOR_HOME_MCC   310
-#define  OPERATOR_HOME_MNC   260
+#define  OPERATOR_HOME_MNC   250
 #define  OPERATOR_HOME_NAME  "Android"
 #define  OPERATOR_HOME_MCCMNC  STRINGIFY(OPERATOR_HOME_MCC) \
                                STRINGIFY(OPERATOR_HOME_MNC)
@@ -144,6 +144,8 @@ android_parse_network_type( const char*  speed )
         { "lte",   A_DATA_NETWORK_LTE },
         { "full",  A_DATA_NETWORK_LTE },
         { "5g",   A_DATA_NETWORK_NR   },  /* non-standalone 5g, based on lte, there is no 5g sa yet */
+        { "5gunmetered",   A_DATA_NETWORK_NR_UN_METERED   },  /* non-standalone 5g, based on lte, there is no 5g sa yet */
+        { "5gmetered",   A_DATA_NETWORK_NR_METERED   },  /* non-standalone 5g, based on lte, there is no 5g sa yet */
         { NULL, 0 }
     };
     int  nn;
@@ -915,6 +917,8 @@ tech_from_network_type( ADataNetworkType type )
             return A_TECH_GSM;
         case A_DATA_NETWORK_LTE:
         case A_DATA_NETWORK_NR:
+        case A_DATA_NETWORK_NR_UN_METERED:
+        case A_DATA_NETWORK_NR_METERED:
             return A_TECH_LTE;
         case A_DATA_NETWORK_UNKNOWN:
             return A_TECH_UNKNOWN;
@@ -926,6 +930,20 @@ void
 amodem_set_data_network_type( AModem  modem, ADataNetworkType   type )
 {
     AModemTech modemTech;
+    if (type == A_DATA_NETWORK_NR_UN_METERED) {
+        //set_operator_mcc_mnc("310250");
+        strcpy( modem->operators[0].name[2], "310260");
+        amodem_add_line( modem, "%%CNEWSIM\r\n");
+        modem->unsol_func( modem->unsol_opaque, modem->out_buff );
+        return;
+    }
+    if (type == A_DATA_NETWORK_NR_METERED) {
+        //set_operator_mcc_mnc("310250");
+        strcpy( modem->operators[0].name[2], "310250");
+        amodem_add_line( modem, "%%CNEWSIM\r\n");
+        modem->unsol_func( modem->unsol_opaque, modem->out_buff );
+        return;
+    }
     modem->data_network_requested = type;
     if (type != A_DATA_NETWORK_NR) {
         modem->data_network = type;
@@ -937,6 +955,7 @@ amodem_set_data_network_type( AModem  modem, ADataNetworkType   type )
         if (_amodem_switch_technology( modem, modemTech, modem->preferred_mask, new_data_network)) {
             modem->unsol_func( modem->unsol_opaque, modem->out_buff );
             amodem_addPhysChanCfgUpdate(modem);
+            modem->unsol_func( modem->unsol_opaque, modem->out_buff );
         }
     }
 }
@@ -2737,6 +2756,16 @@ handleGetModemActivityInfo( const char*  cmd, AModem  modem )
 }
 
 static const char*
+handleCIMI( const char*  cmd, AModem  modem )
+{
+    //strcpy( modem->operators[0].name[2], OPERATOR_HOME_MCCMNC );
+    //{ "+CIMI", OPERATOR_HOME_MCCMNC "000000000", NULL },   /* request internation subscriber identification number */
+    amodem_begin_line( modem );
+    amodem_add_line(modem, "%s000000000\r\n", modem->operators[0].name[2]);
+    return amodem_end_line( modem );
+}
+
+static const char*
 handleHangup( const char*  cmd, AModem  modem )
 {
     if ( !memcmp(cmd, "+CHLD=", 6) ) {
@@ -2952,7 +2981,8 @@ static const struct {
     { "A", NULL, handleAnswer },  /* answer the call */
     { "H", NULL, handleAnswer },  /* user is busy */
     { "!+VTS=", NULL, handleSetDialTone },
-    { "+CIMI", OPERATOR_HOME_MCCMNC "000000000", NULL },   /* request internation subscriber identification number */
+    //{ "+CIMI", OPERATOR_HOME_MCCMNC "000000000", NULL },   /* request internation subscriber identification number */
+    { "+CIMI", NULL, handleCIMI },   /* request internation subscriber identification number */
 
     /* request model version:
      *          35824005        - Nexus 5 (https://en.wikipedia.org/wiki/Type_Allocation_Code)

@@ -107,6 +107,8 @@ static void cellular_setStandard(enum CellularStandard cStandard)
         case Cellular_Std_HSDPA:  speedName = "hsdpa";  break;
         case Cellular_Std_LTE:    speedName = "lte";    break;
         case Cellular_Std_5G:     speedName = "5g";     break;
+        case Cellular_Std_5G_UN_METERED:     speedName = "5gunmetered";     break;
+        case Cellular_Std_5G_METERED:     speedName = "5gmetered";     break;
         case Cellular_Std_full:   speedName = "full";   break;
 
         default:
