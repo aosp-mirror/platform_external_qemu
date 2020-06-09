@@ -947,6 +947,8 @@ set(android-emu_unittests_common
 if (NOT OPTION_GFXSTREAM_BACKEND)
   list(APPEND android-emu_unittests_common
       "android/network/Ieee80211Frame_unittest.cpp")
+  list(APPEND android-emu_unittests_common
+      "android/network/WifiForwardPeer_unittest.cpp")
 endif()
 
 # And declare the test
