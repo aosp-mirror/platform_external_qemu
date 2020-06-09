@@ -42,6 +42,10 @@ namespace base {
 // the memory allocated in iov_base.
 class IOVector {
 public:
+    using iterator = struct iovec*;
+    using const_iterator = const struct iovec*;
+    IOVector() {}
+    IOVector(iterator begin, iterator end) : mIOVecs(begin, end) {}
     // STL-style container methods.
     void push_back(const struct iovec& iov) { mIOVecs.push_back(iov); }
 
@@ -55,17 +59,13 @@ public:
     // clear() doesn't free the memory pointed by iov_base.
     void clear() { mIOVecs.clear(); }
 
-    std::vector<struct iovec>::iterator begin() { return mIOVecs.begin(); }
+    iterator begin() { return mIOVecs.data(); }
 
-    std::vector<struct iovec>::const_iterator begin() const {
-        return mIOVecs.cbegin();
-    }
+    const_iterator begin() const { return mIOVecs.data(); }
 
-    std::vector<struct iovec>::iterator end() { return mIOVecs.end(); }
+    iterator end() { return mIOVecs.data() + size(); }
 
-    std::vector<struct iovec>::const_iterator end() const {
-        return mIOVecs.end();
-    }
+    const_iterator end() const { return mIOVecs.data() + size(); }
     // Copy data from IOVector to destination, starting at the
     // offset in IOVector with the specified size.
     // Return the number of bytes copied.
