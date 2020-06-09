@@ -16,21 +16,22 @@
 #include <vector>
 
 #include <GLES2/gl2.h>
-#include <GLSLANG/ShaderLang.h>
+
+#include "/usr/local/google/home/lfy/emu/external/angle/src/libShaderTranslator/ShaderTranslator.h"
 
 namespace ANGLEShaderParser {
 
 // Convenient to query those
-extern ShBuiltInResources kResources;
+extern ST_BuiltInResources kResources;
 
 // For performing link-time validation of shader programs.
 struct ShaderLinkInfo {
     int esslVersion;
-    std::vector<sh::Uniform> uniforms;
-    std::vector<sh::Varying> varyings;
-    std::vector<sh::Attribute> attributes;
-    std::vector<sh::OutputVariable> outputVars;
-    std::vector<sh::InterfaceBlock> interfaceBlocks;
+    std::vector<ST_ShaderVariable> uniforms;
+    std::vector<ST_ShaderVariable> varyings;
+    std::vector<ST_ShaderVariable> attributes;
+    std::vector<ST_ShaderVariable> outputVars;
+    std::vector<ST_InterfaceBlock> interfaceBlocks;
     std::map<std::string, std::string> nameMap;
     std::map<std::string, std::string> nameMapReverse;
 };

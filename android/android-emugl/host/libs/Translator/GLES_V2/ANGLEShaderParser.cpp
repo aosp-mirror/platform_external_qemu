@@ -13,15 +13,16 @@
 
 #include "android/base/synchronization/Lock.h"
 
+#include <dlfcn.h>
+
 #include <map>
 #include <string>
 
-#define SH_GLES31_SPEC ((ShShaderSpec)0x8B88)
 #define GL_COMPUTE_SHADER 0x91B9
 
 namespace ANGLEShaderParser {
 
-ShBuiltInResources kResources;
+ST_BuiltInResources kResources;
 bool kInitialized = false;
 
 struct ShaderSpecKey {
@@ -29,36 +30,36 @@ struct ShaderSpecKey {
     int esslVersion;
 };
 
-static ShShaderSpec sInputSpecForVersion(int esslVersion) {
+static ST_ShaderSpec sInputSpecForVersion(int esslVersion) {
     switch (esslVersion) {
         case 100:
-            return SH_GLES2_SPEC;
+            return ST_GLES2_SPEC;
         case 300:
-            return SH_GLES3_SPEC;
+            return ST_GLES3_SPEC;
         case 310:
-            return SH_GLES31_SPEC;
+            return ST_GLES3_1_SPEC;
     }
-    return SH_GLES31_SPEC;
+    return ST_GLES3_1_SPEC;
 }
 
-static ShShaderOutput sOutputSpecForVersion(bool coreProfileHost, int esslVersion) {
+static ST_ShaderOutput sOutputSpecForVersion(bool coreProfileHost, int esslVersion) {
     switch (esslVersion) {
         case 100:
             if (coreProfileHost) {
-                return SH_GLSL_330_CORE_OUTPUT;
+                return ST_GLSL_330_CORE_OUTPUT;
             } else {
-                return SH_GLSL_COMPATIBILITY_OUTPUT;
+                return ST_GLSL_COMPATIBILITY_OUTPUT;
             }
         case 300:
             if (coreProfileHost) {
-                return SH_GLSL_330_CORE_OUTPUT;
+                return ST_GLSL_330_CORE_OUTPUT;
             } else {
-                return SH_GLSL_150_CORE_OUTPUT;
+                return ST_GLSL_150_CORE_OUTPUT;
             }
         case 310:
-            return SH_GLSL_430_CORE_OUTPUT;
+            return ST_GLSL_430_CORE_OUTPUT;
     }
-    return SH_GLSL_430_CORE_OUTPUT;
+    return ST_GLSL_430_CORE_OUTPUT;
 }
 
 struct ShaderSpecKeyCompare {
@@ -72,17 +73,12 @@ struct ShaderSpecKeyCompare {
     }
 };
 
-typedef std::map<ShaderSpecKey, ShHandle, ShaderSpecKeyCompare> ShaderCompilerMap;
+typedef std::map<ShaderSpecKey, ST_Handle, ShaderSpecKeyCompare> ShaderCompilerMap;
 static ShaderCompilerMap sCompilerMap;
 
-static ShHandle getShaderCompiler(bool coreProfileHost, ShaderSpecKey key) {
+static ST_Handle getShaderCompiler(bool coreProfileHost, ShaderSpecKey key) {
     if (sCompilerMap.find(key) == sCompilerMap.end()) {
-        sCompilerMap[key] =
-            ShConstructCompiler(
-                    key.shaderType,
-                    sInputSpecForVersion(key.esslVersion),
-                    sOutputSpecForVersion(coreProfileHost, key.esslVersion),
-                    &kResources);
+        return (ST_Handle)nullptr;
     }
     return sCompilerMap[key];
 }
@@ -105,7 +101,7 @@ void initializeResources(
             int maxProgramTexelOffset,
             int maxDualSourceDrawBuffers,
             bool shaderFramebufferFetch) {
-    ShInitBuiltInResources(&kResources);
+    STGenerateResources(&kResources);
 
     kResources.MaxVertexAttribs = attribs; // Defaulted to 8
     kResources.MaxVertexUniformVectors = uniformVectors; // Defaulted to 128
@@ -148,10 +144,9 @@ bool globalInitialize(
             int maxDualSourceDrawBuffers,
             bool shaderFramebufferFetch) {
 
-    if (!ShInitialize()) {
-        fprintf(stderr, "Global ANGLE shader compiler initialzation failed.\n");
-        return false;
-    }
+
+
+    STInitialize();
 
     initializeResources(
             attribs,
@@ -174,27 +169,72 @@ bool globalInitialize(
     return true;
 }
 
+template <class T>
+static std::vector<T> convertArrayToVecWithCopy(
+    unsigned int count, const T* pItems, T (*copyFunc)(const T*)) {
+    std::vector<T> res;
+    for (uint32_t i = 0; i < count; ++i) {
+        res.push_back(copyFunc(pItems + i));
+    }
+    return res;
+}
+
 static void getShaderLinkInfo(int esslVersion,
-                              ShHandle compilerHandle,
+                              const ST_ShaderCompileResult* compileResult,
                               ShaderLinkInfo* linkInfo) {
     linkInfo->esslVersion = esslVersion;
 
-    linkInfo->nameMap = *ShGetNameHashingMap(compilerHandle);
+    for (uint32_t i = 0; i < compileResult->nameHashingMap->entryCount; ++i) {
+        linkInfo->nameMap[compileResult->nameHashingMap->ppUserNames[i]] =
+            compileResult->nameHashingMap->ppCompiledNames[i];
+    }
+
     for (const auto& elt : linkInfo->nameMap) {
         linkInfo->nameMapReverse[elt.second] = elt.first;
     }
 
-    auto uniforms = ShGetUniforms(compilerHandle);
-    auto varyings = ShGetVaryings(compilerHandle);
-    auto attributes = ShGetAttributes(compilerHandle);
-    auto outputVars = ShGetOutputVariables(compilerHandle);
-    auto interfaceBlocks = ShGetInterfaceBlocks(compilerHandle);
+    linkInfo->uniforms = convertArrayToVecWithCopy(
+        compileResult->uniformsCount,
+        compileResult->pUniforms,
+        STCopyVariable);
 
-    if (uniforms) linkInfo->uniforms = *uniforms;
-    if (varyings) linkInfo->varyings = *varyings;
-    if (attributes) linkInfo->attributes = *attributes;
-    if (outputVars) linkInfo->outputVars = *outputVars;
-    if (interfaceBlocks) linkInfo->interfaceBlocks = *interfaceBlocks;
+    std::vector<ST_ShaderVariable> inputVaryings =
+        convertArrayToVecWithCopy(
+            compileResult->inputVaryingsCount, compileResult->pInputVaryings,
+            STCopyVariable);
+    std::vector<ST_ShaderVariable> outputVaryings =
+        convertArrayToVecWithCopy(
+            compileResult->outputVaryingsCount, compileResult->pOutputVaryings,
+            STCopyVariable);
+
+    linkInfo->varyings.clear();
+    linkInfo->varyings.insert(
+        linkInfo->varyings.begin(),
+        inputVaryings.begin(),
+        inputVaryings.end());
+    linkInfo->varyings.insert(
+        linkInfo->varyings.begin(),
+        outputVaryings.begin(),
+        outputVaryings.end());
+
+    linkInfo->attributes =
+        convertArrayToVecWithCopy(
+            compileResult->allAttributesCount,
+            compileResult->pAllAttributes,
+            STCopyVariable);
+
+    linkInfo->outputVars =
+        convertArrayToVecWithCopy(
+            compileResult->activeOutputVariablesCount,
+            compileResult->pActiveOutputVariables,
+            STCopyVariable);
+
+    linkInfo->interfaceBlocks =
+        convertArrayToVecWithCopy(
+            compileResult->uniformBlocksCount,
+            compileResult->pUniformBlocks,
+            STCopyInterfaceBlock);
+    // todo: split to uniform and ssbo
 }
 
 static int detectShaderESSLVersion(const char* const* strings) {
@@ -220,68 +260,6 @@ bool translate(bool hostUsesCoreProfile,
                std::string* outObjCode,
                ShaderLinkInfo* outShaderLinkInfo) {
     int esslVersion = detectShaderESSLVersion(&src);
-
-    bool hasInout = src && strstr(src, "inout ");
-
-    // Temp workaround to get GL_EXT_shader_framebuffer_fetch
-    // to work
-    // (TODO: rebase ANGLE shader compiler)
-    bool avoidingAngleForInout =
-        hostUsesCoreProfile &&
-        (GL_FRAGMENT_SHADER == shaderType) &&
-        (esslVersion == 300) &&
-        hasInout &&
-        kResources.EXT_shader_framebuffer_fetch == 1;
-
-    // Leverage ARB_ES3_1_compatibility for ESSL 310 for now.
-    // Use translator after rest of dEQP-GLES31.functional is in a better state.
-    if (esslVersion == 310 || avoidingAngleForInout) {
-        // Don't try to get obj code just yet.
-        // At least on NVIDIA Quadro K2200 Linux (361.xx),
-        // ARB_ES3_1_compatibility seems to assume incorrectly
-        // that atomic_uint must catch a precision qualifier in ESSL 310.
-        std::string origSrc(src);
-
-        outShaderLinkInfo->esslVersion = esslVersion;
-        size_t versionStart = origSrc.find("#version");
-        size_t versionEnd = origSrc.find("\n", versionStart);
-
-        size_t extensionStart = origSrc.rfind("#extension");
-        size_t extensionEnd = origSrc.find("\n", extensionStart);
-
-        bool addAtomicUintPrecisionQualifier = esslVersion >= 310;
-
-        bool needChangeVersionToCore = avoidingAngleForInout;
-
-        std::string additionalPreamble;
-        if (addAtomicUintPrecisionQualifier) {
-            additionalPreamble += "precision highp atomic_uint;\n";
-        }
-
-        if (extensionStart == std::string::npos) {
-            std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
-            if (needChangeVersionToCore) versionPart = "#version 330 core\n";
-            std::string src2 =
-                versionPart + additionalPreamble +
-                origSrc.substr(versionEnd + 1, origSrc.size() - (versionEnd + 1));
-            *outObjCode = src2;
-        } else {
-            std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
-            if (needChangeVersionToCore) versionPart = "#version 330 core\n";
-
-            std::string uptoExtensionPart = origSrc.substr(versionEnd, extensionEnd - versionEnd + 1);
-            std::string src2 =
-                versionPart + uptoExtensionPart + additionalPreamble +
-                origSrc.substr(extensionEnd + 1, origSrc.size() - (extensionEnd + 1));
-            *outObjCode = src2;
-        }
-        return true;
-    }
-
-    if (!kInitialized) {
-        return false;
-    }
-
     // ANGLE may crash if multiple RenderThreads attempt to compile shaders
     // at the same time.
     android::base::AutoLock autolock(kCompilerLock);
@@ -290,30 +268,30 @@ bool translate(bool hostUsesCoreProfile,
     key.shaderType = shaderType;
     key.esslVersion = esslVersion;
 
-    ShHandle compilerHandle = getShaderCompiler(hostUsesCoreProfile, key);
+    ST_ShaderCompileInfo ci = {
+        (ST_Handle)getShaderCompiler(hostUsesCoreProfile, key),
+        shaderType,
+        sInputSpecForVersion(esslVersion),
+        sOutputSpecForVersion(hostUsesCoreProfile, esslVersion),
+        ST_OBJECT_CODE | ST_VARIABLES,
+        &kResources,
+        src,
+    };
 
-    if (!compilerHandle) {
-        fprintf(stderr, "%s: no compiler handle for shader type 0x%x, ESSL version %d\n",
-                __FUNCTION__,
-                shaderType,
-                esslVersion);
-        return false;
-    }
+    ST_ShaderCompileResult* res = nullptr;
 
-    // Pass in the entire src as 1 string, ask for compiled GLSL object code
-    // and information about all compiled variables.
-    int res = ShCompile(compilerHandle, &src, 1, SH_OBJECT_CODE | SH_VARIABLES);
+    STCompileAndResolve(&ci, &res);
 
-    // The compilers return references that may not be valid in the future,
-    // and we manually clear them immediately anyway.
-    *outInfolog = std::string(ShGetInfoLog(compilerHandle));
-    *outObjCode = std::string(ShGetObjectCode(compilerHandle));
+    sCompilerMap[key] = res->outputHandle;
+    *outInfolog = std::string(res->infoLog);
+    *outObjCode = std::string(res->translatedSource);
 
-    if (outShaderLinkInfo) getShaderLinkInfo(esslVersion, compilerHandle, outShaderLinkInfo);
+    if (outShaderLinkInfo) getShaderLinkInfo(esslVersion, res, outShaderLinkInfo);
 
-    ShClearResults(compilerHandle);
+    bool ret = res->compileStatus == 1;
 
-    return res;
+    STFreeShaderResolveState(res);
+    return ret;
 }
 
-}
+} // namespace ANGLEShaderParser
