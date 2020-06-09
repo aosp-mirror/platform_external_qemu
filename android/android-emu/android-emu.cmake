@@ -241,6 +241,7 @@ set(android-emu-common
     android/telephony/debug.c
     android/telephony/gsm.c
     android/telephony/modem.c
+    android/telephony/MeterService.cpp
     android/telephony/modem_driver.c
     android/telephony/remote_call.c
     android/telephony/phone_number.cpp

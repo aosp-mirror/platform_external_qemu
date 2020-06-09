@@ -115,6 +115,7 @@ extern void                amodem_set_voice_registration( AModem  modem, ARegist
 
 extern ARegistrationState  amodem_get_data_registration( AModem  modem );
 extern void                amodem_set_data_registration( AModem  modem, ARegistrationState    state );
+extern void                amodem_set_meter_state( AModem  modem, int meteron );
 extern void                amodem_set_data_network_type( AModem  modem, ADataNetworkType   type );
 
 extern ADataNetworkType    android_parse_network_type( const char*  speed );
