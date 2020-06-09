@@ -22,6 +22,30 @@
       "revId": "c59dd6e8a47d2748051d6c65679d64557dd63bf9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "97f371bd_aa38fcd6",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-06-09T17:23:55Z",
+      "side": 1,
+      "message": "mRemotePeer-\u003equeue() basically memcpy the data. So fhdr can be safely destroyed.",
+      "parentUuid": "deafe4d0_91054a66",
+      "range": {
+        "startLine": 306,
+        "startChar": 33,
+        "endLine": 306,
+        "endChar": 43
+      },
+      "revId": "c59dd6e8a47d2748051d6c65679d64557dd63bf9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
