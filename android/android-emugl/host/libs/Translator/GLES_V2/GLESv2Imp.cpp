@@ -3300,6 +3300,54 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
         SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
                      GL_INVALID_OPERATION);
+        if (sDebugPrintShaders) { // save repeated checks
+const char* coolSrc = R"(#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+out vec2 out0;
+
+
+const mat4x2 matA = mat4x2(2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0);
+const mat4x2 matB = mat4x2(1.0/2.0, 1.0/4.0, 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64.0, 1.0/128.0, 1.0/256.0);
+
+void main()
+{
+        mat4x2 result = matrixCompMult(matA, matB);
+        out0 = result * vec4(1.0, 1.0, 1.0, 1.0);
+        gl_Position = dEQP_Position;
+
+}
+)";
+const char* coolSrc2 = R"(#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+out vec2 out0;
+
+
+const mat4x2 matA = mat4x2(2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0);
+const mat4x2 matB = mat4x2(1.0/2.0, 1.0/4.0, 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64.0, 1.0/128.0, 1.0/256.0);
+
+void main()
+{
+        mat4x2 result = matrixCompMult(matA, matB);
+        out0 = result * vec4(1.0, 1.0, 1.0, 1.0);
+        gl_Position = dEQP_Position;
+
+}
+)";
+		if (count > 0 && (!strcmp(string[0], coolSrc))) {
+            fprintf(stderr, "%s: is the cool src\n", __func__);
+            ((const char**)string)[0] = coolSrc2;
+		}
+            for (GLsizei i = 0; i < count; ++i) {
+                SHADER_DEBUG_PRINT(
+                    "(Original GLES shader) "
+                    "%u source %d of %d: [%s]\n",
+                    shader,
+                    i, count,
+                    string[i]);
+            }
+        }
         ShaderParser* sp = (ShaderParser*)objData;
         sp->setSrc(count, string, length);
         if (isGles2Gles()) {
