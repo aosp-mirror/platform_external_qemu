@@ -37,6 +37,7 @@ private slots:
     void on_cell_standardBox_currentIndexChanged(int index);
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
     void on_cell_signalStatusBox_currentIndexChanged(int index);
+    void on_cell_meterStatusBox_currentIndexChanged(int index);
 
     // TODO: Implement Network delay setting
     // http://developer.android.com/tools/devices/emulator.html#netdelay

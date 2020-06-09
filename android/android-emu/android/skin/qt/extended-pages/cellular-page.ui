@@ -82,6 +82,7 @@
     </property>
    </item>
   </widget>
+
   <widget class="QGroupBox" name="cell_vStatusGroupBox">
    <property name="geometry">
     <rect>
@@ -101,6 +102,28 @@
     <string notr="true">Title</string>
    </property>
   </widget>
+
+  <widget class="QGroupBox" name="cell_mStatusGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>168</y>
+     <width>111</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Meter status</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Title</string>
+   </property>
+  </widget>
+
+
   <widget class="QGroupBox" name="cell_dStatusGroupBox">
    <property name="geometry">
     <rect>
@@ -158,6 +181,7 @@
     <string notr="true">Title</string>
    </property>
   </widget>
+
   <widget class="QComboBox" name="cell_voiceStatusBox">
    <property name="geometry">
     <rect>
@@ -204,6 +228,39 @@
     </property>
    </item>
   </widget>
+
+  <widget class="QComboBox" name="cell_meterStatusBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>186</y>
+     <width>280</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+   <item>
+    <property name="text">
+     <string>Metered</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Temporarily not metered</string>
+    </property>
+   </item>
+  </widget>
+
   <widget class="QComboBox" name="cell_dataStatusBox">
    <property name="geometry">
     <rect>
@@ -302,6 +359,7 @@
   <tabstop>cell_signalStatusBox</tabstop>
   <tabstop>cell_voiceStatusBox</tabstop>
   <tabstop>cell_dataStatusBox</tabstop>
+  <tabstop>cell_meterStatusBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

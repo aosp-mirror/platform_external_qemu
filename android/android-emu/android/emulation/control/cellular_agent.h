@@ -26,6 +26,8 @@ enum CellularStandard { Cellular_Std_GSM,  Cellular_Std_HSCSD, Cellular_Std_GPRS
 enum CellularSignal { Cellular_Signal_None, Cellular_Signal_Poor, Cellular_Signal_Moderate,
                       Cellular_Signal_Good, Cellular_Signal_Great };
 
+enum CellularMeterStatus { Cellular_Metered,   Cellular_Temporarily_Not_Metered };
+
 typedef struct QAndroidCellularAgent {
     // Sets the cellular signal strength
     // Input: 0(none) .. 31(very strong)
@@ -38,6 +40,10 @@ typedef struct QAndroidCellularAgent {
     // Sets the status of the voice connectivity
     // Input: enum CellularStatus, above
     void (*setVoiceStatus)(enum CellularStatus);
+
+    // Sets the status of the meterness
+    // Input: enum CellularMeterStatus, above
+    void (*setMeterStatus)(enum CellularMeterStatus);
 
     // Sets the status of the data connectivity
     // Input: enum CellularStatus, above

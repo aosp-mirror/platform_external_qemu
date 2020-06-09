@@ -33,7 +33,9 @@ static void saveDataStatus(int status);
 static void saveNetworkType(int type);
 static void saveSignalStrength(int strength);
 static void saveVoiceStatus(int status);
+static void saveMeterStatus(int status);
 static int  getSavedDataStatus();
+static int  getSavedMeterStatus();
 static int  getSavedNetworkType();
 static int  getSavedSignalStrength();
 static int  getSavedVoiceStatus();
@@ -58,6 +60,10 @@ CellularPage::CellularPage(QWidget *parent) :
 
     // Data status
     mUi->cell_dataStatusBox->setCurrentIndex(getSavedDataStatus());
+
+    // Meter status
+    mUi->cell_meterStatusBox->setCurrentIndex(getSavedMeterStatus()); // always metered
+
 }
 
 extern "C" int sim_is_present() {
@@ -114,6 +120,11 @@ void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
     if (sCellularAgent->setDataStatus) {
         sCellularAgent->setDataStatus((CellularStatus)getSavedDataStatus());
     }
+
+    // Meter status
+    if (sCellularAgent->setMeterStatus) {
+        sCellularAgent->setMeterStatus((CellularMeterStatus)getSavedMeterStatus());
+    }
 }
 
 void CellularPage::on_cell_standardBox_currentIndexChanged(int index)
@@ -135,6 +146,17 @@ void CellularPage::on_cell_voiceStatusBox_currentIndexChanged(int index)
     if (sCellularAgent && sCellularAgent->setVoiceStatus) {
         CellularStatus vStatus = (CellularStatus)index;
         sCellularAgent->setVoiceStatus(vStatus);
+    }
+}
+
+void CellularPage::on_cell_meterStatusBox_currentIndexChanged(int index)
+{
+    saveMeterStatus(index);
+
+    android::RecursiveScopedVmLock vmlock;
+    if (sCellularAgent && sCellularAgent->setMeterStatus) {
+        CellularMeterStatus mStatus = (CellularMeterStatus)index;
+        sCellularAgent->setMeterStatus(mStatus);
     }
 }
 
@@ -213,6 +235,33 @@ static void saveVoiceStatus(int status) {
         // Use the global settings if no AVD.
         QSettings settings;
         settings.setValue(Ui::Settings::CELLULAR_VOICE_STATUS, status);
+    }
+}
+
+static void saveMeterStatus(int status) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_CELLULAR_METER_STATUS, status);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::CELLULAR_METER_STATUS, status);
+    }
+}
+
+static int  getSavedMeterStatus() {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        return avdSpecificSettings.value(Ui::Settings::PER_AVD_CELLULAR_METER_STATUS,
+                                         Cellular_Metered).toInt();
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        return settings.value(Ui::Settings::CELLULAR_METER_STATUS, Cellular_Metered).toInt();
     }
 }
 

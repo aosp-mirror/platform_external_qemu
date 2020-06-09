@@ -69,6 +69,7 @@ constexpr char BATTERY_STATUS[]        = "battery/status";
 constexpr char CELLULAR_NETWORK_TYPE[]    = "cell/network_type";
 constexpr char CELLULAR_SIGNAL_STRENGTH[] = "cell/signal_strength";
 constexpr char CELLULAR_VOICE_STATUS[]    = "cell/voice_status";
+constexpr char CELLULAR_METER_STATUS[]    = "cell/meter_status";
 constexpr char CELLULAR_DATA_STATUS[]     = "cell/data_status";
 
 constexpr char CRASHREPORT_PREFERENCE[] = "set/crashReportPreference";
@@ -150,6 +151,7 @@ constexpr char PER_AVD_BATTERY_STATUS[]        = "perAvd/battery/status";
 constexpr char PER_AVD_CELLULAR_NETWORK_TYPE[]    = "perAvd/cell/network_type";
 constexpr char PER_AVD_CELLULAR_SIGNAL_STRENGTH[] = "perAvd/cell/signal_strength";
 constexpr char PER_AVD_CELLULAR_VOICE_STATUS[]    = "perAvd/cell/voice_status";
+constexpr char PER_AVD_CELLULAR_METER_STATUS[]    = "perAvd/cell/meter_status";
 constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
 
 constexpr char PER_AVD_DISABLE_DEVICE_FRAME[] = "perAvd/set/disableDeviceFrame";
