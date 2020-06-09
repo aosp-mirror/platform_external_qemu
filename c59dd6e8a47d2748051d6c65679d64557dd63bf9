@@ -46,6 +46,30 @@
       "revId": "c59dd6e8a47d2748051d6c65679d64557dd63bf9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff948445_ea3d32f3",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-06-09T17:25:38Z",
+      "side": 1,
+      "message": "Then probably you don\u0027t need unique_ptr and new.",
+      "parentUuid": "97f371bd_aa38fcd6",
+      "range": {
+        "startLine": 306,
+        "startChar": 33,
+        "endLine": 306,
+        "endChar": 43
+      },
+      "revId": "c59dd6e8a47d2748051d6c65679d64557dd63bf9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
