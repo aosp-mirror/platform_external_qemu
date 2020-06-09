@@ -72,6 +72,20 @@ static void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
     }
 }
 
+static void cellular_setMeterStatus(enum CellularMeterStatus meterStatus)
+{
+    int meteron = -1;
+
+    if (android_modem) {
+        switch (meterStatus) {
+            case Cellular_Metered:                  meteron = 1;                    break;
+            case Cellular_Temporarily_Not_Metered:  meteron = 0;                    break;
+            default: return;
+        }
+        amodem_set_meter_state(android_modem, meteron);
+    }
+}
+
 static void cellular_setDataStatus(enum CellularStatus dataStatus)
 {
     // (See do_gsm_data() in android-qemu2-glue/console.c)
@@ -134,6 +148,7 @@ static const QAndroidCellularAgent sQAndroidCellularAgent = {
     .setSignalStrength = cellular_setSignalStrength,
     .setSignalStrengthProfile = cellular_setSignalStrengthProfile,
     .setVoiceStatus = cellular_setVoiceStatus,
+    .setMeterStatus = cellular_setMeterStatus,
     .setDataStatus = cellular_setDataStatus,
     .setStandard = cellular_setStandard,
     .setSimPresent = cellular_setSimPresent};
