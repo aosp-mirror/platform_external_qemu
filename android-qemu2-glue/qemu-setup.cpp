@@ -42,6 +42,7 @@
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/goldfish_sync.h"
+#include "android-qemu2-glue/emulation/virtio-wifi.h"
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/net-android.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
@@ -72,6 +73,7 @@
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
@@ -461,6 +463,9 @@ bool qemu_android_emulation_setup() {
                         "is no longer responding.");
     }
 
+    if (feature_is_enabled(kFeature_VirtioWifi)) {
+        virtio_wifi_set_mac_prefix(android_serial_number_port);
+    }
     return true;
 }
 

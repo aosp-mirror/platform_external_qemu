@@ -119,7 +119,7 @@ bool VirtioWifiForwarder::init() {
             .link_status_changed = &VirtioWifiForwarder::onLinkStatusChanged,
     };
 
-    mNic.reset(::qemu_new_nic(&info, mNicConf, kNicModel, kNicName, this));
+    mNic = qemu_new_nic(&info, mNicConf, kNicModel, kNicName, this);
 
     // init WifiFordPeer for P2P network.
     auto onData = [this](const uint8_t* data, size_t size) {
@@ -179,7 +179,7 @@ int VirtioWifiForwarder::forwardFrame(IOVector sg, bool toRemoteVM) {
 }
 
 void VirtioWifiForwarder::stop() {
-    ::qemu_del_nic(mNic.get());
+    qemu_del_nic(mNic);
     mRemotePeer->stop();
 }
 
@@ -323,12 +323,12 @@ int VirtioWifiForwarder::sendToNIC(Ieee80211Frame& frame) {
     // Send to QEMU NIC.
     int res;
     if (mOnFrameSentCallback) {
-        res = ::qemu_sendv_packet_async(
-                qemu_get_subqueue(mNic.get(), 0), &outSg[0], outSg.size(),
+        res = qemu_sendv_packet_async(
+                qemu_get_subqueue(mNic, 0), &outSg[0], outSg.size(),
                 &VirtioWifiForwarder::onFrameSentCallback);
     } else {
-        res = ::qemu_sendv_packet(qemu_get_subqueue(mNic.get(), 0), &outSg[0],
-                                  outSg.size());
+        res = qemu_sendv_packet(qemu_get_subqueue(mNic, 0), &outSg[0],
+                                outSg.size());
     }
     return res ? 0 : -EBUSY;
 }
