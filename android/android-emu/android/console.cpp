@@ -1394,10 +1394,44 @@ do_gsm_status( ControlClient  client, char*  args )
     return 0;
 }
 
+static void help_gsm_meter(ControlClient client) {
+    int nn;
+    control_write(client,
+                  "the 'gsm meter <on|off>' allows you to change the meterness "
+                  "of your mobile data plan\r\n");
+    control_write(client, "\r\n");
+}
 
-static void
-help_gsm_data( ControlClient  client )
-{
+static int do_gsm_meter(ControlClient client, char* args) {
+    int nn;
+
+    if (!args) {
+        control_write(client,
+                      "KO: missing argument, try 'gsm meter <on|off>'\r\n");
+        return -1;
+    }
+
+    int meteron = -1;
+    if (!strcmp(args, "on")) {
+        meteron = 1;
+    } else if (!strcmp(args, "off")) {
+        meteron = 0;
+    } else {
+        control_write(client,
+                      "KO: bad GSM meter state name, try 'help gsm meter' for "
+                      "list of valid values\r\n");
+        return -1;
+    }
+
+    if (!android_modem_get()) {
+        control_write(client, "KO: modem emulation not running\r\n");
+        return -1;
+    }
+    amodem_set_meter_state(android_modem_get(), meteron);
+    return 0;
+}
+
+static void help_gsm_data(ControlClient client) {
     int  nn;
     control_write( client,
             "the 'gsm data <state>' allows you to change the state of your GPRS connection\r\n"
@@ -1413,7 +1447,6 @@ help_gsm_data( ControlClient  client )
     }
     control_write( client, "\r\n" );
 }
-
 
 static int
 do_gsm_data( ControlClient  client, char*  args )
@@ -1779,58 +1812,66 @@ static const CommandDefRec  cdma_commands[] =
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
-static const CommandDefRec  gsm_commands[] =
-{
-    { "list", "list current phone calls",
-    "'gsm list' lists all inbound and outbound calls and their state\r\n", NULL,
-    do_gsm_list, NULL },
+static const CommandDefRec gsm_commands[] = {
+        {"list", "list current phone calls",
+         "'gsm list' lists all inbound and outbound calls and their state\r\n",
+         NULL, do_gsm_list, NULL},
 
-    { "call", "create inbound phone call",
-    "'gsm call <phonenumber>' allows you to simulate a new inbound call\r\n", NULL,
-    do_gsm_call, NULL },
+        {"call", "create inbound phone call",
+         "'gsm call <phonenumber>' allows you to simulate a new inbound "
+         "call\r\n",
+         NULL, do_gsm_call, NULL},
 
-    { "busy", "close waiting outbound call as busy",
-    "'gsm busy <remoteNumber>' closes an outbound call, reporting\r\n"
-    "the remote phone as busy. only possible if the call is 'waiting'.\r\n", NULL,
-    do_gsm_busy, NULL },
+        {"busy", "close waiting outbound call as busy",
+         "'gsm busy <remoteNumber>' closes an outbound call, reporting\r\n"
+         "the remote phone as busy. only possible if the call is "
+         "'waiting'.\r\n",
+         NULL, do_gsm_busy, NULL},
 
-    { "hold", "change the state of an outbound call to 'held'",
-    "'gsm hold <remoteNumber>' change the state of a call to 'held'. this is only possible\r\n"
-    "if the call in the 'waiting' or 'active' state\r\n", NULL,
-    do_gsm_hold, NULL },
+        {"hold", "change the state of an outbound call to 'held'",
+         "'gsm hold <remoteNumber>' change the state of a call to 'held'. this "
+         "is only possible\r\n"
+         "if the call in the 'waiting' or 'active' state\r\n",
+         NULL, do_gsm_hold, NULL},
 
-    { "accept", "change the state of an outbound call to 'active'",
-    "'gsm accept <remoteNumber>' change the state of a call to 'active'. this is only possible\r\n"
-    "if the call is in the 'waiting' or 'held' state\r\n", NULL,
-    do_gsm_accept, NULL },
+        {"accept", "change the state of an outbound call to 'active'",
+         "'gsm accept <remoteNumber>' change the state of a call to 'active'. "
+         "this is only possible\r\n"
+         "if the call is in the 'waiting' or 'held' state\r\n",
+         NULL, do_gsm_accept, NULL},
 
-    { "cancel", "disconnect an inbound or outbound phone call",
-    "'gsm cancel <phonenumber>' allows you to simulate the end of an inbound or outbound call\r\n", NULL,
-    do_gsm_cancel, NULL },
+        {"cancel", "disconnect an inbound or outbound phone call",
+         "'gsm cancel <phonenumber>' allows you to simulate the end of an "
+         "inbound or outbound call\r\n",
+         NULL, do_gsm_cancel, NULL},
 
-    { "data", "modify data connection state", NULL, help_gsm_data,
-    do_gsm_data, NULL },
+        {"data", "modify data connection state", NULL, help_gsm_data,
+         do_gsm_data, NULL},
 
-    { "voice", "modify voice connection state", NULL, help_gsm_voice,
-    do_gsm_voice, NULL },
+        {"meter", "modify mobile data meterness", NULL, help_gsm_meter,
+         do_gsm_meter, NULL},
 
-    { "status", "display GSM status",
-    "'gsm status' displays the current state of the GSM emulation\r\n", NULL,
-    do_gsm_status, NULL },
+        {"voice", "modify voice connection state", NULL, help_gsm_voice,
+         do_gsm_voice, NULL},
 
-    { "signal", "set sets the rssi and ber",
-    "'gsm signal <rssi> [<ber>]' changes the reported strength and error rate on next (15s) update.\r\n"
-    "rssi range is 0..31 and 99 for unknown\r\n"
-    "ber range is 0..7 percent and 99 for unknown\r\n",
-    NULL, do_gsm_signal, NULL },
+        {"status", "display GSM status",
+         "'gsm status' displays the current state of the GSM emulation\r\n",
+         NULL, do_gsm_status, NULL},
 
-    { "signal-profile", "set the signal strength profile",
-    "'gsm signal-profile <strength>' changes the reported strength on next (15s) update.\r\n"
-    "strength range is 0..4\r\n",
-    NULL, do_gsm_signal_profile, NULL },
+        {"signal", "set sets the rssi and ber",
+         "'gsm signal <rssi> [<ber>]' changes the reported strength and error "
+         "rate on next (15s) update.\r\n"
+         "rssi range is 0..31 and 99 for unknown\r\n"
+         "ber range is 0..7 percent and 99 for unknown\r\n",
+         NULL, do_gsm_signal, NULL},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {"signal-profile", "set the signal strength profile",
+         "'gsm signal-profile <strength>' changes the reported strength on "
+         "next (15s) update.\r\n"
+         "strength range is 0..4\r\n",
+         NULL, do_gsm_signal_profile, NULL},
+
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
 
 /********************************************************************************************/
 /********************************************************************************************/

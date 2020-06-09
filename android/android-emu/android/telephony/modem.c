@@ -11,6 +11,7 @@
 */
 #include "android/telephony/modem.h"
 
+#include "android/telephony/MeterService.h"
 #include "android/telephony/debug.h"
 #include "android/telephony/phone_number.h"
 #include "android/telephony/remote_call.h"
@@ -869,6 +870,12 @@ ARegistrationState
 amodem_get_data_registration( AModem  modem )
 {
     return modem->data_state;
+}
+
+void
+amodem_set_meter_state( AModem  modem, int meteron )
+{
+    set_mobile_data_meterness(meteron);
 }
 
 void
