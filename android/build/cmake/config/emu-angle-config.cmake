@@ -20,8 +20,7 @@ get_filename_component(
 set(ANGLE_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
 set(ANGLE_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(ANGLE_LIBRARIES
-    "${PREBUILT_ROOT}/lib/libtranslator_static${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libtranslator_lib${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libpreprocessor${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libangle_common${CMAKE_STATIC_LIBRARY_SUFFIX}"
-)
+    "/usr/local/google/home/lfy/emu/external/angle/out/Debug/libshadertranslator.so")
 
 if(NOT TARGET ANGLE::ANGLE)
   add_library(ANGLE::ANGLE INTERFACE IMPORTED GLOBAL)

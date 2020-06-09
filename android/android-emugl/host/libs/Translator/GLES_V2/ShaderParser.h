@@ -60,6 +60,7 @@ public:
     bool hasAttachedPrograms() const {return m_programs.size()>0;}
 
     const ANGLEShaderParser::ShaderLinkInfo& getShaderLinkInfo() const { return m_shaderLinkInfo; }
+    ANGLEShaderParser::ShaderLinkInfo* shaderLinkInfoPtr() { return &m_shaderLinkInfo; }
 
     virtual GenNameInfo getGenNameInfo() const override;
     const char* getCompiledSrc() const { return m_compiledSrc.c_str(); }
