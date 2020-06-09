@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/base/IOVector.h"
+#include "android/base/ArraySize.h"
 
 #include <gtest/gtest.h>
 #include <vector>
@@ -17,18 +18,19 @@
 using android::base::IOVector;
 
 TEST(IOVectorTest, Basic) {
-    IOVector vec;
-    EXPECT_EQ(vec.size(), 0);
+    IOVector iovector;
+    EXPECT_EQ(iovector.size(), 0);
     const size_t kSize = 10;
     std::vector<uint8_t> buf(kSize);
-    struct iovec iov;
-    iov.iov_base = buf.data();
-    iov.iov_len = buf.size();
-    vec.push_back(iov);
-    EXPECT_EQ(vec.size(), 1);
-    EXPECT_EQ(vec[0].iov_base, buf.data());
-    EXPECT_EQ(vec[0].iov_len, buf.size());
-    EXPECT_EQ(vec.summedLength(), buf.size());
+    const struct iovec iov = {.iov_base = buf.data(), .iov_len = buf.size()};
+    iovector.push_back(iov);
+    EXPECT_EQ(iovector.size(), 1);
+    EXPECT_EQ(iovector[0].iov_base, buf.data());
+    EXPECT_EQ(iovector[0].iov_len, buf.size());
+    EXPECT_EQ(iovector.summedLength(), buf.size());
+    struct iovec vecs[] = {iov, iov};
+    IOVector iovector2(vecs, vecs + android::base::arraySize(vecs));
+    EXPECT_EQ(iovector2.size(), android::base::arraySize(vecs));
 }
 
 TEST(IOVectorTest, Copy) {

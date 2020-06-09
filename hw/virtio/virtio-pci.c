@@ -2609,6 +2609,53 @@ static const TypeInfo virtio_tablet_pci_info = {
     .instance_init = virtio_tablet_initfn,
 };
 
+/* virtio-wifi-pci */
+static Property virtio_wifi_properties[] = {
+    DEFINE_PROP_BIT("ioeventfd", VirtIOPCIProxy, flags,
+                    VIRTIO_PCI_FLAG_USE_IOEVENTFD_BIT, true),
+    DEFINE_PROP_UINT32("vectors", VirtIOPCIProxy, nvectors, 3),
+    DEFINE_PROP_END_OF_LIST(),
+};
+static void virtio_wifi_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
+{
+    DeviceState *qdev = DEVICE(vpci_dev);
+    VirtIOWifiPCI *dev = VIRTIO_WIFI_PCI(vpci_dev);
+    DeviceState *vdev = DEVICE(&dev->vdev);
+    qdev_set_parent_bus(vdev, BUS(&vpci_dev->bus));
+    object_property_set_bool(OBJECT(vdev), true, "realized", errp);
+}
+
+static void virtio_wifi_pci_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+    PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
+    VirtioPCIClass *vpciklass = VIRTIO_PCI_CLASS(klass);
+
+    k->vendor_id = PCI_VENDOR_ID_REDHAT_QUMRANET;
+    k->device_id = PCI_DEVICE_ID_VIRTIO_MAC80211_WLAN;
+    k->revision = VIRTIO_PCI_ABI_VERSION;
+    k->class_id = PCI_CLASS_NETWORK_ETHERNET;
+    set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
+    dc->props = virtio_wifi_properties;
+    vpciklass->realize = virtio_wifi_pci_realize;
+}
+
+static void virtio_wifi_pci_instance_init(Object *obj)
+{
+    VirtIOWifiPCI *dev = VIRTIO_WIFI_PCI(obj);
+
+    virtio_instance_init_common(obj, &dev->vdev, sizeof(dev->vdev),
+                                TYPE_VIRTIO_WIFI);
+}
+
+static const TypeInfo virtio_wifi_pci_info = {
+    .name          = TYPE_VIRTIO_WIFI_PCI,
+    .parent        = TYPE_VIRTIO_PCI,
+    .instance_size = sizeof(VirtIOWifiPCI),
+    .instance_init = virtio_wifi_pci_instance_init,
+    .class_init    = virtio_wifi_pci_class_init,
+};
+
 #ifdef CONFIG_LINUX
 static void virtio_host_initfn(Object *obj)
 {
@@ -2703,6 +2750,7 @@ static void virtio_pci_register_types(void)
 #ifdef CONFIG_VHOST_VSOCK
     type_register_static(&vhost_vsock_pci_info);
 #endif
+    type_register_static(&virtio_wifi_pci_info);
 }
 
 type_init(virtio_pci_register_types)
