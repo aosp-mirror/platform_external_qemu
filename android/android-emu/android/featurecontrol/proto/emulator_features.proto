@@ -91,5 +91,8 @@ enum Feature {
     HasSharedSlotsHostMemoryAllocator = 51;
 
     CarVhalReplay = 52;
+
     HardwareDecoder = 53;
+
+    VirtioWifi = 54;
 }
