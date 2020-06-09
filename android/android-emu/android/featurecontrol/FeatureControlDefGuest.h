@@ -54,3 +54,5 @@ FEATURE_CONTROL_ITEM(VirtioGpuNext)
 FEATURE_CONTROL_ITEM(Mac80211hwsimUserspaceManaged)
 FEATURE_CONTROL_ITEM(HasSharedSlotsHostMemoryAllocator)
 FEATURE_CONTROL_ITEM(HardwareDecoder)
+FEATURE_CONTROL_ITEM(VirtioWifi)
+
