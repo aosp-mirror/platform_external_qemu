@@ -208,7 +208,14 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             params.add("mac80211_hwsim.channels=2");
         }
     }
-
+#ifndef AEMU_GFXSTREAM_BACKEND
+    if (isQemu2 &&
+            android::featurecontrol::isEnabled(android::featurecontrol::VirtioWifi)) {
+        params.add("qemu.virtiowifi=1");
+        // Turn off hwsim when virtio wifi is in use.
+        params.add("mac80211_hwsim.radios=0");
+    }
+#endif
     const bool isDynamicPartition = android::featurecontrol::isEnabled(android::featurecontrol::DynamicPartition);
     if (isQemu2 && isX86ish && !isDynamicPartition) {
         // x86 and x86_64 platforms use an alternative Android DT directory that
