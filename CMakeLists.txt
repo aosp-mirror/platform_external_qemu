@@ -384,6 +384,7 @@ set(EMULATOR_FEATURE_DEPENDENCIES
     "${ANDROID_QEMU2_TOP_DIR}/android/data/advancedFeatures.ini>lib/advancedFeatures.ini"
     "${ANDROID_QEMU2_TOP_DIR}/android/data/advancedFeaturesCanary.ini>lib/advancedFeaturesCanary.ini"
     "${ANDROID_QEMU2_TOP_DIR}/android/data/emu-original-feature-flags.protobuf>lib/emu-original-feature-flags.protobuf"
+    "${ANDROID_QEMU2_TOP_DIR}/android/data/hostapd.conf>lib/hostapd.conf"
 )
 
 if(LINUX_AARCH64)

@@ -440,14 +440,16 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     if (fc::isEnabled(fc::WifiConfigurable)) {
         android::network::registerNetworkPipeService();
     }
-    if (android_wifi_server_port > 0 || android_wifi_client_port > 0) {
-        WifiForwardMode mode = WifiForwardMode::Client;
-        uint16_t port = android_wifi_client_port;
-        if (android_wifi_server_port > 0) {
-            mode = WifiForwardMode::Server;
-            port = android_wifi_server_port;
+    if (fc::isEnabled(fc::Wifi)) {
+        if (android_wifi_server_port > 0 || android_wifi_client_port > 0) {
+            WifiForwardMode mode = WifiForwardMode::Client;
+            uint16_t port = android_wifi_client_port;
+            if (android_wifi_server_port > 0) {
+                mode = WifiForwardMode::Server;
+                port = android_wifi_server_port;
+            }
+            android::network::registerWifiForwardPipeService(mode, port);
         }
-        android::network::registerWifiForwardPipeService(mode, port);
     }
 
     if (fc::isEnabled(fc::MultiDisplay)) {
