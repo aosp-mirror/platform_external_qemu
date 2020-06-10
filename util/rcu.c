@@ -388,3 +388,43 @@ static void __attribute__((__constructor__)) rcu_init(void)
 #endif
     rcu_init_complete();
 }
+
+void rcu_read_lock(void)
+{
+    struct rcu_reader_data *p_rcu_reader = QEMU_THREAD_LOCAL_GET_PTR(rcu_reader);
+    unsigned ctr;
+
+    if (p_rcu_reader->depth++ > 0) {
+        return;
+    }
+
+    ctr = atomic_read(&rcu_gp_ctr);
+    atomic_set(&p_rcu_reader->ctr, ctr);
+
+    /* Write p_rcu_reader->ctr before reading RCU-protected pointers.  */
+    smp_mb_placeholder();
+}
+
+void rcu_read_unlock(void)
+{
+    struct rcu_reader_data *p_rcu_reader = QEMU_THREAD_LOCAL_GET_PTR(rcu_reader);
+
+    assert(p_rcu_reader->depth != 0);
+    if (--p_rcu_reader->depth > 0) {
+        return;
+    }
+
+    /* Ensure that the critical section is seen to precede the
+     * store to p_rcu_reader->ctr.  Together with the following
+     * smp_mb_placeholder(), this ensures writes to p_rcu_reader->ctr
+     * are sequentially consistent.
+     */
+    atomic_store_release(&p_rcu_reader->ctr, 0);
+
+    /* Write p_rcu_reader->ctr before reading p_rcu_reader->waiting.  */
+    smp_mb_placeholder();
+    if (unlikely(atomic_read(&p_rcu_reader->waiting))) {
+        atomic_set(&p_rcu_reader->waiting, false);
+        qemu_event_set(&rcu_gp_event);
+    }
+}
