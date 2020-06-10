@@ -14,7 +14,7 @@
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/Jdwp.h"
 
-#define DEBUG 0
+#define DEBUG 2
 
 #if DEBUG >= 1
 #include <stdio.h>
@@ -24,6 +24,8 @@
 #endif
 
 #if DEBUG >= 2
+
+#include <sys/time.h>
 
 #define DD(...) D(__VA_ARGS__)
 static void debugPrintJdwp(const char* prefix, const uint8_t* data) {
@@ -105,7 +107,7 @@ void JdwpProxy::onSave(android::base::Stream* stream) {
 
 JdwpProxy::State JdwpProxy::nextState(State state) {
     if (state < Proxying) {
-        D("State done %d", state);
+        D("GuestId %d State done %d", guestId(), state);
         return State((int)state + 1);
     }
     return Proxying;
@@ -117,6 +119,28 @@ void JdwpProxy::onGuestRecvData(const android::emulation::amessage* mesg,
                                 std::queue<emulation::apacket>* toSends) {
     if (mesg->command == ADB_CLSE) {
         mShouldClose = true;
+    }
+#if DEBUG >= 2
+            if (mesg->command == ADB_WRTE) {
+                //if (mProxyState != mClientState) {
+                    fprintf(stderr, "guestId %d ", guestId());
+                    debugPrintJdwp("guest recv ", data);
+                //}
+            }
+#endif  // DEBUG >= 2
+    // Leak all ddm lib commands and ADB_OKAY to the guest, without verifying handshakes.
+    if (mesg->command == ADB_OKAY) {
+        *shouldForwardRecv = true;
+        return;
+    }
+    if (mesg->data_length >= kJdwpHeaderSize && mesg->command == ADB_WRTE) {
+        JdwpCommandHeader jdwpCommand;
+        jdwpCommand.parseFrom(data);
+        if (jdwpCommand.command_set == CommandSet::DDM) {
+            mGuestUnrepliedDdmlibCommands++;
+            *shouldForwardRecv = true;
+            return;
+        }
     }
     *shouldForwardRecv = true;
     bool clientProxyDifferent = (mClientState != mProxyState);
@@ -136,6 +160,7 @@ void JdwpProxy::onGuestRecvData(const android::emulation::amessage* mesg,
                 packet.mesg.magic = packet.mesg.command ^ 0xffffffff;
                 toSends->push(packet);
                 mClientState = ConnectOk;
+                fprintf(stderr, "guest %d reconnect state %d\n", guestId(), mClientState);
             }
             break;
         case ConnectOk:
@@ -161,27 +186,18 @@ void JdwpProxy::onGuestRecvData(const android::emulation::amessage* mesg,
                     memcpy(packet.data.data(), kJdwpHandshake,
                            kJdwpHandshakeSize);
                     toSends->push(packet);
-                    mClientState = HandshakeReplied;
+                    // Directly jump to proxying state, leak the last ADB_OKAY to the guest
+                    mClientState = Proxying;
                 }
+                fprintf(stderr, "guest %d reconnect state %d\n", guestId(), mClientState);
             }
             break;
         case HandshakeReplied:
-            // No-op when connecting to jdwp the first time
-            // It should receive an ADB_OKAY, but Android Studio will mix it
-            // with other commands.
-            if (clientProxyDifferent) {
-                // Leak the last ADB_OKAY to the guest, to make it consistent
-                // with icebox behavior.
-                *shouldForwardRecv = true;
-                mClientState = Proxying;
-            }
-            break;
+            assert(false);
+            mShouldClose = true;
+            return;
         case Proxying:
-#if DEBUG >= 2
-            if (mesg->command == ADB_WRTE) {
-                debugPrintJdwp("guest recv ", data);
-            }
-#endif  // DEBUG >= 2
+
             if (mesg->command == ADB_WRTE && mShouldSendCachePacket) {
                 JdwpCommandHeader jdwpCmd;
                 jdwpCmd.parseFrom(data);
@@ -194,8 +210,8 @@ void JdwpProxy::onGuestRecvData(const android::emulation::amessage* mesg,
                         mBreakpointRequestId = jdwpCmd.id;
                     }
                     mPendingGuestReplyCommandIds.insert(jdwpCmd.id);
-                    DD("new cmd id %d, total %d\n", jdwpCmd.id,
-                       (int)mPendingGuestReplyCommandIds.size());
+                    //DD("new cmd id %d, total %d\n", jdwpCmd.id,
+                    //   (int)mPendingGuestReplyCommandIds.size());
                 }
             }
             break;
@@ -215,6 +231,26 @@ void JdwpProxy::onGuestSendData(const android::emulation::amessage* mesg,
     *shouldForwardSend = true;
     if (mesg->command == ADB_CLSE) {
         mShouldClose = true;
+    }
+#if DEBUG >= 2
+            if (mesg->command == ADB_WRTE) {// && mProxyState != mClientState) {
+                fprintf(stderr, "guestId %d ", guestId());
+                debugPrintJdwp("guest send ", data);
+            }
+#endif  // DEBUG >= 2
+    // Reply for ddm lib commands, ignore it.
+    if (mGuestUnrepliedDdmlibCommands > 0 && mesg->command == ADB_OKAY) {
+        *shouldForwardSend = true;
+        mGuestUnrepliedDdmlibCommands --;
+        return;
+    }
+    if (mesg->data_length >= kJdwpHeaderSize && mesg->command == ADB_WRTE) {
+        JdwpCommandHeader jdwpCommand;
+        jdwpCommand.parseFrom(data);
+        if (jdwpCommand.command_set == CommandSet::DDM) {
+            *shouldForwardSend = true;
+            return;
+        }
     }
     switch (mProxyState) {
         case Connect:
@@ -238,11 +274,7 @@ void JdwpProxy::onGuestSendData(const android::emulation::amessage* mesg,
             }
             break;
         case Proxying:
-#if DEBUG >= 2
-            if (mesg->command == ADB_WRTE) {
-                debugPrintJdwp("guest send ", data);
-            }
-#endif  // DEBUG >= 2
+
             if (mesg->command == ADB_CLSE) {
                 mShouldClose = true;
                 return;
@@ -265,8 +297,8 @@ void JdwpProxy::onGuestSendData(const android::emulation::amessage* mesg,
                             memcpy(&mBreakpointEventId, data + kJdwpHeaderSize,
                                    4);
                         }
-                        DD("recv reply id %d, remaining %d\n", jdwpCmd.id,
-                           (int)mPendingGuestReplyCommandIds.size());
+                        //DD("recv reply id %d, remaining %d\n", jdwpCmd.id,
+                        //   (int)mPendingGuestReplyCommandIds.size());
                         // If it doesn't have pending commands and the event ID
                         // is set, send out the loaded pause message
                         if (mPendingGuestReplyCommandIds.empty() &&
@@ -301,6 +333,9 @@ void JdwpProxy::onGuestSendData(const android::emulation::amessage* mesg,
     }
     CHECK(mClientState == mProxyState);
     mClientState = mProxyState = nextState(mProxyState);
+    if (mProxyState == State::HandshakeReplied) {
+        mClientState = mProxyState = State::Proxying;
+    }
 }
 
 bool JdwpProxy::shouldClose() const {

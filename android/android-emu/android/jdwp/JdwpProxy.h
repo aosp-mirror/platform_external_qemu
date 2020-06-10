@@ -55,7 +55,7 @@ private:
         HandshakeRepliedOk,
         Proxying = HandshakeRepliedOk,
     };
-    static State nextState(State state);
+    State nextState(State state);
     emulation::amessage buildReplyMesg();
     State mProxyState = State::Uninitialized;
     State mClientState = State::Uninitialized;
@@ -73,6 +73,7 @@ private:
     int mBreakpointRequestId = 0;
     int mBreakpointEventId = 0;
     int64_t mLastSendMs = 0;
+    int mGuestUnrepliedDdmlibCommands = 0;
 };
 }  // namespace jdwp
 }  // namespace android

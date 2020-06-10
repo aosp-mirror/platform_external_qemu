@@ -34,6 +34,7 @@ enum CommandSet {
     EventRequest = 0xf,
     Event = 0x40,
     ExtensionBegin = 0x80,
+    DDM = 0xC7, // DDM lib command set
 };
 
 enum VirtualMachineCommand {
