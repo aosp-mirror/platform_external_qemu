@@ -94,6 +94,53 @@
       "revId": "87ae67cf1b356e02d28cd869ec7b86b284aa722a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "13945612_e4add1fe",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-06-11T17:18:33Z",
+      "side": 1,
+      "message": "Could you please add a comment explaining that. Thank you.",
+      "parentUuid": "685a6e7e_8e4a6e03",
+      "range": {
+        "startLine": 304,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 18
+      },
+      "revId": "87ae67cf1b356e02d28cd869ec7b86b284aa722a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d5347d1_f83dd458",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-06-11T17:18:33Z",
+      "side": 1,
+      "message": "nit: double dot",
+      "range": {
+        "startLine": 317,
+        "startChar": 22,
+        "endLine": 317,
+        "endChar": 24
+      },
+      "revId": "87ae67cf1b356e02d28cd869ec7b86b284aa722a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
