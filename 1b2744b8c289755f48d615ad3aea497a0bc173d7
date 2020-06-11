@@ -22,6 +22,30 @@
       "revId": "1b2744b8c289755f48d615ad3aea497a0bc173d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "affcab4a_d33c8257",
+        "filename": "android/android-grpc/docs/python/sample/channel/channel_provider.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-06-11T18:47:26Z",
+      "side": 1,
+      "message": "That would def. make sure we don\u0027t hit chromoting weirdness. I will add support for this.",
+      "parentUuid": "9f335b5b_53e30ac3",
+      "range": {
+        "startLine": 29,
+        "startChar": 12,
+        "endLine": 29,
+        "endChar": 52
+      },
+      "revId": "1b2744b8c289755f48d615ad3aea497a0bc173d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
