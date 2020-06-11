@@ -70,6 +70,30 @@
       "revId": "87ae67cf1b356e02d28cd869ec7b86b284aa722a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "685a6e7e_8e4a6e03",
+        "filename": "android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-06-11T17:01:17Z",
+      "side": 1,
+      "message": "The translator works just fine. The problem is related to modifier keys. For example:\n\u0027e\u0027 -\u003e gives one ev dev event [18]. \u0027E\u0027 -\u003e  gives two [42, 18] (shift + e) . The end result is that the sequence \"Ee\" will be translated as [42, 18, 18]. If we deliver this sequence as down + up, we would see \"EE\" in android. By splitting this up in individual chars we guarantee that this doesn\u0027t happen.",
+      "parentUuid": "d091a114_4553db0b",
+      "range": {
+        "startLine": 304,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 18
+      },
+      "revId": "87ae67cf1b356e02d28cd869ec7b86b284aa722a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
