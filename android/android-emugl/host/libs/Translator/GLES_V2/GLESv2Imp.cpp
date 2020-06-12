@@ -1113,6 +1113,7 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
             GLEScontext::shaderFramebufferFetchSupported();
 
         ANGLEShaderParser::globalInitialize(
+                isGles2Gles(),
                 maxVertexAttribs,
                 maxVertexUniformVectors,
                 maxVaryingVectors,
