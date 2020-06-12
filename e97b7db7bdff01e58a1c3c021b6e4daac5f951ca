@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "359a6369_c057cb86",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-06-12T22:07:43Z",
+      "side": 1,
+      "message": "nit: change it to #elif defined(_WIN32) ?",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 13
+      },
+      "revId": "e97b7db7bdff01e58a1c3c021b6e4daac5f951ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
