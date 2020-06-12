@@ -10,17 +10,24 @@
 // GNU General Public License for more details.
 
 #include "android/console_auth.h"
-#include "android/console_auth_internal.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/misc/FileUtils.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/path.h"
-#include "android/utils/tempfile.h"
 
-#include <fcntl.h>
-#include <gtest/gtest.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <fcntl.h>                             // for open, O_CREAT, O_RDONLY
+#include <gtest/gtest.h>                       // for AssertionResult, Test
+#include <stdlib.h>                            // for free, size_t
+#include <sys/stat.h>                          // for stat
+#include <fstream>                             // for ofstream, operator<<
+#include <string>                              // for string
+
+#include "android/base/StringView.h"           // for CStrWrapper, StringView
+#include "android/base/files/PathUtils.h"      // for pj, PathUtils
+#include "android/base/files/ScopedFd.h"       // for ScopedFd
+#include "android/base/misc/FileUtils.h"       // for readFileIntoString
+#include "android/base/system/System.h"        // for System, System::kProgr...
+#include "android/base/testing/TestSystem.h"   // for TestSystem
+#include "android/base/testing/TestTempDir.h"  // for TestTempDir
+#include "android/console_auth_internal.h"     // for tokenLoadOrCreate, g_g...
+#include "android/utils/eintr_wrapper.h"       // for HANDLE_EINTR
+#include "android/utils/tempfile.h"            // for tempfile_path, tempfil...
 
 namespace android {
 
@@ -64,6 +71,27 @@ bool isbase64(char c) {
     return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') ||
            ('0' <= c && c <= '9') || c == '+' || c == '/' || c == '=';
 }
+
+TEST(ConsoleAuth, get_token_from_unicode_path) {
+    // Make sure we can read a token from a unicode path.
+    android::base::TestSystem testSystem("/", android::base::System::kProgramBitness);
+    std::string fname = u8"⺁⺶ɥǝןןo.txt";
+
+    auto testDir = testSystem.getTempRoot();
+    auto unicode_file = android::base::pj(testDir->path(), fname);
+    std::string auth_token;
+    std::string secret="SuperSafe!";
+
+    // Note that using the unicode_file directly on windows will fail
+    // std::ofstream out(unicode_file);
+    std::ofstream out(android::base::PathUtils::asUnicodePath(unicode_file).c_str());
+    out << secret;
+    out.close();
+
+    EXPECT_TRUE(tokenLoadOrCreate(unicode_file, &auth_token));
+    EXPECT_EQ(secret, auth_token);
+}
+
 
 TEST(ConsoleAuth, get_auth_token_from_create) {
     std::string auth_token;
