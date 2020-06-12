@@ -1,3 +1,16 @@
+#  Copyright (C) 2020 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """
 Contains a SnapshotService that can talk to the emulator snapshot service on the given grpc port.
 """
@@ -9,7 +22,7 @@ from google.protobuf import empty_pb2
 
 from proto.snapshot_service_pb2_grpc import SnapshotServiceStub
 from proto.snapshot_service_pb2 import SnapshotPackage
-from snaptool.channel_provider import getEmulatorChannel
+from snaptool.channel.channel_provider import Emulators
 from tqdm import tqdm
 
 
@@ -21,7 +34,8 @@ class SnapshotService(object):
 
     def __init__(self, port, logger=logging.getLogger()):
         """Connect to the emulator on the given port, and log on the given logger."""
-        self.channel = getEmulatorChannel(port)
+        self.emulators = Emulators()
+        self.channel = self.emulators.getEmulatorChannel(port)
         self.stub = SnapshotServiceStub(self.channel)
         self.logger = logger
 
@@ -33,7 +47,7 @@ class SnapshotService(object):
         self.logger.debug("Executing %s(%s)", method, req)
         method_to_call = getattr(self.stub, method)
         try:
-            msg = method_to_call(req)
+            msg = method_to_call(req, metadata=self.metadata)
             self.logger.debug("Response %s", msg)
             if not msg.success:
                 self.logger.error("Failed to %s snapshot: %s", method, msg.err)
@@ -54,7 +68,9 @@ class SnapshotService(object):
         total_size = sum([img.size for img in snap.details.images if img.present])
 
         try:
-            it = self.stub.PullSnapshot(SnapshotPackage(snapshot_id=snap_id, format=fmt))
+            it = self.stub.PullSnapshot(
+                SnapshotPackage(snapshot_id=snap_id, format=fmt)
+            )
             with open(fname, "wb") as fn:
                 with tqdm(fn, total=total_size, unit="B", unit_scale=True) as t:
                     for msg in it:
@@ -94,7 +110,6 @@ class SnapshotService(object):
             if fname.endswith(".tar.gz"):
                 fmt = SnapshotPackage.Format.TARGZ
 
-
             total_size = os.path.getsize(fname)
             snap_id = os.path.basename(fname).replace(".gz", "").replace(".tar", "")
 
@@ -123,12 +138,18 @@ class SnapshotService(object):
 
     def load(self, snap_id):
         """Loads a snapshot inside the emulator."""
-        return self._exec_unary_grpc("LoadSnapshot", SnapshotPackage(snapshot_id=snap_id))
+        return self._exec_unary_grpc(
+            "LoadSnapshot", SnapshotPackage(snapshot_id=snap_id)
+        )
 
     def save(self, snap_id):
         """Saves a snapshot inside the emulator."""
-        return self._exec_unary_grpc("SaveSnapshot", SnapshotPackage(snapshot_id=snap_id))
+        return self._exec_unary_grpc(
+            "SaveSnapshot", SnapshotPackage(snapshot_id=snap_id)
+        )
 
     def delete(self, snap_id):
         """Deletes the given snapshot from the emulator."""
-        return self._exec_unary_grpc("DeleteSnapshot", SnapshotPackage(snapshot_id=snap_id))
+        return self._exec_unary_grpc(
+            "DeleteSnapshot", SnapshotPackage(snapshot_id=snap_id)
+        )

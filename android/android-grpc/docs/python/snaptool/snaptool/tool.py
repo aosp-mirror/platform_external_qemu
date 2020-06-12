@@ -44,7 +44,7 @@ def sizeof_fmt(num):
 
 @click.group()
 @click.option(
-    "--grpc", default="localhost:8556", help="Address of the emulator gRPC endpoint."
+    "--grpc", default="", help="Port or uri of the emulator gRPC endpoint."
 )
 @click.pass_context
 def cli(ctx, grpc):
