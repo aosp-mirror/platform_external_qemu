@@ -515,7 +515,19 @@ public:
             mItems.resize((index + 1) * 2);
         }
 
-        auto item = mItems.data() + indexOfEntity(h);
+        auto item = mItems.data() + index;
+        if (!item->live) return nullptr;
+        return &item->data;
+    }
+
+    const Data* get_const(EntityHandle h) const {
+        size_t index = indexOfEntity(h);
+
+        if (index + 1 > mItems.size()) {
+            return nullptr;
+        }
+
+        auto item = mItems.data() + index;
         if (!item->live) return nullptr;
         return &item->data;
     }
