@@ -5,6 +5,7 @@ prebuilt(VULKAN)
 function(add_opengl_dependencies TGT)
   # And setup the depedencies
   android_target_dependency(${TGT} all SWIFTSHADER_DEPENDENCIES)
+  android_target_dependency(${TGT} all ANGLE_DEPENDENCIES)
   android_target_dependency(${TGT} all VULKAN_DEPENDENCIES)
   android_target_dependency(${TGT} all VULKAN_TEST_DEPENDENCIES)
   android_target_properties(

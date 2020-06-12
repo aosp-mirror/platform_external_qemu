@@ -79,134 +79,41 @@ build_angle_package () {
     # Bolierplate setup
     run mkdir -p "$PKG_BUILD_DIR" &&
     run cd "$PKG_BUILD_DIR" &&
+    log "ANGLE build: git init" &&
+
     export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
     export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
     export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
     export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
 
     # Ensure the gclient command is available.
-    git_clone https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools c55ba20c629ef702cd4bb06da9235c4bb7217f96 &&
+    log "ANGLE build: clone depot_tools" &&
+    git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools &&
     export PATH=`pwd`/depot_tools:"$PATH" &&
 
-    # Ensure ninja, included in the depot tools, is used to generator the build
-    # files, since it is a cross-platform solution.
-    export GYP_GENERATORS=ninja &&
-
+    log "ANGLE build: run bootstrap script"
     # Create gclient file and sync the build files
     run python scripts/bootstrap.py &&
 
     # Sync the appropriate build files
     # The first sync fails, however the second will work
+    log "ANGLE build: gclient sync" &&
     run gclient sync || run gclient sync &&
 
+    log "ANGLE build: apply patch for linux-aarch64 (skipping for now)" &&
     # apply patch for linux-aarch64 host build
-    run patch -p1 -i "linux-aarch64/angle-depo_tools-ninja-aarch64.patch" &&
+    # run patch -p1 -i "linux-aarch64/angle-depo_tools-ninja-aarch64.patch" &&
 
+    log "ANGLE build: gn gen" &&
+    run mkdir -p out/Debug &&
+    echo "is_debug = false" >> out/Debug/args.gn &&
+    run gn gen out/Debug &&
+
+    log "ANGLE build: actual build" &&
     # ninja is provided for each platform in the previously cloned depot_tools
-    run ninja -C out/Debug
+    run ninja -C out/Debug &&
 
-    # The static libs produced by the build script are just thin archives so
-    # they don't contain any objects themselves -> repackage them to actually
-    # contain the object files
-    for lib in $PKG_LIB_DIR/lib*.a; do
-        ar -t $lib | run xargs ar rvs $lib.new && mv $lib.new $lib;
-        run ranlib $lib
-    done
-}
-
-# Build the ANGLE packages using mingw.
-# Based on the https://github.com/Martchus/PKGBUILDs/blob/master/angleproject/mingw-w64/PKGBUILD
-#
-# $1: Source directory.
-# $2: The directory the output libraries are placed in.
-mingw_build_angle_package() {
-    local PKG_FULLNAME="$(basename "$1")"
-    dump "$(builder_text) Building $PKG_FULLNAME"
-
-    local PKG_BUILD_DIR="$1"
-    local PKG_LIB_DIR="$2"
-
-    run mkdir -p "$PKG_BUILD_DIR" &&
-    run cd "$PKG_BUILD_DIR"
-
-    # Setup the right version of mingw
-    local MINGW_PREFIX GYP_TARGET
-    case $SYSTEM in
-        windows-x86_64)
-            MINGW_PREFIX=x86_64
-            GYP_TARGET=win64
-            $AOSP_DIR/external/qemu/android/scripts/unix/gen-android-sdk-toolchain.sh \
-                --host=windows-x86_64 \
-                ./mingw-toolchain
-            ;;
-    esac
-    export PATH=`pwd`/mingw-toolchain:"$PATH"
-
-    # Boilerplate setup
-    export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
-    export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
-    export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
-    export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
-
-    # Ensure the gyp command is available.
-    git_clone https://chromium.googlesource.com/external/gyp gyp bac4680ec9a5c55ab692490b6732999648ecf1e9 &&
-    export PATH=`pwd`/gyp:"$PATH" &&
-
-    # Provide 32-bit versions of *.def files
-    cp mingw-w64/libEGL_mingw32.def src/libEGL/ &&
-    cp mingw-w64/libGLESv2_mingw32.def src/libGLESv2/ &&
-
-    # Provide a file to export symbols declared in ShaderLang.h as part of libGLESv2.dll
-    # (required to build Qt WebKit which uses shader interface)
-    cp mingw-w64/entry_points_shader.cpp src/libGLESv2/ &&
-
-    # Remove .git directory to prevent:
-    # No rule to make target '../build-i686-w64-mingw32/.git/index', needed by 'out/Debug/obj/gen/angle/id/commit.h'.
-    rm -rf .git &&
-
-    # Make sure an import library is created, the correct .def file is used
-    # during the build and entry_points_shader.cpp is compiled
-    run patch -p1 -i "mingw-w64/angleproject-include-import-library-and-use-def-file.patch" &&
-
-    # Provide own implementation of mbstowcs_s for Windows XP support
-    run patch -p1 -i "mingw-w64/provide_mbstowcs_s_for_xp.patch" &&
-
-    # Executing .bat scripts on Linux is a no-go so make this a no-op
-    echo "" > src/copy_compiler_dll.bat &&
-    chmod +x src/copy_compiler_dll.bat &&
-
-    # Set build flags, make sure all header files are found
-    local ARCHFLAG=""
-    case $SYSTEM in
-        windows-x86_64)
-            ARCHFLAG=" -m64"
-            ;;
-    esac
-
-    export CXXFLAGS="-O2 -g $ARCHFLAG -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 -std=c++11 -msse2 -DUNICODE -D_UNICODE -g -Isrc -Iinclude" &&
-    export CXX="$MINGW_PREFIX-w64-mingw32-g++" &&
-    export AR="$MINGW_PREFIX-w64-mingw32-ar" &&
-
-    # TODO: re-enable building ALL of angle, not just the static libraries
-    # gyp -D use_ozone=0 -D OS=win -D TARGET=$GYP_TARGET --format make -D \
-    #     MSVS_VERSION="" --depth . -I build/common.gypi src/angle.gyp &&
-
-    # # Forcing non-concurrent build to prevent failure
-    # run make -j1 V=1 &&
-
-    # static libs must be built separately
-    run gyp -D use_ozone=0 -D OS=win -D TARGET=$GYP_TARGET --format make -D \
-        MSVS_VERSION="" --depth . -I build/common.gypi src/angle.gyp -D \
-        angle_gl_library_type=static_library &&
-    run make -j$NUM_JOBS V=1
-
-    # The static libs produced by the build script are just thin archives so
-    # they don't contain any objects themselves -> repackage them to actually
-    # contain the object files
-    for lib in $PKG_LIB_DIR/lib*.a; do
-        ar -t $lib | run xargs ar rvs $lib.new && mv $lib.new $lib;
-        run ranlib $lib
-    done
+    log "ANGLE build: exit"
 }
 
 # Unpack package source into $(builder_src_dir) if needed.
@@ -215,7 +122,8 @@ copy_angle_source () {
     local PKG_SRC_TIMESTAMP PKG_TIMESTAMP
     PKG_SRC_TIMESTAMP=$PKG_BUILD_DIR/timestamp-angle
     if [ ! -f "$PKG_SRC_TIMESTAMP" ]; then
-        copy_directory $AOSP_DIR/external/angle $PKG_BUILD_DIR
+        cp -r $AOSP_DIR/external/angle $PKG_BUILD_DIR
+        rm -rf $PKG_BUILD_DIR/.git
         touch $PKG_SRC_TIMESTAMP
     fi
 }
@@ -223,54 +131,56 @@ copy_angle_source () {
 # $1: Package basename (e.g. 'libpthread-stubs-0.3')
 # $2+: Extra configuration options.
 build_angle_libraries () {
-    local PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP PKG_LIB_DIR
+    local PKG_BUILD_DIR PKG_SRC_TIMESTAMP PKG_TIMESTAMP PKG_LIB_DIR DYN_LIB_SUFFIX ST_LIB_NAME
     PKG_BUILD_DIR=$TEMP_DIR/build-$SYSTEM/angle
     copy_angle_source
     PKG_TIMESTAMP=$TEMP_DIR/build-$SYSTEM/angle-timestamp
+    PKG_LIB_DIR=$PKG_BUILD_DIR/out/Debug
+    ST_LIB_NAME=libshadertranslator
+
+    # Windows: Not tested; this is just a rough guide to the build steps
+    # on Windows, which should be the same as that for other platforms,
+    # except for setting DEPOT_TOOLS_WIN_TOOLCHAIN=0
+    case $SYSTEM in
+        win*)
+            DYN_LIB_SUFFIX=dll
+            export DEPOT_TOOLS_WIN_TOOLCHAIN=0
+            ;;
+        linux*)
+            DYN_LIB_SUFFIX=so
+            ;;
+        darwin*)
+            DYN_LIB_SUFFIX=dylib
+            ;;
+    esac
+
+
     if [ ! -f "$PKG_TIMESTAMP" -o -n "$OPT_FORCE" ]; then
-        case $SYSTEM in
-            win*)
-                PKG_LIB_DIR=$PKG_BUILD_DIR/out/Debug/obj.target/src/
+        log "Beginning ANGLE build. Dyn lib suffix: ${DYN_LIB_SUFFIX}"
 
-                ;;
-            linux*)
-                PKG_LIB_DIR=$PKG_BUILD_DIR/out/Debug/obj/src/
-                ;;
-            darwin*)
-                # Required for proper build on Darwin!
-                PKG_LIB_DIR=$PKG_BUILD_DIR/out/Debug/
-                builder_disable_verbose_install
-                ;;
-        esac
+        build_angle_package \
+            "$PKG_BUILD_DIR" \
+            "$PKG_LIB_DIR" \
+            "$@"
 
-        case $SYSTEM in
-            win*)
-                mingw_build_angle_package \
-                    "$PKG_BUILD_DIR" \
-                    "$PKG_LIB_DIR" \
-                    "$@"
-                ;;
-            *)
-                build_angle_package \
-                    "$PKG_BUILD_DIR" \
-                    "$PKG_LIB_DIR" \
-                    "$@"
-                ;;
-        esac
+        log "Copying files"
+        run ls $PKG_LIB_DIR
 
         # We don't have a make install command at all since the Makefile is
         # auto-generated, so we just copy the files we want directly.
         copy_directory_files \
                     "$PKG_LIB_DIR" \
                     "$(builder_install_prefix)/lib" \
-                    libangle_common.a \
-                    libpreprocessor.a \
-                    libtranslator_lib.a \
-                    libtranslator_static.a
+                    libEGL.${DYN_LIB_SUFFIX} \
+                    libGLESv2.${DYN_LIB_SUFFIX} \
+                    libGLESv1_CM.${DYN_LIB_SUFFIX} \
+                    ${ST_LIB_NAME}.${DYN_LIB_SUFFIX} \
 
-        copy_directory \
-                "$PKG_BUILD_DIR/include/GLSLANG" \
-                "$(builder_install_prefix)/include/GLSLANG"
+        log "Copying includes"
+        copy_directory_files \
+                "$PKG_BUILD_DIR/src/libShaderTranslator" \
+                "$(builder_install_prefix)/include" \
+                ShaderTranslator.h
 
         touch "$PKG_TIMESTAMP"
     fi
