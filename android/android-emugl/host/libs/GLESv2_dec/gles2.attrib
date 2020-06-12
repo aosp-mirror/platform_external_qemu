@@ -300,7 +300,7 @@ glShaderBinary
 glTexImage2D
     dir pixels in
     len pixels glesv2_enc::pixelDataSize(self, width, height, format, type, 0)
-	custom_guest_pack pixels stream->uploadPixels(self, width, height, format, type, pixels)
+	custom_guest_pack pixels stream->uploadPixels(self, width, height, 1, format, type, pixels)
     var_flag pixels nullAllowed isLarge
 
 #void glTexParameterfv(GLenum target, GLenum pname, GLfloat *params)
@@ -313,7 +313,7 @@ glTexParameteriv
 #void glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels)
 glTexSubImage2D
     len pixels glesv2_enc::pixelDataSize(self, width, height, format, type, 0)
-	custom_guest_pack pixels stream->uploadPixels(self, width, height, format, type, pixels)
+	custom_guest_pack pixels stream->uploadPixels(self, width, height, 1, format, type, pixels)
     var_flag pixels nullAllowed isLarge
 
 #void glUniform1fv(GLint location, GLsizei count, GLfloat *v)
@@ -1023,6 +1023,7 @@ glGetInteger64i_v
 glTexImage3D
     dir data in
     len data glesv2_enc::pixelDataSize3D(self, width, height, depth, format, type, 0)
+	custom_guest_pack data stream->uploadPixels(self, width, height, depth, format, type, data)
     var_flag data nullAllowed isLarge
 
 glTexImage3DOffsetAEMU
@@ -1031,6 +1032,7 @@ glTexImage3DOffsetAEMU
 
 glTexSubImage3D
     len data glesv2_enc::pixelDataSize3D(self, width, height, depth, format, type, 0)
+	custom_guest_pack data stream->uploadPixels(self, width, height, depth, format, type, data)
     var_flag data nullAllowed isLarge
 
 glTexSubImage3DOffsetAEMU
