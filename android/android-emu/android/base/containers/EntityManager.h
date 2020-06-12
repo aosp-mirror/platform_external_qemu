@@ -520,6 +520,18 @@ public:
         return &item->data;
     }
 
+    const Data* get_const(EntityHandle h) const {
+        size_t index = indexOfEntity(h);
+
+        if (index + 1 > mItems.size()) {
+            return nullptr;
+        }
+
+        auto item = mItems.data() + indexOfEntity(h);
+        if (!item->live) return nullptr;
+        return &item->data;
+    }
+
     void forEachComponent(ComponentIteratorFunc func) {
         for (auto& item : mItems) {
             func(item.live, item.handle, item.handle, item.data);
