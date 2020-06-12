@@ -9,28 +9,28 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/misc/FileUtils.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/system/System.h"
-#include "android/utils/file_io.h"
-#include "android/console_auth.h"
-#include "android/console_auth_internal.h"
-#include "android/utils/Random.h"
-extern "C" {
-#include "android/proxy/proxy_int.h"
-}
-#include "android/utils/debug.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/string.h"
+#include "android/console_auth.h"  // for CONSOLE_AUTH_STATUS_DISABLED
 
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
+#include "android/base/files/PathUtils.h"   // for PathUtils
+#include "android/base/files/ScopedFd.h"    // for ScopedFd
+#include "android/base/misc/FileUtils.h"    // for readFileIntoString, write...
+#include "android/base/misc/StringUtils.h"  // for trim
+#include "android/base/system/System.h"     // for System
+#include "android/console_auth_internal.h"  // for fn_get_auth_token_path
+#include "android/utils/Random.h"           // for generateRandomBytes
+#include "android/utils/file_io.h"          // for android_unlink, android_open
+
+extern "C" {
+#include "android/proxy/proxy_int.h"        // for proxy_base64_encode
+}
+#include <fcntl.h>                          // for O_CREAT, O_EXCL, O_RDONLY
+#include <stdlib.h>                         // for size_t
+#include <string.h>                         // for strdup
+#include <sys/types.h>                      // for mode_t
+#include <string>                           // for string
+
+#include "android/utils/debug.h"            // for derror
+#include "android/utils/eintr_wrapper.h"    // for HANDLE_EINTR
 
 #ifndef _WIN32
 #define O_BINARY 0
@@ -38,8 +38,8 @@ extern "C" {
 
 #define E(...) derror(__VA_ARGS__)
 
-using android::base::System;
 using android::base::ScopedFd;
+using android::base::System;
 
 namespace android {
 namespace console_auth {
@@ -76,12 +76,13 @@ bool tokenLoadOrCreate(const std::string& path, std::string* auth_token) {
     const mode_t user_read_only = 0600;
 
     // this open will fail if the file already exists
-    ScopedFd fd(HANDLE_EINTR(
-            open(path.c_str(), O_CREAT | O_EXCL | O_WRONLY | O_TRUNC | O_BINARY,
-                 user_read_only)));
+    ScopedFd fd(HANDLE_EINTR(android_open(
+            path.c_str(), O_CREAT | O_EXCL | O_WRONLY | O_TRUNC | O_BINARY,
+            user_read_only)));
     if (fd.get() < 0) {
         // file already exists, read it
-        ScopedFd read(HANDLE_EINTR(open(path.c_str(), O_RDONLY | O_BINARY)));
+        ScopedFd read(
+                HANDLE_EINTR(android_open(path.c_str(), O_RDONLY | O_BINARY)));
         if (read.get() < 0) {
             return false;
         }
@@ -94,7 +95,7 @@ bool tokenLoadOrCreate(const std::string& path, std::string* auth_token) {
     } else {
         if (!tokenGenerate(auth_token)) {
             fd.close();
-           android_unlink(path.c_str());
+            android_unlink(path.c_str());
             return false;
         }
         if (!android::writeStringToFile(fd.get(), *auth_token)) {
@@ -108,8 +109,8 @@ bool tokenLoadOrCreate(const std::string& path, std::string* auth_token) {
 // Returns a path to the console auth token file on the current system
 std::string tokenGetPathDefault() {
     System* sys = System::get();
-    return android::base::PathUtils::join(
-            sys->getHomeDirectory(), ".emulator_console_auth_token");
+    return android::base::PathUtils::join(sys->getHomeDirectory(),
+                                          ".emulator_console_auth_token");
 }
 
 fn_get_auth_token_path g_get_auth_token_path = tokenGetPathDefault;
