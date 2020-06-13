@@ -35,13 +35,27 @@ static bool getBenchmarkEnabledFromEnv() {
     return false;
 }
 
+static uint64_t currTimeUs(bool enable) {
+    if (enable) {
+        return android::base::System::get()->getHighResTimeUs();
+    } else {
+        return 0;
+    }
+}
+
 RingStream::RingStream(
     struct asg_context context,
     android::emulation::asg::ConsumerCallbacks callbacks,
     size_t bufsize) :
     IOStream(bufsize),
     mContext(context),
-    mCallbacks(callbacks) { }
+    mCallbacks(callbacks),
+    mBenchmarkEnabled(getBenchmarkEnabledFromEnv()) {
+
+    if (mBenchmarkEnabled) {
+        m_stats_t0 = android::base::System::get()->getHighResTimeUs();
+    }
+}
 RingStream::~RingStream() = default;
 
 int RingStream::getNeededFreeTailSize() const {
@@ -112,9 +126,34 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
     uint32_t ringLargeXferAvailable = 0;
 
     const uint32_t maxSpins = 30;
+    const uint32_t maxSpinsSoft = 10000;
     uint32_t spins = 0;
 
     while (count < wanted) {
+
+         if (mBenchmarkEnabled) {
+         auto dt = android::base::System::get()->getHighResTimeUs() - m_stats_t0;
+         if (dt > 1000000) {
+             printf("%p %s: time: %f ms xfer %f ms spin %f ms softspin %f ms idle %f ms BW %f b/s\n",
+                     this,
+                     __func__,
+                     dt / 1000.0f,
+                     m_stats_xfer / 1000.0f,
+                     m_stats_spin / 1000.0f,
+                     m_stats_softSpin / 1000.0f,
+                     m_stats_idleWait / 1000.0f,
+                     m_stats_bytes / (dt / (1000.0f * 1000.0f)));
+             m_stats_t0 = android::base::System::get()->getHighResTimeUs();
+             m_stats_xfer = 0;
+             m_stats_spin = 0;
+             m_stats_softSpin = 0;
+             m_stats_idleWait = 0;
+             m_stats_bytes = 0;
+         }
+         }
+
+
+        auto startUs = currTimeUs(mBenchmarkEnabled);
 
         if (mReadBufferLeft) {
             size_t avail = std::min<size_t>(wanted - count, mReadBufferLeft);
@@ -123,6 +162,8 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
                     avail);
             count += avail;
             mReadBufferLeft -= avail;
+            auto endUs = currTimeUs(mBenchmarkEnabled);
+            m_stats_xfer += endUs - startUs;
             continue;
         }
 
@@ -137,6 +178,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             return nullptr;
         }
 
+
         ringAvailable =
             ring_buffer_available_read(mContext.to_host, 0);
         ringLargeXferAvailable =
@@ -148,6 +190,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
         auto ptrEnd = dst + wanted;
 
         if (ringAvailable) {
+            *mContext.host_state = (asg_host_state)1;
             uint32_t transferMode =
                 mContext.ring_config->transfer_mode;
             switch (transferMode) {
@@ -167,13 +210,22 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
                         transferMode);
                     break;
             }
+            auto endUs = currTimeUs(mBenchmarkEnabled); m_stats_xfer += endUs - startUs;
+            m_stats_bytes += ringAvailable;
         } else if (ringLargeXferAvailable) {
             type3Read(ringLargeXferAvailable,
                       &count, &current, ptrEnd);
+            auto endUs = currTimeUs(mBenchmarkEnabled); m_stats_xfer += endUs - startUs;
+            m_stats_bytes += ringLargeXferAvailable;
         } else {
             if (++spins < maxSpins) {
                 ring_buffer_yield();
+                auto endUs = currTimeUs(mBenchmarkEnabled); m_stats_spin += endUs - startUs;
                 continue;
+            //} else if (++spins < maxSpinsSoft) {
+                //System::get()->sleepMs(0);
+                //auto endUs = currTimeUs(mBenchmarkEnabled); m_stats_softSpin += endUs - startUs;
+                //continue;
             } else {
                 spins = 0;
             }
@@ -184,6 +236,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             if (-1 == mCallbacks.onUnavailableRead()) {
                 mShouldExit = true;
             }
+            auto endUs = currTimeUs(mBenchmarkEnabled); m_stats_idleWait += endUs - startUs;
             continue;
         }
     }

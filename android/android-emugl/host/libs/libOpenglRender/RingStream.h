@@ -75,6 +75,13 @@ protected:
     size_t mTotalRecv = 0;
     bool mBenchmarkEnabled = false;
     bool mShouldExit = false;
+
+    uint64_t m_stats_t0 = 0;
+    uint64_t m_stats_xfer = 0;
+    uint64_t m_stats_spin = 0;
+    uint64_t m_stats_softSpin = 0;
+    uint64_t m_stats_idleWait = 0;
+    uint64_t m_stats_bytes = 0;
 };
 
 }  // namespace emugl

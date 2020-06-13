@@ -296,6 +296,7 @@ intptr_t RenderThread::main() {
 
     int stats_totalBytes = 0;
     uint64_t stats_progressTimeUs = 0;
+    uint64_t stats_readTimeUs = 0;
     auto stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
     bool benchmarkEnabled = getBenchmarkEnabledFromEnv();
 
@@ -317,6 +318,8 @@ intptr_t RenderThread::main() {
     }
 
     while (1) {
+        auto readTimeStart = currTimeUs(benchmarkEnabled);
+
         // Let's make sure we read enough data for at least some processing.
         int packetSize;
         if (readBuf.validData() >= 8) {
@@ -362,6 +365,9 @@ intptr_t RenderThread::main() {
            (int)readBuf.validData(), *(int32_t*)readBuf.buf(),
            *(int32_t*)(readBuf.buf() + 4));
 
+        auto readTimeEnd = currTimeUs(benchmarkEnabled);
+        stats_readTimeUs += readTimeEnd - readTimeStart;
+
         //
         // log received bandwidth statistics
         //
@@ -370,12 +376,14 @@ intptr_t RenderThread::main() {
             auto dt = android::base::System::get()->getHighResTimeUs() / 1000 - stats_t0;
             if (dt > 1000) {
                 float dts = (float)dt / 1000.0f;
-                printf("Used Bandwidth %5.3f MB/s, time in progress %f ms total %f ms\n", ((float)stats_totalBytes / dts) / (1024.0f*1024.0f),
+                printf("Used Bandwidth %5.3f MB/s, time in progress %f ms reading %f total %f ms\n", ((float)stats_totalBytes / dts) / (1024.0f*1024.0f),
                         stats_progressTimeUs / 1000.0f,
+                        stats_readTimeUs / 1000.0f,
                         (float)dt);
                 readBuf.printStats();
                 stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
                 stats_progressTimeUs = 0;
+                stats_readTimeUs = 0;
                 stats_totalBytes = 0;
             }
         }
@@ -468,6 +476,8 @@ intptr_t RenderThread::main() {
                 }
             }
         } while (progress);
+        auto progressEnd = currTimeUs(benchmarkEnabled);
+        stats_progressTimeUs += progressEnd - progressStart;
     }
 
     if (dumpFP) {

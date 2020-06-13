@@ -73,7 +73,8 @@ private:
     void* mCurrentConsumer = 0;
 
     // Communication with consumer
-    base::MessageChannel<ConsumerCommand, 4> mConsumerMessages;
+    base::MessageChannel<ConsumerCommand, 1> mConsumerMessages;
+    base::MessageChannel<ConsumerCommand, 1> mConsumerMessagesReplyWake;
     uint32_t mExiting = 0;
     // For onUnavailableRead
     uint32_t mUnavailableReadCount = 0;

@@ -340,6 +340,7 @@ AddressSpaceGraphicsContext::~AddressSpaceGraphicsContext() {
 }
 
 void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo* info) {
+    ConsumerCommand cmd;
     switch (static_cast<asg_command>(info->metadata)) {
     case ASG_GET_RING:
         info->metadata = mRingAllocation.offsetIntoPhys;
@@ -358,7 +359,8 @@ void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo* info) {
         break;
     }
     case ASG_NOTIFY_AVAILABLE:
-        mConsumerMessages.trySend(ConsumerCommand::Wakeup);
+        mConsumerMessages.send(ConsumerCommand::Wakeup);
+        mConsumerMessagesReplyWake.receive(&cmd);
         info->metadata = 0;
         break;
     }
@@ -386,6 +388,7 @@ sleep:
         switch (cmd) {
             case ConsumerCommand::Wakeup:
                 *(mHostContext.host_state) = ASG_HOST_STATE_CAN_CONSUME;
+                mConsumerMessagesReplyWake.send(cmd);
                 break;
             case ConsumerCommand::Exit:
                 *(mHostContext.host_state) = ASG_HOST_STATE_EXIT;
