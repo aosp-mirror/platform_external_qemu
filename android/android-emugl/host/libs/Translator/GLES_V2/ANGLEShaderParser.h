@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
@@ -49,23 +50,11 @@ protected:
     void clear();
 };
 
+using BuiltinResourcesEditCallback = std::function<void(ST_BuiltInResources&)>;
+
 bool globalInitialize(
     bool isGles2Gles,
-    int attribs,
-    int uniformVectors,
-    int varyingVectors,
-    int vertexTextureImageUnits,
-    int combinedTexImageUnits,
-    int textureImageUnits,
-    int fragmentUniformVectors,
-    int drawBuffers,
-    int fragmentPrecisionHigh,
-    int vertexOutputComponents,
-    int fragmentInputComponents,
-    int minProgramTexelOffset,
-    int maxProgramTexelOffset,
-    int maxDualSourceDrawBuffers,
-    bool shaderFramebufferFetch);
+    BuiltinResourcesEditCallback callback);
 
 bool translate(bool hostUsesCoreProfile,
                const char* src, GLenum shaderType,

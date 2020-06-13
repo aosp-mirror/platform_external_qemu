@@ -221,86 +221,22 @@ static ST_Handle getShaderCompiler(bool coreProfileHost, ShaderSpecKey key) {
 android::base::Lock kCompilerLock;
 
 void initializeResources(
-            int attribs,
-            int uniformVectors,
-            int varyingVectors,
-            int vertexTextureImageUnits,
-            int combinedTexImageUnits,
-            int textureImageUnits,
-            int fragmentUniformVectors,
-            int drawBuffers,
-            int fragmentPrecisionHigh,
-            int vertexOutputComponents,
-            int fragmentInputComponents,
-            int minProgramTexelOffset,
-            int maxProgramTexelOffset,
-            int maxDualSourceDrawBuffers,
-            bool shaderFramebufferFetch) {
+    BuiltinResourcesEditCallback callback) {
 
     getSTDispatch()->generateResources(&kResources);
 
-    kResources.MaxVertexAttribs = attribs; // Defaulted to 8
-    kResources.MaxVertexUniformVectors = uniformVectors; // Defaulted to 128
-    kResources.MaxVaryingVectors = varyingVectors; // Defaulted to 8
-    kResources.MaxVertexTextureImageUnits = vertexTextureImageUnits; // Defaulted to 0
-    kResources.MaxCombinedTextureImageUnits = combinedTexImageUnits; // Defaulted to 8
-    kResources.MaxTextureImageUnits = textureImageUnits; // Defaulted to 8
-    kResources.MaxFragmentUniformVectors = fragmentUniformVectors; // Defaulted to 16
-
-    kResources.MaxDrawBuffers = drawBuffers;
-    kResources.FragmentPrecisionHigh = fragmentPrecisionHigh;
-
-    kResources.MaxVertexOutputVectors = vertexOutputComponents / 4;
-    kResources.MaxFragmentInputVectors = fragmentInputComponents / 4;
-    kResources.MinProgramTexelOffset = minProgramTexelOffset;
-    kResources.MaxProgramTexelOffset = maxProgramTexelOffset;
-
-    kResources.MaxDualSourceDrawBuffers = maxDualSourceDrawBuffers;
-
-    kResources.OES_standard_derivatives = 1;
-    kResources.OES_EGL_image_external = 0;
-    kResources.EXT_gpu_shader5 = 1;
-    kResources.EXT_shader_framebuffer_fetch = shaderFramebufferFetch ? 1 : 0;
+    callback(kResources);
 }
 
 bool globalInitialize(
     bool isGles2Gles,
-    int attribs,
-    int uniformVectors,
-    int varyingVectors,
-    int vertexTextureImageUnits,
-    int combinedTexImageUnits,
-    int textureImageUnits,
-    int fragmentUniformVectors,
-    int drawBuffers,
-    int fragmentPrecisionHigh,
-    int vertexOutputComponents,
-    int fragmentInputComponents,
-    int minProgramTexelOffset,
-    int maxProgramTexelOffset,
-    int maxDualSourceDrawBuffers,
-    bool shaderFramebufferFetch) {
+    BuiltinResourcesEditCallback editCallback) {
 
     if (!isGles2Gles) {
         getSTDispatch()->initialize();
     }
 
-    initializeResources(
-            attribs,
-            uniformVectors,
-            varyingVectors,
-            vertexTextureImageUnits,
-            combinedTexImageUnits,
-            textureImageUnits,
-            fragmentUniformVectors,
-            drawBuffers,
-            fragmentPrecisionHigh,
-            vertexOutputComponents,
-            fragmentInputComponents,
-            minProgramTexelOffset,
-            maxProgramTexelOffset,
-            maxDualSourceDrawBuffers,
-            shaderFramebufferFetch);
+    initializeResources(editCallback);
 
     kInitialized = true;
     return true;
