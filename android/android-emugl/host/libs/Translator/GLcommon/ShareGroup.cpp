@@ -91,16 +91,16 @@ void ShareGroup::onSave(android::base::Stream* stream) {
 
 void ShareGroup::postSave(android::base::Stream* stream) {
     (void)stream;
-    m_saveStage = Empty;
-    // We need to mark the textures dirty, for those that has been bound to
-    // a potential render target.
-    NameSpace* renderbufferNs = m_nameSpace[(int)NamedObjectType::RENDERBUFFER];
-    for (ObjectDataMap::const_iterator it = renderbufferNs->objDataMapBegin();
-        it != renderbufferNs->objDataMapEnd();
-        it ++) {
-        RenderbufferData* rbData = (RenderbufferData*)it->second.get();
-        rbData->makeTextureDirty();
-    }
+    // m_saveStage = Empty;
+    // // We need to mark the textures dirty, for those that has been bound to
+    // // a potential render target.
+    // NameSpace* renderbufferNs = m_nameSpace[(int)NamedObjectType::RENDERBUFFER];
+    // for (ObjectDataMap::const_iterator it = renderbufferNs->objDataMapBegin();
+    //     it != renderbufferNs->objDataMapEnd();
+    //     it ++) {
+    //     RenderbufferData* rbData = (RenderbufferData*)it->second.get();
+    //     rbData->makeTextureDirty();
+    // }
 }
 
 void ShareGroup::postLoadRestore() {

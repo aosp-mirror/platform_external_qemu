@@ -739,21 +739,22 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
 
 void GLEScontext::postSave(android::base::Stream* stream) const {
     (void)stream;
-    // We need to mark the textures dirty, for those that has been bound to
-    // a potential render target.
-    for (ObjectDataMap::const_iterator it = m_fboNameSpace->objDataMapBegin();
-        it != m_fboNameSpace->objDataMapEnd();
-        it ++) {
-        FramebufferData* fbData = (FramebufferData*)it->second.get();
-        fbData->makeTextureDirty([this](NamedObjectType p_type,
-            ObjectLocalName p_localName) {
-                if (p_type == NamedObjectType::FRAMEBUFFER) {
-                    return this->getFBODataPtr(p_localName);
-                } else {
-                    return m_shareGroup->getObjectDataPtr(p_type, p_localName);
-                }
-            });
-    }
+    // // We need to mark the textures dirty, for those that has been bound to
+    // // a potential render target.
+    // for (ObjectDataMap::const_iterator it = m_fboNameSpace->objDataMapBegin();
+    //     it != m_fboNameSpace->objDataMapEnd();
+    //     it ++) {
+
+    //     FramebufferData* fbData = (FramebufferData*)it->second.get();
+    //     fbData->makeTextureDirty([this](NamedObjectType p_type,
+    //         ObjectLocalName p_localName) {
+    //             if (p_type == NamedObjectType::FRAMEBUFFER) {
+    //                 return this->getFBODataPtr(p_localName);
+    //             } else {
+    //                 return m_shareGroup->getObjectDataPtr(p_type, p_localName);
+    //             }
+    //         });
+    // }
 }
 
 void GLEScontext::postLoadRestoreShareGroup() {

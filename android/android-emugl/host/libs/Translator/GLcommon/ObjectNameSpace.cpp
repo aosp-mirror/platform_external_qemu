@@ -73,46 +73,20 @@ NameSpace::~NameSpace() {
 }
 
 void NameSpace::postLoad(const ObjectData::getObjDataPtr_t& getObjDataPtr) {
-    for (const auto& objData : m_objectDataMap) {
-        GL_LOG("NameSpace::%s: %p: try to load object %llu\n", __func__, this, objData.first);
-        if (!objData.second) {
-            // bug: 130631787
-            // emugl::emugl_crash_reporter(
-            //         "Fatal: null object data ptr on restore\n");
-            continue;
-        }
-        objData.second->postLoad(getObjDataPtr);
-    }
+    // for (const auto& objData : m_objectDataMap) {
+    //     GL_LOG("NameSpace::%s: %p: try to load object %llu\n", __func__, this, objData.first);
+    //     if (!objData.second) {
+    //         // bug: 130631787
+    //         // emugl::emugl_crash_reporter(
+    //         //         "Fatal: null object data ptr on restore\n");
+    //         continue;
+    //     }
+    //     objData.second->postLoad(getObjDataPtr);
+    // }
 }
 
 void NameSpace::touchTextures() {
     assert(m_type == NamedObjectType::TEXTURE);
-    for (const auto& obj : m_objectDataMap) {
-        TextureData* texData = (TextureData*)obj.second.get();
-        if (!texData->needRestore()) {
-            GL_LOG("NameSpace::%s: %p: texture data %p does not need restore\n",
-                    __func__, this, texData);
-            continue;
-        }
-        const SaveableTexturePtr& saveableTexture = texData->getSaveableTexture();
-        if (!saveableTexture.get()) {
-            GL_LOG("NameSpace::%s: %p: warning: no saveableTexture for texture data %p\n",
-                    __func__, this, texData);
-            continue;
-        }
-
-        NamedObjectPtr texNamedObj = saveableTexture->getGlobalObject();
-        if (!texNamedObj) {
-            GL_LOG("NameSpace::%s: %p: fatal: global object null for texture data %p\n",
-                    __func__, this, texData);
-            emugl::emugl_crash_reporter(
-                    "fatal: null global texture object in "
-                    "NameSpace::touchTextures");
-        }
-        setGlobalObject(obj.first, texNamedObj);
-        texData->setGlobalName(texNamedObj->getGlobalName());
-        texData->restore(0, nullptr);
-    }
 }
 
 void NameSpace::postLoadRestore(const ObjectData::getGlobalName_t& getGlobalName) {
@@ -128,18 +102,6 @@ void NameSpace::postLoadRestore(const ObjectData::getGlobalName_t& getGlobalName
     int numPasses = m_type == NamedObjectType::SHADER_OR_PROGRAM
             ? 2 : 1;
     for (int pass = 0; pass < numPasses; pass ++) {
-        for (const auto& obj : m_objectDataMap) {
-            assert(m_type == ObjectDataType2NamedObjectType(
-                    obj.second->getDataType()));
-            // get global names
-            if ((obj.second->getDataType() == PROGRAM_DATA && pass == 0)
-                    || (obj.second->getDataType() == SHADER_DATA &&
-                            pass == 1)) {
-                continue;
-            }
-            genName(obj.second->getGenNameInfo(), obj.first, false);
-            obj.second->restore(obj.first, getGlobalName);
-        }
     }
 }
 
@@ -152,17 +114,9 @@ void NameSpace::preSave(GlobalNameSpace *globalNameSpace) {
     // TODO: skip restoration and write saveableTexture directly to the new
     // snapshot
     touchTextures();
-    for (const auto& obj : m_objectDataMap) {
-        globalNameSpace->preSaveAddTex((TextureData*)obj.second.get());
-    }
 }
 
 void NameSpace::onSave(android::base::Stream* stream) {
-    stream->putBe32(m_objectDataMap.size());
-    for (const auto& obj : m_objectDataMap) {
-        stream->putBe64(obj.first);
-        obj.second->onSave(stream, getGlobalName(obj.first));
-    }
 }
 
 
@@ -230,7 +184,11 @@ NameSpace::deleteName(ObjectLocalName p_localName)
         m_localToGlobalMap.remove(p_localName);
     }
 
-    m_objectDataMap.erase(p_localName);
+    auto odPtrPtr = m_objectDataMap.get(p_localName);
+    if (odPtrPtr && (*odPtrPtr)) {
+        *odPtrPtr = nullObjectData.get();
+        m_objectDataMap.remove(p_localName);
+    }
     m_boundMap.remove(p_localName);
 }
 
@@ -281,26 +239,26 @@ bool NameSpace::everBound(ObjectLocalName p_localName) const {
     return *boundPtr;
 }
 
-ObjectDataMap::const_iterator NameSpace::objDataMapBegin() const {
-    return m_objectDataMap.begin();
-}
-
-ObjectDataMap::const_iterator NameSpace::objDataMapEnd() const {
-    return m_objectDataMap.end();
-}
+// ObjectDataMap::const_iterator NameSpace::objDataMapBegin() const {
+//     return m_objectDataMap.begin();
+// }
+// 
+// ObjectDataMap::const_iterator NameSpace::objDataMapEnd() const {
+//     return m_objectDataMap.end();
+// }
 
 const ObjectDataPtr& NameSpace::getObjectDataPtr(
         ObjectLocalName p_localName) {
-    const auto it = m_objectDataMap.find(p_localName);
-    if (it != m_objectDataMap.end()) {
-        return it->second;
+    auto odPtrPtr = m_objectDataMap.get_const(p_localName);
+    if (!odPtrPtr || !(*odPtrPtr)) {
+        return *nullObjectData;
     }
-    return *nullObjectData;
+    return *odPtrPtr;
 }
 
 void NameSpace::setObjectData(ObjectLocalName p_localName,
         ObjectDataPtr data) {
-    m_objectDataMap[p_localName] = std::move(data);
+    m_objectDataMap.add(p_localName, data);
 }
 
 void GlobalNameSpace::preSaveAddEglImage(EglImage* eglImage) {
