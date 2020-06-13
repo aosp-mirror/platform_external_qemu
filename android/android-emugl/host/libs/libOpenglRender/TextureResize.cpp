@@ -145,10 +145,10 @@ const char kGenericVertexShaderSource[] = R"(
 // Fragment shader
 const char kGenericFragmentShaderSource[] = R"(
     precision mediump float;
-    uniform sampler2D texture;
+    uniform sampler2D texSampler;
     varying vec2 outCoord;
     void main(void) {
-        gl_FragColor = texture2D(texture, outCoord);
+        gl_FragColor = texture2D(texSampler, outCoord);
     }
 )";
 
@@ -470,7 +470,7 @@ TextureResize::GenericResizer::GenericResizer() :
     mInCoordAttribLocation =
             s_gles2.glGetAttribLocation(mProgram, "inCoord");
     mInputUniformLocation =
-            s_gles2.glGetUniformLocation(mProgram, "texture");
+            s_gles2.glGetUniformLocation(mProgram, "texSampler");
 
     // Create vertex buffers.
     static const Vertex kVertices[] = {
