@@ -121,6 +121,8 @@ constexpr const char* kTexturesFileName = "textures.bin";
 constexpr const char* kMappedRamFileName = "ram.img";
 constexpr const char* kMappedRamFileDirtyName = "ram.img.dirty";
 
+constexpr const char* kSnapshotProtobufName = "snapshot.pb";
+
 void resetSnapshotLiveness();
 bool isSnapshotAlive();
 

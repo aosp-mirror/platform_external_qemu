@@ -319,7 +319,7 @@ bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
 }
 
 bool Snapshot::writeSnapshotToDisk() {
-    auto res = saveProtobuf(PathUtils::join(mDataDir, "snapshot.pb"),
+    auto res = saveProtobuf(PathUtils::join(mDataDir, kSnapshotProtobufName),
                             mSnapshotPb, &mSize);
     return res == ProtobufSaveResult::Success;
 }
@@ -502,7 +502,7 @@ void Snapshot::loadProtobufOnce() {
         return;
     }
     const auto file =
-            ScopedFd(::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
+            ScopedFd(::open(PathUtils::join(mDataDir, kSnapshotProtobufName).c_str(),
                             O_RDONLY | O_BINARY | O_CLOEXEC, 0755));
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
