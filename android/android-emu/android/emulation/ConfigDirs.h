@@ -87,6 +87,8 @@ struct ConfigDirs {
     //   - %LOCALAPPDATA%/Temp
     //   - %USERPROFILE%/.android
     static std::string getDiscoveryDirectory();
+    static void setCurrentDiscoveryPath(android::base::StringView path);
+    static std::string getCurrentDiscoveryPath();
 
 private:
     // Check if the specified path is a valid AVD root path.

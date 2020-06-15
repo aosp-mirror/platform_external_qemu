@@ -25,6 +25,7 @@
 
 #include <fstream>
 
+using android::base::pj;
 using android::base::System;
 using android::snapshot::FailureReason;
 using android::snapshot::OperationStatus;
@@ -216,4 +217,11 @@ void androidSnapshot_setUsingHdd(bool usingHdd) {
 
 bool androidSnapshot_isUsingHdd() {
     return Snapshotter::get().isUsingHdd();
+}
+
+bool androidSnapshot_protoExists(const char* name) {
+    auto pbPath = pj(
+        android::snapshot::getSnapshotDir(name),
+        android::snapshot::kSnapshotProtobufName);
+    return path_exists(pbPath.c_str());
 }

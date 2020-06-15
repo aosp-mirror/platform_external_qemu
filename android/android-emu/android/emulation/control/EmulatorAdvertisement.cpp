@@ -24,6 +24,7 @@
 #include "android/base/files/PathUtils.h"  // for pj
 #include "android/base/system/System.h"    // for System, System::WaitExitRe...
 #include "android/emulation/ConfigDirs.h"  // for ConfigDirs
+#include "android/globals.h"
 
 namespace android {
 namespace emulation {
@@ -72,7 +73,9 @@ void EmulatorAdvertisement::remove() const {
 std::string EmulatorAdvertisement::location() const {
     auto pid = System::get()->getCurrentProcessId();
     std::string pidfile = android::base::StringFormat(location_format, pid);
-    return android::base::pj(mSharedDirectory, pidfile);
+    std::string result = android::base::pj(mSharedDirectory, pidfile);
+    android::ConfigDirs::setCurrentDiscoveryPath(result);
+    return result;
 }
 
 bool EmulatorAdvertisement::write()  const {

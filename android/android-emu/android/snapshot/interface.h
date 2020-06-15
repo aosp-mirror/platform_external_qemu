@@ -109,4 +109,6 @@ void androidSnapshot_quickbootSetShortRunCheck(bool enable);
 void androidSnapshot_setUsingHdd(bool usingHdd);
 bool androidSnapshot_isUsingHdd();
 
+bool androidSnapshot_protoExists(const char* name);
+
 ANDROID_END_HEADER

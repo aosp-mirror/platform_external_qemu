@@ -23,11 +23,16 @@
 #include "android/base/Log.h"              // for LogStream, LOG, LogMessage
 #include "android/base/Optional.h"         // for Optional
 #include "android/base/files/PathUtils.h"  // for PathUtils, pj
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"    // for System
 #include "android/utils/path.h"            // for path_mkdir_if_needed
 
 namespace android {
 
+using ::android::base::AutoLock;;
+using ::android::base::LazyInstance;
+using ::android::base::Lock;
 using ::android::base::PathUtils;
 using ::android::base::pj;
 using ::android::base::System;
@@ -36,6 +41,16 @@ using ::android::base::System;
 static const char kAndroidSubDir[] = ".android";
 // Subdirectory for AVD data files.
 static const char kAvdSubDir[] = "avd";
+
+// Current discovery path
+class DiscoveryPathState {
+public:
+    Lock lock;
+    std::string path = "";
+};
+
+static LazyInstance<DiscoveryPathState> sDiscoveryPathState =
+    LAZY_INSTANCE_INIT;
 
 // static
 std::string ConfigDirs::getUserDirectory() {
@@ -262,6 +277,16 @@ std::string ConfigDirs::getDiscoveryDirectory() {
         }
     }
     return recomposed;
+}
+
+void ConfigDirs::setCurrentDiscoveryPath(android::base::StringView path) {
+    AutoLock lock(sDiscoveryPathState->lock);
+    sDiscoveryPathState->path = path.str();
+}
+
+std::string ConfigDirs::getCurrentDiscoveryPath() {
+    AutoLock lock(sDiscoveryPathState->lock);
+    return sDiscoveryPathState->path;
 }
 
 }  // namespace android
