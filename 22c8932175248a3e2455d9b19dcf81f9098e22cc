@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c5b3edbf_b3b654e5",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2657,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-06-15T20:04:35Z",
+      "side": 1,
+      "message": "What does \"KO\" stand for?",
+      "range": {
+        "startLine": 2657,
+        "startChar": 32,
+        "endLine": 2657,
+        "endChar": 34
+      },
+      "revId": "22c8932175248a3e2455d9b19dcf81f9098e22cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0462138e_14d7f30f",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2664,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-06-15T20:04:35Z",
+      "side": 1,
+      "message": "Debugging leftover?",
+      "range": {
+        "startLine": 2664,
+        "startChar": 4,
+        "endLine": 2664,
+        "endChar": 11
+      },
+      "revId": "22c8932175248a3e2455d9b19dcf81f9098e22cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
