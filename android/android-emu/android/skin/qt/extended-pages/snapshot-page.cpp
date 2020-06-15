@@ -87,6 +87,7 @@
 #include "android/skin/qt/extended-pages/common.h"   // for setButtonEnabled
 #include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
 #include "android/skin/qt/stylesheet.h"              // for stylesheetForTheme
+#include "android/snapshot/common.h"
 #include "android/snapshot/PathUtils.h"              // for getSnapshotBaseDir
 #include "android/snapshot/Quickboot.h"              // for Quickboot, Quick...
 #include "android/snapshot/Snapshot.h"               // for Snapshot
@@ -1579,7 +1580,7 @@ void SnapshotPage::writeProtobuf(const QString& fileName,
                                  const std::unique_ptr<emulator_snapshot::Snapshot>& protobuf) {
     std::string protoFileName = PathUtils::join(getSnapshotBaseDir().c_str(),
                                                 fileName.toStdString().c_str(),
-                                                "snapshot.pb");
+                                                android::snapshot::kSnapshotProtobufName);
     std::ofstream outStream(protoFileName.c_str(), std::ofstream::binary);
 
     protobuf->SerializeToOstream(&outStream);

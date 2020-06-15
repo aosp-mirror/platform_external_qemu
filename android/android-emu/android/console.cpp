@@ -27,11 +27,13 @@
 #include "android/android.h"
 #include "android/automation/AutomationController.h"
 #include "android/avd/BugreportInfo.h"
+#include "android/avd/info.h"
 #include "android/base/StringView.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -45,6 +47,8 @@
 #include "android/recording/screen-recorder-constants.h"
 #include "android/shaper.h"
 #include "android/snapshot/Icebox.h"
+#include "android/snapshot/interface.h"
+#include "android/snapshot/PathUtils.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
 #include "android/utils/bufprint.h"
@@ -2593,6 +2597,95 @@ do_avd_windowtype( ControlClient  client, char*  args )
 }
 
 static int
+do_avd_path( ControlClient  client, char* args )
+{
+    auto avdInfo = android_avdInfo;
+
+    if (!avdInfo) {
+        control_write( client, "NO_AVD_INFO\r\n" );
+        return 0;
+    }
+
+    auto contentPath = avdInfo_getContentPath(avdInfo);
+
+    if (!contentPath) {
+        control_write( client, "\r\n" );
+        return 0;
+    }
+
+    control_write( client, "%s\r\n", contentPath);
+
+    return 0;
+}
+
+static int
+do_avd_discoverypath( ControlClient  client, char* args )
+{
+    auto avdInfo = android_avdInfo;
+
+    if (!avdInfo) {
+        control_write( client, "NO_AVD_INFO\r\n" );
+        return 0;
+    }
+
+    auto discoveryPath = android::ConfigDirs::getCurrentDiscoveryPath();
+
+    control_write( client, "%s\r\n", discoveryPath.c_str());
+    return 0;
+}
+
+static int
+do_avd_snapshotspath( ControlClient  client, char* args )
+{
+    auto avdInfo = android_avdInfo;
+
+    if (!avdInfo) {
+        control_write( client, "NO_AVD_INFO\r\n" );
+        return 0;
+    }
+
+    auto path = android::snapshot::getSnapshotBaseDir();
+
+    control_write( client, "%s\r\n", path.c_str());
+    return 0;
+}
+
+static int
+do_avd_snapshotpath( ControlClient  client, char* args )
+{
+    if (!args) {
+        control_write( client, "KO: snapshot name required\r\n" );
+        return -1;
+    }
+
+    size_t len = strcspn(args, " ");
+    std::string snapshotName(args, args + len);
+
+    if (snapshotName.empty()) {
+        control_write( client, "KO: snapshot name required\r\n" );
+        return -1;
+    }
+
+    auto avdInfo = android_avdInfo;
+
+    if (!avdInfo) {
+        control_write( client, "NO_AVD_INFO\r\n" );
+        return 0;
+    }
+
+    bool exists = androidSnapshot_protoExists(snapshotName.c_str());
+
+    if (!exists) {
+        control_write( client, "NO_SNAPSHOT\r\n");
+        return 0;
+    }
+
+    auto path = android::snapshot::getSnapshotDir(snapshotName.c_str());
+    control_write( client, "%s\r\n", path.c_str());
+    return 0;
+}
+
+static int
 do_avd_pause( ControlClient  client, char*  args )
 {
     bool success = vmopers(client)->vmPause();
@@ -2693,6 +2786,22 @@ static const CommandDefRec  vm_commands[] =
     { "windowtype", "query virtual device headless or qtwindow",
     "'avd windowtype' will return either windowtype=headless or windowtype=qtwindow.\r\n",
     NULL, do_avd_windowtype, NULL },
+
+    { "path", "query AVD path",
+    "'avd path' will return the path to the AVD files. If no AVD can be found, 'NO_AVD_INFO' is returned. If the path cannot be queried, an empty string will be returned.\r\n",
+    NULL, do_avd_path, NULL },
+
+    { "discoverypath", "query AVD discovery path",
+    "'avd discoverypath' will return the path to the discovery file (for use with Studio embedded). If no AVD can be found, 'NO_AVD_INFO' is returned. If the path cannot be queried, an empty string will be returned.\r\n",
+    NULL, do_avd_discoverypath, NULL },
+
+    { "snapshotspath", "query AVD snapshots path",
+    "'avd snapshotspath' will return the path where snapshots are stored for the current AVD. If no AVD can be found, 'NO_AVD_INFO' is returned. If the path cannot be queried, an empty string will be returned.\r\n",
+    NULL, do_avd_snapshotspath, NULL },
+
+    { "snapshotpath", "query path to a particular AVD snapshot",
+    "'avd snapshotpath <snapshotname>' will return the directory where a particular snapshot is stored. Requires one argument: the name of the snapshot on disk (The user-specified name is currently not supported). If no AVD can be found, 'NO_AVD_INFO' is returned. If the snapshot does not exist at that directory, 'NO_SNAPSHOT' is returned. If the path cannot be formed for some other reason, an empty string is returned.\r\n",
+    NULL, do_avd_snapshotpath, NULL },
 
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
