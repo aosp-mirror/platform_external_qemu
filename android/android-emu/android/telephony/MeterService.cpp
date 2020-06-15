@@ -30,6 +30,15 @@
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
 
+#define DEBUG 0
+
+#if DEBUG >= 1
+#define DD(fmt, ...) \
+    printf("%s:%s:%d| " fmt "\n", __FILE__, __func__, __LINE__, ##__VA_ARGS__)
+#else
+#define DD(...) (void)0
+#endif
+
 namespace android {
 namespace emulation {
 
@@ -74,6 +83,24 @@ std::vector<std::string> parseAdbCmd(xmlNodePtr parent) {
     return result;
 }
 
+static void cleanupXmlDoc(xmlDoc *doc)
+{
+    xmlFreeDoc(doc);
+    xmlCleanupParser();
+    DD("clean up xml doc");
+}
+
+struct MyXmlCleaner {
+    xmlDoc *mDoc = nullptr;
+    explicit MyXmlCleaner(xmlDoc *doc) : mDoc(doc) {}
+    ~MyXmlCleaner() {
+        if (mDoc) {
+            cleanupXmlDoc(mDoc);
+            mDoc = nullptr;
+        }
+    }
+};
+
 void parseRadioConfigForAdbCommands(AdbCommands& cmds) {
     // read the data/misc/emulator/config/radioconfig.xml file
     // to figure out how to turn on/off meterness
@@ -84,13 +111,19 @@ void parseRadioConfigForAdbCommands(AdbCommands& cmds) {
 
     AFREE(avdPath);
 
-    D("trying to open %s xml file to config meterness commands",
+    if (!path_exists(xmlfile.c_str())) {
+        DD("file %s does not exists", xmlfile.c_str());
+        return;
+    }
+
+    DD("trying to open %s xml file to config meterness commands",
       xmlfile.c_str());
 
     xmlDocPtr doc = xmlReadFile(xmlfile.c_str(), nullptr, 0);
+    MyXmlCleaner myXmlCleaner(doc);
 
     if (doc == nullptr) {
-        W("cannot open file %s", xmlfile.c_str());
+        DD("cannot open file %s", xmlfile.c_str());
         return;
     }
 
@@ -98,20 +131,20 @@ void parseRadioConfigForAdbCommands(AdbCommands& cmds) {
     // find mobile_data node
     xmlNodePtr mobile_data = findXmlNode(root, "mobile_data");
     if (mobile_data == nullptr) {
-        W("cannot find mobile_data");
+        DD("cannot find mobile_data");
         return;
     }
     // find meterness node
     xmlNodePtr meterness = findXmlNode(mobile_data->children, "meterness");
     if (meterness == nullptr) {
-        W("cannot find meterness");
+        DD("cannot find meterness");
         return;
     }
 
     // find enable node
     xmlNodePtr enable = findXmlNode(meterness->children, "enable");
     if (enable == nullptr) {
-        W("canot find enable");
+        DD("canot find enable");
         return;
     }
     std::vector<std::string> cmdEnable = parseAdbCmd(enable);
@@ -119,13 +152,13 @@ void parseRadioConfigForAdbCommands(AdbCommands& cmds) {
     // find disable node
     xmlNodePtr disable = findXmlNode(meterness->children, "disable");
     if (disable == nullptr) {
-        W("canot find disable");
+        DD("canot find disable");
         return;
     }
     std::vector<std::string> cmdDisable = parseAdbCmd(disable);
 
     if (cmdEnable.empty() || cmdDisable.empty()) {
-        W("empty disable and empty enable");
+        DD("empty disable and empty enable");
         return;
     }
 
@@ -156,25 +189,25 @@ bool InitMeterService() {
 
 int set_mobile_data_meterness(int on) {
     if (on < 0 || on > 1) {
-        W("on value is invalid %d", on);
+        DD("on value is invalid %d", on);
         return -1;
     }
 
     if (!android::emulation::InitMeterService()) {
-        W("not initialzied");
+        DD("not initialized");
         return -1;
     }
 
     auto mAdb = android::emulation::AdbInterface::getGlobal();
     if (!mAdb) {
-        W("find no adb interface");
+        DD("find no adb interface");
         return -1;
     }
 
     int myresult = -1;
 
     for (size_t i = 0; i < android::emulation::s_adb_commands[on].size(); ++i) {
-        D("cmd %s", android::emulation::s_adb_commands[on][i].c_str());
+        DD("cmd %s", android::emulation::s_adb_commands[on][i].c_str());
     }
 
     mAdb->runAdbCommand(
