@@ -43,6 +43,7 @@ android_add_library(
       ${EMULATOR_GRPC_SRC}
       android/emulation/control/EmulatorService.cpp
       android/emulation/control/GrpcServices.cpp
+      android/emulation/control/clipboard/Clipboard.cpp
       android/emulation/control/interceptor/IdleInterceptor.cpp
       android/emulation/control/interceptor/LoggingInterceptor.cpp
       android/emulation/control/interceptor/MetricsInterceptor.cpp

@@ -47,6 +47,7 @@
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/clipboard/Clipboard.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
@@ -105,6 +106,7 @@ public:
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
           mTouchEventSender(agents),
+          mClipboard(Clipboard::getClipboard(agents->clipboard)),
           mLooper(android::base::ThreadLooper::get()) {
         // the logcat pipe will take ownership of the created stream, and writes
         // to our buffer.
@@ -273,6 +275,46 @@ public:
         value->add_data(c);
         reply->set_status((PhysicalModelValue_State)state);
         reply->set_target(request->target());
+        return Status::OK;
+    }
+
+    Status setClipboard(ServerContext* context,
+                        const ClipData* clipData,
+                        ::google::protobuf::Empty* reply) override {
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [=]() { mClipboard->sendContents(clipData->text()); });
+        return Status::OK;
+    }
+
+    Status getClipboard(ServerContext* context,
+                        const ::google::protobuf::Empty* empty,
+                        ClipData* reply) override {
+        reply->set_text(mClipboard->getCurrentContents());
+        return Status::OK;
+    }
+
+    Status streamClipboard(ServerContext* context,
+                           const ::google::protobuf::Empty* empty,
+                           ServerWriter<ClipData>* writer) override {
+        ClipData reply;
+        bool clientAvailable = !context->IsCancelled();
+
+        if (clientAvailable) {
+            reply.set_text(mClipboard->getCurrentContents());
+            clientAvailable = writer->Write(reply);
+        }
+
+        int frame = 0;
+        while (clientAvailable) {
+            const auto kTimeToWaitForFrame = std::chrono::milliseconds(125);
+            auto arrived = mClipboard->eventWaiter()->next(kTimeToWaitForFrame);
+            if (arrived > 0 && !context->IsCancelled()) {
+                reply.set_text(mClipboard->getCurrentContents());
+                frame += arrived;
+                clientAvailable = writer->Write(reply);
+            }
+            clientAvailable = !context->IsCancelled() && clientAvailable;
+        }
         return Status::OK;
     }
 
@@ -732,6 +774,8 @@ private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
     TouchEventSender mTouchEventSender;
+
+    Clipboard* mClipboard;
     Looper* mLooper;
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
