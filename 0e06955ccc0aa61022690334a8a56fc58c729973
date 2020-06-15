@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b927a34f_6580d802",
+        "filename": "android-qemu2-glue/emulation/virtio-wifi.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-06-15T22:33:43Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "53dbe498_0c5f6e5c",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 6
+      },
+      "revId": "0e06955ccc0aa61022690334a8a56fc58c729973",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5ffaed85_deee837b",
         "filename": "android-qemu2-glue/emulation/virtio-wifi.cpp",
         "patchSetId": 8
@@ -45,6 +69,30 @@
       "revId": "0e06955ccc0aa61022690334a8a56fc58c729973",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c431987_e39f4e6e",
+        "filename": "android-qemu2-glue/emulation/virtio-wifi.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-06-15T22:33:43Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5ffaed85_deee837b",
+      "range": {
+        "startLine": 67,
+        "startChar": 7,
+        "endLine": 67,
+        "endChar": 19
+      },
+      "revId": "0e06955ccc0aa61022690334a8a56fc58c729973",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
