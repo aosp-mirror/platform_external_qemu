@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "53dbe498_0c5f6e5c",
+        "filename": "android-qemu2-glue/emulation/virtio-wifi.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-06-15T21:06:13Z",
+      "side": 1,
+      "message": "Since things here are under an anonymous namespace, you don\u0027t need \u0027static\u0027.",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 6
+      },
+      "revId": "0e06955ccc0aa61022690334a8a56fc58c729973",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ffaed85_deee837b",
+        "filename": "android-qemu2-glue/emulation/virtio-wifi.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-06-15T21:06:13Z",
+      "side": 1,
+      "message": "I don\u0027t think you save a lot here - Globals\u0027s ctor should not be heavier than LazyInstance. Just put\n\nGlobals sGlobals;",
+      "range": {
+        "startLine": 67,
+        "startChar": 7,
+        "endLine": 67,
+        "endChar": 19
+      },
+      "revId": "0e06955ccc0aa61022690334a8a56fc58c729973",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
