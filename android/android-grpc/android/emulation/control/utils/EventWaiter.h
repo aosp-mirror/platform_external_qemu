@@ -49,8 +49,12 @@ using RemoveCallback = void (*)(void* opaque);
 //      handleEvent(cnt++);
 // }
 //
+// If you wish to use the EventWaiter without the registration mechanism
+// you can use the default constructor. Call the "newEvent" method to
+// notify listeners of a newEvent.
 class EventWaiter {
 public:
+    EventWaiter() = default;
     EventWaiter(RegisterCallback add, RemoveCallback remove);
     ~EventWaiter();
 
@@ -75,8 +79,9 @@ public:
     // increasing number.
     uint64_t current() const;
 
+    // Call this when a new event has arrived.
+    void newEvent();
 private:
-    void callback();
     static void callbackForwarder(void* opaque);
 
     std::mutex mStreamLock;

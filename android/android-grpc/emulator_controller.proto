@@ -56,6 +56,19 @@ service EmulatorController {
   rpc streamPhysicalModel(PhysicalModelValue)
       returns (stream PhysicalModelValue) {}
 
+  // Atomically set/get the current primary clipboard data.
+  // Note: Setting the clip board data externally will not result
+  // in an observable change from get/stream clipboard.  For example
+  // setClipboard("Hello") will not result in getClipboard() returning "Hello".
+  rpc setClipboard(ClipData) returns (google.protobuf.Empty) {}
+  rpc getClipboard(google.protobuf.Empty) returns (ClipData) {}
+
+  // Streams the current data on the clipboard. This will immediately produce
+  // a result with the current state of the clipboard. The stream will block
+  // and wait until a new clip event is available. It is possible to lose clipboard
+  // events if the clipboard updates very rapidly.
+  rpc streamClipboard(google.protobuf.Empty) returns (stream ClipData) {}
+
   // Set/get the battery to the given state.
   rpc setBattery(BatteryState) returns (google.protobuf.Empty) {}
   rpc getBattery(google.protobuf.Empty) returns (BatteryState) {}
@@ -360,6 +373,12 @@ message VmConfiguration {
   VmHypervisorType hypervisorType = 1;
   int32 numberOfCpuCores = 2;
   int64 ramSizeBytes = 3;
+}
+
+// Representation of a clipped data object on the clipboard.
+message ClipData {
+  // UTF-8 Encoded text.
+  string text = 1;
 }
 
 // The Touch interface represents a single contact point on a

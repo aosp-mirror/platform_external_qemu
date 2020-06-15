@@ -50,7 +50,7 @@ public:
     }
 
     static void setEnabled(bool enabled);
-    static void setGuestClipboardCallback(GuestClipboardCallback cb);
+    static void registerGuestClipboardCallback(GuestClipboardCallback cb);
     void setGuestClipboardContents(const uint8_t* buf, size_t len);
 
 private:

@@ -11,10 +11,10 @@
 
 #include "android/emulation/ClipboardPipe.h"
 
+#include <cassert>
+
 #include "android/base/memory/LazyInstance.h"
 #include "android/clipboard-pipe.h"
-
-#include <cassert>
 
 namespace android {
 namespace emulation {
@@ -31,8 +31,8 @@ struct ClipboardPipeInstance {
     android::base::Lock pipeLock;
     ClipboardPipe::Ptr pipe;
 
-    ClipboardPipe::GuestClipboardCallback guestClipboardCallback =
-            emptyCallback;
+    android::base::Lock callbackLock;
+    std::vector<ClipboardPipe::GuestClipboardCallback> guestClipboardCallbacks;
 };
 
 static android::base::LazyInstance<ClipboardPipeInstance> sInstance = {};
@@ -131,8 +131,11 @@ int ClipboardPipe::onGuestSend(const AndroidPipeBuffer* buffers,
     int result = processOperation(OperationType::ReadFromGuest,
                                   &mGuestReadState, buffers, numBuffers);
     if (mGuestReadState.isFinished()) {
-        sInstance->guestClipboardCallback(mGuestReadState.buffer.data(),
-                                          mGuestReadState.processedBytes);
+        base::AutoLock cbLock(sInstance->callbackLock);
+        for (const auto& callback : sInstance->guestClipboardCallbacks) {
+            callback(mGuestReadState.buffer.data(),
+                     mGuestReadState.processedBytes);
+        }
         mGuestReadState.reset();
     }
     return result;
@@ -146,9 +149,12 @@ void registerClipboardPipeService() {
     android::AndroidPipe::Service::add(new ClipboardPipe::Service());
 }
 
-void ClipboardPipe::setGuestClipboardCallback(
+void ClipboardPipe::registerGuestClipboardCallback(
         ClipboardPipe::GuestClipboardCallback cb) {
-    sInstance->guestClipboardCallback = cb ? std::move(cb) : emptyCallback;
+    if (cb) {
+        base::AutoLock cbLock(sInstance->callbackLock);
+        sInstance->guestClipboardCallbacks.emplace_back(std::move(cb));
+    }
 }
 
 void ClipboardPipe::wakeGuestIfNeeded() {
@@ -165,7 +171,7 @@ void ClipboardPipe::wakeGuestIfNeededLocked() {
 
 void ClipboardPipe::setGuestClipboardContents(const uint8_t* buf, size_t len) {
     if (!sEnabled) {
-        return; // who cares.
+        return;  // who cares.
     }
     mGuestWriteState.queueContents(buf, len);
     wakeGuestIfNeeded();
