@@ -16,6 +16,7 @@
 
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/car_data_agent.h"
+#include "android/emulation/control/clipboard_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/grpc_agent.h"
@@ -56,6 +57,7 @@ ANDROID_BEGIN_HEADER
     X(QGrpcAgent, grpc)                   \
     X(QAndroidSensorsAgent, sensors)      \
     X(QAndroidMultiDisplayAgent, multi_display)\
+    X(QAndroidClipboardAgent, clipboard) \
 
 
 

@@ -47,14 +47,14 @@ uint64_t EventWaiter::next(uint64_t afterEvent,
     return afterEvent > mEventCounter ? 0 : mEventCounter - afterEvent;
 }
 
-void EventWaiter::callback() {
+void EventWaiter::newEvent() {
     std::unique_lock<std::mutex> lock(mStreamLock);
     mEventCounter++;
     mCv.notify_all();
 }
 
 void EventWaiter::callbackForwarder(void* opaque) {
-    reinterpret_cast<EventWaiter*>(opaque)->callback();
+    reinterpret_cast<EventWaiter*>(opaque)->newEvent();
 }
 
 }  // namespace control
