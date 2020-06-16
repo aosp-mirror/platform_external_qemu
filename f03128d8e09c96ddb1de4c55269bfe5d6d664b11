@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "389136b3_94c3ef17",
+        "filename": "android/data/advancedFeaturesCanary.ini",
+        "patchSetId": 4
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-06-16T17:58:02Z",
+      "side": 1,
+      "message": "do snapshots work?",
+      "range": {
+        "startLine": 337,
+        "startChar": 0,
+        "endLine": 340,
+        "endChar": 15
+      },
+      "revId": "f03128d8e09c96ddb1de4c55269bfe5d6d664b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
