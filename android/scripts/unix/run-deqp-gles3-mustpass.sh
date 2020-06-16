@@ -39,16 +39,16 @@ OPT_BUILD_DIR=$DEQP_BUILD_DIR
 package_builder_process_options deqp
 
 DEQP_DIR=$AOSP_DIR/external/deqp
-GLES3_CTS_MUSTPASS_CASELIST=$AOSP_DIR/external/deqp/android/cts/master/gles3-master.txt
+GLES3_CTS_MUSTPASS_CASELIST=$AOSP_DIR/external/deqp/android/cts/master/gles31-master.txt
 DEQP_BUILD_DIR=$AOSP_DIR/external/deqp/build
-DEQP_GLES3_EXEC_DIR=$DEQP_BUILD_DIR/modules/gles3
+DEQP_GLES3_EXEC_DIR=$DEQP_BUILD_DIR/modules/gles31
 DEQP_CASES="--deqp-caselist-file=$GLES3_CTS_MUSTPASS_CASELIST"
 
 if [ "$OPT_DEQP_CASE" ]; then
 DEQP_CASES="--deqp-case=$OPT_DEQP_CASE"
 fi
 
-DEQP_GLES3_EXEC_NAME="./deqp-gles3 $DEQP_CASES"
+DEQP_GLES3_EXEC_NAME="./deqp-gles31 $DEQP_CASES"
 
 cd $DEQP_GLES3_EXEC_DIR
 

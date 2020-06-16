@@ -1025,7 +1025,7 @@ static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBas
     if (isStruct) {
         // fprintf(stderr, "%s: is struct\n", __func__);
         if (isArr) {
-            // fprintf(stderr, "%s: is arr\n", __func__);
+            fprintf(stderr, "%s: is arr: %s var.name\n", __func__, var.name);
             for (int k = 0; k < var.pArraySizes[0]; k++) {
                 for (uint32_t i = 0; i < var.fieldsCount; ++i) {
                     std::vector<char> keyBuf(keyBase.length() + strlen(var.pFields[i].name) + 20, 0);
@@ -1043,15 +1043,29 @@ static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBas
             }
         }
     } else {
-        // fprintf(stderr, "%s: is not struct\n", __func__);
+        fprintf(stderr, "%s: is not struct: %s basesize: %d\n", __func__, var.name, baseSize);
+        if (baseSize > 1 && (pData->mGuestExplicitUniformsRev.find(keyBase) != pData->mGuestExplicitUniformsRev.end())) {
+            fprintf(stderr, "%s: explicit uniform loc with nontrivialarray: %d\n", __func__, baseSize);
+            for (int k = 0; k < baseSize; ++k) {
+                std::vector<char> keyBuf(keyBase.length() + 20, 0);
+                std::vector<char> keyBuf2(keyBase.length() + 20, 0);
+                snprintf(keyBuf.data(), keyBuf.size(), "%s", keyBase.c_str());
+                snprintf(keyBuf2.data(), keyBuf.size(), "%s[%d]", keyBase.c_str(), k);
+                pData->mGuestExplicitUniformsRev[keyBuf2.data()] = pData->mGuestExplicitUniformsRev[keyBase] + k;
+                pData->mGuestExplicitUniforms[pData->mGuestExplicitUniformsRev[keyBase] + k] = keyBuf2.data();
+                fprintf(stderr, "%s: set loc of %s expl to %d\n", __func__, keyBuf2.data(), pData->mGuestExplicitUniformsRev[keyBase] + k);
+            }
+        }
         for (int k = 0; k < baseSize; k++) {
+            fprintf(stderr, "%s: do %d\n", __func__, k);
             if (k == 0) {
                 std::vector<char> keyBuf(keyBase.length() + 20, 0);
                 std::vector<char> keyBuf2(keyBase.length() + 20, 0);
                 snprintf(keyBuf.data(), keyBuf.size(), "%s", keyBase.c_str());
                 snprintf(keyBuf2.data(), keyBuf.size(), "%s[%d]", keyBase.c_str(), k);
-                // fprintf(stderr, "%s: initGuestUniformLocForKey. keyBuf2 %s\n", __func__, keyBuf2.data());
+                fprintf(stderr, "%s: initGuestUniformLocForKey. keyBuf2 %s\n", __func__, keyBuf2.data());
                 pData->initGuestUniformLocForKey(keyBuf.data(), keyBuf2.data());
+                pData->initGuestUniformLocForKey(keyBuf.data());
             } else {
                 std::vector<char> keyBuf(keyBase.length() + 20, 0);
                 snprintf(keyBuf.data(), keyBuf.size(), "%s[%d]", keyBase.c_str(), k);
@@ -1076,6 +1090,16 @@ static void sInitializeUniformLocs(ProgramData* pData,
 
     std::vector<char> name(nameLength, 0);
 
+    fprintf(stderr, "%s: init for %p\n", __func__, pData);
+    // Get the guest's fixed uniform names
+    for (const auto& var: uniforms) {
+        if (var.location != -1) {
+            pData->mGuestExplicitUniforms[var.location] = var.name;
+            pData->mGuestExplicitUniformsRev[var.name] = var.location;
+            fprintf(stderr, "%s: var %s loc %d\n", __func__, var.name, var.location);
+        }
+    }
+
     for (int i = 0; i < uniform_count; i++) {
         GLint size;
         GLenum type;
@@ -1091,8 +1115,11 @@ static void sInitializeUniformLocs(ProgramData* pData,
 
     size_t i = 0;
     for (const auto& var : uniforms) {
+        while (pData->mGuestExplicitUniforms.find(i) != pData->mGuestExplicitUniforms.end()) {
+            ++i;
+        }
         linkInfoUniformsByName[var.name] = i;
-        i++;
+        ++i;
     }
 
     for (const auto& str : orderedUniforms) {
@@ -1110,18 +1137,34 @@ static void sInitializeUniformLocs(ProgramData* pData,
 }
 
 void ProgramData::initGuestUniformLocForKey(StringView key) {
-    // fprintf(stderr, "%s: for %s\n", __func__, key.str().c_str());
+    fprintf(stderr, "%s: for %s\n", __func__, key.str().c_str());
     if (mUniNameToGuestLoc.find(key) == mUniNameToGuestLoc.end()) {
-        mUniNameToGuestLoc[key] = mCurrUniformBaseLoc;
+        while (mGuestExplicitUniforms.find(mCurrUniformBaseLoc) != mGuestExplicitUniforms.end()) { ++mCurrUniformBaseLoc; }
+        auto explicitRevIt = mGuestExplicitUniformsRev.find(key.str());
+
+        if (explicitRevIt != mGuestExplicitUniformsRev.end()) {
+            mUniNameToGuestLoc[key] = mGuestExplicitUniformsRev[key];
+        } else {
+            mUniNameToGuestLoc[key] = mCurrUniformBaseLoc;
+        }
+
         // Emplace host location beforehand to workaround Unreal bug
         // BUG: 120548998
         GLDispatch& dispatcher = GLEScontext::dispatcher();
         std::string translatedName = getTranslatedName(key);
-        // fprintf(stderr, "%s: trname: %s\n", __func__, translatedName.c_str());
+        fprintf(stderr, "%s: trname: %s\n", __func__, translatedName.c_str());
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
+
+
         if (hostLoc != -1) {
-            mGuestLocToHostLoc[mCurrUniformBaseLoc] = hostLoc;
+            if (explicitRevIt != mGuestExplicitUniformsRev.end()) {
+                mGuestLocToHostLoc[explicitRevIt->second] = hostLoc;
+                fprintf(stderr, "%s: guest loc 2 host loc explicit: %d->%d\n", __func__, explicitRevIt->second, hostLoc);
+            } else {
+                mGuestLocToHostLoc[mCurrUniformBaseLoc] = hostLoc;
+                fprintf(stderr, "%s: guest loc 2 host loc implicit: %d->%d\n", __func__, mCurrUniformBaseLoc, hostLoc);
+            }
         }
 
         mCurrUniformBaseLoc++;
@@ -1129,13 +1172,29 @@ void ProgramData::initGuestUniformLocForKey(StringView key) {
 }
 
 void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
+    fprintf(stderr, "%s: keybase %s key2 %s\n", __func__, key.str().c_str(), key2.str().c_str());
+    while (mGuestExplicitUniforms.find(mCurrUniformBaseLoc) != mGuestExplicitUniforms.end()) { ++mCurrUniformBaseLoc; }
+
     bool newUniform = false;
+
     if (mUniNameToGuestLoc.find(key) == mUniNameToGuestLoc.end()) {
-        mUniNameToGuestLoc[key] = mCurrUniformBaseLoc;
+        if (mGuestExplicitUniformsRev.find(key) != mGuestExplicitUniformsRev.end()) {
+            mUniNameToGuestLoc[key] = mGuestExplicitUniformsRev[key];
+            fprintf(stderr, "%s: uninametoguestlc %s -> %d explicit\n", __func__, key.str().c_str(), mGuestExplicitUniformsRev[key]);
+        } else {
+            mUniNameToGuestLoc[key] = mCurrUniformBaseLoc;
+            fprintf(stderr, "%s: uninametoguestlc %s -> %d implicit\n", __func__, key.str().c_str(), mCurrUniformBaseLoc);
+        }
         newUniform = true;
     }
     if (mUniNameToGuestLoc.find(key2) == mUniNameToGuestLoc.end()) {
-        mUniNameToGuestLoc[key2] = mCurrUniformBaseLoc;
+        if (mGuestExplicitUniformsRev.find(key2) != mGuestExplicitUniformsRev.end()) {
+            mUniNameToGuestLoc[key2] = mGuestExplicitUniformsRev[key2];
+            fprintf(stderr, "%s: uninametoguestlc %s -> %d explicit\n", __func__, key2.str().c_str(), mGuestExplicitUniformsRev[key2]);
+        } else {
+            mUniNameToGuestLoc[key2] = mCurrUniformBaseLoc;
+            fprintf(stderr, "%s: uninametoguestlc %s -> %d implicit\n", __func__, key2.str().c_str(), mCurrUniformBaseLoc);
+        }
         newUniform = true;
     }
 
@@ -1147,7 +1206,13 @@ void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
         if (hostLoc != -1) {
-            mGuestLocToHostLoc[mCurrUniformBaseLoc] = hostLoc;
+            if (mGuestExplicitUniformsRev.find(key) != mGuestExplicitUniformsRev.end()) {
+                mGuestLocToHostLoc[mGuestExplicitUniformsRev[key]] = hostLoc;
+                fprintf(stderr, "%s: explicit: %s, guest loc %d host %d\n", __func__, key.str().c_str(), mGuestExplicitUniformsRev[key], hostLoc);
+            } else {
+                mGuestLocToHostLoc[mCurrUniformBaseLoc] = hostLoc;
+                fprintf(stderr, "%s: explicit: %s, guest loc %d host %d\n", __func__, key.str().c_str(), mCurrUniformBaseLoc, hostLoc);
+            }
         }
 
         mCurrUniformBaseLoc++;
@@ -1155,6 +1220,7 @@ void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
 }
 
 int ProgramData::getGuestUniformLocation(const char* uniName) {
+    fprintf(stderr, "%s: for %s\n", __func__, uniName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     if (mUseUniformLocationVirtualization) {
         if (mUseDirectDriverUniformInfo) {
@@ -1181,6 +1247,7 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
             const auto& activeLoc = mUniNameToGuestLoc.find(uniName);
 
             if (activeLoc != mUniNameToGuestLoc.end()) {
+                fprintf(stderr, "%s: found\n", __func__);
                 guestLoc = activeLoc->second;
             } else {
                 guestLoc = -1;
@@ -1194,6 +1261,7 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
             }
 
             mGuestLocToHostLoc[guestLoc] = hostLoc;
+    fprintf(stderr, "%s: ret %d\n", __func__, guestLoc);
             return guestLoc;
         }
     } else {

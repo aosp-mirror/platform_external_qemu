@@ -374,10 +374,8 @@ bool translate(bool hostUsesCoreProfile,
 
     bool ret = res->compileStatus == 1;
 
-    if (!ret) {
         fprintf(stderr, "%s: FAIL origSrc [%s]\n src [%s]\n infoLog [%s] res %d\n", __func__,
                 src, res->translatedSource, res->infoLog, ret);
-    }
 
     st->freeShaderResolveState(res);
     return ret;

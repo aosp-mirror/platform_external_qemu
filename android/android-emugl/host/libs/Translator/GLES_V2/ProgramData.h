@@ -122,6 +122,8 @@ public:
     int getGuestUniformLocation(const char* uniName);
     int getHostUniformLocation(int guestLocation);
 
+    std::unordered_map<int, std::string> mGuestExplicitUniforms;
+    std::unordered_map<std::string, int> mGuestExplicitUniformsRev;
 private:
     // linkedAttribLocs stores the attribute locations the guest might
     // know about. It includes all boundAttribLocs before the previous
@@ -151,6 +153,7 @@ private:
     std::unordered_map<int, int> mGuestLocToHostLoc;
 
     int mCurrUniformBaseLoc = 0;
+
     bool mUseUniformLocationVirtualization = true;
     bool mUseDirectDriverUniformInfo = false;
 };
