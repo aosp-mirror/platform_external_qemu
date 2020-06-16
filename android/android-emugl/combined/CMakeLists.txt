@@ -35,7 +35,9 @@ if(OPTION_GFXSTREAM_BACKEND)
     gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
                               OpenglRender)
 
+  android_target_dependency(gfxstream_backend all ANGLE_DEPENDENCIES)
   android_install_shared(gfxstream_backend)
+  android_install_dependency(all ANGLE_DEPENDENCIES)
 
   if (CROSVM)
     android_crosvm_build(gfxstream_backend)
