@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79a4a1ee_cc196f93",
+        "filename": "android/android-grpc/android/emulation/control/clipboard/Clipboard.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-06-16T16:31:41Z",
+      "side": 1,
+      "message": "Nit: Sends",
+      "range": {
+        "startLine": 34,
+        "startChar": 7,
+        "endLine": 34,
+        "endChar": 11
+      },
+      "revId": "61683b2dfea49c10a774117b5d6d91fee806bcb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "44f4acc0_01edd337",
+        "filename": "android/android-grpc/android/emulation/control/clipboard/Clipboard.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-06-16T16:31:41Z",
+      "side": 1,
+      "message": "const std::string\u0026 ?",
+      "range": {
+        "startLine": 35,
+        "startChar": 22,
+        "endLine": 35,
+        "endChar": 33
+      },
+      "revId": "61683b2dfea49c10a774117b5d6d91fee806bcb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
