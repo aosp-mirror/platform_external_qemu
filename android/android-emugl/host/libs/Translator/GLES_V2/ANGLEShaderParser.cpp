@@ -120,6 +120,7 @@ ShaderLinkInfo::ShaderLinkInfo(ShaderLinkInfo&& other) {
 }
 
 ShaderLinkInfo& ShaderLinkInfo::operator=(ShaderLinkInfo&& other) {
+    esslVersion = other.esslVersion;
     uniforms = std::move(other.uniforms);
     varyings = std::move(other.varyings);
     attributes = std::move(other.attributes);
@@ -136,6 +137,7 @@ ShaderLinkInfo::~ShaderLinkInfo() {
 
 void ShaderLinkInfo::copyFromOther(const ShaderLinkInfo& other) {
     auto dispatch = getSTDispatch();
+    esslVersion = other.esslVersion;
     for (const auto& var: other.uniforms) { uniforms.push_back(dispatch->copyVariable(&var)); }
     for (const auto& var: other.varyings) { varyings.push_back(dispatch->copyVariable(&var)); }
     for (const auto& var: other.attributes) { attributes.push_back(dispatch->copyVariable(&var)); }
@@ -342,6 +344,40 @@ bool translate(bool hostUsesCoreProfile,
                std::string* outObjCode,
                ShaderLinkInfo* outShaderLinkInfo) {
     int esslVersion = detectShaderESSLVersion(&src);
+
+    // Leverage ARB_ES3_1_compatibility for ESSL 310 for now.
+    // Use translator after rest of dEQP-GLES31.functional is in a better state.
+    if (esslVersion == 310) {
+        // Don't try to get obj code just yet.
+        // At least on NVIDIA Quadro K2200 Linux (361.xx),
+        // ARB_ES3_1_compatibility seems to assume incorrectly
+        // that atomic_uint must catch a precision qualifier in ESSL 310.
+        std::string origSrc(src);
+        outShaderLinkInfo->esslVersion = esslVersion;
+        size_t versionStart = origSrc.find("#version");
+        size_t versionEnd = origSrc.find("\n", versionStart);
+        size_t extensionStart = origSrc.rfind("#extension");
+        size_t extensionEnd = origSrc.find("\n", extensionStart);
+        if (extensionStart == std::string::npos) {
+            std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
+            std::string src2 =
+                versionPart + "precision highp atomic_uint;\n" +
+                origSrc.substr(versionEnd + 1, origSrc.size() - (versionEnd + 1));
+            *outObjCode = src2;
+        } else {
+            std::string uptoExtensionPart = origSrc.substr(0, extensionEnd + 1);
+            std::string src2 =
+                uptoExtensionPart + "precision highp atomic_uint;\n" +
+                origSrc.substr(extensionEnd + 1, origSrc.size() - (extensionEnd + 1));
+            *outObjCode = src2;
+        }
+        return true;
+    }
+
+	if (!kInitialized) {
+        return false;
+    }
+
     // ANGLE may crash if multiple RenderThreads attempt to compile shaders
     // at the same time.
     android::base::AutoLock autolock(kCompilerLock);
@@ -373,11 +409,6 @@ bool translate(bool hostUsesCoreProfile,
     if (outShaderLinkInfo) getShaderLinkInfo(esslVersion, res, outShaderLinkInfo);
 
     bool ret = res->compileStatus == 1;
-
-    if (!ret) {
-        fprintf(stderr, "%s: FAIL origSrc [%s]\n src [%s]\n infoLog [%s] res %d\n", __func__,
-                src, res->translatedSource, res->infoLog, ret);
-    }
 
     st->freeShaderResolveState(res);
     return ret;
