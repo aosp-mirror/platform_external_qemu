@@ -147,7 +147,7 @@ void get_cpuid_func(struct CPUState* cpu, int func, int cnt, uint32_t *eax, uint
 
             *ecx = *ecx & ~(CPUID_EXT_OSXSAVE | CPUID_EXT_MONITOR | CPUID_EXT_X2APIC |
                         CPUID_EXT_VMX | CPUID_EXT_TSC_DEADLINE_TIMER | CPUID_EXT_TM2 | CPUID_EXT_PCID |
-                        CPUID_EXT_EST | CPUID_EXT_SSE42 | CPUID_EXT_SSE41);
+                        CPUID_EXT_EST);
             *ecx = *ecx & f1_ecx_whitelist;
 
             *ecx |= CPUID_EXT_HYPERVISOR;
