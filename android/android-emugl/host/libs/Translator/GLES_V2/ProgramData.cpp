@@ -777,18 +777,20 @@ void ProgramData::setLinkStatus(GLint status) {
 #endif
     if (status && HostLinkStatus) {
         std::vector<ST_ShaderVariable> allUniforms;
+        bool is310 = false;
         for (auto& s : attachedShaders) {
             if (s.localName) {
                 assert(s.shader);
                 s.linkedSource = s.shader->getOriginalSrc();
                 s.linkInfo = s.shader->getShaderLinkInfo();
+                is310 = is310 || (s.linkInfo.esslVersion == 310);
                 for (const auto& var: s.linkInfo.uniforms) {
                     allUniforms.push_back(var);
                 }
             }
         }
 
-        if (isGles2Gles()) {
+        if (is310 || isGles2Gles()) {
             mUseDirectDriverUniformInfo = true;
         } else {
             sInitializeUniformLocs(this, allUniforms);
