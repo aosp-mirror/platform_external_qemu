@@ -1,6 +1,14 @@
 # Let's bring the grpc module.
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../grpc/emulator grpc)
 
+if(LINUX_X86_64)
+  # Our linux headers are from 2013, and do not define newer socket options.
+  # (b/156635589)
+  target_compile_options(grpc PRIVATE -DSO_REUSEPORT=15)
+  target_compile_options(grpc_unsecure PRIVATE -DSO_REUSEPORT=15)
+  target_compile_options(grpc_cronet PRIVATE -DSO_REUSEPORT=15)
+endif()
+
 # Add waterfall only for posix, as there are some issues around
 # stderr/stdout/stdin in the gRPC compiler. See b/148079576 for details.
 if(NOT WINDOWS_MSVC_X86_64)
