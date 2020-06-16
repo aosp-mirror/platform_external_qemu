@@ -432,7 +432,6 @@ if(WINDOWS_MSVC_X86_64)
   set(ANGLE_RENDERER_DEPENDENCIES
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/libGLESv1_CM${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv1_CM${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}"
   )
 
@@ -443,7 +442,6 @@ if(WINDOWS_MSVC_X86_64)
     EXECUTABLES
       "gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      "gles_angle/libGLESv1_CM${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "gles_angle/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}"
     URL "https://chromium.googlesource.com/angle/angle"
     SPDX "BSD-3-Clause"
