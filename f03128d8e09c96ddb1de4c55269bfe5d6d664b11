@@ -22,6 +22,30 @@
       "revId": "f03128d8e09c96ddb1de4c55269bfe5d6d664b11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a357fe36_00e9381f",
+        "filename": "android/data/advancedFeaturesCanary.ini",
+        "patchSetId": 4
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-06-16T18:54:39Z",
+      "side": 1,
+      "message": "Snapshot works. I have tested it. But I started to see this error message when exiting emulator. \n\"emulator: Saving state on exit with session uptime 58299 ms\nqemu-system-x86_64(91483,0x10c81ddc0) malloc: *** error for object 0x7fc1fdf305f0: pointer being freed was not allocated\nqemu-system-x86_64(91483,0x10c81ddc0) malloc: *** set a breakpoint in malloc_error_break to debug\nReceived signal 6\n [0x00010ea95afc]\n [0x00010ea95991]\n [0x7fff674355fd]\n [0x00010c7eb7f8]\n [0x7fff6730b808]\n [0x7fff6740150b]\n [0x7fff6740440f]\n [0x0001067f24b2]\n [0x0001067f23df]\n [0x7fff672e613c]\n [0x7fff672e6412]\n [0x7fff6723ccd0]\n [0x000000000005]\n[end of stack trace]\nAbort trap: 6\"\nNot sure if this is related. I will look into it.",
+      "parentUuid": "389136b3_94c3ef17",
+      "range": {
+        "startLine": 337,
+        "startChar": 0,
+        "endLine": 340,
+        "endChar": 15
+      },
+      "revId": "f03128d8e09c96ddb1de4c55269bfe5d6d664b11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
