@@ -10,12 +10,15 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "android/base/synchronization/Lock.h"
-#include "android/emulation/AndroidPipe.h"
+#include <stddef.h>                                 // for size_t
+#include <cstdint>                                  // for uint8_t, uint32_t
+#include <functional>                               // for function
+#include <memory>                                   // for shared_ptr
+#include <vector>                                   // for vector
 
-#include <functional>
-#include <memory>
-#include <vector>
+#include "android/base/synchronization/Lock.h"      // for Lock, AutoLock
+#include "android/emulation/AndroidPipe.h"          // for AndroidPipe, Andr...
+#include "android/emulation/android_pipe_common.h"  // for AndroidPipeBuffer
 
 namespace android {
 namespace emulation {
@@ -50,7 +53,7 @@ public:
     }
 
     static void setEnabled(bool enabled);
-    static void setGuestClipboardCallback(GuestClipboardCallback cb);
+    static void registerGuestClipboardCallback(GuestClipboardCallback cb);
     void setGuestClipboardContents(const uint8_t* buf, size_t len);
 
 private:

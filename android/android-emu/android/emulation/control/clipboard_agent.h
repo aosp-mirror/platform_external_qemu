@@ -22,10 +22,11 @@ typedef struct QAndroidClipboardAgent {
     // Turns clipboard sharing on/off.
     void (*setEnabled)(bool enabled);
 
-    // Sets a function to call when the guest's clipboard content changes
-    // as a result of an action inside the guest.
+    // Registers a function to call when the guest's clipboard content changes
+    // as a result of an action inside the guest. Note that multiple functions
+    // can be registered.
     // |cb| is the pointer to the function
-    void (*setGuestClipboardCallback)(
+    void (*registerGuestClipboardCallback)(
         void(*cb)(void*, const uint8_t*, size_t), void* context);
 
     // Sets the contents of the guest clipboard.

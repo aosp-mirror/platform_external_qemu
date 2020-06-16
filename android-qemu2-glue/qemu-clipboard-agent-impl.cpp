@@ -9,9 +9,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/emulation/control/clipboard_agent.h"
+#include <stddef.h>                                     // for size_t
+#include <stdint.h>                                     // for uint8_t
+#include <functional>                                   // for __base
+#include <memory>                                       // for shared_ptr
 
-#include "android/emulation/ClipboardPipe.h"
+#include "android/emulation/ClipboardPipe.h"            // for ClipboardPipe
+#include "android/emulation/control/clipboard_agent.h"  // for QAndroidClipb...
 
 using android::emulation::ClipboardPipe;
 
@@ -19,7 +23,7 @@ static void set_guest_clipboard_callback(void (*cb)(void*,
                                                     const uint8_t*,
                                                     size_t),
                                          void* context) {
-    ClipboardPipe::setGuestClipboardCallback(
+    ClipboardPipe::registerGuestClipboardCallback(
             [cb, context](const uint8_t* data, size_t size) {
                 cb(context, data, size);
             });
@@ -34,7 +38,7 @@ static void set_guest_clipboard_contents(const uint8_t* buf, size_t len) {
 
 static const QAndroidClipboardAgent clipboardAgent = {
         .setEnabled = &ClipboardPipe::setEnabled,
-        .setGuestClipboardCallback = set_guest_clipboard_callback,
+        .registerGuestClipboardCallback = set_guest_clipboard_callback,
         .setGuestClipboardContents = set_guest_clipboard_contents};
 
 extern "C" const QAndroidClipboardAgent* const gQAndroidClipboardAgent =

@@ -17,11 +17,11 @@
 #include "msvc-posix.h"
 #endif
 
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <algorithm>
 #include <chrono>
 #include <functional>
@@ -55,7 +55,6 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
-#include "android/console_auth.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/HangDetector.h"
 #include "android/crashreport/crash-handler.h"
@@ -258,7 +257,8 @@ const AndroidConsoleAgents* getConsoleAgents() {
             gQCarDataAgent,
             gQGrpcAgent,
             gQAndroidSensorsAgent,
-            gQAndroidMultiDisplayAgent};
+            gQAndroidMultiDisplayAgent,
+            gQAndroidClipboardAgent};
     return &consoleAgents;
 }
 
