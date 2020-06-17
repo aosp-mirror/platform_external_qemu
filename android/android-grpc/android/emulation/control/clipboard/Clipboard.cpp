@@ -44,11 +44,14 @@ void Clipboard::guestClipboardCallback(void* context,
                                        const uint8_t* data,
                                        size_t size) {
     auto self = static_cast<Clipboard*>(context);
+    android::base::AutoLock lock(self->mContentsLock);
     self->mContents.assign((char*)data, size);
     self->mEventWaiter.newEvent();
 }
 
 void Clipboard::sendContents(const std::string& clipdata) {
+    android::base::AutoLock lock(mContentsLock);
+    mContents.assign(clipdata);
     mClipAgent->setGuestClipboardContents((uint8_t*)(clipdata.c_str()),
                                           clipdata.size());
 }
