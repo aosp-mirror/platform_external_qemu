@@ -57,16 +57,15 @@ service EmulatorController {
       returns (stream PhysicalModelValue) {}
 
   // Atomically set/get the current primary clipboard data.
-  // Note: Setting the clip board data externally will not result
-  // in an observable change from get/stream clipboard.  For example
-  // setClipboard("Hello") will not result in getClipboard() returning "Hello".
   rpc setClipboard(ClipData) returns (google.protobuf.Empty) {}
   rpc getClipboard(google.protobuf.Empty) returns (ClipData) {}
 
   // Streams the current data on the clipboard. This will immediately produce
-  // a result with the current state of the clipboard. The stream will block
-  // and wait until a new clip event is available. It is possible to lose clipboard
-  // events if the clipboard updates very rapidly.
+  // a result with the current state of the clipboard after which the stream
+  // will block and wait until a new clip event is available from the guest.
+  // Calling the setClipboard method above will not result in generating a clip
+  // event. It is possible to lose clipboard events if the clipboard updates
+  // very rapidly.
   rpc streamClipboard(google.protobuf.Empty) returns (stream ClipData) {}
 
   // Set/get the battery to the given state.
