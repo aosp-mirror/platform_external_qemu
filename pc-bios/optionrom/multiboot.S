@@ -26,7 +26,62 @@
 
 #define GS_PROT_JUMP		0
 #define GS_GDT_DESC		6
+#define GS_DMA_CTRL	        12
+#define GS_DMA_LEN	        16
+#define GS_DMA_ADDR1	        20
+#define GS_DMA_ADDR2        	24
 
+/* This macro assumes that gs:GS_DMA_* is set up as a scratch space */
+.macro do_dma data, addr, size
+	/* Struct (all fields are big-endian):
+	     typedef struct FWCfgDmaAccess {
+	         uint32_t control;
+	         uint32_t length;
+	         uint64_t address;
+	     } FWCfgDmaAccess;
+	*/
+	/* Set dma.control (big-endian):
+	     high (16-bit) word is FW_CFG_INITRD_DATA
+	     low (16-bit) word is FW_CFG_DMA_CTL_READ (0x02) |
+	                          FW_CFG_DMA_CTL_SELECT (0x08)
+	*/
+	movl		$(\data << 16 | 0x02 | 0x08), %eax
+	bswap		%eax
+	mov		%eax, %gs:GS_DMA_CTRL
+	/* Get the initrd's length and set dma.length. */
+	read_fw		\size
+	bswap		%eax
+	movl		%eax, %gs:GS_DMA_LEN
+	/* Set dma.address */
+	/* read_fw clobbers edx, and puts the result in eax */
+	read_fw		\addr
+	movl		$0, %gs:GS_DMA_ADDR1
+	bswap		%eax
+	mov		%eax, %gs:GS_DMA_ADDR2
+	/* Kick off the DMA by outputting the physical address of dma to 0x514
+	   (as two 32-bit values). */
+	/* The top value is always 0. */
+	xor		%eax, %eax
+	mov		$0x514, %dx
+	out		%eax, (%dx)
+	/* Calculate the physical address of the DMA request structure stored, and
+	 * send it to 0x514+4. */
+	mov		%gs, %eax
+	movzwl		%ax, %eax
+	shl		$4, %eax
+	addl		$GS_DMA_CTRL, %eax
+	bswap		%eax
+	add		$4, %dx
+	out		%eax, (%dx)
+	/* Wait for DMA to finish */
+.Lwait_for_dma\@:
+	mov 		%gs:GS_DMA_CTRL, %eax
+	bswap  		%eax
+	test 		$~1, %eax
+	jnz 		.Lwait_for_dma\@
+.endm
+
+#define read_fw_dma(var) do_dma var ## _DATA, var ## _ADDR, var ## _SIZE
 
 BOOT_ROM_START
 
@@ -67,13 +122,17 @@ run_multiboot:
 	xor		%eax, %eax
 	mov		%eax, %es
 
-	/* Read the bootinfo struct into RAM */
-	read_fw_blob(FW_CFG_INITRD)
+	/* Read the bootinfo struct into RAM using the DMA interface
+	   TODO(teisenbe): Should really detect whether DMA is supported. */
+	read_fw_dma(FW_CFG_INITRD)
 
 	/* FS = bootinfo_struct */
 	read_fw		FW_CFG_INITRD_ADDR
 	shr		$4, %eax
 	mov		%ax, %fs
+
+	/* Read the kernel and modules into RAM using the DMA interface */
+	read_fw_dma(FW_CFG_KERNEL)
 
 	/* Account for the EBDA in the multiboot structure's e801
 	 * map.
@@ -186,9 +245,6 @@ prot_mode:
 	movl		%eax, %es
 	movl		%eax, %fs
 	movl		%eax, %gs
-
-	/* Read the kernel and modules into RAM */
-	read_fw_blob(FW_CFG_KERNEL)
 
 	/* Jump off to the kernel */
 	read_fw		FW_CFG_KERNEL_ENTRY
