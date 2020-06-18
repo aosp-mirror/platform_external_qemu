@@ -25,6 +25,7 @@
 #include "android/automation/AutomationController.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/android_qemud.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 #include "android/globals.h"
 #include "android/physics/PhysicalModel.h"
 #include "android/sensors-port.h"
@@ -883,6 +884,7 @@ static void _hwSensors_init(HwSensors* h) {
     }
 
     if (android_hw->hw_sensor_hinge) {
+        android_foldable_initialize(nullptr);
         switch (android_hw->hw_sensor_hinge_count) {
             case 3:
                 h->sensors[ANDROID_SENSOR_HINGE_ANGLE2].enabled = true;
@@ -1329,7 +1331,16 @@ void android_foldable_set_hinge_degrees(unsigned int hinge_index,
     _foldableState->currentHingeDegrees[hinge_index] = degrees;
     android_sensors_override_set(ANDROID_SENSOR_HINGE_ANGLE0 + hinge_index,
                                  degrees, 0.0, 0.0);
-    _foldableState->currentPosture = calculate_posture();
+    enum FoldablePostures posture = calculate_posture();
+    if (_foldableState->currentPosture != posture) {
+        _foldableState->currentPosture = posture;
+        auto adbInterface = android::emulation::AdbInterface::getGlobal();
+        if (adbInterface) {
+            adbInterface->enqueueCommand({ "shell", "settings", "put",
+                                            "global", "device_posture",
+                                            std::to_string((int)posture).c_str() });
+        }
+    }
 }
 
 float android_foldable_get_hinge_degrees(unsigned int hinge_index) {
@@ -1349,13 +1360,21 @@ void android_foldable_set_posture(int index) {
     if (_foldableState->currentPosture == (enum FoldablePostures)index) {
         return;
     }
+    auto adbInterface = android::emulation::AdbInterface::getGlobal();
+    if (adbInterface) {
+        adbInterface->enqueueCommand({ "shell", "settings", "put",
+                                        "global", "device_posture",
+                                        std::to_string(index).c_str() });
+    }
     _foldableState->currentPosture = (enum FoldablePostures)index;
     // Update the hinge angles
     for (const auto i : _anglesToPostures) {
         if (i.posture == _foldableState->currentPosture) {
             for (uint32_t j = 0; j < _foldableState->config.numHinges; j++) {
-                _foldableState->currentHingeDegrees[j] =
-                        (i.angles[j].left + i.angles[j].right) / 2.0f;
+                float degrees = (i.angles[j].left + i.angles[j].right) / 2.0f;
+                _foldableState->currentHingeDegrees[j] = degrees;
+                android_sensors_override_set(ANDROID_SENSOR_HINGE_ANGLE0 + j,
+                                             degrees, 0.0, 0.0);
             }
         }
     }
