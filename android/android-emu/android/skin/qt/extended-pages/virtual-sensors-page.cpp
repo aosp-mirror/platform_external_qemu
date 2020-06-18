@@ -529,8 +529,9 @@ void VirtualSensorsPage::propagateAccelWidgetChange() {
  */
 void VirtualSensorsPage::propagateSlidersChange(bool updateHinge, int hingeIndex) {
     reportVirtualSensorsInteraction();
-    updateModelFromSliders(PHYSICAL_INTERPOLATION_SMOOTH);
-    if (updateHinge) {
+    if (!updateHinge) {
+        updateModelFromSliders(PHYSICAL_INTERPOLATION_SMOOTH);
+    } else {
         switch (hingeIndex) {
             case 0:
                 android_foldable_set_hinge_degrees(0, mUi->hinge0Slider->getValue());
