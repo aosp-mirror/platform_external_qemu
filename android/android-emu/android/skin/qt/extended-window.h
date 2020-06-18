@@ -34,6 +34,7 @@ class QShowEvent;
 class ToolWindow;
 class VirtualSceneControlWindow;
 template <class CommandType> class ShortcutKeyStore;
+using ClickCount = uint16_t;
 
 namespace Ui {
     class ExtendedControls;
@@ -101,6 +102,7 @@ private:
     EmulatorQtWindow* mEmulatorWindow;
     ToolWindow*  mToolWindow;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
+    std::map<ExtendedWindowPane, ClickCount> mPaneInvocationCount;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
     std::unique_ptr<Ui::ExtendedControls> mExtendedUi;
     bool mFirstShowEvent = true;
