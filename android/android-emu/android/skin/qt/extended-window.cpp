@@ -278,19 +278,23 @@ ExtendedWindow::~ExtendedWindow() {
 void ExtendedWindow::sendMetricsOnShutDown() {
     mExtendedUi->location_page->sendMetrics();
     mExtendedUi->multiDisplayPage->sendMetrics();
-    if (mExtendedWindowWasShown) {
-        android::metrics::MetricsReporter::get().report(
-                [](android_studio::AndroidStudioEvent* event) {
-                    // Send extended-window open metrics
-                    auto* metrics = event->mutable_emulator_ui_event();
-                    metrics->set_context(android_studio::EmulatorUiEvent::
-                                                 EXTENDED_WINDOW_OPEN);
-                    metrics->set_type(android_studio::EmulatorUiEvent::
-                                              UNKONWN_EMULATOR_UI_EVENT_TYPE);
-                    metrics->set_value(1);
-                    event->set_kind(android_studio::AndroidStudioEvent::
-                                            EMULATOR_UI_EVENT);
-                });
+    if (mPaneInvocationCount.size() > 0) {
+        for (const auto& invocation : mPaneInvocationCount) {
+            android::metrics::MetricsReporter::get().report(
+                    [=](android_studio::AndroidStudioEvent* event) {
+                        auto* metrics = event->mutable_emulator_ui_event();
+                        metrics->set_element_id(
+                                "PANE_" + std::to_string(invocation.first));
+                        metrics->set_context(android_studio::EmulatorUiEvent::
+                                                     EXTENDED_WINDOW_OPEN);
+                        metrics->set_type(
+                                android_studio::EmulatorUiEvent::
+                                        UNKONWN_EMULATOR_UI_EVENT_TYPE);
+                        metrics->set_value(invocation.second);
+                        event->set_kind(android_studio::AndroidStudioEvent::
+                                                EMULATOR_UI_EVENT);
+                    });
+        }
     }
 }
 
@@ -430,9 +434,13 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     if (it == mPaneButtonMap.end()) {
         return;
     }
+
+    if (mExtendedWindowWasShown && mExtendedUi->stackedWidget->currentIndex() != thisIndex) {
+        mPaneInvocationCount[thisIndex]++;
+    }
     QPushButton* thisButton = it->second;
     thisButton->toggle();
-    thisButton->clearFocus(); // It looks better when not highlighted
+    thisButton->clearFocus();  // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
 }
 
