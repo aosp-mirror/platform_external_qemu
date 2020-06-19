@@ -404,13 +404,7 @@ long ring_buffer_view_read(
     return (long)steps;
 }
 
-void ring_buffer_yield() {
-#ifdef _WIN32
-    _mm_pause();
-#else
-    sched_yield();
-#endif
-}
+void ring_buffer_yield() { }
 
 static void ring_buffer_sleep() {
 #ifdef _WIN32

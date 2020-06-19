@@ -468,6 +468,9 @@ intptr_t RenderThread::main() {
                 }
             }
         } while (progress);
+        auto progressEnd = currTimeUs(benchmarkEnabled);
+        stats_progressTimeUs += (progressEnd - progressStart);
+
     }
 
     if (dumpFP) {

@@ -112,6 +112,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
     uint32_t ringLargeXferAvailable = 0;
 
     const uint32_t maxSpins = 30;
+    const uint32_t maxSoftSpins = 10000;
     uint32_t spins = 0;
 
     while (count < wanted) {
@@ -148,6 +149,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
         auto ptrEnd = dst + wanted;
 
         if (ringAvailable) {
+            *(mContext.host_state) = ASG_HOST_STATE_CAN_CONSUME;
             uint32_t transferMode =
                 mContext.ring_config->transfer_mode;
             switch (transferMode) {
@@ -173,6 +175,9 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
         } else {
             if (++spins < maxSpins) {
                 ring_buffer_yield();
+                continue;
+            } else if (++spins < maxSoftSpins) {
+                usleep(1);
                 continue;
             } else {
                 spins = 0;
