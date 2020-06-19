@@ -25,6 +25,7 @@ namespace ANGLEShaderParser {
 
 ST_BuiltInResources kResources;
 bool kInitialized = false;
+bool sIsGles2Gles = false;
 
 class LazyLoadedSTDispatch {
 public:
@@ -136,24 +137,32 @@ ShaderLinkInfo::~ShaderLinkInfo() {
 }
 
 void ShaderLinkInfo::copyFromOther(const ShaderLinkInfo& other) {
-    auto dispatch = getSTDispatch();
     esslVersion = other.esslVersion;
-    for (const auto& var: other.uniforms) { uniforms.push_back(dispatch->copyVariable(&var)); }
-    for (const auto& var: other.varyings) { varyings.push_back(dispatch->copyVariable(&var)); }
-    for (const auto& var: other.attributes) { attributes.push_back(dispatch->copyVariable(&var)); }
-    for (const auto& var: other.outputVars) { outputVars.push_back(dispatch->copyVariable(&var)); }
-    for (const auto& var: other.interfaceBlocks) { interfaceBlocks.push_back(dispatch->copyInterfaceBlock(&var)); }
+
+    if (!sIsGles2Gles) {
+        auto dispatch = getSTDispatch();
+        for (const auto& var: other.uniforms) { uniforms.push_back(dispatch->copyVariable(&var)); }
+        for (const auto& var: other.varyings) { varyings.push_back(dispatch->copyVariable(&var)); }
+        for (const auto& var: other.attributes) { attributes.push_back(dispatch->copyVariable(&var)); }
+        for (const auto& var: other.outputVars) { outputVars.push_back(dispatch->copyVariable(&var)); }
+        for (const auto& var: other.interfaceBlocks) { interfaceBlocks.push_back(dispatch->copyInterfaceBlock(&var)); }
+    }
+
     nameMap = other.nameMap;
     nameMapReverse = other.nameMapReverse;
 }
 
 void ShaderLinkInfo::clear() {
-    auto dispatch = getSTDispatch();
-    for (auto& var: uniforms) { dispatch->destroyVariable(&var); }
-    for (auto& var: varyings) { dispatch->destroyVariable(&var); }
-    for (auto& var: attributes) { dispatch->destroyVariable(&var); }
-    for (auto& var: outputVars) { dispatch->destroyVariable(&var); }
-    for (auto& var: interfaceBlocks) { dispatch->destroyInterfaceBlock(&var); }
+
+    if (!sIsGles2Gles) {
+        auto dispatch = getSTDispatch();
+        for (auto& var: uniforms) { dispatch->destroyVariable(&var); }
+        for (auto& var: varyings) { dispatch->destroyVariable(&var); }
+        for (auto& var: attributes) { dispatch->destroyVariable(&var); }
+        for (auto& var: outputVars) { dispatch->destroyVariable(&var); }
+        for (auto& var: interfaceBlocks) { dispatch->destroyInterfaceBlock(&var); }
+    }
+
     uniforms.clear();
     varyings.clear();
     attributes.clear();
@@ -225,7 +234,9 @@ android::base::Lock kCompilerLock;
 void initializeResources(
     BuiltinResourcesEditCallback callback) {
 
-    getSTDispatch()->generateResources(&kResources);
+    if (!sIsGles2Gles) {
+        getSTDispatch()->generateResources(&kResources);
+    }
 
     callback(kResources);
 }
@@ -234,7 +245,9 @@ bool globalInitialize(
     bool isGles2Gles,
     BuiltinResourcesEditCallback editCallback) {
 
-    if (!isGles2Gles) {
+    sIsGles2Gles = isGles2Gles;
+
+    if (!sIsGles2Gles) {
         getSTDispatch()->initialize();
     }
 
