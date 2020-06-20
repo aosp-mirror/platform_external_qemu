@@ -22,6 +22,30 @@
       "revId": "158f4792c57ae13867a117f8e8bec2d2414054af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5be8fc3c_5c43548d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-06-20T02:36:28Z",
+      "side": 1,
+      "message": "This is true. The reason we need this workaround is:\n\n- The protobuf used for sending metrics is generalized across various platforms.\n- We previously have used the value 1 to indicate panel usage.",
+      "parentUuid": "dda79334_b9884e7e",
+      "range": {
+        "startLine": 23,
+        "startChar": 4,
+        "endLine": 23,
+        "endChar": 25
+      },
+      "revId": "158f4792c57ae13867a117f8e8bec2d2414054af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
