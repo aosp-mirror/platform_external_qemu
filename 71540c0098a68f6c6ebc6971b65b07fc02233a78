@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69b03d41_fcd51bd5",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-06-22T23:16:55Z",
+      "side": 1,
+      "message": "Technically you can wrap qemu_del_nic() into the unique_ptr deleter and call mNic.reset() here, although I am unsure which one would be better. Is there any chance that VirtioWifiForwarder got deconstructed without calling stop()?",
+      "range": {
+        "startLine": 182,
+        "startChar": 4,
+        "endLine": 182,
+        "endChar": 23
+      },
+      "revId": "71540c0098a68f6c6ebc6971b65b07fc02233a78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
