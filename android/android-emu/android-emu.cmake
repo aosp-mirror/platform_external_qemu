@@ -294,6 +294,7 @@ set(android_emu_dependent_src
     android/physics/AmbientEnvironment.cpp
     android/physics/InertialModel.cpp
     android/physics/PhysicalModel.cpp
+    android/physics/FoldableModel.cpp
     android/qemu-setup.cpp
     android/sensors-port.c
     android/snapshot/SnapshotAPI.cpp
@@ -887,7 +888,6 @@ set(android-emu_unittests_common
     android/gps/GpxParser_unittest.cpp
     android/gps/KmlParser_unittest.cpp
     android/hw-lcd_unittest.cpp
-    android/hw-sensors_unittest.cpp
     android/jdwp/Jdwp_unittest.cpp
     android/jdwp/JdwpProxy_unittest.cpp
     android/kernel/kernel_utils_unittest.cpp

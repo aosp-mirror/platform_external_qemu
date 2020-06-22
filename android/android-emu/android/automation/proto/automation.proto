@@ -41,6 +41,10 @@ message PhysicalModelEvent {
         HUMIDITY = 7;
         VELOCITY = 8;
         AMBIENT_MOTION = 9;
+        HINGE_ANGLE0 = 10;
+        HINGE_ANGLE1 = 11;
+        HINGE_ANGLE2 = 12;
+        POSTURE = 13;
     }
 
     optional ParameterType type = 1;

@@ -161,4 +161,6 @@ int physicalModel_recordGroundTruth(PhysicalModel* model, const char* filename);
  */
 int physicalModel_stopRecording(PhysicalModel* model);
 
+int physicalModel_getFoldableState(PhysicalModel* model, struct FoldableState* state);
+
 ANDROID_END_HEADER
