@@ -82,11 +82,11 @@ protected:
     int realPixelsWidth() const { return std::ceil(width() * devicePixelRatioF()); }
     int realPixelsHeight() const { return std::ceil(height() * devicePixelRatioF()); }
     void toggleAA() { mEnableAA = !mEnableAA; }
+    virtual void showEvent(QShowEvent*) override;
 
 private:
     void paintEvent(QPaintEvent*) override;
     void resizeEvent(QResizeEvent*) override;
-    void showEvent(QShowEvent*) override;
 
     bool ensureInit();
     void destroyContext();

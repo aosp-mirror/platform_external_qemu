@@ -128,6 +128,10 @@ typedef enum{
     PHYSICAL_PARAMETER_(HUMIDITY,"humidity",Humidity,float) \
     PHYSICAL_PARAMETER_(VELOCITY,"velocity",Velocity,vec3) \
     PHYSICAL_PARAMETER_(AMBIENT_MOTION,"ambientMotion",AmbientMotion,float) \
+    PHYSICAL_PARAMETER_(HINGE_ANGLE0,"hinge-angle0",HingeAngle0,float) \
+    PHYSICAL_PARAMETER_(HINGE_ANGLE1,"hinge-angle1",HingeAngle1,float) \
+    PHYSICAL_PARAMETER_(HINGE_ANGLE2,"hinge-angle2",HingeAngle2,float) \
+    PHYSICAL_PARAMETER_(POSTURE,"posture",Posture,float) \
 
 typedef enum {
 #define PHYSICAL_PARAMETER_(x,y,z,w)  PHYSICAL_PARAMETER_##x,
@@ -294,11 +298,6 @@ struct FoldableState {
     enum FoldablePostures currentPosture;
 };
 
-struct FoldableState* android_foldable_initialize(const struct FoldableConfig* config);
-void android_foldable_set_hinge_degrees(unsigned int hinge_index, float degrees);
-float android_foldable_get_hinge_degrees(unsigned int hinge_index);
-enum FoldablePostures android_foldable_get_posture();
-void android_foldable_set_posture(int index);
-struct FoldableState* android_foldable_get_state_ptr();
+int android_foldable_get_state(struct FoldableState* state);
 
 ANDROID_END_HEADER

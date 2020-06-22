@@ -64,15 +64,13 @@ Device3DWidget::Device3DWidget(QWidget* parent)
     setFocusPolicy(Qt::ClickFocus);
 
     if (mUseAbstractDevice) {
-        mCurrentFoldableStatePtr = android_foldable_get_state_ptr();
         connect(&mAnimationTimer, SIGNAL(timeout()), this, SLOT(animate()));
         mAnimationTimer.setInterval(kAnimationIntervalMs);
-        mAnimationTimer.start();
     }
 }
 
 Device3DWidget::~Device3DWidget() {
-    if (mUseAbstractDevice) {
+    if (mUseAbstractDevice && mAnimationTimer.isActive()) {
         mAnimationTimer.stop();
     }
 
@@ -176,8 +174,6 @@ bool Device3DWidget::initGL() {
     if (!mGLES2) {
         return false;
     }
-
-    // Perform initial set-up.
 
     // Enable depth testing and blending.
     mGLES2->glEnable(GL_DEPTH_TEST);
@@ -284,10 +280,11 @@ bool Device3DWidget::initModel() {
 }
 
 bool Device3DWidget::initAbstractDeviceModel() {
+    android_foldable_get_state(&mFoldableState);
     // Create an abstract parameterized model
     // std::vector<float> model_vertex_data;
     // std::vector<GLuint> indices;
-    struct FoldableConfig config = mCurrentFoldableStatePtr->config;
+    struct FoldableConfig config = mFoldableState.config;
     bool hSplit = (config.hingesType == ANDROID_FOLDABLE_HORIZONTAL_SPLIT)
                           ? true
                           : false;
@@ -385,7 +382,7 @@ bool Device3DWidget::initAbstractDeviceModel() {
                     r, t, 0.0, 0.0, 0.0, +1.0, ur, ut,
             };
         } else {
-            // rotate 90 degree for vertical split texture sampling 
+            // rotate 90 degree for vertical split texture sampling
             attribFront = {
                     l, b, 0.0, 0.0, 0.0, +1.0, ur, ub,  // front
                     r, b, 0.0, 0.0, 0.0, +1.0, ur, ut,
@@ -393,28 +390,29 @@ bool Device3DWidget::initAbstractDeviceModel() {
                     r, t, 0.0, 0.0, 0.0, +1.0, ul, ut,
             };
         }
-        std::vector<float> attribCommon = {
-                l, b, -d,  0.0,  0.0,  -1.0, 0.0, 0.0,  // back
-                r, b, -d,  0.0,  0.0,  -1.0, 1.0, 0.0,
-                l, t, -d,  0.0,  0.0,  -1.0, 0.0, 1.0,
-                r, t, -d,  0.0,  0.0,  -1.0, 1.0, 1.0,
-                l, b, -d,  -1.0, 0.0,  0.0,  0.0, 0.0,  // left
-                l, b, 0.0, -1.0, 0.0,  0.0,  1.0, 0.0,
-                l, t, -d,  -1.0, 0.0,  0.0,  0.0, 1.0,
-                l, t, 0.0, -1.0, 0.0,  0.0,  1.0, 1.0,
-                r, b, -d,  +1.0, 0.0,  0.0,  0.0, 0.0,  // right
-                r, b, 0.0, +1.0, 0.0,  0.0,  1.0, 0.0,
-                r, t, -d,  +1.0, 0.0,  0.0,  0.0, 1.0,
-                r, t, 0.0, +1.0, 0.0,  0.0,  1.0, 1.0,
-                l, t, 0.0, 0.0,  +1.0, 0.0,  0.0, 0.0,  // top
-                r, t, 0.0, 0.0,  +1.0, 0.0,  1.0, 0.0,
-                l, t, -d,  0.0,  +1.0, 0.0,  0.0, 1.0,
-                r, t, -d,  0.0,  +1.0, 0.0,  1.0, 1.0,
-                l, b, 0.0, 0.0,  -1.0, 0.0,  0.0, 0.0,  // bottom
-                r, b, 0.0, 0.0,  -1.0, 0.0,  1.0, 0.0,
-                l, b, -d,  0.0,  -1.0, 0.0,  0.0, 1.0,
-                r, b, -d,  0.0,  -1.0, 0.0,  1.0, 1.0,
-        };
+        std::vector<float> attribCommon =
+                {
+                        l, b, -d,  0.0,  0.0,  -1.0, 0.0, 0.0,  // back
+                        r, b, -d,  0.0,  0.0,  -1.0, 1.0, 0.0,
+                        l, t, -d,  0.0,  0.0,  -1.0, 0.0, 1.0,
+                        r, t, -d,  0.0,  0.0,  -1.0, 1.0, 1.0,
+                        l, b, -d,  -1.0, 0.0,  0.0,  0.0, 0.0,  // left
+                        l, b, 0.0, -1.0, 0.0,  0.0,  1.0, 0.0,
+                        l, t, -d,  -1.0, 0.0,  0.0,  0.0, 1.0,
+                        l, t, 0.0, -1.0, 0.0,  0.0,  1.0, 1.0,
+                        r, b, -d,  +1.0, 0.0,  0.0,  0.0, 0.0,  // right
+                        r, b, 0.0, +1.0, 0.0,  0.0,  1.0, 0.0,
+                        r, t, -d,  +1.0, 0.0,  0.0,  0.0, 1.0,
+                        r, t, 0.0, +1.0, 0.0,  0.0,  1.0, 1.0,
+                        l, t, 0.0, 0.0,  +1.0, 0.0,  0.0, 0.0,  // top
+                        r, t, 0.0, 0.0,  +1.0, 0.0,  1.0, 0.0,
+                        l, t, -d,  0.0,  +1.0, 0.0,  0.0, 1.0,
+                        r, t, -d,  0.0,  +1.0, 0.0,  1.0, 1.0,
+                        l, b, 0.0, 0.0,  -1.0, 0.0,  0.0, 0.0,  // bottom
+                        r, b, 0.0, 0.0,  -1.0, 0.0,  1.0, 0.0,
+                        l, b, -d,  0.0,  -1.0, 0.0,  0.0, 1.0,
+                        r, b, -d,  0.0,  -1.0, 0.0,  1.0, 1.0,
+                };
         attribs.insert(attribs.end(), attribFront.begin(), attribFront.end());
         attribs.insert(attribs.end(), attribCommon.begin(), attribCommon.end());
         for (auto iter : indice) {
@@ -666,20 +664,17 @@ void Device3DWidget::repaintGL() {
 
     if (mUseAbstractDevice) {
         glm::mat4 rotateLocal =
-                (mCurrentFoldableStatePtr->config.hingesType ==
+                (mFoldableState.config.hingesType ==
                  ANDROID_FOLDABLE_HORIZONTAL_SPLIT)
                         ? glm::mat4()
                         : glm::rotate(glm::mat4(), glm::radians(90.0f),
                                       glm::vec3(0.0, 0.0, 1.0));
-        if (memcmp(&mCachedFoldableState, mCurrentFoldableStatePtr,
-                   sizeof(FoldableState))) {
-            mCachedFoldableState = *mCurrentFoldableStatePtr;
-
+        if (updateHingeAngles() || mFirstAbstractDeviceRepaint) {
+            mFirstAbstractDeviceRepaint = false;
             for (int32_t i = 0, j = 0; i < mDisplaySegments.size(); i++) {
                 if (mDisplaySegments[i].isHinge) {
                     mDisplaySegments[i].hingeAngle =
-                            180 -
-                            mCurrentFoldableStatePtr->currentHingeDegrees[j++];
+                            180 - mFoldableState.currentHingeDegrees[j++];
                 } else {
                     mDisplaySegments[i].hingeAngle = 0;
                 }
@@ -1011,4 +1006,58 @@ glm::vec3 Device3DWidget::screenToWorldCoordinate(int x, int y) const {
 
     // Move plane position to world space.
     return mCameraTransformInverse * cameraSpacePhonePlaneCoordinate;
+}
+
+constexpr float kHingeAngleDelta = 1.0f;
+
+bool Device3DWidget::updateHingeAngles() {
+    bool ret = false;
+    if (mSensorsAgent) {
+        glm::vec3 result;
+        switch (mFoldableState.config.numHinges) {
+            case 3:
+                mSensorsAgent->getPhysicalParameter(
+                        PHYSICAL_PARAMETER_HINGE_ANGLE2, &result.x, &result.y,
+                        &result.z, PARAMETER_VALUE_TYPE_CURRENT);
+                if (abs(mFoldableState.currentHingeDegrees[2] - result.x) >
+                    kHingeAngleDelta) {
+                    mFoldableState.currentHingeDegrees[2] = result.x;
+                    ret = true;
+                }
+            case 2:
+                mSensorsAgent->getPhysicalParameter(
+                        PHYSICAL_PARAMETER_HINGE_ANGLE1, &result.x, &result.y,
+                        &result.z, PARAMETER_VALUE_TYPE_CURRENT);
+                if (abs(mFoldableState.currentHingeDegrees[1] - result.x) >
+                    kHingeAngleDelta) {
+                    mFoldableState.currentHingeDegrees[1] = result.x;
+                    ret = true;
+                }
+            case 1:
+                mSensorsAgent->getPhysicalParameter(
+                        PHYSICAL_PARAMETER_HINGE_ANGLE0, &result.x, &result.y,
+                        &result.z, PARAMETER_VALUE_TYPE_CURRENT);
+                if (abs(mFoldableState.currentHingeDegrees[0] - result.x) >
+                    kHingeAngleDelta) {
+                    mFoldableState.currentHingeDegrees[0] = result.x;
+                    ret = true;
+                }
+            default:;
+        }
+    }
+    return ret;
+}
+
+void Device3DWidget::showEvent(QShowEvent* event) {
+    GLWidget::showEvent(event);
+    if (mUseAbstractDevice && !mAnimationTimer.isActive()) {
+        mAnimationTimer.start();
+    }
+}
+
+void Device3DWidget::hideEvent(QHideEvent* event) {
+    QWidget::hideEvent(event);
+    if (mUseAbstractDevice && mAnimationTimer.isActive()) {
+        mAnimationTimer.stop();
+    }
 }
