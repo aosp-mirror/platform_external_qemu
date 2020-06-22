@@ -28,6 +28,7 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
 #include "android/physics/AmbientEnvironment.h"
+#include "android/physics/FoldableModel.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/physics/InertialModel.h"
 #include "android/utils/stream.h"
@@ -198,6 +199,8 @@ public:
      */
     void stopRecordGroundTruth();
 
+    FoldableState getFoldableState() { return mFoldableModel.getFoldableState(); }
+
 private:
     /*
      * Sets the target value for the given physical parameter that the physical
@@ -274,6 +277,7 @@ private:
 
     InertialModel mInertialModel;
     AmbientEnvironment mAmbientEnvironment;
+    FoldableModel mFoldableModel;
 
     AutomationController* mAutomationController = nullptr;
     const QAndroidPhysicalStateAgent* mAgent = nullptr;
@@ -617,6 +621,46 @@ void PhysicalModelImpl::setTargetInternalHumidity(
     targetStateChanged();
 }
 
+void PhysicalModelImpl::setTargetInternalHingeAngle0(
+        float degrees, PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mFoldableModel.setHingeAngle(0, degrees, mode);
+    }
+    targetStateChanged();
+}
+
+void PhysicalModelImpl::setTargetInternalHingeAngle1(
+        float degrees, PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mFoldableModel.setHingeAngle(1, degrees, mode);
+    }
+    targetStateChanged();
+}
+
+void PhysicalModelImpl::setTargetInternalHingeAngle2(
+        float degrees, PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mFoldableModel.setHingeAngle(2, degrees, mode);
+    }
+    targetStateChanged();
+}
+
+void PhysicalModelImpl::setTargetInternalPosture(
+        float posture, PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mFoldableModel.setPosture(posture, mode);
+    }
+    targetStateChanged();
+}
+
 vec3 PhysicalModelImpl::getParameterPosition(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -677,6 +721,30 @@ float PhysicalModelImpl::getParameterHumidity(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     return mAmbientEnvironment.getHumidity(parameterValueType);
+}
+
+float PhysicalModelImpl::getParameterHingeAngle0(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return mFoldableModel.getHingeAngle(0, parameterValueType);
+}
+
+float PhysicalModelImpl::getParameterHingeAngle1(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return mFoldableModel.getHingeAngle(1, parameterValueType);
+}
+
+float PhysicalModelImpl::getParameterHingeAngle2(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return mFoldableModel.getHingeAngle(2, parameterValueType);
+}
+
+float PhysicalModelImpl::getParameterPosture(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return mFoldableModel.getPosture(parameterValueType);
 }
 
 #define GET_FUNCTION_NAME(x) get##x
@@ -794,18 +862,15 @@ void PhysicalModelImpl::getTransform(
 }
 
 float PhysicalModelImpl::getPhysicalHingeAngle0() const {
-    // hinge sensor value always set by override
-    return mHingeAngle0Override;
+    return mFoldableModel.getHingeAngle(0);
 }
 
 float PhysicalModelImpl::getPhysicalHingeAngle1() const {
-    // hinge sensor value always set by override
-    return mHingeAngle1Override;
+    return mFoldableModel.getHingeAngle(1);
 }
 
 float PhysicalModelImpl::getPhysicalHingeAngle2() const {
-    // hinge sensor value always set by override
-    return mHingeAngle2Override;
+    return mFoldableModel.getHingeAngle(2);
 }
 
 void PhysicalModelImpl::setPhysicalStateAgent(
@@ -1463,5 +1528,15 @@ int physicalModel_stopRecording(PhysicalModel* model) {
         impl->stopRecordGroundTruth();
         return 0;
     }
+    return -1;
+}
+
+int physicalModel_getFoldableState(struct PhysicalModel* model, FoldableState* state) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        *state = impl->getFoldableState();
+        return 0;
+    }
+    E("%s: Failed to load foldable state. Physical model not initiated", __FUNCTION__);
     return -1;
 }
