@@ -295,18 +295,20 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
             // Foldable hinge area and posture update
             if (android_hw->hw_sensor_hinge) {
-                FoldableState* state = android_foldable_get_state_ptr();
-                adbInterface->enqueueCommand({ "shell", "settings", "put",
-                                               "global", "device_posture",
-                                               std::to_string((int)state->currentPosture).c_str() });
-                char hingeArea[128];
-                snprintf(hingeArea, 128, "hinge-[%d,%d,%d,%d]", state->config.hingeParams[0].x,
-                         state->config.hingeParams[0].y,
-                         state->config.hingeParams[0].x + state->config.hingeParams[0].width,
-                         state->config.hingeParams[0].y + state->config.hingeParams[0].height);
-                adbInterface->enqueueCommand({ "shell", "settings", "put",
-                                               "global", "display_features",
-                                               hingeArea });
+                FoldableState state;
+                if (!android_foldable_get_state(&state)) {
+                    adbInterface->enqueueCommand({ "shell", "settings", "put",
+                                                   "global", "device_posture",
+                                                   std::to_string((int)state.currentPosture).c_str() });
+                    char hingeArea[128];
+                    snprintf(hingeArea, 128, "hinge-[%d,%d,%d,%d]", state.config.hingeParams[0].x,
+                             state.config.hingeParams[0].y,
+                             state.config.hingeParams[0].x + state.config.hingeParams[0].width,
+                             state.config.hingeParams[0].y + state.config.hingeParams[0].height);
+                    adbInterface->enqueueCommand({ "shell", "settings", "put",
+                                                   "global", "display_features",
+                                                   hingeArea });
+                }
             }
 
             if (changing_language_country_locale) {

@@ -63,7 +63,7 @@ private slots:
     void updateTargetState();
 
     void propagateAccelWidgetChange();
-    void propagateSlidersChange(bool updateHinge = false, int hingeIndex = 0);
+    void propagateSlidersChange();
 
     void updateModelFromAccelWidget(PhysicalInterpolation mode);
     void updateModelFromSliders(PhysicalInterpolation mode);
@@ -136,6 +136,7 @@ private:
     void onPhysicalStateChanging();
     void onPhysicalStateStabilized();
     void setupHingeSensorUI();
+    void updateUIPosture();
 
     static void onTargetStateChanged(void* context);
     static void onPhysicalStateChanging(void* context);

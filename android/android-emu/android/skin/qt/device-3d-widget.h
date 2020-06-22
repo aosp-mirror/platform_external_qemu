@@ -121,6 +121,8 @@ protected:
     void wheelEvent(QWheelEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
+    virtual void showEvent(QShowEvent*) override;
+    virtual void hideEvent(QHideEvent*) override;
 
 private:
     bool initProgram();
@@ -132,6 +134,7 @@ private:
     glm::vec3 screenToWorldCoordinate(int x, int y) const;
     bool initAbstractDeviceModel();
     GLuint createSkinTexture();
+    bool updateHingeAngles();
 
     const QAndroidSensorsAgent* mSensorsAgent = nullptr;
 
@@ -168,8 +171,8 @@ private:
     QTimer mAnimationTimer;
 
     bool mUseAbstractDevice = false;
-    struct FoldableState* mCurrentFoldableStatePtr;
-    struct FoldableState mCachedFoldableState;
+    bool mFirstAbstractDeviceRepaint = true;
+    struct FoldableState mFoldableState;
     std::vector<DisplaySegment> mDisplaySegments;
     float mFactor;
     uint32_t mCenterIndex = 0;
