@@ -3530,10 +3530,15 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         }
     }
 
+#ifdef CONFIG_HEADLESS
+    // Disable audio driver in headless mode.
+    set_audio_drv("none");
+#else
     // Set audio device based on current QEMU_AUDIO_DRV. This is the first
     // value, to be overriden if -no-audio is provided.  At this point we
     // already have multiple threads started, so we should not setenv().
     set_audio_drv(getenv("QEMU_AUDIO_DRV"));
+#endif
 
     /* second pass of option parsing */
     optind = 1;
