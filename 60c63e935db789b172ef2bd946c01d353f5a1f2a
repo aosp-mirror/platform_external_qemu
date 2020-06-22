@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d545b11f_96cc256f",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3535,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-06-22T22:31:01Z",
+      "side": 1,
+      "message": "let\u0027s guard this with `if (android_qemu_mode) set_audio_drv(getenv(\"QEMU_AUDIO_DRV\")) else set_audio_drv(\"none\")` as there is a headless use case for android that requires audio (Studio embedded Android emulator) and we don\u0027t want to break that",
+      "range": {
+        "startLine": 3534,
+        "startChar": 0,
+        "endLine": 3535,
+        "endChar": 26
+      },
+      "revId": "60c63e935db789b172ef2bd946c01d353f5a1f2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
