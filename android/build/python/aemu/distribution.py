@@ -64,6 +64,7 @@ zip_sets = {
         "sdk-repo-{target}-crosvm-host-package-aarch64-{sdk_build_number}.zip": [
             ("{build_dir}/distribution/cf-host-package/aarch64-linux-gnu", r".*", "/")
         ],
+        "sdk-repo-{target}-wheels-{sdk_build_number}": [("{build_dir}", r".*whl$", "/")],
     },
 }
 

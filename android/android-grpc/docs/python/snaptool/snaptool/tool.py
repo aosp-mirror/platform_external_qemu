@@ -15,21 +15,15 @@
 # limitations under the License.
 from __future__ import absolute_import, division, print_function
 
-# Super hack for protobuf not setting paths properly..
-
 import os
 import sys
-
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "proto"))
-)
+import time
 
 import click
-import time
-from snaptool.snapshot import SnapshotService
-from proto.snapshot_pb2 import Image
-from proto.snapshot_service_pb2 import SnapshotPackage
 
+from aemu.proto.snapshot_pb2 import Image
+from aemu.proto.snapshot_service_pb2 import SnapshotPackage
+from snaptool.snapshot import SnapshotService
 
 def epoch_fmt(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))
@@ -44,7 +38,7 @@ def sizeof_fmt(num):
 
 @click.group()
 @click.option(
-    "--grpc", default="", help="Port or uri of the emulator gRPC endpoint."
+    "--grpc", default="", help="Port of the grpc service to use."
 )
 @click.pass_context
 def cli(ctx, grpc):
@@ -138,4 +132,3 @@ def save(snapshotService, name):
 @click.argument("name")
 def delete(snapshotService, name):
     snapshotService.delete(name)
-

@@ -1,4 +1,3 @@
-
 #  Copyright (C) 2019 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,20 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.protobuf import empty_pb2
-
-import proto.emulator_controller_pb2
-import proto.emulator_controller_pb2_grpc
-from channel.channel_provider import getEmulatorChannel
-
-# Open a grpc channel
-channel = getEmulatorChannel()
+from aemu.discovery.emulator_discovery import get_default_emulator
+from aemu.proto.emulator_controller_pb2 import LogMessage
 
 # Create a client
-stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
+stub = get_default_emulator().get_emulator_controller()
 
 # Let's dump the latest logcat data..
-logcat = proto.emulator_controller_pb2.LogMessage(start=0, sort=1)
+logcat = LogMessage(start=0, sort=1)
 for response in stub.streamLogcat(logcat):
     for e in response.entries:
-            print("{}: {}".format(e.tag, e.msg))
+        print("{}: {}".format(e.tag, e.msg))

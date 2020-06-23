@@ -10,7 +10,7 @@ The samples are well documented and run against the publicly released emulator b
 In the python directory you will find a few examples. The examples require Python3, as Python2 is now [deprecated](https://www.python.org/doc/sunset-python-2/). You can build the examples by running:
 
 ```sh
-  $ make clean deps
+  $ make deps
 ```
 
 Next you need to launch an emulator with the gRPC port enabled on port 8554:
