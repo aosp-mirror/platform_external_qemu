@@ -14,27 +14,19 @@
 
 # -*- coding: utf-8 -*-
 import time
-
+import grpc
 from google.protobuf import empty_pb2
 
-import grpc
-import proto.emulator_controller_pb2
-import proto.emulator_controller_pb2_grpc
-from channel.channel_provider import getEmulatorChannel
-
-_EMPTY_ = empty_pb2.Empty()
-
-channel = getEmulatorChannel()
+from aemu.discovery.emulator_discovery import get_default_emulator
 
 # Create a client
-stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
+stub = get_default_emulator().get_emulator_controller()
 
 # Poll for boot complete every sec..
-booted = False
 for i in range(0, 60):
     time.sleep(1)
     try:
-        response = stub.getStatus(_EMPTY_)
+        response = stub.getStatus(empty_pb2.Empty())
         if response.booted:
             print("Emulator ready")
             break
