@@ -128,6 +128,11 @@ FoldableModel::FoldableModel() {
             }
         }
     }
+
+    for (int i=0; i<POSTURE_MAX; ++i) {
+        defaultConfig.supportedFoldablePostures[i] = 0;
+    }
+
     mState.config = defaultConfig;
 
     // hinge angles to posture mapping
@@ -162,8 +167,11 @@ FoldableModel::FoldableModel() {
                         anglesToPosture.angles[j].right = std::stof(angles[1]);
                     }
                 }
-                anglesToPosture.posture =
+                enum FoldablePostures parsedPosture =
                         (FoldablePostures)std::stoi(postureListTokens[i]);
+                mState.config.supportedFoldablePostures[parsedPosture] = 1;
+
+                anglesToPosture.posture = parsedPosture;
                 mAnglesToPostures.push_back(anglesToPosture);
                 std::sort(mAnglesToPostures.begin(), mAnglesToPostures.end(),
                           compareAnglesToPosture);
