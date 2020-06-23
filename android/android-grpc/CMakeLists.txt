@@ -120,3 +120,15 @@ android_add_executable(
       android/emulation/control/snapshot/TarStreamPerf.cpp)
 target_link_libraries(grpc_benchmark PRIVATE android-grpc android-emu-base
                                              emulator-gbench)
+
+find_package(PythonInterp REQUIRED)
+set(SETUP_PY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/python")
+set(OUTPUT       "${CMAKE_BINARY_DIR}/aemu_grpc-0.0.1-py${PYTHON_VERSION_MAJOR}-none-any.whl")
+add_custom_command(OUTPUT ${OUTPUT}
+                  COMMAND
+                  "${PYTHON_EXECUTABLE}" -m pip install --user --upgrade setuptools wheel &&
+                  "${PYTHON_EXECUTABLE}" setup.py bdist_wheel --dist-dir ${CMAKE_BINARY_DIR}
+                  WORKING_DIRECTORY ${SETUP_PY_DIR}
+                  DEPENDS ${DEPS})
+
+add_custom_target(target ALL DEPENDS ${OUTPUT})

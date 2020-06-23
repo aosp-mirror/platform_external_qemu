@@ -36,7 +36,7 @@ if [ ! -f "./venv/bin/activate" ]; then
 fi
 if [ -e ./venv/bin/activate ]; then
    . ./venv/bin/activate
-   make protoc
+   pushd ../../../python/ && $PYTHON setup.py develop && popd
    $PYTHON setup.py develop
    echo "Ready to run emu-snap!"
 fi
