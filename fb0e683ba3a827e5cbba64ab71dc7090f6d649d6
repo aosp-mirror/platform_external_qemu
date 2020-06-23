@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b496a4b_0d757c07",
+        "filename": "android-qemu2-glue/emulation/virtio-wifi.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-06-23T16:55:23Z",
+      "side": 1,
+      "message": "I wonder if it makes sense to do cleanup and initialization after save and load. The SaveVMHandler provides save_cleanup and post_load function interfaces. But I am not sure if logically that makes sense. Currently, I found no way to properly get the virtio_wifi_device_unrealize() function invoked.",
+      "revId": "fb0e683ba3a827e5cbba64ab71dc7090f6d649d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
