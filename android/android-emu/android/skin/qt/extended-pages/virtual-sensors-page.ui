@@ -49,7 +49,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>361</y>
+       <y>352</y>
        <width>81</width>
        <height>25</height>
       </rect>
@@ -68,7 +68,7 @@
      <property name="geometry">
       <rect>
        <x>110</x>
-       <y>361</y>
+       <y>352</y>
        <width>81</width>
        <height>25</height>
       </rect>
@@ -84,7 +84,7 @@
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>361</y>
+       <y>352</y>
        <width>81</width>
        <height>25</height>
       </rect>
@@ -240,7 +240,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>390</y>
+       <y>380</y>
        <width>311</width>
        <height>231</height>
       </rect>
@@ -395,7 +395,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>10</y>
+         <y>0</y>
          <width>45</width>
          <height>15</height>
         </rect>
@@ -408,7 +408,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>30</y>
+         <y>20</y>
          <width>36</width>
          <height>36</height>
         </rect>
@@ -442,8 +442,8 @@
       <widget class="RaisedMaterialButton" name="btn_postureFlipped">
        <property name="geometry">
         <rect>
-         <x>50</x>
-         <y>30</y>
+         <x>54</x>
+         <y>20</y>
          <width>36</width>
          <height>36</height>
         </rect>
@@ -477,8 +477,8 @@
       <widget class="RaisedMaterialButton" name="btn_postureOpen">
        <property name="geometry">
         <rect>
-         <x>130</x>
-         <y>30</y>
+         <x>142</x>
+         <y>20</y>
          <width>36</width>
          <height>36</height>
         </rect>
@@ -512,8 +512,8 @@
       <widget class="RaisedMaterialButton" name="btn_postureHalfOpen">
        <property name="geometry">
         <rect>
-         <x>90</x>
-         <y>30</y>
+         <x>98</x>
+         <y>20</y>
          <width>36</width>
          <height>36</height>
         </rect>
@@ -548,7 +548,7 @@
        <property name="geometry">
         <rect>
          <x>170</x>
-         <y>30</y>
+         <y>20</y>
          <width>36</width>
          <height>36</height>
         </rect>
@@ -583,13 +583,16 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>70</y>
+         <y>60</y>
          <width>121</width>
          <height>16</height>
         </rect>
        </property>
        <property name="text">
         <string>Current posture:</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+          <string>Title</string>
        </property>
        <property name="textFormat">
         <enum>Qt::AutoText</enum>
@@ -598,8 +601,8 @@
       <widget class="QLabel" name="lbl_currentPostureValue">
        <property name="geometry">
         <rect>
-         <x>130</x>
-         <y>70</y>
+         <x>104</x>
+         <y>60</y>
          <width>121</width>
          <height>16</height>
         </rect>
@@ -607,72 +610,69 @@
        <property name="text">
         <string>Unknown</string>
        </property>
+      <property name="ColorGroup" stdset="0">
+                  <string>Title</string>
+       </property>
        <property name="textFormat">
         <enum>Qt::AutoText</enum>
        </property>
       </widget>
-      <widget class="QScrollArea" name="scrollArea">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>90</y>
-         <width>301</width>
-         <height>81</height>
-        </rect>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAsNeeded</enum>
-       </property>
-       <property name="widgetResizable">
-        <bool>true</bool>
-       </property>
        <widget class="QWidget" name="scrollAreaWidgetContents">
         <property name="geometry">
          <rect>
-          <x>0</x>
-          <y>0</y>
+          <x>10</x>
+          <y>80</y>
           <width>285</width>
-          <height>93</height>
+          <height>124</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
+        <item>
             <widget class="QLabel" name="hinge0Label">
              <property name="text">
-              <string>Hinge1</string>
+              <string>Hinge 1 angle</string>
              </property>
+             <property name="ColorGroup" stdset="0">
+                  <string>Title</string>
+              </property>
             </widget>
            </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">   
            <item>
             <widget class="EditableSliderWidget" name="hinge0Slider" native="true"/>
            </item>
           </layout>
          </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <widget class="QLabel" name="hinge1Label">
              <property name="text">
-              <string>Hinge2</string>
+              <string>Hinge 2 angle</string>
              </property>
+              <property name="ColorGroup" stdset="0">
+                  <string>Title</string>
+              </property>
             </widget>
            </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <widget class="EditableSliderWidget" name="hinge1Slider" native="true"/>
            </item>
           </layout>
          </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QLabel" name="hinge2Label">
              <property name="text">
-              <string>Hinge3</string>
+              <string>Hinge 3 angle</string> 
+             </property>
+             <property name="ColorGroup" stdset="0">
+                <string>Title</string>
              </property>
             </widget>
            </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="EditableSliderWidget" name="hinge2Slider" native="true"/>
            </item>
@@ -692,7 +692,6 @@
           </spacer>
          </item>
         </layout>
-       </widget>
       </widget>
      </widget>
     </widget>
