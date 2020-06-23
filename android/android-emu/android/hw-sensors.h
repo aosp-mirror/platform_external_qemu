@@ -223,6 +223,7 @@ enum FoldablePostures {
     POSTURE_HALF_OPENED = 2,
     POSTURE_OPENED = 3,
     POSTURE_FLIPPED = 4,
+    POSTURE_TENT = 5,
     POSTURE_MAX
 };
 
