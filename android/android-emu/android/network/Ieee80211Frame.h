@@ -56,7 +56,7 @@ public:
     bool uses4Addresses() const;
     uint16_t getQoSControl() const;
     const android::base::IOVector toEthernet();
-    static const size_t MAX_FRAME_LEN = 2352;
+    static constexpr size_t MAX_FRAME_LEN = 2352;
     static bool validEtherType(uint16_t ethertype);
 
 private:

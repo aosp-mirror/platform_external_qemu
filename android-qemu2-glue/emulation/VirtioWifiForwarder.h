@@ -51,7 +51,7 @@ public:
     bool init();
     int forwardFrame(android::base::IOVector iov, bool toRemoteVM = false);
     void stop();
-    NICState* getNic() { return mNic.get(); }
+    NICState* getNic() { return mNic; }
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
 
 private:
@@ -80,7 +80,7 @@ private:
     android::base::Looper* mLooper;
     android::base::ScopedSocket mHostApdSock;
     android::base::ScopedSocket mVirtIOSock;
-    std::unique_ptr<NICState> mNic;
+    NICState* mNic = nullptr;
     std::unique_ptr<android::network::WifiForwardPeer> mRemotePeer;
     android::base::Looper::FdWatch* mFdWatch = nullptr;
     NICConf* mNicConf = nullptr;
