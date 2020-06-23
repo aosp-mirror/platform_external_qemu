@@ -14,14 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import, division, print_function
+
 
 import os
 import re
-import shutil
 import zipfile
 
-from collections import defaultdict, namedtuple
 from absl import logging
 
 from aemu.definitions import get_qemu_root
@@ -89,7 +87,7 @@ def create_distribution(dist_dir, build_dir, data):
     zip_set = zip_sets[data["config"]]
 
     # First we create the individual zip sets using the regular expressions.
-    for zip_fname, params in zip_set.iteritems():
+    for zip_fname, params in zip_set.items():
         zip_fname = os.path.join(dist_dir, zip_fname.format(**data))
         logging.info("Creating %s", zip_fname)
 
@@ -111,4 +109,3 @@ def create_distribution(dist_dir, build_dir, data):
                     arcname = os.path.join(dest, arcname)
                     files.append(arcname)
                     zipf.write(fname, arcname)
-
