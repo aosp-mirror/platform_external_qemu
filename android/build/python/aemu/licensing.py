@@ -14,12 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import, division, print_function
+
 
 import argparse
-import logging
 import os
-import re
 from collections import defaultdict
 
 
@@ -114,7 +112,7 @@ class Licensing(object):
 
         self.shipped_license_names = set()
         # Update exectuble sets for the licenses.
-        for tgt, exes in self.target_exes.items():
+        for tgt, exes in list(self.target_exes.items()):
             for lic in self.license_closure_target(tgt):
                 self.shipped_license_names.add(lic)
                 self.license_from_name(lic).register_exes(exes)
@@ -258,8 +256,8 @@ if __name__ == "__main__":
         ),
         help="Directory of external/qemu",
     )
-    parser.add_argument("-n", "--notice",  action='store_true')
-    parser.add_argument("-c", "--csv",  action='store_true')
+    parser.add_argument("-n", "--notice", action="store_true")
+    parser.add_argument("-c", "--csv", action="store_true")
 
     args = parser.parse_args()
     l = Licensing(args.build, args.qemu)
