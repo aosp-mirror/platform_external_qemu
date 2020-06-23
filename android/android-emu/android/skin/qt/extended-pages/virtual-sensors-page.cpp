@@ -143,6 +143,18 @@ VirtualSensorsPage::~VirtualSensorsPage() {
     }
 }
 
+void VirtualSensorsPage::togglePostureButtonsVisibility(bool newVisibility) {
+    struct FoldableState foldableState;
+    android_foldable_get_state(&foldableState);
+    int *supportedFoldablePostures = foldableState.config.supportedFoldablePostures;
+
+    mUi->btn_postureClosed->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_CLOSED]);
+    mUi->btn_postureFlipped->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_FLIPPED]);
+    mUi->btn_postureHalfOpen->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_HALF_OPENED]);
+    mUi->btn_postureOpen->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_OPENED]);
+    mUi->btn_postureTent->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_TENT]);
+}
+
 void VirtualSensorsPage::setupHingeSensorUI() {
     // Hide the hinge sensors based on the config.
     mUi->hinge0Label->setHidden(true);
@@ -152,37 +164,45 @@ void VirtualSensorsPage::setupHingeSensorUI() {
     mUi->hinge1Slider->setHidden(true);
     mUi->hinge2Slider->setHidden(true);
     mUi->accelModeFold->setHidden(true);
+    mUi->lbl_posture->setHidden(true);
+    mUi->lbl_currentPosture->setHidden(true);
+    mUi->lbl_currentPostureValue->setHidden(true);
+    togglePostureButtonsVisibility(false);
+
+    mUi->hinge0Slider->setLabelHidden();
+    mUi->hinge1Slider->setLabelHidden();
+    mUi->hinge2Slider->setLabelHidden();
+    mUi->verticalLayout->setSpacing(1);
+   
+
     if (android_hw->hw_sensor_hinge) {
+        mUi->lbl_posture->setHidden(false);
+        mUi->lbl_currentPosture->setHidden(false);
+        mUi->lbl_currentPostureValue->setHidden(false);
+        togglePostureButtonsVisibility(true);
         mUi->accelModeFold->setHidden(false);
         mUi->accelModeFold->setChecked(true);
         mUi->accelModeRotate->setChecked(false);
         mUi->accelerometerSliders->setCurrentIndex(2);
-        connect(mUi->posture, SIGNAL(activated(int)), this,
-                SLOT(on_posture_valueChanged(int)));
         struct FoldableState foldableState;
         android_foldable_get_state(&foldableState);
-        mUi->posture->addItems(
-                {"Unknown", "Closed", "Half open", "Open", "Flipped"});
         switch (foldableState.config.numHinges) {
             case 3:
                 mUi->hinge2Slider->setRange(
                         foldableState.config.hingeParams[2].minDegrees,
                         foldableState.config.hingeParams[2].maxDegrees, false);
-                mUi->hinge2Slider->setSteps(200);
                 mUi->hinge2Label->setHidden(false);
                 mUi->hinge2Slider->setHidden(false);
             case 2:
                 mUi->hinge1Slider->setRange(
                         foldableState.config.hingeParams[1].minDegrees,
                         foldableState.config.hingeParams[1].maxDegrees, false);
-                mUi->hinge1Slider->setSteps(200);
                 mUi->hinge1Label->setHidden(false);
                 mUi->hinge1Slider->setHidden(false);
             case 1:
                 mUi->hinge0Slider->setRange(
                         foldableState.config.hingeParams[0].minDegrees,
                         foldableState.config.hingeParams[0].maxDegrees, false);
-                mUi->hinge0Slider->setSteps(200);
                 mUi->hinge0Label->setHidden(false);
                 mUi->hinge0Slider->setHidden(false);
             default:;
@@ -193,6 +213,26 @@ void VirtualSensorsPage::setupHingeSensorUI() {
 void VirtualSensorsPage::showEvent(QShowEvent* event) {
     emit windowVisible();
     mFirstShow = false;
+}
+
+void VirtualSensorsPage::on_btn_postureClosed_clicked() {
+    on_posture_valueChanged(POSTURE_CLOSED);
+}
+
+void VirtualSensorsPage::on_btn_postureFlipped_clicked() {
+    on_posture_valueChanged(POSTURE_FLIPPED);
+}
+
+void VirtualSensorsPage::on_btn_postureHalfOpen_clicked() {
+    on_posture_valueChanged(POSTURE_HALF_OPENED);
+}
+
+void VirtualSensorsPage::on_btn_postureOpen_clicked() {
+    on_posture_valueChanged(POSTURE_OPENED);
+}
+
+void VirtualSensorsPage::on_btn_postureTent_clicked() {
+    on_posture_valueChanged(POSTURE_TENT);
 }
 
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
@@ -651,7 +691,7 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
                     getPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE2),
                     false);
         }
-        if (!mUi->posture->isHidden()) {
+        if (android_hw->hw_sensor_hinge) {
             updateUIPosture();
         }
     }
@@ -816,8 +856,26 @@ void VirtualSensorsPage::updateUIPosture() {
     enum FoldablePostures posture =
             (enum FoldablePostures)getPhysicalParameterTarget(
                     PHYSICAL_PARAMETER_POSTURE);
-    if (mCurrentPosture != posture) {
-        mCurrentPosture = posture;
-        mUi->posture->setCurrentIndex(posture);
+    mCurrentPosture = posture;
+    switch(mCurrentPosture) {
+        case POSTURE_CLOSED:
+            mUi->lbl_currentPostureValue->setText(tr("Closed"));
+            break;
+        case POSTURE_HALF_OPENED:
+            mUi->lbl_currentPostureValue->setText(tr("Half-Open"));
+            break;
+        case POSTURE_OPENED:
+            mUi->lbl_currentPostureValue->setText(tr("Open"));
+            break;
+        case POSTURE_FLIPPED:
+            mUi->lbl_currentPostureValue->setText(tr("Flipped"));
+            break;
+        case POSTURE_TENT:
+            mUi->lbl_currentPostureValue->setText(tr("Tent"));
+            break;
+        case POSTURE_UNKNOWN:
+        default:
+            mUi->lbl_currentPostureValue->setText(tr("Unknown"));
+            break;
     }
 }
