@@ -12,23 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -*- coding: utf-8 -*-
-from google.protobuf import empty_pb2
 
 import sys
-import proto.snapshot_service_pb2
-import proto.snapshot_service_pb2_grpc
-import proto.waterfall_pb2
-import proto.waterfall_pb2_grpc
-from channel.channel_provider import getEmulatorChannel
 
-# Open a grpc channel
-channel = getEmulatorChannel()
+from aemu.discovery.emulator_discovery import get_default_emulator
+from aemu.proto.snapshot_service_pb2 import IceboxTarget
 
-_EMPTY_ = empty_pb2.Empty()
-
-# Create a client
-snap = proto.snapshot_service_pb2_grpc.SnapshotServiceStub(channel)
-
-target = proto.snapshot_service_pb2.IceboxTarget(processName=sys.argv[1])
-response = snap.trackProcess(target)
-print(response)
+target = IceboxTarget(processName=sys.argv[1])
+snap = get_default_emulator().get_snapshot_service()
+print(snap.trackProcess(target))

@@ -35,11 +35,11 @@ setuptools.setup(
     description="A commandline tool to manipulate emulator snapshots.",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    packages=["snaptool", "proto"],
+    packages=["snaptool"],
     platforms="POSIX",
     package_data={"templates": ["*"], "templates/avd": ["*"],},
     entry_points={"console_scripts": ["emu-snap=snaptool.tool:cli"],},
-    install_requires=["click", "tqdm", "grpcio-tools"],
+    install_requires=["click", "tqdm", "aemu-grpc"],
     license="Apache License, Version 2.0",
     classifiers=[
         "Programming Language :: Python :: 2",
