@@ -1,8 +1,11 @@
 #include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
+#include "android-qemu2-glue/utils/stream.h"
 #include "android/base/Log.h"
+#include "android/telephony/sysdeps.h"
 
 extern "C" {
 #include "android-qemu2-glue/emulation/virtio-wifi.h"
+#include "migration/register.h"
 #include "standard-headers/linux/virtio_ids.h"
 }
 
@@ -231,6 +234,31 @@ static VirtIOWifiQueue* getWifiQueue(VirtQueue* vq) {
 
 extern "C" {
 
+static void virtio_wifi_state_save(QEMUFile* file, void* opaque) {
+    Stream* const s = stream_from_qemufile(file);
+    VirtIOWifi* n = static_cast<struct Globals*>(opaque)->wifi;
+    sys_file_put_buffer((SysFile*)s, (uint8_t*)n->mac, ETH_ALEN);
+    sys_file_put_be32((SysFile*)s, n->status);
+    stream_free(s);
+}
+
+static int virtio_wifi_state_load(QEMUFile* file,
+                                  void* opaque,
+                                  int version_id) {
+    Stream* const s = stream_from_qemufile(file);
+    VirtIOWifi* n = static_cast<struct Globals*>(opaque)->wifi;
+    sys_file_get_buffer((SysFile*)s, n->mac, ETH_ALEN);
+    uint32_t status = sys_file_get_be32((SysFile*)s);
+    n->status = status;
+    stream_free(s);
+    return 0;
+}
+
+static SaveVMHandlers virtio_vmhandlers = {
+        .save_state = virtio_wifi_state_save,
+        .load_state = virtio_wifi_state_load,
+};
+
 static const VMStateDescription vmstate_virtio_wifi = {
         .name = "virtio-wifi-device",
         .version_id = 1,
@@ -432,6 +460,8 @@ static void virtio_wifi_class_init(ObjectClass* klass, void* data) {
     vdc->bad_features = virtio_wifi_bad_features;
     vdc->reset = virtio_wifi_reset;
     vdc->set_status = virtio_wifi_set_status;
+    register_savevm_live(NULL, "virtio_wifi", 0, 0, &virtio_vmhandlers,
+                         &sGlobal);
 }
 
 static const TypeInfo virtio_wifi_info = {
