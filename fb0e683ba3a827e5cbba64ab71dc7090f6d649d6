@@ -16,6 +16,24 @@
       "revId": "fb0e683ba3a827e5cbba64ab71dc7090f6d649d6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "260e173d_180b4275",
+        "filename": "android-qemu2-glue/emulation/virtio-wifi.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-06-23T17:54:15Z",
+      "side": 1,
+      "message": "Ideally the clean up code should be triggered when closing the device, maybe the virtio logic is not implemented correctly on that part?\n\nIf you cannot fix that then try to do the unrealize at the beginning of load and leave a comment there.",
+      "parentUuid": "7b496a4b_0d757c07",
+      "revId": "fb0e683ba3a827e5cbba64ab71dc7090f6d649d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
