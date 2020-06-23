@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1721f125_66952c80",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-06-23T02:05:57Z",
+      "side": 1,
+      "message": "introduce -\u003e introduces",
+      "range": {
+        "startLine": 9,
+        "startChar": 5,
+        "endLine": 9,
+        "endChar": 14
+      },
+      "revId": "da29b1dd613304c0323c8e0b07a76bc4374766fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f8af3ac_d13a1ad8",
+        "filename": "android/android-grpc/python/src/aemu/discovery/emulator_discovery.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-06-23T02:05:57Z",
+      "side": 1,
+      "message": "nit: extra blank line.",
+      "revId": "da29b1dd613304c0323c8e0b07a76bc4374766fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "976b7735_5899359a",
+        "filename": "android/android-grpc/python/tests/test_discover_channel.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-06-23T02:05:57Z",
+      "side": 1,
+      "message": "nit: extra blank line",
+      "revId": "da29b1dd613304c0323c8e0b07a76bc4374766fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75a35a50_26543782",
+        "filename": "android/android-grpc/python/tests/test_discover_emulator.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-06-23T02:05:57Z",
+      "side": 1,
+      "message": "nit: extra blank line",
+      "revId": "da29b1dd613304c0323c8e0b07a76bc4374766fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
