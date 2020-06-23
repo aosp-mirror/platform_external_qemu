@@ -22,6 +22,30 @@
       "revId": "13740e1c7faca7f7f0b6d064e4ee7baf1a557bd2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "866e2d61_c7d5249c",
+        "filename": "android/data/hostapd.conf",
+        "patchSetId": 10
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-06-23T18:06:35Z",
+      "side": 1,
+      "message": "I copied from https://source.corp.google.com/android/device/generic/goldfish/wifi/simulated_hostapd.conf;l\u003d16?q\u003dhosta\u0026ss\u003dpiper%2FGoogle%2Fandroid:device%2Fgeneric%2Fgoldfish%2Fwifi%2F",
+      "parentUuid": "5ae55d86_5bf2d979",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "13740e1c7faca7f7f0b6d064e4ee7baf1a557bd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
