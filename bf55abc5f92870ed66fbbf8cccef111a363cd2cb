@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5e9bf3cb_a8cde50d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 534,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-06-23T23:10:18Z",
+      "side": 1,
+      "message": "shouldn\u0027t we always update model from sliders?",
+      "range": {
+        "startLine": 532,
+        "startChar": 1,
+        "endLine": 534,
+        "endChar": 12
+      },
+      "revId": "bf55abc5f92870ed66fbbf8cccef111a363cd2cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
