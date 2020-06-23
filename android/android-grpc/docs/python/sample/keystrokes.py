@@ -11,27 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 # -*- coding: utf-8 -*-
 import sys
 import time
 
-from google.protobuf import empty_pb2
-
-import proto.emulator_controller_pb2
-import proto.emulator_controller_pb2_grpc
-from channel.channel_provider import getEmulatorChannel
-
-_EMPTY_ = empty_pb2.Empty()
-
-channel = getEmulatorChannel()
+from aemu.discovery.emulator_discovery import get_default_emulator
+from aemu.proto.emulator_controller_pb2 import KeyboardEvent
 
 # Create a client
-stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
+stub = get_default_emulator().get_emulator_controller()
 
 # Let's type some text..
 for l in sys.argv[1]:
-    textEvent = proto.emulator_controller_pb2.KeyboardEvent(text=l)
+    textEvent = KeyboardEvent(text=l)
     print("Typing: {}".format(l))
     response = stub.sendKey(textEvent)
     time.sleep(0.2)

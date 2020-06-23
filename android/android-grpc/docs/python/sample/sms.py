@@ -13,23 +13,15 @@
 # limitations under the License.
 
 # -*- coding: utf-8 -*-
-import time
-
-from google.protobuf import empty_pb2
-
-import proto.emulator_controller_pb2
-import proto.emulator_controller_pb2_grpc
-from channel_provider import getEmulatorChannel
-
-_EMPTY_ = empty_pb2.Empty()
-
-channel = getEmulatorChannel()
+from aemu.discovery.emulator_discovery import get_default_emulator
+from aemu.proto.emulator_controller_pb2 import SmsMessage
 
 # Create a client
-stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
-
+stub = get_default_emulator().get_emulator_controller()
 # Let's type some text.
-sms = proto.emulator_controller_pb2.SmsMessage(srcAddress="(650) 555-1212", text="Ic mæg glæs eotan ond hit ne hearmiað me.")
+sms = SmsMessage(
+    srcAddress="(650) 555-1212", text="Ic mæg glæs eotan ond hit ne hearmiað me."
+)
 response = stub.sendSms(sms)
 print(response)
 
