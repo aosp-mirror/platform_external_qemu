@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>622</width>
-    <height>600</height>
+    <height>690</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>0</x>
      <y>20</y>
      <width>630</width>
-     <height>581</height>
+     <height>671</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -242,7 +242,7 @@
        <x>10</x>
        <y>390</y>
        <width>300</width>
-       <height>170</height>
+       <height>211</height>
       </rect>
      </property>
      <property name="currentIndex">
@@ -395,7 +395,7 @@
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>45</y>
+         <y>90</y>
          <width>250</width>
          <height>40</height>
         </rect>
@@ -405,7 +405,7 @@
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>90</y>
+         <y>135</y>
          <width>250</width>
          <height>40</height>
         </rect>
@@ -415,7 +415,7 @@
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>135</y>
+         <y>180</y>
          <width>250</width>
          <height>40</height>
         </rect>
@@ -425,7 +425,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>45</y>
+         <y>90</y>
          <width>40</width>
          <height>15</height>
         </rect>
@@ -438,7 +438,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>90</y>
+         <y>135</y>
          <width>40</width>
          <height>15</height>
         </rect>
@@ -451,7 +451,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>135</y>
+         <y>180</y>
          <width>40</width>
          <height>15</height>
         </rect>
@@ -460,17 +460,7 @@
         <string>Hinge3</string>
        </property>
       </widget>
-      <widget class="QComboBox" name="posture">
-       <property name="geometry">
-        <rect>
-         <x>55</x>
-         <y>5</y>
-         <width>171</width>
-         <height>26</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="PostureLabel">
+      <widget class="QLabel" name="lbl_posture">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -481,6 +471,213 @@
        </property>
        <property name="text">
         <string>Posture</string>
+       </property>
+      </widget>
+      <widget class="RaisedMaterialButton" name="btn_postureClosed">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>36</width>
+         <height>36</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Closed</string>
+       </property>
+       <property name="accessibleDescription">
+        <string>Device rotation upright</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/light/posture_closed</normaloff>:/light/posture_closed</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="themeIconName" stdset="0">
+        <string>posture_closed</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Button</string>
+       </property>
+      </widget>
+      <widget class="RaisedMaterialButton" name="btn_postureFlipped">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>30</y>
+         <width>36</width>
+         <height>36</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Flipped</string>
+       </property>
+       <property name="accessibleDescription">
+        <string>Device rotation upright</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/light/posture_flipped</normaloff>:/light/posture_flipped</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="themeIconName" stdset="0">
+        <string>posture_flipped</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Button</string>
+       </property>
+      </widget>
+      <widget class="RaisedMaterialButton" name="btn_postureOpen">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>30</y>
+         <width>36</width>
+         <height>36</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Open</string>
+       </property>
+       <property name="accessibleDescription">
+        <string>Device rotation upright</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/light/posture_open</normaloff>:/light/posture_open</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="themeIconName" stdset="0">
+        <string>posture_open</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Button</string>
+       </property>
+      </widget>
+      <widget class="RaisedMaterialButton" name="btn_postureHalfOpen">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>30</y>
+         <width>36</width>
+         <height>36</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Half-Open</string>
+       </property>
+       <property name="accessibleDescription">
+        <string>Device rotation upright</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/light/posture_half-open</normaloff>:/light/posture_half-open</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="themeIconName" stdset="0">
+        <string>posture_half-open</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Button</string>
+       </property>
+      </widget>
+      <widget class="RaisedMaterialButton" name="btn_postureTent">
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>30</y>
+         <width>36</width>
+         <height>36</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Tent</string>
+       </property>
+       <property name="accessibleDescription">
+        <string>Device rotation upright</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources.qrc">
+         <normaloff>:/light/posture_tent</normaloff>:/light/posture_tent</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="themeIconName" stdset="0">
+        <string>posture_tent</string>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Button</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lbl_currentPosture">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Current posture:</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::AutoText</enum>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lbl_currentPostureValue">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>70</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Unknown</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::AutoText</enum>
        </property>
       </widget>
      </widget>
