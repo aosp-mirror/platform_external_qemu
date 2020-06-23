@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "973c9a83_1581e846",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-06-23T23:06:08Z",
+      "side": 1,
+      "message": "We can easily become more friendly of we do something like TAB_NAMES[invocation.first].",
+      "range": {
+        "startLine": 287,
+        "startChar": 42,
+        "endLine": 287,
+        "endChar": 74
+      },
+      "revId": "45165b0762a7096244ef05d2df21c0aef22e21e8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
