@@ -18,6 +18,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/Async.h"
 #include "android/base/system/Win32Utils.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
@@ -655,6 +656,28 @@ static void enableSignalTermination() {
 }
 
 }  // namespace
+#ifndef AEMU_GFXSTREAM_BACKEND
+extern "C" int run_hostapd_main(int argc,
+                                 const char** argv,
+                                 void (*on_main_loop_done)(void));
+extern "C" void eloop_terminate(void);
+
+// Hostapd is running in a functor thread with all signals masked.
+// Thus, SIGINT signal will not be delivered to the hostpad event
+// loop when emulator quits. So we explicity terminate hostapd.
+static void stop_hostapd() {
+    eloop_terminate();
+}
+
+static void enter_hostapd_event_loop() {
+    android::ParameterList args{"hostapd"};
+    std::string hostapdConf = PathUtils::join(
+                                  System::get()->getLauncherDirectory(), "lib", "hostapd.conf");
+    args.add(hostapdConf);
+    D("Starting hostapd main loop");
+    run_hostapd_main(args.size(), (const char**)args.array(), []{});
+}
+#endif
 
 extern "C" int run_qemu_main(int argc,
                              const char** argv,
@@ -1907,7 +1930,14 @@ extern "C" int main(int argc, char** argv) {
         args.add("virtio-gpu-pci");
     }
     initialize_virtio_input_devs(args, hw);
-
+#ifndef AEMU_GFXSTREAM_BACKEND
+    if (feature_is_enabled(kFeature_VirtioWifi)) {
+        args.add("-netdev");
+        args.add("user,id=virtio-wifi,dhcpstart=10.0.2.16");
+        args.add("-device");
+        args.add("virtio-wifi-pci,netdev=virtio-wifi");
+    }
+#endif
     if (opts->tcpdump) {
         args.add("-object");
         args.addFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
@@ -2188,7 +2218,10 @@ extern "C" int main(int argc, char** argv) {
         // Dump final command-line option to make debugging the core easier
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
-
+#ifndef AEMU_GFXSTREAM_BACKEND
+    if (feature_is_enabled(kFeature_VirtioWifi))
+        async(&enter_hostapd_event_loop);
+#endif
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
 
@@ -2197,6 +2230,9 @@ extern "C" int main(int argc, char** argv) {
     android::crashreport::CrashReporter::get()->hangDetector().pause(true);
 
     stopRenderer();
+#ifndef AEMU_GFXSTREAM_BACKEND
+    stop_hostapd();
+#endif
     emulator_finiUserInterface();
 
     process_late_teardown();
