@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d896bea_2a8d0724",
+        "filename": "android/android-grpc/docs/python/Makefile",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-06-24T18:18:45Z",
+      "side": 1,
+      "message": "nit: try not to mix space and tab in one file?",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 1
+      },
+      "revId": "e28fb0d354ab91e154f2f1a55c99382e792866d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
