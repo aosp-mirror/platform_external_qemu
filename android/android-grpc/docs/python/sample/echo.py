@@ -14,22 +14,18 @@
 import grpc
 from google.protobuf import empty_pb2
 
-import proto.waterfall_pb2
-import proto.waterfall_pb2_grpc
-from channel.channel_provider import getEmulatorChannel
+from aemu.discovery.emulator_discovery import get_default_emulator
+from aemu.proto.waterfall_pb2 import Message
 
 
 def gen():
     for i in range(10):
-        yield proto.waterfall_pb2.Message(payload="Message: {}".format(i))
+        yield Message(payload="Message: {}".format(i))
         time.sleep(0.1)
 
 
-# Open a grpc channel
-channel = getEmulatorChannel()
-
 # Create a client
-stub = proto.waterfall_pb2_grpc.WaterfallStub(channel)
+stub = get_default_emulator().get_waterfall_service()
 
 # Let's do some echoing..
 it = stub.Echo(gen())

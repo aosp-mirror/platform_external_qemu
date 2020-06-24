@@ -18,13 +18,10 @@ import logging
 import os
 
 import grpc
+from aemu.discovery.emulator_discovery import EmulatorDiscovery, get_default_emulator
+from aemu.proto.snapshot_service_pb2 import SnapshotPackage
 from google.protobuf import empty_pb2
-
-from proto.snapshot_service_pb2_grpc import SnapshotServiceStub
-from proto.snapshot_service_pb2 import SnapshotPackage
-from snaptool.channel.channel_provider import Emulators
 from tqdm import tqdm
-
 
 _EMPTY_ = empty_pb2.Empty()
 
@@ -34,9 +31,14 @@ class SnapshotService(object):
 
     def __init__(self, port, logger=logging.getLogger()):
         """Connect to the emulator on the given port, and log on the given logger."""
-        self.emulators = Emulators()
-        self.channel = self.emulators.getEmulatorChannel(port)
-        self.stub = SnapshotServiceStub(self.channel)
+        if port:
+            self.stub = (
+                EmulatorDiscovery()
+                .find_emulator("grpc.port", port)
+                .get_snapshot_service()
+            )
+        else:
+            self.stub = get_default_emulator().get_snapshot_service()
         self.logger = logger
 
     def _exec_unary_grpc(self, method, req):

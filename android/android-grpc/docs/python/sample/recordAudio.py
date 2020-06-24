@@ -20,36 +20,38 @@
 import sys
 import wave
 
-import proto.emulator_controller_pb2 as p
-import proto.emulator_controller_pb2_grpc
 import google.protobuf.text_format
-from channel.channel_provider import getEmulatorChannel
-from google.protobuf import empty_pb2
+from aemu.discovery.emulator_discovery import get_default_emulator
+from aemu.proto.emulator_controller_pb2 import AudioFormat
+
 
 def streamAudioToWave(wavefile, bitrate=44100):
     """Produces the audio stream, from the gRPC endpoint."""
-    # Open a grpc channel
-    channel = getEmulatorChannel()
 
     # Create a client
-    stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
+    stub = get_default_emulator().get_emulator_controller()
 
     # Desired format.
-    fmt = p.AudioFormat(
-        format=p.AudioFormat.AUD_FMT_S16, channels=p.AudioFormat.Stereo, samplingRate=bitrate)
+    fmt = AudioFormat(
+        format=AudioFormat.AUD_FMT_S16,
+        channels=AudioFormat.Stereo,
+        samplingRate=bitrate,
+    )
 
-    with wave.open(wavefile, 'wb') as wav:
+    with wave.open(wavefile, "wb") as wav:
         wav.setnchannels(2)
         wav.setframerate(fmt.samplingRate)
         wav.setsampwidth(2)
         for frame in stub.streamAudio(fmt):
-            fmt = google.protobuf.text_format.MessageToString(frame.format, as_one_line=True)
+            fmt = google.protobuf.text_format.MessageToString(
+                frame.format, as_one_line=True
+            )
             print("Packet: {} - {}".format(frame.timestamp, fmt))
             wav.writeframes(frame.audio)
 
 
 def main(args):
-  streamAudioToWave(args[1])
+    streamAudioToWave(args[1])
 
 
 if __name__ == "__main__":

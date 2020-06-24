@@ -26,13 +26,10 @@ import sys
 from threading import Lock, Thread
 from tkinter import Label, Tk
 
-from PIL import Image, ImageTk
-
-import proto.emulator_controller_pb2 as p
-import proto.emulator_controller_pb2_grpc
+import aemu.proto.emulator_controller_pb2 as p
 import google.protobuf.text_format
-from channel.channel_provider import getEmulatorChannel
-from google.protobuf import empty_pb2
+from aemu.discovery.emulator_discovery import get_default_emulator
+from PIL import Image, ImageTk
 
 SAMPLE_WIDTH = 540
 SAMPLE_HEIGHT = 960
@@ -52,14 +49,15 @@ def center_window(root, width=300, height=200):
 
 def _img_producer(queue, lock):
     """Produces the image stream, from the gRPC endpoint."""
-    # Open a grpc channel
-    channel = getEmulatorChannel()
 
     # Create a client
-    stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
+    stub = get_default_emulator().get_emulator_controller()
 
     fmt = p.ImageFormat(
-        format=p.ImageFormat.RGBA8888, width=SAMPLE_WIDTH, height=SAMPLE_HEIGHT, display=0
+        format=p.ImageFormat.RGBA8888,
+        width=SAMPLE_WIDTH,
+        height=SAMPLE_HEIGHT,
+        display=0,
     )
     i = 0
     for img in stub.streamScreenshot(fmt):
@@ -85,10 +83,11 @@ def _img_consumer(queue, lock, label, root):
         queue.clear()
         lock.release()
 
-
         if img.format.width != 0:
             # Note, this thing is slow and probably cannot keep up..
-            emu = Image.frombytes("RGBA", (img.format.width, img.format.height), img.image)
+            emu = Image.frombytes(
+                "RGBA", (img.format.width, img.format.height), img.image
+            )
             visual = ImageTk.PhotoImage(emu)
             label.configure(image=visual)
             label.image = visual

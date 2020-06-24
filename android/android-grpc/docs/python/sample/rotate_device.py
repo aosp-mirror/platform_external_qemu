@@ -12,24 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.protobuf import empty_pb2
-
-import proto.emulator_controller_pb2 as p
-import proto.emulator_controller_pb2_grpc
-from channel.channel_provider import getEmulatorChannel
 import time
 
-# Open a grpc channel
-channel = getEmulatorChannel()
+from aemu.discovery.emulator_discovery import get_default_emulator
+from aemu.proto.emulator_controller_pb2 import (ParameterValue,
+                                                PhysicalModelValue)
 
 # Create a client
-stub = proto.emulator_controller_pb2_grpc.EmulatorControllerStub(channel)
+stub = get_default_emulator().get_emulator_controller()
 
 # Rotate the emulator around..
 rotation = [-180, -90, 0, 90]
 for i in rotation:
-    model = p.PhysicalModelValue(
-        target=p.PhysicalModelValue.ROTATION, value=p.ParameterValue(data=[0, 0, i])
+    model = PhysicalModelValue(
+        target=PhysicalModelValue.ROTATION, value=ParameterValue(data=[0, 0, i])
     )
     stub.setPhysicalModel(model)
     print(stub.getPhysicalModel(model))
