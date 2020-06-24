@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "25dd71de_4c5563f5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2896,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-06-24T17:52:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f2a4be53_aa51ebd2",
+      "revId": "878ac1f99021899c735f154a79e2cc9b325fea16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7be794bc_55c7eb08",
         "filename": "android/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
         "patchSetId": 4
@@ -48,6 +66,30 @@
       "writtenOn": "2020-06-24T17:46:32Z",
       "side": 1,
       "message": "Is it possible that we return the result of this command, so that the caller can also catch the error if that happens?",
+      "range": {
+        "startLine": 93,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 4
+      },
+      "revId": "878ac1f99021899c735f154a79e2cc9b325fea16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bbfc25bb_cf983e30",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-06-24T17:52:14Z",
+      "side": 1,
+      "message": "Opted for a warning in SyncThread.cpp versus plumbing out the result.",
+      "parentUuid": "7be794bc_55c7eb08",
       "range": {
         "startLine": 93,
         "startChar": 0,
