@@ -13,35 +13,60 @@
 // limitations under the License.
 #include "emulator/net/EmulatorConnection.h"
 
-#include <rtc_base/async_socket.h>                // for AsyncSocket
-#include <rtc_base/logging.h>                    // for RTC_LOG
-#include <rtc_base/thread.h>                     // for AutoSocketServerThread
-#include <stdio.h>                               // for fprintf, stderr
-#include <sys/socket.h>                          // for AF_INET, SOCK_STREAM
-#include <unistd.h>                              // for fork, pid_t
-#include <utility>                               // for move
+#include <rtc_base/async_socket.h>  // for AsyncSocket
+#include <rtc_base/logging.h>       // for RTC_LOG
+#include <rtc_base/thread.h>        // for AutoSocketServerThread
+#include <stdio.h>                  // for fprintf, stderr
+
+#include <utility>  // for move
+
+#ifndef _WIN32
+#include <sys/socket.h>  // for AF_INET, SOCK_STREAM
+#include <unistd.h>      // for fork, pid_t
+#endif
 
 #include "emulator/net/RtcAsyncSocketAdapter.h"  // for AsyncSocket, RtcAsyn...
 #include "emulator/webrtc/Switchboard.h"         // for Switchboard
-#include "rtc_base/physical_socket_server.h"       // for PhysicalSocketServer
-#include "rtc_base/socket_address.h"              // for SocketAddress
+#include "rtc_base/physical_socket_server.h"     // for PhysicalSocketServer
+#include "rtc_base/socket_address.h"             // for SocketAddress
 
 namespace emulator {
 namespace net {
 
-EmulatorConnection::EmulatorConnection(int port, std::string handle, std::string turnConfig)
+EmulatorConnection::EmulatorConnection(int port,
+                                       std::string handle,
+                                       std::string turnConfig)
     : mPort(port), mHandle(handle), mTurnConfig(turnConfig) {}
 
 EmulatorConnection::~EmulatorConnection() {}
 
+#ifdef _WIN32
+static bool initializeSockets() {
+    WORD  wVersionRequested = MAKEWORD(2, 2);
+    WSADATA wsaData;
+    return WSAStartup(wVersionRequested, &wsaData);
+}
+#endif
+
 bool EmulatorConnection::listen(bool should_fork) {
-    RTC_LOG(INFO) << "Listening as " << (should_fork ? " deamon (forked)" : " thread, not returning.");
+    RTC_LOG(INFO) << "Listening as "
+                  << (should_fork ? " deamon (forked)"
+                                  : " thread, not returning.");
+#ifdef _WIN32
+    initializeSockets();
+#endif
     rtc::PhysicalSocketServer socket_server;
 
     // TODO(jansen): Use own thread that finalizes participants?
     rtc::AutoSocketServerThread thread(&socket_server);
     thread.SetName("Main Socket Server", &socket_server);
     auto socket = socket_server.CreateAsyncSocket(AF_INET, SOCK_STREAM);
+    if (!socket) {
+#ifdef _WIN32
+        errno = WSAGetLastError();
+#endif
+        RTC_LOG(LERROR) << "Failed to create socket, errno: " << errno;
+    }
 
     socket->SignalCloseEvent.connect(this, &EmulatorConnection::OnClose);
     socket->SignalConnectEvent.connect(this, &EmulatorConnection::OnConnect);
@@ -72,6 +97,8 @@ bool EmulatorConnection::listen(bool should_fork) {
 
     // Socket server is associated with this thread..
     thread.Run();
+
+    RTC_LOG(INFO) << "Completed";
     return true;
 }
 

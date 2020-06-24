@@ -17,7 +17,10 @@
 #include <fcntl.h>        // for open, O_CREAT, O_WRONLY
 #include <gtest/gtest.h>  // for Test, AssertionResult
 #include <string.h>       // for memcpy
+
+#ifndef _WIN32
 #include <unistd.h>       // for close
+#endif
 
 #include <algorithm>   // for min
 #include <functional>  // for __base

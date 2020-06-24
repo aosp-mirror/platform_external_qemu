@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <getopt.h>                // for optarg, required_argument
 #include <rtc_base/log_sinks.h>    // for FileRotatingLogSink
 #include <rtc_base/logging.h>      // for LogSink, RTC_LOG, INFO
 #include <rtc_base/ssl_adapter.h>  // for CleanupSSL, InitializeSSL
@@ -24,6 +23,13 @@
 #include "android/base/StringView.h"           // for StringView
 #include "android/base/memory/SharedMemory.h"  // for SharedMemory, SharedMe...
 #include "emulator/net/EmulatorConnection.h"   // for EmulatorConnection
+
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#include "msvc-getopt.h"
+#else
+#include <getopt.h>
+#endif
 
 static std::string FLAG_logdir("");
 static std::string FLAG_server("127.0.0.1");

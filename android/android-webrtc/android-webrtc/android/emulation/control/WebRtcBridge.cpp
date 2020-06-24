@@ -213,7 +213,7 @@ void WebRtcBridge::received(SocketTransport* from, json object) {
                 if (queue->tryPushLocked(object["msg"]) !=
                     BufferQueueResult::Ok) {
                     LOG(ERROR) << "Unable to push message "
-                               << (std::string)object["msg"] << "dropping it";
+                               << object["msg"].get<std::string>() << "dropping it";
                 }
             }
         }
