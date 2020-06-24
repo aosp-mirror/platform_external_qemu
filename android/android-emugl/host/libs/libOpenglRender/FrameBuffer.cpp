@@ -2885,7 +2885,6 @@ void FrameBuffer::sweepColorBuffersLocked() {
 }
 
 void FrameBuffer::waitForGpu(uint64_t eglsync) {
-    uint64_t timeout = ~0ULL;
     FenceSync* fenceSync = FenceSync::getFromHandle(eglsync);
 
     if (!fenceSync) {
@@ -2894,5 +2893,5 @@ void FrameBuffer::waitForGpu(uint64_t eglsync) {
         return;
     }
 
-    fenceSync->wait(timeout);
+    SyncThread::get()->triggerBlockedWaitNoTimeline(fenceSync);
 }
