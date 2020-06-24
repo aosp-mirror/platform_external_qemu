@@ -73,26 +73,24 @@ TEST(Console, preauth_ping) {
     ping_test();
 }
 
-// BUG: 156158638
-#ifndef _WIN32
 TEST(Console, postauth_ping) {
     ping_test();
 }
-#endif
-
 
 static void ping_test() {
     // Verify the 'ping' response.
     // This may be used by automated clients that expect
     // an exact response, so we verify the exact response.
-    const char EXPECTED_PING_RESPONSE[] = "I am alive!\r\nOK\r\n";
-    auto PING_SIZE = strlen(EXPECTED_PING_RESPONSE);
+    const char ALIVE_WRITE[] = "I am alive!\r\n";
+    const char OK_WRITE[]= "OK\r\n";
+    auto PING_SIZE_ALIVE = strlen(ALIVE_WRITE);
+    auto PING_SIZE_OK = strlen(OK_WRITE);
     const int BUFF_SIZE = STUDIO_BUFF_SIZE + 1;
     char buff[BUFF_SIZE];
     int sock[2];
     errno = 0;
 
-    EXPECT_GT(BUFF_SIZE, PING_SIZE);
+    EXPECT_GT(BUFF_SIZE, PING_SIZE_ALIVE + PING_SIZE_OK);
     ASSERT_EQ(0, socketCreatePair(&sock[0], &sock[1]));
 
     // Create a fake client that will send the output through this socket
@@ -103,10 +101,10 @@ static void ping_test() {
     send_test_string(opaque, "ping");
     EXPECT_EQ(0, errno);
 
-    // Read back the output
+    // First check we can read the alive message.
     errno = 0;
     memset(buff, 0, BUFF_SIZE);
-    bool hasRecvAll = socketRecvAll(sock[0], buff, PING_SIZE);
+    bool hasRecvAll = socketRecvAll(sock[0], buff, PING_SIZE_ALIVE);
 
     // All the ping bytes should have been received.
     EXPECT_TRUE(hasRecvAll);
@@ -115,15 +113,29 @@ static void ping_test() {
     // even when running on windows.
     EXPECT_EQ(0, errno);
 
+    // We should have received the alive message
+    EXPECT_EQ(PING_SIZE_ALIVE, strlen(buff));
+    EXPECT_STREQ(buff, ALIVE_WRITE);
+
+    // Next we receive the OK message.
+    errno = 0;
+    memset(buff, 0, BUFF_SIZE);
+    hasRecvAll = socketRecvAll(sock[0], buff, PING_SIZE_OK);
+
+    // All the ping bytes should have been received.
+    EXPECT_TRUE(hasRecvAll);
+
+    // There should not be an errors. errno will contain a unix error code
+    // even when running on windows.
+    EXPECT_EQ(0, errno);
+
+    // We should have received the OK message
+    EXPECT_EQ(PING_SIZE_OK, strlen(buff));
+    EXPECT_STREQ(buff, OK_WRITE);
+
     test_control_client_close(opaque);
     socketClose(sock[1]);
     socketClose(sock[0]);
-
-    // Ping size check
-    EXPECT_EQ(PING_SIZE, strlen(buff));
-    // Ping string comparison check
-    EXPECT_STREQ(buff, EXPECTED_PING_RESPONSE);
 }
-
 }  // namespace console
 }  // namespace android
