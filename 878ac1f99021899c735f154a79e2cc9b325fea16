@@ -99,6 +99,30 @@
       "revId": "878ac1f99021899c735f154a79e2cc9b325fea16",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02552160_26df06b7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-06-24T20:14:17Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "bbfc25bb_cf983e30",
+      "range": {
+        "startLine": 93,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 4
+      },
+      "revId": "878ac1f99021899c735f154a79e2cc9b325fea16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
