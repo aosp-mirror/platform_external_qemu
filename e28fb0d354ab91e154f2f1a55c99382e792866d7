@@ -22,6 +22,30 @@
       "revId": "e28fb0d354ab91e154f2f1a55c99382e792866d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b34a849_1ac290cd",
+        "filename": "android/android-grpc/docs/python/Makefile",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-06-24T19:19:38Z",
+      "side": 1,
+      "message": "Unfortunately the ancient Make tool expects tabs. https://stackoverflow.com/questions/2131213/can-you-make-valid-makefiles-without-tab-characters",
+      "parentUuid": "3d896bea_2a8d0724",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 1
+      },
+      "revId": "e28fb0d354ab91e154f2f1a55c99382e792866d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
