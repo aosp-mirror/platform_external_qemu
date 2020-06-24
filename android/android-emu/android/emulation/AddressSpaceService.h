@@ -38,6 +38,7 @@ enum AddressSpaceDeviceType {
     GenericPipe = 4,
     HostMemoryAllocator = 5,
     SharedSlotsHostMemoryAllocator = 6,
+    VirtioGpuGraphics = 10,
 };
 
 struct AddressSpaceDevicePingInfo {
