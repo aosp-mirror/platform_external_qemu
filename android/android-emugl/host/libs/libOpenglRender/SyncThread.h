@@ -41,7 +41,10 @@ enum SyncThreadOpCode {
     // A fence FD object in the guest is signaled.
     SYNC_THREAD_WAIT = 1,
     // Blocking command to clean up and exit the sync thread.
-    SYNC_THREAD_EXIT = 2
+    SYNC_THREAD_EXIT = 2,
+    // Blocking command to wait on a given FenceSync object.
+    // No timeline handling is done.
+    SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE = 3,
 };
 
 struct SyncThreadCmd {
@@ -68,6 +71,11 @@ public:
     // knows when to increment timelines / signal native fence FD's.
     void triggerWait(FenceSync* fenceSync,
                      uint64_t timeline);
+
+    // for use with the virtio-gpu path; is meant to have a current context
+    // while waiting.
+    void triggerBlockedWaitNoTimeline(FenceSync* fenceSync);
+
     // |cleanup|: for use with destructors and other cleanup functions.
     // it destroys the sync context and exits the sync thread.
     // This is blocking; after this function returns, we're sure
@@ -114,6 +122,7 @@ private:
     GLint doSyncThreadCmd(SyncThreadCmd* cmd);
     void doSyncContextInit();
     void doSyncWait(SyncThreadCmd* cmd);
+    void doSyncBlockedWaitNoTimeline(SyncThreadCmd* cmd);
     void doExit();
 
     // EGL objects / object handles specific to
