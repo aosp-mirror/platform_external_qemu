@@ -39,4 +39,19 @@ If this fails you should try:
 
 cd ./webrtc/src && gclient sync
 
+### Notes for windows
 
+- Make sure you build from a short path. For example 
+
+```bat
+mkdir C:\x
+cd C:\x
+cmake %PATH_LIBWEBRTC% -DCMAKE_BUILD_TYPE=Release -G Ninja
+ninja -v
+```
+
+- You might need to create C:\x\depot_tools\src\depot-tools\python3_bin_reldir.txt, just set python in it
+- echo "python" > C:\y\depot_tools\src\depot-tools\python3_bin_reldir.txt
+- mkdir C:\x\depot_tools\src\depot-tools\python
+- mklink  C:\x\depot_tools\src\depot-tools\python\python3.exe C:\my\path\to\python3.exe
+- You will likely need to run cd webrtc\src && gclient sync manually

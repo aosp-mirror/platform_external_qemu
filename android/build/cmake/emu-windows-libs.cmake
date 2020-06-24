@@ -13,6 +13,7 @@ function(android_find_windows_library NAME)
   if(NOT TARGET ${NAME}::${NAME})
     add_library(${NAME}::${NAME} INTERFACE IMPORTED GLOBAL)
     set_target_properties(${NAME}::${NAME} PROPERTIES INTERFACE_LINK_LIBRARIES ${${NAME}_LIBRARIES})
+    android_license(TARGET "${NAME}::${NAME}" LIBNAME None SPDX None LICENSE None LOCAL None)
   endif()
 endfunction()
 
@@ -29,6 +30,10 @@ set(WINDOWS_LIBS
     advapi32
     secur32
     mfuuid
+    msdmo
+    dmoguids
+    wmcodecdspuuid
+    amstrmid
     winmm
     shlwapi
     gdi32
