@@ -15,21 +15,24 @@
 # limitations under the License.
 import os
 import platform
-try:
-    from queue import Queue
-except ImportError:
-    from Queue import Queue
 import subprocess
+import sys
 from threading import Thread
 
-from aemu.definitions import get_qemu_root, get_visual_studio
 from absl import logging
+
+from aemu.definitions import get_qemu_root, get_visual_studio
+
+if sys.version_info[0] == 3:
+    from queue import Queue
+else:
+    from Queue import Queue
 
 
 def _reader(pipe, queue):
     try:
         with pipe:
-            for line in iter(pipe.readline, b''):
+            for line in iter(pipe.readline, b""):
                 queue.put((pipe, line[:-1]))
     finally:
         queue.put(None)
@@ -43,14 +46,14 @@ def log_std_out(proc):
     for _ in range(2):
         for _, line in iter(q.get, None):
             try:
-              logging.info(line.decode('utf-8'))
+                logging.info(line.decode("utf-8"))
             except IOError:
                 # We sometimes see IOError, errno = 0 on windows.
                 pass
 
 
-
 _CACHED_ENV = None
+
 
 def get_system_env():
     # Configure the paths for the various development environments
@@ -59,19 +62,27 @@ def get_system_env():
         return _CACHED_ENV
 
     local_env = os.environ.copy()
-    if platform.system() == 'Windows':
+    if platform.system() == "Windows":
         vs = get_visual_studio()
-        env_lines = subprocess.check_output([vs, "&&",  "set"]).splitlines()
+        env_lines = subprocess.check_output([vs, "&&", "set"]).splitlines()
         for env_line in env_lines:
-            if '=' in env_line:
-                env = env_line.split('=')
+            line = str(env_line)
+            if "=" in line:
+                env = line.split("=")
                 # Variables in windows are case insensitive, but not in python dict!
                 local_env[env[0].upper()] = env[1]
     else:
-        local_env['PATH'] = os.path.join(get_qemu_root(), 'android', 'third_party', 'chromium', 'depot_tools') + os.pathsep + local_env['PATH']
+        local_env["PATH"] = (
+            os.path.join(
+                get_qemu_root(), "android", "third_party", "chromium", "depot_tools"
+            )
+            + os.pathsep
+            + local_env["PATH"]
+        )
 
     _CACHED_ENV = local_env
     return local_env
+
 
 def run(cmd, cwd=None, extra_env=None):
     if cwd:
@@ -81,22 +92,22 @@ def run(cmd, cwd=None, extra_env=None):
 
     # We need to use a shell under windows, to set environment parameters.
     # otherwise we don't, since we will experience cmake invocation errors.
-    use_shell = (platform.system() == 'Windows')
+    use_shell = platform.system() == "Windows"
     local_env = get_system_env()
     if extra_env:
         local_env.update(extra_env)
 
-    logging.info('Running: %s in %s', ' '.join(cmd), cwd)
+    logging.info("Running: %s in %s", " ".join(cmd), cwd)
     proc = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         cwd=cwd,
-        shell=use_shell, # Needed on windows, otherwise the environment won't propagate.
-        env=local_env)
+        shell=use_shell,  # Needed on windows, otherwise the environment won't propagate.
+        env=local_env,
+    )
 
     log_std_out(proc)
     proc.wait()
     if proc.returncode != 0:
-        raise Exception('Failed to run %s - %s' %
-                        (' '.join(cmd), proc.returncode))
+        raise Exception("Failed to run %s - %s" % (" ".join(cmd), proc.returncode))
