@@ -112,10 +112,10 @@ Switchboard::Switchboard(const std::string handle,
             mNetwork.get() /* network_thread */,
             mWorker.get() /* worker_thread */,
             mSignaling.get() /* signaling_thread */, nullptr /* default_adm */,
-            ::webrtc::CreateBuiltinAudioEncoderFactory(),
-            ::webrtc::CreateBuiltinAudioDecoderFactory(),
-            ::webrtc::CreateBuiltinVideoEncoderFactory(),
-            ::webrtc::CreateBuiltinVideoDecoderFactory(),
+           ::webrtc::CreateBuiltinAudioEncoderFactory(),
+           ::webrtc::CreateBuiltinAudioDecoderFactory(),
+           ::webrtc::CreateBuiltinVideoEncoderFactory(),
+           ::webrtc::CreateBuiltinVideoDecoderFactory(),
             nullptr /* audio_mixer */, nullptr /* audio_processing */);
 
     split(turnConfig, " ", [this](StringView str) {
@@ -190,7 +190,7 @@ void Switchboard::received(SocketTransport* transport, const json object) {
     // Start a new participant.
     if (msg.count("start")) {
         std::vector<std::string> handles = msg["handles"];
-        mIdentityMap[from] = msg["start"];
+        mIdentityMap[from] = msg["start"].get<std::string>();
 
         // Inform the client we are going to start, this is the place
         // where we should send the turn config to the client.

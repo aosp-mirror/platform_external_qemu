@@ -19,6 +19,12 @@ if(NOT EXISTS "${PREBUILT_ROOT}/include/common_types.h")
         "The webrtc prebuilts for darwin are not in the repo by default. You can apply this patch:"
         "https://android-review.googlesource.com/c/platform/prebuilts/android-emulator-build/common/+/1316514 "
         "in the ${PREBUILT_ROOT} directory.")
+elseif(WINDOWS_MSVC_X86_64)
+  message(
+    FATAL_ERROR
+      "The webrtc prebuilts for windows are not in the repo by default. You can apply this patch:"
+      "https://android-review.googlesource.com/c/platform/prebuilts/android-emulator-build/common/+/1341498 "
+      "in the ${PREBUILT_ROOT} directory.")
   else()
     message(
       FATAL_ERROR

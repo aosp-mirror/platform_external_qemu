@@ -16,8 +16,10 @@
 #include <rtc_base/logging.h>          // for RTC_LOG
 #include <rtc_base/platform_thread.h>  // for PlatformThread
 #include <rtc_base/time_utils.h>       // for TimeMicros
-#include <unistd.h>                    // for usleep
 
+#include <chrono>
+
+#include "android/base/system/System.h"
 #include "emulator/webrtc/capture/VideoCapturer.h"  // for VideoCapturer
 
 namespace emulator {
@@ -43,8 +45,10 @@ VideoTrackSource::~VideoTrackSource() {
 }
 
 void VideoTrackSource::captureFrames() {
-    constexpr int64_t kUsPerSecond = std::chrono::microseconds(std::chrono::seconds(1)).count();
-    constexpr int64_t kInitialDelivery =  std::chrono::microseconds(std::chrono::seconds(5)).count();
+    constexpr int64_t kUsPerSecond =
+            std::chrono::microseconds(std::chrono::seconds(1)).count();
+    constexpr int64_t kInitialDelivery =
+            std::chrono::microseconds(std::chrono::seconds(5)).count();
 
     // Initially we deliver every individual frame, this guarantees that the
     // encoder pipeline will have frames and can generate keyframes for the web
@@ -60,7 +64,7 @@ void VideoTrackSource::captureFrames() {
         auto maxFrameDelayUs = kUsPerSecond / mVideoCapturer->maxFps();
         int64_t sleeptime = maxFrameDelayUs - (now - mPrevTimestamp);
         if (sleeptime > 0) {
-            usleep(sleeptime);
+            android::base::System::get()->sleepUs(sleeptime);
         }
 
         auto currentFrame = mVideoCapturer->frameNumber();

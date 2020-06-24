@@ -55,7 +55,7 @@ include(LibWebRTCCommand)
 
 libwebrtc_command(
     NAME webrtc-sync
-    COMMAND ${GCLIENT_EXECUTABLE} sync --nohooks
+    COMMAND ${GCLIENT_EXECUTABLE} sync
     WORKING_DIRECTORY "${WEBRTC_PARENT_DIR}"
     COMMENT "Synchronizing WebRTC"
 )
