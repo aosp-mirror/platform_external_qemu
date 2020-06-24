@@ -36,13 +36,13 @@
 #include "android/globals.h"                          // for android_avdInfo
 #include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
 #include "android/metrics/PeriodicReporter.h"         // for PeriodicReporter
-#include "studio_stats.pb.h"    // for AndroidStudioEvent
 #include "android/physics/GlmHelpers.h"               // for vecNearEqual
 #include "android/skin/qt/device-3d-widget.h"         // for Device3D...
 #include "android/skin/qt/editable-slider-widget.h"   // for EditableSliderW...
 #include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
 #include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
 #include "android/skin/qt/stylesheet.h"               // for stylesheetFontSize
+#include "studio_stats.pb.h"                          // for AndroidStudioEvent
 
 class QShowEvent;
 class QWidget;
@@ -157,20 +157,18 @@ void VirtualSensorsPage::setupHingeSensorUI() {
         mUi->accelModeFold->setChecked(true);
         mUi->accelModeRotate->setChecked(false);
         mUi->accelerometerSliders->setCurrentIndex(2);
-        connect(mUi->posture, SIGNAL(activated(int)),
-                this, SLOT(on_posture_valueChanged(int)));
-        struct FoldableState foldableState = *android_foldable_get_state_ptr();
-        mUi->posture->addItems({"Unknown", "Closed", "Half open", "Open", "Flipped"});
-        mCurrentPosture = foldableState.currentPosture;
-        mUi->posture->setCurrentIndex(foldableState.currentPosture);
+        connect(mUi->posture, SIGNAL(activated(int)), this,
+                SLOT(on_posture_valueChanged(int)));
+        struct FoldableState foldableState;
+        android_foldable_get_state(&foldableState);
+        mUi->posture->addItems(
+                {"Unknown", "Closed", "Half open", "Open", "Flipped"});
         switch (foldableState.config.numHinges) {
             case 3:
                 mUi->hinge2Slider->setRange(
                         foldableState.config.hingeParams[2].minDegrees,
                         foldableState.config.hingeParams[2].maxDegrees, false);
                 mUi->hinge2Slider->setSteps(200);
-                mUi->hinge2Slider->setValue(
-                        foldableState.currentHingeDegrees[2]);
                 mUi->hinge2Label->setHidden(false);
                 mUi->hinge2Slider->setHidden(false);
             case 2:
@@ -178,8 +176,6 @@ void VirtualSensorsPage::setupHingeSensorUI() {
                         foldableState.config.hingeParams[1].minDegrees,
                         foldableState.config.hingeParams[1].maxDegrees, false);
                 mUi->hinge1Slider->setSteps(200);
-                mUi->hinge1Slider->setValue(
-                        foldableState.currentHingeDegrees[1]);
                 mUi->hinge1Label->setHidden(false);
                 mUi->hinge1Slider->setHidden(false);
             case 1:
@@ -187,8 +183,6 @@ void VirtualSensorsPage::setupHingeSensorUI() {
                         foldableState.config.hingeParams[0].minDegrees,
                         foldableState.config.hingeParams[0].maxDegrees, false);
                 mUi->hinge0Slider->setSteps(200);
-                mUi->hinge0Slider->setValue(
-                        foldableState.currentHingeDegrees[0]);
                 mUi->hinge0Label->setHidden(false);
                 mUi->hinge0Slider->setHidden(false);
             default:;
@@ -327,6 +321,21 @@ void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
             mUi->magVerticalWidget->value());
 }
 
+void VirtualSensorsPage::on_hinge0Slider_valueChanged(double value) {
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE0,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
+void VirtualSensorsPage::on_hinge1Slider_valueChanged(double value) {
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE1,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
+void VirtualSensorsPage::on_hinge2Slider_valueChanged(double value) {
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE2,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
 void VirtualSensorsPage::on_zRotSlider_valueChanged(double) {
     propagateSlidersChange();
 }
@@ -349,18 +358,6 @@ void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
 
 void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
     propagateSlidersChange();
-}
-
-void VirtualSensorsPage::on_hinge0Slider_valueChanged(double) {
-    propagateSlidersChange(true, 0);
-}
-
-void VirtualSensorsPage::on_hinge1Slider_valueChanged(double) {
-    propagateSlidersChange(true, 1);
-}
-
-void VirtualSensorsPage::on_hinge2Slider_valueChanged(double) {
-    propagateSlidersChange(true, 2);
 }
 
 void VirtualSensorsPage::updateTargetState() {
@@ -527,27 +524,9 @@ void VirtualSensorsPage::propagateAccelWidgetChange() {
 /*
  * Propagate a UI change from the sliders to the accel widget and model.
  */
-void VirtualSensorsPage::propagateSlidersChange(bool updateHinge, int hingeIndex) {
+void VirtualSensorsPage::propagateSlidersChange() {
     reportVirtualSensorsInteraction();
     updateModelFromSliders(PHYSICAL_INTERPOLATION_SMOOTH);
-    if (updateHinge) {
-        switch (hingeIndex) {
-            case 0:
-                android_foldable_set_hinge_degrees(0, mUi->hinge0Slider->getValue());
-                break;
-            case 1:
-                android_foldable_set_hinge_degrees(1, mUi->hinge1Slider->getValue());
-                break;
-            case 2:
-                android_foldable_set_hinge_degrees(2, mUi->hinge2Slider->getValue());
-                break;
-            default: ;
-        }
-        if (mCurrentPosture != android_foldable_get_posture()) {
-            mCurrentPosture = android_foldable_get_posture();
-            mUi->posture->setCurrentIndex(mCurrentPosture);
-        }
-    }
 }
 
 /*
@@ -657,6 +636,24 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
                 getPhysicalParameterTarget(PHYSICAL_PARAMETER_PRESSURE), false);
         mUi->humiditySensorValueWidget->setValue(
                 getPhysicalParameterTarget(PHYSICAL_PARAMETER_HUMIDITY), false);
+        if (!mUi->hinge0Slider->isHidden()) {
+            mUi->hinge0Slider->setValue(
+                    getPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE0),
+                    false);
+        }
+        if (!mUi->hinge1Slider->isHidden()) {
+            mUi->hinge1Slider->setValue(
+                    getPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE1),
+                    false);
+        }
+        if (!mUi->hinge2Slider->isHidden()) {
+            mUi->hinge2Slider->setValue(
+                    getPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE2),
+                    false);
+        }
+        if (!mUi->posture->isHidden()) {
+            updateUIPosture();
+        }
     }
 }
 
@@ -667,7 +664,6 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
 void VirtualSensorsPage::updateSensorValuesInUI() {
     if (EmulatorQtWindow::sClosed)
         return;
-
     updateUIFromModelCurrentState();
 
     if (sSensorsAgent != nullptr) {
@@ -757,7 +753,8 @@ void VirtualSensorsPage::on_accelModeMove_toggled() {
 void VirtualSensorsPage::on_accelModeFold_toggled() {
     reportVirtualSensorsInteraction();
     if (mUi->accelModeFold->isChecked()) {
-        mUi->accelWidget->setOperationMode(Device3DWidget::OperationMode::Rotate);
+        mUi->accelWidget->setOperationMode(
+                Device3DWidget::OperationMode::Rotate);
         mUi->accelerometerSliders->setCurrentIndex(2);
     }
 }
@@ -767,10 +764,9 @@ void VirtualSensorsPage::on_posture_valueChanged(int index) {
         return;
     }
     mCurrentPosture = (enum FoldablePostures)index;
-    android_foldable_set_posture(index);
-    mUi->hinge0Slider->setValue(android_foldable_get_hinge_degrees(0));
-    mUi->hinge1Slider->setValue(android_foldable_get_hinge_degrees(1));
-    mUi->hinge2Slider->setValue(android_foldable_get_hinge_degrees(2));
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               (double)mCurrentPosture);
 }
 
 void VirtualSensorsPage::on_helpMagneticField_clicked() {
@@ -814,4 +810,14 @@ void VirtualSensorsPage::hideRotationButtons(bool hide) {
     mUi->rotateToReversePortrait->setHidden(hide);
     mUi->rotateToReverseLandscape->setHidden(hide);
     mUi->accelModeRotate->setHidden(hide);
+}
+
+void VirtualSensorsPage::updateUIPosture() {
+    enum FoldablePostures posture =
+            (enum FoldablePostures)getPhysicalParameterTarget(
+                    PHYSICAL_PARAMETER_POSTURE);
+    if (mCurrentPosture != posture) {
+        mCurrentPosture = posture;
+        mUi->posture->setCurrentIndex(posture);
+    }
 }
