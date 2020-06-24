@@ -431,7 +431,6 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
         abort();
     }
 
-    address_space_set_vm_operations(gQAndroidVmOperations);
     android_init_opengles_pipe();
     android_opengles_pipe_set_recv_mode(2 /* virtio-gpu */);
     android_init_refcount_pipe();

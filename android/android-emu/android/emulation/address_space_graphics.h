@@ -33,14 +33,11 @@ struct Allocation {
     size_t blockIndex = 0;
     uint64_t offsetIntoPhys = 0;
     uint64_t size = 0;
-    bool dedicated = false;
-    uint64_t hostmemId = 0;
-    bool isView = false;
 };
 
 class AddressSpaceGraphicsContext : public AddressSpaceDeviceContext {
 public:
-    AddressSpaceGraphicsContext(bool isVirtio = false);
+    AddressSpaceGraphicsContext();
     ~AddressSpaceGraphicsContext();
 
     static void setConsumer(ConsumerInterface);
@@ -68,7 +65,6 @@ private:
     uint32_t mVersion = 1;
     Allocation mRingAllocation;
     Allocation mBufferAllocation;
-    Allocation mCombinedAllocation;
     struct asg_context mHostContext = {};
 
     // Consumer storage
@@ -81,10 +77,6 @@ private:
     uint32_t mExiting = 0;
     // For onUnavailableRead
     uint32_t mUnavailableReadCount = 0;
-
-    bool mIsVirtio = false;
-    // To save the ring config if it is cleared on hostmem map
-    struct asg_ring_config mSavedConfig;
 };
 
 }  // namespace asg
