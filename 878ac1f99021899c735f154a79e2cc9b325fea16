@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "07041573_50d4a0d1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2896,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-06-24T17:46:32Z",
+      "side": 1,
+      "message": "If we could return the result from triggerBlockedWaitNoTimeline() we can also check if an error happens here and write a warning on stderr.",
+      "revId": "878ac1f99021899c735f154a79e2cc9b325fea16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7be794bc_55c7eb08",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/SyncThread.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-06-24T17:46:32Z",
+      "side": 1,
+      "message": "Is it possible that we return the result of this command, so that the caller can also catch the error if that happens?",
+      "range": {
+        "startLine": 93,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 4
+      },
+      "revId": "878ac1f99021899c735f154a79e2cc9b325fea16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
