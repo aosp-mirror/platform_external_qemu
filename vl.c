@@ -697,9 +697,13 @@ static QemuOptsList qemu_iscsi_opts = {
     },
 };
 #endif
+
 #ifdef CONFIG_ANDROID
+
 // Save System boot parameters from the command line
+
 #define MAX_N_CMD_PROPS 16
+
 static const char* cmd_props[MAX_N_CMD_PROPS];
 static       int   n_cmd_props = 0;
 
