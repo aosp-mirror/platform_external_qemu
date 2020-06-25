@@ -378,6 +378,8 @@ static void virtio_wifi_device_realize(DeviceState* dev, Error** errp) {
     n->mac[5] = sGlobal.macPrefix & 0xff;
     n->status = VIRTIO_LINK_UP;
     n->qdev = dev;
+    register_savevm_live(NULL, "virtio_wifi", 0, 0, &virtio_vmhandlers,
+            &sGlobal);
 }
 
 static void virtio_wifi_device_unrealize(DeviceState* dev, Error** errp) {
@@ -460,8 +462,6 @@ static void virtio_wifi_class_init(ObjectClass* klass, void* data) {
     vdc->bad_features = virtio_wifi_bad_features;
     vdc->reset = virtio_wifi_reset;
     vdc->set_status = virtio_wifi_set_status;
-    register_savevm_live(NULL, "virtio_wifi", 0, 0, &virtio_vmhandlers,
-                         &sGlobal);
 }
 
 static const TypeInfo virtio_wifi_info = {
