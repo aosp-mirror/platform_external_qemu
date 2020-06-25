@@ -525,6 +525,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 showOrRaiseExtendedWindow(PANE_IDX_CAR);
             }
             break;
+        case QtUICommand::SHOW_PANE_CAR_ROTARY:
+            if (down) {
+                showOrRaiseExtendedWindow(PANE_IDX_CAR_ROTARY);
+            }
+            break;
         case QtUICommand::SHOW_PANE_MULTIDISPLAY:
             if (down) {
                 if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
