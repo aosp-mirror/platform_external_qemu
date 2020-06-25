@@ -46,6 +46,30 @@
       "revId": "45165b0762a7096244ef05d2df21c0aef22e21e8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d89ad19a_390000b8",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-06-25T16:48:36Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "57b266f9_7bc29829",
+      "range": {
+        "startLine": 287,
+        "startChar": 42,
+        "endLine": 287,
+        "endChar": 74
+      },
+      "revId": "45165b0762a7096244ef05d2df21c0aef22e21e8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
