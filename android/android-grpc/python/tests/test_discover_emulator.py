@@ -68,6 +68,7 @@ def test_can_parse_and_read_emu_file(mocker, fake_emu_pid_file):
     assert emu.find_by_pid(1234) is not None
     assert emu.find_by_pid(1234).name() == "emulator-5554"
 
+
 def test_finds_default_emulator(mocker, fake_emu_pid_file):
     path = os.path.dirname(fake_emu_pid_file)
     pid_file = os.path.basename(fake_emu_pid_file)
@@ -77,5 +78,3 @@ def test_finds_default_emulator(mocker, fake_emu_pid_file):
     mocker.patch.object(os, "listdir", return_value=[pid_file])
     assert get_default_emulator() is not None
     assert get_default_emulator().name() == "emulator-5554"
-
-

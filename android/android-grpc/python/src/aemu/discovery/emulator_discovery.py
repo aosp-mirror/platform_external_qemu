@@ -85,19 +85,19 @@ class EmulatorDiscovery(object):
 
 def get_discovery_directory():
     """Gets the discovery directory with the emulator pid files."""
-    path = "unknown"
-    if platform.system() == "Windows":
+    path = None
+    if platform.system() == "Windows" and "LOCALAPPADATA" in os.environ:
         path = os.path.join(os.environ.get("LOCALAPPDATA"), "Temp")
     if platform.system() == "Linux":
         path = os.environ.get("XDG_RUNTIME_DIR")
-        if not os.path.exists(path):
-            path = os.path.join("run", "user", os.getuid())
-    if platform.system() == "Darwin":
+        if path is None or not os.path.exists(path):
+            path = os.path.join("run", "user", str(os.getuid()))
+    if platform.system() == "Darwin" and "HOME" in os.environ:
         path = os.path.join(
             os.environ.get("HOME"), "Library", "Caches", "TemporaryItems"
         )
 
-    if not os.path.exists(path):
+    if path is None or not os.path.exists(path):
         path = _get_user_directory()
     return os.path.join(path, "avd", "running")
 
