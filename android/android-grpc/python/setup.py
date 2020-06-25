@@ -62,7 +62,7 @@ if need_grpc():
     install_grpc_dependencies()
 
 # Compile all the needed protobufs.
-proto_dest = os.path.join(here, 'src', 'aemu', 'proto')
+proto_dest = os.path.join(here, "src", "aemu", "proto")
 for protofile in os.listdir(proto_dest):
     if protofile.endswith(".proto"):
         compile_grpc(proto_dest, protofile)
@@ -153,8 +153,8 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages('src'),  # Required
-    package_dir={'': 'src'},
+    packages=find_packages("src"),  # Required
+    package_dir={"": "src"},
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. If you

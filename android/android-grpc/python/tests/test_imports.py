@@ -18,4 +18,5 @@ def test_can_import_proto():
     # Make sure the py2/py3 import patch works
     import aemu.proto.emulator_controller_pb2_grpc
     from aemu.proto.emulator_controller_pb2 import MouseEvent
+
     m = MouseEvent(x=10, y=10)
