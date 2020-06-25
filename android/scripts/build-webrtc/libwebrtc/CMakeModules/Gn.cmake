@@ -15,6 +15,11 @@ else (MSVC OR XCODE)
   set(_NINJA_BUILD_DIR out/Release)
 endif (MSVC OR XCODE)
 
+if (MSVC)
+   # Make sure we are not creating weirdness with libc++ vs msvc std lib.
+   set(_GEN_ARGS ${_GEN_ARGS} is_clang=false "")
+endif()
+
 if (BUILD_TESTS)
   set(_GEN_ARGS ${_GEN_ARGS} rtc_include_tests=true)
 else (BUILD_TESTS)

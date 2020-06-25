@@ -1,4 +1,4 @@
- cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0)
 project(libwebrtc)
 
 set(_OBJ_EXT ${CMAKE_CXX_OUTPUT_EXTENSION})
@@ -17,6 +17,7 @@ file(GLOB_RECURSE _OBJ_EXCLUDED
      ${WEBRTC_OUTPUT_DIR}/obj/third_party/yasm/gen*/*${_OBJ_EXT}
      ${WEBRTC_OUTPUT_DIR}/obj/third_party/yasm/re2c/*${_OBJ_EXT}
      ${WEBRTC_OUTPUT_DIR}/obj/third_party/yasm/yasm/*${_OBJ_EXT}
+     ${WEBRTC_OUTPUT_DIR}/obj/third_party/nasnm/nasm/*${_OBJ_EXT}
      ${WEBRTC_OUTPUT_DIR}/obj/third_party/protobuf/*/*${_OBJ_EXT}
      ${WEBRTC_OUTPUT_DIR}/obj/third_party/boringssl/boringssl*/*${_OBJ_EXT}
      ${WEBRTC_OUTPUT_DIR}/obj/third_party/zlib/zlib*/*${_OBJ_EXT}
@@ -34,6 +35,10 @@ add_library(webrtc STATIC ${_OBJ_FILES})
 set_source_files_properties(${_OBJ_FILES} PROPERTIES
                             EXTERNAL_OBJECT true
                             GENERATED true)
+
+if(MSVC)
+   set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+endif()
 
 set_target_properties(webrtc PROPERTIES
                       LINKER_LANGUAGE C
