@@ -41,9 +41,16 @@ class EmulatorDescription(dict):
 
            Note: Currently only produces insecure channels.
         """
+        # Message length of 4gb should do the trick.
+        MAX_MESSAGE_LENGTH = 4 * 1024 * 1024 * 1024
 
         addr = "localhost:{}".format(self.get("grpc.port", 8554))
-        channel = grpc.insecure_channel(addr)
+        channel = grpc.insecure_channel(addr,
+                options=[
+                    ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
+                    ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH),
+                    ],
+                )
         if "grpc.token" in self._description:
             bearer = "Bearer {}".format(self.get("grpc.token", ""))
             logging.debug("Insecure Channel with token to: %s", addr)
