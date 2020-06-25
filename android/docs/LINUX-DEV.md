@@ -107,7 +107,7 @@ Configure ccache to use a different cache size with `ccache -M <max size>`. You 
 
 ### Cross compiling to Windows with clang-cl
 
-***It is higly recommended to use a windows machine for windows development, vs cross compilation.***
+***It is highly recommended to use a windows machine for windows development, vs cross compilation.***
 
 It is possible to cross compile from linux to windows. This is mainly useful to quickly discover compilation issues, as you will not be able to actually run the code.
 
@@ -116,13 +116,13 @@ The windows target requires you to install the MSVC libraries. These libraries n
 #### Enable cross compiling from within Google:
 run:
 
-    emu-master-dev/external/qemu/android/scripts/activate-msvc.sh
+    $AOSP/external/qemu/android/scripts/activate-msvc.sh
 
 This script will guide you through the steps, and configure your machine for cross compiling msvc. Once this is completed you should be able to replicate what is happening on the build bots. **The script will require sudo priveleges**
 
 If all went well you can now target windows as follows:
 
-    ./android/rebuild.sh --target windows
+    cd $AOSP/external/qemu/ && ./android/rebuild.sh --target windows
 
 #### Enable cross compiling from outside Google:
 

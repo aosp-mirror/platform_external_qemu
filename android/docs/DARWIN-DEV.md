@@ -117,7 +117,7 @@ Configure ccache to use a different cache size with `ccache -M <max size>`. You 
 
 ### Cross compiling to Windows with clang-cl
 
-***It is higly recommended to use a windows machine for windows development, vs cross compilation.***
+***It is highly recommended to use a windows machine for windows development, vs cross compilation.***
 
 It is possible to cross compile from MacOs to windows. This is mainly useful to quickly discover compilation issues, as you will not be able to actually run the code.
 
