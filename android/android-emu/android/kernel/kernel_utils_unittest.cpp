@@ -18,6 +18,7 @@
 namespace android {
 namespace kernel {
 
+#if 0
 TEST(KernelUtils, GetKernelSerialDevicePrefix) {
     EXPECT_STREQ("ttyS",
                  android_kernelSerialDevicePrefix(KERNEL_VERSION_2_6_29));
@@ -216,6 +217,7 @@ TEST(KernelUtils, ParseKernelVersionString) {
     ParseKernelVersionString("0123456789ABCDEF3.4.0+ (ghac...\n",
                              KERNEL_VERSION_3_4_0);
 }
+#endif
 
 }  // namespace kernel
 }  // namespace android

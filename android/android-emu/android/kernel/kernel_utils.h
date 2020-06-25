@@ -36,6 +36,7 @@ typedef enum {
 } KernelVersion;
 #undef MAKE_KERNEL_VERSION
 
+#if 0
 // Converts a string at |versionString| in the format "Linux version MM.mm.rr..."
 // into a hex value 0x00MMmmrr.  On success, returns true and sets |*kernelVersion|
 // appropriately
@@ -53,6 +54,10 @@ bool android_parseLinuxVersionString(const char* versionString,
 bool android_pathProbeKernelVersionString(const char* kernelPath,
                                           char* dst,
                                           size_t dstLen);
+#endif
+
+bool android_getKernelVersion(const char* kernelPath,
+                              KernelVersion* kernelVersion);
 
 // Return the serial device name prefix matching a given kernel type
 // |kernelVersion|.  I.e. this should be "/dev/ttyS" for before 3.10.0 and
