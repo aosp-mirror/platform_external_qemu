@@ -906,14 +906,22 @@ static void _hwSensors_init(HwSensors* h) {
 }
 
 static HwSensors _sensorsState[1] = {};
+static const QAndroidEmulatorWindowAgent* _windowAgent = NULL;
 
-void android_hw_sensors_init(void) {
+void android_hw_sensors_init(const QAndroidEmulatorWindowAgent* windowAgent) {
     HwSensors* hw = _sensorsState;
+    if (windowAgent != NULL) {
+        _windowAgent = windowAgent;
+    }
 
     if (hw->service == NULL) {
         _hwSensors_init(hw);
         D("%s: sensors qemud service initialized", __FUNCTION__);
     }
+}
+
+const QAndroidEmulatorWindowAgent* android_hw_sensors_get_window_agent() {
+    return _windowAgent;
 }
 
 void android_hw_sensors_init_remote_controller(void) {
@@ -935,7 +943,7 @@ void android_hw_sensors_init_remote_controller(void) {
 extern int android_sensors_set_coarse_orientation(
         AndroidCoarseOrientation orient,
         float tilt_degrees) {
-    android_hw_sensors_init();
+    android_hw_sensors_init(NULL);
     _hwSensors_setCoarseOrientation(_sensorsState, orient, tilt_degrees);
     return 0;
 }
