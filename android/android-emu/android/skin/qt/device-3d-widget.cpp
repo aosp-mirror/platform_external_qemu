@@ -373,13 +373,18 @@ bool Device3DWidget::initAbstractDeviceModel() {
         float ur = (hSplit) ? 1.0f : float(centerY - i.b) / float(displayH);
         float ub = (hSplit) ? float(i.b + centerY) / float(displayH) : 0.0f;
         float ut = (hSplit) ? float(i.t + centerY) / float(displayH) : 1.0f;
-        std::vector<float> attribFront;
+        std::vector<float> attribFront, attribBack;
         if (hSplit) {
             attribFront = {
                     l, b, 0.0, 0.0, 0.0, +1.0, ul, ub,  // front
                     r, b, 0.0, 0.0, 0.0, +1.0, ur, ub,
                     l, t, 0.0, 0.0, 0.0, +1.0, ul, ut,
                     r, t, 0.0, 0.0, 0.0, +1.0, ur, ut,
+            };
+            attribBack = {
+                    l,   b,    -d, 0.0, 0.0, -1.0, ul, ub,  // front
+                    r,   b,    -d, 0.0, 0.0, -1.0, ur, ub,  l,   t,    -d, 0.0,
+                    0.0, -1.0, ul, ut,  r,   t,    -d, 0.0, 0.0, -1.0, ur, ut,
             };
         } else {
             // rotate 90 degree for vertical split texture sampling
@@ -389,31 +394,41 @@ bool Device3DWidget::initAbstractDeviceModel() {
                     l, t, 0.0, 0.0, 0.0, +1.0, ul, ub,
                     r, t, 0.0, 0.0, 0.0, +1.0, ul, ut,
             };
+            attribBack = {
+                    l,   b,    -d, 0.0, 0.0, -1.0, ur, ub,  // front
+                    r,   b,    -d, 0.0, 0.0, -1.0, ur, ut,  l,   t,    -d, 0.0,
+                    0.0, -1.0, ul, ub,  r,   t,    -d, 0.0, 0.0, -1.0, ul, ut,
+            };
         }
         std::vector<float> attribCommon =
                 {
-                        l, b, -d,  0.0,  0.0,  -1.0, 0.0, 0.0,  // back
-                        r, b, -d,  0.0,  0.0,  -1.0, 1.0, 0.0,
-                        l, t, -d,  0.0,  0.0,  -1.0, 0.0, 1.0,
-                        r, t, -d,  0.0,  0.0,  -1.0, 1.0, 1.0,
-                        l, b, -d,  -1.0, 0.0,  0.0,  0.0, 0.0,  // left
-                        l, b, 0.0, -1.0, 0.0,  0.0,  1.0, 0.0,
-                        l, t, -d,  -1.0, 0.0,  0.0,  0.0, 1.0,
-                        l, t, 0.0, -1.0, 0.0,  0.0,  1.0, 1.0,
-                        r, b, -d,  +1.0, 0.0,  0.0,  0.0, 0.0,  // right
-                        r, b, 0.0, +1.0, 0.0,  0.0,  1.0, 0.0,
-                        r, t, -d,  +1.0, 0.0,  0.0,  0.0, 1.0,
-                        r, t, 0.0, +1.0, 0.0,  0.0,  1.0, 1.0,
-                        l, t, 0.0, 0.0,  +1.0, 0.0,  0.0, 0.0,  // top
-                        r, t, 0.0, 0.0,  +1.0, 0.0,  1.0, 0.0,
-                        l, t, -d,  0.0,  +1.0, 0.0,  0.0, 1.0,
-                        r, t, -d,  0.0,  +1.0, 0.0,  1.0, 1.0,
-                        l, b, 0.0, 0.0,  -1.0, 0.0,  0.0, 0.0,  // bottom
-                        r, b, 0.0, 0.0,  -1.0, 0.0,  1.0, 0.0,
-                        l, b, -d,  0.0,  -1.0, 0.0,  0.0, 1.0,
-                        r, b, -d,  0.0,  -1.0, 0.0,  1.0, 1.0,
+                        //                        l, b, -d,  0.0,  0.0,  -1.0,
+                        //                        0.0, 0.0,  // back
+                        //                        r, b, -d,  0.0,  0.0,
+                        //                        -1.0, 1.0, 0.0,
+                        //                        l, t, -d,  0.0,  0.0,  -1.0,
+                        //                        0.0, 1.0,
+                        //                        r, t, -d,  0.0,  0.0,
+                        //                        -1.0, 1.0, 1.0,
+                        l, b, -d,  -1.0, 0.0,  0.0, 0.0, 0.0,  // left
+                        l, b, 0.0, -1.0, 0.0,  0.0, 1.0, 0.0,
+                        l, t, -d,  -1.0, 0.0,  0.0, 0.0, 1.0,
+                        l, t, 0.0, -1.0, 0.0,  0.0, 1.0, 1.0,
+                        r, b, -d,  +1.0, 0.0,  0.0, 0.0, 0.0,  // right
+                        r, b, 0.0, +1.0, 0.0,  0.0, 1.0, 0.0,
+                        r, t, -d,  +1.0, 0.0,  0.0, 0.0, 1.0,
+                        r, t, 0.0, +1.0, 0.0,  0.0, 1.0, 1.0,
+                        l, t, 0.0, 0.0,  +1.0, 0.0, 0.0, 0.0,  // top
+                        r, t, 0.0, 0.0,  +1.0, 0.0, 1.0, 0.0,
+                        l, t, -d,  0.0,  +1.0, 0.0, 0.0, 1.0,
+                        r, t, -d,  0.0,  +1.0, 0.0, 1.0, 1.0,
+                        l, b, 0.0, 0.0,  -1.0, 0.0, 0.0, 0.0,  // bottom
+                        r, b, 0.0, 0.0,  -1.0, 0.0, 1.0, 0.0,
+                        l, b, -d,  0.0,  -1.0, 0.0, 0.0, 1.0,
+                        r, b, -d,  0.0,  -1.0, 0.0, 1.0, 1.0,
                 };
         attribs.insert(attribs.end(), attribFront.begin(), attribFront.end());
+        attribs.insert(attribs.end(), attribBack.begin(), attribBack.end());
         attribs.insert(attribs.end(), attribCommon.begin(), attribCommon.end());
         for (auto iter : indice) {
             indices.push_back(iter + j * 24);
@@ -780,14 +795,23 @@ void Device3DWidget::repaintGL() {
                                       (void*)(sizeof(float) * 6));
         mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
         mGLES2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Draw 5 non-front sides of each display segment cuboid
-        mGLES2->glActiveTexture(GL_TEXTURE0);
-        mGLES2->glBindTexture(GL_TEXTURE_2D, mSpecularMap);
         GLuint diffuse_map_uniform =
                 mGLES2->glGetUniformLocation(mProgram, "diffuse_map");
         mGLES2->glUniform1i(diffuse_map_uniform, 0);
+        FoldablePostures posture = POSTURE_UNKNOWN;
+        if (mSensorsAgent) {
+            glm::vec3 result;
+            mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_POSTURE,
+                                                &result.x, &result.y, &result.z,
+                                                PARAMETER_VALUE_TYPE_CURRENT);
+            posture = (FoldablePostures)result.x;
+        }
+
         uint32_t i = 0;
+        // Draw 5 non-front sides of each display segment cuboid
+        mGLES2->glActiveTexture(GL_TEXTURE0);
+        mGLES2->glBindTexture(GL_TEXTURE_2D, mSpecularMap);
+        i = 0;
         for (auto iter : mDisplaySegments) {
             if (iter.t == iter.b) {
                 continue;
@@ -811,8 +835,26 @@ void Device3DWidget::repaintGL() {
                 mGLES2->glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,
                                        (void*)(i * 36 * sizeof(GLuint)));
             } else {
-                mGLES2->glDrawElements(GL_TRIANGLES, 30, GL_UNSIGNED_INT,
-                                       (void*)((i * 36 + 6) * sizeof(GLuint)));
+                if (ToolWindow::isFoldableConfigured()) {
+                    if (posture == POSTURE_CLOSED) {
+                        // legacy foldable configured, display moves to
+                        // secondary smaller screen on the back of device
+                        mGLES2->glDrawElements(
+                                GL_TRIANGLES, 6, GL_UNSIGNED_INT,
+                                (void*)((i * 36) * sizeof(GLuint)));
+                        mGLES2->glDrawElements(
+                                GL_TRIANGLES, 24, GL_UNSIGNED_INT,
+                                (void*)((i * 36 + 12) * sizeof(GLuint)));
+                    } else {
+                        mGLES2->glDrawElements(
+                                GL_TRIANGLES, 30, GL_UNSIGNED_INT,
+                                (void*)((i * 36 + 6) * sizeof(GLuint)));
+                    }
+                } else {
+                    mGLES2->glDrawElements(
+                            GL_TRIANGLES, 30, GL_UNSIGNED_INT,
+                            (void*)((i * 36 + 6) * sizeof(GLuint)));
+                }
             }
             i++;
         }
@@ -846,8 +888,13 @@ void Device3DWidget::repaintGL() {
                                        &normal_transform[0][0]);
             mGLES2->glUniformMatrix4fv(mvp_matrix_uniform, 1, GL_FALSE,
                                        &model_view_projection[0][0]);
-            mGLES2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
-                                   (void*)(i * 36 * sizeof(GLuint)));
+            if (posture == POSTURE_CLOSED) {
+                mGLES2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
+                                       (void*)((i * 36 + 6) * sizeof(GLuint)));
+            } else {
+                mGLES2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
+                                       (void*)(i * 36 * sizeof(GLuint)));
+            }
             i++;
         }
     } else {
