@@ -22,6 +22,30 @@
       "revId": "be942ae844bd480a190ddb84cfb66aa36166e9e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9bc5cc9_ee3735e4",
+        "filename": "android/docs/LINUX-DEV.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-06-26T00:02:38Z",
+      "side": 1,
+      "message": "We should get in touch with legal for that, we would be distributing the windows sdk.",
+      "parentUuid": "39c0d621_a195b072",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 56
+      },
+      "revId": "be942ae844bd480a190ddb84cfb66aa36166e9e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
