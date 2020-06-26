@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "a1c86028_5905b8e0",
+        "filename": "android/docs/DARWIN-DEV.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-06-26T17:11:18Z",
+      "side": 1,
+      "message": "Compiling Emulator with the latest xcode 11.5, we observed issues in creating QT window.\nBetter to recommend xcode 10.1",
+      "revId": "be942ae844bd480a190ddb84cfb66aa36166e9e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "39c0d621_a195b072",
         "filename": "android/docs/LINUX-DEV.md",
         "patchSetId": 1
