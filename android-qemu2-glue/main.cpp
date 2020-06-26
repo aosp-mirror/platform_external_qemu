@@ -2159,7 +2159,7 @@ extern "C" int main(int argc, char** argv) {
 
         ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-                hw->kernel_parameters, &all_boot_params,
+                hw->kernel_parameters, hw->kernel_path, &all_boot_params,
                 rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
                 true /* isQemu2 */, hw->hw_arc, hw->hw_lcd_width,

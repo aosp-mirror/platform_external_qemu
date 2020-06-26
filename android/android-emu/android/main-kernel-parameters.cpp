@@ -16,6 +16,7 @@
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/kernel/kernel_utils.h"
 #include "android/utils/debug.h"
 #include "android/utils/dns.h"
 #include "android/version.h"
@@ -43,6 +44,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int apiLevel,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
+                                   const char* kernelPath,
                                    const std::vector<std::string>* verifiedBootParameters,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
@@ -87,11 +89,22 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (isX86ish) {
         params.add("clocksource=pit");
+
+        KernelVersion kernelVersion = KERNEL_VERSION_0;
+        if (!android_getKernelVersion(kernelPath, &kernelVersion)) {
+            derror("Can't get kernel version from the kernel image file: '%s'",
+                   kernelPath);
+        }
+
         // b/67565886, when cpu core is set to 2, clock_gettime() function hangs
         // in goldfish kernel which caused surfaceflinger hanging in the guest
         // system. To workaround, start the kernel with no kvmclock. Currently,
         // only API 24 and API 25 have kvm clock enabled in goldfish kernel.
-        params.add("no-kvmclock");
+        //
+        // kvm-clock seems to be stable for >= 5.4.
+        if (kernelVersion < KERNEL_VERSION_5_4_0) {
+            params.add("no-kvmclock");
+        }
     }
 
     android::setupVirtualSerialPorts(
