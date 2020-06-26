@@ -46,6 +46,7 @@ public:
 private:
     enum FoldablePostures calculatePosture();
     void sendPostureToSystem();
+    void setToolBarFold(enum FoldablePostures oldPosture);
 
     FoldableState mState;
     std::vector<struct AnglesToPosture> mAnglesToPostures;

@@ -194,13 +194,16 @@ void FoldableModel::setHingeAngle(uint32_t hingeIndex,
     mState.currentHingeDegrees[hingeIndex] = degrees;
     enum FoldablePostures p = calculatePosture();
     if (mState.currentPosture != p) {
+        enum FoldablePostures oldP = mState.currentPosture;
         mState.currentPosture = p;
         sendPostureToSystem();
+        setToolBarFold(oldP);
     }
 }
 
 void FoldableModel::setPosture(float posture, PhysicalInterpolation mode) {
     enum FoldablePostures p = (enum FoldablePostures)posture;
+    enum FoldablePostures oldP = mState.currentPosture;
     if (mState.currentPosture == p) {
         return;
     }
@@ -215,6 +218,7 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode) {
             }
         }
     }
+    setToolBarFold(oldP);
 }
 
 float FoldableModel::getHingeAngle(uint32_t hingeIndex,
@@ -242,6 +246,21 @@ void FoldableModel::sendPostureToSystem() {
                                     "global", "device_posture",
                                     std::to_string((int)mState.currentPosture).c_str() });
 
+}
+
+void FoldableModel::setToolBarFold(enum FoldablePostures oldPosture) {
+    const QAndroidEmulatorWindowAgent* windowAgent =
+        android_hw_sensors_get_window_agent();
+    if (!windowAgent) {
+        return;
+    }
+    if (mState.currentPosture == POSTURE_CLOSED) {
+        windowAgent->fold(true);
+    } else {
+        if (oldPosture == POSTURE_CLOSED) {
+            windowAgent->fold(false);
+        }
+    }
 }
 
 }  // namespace physics

@@ -14,6 +14,7 @@
 
 #include "android/physics/Physics.h"
 #include "android/utils/compiler.h"
+#include "android/emulation/control/window_agent.h"
 
 #include <stdint.h>
 #include <math.h>
@@ -25,7 +26,9 @@ typedef struct PhysicalModel PhysicalModel;
 ANDROID_BEGIN_HEADER
 
 /* initialize sensor emulation */
-extern void  android_hw_sensors_init( void );
+extern void  android_hw_sensors_init(const QAndroidEmulatorWindowAgent* windowAgent);
+
+const QAndroidEmulatorWindowAgent* android_hw_sensors_get_window_agent();
 
 /* initialize remote controller for HW sensors. This must be called after
  * init_clocks(), i.e. later than android_hw_sensors_init(). */
@@ -207,6 +210,8 @@ extern int android_physical_model_record_ground_truth(const char* file_name);
 
 // Stop recording ground truth.
 extern int android_physical_model_stop_recording();
+
+extern void android_hw_sensor_set_window_agent(void* agent);
 
 /* Foldable state */
 
