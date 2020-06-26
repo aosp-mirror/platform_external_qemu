@@ -496,7 +496,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_http_proxy_setup(op_http_proxy, VERBOSE_CHECK(proxy));
 
     /* initialize sensors, this must be done here due to timer issues */
-    android_hw_sensors_init();
+    android_hw_sensors_init(agents->emu);
     android::automation::AutomationController::initialize();
     android::videoinjection::VideoInjectionController::initialize();
     android::offworld::registerOffworldPipeService();
