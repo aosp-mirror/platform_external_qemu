@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6cfddde0_313b693e",
+        "filename": "android/android-emu/android/physics/FoldableModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-06-26T19:09:50Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 252,
+        "startChar": 52,
+        "endLine": 252,
+        "endChar": 53
+      },
+      "revId": "d2c06cdbd822bd36a42720ee92e90f1220e85304",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46262afb_10410a4b",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 680,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-06-26T19:09:50Z",
+      "side": 1,
+      "message": "Not too familiar with this code. It this float-to-int conversion ok? Or does it need to be rounded/ceiling?",
+      "range": {
+        "startLine": 680,
+        "startChar": 43,
+        "endLine": 680,
+        "endChar": 50
+      },
+      "revId": "d2c06cdbd822bd36a42720ee92e90f1220e85304",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
