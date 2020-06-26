@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e12a0053_6f7919ce",
+        "filename": "android/android-emu/android/physics/FoldableModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-06-26T19:16:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6cfddde0_313b693e",
+      "range": {
+        "startLine": 252,
+        "startChar": 52,
+        "endLine": 252,
+        "endChar": 53
+      },
+      "revId": "d2c06cdbd822bd36a42720ee92e90f1220e85304",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "46262afb_10410a4b",
         "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "d2c06cdbd822bd36a42720ee92e90f1220e85304",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48628f83_11d86be9",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 680,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-06-26T19:16:05Z",
+      "side": 1,
+      "message": "should be fine. It is set as 0.0, 1.0, 2.0, 3.0, 4.0",
+      "parentUuid": "46262afb_10410a4b",
+      "range": {
+        "startLine": 680,
+        "startChar": 43,
+        "endLine": 680,
+        "endChar": 50
+      },
+      "revId": "d2c06cdbd822bd36a42720ee92e90f1220e85304",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
