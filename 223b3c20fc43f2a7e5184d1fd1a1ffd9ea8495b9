@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ca1c50f5_cae4d5c2",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ShareGroup.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-06-29T21:49:27Z",
+      "side": 1,
+      "message": "is this always true? (because it is in a .cpp file)",
+      "range": {
+        "startLine": 318,
+        "startChar": 7,
+        "endLine": 318,
+        "endChar": 18
+      },
+      "revId": "223b3c20fc43f2a7e5184d1fd1a1ffd9ea8495b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b3ccecc_bba68a6b",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ShareGroup.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-06-29T21:49:27Z",
+      "side": 1,
+      "message": "move default to the end and log error?",
+      "range": {
+        "startLine": 343,
+        "startChar": 16,
+        "endLine": 343,
+        "endChar": 24
+      },
+      "revId": "223b3c20fc43f2a7e5184d1fd1a1ffd9ea8495b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e8d64871_1c80539e",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-06-29T21:49:27Z",
+      "side": 1,
+      "message": "nit: remove commented code",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 98
+      },
+      "revId": "223b3c20fc43f2a7e5184d1fd1a1ffd9ea8495b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
