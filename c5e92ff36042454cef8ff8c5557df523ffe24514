@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6052b9d9_cecae11a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-06-29T22:49:20Z",
+      "side": 1,
+      "message": "I don\u0027t think this improves much. Could you please move this to a separate change?",
+      "range": {
+        "startLine": 140,
+        "startChar": 4,
+        "endLine": 140,
+        "endChar": 47
+      },
+      "revId": "c5e92ff36042454cef8ff8c5557df523ffe24514",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
