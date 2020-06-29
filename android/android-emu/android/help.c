@@ -1925,6 +1925,14 @@ help_no_direct_adb(stralloc_t* out)
     "  Disables the internal ADB bridge and use the external adb bridge.\n"
     );
 }
+
+static void
+help_crostini(stralloc_t* out)
+{
+    PRINTF(
+    "  Turn on optimizations for running in a VM on Chrome OS.\n"
+    );
+}
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
