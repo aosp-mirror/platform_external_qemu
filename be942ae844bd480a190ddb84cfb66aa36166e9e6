@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7f1c28ad_bf252632",
+        "filename": "android/docs/DARWIN-DEV.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-06-29T21:06:16Z",
+      "side": 1,
+      "message": "Good suggestion, let me address that as well.",
+      "parentUuid": "a1c86028_5905b8e0",
+      "revId": "be942ae844bd480a190ddb84cfb66aa36166e9e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "39c0d621_a195b072",
         "filename": "android/docs/LINUX-DEV.md",
         "patchSetId": 1
