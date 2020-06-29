@@ -46,6 +46,30 @@
       "revId": "12e7c9945cc6e6dd57e60d389fe164a4058559dd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9200b5f1_b1b39981",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-06-29T21:45:53Z",
+      "side": 1,
+      "message": "removed; based on offline discussion this shouldn\u0027t make a difference.",
+      "parentUuid": "d1e4efd9_68ca5cf8",
+      "range": {
+        "startLine": 493,
+        "startChar": 18,
+        "endLine": 493,
+        "endChar": 20
+      },
+      "revId": "12e7c9945cc6e6dd57e60d389fe164a4058559dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
