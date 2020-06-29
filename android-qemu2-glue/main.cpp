@@ -1350,16 +1350,21 @@ extern "C" int main(int argc, char** argv) {
                 if (*diskKind == System::DiskKind::Hdd) {
                     androidSnapshot_setUsingHdd(true /* is hdd */);
 #ifndef _WIN32
-                    feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false);
+                    feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false /* enable */);
 #endif
                 }
             }
 #ifdef __APPLE__
             auto numCores = System::get()->getCpuCoreCount();
             if (numCores < 8) {
-                feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false);
+                feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false /* enable */);
             }
 #endif
+
+            if (opts->crostini) {
+                feature_set_if_not_overridden(kFeature_QuickbootFileBacked,
+                                              false /* enable */);
+            }
         }
         // 2. TODO
 

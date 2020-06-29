@@ -1021,5 +1021,8 @@ DEF("record-session", HAS_ARG, QEMU_OPTION_record_session,
 DEF("legacy-fake-camera", 0, QEMU_OPTION_legacy_fake_camera,
 "-legacy-fake-camera emulates fake camera by legacy camera HAL", QEMU_ARCH_ALL)
 
+DEF("crostini", 0, QEMU_OPTION_crostini,
+"-crostini Turn on optimizations for running in a VM on Chrome OS", QEMU_ARCH_ALL)
+
 #endif  // CONFIG_ANDROID
 
