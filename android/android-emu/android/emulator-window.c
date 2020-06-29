@@ -12,6 +12,7 @@
 
 #include "android/emulator-window.h"
 
+#include <assert.h>                                      // for assert
 #include <stdio.h>                                       // for snprintf
 #include <stdlib.h>                                      // for NULL, calloc
 #include <string.h>                                      // for strcmp
@@ -531,13 +532,16 @@ emulator_window_set_device_coarse_orientation(SkinRotation orientation,
     android_sensors_set_coarse_orientation(coarseOrientation, tilt_degrees);
 }
 
-bool
-emulator_window_rotate_90(bool clockwise) {
+bool emulator_window_rotate_90(bool clockwise) {
     if (qemulator->ui) {
-        const SkinLayout* layout = clockwise ?
-                skin_ui_get_next_layout(qemulator->ui) :
-                skin_ui_get_prev_layout(qemulator->ui);
-        emulator_window_set_device_coarse_orientation(layout->orientation, 0.f);
+        const SkinRotation fromState = qemulator->uiEmuAgent->window->getRotation();
+        const int max_rotation = SKIN_ROTATION_270 + 1;
+        assert(fromState >= 0 && fromState < max_rotation);
+        const SkinRotation orientation =
+                clockwise ? (fromState + 1) % max_rotation
+                          : (max_rotation + fromState - 1) % max_rotation;
+        assert(orientation < max_rotation && orientation >= 0);
+        emulator_window_set_device_coarse_orientation(orientation, 0.f);
         skin_winsys_touch_qt_extended_virtual_sensors();
         return true;
     }
