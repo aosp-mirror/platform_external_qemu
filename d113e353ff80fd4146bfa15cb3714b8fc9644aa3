@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b257fba_6bfbdbba",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-06-29T21:44:10Z",
+      "side": 1,
+      "message": "Please describe what this function does since it\u0027s nontrivial.",
+      "range": {
+        "startLine": 279,
+        "startChar": 19,
+        "endLine": 279,
+        "endChar": 32
+      },
+      "revId": "d113e353ff80fd4146bfa15cb3714b8fc9644aa3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
