@@ -12,26 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/window_agent.h"
+#include <math.h>    // for fabs
+#include <stdint.h>  // for uint32_t, int32_t
 
-#include "android/emulator-window.h"
-#include "android/skin/qt/emulator-no-qt-no-window.h"
-#include "android/utils/debug.h"
+#include <array>    // for array
+#include <utility>  // for make_pair, pair
+
+#include "android/emulation/control/sensors_agent.h"   // for QAndroidSensor...
+#include "android/emulation/control/window_agent.h"    // for WINDOW_MESSAGE...
+#include "android/emulator-window.h"                   // for emulator_windo...
+#include "android/hw-sensors.h"                        // for ANDROID_SENSOR...
+#include "android/skin/qt/emulator-no-qt-no-window.h"  // for EmulatorNoQtNo...
+#include "android/skin/rect.h"                         // for (anonymous)
+#include "android/utils/debug.h"                       // for derror, dprint
+#include "glm/detail/func_geometric.hpp"               // for dot, normalize
+#include "glm/detail/type_vec.hpp"                     // for vec3
+#include "glm/detail/type_vec3.hpp"                    // for tvec3
+
+static SkinRotation getRotation() {
+    // Calculate the skin rotation based upon the state of the physical sensors.
+    EmulatorWindow* window = emulator_window_get();
+    if (!window)
+        return SKIN_ROTATION_0;
+    const QAndroidSensorsAgent* sensorsAgent = window->uiEmuAgent->sensors;
+    if (!sensorsAgent)
+        return SKIN_ROTATION_0;
+    sensorsAgent->advanceTime();
+    glm::vec3 device_accelerometer;
+    sensorsAgent->getSensor(ANDROID_SENSOR_ACCELERATION,
+                            &device_accelerometer.x, &device_accelerometer.y,
+                            &device_accelerometer.z);
+    glm::vec3 normalized_accelerometer = glm::normalize(device_accelerometer);
+
+    static const std::array<std::pair<glm::vec3, SkinRotation>, 4> directions{
+            std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f), SKIN_ROTATION_0),
+            std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f), SKIN_ROTATION_90),
+            std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f), SKIN_ROTATION_180),
+            std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f), SKIN_ROTATION_270)};
+    SkinRotation coarse_orientation = SKIN_ROTATION_0;
+    for (const auto& v : directions) {
+        if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) < 0.1f) {
+            coarse_orientation = v.second;
+            break;
+        }
+    }
+    return coarse_orientation;
+}
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
         .rotate90Clockwise = [] { return emulator_window_rotate_90(true); },
         .rotate = emulator_window_rotate,
-        .getRotation =
-                [] {
-                    EmulatorWindow* window = emulator_window_get();
-                    if (!window)
-                        return SKIN_ROTATION_0;
-                    SkinLayout* layout = emulator_window_get_layout(window);
-                    if (!layout)
-                        return SKIN_ROTATION_0;
-                    return layout->orientation;
-                },
+        .getRotation = [] { return getRotation(); },
         .showMessage =
                 [](const char* message, WindowMessageType type, int timeoutMs) {
                     const auto printer =
@@ -88,11 +120,13 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                               bool* enabled) { return false; },
         .setNoSkin = []() {},
         .restoreSkin = []() {},
-        .updateUIMultiDisplayPage = [](uint32_t id) { },
+        .updateUIMultiDisplayPage = [](uint32_t id) {},
         .getMonitorRect =
-                [](uint32_t* w, uint32_t* h) { 
-                    if (w) *w = 2500;
-                    if (h) *h = 1600;
+                [](uint32_t* w, uint32_t* h) {
+                    if (w)
+                        *w = 2500;
+                    if (h)
+                        *h = 1600;
                     return true;
                 },
 };
