@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1936b67c_1343387f",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-06-29T21:32:07Z",
+      "side": 1,
+      "message": "Do we need to do copy-on-write here?",
+      "range": {
+        "startLine": 493,
+        "startChar": 18,
+        "endLine": 493,
+        "endChar": 20
+      },
+      "revId": "12e7c9945cc6e6dd57e60d389fe164a4058559dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
