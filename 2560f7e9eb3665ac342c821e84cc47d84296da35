@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9371c5b8_b002b1f1",
+        "filename": "android/android-emu/android/window-agent-headless-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-06-29T23:36:10Z",
+      "side": 1,
+      "message": "Not used.",
+      "revId": "2560f7e9eb3665ac342c821e84cc47d84296da35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
