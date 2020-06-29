@@ -487,8 +487,10 @@ public:
 
         size_t index = indexOfEntity(h);
 
-        if (index + 1 > mItems.size()) {
+        if (index + 1 > mSize) {
             mItems.resize((index + 1) * 2);
+            mSize = mItems.size();
+            mData = mItems.data();
         }
 
         mItems[index].live = true;
@@ -500,9 +502,13 @@ public:
 
     void clear() {
         mItems.clear();
+        mSize = 0;
+        mData = nullptr;
     }
 
     void remove(EntityHandle h) {
+        if (nullptr == get_const(h)) return;
+
         size_t index = indexOfEntity(h);
         mItems[index].live = false;
         // no-op
@@ -511,11 +517,25 @@ public:
     Data* get(EntityHandle h) {
         size_t index = indexOfEntity(h);
 
-        if (index + 1 > mItems.size()) {
+        if (index + 1 > mSize) {
             mItems.resize((index + 1) * 2);
+            mSize = mItems.size();
+            mData = mItems.data();
         }
 
-        auto item = mItems.data() + indexOfEntity(h);
+        auto item = mData + index;
+        if (!item->live) return nullptr;
+        return &item->data;
+    }
+
+    const Data* get_const(EntityHandle h) const {
+        size_t index = indexOfEntity(h);
+
+        if (index + 1 > mSize) {
+            return nullptr;
+        }
+
+        auto item = mData + index;
         if (!item->live) return nullptr;
         return &item->data;
     }
@@ -551,7 +571,7 @@ public:
     }
 
 private:
-    size_t indexOfEntity(EntityHandle h) {
+    static size_t indexOfEntity(EntityHandle h) {
         return EntityManager<indexBits, generationBits, typeBits, int>::getHandleIndex(h);
     }
 
@@ -562,6 +582,8 @@ private:
     };
 
     std::vector<InternalItem> mItems;
+    size_t mSize = 0;
+    InternalItem* mData = nullptr;
 };
 
 } // namespace android
