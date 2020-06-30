@@ -46,6 +46,30 @@
       "revId": "5505288922e2a7335269183041f6472130715e7c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed08a5ba_e2d87dbb",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-06-30T01:47:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b14a1c2_3d63c0a4",
+      "range": {
+        "startLine": 506,
+        "startChar": 0,
+        "endLine": 509,
+        "endChar": 35
+      },
+      "revId": "5505288922e2a7335269183041f6472130715e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
