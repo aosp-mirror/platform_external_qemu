@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9e53c19c_438d50e2",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-06-30T00:16:45Z",
+      "side": 1,
+      "message": "This code calls indexOfEntity twice. Can we use the result of get_const to set \u0027live\u0027 to \u0027false\u0027?",
+      "range": {
+        "startLine": 506,
+        "startChar": 0,
+        "endLine": 509,
+        "endChar": 35
+      },
+      "revId": "5505288922e2a7335269183041f6472130715e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
