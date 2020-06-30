@@ -17,6 +17,8 @@ Make sure to install the command line tools by executing:
 
     xcode-select --install
 
+**NOTE:** *The recommended xcode version is [xcode 10.1](https://download.developer.apple.com/Developer_Tools/Xcode_10.1/Xcode_10.1.xip)*
+
 ## Obtaining repo
 
 First we need to obtain the repo tool.
@@ -117,7 +119,7 @@ Configure ccache to use a different cache size with `ccache -M <max size>`. You 
 
 ### Cross compiling to Windows with clang-cl
 
-***It is higly recommended to use a windows machine for windows development, vs cross compilation.***
+***It is highly recommended to use a windows machine for windows development, vs cross compilation.***
 
 It is possible to cross compile from MacOs to windows. This is mainly useful to quickly discover compilation issues, as you will not be able to actually run the code.
 
