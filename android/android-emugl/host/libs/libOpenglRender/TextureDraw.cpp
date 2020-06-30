@@ -16,6 +16,7 @@
 
 #include "DispatchTables.h"
 
+#include <string>
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -42,6 +43,15 @@ GLuint createShader(GLint shaderType, const char* shaderText) {
     s_gles2.glCompileShader(shader);
     s_gles2.glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (success == GL_FALSE) {
+        GLint infoLogLength;
+        s_gles2.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::string infoLog(infoLogLength + 1, '\0');
+        fprintf(stderr, "%s: TextureDraw shader compile failed.\n", __func__);
+        s_gles2.glGetShaderInfoLog(shader, infoLogLength, 0, &infoLog[0]);
+        fprintf(stderr, "%s: Info log:\n%s\n", __func__,
+                infoLog.c_str());
+        fprintf(stderr, "%s: Source:\n%s\n", __func__,
+                shaderText);
         s_gles2.glDeleteShader(shader);
         return 0;
     }
