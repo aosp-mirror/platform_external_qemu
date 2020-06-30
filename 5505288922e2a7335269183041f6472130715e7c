@@ -22,6 +22,30 @@
       "revId": "5505288922e2a7335269183041f6472130715e7c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b14a1c2_3d63c0a4",
+        "filename": "android/android-emu/android/base/containers/EntityManager.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-06-30T01:34:04Z",
+      "side": 1,
+      "message": "Can\u0027t; there might not be enough space allocated in mItems, and we don\u0027t want to create new entries there unnecessarily.",
+      "parentUuid": "9e53c19c_438d50e2",
+      "range": {
+        "startLine": 506,
+        "startChar": 0,
+        "endLine": 509,
+        "endChar": 35
+      },
+      "revId": "5505288922e2a7335269183041f6472130715e7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
