@@ -1124,6 +1124,52 @@ const mat4x2 matB = mat4x2(1.0/2.0, 1.0/4.0, 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64
     glDeleteShader(shader);
 }
 
+TEST_P(CombinedGoldfishOpenglTest, SampleVariableName) {
+    const char* src[] = {
+R"(#define EVA_SHADER_PROFILE 20
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+    precision highp float;
+#else
+    precision mediump float;
+#endif
+uniform sampler2D InputTexture;
+uniform vec4 Taps0;
+uniform vec4 Taps1;
+uniform vec4 Taps2;
+uniform vec4 Taps3;
+uniform vec4 Taps4;
+varying vec4 fragmentTexCoords[5];
+void main(void)
+{
+    vec4 result = vec4(0.0);
+    vec4 somple;
+    somple = texture2D(InputTexture, fragmentTexCoords[0].xy);
+    result += somple * Taps0.w;
+    somple = texture2D(InputTexture, fragmentTexCoords[1].xy);
+    result += somple * Taps1.w;
+    somple = texture2D(InputTexture, fragmentTexCoords[2].xy);
+    result += somple * Taps2.w;
+    somple = texture2D(InputTexture, fragmentTexCoords[3].xy);
+    result += somple * Taps3.w;
+    somple = texture2D(InputTexture, fragmentTexCoords[4].xy);
+    result += somple * Taps4.w;
+    gl_FragColor = result;
+}
+)",
+    };
+
+    GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    EXPECT_NE(0, shader);
+
+    glShaderSource(shader, 1, (const GLchar* const*)src, nullptr);
+    glCompileShader(shader);
+    GLint compileStatus;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    EXPECT_EQ(GL_TRUE, compileStatus);
+    glDeleteShader(shader);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     MultipleTransports,
     CombinedGoldfishOpenglTest,
