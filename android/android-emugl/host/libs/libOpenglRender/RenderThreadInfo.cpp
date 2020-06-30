@@ -18,38 +18,27 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
-#include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
 #include "emugl/common/lazy_instance.h"
-#include "emugl/common/thread_store.h"
 #include "FrameBuffer.h"
 
 #include <unordered_map>
 
 using android::base::Stream;
 
-namespace {
-
-class ThreadInfoStore : public ::emugl::ThreadStore {
-public:
-    ThreadInfoStore() : ::emugl::ThreadStore(NULL) {}
-};
-
-}  // namespace
-
-static ::emugl::LazyInstance<ThreadInfoStore> s_tls = LAZY_INSTANCE_INIT;
+static thread_local RenderThreadInfo* s_threadInfoPtr;
 
 RenderThreadInfo::RenderThreadInfo() {
-    s_tls->set(this);
+    s_threadInfoPtr = this;
 }
 
 RenderThreadInfo::~RenderThreadInfo() {
-    s_tls->set(NULL);
+    s_threadInfoPtr = nullptr;
 }
 
 RenderThreadInfo* RenderThreadInfo::get() {
-    return static_cast<RenderThreadInfo*>(s_tls->get());
+    return s_threadInfoPtr;
 }
 
 void RenderThreadInfo::onSave(Stream* stream) {

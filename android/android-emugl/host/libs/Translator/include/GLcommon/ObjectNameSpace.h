@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "android/base/containers/HybridComponentManager.h"
 #include "android/snapshot/common.h"
 #include "emugl/common/mutex.h"
 #include "GLcommon/GLBackgroundLoader.h"
@@ -28,9 +29,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
-typedef std::unordered_map<ObjectLocalName, NamedObjectPtr> NamesMap;
+typedef android::base::HybridComponentManager<10000, ObjectLocalName, NamedObjectPtr> NamesMap;
 typedef std::unordered_map<ObjectLocalName, ObjectDataPtr> ObjectDataMap;
-typedef std::unordered_map<unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
+typedef android::base::HybridComponentManager<10000, unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
+typedef android::base::HybridComponentManager<10000, ObjectLocalName, bool> BoundAtLeastOnceMap;
 
 class GlobalNameSpace;
 
@@ -66,7 +68,7 @@ public:
     // getGlobalName - returns the global name of an object or 0 if the object
     //                 does not exist.
     //
-    unsigned int getGlobalName(ObjectLocalName p_localName);
+    unsigned int getGlobalName(ObjectLocalName p_localName, bool* found = nullptr);
 
     //
     // getLocaalName - returns the local name of an object or 0 if the object
@@ -100,6 +102,10 @@ public:
     //
     void replaceGlobalObject(ObjectLocalName p_localName, NamedObjectPtr p_namedObject);
 
+    // sets that the local name has been bound at least once, to save time later
+    void setBoundAtLeastOnce(ObjectLocalName p_localName);
+    bool everBound(ObjectLocalName p_localName) const;
+
     const ObjectDataPtr& getObjectDataPtr(ObjectLocalName p_localName);
     void setObjectData(ObjectLocalName p_localName, ObjectDataPtr data);
     // snapshot functions
@@ -113,6 +119,7 @@ private:
     ObjectLocalName m_nextName = 0;
     NamesMap m_localToGlobalMap;
     ObjectDataMap m_objectDataMap;
+    BoundAtLeastOnceMap m_boundMap;
     GlobalToLocalNamesMap m_globalToLocalMap;
     const NamedObjectType m_type;
     GlobalNameSpace *m_globalNameSpace = nullptr;

@@ -1185,7 +1185,7 @@ void GLEScontext::convertIndirectVBO(GLESConversionArrays& cArrs,GLsizei count,G
     cArrs.setArr(data,p->getStride(),GL_FLOAT);
 }
 
-void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
+GLuint GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     switch(target) {
     case GL_ARRAY_BUFFER:
         m_arrayBuffer = buffer;
@@ -1227,6 +1227,14 @@ void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
         m_arrayBuffer = buffer;
         break;
     }
+
+    if (!buffer) return 0;
+
+    auto sg = m_shareGroup.get();
+
+    if (!sg) return 0;
+
+    return sg->ensureObjectOnBind(NamedObjectType::VERTEXBUFFER, buffer);
 }
 
 void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
