@@ -16,6 +16,24 @@
       "revId": "2560f7e9eb3665ac342c821e84cc47d84296da35",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9ffe069c_d0df112a",
+        "filename": "android/android-emu/android/window-agent-headless-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-06-30T00:02:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "9371c5b8_b002b1f1",
+      "revId": "2560f7e9eb3665ac342c821e84cc47d84296da35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
