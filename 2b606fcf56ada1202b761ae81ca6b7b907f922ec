@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c1a31841_4ed0b396",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1011530
+      },
+      "writtenOn": "2020-06-30T16:27:31Z",
+      "side": 1,
+      "message": "You missed __func__?",
+      "revId": "2b606fcf56ada1202b761ae81ca6b7b907f922ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d52262fe_69643464",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1011530
+      },
+      "writtenOn": "2020-06-30T16:27:31Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "2b606fcf56ada1202b761ae81ca6b7b907f922ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
