@@ -42,6 +42,15 @@ GLuint createShader(GLint shaderType, const char* shaderText) {
     s_gles2.glCompileShader(shader);
     s_gles2.glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (success == GL_FALSE) {
+        GLint infoLength;
+        s_gles2.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLength);
+        std::string infoLog(infoLogLength + 1, '\0');
+        fprintf(stderr, "%s: TextureDraw shader compile failed.\n", __func__);
+        s_gles2.glGetShaderInfoLog(shader, infoLength, 0, &infoLog[0]);
+        fprintf(stderr, "%s: Info log:\n%s\n",
+                infoLog.c_str());
+        fprintf(stderr, "%s: Source:\n%s\n",
+                shaderText);
         s_gles2.glDeleteShader(shader);
         return 0;
     }
