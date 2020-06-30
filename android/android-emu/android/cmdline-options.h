@@ -261,6 +261,8 @@ OPT_FLAG(legacy_fake_camera, "Use legacy camera HAL for the emulated fake camera
 
 OPT_FLAG(no_direct_adb, "Use external adb executable for internal communication.")
 
+OPT_FLAG(crostini, "Turn on optimizations for running in a VM on Chrome OS")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
