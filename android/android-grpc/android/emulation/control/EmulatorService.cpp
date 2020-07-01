@@ -208,11 +208,10 @@ public:
         auto agent = mAgents->location;
         GpsState request = *requestPtr;
 
-        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion([agent, request]() {
             struct timeval tVal;
             memset(&tVal, 0, sizeof(tVal));
             gettimeofday(&tVal, NULL);
-            agent->gpsSetPassiveUpdate(request.passiveupdate());
             agent->gpsSendLoc(request.latitude(), request.longitude(),
                               request.altitude(), request.speed(),
                               request.bearing(), request.satellites(), &tVal);
