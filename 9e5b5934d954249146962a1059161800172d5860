@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "256fc296_5314ea37",
+        "filename": "android/android-emu/android/gps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-01T21:19:43Z",
+      "side": 1,
+      "message": "- I don\u0027t think it is a common problem. We have never had a need for read until the acid team specifically asked for it.\n- The main concern is that the coordinates might not have yet been read by android itself.",
+      "parentUuid": "939606f7_e5792939",
+      "range": {
+        "startLine": 227,
+        "startChar": 4,
+        "endLine": 227,
+        "endChar": 28
+      },
+      "revId": "9e5b5934d954249146962a1059161800172d5860",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "df8ba723_63751001",
         "filename": "android/android-emu/android/gps.c",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "9e5b5934d954249146962a1059161800172d5860",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6bba0db3_c811cb19",
+        "filename": "android/android-emu/android/gps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-01T21:19:43Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "df8ba723_63751001",
+      "range": {
+        "startLine": 242,
+        "startChar": 8,
+        "endLine": 242,
+        "endChar": 34
+      },
+      "revId": "9e5b5934d954249146962a1059161800172d5860",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
