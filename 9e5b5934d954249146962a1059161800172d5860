@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "939606f7_e5792939",
+        "filename": "android/android-emu/android/gps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-07-01T21:02:07Z",
+      "side": 1,
+      "message": "if you get location before any send, it would almost always give you a wrong location? Is it a common situation?",
+      "range": {
+        "startLine": 227,
+        "startChar": 4,
+        "endLine": 227,
+        "endChar": 28
+      },
+      "revId": "9e5b5934d954249146962a1059161800172d5860",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df8ba723_63751001",
+        "filename": "android/android-emu/android/gps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-07-01T21:02:07Z",
+      "side": 1,
+      "message": "nit: brackets",
+      "range": {
+        "startLine": 242,
+        "startChar": 8,
+        "endLine": 242,
+        "endChar": 34
+      },
+      "revId": "9e5b5934d954249146962a1059161800172d5860",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
