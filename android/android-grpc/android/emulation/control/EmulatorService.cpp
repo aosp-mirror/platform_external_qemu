@@ -208,7 +208,7 @@ public:
         auto agent = mAgents->location;
         GpsState request = *requestPtr;
 
-        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion([agent, request]() {
             struct timeval tVal;
             memset(&tVal, 0, sizeof(tVal));
             gettimeofday(&tVal, NULL);
