@@ -3300,6 +3300,100 @@ void handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_KHR_performance_query
+void handlemap_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPerformanceCounterKHR(
+    VulkanHandleMapping* handlemap,
+    VkPerformanceCounterKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPerformanceCounterDescriptionKHR(
+    VulkanHandleMapping* handlemap,
+    VkPerformanceCounterDescriptionKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkQueryPoolPerformanceCreateInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkQueryPoolPerformanceCreateInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPerformanceCounterResultKHR(
+    VulkanHandleMapping* handlemap,
+    VkPerformanceCounterResultKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+}
+
+void handlemap_VkAcquireProfilingLockInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkAcquireProfilingLockInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPerformanceQuerySubmitInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkPerformanceQuerySubmitInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void handlemap_VkNativeBufferANDROID(
     VulkanHandleMapping* handlemap,
@@ -4754,6 +4848,20 @@ void handlemap_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
 #endif
+#ifdef VK_EXT_scalar_block_layout
+void handlemap_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceScalarBlockLayoutFeatures* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
 void handlemap_extension_struct(
     VulkanHandleMapping* handlemap,
     void* structExtension_out)
@@ -5068,6 +5176,28 @@ void handlemap_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_performance_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDevicePerformanceQueryFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDevicePerformanceQueryFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_PROPERTIES_KHR:
+        {
+            handlemap_VkPhysicalDevicePerformanceQueryPropertiesKHR(handlemap, reinterpret_cast<VkPhysicalDevicePerformanceQueryPropertiesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_CREATE_INFO_KHR:
+        {
+            handlemap_VkQueryPoolPerformanceCreateInfoKHR(handlemap, reinterpret_cast<VkQueryPoolPerformanceCreateInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PERFORMANCE_QUERY_SUBMIT_INFO_KHR:
+        {
+            handlemap_VkPerformanceQuerySubmitInfoKHR(handlemap, reinterpret_cast<VkPerformanceQuerySubmitInfoKHR*>(structExtension_out));
             break;
         }
 #endif
@@ -5407,6 +5537,13 @@ void handlemap_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             handlemap_VkImportPhysicalAddressGOOGLE(handlemap, reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_scalar_block_layout
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES:
+        {
+            handlemap_VkPhysicalDeviceScalarBlockLayoutFeatures(handlemap, reinterpret_cast<VkPhysicalDeviceScalarBlockLayoutFeatures*>(structExtension_out));
             break;
         }
 #endif

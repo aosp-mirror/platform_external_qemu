@@ -2084,6 +2084,72 @@ void transform_fromhost_VkPhysicalDevice8BitStorageFeaturesKHR(
     VkPhysicalDevice8BitStorageFeaturesKHR* toTransform);
 
 #endif
+#ifdef VK_KHR_performance_query
+void transform_tohost_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* toTransform);
+
+void transform_fromhost_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* toTransform);
+
+void transform_tohost_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* toTransform);
+
+void transform_fromhost_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* toTransform);
+
+void transform_tohost_VkPerformanceCounterKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterKHR* toTransform);
+
+void transform_fromhost_VkPerformanceCounterKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterKHR* toTransform);
+
+void transform_tohost_VkPerformanceCounterDescriptionKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterDescriptionKHR* toTransform);
+
+void transform_fromhost_VkPerformanceCounterDescriptionKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterDescriptionKHR* toTransform);
+
+void transform_tohost_VkQueryPoolPerformanceCreateInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkQueryPoolPerformanceCreateInfoKHR* toTransform);
+
+void transform_fromhost_VkQueryPoolPerformanceCreateInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkQueryPoolPerformanceCreateInfoKHR* toTransform);
+
+void transform_tohost_VkPerformanceCounterResultKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterResultKHR* toTransform);
+
+void transform_fromhost_VkPerformanceCounterResultKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterResultKHR* toTransform);
+
+void transform_tohost_VkAcquireProfilingLockInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkAcquireProfilingLockInfoKHR* toTransform);
+
+void transform_fromhost_VkAcquireProfilingLockInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkAcquireProfilingLockInfoKHR* toTransform);
+
+void transform_tohost_VkPerformanceQuerySubmitInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceQuerySubmitInfoKHR* toTransform);
+
+void transform_fromhost_VkPerformanceQuerySubmitInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceQuerySubmitInfoKHR* toTransform);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void transform_tohost_VkNativeBufferANDROID(
     VkDecoderGlobalState* resourceTracker,
@@ -3071,6 +3137,16 @@ void transform_fromhost_VkImportPhysicalAddressGOOGLE(
 #ifdef VK_GOOGLE_address_space_info
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
+#endif
+#ifdef VK_EXT_scalar_block_layout
+void transform_tohost_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDeviceScalarBlockLayoutFeatures* toTransform);
+
+void transform_fromhost_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDeviceScalarBlockLayoutFeatures* toTransform);
+
 #endif
 
 } // namespace goldfish_vk

@@ -3347,6 +3347,49 @@ void vkCmdDrawIndexedIndirectCountKHR(
 #endif
 #ifdef VK_KHR_8bit_storage
 #endif
+#ifdef VK_KHR_performance_query
+void vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkPhysicalDevice physicalDevice,
+    uint32_t queueFamilyIndex,
+    uint32_t* pCounterCount,
+    VkPerformanceCounterKHR* pCounters,
+    VkPerformanceCounterDescriptionKHR* pCounterDescriptions)
+{
+    // TODO: Implement
+}
+void vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkPhysicalDevice physicalDevice,
+    const VkQueryPoolPerformanceCreateInfoKHR* pPerformanceQueryCreateInfo,
+    uint32_t* pNumPasses)
+{
+    // TODO: Implement
+}
+void vkAcquireProfilingLockKHR(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    const VkAcquireProfilingLockInfoKHR* pInfo)
+{
+    // TODO: Implement
+}
+void vkReleaseProfilingLockKHR(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkDevice device)
+{
+    // TODO: Implement
+}
+#endif
 #ifdef VK_ANDROID_native_buffer
 void vkGetSwapchainGrallocUsageANDROID(
     const uint8_t* snapshotTraceBegin,
@@ -4461,6 +4504,8 @@ void vkFreeMemorySyncGOOGLE(
     // memory destroy
     mReconstruction.removeHandles((const uint64_t*)(&memory), 1);
 }
+#endif
+#ifdef VK_EXT_scalar_block_layout
 #endif
 
 private:
@@ -7768,6 +7813,55 @@ void VkDecoderSnapshot::vkCmdDrawIndexedIndirectCountKHR(
     uint32_t stride)
 {
     mImpl->vkCmdDrawIndexedIndirectCountKHR(snapshotTraceBegin, snapshotTraceBytes, pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
+}
+#endif
+#ifdef VK_KHR_performance_query
+void VkDecoderSnapshot::vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkPhysicalDevice physicalDevice,
+    uint32_t queueFamilyIndex,
+    uint32_t* pCounterCount,
+    VkPerformanceCounterKHR* pCounters,
+    VkPerformanceCounterDescriptionKHR* pCounterDescriptions)
+{
+    mImpl->vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, physicalDevice, queueFamilyIndex, pCounterCount, pCounters, pCounterDescriptions);
+}
+#endif
+#ifdef VK_KHR_performance_query
+void VkDecoderSnapshot::vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkPhysicalDevice physicalDevice,
+    const VkQueryPoolPerformanceCreateInfoKHR* pPerformanceQueryCreateInfo,
+    uint32_t* pNumPasses)
+{
+    mImpl->vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR(snapshotTraceBegin, snapshotTraceBytes, pool, physicalDevice, pPerformanceQueryCreateInfo, pNumPasses);
+}
+#endif
+#ifdef VK_KHR_performance_query
+void VkDecoderSnapshot::vkAcquireProfilingLockKHR(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    const VkAcquireProfilingLockInfoKHR* pInfo)
+{
+    mImpl->vkAcquireProfilingLockKHR(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, pInfo);
+}
+#endif
+#ifdef VK_KHR_performance_query
+void VkDecoderSnapshot::vkReleaseProfilingLockKHR(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkDevice device)
+{
+    mImpl->vkReleaseProfilingLockKHR(snapshotTraceBegin, snapshotTraceBytes, pool, device);
 }
 #endif
 #ifdef VK_ANDROID_native_buffer

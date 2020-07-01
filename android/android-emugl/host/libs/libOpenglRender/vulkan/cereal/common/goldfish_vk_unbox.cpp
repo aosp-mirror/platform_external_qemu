@@ -2799,6 +2799,96 @@ VkPhysicalDevice8BitStorageFeaturesKHR* unbox_VkPhysicalDevice8BitStorageFeature
 }
 
 #endif
+#ifdef VK_KHR_performance_query
+VkPhysicalDevicePerformanceQueryFeaturesKHR* unbox_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    Pool* pool,
+    const VkPhysicalDevicePerformanceQueryFeaturesKHR* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* res = (VkPhysicalDevicePerformanceQueryFeaturesKHR*)pool->alloc(sizeof(const VkPhysicalDevicePerformanceQueryFeaturesKHR));
+    deepcopy_VkPhysicalDevicePerformanceQueryFeaturesKHR(pool, toUnbox, res);
+    handlemap_VkPhysicalDevicePerformanceQueryFeaturesKHR(&unboxMapping, res);
+    return res;
+}
+
+VkPhysicalDevicePerformanceQueryPropertiesKHR* unbox_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    Pool* pool,
+    const VkPhysicalDevicePerformanceQueryPropertiesKHR* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* res = (VkPhysicalDevicePerformanceQueryPropertiesKHR*)pool->alloc(sizeof(const VkPhysicalDevicePerformanceQueryPropertiesKHR));
+    deepcopy_VkPhysicalDevicePerformanceQueryPropertiesKHR(pool, toUnbox, res);
+    handlemap_VkPhysicalDevicePerformanceQueryPropertiesKHR(&unboxMapping, res);
+    return res;
+}
+
+VkPerformanceCounterKHR* unbox_VkPerformanceCounterKHR(
+    Pool* pool,
+    const VkPerformanceCounterKHR* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkPerformanceCounterKHR* res = (VkPerformanceCounterKHR*)pool->alloc(sizeof(const VkPerformanceCounterKHR));
+    deepcopy_VkPerformanceCounterKHR(pool, toUnbox, res);
+    handlemap_VkPerformanceCounterKHR(&unboxMapping, res);
+    return res;
+}
+
+VkPerformanceCounterDescriptionKHR* unbox_VkPerformanceCounterDescriptionKHR(
+    Pool* pool,
+    const VkPerformanceCounterDescriptionKHR* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkPerformanceCounterDescriptionKHR* res = (VkPerformanceCounterDescriptionKHR*)pool->alloc(sizeof(const VkPerformanceCounterDescriptionKHR));
+    deepcopy_VkPerformanceCounterDescriptionKHR(pool, toUnbox, res);
+    handlemap_VkPerformanceCounterDescriptionKHR(&unboxMapping, res);
+    return res;
+}
+
+VkQueryPoolPerformanceCreateInfoKHR* unbox_VkQueryPoolPerformanceCreateInfoKHR(
+    Pool* pool,
+    const VkQueryPoolPerformanceCreateInfoKHR* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkQueryPoolPerformanceCreateInfoKHR* res = (VkQueryPoolPerformanceCreateInfoKHR*)pool->alloc(sizeof(const VkQueryPoolPerformanceCreateInfoKHR));
+    deepcopy_VkQueryPoolPerformanceCreateInfoKHR(pool, toUnbox, res);
+    handlemap_VkQueryPoolPerformanceCreateInfoKHR(&unboxMapping, res);
+    return res;
+}
+
+VkPerformanceCounterResultKHR* unbox_VkPerformanceCounterResultKHR(
+    Pool* pool,
+    const VkPerformanceCounterResultKHR* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkPerformanceCounterResultKHR* res = (VkPerformanceCounterResultKHR*)pool->alloc(sizeof(const VkPerformanceCounterResultKHR));
+    deepcopy_VkPerformanceCounterResultKHR(pool, toUnbox, res);
+    handlemap_VkPerformanceCounterResultKHR(&unboxMapping, res);
+    return res;
+}
+
+VkAcquireProfilingLockInfoKHR* unbox_VkAcquireProfilingLockInfoKHR(
+    Pool* pool,
+    const VkAcquireProfilingLockInfoKHR* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkAcquireProfilingLockInfoKHR* res = (VkAcquireProfilingLockInfoKHR*)pool->alloc(sizeof(const VkAcquireProfilingLockInfoKHR));
+    deepcopy_VkAcquireProfilingLockInfoKHR(pool, toUnbox, res);
+    handlemap_VkAcquireProfilingLockInfoKHR(&unboxMapping, res);
+    return res;
+}
+
+VkPerformanceQuerySubmitInfoKHR* unbox_VkPerformanceQuerySubmitInfoKHR(
+    Pool* pool,
+    const VkPerformanceQuerySubmitInfoKHR* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkPerformanceQuerySubmitInfoKHR* res = (VkPerformanceQuerySubmitInfoKHR*)pool->alloc(sizeof(const VkPerformanceQuerySubmitInfoKHR));
+    deepcopy_VkPerformanceQuerySubmitInfoKHR(pool, toUnbox, res);
+    handlemap_VkPerformanceQuerySubmitInfoKHR(&unboxMapping, res);
+    return res;
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 VkNativeBufferANDROID* unbox_VkNativeBufferANDROID(
     Pool* pool,
@@ -4098,6 +4188,19 @@ VkImportPhysicalAddressGOOGLE* unbox_VkImportPhysicalAddressGOOGLE(
 #ifdef VK_GOOGLE_address_space_info
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
+#endif
+#ifdef VK_EXT_scalar_block_layout
+VkPhysicalDeviceScalarBlockLayoutFeatures* unbox_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    Pool* pool,
+    const VkPhysicalDeviceScalarBlockLayoutFeatures* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkPhysicalDeviceScalarBlockLayoutFeatures* res = (VkPhysicalDeviceScalarBlockLayoutFeatures*)pool->alloc(sizeof(const VkPhysicalDeviceScalarBlockLayoutFeatures));
+    deepcopy_VkPhysicalDeviceScalarBlockLayoutFeatures(pool, toUnbox, res);
+    handlemap_VkPhysicalDeviceScalarBlockLayoutFeatures(&unboxMapping, res);
+    return res;
+}
+
 #endif
 
 } // namespace goldfish_vk

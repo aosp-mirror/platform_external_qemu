@@ -1349,6 +1349,48 @@ void checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_KHR_performance_query
+void checkEqual_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    const VkPhysicalDevicePerformanceQueryFeaturesKHR* a,
+    const VkPhysicalDevicePerformanceQueryFeaturesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    const VkPhysicalDevicePerformanceQueryPropertiesKHR* a,
+    const VkPhysicalDevicePerformanceQueryPropertiesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPerformanceCounterKHR(
+    const VkPerformanceCounterKHR* a,
+    const VkPerformanceCounterKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPerformanceCounterDescriptionKHR(
+    const VkPerformanceCounterDescriptionKHR* a,
+    const VkPerformanceCounterDescriptionKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkQueryPoolPerformanceCreateInfoKHR(
+    const VkQueryPoolPerformanceCreateInfoKHR* a,
+    const VkQueryPoolPerformanceCreateInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPerformanceCounterResultKHR(
+    const VkPerformanceCounterResultKHR* a,
+    const VkPerformanceCounterResultKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkAcquireProfilingLockInfoKHR(
+    const VkAcquireProfilingLockInfoKHR* a,
+    const VkAcquireProfilingLockInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPerformanceQuerySubmitInfoKHR(
+    const VkPerformanceQuerySubmitInfoKHR* a,
+    const VkPerformanceQuerySubmitInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void checkEqual_VkNativeBufferANDROID(
     const VkNativeBufferANDROID* a,
@@ -2024,6 +2066,13 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
 #ifdef VK_GOOGLE_address_space_info
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
+#endif
+#ifdef VK_EXT_scalar_block_layout
+void checkEqual_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    const VkPhysicalDeviceScalarBlockLayoutFeatures* a,
+    const VkPhysicalDeviceScalarBlockLayoutFeatures* b,
+    OnFailCompareFunc onFail);
+
 #endif
 
 } // namespace goldfish_vk

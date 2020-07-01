@@ -4429,6 +4429,123 @@ void checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_KHR_performance_query
+void checkEqual_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    const VkPhysicalDevicePerformanceQueryFeaturesKHR* a,
+    const VkPhysicalDevicePerformanceQueryFeaturesKHR* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->performanceCounterQueryPools) == (b->performanceCounterQueryPools))) { onFail("a->performanceCounterQueryPools (Error: Value not equal)"); };
+    if (!((a->performanceCounterMultipleQueryPools) == (b->performanceCounterMultipleQueryPools))) { onFail("a->performanceCounterMultipleQueryPools (Error: Value not equal)"); };
+}
+
+void checkEqual_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    const VkPhysicalDevicePerformanceQueryPropertiesKHR* a,
+    const VkPhysicalDevicePerformanceQueryPropertiesKHR* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->allowCommandBufferQueryCopies) == (b->allowCommandBufferQueryCopies))) { onFail("a->allowCommandBufferQueryCopies (Error: Value not equal)"); };
+}
+
+void checkEqual_VkPerformanceCounterKHR(
+    const VkPerformanceCounterKHR* a,
+    const VkPerformanceCounterKHR* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->unit) == (b->unit))) { onFail("a->unit (Error: Value not equal)"); };
+    if (!((a->scope) == (b->scope))) { onFail("a->scope (Error: Value not equal)"); };
+    if (!((a->storage) == (b->storage))) { onFail("a->storage (Error: Value not equal)"); };
+    if (!((memcmp(a->uuid, b->uuid, VK_UUID_SIZE * sizeof(uint8_t)) == 0))) { onFail("a->uuid (Error: Unequal static array)"); };
+}
+
+void checkEqual_VkPerformanceCounterDescriptionKHR(
+    const VkPerformanceCounterDescriptionKHR* a,
+    const VkPerformanceCounterDescriptionKHR* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
+    if (!((memcmp(a->name, b->name, VK_MAX_DESCRIPTION_SIZE * sizeof(char)) == 0))) { onFail("a->name (Error: Unequal static array)"); };
+    if (!((memcmp(a->category, b->category, VK_MAX_DESCRIPTION_SIZE * sizeof(char)) == 0))) { onFail("a->category (Error: Unequal static array)"); };
+    if (!((memcmp(a->description, b->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char)) == 0))) { onFail("a->description (Error: Unequal static array)"); };
+}
+
+void checkEqual_VkQueryPoolPerformanceCreateInfoKHR(
+    const VkQueryPoolPerformanceCreateInfoKHR* a,
+    const VkQueryPoolPerformanceCreateInfoKHR* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->queueFamilyIndex) == (b->queueFamilyIndex))) { onFail("a->queueFamilyIndex (Error: Value not equal)"); };
+    if (!((a->counterIndexCount) == (b->counterIndexCount))) { onFail("a->counterIndexCount (Error: Value not equal)"); };
+    if (!((a->counterIndexCount) == (b->counterIndexCount))) { onFail("a->pCounterIndices (Error: Lengths not equal)"); };
+    if (!((memcmp(a->pCounterIndices, b->pCounterIndices, a->counterIndexCount * sizeof(const uint32_t)) == 0))) { onFail("a->pCounterIndices (Error: Unequal dyn array)"); };
+}
+
+void checkEqual_VkPerformanceCounterResultKHR(
+    const VkPerformanceCounterResultKHR* a,
+    const VkPerformanceCounterResultKHR* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->int32) == (b->int32))) { onFail("a->int32 (Error: Value not equal)"); };
+    if (!((a->int64) == (b->int64))) { onFail("a->int64 (Error: Value not equal)"); };
+    if (!((a->uint32) == (b->uint32))) { onFail("a->uint32 (Error: Value not equal)"); };
+    if (!((a->uint64) == (b->uint64))) { onFail("a->uint64 (Error: Value not equal)"); };
+    if (!((a->float32) == (b->float32))) { onFail("a->float32 (Error: Value not equal)"); };
+    if (!((a->float64) == (b->float64))) { onFail("a->float64 (Error: Value not equal)"); };
+}
+
+void checkEqual_VkAcquireProfilingLockInfoKHR(
+    const VkAcquireProfilingLockInfoKHR* a,
+    const VkAcquireProfilingLockInfoKHR* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
+    if (!((a->timeout) == (b->timeout))) { onFail("a->timeout (Error: Value not equal)"); };
+}
+
+void checkEqual_VkPerformanceQuerySubmitInfoKHR(
+    const VkPerformanceQuerySubmitInfoKHR* a,
+    const VkPerformanceQuerySubmitInfoKHR* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->counterPassIndex) == (b->counterPassIndex))) { onFail("a->counterPassIndex (Error: Value not equal)"); };
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void checkEqual_VkNativeBufferANDROID(
     const VkNativeBufferANDROID* a,
@@ -6298,6 +6415,21 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
 #endif
+#ifdef VK_EXT_scalar_block_layout
+void checkEqual_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    const VkPhysicalDeviceScalarBlockLayoutFeatures* a,
+    const VkPhysicalDeviceScalarBlockLayoutFeatures* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->scalarBlockLayout) == (b->scalarBlockLayout))) { onFail("a->scalarBlockLayout (Error: Value not equal)"); };
+}
+
+#endif
 void checkEqual_extension_struct(
     const void* structExtension,
     const void* structExtension2,
@@ -6613,6 +6745,28 @@ void checkEqual_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension), reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension2), onFail);
+            break;
+        }
+#endif
+#ifdef VK_KHR_performance_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR:
+        {
+            checkEqual_VkPhysicalDevicePerformanceQueryFeaturesKHR(reinterpret_cast<const VkPhysicalDevicePerformanceQueryFeaturesKHR*>(structExtension), reinterpret_cast<const VkPhysicalDevicePerformanceQueryFeaturesKHR*>(structExtension2), onFail);
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_PROPERTIES_KHR:
+        {
+            checkEqual_VkPhysicalDevicePerformanceQueryPropertiesKHR(reinterpret_cast<const VkPhysicalDevicePerformanceQueryPropertiesKHR*>(structExtension), reinterpret_cast<const VkPhysicalDevicePerformanceQueryPropertiesKHR*>(structExtension2), onFail);
+            break;
+        }
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_CREATE_INFO_KHR:
+        {
+            checkEqual_VkQueryPoolPerformanceCreateInfoKHR(reinterpret_cast<const VkQueryPoolPerformanceCreateInfoKHR*>(structExtension), reinterpret_cast<const VkQueryPoolPerformanceCreateInfoKHR*>(structExtension2), onFail);
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PERFORMANCE_QUERY_SUBMIT_INFO_KHR:
+        {
+            checkEqual_VkPerformanceQuerySubmitInfoKHR(reinterpret_cast<const VkPerformanceQuerySubmitInfoKHR*>(structExtension), reinterpret_cast<const VkPerformanceQuerySubmitInfoKHR*>(structExtension2), onFail);
             break;
         }
 #endif
@@ -6952,6 +7106,13 @@ void checkEqual_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             checkEqual_VkImportPhysicalAddressGOOGLE(reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension), reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension2), onFail);
+            break;
+        }
+#endif
+#ifdef VK_EXT_scalar_block_layout
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES:
+        {
+            checkEqual_VkPhysicalDeviceScalarBlockLayoutFeatures(reinterpret_cast<const VkPhysicalDeviceScalarBlockLayoutFeatures*>(structExtension), reinterpret_cast<const VkPhysicalDeviceScalarBlockLayoutFeatures*>(structExtension2), onFail);
             break;
         }
 #endif

@@ -1348,6 +1348,48 @@ void deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR(
     VkPhysicalDevice8BitStorageFeaturesKHR* to);
 
 #endif
+#ifdef VK_KHR_performance_query
+void deepcopy_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    Pool* pool,
+    const VkPhysicalDevicePerformanceQueryFeaturesKHR* from,
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* to);
+
+void deepcopy_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    Pool* pool,
+    const VkPhysicalDevicePerformanceQueryPropertiesKHR* from,
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* to);
+
+void deepcopy_VkPerformanceCounterKHR(
+    Pool* pool,
+    const VkPerformanceCounterKHR* from,
+    VkPerformanceCounterKHR* to);
+
+void deepcopy_VkPerformanceCounterDescriptionKHR(
+    Pool* pool,
+    const VkPerformanceCounterDescriptionKHR* from,
+    VkPerformanceCounterDescriptionKHR* to);
+
+void deepcopy_VkQueryPoolPerformanceCreateInfoKHR(
+    Pool* pool,
+    const VkQueryPoolPerformanceCreateInfoKHR* from,
+    VkQueryPoolPerformanceCreateInfoKHR* to);
+
+void deepcopy_VkPerformanceCounterResultKHR(
+    Pool* pool,
+    const VkPerformanceCounterResultKHR* from,
+    VkPerformanceCounterResultKHR* to);
+
+void deepcopy_VkAcquireProfilingLockInfoKHR(
+    Pool* pool,
+    const VkAcquireProfilingLockInfoKHR* from,
+    VkAcquireProfilingLockInfoKHR* to);
+
+void deepcopy_VkPerformanceQuerySubmitInfoKHR(
+    Pool* pool,
+    const VkPerformanceQuerySubmitInfoKHR* from,
+    VkPerformanceQuerySubmitInfoKHR* to);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void deepcopy_VkNativeBufferANDROID(
     Pool* pool,
@@ -2023,6 +2065,13 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
 #ifdef VK_GOOGLE_address_space_info
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
+#endif
+#ifdef VK_EXT_scalar_block_layout
+void deepcopy_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    Pool* pool,
+    const VkPhysicalDeviceScalarBlockLayoutFeatures* from,
+    VkPhysicalDeviceScalarBlockLayoutFeatures* to);
+
 #endif
 
 } // namespace goldfish_vk

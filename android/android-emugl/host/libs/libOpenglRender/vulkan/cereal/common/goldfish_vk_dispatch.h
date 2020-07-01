@@ -429,6 +429,12 @@ PFN_vkCmdDrawIndexedIndirectCountKHR vkCmdDrawIndexedIndirectCountKHR;
 #endif
 #ifdef VK_KHR_8bit_storage
 #endif
+#ifdef VK_KHR_performance_query
+PFN_vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR;
+PFN_vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR;
+PFN_vkAcquireProfilingLockKHR vkAcquireProfilingLockKHR;
+PFN_vkReleaseProfilingLockKHR vkReleaseProfilingLockKHR;
+#endif
 #ifdef VK_ANDROID_native_buffer
 PFN_vkGetSwapchainGrallocUsageANDROID vkGetSwapchainGrallocUsageANDROID;
 PFN_vkAcquireImageANDROID vkAcquireImageANDROID;
@@ -662,6 +668,8 @@ PFN_vkGetMemoryHostAddressInfoGOOGLE vkGetMemoryHostAddressInfoGOOGLE;
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
 PFN_vkFreeMemorySyncGOOGLE vkFreeMemorySyncGOOGLE;
+#endif
+#ifdef VK_EXT_scalar_block_layout
 #endif
 };
 

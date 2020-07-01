@@ -6242,6 +6242,192 @@ void transform_fromhost_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_KHR_performance_query
+void transform_tohost_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_tohost_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_tohost_VkPerformanceCounterKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkPerformanceCounterKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_tohost_VkPerformanceCounterDescriptionKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterDescriptionKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkPerformanceCounterDescriptionKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterDescriptionKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_tohost_VkQueryPoolPerformanceCreateInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkQueryPoolPerformanceCreateInfoKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkQueryPoolPerformanceCreateInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkQueryPoolPerformanceCreateInfoKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_tohost_VkPerformanceCounterResultKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterResultKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+}
+
+void transform_fromhost_VkPerformanceCounterResultKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceCounterResultKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+}
+
+void transform_tohost_VkAcquireProfilingLockInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkAcquireProfilingLockInfoKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkAcquireProfilingLockInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkAcquireProfilingLockInfoKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_tohost_VkPerformanceQuerySubmitInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceQuerySubmitInfoKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkPerformanceQuerySubmitInfoKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkPerformanceQuerySubmitInfoKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void transform_tohost_VkNativeBufferANDROID(
     VkDecoderGlobalState* resourceTracker,
@@ -8948,6 +9134,32 @@ void transform_fromhost_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
 #endif
+#ifdef VK_EXT_scalar_block_layout
+void transform_tohost_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDeviceScalarBlockLayoutFeatures* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDeviceScalarBlockLayoutFeatures* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+#endif
 void transform_tohost_extension_struct(
     VkDecoderGlobalState* resourceTracker,
     void* structExtension_out)
@@ -9267,6 +9479,28 @@ void transform_tohost_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             transform_tohost_VkPhysicalDevice8BitStorageFeaturesKHR(resourceTracker, reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_performance_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR:
+        {
+            transform_tohost_VkPhysicalDevicePerformanceQueryFeaturesKHR(resourceTracker, reinterpret_cast<VkPhysicalDevicePerformanceQueryFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_PROPERTIES_KHR:
+        {
+            transform_tohost_VkPhysicalDevicePerformanceQueryPropertiesKHR(resourceTracker, reinterpret_cast<VkPhysicalDevicePerformanceQueryPropertiesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_CREATE_INFO_KHR:
+        {
+            transform_tohost_VkQueryPoolPerformanceCreateInfoKHR(resourceTracker, reinterpret_cast<VkQueryPoolPerformanceCreateInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PERFORMANCE_QUERY_SUBMIT_INFO_KHR:
+        {
+            transform_tohost_VkPerformanceQuerySubmitInfoKHR(resourceTracker, reinterpret_cast<VkPerformanceQuerySubmitInfoKHR*>(structExtension_out));
             break;
         }
 #endif
@@ -9609,6 +9843,13 @@ void transform_tohost_extension_struct(
             break;
         }
 #endif
+#ifdef VK_EXT_scalar_block_layout
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES:
+        {
+            transform_tohost_VkPhysicalDeviceScalarBlockLayoutFeatures(resourceTracker, reinterpret_cast<VkPhysicalDeviceScalarBlockLayoutFeatures*>(structExtension_out));
+            break;
+        }
+#endif
         default:
         {
             return;
@@ -9935,6 +10176,28 @@ void transform_fromhost_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             transform_fromhost_VkPhysicalDevice8BitStorageFeaturesKHR(resourceTracker, reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_performance_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR:
+        {
+            transform_fromhost_VkPhysicalDevicePerformanceQueryFeaturesKHR(resourceTracker, reinterpret_cast<VkPhysicalDevicePerformanceQueryFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_PROPERTIES_KHR:
+        {
+            transform_fromhost_VkPhysicalDevicePerformanceQueryPropertiesKHR(resourceTracker, reinterpret_cast<VkPhysicalDevicePerformanceQueryPropertiesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_CREATE_INFO_KHR:
+        {
+            transform_fromhost_VkQueryPoolPerformanceCreateInfoKHR(resourceTracker, reinterpret_cast<VkQueryPoolPerformanceCreateInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PERFORMANCE_QUERY_SUBMIT_INFO_KHR:
+        {
+            transform_fromhost_VkPerformanceQuerySubmitInfoKHR(resourceTracker, reinterpret_cast<VkPerformanceQuerySubmitInfoKHR*>(structExtension_out));
             break;
         }
 #endif
@@ -10274,6 +10537,13 @@ void transform_fromhost_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             transform_fromhost_VkImportPhysicalAddressGOOGLE(resourceTracker, reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_scalar_block_layout
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES:
+        {
+            transform_fromhost_VkPhysicalDeviceScalarBlockLayoutFeatures(resourceTracker, reinterpret_cast<VkPhysicalDeviceScalarBlockLayoutFeatures*>(structExtension_out));
             break;
         }
 #endif

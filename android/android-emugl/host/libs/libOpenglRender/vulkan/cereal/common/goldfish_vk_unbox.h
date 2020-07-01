@@ -1114,6 +1114,40 @@ VkPhysicalDevice8BitStorageFeaturesKHR* unbox_VkPhysicalDevice8BitStorageFeature
     const VkPhysicalDevice8BitStorageFeaturesKHR* toUnbox);
 
 #endif
+#ifdef VK_KHR_performance_query
+VkPhysicalDevicePerformanceQueryFeaturesKHR* unbox_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    Pool* pool,
+    const VkPhysicalDevicePerformanceQueryFeaturesKHR* toUnbox);
+
+VkPhysicalDevicePerformanceQueryPropertiesKHR* unbox_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    Pool* pool,
+    const VkPhysicalDevicePerformanceQueryPropertiesKHR* toUnbox);
+
+VkPerformanceCounterKHR* unbox_VkPerformanceCounterKHR(
+    Pool* pool,
+    const VkPerformanceCounterKHR* toUnbox);
+
+VkPerformanceCounterDescriptionKHR* unbox_VkPerformanceCounterDescriptionKHR(
+    Pool* pool,
+    const VkPerformanceCounterDescriptionKHR* toUnbox);
+
+VkQueryPoolPerformanceCreateInfoKHR* unbox_VkQueryPoolPerformanceCreateInfoKHR(
+    Pool* pool,
+    const VkQueryPoolPerformanceCreateInfoKHR* toUnbox);
+
+VkPerformanceCounterResultKHR* unbox_VkPerformanceCounterResultKHR(
+    Pool* pool,
+    const VkPerformanceCounterResultKHR* toUnbox);
+
+VkAcquireProfilingLockInfoKHR* unbox_VkAcquireProfilingLockInfoKHR(
+    Pool* pool,
+    const VkAcquireProfilingLockInfoKHR* toUnbox);
+
+VkPerformanceQuerySubmitInfoKHR* unbox_VkPerformanceQuerySubmitInfoKHR(
+    Pool* pool,
+    const VkPerformanceQuerySubmitInfoKHR* toUnbox);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 VkNativeBufferANDROID* unbox_VkNativeBufferANDROID(
     Pool* pool,
@@ -1685,6 +1719,12 @@ VkImportPhysicalAddressGOOGLE* unbox_VkImportPhysicalAddressGOOGLE(
 #ifdef VK_GOOGLE_address_space_info
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
+#endif
+#ifdef VK_EXT_scalar_block_layout
+VkPhysicalDeviceScalarBlockLayoutFeatures* unbox_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    Pool* pool,
+    const VkPhysicalDeviceScalarBlockLayoutFeatures* toUnbox);
+
 #endif
 
 } // namespace goldfish_vk

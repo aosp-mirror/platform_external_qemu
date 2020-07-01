@@ -4412,6 +4412,138 @@ void deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_KHR_performance_query
+void deepcopy_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    Pool* pool,
+    const VkPhysicalDevicePerformanceQueryFeaturesKHR* from,
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+}
+
+void deepcopy_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    Pool* pool,
+    const VkPhysicalDevicePerformanceQueryPropertiesKHR* from,
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+}
+
+void deepcopy_VkPerformanceCounterKHR(
+    Pool* pool,
+    const VkPerformanceCounterKHR* from,
+    VkPerformanceCounterKHR* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (const void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+    memcpy(to->uuid, from->uuid, VK_UUID_SIZE * sizeof(uint8_t));
+}
+
+void deepcopy_VkPerformanceCounterDescriptionKHR(
+    Pool* pool,
+    const VkPerformanceCounterDescriptionKHR* from,
+    VkPerformanceCounterDescriptionKHR* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (const void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+    memcpy(to->name, from->name, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    memcpy(to->category, from->category, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    memcpy(to->description, from->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+}
+
+void deepcopy_VkQueryPoolPerformanceCreateInfoKHR(
+    Pool* pool,
+    const VkQueryPoolPerformanceCreateInfoKHR* from,
+    VkQueryPoolPerformanceCreateInfoKHR* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (const void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+    to->pCounterIndices = nullptr;
+    if (from->pCounterIndices)
+    {
+        to->pCounterIndices = (uint32_t*)pool->dupArray(from->pCounterIndices, from->counterIndexCount * sizeof(const uint32_t));
+    }
+}
+
+void deepcopy_VkPerformanceCounterResultKHR(
+    Pool* pool,
+    const VkPerformanceCounterResultKHR* from,
+    VkPerformanceCounterResultKHR* to)
+{
+    (void)pool;
+    *to = *from;
+}
+
+void deepcopy_VkAcquireProfilingLockInfoKHR(
+    Pool* pool,
+    const VkAcquireProfilingLockInfoKHR* from,
+    VkAcquireProfilingLockInfoKHR* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (const void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+}
+
+void deepcopy_VkPerformanceQuerySubmitInfoKHR(
+    Pool* pool,
+    const VkPerformanceQuerySubmitInfoKHR* from,
+    VkPerformanceQuerySubmitInfoKHR* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (const void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void deepcopy_VkNativeBufferANDROID(
     Pool* pool,
@@ -6390,6 +6522,24 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
 #endif
+#ifdef VK_EXT_scalar_block_layout
+void deepcopy_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    Pool* pool,
+    const VkPhysicalDeviceScalarBlockLayoutFeatures* from,
+    VkPhysicalDeviceScalarBlockLayoutFeatures* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+}
+
+#endif
 void deepcopy_extension_struct(
     Pool* pool,
     const void* structExtension,
@@ -6705,6 +6855,28 @@ void deepcopy_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR(pool, reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension), reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_performance_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR:
+        {
+            deepcopy_VkPhysicalDevicePerformanceQueryFeaturesKHR(pool, reinterpret_cast<const VkPhysicalDevicePerformanceQueryFeaturesKHR*>(structExtension), reinterpret_cast<VkPhysicalDevicePerformanceQueryFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_PROPERTIES_KHR:
+        {
+            deepcopy_VkPhysicalDevicePerformanceQueryPropertiesKHR(pool, reinterpret_cast<const VkPhysicalDevicePerformanceQueryPropertiesKHR*>(structExtension), reinterpret_cast<VkPhysicalDevicePerformanceQueryPropertiesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_CREATE_INFO_KHR:
+        {
+            deepcopy_VkQueryPoolPerformanceCreateInfoKHR(pool, reinterpret_cast<const VkQueryPoolPerformanceCreateInfoKHR*>(structExtension), reinterpret_cast<VkQueryPoolPerformanceCreateInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PERFORMANCE_QUERY_SUBMIT_INFO_KHR:
+        {
+            deepcopy_VkPerformanceQuerySubmitInfoKHR(pool, reinterpret_cast<const VkPerformanceQuerySubmitInfoKHR*>(structExtension), reinterpret_cast<VkPerformanceQuerySubmitInfoKHR*>(structExtension_out));
             break;
         }
 #endif
@@ -7044,6 +7216,13 @@ void deepcopy_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             deepcopy_VkImportPhysicalAddressGOOGLE(pool, reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension), reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_scalar_block_layout
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES:
+        {
+            deepcopy_VkPhysicalDeviceScalarBlockLayoutFeatures(pool, reinterpret_cast<const VkPhysicalDeviceScalarBlockLayoutFeatures*>(structExtension), reinterpret_cast<VkPhysicalDeviceScalarBlockLayoutFeatures*>(structExtension_out));
             break;
         }
 #endif

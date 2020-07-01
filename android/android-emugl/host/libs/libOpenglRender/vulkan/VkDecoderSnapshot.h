@@ -2188,6 +2188,37 @@ public:
 #endif
 #ifdef VK_KHR_8bit_storage
 #endif
+#ifdef VK_KHR_performance_query
+    void vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkResult input_result,
+        VkPhysicalDevice physicalDevice,
+        uint32_t queueFamilyIndex,
+        uint32_t* pCounterCount,
+        VkPerformanceCounterKHR* pCounters,
+        VkPerformanceCounterDescriptionKHR* pCounterDescriptions);
+    void vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkPhysicalDevice physicalDevice,
+        const VkQueryPoolPerformanceCreateInfoKHR* pPerformanceQueryCreateInfo,
+        uint32_t* pNumPasses);
+    void vkAcquireProfilingLockKHR(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkResult input_result,
+        VkDevice device,
+        const VkAcquireProfilingLockInfoKHR* pInfo);
+    void vkReleaseProfilingLockKHR(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkDevice device);
+#endif
 #ifdef VK_ANDROID_native_buffer
     void vkGetSwapchainGrallocUsageANDROID(
     const uint8_t* snapshotTraceBegin,
@@ -2972,6 +3003,8 @@ public:
         VkDevice device,
         VkDeviceMemory memory,
         const VkAllocationCallbacks* pAllocator);
+#endif
+#ifdef VK_EXT_scalar_block_layout
 #endif
 
 private:

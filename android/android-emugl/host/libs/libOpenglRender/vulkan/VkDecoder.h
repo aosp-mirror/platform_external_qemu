@@ -157,6 +157,8 @@ private:
 #endif
 #ifdef VK_KHR_8bit_storage
 #endif
+#ifdef VK_KHR_performance_query
+#endif
 #ifdef VK_ANDROID_native_buffer
 #endif
 #ifdef VK_EXT_debug_report
@@ -312,6 +314,8 @@ private:
 #ifdef VK_GOOGLE_address_space_info
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
+#endif
+#ifdef VK_EXT_scalar_block_layout
 #endif
 
 

@@ -1105,6 +1105,40 @@ void handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(
     VkPhysicalDevice8BitStorageFeaturesKHR* toMap);
 
 #endif
+#ifdef VK_KHR_performance_query
+void handlemap_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* toMap);
+
+void handlemap_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* toMap);
+
+void handlemap_VkPerformanceCounterKHR(
+    VulkanHandleMapping* handlemap,
+    VkPerformanceCounterKHR* toMap);
+
+void handlemap_VkPerformanceCounterDescriptionKHR(
+    VulkanHandleMapping* handlemap,
+    VkPerformanceCounterDescriptionKHR* toMap);
+
+void handlemap_VkQueryPoolPerformanceCreateInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkQueryPoolPerformanceCreateInfoKHR* toMap);
+
+void handlemap_VkPerformanceCounterResultKHR(
+    VulkanHandleMapping* handlemap,
+    VkPerformanceCounterResultKHR* toMap);
+
+void handlemap_VkAcquireProfilingLockInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkAcquireProfilingLockInfoKHR* toMap);
+
+void handlemap_VkPerformanceQuerySubmitInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkPerformanceQuerySubmitInfoKHR* toMap);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void handlemap_VkNativeBufferANDROID(
     VulkanHandleMapping* handlemap,
@@ -1676,6 +1710,12 @@ void handlemap_VkImportPhysicalAddressGOOGLE(
 #ifdef VK_GOOGLE_address_space_info
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
+#endif
+#ifdef VK_EXT_scalar_block_layout
+void handlemap_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceScalarBlockLayoutFeatures* toMap);
+
 #endif
 
 } // namespace goldfish_vk
