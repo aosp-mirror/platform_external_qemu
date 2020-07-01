@@ -62,4 +62,3 @@ def test_get_discovery_directory_fallback(platform, env, mocker):
     mocker.patch("platform.system", return_value=platform)
     disc = get_discovery_directory()
     assert disc == os.path.join("bar", ".android", "avd", "running")
-

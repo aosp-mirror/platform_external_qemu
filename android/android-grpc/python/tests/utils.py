@@ -13,5 +13,6 @@
 # limitations under the License.
 import google.protobuf.text_format
 
+
 def fmt_proto(msg):
     return google.protobuf.text_format.MessageToString(msg, as_one_line=True)
