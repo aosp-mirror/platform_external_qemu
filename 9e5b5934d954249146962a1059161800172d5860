@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "078a7d5d_d3c08e48",
+        "filename": "android/android-emu/android/gps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-07-01T21:26:04Z",
+      "side": 1,
+      "message": "If we don\u0027t have better solutions...",
+      "parentUuid": "256fc296_5314ea37",
+      "range": {
+        "startLine": 227,
+        "startChar": 4,
+        "endLine": 227,
+        "endChar": 28
+      },
+      "revId": "9e5b5934d954249146962a1059161800172d5860",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df8ba723_63751001",
         "filename": "android/android-emu/android/gps.c",
         "patchSetId": 2
