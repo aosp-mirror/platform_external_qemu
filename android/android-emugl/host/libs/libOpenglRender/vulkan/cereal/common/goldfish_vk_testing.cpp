@@ -4429,6 +4429,22 @@ void checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+void checkEqual_VkPhysicalDeviceShaderFloat16Int8Features(
+    const VkPhysicalDeviceShaderFloat16Int8Features* a,
+    const VkPhysicalDeviceShaderFloat16Int8Features* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->shaderFloat16) == (b->shaderFloat16))) { onFail("a->shaderFloat16 (Error: Value not equal)"); };
+    if (!((a->shaderInt8) == (b->shaderInt8))) { onFail("a->shaderInt8 (Error: Value not equal)"); };
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void checkEqual_VkNativeBufferANDROID(
     const VkNativeBufferANDROID* a,
@@ -6626,6 +6642,13 @@ void checkEqual_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension), reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension2), onFail);
+            break;
+        }
+#endif
+#ifdef VK_KHR_shader_float16_int8
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+        {
+            checkEqual_VkPhysicalDeviceShaderFloat16Int8Features(reinterpret_cast<const VkPhysicalDeviceShaderFloat16Int8Features*>(structExtension), reinterpret_cast<const VkPhysicalDeviceShaderFloat16Int8Features*>(structExtension2), onFail);
             break;
         }
 #endif
