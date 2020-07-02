@@ -1433,7 +1433,8 @@ message EmulatorFeatureFlagState {
     NO_DEVICE_FRAME = 62;
     VIRTIO_GPU_NATIVE_SYNC = 63;
     VIRTIO_WIFI = 64;
-    // Next tag: 65
+    VULKAN_SHADER_FLOAT16_INT8 = 65;
+    // Next tag: 66
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

@@ -38,6 +38,10 @@ uint32_t goldfish_vk_struct_type(
 size_t goldfish_vk_extension_struct_size(
     const void* structExtension);
 
+size_t goldfish_vk_extension_struct_size_with_stream_features(
+    uint32_t streamFeatures,
+    const void* structExtension);
+
 #ifdef VK_VERSION_1_0
 #endif
 #ifdef VK_VERSION_1_1
@@ -141,6 +145,8 @@ size_t goldfish_vk_extension_struct_size(
 #ifdef VK_KHR_draw_indirect_count
 #endif
 #ifdef VK_KHR_8bit_storage
+#endif
+#ifdef VK_KHR_shader_float16_int8
 #endif
 #ifdef VK_ANDROID_native_buffer
 #endif

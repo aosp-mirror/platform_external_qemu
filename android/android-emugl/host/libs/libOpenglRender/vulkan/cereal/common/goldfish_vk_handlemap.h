@@ -1105,6 +1105,12 @@ void handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(
     VkPhysicalDevice8BitStorageFeaturesKHR* toMap);
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+void handlemap_VkPhysicalDeviceShaderFloat16Int8Features(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceShaderFloat16Int8Features* toMap);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void handlemap_VkNativeBufferANDROID(
     VulkanHandleMapping* handlemap,
