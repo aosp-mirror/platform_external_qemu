@@ -512,11 +512,10 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         }
     }
 
-    LOG(VERBOSE) << "Creating instance, asking for version " << 
-        VK_VERSION_MAJOR(appInfo.apiVersion) << "." <<
-        VK_VERSION_MINOR(appInfo.apiVersion) << "." <<
-        VK_VERSION_PATCH(appInfo.apiVersion) << " ...";
-
+    LOG(VERBOSE) << "Creating instance, asking for version "
+                 << VK_VERSION_MAJOR(appInfo.apiVersion) << "."
+                 << VK_VERSION_MINOR(appInfo.apiVersion) << "."
+                 << VK_VERSION_PATCH(appInfo.apiVersion) << " ...";
 
     VkResult res = gvk->vkCreateInstance(&instCi, nullptr, &sVkEmulation->instance);
 
@@ -1469,7 +1468,7 @@ bool updateColorBufferFromVkImage(uint32_t colorBufferHandle) {
     }
 
     if (infoPtr->glExported ||
-        (infoPtr->vulkanMode == VkEmulation::ColorBufferInfo::VulkanMode::VulkanOnly)) {
+        (infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly)) {
         // No sync needed if exported to GL or in Vulkan-only mode
         return true;
     }
@@ -1608,7 +1607,7 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
     }
 
     if (infoPtr->glExported ||
-        (infoPtr->vulkanMode == VkEmulation::ColorBufferInfo::VulkanMode::VulkanOnly)) {
+        (infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly)) {
         // No sync needed if exported to GL or in Vulkan-only mode
         return true;
     }
@@ -1787,7 +1786,7 @@ bool setColorBufferVulkanMode(uint32_t colorBuffer, uint32_t vulkanMode) {
         return false;
     }
 
-    infoPtr->vulkanMode = static_cast<VkEmulation::ColorBufferInfo::VulkanMode>(vulkanMode);
+    infoPtr->vulkanMode = static_cast<VkEmulation::VulkanMode>(vulkanMode);
 
     return true;
 }
@@ -1808,6 +1807,160 @@ IOSurfaceRef getColorBufferIOSurface(uint32_t colorBuffer) {
     CFRetain(infoPtr->ioSurface);
 #endif
     return infoPtr->ioSurface;
+}
+
+bool setupVkBuffer(uint32_t bufferHandle,
+                   bool vulkanOnly,
+                   bool* exported,
+                   VkDeviceSize* allocSize,
+                   uint32_t* typeIndex) {
+    if (vulkanOnly == false) {
+        fprintf(stderr, "Data buffers should be vulkanOnly. Setup failed.\n");
+        return false;
+    }
+
+    auto vk = sVkEmulation->dvk;
+    auto fb = FrameBuffer::getFB();
+
+    int size;
+    if (!fb->getBufferInfo(bufferHandle, &size)) {
+        return false;
+    }
+
+    AutoLock lock(sVkEmulationLock);
+
+    auto infoPtr = android::base::find(sVkEmulation->buffers, bufferHandle);
+
+    // Already setup
+    if (infoPtr) {
+        // Update the allocation size to what the host driver wanted, or we
+        // might get VK_ERROR_OUT_OF_DEVICE_MEMORY and a host crash
+        if (allocSize)
+            *allocSize = infoPtr->memory.size;
+        // Update the type index to what the host driver wanted, or we might
+        // get VK_ERROR_DEVICE_LOST
+        if (typeIndex)
+            *typeIndex = infoPtr->memory.typeIndex;
+        return true;
+    }
+
+    VkEmulation::BufferInfo res;
+
+    res.handle = bufferHandle;
+
+    res.size = size;
+    res.usageFlags = VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+                     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+                     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+                     VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT |
+                     VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
+                     VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    res.createFlags = 0;
+
+    res.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    // Create the image. If external memory is supported, make it external.
+    VkExternalMemoryBufferCreateInfo extBufferCi = {
+            VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO,
+            0,
+            VK_EXT_MEMORY_HANDLE_TYPE_BIT,
+    };
+
+    VkExternalMemoryBufferCreateInfo* extBufferCiPtr = nullptr;
+    if (sVkEmulation->deviceInfo.supportsExternalMemory) {
+        extBufferCiPtr = &extBufferCi;
+    }
+
+    VkBufferCreateInfo bufferCi = {
+            VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+            extBufferCiPtr,
+            res.createFlags,
+            res.size,
+            res.usageFlags,
+            res.sharingMode,
+            /* queueFamilyIndexCount */ 0,
+            /* pQueueFamilyIndices */ nullptr,
+    };
+
+    VkResult createRes = vk->vkCreateBuffer(sVkEmulation->device, &bufferCi,
+                                            nullptr, &res.buffer);
+
+    if (createRes != VK_SUCCESS) {
+        LOG(VERBOSE) << "Failed to create Vulkan Buffer for Buffer "
+                     << bufferHandle;
+        return false;
+    }
+
+    vk->vkGetBufferMemoryRequirements(sVkEmulation->device, res.buffer,
+                                      &res.memReqs);
+
+    res.memory.size = res.memReqs.size;
+    res.memory.typeIndex = lastGoodTypeIndex(res.memReqs.memoryTypeBits);
+
+    LOG(VERBOSE) << "Buffer " << bufferHandle
+                 << "allocation size and type index: " << res.memory.size
+                 << ", " << res.memory.typeIndex;
+
+    bool allocRes = allocExternalMemory(vk, &res.memory);
+
+    if (!allocRes) {
+        LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
+    }
+
+    VkResult bindBufferMemoryRes = vk->vkBindBufferMemory(
+            sVkEmulation->device, res.buffer, res.memory.memory, 0);
+
+    if (bindBufferMemoryRes != VK_SUCCESS) {
+        fprintf(stderr, "%s: Failed to bind buffer memory. %d\n", __func__,
+                bindBufferMemoryRes);
+        return bindBufferMemoryRes;
+    }
+
+    res.glExported = false;
+    if (exported)
+        *exported = res.glExported;
+    if (allocSize)
+        *allocSize = res.memory.size;
+    if (typeIndex)
+        *typeIndex = res.memory.typeIndex;
+
+    sVkEmulation->buffers[bufferHandle] = res;
+    return allocRes;
+}
+
+bool teardownVkBuffer(uint32_t bufferHandle) {
+    if (!sVkEmulation || !sVkEmulation->live)
+        return false;
+
+    auto vk = sVkEmulation->dvk;
+    AutoLock lock(sVkEmulationLock);
+
+    auto infoPtr = android::base::find(sVkEmulation->buffers, bufferHandle);
+    if (!infoPtr)
+        return false;
+    auto& info = *infoPtr;
+
+    vk->vkDestroyBuffer(sVkEmulation->device, info.buffer, nullptr);
+    freeExternalMemory(vk, &info.memory);
+    sVkEmulation->buffers.erase(bufferHandle);
+
+    return true;
+}
+
+VK_EXT_MEMORY_HANDLE getBufferExtMemoryHandle(uint32_t bufferHandle) {
+    if (!sVkEmulation || !sVkEmulation->live)
+        return VK_EXT_MEMORY_HANDLE_INVALID;
+
+    auto vk = sVkEmulation->dvk;
+    AutoLock lock(sVkEmulationLock);
+
+    auto infoPtr = android::base::find(sVkEmulation->buffers, bufferHandle);
+    if (!infoPtr) {
+        // Color buffer not found; this is usually OK.
+        return VK_EXT_MEMORY_HANDLE_INVALID;
+    }
+
+    return infoPtr->memory.exportedHandle;
 }
 
 VkExternalMemoryHandleTypeFlags

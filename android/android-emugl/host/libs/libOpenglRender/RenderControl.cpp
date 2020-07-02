@@ -1320,6 +1320,25 @@ static void rcCreateColorBufferWithHandle(
         FRAMEWORK_FORMAT_GL_COMPATIBLE, handle);
 }
 
+static uint32_t rcCreateBuffer(uint32_t size) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (!fb) {
+        return 0;
+    }
+
+    return fb->createBuffer(size);
+}
+
+static void rcCloseBuffer(uint32_t buffer) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+    fb->closeBuffer(buffer);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1371,4 +1390,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcReadColorBufferYUV = rcReadColorBufferYUV;
     dec->rcIsSyncSignaled = rcIsSyncSignaled;
     dec->rcCreateColorBufferWithHandle = rcCreateColorBufferWithHandle;
+    dec->rcCreateBuffer = rcCreateBuffer;
+    dec->rcCloseBuffer = rcCloseBuffer;
 }
