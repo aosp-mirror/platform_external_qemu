@@ -3225,6 +3225,11 @@ server.
             <member><type>void</type>*                  <name>pNext</name></member>
             <member><type>uint32_t</type>   <name>colorBuffer</name></member>
         </type>
+        <type category="struct" name="VkImportBufferGOOGLE" structextends="VkMemoryAllocateInfo">
+            <member values="VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
+            <member><type>void</type>*                  <name>pNext</name></member>
+            <member><type>uint32_t</type>   <name>buffer</name></member>
+        </type>
         <type category="struct" name="VkImportPhysicalAddressGOOGLE" structextends="VkMemoryAllocateInfo">
             <member values="VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
             <member><type>void</type>*                  <name>pNext</name></member>
@@ -9201,7 +9206,9 @@ server.
                 <enum value="&quot;VK_GOOGLE_color_buffer&quot;"            name="VK_GOOGLE_COLOR_BUFFER_EXTENSION_NAME"/>
                 <enum offset="0" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE"/>
                 <enum offset="1" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE"/>
+                <enum offset="0" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_BUFFER_HANDLE_GOOGLE"/>
                 <type name="VkImportColorBufferGOOGLE"/>
+                <type name="VkImportBufferGOOGLE"/>
                 <type name="VkImportPhysicalAddressGOOGLE"/>
                 <command name="vkRegisterImageColorBufferGOOGLE"/>
                 <command name="vkRegisterBufferColorBufferGOOGLE"/>

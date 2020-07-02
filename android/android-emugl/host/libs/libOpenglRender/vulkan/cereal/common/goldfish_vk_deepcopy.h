@@ -2008,6 +2008,11 @@ void deepcopy_VkImportColorBufferGOOGLE(
     const VkImportColorBufferGOOGLE* from,
     VkImportColorBufferGOOGLE* to);
 
+void deepcopy_VkImportBufferGOOGLE(
+    Pool* pool,
+    const VkImportBufferGOOGLE* from,
+    VkImportBufferGOOGLE* to);
+
 void deepcopy_VkImportPhysicalAddressGOOGLE(
     Pool* pool,
     const VkImportPhysicalAddressGOOGLE* from,
