@@ -2799,6 +2799,19 @@ VkPhysicalDevice8BitStorageFeaturesKHR* unbox_VkPhysicalDevice8BitStorageFeature
 }
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+VkPhysicalDeviceShaderFloat16Int8Features* unbox_VkPhysicalDeviceShaderFloat16Int8Features(
+    Pool* pool,
+    const VkPhysicalDeviceShaderFloat16Int8Features* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkPhysicalDeviceShaderFloat16Int8Features* res = (VkPhysicalDeviceShaderFloat16Int8Features*)pool->alloc(sizeof(const VkPhysicalDeviceShaderFloat16Int8Features));
+    deepcopy_VkPhysicalDeviceShaderFloat16Int8Features(pool, toUnbox, res);
+    handlemap_VkPhysicalDeviceShaderFloat16Int8Features(&unboxMapping, res);
+    return res;
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 VkNativeBufferANDROID* unbox_VkNativeBufferANDROID(
     Pool* pool,
