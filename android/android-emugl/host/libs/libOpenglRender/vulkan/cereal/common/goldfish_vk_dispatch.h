@@ -429,6 +429,8 @@ PFN_vkCmdDrawIndexedIndirectCountKHR vkCmdDrawIndexedIndirectCountKHR;
 #endif
 #ifdef VK_KHR_8bit_storage
 #endif
+#ifdef VK_KHR_shader_float16_int8
+#endif
 #ifdef VK_ANDROID_native_buffer
 PFN_vkGetSwapchainGrallocUsageANDROID vkGetSwapchainGrallocUsageANDROID;
 PFN_vkAcquireImageANDROID vkAcquireImageANDROID;

@@ -42,6 +42,9 @@ public:
         if (emugl_feature_is_enabled(android::featurecontrol::VulkanIgnoredHandles)) {
             mFeatureBits |= VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT;
         }
+        if (emugl_feature_is_enabled(android::featurecontrol::VulkanShaderFloat16Int8)) {
+            mFeatureBits |= VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT;
+        }
     }
 
     ~Impl() { }

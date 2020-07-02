@@ -1114,6 +1114,12 @@ VkPhysicalDevice8BitStorageFeaturesKHR* unbox_VkPhysicalDevice8BitStorageFeature
     const VkPhysicalDevice8BitStorageFeaturesKHR* toUnbox);
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+VkPhysicalDeviceShaderFloat16Int8Features* unbox_VkPhysicalDeviceShaderFloat16Int8Features(
+    Pool* pool,
+    const VkPhysicalDeviceShaderFloat16Int8Features* toUnbox);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 VkNativeBufferANDROID* unbox_VkNativeBufferANDROID(
     Pool* pool,
