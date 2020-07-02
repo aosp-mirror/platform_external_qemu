@@ -132,6 +132,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_KHR_8bit_storage
 #endif
+#ifdef VK_KHR_shader_float16_int8
+#endif
 #ifdef VK_ANDROID_native_buffer
 #endif
 #ifdef VK_EXT_debug_report
@@ -553,6 +555,12 @@ size_t goldfish_vk_extension_struct_size(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             return sizeof(VkPhysicalDevice8BitStorageFeaturesKHR);
+        }
+#endif
+#ifdef VK_KHR_shader_float16_int8
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceShaderFloat16Int8Features);
         }
 #endif
 #ifdef VK_ANDROID_native_buffer
