@@ -95,6 +95,7 @@ typedef VkResult (VKAPI_PTR *PFN_vkMapMemoryIntoAddressSpaceGOOGLE)(VkDevice dev
 #define VK_GOOGLE_COLOR_BUFFER_ENUM(type,id)    ((type)(1000000000 + (1000 * (VK_GOOGLE_COLOR_BUFFER_EXTENSION_NUMBER - 1)) + (id)))
 #define VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE   VK_GOOGLE_COLOR_BUFFER_ENUM(VkStructureType, 0)
 #define VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE   VK_GOOGLE_COLOR_BUFFER_ENUM(VkStructureType, 1)
+#define VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE   VK_GOOGLE_COLOR_BUFFER_ENUM(VkStructureType, 2)
 
 typedef struct {
     VkStructureType sType; // must be VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE
@@ -111,6 +112,12 @@ typedef struct {
     VkImageTiling tiling;
     uint32_t tilingParameter;
 } VkImportPhysicalAddressGOOGLE;
+
+typedef struct {
+    VkStructureType sType; // must be VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE
+    const void* pNext;
+    uint32_t buffer;
+} VkImportBufferGOOGLE;
 
 typedef VkResult (VKAPI_PTR *PFN_vkRegisterImageColorBufferGOOGLE)(VkDevice device, VkImage image, uint32_t colorBuffer);
 typedef VkResult (VKAPI_PTR *PFN_vkRegisterBufferColorBufferGOOGLE)(VkDevice device, VkBuffer image, uint32_t colorBuffer);

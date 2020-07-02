@@ -6270,6 +6270,19 @@ void checkEqual_VkImportColorBufferGOOGLE(
     if (!((a->colorBuffer) == (b->colorBuffer))) { onFail("a->colorBuffer (Error: Value not equal)"); };
 }
 
+void checkEqual_VkImportBufferGOOGLE(
+    const VkImportBufferGOOGLE* a,
+    const VkImportBufferGOOGLE* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->buffer) == (b->buffer))) { onFail("a->buffer (Error: Value not equal)"); };
+}
+
 void checkEqual_VkImportPhysicalAddressGOOGLE(
     const VkImportPhysicalAddressGOOGLE* a,
     const VkImportPhysicalAddressGOOGLE* b,
@@ -6947,6 +6960,11 @@ void checkEqual_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
         {
             checkEqual_VkImportColorBufferGOOGLE(reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension), reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension2), onFail);
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            checkEqual_VkImportBufferGOOGLE(reinterpret_cast<const VkImportBufferGOOGLE*>(structExtension), reinterpret_cast<const VkImportBufferGOOGLE*>(structExtension2), onFail);
             break;
         }
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:

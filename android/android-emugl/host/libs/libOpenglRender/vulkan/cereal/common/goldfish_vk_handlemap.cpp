@@ -4731,6 +4731,18 @@ void handlemap_VkImportColorBufferGOOGLE(
     }
 }
 
+void handlemap_VkImportBufferGOOGLE(
+    VulkanHandleMapping* handlemap,
+    VkImportBufferGOOGLE* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
 void handlemap_VkImportPhysicalAddressGOOGLE(
     VulkanHandleMapping* handlemap,
     VkImportPhysicalAddressGOOGLE* toMap)
@@ -5402,6 +5414,11 @@ void handlemap_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
         {
             handlemap_VkImportColorBufferGOOGLE(handlemap, reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            handlemap_VkImportBufferGOOGLE(handlemap, reinterpret_cast<VkImportBufferGOOGLE*>(structExtension_out));
             break;
         }
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
