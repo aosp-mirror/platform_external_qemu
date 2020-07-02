@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d2a577b9_f14137ec",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2599,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-02T19:07:06Z",
+      "side": 1,
+      "message": "s/image/buffer",
+      "revId": "dd0357e9e06b6951bde67b306cba64ce213f8fee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
