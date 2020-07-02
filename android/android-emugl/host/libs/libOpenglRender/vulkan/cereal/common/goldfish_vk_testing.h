@@ -2009,6 +2009,11 @@ void checkEqual_VkImportColorBufferGOOGLE(
     const VkImportColorBufferGOOGLE* b,
     OnFailCompareFunc onFail);
 
+void checkEqual_VkImportBufferGOOGLE(
+    const VkImportBufferGOOGLE* a,
+    const VkImportBufferGOOGLE* b,
+    OnFailCompareFunc onFail);
+
 void checkEqual_VkImportPhysicalAddressGOOGLE(
     const VkImportPhysicalAddressGOOGLE* a,
     const VkImportPhysicalAddressGOOGLE* b,

@@ -8913,6 +8913,30 @@ void transform_fromhost_VkImportColorBufferGOOGLE(
     }
 }
 
+void transform_tohost_VkImportBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportBufferGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkImportBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportBufferGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
 void transform_tohost_VkImportPhysicalAddressGOOGLE(
     VkDecoderGlobalState* resourceTracker,
     VkImportPhysicalAddressGOOGLE* toTransform)
@@ -9603,6 +9627,11 @@ void transform_tohost_extension_struct(
             transform_tohost_VkImportColorBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
             break;
         }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            transform_tohost_VkImportBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportBufferGOOGLE*>(structExtension_out));
+            break;
+        }
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             transform_tohost_VkImportPhysicalAddressGOOGLE(resourceTracker, reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
@@ -10269,6 +10298,11 @@ void transform_fromhost_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
         {
             transform_fromhost_VkImportColorBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            transform_fromhost_VkImportBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportBufferGOOGLE*>(structExtension_out));
             break;
         }
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
