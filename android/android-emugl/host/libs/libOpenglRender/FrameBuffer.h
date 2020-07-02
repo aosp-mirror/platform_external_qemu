@@ -58,6 +58,10 @@ struct ColorBufferRef {
     android::base::System::Duration closedTs;
 };
 
+struct BufferRef {
+    BufferPtr buffer;
+};
+
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
 typedef std::unordered_set<HandleType> WindowSurfaceSet;
 typedef std::unordered_map<uint64_t, WindowSurfaceSet> ProcOwnedWindowSurfaces;
@@ -69,6 +73,10 @@ typedef std::unordered_map<uint64_t, RenderContextSet> ProcOwnedRenderContexts;
 typedef std::unordered_map<HandleType, ColorBufferRef> ColorBufferMap;
 typedef std::unordered_multiset<HandleType> ColorBufferSet;
 typedef std::unordered_map<uint64_t, ColorBufferSet> ProcOwnedColorBuffers;
+
+typedef std::unordered_map<HandleType, BufferRef> BufferMap;
+typedef std::unordered_multiset<HandleType> BufferSet;
+typedef std::unordered_map<uint64_t, BufferSet> ProcOwnedBuffers;
 
 typedef std::unordered_set<HandleType> EGLImageSet;
 typedef std::unordered_map<uint64_t, EGLImageSet> ProcOwnedEGLImages;
@@ -215,6 +223,12 @@ public:
         FrameworkFormat p_frameworkFormat,
         HandleType handle);
 
+    // Create a new data Buffer instance from this display instance.
+    // The buffer will be backed by a VkBuffer and VkDeviceMemory (if Vulkan
+    // is available).
+    // |size| is the requested size of Buffer in bytes.
+    HandleType createBuffer(int size);
+
     // Call this function when a render thread terminates to destroy all
     // the remaining contexts it created. Necessary to avoid leaking host
     // contexts when a guest application crashes, for example.
@@ -245,6 +259,10 @@ public:
     // createColorBuffer(). Note that if the reference count reaches 0,
     // the instance is destroyed automatically.
     void closeColorBuffer(HandleType p_colorbuffer);
+
+    // Destroy a Buffer created previously. |p_buffer| is its handle value as
+    // returned by createBuffer().
+    void closeBuffer(HandleType p_colorbuffer);
 
     void cleanupProcGLObjects(uint64_t puid);
 
@@ -383,6 +401,7 @@ public:
                             int* width,
                             int* height,
                             GLint* internalformat);
+    bool getBufferInfo(HandleType p_buffer, int* size);
 
     // Display the content of a given ColorBuffer into the framebuffer's
     // sub-window. |p_colorbuffer| is a handle value.
@@ -602,6 +621,9 @@ private:
         GLenum p_internalFormat,
         FrameworkFormat p_frameworkFormat,
         HandleType handle);
+    HandleType createBufferLocked(int p_size);
+    HandleType createBufferWithHandleLocked(int p_size, HandleType handle);
+
     void recomputeLayout();
     void setDisplayPoseInSkinUI(int totalHeight);
     void sweepColorBuffersLocked();
@@ -634,6 +656,7 @@ private:
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
+    BufferMap m_buffers;
     std::unordered_map<HandleType, HandleType> m_windowSurfaceToColorBuffer;
 
     // A collection of color buffers that were closed without any usages
