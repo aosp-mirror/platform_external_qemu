@@ -201,6 +201,12 @@ public:
 
     FoldableState getFoldableState() { return mFoldableModel.getFoldableState(); }
 
+    /*
+     * Registers a new listener which is to be informed of changes in foldable posture state.
+     * (e.g. device becoming physically flipped or physically open)
+     */
+    void registerPostureListener(FoldablePostureListener* listener);
+
 private:
     /*
      * Sets the target value for the given physical parameter that the physical
@@ -745,6 +751,12 @@ float PhysicalModelImpl::getParameterPosture(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     return mFoldableModel.getPosture(parameterValueType);
+}
+
+void PhysicalModelImpl::registerPostureListener(
+        FoldablePostureListener* listener) {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    mFoldableModel.registerPostureListener(listener);
 }
 
 #define GET_FUNCTION_NAME(x) get##x
@@ -1539,4 +1551,13 @@ int physicalModel_getFoldableState(struct PhysicalModel* model, FoldableState* s
     }
     E("%s: Failed to load foldable state. Physical model not initiated", __FUNCTION__);
     return -1;
+}
+
+void physicalModel_registerPostureListener(PhysicalModel* model, FoldablePostureListener* listener) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        impl->registerPostureListener(listener);
+    } else {
+        E("%s: Failed to register posture listener. Physical model not initiated", __FUNCTION__);
+    }
 }

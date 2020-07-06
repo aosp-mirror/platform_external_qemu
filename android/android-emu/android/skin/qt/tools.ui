@@ -42,7 +42,16 @@ color: #f0f0f0</string>
    <property name="sizeConstraint">
     <enum>QLayout::SetFixedSize</enum>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -433,6 +442,56 @@ color: #f0f0f0</string>
        </property>
        <property name="uiCommand" stdset="0">
         <string>ROTATE_RIGHT</string>
+       </property>
+       <property name="ToolWindowButton" stdset="0">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="change_posture_button">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>34</width>
+         <height>34</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Zoom</string>
+       </property>
+       <property name="text">
+        <string notr="true"/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/light/posture_open</normaloff>:/light/posture_open</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+       <property name="report_metrics" stdset="0">
+        <bool>false</bool>
+       </property>
+       <property name="themeIconName" stdset="0">
+        <string notr="true">posture_open</string>
+       </property>
+       <property name="uiCommand" stdset="0">
+        <string>CHANGE_POSTURE</string>
        </property>
        <property name="ToolWindowButton" stdset="0">
         <bool>true</bool>

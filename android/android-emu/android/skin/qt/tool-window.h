@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "android/foldable-utils.h"
+#include "android/hw-sensors.h"
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/memory/OnDemand.h"
 #include "android/skin/event.h"
@@ -38,7 +40,7 @@
 class EmulatorQtWindow;
 class ExtendedWindow;
 
-class ToolWindow : public QFrame {
+class ToolWindow : public QFrame, public FoldablePostureListener {
     Q_OBJECT
     using UIEventRecorderPtr =
             std::weak_ptr<UIEventRecorder<android::base::CircularBuffer>>;
@@ -118,6 +120,8 @@ public:
     }
     void hideRotationButton(bool hide);
 
+    void postureHasChanged();
+
 signals:
     void guestClipboardChanged(QString text);
     void haveClipboardSharingKnown(bool have);
@@ -175,6 +179,8 @@ private:
     bool mClipboardSupported = false;
     bool mFolded = false;
 
+    int mLastRequestedFoldablePosture = -1;
+
     static const UiEmuAgent* sUiEmuAgent;
 
 public slots:
@@ -205,6 +211,9 @@ private slots:
     void on_zoom_button_clicked();
     void on_tablet_mode_button_clicked();
     void on_fold_switch_clicked();
+    void on_change_posture_button_clicked();
+    void on_new_posture_requested(int newPosture);
+    void on_dismiss_posture_selection_dialog();
 
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();

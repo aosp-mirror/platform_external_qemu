@@ -20,6 +20,7 @@
 #include <QWidget>                                 // for QWidget
 #include <memory>                                  // for unique_ptr
 
+#include "android/foldable-utils.h"                // for FoldablePostureListener
 #include "android/hw-sensors.h"                    // for PhysicalParameter
 #include "android/metrics/PeriodicReporter.h"      // for PeriodicReporter
 #include "android/physics/Physics.h"               // for PhysicalInterpolation
@@ -34,7 +35,7 @@ class QShowEvent;
 class QWidget;
 struct QAndroidSensorsAgent;
 
-class VirtualSensorsPage : public QWidget
+class VirtualSensorsPage : public QWidget, public FoldablePostureListener
 {
     Q_OBJECT
 
@@ -45,6 +46,8 @@ public:
     void showEvent(QShowEvent* event) override;
     static void setSensorsAgent(const QAndroidSensorsAgent* agent);
     void hideRotationButtons(bool hide);
+
+    void postureHasChanged();
 
 private slots:
     void on_temperatureSensorValueWidget_valueChanged(double value);
@@ -168,5 +171,5 @@ private:
     QElapsedTimer mLastInteractionElapsed;
     enum FoldablePostures mCurrentPosture = POSTURE_UNKNOWN;
 
-    void updateCurrentPostureLabel();
+    void updateCurrentPosture();
 };
