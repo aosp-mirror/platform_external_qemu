@@ -108,6 +108,8 @@ build_angle_package () {
     run mkdir -p out/Debug &&
     echo "is_debug = false" >> out/Debug/args.gn &&
     echo "use_custom_libcxx = true" >> out/Debug/args.gn &&
+    echo "is_component_build = true" >> out/Debug/args.gn &&
+    echo "libcxx_abi_unstable = false" >> out/Debug/args.gn &&
     run gn gen out/Debug &&
 
     log "ANGLE build: actual build" &&

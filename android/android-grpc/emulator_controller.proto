@@ -72,9 +72,24 @@ service EmulatorController {
   rpc setBattery(BatteryState) returns (google.protobuf.Empty) {}
   rpc getBattery(google.protobuf.Empty) returns (BatteryState) {}
 
-  // Set/get the state of the gps.
-  rpc getGps(google.protobuf.Empty) returns (GpsState) {}
+  // Set the state of the gps, gps support will only work
+  // properly if:
+  //
+  // - no location ui is active. That is the emulator
+  //   is launched in headless mode (-no-window) or the location
+  //   ui is disabled (-no-location-ui).
+  // - the passiveUpdate is set to false. Setting this to false
+  //   will disable/break the LocationUI.
+  //
+  // Keep in mind that android usually only samples the gps at 1 hz.
   rpc setGps(GpsState) returns (google.protobuf.Empty) {}
+
+  // Gets the latest gps state as delivered by the setGps call, or location ui
+  // if active.
+  //
+  // Note: this is not neccessarily the actual gps coordinate visible at the
+  // time, due to gps sample frequency (usually 1hz).
+  rpc getGps(google.protobuf.Empty) returns (GpsState) {}
 
   // Simulate a touch event on the finger print sensor.
   rpc sendFingerprint(Fingerprint) returns (google.protobuf.Empty) {}
@@ -567,6 +582,13 @@ message Fingerprint {
 }
 
 message GpsState {
+  // Setting this to false will disable auto updating  from the LocationUI,
+  // otherwise the location UI will override the location at a frequency of 1hz.
+  //
+  // - This is unused if the emulator is launched with -no-window, or when he
+  //   location ui is disabled.
+  // - This will BREAK the location ui experience if it is set to false. For
+  //    example routing will no longer function.
   bool passiveUpdate = 1;
 
   // The latitude, in degrees.
