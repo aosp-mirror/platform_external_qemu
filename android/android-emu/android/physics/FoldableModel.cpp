@@ -227,6 +227,14 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode) {
         }
     }
     setToolBarFold(oldP);
+
+    const QAndroidEmulatorWindowAgent* windowAgent =
+        android_hw_sensors_get_window_agent();
+    if (windowAgent) {
+        windowAgent->updateFoldablePostureIndicator();
+    } else {
+        E("Could not update foldable posture indicator: null WindowAgent");
+    }
 }
 
 float FoldableModel::getHingeAngle(uint32_t hingeIndex,

@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "android/hw-sensors.h"
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/memory/OnDemand.h"
 #include "android/skin/event.h"
@@ -175,6 +176,8 @@ private:
     bool mClipboardSupported = false;
     bool mFolded = false;
 
+    int mLastRequestedFoldablePosture = -1;
+
     static const UiEmuAgent* sUiEmuAgent;
 
 public slots:
@@ -205,6 +208,9 @@ private slots:
     void on_zoom_button_clicked();
     void on_tablet_mode_button_clicked();
     void on_fold_switch_clicked();
+    void on_change_posture_button_clicked();
+    void on_new_posture_requested(int newPosture);
+    void on_dismiss_posture_selection_dialog();
 
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();
