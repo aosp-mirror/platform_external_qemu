@@ -1671,6 +1671,10 @@ VkImportColorBufferGOOGLE* unbox_VkImportColorBufferGOOGLE(
     Pool* pool,
     const VkImportColorBufferGOOGLE* toUnbox);
 
+VkImportBufferGOOGLE* unbox_VkImportBufferGOOGLE(
+    Pool* pool,
+    const VkImportBufferGOOGLE* toUnbox);
+
 VkImportPhysicalAddressGOOGLE* unbox_VkImportPhysicalAddressGOOGLE(
     Pool* pool,
     const VkImportPhysicalAddressGOOGLE* toUnbox);

@@ -2541,6 +2541,8 @@ public:
 
         const VkImportColorBufferGOOGLE* importCbInfoPtr =
             vk_find_struct<VkImportColorBufferGOOGLE>(pAllocateInfo);
+        const VkImportBufferGOOGLE* importBufferInfoPtr =
+                vk_find_struct<VkImportBufferGOOGLE>(pAllocateInfo);
 
 #ifdef _WIN32
         VkImportMemoryWin32HandleInfoKHR importInfo {
@@ -2584,6 +2586,40 @@ public:
                 importInfo.handle = cbExtMemoryHandle;
 #else
                 importInfo.fd = cbExtMemoryHandle;
+#endif
+                vk_append_struct(&structChainIter, &importInfo);
+            }
+        }
+
+        if (importBufferInfoPtr) {
+            // Ensure buffer has Vulkan backing.
+            setupVkBuffer(importBufferInfoPtr->buffer,
+                          true /* Buffers are Vulkan only */, nullptr,
+                          // Modify the allocation size and type index
+                          // to suit the resulting image memory size.
+                          &localAllocInfo.allocationSize,
+                          &localAllocInfo.memoryTypeIndex);
+
+            if (m_emu->instanceSupportsExternalMemoryCapabilities) {
+                VK_EXT_MEMORY_HANDLE bufferExtMemoryHandle =
+                        getBufferExtMemoryHandle(importBufferInfoPtr->buffer);
+
+                if (bufferExtMemoryHandle == VK_EXT_MEMORY_HANDLE_INVALID) {
+                    fprintf(stderr,
+                            "%s: VK_ERROR_OUT_OF_DEVICE_MEMORY: "
+                            "buffer 0x%x does not have Vulkan external memory "
+                            "backing\n",
+                            __func__, importBufferInfoPtr->buffer);
+                    return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+                }
+
+                bufferExtMemoryHandle =
+                        dupExternalMemory(bufferExtMemoryHandle);
+
+#ifdef _WIN32
+                importInfo.handle = bufferExtMemoryHandle;
+#else
+                importInfo.fd = bufferExtMemoryHandle;
 #endif
                 vk_append_struct(&structChainIter, &importInfo);
             }

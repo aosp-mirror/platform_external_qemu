@@ -834,6 +834,10 @@ size_t goldfish_vk_extension_struct_size(
         {
             return sizeof(VkImportColorBufferGOOGLE);
         }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            return sizeof(VkImportBufferGOOGLE);
+        }
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             return sizeof(VkImportPhysicalAddressGOOGLE);

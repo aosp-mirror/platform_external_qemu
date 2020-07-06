@@ -4077,6 +4077,17 @@ VkImportColorBufferGOOGLE* unbox_VkImportColorBufferGOOGLE(
     return res;
 }
 
+VkImportBufferGOOGLE* unbox_VkImportBufferGOOGLE(
+    Pool* pool,
+    const VkImportBufferGOOGLE* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkImportBufferGOOGLE* res = (VkImportBufferGOOGLE*)pool->alloc(sizeof(const VkImportBufferGOOGLE));
+    deepcopy_VkImportBufferGOOGLE(pool, toUnbox, res);
+    handlemap_VkImportBufferGOOGLE(&unboxMapping, res);
+    return res;
+}
+
 VkImportPhysicalAddressGOOGLE* unbox_VkImportPhysicalAddressGOOGLE(
     Pool* pool,
     const VkImportPhysicalAddressGOOGLE* toUnbox)

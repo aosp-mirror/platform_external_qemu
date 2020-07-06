@@ -168,46 +168,45 @@ struct VkEmulation {
         VkDeviceSize size = kDefaultStagingBufferSize;
     };
 
+    enum class VulkanMode {
+        // Default: ColorBuffers can still be used with the existing GL-based
+        // API.  Synchronization with (if it exists) Vulkan images happens on
+        // every one of the GL-based API calls:
+        //
+        // rcReadColorBuffer
+        // rcUpdateColorBuffer
+        // rcBindTexture
+        // rcBindRenderbuffer
+        // rcFlushWindowColorBuffer
+        //
+        // either through explicit CPU copies or implicit in the host driver
+        // if OpenGL interop is supported.
+        //
+        // When images are posted (rcFBPost),
+        // eglSwapBuffers is used, even if that requires a CPU readback.
+
+        Default = 0,
+
+        // VulkanOnly: It is assumed that the guest interacts entirely with
+        // the underlying Vulkan image in the guest and does not use the
+        // GL-based API.  This means we can assume those APIs are not called:
+        //
+        // rcReadColorBuffer
+        // rcUpdateColorBuffer
+        // rcBindTexture
+        // rcBindRenderbuffer
+        // rcFlushWindowColorBuffer
+        //
+        // and thus we skip a lot of GL/Vk synchronization.
+        //
+        // When images are posted, eglSwapBuffers is only used if OpenGL
+        // interop is supported. If OpenGL interop is not supported, then we
+        // use a host platform-specific Vulkan swapchain to display the
+        // results.
+
+        VulkanOnly = 1,
+    };
     struct ColorBufferInfo {
-        enum class VulkanMode {
-            // Default: ColorBuffers can still be used with the existing GL-based
-            // API.  Synchronization with (if it exists) Vulkan images happens on
-            // every one of the GL-based API calls:
-            //
-            // rcReadColorBuffer
-            // rcUpdateColorBuffer
-            // rcBindTexture
-            // rcBindRenderbuffer
-            // rcFlushWindowColorBuffer
-            //
-            // either through explicit CPU copies or implicit in the host driver
-            // if OpenGL interop is supported.
-            //
-            // When images are posted (rcFBPost),
-            // eglSwapBuffers is used, even if that requires a CPU readback.
-
-            Default = 0,
-
-            // VulkanOnly: It is assumed that the guest interacts entirely with
-            // the underlying Vulkan image in the guest and does not use the
-            // GL-based API.  This means we can assume those APIs are not called:
-            //
-            // rcReadColorBuffer
-            // rcUpdateColorBuffer
-            // rcBindTexture
-            // rcBindRenderbuffer
-            // rcFlushWindowColorBuffer
-            //
-            // and thus we skip a lot of GL/Vk synchronization.
-            //
-            // When images are posted, eglSwapBuffers is only used if OpenGL
-            // interop is supported. If OpenGL interop is not supported, then we
-            // use a host platform-specific Vulkan swapchain to display the
-            // results.
-
-            VulkanOnly = 1,
-        };
-
         ExternalMemoryInfo memory;
 
         uint32_t handle;
@@ -237,6 +236,23 @@ struct VkEmulation {
         IOSurfaceRef ioSurface = nullptr;
     };
 
+    struct BufferInfo {
+        ExternalMemoryInfo memory;
+        uint32_t handle;
+
+        VkDeviceSize size;
+        VkBufferCreateFlags createFlags;
+        VkBufferUsageFlags usageFlags;
+        VkSharingMode sharingMode;
+
+        VkBuffer buffer = VK_NULL_HANDLE;
+        VkMemoryRequirements memReqs;
+
+        bool glExported = false;
+        VulkanMode vulkanMode = VulkanMode::Default;
+        IOSurfaceRef ioSurface = nullptr;
+    };
+
     // Track what is supported on whatever device was selected.
     DeviceSupportInfo deviceInfo;
 
@@ -252,6 +268,9 @@ struct VkEmulation {
     // Fuchsia: ImagePipeHandle
     // Linux: dmabuf
     std::unordered_map<uint32_t, ColorBufferInfo> colorBuffers;
+
+    // Buffers are intended to back the guest's shareable Vulkan buffers.
+    std::unordered_map<uint32_t, BufferInfo> buffers;
 
     // In order to support VK_KHR_external_memory_(fd|win32) we need also to
     // support the concept of plain external memories that are just memory and
@@ -310,6 +329,16 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);
 VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBufferHandle);
 IOSurfaceRef getColorBufferIOSurface(uint32_t colorBufferHandle);
 bool setColorBufferVulkanMode(uint32_t colorBufferHandle, uint32_t vulkanMode);
+
+// Data buffer operations
+
+bool setupVkBuffer(uint32_t bufferHandle,
+                   bool vulkanOnly = false,
+                   bool* exported = nullptr,
+                   VkDeviceSize* allocSize = nullptr,
+                   uint32_t* typeIndex = nullptr);
+bool teardownVkBuffer(uint32_t bufferHandle);
+VK_EXT_MEMORY_HANDLE getBufferExtMemoryHandle(uint32_t bufferHandle);
 
 VkExternalMemoryHandleTypeFlags
 transformExternalMemoryHandleTypeFlags_tohost(
