@@ -275,22 +275,63 @@ ExtendedWindow::~ExtendedWindow() {
     mExtendedUi->location_page->requestStopLoadingGeoData();
 }
 
+
+// Translates an ExtendWindowPane value into a human
+// readable string. Translation is done by
+// turning the identifier into a string and removing
+// the _IDX tag.
+static std::string translate_idx(ExtendedWindowPane value) {
+    std::string s = "";
+#define PANE(p)                   \
+    case (ExtendedWindowPane::p): \
+        s = #p;                   \
+        break;
+    switch (value) {
+        PANE(PANE_IDX_LOCATION)
+        PANE(PANE_IDX_MULTIDISPLAY)
+        PANE(PANE_IDX_CELLULAR)
+        PANE(PANE_IDX_BATTERY)
+        PANE(PANE_IDX_CAMERA)
+        PANE(PANE_IDX_TELEPHONE)
+        PANE(PANE_IDX_DPAD)
+        PANE(PANE_IDX_ROTARY)
+        PANE(PANE_IDX_MICROPHONE)
+        PANE(PANE_IDX_FINGER)
+        PANE(PANE_IDX_VIRT_SENSORS)
+        PANE(PANE_IDX_SNAPSHOT)
+        PANE(PANE_IDX_BUGREPORT)
+        PANE(PANE_IDX_RECORD)
+        PANE(PANE_IDX_GOOGLE_PLAY)
+        PANE(PANE_IDX_SETTINGS)
+        PANE(PANE_IDX_HELP)
+        PANE(PANE_IDX_CAR)
+    }
+#undef PANE
+    // Remove _IDX from the string.
+    assert(s.substr(0,8) == "PANE_IDX");
+    return s.replace(4,4,"");
+}
+
 void ExtendedWindow::sendMetricsOnShutDown() {
     mExtendedUi->location_page->sendMetrics();
     mExtendedUi->multiDisplayPage->sendMetrics();
-    if (mExtendedWindowWasShown) {
-        android::metrics::MetricsReporter::get().report(
-                [](android_studio::AndroidStudioEvent* event) {
-                    // Send extended-window open metrics
-                    auto* metrics = event->mutable_emulator_ui_event();
-                    metrics->set_context(android_studio::EmulatorUiEvent::
-                                                 EXTENDED_WINDOW_OPEN);
-                    metrics->set_type(android_studio::EmulatorUiEvent::
-                                              UNKONWN_EMULATOR_UI_EVENT_TYPE);
-                    metrics->set_value(1);
-                    event->set_kind(android_studio::AndroidStudioEvent::
-                                            EMULATOR_UI_EVENT);
-                });
+    if (mPaneInvocationCount.size() > 0) {
+        for (const auto& invocation : mPaneInvocationCount) {
+            android::metrics::MetricsReporter::get().report(
+                    [=](android_studio::AndroidStudioEvent* event) {
+                        auto* metrics = event->mutable_emulator_ui_event();
+                        metrics->set_element_id(
+                                translate_idx(invocation.first));
+                        metrics->set_context(android_studio::EmulatorUiEvent::
+                                                     EXTENDED_WINDOW_OPEN);
+                        metrics->set_type(
+                                android_studio::EmulatorUiEvent::
+                                        UNKONWN_EMULATOR_UI_EVENT_TYPE);
+                        metrics->set_value(invocation.second);
+                        event->set_kind(android_studio::AndroidStudioEvent::
+                                                EMULATOR_UI_EVENT);
+                    });
+        }
     }
 }
 
@@ -430,9 +471,13 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     if (it == mPaneButtonMap.end()) {
         return;
     }
+
+    if (mExtendedWindowWasShown && mExtendedUi->stackedWidget->currentIndex() != thisIndex) {
+        mPaneInvocationCount[thisIndex]++;
+    }
     QPushButton* thisButton = it->second;
     thisButton->toggle();
-    thisButton->clearFocus(); // It looks better when not highlighted
+    thisButton->clearFocus();  // It looks better when not highlighted
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
 }
 
