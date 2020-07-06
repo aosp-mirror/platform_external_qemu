@@ -116,6 +116,15 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                     return false;
                 },
+        .updateFoldablePostureIndicator =
+                [] {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        QtUICommand cmd = QtUICommand::UPDATE_FOLDABLE_POSTURE_INDICATOR;
+                        win->runOnUiThread([win, cmd]() {
+                            win->toolWindow()->handleUICommand(cmd);
+                        });
+                    }
+                },
         .setUIDisplayRegion =
                 [](int x, int y, int w, int h) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
