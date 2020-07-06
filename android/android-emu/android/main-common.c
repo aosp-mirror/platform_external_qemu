@@ -667,24 +667,6 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         AFREE(abi);
     }
 
-#if 0
-    char versionString[256];
-    if (!android_pathProbeKernelVersionString(hw->kernel_path,
-                                              versionString,
-                                              sizeof(versionString))) {
-        derror("Can't find 'Linux version ' string in kernel image file: %s",
-               hw->kernel_path);
-        return false;
-    }
-
-    KernelVersion kernelVersion = KERNEL_VERSION_0;
-    if (!android_parseLinuxVersionString(versionString, &kernelVersion)) {
-        derror("Can't parse 'Linux version ' string in kernel image file: '%s'",
-               versionString);
-        return false;
-    }
-#endif
-
     KernelVersion kernelVersion = KERNEL_VERSION_0;
     if (!android_getKernelVersion(hw->kernel_path, &kernelVersion)) {
         derror("Can't get kernel version from the kernel image file: '%s'",
