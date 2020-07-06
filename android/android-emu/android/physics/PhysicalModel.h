@@ -163,4 +163,9 @@ int physicalModel_stopRecording(PhysicalModel* model);
 
 int physicalModel_getFoldableState(PhysicalModel* model, struct FoldableState* state);
 
+/* Registers a new listener which is to be informed of changes in foldable posture state.
+ * (e.g. device becoming physically flipped or physically open)
+ */
+void physicalModel_registerPostureListener(PhysicalModel* model, struct FoldablePostureListener* listener);
+
 ANDROID_END_HEADER

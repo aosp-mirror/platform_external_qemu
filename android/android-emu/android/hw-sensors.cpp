@@ -26,6 +26,7 @@
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/android_qemud.h"
 #include "android/emulation/control/adb/AdbInterface.h"
+#include "android/foldable-utils.h"
 #include "android/globals.h"
 #include "android/physics/PhysicalModel.h"
 #include "android/sensors-port.h"
@@ -1159,4 +1160,8 @@ extern int android_physical_model_stop_recording() {
 
 int android_foldable_get_state(struct FoldableState* state) {
     return physicalModel_getFoldableState(android_physical_model_instance(), state);
+}
+
+void android_foldable_register_posture_listener(FoldablePostureListener* listener) {
+    physicalModel_registerPostureListener(android_physical_model_instance(), listener);
 }

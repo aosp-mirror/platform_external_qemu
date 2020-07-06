@@ -18,6 +18,7 @@
 
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/control/adb/AdbInterface.h"
+#include "android/foldable-utils.h"
 #include "android/globals.h"
 
 #define D(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
@@ -198,6 +199,7 @@ void FoldableModel::setHingeAngle(uint32_t hingeIndex,
         mState.currentPosture = p;
         sendPostureToSystem();
         setToolBarFold(oldP);
+        notifyPostureListeners();
     }
 }
 
@@ -219,6 +221,7 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode) {
         }
     }
     setToolBarFold(oldP);
+    notifyPostureListeners();
 }
 
 float FoldableModel::getHingeAngle(uint32_t hingeIndex,
@@ -260,6 +263,22 @@ void FoldableModel::setToolBarFold(enum FoldablePostures oldPosture) {
         if (oldPosture == POSTURE_CLOSED) {
             windowAgent->fold(false);
         }
+    }
+}
+
+void FoldableModel::registerPostureListener(FoldablePostureListener* listener) {
+    if (listener == nullptr) {
+        E("Cannot register null posture listener!\n");
+        return;
+    }
+    mPostureListeners.insert(listener);
+    notifyPostureListeners();
+}
+
+void FoldableModel::notifyPostureListeners() const {
+    std::set<FoldablePostureListener*>::iterator it;
+    for (it = mPostureListeners.begin(); it != mPostureListeners.end(); ++it) {
+        (*it)->postureHasChanged();
     }
 }
 

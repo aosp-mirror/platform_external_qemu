@@ -174,6 +174,9 @@ void VirtualSensorsPage::setupHingeSensorUI() {
         mUi->accelModeFold->setChecked(true);
         mUi->accelModeRotate->setChecked(false);
         mUi->accelerometerSliders->setCurrentIndex(2);
+
+        android_foldable_register_posture_listener(this);
+
         struct FoldableState foldableState;
         android_foldable_get_state(&foldableState);
         switch (foldableState.config.numHinges) {
@@ -871,4 +874,8 @@ void VirtualSensorsPage::updateUIPosture() {
             mUi->lbl_currentPostureValue->setText(tr("None"));
             break;
     }
+}
+
+void VirtualSensorsPage::postureHasChanged() {
+    updateUIPosture();
 }

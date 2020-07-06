@@ -306,4 +306,11 @@ struct FoldableState {
 
 int android_foldable_get_state(struct FoldableState* state);
 
+/* This header is included in some C files, so we cannot declare
+   anything using 'virtual' here. Let's just forward-declare it. */
+struct FoldablePostureListener;
+
+void android_foldable_register_posture_listener(
+    struct FoldablePostureListener* newPostureListener);
+
 ANDROID_END_HEADER

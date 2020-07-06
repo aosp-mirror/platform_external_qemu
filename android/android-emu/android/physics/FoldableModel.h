@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <set>
 #include <vector>
 
 #include "android/hw-sensors.h"
@@ -43,12 +44,16 @@ public:
 
     FoldableState getFoldableState() { return mState; }     // structure copy
 
+    void registerPostureListener(FoldablePostureListener* listener);
+
 private:
     enum FoldablePostures calculatePosture();
     void sendPostureToSystem();
     void setToolBarFold(enum FoldablePostures oldPosture);
+    void notifyPostureListeners() const;
 
     FoldableState mState;
+    std::set<FoldablePostureListener*> mPostureListeners;
     std::vector<struct AnglesToPosture> mAnglesToPostures;
 };
 
