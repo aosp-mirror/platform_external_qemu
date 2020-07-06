@@ -21,6 +21,14 @@ CSerialLine* android_gps_serial_line;
 // Set to true to ping guest for location updates every few seconds
 static bool s_enable_passive_location_update = true;
 
+// Last state of the gps, initial coordinates point to Googleplex.
+double s_latitude = 39.237256;
+double s_longitude = -123.150032;
+double s_metersElevation = 0;
+double s_speedKnots = 0;
+double s_headingDegrees = 0;
+int s_nSatellites = 4;
+
 #define  D(...)  VERBOSE_PRINT(gps,__VA_ARGS__)
 
 void
@@ -82,6 +90,13 @@ android_gps_send_location(double latitude, double longitude,
                           int nSatellites,
                           const struct timeval *time)
 {
+    s_latitude = latitude;
+    s_longitude = longitude;
+    s_metersElevation = metersElevation;
+    s_speedKnots = speedKnots;
+    s_headingDegrees = headingDegrees;
+    s_nSatellites = nSatellites;
+
     STRALLOC_DEFINE(msgStr);
     STRALLOC_DEFINE(elevationStr);
     char* elevStrPtr;
@@ -209,14 +224,33 @@ android_gps_send_location(double latitude, double longitude,
     stralloc_reset(rmcStr);
 }
 
-int
-android_gps_get_location(double* outLatitude, double* outLongitude,
-                         double* outMetersElevation,
-                         double* outVelocityKnots, double* outHeading,
-                         int* outNSatellites)
-{
-    // TODO: This should use 'adb shell dumpsys location' and parse the result.
-    //       It must ignore parameters the caller does not want (null pointers).
+int android_gps_get_location(double* outLatitude,
+                             double* outLongitude,
+                             double* outMetersElevation,
+                             double* outVelocityKnots,
+                             double* outHeading,
+                             int* outNSatellites) {
+
+    // Note: This does not retrieve the gps state from the actual device
+    // which means that it is possible to observe a gps state that is
+    // different from what is actually reported in the device.
+    // 2 cases:
+    //
+    // - Someone managed to fake the gps coordinates from inside the device
+    // - Android itself has not yet sampled this value. (Usually 1hz)
+    if (outLatitude)
+        *outLatitude = s_latitude;
+    if (outLongitude)
+        *outLongitude = s_longitude;
+    if (outMetersElevation)
+        *outMetersElevation = s_metersElevation;
+    if (outVelocityKnots)
+        *outVelocityKnots = s_speedKnots;
+    if (outHeading)
+        *outHeading = s_headingDegrees;
+    if (outNSatellites)
+        *outNSatellites = s_nSatellites;
+
     return 0;
 }
 

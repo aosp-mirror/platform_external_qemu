@@ -16,6 +16,9 @@
 
 #include "DispatchTables.h"
 
+#include "emugl/common/crash_reporter.h"
+
+#include <string>
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -42,8 +45,24 @@ GLuint createShader(GLint shaderType, const char* shaderText) {
     s_gles2.glCompileShader(shader);
     s_gles2.glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (success == GL_FALSE) {
+        GLint infoLogLength;
+        s_gles2.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::string infoLog(infoLogLength + 1, '\0');
+        fprintf(stderr, "%s: TextureDraw shader compile failed.\n", __func__);
+        s_gles2.glGetShaderInfoLog(shader, infoLogLength, 0, &infoLog[0]);
+        fprintf(stderr, "%s: Info log:\n%s\n", __func__,
+                infoLog.c_str());
+        fprintf(stderr, "%s: Source:\n%s\n", __func__,
+                shaderText);
         s_gles2.glDeleteShader(shader);
-        return 0;
+
+        // No point in continuing as it's going to be a black screen.
+        // Send a crash report.
+        emugl::emugl_crash_reporter(
+            "FATAL: Could not compile shader for guest framebuffer blit. "
+            "There may be an issue with the GPU drivers on your machine. "
+            "Try using software rendering; launch the emulator "
+            "from the command line with -gpu swiftshader_indirect. ");
     }
 
     return shader;

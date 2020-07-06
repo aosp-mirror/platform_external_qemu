@@ -31,11 +31,11 @@ startTime = None
 
 def startTimer(timeit):
     global startTime
-    startTime = time.clock()
+    startTime = time.perf_counter()
 
 def endTimer(timeit, msg):
     global startTime
-    endTime = time.clock()
+    endTime = time.perf_counter()
     if (timeit):
         write(msg, endTime - startTime, file=sys.stderr)
         startTime = None
