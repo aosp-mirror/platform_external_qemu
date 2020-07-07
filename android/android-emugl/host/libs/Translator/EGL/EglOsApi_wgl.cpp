@@ -16,6 +16,7 @@
 #include "EglOsApi.h"
 
 #include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
 
 #include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"
@@ -314,6 +315,7 @@ HWND createDummyWindow() {
 // List of functions define by WGL_EXT_swap_control
 #define LIST_swap_control_FUNCTIONS(X) \
     X(void, wglSwapInterval, (int)) \
+    X(void, wglSwapIntervalEXT, (int)) \
     X(int, wglGetSwapInterval, (void)) \
 
 #define LIST_WGL_EXTENSIONS_FUNCTIONS(X) \
@@ -980,7 +982,11 @@ public:
 
         queryCoreProfileSupport();
 
-        if (mDispatch->wglSwapInterval) {
+        if (mDispatch->wglSwapIntervalEXT) {
+            fprintf(stderr, "%s(%d): using wglSwapIntervalEXT\n", __FILE__, __LINE__);
+            mDispatch->wglSwapIntervalEXT(0); // use guest SF / HWC instead
+        } else if(mDispatch->wglSwapInterval) {
+            fprintf(stderr, "%s(%d): using wglSwapInterval\n", __FILE__, __LINE__);
             mDispatch->wglSwapInterval(0); // use guest SF / HWC instead
         }
     }
@@ -1173,9 +1179,12 @@ public:
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
         android::base::AutoLock lock(sGlobalLock);
+        auto before = android::base::System::get()->getHighResTimeUs();
         if (srfc && !mDispatch->SwapBuffers(WinSurface::from(srfc)->getDC())) {
             GetLastError();
         }
+        auto diff = android::base::System::get()->getHighResTimeUs() - before;
+        fprintf(stderr, "%s(%d): SwapBuffers takes %" PRId64 " us\n", __FILE__, __LINE__, diff);
     }
 
 private:

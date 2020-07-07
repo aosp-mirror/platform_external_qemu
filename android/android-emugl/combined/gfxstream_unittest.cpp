@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 
 #include "GfxStreamBackend.h"
+#include "OSWindow.h"
 #include "android/base/system/System.h"
 
 using android::base::System;
@@ -34,7 +35,7 @@ TEST(GfxStreamBackend, Init) {
     };
     
     System::setEnvironmentVariable("ANDROID_GFXSTREAM_EGL", "1");
-    gfxstream_backend_init(256, 256, 0, &cookie, GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT | GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT, &cbs);
+    gfxstream_backend_init(256, 256, 0, &cookie, GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT | GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT, &cbs, nullptr);
     gfxstream_backend_teardown();
 }
 
@@ -49,8 +50,12 @@ TEST(GfxStreamBackend, SimpleFlush) {
     
     const uint32_t res_id = 8;
     const uint32_t width = 256, height = 256;
-    System::setEnvironmentVariable("ANDROID_GFXSTREAM_EGL", "1");
-    gfxstream_backend_init(width, height, 0, &cookie, GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT | GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT, &cbs);
+    // System::setEnvironmentVariable("ANDROID_GFXSTREAM_EGL", "1");
+    auto window = CreateOSWindow();
+    window->initialize("GfxstreamBackendTestWindow", width, height);
+    window->setVisible(true);
+    window->messageLoop();
+    gfxstream_backend_init(width, height, 0, &cookie, GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT | GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT, &cbs, window->getFramebufferNativeWindow());
 
     struct virgl_renderer_resource_create_args create_resource_args = {
         .handle = res_id,
@@ -67,9 +72,13 @@ TEST(GfxStreamBackend, SimpleFlush) {
     };
     EXPECT_EQ(pipe_virgl_renderer_resource_create(&create_resource_args, NULL, 0), 0);
     // R8G8B8A8 is used, so 4 bytes per pixel
-    auto fb = std::make_unique<uint32_t[]>(width * height);
-    EXPECT_NE(fb, nullptr);
-    stream_renderer_flush_resource_and_readback(res_id, 0, 0, width, height, fb.get(), width * height);
+    // auto fb = std::make_unique<uint32_t[]>(width * height);
+    // EXPECT_NE(fb, nullptr);
+    // stream_renderer_flush_resource_and_readback(res_id, 0, 0, width, height, fb.get(), width * height);
+    for (int i = 0; i < 10000; i++) {
+        stream_renderer_flush_resource_and_readback(res_id, 0, 0, width, height, nullptr, 0);
+        window->messageLoop();
+    }
 
     gfxstream_backend_teardown();
 }

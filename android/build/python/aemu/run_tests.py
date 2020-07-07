@@ -99,7 +99,7 @@ def run_binary_exists(out_dir):
 
 
 def run_ctest(out_dir, jobs):
-    cmd = [get_ctest(), "-j", jobs, "--output-on-failure"]
+    cmd = [get_ctest(), "-j", jobs, "--verbose", "-R", "gfxstream_unittest"]
     with TemporaryDirectory() as tmpdir:
         logging.info("Running tests with TMP=%s", tmpdir)
         run(cmd, out_dir, {"TMP": tmpdir, "TEMP": tmpdir})
