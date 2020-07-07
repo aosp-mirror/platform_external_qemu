@@ -143,7 +143,6 @@ void MediaH264DecoderDefault::handlePing(MediaCodecType type,
             if (!mydecoder)
                 return;
 
-            mydecoder->destroyH264Context();
             delete mydecoder;
             removeDecoder(readId(ptr));
             break;
