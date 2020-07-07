@@ -259,8 +259,11 @@ void MediaH264DecoderGeneric::try_decode(const uint8_t* data,
 void MediaH264DecoderGeneric::fetchAllFrames() {
     while (true) {
         MediaSnapshotState::FrameInfo frame;
-        bool success = mHwVideoHelper ? mHwVideoHelper->receiveFrame(&frame)
-                                      : mVideoHelper->receiveFrame(&frame);
+        bool success =
+                mHwVideoHelper
+                        ? mHwVideoHelper->receiveFrame(&frame)
+                        : (mVideoHelper ? mVideoHelper->receiveFrame(&frame)
+                                        : false);
         if (!success) {
             break;
         }
