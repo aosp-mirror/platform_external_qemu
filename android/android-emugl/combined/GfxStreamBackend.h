@@ -27,6 +27,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     uint32_t display_type,
     void* renderer_cookie,
     int renderer_flags,
-    struct virgl_renderer_callbacks* virglrenderer_callbacks);
+    struct virgl_renderer_callbacks* virglrenderer_callbacks,
+    void* hwnd);
 
 extern "C" VG_EXPORT void gfxstream_backend_teardown(void);
