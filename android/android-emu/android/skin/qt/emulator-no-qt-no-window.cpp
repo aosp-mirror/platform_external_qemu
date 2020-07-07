@@ -33,6 +33,11 @@
 #include "android/metrics/metrics.h"                     // for android_metr...
 #include "android/test/checkboot.h"                      // for android_test...
 #include "android/utils/filelock.h"                      // for filelock_create
+#include "android/base/threads/Async.h"
+#include "android/base/threads/FunctorThread.h"
+#include "android/base/threads/Thread.h"
+#include "android/skin/qt/init-qt.h"
+#include "android/skin/winsys.h"
 
 #define DEBUG 0
 
@@ -228,6 +233,15 @@ void EmulatorNoQtNoWindow::pollEvent(SkinEvent* event, bool* hasEvent) {
         memcpy(event, newEvent, sizeof(SkinEvent));
         delete newEvent;
     }
+}
+
+void EmulatorNoQtNoWindow::startExtendedWindow() {
+    skin_winsys_extended_window_start();
+}
+
+void EmulatorNoQtNoWindow::quitExtendedWindow() {
+    skin_winsys_extended_window_end();
+
 }
 
 //static

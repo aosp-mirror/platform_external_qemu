@@ -114,7 +114,8 @@ public:
     void requestClose();
     void startThread(std::function<void()> looperFunction);
     void waitThread();
-
+    void startExtendedWindow();
+    void quitExtendedWindow();
 private:
     explicit EmulatorNoQtNoWindow();
     void forwardGenericEventToEmulator(int type, int code, int value);

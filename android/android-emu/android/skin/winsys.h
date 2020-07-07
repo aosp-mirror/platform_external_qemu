@@ -109,6 +109,13 @@ enum WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel();
 // This is invoked using the command line parameter "-ui-only snapshot-control".
 int skin_winsys_snapshot_control_start();
 
+// Start just the extended window
+// This is invoked by emulator console command "start_extended_window"
+int skin_winsys_extended_window_start();
+
+// Start just the extended window
+// This is invoked by emulator console command "start_extended_window"
+int skin_winsys_extended_window_end();
 // Start main window support. |no_window| must be true to indicate that
 // no window needs to be shown, but that the GUI backend still needs to be
 // initialized.

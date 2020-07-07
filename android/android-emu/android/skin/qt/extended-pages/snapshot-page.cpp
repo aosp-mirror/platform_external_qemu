@@ -417,6 +417,10 @@ void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {
     }
 }
 
+void SnapshotPage::quitApplication() {
+    close();
+    emit(quit());
+}
 void SnapshotPage::slot_snapshotDeleteCompleted() {
     populateSnapshotDisplay();
     enableActions();

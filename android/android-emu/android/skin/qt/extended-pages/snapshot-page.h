@@ -46,7 +46,7 @@ public:
     static SnapshotPage* get();
 
     void    setOperationInProgress(bool inProgress);
-
+    void    quitApplication();
 public slots:
     void slot_snapshotLoadCompleted(int status, const QString& name);
     void slot_snapshotSaveCompleted(int status, const QString& name);
@@ -57,6 +57,7 @@ public slots:
              Ui::Settings::SaveSnapshotOnExit nextSetting);
 
 signals:
+    void quit();
     void loadCompleted(int status, const QString& name);
     void saveCompleted(int status, const QString& name);
     void deleteCompleted();

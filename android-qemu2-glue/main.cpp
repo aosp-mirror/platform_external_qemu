@@ -1175,7 +1175,7 @@ extern "C" int main(int argc, char** argv) {
 
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
-
+    opts->no_window = true;
     avd = android_avdInfo;
 
     bool lowDisk = System::isUnderDiskPressure(avdInfo_getContentPath(avd));

@@ -17,6 +17,7 @@
 #include "android/emulator-window.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/emulator-no-qt-no-window.h"
 #include "android/utils/debug.h"
 
 static_assert(WINDOW_MESSAGE_GENERIC == int(Ui::OverlayMessageType::None),
@@ -161,7 +162,20 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     } else {
                         return false;
                     }
+                },
+        .startExtendedWindow = []() {
+                auto* win = EmulatorNoQtNoWindow::getInstance();
+                if (win) {
+                    win->startExtendedWindow();
                 }
+            },
+        .quitExtendedWindow = []() {
+                auto* win = EmulatorNoQtNoWindow::getInstance();
+                if (win) {
+                    win->quitExtendedWindow();
+                }
+            },
+
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

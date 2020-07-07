@@ -31,6 +31,7 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/metrics.h"
 #include "studio_stats.pb.h"
