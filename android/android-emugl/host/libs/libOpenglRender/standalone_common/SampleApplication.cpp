@@ -57,6 +57,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .setNoSkin = []() {},
         .restoreSkin = []() {},
         .updateUIMultiDisplayPage = [](uint32_t id) { },
+        .startExtendedWindow = []() {},
+        .quitExtendedWindow = []() {},
 };
 extern "C" const QAndroidEmulatorWindowAgent* const
         gQAndroidEmulatorWindowAgent = &sQAndroidEmulatorWindowAgent;

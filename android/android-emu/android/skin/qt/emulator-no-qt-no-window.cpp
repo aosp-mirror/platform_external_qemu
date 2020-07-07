@@ -33,6 +33,11 @@
 #include "android/metrics/metrics.h"                     // for android_metr...
 #include "android/test/checkboot.h"                      // for android_test...
 #include "android/utils/filelock.h"                      // for filelock_create
+#include "android/base/threads/Async.h"
+#include "android/base/threads/FunctorThread.h"
+#include "android/base/threads/Thread.h"
+#include "android/skin/qt/init-qt.h"
+#include "android/skin/winsys.h"
 
 #define DEBUG 0
 
@@ -46,6 +51,8 @@
 
 static android::base::LazyInstance<EmulatorNoQtNoWindow::Ptr> sNoWindowInstance =
         LAZY_INSTANCE_INIT;
+
+static std::unique_ptr<android::base::Thread> s_workerThread = {};
 
 /******************************************************************************/
 
@@ -228,6 +235,23 @@ void EmulatorNoQtNoWindow::pollEvent(SkinEvent* event, bool* hasEvent) {
         memcpy(event, newEvent, sizeof(SkinEvent));
         delete newEvent;
     }
+}
+
+void EmulatorNoQtNoWindow::startExtendedWindow() {
+    if (s_workerThread) {
+        if (!s_workerThread->tryWait(nullptr)) {
+            return;
+        }
+    }
+    s_workerThread.reset(new android::base::FunctorThread([](){
+        skin_winsys_extended_window_start();
+    }));
+    s_workerThread->start();
+
+}
+
+void EmulatorNoQtNoWindow::quitExtendedWindow() {
+    s_workerThread->wait();
 }
 
 //static

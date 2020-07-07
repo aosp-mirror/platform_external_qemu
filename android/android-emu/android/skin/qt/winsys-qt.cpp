@@ -710,6 +710,16 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     }
 }
 
+extern int skin_winsys_extended_window_start() {
+    GlobalState* g = globalState();
+
+    g->app = new QApplication(g->argc, g->argv);
+    androidQtDefaultInit();
+    // TODO(wdu@) Figure out how to create extended window without EmulatorQtWindow
+    return g->app->exec();
+}
+
+
 extern int skin_winsys_snapshot_control_start() {
     GlobalState* g = globalState();
 
@@ -741,7 +751,6 @@ extern void skin_winsys_start(bool no_window) {
     XInitThreads();
 #endif
     skin_winsys_setup_library_paths();
-
     qInstallMessageHandler(myMessageOutput);
     initUserGoogleMapKeys();
     if (no_window) {
