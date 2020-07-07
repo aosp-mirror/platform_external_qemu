@@ -83,7 +83,9 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     uint32_t display_type,
     void* renderer_cookie,
     int renderer_flags,
-    struct virgl_renderer_callbacks* virglrenderer_callbacks);
+    struct virgl_renderer_callbacks* virglrenderer_callbacks,
+    void* window
+    );
 
 // For reading back rendered contents to display
 extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes);
@@ -291,7 +293,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     uint32_t display_type,
     void* renderer_cookie,
     int renderer_flags,
-    struct virgl_renderer_callbacks* virglrenderer_callbacks) {
+    struct virgl_renderer_callbacks* virglrenderer_callbacks,
+    void* window) {
 
 
     // First we make some agents available.
@@ -407,7 +410,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     emuglConfig_init(&config, true /* gpu enabled */, "auto",
                      enable_egl2egl ? "swiftshader_indirect" : "host",
                      64,                     /* bitness */
-                     true,                   /* no window */
+                     false,                   /* no window */
                      false,                  /* blacklisted */
                      false,                  /* has guest renderer */
                      WINSYS_GLESBACKEND_PREFERENCE_AUTO,
@@ -435,6 +438,13 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     GFXS_LOG("GL strings; [%s] [%s] [%s].\n",
              vendor, renderer, version);
 
+    if(window && android_showOpenglesWindow(window, 0, 0, display_width,
+                               display_height, display_width, display_height,
+                               1.0f, 0, true) != 0) {
+        fprintf(stderr, "%s: no window created, fatal\n", __func__);
+        abort();
+    }
+
     auto openglesRenderer = android_getOpenglesRenderer().get();
 
     if (!openglesRenderer) {
@@ -454,7 +464,9 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     GFXS_LOG("Started renderer");
 
-    set_post_callback(nullptr, default_post_callback, display_type);
+    if(!window) {
+        set_post_callback(nullptr, default_post_callback, display_type);
+    }
 }
 
 static void set_post_callback(struct renderer_display_info* r, post_callback_t func, uint32_t display_type) {
@@ -480,6 +492,7 @@ static void set_post_callback(struct renderer_display_info* r, post_callback_t f
 }
 
 extern "C" VG_EXPORT void gfxstream_backend_teardown() {
+    android_hideOpenglesWindow();
     android_stopOpenglesRenderer(true);
 }
 

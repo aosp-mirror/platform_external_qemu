@@ -16,6 +16,7 @@
 #include "EglOsApi.h"
 
 #include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
 
 #include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"
@@ -1173,9 +1174,12 @@ public:
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
         android::base::AutoLock lock(sGlobalLock);
+        auto before = android::base::System::get()->getHighResTimeUs();
         if (srfc && !mDispatch->SwapBuffers(WinSurface::from(srfc)->getDC())) {
             GetLastError();
         }
+        auto diff = android::base::System::get()->getHighResTimeUs() - before;
+        fprintf(stderr, "%s(%d): SwapBuffers takes %" PRId64 " us\n", __FILE__, __LINE__, diff);
     }
 
 private:

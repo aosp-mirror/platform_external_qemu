@@ -8,6 +8,10 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "emugl/common/misc.h"
 
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+
 #define POST_DEBUG 0
 #if POST_DEBUG >= 1
 #define DD(fmt, ...) \
@@ -47,6 +51,7 @@ void PostWorker::post(ColorBuffer* cb) {
     int zRot = mFb->getZrot();
     hwc_transform_t rotation = (hwc_transform_t)0;
 
+    // cb->setSync();
     cb->waitSync();
 
     // Find the x and y values at the origin when "fully scrolled."
@@ -130,6 +135,29 @@ void PostWorker::post(ColorBuffer* cb) {
         GLuint tex = cb->scale();
         cb->postWithOverlay(tex, zRot, dx, dy);
     }
+
+    // char tmp[3];
+    // s_gles2.glReadPixels(0, 0, windowWidth, windowHeight, GL_RGB, GL_UNSIGNED_BYTE, tmp);
+
+    // static uint64_t frame_no = 0;
+    // size_t buffer_size = windowWidth * windowHeight * 3;
+    // char *buffer = new char[buffer_size];
+    // s_gles2.glReadPixels(0, 0, windowWidth, windowHeight, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+    // if (frame_no % 100 == 0) {
+    //     std::fstream f;
+    //     std::stringstream file_name;
+    //     file_name << "C:\\src\\tmp\\frame-" << std::setfill('0') << std::setw(32) << frame_no << ".ppm";
+    //     f.open(file_name.str(), std::ios::out | std::ios::binary);
+    //     f << "P6\n"
+    //         << windowWidth << " "
+    //         << windowHeight << "\n"
+    //         << 255 << "\n";
+    //     f.write(buffer, buffer_size);
+    //     f.close();
+    // }
+    // delete[] buffer;
+    // buffer = nullptr;
+    // frame_no++;
 
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
