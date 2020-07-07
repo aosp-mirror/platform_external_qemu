@@ -394,6 +394,15 @@ extern int skin_winsys_snapshot_control_start() {
     return 0;
 }
 
+int skin_winsys_extended_window_start() {
+    fprintf(stderr, "%s: Extedned window UI not available yet in headless mode\n", __func__);
+    return 0;
+}
+
+int skin_winsys_extended_window_end() {
+    fprintf(stderr, "%s: Extedned window UI not available yet in headless mode\n", __func__);
+    return 0;
+}
 extern void skin_winsys_start(bool no_window) {
     (void)no_window;
     GlobalState* g = globalState();

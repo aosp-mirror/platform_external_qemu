@@ -135,6 +135,8 @@ static GlobalState* globalState() {
 }
 
 static bool sMainLoopShouldExit = false;
+static volatile bool extendedWindowStartRequested = false;
+static SnapshotPage* pSP = nullptr;
 
 #ifdef _WIN32
 static HANDLE sWakeEvent;
@@ -177,13 +179,13 @@ std::shared_ptr<void> skin_winsys_get_shared_ptr() {
 extern void skin_winsys_enter_main_loop(bool no_window) {
 
     if (no_window) {
-        D("Starting QEMU main loop\n");
+        GlobalState* g = globalState();
+        fprintf(stderr, "Starting QEMU main loop\n");
 #ifdef _WIN32
         sWakeEvent = CreateEvent(NULL,                             // Default security attributes
                                  TRUE,                             // Manual reset
                                  FALSE,                            // Initially nonsignaled
                                  TEXT("winsys-qt::sWakeEvent"));   // Object name
-
         while (1) {
             WaitForSingleObject(sWakeEvent, INFINITE);
             if (sMainLoopShouldExit) break;
@@ -193,14 +195,26 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
         while (1) {
             sigset_t mask;
             sigset_t origMask;
-
-            sigemptyset (&mask);
-            if (sigprocmask(SIG_BLOCK, &mask, &origMask) < 0) {
-                fprintf(stderr, "%s %s: sigprocmask() failed!\n", __FILE__, __FUNCTION__);
+            GlobalState* g = globalState();
+            // If extended window has been requested.
+            if (extendedWindowStartRequested) {
+                g->app = new QApplication(g->argc, g->argv);
+                androidQtDefaultInit();
+                // Pop up a stand-alone Snapshot pane
+                pSP = new SnapshotPage(nullptr, true);
+                if (pSP == nullptr) {
+                    break;
+                }
+                QObject::connect(pSP, &SnapshotPage::quit, g->app, &QCoreApplication::quit, Qt::QueuedConnection);
+                pSP->show();
+                g->app->exec();
+                fprintf(stderr, "######### returned from app->exec()\n");
+                extendedWindowStartRequested = false;
+            }
+            
+            if (sMainLoopShouldExit) {
                 break;
             }
-            sigsuspend(&mask);
-            if (sMainLoopShouldExit) break;
             // Loop and wait again
         }
 #endif
@@ -210,6 +224,7 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
             noQtNoWindow->requestClose();
             noQtNoWindow->waitThread();
         }
+
         D("Finished QEMU main loop\n");
     } else {
         // We're using Qt
@@ -474,15 +489,6 @@ extern void skin_winsys_quit_request()
         window->requestClose();
     } else if (auto nowindow = EmulatorNoQtNoWindow::getInstance()){
         sMainLoopShouldExit = true;
-#ifdef _WIN32
-        if ( !SetEvent(sWakeEvent) ) {
-            fprintf(stderr, "%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
-        }
-#else
-        if ( kill(getpid(), SIGUSR1) ) {
-           fprintf(stderr, "%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
-        }
-#endif
     } else {
         D("%s: Could not get window handle", __FUNCTION__);
     }
@@ -710,6 +716,17 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     }
 }
 
+extern int skin_winsys_extended_window_start() {
+    GlobalState* g = globalState();
+    extendedWindowStartRequested = true;
+    return 0;
+}
+
+extern int skin_winsys_extended_window_end() {
+    pSP->quitApplication();
+    return 0;
+}
+
 extern int skin_winsys_snapshot_control_start() {
     GlobalState* g = globalState();
 
@@ -741,7 +758,6 @@ extern void skin_winsys_start(bool no_window) {
     XInitThreads();
 #endif
     skin_winsys_setup_library_paths();
-
     qInstallMessageHandler(myMessageOutput);
     initUserGoogleMapKeys();
     if (no_window) {
