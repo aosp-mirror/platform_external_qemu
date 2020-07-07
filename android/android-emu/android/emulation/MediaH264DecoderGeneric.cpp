@@ -176,8 +176,11 @@ void MediaH264DecoderGeneric::destroyH264Context() {
         if (!pFrame) {
             break;
         }
-        mRenderer.putTextureFrame(
-                TextureFrame{pFrame->texture[0], pFrame->texture[1]});
+        if (mUseGpuTexture && pFrame->texture[0] > 0 &&
+            pFrame->texture[1] > 0) {
+            mRenderer.putTextureFrame(
+                    TextureFrame{pFrame->texture[0], pFrame->texture[1]});
+        }
         mSnapshotHelper->discardFrontFrame();
     }
     mRenderer.cleanUpTextures();
