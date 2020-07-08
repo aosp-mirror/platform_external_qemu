@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "766ac6e6_a2bf127f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-07-08T21:44:11Z",
+      "side": 1,
+      "message": "Great to see this! 👍",
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c94171f9_16d67c06",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-07-08T21:44:11Z",
+      "side": 1,
+      "message": "Is this a placeholder?",
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "91c93da0_959af21a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
         "patchSetId": 2
@@ -48,6 +82,29 @@
     },
     {
       "key": {
+        "uuid": "7983284a_1536692a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-07-08T21:44:11Z",
+      "side": 1,
+      "message": "Should there be a space after the { ?",
+      "range": {
+        "startLine": 74,
+        "startChar": 49,
+        "endLine": 74,
+        "endChar": 50
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "11ff20bd_bb3165f3",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
         "patchSetId": 2
@@ -71,6 +128,29 @@
     },
     {
       "key": {
+        "uuid": "d8717b36_5070d87a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-07-08T21:44:11Z",
+      "side": 1,
+      "message": "I\u0027m not sure about C++ but in Java we don\u0027t put a space here.",
+      "range": {
+        "startLine": 95,
+        "startChar": 38,
+        "endLine": 95,
+        "endChar": 39
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "015c1586_4831c182",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
         "patchSetId": 2
@@ -87,6 +167,138 @@
         "startChar": 101,
         "endLine": 98,
         "endChar": 102
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cbbd9d60_f8986d58",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-07-08T21:44:11Z",
+      "side": 1,
+      "message": "Add \"If the long-press interval is zero...\" and the beginning.",
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56d52f7e_0853ed9b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-07-08T21:44:11Z",
+      "side": 1,
+      "message": "event -\u003e events",
+      "range": {
+        "startLine": 104,
+        "startChar": 57,
+        "endLine": 104,
+        "endChar": 62
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c6d7bb37_9f29f7ce",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-07-08T21:44:11Z",
+      "side": 1,
+      "message": "be -\u003e be a result of",
+      "range": {
+        "startLine": 105,
+        "startChar": 15,
+        "endLine": 105,
+        "endChar": 17
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b38228b9_95e02026",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-07-08T21:44:11Z",
+      "side": 1,
+      "message": "failing or the user inputting",
+      "range": {
+        "startLine": 105,
+        "startChar": 61,
+        "endLine": 105,
+        "endChar": 89
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c69fb554_4a3bebb4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-07-08T21:44:11Z",
+      "side": 1,
+      "message": "/* pressed\u003d */",
+      "range": {
+        "startLine": 120,
+        "startChar": 28,
+        "endLine": 120,
+        "endChar": 33
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "21c78721_e3d55e73",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-07-08T21:44:11Z",
+      "side": 1,
+      "message": "This doesn\u0027t match the name of the debug() method.",
+      "range": {
+        "startLine": 182,
+        "startChar": 8,
+        "endLine": 182,
+        "endChar": 12
       },
       "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
