@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "355b09f3_1b0a26cb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-08T20:48:30Z",
+      "side": 1,
+      "message": "Nice, should we try adding the car rotary page .cpp to the cmake files in this CL? You\u0027ll get signal from presubmit.",
+      "revId": "bf08ddd5dc48dea104231c59fb6e80b7cc2ffd15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
