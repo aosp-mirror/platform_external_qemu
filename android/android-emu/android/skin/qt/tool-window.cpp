@@ -71,7 +71,6 @@
 #include "android/featurecontrol/Features.h"              // for QuickbootFi...
 #include "android/globals.h"                              // for android_hw
 #include "android/hw-events.h"                            // for EV_SW, EV_SYN
-#include "android/hw-sensors.h"
 #include "android/metrics/MetricsReporter.h"              // for MetricsRepo...
 #include "android/metrics/MetricsWriter.h"                // for android_studio
 #include "studio_stats.pb.h"        // for EmulatorSna...
@@ -179,6 +178,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->zoom_button->hide();
         mToolsUi->zoom_button->setEnabled(false);
     }
+
     // Get the latest user selections from the user-config code.
     SettingsTheme theme = getSelectedTheme();
     adjustAllButtonsForTheme(theme);
@@ -525,6 +525,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 showOrRaiseExtendedWindow(PANE_IDX_CAR);
             }
             break;
+        case QtUICommand::SHOW_PANE_CAR_ROTARY:
+            if (down) {
+                showOrRaiseExtendedWindow(PANE_IDX_CAR_ROTARY);
+            }
+            break;
         case QtUICommand::SHOW_PANE_MULTIDISPLAY:
             if (down) {
                 if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
@@ -634,9 +639,6 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             break;
         case QtUICommand::FOLD:
             if (down && isFoldableConfigured()) {
-                if (mFolded) {
-                    break;
-                }
                 mFolded = true;
                 ChangeIcon(mToolsUi->fold_switch, "expand_horiz", "Unfold");
                 updateButtonUiCommand(mToolsUi->fold_switch, "UNFOLD");
@@ -644,46 +646,16 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 sendFoldedArea();
                 forwardGenericEventToEmulator(EV_SW, SW_LID, true);
                 forwardGenericEventToEmulator(EV_SYN, 0, 0);
-                float posture, unused1, unused2;
-                sUiEmuAgent->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_POSTURE,
-                                                           &posture,
-                                                           &unused1,
-                                                           &unused2,
-                                                           PARAMETER_VALUE_TYPE_CURRENT);
-                if ((enum FoldablePostures)posture != POSTURE_CLOSED) {
-                    sUiEmuAgent->sensors->setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
-                                                                     (float)POSTURE_CLOSED,
-                                                                     0.0f,
-                                                                     0.0f,
-                                                                     PHYSICAL_INTERPOLATION_SMOOTH);
-                }
             }
             break;
         case QtUICommand::UNFOLD:
             if (down && isFoldableConfigured()) {
-                if (!mFolded) {
-                    break;
-                }
                 mFolded = false;
                 ChangeIcon(mToolsUi->fold_switch, "compress_horiz", "Fold");
                 updateButtonUiCommand(mToolsUi->fold_switch, "FOLD");
                 mEmulatorWindow->resizeAndChangeAspectRatio(false);
                 forwardGenericEventToEmulator(EV_SW, SW_LID, false);
                 forwardGenericEventToEmulator(EV_SYN, 0, 0);
-                // unfold = { POSTURE_HALF_OPENED, POSTURE_OPENED, POSTURE_FLIPPED }
-                float posture, unused1, unused2;
-                sUiEmuAgent->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_POSTURE,
-                                                           &posture,
-                                                           &unused1,
-                                                           &unused2,
-                                                           PARAMETER_VALUE_TYPE_CURRENT);
-                if ((enum FoldablePostures)posture == POSTURE_CLOSED) {
-                    sUiEmuAgent->sensors->setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
-                                                                     (float)POSTURE_OPENED,
-                                                                     0.0f,
-                                                                     0.0f,
-                                                                     PHYSICAL_INTERPOLATION_SMOOTH);
-                }
             }
             break;
         case QtUICommand::SHOW_MULTITOUCH:
@@ -867,7 +839,7 @@ void ToolWindow::setClipboardCallbacks(const UiEmuAgent* agPtr) {
     if (agPtr->clipboard) {
         connect(this, SIGNAL(guestClipboardChanged(QString)), this,
                 SLOT(onGuestClipboardChanged(QString)), Qt::QueuedConnection);
-        agPtr->clipboard->registerGuestClipboardCallback(
+        agPtr->clipboard->setGuestClipboardCallback(
                 [](void* context, const uint8_t* data, size_t size) {
                     auto self = static_cast<ToolWindow*>(context);
                     emit self->guestClipboardChanged(
