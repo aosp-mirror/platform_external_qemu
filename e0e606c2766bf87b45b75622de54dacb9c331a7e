@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91c93da0_959af21a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1099465
+      },
+      "writtenOn": "2020-07-08T21:29:54Z",
+      "side": 1,
+      "message": "Click",
+      "range": {
+        "startLine": 62,
+        "startChar": 76,
+        "endLine": 62,
+        "endChar": 82
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51065b17_4db3ec81",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1099465
+      },
+      "writtenOn": "2020-07-08T21:29:54Z",
+      "side": 1,
+      "message": "click",
+      "range": {
+        "startLine": 62,
+        "startChar": 28,
+        "endLine": 62,
+        "endChar": 34
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11ff20bd_bb3165f3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1099465
+      },
+      "writtenOn": "2020-07-08T21:29:54Z",
+      "side": 1,
+      "message": "nit: put it in the same line, just like other places.",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 1
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "015c1586_4831c182",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1099465
+      },
+      "writtenOn": "2020-07-08T21:29:54Z",
+      "side": 1,
+      "message": "nit: break it into 2 lines. And other places.",
+      "range": {
+        "startLine": 98,
+        "startChar": 101,
+        "endLine": 98,
+        "endChar": 102
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "186db06d_b1bafdb6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1099465
+      },
+      "writtenOn": "2020-07-08T21:29:54Z",
+      "side": 1,
+      "message": "why use 2 private?",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 7
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8c617e4_25d2f41f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1099465
+      },
+      "writtenOn": "2020-07-08T21:29:54Z",
+      "side": 1,
+      "message": "Glad to see the emulator also supports long press!\n\nI\u0027m not familiar with the format here, but it seems that only \"text\" property is used. Can we remove other properties? Besides, \"text\" seems ambiguous, can we rename it to something like \"timeMs\"?",
+      "range": {
+        "startLine": 328,
+        "startChar": 5,
+        "endLine": 344,
+        "endChar": 14
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
