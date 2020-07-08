@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36a43f63_a5b7c73c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Sorry for the patch update spams...",
+      "revId": "3b84e1acf4faa1c4391b05faa33ed4d00eed651e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

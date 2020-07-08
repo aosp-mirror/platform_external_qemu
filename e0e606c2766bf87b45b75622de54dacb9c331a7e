@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "d63fe407_5c141aef",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done.\n\nAh, I must not have uploaded the latest to my POC CL.",
+      "parentUuid": "c94171f9_16d67c06",
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91c93da0_959af21a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
         "patchSetId": 2
@@ -82,6 +100,54 @@
     },
     {
       "key": {
+        "uuid": "2268404d_599eb167",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "51065b17_4db3ec81",
+      "range": {
+        "startLine": 62,
+        "startChar": 28,
+        "endLine": 62,
+        "endChar": 34
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80691b6b_8c86a6b5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "91c93da0_959af21a",
+      "range": {
+        "startLine": 62,
+        "startChar": 76,
+        "endLine": 62,
+        "endChar": 82
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7983284a_1536692a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
         "patchSetId": 2
@@ -102,6 +168,30 @@
       "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b2375d7_63895a1f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7983284a_1536692a",
+      "range": {
+        "startLine": 74,
+        "startChar": 49,
+        "endLine": 74,
+        "endChar": 50
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -128,6 +218,30 @@
     },
     {
       "key": {
+        "uuid": "f86473e4_d52f02c9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11ff20bd_bb3165f3",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 1
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d8717b36_5070d87a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
         "patchSetId": 2
@@ -151,6 +265,30 @@
     },
     {
       "key": {
+        "uuid": "3a0b63e9_33646b83",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d8717b36_5070d87a",
+      "range": {
+        "startLine": 95,
+        "startChar": 38,
+        "endLine": 95,
+        "endChar": 39
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "015c1586_4831c182",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
         "patchSetId": 2
@@ -171,6 +309,30 @@
       "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31fa6ac2_84ab84a7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "015c1586_4831c182",
+      "range": {
+        "startLine": 98,
+        "startChar": 101,
+        "endLine": 98,
+        "endChar": 102
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -211,6 +373,48 @@
       "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "874ce782_cbe94065",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cbbd9d60_f8986d58",
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a377a5d_f9912bb5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56d52f7e_0853ed9b",
+      "range": {
+        "startLine": 104,
+        "startChar": 57,
+        "endLine": 104,
+        "endChar": 62
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -260,6 +464,54 @@
     },
     {
       "key": {
+        "uuid": "a68e3ba1_5fa78d66",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b38228b9_95e02026",
+      "range": {
+        "startLine": 105,
+        "startChar": 61,
+        "endLine": 105,
+        "endChar": 89
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "054d4c0b_c5e2e793",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c6d7bb37_9f29f7ce",
+      "range": {
+        "startLine": 105,
+        "startChar": 15,
+        "endLine": 105,
+        "endChar": 17
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c69fb554_4a3bebb4",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
         "patchSetId": 2
@@ -280,6 +532,30 @@
       "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a69561a_2986cec7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c69fb554_4a3bebb4",
+      "range": {
+        "startLine": 120,
+        "startChar": 28,
+        "endLine": 120,
+        "endChar": 33
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -306,6 +582,30 @@
     },
     {
       "key": {
+        "uuid": "c27a8b54_730590e0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "there is no DEBUG severity. But I see other existing code are using `#define D(...) VERBOSE_PRINT(...)`, I\u0027ll piggyback on that.",
+      "parentUuid": "21c78721_e3d55e73",
+      "range": {
+        "startLine": 182,
+        "startChar": 8,
+        "endLine": 182,
+        "endChar": 12
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "186db06d_b1bafdb6",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.h",
         "patchSetId": 2
@@ -329,6 +629,30 @@
     },
     {
       "key": {
+        "uuid": "14d780af_1b57a5b0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "186db06d_b1bafdb6",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 7
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8c617e4_25d2f41f",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.ui",
         "patchSetId": 2
@@ -349,6 +673,30 @@
       "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "63e76b23_f9a38e91",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-08T23:54:10Z",
+      "side": 1,
+      "message": "These are property names for the QLineEdit widget. This file is mostly generated with QT Designer when building the UI.",
+      "parentUuid": "c8c617e4_25d2f41f",
+      "range": {
+        "startLine": 328,
+        "startChar": 5,
+        "endLine": 344,
+        "endChar": 14
+      },
+      "revId": "e0e606c2766bf87b45b75622de54dacb9c331a7e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
