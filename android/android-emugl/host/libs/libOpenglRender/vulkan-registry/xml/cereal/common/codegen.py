@@ -750,7 +750,7 @@ class VulkanWrapperGenerator(object):
     def onGenCmd(self, cmdinfo, name, alias):
         pass
 
-    def emitForEachStructExtension(self, cgen, retType, triggerVar, forEachFunc, autoBreak=True):
+    def emitForEachStructExtension(self, cgen, retType, triggerVar, forEachFunc, autoBreak=True, defaultEmit=None, nullEmit=None):
         def readStructType(structTypeName, structVarName, cgen):
             cgen.stmt("uint32_t %s = (uint32_t)%s(%s)" % \
                 (structTypeName, "goldfish_vk_struct_type", structVarName))
@@ -766,7 +766,10 @@ class VulkanWrapperGenerator(object):
                 cgen.stmt("return (%s)0" % retType.typeName)
 
         cgen.beginIf("!%s" % triggerVar.paramName)
-        doDefaultReturn(cgen)
+        if nullEmit is None:
+            doDefaultReturn(cgen)
+        else:
+            nullEmit(cgen)
         cgen.endIf()
 
         readStructType("structType", triggerVar.paramName, cgen)
@@ -803,7 +806,10 @@ class VulkanWrapperGenerator(object):
 
         cgen.line("default:")
         cgen.beginBlock()
-        doDefaultReturn(cgen)
+        if defaultEmit is None:
+            doDefaultReturn(cgen)
+        else:
+            defaultEmit(cgen)
         cgen.endBlock()
 
         cgen.endBlock()

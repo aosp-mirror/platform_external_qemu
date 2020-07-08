@@ -2326,6 +2326,16 @@ void unmarshal_VkPhysicalDevice8BitStorageFeaturesKHR(
     VkPhysicalDevice8BitStorageFeaturesKHR* forUnmarshaling);
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+void marshal_VkPhysicalDeviceShaderFloat16Int8Features(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderFloat16Int8Features* forMarshaling);
+
+void unmarshal_VkPhysicalDeviceShaderFloat16Int8Features(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderFloat16Int8Features* forUnmarshaling);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void marshal_VkNativeBufferANDROID(
     VulkanStream* vkStream,

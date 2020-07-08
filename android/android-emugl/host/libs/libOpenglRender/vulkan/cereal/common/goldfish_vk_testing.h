@@ -1349,6 +1349,13 @@ void checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+void checkEqual_VkPhysicalDeviceShaderFloat16Int8Features(
+    const VkPhysicalDeviceShaderFloat16Int8Features* a,
+    const VkPhysicalDeviceShaderFloat16Int8Features* b,
+    OnFailCompareFunc onFail);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void checkEqual_VkNativeBufferANDROID(
     const VkNativeBufferANDROID* a,
