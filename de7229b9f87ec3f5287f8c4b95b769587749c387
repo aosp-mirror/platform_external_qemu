@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1709c7fe_69aabc0d",
+        "filename": "android/android-emu/android/foldable-utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-09T17:41:37Z",
+      "side": 1,
+      "message": "Please check that the Copyright/License added here are correct.",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "715cb56c_7cd2bf17",
+        "filename": "android/android-emu/android/skin/qt/posture-selection-dialog.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-09T17:41:37Z",
+      "side": 1,
+      "message": "Please check that the Copyright/License added here are correct.",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7befa248_823b27d6",
+        "filename": "android/android-emu/android/skin/qt/posture-selection-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-09T17:41:37Z",
+      "side": 1,
+      "message": "Please check that the Copyright/License added here are correct.",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f125fb5_8b5584c4",
+        "filename": "android/android-emu/android/skin/qt/tools.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-09T17:41:37Z",
+      "side": 1,
+      "message": "TODO need to hide this if hinge sensor is not configured.",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
