@@ -258,7 +258,7 @@ void get_cpuid_func(struct CPUState* cpu, int func, int cnt, uint32_t *eax, uint
             *eax = 0;
             *ebx = 0;
             *ecx = 0;
-            *edx = 0;   /* Note - We disable invariant TSC (bit 8) in purpose */
+            *edx = 0x00000100;   /* Note - Enable invtsc (looks like Android snapshots still work on Mac with this) */
             break;
         case 0x80000008:
             /* virtual & phys address size in low 2 bytes. */
