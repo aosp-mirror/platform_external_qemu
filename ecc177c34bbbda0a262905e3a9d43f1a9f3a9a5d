@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4a2b727_137e726b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086713
+      },
+      "writtenOn": "2020-07-09T21:18:58Z",
+      "side": 1,
+      "message": "cool, I\u0027ll give this a try as soon as it makes it to fuchsia tree and report back if it improves performance",
+      "revId": "ecc177c34bbbda0a262905e3a9d43f1a9f3a9a5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
