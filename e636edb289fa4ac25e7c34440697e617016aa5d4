@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9c3031dc_8f0e3722",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-07-09T21:22:18Z",
+      "side": 1,
+      "message": "Verified that the tests originally affected passed on Fuchsia.",
+      "revId": "e636edb289fa4ac25e7c34440697e617016aa5d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
