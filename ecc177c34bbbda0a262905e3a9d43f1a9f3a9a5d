@@ -16,6 +16,24 @@
       "revId": "ecc177c34bbbda0a262905e3a9d43f1a9f3a9a5d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cdee099_908ec7c3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1726935
+      },
+      "writtenOn": "2020-07-09T21:24:03Z",
+      "side": 1,
+      "message": "I did, and we boot 5-10x faster on macos by wall time.\n\nExact quantification is a bit tricky as I\u0027ve not made a specific benchmark, but essentially we\u0027re moving from fully emulated HPET to invariant tsc as a clock source, which is many orders of magnitude faster on every clock read - and we read clocks a lot.\n\nThis brings hvf performance into the same ballpark as kvm performance on linux (with +invtsc).",
+      "parentUuid": "f4a2b727_137e726b",
+      "revId": "ecc177c34bbbda0a262905e3a9d43f1a9f3a9a5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
