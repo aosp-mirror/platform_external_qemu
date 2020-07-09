@@ -33,6 +33,24 @@
       "revId": "f92ae94a7559759445d65f9798d95f34f2788bdc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5861eb4_c37c9af2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-09T22:19:46Z",
+      "side": 1,
+      "message": "hide rotary tab for non-car \u003c- this will be part of the next CL to hookup car rotary page to extended controls.\n\nhide rotary tab from car avds that don\u0027t support rotary \u003c- filed b/160908234\n\nThanks!",
+      "parentUuid": "6c17b4ad_2713eb0a",
+      "revId": "f92ae94a7559759445d65f9798d95f34f2788bdc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
