@@ -3742,10 +3742,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkCreateGraphicsPipelines 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipelineCache, (unsigned long long)createInfoCount, (unsigned long long)pCreateInfos, (unsigned long long)pAllocator, (unsigned long long)pPipelines);
                 }
                 VkResult vkCreateGraphicsPipelines_VkResult_return = (VkResult)0;
-                vkCreateGraphicsPipelines_VkResult_return = m_state->on_vkCreateGraphicsPipelines(&m_pool, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
+                vkCreateGraphicsPipelines_VkResult_return = vk->vkCreateGraphicsPipelines(unboxed_device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 vkStream->unsetHandleMapping();
-                // Begin manual non dispatchable handle create for pPipelines;
-                vkStream->unsetHandleMapping();
+                // Begin auto non dispatchable handle create for pPipelines;
+                if (vkCreateGraphicsPipelines_VkResult_return == VK_SUCCESS) vkStream->setHandleMapping(&m_boxedHandleCreateMapping);
                 if (((createInfoCount)))
                 {
                     uint64_t* cgen_var_199;
@@ -3754,7 +3754,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkStream->handleMapping()->mapHandles_VkPipeline((VkPipeline*)pPipelines, ((createInfoCount)));
                     vkStream->write((VkPipeline*)pPipelines, 8 * ((createInfoCount)));
                 }
-                // Begin manual non dispatchable handle create for pPipelines;
+                // Begin auto non dispatchable handle create for pPipelines;
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateGraphicsPipelines_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -3828,10 +3828,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkCreateComputePipelines 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipelineCache, (unsigned long long)createInfoCount, (unsigned long long)pCreateInfos, (unsigned long long)pAllocator, (unsigned long long)pPipelines);
                 }
                 VkResult vkCreateComputePipelines_VkResult_return = (VkResult)0;
-                vkCreateComputePipelines_VkResult_return = m_state->on_vkCreateComputePipelines(&m_pool, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
+                vkCreateComputePipelines_VkResult_return = vk->vkCreateComputePipelines(unboxed_device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 vkStream->unsetHandleMapping();
-                // Begin manual non dispatchable handle create for pPipelines;
-                vkStream->unsetHandleMapping();
+                // Begin auto non dispatchable handle create for pPipelines;
+                if (vkCreateComputePipelines_VkResult_return == VK_SUCCESS) vkStream->setHandleMapping(&m_boxedHandleCreateMapping);
                 if (((createInfoCount)))
                 {
                     uint64_t* cgen_var_204;
@@ -3840,7 +3840,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkStream->handleMapping()->mapHandles_VkPipeline((VkPipeline*)pPipelines, ((createInfoCount)));
                     vkStream->write((VkPipeline*)pPipelines, 8 * ((createInfoCount)));
                 }
-                // Begin manual non dispatchable handle create for pPipelines;
+                // Begin auto non dispatchable handle create for pPipelines;
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateComputePipelines_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -3891,7 +3891,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     fprintf(stderr, "stream %p: call vkDestroyPipeline 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipeline, (unsigned long long)pAllocator);
                 }
-                m_state->on_vkDestroyPipeline(&m_pool, device, pipeline, pAllocator);
+                vk->vkDestroyPipeline(unboxed_device, pipeline, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
@@ -3949,16 +3949,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 m_state->lock();
                 VkResult vkCreatePipelineLayout_VkResult_return = (VkResult)0;
-                vkCreatePipelineLayout_VkResult_return = m_state->on_vkCreatePipelineLayout(&m_pool, device, pCreateInfo, pAllocator, pPipelineLayout);
+                vkCreatePipelineLayout_VkResult_return = vk->vkCreatePipelineLayout(unboxed_device, pCreateInfo, pAllocator, pPipelineLayout);
                 m_state->unlock();
                 vkStream->unsetHandleMapping();
-                // Begin manual non dispatchable handle create for pPipelineLayout;
-                vkStream->unsetHandleMapping();
+                // Begin auto non dispatchable handle create for pPipelineLayout;
+                if (vkCreatePipelineLayout_VkResult_return == VK_SUCCESS) vkStream->setHandleMapping(&m_boxedHandleCreateMapping);
                 uint64_t cgen_var_211;
                 static_assert(8 == sizeof(VkPipelineLayout), "handle map overwrite requres VkPipelineLayout to be 8 bytes long");
                 vkStream->handleMapping()->mapHandles_VkPipelineLayout((VkPipelineLayout*)pPipelineLayout, 1);
                 vkStream->write((VkPipelineLayout*)pPipelineLayout, 8 * 1);
-                // Begin manual non dispatchable handle create for pPipelineLayout;
+                // Begin auto non dispatchable handle create for pPipelineLayout;
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreatePipelineLayout_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -4010,7 +4010,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkDestroyPipelineLayout 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipelineLayout, (unsigned long long)pAllocator);
                 }
                 m_state->lock();
-                m_state->on_vkDestroyPipelineLayout(&m_pool, device, pipelineLayout, pAllocator);
+                vk->vkDestroyPipelineLayout(unboxed_device, pipelineLayout, pAllocator);
                 m_state->unlock();
                 vkStream->unsetHandleMapping();
                 vkStream->commitWrite();
