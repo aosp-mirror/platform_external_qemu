@@ -634,6 +634,12 @@ public:
         if (pProperties->apiVersion > kMaxSafeVersion) {
             pProperties->apiVersion = kMaxSafeVersion;
         }
+
+        if (strstr(pProperties->deviceName, "SwiftShader")) {
+            mUsePipelineLayoutRefcounting = true;
+        } else {
+            mUsePipelineLayoutRefcounting = false;
+        }
     }
 
     void on_vkGetPhysicalDeviceProperties2(
@@ -3708,7 +3714,9 @@ public:
 
         // no AutoLock lock(mLock); locked outside in decoder
 
-        incPipelineLayoutRefLocked(*pPipelineLayout);
+        if (mUsePipelineLayoutRefcounting) {
+            incPipelineLayoutRefLocked(*pPipelineLayout);
+        }
 
         *pPipelineLayout =
             new_boxed_non_dispatchable_VkPipelineLayout(*pPipelineLayout);
@@ -3729,8 +3737,14 @@ public:
 
         // no AutoLock lock(mLock); locked outside in decoder
 
-        decPipelineLayoutRefLocked(
-            vk, device, pipelineLayout, pAllocator);
+        if (mUsePipelineLayoutRefcounting) {
+            decPipelineLayoutRefLocked(
+                vk, device, pipelineLayout, pAllocator);
+        } else {
+            vk->vkDestroyPipelineLayout(
+                device, pipelineLayout, pAllocator);
+            mPipelineLayoutInfo.erase(pipelineLayout);
+        }
     }
 
     VkResult on_vkCreateGraphicsPipelines(
@@ -3758,7 +3772,9 @@ public:
         for (uint32_t i = 0; i < createInfoCount; ++i) {
             auto& info = mPipelineInfo[pPipelines[i]];
             info.pipelineLayout = pCreateInfos[i].layout;
-            incPipelineLayoutRefLocked(info.pipelineLayout);
+            if (mUsePipelineLayoutRefcounting) {
+                incPipelineLayoutRefLocked(info.pipelineLayout);
+            }
             pPipelines[i] =
                 new_boxed_non_dispatchable_VkPipeline(pPipelines[i]);
         }
@@ -3790,7 +3806,9 @@ public:
         for (uint32_t i = 0; i < createInfoCount; ++i) {
             auto& info = mPipelineInfo[pPipelines[i]];
             info.pipelineLayout = pCreateInfos[i].layout;
-            incPipelineLayoutRefLocked(info.pipelineLayout);
+            if (mUsePipelineLayoutRefcounting) {
+                incPipelineLayoutRefLocked(info.pipelineLayout);
+            }
             pPipelines[i] =
                 new_boxed_non_dispatchable_VkPipeline(pPipelines[i]);
         }
@@ -3816,8 +3834,11 @@ public:
         auto infoPtr = android::base::find(mPipelineInfo, pipeline);
         if (!infoPtr) return;
 
-        decPipelineLayoutRefLocked(
-            vk, device, infoPtr->pipelineLayout, pAllocator);
+        if (mUsePipelineLayoutRefcounting) {
+            decPipelineLayoutRefLocked(
+                vk, device, infoPtr->pipelineLayout, pAllocator);
+        }
+
         mPipelineInfo.erase(pipeline);
     }
 
@@ -5320,6 +5341,7 @@ private:
     bool mSnapshotsEnabled = false;
     bool mVkCleanupEnabled = true;
     bool mLogging = false;
+    bool mUsePipelineLayoutRefcounting = false;
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
