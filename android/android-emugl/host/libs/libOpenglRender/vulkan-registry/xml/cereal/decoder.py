@@ -251,15 +251,8 @@ def emit_dispatch_call(api, cgen):
 
 def emit_global_state_wrapped_call(api, cgen):
     customParams = ["&m_pool"] + list(map(lambda p: p.paramName, api.parameters))
-
-    if api.name in driver_workarounds_global_lock_apis:
-        cgen.stmt("m_state->lock()")
-
     cgen.vkApiCall(api, customPrefix="m_state->on_", \
         customParameters=customParams)
-
-    if api.name in driver_workarounds_global_lock_apis:
-        cgen.stmt("m_state->unlock()")
 
 def emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=True):
     decodingParams = DecodingParameters(api)
@@ -543,16 +536,6 @@ custom_decodes = {
     # VK_GOOGLE_create_resources_with_requirements
     "vkCreateImageWithRequirementsGOOGLE" : emit_global_state_wrapped_decoding,
     "vkCreateBufferWithRequirementsGOOGLE" : emit_global_state_wrapped_decoding,
-
-    # Driver workarounds for drivers that don't let one
-    # use pipeline layouts past the life of a graphics pipeline
-    "vkCreatePipelineLayout" : emit_global_state_wrapped_decoding,
-    "vkDestroyPipelineLayout" : emit_global_state_wrapped_decoding,
-
-    "vkCreateGraphicsPipelines" : emit_global_state_wrapped_decoding,
-    "vkCreateComputePipelines" : emit_global_state_wrapped_decoding,
-    # TODO: vkCreateRayTracingPipelinesKHR
-    "vkDestroyPipeline" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):

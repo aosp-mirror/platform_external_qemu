@@ -634,12 +634,6 @@ public:
         if (pProperties->apiVersion > kMaxSafeVersion) {
             pProperties->apiVersion = kMaxSafeVersion;
         }
-
-        if (strstr(pProperties->deviceName, "SwiftShader")) {
-            mUsePipelineLayoutRefcounting = true;
-        } else {
-            mUsePipelineLayoutRefcounting = false;
-        }
     }
 
     void on_vkGetPhysicalDeviceProperties2(
@@ -3661,187 +3655,6 @@ public:
         return res;
     }
 
-    void incPipelineLayoutRefLocked(VkPipelineLayout pipelineLayout) {
-        auto infoPtr = android::base::find(mPipelineLayoutInfo, pipelineLayout);
-
-        if (!infoPtr) return;
-
-        infoPtr->refCount++;
-    }
-
-    bool decPipelineLayoutRefLocked(
-        VulkanDispatch* vk,
-        VkDevice device,
-        VkPipelineLayout pipelineLayout,
-        const VkAllocationCallbacks* pAllocator) {
-
-        auto infoPtr = android::base::find(mPipelineLayoutInfo, pipelineLayout);
-
-        bool deleted = false;
-
-        if (!infoPtr) {
-            deleted = true;
-            return deleted;
-        }
-
-        --infoPtr->refCount;
-
-        deleted = infoPtr->refCount == 0;
-
-        if (deleted) {
-            vk->vkDestroyPipelineLayout(
-                device, pipelineLayout, pAllocator);
-            mPipelineLayoutInfo.erase(pipelineLayout);
-        }
-    }
-
-    VkResult on_vkCreatePipelineLayout(
-        android::base::Pool* pool,
-        VkDevice boxed_device,
-        const VkPipelineLayoutCreateInfo* pCreateInfo,
-        const VkAllocationCallbacks* pAllocator,
-        VkPipelineLayout* pPipelineLayout) {
-
-        (void)pool;
-
-        auto device = unbox_VkDevice(boxed_device);
-        auto vk = dispatch_VkDevice(boxed_device);
-
-        auto res = vk->vkCreatePipelineLayout(
-            device, pCreateInfo, pAllocator, pPipelineLayout);
-
-        if (res != VK_SUCCESS) return res;
-
-        // no AutoLock lock(mLock); locked outside in decoder
-
-        if (mUsePipelineLayoutRefcounting) {
-            incPipelineLayoutRefLocked(*pPipelineLayout);
-        }
-
-        *pPipelineLayout =
-            new_boxed_non_dispatchable_VkPipelineLayout(*pPipelineLayout);
-
-        return res;
-    }
-
-    void on_vkDestroyPipelineLayout(
-        android::base::Pool* pool,
-        VkDevice boxed_device,
-        VkPipelineLayout pipelineLayout,
-        const VkAllocationCallbacks* pAllocator) {
-
-        (void)pool;
-
-        auto device = unbox_VkDevice(boxed_device);
-        auto vk = dispatch_VkDevice(boxed_device);
-
-        // no AutoLock lock(mLock); locked outside in decoder
-
-        if (mUsePipelineLayoutRefcounting) {
-            decPipelineLayoutRefLocked(
-                vk, device, pipelineLayout, pAllocator);
-        } else {
-            vk->vkDestroyPipelineLayout(
-                device, pipelineLayout, pAllocator);
-            mPipelineLayoutInfo.erase(pipelineLayout);
-        }
-    }
-
-    VkResult on_vkCreateGraphicsPipelines(
-        android::base::Pool* pool,
-        VkDevice boxed_device,
-        VkPipelineCache pipelineCache,
-        uint32_t createInfoCount,
-        const VkGraphicsPipelineCreateInfo* pCreateInfos,
-        const VkAllocationCallbacks* pAllocator,
-        VkPipeline* pPipelines) {
-
-        (void)pool;
-
-        auto device = unbox_VkDevice(boxed_device);
-        auto vk = dispatch_VkDevice(boxed_device);
-
-        auto res = vk->vkCreateGraphicsPipelines(
-            device, pipelineCache, createInfoCount,
-            pCreateInfos, pAllocator, pPipelines);
-
-        if (res != VK_SUCCESS) return res;
-
-        AutoLock lock(mLock);
-
-        for (uint32_t i = 0; i < createInfoCount; ++i) {
-            auto& info = mPipelineInfo[pPipelines[i]];
-            info.pipelineLayout = pCreateInfos[i].layout;
-            if (mUsePipelineLayoutRefcounting) {
-                incPipelineLayoutRefLocked(info.pipelineLayout);
-            }
-            pPipelines[i] =
-                new_boxed_non_dispatchable_VkPipeline(pPipelines[i]);
-        }
-
-        return res;
-    }
-
-    VkResult on_vkCreateComputePipelines(
-        android::base::Pool* pool,
-        VkDevice boxed_device,
-        VkPipelineCache pipelineCache,
-        uint32_t createInfoCount,
-        const VkComputePipelineCreateInfo* pCreateInfos,
-        const VkAllocationCallbacks* pAllocator, VkPipeline* pPipelines) {
-
-        (void)pool;
-
-        auto device = unbox_VkDevice(boxed_device);
-        auto vk = dispatch_VkDevice(boxed_device);
-
-        auto res = vk->vkCreateComputePipelines(
-            device, pipelineCache, createInfoCount, pCreateInfos,
-            pAllocator, pPipelines);
-
-        if (res != VK_SUCCESS) return res;
-
-        AutoLock lock(mLock);
-
-        for (uint32_t i = 0; i < createInfoCount; ++i) {
-            auto& info = mPipelineInfo[pPipelines[i]];
-            info.pipelineLayout = pCreateInfos[i].layout;
-            if (mUsePipelineLayoutRefcounting) {
-                incPipelineLayoutRefLocked(info.pipelineLayout);
-            }
-            pPipelines[i] =
-                new_boxed_non_dispatchable_VkPipeline(pPipelines[i]);
-        }
-
-        return res;
-    }
-
-    void on_vkDestroyPipeline(
-        android::base::Pool* pool,
-        VkDevice boxed_device,
-        VkPipeline pipeline,
-        const VkAllocationCallbacks* pAllocator) {
-
-        (void)pool;
-
-        auto device = unbox_VkDevice(boxed_device);
-        auto vk = dispatch_VkDevice(boxed_device);
-
-        vk->vkDestroyPipeline(
-            device, pipeline, pAllocator);
-
-        AutoLock lock(mLock);
-        auto infoPtr = android::base::find(mPipelineInfo, pipeline);
-        if (!infoPtr) return;
-
-        if (mUsePipelineLayoutRefcounting) {
-            decPipelineLayoutRefLocked(
-                vk, device, infoPtr->pipelineLayout, pAllocator);
-        }
-
-        mPipelineInfo.erase(pipeline);
-    }
-
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
@@ -5341,7 +5154,6 @@ private:
     bool mSnapshotsEnabled = false;
     bool mVkCleanupEnabled = true;
     bool mLogging = false;
-    bool mUsePipelineLayoutRefcounting = false;
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
@@ -5684,18 +5496,6 @@ private:
     std::unordered_map<VkDescriptorSetLayout, DescriptorSetLayoutInfo> mDescriptorSetLayoutInfo;
     std::unordered_map<VkDescriptorPool, DescriptorPoolInfo> mDescriptorPoolInfo;
     std::unordered_map<VkDescriptorSet, DescriptorSetInfo> mDescriptorSetInfo;
-
-    struct PipelineLayoutInfo {
-        uint32_t refCount = 0;
-    };
-
-    std::unordered_map<VkPipelineLayout, PipelineLayoutInfo> mPipelineLayoutInfo;
-
-    struct PipelineInfo {
-        VkPipelineLayout pipelineLayout = 0;
-    };
-
-    std::unordered_map<VkPipeline, PipelineInfo> mPipelineInfo;
 
 #ifdef _WIN32
     int mSemaphoreId = 1;
@@ -6630,59 +6430,6 @@ VkResult VkDecoderGlobalState::on_vkCreateRenderPass(
         VkRenderPass* pRenderPass) {
     return mImpl->on_vkCreateRenderPass(pool, boxed_device, pCreateInfo,
                                         pAllocator, pRenderPass);
-}
-
-VkResult VkDecoderGlobalState::on_vkCreatePipelineLayout(
-    android::base::Pool* pool,
-    VkDevice device,
-    const VkPipelineLayoutCreateInfo* pCreateInfo,
-    const VkAllocationCallbacks* pAllocator,
-    VkPipelineLayout* pPipelineLayout) {
-    return mImpl->on_vkCreatePipelineLayout(
-        pool, device, pCreateInfo, pAllocator, pPipelineLayout);
-}
-
-void VkDecoderGlobalState::on_vkDestroyPipelineLayout(
-    android::base::Pool* pool,
-    VkDevice device,
-    VkPipelineLayout pipelineLayout,
-    const VkAllocationCallbacks* pAllocator) {
-    mImpl->on_vkDestroyPipelineLayout(
-        pool, device, pipelineLayout, pAllocator);
-}
-
-VkResult VkDecoderGlobalState::on_vkCreateGraphicsPipelines(
-    android::base::Pool* pool,
-    VkDevice device,
-    VkPipelineCache pipelineCache,
-    uint32_t createInfoCount,
-    const VkGraphicsPipelineCreateInfo* pCreateInfos,
-    const VkAllocationCallbacks* pAllocator,
-    VkPipeline* pPipelines) {
-    return mImpl->on_vkCreateGraphicsPipelines(
-        pool, device, pipelineCache, createInfoCount,
-        pCreateInfos, pAllocator, pPipelines);
-}
-
-VkResult VkDecoderGlobalState::on_vkCreateComputePipelines(
-    android::base::Pool* pool,
-    VkDevice device,
-    VkPipelineCache pipelineCache,
-    uint32_t createInfoCount,
-    const VkComputePipelineCreateInfo* pCreateInfos,
-    const VkAllocationCallbacks* pAllocator, VkPipeline* pPipelines) {
-    return mImpl->on_vkCreateComputePipelines(
-        pool, device, pipelineCache, createInfoCount, pCreateInfos,
-        pAllocator, pPipelines);
-}
-
-void VkDecoderGlobalState::on_vkDestroyPipeline(
-    android::base::Pool* pool,
-    VkDevice device,
-    VkPipeline pipeline,
-    const VkAllocationCallbacks* pAllocator) {
-    return mImpl->on_vkDestroyPipeline(
-        pool, device, pipeline, pAllocator);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(
