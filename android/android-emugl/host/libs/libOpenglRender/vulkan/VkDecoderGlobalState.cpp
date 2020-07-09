@@ -199,7 +199,13 @@ public:
             android::base::Pool* pool,
             uint32_t* pApiVersion) {
         if (m_vk->vkEnumerateInstanceVersion) {
-            return m_vk->vkEnumerateInstanceVersion(pApiVersion);
+            VkResult res = m_vk->vkEnumerateInstanceVersion(pApiVersion);
+
+            if (*pApiVersion > kMaxSafeVersion) {
+                *pApiVersion = kMaxSafeVersion;
+            }
+
+            return res;
         }
         *pApiVersion = kMinVersion;
         return VK_SUCCESS;
@@ -353,9 +359,9 @@ public:
                 vk->vkGetPhysicalDeviceProperties(physicalDevices[i],
                         &physdevInfo.props);
 
-                // if (physdevInfo.props.apiVersion > kMaxSafeVersion) {
-                // physdevInfo.props.apiVersion = kMaxSafeVersion;
-                // }
+                if (physdevInfo.props.apiVersion > kMaxSafeVersion) {
+                    physdevInfo.props.apiVersion = kMaxSafeVersion;
+                }
 
                 vk->vkGetPhysicalDeviceMemoryProperties(
                         physicalDevices[i], &physdevInfo.memoryProperties);
