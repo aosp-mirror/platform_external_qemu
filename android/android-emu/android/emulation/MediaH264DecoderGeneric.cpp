@@ -146,10 +146,6 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
 // TODO: add video toolbox for apple
 #endif
 
-    if (mHwVideoHelper == nullptr) {
-        createAndInitSoftVideoHelper();
-    }
-
     mSnapshotHelper.reset(
             new MediaSnapshotHelper(MediaSnapshotHelper::CodecType::H264));
 

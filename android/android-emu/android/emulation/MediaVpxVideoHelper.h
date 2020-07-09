@@ -42,7 +42,7 @@ namespace emulation {
 class MediaVpxVideoHelper : public MediaVideoHelper {
 public:
     MediaVpxVideoHelper(int type, int threads);
-    ~MediaVpxVideoHelper();
+    ~MediaVpxVideoHelper() override;
 
     // return true if success; false otherwise
     bool init() override;
