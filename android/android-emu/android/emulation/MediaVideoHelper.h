@@ -33,7 +33,7 @@ namespace emulation {
 class MediaVideoHelper {
 public:
     MediaVideoHelper() = default;
-    ~MediaVideoHelper() = default;
+    virtual ~MediaVideoHelper() = default;
     // return true if success; false otherwise
     virtual bool init() { return false; }
     virtual void decode(const uint8_t* frame,
