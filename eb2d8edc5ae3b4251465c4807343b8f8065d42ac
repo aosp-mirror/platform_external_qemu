@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "6a209915_5cb0c747",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-07-10T23:47:27Z",
+      "side": 1,
+      "message": "Yes if you set it on in android/data/advancedFeatures.ini and android/data/advancedFeaturesCanary.ini. See CarVhalReplay and CarVHalTable",
+      "parentUuid": "ce34ce72_80a7f943",
+      "revId": "eb2d8edc5ae3b4251465c4807343b8f8065d42ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5a8a881e_a449a71b",
         "filename": "android/android-emu/android/skin/qt/extended.ui",
         "patchSetId": 5
