@@ -912,7 +912,8 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
               emulator-libui
               android-emu
               android-qemu-deps
-              android-qemu-deps-headful)
+              android-qemu-deps-headful
+              emulator-libusb)
 endfunction()
 
 # Constructs the qemu headless executable.
@@ -935,7 +936,8 @@ function(android_add_qemu_headless_executable ANDROID_AARCH STUBS)
               android-emu
               emulator-libui-headless
               android-qemu-deps
-              android-qemu-deps-headless)
+              android-qemu-deps-headless
+              emulator-libusb)
 endfunction()
 
 # Constructs the qemu upstream executable.
@@ -955,7 +957,8 @@ function(android_add_qemu_upstream_executable ANDROID_AARCH STUBS)
               libqemu2-util
               SDL2::SDL2
               android-qemu-deps
-              android-qemu-deps-headful)
+              android-qemu-deps-headful
+              emulator-libusb)
 endfunction()
 
 # Copies a shared library
