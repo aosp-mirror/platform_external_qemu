@@ -38,7 +38,7 @@ using android::emulation::OptionalAdbCommandResult;
 using std::string;
 
 /* set to 1 for debugging */
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #define D(...) VERBOSE_PRINT(car_rotary, __VA_ARGS__)
@@ -154,6 +154,7 @@ void CarRotaryPage::executeLastPushButtonCmd() {
     if (!mLastPushButtonCmd.empty()) {
         mAdbExecuteIsActive = true;
         mAdbExecuteTime.restart();
+        D("Executing cmd: %s", mLastPushButtonCmd.c_str());
         mAdb->runAdbCommand(
                 {"shell", mLastPushButtonCmd},
                 [this](const OptionalAdbCommandResult& result) {
