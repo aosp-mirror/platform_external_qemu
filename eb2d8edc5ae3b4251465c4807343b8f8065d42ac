@@ -16,6 +16,24 @@
       "revId": "eb2d8edc5ae3b4251465c4807343b8f8065d42ac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4cf2e775_66c4b7eb",
+        "filename": "android/android-emu/android/skin/qt/extended.ui",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-10T20:38:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a8a881e_a449a71b",
+      "revId": "eb2d8edc5ae3b4251465c4807343b8f8065d42ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
