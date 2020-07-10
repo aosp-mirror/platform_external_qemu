@@ -131,7 +131,7 @@ void CarRotaryPage::toggleButtonPressed(QPushButton* button, const string cmd,
 
 void CarRotaryPage::toggleButtonReleased(
         QPushButton* button, const string cmd, const string label) {
-    D("%s button released", label);
+    D("%s button released", label.c_str());
     toggleIconTheme(button, /* pressed= */ false);
     if (mLongPressTimer.isActive()) {
         mLongPressTimer.stop();
@@ -154,6 +154,7 @@ void CarRotaryPage::executeLastPushButtonCmd() {
     if (!mLastPushButtonCmd.empty()) {
         mAdbExecuteIsActive = true;
         mAdbExecuteTime.restart();
+        D("Executing cmd: %s", mLastPushButtonCmd.c_str());
         mAdb->runAdbCommand(
                 {"shell", mLastPushButtonCmd},
                 [this](const OptionalAdbCommandResult& result) {
