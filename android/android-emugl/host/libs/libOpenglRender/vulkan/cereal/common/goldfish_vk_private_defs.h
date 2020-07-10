@@ -240,6 +240,16 @@ typedef struct VkPhysicalDeviceShaderFloat16Int8Features {
 typedef VkPhysicalDeviceShaderFloat16Int8Features VkPhysicalDeviceShaderFloat16Int8FeaturesKHR;
 typedef VkPhysicalDeviceShaderFloat16Int8Features VkPhysicalDeviceFloat16Int8FeaturesKHR;
 
+#define VK_GOOGLE_async_queue_submit 1
+
+typedef void (VKAPI_PTR *PFN_vkQueueHostSyncGOOGLE)(
+    VkQueue queue, uint32_t needHostSync, uint32_t sequenceNumber);
+typedef void (VKAPI_PTR *PFN_vkQueueSubmitAsyncGOOGLE)(
+    VkQueue queue, uint32_t submitCount, const VkSubmitInfo* pSubmits, VkFence fence);
+typedef void (VKAPI_PTR *PFN_vkQueueWaitIdleAsyncGOOGLE)(VkQueue queue);
+typedef void (VKAPI_PTR *PFN_vkQueueBindSparseAsyncGOOGLE)(
+    VkQueue queue, uint32_t bindInfoCount, const VkBindSparseInfo* pBindInfo, VkFence fence);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
