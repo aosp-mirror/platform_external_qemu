@@ -4464,6 +4464,48 @@ void vkFreeMemorySyncGOOGLE(
     mReconstruction.removeHandles((const uint64_t*)(&memory), 1);
 }
 #endif
+#ifdef VK_GOOGLE_async_queue_submit
+void vkQueueHostSyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t needHostSync,
+    uint32_t sequenceNumber)
+{
+    // TODO: Implement
+}
+void vkQueueSubmitAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t submitCount,
+    const VkSubmitInfo* pSubmits,
+    VkFence fence)
+{
+    // TODO: Implement
+}
+void vkQueueWaitIdleAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkQueue queue)
+{
+    // TODO: Implement
+}
+void vkQueueBindSparseAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t bindInfoCount,
+    const VkBindSparseInfo* pBindInfo,
+    VkFence fence)
+{
+    // TODO: Implement
+}
+#endif
 
 private:
     android::base::Lock mLock;
@@ -8789,6 +8831,54 @@ void VkDecoderSnapshot::vkFreeMemorySyncGOOGLE(
     const VkAllocationCallbacks* pAllocator)
 {
     mImpl->vkFreeMemorySyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, memory, pAllocator);
+}
+#endif
+#ifdef VK_GOOGLE_async_queue_submit
+void VkDecoderSnapshot::vkQueueHostSyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t needHostSync,
+    uint32_t sequenceNumber)
+{
+    mImpl->vkQueueHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, needHostSync, sequenceNumber);
+}
+#endif
+#ifdef VK_GOOGLE_async_queue_submit
+void VkDecoderSnapshot::vkQueueSubmitAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t submitCount,
+    const VkSubmitInfo* pSubmits,
+    VkFence fence)
+{
+    mImpl->vkQueueSubmitAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, submitCount, pSubmits, fence);
+}
+#endif
+#ifdef VK_GOOGLE_async_queue_submit
+void VkDecoderSnapshot::vkQueueWaitIdleAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkQueue queue)
+{
+    mImpl->vkQueueWaitIdleAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue);
+}
+#endif
+#ifdef VK_GOOGLE_async_queue_submit
+void VkDecoderSnapshot::vkQueueBindSparseAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t bindInfoCount,
+    const VkBindSparseInfo* pBindInfo,
+    VkFence fence)
+{
+    mImpl->vkQueueBindSparseAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, bindInfoCount, pBindInfo, fence);
 }
 #endif
 

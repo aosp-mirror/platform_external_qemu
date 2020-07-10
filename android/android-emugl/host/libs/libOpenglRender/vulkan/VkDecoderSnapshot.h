@@ -2975,6 +2975,36 @@ public:
         VkDeviceMemory memory,
         const VkAllocationCallbacks* pAllocator);
 #endif
+#ifdef VK_GOOGLE_async_queue_submit
+    void vkQueueHostSyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkQueue queue,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber);
+    void vkQueueSubmitAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkQueue queue,
+        uint32_t submitCount,
+        const VkSubmitInfo* pSubmits,
+        VkFence fence);
+    void vkQueueWaitIdleAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkQueue queue);
+    void vkQueueBindSparseAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkQueue queue,
+        uint32_t bindInfoCount,
+        const VkBindSparseInfo* pBindInfo,
+        VkFence fence);
+#endif
 
 private:
     class Impl;
