@@ -665,6 +665,12 @@ PFN_vkGetMemoryHostAddressInfoGOOGLE vkGetMemoryHostAddressInfoGOOGLE;
 #ifdef VK_GOOGLE_free_memory_sync
 PFN_vkFreeMemorySyncGOOGLE vkFreeMemorySyncGOOGLE;
 #endif
+#ifdef VK_GOOGLE_async_queue_submit
+PFN_vkQueueHostSyncGOOGLE vkQueueHostSyncGOOGLE;
+PFN_vkQueueSubmitAsyncGOOGLE vkQueueSubmitAsyncGOOGLE;
+PFN_vkQueueWaitIdleAsyncGOOGLE vkQueueWaitIdleAsyncGOOGLE;
+PFN_vkQueueBindSparseAsyncGOOGLE vkQueueBindSparseAsyncGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk
