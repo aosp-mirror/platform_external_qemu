@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "3151abca_f6441ab4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-10T17:04:51Z",
+      "side": 1,
+      "message": "Thanks Emilian!",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1709c7fe_69aabc0d",
         "filename": "android/android-emu/android/foldable-utils.h",
         "patchSetId": 1
@@ -13,6 +30,24 @@
       "writtenOn": "2020-07-09T17:41:37Z",
       "side": 1,
       "message": "Please check that the Copyright/License added here are correct.",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dbbaf1ff_7da00013",
+        "filename": "android/android-emu/android/foldable-utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-10T17:04:51Z",
+      "side": 1,
+      "message": "Apache 2 for stuff in android-emu that\u0027s not in qt/",
+      "parentUuid": "1709c7fe_69aabc0d",
       "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -36,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "1294e5d8_3b6f504b",
+        "filename": "android/android-emu/android/skin/qt/posture-selection-dialog.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-10T17:04:51Z",
+      "side": 1,
+      "message": "correct",
+      "parentUuid": "715cb56c_7cd2bf17",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7befa248_823b27d6",
         "filename": "android/android-emu/android/skin/qt/posture-selection-dialog.h",
         "patchSetId": 1
@@ -53,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "0f5576b2_9efd3ab0",
+        "filename": "android/android-emu/android/skin/qt/posture-selection-dialog.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-10T17:04:51Z",
+      "side": 1,
+      "message": "correct",
+      "parentUuid": "7befa248_823b27d6",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1f125fb5_8b5584c4",
         "filename": "android/android-emu/android/skin/qt/tools.ui",
         "patchSetId": 1
@@ -67,6 +138,24 @@
       "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e4b8f47_338ba25c",
+        "filename": "android/android-emu/android/skin/qt/tools.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-10T17:04:51Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1f125fb5_8b5584c4",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
