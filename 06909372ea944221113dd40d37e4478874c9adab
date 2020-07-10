@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f41ce4d6_0286dec1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-10T17:06:03Z",
+      "side": 1,
+      "message": "what do we do for this one?",
+      "revId": "06909372ea944221113dd40d37e4478874c9adab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94fe5ec4_c6ace911",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 687,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-10T17:06:03Z",
+      "side": 1,
+      "message": "should we integrate w/ the hidden/shown logic first?",
+      "revId": "06909372ea944221113dd40d37e4478874c9adab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
