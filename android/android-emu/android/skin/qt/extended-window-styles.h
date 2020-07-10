@@ -37,4 +37,5 @@ enum ExtendedWindowPane {
     PANE_IDX_SETTINGS,
     PANE_IDX_HELP,
     PANE_IDX_CAR,
+    PANE_IDX_CAR_ROTARY,
 };
