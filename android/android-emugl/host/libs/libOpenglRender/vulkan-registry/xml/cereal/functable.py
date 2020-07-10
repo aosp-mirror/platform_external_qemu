@@ -74,6 +74,9 @@ SUCCESS_VAL = {
 def is_cmdbuf_dispatch(api):
     return "VkCommandBuffer" == api.parameters[0].typeName
 
+def is_queue_dispatch(api):
+    return "VkQueue" == api.parameters[0].typeName
+
 class VulkanFuncTable(VulkanWrapperGenerator):
     def __init__(self, module, typeInfo):
         VulkanWrapperGenerator.__init__(self, module, typeInfo)
@@ -110,6 +113,9 @@ class VulkanFuncTable(VulkanWrapperGenerator):
 
             if is_cmdbuf_dispatch(api):
                 cgen.stmt("ResourceTracker::get()->syncEncodersForCommandBuffer(commandBuffer, vkEnc)")
+
+            if is_queue_dispatch(api):
+                cgen.stmt("ResourceTracker::get()->syncEncodersForQueue(queue, vkEnc)")
 
             callLhs = None
             retTypeName = api.getRetTypeExpr()
