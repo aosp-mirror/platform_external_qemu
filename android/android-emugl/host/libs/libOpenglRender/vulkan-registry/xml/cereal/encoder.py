@@ -155,6 +155,11 @@ ENCODER_CUSTOM_RESOURCE_POSTPROCESS = [
 ]
 
 ENCODER_EXPLICIT_FLUSHED_APIS = [
+    "vkEndCommandBufferAsyncGOOGLE",
+    "vkQueueSubmitAsyncGOOGLE",
+    "vkQueueBindSparseAsyncGOOGLE",
+    "vkQueueWaitIdleAsyncGOOGLE",
+    "vkQueueSignalReleaseImageANDROID",
     "vkDestroyDevice",
 ]
 

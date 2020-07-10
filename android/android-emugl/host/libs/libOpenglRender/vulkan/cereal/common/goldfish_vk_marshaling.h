@@ -3410,6 +3410,12 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #ifdef VK_GOOGLE_free_memory_sync
 #define OP_vkFreeMemorySyncGOOGLE 20328
 #endif
+#ifdef VK_GOOGLE_async_queue_submit
+#define OP_vkQueueHostSyncGOOGLE 20329
+#define OP_vkQueueSubmitAsyncGOOGLE 20330
+#define OP_vkQueueWaitIdleAsyncGOOGLE 20331
+#define OP_vkQueueBindSparseAsyncGOOGLE 20332
+#endif
 const char* api_opcode_to_string(
     const uint32_t opcode);
 

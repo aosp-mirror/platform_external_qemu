@@ -3489,6 +3489,43 @@ public:
         mCvWaitSequenceNumber.signal();
     }
 
+    void hostSyncQueue(
+        const char* tag,
+        VkQueue boxed_queue,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber) {
+
+        auto nextDeadline = []() {
+            return System::get()->getUnixTimeUs() + 10000; // 10 ms
+        };
+
+        auto timeoutDeadline = System::get()->getUnixTimeUs() + 5000000; // 5 s
+
+        auto queue = unbox_VkQueue(boxed_queue);
+
+        AutoLock lock(mLock);
+        auto& info = mQueueInfo[queue];
+
+        bool doWait = false;
+
+        if (needHostSync) {
+            while ((sequenceNumber - info.sequenceNumber) != 1) {
+                auto waitUntilUs = nextDeadline();
+                mCvWaitSequenceNumber.timedWait(
+                    &mLock, waitUntilUs);
+                doWait = true;
+
+                if (timeoutDeadline < System::get()->getUnixTimeUs()) {
+                    fprintf(stderr, "%s: warning: command buffer sync timed out! curr %u info %u\n", __func__, sequenceNumber, info.sequenceNumber);
+                    break;
+                }
+            }
+        }
+
+        info.sequenceNumber = sequenceNumber;
+        mCvWaitSequenceNumber.signal();
+    }
+
     VkResult on_vkCreateImageWithRequirementsGOOGLE(
         android::base::Pool* pool,
         VkDevice boxed_device,
@@ -3673,6 +3710,17 @@ public:
         *pRenderPass = new_boxed_non_dispatchable_VkRenderPass(*pRenderPass);
 
         return res;
+    }
+
+    void on_vkQueueBindSparseAsyncGOOGLE(
+        android::base::Pool* pool,
+        VkQueue boxed_queue,
+        uint32_t bindInfoCount,
+        const VkBindSparseInfo* pBindInfo, VkFence fence) {
+        auto queue = unbox_VkQueue(boxed_queue);
+        auto vk = dispatch_VkQueue(boxed_queue);
+        (void)pool;
+        vk->vkQueueBindSparse(queue, bindInfoCount, pBindInfo, fence);
     }
 
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
@@ -5274,6 +5322,7 @@ private:
         VkDevice device;
         uint32_t queueFamilyIndex;
         VkQueue boxed = nullptr;
+        uint32_t sequenceNumber = 0;
     };
 
     struct BufferInfo {
@@ -6451,6 +6500,37 @@ VkResult VkDecoderGlobalState::on_vkCreateRenderPass(
         VkRenderPass* pRenderPass) {
     return mImpl->on_vkCreateRenderPass(pool, boxed_device, pCreateInfo,
                                         pAllocator, pRenderPass);
+}
+
+void VkDecoderGlobalState::on_vkQueueHostSyncGOOGLE(
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t needHostSync,
+    uint32_t sequenceNumber) {
+    mImpl->hostSyncQueue("hostSyncQueue", queue, needHostSync, sequenceNumber);
+}
+
+void VkDecoderGlobalState::on_vkQueueSubmitAsyncGOOGLE(
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t submitCount,
+    const VkSubmitInfo* pSubmits,
+    VkFence fence) {
+    mImpl->on_vkQueueSubmit(pool, queue, submitCount, pSubmits, fence);
+}
+
+void VkDecoderGlobalState::on_vkQueueWaitIdleAsyncGOOGLE(
+    android::base::Pool* pool,
+    VkQueue queue) {
+    mImpl->on_vkQueueWaitIdle(pool, queue);
+}
+
+void VkDecoderGlobalState::on_vkQueueBindSparseAsyncGOOGLE(
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t bindInfoCount,
+    const VkBindSparseInfo* pBindInfo, VkFence fence) {
+    mImpl->on_vkQueueBindSparseAsyncGOOGLE(pool, queue, bindInfoCount, pBindInfo, fence);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(
