@@ -13007,6 +13007,8 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
 #endif
+#ifdef VK_GOOGLE_async_queue_submit
+#endif
 void marshal_extension_struct(
     VulkanStream* vkStream,
     const void* structExtension)
@@ -15854,6 +15856,24 @@ const char* api_opcode_to_string(
         case OP_vkFreeMemorySyncGOOGLE:
         {
             return "OP_vkFreeMemorySyncGOOGLE";
+        }
+#endif
+#ifdef VK_GOOGLE_async_queue_submit
+        case OP_vkQueueHostSyncGOOGLE:
+        {
+            return "OP_vkQueueHostSyncGOOGLE";
+        }
+        case OP_vkQueueSubmitAsyncGOOGLE:
+        {
+            return "OP_vkQueueSubmitAsyncGOOGLE";
+        }
+        case OP_vkQueueWaitIdleAsyncGOOGLE:
+        {
+            return "OP_vkQueueWaitIdleAsyncGOOGLE";
+        }
+        case OP_vkQueueBindSparseAsyncGOOGLE:
+        {
+            return "OP_vkQueueBindSparseAsyncGOOGLE";
         }
 #endif
         default:
