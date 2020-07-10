@@ -451,6 +451,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::VIRTIO_WIFI;
         case android::featurecontrol::VulkanShaderFloat16Int8:
             return android_studio::EmulatorFeatureFlagState::VULKAN_SHADER_FLOAT16_INT8;
+        case android::featurecontrol::CarRotary:
+            return android_studio::EmulatorFeatureFlagState::CAR_ROTARY;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

@@ -84,6 +84,7 @@ private slots:
     void on_googlePlayButton_clicked();
     void on_helpButton_clicked();
     void on_carDataButton_clicked();
+    void on_carRotaryButton_clicked();
     void on_locationButton_clicked();
     void on_microphoneButton_clicked();
     void on_recordButton_clicked();
