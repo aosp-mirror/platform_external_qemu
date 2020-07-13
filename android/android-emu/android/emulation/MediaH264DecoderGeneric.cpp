@@ -149,7 +149,7 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
     mSnapshotHelper.reset(
             new MediaSnapshotHelper(MediaSnapshotHelper::CodecType::H264));
 
-    H264_DPRINT("Successfully created ffmpeg h264 decoder context %p", this);
+    H264_DPRINT("Successfully created h264 decoder context %p", this);
 }
 
 void MediaH264DecoderGeneric::createAndInitSoftVideoHelper() {
