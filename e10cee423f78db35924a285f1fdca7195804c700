@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a6e92750_d883498c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-07-13T22:19:10Z",
+      "side": 1,
+      "message": "LGTM! Let me verify this on Fuchsia tests.",
+      "revId": "e10cee423f78db35924a285f1fdca7195804c700",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
