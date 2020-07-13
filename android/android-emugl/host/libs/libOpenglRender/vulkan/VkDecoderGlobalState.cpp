@@ -877,6 +877,12 @@ public:
         deviceInfo.emulateTextureEtc2 = emulateTextureEtc2;
         deviceInfo.emulateTextureAstc = emulateTextureAstc;
 
+        for (uint32_t i = 0; i < createInfoFiltered.enabledExtensionCount;
+                ++i) {
+            deviceInfo.enabledExtensionNames.push_back(
+                createInfoFiltered.ppEnabledExtensionNames[i]);
+        }
+
         // First, get the dispatch table.
         VkDevice boxed = new_boxed_VkDevice(*pDevice, nullptr, true /* own dispatch */);
 
@@ -2089,6 +2095,7 @@ public:
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
         AutoLock lock(mLock);
+
         auto physicalDevice = mDeviceToPhysicalDevice[device];
         auto physdevInfo = android::base::find(mPhysdevInfo, physicalDevice);
 
@@ -2099,13 +2106,12 @@ public:
                     "FATAL: Could not get image memory requirement for "
                     "VkPhysicalDevice");
         }
-        auto instance = mPhysicalDeviceToInstance[physicalDevice];
 
         if ((physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) &&
             vk->vkGetImageMemoryRequirements2) {
             vk->vkGetImageMemoryRequirements2(device, pInfo,
                     pMemoryRequirements);
-        } else if (hasInstanceExtension(instance,
+        } else if (hasDeviceExtension(device,
                     "VK_KHR_get_memory_requirements2")) {
             vk->vkGetImageMemoryRequirements2KHR(device, pInfo,
                     pMemoryRequirements);
@@ -2117,10 +2123,7 @@ public:
                         "the extension!!!!11111\n",
                         __func__);
             }
-            *pMemoryRequirements = {
-                VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2,
-                nullptr,
-            };
+
             vk->vkGetImageMemoryRequirements(
                     device, pInfo->image,
                     &pMemoryRequirements->memoryRequirements);
@@ -2879,6 +2882,17 @@ public:
 
     bool hasInstanceExtension(VkInstance instance, const std::string& name) {
         auto info = android::base::find(mInstanceInfo, instance);
+        if (!info) return false;
+
+        for (const auto& enabledName : info->enabledExtensionNames) {
+            if (name == enabledName) return true;
+        }
+
+        return false;
+    }
+
+    bool hasDeviceExtension(VkDevice device, const std::string& name) {
+        auto info = android::base::find(mDeviceInfo, device);
         if (!info) return false;
 
         for (const auto& enabledName : info->enabledExtensionNames) {
@@ -5198,6 +5212,7 @@ private:
 
     struct DeviceInfo {
         std::unordered_map<uint32_t, std::vector<VkQueue>> queues;
+        std::vector<std::string> enabledExtensionNames;
         bool emulateTextureEtc2 = false;
         bool emulateTextureAstc = false;
         VkPhysicalDevice physicalDevice;
