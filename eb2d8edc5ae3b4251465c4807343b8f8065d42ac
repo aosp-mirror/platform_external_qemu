@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "1db1e8ae_e720167e",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-07-13T17:03:47Z",
+      "side": 1,
+      "message": "Added the CarRotary feature. Thanks for the pointers!",
+      "parentUuid": "6a209915_5cb0c747",
+      "revId": "eb2d8edc5ae3b4251465c4807343b8f8065d42ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a8a881e_a449a71b",
         "filename": "android/android-emu/android/skin/qt/extended.ui",
         "patchSetId": 5
