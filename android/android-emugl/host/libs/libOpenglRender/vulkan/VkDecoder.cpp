@@ -7449,6 +7449,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_fromhost_VkMemoryRequirements2(m_state, (VkMemoryRequirements2*)(pMemoryRequirements));
                 }
+                fprintf(stderr, "%s: send VkMemoryRequirements2 back to guest. next: %p\n", __func__,
+                        pMemoryRequirements->pNext);
                 marshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
                 vkStream->commitWrite();
                 size_t snapshotTraceBytes = vkReadStream->endTrace();

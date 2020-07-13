@@ -4500,6 +4500,7 @@ void marshal_VkMemoryDedicatedRequirements(
     VulkanStream* vkStream,
     const VkMemoryDedicatedRequirements* forMarshaling)
 {
+    fprintf(stderr, "%s: structure type size: %zu vkbool32 size: %zu\n", __func__, sizeof(VkStructureType), sizeof(VkBool32), sizeof(VkBool32));
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkBool32*)&forMarshaling->prefersDedicatedAllocation, sizeof(VkBool32));
@@ -4510,6 +4511,7 @@ void unmarshal_VkMemoryDedicatedRequirements(
     VulkanStream* vkStream,
     VkMemoryDedicatedRequirements* forUnmarshaling)
 {
+    fprintf(stderr, "%s: structure type size: %zu vkbool32 size: %zu\n", __func__, sizeof(VkStructureType), sizeof(VkBool32), sizeof(VkBool32));
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
     pNext_size = vkStream->getBe32();
@@ -5003,6 +5005,7 @@ void unmarshal_VkMemoryRequirements2(
     VulkanStream* vkStream,
     VkMemoryRequirements2* forUnmarshaling)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
     pNext_size = vkStream->getBe32();
@@ -5014,6 +5017,8 @@ void unmarshal_VkMemoryRequirements2(
         VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
         vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
         *(VkStructureType*)forUnmarshaling->pNext = extType;
+        fprintf(stderr, "%s: unmarshal extension. goldfish_vk_extension_struct_size_with_stream_features: %zu\n", __func__,
+                goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     unmarshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(&forUnmarshaling->memoryRequirements));
@@ -13011,16 +13016,21 @@ void marshal_extension_struct(
     VulkanStream* vkStream,
     const void* structExtension)
 {
+    fprintf(stderr, "%s: host: at line %d\n", __func__, __LINE__);
     VkInstanceCreateInfo* structAccess = (VkInstanceCreateInfo*)(structExtension);
+    fprintf(stderr, "%s: host: at line %d\n", __func__, __LINE__);
     size_t currExtSize = goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), structExtension);
+    fprintf(stderr, "%s: host: at line %d. size: %zu\n", __func__, __LINE__, currExtSize);
     if (!currExtSize && structExtension)
     {
+        fprintf(stderr, "%s: unknown struct extension: %u\n", __func__, *(uint32_t*)(structExtension));
         // unknown struct extension; skip and call on its pNext field
         marshal_extension_struct(vkStream, (void*)structAccess->pNext);
         return;
     }
     else
     {
+        fprintf(stderr, "%s: known or null extension. size: %zu\n", __func__, currExtSize);
         // known or null extension struct
         vkStream->putBe32(currExtSize);
         if (!currExtSize)
@@ -13029,6 +13039,7 @@ void marshal_extension_struct(
             return;
         }
     }
+    fprintf(stderr, "%s: write %u for extension\n", __func__, *(uint32_t*)(structExtension));
     vkStream->write(structExtension, sizeof(VkStructureType));
     if (!structExtension)
     {
@@ -13050,6 +13061,7 @@ void marshal_extension_struct(
         }
         case VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS:
         {
+            fprintf(stderr, "%s: process dedicated reqs\n", __func__);
             marshal_VkMemoryDedicatedRequirements(vkStream, reinterpret_cast<const VkMemoryDedicatedRequirements*>(structExtension));
             break;
         }
@@ -13708,14 +13720,17 @@ void unmarshal_extension_struct(
 {
     VkInstanceCreateInfo* structAccess = (VkInstanceCreateInfo*)(structExtension_out);
     size_t currExtSize = goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), structExtension_out);
+    fprintf(stderr, "%s: currExtSize: %zu\n", __func__, currExtSize);
     if (!currExtSize && structExtension_out)
     {
+        fprintf(stderr, "%s: unknown struct extension\n", __func__);
         // unknown struct extension; skip and call on its pNext field
         unmarshal_extension_struct(vkStream, (void*)structAccess->pNext);
         return;
     }
     else
     {
+        fprintf(stderr, "%s: known struct extension\n", __func__);
         // known or null extension struct
         if (!currExtSize)
         {
@@ -13743,6 +13758,7 @@ void unmarshal_extension_struct(
         }
         case VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS:
         {
+        fprintf(stderr, "%s: process dedicated reqs\n", __func__);
             unmarshal_VkMemoryDedicatedRequirements(vkStream, reinterpret_cast<VkMemoryDedicatedRequirements*>(structExtension_out));
             break;
         }
