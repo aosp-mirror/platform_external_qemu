@@ -371,11 +371,23 @@ protected:
             "VK_ANDROID_external_memory_android_hardware_buffer",
         };
 
+        // Mostly for MoltenVK or any other driver that doesn't support
+        // external memory.
+        std::vector<const char*> usefulExtensions = {
+            "VK_KHR_get_memory_requirements2",
+            "VK_KHR_dedicated_allocation",
+        };
+
         if (mDeviceHasExternalMemorySupport) {
             dCi.enabledExtensionCount =
                 (uint32_t)externalMemoryExtensions.size();
             dCi.ppEnabledExtensionNames =
             externalMemoryExtensions.data();
+        } else {
+            dCi.enabledExtensionCount =
+                (uint32_t)usefulExtensions.size();
+            dCi.ppEnabledExtensionNames =
+            usefulExtensions.data();
         }
 
         EXPECT_EQ(VK_SUCCESS, vk->vkCreateDevice(physdevs[bestPhysicalDevice], &dCi,
@@ -1543,6 +1555,54 @@ TEST_P(VulkanHalTest, ImmutableSamplersSuppressVkWriteDescriptorSetSampler) {
     vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
     vk->vkDestroyDescriptorSetLayout(mDevice, setLayout, nullptr);
     vk->vkDestroySampler(mDevice, sampler, nullptr);
+}
+
+
+// Tests vkGetImageMemoryRequirements2
+TEST_P(VulkanHalTest, GetImageMemoryRequirements2) {
+    VkImageCreateInfo testImageCi = {
+        VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, nullptr,
+        0,
+        VK_IMAGE_TYPE_2D,
+        VK_FORMAT_R8G8B8A8_UNORM,
+        { kWindowSize, kWindowSize, 1, },
+        1, 1,
+        VK_SAMPLE_COUNT_1_BIT,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        VK_SHARING_MODE_EXCLUSIVE,
+        0, nullptr /* shared queue families */,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    VkImage testImage;
+    EXPECT_EQ(VK_SUCCESS, vk->vkCreateImage(mDevice, &testImageCi, nullptr,
+                                        &testImage));
+
+    VkImageMemoryRequirementsInfo2 info2 = {
+        VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2_KHR, 0,
+        testImage,
+    };
+
+    VkMemoryDedicatedRequirements dedicatedReqs {
+        VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS_KHR, 0,
+    };
+
+    VkMemoryRequirements2 reqs2 = {
+        VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2_KHR, 0,
+    };
+
+    reqs2.pNext = &dedicatedReqs;
+
+    PFN_vkGetImageMemoryRequirements2KHR func =
+        (PFN_vkGetImageMemoryRequirements2KHR)
+        vk->vkGetDeviceProcAddr(mDevice, "vkGetImageMemoryRequirements2KHR");
+
+    EXPECT_NE(nullptr, func);
+
+    func(mDevice, &info2, &reqs2);
+
+    vk->vkDestroyImage(mDevice, testImage, nullptr);
 }
 
 INSTANTIATE_TEST_SUITE_P(
