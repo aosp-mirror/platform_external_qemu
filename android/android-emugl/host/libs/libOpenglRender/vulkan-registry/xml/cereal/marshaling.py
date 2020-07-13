@@ -26,7 +26,7 @@ from .wrapperdefs import MARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import UNMARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import PARAMETERS_MARSHALING
 from .wrapperdefs import PARAMETERS_MARSHALING_GUEST
-from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_API_NAME
+from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_API_NAME, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 
@@ -470,50 +470,38 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
     def onStructExtension(self, vulkanType):
         access = self.exprAccessor(vulkanType)
-
         sizeVar = "%s_size" % vulkanType.paramName
 
-        if self.direction == "write":
-            self.cgen.stmt("size_t %s = %s(%s)" % (sizeVar, EXTENSION_SIZE_API_NAME, access))
-            self.cgen.stmt("%s->putBe32(%s)" % \
-                (self.streamVarName, sizeVar))
-        else:
-            self.cgen.stmt("size_t %s" % sizeVar)
-            self.cgen.stmt("%s = %s->getBe32()" % \
-                (sizeVar, self.streamVarName))
-
-        if self.direction == "read" and self.dynAlloc:
-            self.cgen.stmt("%s = nullptr" % access)
-
-        self.cgen.beginIf(sizeVar)
-
         if self.direction == "read":
-            if self.dynAlloc:
-                self.cgen.stmt( \
-                    "%s->alloc((void**)&%s, sizeof(VkStructureType))" %
-                    (self.streamVarName, access))
             castedAccessExpr = "(%s)(%s)" % ("void*", access)
         else:
             castedAccessExpr = access
 
-        if self.dynAlloc or self.direction == "write":
+        if self.direction == "read" and self.dynAlloc:
+            self.cgen.stmt("size_t %s" % sizeVar)
+            self.cgen.stmt("%s = %s->getBe32()" % \
+                (sizeVar, self.streamVarName))
+            self.cgen.stmt("%s = nullptr" % access)
+            self.cgen.beginIf(sizeVar)
+            self.cgen.stmt( \
+                    "%s->alloc((void**)&%s, sizeof(VkStructureType))" %
+                    (self.streamVarName, access))
+
             self.genStreamCall(vulkanType, access, "sizeof(VkStructureType)")
-            if self.direction == "read":
-                self.cgen.stmt("VkStructureType extType = *(VkStructureType*)(%s)" % access)
-                self.cgen.stmt( \
-                    "%s->alloc((void**)&%s, goldfish_vk_extension_struct_size(%s))" %
-                    (self.streamVarName, access, access))
-                self.cgen.stmt("*(VkStructureType*)%s = extType" % access)
+            self.cgen.stmt("VkStructureType extType = *(VkStructureType*)(%s)" % access)
+            self.cgen.stmt( \
+                    "%s->alloc((void**)&%s, %s(%s->getFeatureBits(), %s))" %
+                    (self.streamVarName, access, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME, self.streamVarName, access))
+            self.cgen.stmt("*(VkStructureType*)%s = extType" % access)
+
+            self.cgen.funcCall(None, self.marshalPrefix + "extension_struct",
+                [self.streamVarName, castedAccessExpr])
+            self.cgen.endIf()
         else:
-            self.cgen.stmt("uint64_t pNext_placeholder")
-            placeholderAccess = "(&pNext_placeholder)"
-            self.genStreamCall(vulkanType, placeholderAccess, "sizeof(VkStructureType)")
 
+            self.cgen.funcCall(None, self.marshalPrefix + "extension_struct",
+                [self.streamVarName, castedAccessExpr])
 
-        self.cgen.funcCall(None, self.marshalPrefix + "extension_struct",
-                           [self.streamVarName, castedAccessExpr])
-
-        self.cgen.endIf()
 
     def onPointer(self, vulkanType):
         access = self.exprAccessor(vulkanType)
@@ -595,6 +583,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
         self.currentFeature = None
         self.apiOpcodes = {}
+        self.dynAlloc = self.variant != "guest"
 
         if self.variant == "guest":
             self.marshalingParams = PARAMETERS_MARSHALING_GUEST
@@ -616,7 +605,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 UNMARSHAL_INPUT_VAR_NAME,
                 API_PREFIX_UNMARSHAL,
                 direction = "read",
-                dynAlloc = self.variant != "guest")
+                dynAlloc=self.dynAlloc)
 
         self.knownDefs = {}
 
@@ -780,6 +769,56 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         self.apiOpcodes[name] = (self.currentOpcode, self.currentFeature)
         self.currentOpcode += 1
 
+    def doExtensionStructMarshalingCodegen(self, cgen, retType, extParam, forEach, funcproto, direction):
+        accessVar = "structAccess"
+        sizeVar = "currExtSize"
+        cgen.stmt("VkInstanceCreateInfo* %s = (VkInstanceCreateInfo*)(%s)" % (accessVar, extParam.paramName))
+        cgen.stmt("size_t %s = %s(%s->getFeatureBits(), %s)" % (sizeVar, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME, VULKAN_STREAM_VAR_NAME, extParam.paramName))
+
+        cgen.beginIf("!%s && %s" % (sizeVar, extParam.paramName))
+
+        cgen.line("// unknown struct extension; skip and call on its pNext field");
+        cgen.funcCall(None, funcproto.name, ["vkStream", "(void*)%s->pNext" % accessVar])
+        cgen.stmt("return")
+
+        cgen.endIf()
+        cgen.beginElse()
+
+        cgen.line("// known or null extension struct")
+
+        if direction == "write":
+            cgen.stmt("vkStream->putBe32(%s)" % sizeVar)
+        elif not self.dynAlloc:
+            cgen.stmt("vkStream->getBe32()");
+
+        cgen.beginIf("!%s" % (sizeVar))
+        cgen.line("// exit if this was a null extension struct (size == 0 in this branch)")
+        cgen.stmt("return")
+        cgen.endIf()
+
+        cgen.endIf()
+
+        # Now we can do stream stuff
+        if direction == "write":
+            cgen.stmt("vkStream->write(%s, sizeof(VkStructureType))" % extParam.paramName)
+        elif not self.dynAlloc:
+            cgen.stmt("uint64_t pNext_placeholder")
+            placeholderAccess = "(&pNext_placeholder)"
+            cgen.stmt("vkStream->read((void*)(&pNext_placeholder), sizeof(VkStructureType))")
+            cgen.stmt("(void)pNext_placeholder")
+
+        def fatalDefault(cgen):
+            cgen.line("// fatal; the switch is only taken if the extension struct is known");
+            cgen.stmt("abort()")
+            pass
+
+        self.emitForEachStructExtension(
+            cgen,
+            retType,
+            extParam,
+            forEach,
+            defaultEmit=fatalDefault)
+
     def onEnd(self,):
         VulkanWrapperGenerator.onEnd(self)
 
@@ -794,20 +833,24 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         self.module.appendImpl(
             self.cgenImpl.makeFuncImpl(
                 self.extensionMarshalPrototype,
-                lambda cgen: self.emitForEachStructExtension(
+                lambda cgen: self.doExtensionStructMarshalingCodegen(
                     cgen,
                     STREAM_RET_TYPE,
                     STRUCT_EXTENSION_PARAM,
-                    forEachExtensionMarshal)))
+                    forEachExtensionMarshal,
+                    self.extensionMarshalPrototype,
+                    "write")))
 
         self.module.appendImpl(
             self.cgenImpl.makeFuncImpl(
                 self.extensionUnmarshalPrototype,
-                lambda cgen: self.emitForEachStructExtension(
+                lambda cgen: self.doExtensionStructMarshalingCodegen(
                     cgen,
                     STREAM_RET_TYPE,
                     STRUCT_EXTENSION_PARAM_FOR_WRITE,
-                    forEachExtensionUnmarshal)))
+                    forEachExtensionUnmarshal,
+                    self.extensionUnmarshalPrototype,
+                    "read")))
 
         opcode2stringPrototype = \
             VulkanAPI("api_opcode_to_string",

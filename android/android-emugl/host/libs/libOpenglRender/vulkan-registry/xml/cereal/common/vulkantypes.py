@@ -219,6 +219,9 @@ class VulkanType(object):
         self.filterFunc = None
         self.filterOtherwise = None
 
+        # Stream feature
+        self.streamFeature = None
+
         # All other annotations
         self.attribs = {}
 
@@ -644,7 +647,7 @@ def initDeviceMemoryInfoParameterIndices(parameters):
 # Classes for describing aggregate types (unions, structs) and API calls.
 class VulkanCompoundType(object):
 
-    def __init__(self, name, members, isUnion=False, structEnumExpr=None, structExtendsExpr=None, feature=None, initialEnv={}):
+    def __init__(self, name, members, isUnion=False, structEnumExpr=None, structExtendsExpr=None, feature=None, initialEnv={}, optional=None):
         self.name = name
         self.typeName = name
         self.members = members
@@ -661,6 +664,8 @@ class VulkanCompoundType(object):
         self.isTransformed = name in TRANSFORMED_TYPES
 
         self.copy = None
+
+        self.optionalStr = optional
 
     def initCopies(self):
         self.copy = self
@@ -907,7 +912,8 @@ class VulkanTypeInfo(object):
                     structEnumExpr = structEnumExpr,
                     structExtendsExpr = structExtendsExpr,
                     feature = self.feature,
-                    initialEnv = initialEnv)
+                    initialEnv = initialEnv,
+                    optional = typeinfo.elem.get("optional", None))
             self.structs[typeName].initCopies()
 
     def onGenGroup(self, _groupinfo, groupName, _alias=None):

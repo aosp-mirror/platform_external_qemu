@@ -1131,6 +1131,7 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::VulkanNullOptionalStrings, true);
                 fc::setIfNotOverriden(fc::VulkanIgnoredHandles, true);
                 fc::setIfNotOverriden(fc::NoDelayCloseColorBuffer, true);
+                fc::setIfNotOverriden(fc::VulkanShaderFloat16Int8, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;

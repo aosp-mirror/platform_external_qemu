@@ -21,6 +21,7 @@ from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import STRUCT_EXTENSION_PARAM
 from .wrapperdefs import STRUCT_EXTENSION_PARAM_FOR_WRITE
 from .wrapperdefs import EXTENSION_SIZE_API_NAME
+from .wrapperdefs import EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME
 from .wrapperdefs import STRUCT_TYPE_API_NAME
 
 class VulkanExtensionStructs(VulkanWrapperGenerator):
@@ -44,12 +45,20 @@ class VulkanExtensionStructs(VulkanWrapperGenerator):
                       self.extensionStructSizeRetType,
                       [STRUCT_EXTENSION_PARAM])
 
+        self.streamFeaturesType = makeVulkanTypeSimple(False, "uint32_t", 0, "streamFeatures")
+
+        self.extensionStructSizeWithStreamFeaturesPrototype = \
+            VulkanAPI(EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME,
+                      self.extensionStructSizeRetType,
+                      [self.streamFeaturesType, STRUCT_EXTENSION_PARAM])
     def onBegin(self,):
         VulkanWrapperGenerator.onBegin(self)
         self.module.appendHeader(self.codegen.makeFuncDecl(
             self.structTypePrototype))
         self.module.appendHeader(self.codegen.makeFuncDecl(
             self.extensionStructSizePrototype))
+        self.module.appendHeader(self.codegen.makeFuncDecl(
+            self.extensionStructSizeWithStreamFeaturesPrototype))
 
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
@@ -77,6 +86,19 @@ class VulkanExtensionStructs(VulkanWrapperGenerator):
         def forEachExtensionReturnSize(ext, _, cgen):
             cgen.stmt("return sizeof(%s)" % ext.name)
 
+        def forEachExtensionReturnSizeProtectedByFeature(ext, _, cgen):
+            featureProtected = (ext.optionalStr is not None) and (ext.optionalStr.startswith("streamFeature:"))
+            if featureProtected:
+                splitted = ext.optionalStr.split(":")
+                cgen.beginIf("%s & %s" % ("streamFeatures", splitted[1]))
+                cgen.stmt("return sizeof(%s)" % ext.name)
+                cgen.endIf()
+                cgen.beginElse()
+                cgen.stmt("return 0")
+                cgen.endIf()
+            else:
+                cgen.stmt("return sizeof(%s)" % ext.name)
+
         self.module.appendImpl(
             self.codegen.makeFuncImpl(
                 self.extensionStructSizePrototype,
@@ -85,3 +107,12 @@ class VulkanExtensionStructs(VulkanWrapperGenerator):
                     self.extensionStructSizeRetType,
                     STRUCT_EXTENSION_PARAM,
                     forEachExtensionReturnSize, autoBreak=False)))
+
+        self.module.appendImpl(
+            self.codegen.makeFuncImpl(
+                self.extensionStructSizeWithStreamFeaturesPrototype,
+                lambda cgen: self.emitForEachStructExtension(
+                    cgen,
+                    self.extensionStructSizeRetType,
+                    STRUCT_EXTENSION_PARAM,
+                    forEachExtensionReturnSizeProtectedByFeature, autoBreak=False)))

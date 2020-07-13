@@ -28,7 +28,7 @@ TEST(KernelUtils, GetKernelSerialDevicePrefix) {
                  android_kernelSerialDevicePrefix(KERNEL_VERSION_3_10_0));
 }
 
-TEST(KernelUtils, getKernelVersion) {
+TEST(KernelUtils, getKernelVersionOffset) {
     std::vector<char> kernelBits(1024);
     KernelVersion version;
 
@@ -64,6 +64,28 @@ TEST(KernelUtils, getKernelVersion) {
                                                   &version));
 
     strcpy(&kernelBits[kVersionOffset], "4.14.150-something");
+    EXPECT_EQ(true, android_getKernelVersionImpl(kernelBits.data(),
+                                                 kernelBits.size(),
+                                                 &version));
+    EXPECT_EQ(version, KERNEL_VERSION_4_14_150);
+}
+
+TEST(KernelUtils, getKernelVersionPrefix) {
+    std::string kernelBits;
+    KernelVersion version;
+
+    kernelBits = "random bits Linux version 3.4.67-something";
+    EXPECT_EQ(true, android_getKernelVersionImpl(kernelBits.data(),
+                                                 kernelBits.size(),
+                                                 &version));
+    EXPECT_EQ(version, KERNEL_VERSION_3_4_67);
+
+    kernelBits = "random bits Linux version something";
+    EXPECT_EQ(false, android_getKernelVersionImpl(kernelBits.data(),
+                                                  kernelBits.size(),
+                                                  &version));
+
+    kernelBits = "random bits Linux version something Linux version 4.14.150-something";
     EXPECT_EQ(true, android_getKernelVersionImpl(kernelBits.data(),
                                                  kernelBits.size(),
                                                  &version));

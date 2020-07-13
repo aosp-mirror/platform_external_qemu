@@ -6242,6 +6242,32 @@ void transform_fromhost_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+void transform_tohost_VkPhysicalDeviceShaderFloat16Int8Features(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDeviceShaderFloat16Int8Features* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkPhysicalDeviceShaderFloat16Int8Features(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDeviceShaderFloat16Int8Features* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void transform_tohost_VkNativeBufferANDROID(
     VkDecoderGlobalState* resourceTracker,
@@ -8913,6 +8939,30 @@ void transform_fromhost_VkImportColorBufferGOOGLE(
     }
 }
 
+void transform_tohost_VkImportBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportBufferGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkImportBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportBufferGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
 void transform_tohost_VkImportPhysicalAddressGOOGLE(
     VkDecoderGlobalState* resourceTracker,
     VkImportPhysicalAddressGOOGLE* toTransform)
@@ -9270,6 +9320,13 @@ void transform_tohost_extension_struct(
             break;
         }
 #endif
+#ifdef VK_KHR_shader_float16_int8
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+        {
+            transform_tohost_VkPhysicalDeviceShaderFloat16Int8Features(resourceTracker, reinterpret_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_ANDROID_native_buffer
         case VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID:
         {
@@ -9601,6 +9658,11 @@ void transform_tohost_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
         {
             transform_tohost_VkImportColorBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            transform_tohost_VkImportBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportBufferGOOGLE*>(structExtension_out));
             break;
         }
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
@@ -9938,6 +10000,13 @@ void transform_fromhost_extension_struct(
             break;
         }
 #endif
+#ifdef VK_KHR_shader_float16_int8
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+        {
+            transform_fromhost_VkPhysicalDeviceShaderFloat16Int8Features(resourceTracker, reinterpret_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_ANDROID_native_buffer
         case VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID:
         {
@@ -10269,6 +10338,11 @@ void transform_fromhost_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
         {
             transform_fromhost_VkImportColorBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            transform_fromhost_VkImportBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportBufferGOOGLE*>(structExtension_out));
             break;
         }
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:

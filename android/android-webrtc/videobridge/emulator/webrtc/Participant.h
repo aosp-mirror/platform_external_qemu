@@ -134,6 +134,8 @@ public:
     void IncomingMessage(json msg);
     bool AddVideoTrack(std::string handle);
     bool RemoveVideoTrack(std::string handle);
+    bool AddAudioTrack(std::string grpcAddress);
+    bool RemoveAudioTrack(std::string grpcAddress);
     bool Initialize();
     inline const std::string GetPeerId() const { return mPeerId; };
     void SendToBridge(json msg);
@@ -159,6 +161,9 @@ private:
 
     std::unordered_map<std::string, scoped_refptr<::webrtc::RtpSenderInterface>>
             mActiveVideoTracks;
+    std::unordered_map<std::string, scoped_refptr<::webrtc::RtpSenderInterface>>
+            mActiveAudioTracks;
+
 
     Switchboard* mSwitchboard;
     std::string mPeerId;

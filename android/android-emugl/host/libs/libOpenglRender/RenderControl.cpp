@@ -213,6 +213,9 @@ static constexpr android::base::StringView kVulkanFreeMemorySync = "ANDROID_EMU_
 // virtio-gpu native sync
 static constexpr android::base::StringView kVirtioGpuNativeSync = "ANDROID_EMU_virtio_gpu_native_sync";
 
+// Struct defs for VK_KHR_shader_float16_int8
+static constexpr android::base::StringView kVulkanShaderFloat16Int8 = "ANDROID_EMU_vulkan_shader_float16_int8";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -312,6 +315,11 @@ static bool shouldEnableCreateResourcesWithRequirements() {
             getHostFeatureSupport();
     return supportInfo.supportsVulkan &&
            supportInfo.useCreateResourcesWithRequirements;
+}
+
+static bool shouldEnableVulkanShaderFloat16Int8() {
+    return shouldEnableVulkan() &&
+        emugl_feature_is_enabled(android::featurecontrol::VulkanShaderFloat16Int8);
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
@@ -436,6 +444,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         emugl_feature_is_enabled(android::featurecontrol::HasSharedSlotsHostMemoryAllocator);
     bool vulkanFreeMemorySyncEnabled =
         shouldEnableVulkan();
+    bool vulkanShaderFloat16Int8Enabled = shouldEnableVulkanShaderFloat16Int8();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -531,6 +540,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (vulkanFreeMemorySyncEnabled && name == GL_EXTENSIONS) {
         glStr += kVulkanFreeMemorySync;
+        glStr += " ";
+    }
+
+    if (vulkanShaderFloat16Int8Enabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanShaderFloat16Int8;
         glStr += " ";
     }
 
@@ -1320,6 +1334,25 @@ static void rcCreateColorBufferWithHandle(
         FRAMEWORK_FORMAT_GL_COMPATIBLE, handle);
 }
 
+static uint32_t rcCreateBuffer(uint32_t size) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (!fb) {
+        return 0;
+    }
+
+    return fb->createBuffer(size);
+}
+
+static void rcCloseBuffer(uint32_t buffer) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+    fb->closeBuffer(buffer);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1371,4 +1404,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcReadColorBufferYUV = rcReadColorBufferYUV;
     dec->rcIsSyncSignaled = rcIsSyncSignaled;
     dec->rcCreateColorBufferWithHandle = rcCreateColorBufferWithHandle;
+    dec->rcCreateBuffer = rcCreateBuffer;
+    dec->rcCloseBuffer = rcCloseBuffer;
 }

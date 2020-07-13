@@ -2719,6 +2719,12 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
 
     if (!shouldBlit) return;
 
+    // b/159670873: The texture to blit doesn't necessarily match the display
+    // size. If it doesn't match, then we might not be using the right mipmap
+    // level, which can result in a black screen. Set to always use level 0.
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
     gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

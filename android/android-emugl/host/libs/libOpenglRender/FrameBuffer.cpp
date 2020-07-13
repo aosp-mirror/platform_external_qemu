@@ -234,6 +234,7 @@ void FrameBuffer::finalize() {
 
     sweepColorBuffersLocked();
 
+    m_buffers.clear();
     m_colorbuffers.clear();
     m_colorBufferDelayedCloseList.clear();
     if (m_useSubWindow) {
@@ -1046,7 +1047,8 @@ HandleType FrameBuffer::genHandle_locked() {
         id = ++s_nextHandle;
     } while (id == 0 || m_contexts.find(id) != m_contexts.end() ||
              m_windows.find(id) != m_windows.end() ||
-             m_colorbuffers.find(id) != m_colorbuffers.end());
+             m_colorbuffers.find(id) != m_colorbuffers.end() ||
+             m_buffers.find(id) != m_buffers.end());
 
     return id;
 }
@@ -1136,6 +1138,46 @@ HandleType FrameBuffer::createColorBufferWithHandleLocked(
     } else {
         handle = 0;
         DBG("Create color buffer failed.\n");
+    }
+    return handle;
+}
+
+HandleType FrameBuffer::createBuffer(int p_size) {
+    AutoLock mutex(m_lock);
+    HandleType handle = createBufferLocked(p_size);
+    m_lock.unlock();
+
+    bool setupStatus =
+            goldfish_vk::setupVkBuffer(handle, /* vulkanOnly */ true);
+    assert(setupStatus);
+    return handle;
+}
+
+HandleType FrameBuffer::createBufferLocked(int p_size) {
+    return createBufferWithHandleLocked(p_size, genHandle_locked());
+}
+
+HandleType FrameBuffer::createBufferWithHandleLocked(int p_size,
+                                                     HandleType handle) {
+    if (m_colorbuffers.count(handle) != 0) {
+        emugl::emugl_crash_reporter(
+                "FATAL: color buffer with handle %u already exists", handle);
+        abort();
+    }
+
+    if (m_buffers.count(handle) != 0) {
+        emugl::emugl_crash_reporter(
+                "FATAL: buffer with handle %u already exists", handle);
+        abort();
+    }
+
+    BufferPtr buffer(Buffer::create(p_size, handle));
+
+    if (buffer) {
+        m_buffers[handle] = {std::move(buffer)};
+    } else {
+        handle = 0;
+        DBG("Create buffer failed.\n");
     }
     return handle;
 }
@@ -1395,6 +1437,18 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
 
     for (auto handle : toCleanup) {
         goldfish_vk::teardownVkColorBuffer(handle);
+    }
+}
+
+void FrameBuffer::closeBuffer(HandleType p_buffer) {
+    AutoLock mutex(m_lock);
+
+    if (m_buffers.find(p_buffer) == m_buffers.end()) {
+        ERR("closeColorBuffer: cannot find buffer %u\n",
+            static_cast<uint32_t>(p_buffer));
+    } else {
+        goldfish_vk::teardownVkBuffer(p_buffer);
+        m_buffers.erase(p_buffer);
     }
 }
 
@@ -1844,6 +1898,20 @@ bool FrameBuffer::getColorBufferInfo(
     *height = cb->getHeight();
     *internalformat = cb->getInternalFormat();
 
+    return true;
+}
+
+bool FrameBuffer::getBufferInfo(HandleType p_buffer, int* size) {
+    AutoLock mutex(m_lock);
+
+    BufferMap::iterator c(m_buffers.find(p_buffer));
+    if (c == m_buffers.end()) {
+        // Bad buffer handle.
+        return false;
+    }
+
+    auto buf = (*c).second.buffer;
+    *size = buf->getSize();
     return true;
 }
 

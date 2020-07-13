@@ -34,15 +34,19 @@ namespace emulator {
 namespace net {
 
 EmulatorConnection::EmulatorConnection(int port,
+                                       std::string discovery_file,
                                        std::string handle,
                                        std::string turnConfig)
-    : mPort(port), mHandle(handle), mTurnConfig(turnConfig) {}
+    : mPort(port),
+      mDiscoveryFile(discovery_file),
+      mHandle(handle),
+      mTurnConfig(turnConfig) {}
 
 EmulatorConnection::~EmulatorConnection() {}
 
 #ifdef _WIN32
 static bool initializeSockets() {
-    WORD  wVersionRequested = MAKEWORD(2, 2);
+    WORD wVersionRequested = MAKEWORD(2, 2);
     WSADATA wsaData;
     return WSAStartup(wVersionRequested, &wsaData);
 }
@@ -109,8 +113,8 @@ void EmulatorConnection::OnRead(rtc::AsyncSocket* socket) {
     rtc::SocketAddress accept_addr;
     while (AsyncSocket* incoming = socket->Accept(&accept_addr)) {
         RtcAsyncSocketAdapter* adapter = new RtcAsyncSocketAdapter(incoming);
-        std::unique_ptr<Switchboard> board(
-                new webrtc::Switchboard(mHandle, mTurnConfig, adapter, this));
+        std::unique_ptr<Switchboard> board(new webrtc::Switchboard(
+                mDiscoveryFile, mHandle, mTurnConfig, adapter, this));
         mConnections.push_back(std::move(board));
         RTC_LOG(INFO) << "New switchboard registered for incoming emulator.";
     }

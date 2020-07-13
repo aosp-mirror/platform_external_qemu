@@ -28,6 +28,7 @@
 #include <utility>  // for pair
 
 #include "emulator/webrtc/Switchboard.h"               // for Switchboard
+#include "emulator/webrtc/capture/GrpcAudioSource.h"   // for GrpcAudioSource
 #include "emulator/webrtc/capture/VideoCapturer.h"     // for VideoCapturer
 #include "emulator/webrtc/capture/VideoTrackSource.h"  // for VideoTrackSource
 #include "nlohmann/json.hpp"                           // for basic_json<>::...
@@ -248,8 +249,10 @@ bool Participant::AddVideoTrack(std::string handle) {
                           << " already active, not adding again.";
     }
 
+    // TODO(jansene): Video sources should be shared amongst participants.
     RTC_LOG(INFO) << "Adding track: [" << handle << "]";
-    auto capturer = mSwitchboard->getVideoCaptureFactory()->getVideoCapturer(handle);
+    auto capturer =
+            mSwitchboard->getVideoCaptureFactory()->getVideoCapturer(handle);
     auto track = new rtc::RefCountedObject<emulator::webrtc::VideoTrackSource>(
             capturer);
     scoped_refptr<::webrtc::VideoTrackInterface> video_track(
@@ -266,10 +269,46 @@ bool Participant::AddVideoTrack(std::string handle) {
     return true;
 }
 
+bool Participant::AddAudioTrack(std::string grpc) {
+    if (mActiveAudioTracks.count(grpc) != 0) {
+        RTC_LOG(LS_ERROR) << "Track " << grpc
+                          << " already active, not adding again.";
+    }
+
+    // TODO(jansene): Audio sources should be shared amongst participants.
+    RTC_LOG(INFO) << "Adding audio track: [" << grpc << "]";
+    auto track =
+            new rtc::RefCountedObject<emulator::webrtc::GrpcAudioSource>(grpc);
+    scoped_refptr<::webrtc::AudioTrackInterface> audio_track(
+            mPeerConnectionFactory->CreateAudioTrack(grpc, track));
+
+    auto result = mPeerConnection->AddTrack(audio_track, {grpc});
+    if (!result.ok()) {
+        RTC_LOG(LS_ERROR) << "Failed to add audio track: "
+                          << result.error().message();
+        return false;
+    }
+
+    mActiveAudioTracks[grpc] = result.value();
+    return true;
+}
+
 void Participant::CreateOffer() {
     RTC_LOG(INFO) << "Creating offer";
     mPeerConnection->CreateOffer(
             this, ::webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+}
+
+bool Participant::RemoveAudioTrack(std::string grpc) {
+    if (mActiveAudioTracks.count(grpc) == 0) {
+        RTC_LOG(LS_ERROR) << "Track " << grpc
+                          << " not active, no need to remove.";
+        return false;
+    }
+
+    auto track = mActiveAudioTracks[grpc];
+    mPeerConnection->RemoveTrack(track);
+    return true;
 }
 
 bool Participant::RemoveVideoTrack(std::string handle) {

@@ -316,8 +316,7 @@ int MultiDisplay::destroyDisplay(uint32_t displayId) {
     {
         AutoLock lock(mLock);
         if (mMultiDisplay.find(displayId) == mMultiDisplay.end()) {
-            LOG(WARNING) << "cannot find display " << displayId;
-            return -1;
+            return 0;
         }
         needUIUpdate = ((mMultiDisplay[displayId].cb != 0) ? true : false);
         mMultiDisplay.erase(displayId);

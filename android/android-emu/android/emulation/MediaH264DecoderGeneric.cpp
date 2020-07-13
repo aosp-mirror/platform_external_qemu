@@ -146,10 +146,6 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
 // TODO: add video toolbox for apple
 #endif
 
-    if (mHwVideoHelper == nullptr) {
-        createAndInitSoftVideoHelper();
-    }
-
     mSnapshotHelper.reset(
             new MediaSnapshotHelper(MediaSnapshotHelper::CodecType::H264));
 
@@ -176,8 +172,11 @@ void MediaH264DecoderGeneric::destroyH264Context() {
         if (!pFrame) {
             break;
         }
-        mRenderer.putTextureFrame(
-                TextureFrame{pFrame->texture[0], pFrame->texture[1]});
+        if (mUseGpuTexture && pFrame->texture[0] > 0 &&
+            pFrame->texture[1] > 0) {
+            mRenderer.putTextureFrame(
+                    TextureFrame{pFrame->texture[0], pFrame->texture[1]});
+        }
         mSnapshotHelper->discardFrontFrame();
     }
     mRenderer.cleanUpTextures();
@@ -259,8 +258,11 @@ void MediaH264DecoderGeneric::try_decode(const uint8_t* data,
 void MediaH264DecoderGeneric::fetchAllFrames() {
     while (true) {
         MediaSnapshotState::FrameInfo frame;
-        bool success = mHwVideoHelper ? mHwVideoHelper->receiveFrame(&frame)
-                                      : mVideoHelper->receiveFrame(&frame);
+        bool success =
+                mHwVideoHelper
+                        ? mHwVideoHelper->receiveFrame(&frame)
+                        : (mVideoHelper ? mVideoHelper->receiveFrame(&frame)
+                                        : false);
         if (!success) {
             break;
         }

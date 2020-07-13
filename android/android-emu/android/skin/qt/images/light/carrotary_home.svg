@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="146px" height="203px" viewBox="0 0 146 203" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>carrotary_home</title>
+    <g id="carrotary_home" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="emulator_rotary_controller" transform="translate(-190.000000, -190.000000)">
+            <rect id="Rectangle-Copy" stroke="#F9F9F9" stroke-width="3" fill="#E0E0E0" fill-rule="nonzero" x="191" y="191.132" width="144" height="200"></rect>
+            <path d="M285,337.5 L270.333,348.5 L270.333,370.5 L299.667,370.5 L299.667,348.5 L285,337.5 Z M296,366.833 L290.5,366.833 L279.5,366.833 L274,366.833 L274,350.333 L285,342.083 L296,350.333 L296,366.833 Z" id="Shape" fill="#FFFFFF" fill-rule="nonzero"></path>
+        </g>
+    </g>
+</svg>

@@ -1,21 +1,19 @@
 #include "android/emulation/control/WebRtcBridge.h"
 
-#include <stdio.h>  // for sscanf
+#include <nlohmann/json.hpp>                    // for json, basic_json<>::v...
+#include <stdio.h>                              // for sscanf
+#include <chrono>                               // for operator+, seconds
+#include <memory>                               // for shared_ptr, shared_pt...
+#include <utility>                              // for move
+#include <vector>                               // for vector
 
-#include <memory>             // for shared_ptr, shared_pt...
-#include <new>                // for operator new
-#include <nlohmann/json.hpp>  // for basic_json<>::value_type
-#include <utility>            // for move
-#include <vector>             // for vector
-
-#include "android/base/CpuTime.h"               // for base
 #include "android/base/Log.h"                   // for LOG, LogMessage, LogS...
 #include "android/base/Optional.h"              // for Optional
 #include "android/base/async/AsyncSocket.h"     // for AsyncSocket
-#include "android/base/async/ThreadLooper.h"    // for ThreadLooper
 #include "android/base/sockets/ScopedSocket.h"  // for ScopedSocket
 #include "android/base/sockets/SocketUtils.h"   // for socketGetPort, socket...
 #include "android/base/system/System.h"         // for System, System::Pid
+#include "android/emulation/ConfigDirs.h"       // for ConfigDirs
 
 namespace android {
 namespace base {
@@ -173,7 +171,6 @@ void WebRtcBridge::terminate() {
     // attempt to read inaccessible memory.
     LOG(INFO) << "Stopping the rtc module.";
     mScreenAgent->stopSharedMemoryModule();
-
 }
 
 void WebRtcBridge::received(SocketTransport* from, json object) {
@@ -213,7 +210,8 @@ void WebRtcBridge::received(SocketTransport* from, json object) {
                 if (queue->tryPushLocked(object["msg"]) !=
                     BufferQueueResult::Ok) {
                     LOG(ERROR) << "Unable to push message "
-                               << object["msg"].get<std::string>() << "dropping it";
+                               << object["msg"].get<std::string>()
+                               << "dropping it";
                 }
             }
         }
@@ -249,11 +247,13 @@ static Optional<System::Pid> launchAsDaemon(std::string executable,
                                             int port,
                                             std::string videomodule,
                                             std::string turnConfig) {
-    std::vector<std::string> cmdArgs{executable, "--daemon",
-                                     "--logdir", System::get()->getTempDir(),
-                                     "--port",   std::to_string(port),
-                                     "--handle", videomodule,
-                                     "--turn",   turnConfig};
+    std::vector<std::string> cmdArgs{
+            executable,    "--daemon",
+            "--logdir",    System::get()->getTempDir(),
+            "--discovery", ConfigDirs::getCurrentDiscoveryPath(),
+            "--port",      std::to_string(port),
+            "--handle",    videomodule,
+            "--turn",      turnConfig};
 
     System::Pid bridgePid;
     std::string invoke = "";
@@ -285,6 +285,8 @@ static Optional<System::Pid> launchInBackground(std::string executable,
     std::vector<std::string> cmdArgs{executable,
                                      "--logdir",
                                      System::get()->getTempDir(),
+                                     "--discovery",
+                                     ConfigDirs::getCurrentDiscoveryPath(),
                                      "--port",
                                      std::to_string(port),
                                      "--handle",
@@ -352,7 +354,8 @@ bool WebRtcBridge::start() {
             lock, future, [=]() { return mState == BridgeState::Connected; });
     bool connected = mState == BridgeState::Connected;
     LOG(INFO) << "WebRtcBridge state: "
-              << (connected ? "Connected" : "Disconnected");
+              << (connected ? "Connected" : "Disconnected")
+              << "at pid: " << *bridgePid;
     return connected;
 }
 

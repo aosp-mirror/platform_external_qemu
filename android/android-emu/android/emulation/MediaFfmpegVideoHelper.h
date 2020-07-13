@@ -49,7 +49,7 @@ namespace emulation {
 class MediaFfmpegVideoHelper : public MediaVideoHelper {
 public:
     MediaFfmpegVideoHelper(int type, int threads);
-    ~MediaFfmpegVideoHelper();
+    ~MediaFfmpegVideoHelper() override;
 
     // return true if success; false otherwise
     bool init() override;
