@@ -3225,6 +3225,11 @@ server.
             <member><type>void</type>*                  <name>pNext</name></member>
             <member><type>uint32_t</type>   <name>colorBuffer</name></member>
         </type>
+        <type category="struct" name="VkImportBufferGOOGLE" structextends="VkMemoryAllocateInfo">
+            <member values="VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
+            <member><type>void</type>*                  <name>pNext</name></member>
+            <member><type>uint32_t</type>   <name>buffer</name></member>
+        </type>
         <type category="struct" name="VkImportPhysicalAddressGOOGLE" structextends="VkMemoryAllocateInfo">
             <member values="VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
             <member><type>void</type>*                  <name>pNext</name></member>
@@ -3234,6 +3239,14 @@ server.
             <member><type>VkImageTiling</type>   <name>tiling</name></member>
             <member><type>uint32_t</type>   <name>tilingParameter</name></member>
         </type>
+        <type category="struct" name="VkPhysicalDeviceShaderFloat16Int8Features" structextends="VkPhysicalDeviceFeatures2,VkDeviceCreateInfo" optional="streamFeature:VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT">
+            <member values="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES"><type>VkStructureType</type> <name>sType</name></member>
+            <member noautovalidity="true"><type>void</type>*      <name>pNext</name></member>
+            <member><type>VkBool32</type>                         <name>shaderFloat16</name><comment>16-bit floats (halfs) in shaders</comment></member>
+            <member><type>VkBool32</type>                         <name>shaderInt8</name><comment>8-bit integers in shaders</comment></member>
+        </type>
+        <type category="struct" name="VkPhysicalDeviceShaderFloat16Int8FeaturesKHR"            alias="VkPhysicalDeviceShaderFloat16Int8Features" optional="streamFeature:VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT"/>
+        <type category="struct" name="VkPhysicalDeviceFloat16Int8FeaturesKHR"                  alias="VkPhysicalDeviceShaderFloat16Int8Features" optional="streamFeature:VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT"/>
     </types>
 
     <comment>Vulkan enumerant (token) definitions</comment>
@@ -9201,7 +9214,9 @@ server.
                 <enum value="&quot;VK_GOOGLE_color_buffer&quot;"            name="VK_GOOGLE_COLOR_BUFFER_EXTENSION_NAME"/>
                 <enum offset="0" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE"/>
                 <enum offset="1" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE"/>
+                <enum offset="0" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_BUFFER_HANDLE_GOOGLE"/>
                 <type name="VkImportColorBufferGOOGLE"/>
+                <type name="VkImportBufferGOOGLE"/>
                 <type name="VkImportPhysicalAddressGOOGLE"/>
                 <command name="vkRegisterImageColorBufferGOOGLE"/>
                 <command name="vkRegisterBufferColorBufferGOOGLE"/>
@@ -9249,6 +9264,16 @@ server.
                 <enum value="224"                                           name="VK_GOOGLE_FREE_MEMORY_SYNC_NUMBER"/>
                 <enum value="&quot;VK_GOOGLE_free_memory_sync&quot;"           name="VK_GOOGLE_FREE_MEMORY_SYNC_EXTENSION_NAME"/>
                 <command name="vkFreeMemorySyncGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_KHR_shader_float16_int8" number="225" type="device" requires="VK_KHR_get_physical_device_properties2" author="KHR" contact="Alexander Galazin @alegal-arm" supported="vulkan">
+            <require>
+                <enum value="1"                                           name="VK_KHR_SHADER_FLOAT16_INT8_SPEC_VERSION"/>
+                <enum value="&quot;VK_KHR_shader_float16_int8&quot;"      name="VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME"/>
+                <enum extends="VkStructureType"                           name="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR" alias="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES"/>
+                <enum extends="VkStructureType"                           name="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FLOAT16_INT8_FEATURES_KHR" alias="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES"/>
+                <type name="VkPhysicalDeviceShaderFloat16Int8FeaturesKHR"/>
+                <type name="VkPhysicalDeviceFloat16Int8FeaturesKHR"/>
             </require>
         </extension>
     </extensions>

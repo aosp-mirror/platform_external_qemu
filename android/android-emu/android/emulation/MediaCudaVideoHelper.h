@@ -53,7 +53,7 @@ public:
     MediaCudaVideoHelper(OutputTreatmentMode outMode,
                          FrameStorageMode fMode,
                          cudaVideoCodec cudaVideoCodecType);
-    ~MediaCudaVideoHelper();
+    ~MediaCudaVideoHelper() override;
 
 public:
     // return true if success; false otherwise

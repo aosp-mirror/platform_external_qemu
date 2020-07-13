@@ -86,6 +86,7 @@ bool MediaFfmpegVideoHelper::init() {
     if (mThreadCount > 1) {
         mCodecCtx->thread_count = std::min(mThreadCount, 4);
         mCodecCtx->thread_type = FF_THREAD_FRAME;
+        mCodecCtx->active_thread_type = FF_THREAD_FRAME;
     }
     avcodec_open2(mCodecCtx, mCodec, 0);
     mFrame = av_frame_alloc();
@@ -107,8 +108,9 @@ void MediaFfmpegVideoHelper::deInit() {
     MEDIA_DPRINT("Destroy %p", this);
     mSavedDecodedFrames.clear();
     if (mCodecCtx) {
+        avcodec_flush_buffers(mCodecCtx);
         avcodec_close(mCodecCtx);
-        av_free(mCodecCtx);
+        avcodec_free_context(&mCodecCtx);
         mCodecCtx = NULL;
         mCodec = NULL;
     }

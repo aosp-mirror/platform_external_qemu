@@ -685,43 +685,6 @@ public:
                                    const VkRenderPassCreateInfo* pCreateInfo,
                                    const VkAllocationCallbacks* pAllocator,
                                    VkRenderPass* pRenderPass);
-
-    VkResult on_vkCreatePipelineLayout(
-        android::base::Pool* pool,
-        VkDevice device,
-        const VkPipelineLayoutCreateInfo* pCreateInfo,
-        const VkAllocationCallbacks* pAllocator,
-        VkPipelineLayout* pPipelineLayout);
-
-    void on_vkDestroyPipelineLayout(
-        android::base::Pool* pool,
-        VkDevice device,
-        VkPipelineLayout pipelineLayout,
-        const VkAllocationCallbacks* pAllocator);
-
-    VkResult on_vkCreateGraphicsPipelines(
-        android::base::Pool* pool,
-        VkDevice device,
-        VkPipelineCache pipelineCache,
-        uint32_t createInfoCount,
-        const VkGraphicsPipelineCreateInfo* pCreateInfos,
-        const VkAllocationCallbacks* pAllocator,
-        VkPipeline* pPipelines);
-
-    VkResult on_vkCreateComputePipelines(
-        android::base::Pool* pool,
-        VkDevice device,
-        VkPipelineCache pipelineCache,
-        uint32_t createInfoCount,
-        const VkComputePipelineCreateInfo* pCreateInfos,
-        const VkAllocationCallbacks* pAllocator, VkPipeline* pPipelines);
-
-    void on_vkDestroyPipeline(
-        android::base::Pool* pool,
-        VkDevice device,
-        VkPipeline pipeline,
-        const VkAllocationCallbacks* pAllocator);
-
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,

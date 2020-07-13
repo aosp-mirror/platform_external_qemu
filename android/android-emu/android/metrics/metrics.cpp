@@ -449,6 +449,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::VIRTIO_GPU_NATIVE_SYNC;
         case android::featurecontrol::VirtioWifi:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_WIFI;
+        case android::featurecontrol::VulkanShaderFloat16Int8:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_SHADER_FLOAT16_INT8;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
