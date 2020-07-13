@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0da3d30a_edf6d984",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-07-13T17:48:48Z",
+      "side": 1,
+      "message": "Thanks Emilian for adding postures to the toolbar.\nHere are some comments:\n1, The callback function works, but it overlapped with our existing infrastructure. E.g., from foldableDevice to virtualSensorPage, posture value change will trigger the UIupdate; from foldableDevice to toolBar, it is better to add a windowAgent function to update toolbar. The original posture drop-down menu is an example.\n2, Realign the posture sub page. No space to show the third hinge sensor slider bar.",
+      "revId": "b29abbd6ebc909d3aa4a0e536bdba8d14d7fb311",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
