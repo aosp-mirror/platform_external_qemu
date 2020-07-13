@@ -47,11 +47,13 @@ using TextureFrame = MediaHostRenderer::TextureFrame;
 
 namespace {
 
+static bool s_force_no_gpu = false;
+
 bool canUseCudaDecoder() {
     // TODO: implement a whitelist for
     // nvidia gpu;
 #ifndef __APPLE__
-    if (MediaCudaDriverHelper::initCudaDrivers()) {
+    if (!s_force_no_gpu && MediaCudaDriverHelper::initCudaDrivers()) {
         VPX_DPRINT("Using Cuvid decoder on Linux/Windows");
         return true;
     } else {
@@ -64,7 +66,6 @@ bool canUseCudaDecoder() {
 #endif
 }
 
-static bool s_force_no_gpu = false;
 bool canDecodeToGpuTexture() {
 #ifndef __APPLE__
 
@@ -86,7 +87,11 @@ MediaVpxDecoderGeneric::MediaVpxDecoderGeneric(VpxPingInfoParser parser,
       mSnapshotHelper(mType == MediaCodecType::VP8Codec
                               ? MediaSnapshotHelper::CodecType::VP8
                               : MediaSnapshotHelper::CodecType::VP9) {
-    mUseGpuTexture = canDecodeToGpuTexture();
+    if (mType == MediaCodecType::VP9Codec) {
+        mUseGpuTexture = canDecodeToGpuTexture();
+    } else {
+        mUseGpuTexture = false;
+    }
 }
 
 MediaVpxDecoderGeneric::~MediaVpxDecoderGeneric() {
@@ -97,7 +102,8 @@ void MediaVpxDecoderGeneric::initVpxContext(void* ptr) {
     VPX_DPRINT("calling init context");
 
 #ifndef __APPLE__
-    if (canUseCudaDecoder() && mParser.version() >= 200) {
+    if (canUseCudaDecoder() && mParser.version() >= 200 &&
+        mType == MediaCodecType::VP9Codec) {
         MediaCudaVideoHelper::OutputTreatmentMode oMode =
                 MediaCudaVideoHelper::OutputTreatmentMode::SAVE_RESULT;
 
