@@ -4429,6 +4429,22 @@ void checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+void checkEqual_VkPhysicalDeviceShaderFloat16Int8Features(
+    const VkPhysicalDeviceShaderFloat16Int8Features* a,
+    const VkPhysicalDeviceShaderFloat16Int8Features* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->shaderFloat16) == (b->shaderFloat16))) { onFail("a->shaderFloat16 (Error: Value not equal)"); };
+    if (!((a->shaderInt8) == (b->shaderInt8))) { onFail("a->shaderInt8 (Error: Value not equal)"); };
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void checkEqual_VkNativeBufferANDROID(
     const VkNativeBufferANDROID* a,
@@ -6270,6 +6286,19 @@ void checkEqual_VkImportColorBufferGOOGLE(
     if (!((a->colorBuffer) == (b->colorBuffer))) { onFail("a->colorBuffer (Error: Value not equal)"); };
 }
 
+void checkEqual_VkImportBufferGOOGLE(
+    const VkImportBufferGOOGLE* a,
+    const VkImportBufferGOOGLE* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->buffer) == (b->buffer))) { onFail("a->buffer (Error: Value not equal)"); };
+}
+
 void checkEqual_VkImportPhysicalAddressGOOGLE(
     const VkImportPhysicalAddressGOOGLE* a,
     const VkImportPhysicalAddressGOOGLE* b,
@@ -6616,6 +6645,13 @@ void checkEqual_extension_struct(
             break;
         }
 #endif
+#ifdef VK_KHR_shader_float16_int8
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+        {
+            checkEqual_VkPhysicalDeviceShaderFloat16Int8Features(reinterpret_cast<const VkPhysicalDeviceShaderFloat16Int8Features*>(structExtension), reinterpret_cast<const VkPhysicalDeviceShaderFloat16Int8Features*>(structExtension2), onFail);
+            break;
+        }
+#endif
 #ifdef VK_ANDROID_native_buffer
         case VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID:
         {
@@ -6947,6 +6983,11 @@ void checkEqual_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
         {
             checkEqual_VkImportColorBufferGOOGLE(reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension), reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension2), onFail);
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            checkEqual_VkImportBufferGOOGLE(reinterpret_cast<const VkImportBufferGOOGLE*>(structExtension), reinterpret_cast<const VkImportBufferGOOGLE*>(structExtension2), onFail);
             break;
         }
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:

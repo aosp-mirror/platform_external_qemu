@@ -2084,6 +2084,16 @@ void transform_fromhost_VkPhysicalDevice8BitStorageFeaturesKHR(
     VkPhysicalDevice8BitStorageFeaturesKHR* toTransform);
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+void transform_tohost_VkPhysicalDeviceShaderFloat16Int8Features(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDeviceShaderFloat16Int8Features* toTransform);
+
+void transform_fromhost_VkPhysicalDeviceShaderFloat16Int8Features(
+    VkDecoderGlobalState* resourceTracker,
+    VkPhysicalDeviceShaderFloat16Int8Features* toTransform);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void transform_tohost_VkNativeBufferANDROID(
     VkDecoderGlobalState* resourceTracker,
@@ -3052,6 +3062,14 @@ void transform_tohost_VkImportColorBufferGOOGLE(
 void transform_fromhost_VkImportColorBufferGOOGLE(
     VkDecoderGlobalState* resourceTracker,
     VkImportColorBufferGOOGLE* toTransform);
+
+void transform_tohost_VkImportBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportBufferGOOGLE* toTransform);
+
+void transform_fromhost_VkImportBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportBufferGOOGLE* toTransform);
 
 void transform_tohost_VkImportPhysicalAddressGOOGLE(
     VkDecoderGlobalState* resourceTracker,

@@ -64,9 +64,11 @@ bool canUseCudaDecoder() {
 #endif
 }
 
+static bool s_force_no_gpu = false;
 bool canDecodeToGpuTexture() {
 #ifndef __APPLE__
-    if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
+
+    if (!s_force_no_gpu && emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
         return true;
     } else {
         return false;
@@ -187,6 +189,8 @@ void MediaVpxDecoderGeneric::try_decode(const uint8_t* data,
             dprint("Failed to decode with HW decoder (Error Code: %d); switch "
                    "to SW",
                    mHwVideoHelper->error());
+            mUseGpuTexture = false;
+            s_force_no_gpu = true;
             mHwVideoHelper.reset(nullptr);
         }
     }

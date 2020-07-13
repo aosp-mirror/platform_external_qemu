@@ -36,7 +36,7 @@ using webrtc::Switchboard;
 // Binds to a port and listens for incoming emulator connections.
 class EmulatorConnection : public sigslot::has_slots<> {
 public:
-    EmulatorConnection(int port, std::string handle, std::string turnconfig);
+    EmulatorConnection(int port, std::string discovery_file, std::string handle, std::string turnconfig);
     ~EmulatorConnection();
 
     bool listen(bool fork);
@@ -55,6 +55,7 @@ private:
     std::string mHandle;
     std::string mTurnConfig;
     int mPort;
+    std::string mDiscoveryFile;
 };
 }  // namespace net
 }  // namespace emulator

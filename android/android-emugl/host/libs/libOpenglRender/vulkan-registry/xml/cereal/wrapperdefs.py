@@ -58,6 +58,7 @@ STRUCT_EXTENSION_PARAM_FOR_WRITE = \
 
 STRUCT_TYPE_API_NAME = "goldfish_vk_struct_type"
 EXTENSION_SIZE_API_NAME = "goldfish_vk_extension_struct_size"
+EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME = "goldfish_vk_extension_struct_size_with_stream_features"
 
 VOID_TYPE = makeVulkanTypeSimple(False, "void", 0)
 STREAM_RET_TYPE = makeVulkanTypeSimple(False, "void", 0)

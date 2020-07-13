@@ -2799,6 +2799,19 @@ VkPhysicalDevice8BitStorageFeaturesKHR* unbox_VkPhysicalDevice8BitStorageFeature
 }
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+VkPhysicalDeviceShaderFloat16Int8Features* unbox_VkPhysicalDeviceShaderFloat16Int8Features(
+    Pool* pool,
+    const VkPhysicalDeviceShaderFloat16Int8Features* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkPhysicalDeviceShaderFloat16Int8Features* res = (VkPhysicalDeviceShaderFloat16Int8Features*)pool->alloc(sizeof(const VkPhysicalDeviceShaderFloat16Int8Features));
+    deepcopy_VkPhysicalDeviceShaderFloat16Int8Features(pool, toUnbox, res);
+    handlemap_VkPhysicalDeviceShaderFloat16Int8Features(&unboxMapping, res);
+    return res;
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 VkNativeBufferANDROID* unbox_VkNativeBufferANDROID(
     Pool* pool,
@@ -4074,6 +4087,17 @@ VkImportColorBufferGOOGLE* unbox_VkImportColorBufferGOOGLE(
     VkImportColorBufferGOOGLE* res = (VkImportColorBufferGOOGLE*)pool->alloc(sizeof(const VkImportColorBufferGOOGLE));
     deepcopy_VkImportColorBufferGOOGLE(pool, toUnbox, res);
     handlemap_VkImportColorBufferGOOGLE(&unboxMapping, res);
+    return res;
+}
+
+VkImportBufferGOOGLE* unbox_VkImportBufferGOOGLE(
+    Pool* pool,
+    const VkImportBufferGOOGLE* toUnbox)
+{
+    BoxedHandleUnwrapMapping unboxMapping;
+    VkImportBufferGOOGLE* res = (VkImportBufferGOOGLE*)pool->alloc(sizeof(const VkImportBufferGOOGLE));
+    deepcopy_VkImportBufferGOOGLE(pool, toUnbox, res);
+    handlemap_VkImportBufferGOOGLE(&unboxMapping, res);
     return res;
 }
 

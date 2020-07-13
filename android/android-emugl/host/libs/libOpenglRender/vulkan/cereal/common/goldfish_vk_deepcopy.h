@@ -1348,6 +1348,13 @@ void deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR(
     VkPhysicalDevice8BitStorageFeaturesKHR* to);
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+void deepcopy_VkPhysicalDeviceShaderFloat16Int8Features(
+    Pool* pool,
+    const VkPhysicalDeviceShaderFloat16Int8Features* from,
+    VkPhysicalDeviceShaderFloat16Int8Features* to);
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void deepcopy_VkNativeBufferANDROID(
     Pool* pool,
@@ -2007,6 +2014,11 @@ void deepcopy_VkImportColorBufferGOOGLE(
     Pool* pool,
     const VkImportColorBufferGOOGLE* from,
     VkImportColorBufferGOOGLE* to);
+
+void deepcopy_VkImportBufferGOOGLE(
+    Pool* pool,
+    const VkImportBufferGOOGLE* from,
+    VkImportBufferGOOGLE* to);
 
 void deepcopy_VkImportPhysicalAddressGOOGLE(
     Pool* pool,

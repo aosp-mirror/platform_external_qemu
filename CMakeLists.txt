@@ -463,11 +463,6 @@ if(WINDOWS)
   include(emu-windows-libs)
 endif()
 
-# There is no USB support on windows, so we will not try to resolve it.
-if(NOT WINDOWS)
-  prebuilt(USB)
-endif()
-
 # Get the versions from git (Note that both functions are doing pretty much the
 # same)
 get_git_version(ANDROID_QEMU_VERSION)
@@ -560,11 +555,6 @@ target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN
                                                   zlib)
 
 target_link_libraries(android-qemu-deps INTERFACE virglrenderer-headers)
-
-# We only support usb on mac/lin
-android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE
-                              USB::USB)
-android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE USB::USB)
 
 # Now we add the normal android libs, so we can use them
 add_subdirectory(android)
@@ -738,7 +728,7 @@ android_add_library(
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_compile_options(qemu2-common PRIVATE "-Wno-string-plus-int"
                                             "-Wno-return-type")
-target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
+target_link_libraries(qemu2-common PUBLIC android-qemu-deps emulator-libusb)
 
 if (NOT OPTION_AEMU_LIBS_ONLY)
 
