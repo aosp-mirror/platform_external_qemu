@@ -1605,6 +1605,109 @@ TEST_P(VulkanHalTest, GetImageMemoryRequirements2) {
     vk->vkDestroyImage(mDevice, testImage, nullptr);
 }
 
+TEST_P(VulkanHalTest, PerfTestObjCreate) {
+    for (uint32_t i = 0; i < 100000; ++i) {
+        VkImageCreateInfo testImageCi = {
+            VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, nullptr,
+            0,
+            VK_IMAGE_TYPE_2D,
+            VK_FORMAT_R8G8B8A8_UNORM,
+            { kWindowSize, kWindowSize, 1, },
+            1, 1,
+            VK_SAMPLE_COUNT_1_BIT,
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+            VK_SHARING_MODE_EXCLUSIVE,
+            0, nullptr /* shared queue families */,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+        };
+
+        VkImage testImage;
+        EXPECT_EQ(VK_SUCCESS, vk->vkCreateImage(mDevice, &testImageCi, nullptr,
+                    &testImage));
+
+        VkImageMemoryRequirementsInfo2 info2 = {
+            VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2_KHR, 0,
+            testImage,
+        };
+
+        VkMemoryDedicatedRequirements dedicatedReqs {
+            VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS_KHR, 0,
+        };
+
+        VkMemoryRequirements2 reqs2 = {
+            VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2_KHR, 0,
+        };
+
+        reqs2.pNext = &dedicatedReqs;
+
+        PFN_vkGetImageMemoryRequirements2KHR func =
+            (PFN_vkGetImageMemoryRequirements2KHR)
+            vk->vkGetDeviceProcAddr(mDevice, "vkGetImageMemoryRequirements2KHR");
+
+        EXPECT_NE(nullptr, func);
+
+        func(mDevice, &info2, &reqs2);
+
+        vk->vkDestroyImage(mDevice, testImage, nullptr);
+    } 
+}
+
+TEST_P(VulkanHalTest, PerfTestCmdSubmit) {
+
+    VkCommandPoolCreateInfo poolCi = {
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0, 0, mGraphicsQueueFamily,
+    };
+
+    VkCommandPool pool;
+    vk->vkCreateCommandPool(mDevice, &poolCi, nullptr, &pool);
+
+    std::vector<VkCommandBuffer> cbs(1000);
+
+    VkCommandBufferAllocateInfo cbAi = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
+        pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1000,
+    };
+
+    vk->vkAllocateCommandBuffers(mDevice, &cbAi, cbs.data());
+
+    auto cpuTimeStart = System::cpuTime();
+
+    for (uint32_t i = 0; i < 500000; ++i) {
+        VkCommandBufferBeginInfo beginInfo = {
+            VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, 0,
+            VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, 0,
+        };
+
+        vk->vkBeginCommandBuffer(cbs[i % 1000], &beginInfo);
+        vk->vkEndCommandBuffer(cbs[i % 1000]);
+
+        VkSubmitInfo si = {
+            VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+            0, 0,
+            0,
+            1, &cbs[i % 1000],
+            0, 0,
+        };
+        vk->vkQueueSubmit(mQueue, 1, &si, 0);
+    } 
+
+    auto cpuTime = System::cpuTime() - cpuTimeStart;
+
+    uint64_t duration_us = cpuTime.wall_time_us;
+    uint64_t duration_cpu_us = cpuTime.usageUs();
+
+    float ms = duration_us / 1000.0f;
+    float sec = duration_us / 1000000.0f;
+
+    float submitHz = 500000 / sec;
+
+    printf("Submit %u times in %f ms. Rate: %f Hz\n", 500000, ms, submitHz);
+
+    vk->vkFreeCommandBuffers(mDevice, pool, 1000, cbs.data());
+    vk->vkDestroyCommandPool(mDevice, pool, nullptr);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     MultipleTransports,
     VulkanHalTest,
