@@ -18,6 +18,8 @@ public:
     ~VkEncoder();
 
     void flush();
+    void lock();
+    void unlock();
 
     using CleanupCallback = std::function<void()>;
     void registerCleanupCallback(void* handle, CleanupCallback cb);
@@ -40,6 +42,8 @@ using android::aligned_buf_free;
 using android::base::guest::AutoLock;
 using android::base::guest::Lock;
 using android::base::Pool;
+
+struct EncoderAutoLock;
 
 class VkEncoder::Impl {
 public:
@@ -70,8 +74,9 @@ public:
     }
 
     void flush() {
-        AutoLock encoderLock(lock);
+        lock();
         m_stream.flush();
+        unlock();
     }
 
     // Assume the lock for the current encoder is held.
@@ -87,7 +92,18 @@ public:
         mCleanupCallbacks.erase(handle);
     }
 
-    Lock lock;
+    // can be recursive
+    void lock() {
+        if (this == sAcquiredEncoderThreadLocal) return; // recursive
+        
+        while (mLock.test_and_set(std::memory_order_acquire));
+        sAcquiredEncoderThreadLocal = this;
+    }
+
+    void unlock() {
+        mLock.clear(std::memory_order_release);
+        sAcquiredEncoderThreadLocal = nullptr;
+    }
 
 private:
     VulkanCountingStream m_countingStream;
@@ -96,8 +112,25 @@ private:
 
     Validation m_validation;
     bool m_logEncodes;
+    std::atomic_flag mLock = ATOMIC_FLAG_INIT;
+    static thread_local Impl* sAcquiredEncoderThreadLocal;
 
     std::unordered_map<void*, VkEncoder::CleanupCallback> mCleanupCallbacks;
+};
+
+VkEncoder::~VkEncoder() = default;
+
+// static
+thread_local VkEncoder::Impl* VkEncoder::Impl::sAcquiredEncoderThreadLocal = nullptr;
+
+struct EncoderAutoLock {
+    EncoderAutoLock(VkEncoder* enc) : mEnc(enc) {
+        mEnc->lock();
+    }
+    ~EncoderAutoLock() {
+        mEnc->unlock();
+    }
+    VkEncoder* mEnc;
 };
 
 VkEncoder::VkEncoder(IOStream *stream) :
@@ -105,6 +138,14 @@ VkEncoder::VkEncoder(IOStream *stream) :
 
 void VkEncoder::flush() {
     mImpl->flush();
+}
+
+void VkEncoder::lock() {
+    mImpl->lock();
+}
+
+void VkEncoder::unlock() {
+    mImpl->unlock();
 }
 
 void VkEncoder::registerCleanupCallback(void* handle, VkEncoder::CleanupCallback cb) {
@@ -206,25 +247,21 @@ def emit_custom_pre_validate(typeInfo, api, cgen):
 
 def emit_custom_resource_preprocess(typeInfo, api, cgen):
     if api.name in ENCODER_CUSTOM_RESOURCE_PREPROCESS:
-        cgen.stmt("encoderLock.unlock()")
         cgen.stmt( \
             make_event_handler_call( \
                 "mImpl->resources()", api,
                 ENCODER_THIS_PARAM,
                 SUCCESS_RET_TYPES[api.getRetTypeExpr()],
                 cgen, suffix="_pre"))
-        cgen.stmt("encoderLock.lock()")
 
 def emit_custom_resource_postprocess(typeInfo, api, cgen):
     if api.name in ENCODER_CUSTOM_RESOURCE_POSTPROCESS:
-        cgen.stmt("encoderLock.unlock()")
         cgen.stmt(make_event_handler_call( \
             "mImpl->resources()",
             api,
             ENCODER_THIS_PARAM,
             api.getRetVarExpr(),
             cgen))
-        cgen.stmt("encoderLock.lock()")
 
 def emit_count_marshal(typeInfo, param, cgen):
     res = \
@@ -322,7 +359,7 @@ class EncodingParameters(object):
                 self.toWrite.append(localCopyParam)
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
-    cgen.stmt("AutoLock encoderLock(mImpl->lock)")
+    cgen.stmt("EncoderAutoLock encoderLock(this)")
     cgen.stmt("AEMU_SCOPED_TRACE(\"%s encode\")" % api.name)
 
     cgen.stmt("mImpl->log(\"start %s\")" % api.name)
@@ -435,6 +472,11 @@ def emit_post(typeInfo, api, cgen):
     if api.name in ENCODER_EXPLICIT_FLUSHED_APIS:
         cgen.stmt("stream->flush()");
 
+def emit_pool_free(cgen):
+    cgen.stmt("pool->freeAll()")
+    cgen.stmt("%s->clearPool()" % COUNTING_STREAM)
+    cgen.stmt("%s->clearPool()" % STREAM)
+
 def emit_return_unmarshal(typeInfo, api, cgen):
     cgen.stmt("AEMU_SCOPED_TRACE(\"%s returnUnmarshal\")" % api.name)
 
@@ -447,9 +489,6 @@ def emit_return_unmarshal(typeInfo, api, cgen):
     cgen.stmt("%s %s = (%s)0" % (retType, retVar, retType))
     cgen.stmt("%s->read(&%s, %s)" % \
               (STREAM, retVar, cgen.sizeofExpr(api.retType)))
-    cgen.stmt("%s->clearPool()" % COUNTING_STREAM)
-    cgen.stmt("%s->clearPool()" % STREAM)
-    cgen.stmt("pool->freeAll()")
 
 def emit_return(typeInfo, api, cgen):
     cgen.stmt("mImpl->log(\"finish %s\");" % api.name);
@@ -467,6 +506,7 @@ def emit_default_encoding(typeInfo, api, cgen):
     emit_parameter_encode_read(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
     emit_post(typeInfo, api, cgen)
+    emit_pool_free(cgen)
     emit_return(typeInfo, api, cgen)
 
 ## Custom encoding definitions##################################################
@@ -513,6 +553,7 @@ def emit_with_custom_unwrap(custom):
         emit_parameter_encode_do_parameter_write(typeInfo, api, cgen)
         emit_parameter_encode_read(typeInfo, api, cgen)
         emit_return_unmarshal(typeInfo, api, cgen)
+        emit_pool_free(cgen)
         emit_return(typeInfo, api, cgen)
     return call
 
@@ -548,6 +589,7 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
 
     emit_parameter_encode_read(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
+    emit_pool_free(cgen)
     emit_return(typeInfo, api, cgen)
 
 def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
@@ -578,7 +620,7 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
         cgen.endIf()
 
     emit_invalidate_ranges(STREAM)
-
+    emit_pool_free(cgen)
     emit_return(typeInfo, api, cgen)
 
 def unwrap_VkNativeBufferANDROID():
