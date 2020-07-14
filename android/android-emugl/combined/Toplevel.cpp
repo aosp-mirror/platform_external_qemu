@@ -181,7 +181,7 @@ private:
         // Set fake guest properties
         property_set("ro.kernel.qemu.gles", "1");
         property_set("qemu.sf.lcd_density", "420");
-        property_set("ro.kernel.qemu.gltransport", "pipe");
+        property_set("ro.kernel.qemu.gltransport", "asg");
         property_set("ro.kernel.qemu.gltransport.drawFlushInterval", "800");
 
         android_initOpenglesEmulation();
