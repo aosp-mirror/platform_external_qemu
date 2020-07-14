@@ -69,10 +69,7 @@ public:
         ALOGD(\"encoder log: %%s\", text);
     }
 
-    void flush() {
-        AutoLock encoderLock(lock);
-        m_stream.flush();
-    }
+    void flush();
 
     // Assume the lock for the current encoder is held.
     void registerCleanupCallback(void* handle, VkEncoder::CleanupCallback cb) {
@@ -87,7 +84,18 @@ public:
         mCleanupCallbacks.erase(handle);
     }
 
-    Lock lock;
+    // can be recursive
+    void lockEncoder() {
+        if (this == sAcquiredEncoderThreadLocal) return; // recursive
+        
+        while (mLock.test_and_set(std::memory_order_acquire));
+        sAcquiredEncoderThreadLocal = this;
+    }
+
+    void unlockEncoder() {
+        mLock.clear(std::memory_order_release);
+        sAcquiredEncoderThreadLocal = nullptr;
+    }
 
 private:
     VulkanCountingStream m_countingStream;
@@ -96,9 +104,29 @@ private:
 
     Validation m_validation;
     bool m_logEncodes;
+    std::atomic_flag mLock = ATOMIC_FLAG_INIT;
+    static thread_local Impl* sAcquiredEncoderThreadLocal;
 
     std::unordered_map<void*, VkEncoder::CleanupCallback> mCleanupCallbacks;
 };
+
+// static
+thread_local VkEncoder::Impl* VkEncoder::Impl::sAcquiredEncoderThreadLocal = nullptr;
+
+struct EncoderAutoLock {
+    EncoderAutoLock(VkEncoder::Impl* impl) : mImpl(impl) {
+        mImpl->lockEncoder();
+    }
+    ~EncoderAutoLock() {
+        mImpl->unlockEncoder();
+    }
+    VkEncoder::Impl* mImpl;
+};
+
+void VkEncoder::Impl::flush() {
+    EncoderAutoLock lock(this);
+    m_stream.flush();
+}
 
 VkEncoder::VkEncoder(IOStream *stream) :
     mImpl(new VkEncoder::Impl(stream)) { }
@@ -206,25 +234,21 @@ def emit_custom_pre_validate(typeInfo, api, cgen):
 
 def emit_custom_resource_preprocess(typeInfo, api, cgen):
     if api.name in ENCODER_CUSTOM_RESOURCE_PREPROCESS:
-        cgen.stmt("encoderLock.unlock()")
         cgen.stmt( \
             make_event_handler_call( \
                 "mImpl->resources()", api,
                 ENCODER_THIS_PARAM,
                 SUCCESS_RET_TYPES[api.getRetTypeExpr()],
                 cgen, suffix="_pre"))
-        cgen.stmt("encoderLock.lock()")
 
 def emit_custom_resource_postprocess(typeInfo, api, cgen):
     if api.name in ENCODER_CUSTOM_RESOURCE_POSTPROCESS:
-        cgen.stmt("encoderLock.unlock()")
         cgen.stmt(make_event_handler_call( \
             "mImpl->resources()",
             api,
             ENCODER_THIS_PARAM,
             api.getRetVarExpr(),
             cgen))
-        cgen.stmt("encoderLock.lock()")
 
 def emit_count_marshal(typeInfo, param, cgen):
     res = \
@@ -322,7 +346,7 @@ class EncodingParameters(object):
                 self.toWrite.append(localCopyParam)
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
-    cgen.stmt("AutoLock encoderLock(mImpl->lock)")
+    cgen.stmt("EncoderAutoLock encoderLock(mImpl)")
     cgen.stmt("AEMU_SCOPED_TRACE(\"%s encode\")" % api.name)
 
     cgen.stmt("mImpl->log(\"start %s\")" % api.name)
