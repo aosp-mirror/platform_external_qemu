@@ -36,9 +36,10 @@ public:
     //
     // Rough space cost formula:
     // O(chunksPerSize * log2(maxSize / minSize) * maxSize)
-    Pool(size_t minSize = 8,
+    Pool(size_t minSize = 4,
          size_t maxSize = 4096,
-         size_t chunksPerSize = 256);
+         size_t chunksPerSize = 1024);
+
 
     // All memory allocated by this pool
     // is automatically deleted when the pool
