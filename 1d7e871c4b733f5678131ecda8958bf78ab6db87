@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a06fc11d_49ac2617",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/encoder.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-15T15:13:28Z",
+      "side": 1,
+      "message": "Ack, will address",
+      "parentUuid": "0f4403ac_2e8d71a7",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 23
+      },
+      "revId": "1d7e871c4b733f5678131ecda8958bf78ab6db87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "76d79fc1_cdac1613",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/encoder.py",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2020-07-14T23:18:49Z",
       "side": 1,
       "message": "Should we make the lock recursive? The android Lock itself seems to use the normal pthread_mutex without specifying it to be recursive.\n\nAlso in this implementation it looks unsafe if we do things like:\n\n  lock();\n  ...\n  lock();\n  ...\n  unlock();\n  // already unlocked\n  unlock();",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 69
+      },
+      "revId": "1d7e871c4b733f5678131ecda8958bf78ab6db87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9ae76a4d_b14ab25e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/encoder.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-15T15:13:28Z",
+      "side": 1,
+      "message": "Ack, will address",
+      "parentUuid": "76d79fc1_cdac1613",
       "range": {
         "startLine": 97,
         "startChar": 0,
