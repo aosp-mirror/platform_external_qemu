@@ -128,6 +128,16 @@ BugreportPage::~BugreportPage() {
     if (System::get()->pathIsFile(mSavingStates.screenshotFilePath)) {
         System::get()->deleteFile(mSavingStates.screenshotFilePath);
     }
+
+    // We need to cancel these running adb commands, as their result callbacks
+    // may call runOnUiThread on an already destroyed EmulatorQtWindow instance.
+    // Cancelling will ensure the result callback is not called.
+    if (mAdbLogcat) {
+        mAdbLogcat->cancel();
+    }
+    if (mAdbBugreport) {
+        mAdbBugreport->cancel();
+    }
 }
 
 void BugreportPage::setAdbInterface(AdbInterface* adb) {
