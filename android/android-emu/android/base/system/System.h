@@ -21,6 +21,7 @@
 #include "android/base/StringView.h"
 
 #include <algorithm>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -411,6 +412,8 @@ public:
     // Setup system specific handlers. For example on msvc you might
     // want to redirect parameter validation.
     virtual void configureHost() const = 0;
+
+    virtual void cleanupWaitingPids() const = 0;
 
     // /////////////////////////////////////////////////////////////////////////
     // Execute commands.
