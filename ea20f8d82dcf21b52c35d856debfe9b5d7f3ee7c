@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9114df6_8fa131b8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/encoder.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-07-15T19:20:52Z",
+      "side": 1,
+      "message": "should this be a std::atomic\u003cint\u003e? though std::atomic\u003c\u003e is not guaranteed lock-free by the standard.",
+      "range": {
+        "startLine": 74,
+        "startChar": 14,
+        "endLine": 74,
+        "endChar": 46
+      },
+      "revId": "ea20f8d82dcf21b52c35d856debfe9b5d7f3ee7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
