@@ -46,6 +46,30 @@
       "revId": "ea20f8d82dcf21b52c35d856debfe9b5d7f3ee7c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2efe5678_57710c5d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/encoder.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-07-15T19:24:06Z",
+      "side": 1,
+      "message": "oh I see it\u0027s thread_local. Sounds good.",
+      "parentUuid": "636bc8c8_c887ae2c",
+      "range": {
+        "startLine": 74,
+        "startChar": 14,
+        "endLine": 74,
+        "endChar": 46
+      },
+      "revId": "ea20f8d82dcf21b52c35d856debfe9b5d7f3ee7c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
