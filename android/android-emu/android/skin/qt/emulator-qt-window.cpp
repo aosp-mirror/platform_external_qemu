@@ -777,6 +777,7 @@ EmulatorQtWindow::~EmulatorQtWindow() {
         mStartupDialog.clear();
     });
 
+
     AutoLock lock(mSnapshotStateLock);
     mShouldShowSnapshotModalOverlay = false;
     mContainer.hideModalOverlay();

@@ -1219,6 +1219,13 @@ public:
     #endif
     }
 
+    void cleanupWaitingPids() const override {
+        for (auto pid : mWaitingPids) {
+            LOG(VERBOSE) << "Force killing pid=" << pid;
+            kill(pid, SIGKILL);
+        }
+    }
+
     Optional<std::string> runCommandWithResult(
             const std::vector<std::string>& commandLine,
             System::Duration timeoutMs = kInfinite,
@@ -1504,7 +1511,9 @@ public:
         if (timeoutMs == kInfinite) {
             // Let's just wait forever and hope that the child process
             // exits.
+            mWaitingPids.insert(pid);
             HANDLE_EINTR(waitpid(pid, &exitCode, 0));
+            mWaitingPids.erase(pid);
             if (outExitCode) {
                 *outExitCode = WEXITSTATUS(exitCode);
             }
@@ -1704,6 +1713,7 @@ public:
 #endif  // !_WIN32
 
 private:
+    std::unordered_set<int> mWaitingPids;
     mutable std::string mProgramDir;
     mutable std::string mLauncherDir;
     mutable std::string mHomeDir;

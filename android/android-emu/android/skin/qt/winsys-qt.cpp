@@ -493,6 +493,10 @@ void skin_winsys_destroy() {
 
     QtLogger::stop();
 
+    // Force kill any parallel tasks that may be running (with no timeouts), as this can make Qt
+    // hang on exit.
+    System::get()->cleanupWaitingPids();
+
     // Mac is still causing us troubles - it somehow manages to not call the
     // main window destructor (in qemu1 only!) and crashes if QApplication
     // is destroyed right here. So let's delay the deletion for now

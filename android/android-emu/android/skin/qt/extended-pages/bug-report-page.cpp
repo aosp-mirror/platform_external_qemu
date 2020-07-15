@@ -128,6 +128,12 @@ BugreportPage::~BugreportPage() {
     if (System::get()->pathIsFile(mSavingStates.screenshotFilePath)) {
         System::get()->deleteFile(mSavingStates.screenshotFilePath);
     }
+    if (mAdbLogcat) {
+        mAdbLogcat->cancel();
+    }
+    if (mAdbBugreport) {
+        mAdbBugreport->cancel();
+    }
 }
 
 void BugreportPage::setAdbInterface(AdbInterface* adb) {
