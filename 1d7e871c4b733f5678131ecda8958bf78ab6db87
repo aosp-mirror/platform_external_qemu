@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "2049c85c_aaebe715",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/encoder.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-15T19:17:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a06fc11d_49ac2617",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 23
+      },
+      "revId": "1d7e871c4b733f5678131ecda8958bf78ab6db87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "76d79fc1_cdac1613",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/encoder.py",
         "patchSetId": 2
@@ -93,6 +117,30 @@
       "revId": "1d7e871c4b733f5678131ecda8958bf78ab6db87",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9139687d_47c7736a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/encoder.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-15T19:17:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ae76a4d_b14ab25e",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 69
+      },
+      "revId": "1d7e871c4b733f5678131ecda8958bf78ab6db87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
