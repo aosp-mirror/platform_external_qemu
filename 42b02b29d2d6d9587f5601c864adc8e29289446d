@@ -50,6 +50,24 @@
       "revId": "42b02b29d2d6d9587f5601c864adc8e29289446d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f161b53d_38782ca2",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1471,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-07-16T22:12:27Z",
+      "side": 1,
+      "message": "The only worry is if some qt code is scheduling another process after this call, which shouldn\u0027t happen as this is basically the end of the QApplication\u0027s life (all other child widgets have already been destructed at this point).\n\nThere could some other code that spawns a process after the qApp has terminated and perhaps adding an exit handler that also calls cleanupWaitingPids() can be a safe layer of redundancy.",
+      "parentUuid": "d7e8d47b_8370a75f",
+      "revId": "42b02b29d2d6d9587f5601c864adc8e29289446d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
