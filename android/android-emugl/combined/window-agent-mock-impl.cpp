@@ -80,5 +80,5 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
 };
 
-const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
+const QAndroidEmulatorWindowAgent* const gMockQAndroidEmulatorWindowAgent =
         &sQAndroidEmulatorWindowAgent;

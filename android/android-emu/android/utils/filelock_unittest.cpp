@@ -16,7 +16,7 @@
 #include "android/base/testing/TestTempDir.h"
 #include "android/utils/path.h"
 #include "android/utils/eintr_wrapper.h"
-
+#include "android/emulation/testing/MockAndroidAgentFactory.h"
 #include <gtest/gtest.h>
 #include <memory>
 
@@ -81,10 +81,6 @@ protected:
 };
 
 #ifdef _WIN32
-bool sIsParentProcess = true;
-HANDLE sChildRead = nullptr;
-HANDLE sChildWrite = nullptr;
-char sFileLockPath[MAX_PATH] = {};
 
 class FileLockTest : public FileLockTestInterface {
 public:
@@ -123,9 +119,9 @@ public:
             ASSERT_TRUE(CreateProcess(nullptr, cmdBuffer, nullptr, nullptr,
                                       true, 0, nullptr, nullptr, &si, &mPi));
         } else {
-            mFileLockPath = sFileLockPath;
-            mChildRead = sChildRead;
-            mChildWrite = sChildWrite;
+            mFileLockPath = android::emulation::sFileLockPath;
+            mChildRead = android::emulation::sChildRead;
+            mChildWrite = android::emulation::sChildWrite;
         }
     }
     void TearDown() override {
@@ -147,7 +143,7 @@ public:
     }
 
 protected:
-    bool isParentProcess() const override { return sIsParentProcess; }
+    bool isParentProcess() const override { return android::emulation::sIsParentProcess; }
     size_t writeToOther(void* buffer, size_t size) override {
         HANDLE pipe = isParentProcess() ? mParentWrite : mChildWrite;
         DWORD ret = 0;
@@ -356,23 +352,3 @@ TEST_F(FileLockTest, killChildStaleLock) {
     }
 }
 
-int main(int argc, char** argv) {
-#ifdef _WIN32
-#define _READ_STR "--read"
-#define _WRITE_STR "--write"
-#define _FILE_PATH_STR "--file-lock-path"
-    for (int i = 1; i < argc; i++) {
-        if (!strcmp("--child", argv[i])) {
-            sIsParentProcess = false;
-        } else if (!strncmp(_READ_STR, argv[i], strlen(_READ_STR))) {
-            sscanf(argv[i], _READ_STR "=%p", &sChildRead);
-        } else if (!strncmp(_WRITE_STR, argv[i], strlen(_WRITE_STR))) {
-            sscanf(argv[i], _WRITE_STR "=%p", &sChildWrite);
-        } else if (!strncmp(_FILE_PATH_STR, argv[i], strlen(_FILE_PATH_STR))) {
-            sscanf(argv[i], _FILE_PATH_STR "=%s", sFileLockPath);
-        }
-    }
-#endif
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

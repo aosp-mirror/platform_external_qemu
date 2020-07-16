@@ -31,6 +31,7 @@
 #include "android/opengles.h"
 #include "android/refcount-pipe.h"
 #include "android/snapshot/interface.h"
+#include "android/console.h"
 
 #include <fstream>
 #include <string>
@@ -409,9 +410,9 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     int min;
     android_startOpenglesRenderer(
         display_width, display_height, 1, 28,
-        gQAndroidVmOperations,
-        gQAndroidEmulatorWindowAgent,
-        gQAndroidMultiDisplayAgent,
+        getConsoleAgents()->vm,
+        getConsoleAgents()->emu,
+        getConsoleAgents()->multi_display,
         &maj, &min);
 
     char* vendor = nullptr;
@@ -431,7 +432,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
         abort();
     }
 
-    address_space_set_vm_operations(gQAndroidVmOperations);
+    address_space_set_vm_operations(getConsoleAgents()->vm);
     android_init_opengles_pipe();
     android_opengles_pipe_set_recv_mode(2 /* virtio-gpu */);
     android_init_refcount_pipe();
@@ -550,5 +551,5 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
     .hostmemGetInfo = android_emulation_hostmem_get_info,
 };
 
-const QAndroidVmOperations* const gQAndroidVmOperations =
-        &sQAndroidVmOperations;
+const QAndroidVmOperations* const gMockQAndroidVmOperations =
+         &sQAndroidVmOperations;
