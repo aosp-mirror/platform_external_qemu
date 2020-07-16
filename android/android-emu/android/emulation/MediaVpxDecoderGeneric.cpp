@@ -154,12 +154,16 @@ void MediaVpxDecoderGeneric::decodeFrame(void* ptr) {
     unsigned int len = param.size;
 
     mSnapshotHelper.savePacket(data, len, param.user_priv);
-    VPX_DPRINT("calling vpx_codec_decode data %p datalen %d", data, (int)len);
+    VPX_DPRINT("calling vpx_codec_decode data %p datalen %d userdata %" PRIx64,
+               data, (int)len, param.user_priv);
 
+    mUserDataList.push_back(param.user_priv);
     decode_internal(data, len, param.user_priv);
 
     // now the we can call getImage
     fetchAllFrames();
+    ++mNumFramesDecoded;
+    VPX_DPRINT("decoded %d frames", mNumFramesDecoded);
 }
 
 void MediaVpxDecoderGeneric::decode_internal(const uint8_t* data,
@@ -213,6 +217,8 @@ void MediaVpxDecoderGeneric::fetchAllFrames() {
         if (!success) {
             break;
         }
+        frame.pts = mUserDataList.front();
+        mUserDataList.pop_front();
         mSnapshotHelper.saveDecodedFrame(std::move(frame));
     }
 }
@@ -235,6 +241,7 @@ void MediaVpxDecoderGeneric::getImage(void* ptr) {
     *(param.p_d_w) = pFrame->width;
     *(param.p_d_h) = pFrame->height;
     *(param.p_user_priv) = pFrame->pts;
+    VPX_DPRINT("got time %" PRIx64, pFrame->pts);
     VPX_DPRINT(
             "fmt is %d  I42016 is %d I420 is %d userdata is %p colorbuffer id "
             "%d bpp %d",
@@ -277,6 +284,7 @@ void MediaVpxDecoderGeneric::flush(void* ptr) {
     if (mVideoHelper) {
         mVideoHelper->flush();
         fetchAllFrames();
+        mUserDataList.clear();
     }
     VPX_DPRINT("flush done");
 }
