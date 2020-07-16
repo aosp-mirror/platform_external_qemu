@@ -78,7 +78,12 @@ void MediaSnapshotHelper::saveH264Packet(const uint8_t* frame,
         v.assign(frame, frame + szBytes);
         bool hasSps = H264NaluParser::checkSpsFrame(frame, szBytes);
         if (hasSps) {
-            mSnapshotState = MediaSnapshotState{};
+            SNAPSHOT_DPRINT("create new snapshot state");
+            MediaSnapshotState newSnapshotState{};
+            // we need to keep the frames, the guest might not have retrieved
+            // them yet; otherwise, we might loose some frames
+            std::swap(newSnapshotState.savedFrames, mSnapshotState.savedFrames);
+            std::swap(newSnapshotState, mSnapshotState);
             mSnapshotState.saveSps(v);
         } else {
             bool hasPps = H264NaluParser::checkPpsFrame(frame, szBytes);
