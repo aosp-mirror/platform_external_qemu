@@ -20,6 +20,15 @@
 
 #include <inttypes.h>
 
+#ifdef _WIN32
+#ifdef ANDROID_EMU_EXPORTS
+#define ANDROID_EMU_API __declspec(dllexport)
+#else
+#define ANDROID_EMU_API __declspec(dllimport)
+#endif
+#endif
+
+
 namespace android {
 
 namespace base {
@@ -31,7 +40,7 @@ class Stream;
 class HostAddressSpaceDevice {
 public:
     HostAddressSpaceDevice();
-    static HostAddressSpaceDevice* get();
+    ANDROID_EMU_API static HostAddressSpaceDevice* get();
 
     void initialize();
 
@@ -44,9 +53,9 @@ public:
     void freeBlock(uint32_t handle, uint64_t off);
     void setHostAddr(uint32_t handle, size_t off, void* hva);
 
-    void setHostAddrByPhysAddr(uint64_t physAddr, void* hva);
-    void unsetHostAddrByPhysAddr(uint64_t physAddr);
-    void* getHostAddr(uint64_t physAddr);
+    ANDROID_EMU_API void setHostAddrByPhysAddr(uint64_t physAddr, void* hva);
+    ANDROID_EMU_API void unsetHostAddrByPhysAddr(uint64_t physAddr);
+    ANDROID_EMU_API void* getHostAddr(uint64_t physAddr);
     uint64_t offsetToPhysAddr(uint64_t offset) const;
 
     void ping(uint32_t handle, emulation::AddressSpaceDevicePingInfo* pingInfo);
