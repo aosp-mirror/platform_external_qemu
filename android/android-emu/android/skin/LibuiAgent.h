@@ -10,11 +10,3 @@
 
 #pragma once
 
-#include "android/emulation/control/libui_agent.h"
-#include "android/utils/compiler.h"
-
-ANDROID_BEGIN_HEADER
-
-extern const QAndroidLibuiAgent* const gQAndroidLibuiAgent;
-
-ANDROID_END_HEADER
