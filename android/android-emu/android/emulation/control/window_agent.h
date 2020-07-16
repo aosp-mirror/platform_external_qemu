@@ -78,7 +78,4 @@ typedef struct QAndroidEmulatorWindowAgent {
     bool (*getMonitorRect)(uint32_t*, uint32_t*);
 } QAndroidEmulatorWindowAgent;
 
-// Defined in android/window-agent-impl.cpp
-extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
-
 ANDROID_END_HEADER

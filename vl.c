@@ -152,9 +152,10 @@ int main(int argc, char **argv)
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/drive-share.h"
 #include "android-qemu2-glue/looper-qemu.h"
-#include "android-qemu2-glue/qemu-control-impl.h"
 #include "android-qemu2-glue/qemu-setup.h"
+#include "android-qemu2-glue/qemu-console-factory.h"
 #include "android/android.h"
+#include "android/console.h"
 #include "android/base/process-control.h"
 #include "android/boot-properties.h"
 #include "android/camera/camera-service.h"
@@ -4654,9 +4655,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         android_wear_agent_start(looper_getForThread());
         android_registerMainLooper(looper_getForThread());
     }
+\
 
     if (min_config_qemu_mode) {
-        mts_port_create(NULL, gQAndroidUserEventAgent, gQAndroidDisplayAgent);
+        mts_port_create(NULL, getConsoleAgents()->user_event, getConsoleAgents()->display);
     }
 
     if (android_qemu_mode) {
@@ -4737,7 +4739,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
         /* Initialize multi-touch emulation. */
         if (androidHwConfig_isScreenMultiTouch(android_hw)) {
-            mts_port_create(NULL, gQAndroidUserEventAgent, gQAndroidDisplayAgent);
+            mts_port_create(NULL, getConsoleAgents()->user_event, getConsoleAgents()->display);
         }
 
         /* Enable ADB authenticaiton, or not. */
@@ -5585,6 +5587,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         qemu_boot_set(boot_once, &error_fatal);
         qemu_register_reset(restore_boot_order, g_strdup(boot_order));
     }
+
+
+#ifdef CONFIG_ANDROID
+    // Setup all the console agents at this point.
+    injectConsoleAgents("");
+#endif
 
     /* init local displays */
     ds = init_displaystate();

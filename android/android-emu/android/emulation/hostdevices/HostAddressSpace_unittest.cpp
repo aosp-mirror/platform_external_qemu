@@ -20,12 +20,15 @@
 
 #include <gtest/gtest.h>
 
+
+#include "android/emulation/testing/MockAndroidAgentFactory.h"
+
 namespace android {
 
 class HostAddressSpaceTest : public ::testing::Test {
 protected:
     static void SetUpTestCase() {
-        emulation::goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
+        emulation::goldfish_address_space_set_vm_operations(getConsoleAgents()->vm);
     }
 
     static void TearDownTestCase() { }

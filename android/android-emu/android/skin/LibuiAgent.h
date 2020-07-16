@@ -15,6 +15,7 @@
 
 ANDROID_BEGIN_HEADER
 
-extern const QAndroidLibuiAgent* const gQAndroidLibuiAgent;
+// Do not use, get a reference to the battery agent through the getConsoleAgents function.
+// extern const QAndroidLibuiAgent* const gQAndroidLibuiAgent;
 
 ANDROID_END_HEADER

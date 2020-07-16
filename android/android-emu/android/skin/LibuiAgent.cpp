@@ -81,4 +81,4 @@ static const QAndroidLibuiAgent kLibuiAgent = {
         },
 };
 
-const QAndroidLibuiAgent* const gQAndroidLibuiAgent = &kLibuiAgent;
+extern "C" const QAndroidLibuiAgent* const gQAndroidLibuiAgent = &kLibuiAgent;

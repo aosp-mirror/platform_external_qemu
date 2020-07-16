@@ -222,8 +222,8 @@ android_add_test(
       tests/TextureDraw_unittest.cpp
       tests/Vulkan_unittest.cpp)
 target_link_libraries(
-  OpenglRender_unittests PRIVATE android-emu-base gmock_main
-                                 OpenglRender_standalone_common)
+  OpenglRender_unittests PRIVATE android-emu-base
+                                 OpenglRender_standalone_common android-emu-test-launcher)
 android_target_compile_definitions(OpenglRender_unittests windows PRIVATE
                                    -DVK_USE_PLATFORM_WIN32_KHR)
 add_opengl_dependencies(OpenglRender_unittests)
