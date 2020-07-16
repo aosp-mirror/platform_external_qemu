@@ -103,7 +103,7 @@ target_include_directories(
   PRIVATE ${ANDROID_EMUGL_DIR}/host/include ${ANDROID_EMUGL_DIR}/combined
           ${ANDROID_EMUGL_DIR}/guest/grallocusage)
 target_link_libraries(vulkanhal_unittests PRIVATE grallocusage aemugraphics
-                      PRIVATE gtest_main)
+                      PRIVATE android-emu-test-launcher)
 target_compile_definitions(vulkanhal_unittests PRIVATE -D__ANDROID_API__=28)
 android_target_dependency(vulkanhal_unittests all EMULATOR_FEATURE_DEPENDENCIES)
 android_target_dependency(vulkanhal_unittests all SWIFTSHADER_DEPENDENCIES)
