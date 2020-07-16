@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f3c432db_38fcd1ab",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-16T19:51:40Z",
+      "side": 1,
+      "message": "Thanks Joshua! LGTM after addressing windows build failure in psq.",
+      "revId": "42b02b29d2d6d9587f5601c864adc8e29289446d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
