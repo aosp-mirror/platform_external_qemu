@@ -70,6 +70,7 @@ set(android-emu-common
     android/emulation/control/adb/AdbInterface.cpp
     android/emulation/control/adb/AdbShellStream.cpp
     android/emulation/control/adb/adbkey.cpp
+    android/emulation/control/AndroidAgentFactory.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/EmulatorAdvertisement.cpp
     android/emulation/control/FilePusher.cpp
@@ -733,17 +734,24 @@ if(OPTION_GFXSTREAM_BACKEND)
   target_compile_definitions(android-emu-shared PUBLIC -DAEMU_GFXSTREAM_BACKEND=1)
   android_install_shared(android-emu-shared)
 endif()
+
+# This library contains a main entry point that injects fake console agents into your unit tests.
+# you usually want to link against this library if you need to make any calls to getConsoleAgents()
 android_add_library(
-  TARGET android-mock-vm-operations
+  TARGET android-emu-test-launcher
   LICENSE Apache-2.0
   SRC # cmake-format:
       # sortable
-      android/emulation/testing/MockAndroidVmOperations.cpp)
-android_target_compile_options(android-mock-vm-operations Clang
+      android/emulation/testing/MockAndroidVmOperations.cpp
+      android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
+      android/emulation/testing/MockAndroidMultiDisplayAgent.cpp
+      android/emulation/testing/MockAndroidAgentFactory.cpp
+      )
+android_target_compile_options(android-emu-test-launcher Clang
                                PRIVATE -O0 -Wno-invalid-constexpr)
-target_include_directories(android-mock-vm-operations
+target_include_directories(android-emu-test-launcher
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(android-mock-vm-operations PRIVATE gmock)
+target_link_libraries(android-emu-test-launcher PUBLIC gmock gtest)
 
 if(NOT LINUX_AARCH64)
 set(android-emu_unittests_common
@@ -873,7 +881,6 @@ set(android-emu_unittests_common
     android/emulation/serial_line_unittest.cpp
     android/emulation/SetupParameters_unittest.cpp
     android/emulation/testing/TestAndroidPipeDevice.cpp
-    android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
     android/emulation/VmLock_unittest.cpp
     android/error-messages_unittest.cpp
     android/featurecontrol/FeatureControl_unittest.cpp
@@ -986,8 +993,7 @@ android_target_compile_options(android-emu_unittests darwin-x86_64
 
 # Dependecies are exported from android-emu.
 target_link_libraries(
-  android-emu_unittests PRIVATE android-emu android-mock-vm-operations gtest
-                                gmock gtest_main)
+  android-emu_unittests PRIVATE android-emu android-emu-test-launcher)
 
 
 android_add_executable(
