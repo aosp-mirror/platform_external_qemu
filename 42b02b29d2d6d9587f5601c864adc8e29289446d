@@ -16,6 +16,40 @@
       "revId": "42b02b29d2d6d9587f5601c864adc8e29289446d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ac5e8a35_f1e988b8",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 780,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-16T20:01:53Z",
+      "side": 1,
+      "message": "Nit: extra whitespace.",
+      "revId": "42b02b29d2d6d9587f5601c864adc8e29289446d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7e8d47b_8370a75f",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1471,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-16T20:01:53Z",
+      "side": 1,
+      "message": "Do we need to make sure that nobody schedules another process after this call?",
+      "revId": "42b02b29d2d6d9587f5601c864adc8e29289446d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
