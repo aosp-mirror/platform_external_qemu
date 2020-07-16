@@ -9,7 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android-qemu2-glue/qemu-control-impl.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/opengles.h"
@@ -169,4 +168,4 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
         },
 };
 
-const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent = &sMultiDisplayAgent;
+extern "C" const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent = &sMultiDisplayAgent;
