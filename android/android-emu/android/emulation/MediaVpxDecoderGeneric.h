@@ -66,6 +66,9 @@ private:
     VpxPingInfoParser mParser;
     MediaHostRenderer mRenderer;
 
+    int mNumFramesDecoded = 0;
+    std::list<uint64_t> mUserDataList;
+
     bool mUseGpuTexture = false;
     bool mTrialPeriod = true;
     // at any point of time, only one of the following is valid
