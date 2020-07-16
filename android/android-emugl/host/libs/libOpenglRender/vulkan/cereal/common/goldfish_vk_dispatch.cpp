@@ -294,6 +294,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
 #endif
+#ifdef VK_GOOGLE_async_queue_submit
+#endif
 
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -787,6 +789,12 @@ void init_vulkan_dispatch_from_system_loader(
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
     out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)dlSymFunc(lib, "vkFreeMemorySyncGOOGLE");
+#endif
+#ifdef VK_GOOGLE_async_queue_submit
+    out->vkQueueHostSyncGOOGLE = (PFN_vkQueueHostSyncGOOGLE)dlSymFunc(lib, "vkQueueHostSyncGOOGLE");
+    out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)dlSymFunc(lib, "vkQueueSubmitAsyncGOOGLE");
+    out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)dlSymFunc(lib, "vkQueueWaitIdleAsyncGOOGLE");
+    out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)dlSymFunc(lib, "vkQueueBindSparseAsyncGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
@@ -1309,6 +1317,12 @@ void init_vulkan_dispatch_from_instance(
 #ifdef VK_GOOGLE_free_memory_sync
     out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkFreeMemorySyncGOOGLE");
 #endif
+#ifdef VK_GOOGLE_async_queue_submit
+    out->vkQueueHostSyncGOOGLE = (PFN_vkQueueHostSyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueHostSyncGOOGLE");
+    out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueSubmitAsyncGOOGLE");
+    out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueWaitIdleAsyncGOOGLE");
+    out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueBindSparseAsyncGOOGLE");
+#endif
 }
 
 void init_vulkan_dispatch_from_device(
@@ -1801,6 +1815,12 @@ void init_vulkan_dispatch_from_device(
 #endif
 #ifdef VK_GOOGLE_free_memory_sync
     out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkFreeMemorySyncGOOGLE");
+#endif
+#ifdef VK_GOOGLE_async_queue_submit
+    out->vkQueueHostSyncGOOGLE = (PFN_vkQueueHostSyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueHostSyncGOOGLE");
+    out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueSubmitAsyncGOOGLE");
+    out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueWaitIdleAsyncGOOGLE");
+    out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueBindSparseAsyncGOOGLE");
 #endif
 }
 

@@ -17468,6 +17468,162 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 break;
             }
 #endif
+#ifdef VK_GOOGLE_async_queue_submit
+            case OP_vkQueueHostSyncGOOGLE:
+            {
+                VkQueue queue;
+                uint32_t needHostSync;
+                uint32_t sequenceNumber;
+                // Begin manual dispatchable handle unboxing for queue;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_848;
+                vkReadStream->read((uint64_t*)&cgen_var_848, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_848, (VkQueue*)&queue, 1);
+                auto unboxed_queue = unbox_VkQueue(queue);
+                auto vk = dispatch_VkQueue(queue);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for queue;
+                vkReadStream->read((uint32_t*)&needHostSync, sizeof(uint32_t));
+                vkReadStream->read((uint32_t*)&sequenceNumber, sizeof(uint32_t));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueHostSyncGOOGLE 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)needHostSync, (unsigned long long)sequenceNumber);
+                }
+                m_state->on_vkQueueHostSyncGOOGLE(&m_pool, queue, needHostSync, sequenceNumber);
+                vkStream->unsetHandleMapping();
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkQueueHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, needHostSync, sequenceNumber);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+            case OP_vkQueueSubmitAsyncGOOGLE:
+            {
+                VkQueue queue;
+                uint32_t submitCount;
+                const VkSubmitInfo* pSubmits;
+                VkFence fence;
+                // Begin manual dispatchable handle unboxing for queue;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_849;
+                vkReadStream->read((uint64_t*)&cgen_var_849, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_849, (VkQueue*)&queue, 1);
+                auto unboxed_queue = unbox_VkQueue(queue);
+                auto vk = dispatch_VkQueue(queue);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for queue;
+                vkReadStream->read((uint32_t*)&submitCount, sizeof(uint32_t));
+                vkReadStream->alloc((void**)&pSubmits, ((submitCount)) * sizeof(const VkSubmitInfo));
+                for (uint32_t i = 0; i < (uint32_t)((submitCount)); ++i)
+                {
+                    unmarshal_VkSubmitInfo(vkReadStream, (VkSubmitInfo*)(pSubmits + i));
+                }
+                uint64_t cgen_var_850;
+                vkReadStream->read((uint64_t*)&cgen_var_850, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_850, (VkFence*)&fence, 1);
+                if (pSubmits)
+                {
+                    for (uint32_t i = 0; i < (uint32_t)((submitCount)); ++i)
+                    {
+                        transform_tohost_VkSubmitInfo(m_state, (VkSubmitInfo*)(pSubmits + i));
+                    }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueSubmitAsyncGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)submitCount, (unsigned long long)pSubmits, (unsigned long long)fence);
+                }
+                m_state->on_vkQueueSubmitAsyncGOOGLE(&m_pool, queue, submitCount, pSubmits, fence);
+                vkStream->unsetHandleMapping();
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkQueueSubmitAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, submitCount, pSubmits, fence);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+            case OP_vkQueueWaitIdleAsyncGOOGLE:
+            {
+                VkQueue queue;
+                // Begin manual dispatchable handle unboxing for queue;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_851;
+                vkReadStream->read((uint64_t*)&cgen_var_851, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_851, (VkQueue*)&queue, 1);
+                auto unboxed_queue = unbox_VkQueue(queue);
+                auto vk = dispatch_VkQueue(queue);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for queue;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueWaitIdleAsyncGOOGLE 0x%llx \n", ioStream, (unsigned long long)queue);
+                }
+                m_state->on_vkQueueWaitIdleAsyncGOOGLE(&m_pool, queue);
+                vkStream->unsetHandleMapping();
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkQueueWaitIdleAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+            case OP_vkQueueBindSparseAsyncGOOGLE:
+            {
+                VkQueue queue;
+                uint32_t bindInfoCount;
+                const VkBindSparseInfo* pBindInfo;
+                VkFence fence;
+                // Begin manual dispatchable handle unboxing for queue;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_852;
+                vkReadStream->read((uint64_t*)&cgen_var_852, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_852, (VkQueue*)&queue, 1);
+                auto unboxed_queue = unbox_VkQueue(queue);
+                auto vk = dispatch_VkQueue(queue);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for queue;
+                vkReadStream->read((uint32_t*)&bindInfoCount, sizeof(uint32_t));
+                vkReadStream->alloc((void**)&pBindInfo, ((bindInfoCount)) * sizeof(const VkBindSparseInfo));
+                for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
+                {
+                    unmarshal_VkBindSparseInfo(vkReadStream, (VkBindSparseInfo*)(pBindInfo + i));
+                }
+                uint64_t cgen_var_853;
+                vkReadStream->read((uint64_t*)&cgen_var_853, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_853, (VkFence*)&fence, 1);
+                if (pBindInfo)
+                {
+                    for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
+                    {
+                        transform_tohost_VkBindSparseInfo(m_state, (VkBindSparseInfo*)(pBindInfo + i));
+                    }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueBindSparseAsyncGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)bindInfoCount, (unsigned long long)pBindInfo, (unsigned long long)fence);
+                }
+                m_state->on_vkQueueBindSparseAsyncGOOGLE(&m_pool, queue, bindInfoCount, pBindInfo, fence);
+                vkStream->unsetHandleMapping();
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkQueueBindSparseAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, bindInfoCount, pBindInfo, fence);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+#endif
             default:
             {
                 return ptr - (unsigned char *)buf;
