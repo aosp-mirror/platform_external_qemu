@@ -87,11 +87,7 @@ MediaVpxDecoderGeneric::MediaVpxDecoderGeneric(VpxPingInfoParser parser,
       mSnapshotHelper(mType == MediaCodecType::VP8Codec
                               ? MediaSnapshotHelper::CodecType::VP8
                               : MediaSnapshotHelper::CodecType::VP9) {
-    if (mType == MediaCodecType::VP9Codec) {
-        mUseGpuTexture = canDecodeToGpuTexture();
-    } else {
-        mUseGpuTexture = false;
-    }
+    mUseGpuTexture = canDecodeToGpuTexture();
 }
 
 MediaVpxDecoderGeneric::~MediaVpxDecoderGeneric() {
@@ -102,8 +98,7 @@ void MediaVpxDecoderGeneric::initVpxContext(void* ptr) {
     VPX_DPRINT("calling init context");
 
 #ifndef __APPLE__
-    if (canUseCudaDecoder() && mParser.version() >= 200 &&
-        mType == MediaCodecType::VP9Codec) {
+    if (canUseCudaDecoder() && mParser.version() >= 200) {
         MediaCudaVideoHelper::OutputTreatmentMode oMode =
                 MediaCudaVideoHelper::OutputTreatmentMode::SAVE_RESULT;
 
