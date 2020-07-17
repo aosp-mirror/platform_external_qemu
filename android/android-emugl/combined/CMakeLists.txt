@@ -31,13 +31,25 @@ if(OPTION_GFXSTREAM_BACKEND)
   android_target_properties(gfxstream_backend darwin-x86_64
       "INSTALL_RPATH>=@loader_path")
 
-  target_link_libraries(
-    gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
-                              OpenglRender)
+  if (NOT LINUX_AARCH64)
+      target_link_libraries(
+          gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
+          OpenglRender)
+  else()
+      target_link_libraries(
+          gfxstream_backend PRIVATE GLIB2::GLIB2 android-emu-shared emugl_base OpenglRender)
+  endif()
 
-  android_target_dependency(gfxstream_backend all ANGLE_DEPENDENCIES)
+
+  if (NOT LINUX_AARCH64)
+    android_target_dependency(gfxstream_backend all ANGLE_DEPENDENCIES)
+  endif()
+
   android_install_shared(gfxstream_backend)
-  android_install_dependency(all ANGLE_DEPENDENCIES)
+
+  if (NOT LINUX_AARCH64)
+    android_install_dependency(all ANGLE_DEPENDENCIES)
+  endif()
 
   if (CROSVM)
     android_crosvm_build(gfxstream_backend)
