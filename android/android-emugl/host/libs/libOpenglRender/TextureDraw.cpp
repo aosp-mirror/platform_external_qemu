@@ -18,6 +18,8 @@
 
 #include "emugl/common/crash_reporter.h"
 
+#include "android/base/Tracing.h"
+
 #include <string>
 #include <assert.h>
 #include <string.h>
@@ -528,6 +530,7 @@ void TextureDraw::prepareForDrawLayer() {
 
 void TextureDraw::drawLayer(ComposeLayer* l, int frameWidth, int frameHeight,
                             int cbWidth, int cbHeight, GLuint texture) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     switch(l->composeMode) {
         case HWC2_COMPOSITION_DEVICE:
             s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
@@ -549,10 +552,12 @@ void TextureDraw::drawLayer(ComposeLayer* l, int frameWidth, int frameHeight,
     }
 
     switch(l->blendMode) {
-        case HWC2_BLEND_MODE_NONE:
+        case HWC2_BLEND_MODE_NONE: {
+                                       AEMU_SCOPED_THRESHOLD_TRACE("disableBlend");
             s_gles2.glDisable(GL_BLEND);
             mBlendResetNeeded = true;
             break;
+                                   }
         case HWC2_BLEND_MODE_PREMULTIPLIED:
             break;
         case HWC2_BLEND_MODE_INVALID:
@@ -625,6 +630,7 @@ void TextureDraw::drawLayer(ComposeLayer* l, int frameWidth, int frameHeight,
         s_gles2.glUniform1i(mComposeMode, HWC2_COMPOSITION_DEVICE);
     }
     if (l->blendMode != HWC2_BLEND_MODE_PREMULTIPLIED) {
+                                       AEMU_SCOPED_THRESHOLD_TRACE("enableBlend");
         s_gles2.glEnable(GL_BLEND);
         mBlendResetNeeded = false;
         s_gles2.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);

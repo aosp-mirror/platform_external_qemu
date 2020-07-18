@@ -36,6 +36,7 @@
 #include "android/base/memory/MemoryTracker.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/base/Tracing.h"
 
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
@@ -736,18 +737,25 @@ FrameBuffer::sendReadbackWorkerCmd(const Readback& readback) {
 
 WorkerProcessingResult
 FrameBuffer::postWorkerFunc(const Post& post) {
+    AEMU_SCOPED_THRESHOLD_TRACE("postWorkerFuncRun");
     switch (post.cmd) {
-        case PostCmd::Post:
+        case PostCmd::Post: {
+    AEMU_SCOPED_THRESHOLD_TRACE("postWorkerFuncRunPost");
             m_postWorker->post(post.cb);
             break;
-        case PostCmd::Viewport:
+                            }
+        case PostCmd::Viewport: {
+    AEMU_SCOPED_THRESHOLD_TRACE("postWorkerFuncRunViewport");
             m_postWorker->viewport(post.viewport.width,
                                    post.viewport.height);
             break;
+                                }
         case PostCmd::Compose:
             if (post.d->version <= 1) {
+    AEMU_SCOPED_THRESHOLD_TRACE("postWorkerFuncRunCompose");
                 m_postWorker->compose(post.d);
             } else {
+    AEMU_SCOPED_THRESHOLD_TRACE("postWorkerFuncRunComposeV2");
                 m_postWorker->compose((ComposeDevice_v2*)post.d);
             }
             break;
@@ -785,6 +793,8 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
     }
 
     m_postThread.enqueue(Post(post));
+
+    AEMU_SCOPED_THRESHOLD_TRACE("waitQueuedItemsForPostWorker");
     m_postThread.waitQueuedItems();
 }
 

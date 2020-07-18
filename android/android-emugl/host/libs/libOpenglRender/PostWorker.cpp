@@ -7,6 +7,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "emugl/common/misc.h"
+#include "android/base/Tracing.h"
 
 #define POST_DEBUG 0
 #if POST_DEBUG >= 1
@@ -38,6 +39,7 @@ void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l, int32_t x, int32_t 
 }
 
 void PostWorker::post(ColorBuffer* cb) {
+        AEMU_SCOPED_THRESHOLD_TRACE("PostWOrkerPost");
     // bind the subwindow eglSurface
     if (!m_initialized) {
         m_initialized = mBindSubwin();
@@ -89,11 +91,13 @@ void PostWorker::post(ColorBuffer* cb) {
             start_id = id;
         }
     } else {
+        AEMU_SCOPED_THRESHOLD_TRACE("PostWOrkerPost.runPostWIthOverlay");
         // render the color buffer to the window and apply the overlay
         GLuint tex = cb->scale();
         cb->postWithOverlay(tex, zRot, dx, dy);
     }
 
+        AEMU_SCOPED_THRESHOLD_TRACE("PostWOrkerPost.runeglswapbuffers");
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 
@@ -123,6 +127,7 @@ void PostWorker::clear() {
 }
 
 void PostWorker::compose(ComposeDevice* p) {
+        AEMU_SCOPED_THRESHOLD_TRACE("composev1");
     // bind the subwindow eglSurface
     if (!m_initialized) {
         m_initialized = mBindSubwin();
@@ -164,27 +169,36 @@ void PostWorker::compose(ComposeDevice* p) {
 }
 
 void PostWorker::compose(ComposeDevice_v2* p) {
+        AEMU_SCOPED_THRESHOLD_TRACE("composev2");
     // bind the subwindow eglSurface
     if (!m_initialized) {
+        AEMU_SCOPED_THRESHOLD_TRACE("composeBindSubwin");
         m_initialized = mBindSubwin();
     }
 
     ComposeLayer* l = (ComposeLayer*)p->layer;
     GLint vport[4] = { 0, };
-    s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
-    s_gles2.glViewport(0, 0, mFb->getWidth(),mFb->getHeight());
-    if (!m_composeFbo) {
-        s_gles2.glGenFramebuffers(1, &m_composeFbo);
-    }
-    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, m_composeFbo);
-    s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER,
-                                   GL_COLOR_ATTACHMENT0_OES,
-                                   GL_TEXTURE_2D,
-                                   mFb->findColorBuffer(p->targetHandle)->getTexture(),
-                                   0);
 
+    {
+        AEMU_SCOPED_THRESHOLD_TRACE("composeSetup");
+        s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
+        s_gles2.glViewport(0, 0, mFb->getWidth(),mFb->getHeight());
+        if (!m_composeFbo) {
+            s_gles2.glGenFramebuffers(1, &m_composeFbo);
+        }
+        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, m_composeFbo);
+        s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER,
+                GL_COLOR_ATTACHMENT0_OES,
+                GL_TEXTURE_2D,
+                mFb->findColorBuffer(p->targetHandle)->getTexture(),
+                0);
+    }
+
+    {
+        AEMU_SCOPED_THRESHOLD_TRACE("drawLayerPrep");
     DD("worker compose %d layers\n", p->numLayers);
     mFb->getTextureDraw()->prepareForDrawLayer();
+    }
     for (int i = 0; i < p->numLayers; i++, l++) {
         DD("\tcomposeMode %d color %d %d %d %d blendMode "
                "%d alpha %f transform %d %d %d %d %d "
@@ -198,10 +212,13 @@ void PostWorker::compose(ComposeDevice_v2* p) {
         composeLayer(l);
     }
 
-    mFb->findColorBuffer(p->targetHandle)->setSync();
-    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
-    mFb->getTextureDraw()->cleanupForDrawLayer();
+    {
+        AEMU_SCOPED_THRESHOLD_TRACE("composeCleanup");
+        mFb->findColorBuffer(p->targetHandle)->setSync();
+        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
+        mFb->getTextureDraw()->cleanupForDrawLayer();
+    }
 }
 
 void PostWorker::composeLayer(ComposeLayer* l) {
@@ -215,6 +232,7 @@ void PostWorker::composeLayer(ComposeLayer* l) {
         cb->postLayer(l, mFb->getWidth(), mFb->getHeight());
     }
     else {
+        AEMU_SCOPED_THRESHOLD_TRACE("solidColor");
         // no Colorbuffer associated with SOLID_COLOR mode
         mFb->getTextureDraw()->drawLayer(l, mFb->getWidth(), mFb->getHeight(),
                                          1, 1, 0);

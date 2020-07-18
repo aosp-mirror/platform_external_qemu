@@ -971,6 +971,7 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "#include \"ProtocolUtils.h\"\n\n");
     fprintf(fp, "#include \"ChecksumCalculatorThreadInfo.h\"\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
+    fprintf(fp, "#include \"android/base/Tracing.h\"\n");
     fprintf(fp, "typedef unsigned int tsize_t; // Target \"size_t\", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.\n\n");
 
     // helper macro for debug print
@@ -1043,6 +1044,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
         // TODO - add for return value;
         fprintf(fp, "\t\tcase OP_%s: {\n", e->name().c_str());
+        fprintf(fp, "AEMU_SCOPED_THRESHOLD_TRACE(\"%s\");\n", e->name().c_str());
 
 #if INSTRUMENT_TIMING_HOST
         fprintf(fp, "\t\t\tstruct timespec ts0, ts1, ts2;\n");
