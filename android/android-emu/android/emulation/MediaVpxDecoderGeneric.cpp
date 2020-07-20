@@ -195,7 +195,9 @@ void MediaVpxDecoderGeneric::try_decode(const uint8_t* data,
                    "to SW",
                    mHwVideoHelper->error());
             mUseGpuTexture = false;
-            s_force_no_gpu = true;
+            if (mHwVideoHelper->fatal()) {
+                s_force_no_gpu = true;
+            }
             mHwVideoHelper.reset(nullptr);
         }
     }
