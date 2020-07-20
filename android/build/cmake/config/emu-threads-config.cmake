@@ -13,10 +13,12 @@
 # packages, so we just declare it explicitly
 if(NOT TARGET Threads::Threads)
   add_library(Threads::Threads INTERFACE IMPORTED)
-  set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS
-                                                "-pthread")
-  set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES
-                                                "-lpthread")
+  if(NOT WINDOWS_MSVC_X86_64)
+    set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS
+                                                  "-pthread")
+    set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES
+                                                  "-lpthread")
+  endif()
 endif()
 
 set(CMAKE_USE_PTHREADS_INIT 1)

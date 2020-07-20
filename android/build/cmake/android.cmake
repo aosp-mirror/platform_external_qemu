@@ -1009,7 +1009,7 @@ function(android_upload_symbols TGT)
                              ERROR_FILE ${LOG})\n
     if (EXISTS ${LOG})
       FILE(READ ${LOG} contents)
-      STRING(STRIP \$\{contents\} contents)
+      STRING(STRIP \"\$\{contents\}\" contents)
     else()
         SET(contents \"No logfile in ${LOG} for ${DEST} was created\")
     endif()
