@@ -48,6 +48,7 @@ public:
 
     virtual int error() const { return 0; }
     virtual bool good() const { return true; }
+    virtual bool fatal() const { return false; }
 
 protected:
     bool mIgnoreDecoderOutput = false;

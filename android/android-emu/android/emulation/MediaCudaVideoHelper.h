@@ -70,6 +70,7 @@ public:
 
     virtual int error() const override { return mErrorCode; }
     virtual bool good() const override { return mIsGood; }
+    virtual bool fatal() const override { return false == s_isCudaDecoderGood; }
 
 private:
     static bool s_isCudaDecoderGood;
