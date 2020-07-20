@@ -897,6 +897,9 @@ endfunction()
 # ANDROID_AARCH The android architecture name STUBS The set of stub sources to
 # use.
 function(android_add_qemu_executable ANDROID_AARCH STUBS)
+  if (WINDOWS_MSVC_X86_64)
+    set(WINDOWS_LAUNCHER emulator-winqt-launcher)
+  endif()
   android_build_qemu_variant(
     INSTALL
     EXE qemu-system-${ANDROID_AARCH}
@@ -913,7 +916,8 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
               android-emu
               android-qemu-deps
               android-qemu-deps-headful
-              emulator-libusb)
+              emulator-libusb
+              ${WINDOWS_LAUNCHER})
 endfunction()
 
 # Constructs the qemu headless executable.
