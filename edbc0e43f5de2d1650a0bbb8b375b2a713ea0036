@@ -33,6 +33,24 @@
       "revId": "edbc0e43f5de2d1650a0bbb8b375b2a713ea0036",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "21d4ad37_fd13ac3a",
+        "filename": "android/build/cmake/config/emu-threads-config.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-21T05:01:39Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "68677d55_63da7cb8",
+      "revId": "edbc0e43f5de2d1650a0bbb8b375b2a713ea0036",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
