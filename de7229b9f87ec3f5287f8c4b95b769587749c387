@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "bb280a92_d02e99d5",
+        "filename": "android/android-emu/android/foldable-utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-22T13:21:43Z",
+      "side": 1,
+      "message": "This file got deleted in the latest patchset (#3), so I don\u0027t think this is needed anymore.",
+      "parentUuid": "dbbaf1ff_7da00013",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "715cb56c_7cd2bf17",
         "filename": "android/android-emu/android/skin/qt/posture-selection-dialog.cpp",
         "patchSetId": 1
@@ -153,6 +171,24 @@
       "side": 1,
       "message": "Ack",
       "parentUuid": "1f125fb5_8b5584c4",
+      "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "634b8199_b0365450",
+        "filename": "android/android-emu/android/skin/qt/tools.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-22T13:21:43Z",
+      "side": 1,
+      "message": "Patchset #2 should take care of this.",
+      "parentUuid": "5e4b8f47_338ba25c",
       "revId": "de7229b9f87ec3f5287f8c4b95b769587749c387",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false

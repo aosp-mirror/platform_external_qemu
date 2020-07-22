@@ -16,6 +16,24 @@
       "revId": "b29abbd6ebc909d3aa4a0e536bdba8d14d7fb311",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a2edc1d_84680eb5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-22T13:21:43Z",
+      "side": 1,
+      "message": "Hi Huan, thank you for the feedback!\n\nPatchset #3 should address these as follows:\n1. Should be done (hope I understood your request correctly).\n2. I increased the extended-controls height and added a vertical scroller for hinge angle sliders. Alternatively, I can increase the height of the entire emulator-controls window (please let me know if that is preferred).",
+      "parentUuid": "0da3d30a_edf6d984",
+      "revId": "b29abbd6ebc909d3aa4a0e536bdba8d14d7fb311",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
