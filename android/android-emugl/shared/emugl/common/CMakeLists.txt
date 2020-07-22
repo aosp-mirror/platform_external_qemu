@@ -1,4 +1,5 @@
 set(emugl_common_src
+    address_space_device_control_ops.cpp
     crash_reporter.cpp
     dma_device.cpp
     vm_operations.cpp
