@@ -140,6 +140,33 @@ public:
         }
     }
 
+    void registerDeallocationCallback(uint64_t gpa, void* context, address_space_device_deallocation_callback_t func) {
+        AutoLock lock(mContextsLock);
+        auto& currentCallbacks = mDeallocationCallbacks[gpa];
+
+        DeallocationCallbackEntry entry = {
+            context,
+            func,
+        };
+
+        currentCallbacks.push_back(entry);
+    }
+
+    void runDeallocationCallbacks(uint64_t gpa) {
+        AutoLock lock(mContextsLock);
+
+        auto it = mDeallocationCallbacks.find(gpa);
+        if (it == mDeallocationCallbacks.end()) return;
+
+        auto& callbacks = it->second;
+
+        for (auto& entry: callbacks) {
+            entry.func(entry.context, gpa);
+        }
+
+        mDeallocationCallbacks.erase(gpa);
+    }
+
     AddressSpaceDeviceContext* handleToContext(uint32_t handle) {
         AutoLock lock(mContextsLock);
         if (mContexts.find(handle) == mContexts.end()) return nullptr;
@@ -362,6 +389,13 @@ private:
 
     mutable Lock mMemoryMappingsLock;
     std::map<uint64_t, std::pair<void *, uint64_t>> mMemoryMappings;  // do not save/load
+
+    struct DeallocationCallbackEntry {
+        void* context;
+        address_space_device_deallocation_callback_t func;
+    };
+
+    std::map<uint64_t, std::vector<DeallocationCallbackEntry>> mDeallocationCallbacks; // do not save/load, users re-register on load
 };
 
 static LazyInstance<AddressSpaceDeviceState> sAddressSpaceDeviceState =
@@ -419,23 +453,35 @@ static void sAddressSpaceDevicePingAtHva(uint32_t handle, void* hva) {
         handle, (AddressSpaceDevicePingInfo*)hva);
 }
 
+static void sAddressSpaceDeviceRegisterDeallocationCallback(
+    void* context, uint64_t gpa, address_space_device_deallocation_callback_t func) {
+    sAddressSpaceDeviceState->registerDeallocationCallback(gpa, context, func);
+}
+
+static void sAddressSpaceDeviceRunDeallocationCallbacks(uint64_t gpa) {
+    sAddressSpaceDeviceState->runDeallocationCallbacks(gpa);
+}
+
+
 } // namespace
 
 extern "C" {
 
 static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
-    &sAddressSpaceDeviceGenHandle,           // gen_handle
-    &sAddressSpaceDeviceDestroyHandle,       // destroy_handle
-    &sAddressSpaceDeviceTellPingInfo,        // tell_ping_info
-    &sAddressSpaceDevicePing,                // ping
-    &sAddressSpaceDeviceAddMemoryMapping,    // add_memory_mapping
-    &sAddressSpaceDeviceRemoveMemoryMapping, // remove_memory_mapping
-    &sAddressSpaceDeviceGetHostPtr,          // get_host_ptr
-    &sAddressSpaceHandleToContext,           // handle_to_context
-    &sAddressSpaceDeviceClear,               // clear
-    &sAddressSpaceDeviceHostmemRegister,     // hostmem register
-    &sAddressSpaceDeviceHostmemUnregister,   // hostmem unregister
-    &sAddressSpaceDevicePingAtHva,           // ping_at_hva
+    &sAddressSpaceDeviceGenHandle,                     // gen_handle
+    &sAddressSpaceDeviceDestroyHandle,                 // destroy_handle
+    &sAddressSpaceDeviceTellPingInfo,                  // tell_ping_info
+    &sAddressSpaceDevicePing,                          // ping
+    &sAddressSpaceDeviceAddMemoryMapping,              // add_memory_mapping
+    &sAddressSpaceDeviceRemoveMemoryMapping,           // remove_memory_mapping
+    &sAddressSpaceDeviceGetHostPtr,                    // get_host_ptr
+    &sAddressSpaceHandleToContext,                     // handle_to_context
+    &sAddressSpaceDeviceClear,                         // clear
+    &sAddressSpaceDeviceHostmemRegister,               // hostmem register
+    &sAddressSpaceDeviceHostmemUnregister,             // hostmem unregister
+    &sAddressSpaceDevicePingAtHva,                     // ping_at_hva
+    &sAddressSpaceDeviceRegisterDeallocationCallback,  // register_deallocation_callback
+    &sAddressSpaceDeviceRunDeallocationCallbacks,      // run_deallocation_callbacks
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
