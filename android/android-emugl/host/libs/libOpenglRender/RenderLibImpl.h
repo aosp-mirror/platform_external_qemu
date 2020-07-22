@@ -45,6 +45,7 @@ public:
     virtual void setDmaOps(emugl_dma_ops) override;
 
     virtual void setVmOps(const QAndroidVmOperations &vm_operations) override;
+    virtual void setAddressSpaceDeviceControlOps(struct address_space_device_control_ops* ops) override;
 
     virtual void setWindowOps(const QAndroidEmulatorWindowAgent &window_operations,
                               const QAndroidMultiDisplayAgent &multi_display_operations) override;
