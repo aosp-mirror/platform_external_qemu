@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4a35fddf_2621a645",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T17:09:07Z",
+      "side": 1,
+      "message": "g3 presubmit is super flaky, different set of failures on each run.",
+      "revId": "6cf66659e1faba1865e966f0d70d09f5ead4249b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
