@@ -19,6 +19,7 @@
 #include "android/base/memory/MemoryTracker.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/address_space_device.h"
 #include "android/emulation/address_space_graphics.h"
 #include "android/emulation/address_space_graphics_types.h"
 #include "android/emulation/GoldfishDma.h"
@@ -244,6 +245,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
     sRenderLib->setDmaOps(dma_ops);
     sRenderLib->setVmOps(*vm_operations);
+    sRenderLib->setAddressSpaceDeviceControlOps(get_address_space_device_control_ops());
     sRenderLib->setWindowOps(*window_agent, *multi_display_agent);
     sRenderLib->setUsageTracker(android::base::CpuUsage::get(),
                                 android::base::MemoryTracker::get());
