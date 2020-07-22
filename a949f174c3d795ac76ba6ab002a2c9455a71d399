@@ -22,6 +22,30 @@
       "revId": "a949f174c3d795ac76ba6ab002a2c9455a71d399",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9be384fa_7e91ec0e",
+        "filename": "android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1308,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-22T16:41:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb01fead_ece70f30",
+      "range": {
+        "startLine": 1308,
+        "startChar": 29,
+        "endLine": 1308,
+        "endChar": 30
+      },
+      "revId": "a949f174c3d795ac76ba6ab002a2c9455a71d399",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
