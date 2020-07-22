@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "DecompressionShaders.h"
 #include "FrameBuffer.h"
 #include "GLcommon/etc.h"
 #include "VkAndroidNativeBuffer.h"
@@ -27,6 +28,7 @@
 #include "VkDecoderSnapshot.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
+#include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
 #include "android/base/containers/EntityManager.h"
 #include "android/base/containers/Lookup.h"
@@ -46,6 +48,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
+using android::base::arraySize;
 using android::base::AutoLock;
 using android::base::ConditionVariable;
 using android::base::LazyInstance;
@@ -3990,22 +3993,23 @@ private:
         return false;
     }
 
-    static std::vector<char> loadShaderSource(const char* filename) {
-        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+    static SpvFileEntry loadDecompressionShaderSource(const char* filename) {
+        size_t numDecompressionShaderFileEntries = arraySize(sDecompressionShaderFileEntries);
 
-        if (!file.is_open()) {
-            fprintf(stderr, "WARNING: shader source open failed! %s\n",
-                    filename);
-            return {};
+        for (size_t i = 0; i < numDecompressionShaderFileEntries; ++i) {
+            if (!strcmp(filename, sDecompressionShaderFileEntries[i].name)) {
+                return sDecompressionShaderFileEntries[i];
+            }
         }
-        size_t fileSize = (size_t)file.tellg();
-        std::vector<char> buffer(fileSize);
-        file.seekg(0);
-        file.read(buffer.data(), fileSize);
-        file.close();
 
-        return buffer;
+        SpvFileEntry invalid = {
+            filename, nullptr, 0,
+        };
+        fprintf(stderr, "WARNING: shader source open failed! %s\n",
+                filename);
+        return invalid;
     }
+
     struct CompressedImageInfo {
         bool isCompressed = false;
         bool isEtc2 = false;
@@ -4218,25 +4222,20 @@ private:
                 shaderSrcFileName += "2DArray.spv";
             }
 
-            std::string fullPath =
-                pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
-                        "shaders", shaderSrcFileName);
-            std::vector<char> shaderSource = loadShaderSource(fullPath.c_str());
-            if (shaderSource.empty()) {
-                fullPath =
-                    pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
-                            "shaders", shaderSrcFileName);
-                shaderSource = loadShaderSource(fullPath.c_str());
-                if (shaderSource.empty()) {
-                    return VK_ERROR_OUT_OF_HOST_MEMORY;
-                }
+            SpvFileEntry shaderSource = VkDecoderGlobalState::Impl::loadDecompressionShaderSource(
+                    shaderSrcFileName.c_str());
+
+            if (!shaderSource.size)  {
+                return VK_ERROR_OUT_OF_HOST_MEMORY;
             }
+
             VkShaderModuleCreateInfo shaderInfo = {};
             shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-            shaderInfo.codeSize = shaderSource.size();
-            // std::vector aligns the pointer for us, so it is safe to cast
+            shaderInfo.codeSize = shaderSource.size;
+            // DecompressionShaders.h declares everything as aligned to 4 bytes,
+            // so it is safe to cast
             shaderInfo.pCode =
-                reinterpret_cast<const uint32_t*>(shaderSource.data());
+                reinterpret_cast<const uint32_t*>(shaderSource.base);
             _RETURN_ON_FAILURE(vk->vkCreateShaderModule(
                         device, &shaderInfo, nullptr, &decompShader));
 
