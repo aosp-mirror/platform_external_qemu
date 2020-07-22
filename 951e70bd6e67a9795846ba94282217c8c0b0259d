@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cafa4800_69a01d82",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1238553
+      },
+      "writtenOn": "2020-07-22T23:49:29Z",
+      "side": 1,
+      "message": "Verified no regressions for opal hermetic tests in google3.",
+      "revId": "951e70bd6e67a9795846ba94282217c8c0b0259d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
