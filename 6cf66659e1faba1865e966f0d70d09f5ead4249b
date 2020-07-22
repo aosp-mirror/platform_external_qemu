@@ -105,6 +105,23 @@
     },
     {
       "key": {
+        "uuid": "1805d81b_50b0c722",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-07-22T21:50:45Z",
+      "side": 1,
+      "message": "LGTM to me after fixing my minor comments. (The big one can be left for a next commit.)",
+      "revId": "6cf66659e1faba1865e966f0d70d09f5ead4249b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5d998c0d_9405822d",
         "filename": "android-qemu2-glue/qemu-battery-agent-impl.cpp",
         "patchSetId": 10
@@ -139,6 +156,29 @@
       "writtenOn": "2020-07-22T19:45:40Z",
       "side": 1,
       "message": "nit: put an override keyword here, to make it more difficult to have bugs.",
+      "revId": "6cf66659e1faba1865e966f0d70d09f5ead4249b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eae4adba_0b99eb6a",
+        "filename": "android/android-emu/android/emulation/testing/MockAndroidAgentFactory.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-07-22T21:50:45Z",
+      "side": 1,
+      "message": "I don\u0027t really like the design of this part because it is not very extensible. It is forcing every test to run the WindowsFlags setup code while only one test actually needs it. And every time we add a new test that would require a custom main, we would need to add it to this function.\n\nA better way was to add a EmuTest class, inherit gtest class and call injectConsoleAgents in setup. And make all its users to inherit EmuTest instead of gtest.\n\nBut we should leave it after submitting this commit, because it is already too big.",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 1
+      },
       "revId": "6cf66659e1faba1865e966f0d70d09f5ead4249b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
