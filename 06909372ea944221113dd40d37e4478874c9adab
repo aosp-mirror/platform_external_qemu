@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7b3e9d45_29d10a98",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-22T13:21:03Z",
+      "side": 1,
+      "message": "Added POSTURE_TENT (and also replaced magic numbers with enum constants).",
+      "parentUuid": "f41ce4d6_0286dec1",
+      "revId": "06909372ea944221113dd40d37e4478874c9adab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "94fe5ec4_c6ace911",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
         "patchSetId": 1
@@ -33,6 +51,24 @@
       "revId": "06909372ea944221113dd40d37e4478874c9adab",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94b360e9_141361d7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 687,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-22T13:21:03Z",
+      "side": 1,
+      "message": "I added a check for the hinge sensor, hope that\u0027s what the original comment refers to.\n\n(preferred this over something like if (!lbl_currentPostureValue-\u003eisHidden) because posture UI may end up covering other views as well)",
+      "parentUuid": "94fe5ec4_c6ace911",
+      "revId": "06909372ea944221113dd40d37e4478874c9adab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

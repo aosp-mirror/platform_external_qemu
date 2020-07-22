@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a575530c_16b31db5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-22T13:21:03Z",
+      "side": 1,
+      "message": "Realised I forgot to hit SEND on these comments for patchset#2, they should apply to patchset #3 as well.",
+      "revId": "38100b2dfe5d3dccf2543691a7d89dd6a640483b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
