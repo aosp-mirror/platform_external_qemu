@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8677667_d24fe641",
+        "filename": "android/scripts/unix/generate-emulator-vulkan-decompression-shaders.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1561731
+      },
+      "writtenOn": "2020-07-22T01:52:32Z",
+      "side": 1,
+      "message": "2020",
+      "range": {
+        "startLine": 3,
+        "startChar": 12,
+        "endLine": 3,
+        "endChar": 16
+      },
+      "revId": "0b9a37ec1251b0463df2488ba4530ed2fb1c6426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
