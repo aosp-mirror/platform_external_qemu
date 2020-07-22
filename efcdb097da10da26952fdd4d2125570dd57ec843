@@ -224,6 +224,24 @@
     },
     {
       "key": {
+        "uuid": "8bbcb6ec_b3a2265d",
+        "filename": "android/third_party/modem-simulator/json/json/json-forwards.h",
+        "patchSetId": 60
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-07-22T23:12:11Z",
+      "side": 1,
+      "message": "right, the problem is the modem-simulator source code is referring to a\ndifferent one;\nsame goes to xml.",
+      "parentUuid": "fece9255_dce0d3c6",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "66de15a6_cac86e77",
         "filename": "android/third_party/modem-simulator/tinyxml2/tinyxml2.h",
         "patchSetId": 60
