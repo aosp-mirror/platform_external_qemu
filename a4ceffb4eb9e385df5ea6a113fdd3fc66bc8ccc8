@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f572698_8e0f52ca",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-07-22T13:35:22Z",
+      "side": 1,
+      "message": "Not sure how to trigger Linter checks (e.g. Lint/Open-Source-Licensing). Could somebody please tell me how that works?",
+      "revId": "a4ceffb4eb9e385df5ea6a113fdd3fc66bc8ccc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
