@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "833ce8bb_9bbf2f87",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 550,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-22T18:06:40Z",
+      "side": 0,
+      "message": "We still need to be using these here; is that still the case?",
+      "range": {
+        "startLine": 548,
+        "startChar": 0,
+        "endLine": 550,
+        "endChar": 57
+      },
+      "revId": "29f7852279444b6546dd67bb7f82e1978536ee4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
