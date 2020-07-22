@@ -34,6 +34,210 @@
       "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "38dc10ec_3ec60b60",
+        "filename": "android/android-emu/android/base/Log.cpp",
+        "patchSetId": 60
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "Nit: Could we move the logging changes to a separate commit?",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b24d79fa_42145229",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 60
+      },
+      "lineNbr": 1944,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "Leftover comments + debug printf?",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cbd780bf_fa817d65",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 60
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "Nit: ifs can be combined.",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb5da344_49fe6215",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 60
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "Unused.",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e32794b5_85b1d0ee",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/telephony-page.cpp",
+        "patchSetId": 60
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "This can be removed.",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2f647767_0f7d0976",
+        "filename": "android/third_party/modem-simulator/CMakeLists.txt",
+        "patchSetId": 60
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "Can be removed.",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1226b5a_8808cec2",
+        "filename": "android/third_party/modem-simulator/android-base/logging.h",
+        "patchSetId": 60
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "Looks like this file can be removed.",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2f2b924a_9aa7437a",
+        "filename": "android/third_party/modem-simulator/android-base/strings.h",
+        "patchSetId": 60
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "if we only had c++20 :-). Should this move to android-emu (-base) ?",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45542ba2_b7b9fab0",
+        "filename": "android/third_party/modem-simulator/android_modem_v2.cpp",
+        "patchSetId": 60
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "Would a subclass make this easier vs if else everywhere?",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d2fa9ac_52b0bce9",
+        "filename": "android/third_party/modem-simulator/common/libs/utils/files.cpp",
+        "patchSetId": 60
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "This will not read unicode paths in windows. Use:\nandroid::base::PathUtils::asUnicodePath(unicode_file).c_str() if you need unicode support on windows.",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fece9255_dce0d3c6",
+        "filename": "android/third_party/modem-simulator/json/json/json-forwards.h",
+        "patchSetId": 60
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "We also have a c++ json parser in third_party/json.",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "66de15a6_cac86e77",
+        "filename": "android/third_party/modem-simulator/tinyxml2/tinyxml2.h",
+        "patchSetId": 60
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:51:57Z",
+      "side": 1,
+      "message": "We also have LibXML2",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
