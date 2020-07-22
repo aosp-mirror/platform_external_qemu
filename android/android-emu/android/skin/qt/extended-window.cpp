@@ -250,6 +250,8 @@ ExtendedWindow::ExtendedWindow(
         }
     }
 
+    mExtendedUi->carRotaryButton->setVisible(false);
+
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         mSidebarButtons.addButton(mExtendedUi->carDataButton);
         mExtendedUi->carDataButton->setVisible(true);
