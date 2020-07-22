@@ -16,6 +16,24 @@
       "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2efd9091_b411200e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 60
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-22T20:06:15Z",
+      "side": 1,
+      "message": "we should; c++17 added in https://android-review.googlesource.com/c/platform/external/qemu/+/1299328",
+      "parentUuid": "cf34d39a_a8dd38b4",
+      "revId": "efcdb097da10da26952fdd4d2125570dd57ec843",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
