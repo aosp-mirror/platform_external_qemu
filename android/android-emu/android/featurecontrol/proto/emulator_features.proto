@@ -97,4 +97,6 @@ enum Feature {
     VirtioWifi = 54;
 
     CarRotary = 55;
+    
+    ModemSimulator = 56;
 }
