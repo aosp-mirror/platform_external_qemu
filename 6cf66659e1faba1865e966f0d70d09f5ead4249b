@@ -122,6 +122,24 @@
     },
     {
       "key": {
+        "uuid": "b8a38452_371c389a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:56:08Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5b307f30_665d19b8",
+      "revId": "6cf66659e1faba1865e966f0d70d09f5ead4249b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5d998c0d_9405822d",
         "filename": "android-qemu2-glue/qemu-battery-agent-impl.cpp",
         "patchSetId": 10
@@ -133,6 +151,30 @@
       "writtenOn": "2020-07-22T19:45:40Z",
       "side": 1,
       "message": "The change of this part doesn\u0027t seem necessary?",
+      "range": {
+        "startLine": 154,
+        "startChar": 0,
+        "endLine": 157,
+        "endChar": 31
+      },
+      "revId": "6cf66659e1faba1865e966f0d70d09f5ead4249b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6290fc39_2cbe60b0",
+        "filename": "android-qemu2-glue/qemu-battery-agent-impl.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:56:08Z",
+      "side": 1,
+      "message": "Somehow needed for msvc cross compilation:\n\n```\nlld-link: error: undefined symbol: gQAndroidBatteryAgent\n\u003e\u003e\u003e referenced by /usr/local/google/home/jansene/src/emu-master-dev/external/qemu/build-msvc/../android-qemu2-glue/qemu-console-factory.cpp:100\n\u003e\u003e\u003e               libqemu2-glue.lib(qemu-console-factory.cpp.obj):(private: virtual struct QAndroidBatteryAgent const *const __cdecl QemuAndroidConsoleAgentFactory::android_get_QAndroidBatteryAgent(void) const)\nclang-10: error: linker command failed with exit code 1 (use -v to see invocation)\n```",
+      "parentUuid": "5d998c0d_9405822d",
       "range": {
         "startLine": 154,
         "startChar": 0,
@@ -162,6 +204,24 @@
     },
     {
       "key": {
+        "uuid": "6a0bb112_a7376b8d",
+        "filename": "android-qemu2-glue/qemu-console-factory.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:56:08Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "dfafbcc2_43fed9ef",
+      "revId": "6cf66659e1faba1865e966f0d70d09f5ead4249b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eae4adba_0b99eb6a",
         "filename": "android/android-emu/android/emulation/testing/MockAndroidAgentFactory.cpp",
         "patchSetId": 10
@@ -173,6 +233,30 @@
       "writtenOn": "2020-07-22T21:50:45Z",
       "side": 1,
       "message": "I don\u0027t really like the design of this part because it is not very extensible. It is forcing every test to run the WindowsFlags setup code while only one test actually needs it. And every time we add a new test that would require a custom main, we would need to add it to this function.\n\nA better way was to add a EmuTest class, inherit gtest class and call injectConsoleAgents in setup. And make all its users to inherit EmuTest instead of gtest.\n\nBut we should leave it after submitting this commit, because it is already too big.",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 1
+      },
+      "revId": "6cf66659e1faba1865e966f0d70d09f5ead4249b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f9723e3_1ba4127f",
+        "filename": "android/android-emu/android/emulation/testing/MockAndroidAgentFactory.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:56:08Z",
+      "side": 1,
+      "message": "Tracking in b/161934358",
+      "parentUuid": "eae4adba_0b99eb6a",
       "range": {
         "startLine": 56,
         "startChar": 0,
@@ -199,6 +283,24 @@
       "revId": "6cf66659e1faba1865e966f0d70d09f5ead4249b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9337f380_3e204ace",
+        "filename": "android/android-emu/android/skin/LibuiAgent.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-22T22:56:08Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "115c1fd0_61887bc8",
+      "revId": "6cf66659e1faba1865e966f0d70d09f5ead4249b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
