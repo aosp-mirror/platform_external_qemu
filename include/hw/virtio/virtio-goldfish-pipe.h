@@ -89,6 +89,9 @@ VG_EXPORT uint64_t stream_renderer_resource_get_hva(uint32_t res_handle);
 VG_EXPORT uint64_t stream_renderer_resource_get_hva_size(uint32_t res_handle);
 VG_EXPORT void stream_renderer_resource_set_hv_slot(uint32_t res_handle, uint32_t slot);
 VG_EXPORT uint32_t stream_renderer_resource_get_hv_slot(uint32_t res_handle);
+VG_EXPORT int stream_renderer_resource_map(uint32_t res_handle, void** hvaOut, uint64_t* sizeOut);
+VG_EXPORT int stream_renderer_resource_unmap(uint32_t res_handle);
+
 #else
 
 #define VG_EXPORT
