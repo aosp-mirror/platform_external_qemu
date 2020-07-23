@@ -157,9 +157,15 @@ endif()
 android_target_link_libraries(
   android-emu-base darwin-x86_64
   PUBLIC "-framework IOKit" "-framework Foundation")
+android_target_link_libraries(
+  android-emu-base darwin-aarch64
+  PUBLIC "-framework IOKit" "-framework Foundation")
 
 android_target_compile_definitions(
   android-emu-base darwin-x86_64 PRIVATE "-D_DARWIN_C_SOURCE=1"
+  "-Dftello64=ftell" "-Dfseeko64=fseek")
+android_target_compile_definitions(
+  android-emu-base darwin-aarch64 PRIVATE "-D_DARWIN_C_SOURCE=1"
   "-Dftello64=ftell" "-Dfseeko64=fseek")
 
 if(OPTION_TCMALLOC)

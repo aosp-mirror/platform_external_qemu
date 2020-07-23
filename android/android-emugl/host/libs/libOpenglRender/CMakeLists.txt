@@ -4,8 +4,8 @@ prebuilt(VULKAN)
 # Adds the proper graphic driver dependencies to the given target.
 function(add_opengl_dependencies TGT)
   # And setup the depedencies
-  android_target_dependency(${TGT} all SWIFTSHADER_DEPENDENCIES)
-  android_target_dependency(${TGT} all ANGLE_DEPENDENCIES)
+  # android_target_dependency(${TGT} all SWIFTSHADER_DEPENDENCIES)
+  # android_target_dependency(${TGT} all ANGLE_DEPENDENCIES)
   android_target_dependency(${TGT} all VULKAN_DEPENDENCIES)
   android_target_dependency(${TGT} all VULKAN_TEST_DEPENDENCIES)
   android_target_properties(
@@ -130,7 +130,7 @@ android_target_link_libraries(
   PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 android_install_shared(OpenglRender)
 
-if (NOT LINUX_AARCH64)
+if (NOT BUILDING_FOR_AARCH64)
 
 android_add_library(
   TARGET OpenglRender_standalone_common

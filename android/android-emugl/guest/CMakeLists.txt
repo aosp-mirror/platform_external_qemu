@@ -10,7 +10,7 @@ android_add_library(
 target_include_directories(log PRIVATE android/android-emugl/guest
                                        android/android-emu)
 target_link_libraries(log PRIVATE emugl_base)
-if (NOT LINUX_AARCH64)
+if (NOT BUILDING_FOR_AARCH64)
 # The cutils library.
 android_add_library(
   TARGET cutils SHARED
@@ -106,7 +106,7 @@ target_link_libraries(vulkanhal_unittests PRIVATE grallocusage aemugraphics
                       PRIVATE gtest_main)
 target_compile_definitions(vulkanhal_unittests PRIVATE -D__ANDROID_API__=28)
 android_target_dependency(vulkanhal_unittests all EMULATOR_FEATURE_DEPENDENCIES)
-android_target_dependency(vulkanhal_unittests all SWIFTSHADER_DEPENDENCIES)
+# android_target_dependency(vulkanhal_unittests all SWIFTSHADER_DEPENDENCIES)
 android_target_properties(vulkanhal_unittests darwin-x86_64
                           "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 android_target_properties(
