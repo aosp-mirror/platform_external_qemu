@@ -16,6 +16,29 @@
       "revId": "951e70bd6e67a9795846ba94282217c8c0b0259d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9dfa5e72_a4e2ed81",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2792,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-07-23T00:07:23Z",
+      "side": 1,
+      "message": "for virtio gpu mapping, should we add the mapping information to mOccupiedGpas as well? It looks like currently we only add mapping information of direct-mapped vkDeviceMemory objs to this map.",
+      "range": {
+        "startLine": 2792,
+        "startChar": 0,
+        "endLine": 2792,
+        "endChar": 49
+      },
+      "revId": "951e70bd6e67a9795846ba94282217c8c0b0259d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
