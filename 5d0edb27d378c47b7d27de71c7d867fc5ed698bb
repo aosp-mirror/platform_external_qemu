@@ -16,6 +16,23 @@
       "revId": "5d0edb27d378c47b7d27de71c7d867fc5ed698bb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2817daba_90c648fe",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-23T15:57:55Z",
+      "side": 1,
+      "message": "vk cts failure (timeout, hang) with this",
+      "revId": "5d0edb27d378c47b7d27de71c7d867fc5ed698bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
