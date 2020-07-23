@@ -11,10 +11,14 @@
 
 #include "android/test/checkboot.h"
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/threads/ParallelTask.h"
-#include "android/base/system/System.h"
-#include "android/emulation/control/vm_operations.h"
+#include <stdio.h>                                    // for printf
+#include <functional>                                 // for __base
+
+#include "android/base/async/ThreadLooper.h"          // for ThreadLooper
+#include "android/base/system/System.h"               // for System
+#include "android/base/threads/ParallelTask.h"        // for runParallelTask
+#include "android/console.h"                          // for getConsoleAgents
+#include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
 
 static int s_SleepTime = 0;
 
@@ -27,7 +31,7 @@ static void myTask(int * outResult) {
 static void myTaskDone(const int& outResult) {
     // quit emulator if it is not dead yet
     printf("emulator: ERROR: fail to boot after %d seconds, quit\n", s_SleepTime);
-    gQAndroidVmOperations->vmShutdown();
+    getConsoleAgents()->vm->vmShutdown();
 }
 
 bool android_test_start_boot_complete_timer(int time_out_seconds) {

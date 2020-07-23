@@ -20,50 +20,54 @@
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/grpc_agent.h"
+#include "android/emulation/control/http_proxy_agent.h"
 #include "android/emulation/control/libui_agent.h"
 #include "android/emulation/control/location_agent.h"
-#include "android/emulation/control/http_proxy_agent.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/record_screen_agent.h"
+#include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/virtual_scene_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
-#include "android/emulation/control/sensors_agent.h"
 #include "android/utils/compiler.h"
-
+#include "emulation/control/cellular_agent.h"
 ANDROID_BEGIN_HEADER
+
+typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
 
 // A macro used to list all the agents used by the Android Console.
 // The macro takes a parameter |X| which must be a macro that takes two
 // parameter as follows:  X(type, name), where |type| is the agent type
 // name, and |name| is a field name. See usage below to declare
 // AndroidConsoleAgents.
-#define ANDROID_CONSOLE_AGENTS_LIST(X)    \
-    X(QAndroidBatteryAgent, battery)      \
-    X(QAndroidDisplayAgent, display)      \
-    X(QAndroidEmulatorWindowAgent, emu)   \
-    X(QAndroidFingerAgent, finger)        \
-    X(QAndroidLocationAgent, location)    \
-    X(QAndroidHttpProxyAgent, proxy)      \
-    X(QAndroidRecordScreenAgent, record)  \
-    X(QAndroidTelephonyAgent, telephony)  \
-    X(QAndroidUserEventAgent, user_event) \
-    X(QAndroidVmOperations, vm)           \
-    X(QAndroidNetAgent, net)              \
-    X(QAndroidLibuiAgent, libui)          \
-    X(QCarDataAgent, car)                 \
-    X(QGrpcAgent, grpc)                   \
-    X(QAndroidSensorsAgent, sensors)      \
-    X(QAndroidMultiDisplayAgent, multi_display)\
-    X(QAndroidClipboardAgent, clipboard) \
-
-
+#define ANDROID_CONSOLE_AGENTS_LIST(X)          \
+    X(QAndroidAutomationAgent, automation)      \
+    X(QAndroidBatteryAgent, battery)            \
+    X(QAndroidClipboardAgent, clipboard)        \
+    X(QAndroidCellularAgent, cellular)          \
+    X(QAndroidDisplayAgent, display)            \
+    X(QAndroidEmulatorWindowAgent, emu)         \
+    X(QAndroidFingerAgent, finger)              \
+    X(QAndroidHttpProxyAgent, proxy)            \
+    X(QAndroidLibuiAgent, libui)                \
+    X(QAndroidLocationAgent, location)          \
+    X(QAndroidMultiDisplayAgent, multi_display) \
+    X(QAndroidNetAgent, net)                    \
+    X(QAndroidRecordScreenAgent, record)        \
+    X(QAndroidSensorsAgent, sensors)            \
+    X(QAndroidTelephonyAgent, telephony)        \
+    X(QAndroidUserEventAgent, user_event)       \
+    X(QAndroidVirtualSceneAgent, virtual_scene) \
+    X(QAndroidVmOperations, vm)                 \
+    X(QCarDataAgent, car)                       \
+    X(QGrpcAgent, grpc)
 
 // A structure used to group pointers to all agent interfaces used by the
 // Android console.
-#define ANDROID_CONSOLE_DEFINE_POINTER(type,name) const type* name;
+#define ANDROID_CONSOLE_DEFINE_POINTER(type, name) const type* name;
 typedef struct AndroidConsoleAgents {
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_DEFINE_POINTER)
 } AndroidConsoleAgents;
@@ -73,4 +77,7 @@ typedef struct AndroidConsoleAgents {
 // functions. Takes ownership of |agents|.
 extern int android_console_start(int port, const AndroidConsoleAgents* agents);
 
+
+// Accessor for the android console agents. The console agents are used to interact with the actual emulator.
+const AndroidConsoleAgents* getConsoleAgents();
 ANDROID_END_HEADER

@@ -11,11 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <gtest/gtest.h>  // for Test, AssertionResult
 
 #include "android/emulation/control/WebRtcBridge.h"
 
 #include <fcntl.h>        // for open, O_CREAT, O_WRONLY
-#include <gtest/gtest.h>  // for Test, AssertionResult
 #include <string.h>       // for memcpy
 
 #ifndef _WIN32
