@@ -267,6 +267,12 @@ enum FoldableDisplayType {
     ANDROID_FOLDABLE_TYPE_MAX
 };
 
+enum FoldableHingeSubType {
+    ANDROID_FOLDABLE_HINGE_FOLD = 0,
+    ANDROID_FOLDABLE_HINGE_HINGE = 1,
+    ANDROID_FOLDABLE_HINGE_SUB_TYPE_MAX
+};
+
 struct FoldableHingeParameters {
     int x, y, width, height;
     int displayId;
@@ -284,7 +290,7 @@ struct RollableParameters {
 
 struct FoldableConfig {
     enum FoldableDisplayType hingesType;
-
+    enum FoldableHingeSubType hingesSubType;
     // Display id where the folding occurs.  TODO: account for multiple
     // displays that are related by a hinge, perhaps via folding (heh)
     // displayId into hingeParams

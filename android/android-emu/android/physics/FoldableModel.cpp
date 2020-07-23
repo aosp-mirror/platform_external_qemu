@@ -75,18 +75,26 @@ FoldableModel::FoldableModel() {
             (enum FoldableDisplayType)android_hw->hw_sensor_hinge_type;
     if (type < 0 || type >= ANDROID_FOLDABLE_TYPE_MAX) {
         type = ANDROID_FOLDABLE_HORIZONTAL_SPLIT;
-        E("Incorrect hinge type %d, default to 0\n",
+        W("Incorrect hinge type %d, default to 0\n",
           android_hw->hw_sensor_hinge_type);
     }
-    // hinge number
+    enum FoldableHingeSubType subType =
+            (enum FoldableHingeSubType)android_hw->hw_sensor_hinge_sub_type;
+    if (subType < 0 || subType >= ANDROID_FOLDABLE_HINGE_SUB_TYPE_MAX) {
+        subType = ANDROID_FOLDABLE_HINGE_FOLD;
+        W("Incorrect hinge sub_type %d, default to 0\n",
+          android_hw->hw_sensor_hinge_sub_type);
+    }
+     // hinge number
     int numHinge = android_hw->hw_sensor_hinge_count;
     if (numHinge < 0 || numHinge > ANDROID_FOLDABLE_MAX_HINGES) {
         numHinge = 0;
-        E("Incorrect hinge count %d, default to 0\n",
+        W("Incorrect hinge count %d, default to 0\n",
           android_hw->hw_sensor_hinge_count);
     }
     struct FoldableConfig defaultConfig = {
             .hingesType = type,
+            .hingesSubType = subType,
             .numHinges = numHinge,
     };
     // hinge angle ranges and defaults
