@@ -175,7 +175,7 @@ target_compile_definitions(hostapd PRIVATE -DWPA_IGNORE_CONFIG_ERRORS
 
 android_target_compile_definitions(hostapd windows PRIVATE -DCONFIG_NATIVE_WINDOWS)
 
-if(NOT LINUX_AARCH64)
+if(NOT BUILDING_FOR_AARCH64)
 target_compile_options(hostapd PRIVATE -Wall
                                        -Werror
                                        -Wno-error-deprecated-declarations
