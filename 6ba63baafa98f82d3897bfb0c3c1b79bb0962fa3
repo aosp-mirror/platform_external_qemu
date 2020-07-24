@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9a98417_68e67697",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-24T02:15:41Z",
+      "side": 1,
+      "message": "Verified: No vk-cts regressions.",
+      "revId": "6ba63baafa98f82d3897bfb0c3c1b79bb0962fa3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
