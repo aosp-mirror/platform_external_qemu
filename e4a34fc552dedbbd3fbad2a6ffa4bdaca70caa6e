@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7e438b3_6708d31d",
+        "filename": "android/android-emu/android/hw-sensors.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-07-24T21:26:35Z",
+      "side": 1,
+      "message": "boolean type? or bit map",
+      "revId": "e4a34fc552dedbbd3fbad2a6ffa4bdaca70caa6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05509e87_97e75f0a",
+        "filename": "android/android-emu/android/skin/qt/editable-slider-widget.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-07-24T21:26:35Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "e4a34fc552dedbbd3fbad2a6ffa4bdaca70caa6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
