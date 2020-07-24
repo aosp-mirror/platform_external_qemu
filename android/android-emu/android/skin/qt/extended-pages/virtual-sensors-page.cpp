@@ -152,7 +152,7 @@ void VirtualSensorsPage::setupHingeSensorUI() {
     mUi->hinge1Slider->setHidden(true);
     mUi->hinge2Slider->setHidden(true);
     mUi->accelModeFold->setHidden(true);
-    if (android_hw->hw_sensor_hinge) {
+    if (android_foldable_hinge_configured()) {
         mUi->accelModeFold->setHidden(false);
         mUi->accelModeFold->setChecked(true);
         mUi->accelModeRotate->setChecked(false);

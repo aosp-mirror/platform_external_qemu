@@ -884,13 +884,12 @@ static void _hwSensors_init(HwSensors* h) {
     }
 
     if (android_hw->hw_sensor_hinge) {
+        h->sensors[ANDROID_SENSOR_HINGE_ANGLE0].enabled = true;
         switch (android_hw->hw_sensor_hinge_count) {
             case 3:
                 h->sensors[ANDROID_SENSOR_HINGE_ANGLE2].enabled = true;
             case 2:
                 h->sensors[ANDROID_SENSOR_HINGE_ANGLE1].enabled = true;
-            case 1:
-                h->sensors[ANDROID_SENSOR_HINGE_ANGLE0].enabled = true;
             default:;
         }
     }
@@ -1159,4 +1158,8 @@ extern int android_physical_model_stop_recording() {
 
 int android_foldable_get_state(struct FoldableState* state) {
     return physicalModel_getFoldableState(android_physical_model_instance(), state);
+}
+
+bool android_foldable_hinge_configured() {
+    return (android_hw->hw_sensor_hinge && android_hw->hw_sensor_hinge_count > 0);
 }

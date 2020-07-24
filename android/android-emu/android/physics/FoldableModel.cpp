@@ -69,6 +69,13 @@ FoldableModel::FoldableModel() {
         mState.currentPosture = POSTURE_UNKNOWN;
         return;
     }
+    if (!android_foldable_hinge_configured()) {
+        // create a default hinge with 180 degree
+        mState.config.numHinges = 1;
+        mState.config.hingeParams[0].defaultDegrees = 180.0f;
+        mState.currentHingeDegrees[0] = 180.0f;
+        return;
+    }
 
     // hinge type
     enum FoldableDisplayType type =

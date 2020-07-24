@@ -310,5 +310,6 @@ struct FoldableState {
 };
 
 int android_foldable_get_state(struct FoldableState* state);
+bool android_foldable_hinge_configured();
 
 ANDROID_END_HEADER
