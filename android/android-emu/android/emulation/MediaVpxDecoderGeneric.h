@@ -67,7 +67,6 @@ private:
     MediaHostRenderer mRenderer;
 
     int mNumFramesDecoded = 0;
-    std::list<uint64_t> mUserDataList;
 
     bool mUseGpuTexture = false;
     bool mTrialPeriod = true;
