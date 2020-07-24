@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ce51648_2bbaa28a",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1170,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-24T23:03:24Z",
+      "side": 0,
+      "message": "Nit: not needed",
+      "revId": "dd0f10942065dd97798f2c2af27509d87810719f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ae846e7_b4daaa0b",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-24T23:03:24Z",
+      "side": 0,
+      "message": "Not needed",
+      "revId": "dd0f10942065dd97798f2c2af27509d87810719f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

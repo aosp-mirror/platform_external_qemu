@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba4af62d_09456647",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-24T23:03:24Z",
+      "side": 1,
+      "message": "This snippet is popping up everywhere, is there a way that we can have this in only one place?",
+      "revId": "b9b90856bd01ddf4f225079447f0666fd6424a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
