@@ -207,7 +207,7 @@ private:
         if (mUseWindow) {
             android_showOpenglesWindow(mDisplay.getNative(), 0, 0, kWindowSize,
                                        kWindowSize, kWindowSize, kWindowSize,
-                                       mDisplay.getDevicePixelRatio(), 0, false);
+                                       mDisplay.getDevicePixelRatio(), 0, false, false);
             mDisplay.loop();
         }
 

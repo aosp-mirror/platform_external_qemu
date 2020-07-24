@@ -21,6 +21,7 @@
 #include "android/base/Optional.h"              // for Optional
 #include "android/settings-agent.h"             // for SETTINGS_THEME_DARK
 #include "android/skin/qt/stylesheet.h"         // for stylesheetFontSize
+#include "android/cmdline-option.h"
 
 class QGraphicsOpacityEffect;
 class QShowEvent;
@@ -439,6 +440,8 @@ OverlayChildWidget* OverlayMessageCenter::addMessage(QString message,
 }
 
 void OverlayMessageCenter::reattachToParent() {
+
+
 #ifdef __APPLE__
     // See EmulatorContainer::showEvent() for explanation on why this is needed
     WId parentWid = parentWidget()->effectiveWinId();
@@ -450,9 +453,15 @@ void OverlayMessageCenter::reattachToParent() {
         nsWindowAdopt((void*)parentWid, (void*)wid);
     }
 #endif
+
 }
 
 void OverlayMessageCenter::showEvent(QShowEvent* event) {
+    if (android_cmdLineOptions->qt_no_window) {
+        setVisible(false);
+        event->ignore();
+        return;
+    }
     QWidget::showEvent(event);
     reattachToParent();
     emit resized();

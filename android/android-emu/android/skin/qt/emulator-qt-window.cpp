@@ -31,6 +31,7 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/cmdline-option.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/metrics.h"
 #include "studio_stats.pb.h"
@@ -881,7 +882,9 @@ void EmulatorQtWindow::slot_startupTick() {
     // It's been a while since we were launched, and the main
     // window still hasn't appeared.
     // Show a pop-up that lets the user know we are working.
-
+    if (android_cmdLineOptions->qt_no_window) {
+        return;
+    }
     mStartupDialog->setWindowTitle(tr("Android Emulator"));
     // Hide close/minimize/maximize buttons
     mStartupDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
@@ -1865,10 +1868,6 @@ void EmulatorQtWindow::onScreenConfigChanged() {
 }
 
 void EmulatorQtWindow::showEvent(QShowEvent* event) {
-    mStartupTimer.stop();
-    mStartupDialog->hide();
-    mStartupDialog.clear();
-    mStartupDone = true;
 
     if (mClosed) {
         event->ignore();
@@ -1882,6 +1881,18 @@ void EmulatorQtWindow::showEvent(QShowEvent* event) {
         }
         mFirstShowEvent = false;
     }
+
+    if (android_cmdLineOptions->qt_no_window) {
+        setVisible(false);
+        event->ignore();
+        return;
+    }
+    mStartupTimer.stop();
+    mStartupDialog->hide();
+    mStartupDialog.clear();
+    mStartupDone = true;
+
+
 }
 
 void EmulatorQtWindow::slot_horizontalScrollChanged(int value) {
@@ -2002,7 +2013,8 @@ void EmulatorQtWindow::slot_adbPushCanceled() {
 void EmulatorQtWindow::slot_showMessage(QString text,
                                         Ui::OverlayMessageType messageType,
                                         int timeoutMs) {
-    mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
+    if (!android_cmdLineOptions->qt_no_window)
+        mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
 }
 
 void EmulatorQtWindow::slot_showMessageWithDismissCallback(QString text,
@@ -2010,8 +2022,10 @@ void EmulatorQtWindow::slot_showMessageWithDismissCallback(QString text,
                                                            QString dismissText,
                                                            RunOnUiThreadFunc func,
                                                            int timeoutMs) {
-    auto msg = mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
-    msg->setDismissCallback(dismissText, std::move(func));
+    if (!android_cmdLineOptions->qt_no_window) {
+        auto msg = mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
+        msg->setDismissCallback(dismissText, std::move(func));
+    }
 }
 
 void EmulatorQtWindow::adbPushProgress(double progress, bool done) {
