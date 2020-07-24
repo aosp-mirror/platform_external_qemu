@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "a423d8fd_229d62ec",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-07-24T21:28:34Z",
+      "side": 1,
+      "message": "We need to integrate this with Emulator legacy fold/unfold.\nOnce Emilian finalizes his CLs, I will upload one more CL.\nThen, merged together.",
+      "revId": "99f7c8b75a5008cc555d62d0b410d18f4fd2bc45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "23536eb4_e363d15e",
         "filename": "android/android-emu/android/hw-sensors.cpp",
         "patchSetId": 5
