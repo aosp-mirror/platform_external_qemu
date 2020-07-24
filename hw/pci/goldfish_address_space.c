@@ -495,6 +495,8 @@ static uint32_t address_space_deallocate_block(struct address_space_state *state
     struct address_space_registers *regs = &state->registers;
     uint64_t offset = merge_u64(regs->offset_low, regs->offset_high);
 
+    qemu_get_address_space_device_control_ops()->run_deallocation_callbacks(
+        goldfish_address_space_get_phys_addr_start_locked() + offset);
     return address_space_allocator_deallocate(&state->allocator, offset);
 }
 

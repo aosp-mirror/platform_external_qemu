@@ -39,6 +39,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_dispatch.h"
+#include "emugl/common/address_space_device_control_ops.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/vm_operations.h"
@@ -2496,7 +2497,33 @@ public:
             sizeToPage,
         };
 
+        get_emugl_address_space_device_control_ops().register_deallocation_callback(
+            this, gpa, [](void* thisPtr, uint64_t gpa) {
+            Impl* implPtr = (Impl*)thisPtr;
+            implPtr->freeMappedMemoryAtGpaIfExists(gpa);
+        });
+
         return true;
+    }
+
+    void freeMappedMemoryAtGpaIfExists(uint64_t gpa) {
+        AutoLock lock(mLock);
+
+        auto existingMemoryInfo =
+            android::base::find(mOccupiedGpas, gpa);
+
+        if (!existingMemoryInfo) return;
+
+        if (mLogging) {
+            fprintf(stderr, "%s: Warning: freeing memory as part of deallocation callback. "
+                    "gpa: 0x%llx\n", __func__, (unsigned long long)gpa);
+        }
+
+        freeMemoryLocked(
+                existingMemoryInfo->vk,
+                existingMemoryInfo->device,
+                existingMemoryInfo->memory,
+                nullptr);
     }
 
     VkResult on_vkAllocateMemory(
@@ -2762,6 +2789,8 @@ public:
         }
 
         vk->vkFreeMemory(device, memory, pAllocator);
+
+        mMapInfo.erase(memory);
     }
 
     void on_vkFreeMemory(
@@ -2776,8 +2805,6 @@ public:
         AutoLock lock(mLock);
 
         freeMemoryLocked(vk, device, memory, pAllocator);
-
-        mMapInfo.erase(memory);
     }
 
     VkResult on_vkMapMemory(
@@ -5016,17 +5043,20 @@ private:
             // https://bugs.chromium.org/p/chromium/issues/detail?id=1074600
             // it's important to idle the device before destroying it!
             devicesToDestroyDispatches[i]->vkDeviceWaitIdle(devicesToDestroy[i]);
+            std::vector<VkDeviceMemory> toDestroy;
+
             auto it = mMapInfo.begin();
             while (it != mMapInfo.end()) {
                 if (it->second.device == devicesToDestroy[i]) {
-                    auto mem = it->first;
-                    freeMemoryLocked(devicesToDestroyDispatches[i],
-                            devicesToDestroy[i],
-                            mem, nullptr);
-                    it = mMapInfo.erase(it);
-                } else {
-                    ++it;
+                    toDestroy.push_back(it->first);
                 }
+                ++it;
+            }
+
+            for (auto mem: toDestroy) {
+                freeMemoryLocked(devicesToDestroyDispatches[i],
+                        devicesToDestroy[i],
+                        mem, nullptr);
             }
         }
 

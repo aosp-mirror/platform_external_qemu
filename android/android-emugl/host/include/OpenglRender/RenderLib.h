@@ -23,6 +23,12 @@
 #include "android/emulation/control/window_agent.h"
 #include "android/opengl/emugl_config.h"
 
+extern "C" {
+
+struct address_space_device_control_ops;
+
+} // extern "C"
+
 namespace android {
 namespace base {
 
@@ -73,6 +79,7 @@ public:
     virtual void setDmaOps(emugl_dma_ops) = 0;
 
     virtual void setVmOps(const QAndroidVmOperations &vm_operations) = 0;
+    virtual void setAddressSpaceDeviceControlOps(struct address_space_device_control_ops* ops) = 0;
 
     virtual void setWindowOps(const QAndroidEmulatorWindowAgent &window_operations,
                               const QAndroidMultiDisplayAgent &multi_display_operations) = 0;
