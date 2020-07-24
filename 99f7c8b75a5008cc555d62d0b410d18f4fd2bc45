@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "23536eb4_e363d15e",
+        "filename": "android/android-emu/android/hw-sensors.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1163,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-07-24T21:26:22Z",
+      "side": 1,
+      "message": "nit: no new line",
+      "revId": "99f7c8b75a5008cc555d62d0b410d18f4fd2bc45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
