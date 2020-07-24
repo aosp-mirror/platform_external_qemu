@@ -178,7 +178,8 @@ const TargetInfo kTarget = {
         "arm64",
         "aarch64",
 #if defined(__aarch64__)
-        "host",
+        // "host",
+        "cortex-a57",
 #else
         "cortex-a57",
 #endif

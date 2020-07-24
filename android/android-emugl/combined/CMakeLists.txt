@@ -30,8 +30,10 @@ if(OPTION_GFXSTREAM_BACKEND)
       "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN'")
   android_target_properties(gfxstream_backend darwin-x86_64
       "INSTALL_RPATH>=@loader_path")
+  android_target_properties(gfxstream_backend darwin-aarch64
+      "INSTALL_RPATH>=@loader_path")
 
-  if (NOT LINUX_AARCH64)
+  if (NOT BUILDING_FOR_AARCH64)
       target_link_libraries(
           gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
           OpenglRender)
@@ -61,7 +63,7 @@ if(OPTION_GFXSTREAM_BACKEND)
 
 endif()
 
-if(NOT WINDOWS AND NOT LINUX_AARCH64)
+if(NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
 
   set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp
                        multi-display-agent-mock-impl.cpp Toplevel.cpp window-agent-mock-impl.cpp)
