@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/emulation/MediaVpxDecoderGeneric.h"
+#include "android/base/system/System.h"
 #include "android/emulation/MediaFfmpegVideoHelper.h"
 #include "android/emulation/MediaVpxVideoHelper.h"
 #include "android/emulation/VpxFrameParser.h"
@@ -47,13 +48,28 @@ using TextureFrame = MediaHostRenderer::TextureFrame;
 
 namespace {
 
-static bool s_force_no_gpu = false;
+static bool s_cuvid_good = true;
+
+static bool cudaVpxAllowed() {
+    static std::once_flag once_flag;
+    static bool s_cuda_vpx_allowed = false;
+
+    std::call_once(once_flag, []() {
+        {
+            s_cuda_vpx_allowed =
+                    android::base::System::getEnvironmentVariable(
+                            "ANDROID_EMU_MEDIA_DECODER_CUDA_VPX") == "1";
+        }
+    });
+
+    return s_cuda_vpx_allowed && s_cuvid_good;
+}
 
 bool canUseCudaDecoder() {
     // TODO: implement a whitelist for
     // nvidia gpu;
 #ifndef __APPLE__
-    if (!s_force_no_gpu && MediaCudaDriverHelper::initCudaDrivers()) {
+    if (cudaVpxAllowed() && MediaCudaDriverHelper::initCudaDrivers()) {
         VPX_DPRINT("Using Cuvid decoder on Linux/Windows");
         return true;
     } else {
@@ -69,7 +85,8 @@ bool canUseCudaDecoder() {
 bool canDecodeToGpuTexture() {
 #ifndef __APPLE__
 
-    if (!s_force_no_gpu && emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
+    if (cudaVpxAllowed() &&
+        emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
         return true;
     } else {
         return false;
@@ -158,7 +175,6 @@ void MediaVpxDecoderGeneric::decodeFrame(void* ptr) {
     VPX_DPRINT("calling vpx_codec_decode data %p datalen %d userdata %" PRIx64,
                data, (int)len, param.user_priv);
 
-    mUserDataList.push_back(param.user_priv);
     decode_internal(data, len, param.user_priv);
 
     // now the we can call getImage
@@ -196,7 +212,7 @@ void MediaVpxDecoderGeneric::try_decode(const uint8_t* data,
                    mHwVideoHelper->error());
             mUseGpuTexture = false;
             if (mHwVideoHelper->fatal()) {
-                s_force_no_gpu = true;
+                s_cuvid_good = false;
             }
             mHwVideoHelper.reset(nullptr);
         }
@@ -220,8 +236,6 @@ void MediaVpxDecoderGeneric::fetchAllFrames() {
         if (!success) {
             break;
         }
-        frame.pts = mUserDataList.front();
-        mUserDataList.pop_front();
         mSnapshotHelper.saveDecodedFrame(std::move(frame));
     }
 }
@@ -287,7 +301,6 @@ void MediaVpxDecoderGeneric::flush(void* ptr) {
     if (mVideoHelper) {
         mVideoHelper->flush();
         fetchAllFrames();
-        mUserDataList.clear();
     }
     VPX_DPRINT("flush done");
 }
