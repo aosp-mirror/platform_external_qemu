@@ -16,6 +16,8 @@ function(add_opengl_dependencies TGT)
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
   android_target_properties(
     ${TGT} darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+  android_target_properties(
+    ${TGT} darwin-aarch64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 endfunction()
 
 android_add_library(
@@ -129,8 +131,6 @@ android_target_link_libraries(
   OpenglRender darwin-x86_64
   PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 android_install_shared(OpenglRender)
-
-if (NOT LINUX_AARCH64)
 
 android_add_library(
   TARGET OpenglRender_standalone_common
@@ -334,5 +334,3 @@ target_link_libraries(
          OpenglRender_vulkan
          OSWindow)
 add_opengl_dependencies(HelloVulkan)
-
-endif()

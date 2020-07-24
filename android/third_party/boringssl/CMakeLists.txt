@@ -55,6 +55,18 @@ elseif(DARWIN_X86_64)
     LICENSE "OpenSSL"
     SRC # cmake-format: sortable
         ${crypto_sources} ${crypto_sources_mac_x86_64})
+elseif(DARWIN_AARCH64)
+  android_add_library(
+    TARGET crypto
+    LIBNAME
+      boringssl
+      URL
+      "https://android.googlesource.com/platform/external/boringssl/+/refs/heads/master"
+    REPO "${BORINGSSL_ROOT}"
+    NOTICE "REPO/NOTICE"
+    LICENSE "OpenSSL"
+    SRC # cmake-format: sortable
+        ${crypto_sources} ${crypto_sources_mac_aarch64})
 
 else()
   android_add_library(
