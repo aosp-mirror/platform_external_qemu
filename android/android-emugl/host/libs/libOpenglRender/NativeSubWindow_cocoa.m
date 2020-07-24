@@ -68,6 +68,15 @@ void destroySubWindow(EGLNativeWindowType win) {
     }
 }
 
+void hideSubWindow(EGLNativeWindowType win) {
+    if(win){
+        NSView *glView = (NSView *)win;
+        [glView setHidden:YES];
+    }
+
+}
+
+
 int moveSubWindow(FBNativeWindowType p_parent_window,
                   EGLNativeWindowType p_sub_window,
                   int x,

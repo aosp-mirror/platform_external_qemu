@@ -31,6 +31,7 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/cmdline-option.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/metrics.h"
 #include "studio_stats.pb.h"
@@ -1865,6 +1866,9 @@ void EmulatorQtWindow::onScreenConfigChanged() {
 }
 
 void EmulatorQtWindow::showEvent(QShowEvent* event) {
+    if (android_cmdLineOptions->qt_no_window) {
+        setVisible(false);
+    }
     mStartupTimer.stop();
     mStartupDialog->hide();
     mStartupDialog.clear();

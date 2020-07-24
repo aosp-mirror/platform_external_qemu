@@ -101,6 +101,7 @@ struct RenderWindowMessage {
             float dpr;
             float rotation;
             bool deleteExisting;
+            bool hideWindow;
         } subwindow;
 
         // CMD_SET_TRANSLATION;
@@ -186,7 +187,8 @@ struct RenderWindowMessage {
                         msg.subwindow.fbh,
                         msg.subwindow.dpr,
                         msg.subwindow.rotation,
-                        msg.subwindow.deleteExisting);
+                        msg.subwindow.deleteExisting,
+                        msg.subwindow.hideWindow);
                 break;
 
             case CMD_REMOVE_SUBWINDOW:
@@ -486,7 +488,8 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   int fbh,
                                   float dpr,
                                   float zRot,
-                                  bool deleteExisting) {
+                                  bool deleteExisting,
+                                  bool hideWindow) {
     D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
 
     RenderWindowMessage msg = {};
@@ -501,7 +504,7 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
     msg.subwindow.dpr = dpr;
     msg.subwindow.rotation = zRot;
     msg.subwindow.deleteExisting = deleteExisting;
-
+    msg.subwindow.hideWindow = hideWindow;
     mHasSubWindow = processMessage(msg);
 
     D("Exiting mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");

@@ -51,6 +51,9 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
 // Destroy a sub-window previously created through createSubWindow() above.
 void destroySubWindow(EGLNativeWindowType win);
 
+// Hide a sub-window previously created through createSubWindow() above.
+void hideSubWindow(EGLNativeWindowType win);
+
 // Moves a sub-window previously created through createSubWindow() above.
 // |p_parent_window| is the platform-specific handle to the main UI window.
 // |p_sub_window| is the platform-specific handle to the EGL subwindow.

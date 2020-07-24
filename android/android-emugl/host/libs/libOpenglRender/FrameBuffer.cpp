@@ -845,7 +845,8 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  int fbh,
                                  float dpr,
                                  float zRot,
-                                 bool deleteExisting) {
+                                 bool deleteExisting,
+                                 bool hideWindow) {
     GL_LOG("Begin setupSubWindow");
     if (!m_useSubWindow) {
         ERR("%s: Cannot create native sub-window in this configuration\n",
@@ -981,6 +982,9 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             }
         }
     }
+    if (hideWindow && m_subWin)
+        ::hideSubWindow(m_subWin);
+    
 
     if (success && redrawSubwindow) {
         bool bindSuccess = bind_locked();

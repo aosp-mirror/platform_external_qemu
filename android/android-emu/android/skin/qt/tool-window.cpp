@@ -97,6 +97,7 @@
 #include "android/utils/debug.h"                          // for VERBOSE_fol...
 #include "android/utils/system.h"                         // for get_uptime_ms
 #include "ui_tools.h"                                     // for ToolControls
+#include "android/cmdline-option.h"
 
 class QCloseEvent;
 class QHideEvent;
@@ -333,6 +334,11 @@ void ToolWindow::updateButtonUiCommand(QPushButton* button,
     }
 }
 
+void ToolWindow::showEvent(QShowEvent* event) {
+    if (android_cmdLineOptions->qt_no_window) {
+        setVisible(false);
+    }
+}
 void ToolWindow::raise() {
     if (mVirtualSceneControlWindow.hasInstance() &&
         mVirtualSceneControlWindow.get()->isActive()) {

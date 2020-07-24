@@ -37,6 +37,7 @@
 #include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
 #include "android/skin/qt/tool-window.h"             // for ToolWindow
 #include "android/utils/debug.h"                     // for VERBOSE_PRINT
+#include "android/cmdline-option.h"
 
 class QCloseEvent;
 class QFocusEvent;
@@ -326,12 +327,16 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
 }
 
 void EmulatorContainer::showEvent(QShowEvent* event) {
+
 // Disable the minimize and maximize buttons on OSX. See the comment in the
 // constructor for an explanation of why this is necessary.
 #ifdef __APPLE__
     WId wid = effectiveWinId();
     wid = (WId)getNSWindow((void*)wid);
     nsWindowHideWindowButtons((void*)wid);
+    if (android_cmdLineOptions->qt_no_window) {
+        setVisible(false);
+    }
 
     // The following is an OS X specific hack.
     // Explanation:
