@@ -81,10 +81,16 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*restoreSkin)(void);
     void (*updateUIMultiDisplayPage)(uint32_t);
     bool (*getMonitorRect)(uint32_t*, uint32_t*);
+<<<<<<< HEAD   (57d972 Merge "Merge cherrypicks of [1486495] into emu-30-release" i)
     // return true if extended controls window's visibility has changed.
     bool (*startExtendedWindow)(void);
     bool (*quitExtendedWindow)(void);
     bool (*setUiTheme)(SettingsTheme type);
+=======
+    void (*startExtendedWindow)(void);
+    void (*quitExtendedWindow)(void);
+    bool (*setUITheme)(SettingsTheme type);
+>>>>>>> CHANGE (94635c [Extended Window] Embedded Emulator)
 } QAndroidEmulatorWindowAgent;
 
 ANDROID_END_HEADER

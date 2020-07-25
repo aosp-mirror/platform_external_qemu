@@ -4042,6 +4042,7 @@ static int do_quit_extended_window(ControlClient client, char* args) {
 }
 
 static int do_set_ui_theme(ControlClient client, char* args) {
+<<<<<<< HEAD   (57d972 Merge "Merge cherrypicks of [1486495] into emu-30-release" i)
     if (!args) {
         control_write(client, "KO: argument missing, try 'setUiTheme <dark|light>'\r\n");
         return -1;
@@ -4053,6 +4054,12 @@ static int do_set_ui_theme(ControlClient client, char* args) {
     } else {
         control_write( client, "KO: Failed to set UI theme to %s, try 'setUiTheme <dark|light>'\r\n", args);
                 return -1;
+=======
+    if (!strcmp(args,"dark")) {
+        client->global->emu_agent->setUITheme(SETTINGS_THEME_DARK);
+    } else if (!strcmp(args, "light")) {
+        client->global->emu_agent->setUITheme(SETTINGS_THEME_LIGHT);
+>>>>>>> CHANGE (94635c [Extended Window] Embedded Emulator)
     }
     return 0;
 }
@@ -4182,7 +4189,11 @@ extern const CommandDefRec main_commands[] = {
         {"quitExtendedWindow", "Show the extended window", NULL, NULL,
          do_quit_extended_window, NULL},
 
+<<<<<<< HEAD   (57d972 Merge "Merge cherrypicks of [1486495] into emu-30-release" i)
         {"setUiTheme", "Set emultaor's UI theme to either light or dark", NULL, NULL,
+=======
+        {"setUITheme", "Set emultaor's UI theme to either light or dark", NULL, NULL,
+>>>>>>> CHANGE (94635c [Extended Window] Embedded Emulator)
         do_set_ui_theme, NULL},
 
         {"screenrecord", "Records the emulator's display", NULL, NULL, NULL,

@@ -131,6 +131,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .startExtendedWindow =
                 []() {
                 // Not implemented
+<<<<<<< HEAD   (57d972 Merge "Merge cherrypicks of [1486495] into emu-30-release" i)
                 return false;
                 },
         .quitExtendedWindow =
@@ -139,6 +140,14 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 return false;
                 },
         .setUiTheme = [](SettingsTheme type) {
+=======
+                },
+        .quitExtendedWindow =
+                []() {
+                // Not implemented
+                },
+        .setUITheme = [](SettingsTheme type) {
+>>>>>>> CHANGE (94635c [Extended Window] Embedded Emulator)
                 // Not implemented
                 return false;
                 },

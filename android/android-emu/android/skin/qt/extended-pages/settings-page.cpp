@@ -340,7 +340,11 @@ void SettingsPage::setHaveClipboardSharing(bool haveSharing) {
     }
 }
 
+<<<<<<< HEAD   (57d972 Merge "Merge cherrypicks of [1486495] into emu-30-release" i)
 void SettingsPage::setUiTheme(SettingsTheme theme) {
+=======
+void SettingsPage::setUITheme(SettingsTheme theme) {
+>>>>>>> CHANGE (94635c [Extended Window] Embedded Emulator)
     mUi->set_themeBox->setCurrentIndex(static_cast<int>(theme));
 }
 

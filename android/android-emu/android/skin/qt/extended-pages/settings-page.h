@@ -46,7 +46,11 @@ public:
 
 public slots:
     void setHaveClipboardSharing(bool haveSharing);
+<<<<<<< HEAD   (57d972 Merge "Merge cherrypicks of [1486495] into emu-30-release" i)
     void setUiTheme(SettingsTheme theme);
+=======
+    void setUITheme(SettingsTheme theme);
+>>>>>>> CHANGE (94635c [Extended Window] Embedded Emulator)
 signals:
     void frameAlwaysChanged(bool showFrame);
     void onForwardShortcutsToDeviceChanged(int index);
