@@ -157,7 +157,8 @@ public:
                                      int fbh,
                                      float dpr,
                                      float zRot,
-                                     bool deleteExisting) {
+                                     bool deleteExisting,
+                                     bool hideWindow) {
         return false;
     }
     bool destroyOpenGLSubwindow() {
