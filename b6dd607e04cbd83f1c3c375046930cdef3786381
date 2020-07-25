@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6af5c1a4_5c366150",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2020-07-25T02:25:34Z",
+      "side": 1,
+      "message": "Hi Erwin, can you take a look of this CL? with this change, I can get rid of this error on windows:\n\n\u0027usb-host\u0027 is not a valid device model name.\n\nI am not sure if it\u0027s needed to modify the .sh file, as cmake is used to build emulator.",
+      "revId": "b6dd607e04cbd83f1c3c375046930cdef3786381",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
