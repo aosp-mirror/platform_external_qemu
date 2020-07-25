@@ -293,8 +293,8 @@ build_qemu_android () {
         LIBUSB_FLAGS=
         case $1 in
             windows*)
-                # Libusb support on windows is not what we would like it to be
-                LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
+                # Libusb support on windows is needed for bluetooth passthru
+                LIBUSB_FLAGS="--enable-libusb --enable-usb-redir"
                 ;;
             linux-aarch64)
                 # TODO(bohu): cross build libusb for aarch64
@@ -447,7 +447,6 @@ EOF
             --disable-seccomp \
             --disable-smartcard \
             --disable-spice \
-            --disable-usb-redir \
             --disable-user \
             --disable-vde \
             --disable-vte \
