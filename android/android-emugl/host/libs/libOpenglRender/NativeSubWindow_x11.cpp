@@ -39,7 +39,8 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int width,
                                     int height,
                                     SubWindowRepaintCallback repaint_callback,
-                                    void* repaint_callback_param) {
+                                    void* repaint_callback_param,
+                                    int hideWindow) {
    // The call to this function is protected by a lock
    // in FrameBuffer so it is safe to check and initialize s_display here
    if (!s_display) {
@@ -61,10 +62,12 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                CopyFromParent,
                                CWEventMask,
                                &wa);
-    XMapWindow(s_display,win);
-    XSetWindowBackground(s_display, win, BlackPixel(s_display, 0));
-    XEvent e;
-    XIfEvent(s_display, &e, WaitForMapNotify, (char *)win);
+    if (!hideWindow) {
+        XMapWindow(s_display,win);
+        XSetWindowBackground(s_display, win, BlackPixel(s_display, 0));
+        XEvent e;
+        XIfEvent(s_display, &e, WaitForMapNotify, (char *)win);
+    }
     return win;
 }
 

@@ -133,6 +133,14 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         *h = 1600;
                     return true;
                 },
+        .startExtendedWindow =
+                []() {
+                    // Not implemented
+                },
+        .quitExtendedWindow =
+                []() {
+                    // Not implemented
+                },
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

@@ -163,7 +163,24 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     } else {
                         return false;
                     }
-                }
+                },
+        .startExtendedWindow =
+                []() {
+                    if (auto* win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread([win]() {
+                            win->toolWindow()->handleUICommand(
+                                    QtUICommand::SHOW_PANE_LOCATION);
+                        });
+                    }
+                },
+        .quitExtendedWindow =
+                []() {
+                    if (auto* win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread(
+                                [win]() { win->toolWindow()->hide(); });
+                    }
+                },
+
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
