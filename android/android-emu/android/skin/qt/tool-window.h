@@ -117,12 +117,14 @@ public:
         handleUICommand(cmd, false);
     }
     void hideRotationButton(bool hide);
+    ExtendedWindow*  extendedWindow() const;
 
 signals:
     void guestClipboardChanged(QString text);
     void haveClipboardSharingKnown(bool have);
 
 private:
+    void showEvent(QShowEvent* event) override;
     static void forwardGenericEventToEmulator(int type, int code, int value);
     static void sendFoldedArea();
     void handleUICommand(QtUICommand cmd, bool down);

@@ -144,7 +144,8 @@ public:
                                      int fbh,
                                      float dpr,
                                      float zRot,
-                                     bool deleteExisting) = 0;
+                                     bool deleteExisting,
+                                     bool hideWindow) = 0;
 
     // destroyOpenGLSubwindow -
     //   destroys the created native subwindow. Once destroyed,

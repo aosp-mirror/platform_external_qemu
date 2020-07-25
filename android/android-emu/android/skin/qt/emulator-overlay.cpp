@@ -11,6 +11,7 @@
 
 #include "android/skin/qt/emulator-overlay.h"
 
+#include "android/cmdline-option.h"
 #include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
@@ -281,6 +282,12 @@ void EmulatorOverlay::paintEvent(QPaintEvent* e) {
 }
 
 void EmulatorOverlay::showEvent(QShowEvent* event) {
+    if (android_cmdLineOptions->qt_hide_window) {
+        setVisible(false);
+        event->ignore();
+        return;
+    }
+
     setFocus();
     activateWindow();
 }

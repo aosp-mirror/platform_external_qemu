@@ -23,6 +23,7 @@
 #include "android/base/system/System.h"
 #include "android/base/system/Win32Utils.h"
 #include "android/base/threads/Async.h"
+#include "android/cmdline-option.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
@@ -33,7 +34,6 @@
 #include "android/globals.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/metrics.h"
-#include "studio_stats.pb.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
@@ -57,6 +57,7 @@
 #include "android/utils/filelock.h"
 #include "android/utils/x86_cpuid.h"
 #include "android/virtualscene/TextureUtils.h"
+#include "studio_stats.pb.h"
 
 #define DEBUG 1
 
@@ -881,7 +882,9 @@ void EmulatorQtWindow::slot_startupTick() {
     // It's been a while since we were launched, and the main
     // window still hasn't appeared.
     // Show a pop-up that lets the user know we are working.
-
+    if (android_cmdLineOptions->qt_hide_window) {
+        return;
+    }
     mStartupDialog->setWindowTitle(tr("Android Emulator"));
     // Hide close/minimize/maximize buttons
     mStartupDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
@@ -1781,6 +1784,9 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     if (mClosed) {
         return;
     }
+    if (android_cmdLineOptions->qt_hide_window) {
+        return;
+    }
     if (surface != mBackingSurface) {
         mBackingBitmapChanged = true;
         mBackingSurface = surface;
@@ -1865,10 +1871,6 @@ void EmulatorQtWindow::onScreenConfigChanged() {
 }
 
 void EmulatorQtWindow::showEvent(QShowEvent* event) {
-    mStartupTimer.stop();
-    mStartupDialog->hide();
-    mStartupDialog.clear();
-    mStartupDone = true;
 
     if (mClosed) {
         event->ignore();
@@ -1882,6 +1884,16 @@ void EmulatorQtWindow::showEvent(QShowEvent* event) {
         }
         mFirstShowEvent = false;
     }
+
+    if (android_cmdLineOptions->qt_hide_window) {
+        setVisible(false);
+        event->ignore();
+        return;
+    }
+    mStartupTimer.stop();
+    mStartupDialog->hide();
+    mStartupDialog.clear();
+    mStartupDone = true;
 }
 
 void EmulatorQtWindow::slot_horizontalScrollChanged(int value) {
@@ -2002,7 +2014,8 @@ void EmulatorQtWindow::slot_adbPushCanceled() {
 void EmulatorQtWindow::slot_showMessage(QString text,
                                         Ui::OverlayMessageType messageType,
                                         int timeoutMs) {
-    mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
+    if (!android_cmdLineOptions->qt_hide_window)
+        mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
 }
 
 void EmulatorQtWindow::slot_showMessageWithDismissCallback(QString text,
@@ -2010,8 +2023,11 @@ void EmulatorQtWindow::slot_showMessageWithDismissCallback(QString text,
                                                            QString dismissText,
                                                            RunOnUiThreadFunc func,
                                                            int timeoutMs) {
-    auto msg = mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
-    msg->setDismissCallback(dismissText, std::move(func));
+    if (!android_cmdLineOptions->qt_hide_window) {
+        auto msg = mContainer.messageCenter().addMessage(text, messageType,
+                                                         timeoutMs);
+        msg->setDismissCallback(dismissText, std::move(func));
+    }
 }
 
 void EmulatorQtWindow::adbPushProgress(double progress, bool done) {
