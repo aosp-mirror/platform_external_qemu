@@ -173,6 +173,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .startExtendedWindow =
                 []() {
+<<<<<<< HEAD   (57d972 Merge "Merge cherrypicks of [1486495] into emu-30-release" i)
                     auto* win = EmulatorQtWindow::getInstance();
                     if (win && !win->toolWindow()->isExtendedWindowVisible()) {
                         win->runOnUiThread([win]() {
@@ -198,6 +199,25 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         win->runOnUiThread(
                                 [win, type]() { win->toolWindow()->setUiTheme(type); });
                         return true;
+=======
+                    if (auto* win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread([win]() {
+                            win->toolWindow()->handleUICommand(
+                                    QtUICommand::SHOW_PANE_LOCATION);
+                        });
+                    }
+                },
+        .quitExtendedWindow =
+                []() {
+                    if (auto* win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread(
+                                [win]() { win->toolWindow()->hide(); });
+                    }
+                },
+        .setUITheme = [](SettingsTheme type) {
+                    if (auto* win = EmulatorQtWindow::getInstance()) {
+                        return win->setUITheme(type);
+>>>>>>> CHANGE (94635c [Extended Window] Embedded Emulator)
                     } else {
                         return false;
                     }

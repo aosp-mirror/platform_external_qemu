@@ -133,8 +133,13 @@ ExtendedWindow::ExtendedWindow(
         this, SLOT(switchToTheme(SettingsTheme)));
 
     connect(
+<<<<<<< HEAD   (57d972 Merge "Merge cherrypicks of [1486495] into emu-30-release" i)
         mToolWindow, SIGNAL(themeChanged(SettingsTheme)),
         mExtendedUi->settingsPage, SLOT(setUiTheme(SettingsTheme)), Qt::DirectConnection);
+=======
+        mEmulatorWindow, SIGNAL(themeChanged(SettingsTheme)),
+        mExtendedUi->settingsPage, SLOT(setUITheme(SettingsTheme)), Qt::DirectConnection);
+>>>>>>> CHANGE (94635c [Extended Window] Embedded Emulator)
 
     connect(mExtendedUi->settingsPage, SIGNAL(disableMouseWheelChanged(bool)),
         this, SLOT(disableMouseWheel(bool)));
