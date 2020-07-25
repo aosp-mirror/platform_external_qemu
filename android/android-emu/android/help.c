@@ -1947,6 +1947,7 @@ help_crostini(stralloc_t* out)
 #define  help_no_sim       NULL
 #define  help_lowram       NULL
 #define  help_no_window    NULL
+#define  help_qt_hide_window NULL
 #define  help_version      NULL
 #define  help_no_passive_gps NULL
 #define  help_read_only    NULL
