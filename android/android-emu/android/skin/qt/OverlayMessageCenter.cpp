@@ -19,6 +19,7 @@
 #include <qwindowdefs.h>                        // for WId
 
 #include "android/base/Optional.h"              // for Optional
+#include "android/cmdline-option.h"             // for android_cmdLineOptions
 #include "android/settings-agent.h"             // for SETTINGS_THEME_DARK
 #include "android/skin/qt/stylesheet.h"         // for stylesheetFontSize
 
@@ -453,6 +454,11 @@ void OverlayMessageCenter::reattachToParent() {
 }
 
 void OverlayMessageCenter::showEvent(QShowEvent* event) {
+    if (android_cmdLineOptions->qt_hide_window) {
+        setVisible(false);
+        event->ignore();
+        return;
+    }
     QWidget::showEvent(event);
     reattachToParent();
     emit resized();

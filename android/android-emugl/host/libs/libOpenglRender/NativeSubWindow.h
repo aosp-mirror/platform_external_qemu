@@ -46,7 +46,8 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int width,
                                     int height,
                                     SubWindowRepaintCallback repaint_callback,
-                                    void* repaint_callback_param);
+                                    void* repaint_callback_param,
+                                    int hideWindow);
 
 // Destroy a sub-window previously created through createSubWindow() above.
 void destroySubWindow(EGLNativeWindowType win);
