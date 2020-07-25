@@ -4025,6 +4025,16 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
     return -1;
 }
 
+static int do_start_extended_window(ControlClient client, char* args) {
+    client->global->emu_agent->startExtendedWindow();
+    return 0;
+}
+
+static int do_quit_extended_window(ControlClient client, char* args) {
+    client->global->emu_agent->quitExtendedWindow();
+    return 0;
+}
+
 static int do_fold(ControlClient client, char* args) {
     if (client->global->emu_agent->fold(true)) {
           return 0;
@@ -4143,6 +4153,12 @@ extern const CommandDefRec main_commands[] = {
 
         {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
          do_rotate_90_clockwise, NULL},
+
+        {"startExtendedWindow", "Show the extended window", NULL, NULL,
+         do_start_extended_window, NULL},
+
+        {"quitExtendedWindow", "Show the extended window", NULL, NULL,
+         do_quit_extended_window, NULL},
 
         {"screenrecord", "Records the emulator's display", NULL, NULL, NULL,
          screenrecord_commands},
