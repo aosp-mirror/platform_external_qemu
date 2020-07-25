@@ -320,6 +320,13 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 var_append EXTRA_CONFIGURE_FLAGS \
                     -no-framework \
                     -sdk macosx
+                case $SYSTEM in
+                    darwin-aarch64)
+                        # Our Qt is patched with a mkspec to support mac on apple silicon
+                        var_append EXTRA_CONFIGURE_FLAGS \
+                            -platform macx-clang-aarch64
+                        ;;
+                esac
                 var_append CFLAGS -mmacosx-version-min=10.11
                 var_append LDFLAGS -mmacosx-version-min=10.11
                 var_append LDFLAGS -lc++
