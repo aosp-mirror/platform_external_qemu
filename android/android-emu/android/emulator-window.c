@@ -39,6 +39,7 @@
 #include "android/ui-emu-agent.h"                        // for UiEmuAgent
 #include "android/utils/debug.h"                         // for dprint, dwar...
 #include "android/utils/looper.h"                        // for looper_getFo...
+#include "android/cmdline-option.h"                      // for android_cmdLineOptions
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -54,6 +55,9 @@ const QAndroidUserEventAgent* user_event_agent;
 // the frame post callback to retrieve every frame from the GPU, which will
 // be slower, except for software-based renderers.
 static bool s_use_emugl_subwindow = 1;
+// Set to 1 to hide all QT windows and their subwindows except for the
+// extended control window.
+static bool s_qt_hide_windw = 0;
 
 static void emulator_window_refresh(EmulatorWindow* emulator);
 
@@ -147,7 +151,7 @@ static int emulator_window_opengles_show_window(
         float rotation, bool deleteExisting) {
     if (s_use_emugl_subwindow) {
         return android_showOpenglesWindow(window, x, y, vw, vh, w, h, dpr,
-                                          rotation, deleteExisting);
+                                          rotation, deleteExisting, s_qt_hide_windw);
     } else {
         return 0;
     }
@@ -267,7 +271,9 @@ emulator_window_setup( EmulatorWindow*  emulator )
     if (!android_hw->hw_gpu_enabled || !strcmp(android_hw->hw_gpu_mode, "guest")) {
         s_use_emugl_subwindow = 0;
     }
-
+    if (android_cmdLineOptions->qt_hide_window) {
+        s_qt_hide_windw = 1;
+    }
 
     if (s_use_emugl_subwindow) {
         VERBOSE_PRINT(gles, "Using EmuGL sub-window for GPU display");
