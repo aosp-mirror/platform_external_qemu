@@ -406,10 +406,11 @@ bool RendererImpl::showOpenGLSubwindow(FBNativeWindowType window,
                                        int fbh,
                                        float dpr,
                                        float zRot,
-                                       bool deleteExisting) {
+                                       bool deleteExisting,
+                                       bool hideWindow) {
     assert(mRenderWindow);
     return mRenderWindow->setupSubWindow(window, wx, wy, ww, wh, fbw, fbh, dpr,
-                                         zRot, deleteExisting);
+                                         zRot, deleteExisting, hideWindow);
 }
 
 bool RendererImpl::destroyOpenGLSubwindow() {

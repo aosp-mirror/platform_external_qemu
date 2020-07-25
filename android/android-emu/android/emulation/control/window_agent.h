@@ -13,6 +13,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "android/settings-agent.h"
 #include "android/skin/rect.h"
 #include "android/utils/compiler.h"
 
@@ -80,6 +81,9 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*restoreSkin)(void);
     void (*updateUIMultiDisplayPage)(uint32_t);
     bool (*getMonitorRect)(uint32_t*, uint32_t*);
+    void (*startExtendedWindow)(void);
+    void (*quitExtendedWindow)(void);
+    bool (*setUITheme)(SettingsTheme type);
 } QAndroidEmulatorWindowAgent;
 
 ANDROID_END_HEADER

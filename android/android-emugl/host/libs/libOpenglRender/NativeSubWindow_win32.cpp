@@ -38,7 +38,7 @@ static LRESULT CALLBACK subWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int x, int y,int width, int height,
                                     SubWindowRepaintCallback repaint_callback,
-                                    void* repaint_callback_param){
+                                    void* repaint_callback_param, int hideWindow){
     static const char className[] = "subWin";
 
     WNDCLASS wc = {};
@@ -66,7 +66,8 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
     user_data->repaint_callback_param = repaint_callback_param;
 
     SetWindowLongPtr(ret, GWLP_USERDATA, (LONG_PTR)user_data);
-    ShowWindow(ret, SW_SHOW);
+    if (!hideWindow)
+        ShowWindow(ret, SW_SHOW);
     return ret;
 }
 

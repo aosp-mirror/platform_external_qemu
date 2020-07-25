@@ -128,6 +128,18 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         *h = 1600;
                     return true;
                 },
+        .startExtendedWindow =
+                []() {
+                // Not implemented
+                },
+        .quitExtendedWindow =
+                []() {
+                // Not implemented
+                },
+        .setUITheme = [](SettingsTheme type) {
+                // Not implemented
+                return false;
+                },
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

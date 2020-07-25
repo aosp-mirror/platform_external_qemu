@@ -138,10 +138,16 @@ public:
     //
     // NOTE: This can return false for software-only EGL engines like OSMesa.
     bool setupSubWindow(FBNativeWindowType p_window,
-                        int wx, int wy,
-                        int ww, int wh,
-                        int fbw, int fbh, float dpr, float zRot,
-                        bool deleteExisting);
+                        int wx,
+                        int wy,
+                        int ww,
+                        int wh,
+                        int fbw,
+                        int fbh,
+                        float dpr,
+                        float zRot,
+                        bool deleteExisting,
+                        bool hideWindow);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
