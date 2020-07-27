@@ -1,4 +1,4 @@
-// Copyright (C) 2020 The Android Open Source Project
+// Copyright 2015-2017 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <stdint.h>                                         // for uint32_t
-#include <map>                                              // for map, __ma...
-#include <utility>                                          // for pair
+#include <stdio.h>
+#include "android/emulation/control/multi_display_agent.h"
 
-#include "android/emulation/MultiDisplay.h"                 // for MultiDisp...
-#include "android/emulation/control/multi_display_agent.h"  // for QAndroidM...
+static int32_t sDisplayX = 0;
+static int32_t sDisplayY = 0;
+static int32_t sDisplayW = 0;
+static int32_t sDisplayH = 0;
+static int32_t sDisplayDpi = 0;
 
-std::map<uint32_t, android::MultiDisplayInfo> mMultiDisplay;
 static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
         .setMultiDisplay = [](uint32_t id,
                               int32_t x,
@@ -29,6 +30,8 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                               uint32_t dpi,
                               uint32_t flag,
                               bool add) -> int{
+            printf("setMultiDisplay (mock). id %u x y w h %d %d %u %u dpi %u flag %u add? %d\n",
+                   id, x, y, w, h, dpi, flag, add);
             return 0;
         },
         .getMultiDisplay = [](uint32_t id,
@@ -39,7 +42,13 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                              uint32_t* dpi,
                              uint32_t* flag,
                              bool* enable) -> bool{
-            return true;
+            printf("getMultiDisplay (mock) id %u\n", id);
+            if (x) *x = sDisplayX;
+            if (y) *y = sDisplayY;
+            if (w) *w = sDisplayW;
+            if (h) *h = sDisplayH;
+            if (dpi) *dpi = sDisplayDpi;
+            return id == 0;
         },
         .getNextMultiDisplay = [](int32_t start_id,
                                 uint32_t* id,
@@ -50,81 +59,55 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                                 uint32_t* dpi,
                                 uint32_t* flag,
                                 uint32_t* cb) -> bool {
-            uint32_t key;
-            std::map<uint32_t, android::MultiDisplayInfo>::iterator i;
-            if (start_id < 0) {
-                key = 0;
-            } else {
-                key = start_id + 1;
-            }
-            i = mMultiDisplay.lower_bound(key);
-            if (i == mMultiDisplay.end()) {
-                return false;
-            } else {
-                if (id) {
-                    *id = i->first;
-                }
-                if (x) {
-                    *x = i->second.pos_x;
-                }
-                if (y) {
-                    *y = i->second.pos_y;
-                }
-                if (w) {
-                    *w = i->second.width;
-                }
-                if (h) {
-                    *h = i->second.height;
-                }
-                if (dpi) {
-                    *dpi = i->second.dpi;
-                }
-                if (flag) {
-                    *flag = i->second.flag;
-                }
-                if (cb) {
-                    *cb = i->second.cb;
-                }
-                return true;
-            }
+            printf("getNextMultiDisplay (mock)\n");
+            return false;
         },
         .isMultiDisplayEnabled = [](void) -> bool {
-            return mMultiDisplay.size() > 1;
+            printf("isMultiDisplayEnabled (mock)\n");
+            return false;
         },
-        .getCombinedDisplaySize = [](uint32_t* width, uint32_t* height) {
+        .getCombinedDisplaySize = [](uint32_t* width,
+                                     uint32_t* height) {
+            printf("getCombinedDisplaySize (mock)\n");
         },
         .multiDisplayParamValidate = [](uint32_t id,
                                         uint32_t w,
                                         uint32_t h,
                                         uint32_t dpi,
                                         uint32_t flag) -> bool {
-            return true;
+            printf("multiDisplayParamValidate (mock)\n");
+            return false;
         },
         .translateCoordination = [](uint32_t* x,
                                     uint32_t*y,
                                     uint32_t* displayId) -> bool {
+            printf("translateCoordination (mock)\n");
             return true;
         },
-        .setGpuMode = [](bool isGuestMode, uint32_t w, uint32_t h) { },
+        .setGpuMode = [](bool isGuestMode, uint32_t w, uint32_t h) {
+            printf("setGpuMode (mock)\n");
+        },
         .createDisplay = [](uint32_t* displayId) -> int {
-            mMultiDisplay.emplace(*displayId, android::MultiDisplayInfo());
+            printf("createDisplay (mock)\n");
+            *displayId = 0;
             return 0;
         },
         .destroyDisplay = [](uint32_t displayId) -> int {
-            mMultiDisplay.erase(displayId);
+            printf("destroyDisplay (mock)\n");
             return 0;
         },
         .setDisplayPose = [](uint32_t displayId,
-                             int32_t x,
-                             int32_t y,
-                             uint32_t w,
-                             uint32_t h,
-                             uint32_t dpi) -> int {
-            mMultiDisplay[displayId].pos_x = x;
-            mMultiDisplay[displayId].pos_y = y;
-            mMultiDisplay[displayId].width = w;
-            mMultiDisplay[displayId].height = h;
-            mMultiDisplay[displayId].dpi = dpi;
+                            int32_t x,
+                            int32_t y,
+                            uint32_t w,
+                            uint32_t h,
+                            uint32_t dpi) -> int {
+            printf("setDisplayPose (mock): x y w h %d %d %u %u dpi %u\n", x, y, w, h, dpi);
+            sDisplayX = x;
+            sDisplayY = y;
+            sDisplayW = w;
+            sDisplayH = h;
+            sDisplayDpi = dpi;
             return 0;
         },
         .getDisplayPose = [](uint32_t displayId,
@@ -132,32 +115,24 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                             int32_t* y,
                             uint32_t* w,
                             uint32_t* h) -> int {
-            *x = mMultiDisplay[displayId].pos_x;
-            *y = mMultiDisplay[displayId].pos_y;
-            *w = mMultiDisplay[displayId].width;
-            *h = mMultiDisplay[displayId].height;
+            printf("getDisplayPose (mock)\n");
             return 0;
         },
         .getDisplayColorBuffer = [](uint32_t displayId,
                                     uint32_t* colorBuffer) -> int {
-            *colorBuffer = mMultiDisplay[displayId].cb;
+            printf("getDisplayColorBuffer (mock)\n");
             return 0;
          },
          .getColorBufferDisplay = [](uint32_t colorBuffer,
                                      uint32_t* displayId) -> int {
-            for (const auto& iter : mMultiDisplay) {
-                if (iter.second.cb == colorBuffer) {
-                    *displayId = iter.first;
-                    return 0;
-                }
-            }
-            return -1;
+            printf("getColorBufferDisplay (mock)\n");
+            return 0;
         },
         .setDisplayColorBuffer = [](uint32_t displayId,
                                     uint32_t colorBuffer) -> int {
-            mMultiDisplay[displayId].cb = colorBuffer;
+            printf("setDisplayColorBuffer (mock)\n");
             return 0;
         }
 };
-extern "C" const QAndroidMultiDisplayAgent* const
-        gMockQAndroidMultiDisplayAgent = &sMultiDisplayAgent;
+
+const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent = &sMultiDisplayAgent;

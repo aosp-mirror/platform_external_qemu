@@ -133,7 +133,7 @@ typedef struct ControlClientRec_
 typedef struct ControlGlobalRec_
 {
     // Interfaces to call into QEMU specific code.
-#define ANDROID_CONSOLE_DEFINE_FIELD(type, name) const type * name ## _agent;
+#define ANDROID_CONSOLE_DEFINE_FIELD(type, name) type name ## _agent [1];
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_DEFINE_FIELD)
 
     /* IO */
@@ -789,7 +789,7 @@ int android_console_start(int control_port,
     // Copy the QEMU specific interfaces passed in to make lifetime management
     // simpler.
 #define ANDROID_CONSOLE_COPY_AGENT(type, name) \
-        global-> name ## _agent  = agents-> name ;
+        global-> name ## _agent [0] = agents-> name [0];
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_COPY_AGENT)
 
     int console_auth_status = android_console_auth_get_status();

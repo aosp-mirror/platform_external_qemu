@@ -24,7 +24,6 @@
 #include "android/emulation/control/window_agent.h"
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/console.h"
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengles-pipe.h"
@@ -191,9 +190,9 @@ private:
         int min;
 
         android_startOpenglesRenderer(kWindowSize, kWindowSize, 1, 28,
-                                      getConsoleAgents()->vm,
-                                      getConsoleAgents()->emu,
-                                      getConsoleAgents()->multi_display,
+                                      gQAndroidVmOperations,
+                                      gQAndroidEmulatorWindowAgent,
+                                      gQAndroidMultiDisplayAgent,
                                       &maj, &min);
 
         char* vendor = nullptr;
@@ -212,7 +211,7 @@ private:
             mDisplay.loop();
         }
 
-        android::emulation::goldfish_address_space_set_vm_operations(getConsoleAgents()->vm);
+        android::emulation::goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
 
         HostGoldfishPipeDevice::get();
 

@@ -9,6 +9,9 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  */
+
+#include "android-qemu2-glue/qemu-control-impl.h"
+
 #include "android/android.h"
 #include "android/emulation/control/cellular_agent.h"
 #include "android/network/control.h"

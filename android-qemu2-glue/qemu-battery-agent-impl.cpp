@@ -9,6 +9,9 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  */
+
+#include "android-qemu2-glue/qemu-control-impl.h"
+
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/VmLock.h"
 
@@ -151,7 +154,7 @@ static const QAndroidBatteryAgent sQAndroidBatteryAgent = {
         .status = battery_status,
         .batteryDisplay = (BatteryDisplayCb)goldfish_battery_display_cb
 };
-} // extern "C"
-
-extern "C" const QAndroidBatteryAgent* const gQAndroidBatteryAgent =
+const QAndroidBatteryAgent* const gQAndroidBatteryAgent =
         &sQAndroidBatteryAgent;
+
+} // extern "C"

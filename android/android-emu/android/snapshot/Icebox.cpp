@@ -14,34 +14,29 @@
 
 #include "android/snapshot/Icebox.h"
 
-#include <assert.h>                                          // for assert
-#include <openssl/pem.h>                                     // for PEM_read...
-#include <openssl/rsa.h>                                     // for RSA_free
-#include <stdio.h>                                           // for fprintf
-#include <string.h>                                          // for strlen
-#include <algorithm>                                         // for min
-#include <atomic>                                            // for atomic
-#include <cstdint>                                           // for uint8_t
-#include <functional>                                        // for __base
-#include <memory>                                            // for unique_ptr
-#include <vector>                                            // for vector
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
+#include <stdio.h>
+#include <atomic>
+#include <memory>
+#include <vector>
 
-#include "android/base/Log.h"                                // for CHECK
-#include "android/base/async/ThreadLooper.h"                 // for ThreadLo...
-#include "android/base/files/PathUtils.h"                    // for pj
-#include "android/base/sockets/SocketUtils.h"                // for socketSe...
-#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
-#include "android/base/synchronization/Lock.h"               // for Lock
-#include "android/base/system/System.h"                      // for System
-#include "android/base/threads/FunctorThread.h"              // for FunctorT...
-#include "android/base/threads/Thread.h"                     // for Thread
-#include "android/console.h"                                 // for getConso...
-#include "android/emulation/apacket_utils.h"                 // for apacket
-#include "android/emulation/control/vm_operations.h"         // for QAndroid...
-#include "android/jdwp/Jdwp.h"                               // for JdwpComm...
-#include "android/snapshot/interface.h"                      // for androidS...
-#include "openssl/base.h"                                    // for RSA
-#include "openssl/nid.h"                                     // for NID_sha1
+#include "android/base/async/ThreadLooper.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/sockets/ScopedSocket.h"
+#include "android/base/sockets/SocketUtils.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
+#include "android/base/threads/Async.h"
+#include "android/base/threads/FunctorThread.h"
+#include "android/base/threads/Thread.h"
+#include "android/emulation/apacket_utils.h"
+#include "android/emulation/AdbMessageSniffer.h"
+#include "android/emulation/control/vm_operations.h"
+#include "android/globals.h"
+#include "android/jdwp/Jdwp.h"
+#include "android/snapshot/interface.h"
 
 #define DEBUG 1
 
@@ -617,12 +612,12 @@ bool track(int pid, const std::string snapshot_name) {
                     [&snapshot_done, &snapshot_signal, &snapshot_lock,
                      &snapshot_name]() {
                         D("ready to take snapshot");
-                        getConsoleAgents()->vm->vmStop();
+                        gQAndroidVmOperations->vmStop();
                         const AndroidSnapshotStatus result =
                                 androidSnapshot_save(snapshot_name.c_str());
                         D("Snapshot done, result %d (expect %d)", result,
                                 SNAPSHOT_STATUS_OK);
-                        getConsoleAgents()->vm->vmStart();
+                        gQAndroidVmOperations->vmStart();
                         snapshot_lock.lock();
                         snapshot_done = true;
                         snapshot_signal.broadcastAndUnlock(&snapshot_lock);

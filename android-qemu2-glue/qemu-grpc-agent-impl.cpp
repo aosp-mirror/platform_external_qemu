@@ -9,6 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android-qemu2-glue/qemu-control-impl.h"  // IWYU pragma: keep
 #include "android-qemu2-glue/qemu-setup.h"         // for qemu_setup_grpc
 #include "android/console.h"                       // for AndroidConsoleAgents
 #include "android/emulation/control/grpc_agent.h"  // for QGrpcAgent
@@ -24,4 +25,4 @@ static const QGrpcAgent grpcAgent = {
         .start = start_grpc,
 };
 
-extern "C" const QGrpcAgent* const gQGrpcAgent = &grpcAgent;
+const QGrpcAgent* const gQGrpcAgent = &grpcAgent;

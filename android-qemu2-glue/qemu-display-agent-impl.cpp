@@ -144,4 +144,4 @@ static const QAndroidDisplayAgent displayAgent = {
         .initFrameBufferNoWindow = &initFrameBufferNoWindow,
 };
 
-extern "C" const QAndroidDisplayAgent* const gQAndroidDisplayAgent = &displayAgent;
+const QAndroidDisplayAgent* const gQAndroidDisplayAgent = &displayAgent;

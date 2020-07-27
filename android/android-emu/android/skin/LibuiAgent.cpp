@@ -7,11 +7,14 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/ProcessControl.h"            // for restartEmulator
-#include "android/emulation/control/libui_agent.h"  // for LibuiKeyCodeSendFunc
-#include "android/skin/charmap.h"                   // for skin_charmap_reve...
-#include "android/skin/keycode-buffer.h"            // for skin_keycode_buff...
-#include "android/skin/winsys.h"                    // for skin_winsys_quit_...
+
+#include "android/skin/LibuiAgent.h"
+
+#include "android/base/ProcessControl.h"
+
+#include "android/skin/charmap.h"
+#include "android/skin/keycode-buffer.h"
+#include "android/skin/winsys.h"
 
 static int utf8_next(const unsigned char** pp, const unsigned char* end) {
     const unsigned char* p = *pp;
@@ -78,4 +81,4 @@ static const QAndroidLibuiAgent kLibuiAgent = {
         },
 };
 
-extern "C" const QAndroidLibuiAgent* const gQAndroidLibuiAgent = &kLibuiAgent;
+const QAndroidLibuiAgent* const gQAndroidLibuiAgent = &kLibuiAgent;

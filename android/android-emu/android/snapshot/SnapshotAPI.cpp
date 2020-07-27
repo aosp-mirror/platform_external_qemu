@@ -11,27 +11,26 @@
 
 #include "android/snapshot/SnapshotAPI.h"
 
-#include <cassert>                                      // for assert
-#include <cstdint>                                      // for uint32_t
-#include <functional>                                   // for __base
-#include <map>                                          // for map, map<>::m...
-#include <string>                                       // for string
-#include <utility>                                      // for pair
+#include "android/base/async/ThreadLooper.h"
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/crashreport/crash-handler.h"
+#include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "android/globals.h"
+#include "android/metrics/MetricsLogging.h"
+#include "android/multi-instance.h"
+#include "android/offworld/OffworldPipe.h"
+#include "android/snapshot/common.h"
+#include "android/snapshot/interface.h"
+#include "android/opengl/emugl_config.h"
 
-#include "android/base/Log.h"                           // for LogMessage
-#include "android/base/async/ThreadLooper.h"            // for ThreadLooper
-#include "android/base/files/Stream.h"                  // for Stream
-#include "android/base/memory/LazyInstance.h"           // for LazyInstance
-#include "android/console.h"                            // for getConsoleAgents
-#include "android/emulation/AndroidAsyncMessagePipe.h"  // for AsyncMessageP...
-#include "android/emulation/control/vm_operations.h"    // for QAndroidVmOpe...
-#include "android/globals.h"                            // for android_snaps...
-#include "android/multi-instance.h"                     // for updateInstanc...
-#include "android/offworld/OffworldPipe.h"              // for sendResponse
-#include "android/opengl/emugl_config.h"                // for emuglConfig_c...
-#include "android/snapshot/common.h"                    // for kDefaultBootS...
-#include "android/snapshot/interface.h"                 // for AndroidSnapsh...
-#include "offworld.pb.h"                                // for Response, Res...
+#include <atomic>
+#include <cassert>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <vector>
 
 namespace {
 
@@ -135,12 +134,12 @@ void createCheckpoint(AsyncMessagePipeHandle pipe,
     sSnapshotCrossSession->mPipesAwaitingResponse[pipe] =
             RequestType::CreateCheckpoint;
 
-    getConsoleAgents()->vm->vmStop();
+    gQAndroidVmOperations->vmStop();
     android::base::ThreadLooper::runOnMainLooper([pipe, snapshotName]() {
         android_snapshot_update_timer = 0;
         const AndroidSnapshotStatus result =
                 androidSnapshot_save(snapshotName.c_str());
-        getConsoleAgents()->vm->vmStart();
+        gQAndroidVmOperations->vmStart();
 
         sSnapshotCrossSession->mPipesAwaitingResponse.erase(pipe);
         android::offworld::sendResponse(
@@ -160,7 +159,7 @@ void gotoCheckpoint(
     sSnapshotCrossSession->mOverrideResponse[RequestType::CreateCheckpoint] =
             createCheckpointMetadataResponse(metadata);
 
-    getConsoleAgents()->vm->vmStop();
+    gQAndroidVmOperations->vmStop();
     android::base::ThreadLooper::runOnMainLooper([pipe, snapshotName,
                                                   shareMode]() {
         android_snapshot_update_timer = 0;
@@ -174,7 +173,7 @@ void gotoCheckpoint(
 
         const AndroidSnapshotStatus result =
                 androidSnapshot_load(snapshotName.c_str());
-        getConsoleAgents()->vm->vmStart();
+        gQAndroidVmOperations->vmStart();
         if (result != AndroidSnapshotStatus::SNAPSHOT_STATUS_OK) {
             android::offworld::sendResponse(pipe, createErrorResponse());
         }
@@ -203,13 +202,13 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
     sSnapshotCrossSession->mOverrideResponse[RequestType::Fork] =
             createForkIdResponse(0);
 
-    getConsoleAgents()->vm->vmStop();
+    gQAndroidVmOperations->vmStop();
     android::base::ThreadLooper::runOnMainLooper([pipe]() {
         // snapshotRemap triggers a snapshot save.
         // It must happen before changing disk backend
         android_snapshot_update_timer = 0;
         bool res =
-                getConsoleAgents()->vm->snapshotRemap(false, nullptr, nullptr);
+                gQAndroidVmOperations->snapshotRemap(false, nullptr, nullptr);
         LOG_IF(WARNING, !res) << "RAM share mode update failure";
 
         // Update share mode flag and disk backend
@@ -221,7 +220,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
         assert(res);
         const AndroidSnapshotStatus result =
                 androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
-        getConsoleAgents()->vm->vmStart();
+        gQAndroidVmOperations->vmStart();
         if (result != AndroidSnapshotStatus::SNAPSHOT_STATUS_OK) {
             sSnapshotCrossSession->mPipesAwaitingResponse.erase(pipe);
             android::offworld::sendResponse(pipe, createErrorResponse());
@@ -239,7 +238,7 @@ void doneInstance(android::AsyncMessagePipeHandle pipe,
                 createForkIdResponse(sSnapshotCrossSession->sForkId,
                         metadata);
 
-        getConsoleAgents()->vm->vmStop();
+        gQAndroidVmOperations->vmStop();
         // Load back to write mode for the last run
         android::base::FileShare mode =
                 sSnapshotCrossSession->sForkId <
@@ -251,9 +250,9 @@ void doneInstance(android::AsyncMessagePipeHandle pipe,
             bool res = android::multiinstance::updateInstanceShareMode(
                     android::snapshot::kDefaultBootSnapshot, mode);
             LOG_IF(WARNING, !res) << "Share mode update failure";
-            res = getConsoleAgents()->vm->snapshotRemap(
+            res = gQAndroidVmOperations->snapshotRemap(
                     mode == android::base::FileShare::Write, nullptr, nullptr);
-            getConsoleAgents()->vm->vmStart();
+            gQAndroidVmOperations->vmStart();
         });
     } else if (sSnapshotCrossSession->sForkId ==
                sSnapshotCrossSession->sForkTotal - 1) {

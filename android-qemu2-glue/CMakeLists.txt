@@ -27,7 +27,6 @@ set (android-qemu2-glue_src
     qemu-battery-agent-impl.cpp
     qemu-car-data-agent-impl.cpp
     qemu-cellular-agent-impl.c
-    qemu-console-factory.cpp
     qemu-clipboard-agent-impl.cpp
     qemu-display-agent-impl.cpp
     qemu-finger-agent-impl.c
@@ -77,7 +76,7 @@ target_link_libraries(libqemu2-glue PRIVATE android-emu GLIB2::GLIB2
 if (NOT OPTION_GFXSTREAM_BACKEND)
   target_link_libraries(libqemu2-glue PRIVATE hostapd)
 endif()
-
+                                       
 target_compile_definitions(libqemu2-glue INTERFACE "-DCONFIG_VIRGL")
 android_add_library(
   TARGET libqemu2-glue-vm-operations LICENSE Apache-2.0
