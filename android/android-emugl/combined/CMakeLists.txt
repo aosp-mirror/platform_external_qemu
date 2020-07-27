@@ -31,11 +31,12 @@ if(OPTION_GFXSTREAM_BACKEND)
 
   if (NOT LINUX_AARCH64)
       target_link_libraries(
-          gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
-          OpenglRender)
+          gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared
+          emugl_base OpenglRender android-emu-test-launcher)
   else()
       target_link_libraries(
-          gfxstream_backend PRIVATE GLIB2::GLIB2 android-emu-shared emugl_base OpenglRender)
+          gfxstream_backend PRIVATE GLIB2::GLIB2 android-emu-shared
+          emugl_base OpenglRender android-emu-test-launcher)
   endif()
 
 
