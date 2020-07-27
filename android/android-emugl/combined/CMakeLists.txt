@@ -31,11 +31,12 @@ if(OPTION_GFXSTREAM_BACKEND)
 
   if (NOT LINUX_AARCH64)
       target_link_libraries(
-          gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
-          OpenglRender)
+          gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared
+          emugl_base OpenglRender android-emu-test-launcher)
   else()
       target_link_libraries(
-          gfxstream_backend PRIVATE GLIB2::GLIB2 android-emu-shared emugl_base OpenglRender)
+          gfxstream_backend PRIVATE GLIB2::GLIB2 android-emu-shared
+          emugl_base OpenglRender android-emu-test-launcher)
   endif()
 
 
@@ -56,6 +57,23 @@ if(OPTION_GFXSTREAM_BACKEND)
     add_custom_target(crosvm_gfxstream ALL DEPENDS
         "${CMAKE_BINARY_DIR}/crosvm-build-env/release/crosvm")
   endif()
+
+  android_add_test(TARGET gfxstream_unittests SRC gfxstream_unittest.cpp)
+  target_compile_options(gfxstream_unittests PRIVATE -fvisibility=default)
+  target_link_libraries(gfxstream_unittests PUBLIC gfxstream_backend gtest gtest_main)
+  target_include_directories(
+    gfxstream_unittests
+    PRIVATE
+      ${VIRGLRENDERER_INCLUDE_DIR}
+      ${ANDROID_QEMU2_TOP_DIR}/include
+      ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated
+      ${GOLDFISH_EMUGL_DIR}/host/include/libOpenglRender
+      ${GOLDFISH_EMUGL_DIR}/system/include
+      ${ANDROID_EMUGL_DIR}/guest
+      ${ANDROID_EMUGL_DIR}/guest/androidImpl
+      ${ANDROID_EMUGL_DIR}/host/include
+      ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/standalone_common/angle-util
+  )
 
 endif()
 
