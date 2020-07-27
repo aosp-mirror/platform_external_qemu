@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9b2ecb72_0fd7105c",
+        "filename": "android/android-emu/android/cmdline-options.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-07-27T17:59:25Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "0988ec38_358d8fb6",
+      "revId": "7c4c1448dd2de94daee66c6c428b646bdf90d435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "443a487e_e64b9ed9",
         "filename": "android/android-emu/android/emulator-window.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2020-07-24T21:37:40Z",
       "side": 1,
       "message": "nit: space",
+      "revId": "7c4c1448dd2de94daee66c6c428b646bdf90d435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f63d8a4_164bce20",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-07-27T17:59:25Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "443a487e_e64b9ed9",
       "revId": "7c4c1448dd2de94daee66c6c428b646bdf90d435",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true

@@ -16,6 +16,24 @@
       "revId": "b9b90856bd01ddf4f225079447f0666fd6424a84",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6cceacc2_9c2d6bf8",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-07-27T17:59:25Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ba4af62d_09456647",
+      "revId": "b9b90856bd01ddf4f225079447f0666fd6424a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
