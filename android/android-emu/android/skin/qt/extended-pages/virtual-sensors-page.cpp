@@ -168,21 +168,18 @@ void VirtualSensorsPage::setupHingeSensorUI() {
                 mUi->hinge2Slider->setRange(
                         foldableState.config.hingeParams[2].minDegrees,
                         foldableState.config.hingeParams[2].maxDegrees, false);
-                mUi->hinge2Slider->setSteps(200);
                 mUi->hinge2Label->setHidden(false);
                 mUi->hinge2Slider->setHidden(false);
             case 2:
                 mUi->hinge1Slider->setRange(
                         foldableState.config.hingeParams[1].minDegrees,
                         foldableState.config.hingeParams[1].maxDegrees, false);
-                mUi->hinge1Slider->setSteps(200);
                 mUi->hinge1Label->setHidden(false);
                 mUi->hinge1Slider->setHidden(false);
             case 1:
                 mUi->hinge0Slider->setRange(
                         foldableState.config.hingeParams[0].minDegrees,
                         foldableState.config.hingeParams[0].maxDegrees, false);
-                mUi->hinge0Slider->setSteps(200);
                 mUi->hinge0Label->setHidden(false);
                 mUi->hinge0Slider->setHidden(false);
             default:;
