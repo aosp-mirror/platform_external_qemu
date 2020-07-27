@@ -290,6 +290,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     int renderer_flags,
     struct virgl_renderer_callbacks* virglrenderer_callbacks) {
 
+    android::emulation::injectConsoleAgents(GolfishMockConsoleFactory());
+
     GFXS_LOG("start. display dimensions: width %u height %u. backend flags: 0x%x renderer flags: 0x%x",
              display_width, display_height, sBackendFlags, renderer_flags);
 
