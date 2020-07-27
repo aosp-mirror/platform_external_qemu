@@ -41,6 +41,7 @@
 #include "android/emulation/control/vm_operations.h"         // for Snapshot...
 #include "android/emulation/hostdevices/HostAddressSpace.h"  // for HostAddr...
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"  // for HostGold...
+#include "android/emulation/testing/MockAndroidAgentFactory.h"
 #include "android/featurecontrol/FeatureControl.h"           // for setEnabl...
 #include "android/featurecontrol/Features.h"                 // for GLAsyncSwap
 #include "android/globals.h"                                 // for android_hw
@@ -235,7 +236,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
 };
 
 class GolfishMockConsoleFactory
-    : public android::emulation::AndroidConsoleFactory {
+    : public android::emulation::MockAndroidConsoleFactory {
     const QAndroidVmOperations* const android_get_QAndroidVmOperations()
             const override {
         return &sQAndroidVmOperations;
