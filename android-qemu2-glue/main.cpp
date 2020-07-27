@@ -25,7 +25,6 @@
 #include "android/camera/camera-virtualscene.h"
 #include "android/cmdline-option.h"
 #include "android/config/BluetoothConfig.h"
-#include "android/console.h"
 #include "android/constants.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
@@ -72,7 +71,6 @@
 #include "android/utils/tempfile.h"
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/verified-boot/load_config.h"
-#include "android-qemu2-glue/qemu-console-factory.h"
 
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/winsys.h"
@@ -89,6 +87,7 @@ extern "C" {
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
 #include "android-qemu2-glue/emulation/virtio-input-rotary.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
 #include "android/ui-emu-agent.h"
 
 #include <iostream>
@@ -897,34 +896,34 @@ static int startEmulatorWithMinConfig(
     hw->hw_lcd_height = lcdHeight;
     hw->hw_lcd_density = lcdDensity;
 
-    auto battery = getConsoleAgents()->battery;
-    if (battery &&
-        battery->setHasBattery) {
-        battery->setHasBattery(false);
+    if (gQAndroidBatteryAgent &&
+        gQAndroidBatteryAgent->setHasBattery) {
+        gQAndroidBatteryAgent->setHasBattery(false);
     }
-    getConsoleAgents()->location->gpsSetPassiveUpdate(false);
+
+    gQAndroidLocationAgent->gpsSetPassiveUpdate(false);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
     const UiEmuAgent uiEmuAgent = {
-        getConsoleAgents()->automation,
-            getConsoleAgents()->battery,
-            getConsoleAgents()->cellular,
-            getConsoleAgents()->clipboard,
-            getConsoleAgents()->display,
-            getConsoleAgents()->emu,
-            getConsoleAgents()->finger,
-            getConsoleAgents()->location,
-            getConsoleAgents()->proxy,
-            getConsoleAgents()->record,
-            getConsoleAgents()->sensors,
-            getConsoleAgents()->telephony,
-            getConsoleAgents()->user_event,
-            getConsoleAgents()->virtual_scene,
-            getConsoleAgents()->car,
-            getConsoleAgents()->multi_display,
+            gQAndroidAutomationAgent,
+            gQAndroidBatteryAgent,
+            gQAndroidCellularAgent,
+            gQAndroidClipboardAgent,
+            gQAndroidDisplayAgent,
+            gQAndroidEmulatorWindowAgent,
+            gQAndroidFingerAgent,
+            gQAndroidLocationAgent,
+            gQAndroidHttpProxyAgent,
+            gQAndroidRecordScreenAgent,
+            gQAndroidSensorsAgent,
+            gQAndroidTelephonyAgent,
+            gQAndroidUserEventAgent,
+            gQAndroidVirtualSceneAgent,
+            gQCarDataAgent,
+            gQAndroidMultiDisplayAgent,
             nullptr  // For now there's no uses of SettingsAgent, so we
-            //          // don't set it.
+                     // don't set it.
     };
 
     android::base::Thread::maskAllSignals();
@@ -997,22 +996,22 @@ static int startEmulatorWithMinConfig(
                             WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
         }
     }
-    android_init_multi_display(getConsoleAgents()->emu, getConsoleAgents()->record);
+    android_init_multi_display(gQAndroidEmulatorWindowAgent, gQAndroidRecordScreenAgent);
 
     RendererConfig rendererConfig;
-    configAndStartRenderer(avd, opts, hw, getConsoleAgents()->vm,
-                           getConsoleAgents()->emu,
-                           getConsoleAgents()->multi_display,
+    configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
+                           gQAndroidEmulatorWindowAgent,
+                           gQAndroidMultiDisplayAgent,
                            uiPreferredGlesBackend, &rendererConfig);
 
     // Gpu configuration is set, now initialize the multi display, screen recorder
     // and screenshot callback
     bool isGuestMode =
             (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
-    getConsoleAgents()->multi_display->setGpuMode(isGuestMode, hw->hw_lcd_width, hw->hw_lcd_height);
+    gQAndroidMultiDisplayAgent->setGpuMode(isGuestMode, hw->hw_lcd_width, hw->hw_lcd_height);
     screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
                          isGuestMode ? uiEmuAgent.display : nullptr,
-                         getConsoleAgents()->multi_display);
+                         gQAndroidMultiDisplayAgent);
     android_registerScreenshotFunc([](const char* dirname, uint32_t display) ->bool {
         return android::emulation::captureScreenshot(dirname, nullptr, display);
     });
@@ -1071,9 +1070,6 @@ extern "C" int main(int argc, char** argv) {
     process_early_setup(argc, argv);
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
 
-    // Make the console agents available.
-    injectConsoleAgents("");
-
     // Start GPU information query to use it later for the renderer seleciton.
     async_query_host_gpu_start();
 
@@ -1092,7 +1088,6 @@ extern "C" int main(int argc, char** argv) {
                 &argc, &argv, kTarget.androidArch,
                 true,  // is_qemu2
                 opts, hw, &android_avdInfo, &exitStatus)) {
-
         // Special case for QEMU positional parameters (or Fuchsia path)
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
@@ -1976,37 +1971,35 @@ extern "C" int main(int argc, char** argv) {
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
 
-    auto battery = getConsoleAgents()->battery;
-    if (battery && battery->setHasBattery) {
-        battery->setHasBattery(android_hw->hw_battery);
+    if (gQAndroidBatteryAgent && gQAndroidBatteryAgent->setHasBattery) {
+        gQAndroidBatteryAgent->setHasBattery(android_hw->hw_battery);
     }
 
-    getConsoleAgents()->location->gpsSetPassiveUpdate(!opts->no_passive_gps);
+    gQAndroidLocationAgent->gpsSetPassiveUpdate(!opts->no_passive_gps);
 
-    android_init_multi_display(getConsoleAgents()->emu, getConsoleAgents()->record);
+    android_init_multi_display(gQAndroidEmulatorWindowAgent, gQAndroidRecordScreenAgent);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
-    const UiEmuAgent uiEmuAgent =
-    {
-        getConsoleAgents()->automation,
-        getConsoleAgents()->battery,
-        getConsoleAgents()->cellular,
-        getConsoleAgents()->clipboard,
-        getConsoleAgents()->display,
-        getConsoleAgents()->emu,
-        getConsoleAgents()->finger,
-        getConsoleAgents()->location,
-        getConsoleAgents()->proxy,
-        getConsoleAgents()->record,
-        getConsoleAgents()->sensors,
-        getConsoleAgents()->telephony,
-        getConsoleAgents()->user_event,
-        getConsoleAgents()->virtual_scene,
-        getConsoleAgents()->car,
-        getConsoleAgents()->multi_display,
-        nullptr,  // For now there's no uses of SettingsAgent, so we
-                // don't set it.
+    const UiEmuAgent uiEmuAgent = {
+            gQAndroidAutomationAgent,
+            gQAndroidBatteryAgent,
+            gQAndroidCellularAgent,
+            gQAndroidClipboardAgent,
+            gQAndroidDisplayAgent,
+            gQAndroidEmulatorWindowAgent,
+            gQAndroidFingerAgent,
+            gQAndroidLocationAgent,
+            gQAndroidHttpProxyAgent,
+            gQAndroidRecordScreenAgent,
+            gQAndroidSensorsAgent,
+            gQAndroidTelephonyAgent,
+            gQAndroidUserEventAgent,
+            gQAndroidVirtualSceneAgent,
+            gQCarDataAgent,
+            gQAndroidMultiDisplayAgent,
+            nullptr  // For now there's no uses of SettingsAgent, so we
+                     // don't set it.
     };
 
     {
@@ -2098,19 +2091,19 @@ extern "C" int main(int argc, char** argv) {
         }
 
         RendererConfig rendererConfig;
-        configAndStartRenderer(avd, opts, hw, getConsoleAgents()->vm,
-                               getConsoleAgents()->emu,
-                               getConsoleAgents()->multi_display,
+        configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
+                               gQAndroidEmulatorWindowAgent,
+                               gQAndroidMultiDisplayAgent,
                                uiPreferredGlesBackend, &rendererConfig);
 
         // Gpu configuration is set, now initialize the multi display, screen recorder
         // and screenshot callback
         bool isGuestMode =
             (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
-        getConsoleAgents()->multi_display->setGpuMode(isGuestMode, hw->hw_lcd_width, hw->hw_lcd_height);
+        gQAndroidMultiDisplayAgent->setGpuMode(isGuestMode, hw->hw_lcd_width, hw->hw_lcd_height);
         screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
                              isGuestMode ? uiEmuAgent.display : nullptr,
-                             getConsoleAgents()->multi_display);
+                             gQAndroidMultiDisplayAgent);
         android_registerScreenshotFunc([](const char* dirname, uint32_t display) -> bool {
             return android::emulation::captureScreenshot(dirname, nullptr, display);
         });

@@ -1,5 +1,4 @@
 // Copyright 2017 The Android Open Source Project
-//
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
 // may be copied, distributed, and modified under those terms.
@@ -9,21 +8,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android-qemu2-glue/qemu-control-impl.h"
+#pragma once
 
-#include "android/emulation/control/car_data_agent.h"
+#include "android/emulation/control/libui_agent.h"
+#include "android/utils/compiler.h"
 
-void send_car_data(const char* msg, int length) {
-    android_send_car_data(msg, length);
-}
+ANDROID_BEGIN_HEADER
 
-void set_car_data_call_back(car_callback_t callback, void* context) {
-    set_car_call_back(callback, context);
-}
+extern const QAndroidLibuiAgent* const gQAndroidLibuiAgent;
 
-static const QCarDataAgent carDataAgent = {
-        .setCarCallback = set_car_data_call_back,
-        .sendCarData = send_car_data,
-};
-
-const QCarDataAgent* const gQCarDataAgent = &carDataAgent;
+ANDROID_END_HEADER

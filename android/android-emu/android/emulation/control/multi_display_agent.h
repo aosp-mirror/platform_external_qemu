@@ -67,5 +67,6 @@ typedef struct QAndroidMultiDisplayAgent {
     int (*setDisplayColorBuffer)(uint32_t displayId, uint32_t colorBuffer);
 } QAndroidMultiDisplayAgent;
 
+extern const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
 
 ANDROID_END_HEADER

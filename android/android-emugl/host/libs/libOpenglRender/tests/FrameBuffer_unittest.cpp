@@ -18,7 +18,6 @@
 #include "android/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
-#include "android/console.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/emulation/MultiDisplay.h"
@@ -58,8 +57,8 @@ protected:
     virtual void SetUp() override {
         setupStandaloneLibrarySearchPaths();
         emugl::setGLObjectCounter(android::base::GLObjectCounter::get());
-        emugl::set_emugl_window_operations(*getConsoleAgents()->emu);
-        emugl::set_emugl_multi_display_operations(*getConsoleAgents()->multi_display);
+        emugl::set_emugl_window_operations(*gQAndroidEmulatorWindowAgent);
+        emugl::set_emugl_multi_display_operations(*gQAndroidMultiDisplayAgent);
         const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
         ASSERT_NE(nullptr, egl);
         ASSERT_NE(nullptr, LazyLoadedGLESv2Dispatch::get());
@@ -738,7 +737,7 @@ TEST_F(FrameBufferTest, VulkanInteropQuery) {
     EGLBoolean supported =
         egl->eglQueryVulkanInteropSupportANDROID();
 
-    // Disregard the result for now
+    // Disregard the result for now 
     (void)supported;
 }
 

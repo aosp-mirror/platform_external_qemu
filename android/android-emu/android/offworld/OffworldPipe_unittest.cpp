@@ -13,56 +13,41 @@
 // limitations under the License.
 
 #include "android/offworld/OffworldPipe.h"
+#include "android/automation/AutomationController.h"
+#include "android/base/ArraySize.h"
+#include "android/base/files/MemStream.h"
+#include "android/base/system/System.h"
+#include "android/base/testing/MockUtils.h"
+#include "android/base/testing/ProtobufMatchers.h"
+#include "android/base/testing/ResultMatchers.h"
+#include "android/base/testing/TestEvent.h"
+#include "android/base/testing/TestLooper.h"
+#include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "android/emulation/AndroidPipe.h"
+#include "android/emulation/VmLock.h"
+#include "android/emulation/android_pipe_device.h"
+#include "android/emulation/hostdevices/HostGoldfishPipe.h"
+#include "android/emulation/testing/MockAndroidVmOperations.h"
+#include "android/emulation/testing/TestVmLock.h"
+#include "android/globals.h"
+#include "android/opengl/emugl_config.h"
+#include "android/physics/PhysicalModel.h"
+#include "android/snapshot/SnapshotAPI.h"
+#include "android/snapshot/interface.h"
+#include "android/utils/looper.h"
+#include "android/videoinjection/VideoInjectionController.h"
 
-#include <android/console.h>                                    // for getCo...
-#include <gmock/gmock.h>                                        // for Anyth...
-#include <gtest/gtest.h>                                        // for Message
-#include <stddef.h>                                             // for size_t
-#include <cstdint>                                              // for uint8_t
-#include <functional>                                           // for __base
-#include <memory>                                               // for uniqu...
-#include <string>                                               // for string
-#include <type_traits>                                          // for decay...
-#include <utility>                                              // for move
-#include <vector>                                               // for vector
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
-#include "android/automation/AutomationController.h"            // for Autom...
-#include "android/base/Log.h"                                   // for android
-#include "android/base/Result.h"                                // for Result
-#include "android/base/async/Looper.h"                          // for Looper
-#include "android/base/files/MemStream.h"                       // for MemSt...
-#include "android/base/testing/MockUtils.h"                     // for repla...
-#include "android/base/testing/ProtobufMatchers.h"              // for Equal...
-#include "android/base/testing/ResultMatchers.h"                // for IsOk
-#include "android/base/testing/TestEvent.h"                     // for TestE...
-#include "android/base/testing/TestLooper.h"                    // for TestL...
-#include "android/emulation/AndroidAsyncMessagePipe.h"          // for Async...
-#include "android/emulation/AndroidPipe.h"                      // for Andro...
-#include "android/emulation/VmLock.h"                           // for Recur...
-#include "android/emulation/android_pipe_common.h"              // for PIPE_...
-#include "android/emulation/control/callbacks.h"                // for LineC...
-#include "android/emulation/hostdevices/HostGoldfishPipe.h"     // for HostG...
-#include "android/emulation/testing/MockAndroidVmOperations.h"  // for MockA...
-#include "android/emulation/testing/TestVmLock.h"               // for TestV...
-#include "android/globals.h"                                    // for engin...
-#include "android/opengl/emugl_config.h"                        // for emugl...
-#include "android/physics/PhysicalModel.h"                      // for physi...
-#include "android/physics/Physics.h"                            // for PARAM...
-#include "android/skin/winsys.h"                                // for WINSY...
-#include "android/snapshot/SnapshotAPI.h"                       // for onOff...
-#include "android/snapshot/interface.h"                         // for andro...
-#include "android/utils/looper.h"                               // for andro...
-#include "android/videoinjection/VideoInjectionController.h"    // for Video...
-#include "google/protobuf/message.h"                            // for Message
-#include "google/protobuf/text_format.h"                        // for TextF...
-#include "offworld.pb.h"                                        // for Response
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <deque>
+#include <mutex>
+#include <thread>
 
-namespace android {
-namespace base {
-class Stream;
-}  // namespace base
-}  // namespace android
-
+extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
 
 using namespace android;
 using namespace android::offworld;
@@ -245,8 +230,8 @@ protected:
                 replaceMock(&MockAndroidVmOperations::mock, &mock);
 
         EXPECT_CALL(mock, setSnapshotCallbacks(_, _)).Times(1);
-        androidSnapshot_initialize(getConsoleAgents()->vm,
-                                  getConsoleAgents()->emu);
+        androidSnapshot_initialize(gQAndroidVmOperations,
+                                   gQAndroidEmulatorWindowAgent);
         Mock::VerifyAndClearExpectations(&mock);
 
         EXPECT_CALL(mock, vmStop()).Times(1);

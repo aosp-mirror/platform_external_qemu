@@ -14,9 +14,9 @@
 #include "android/emulation/hostdevices/HostAddressSpace.h"
 
 #include "android/base/AlignedBuf.h"
-#include "android/console.h"
-#include "android/emulation/address_space_device.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/emulation/address_space_device.hpp"
+#include "android/emulation/address_space_device.h"
 
 #include <gtest/gtest.h>
 
@@ -25,7 +25,7 @@ namespace android {
 class HostAddressSpaceTest : public ::testing::Test {
 protected:
     static void SetUpTestCase() {
-        emulation::goldfish_address_space_set_vm_operations(getConsoleAgents()->vm);
+        emulation::goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
     }
 
     static void TearDownTestCase() { }

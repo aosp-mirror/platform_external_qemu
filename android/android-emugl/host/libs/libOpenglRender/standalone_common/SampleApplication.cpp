@@ -21,9 +21,9 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/threads/FunctorThread.h"
-#include "android/console.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/MultiDisplay.h"
+
 #include "Standalone.h"
 
 #include <EGL/egl.h>
@@ -40,6 +40,170 @@ using android::base::System;
 using android::base::TestSystem;
 
 namespace emugl {
+static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
+        .getEmulatorWindow = nullptr,
+        .rotate90Clockwise = nullptr,
+        .rotate = nullptr,
+        .getRotation = nullptr,
+        .showMessage = nullptr,
+        .showMessageWithDismissCallback = nullptr,
+        .fold = nullptr,
+        .isFolded = nullptr,
+        .setUIDisplayRegion = [](int x,
+                                 int y,
+                                 int width,
+                                 int height) {},
+        .getMultiDisplay = nullptr,
+        .setNoSkin = []() {},
+        .restoreSkin = []() {},
+        .updateUIMultiDisplayPage = [](uint32_t id) { },
+};
+extern "C" const QAndroidEmulatorWindowAgent* const
+        gQAndroidEmulatorWindowAgent = &sQAndroidEmulatorWindowAgent;
+
+std::map<uint32_t, android::MultiDisplayInfo> mMultiDisplay;
+static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
+        .setMultiDisplay = [](uint32_t id,
+                              int32_t x,
+                              int32_t y,
+                              uint32_t w,
+                              uint32_t h,
+                              uint32_t dpi,
+                              uint32_t flag,
+                              bool add) -> int{
+            return 0;
+        },
+        .getMultiDisplay = [](uint32_t id,
+                             int32_t* x,
+                             int32_t* y,
+                             uint32_t* w,
+                             uint32_t* h,
+                             uint32_t* dpi,
+                             uint32_t* flag,
+                             bool* enable) -> bool{
+            return true;
+        },
+        .getNextMultiDisplay = [](int32_t start_id,
+                                uint32_t* id,
+                                int32_t* x,
+                                int32_t* y,
+                                uint32_t* w,
+                                uint32_t* h,
+                                uint32_t* dpi,
+                                uint32_t* flag,
+                                uint32_t* cb) -> bool {
+            uint32_t key;
+            std::map<uint32_t, android::MultiDisplayInfo>::iterator i;
+            if (start_id < 0) {
+                key = 0;
+            } else {
+                key = start_id + 1;
+            }
+            i = mMultiDisplay.lower_bound(key);
+            if (i == mMultiDisplay.end()) {
+                return false;
+            } else {
+                if (id) {
+                    *id = i->first;
+                }
+                if (x) {
+                    *x = i->second.pos_x;
+                }
+                if (y) {
+                    *y = i->second.pos_y;
+                }
+                if (w) {
+                    *w = i->second.width;
+                }
+                if (h) {
+                    *h = i->second.height;
+                }
+                if (dpi) {
+                    *dpi = i->second.dpi;
+                }
+                if (flag) {
+                    *flag = i->second.flag;
+                }
+                if (cb) {
+                    *cb = i->second.cb;
+                }
+                return true;
+            }
+        },
+        .isMultiDisplayEnabled = [](void) -> bool {
+            return mMultiDisplay.size() > 1;
+        },
+        .getCombinedDisplaySize = [](uint32_t* width, uint32_t* height) {
+        },
+        .multiDisplayParamValidate = [](uint32_t id,
+                                        uint32_t w,
+                                        uint32_t h,
+                                        uint32_t dpi,
+                                        uint32_t flag) -> bool {
+            return true;
+        },
+        .translateCoordination = [](uint32_t* x,
+                                    uint32_t*y,
+                                    uint32_t* displayId) -> bool {
+            return true;
+        },
+        .setGpuMode = [](bool isGuestMode, uint32_t w, uint32_t h) { },
+        .createDisplay = [](uint32_t* displayId) -> int {
+            mMultiDisplay.emplace(*displayId, android::MultiDisplayInfo());
+            return 0;
+        },
+        .destroyDisplay = [](uint32_t displayId) -> int {
+            mMultiDisplay.erase(displayId);
+            return 0;
+        },
+        .setDisplayPose = [](uint32_t displayId,
+                             int32_t x,
+                             int32_t y,
+                             uint32_t w,
+                             uint32_t h,
+                             uint32_t dpi) -> int {
+            mMultiDisplay[displayId].pos_x = x;
+            mMultiDisplay[displayId].pos_y = y;
+            mMultiDisplay[displayId].width = w;
+            mMultiDisplay[displayId].height = h;
+            mMultiDisplay[displayId].dpi = dpi;
+            return 0;
+        },
+        .getDisplayPose = [](uint32_t displayId,
+                            int32_t* x,
+                            int32_t* y,
+                            uint32_t* w,
+                            uint32_t* h) -> int {
+            *x = mMultiDisplay[displayId].pos_x;
+            *y = mMultiDisplay[displayId].pos_y;
+            *w = mMultiDisplay[displayId].width;
+            *h = mMultiDisplay[displayId].height;
+            return 0;
+        },
+        .getDisplayColorBuffer = [](uint32_t displayId,
+                                    uint32_t* colorBuffer) -> int {
+            *colorBuffer = mMultiDisplay[displayId].cb;
+            return 0;
+         },
+         .getColorBufferDisplay = [](uint32_t colorBuffer,
+                                     uint32_t* displayId) -> int {
+            for (const auto& iter : mMultiDisplay) {
+                if (iter.second.cb == colorBuffer) {
+                    *displayId = iter.first;
+                    return 0;
+                }
+            }
+            return -1;
+        },
+        .setDisplayColorBuffer = [](uint32_t displayId,
+                                    uint32_t colorBuffer) -> int {
+            mMultiDisplay[displayId].cb = colorBuffer;
+            return 0;
+        }
+};
+extern "C" const QAndroidMultiDisplayAgent* const
+        gQAndroidMultiDisplayAgent = &sMultiDisplayAgent;
+
 
 // Class holding the persistent test window.
 class TestWindow {
@@ -222,7 +386,7 @@ private:
     ComposeDevice* mComposeDevice;
 };
 
-extern "C" const QAndroidMultiDisplayAgent* const gMockQAndroidMultiDisplayAgent;
+extern "C" const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
 
 // SampleApplication implementation/////////////////////////////////////////////
 SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refreshRate, GLESApi glVersion, bool compose) :
@@ -230,8 +394,8 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
 
     setupStandaloneLibrarySearchPaths();
     emugl::setGLObjectCounter(android::base::GLObjectCounter::get());
-    emugl::set_emugl_window_operations(*getConsoleAgents()->emu);;
-    emugl::set_emugl_multi_display_operations(*getConsoleAgents()->multi_display);
+    emugl::set_emugl_window_operations(*gQAndroidEmulatorWindowAgent);
+    emugl::set_emugl_multi_display_operations(*gQAndroidMultiDisplayAgent);
     LazyLoadedEGLDispatch::get();
     if (glVersion == GLESApi_CM) LazyLoadedGLESv1Dispatch::get();
     LazyLoadedGLESv2Dispatch::get();

@@ -131,5 +131,5 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
 };
 
-extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
+const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
         &sQAndroidEmulatorWindowAgent;

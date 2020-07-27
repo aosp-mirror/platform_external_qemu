@@ -13,16 +13,14 @@
 
 #include <QCheckBox>                                  // for QCheckBox
 
-#include "android/avd/info.h"                         // for avdInfo_getAvdF...
-#include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
-#include "android/console.h"                          // for getConsoleAgents
 #include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
-#include "android/globals.h"                          // for android_avdInfo
 #include "android/hw-events.h"                        // for EV_KEY, EV_SW
 #include "android/skin/event.h"                       // for SkinEvent, Skin...
 #include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
 #include "android/skin/qt/extended-pages/common.h"    // for getSelectedTheme
 #include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
+
+class QWidget;
 
 MicrophonePage::MicrophonePage(QWidget* parent)
     : QWidget(parent),
@@ -84,7 +82,7 @@ void MicrophonePage::on_mic_inserted_toggled(bool checked) {
 }
 
 void MicrophonePage::on_mic_allowRealAudio_toggled(bool checked) {
-    getConsoleAgents()->vm->allowRealAudio(checked);
+    gQAndroidVmOperations->allowRealAudio(checked);
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_pressed() {

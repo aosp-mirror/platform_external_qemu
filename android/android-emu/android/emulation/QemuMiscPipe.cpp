@@ -11,36 +11,29 @@
 
 #include "android/emulation/QemuMiscPipe.h"
 
-#include <stdio.h>                                       // for printf, fflush
-#include <string.h>                                      // for strcmp, strlen
-#include <time.h>                                        // for ctime, time
-#include <algorithm>                                     // for uniform_int_...
-#include <atomic>                                        // for atomic, __at...
-#include <cstdint>                                       // for uint8_t, int...
-#include <functional>                                    // for __base
-#include <random>                                        // for mt19937, ran...
-#include <string>                                        // for string, to_s...
-#include <thread>                                        // for thread
-#include <vector>                                        // for vector
+#include "android/avd/info.h"                        // for avdInfo_getSkinInfo
+#include "android/base/ProcessControl.h"
+#include "android/base/files/MemStream.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/threads/Thread.h"
+#include "android/emulation/AndroidMessagePipe.h"
+#include "android/emulation/control/adb/AdbInterface.h"
+#include "android/emulation/control/vm_operations.h"
+#include "android/featurecontrol/FeatureControl.h"
+#include "android/globals.h"
+#include "android/hw-sensors.h"
+#include "android/utils/aconfig-file.h"              // for aconfig_str, aco...
+#include "android/utils/debug.h"
+#include "android/utils/path.h"
+#include "android/utils/system.h"
 
-#include "android/avd/info.h"                            // for avdInfo_getS...
-#include "android/base/ProcessControl.h"                 // for restartEmulator
-#include "android/base/files/MemStream.h"                // for MemStream
-#include "android/base/files/PathUtils.h"                // for PathUtils
-#include "android/base/threads/Thread.h"                 // for Thread
-#include "android/console.h"                             // for getConsoleAg...
-#include "android/emulation/AndroidMessagePipe.h"        // for AndroidMessa...
-#include "android/emulation/AndroidPipe.h"               // for AndroidPipe
-#include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
-#include "android/emulation/control/vm_operations.h"     // for QAndroidVmOp...
-#include "android/featurecontrol/FeatureControl.h"       // for isEnabled
-#include "android/featurecontrol/Features.h"             // for MultiDisplay
-#include "android/globals.h"                             // for to_set_language
-#include "android/hw-sensors.h"                          // for FoldableHing...
-#include "android/utils/aconfig-file.h"                  // for aconfig_find
-#include "android/utils/path.h"                          // for path_exists
-#include "android/utils/system.h"                        // for get_uptime_ms
+#include <assert.h>
 
+#include <atomic>
+#include <memory>
+#include <random>
+#include <thread>
+#include <vector>
 // This indicates the number of heartbeats from guest
 static std::atomic<int> guest_heart_beat_count {};
 
@@ -238,7 +231,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
         guest_boot_completed = 1;
 
         if (android_hw->test_quitAfterBootTimeOut > 0) {
-            getConsoleAgents()->vm->vmShutdown();
+            gQAndroidVmOperations->vmShutdown();
         } else {
             auto adbInterface = emulation::AdbInterface::getGlobal();
             if (!adbInterface) return;
@@ -267,7 +260,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
             // If we allowed host audio, don't revoke
             // microphone perms.
-            if (getConsoleAgents()->vm->isRealAudioAllowed()) {
+            if (gQAndroidVmOperations->isRealAudioAllowed()) {
                 printf("emulator: Not revoking microphone permissions "
                        "for Google App.\n");
                 return;
