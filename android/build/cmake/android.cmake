@@ -993,6 +993,7 @@ endfunction()
 
 # Uploads the symbols to the breakpad crash server
 function(android_upload_symbols TGT)
+  find_package(PythonInterp)
   if(NOT ANDROID_EXTRACT_SYMBOLS)
     return()
   endif()
