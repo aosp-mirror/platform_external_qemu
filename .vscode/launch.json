@@ -11,8 +11,6 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 "--gtest_break_on_failure"
-             ,"--gtest_filter=StudioDiscoveryTest.pid_file_is_written"
-             ,"--gtest_repeat=-1"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -21,6 +19,11 @@
                     // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                     "name": "ASAN_OPTIONS",
                     "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+                 },
+                
+                {
+                    "name": "PATH",
+                    "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
                 }
             ],
             "externalConsole": true
