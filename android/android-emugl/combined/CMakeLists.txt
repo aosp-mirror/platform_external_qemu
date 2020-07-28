@@ -59,6 +59,23 @@ if(OPTION_GFXSTREAM_BACKEND)
         "${CMAKE_BINARY_DIR}/crosvm-build-env/release/crosvm")
   endif()
 
+  android_add_test(TARGET gfxstream_unittests SRC gfxstream_unittest.cpp)
+  target_compile_options(gfxstream_unittests PRIVATE -fvisibility=default)
+  target_link_libraries(gfxstream_unittests PUBLIC gfxstream_backend gtest gtest_main)
+  target_include_directories(
+    gfxstream_unittests
+    PRIVATE
+      ${VIRGLRENDERER_INCLUDE_DIR}
+      ${ANDROID_QEMU2_TOP_DIR}/include
+      ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated
+      ${GOLDFISH_EMUGL_DIR}/host/include/libOpenglRender
+      ${GOLDFISH_EMUGL_DIR}/system/include
+      ${ANDROID_EMUGL_DIR}/guest
+      ${ANDROID_EMUGL_DIR}/guest/androidImpl
+      ${ANDROID_EMUGL_DIR}/host/include
+      ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/standalone_common/angle-util
+  )
+
 endif()
 
 if(NOT WINDOWS AND NOT LINUX_AARCH64)
