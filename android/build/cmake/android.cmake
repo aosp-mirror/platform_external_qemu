@@ -516,10 +516,16 @@ function(android_add_default_test_properties name)
         "/"
         "\\"
         WIN_PATH
-        "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib"
+        "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib;$ENV{PATH}"
     )
-    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT
-                                              "PATH=${WIN_PATH};$ENV{PATH}")
+    string(
+      REPLACE
+        ";"
+        "\;"
+        WIN_PATH
+        "${WIN_PATH}"
+    )
+    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH}")
   endif()
 endfunction()
 
