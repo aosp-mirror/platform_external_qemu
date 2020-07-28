@@ -222,7 +222,7 @@ def main(argv=None):
             if FLAGS.gfxstream or FLAGS.crosvm or FLAGS.gfxstream_only:
                 run_tests_opts.append("--skip-emulator-check")
 
-            run_tests(FLAGS.out, FLAGS.test_jobs, run_tests_opts)
+            run_tests(FLAGS.out, FLAGS.test_jobs, FLAGS.crash != "none", run_tests_opts)
         else:
             logging.info("Not running tests for cross compile.")
 
