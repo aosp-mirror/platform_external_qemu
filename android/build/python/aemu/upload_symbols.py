@@ -17,8 +17,13 @@
 
 import json
 import os
+import sys
 import time
-import urllib.request, urllib.parse, urllib.error
+
+if sys.version_info[0] == 2:
+  import urllib
+else:
+  import urllib.request, urllib.parse, urllib.error
 
 from absl import app, flags, logging
 
@@ -30,7 +35,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string(
     "environment",
     "prod",
-    "Which symbol server endpoint to use, cemuan be staging or prod",
+    "Which symbol server endpoint to use, can be staging or prod",
 )
 flags.DEFINE_string(
     "api_key",
@@ -241,6 +246,9 @@ def main(args):
         )
     else:
         print("Symbol already available, skipping upload.")
+
+    # api key -> symbol file should have been made available.
+    sys.exit(0 if not api_key or server.is_available(FLAGS.symbol_file) else 1)
 
 
 def launch():
