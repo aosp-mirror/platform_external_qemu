@@ -16,6 +16,24 @@
       "revId": "94fd13b70e56858a8d8822a51dd1b7f237acdec9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83a04c52_9811ca5f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-07-28T00:21:45Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "2ba17f20_6a4e48fb",
+      "revId": "94fd13b70e56858a8d8822a51dd1b7f237acdec9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
