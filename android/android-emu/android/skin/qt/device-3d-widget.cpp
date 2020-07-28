@@ -59,7 +59,7 @@ static glm::vec3 clampPosition(glm::vec3 position) {
 static constexpr int kAnimationIntervalMs = 33;
 
 Device3DWidget::Device3DWidget(QWidget* parent)
-    : GLWidget(parent), mUseAbstractDevice(android_hw->hw_sensor_hinge) {
+    : GLWidget(parent), mUseAbstractDevice(android_foldable_hinge_configured()) {
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
 
