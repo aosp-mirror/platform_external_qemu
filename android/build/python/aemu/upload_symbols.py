@@ -21,9 +21,10 @@ import sys
 import time
 
 if sys.version_info[0] == 2:
-  import urllib
+  from urllib import quote
 else:
-  import urllib.request, urllib.parse, urllib.error
+  from urllib.parse import quote
+  import urllib.request, urllib.error
 
 from absl import app, flags, logging
 
@@ -147,7 +148,7 @@ class SymbolFileServer(object):
         if resp.status_code > 399:
             # Make sure we don't leak secret keys by accident.
             if not self.use_classic_api():
-                resp.url = resp.url.replace(urllib.parse.quote(self.api_key), "XX-HIDDEN-XX")
+                resp.url = resp.url.replace(quote(self.api_key), "XX-HIDDEN-XX")
             logging.error(
                 'Url: %s, Status: %s, response: "%s", in: %s',
                 resp.url,
