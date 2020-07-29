@@ -2447,43 +2447,16 @@ public:
                     (unsigned long long)info->guestPhysAddr + info->sizeToPage);
         }
 
-        // Check for an existing memory at that address that may exist due to
-        // lack of proper synchronized cleanup guest/host.
-
         info->directMapped = true;
-
-        // Don't use |info| after this as freeMemoryLocked may change |mMapInfo|.
-
         uint64_t gpa = info->guestPhysAddr;
         void* hva = info->pageAlignedHva;
         size_t sizeToPage = info->sizeToPage;
 
-        std::vector<uint64_t> keysToDelete;
-        for (auto it: mOccupiedGpas) {
-            bool overlap =
-                gpa >= it.first &&
-                gpa < it.first + it.second.sizeToPage;
-            if (overlap) {
-                keysToDelete.push_back(it.first);
-            }
-        }
+        AutoLock occupiedGpasLock(mOccupiedGpasLock);
 
-        for (auto key: keysToDelete) {
-            auto existingMemoryInfo =
-                android::base::find(mOccupiedGpas, key);
-            if (existingMemoryInfo) {
-                fprintf(stderr, "%s: Warning: existing mapping at gpa 0x%llx, deleting\n",
-                        __func__,
-                        (unsigned long long)gpa);
-                freeMemoryLocked(
-                    existingMemoryInfo->vk,
-                    existingMemoryInfo->device,
-                    existingMemoryInfo->memory,
-                    nullptr);
-                // fprintf(stderr, "%s: waiting debug\n", __func__);
-                // usleep(1000000);
-                // fprintf(stderr, "%s: done\n", __func__);
-            }
+        if (mOccupiedGpas.find(gpa) != mOccupiedGpas.end()) {
+            emugl::emugl_crash_reporter(
+                    "FATAL: already mapped gpa 0x%llx! ", (unsigned long long)gpa);
         }
 
         get_emugl_vm_operations().mapUserBackedRam(
@@ -2500,30 +2473,28 @@ public:
         get_emugl_address_space_device_control_ops().register_deallocation_callback(
             this, gpa, [](void* thisPtr, uint64_t gpa) {
             Impl* implPtr = (Impl*)thisPtr;
-            implPtr->freeMappedMemoryAtGpaIfExists(gpa);
+            implPtr->unmapMemoryAtGpaIfExists(gpa);
         });
 
         return true;
     }
 
-    void freeMappedMemoryAtGpaIfExists(uint64_t gpa) {
-        AutoLock lock(mLock);
+    // Only call this from the address space device deallocation operation's
+    // context, or it's possible that the guest/host view of which gpa's are
+    // occupied goes out of sync.
+    void unmapMemoryAtGpaIfExists(uint64_t gpa) {
+        AutoLock lock(mOccupiedGpasLock);
 
         auto existingMemoryInfo =
             android::base::find(mOccupiedGpas, gpa);
 
         if (!existingMemoryInfo) return;
 
-        if (mLogging) {
-            fprintf(stderr, "%s: Warning: freeing memory as part of deallocation callback. "
-                    "gpa: 0x%llx\n", __func__, (unsigned long long)gpa);
-        }
+        get_emugl_vm_operations().unmapUserBackedRam(
+            existingMemoryInfo->gpa,
+            existingMemoryInfo->sizeToPage);
 
-        freeMemoryLocked(
-                existingMemoryInfo->vk,
-                existingMemoryInfo->device,
-                existingMemoryInfo->memory,
-                nullptr);
+        mOccupiedGpas.erase(gpa);
     }
 
     VkResult on_vkAllocateMemory(
@@ -2760,18 +2731,17 @@ public:
 #endif
 
         if (info->directMapped) {
-            if (mLogging) {
-                fprintf(stderr, "%s: unmap: %p, [0x%llx 0x%llx]\n", __func__,
-                        info->ptr,
-                        (unsigned long long)info->guestPhysAddr,
-                        (unsigned long long)info->guestPhysAddr + info->sizeToPage);
-            }
 
-            get_emugl_vm_operations().unmapUserBackedRam(
-                    info->guestPhysAddr,
-                    info->sizeToPage);
+            // if direct mapped, we leave it up to the guest address space driver
+            // to control the unmapping of kvm slot on the host side
+            // in order to avoid situations where
+            //
+            // 1. we try to unmap here and deadlock
+            //
+            // 2. unmapping at the wrong time (possibility of a parallel call
+            // to unmap vs. address space allocate and mapMemory leading to
+            // mapping the same gpa twice)
 
-            mOccupiedGpas.erase(info->guestPhysAddr);
         }
 
         if (info->virtioGpuMapped) {
@@ -5579,16 +5549,6 @@ private:
     std::unordered_map<VkBuffer, BufferInfo> mBufferInfo;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
-    // Back-reference to the VkDeviceMemory that is occupying a particular
-    // guest physical address
-    struct OccupiedGpaInfo {
-        VulkanDispatch* vk;
-        VkDevice device;
-        VkDeviceMemory memory;
-        uint64_t gpa;
-        size_t sizeToPage;
-    };
-    std::unordered_map<uint64_t, OccupiedGpaInfo> mOccupiedGpas;
 
     std::unordered_map<VkSemaphore, SemaphoreInfo> mSemaphoreInfo;
 
@@ -5616,6 +5576,18 @@ private:
 
     std::vector<uint64_t> mCreatedHandlesForSnapshotLoad;
     size_t mCreatedHandlesForSnapshotLoadIndex = 0;
+
+    Lock mOccupiedGpasLock;
+    // Back-reference to the VkDeviceMemory that is occupying a particular
+    // guest physical address
+    struct OccupiedGpaInfo {
+        VulkanDispatch* vk;
+        VkDevice device;
+        VkDeviceMemory memory;
+        uint64_t gpa;
+        size_t sizeToPage;
+    };
+    std::unordered_map<uint64_t, OccupiedGpaInfo> mOccupiedGpas;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
