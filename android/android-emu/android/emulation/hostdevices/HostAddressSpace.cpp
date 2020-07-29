@@ -87,6 +87,8 @@ public:
     void freeBlock(uint32_t handle, uint64_t off) {
         AutoLock lock(mLock);
         freeBlockLocked(handle, off);
+        lock.unlock();
+        mControlOps->run_deallocation_callbacks(kPciStart + off);
     }
 
     void setHostAddr(uint32_t handle, size_t off, void* hva) {
