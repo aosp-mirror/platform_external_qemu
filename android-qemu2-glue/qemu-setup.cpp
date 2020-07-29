@@ -53,7 +53,10 @@
 #include "android/base/CpuUsage.h"
 #include "android/base/Log.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/system/System.h"
+#include "android/base/threads/Async.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
@@ -63,6 +66,7 @@
 #include "android/emulation/AudioCaptureEngine.h"
 #include "android/emulation/AudioOutputEngine.h"
 #include "android/emulation/DmaMap.h"
+#include "android/emulation/ParameterList.h"
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/emulation/VmLock.h"
 #include "android/emulation/address_space_device.h"
@@ -73,10 +77,10 @@
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
-#include "android/featurecontrol/feature_control.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
 #include "android/skin/LibuiAgent.h"
@@ -100,22 +104,23 @@ extern "C" {
 #include "sysemu/device_tree.h"
 #include "sysemu/sysemu.h"
 
-namespace android {
-namespace base {
-class PathUtils;
-}  // namespace base
-}  // namespace android
-
 extern char* android_op_ports;
 
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
+
+#ifndef AEMU_GFXSTREAM_BACKEND
+extern int run_hostapd_main(int argc,
+                            const char** argv,
+                            void (*on_main_loop_done)(void));
+#endif
 
 }  // extern "C"
 
 using android::DmaMap;
 using android::VmLock;
 using android::base::PathUtils;
+using android::base::System;
 using android::emulation::control::EmulatorAdvertisement;
 using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::EmulatorProperties;
@@ -466,6 +471,14 @@ bool qemu_android_emulation_setup() {
     if (feature_is_enabled(kFeature_VirtioWifi)) {
         virtio_wifi_set_mac_prefix(android_serial_number_port);
     }
+    auto hostapdEventLoop = []() {
+        android::ParameterList args{"hostapd"};
+        std::string hostapdConf = PathUtils::join(
+                System::get()->getLauncherDirectory(), "lib", "hostapd.conf");
+        args.add(hostapdConf);
+        run_hostapd_main(args.size(), (const char**)args.array(), [] {});
+    };
+    android::base::async(hostapdEventLoop);
 #endif
     return true;
 }
