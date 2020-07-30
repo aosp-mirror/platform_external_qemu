@@ -37,62 +37,12 @@
 
 ANDROID_BEGIN_HEADER
 
+// TODO(jansene): This file can be safely deleted once all the include dependencies are fixed.
+
 // This file contains handles to globally allocated objects implementing various
 // interfaces required by AndroidEmu library in emulation/control/*.
 
 // Defined in .../emulation/control/automation_agent.h
 typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
-extern const QAndroidAutomationAgent* const gQAndroidAutomationAgent;
-
-// Defined in .../emulation/control/battery_agent.h
-extern const QAndroidBatteryAgent* const gQAndroidBatteryAgent;
-
-// Defined in android/qemu-cellular-agent.c
-extern const QAndroidCellularAgent* const gQAndroidCellularAgent;
-
-// Defined in qemu-clipboard-agent-impl.cpp
-extern const QAndroidClipboardAgent* const gQAndroidClipboardAgent;
-
-// Defined in android/qemu-finger-agent.c
-extern const QAndroidFingerAgent* const gQAndroidFingerAgent;
-
-// Defined in android/qemu-location-agent-impl.c
-extern const QAndroidLocationAgent* const gQAndroidLocationAgent;
-
-// Defined in android/qemu-http-proxy-agent-impl.c
-extern const QAndroidHttpProxyAgent* const gQAndroidHttpProxyAgent;
-
-// Defined in android/qemu-record-screen-agent.c
-extern const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent;
-
-// Defined in android/qemu-sensors-agent.cpp
-extern const QAndroidSensorsAgent* const gQAndroidSensorsAgent;
-
-// Defined in android/qemu-telephony-agent.c
-extern const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent;
-
-// Defined in android-qemu2-glue/qemu-user-event-agent-impl.c
-extern const QAndroidUserEventAgent* const gQAndroidUserEventAgent;
-
-// Defined in android/qemu-virtual-scene-agent.cpp
-extern const QAndroidVirtualSceneAgent* const gQAndroidVirtualSceneAgent;
-
-// Defined in android-qemu2-glue/qemu-net-agent-impl.c
-extern const QAndroidNetAgent* const gQAndroidNetAgent;
-
-// Defined in android-qemu2-glue/qemu-display-agent-impl.cpp
-extern const QAndroidDisplayAgent* const gQAndroidDisplayAgent;
-
-extern const QCarDataAgent* const gQCarDataAgent;
-
-extern const QGrpcAgent* const gQGrpcAgent;
-
-extern const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
-
-// Called by hw/android/goldfish/events_device.c to initialize generic event
-// handling.
-// In this QEMU1 specific implementation, we stash away an |opaque| handle the
-// and call a function on the device directly.
-extern void qemu_control_setEventDevice(void* opaque);
 
 ANDROID_END_HEADER
