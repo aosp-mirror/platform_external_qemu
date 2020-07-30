@@ -462,6 +462,10 @@ static void sAddressSpaceDeviceRunDeallocationCallbacks(uint64_t gpa) {
     sAddressSpaceDeviceState->runDeallocationCallbacks(gpa);
 }
 
+static const struct AddressSpaceHwFuncs* sAddressSpaceDeviceControlGetHwFuncs() {
+    return get_address_space_device_hw_funcs();
+}
+
 
 } // namespace
 
@@ -482,6 +486,7 @@ static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
     &sAddressSpaceDevicePingAtHva,                     // ping_at_hva
     &sAddressSpaceDeviceRegisterDeallocationCallback,  // register_deallocation_callback
     &sAddressSpaceDeviceRunDeallocationCallbacks,      // run_deallocation_callbacks
+    &sAddressSpaceDeviceControlGetHwFuncs,             // control_get_hw_funcs
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
