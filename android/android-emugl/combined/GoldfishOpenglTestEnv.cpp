@@ -200,6 +200,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     android::emulation::goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
 
+    HostAddressSpaceDevice::get();
     HostGoldfishPipeDevice::get();
 
     android_init_opengles_pipe();

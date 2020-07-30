@@ -102,6 +102,10 @@ public:
                 android::featurecontrol::VulkanSnapshots);
         mVkCleanupEnabled = System::get()->envGet("ANDROID_EMU_VK_NO_CLEANUP") != "1";
         mLogging = System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1";
+        if (get_emugl_address_space_device_control_ops().control_get_hw_funcs &&
+            get_emugl_address_space_device_control_ops().control_get_hw_funcs()) {
+            mUseOldMemoryCleanupPath = 0 == get_emugl_address_space_device_control_ops().control_get_hw_funcs()->getPhysAddrStartLocked();
+        }
     }
 
     ~Impl() = default;
@@ -2470,11 +2474,13 @@ public:
             sizeToPage,
         };
 
-        get_emugl_address_space_device_control_ops().register_deallocation_callback(
-            this, gpa, [](void* thisPtr, uint64_t gpa) {
-            Impl* implPtr = (Impl*)thisPtr;
-            implPtr->unmapMemoryAtGpaIfExists(gpa);
-        });
+        if (!mUseOldMemoryCleanupPath) {
+            get_emugl_address_space_device_control_ops().register_deallocation_callback(
+                this, gpa, [](void* thisPtr, uint64_t gpa) {
+                Impl* implPtr = (Impl*)thisPtr;
+                implPtr->unmapMemoryAtGpaIfExists(gpa);
+            });
+        }
 
         return true;
     }
@@ -2741,7 +2747,9 @@ public:
             // 2. unmapping at the wrong time (possibility of a parallel call
             // to unmap vs. address space allocate and mapMemory leading to
             // mapping the same gpa twice)
-
+            if (mUseOldMemoryCleanupPath) {
+                unmapMemoryAtGpaIfExists(info->guestPhysAddr);
+            }
         }
 
         if (info->virtioGpuMapped) {
@@ -5221,6 +5229,7 @@ private:
     bool mSnapshotsEnabled = false;
     bool mVkCleanupEnabled = true;
     bool mLogging = false;
+    bool mUseOldMemoryCleanupPath = false;
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
