@@ -19,7 +19,6 @@
 #include <memory>
 
 #include <inttypes.h>
-
 namespace android {
 
 namespace base {
