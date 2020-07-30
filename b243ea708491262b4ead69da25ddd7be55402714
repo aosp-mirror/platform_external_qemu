@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "47d8ac71_776fd4ec",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-30T19:12:38Z",
+      "side": 1,
+      "message": "Erwin, please fix the presubmit error; it looks like all g3 boot tests are broken by this. Please coordinate with lishoulong@ to investigate",
+      "revId": "b243ea708491262b4ead69da25ddd7be55402714",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
