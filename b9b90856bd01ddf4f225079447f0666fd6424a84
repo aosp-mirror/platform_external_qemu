@@ -52,6 +52,24 @@
       "revId": "b9b90856bd01ddf4f225079447f0666fd6424a84",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "62ec9796_70965327",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-07-30T22:32:48Z",
+      "side": 1,
+      "message": "Maybe try to check in the installed event filter? cs/android/external/qemu/android/android-emu/android/skin/qt/event-capturer.h?q\u003deventfilter\u0026ss\u003dpiper%2FGoogle%2Fandroid:external%2Fqemu%2Fandroid%2Fandroid-emu%2Fandroid%2Fskin%2Fqt%2F\n\nIf adding it in the event filter works, we\u0027ll only have this in one place.",
+      "parentUuid": "469fa7ed_47382088",
+      "revId": "b9b90856bd01ddf4f225079447f0666fd6424a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
