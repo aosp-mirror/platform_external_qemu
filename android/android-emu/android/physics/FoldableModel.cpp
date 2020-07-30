@@ -92,6 +92,15 @@ FoldableModel::FoldableModel() {
         W("Incorrect hinge sub_type %d, default to 0\n",
           android_hw->hw_sensor_hinge_sub_type);
     }
+
+    enum FoldablePostures foldAtPosture =
+            (enum FoldablePostures)android_hw->hw_sensor_fold_at_posture;
+    if (foldAtPosture < 0 || foldAtPosture >= POSTURE_MAX) {
+        foldAtPosture = POSTURE_CLOSED;
+        W("Incorrect fold at posture %d, default to 1\n",
+          android_hw->hw_sensor_fold_at_posture);
+    }
+
      // hinge number
     int numHinge = android_hw->hw_sensor_hinge_count;
     if (numHinge < 0 || numHinge > ANDROID_FOLDABLE_MAX_HINGES) {
@@ -102,6 +111,7 @@ FoldableModel::FoldableModel() {
     struct FoldableConfig defaultConfig = {
             .hingesType = type,
             .hingesSubType = subType,
+            .foldAtPosture = foldAtPosture,
             .numHinges = numHinge,
     };
     // hinge angle ranges and defaults
@@ -269,10 +279,10 @@ void FoldableModel::setToolBarFold(enum FoldablePostures oldPosture) {
     if (!windowAgent) {
         return;
     }
-    if (mState.currentPosture == POSTURE_CLOSED) {
+    if (mState.currentPosture == mState.config.foldAtPosture) {
         windowAgent->fold(true);
     } else {
-        if (oldPosture == POSTURE_CLOSED) {
+        if (oldPosture == mState.config.foldAtPosture) {
             windowAgent->fold(false);
         }
     }
