@@ -869,6 +869,7 @@ void ColorBuffer::onSave(android::base::Stream* stream) {
     assert(m_eglImage && m_blitEGLImage);
     stream->putBe32(reinterpret_cast<uintptr_t>(m_eglImage));
     stream->putBe32(reinterpret_cast<uintptr_t>(m_blitEGLImage));
+    stream->putBe32(m_needFormatCheck);
 }
 
 ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
@@ -898,6 +899,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
     cb->m_internalFormat = internalFormat;
     cb->m_frameworkFormat = frameworkFormat;
     cb->m_fastBlitSupported = fastBlitSupported;
+    cb->m_needFormatCheck = stream->getBe32();
     return cb;
 }
 
