@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d841abc1_5a3bb191",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-07-30T23:55:49Z",
+      "side": 1,
+      "message": "I have observed another crash with this change after gfxstream_backend_init() called. It crashes here: https://android.googlesource.com/platform/external/qemu/+/d47e82eb9faa055137d6e4ea543e0f65bacc38f1/android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp#182.\n\nException thrown at 0x00007FF8EEC312DE (vcruntime140.dll) in crosvm.exe: 0xC0000005: Access violation reading location 0x0000000000000000.\n\nThe full stack can be found here: http://go/paste/5931728528998400",
+      "revId": "de1b86b7624850b6e331e6cbeea2671b13a1f4bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
