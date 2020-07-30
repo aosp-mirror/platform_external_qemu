@@ -182,10 +182,17 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
     }
 
     auto newObjPtr = NamedObjectPtr( new NamedObject(genNameInfo, m_globalNameSpace));
-    m_localToGlobalMap.add(localName, newObjPtr);
 
     unsigned int globalName = newObjPtr->getGlobalName();
     m_globalToLocalMap.add(globalName, localName);
+    if (!m_localToGlobalMap.getExceptZero_const(localName)) {
+        m_localToGlobalMap.add(localName, newObjPtr);
+    } else {
+        fprintf(stderr, "%s: Warning: type 0x%x local name %llu already exists!!!!!!!!!!!!!!!\n", __func__, (uint32_t)m_type,
+                (unsigned long long)localName);
+        emugl::emugl_crash_reporter(
+                "Fatal: \n");
+    }
     return localName;
 }
 
