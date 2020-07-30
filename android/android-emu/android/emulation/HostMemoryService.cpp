@@ -13,16 +13,21 @@
 // limitations under the License.
 #include "android/emulation/HostMemoryService.h"
 
-#include "android/base/AlignedBuf.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/emulation/AndroidAsyncMessagePipe.h"
-#include "android/emulation/control/vm_operations.h"
+#include <stdio.h>                                      // for fprintf, stderr
+#include <cstdint>                                      // for uint8_t, uint...
+#include <functional>                                   // for __base
+#include <unordered_map>                                // for unordered_map
+#include <utility>                                      // for move
+#include <vector>                                       // for vector, vecto...
 
-#include <iomanip>
-#include <sstream>
-#include <unordered_map>
-#include <vector>
+#include "android/base/AlignedBuf.h"                    // for AlignedBuf
+#include "android/base/memory/LazyInstance.h"           // for LazyInstance
+#include "android/base/synchronization/Lock.h"          // for AutoLock, Loc...
+#include "android/console.h"                            // for getConsoleAgents
+#include "android/emulation/AndroidAsyncMessagePipe.h"  // for AndroidAsyncM...
+#include "android/emulation/AndroidPipe.h"              // for AndroidPipe
+#include "android/emulation/control/vm_operations.h"    // for QAndroidVmOpe...
+
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
@@ -41,7 +46,7 @@ public:
         ~Service() {
             AutoLock lock(sServiceLock);
             sService = nullptr;
-            gQAndroidVmOperations->unmapUserBackedRam(
+            getConsoleAgents()->vm->unmapUserBackedRam(
                 mSharedRegionPhysAddr,
                 mSharedRegionSize);
         }
@@ -72,7 +77,7 @@ public:
             mSharedRegionPhysAddr = physAddr;
             mSharedRegionSize = size;
 
-            gQAndroidVmOperations->mapUserBackedRam(
+            getConsoleAgents()->vm->mapUserBackedRam(
                 mSharedRegionPhysAddr,
                 sharedRegionHostAddrLocked(),
                 mSharedRegionSize);

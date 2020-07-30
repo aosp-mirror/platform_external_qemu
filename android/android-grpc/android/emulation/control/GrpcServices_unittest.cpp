@@ -8,12 +8,12 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
+#include <gtest/gtest.h>                  // for Asser...
 
 #include "android/emulation/control/GrpcServices.h"
 
 #include <grpcpp/grpcpp.h>                // for OK
 #include <grpcpp/security/credentials.h>  // for Insec...
-#include <gtest/gtest.h>                  // for Asser...
 
 #include <fstream>      // for ifstream
 #include <iterator>     // for istre...

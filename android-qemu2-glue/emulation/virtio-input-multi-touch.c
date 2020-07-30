@@ -13,7 +13,7 @@
 // limitations under the License.
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
 
-#include "android-qemu2-glue/qemu-control-impl.h"
+#include "android/console.h"
 #include "android/multitouch-screen.h"
 
 #include "qemu/osdep.h"
@@ -348,9 +348,10 @@ void android_virtio_kbd_mouse_event(int dx,
         displayId = 0;
     }
 
-    if (!gQAndroidEmulatorWindowAgent->getMultiDisplay(displayId, NULL, NULL, &w,
+
+    if (!getConsoleAgents()->multi_display->getMultiDisplay(displayId, NULL, NULL, &w,
                                                   &h, NULL, NULL, NULL)) {
-        gQAndroidDisplayAgent->getFrameBuffer((int*)&w, (int*)&h, NULL, NULL,
+        getConsoleAgents()->display->getFrameBuffer((int*)&w, (int*)&h, NULL, NULL,
                                               NULL);
     }
 

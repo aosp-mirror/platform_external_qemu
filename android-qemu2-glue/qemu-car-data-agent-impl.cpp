@@ -8,9 +8,6 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
-#include "android-qemu2-glue/qemu-control-impl.h"
-
 #include "android/emulation/control/car_data_agent.h"
 
 void send_car_data(const char* msg, int length) {
@@ -26,4 +23,4 @@ static const QCarDataAgent carDataAgent = {
         .sendCarData = send_car_data,
 };
 
-const QCarDataAgent* const gQCarDataAgent = &carDataAgent;
+extern "C" const QCarDataAgent* const gQCarDataAgent = &carDataAgent;
