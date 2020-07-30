@@ -13,49 +13,51 @@
 // limitations under the License.
 #include "GoldfishOpenglTestEnv.h"
 
-#include "android/avd/info.h"
-#include "android/base/files/MemStream.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/System.h"
-#include "android/base/testing/TestTempDir.h"
-#include "android/cmdline-option.h"
-#include "android/emulation/address_space_device.h"
-#include "android/emulation/address_space_device.hpp"
-#include "android/emulation/address_space_graphics.h"
-#include "android/emulation/address_space_graphics_types.h"
-#include "android/emulation/AndroidPipe.h"
-#include "android/emulation/control/multi_display_agent.h"
-#include "android/emulation/control/vm_operations.h"
-#include "android/emulation/control/window_agent.h"
-#include "android/emulation/hostdevices/HostAddressSpace.h"
-#include "android/emulation/hostdevices/HostGoldfishPipe.h"
-#include "android/emulation/HostmemIdMapping.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
-#include "android/opengl/emugl_config.h"
-#include "android/opengles-pipe.h"
-#include "android/opengles.h"
-#include "android/refcount-pipe.h"
-#include "android/snapshot/interface.h"
+#include <cutils/properties.h>                               // for property...
+#include <stdint.h>                                          // for uint64_t
+#include <stdio.h>                                           // for fprintf
+#include <fstream>                                           // for ofstream
+#include <functional>                                        // for __base
+#include <string>                                            // for operator==
 
-#include "AndroidBufferQueue.h"
-#include "AndroidWindow.h"
-#include "AndroidWindowBuffer.h"
-#include "ClientComposer.h"
-#include "Display.h"
-#include "GrallocDispatch.h"
-#include "VulkanDispatch.h"
+#include "Renderer.h"                                        // for Renderer
+#include "VulkanDispatch.h"                                  // for vkDispatch
+#include "android/avd/info.h"                                // for avdInfo_...
+#include "android/avd/util.h"                                // for AVD_PHONE
+#include "android/base/StringView.h"                         // for StringView
+#include "android/base/files/MemStream.h"                    // for MemStream
+#include "android/base/files/PathUtils.h"                    // for pj
+#include "android/base/system/System.h"                      // for System
+#include "android/base/testing/TestTempDir.h"                // for TestTempDir
+#include "android/cmdline-option.h"                          // for AndroidO...
+#include "android/console.h"                                 // for getConso...
+#include "android/emulation/AndroidPipe.h"                   // for AndroidPipe
+#include "android/emulation/HostmemIdMapping.h"              // for android_...
+#include "android/emulation/address_space_device.hpp"        // for goldfish...
+#include "android/emulation/address_space_graphics.h"        // for AddressS...
+#include "android/emulation/address_space_graphics_types.h"  // for Consumer...
+#include "android/emulation/control/AndroidAgentFactory.h"   // for initiali...
+#include "android/emulation/control/callbacks.h"             // for LineCons...
+#include "android/emulation/control/vm_operations.h"         // for Snapshot...
+#include "android/emulation/hostdevices/HostAddressSpace.h"  // for HostAddr...
+#include "android/emulation/hostdevices/HostGoldfishPipe.h"  // for HostGold...
+#include "android/featurecontrol/FeatureControl.h"           // for setEnabl...
+#include "android/featurecontrol/Features.h"                 // for GLAsyncSwap
+#include "android/globals.h"                                 // for android_hw
+#include "android/opengl/emugl_config.h"                     // for emuglCon...
+#include "android/opengles-pipe.h"                           // for android_...
+#include "android/opengles.h"                                // for android_...
+#include "android/refcount-pipe.h"                           // for android_...
+#include "android/skin/winsys.h"                             // for WINSYS_G...
+#include "android/snapshot/interface.h"                      // for androidS...
 
-#include <cutils/properties.h>
-#include <hardware/gralloc.h>
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#include <GLES3/gl3.h>
-
-#include <fstream>
-#include <string>
-
-#include <stdio.h>
+namespace aemu {
+class AndroidBufferQueue;
+class AndroidWindow;
+class AndroidWindowBuffer;
+class ClientComposer;
+class Display;
+}  // namespace aemu
 
 using aemu::AndroidBufferQueue;
 using aemu::AndroidWindow;
@@ -64,22 +66,16 @@ using aemu::ClientComposer;
 using aemu::Display;
 
 using android::AndroidPipe;
-using android::base::pj;
-using android::base::System;
 using android::HostAddressSpaceDevice;
 using android::HostGoldfishPipeDevice;
+using android::base::pj;
+using android::base::System;
 
 using android::emulation::asg::AddressSpaceGraphicsContext;
-using android::emulation::asg::ConsumerInterface;
 using android::emulation::asg::ConsumerCallbacks;
+using android::emulation::asg::ConsumerInterface;
 
 static constexpr int kWindowSize = 256;
-
-extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
-
-extern const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
-
-extern const QAndroidVmOperations* const gQAndroidVmOperations;
 
 static GoldfishOpenglTestEnv* sTestEnv = nullptr;
 
@@ -89,24 +85,175 @@ static AndroidOptions sTestEnvCmdLineOptions;
 
 // static
 std::vector<const char*> GoldfishOpenglTestEnv::getTransportsToTest() {
-    return { "pipe", };
+    return {
+            "pipe",
+    };
 }
 
-GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
-    sTestEnv = this;
-    sTestContentDir = new android::base::TestTempDir("goldfish_opengl_snapshot_test_dir");
+static const SnapshotCallbacks* sSnapshotCallbacks = nullptr;
 
-    android_avdInfo = avdInfo_newCustom(
-        "goldfish_opengl_test",
-        28,
-        "x86_64",
-        "x86_64",
-        true /* is google APIs */,
-        AVD_PHONE);
+static const QAndroidVmOperations sQAndroidVmOperations = {
+        .vmStop = []() -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: vm stop\n");
+            return true;
+        },
+        .vmStart = []() -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: vm start\n");
+            return true;
+        },
+        .vmReset =
+                []() { fprintf(stderr, "goldfish-opengl vm ops: vm reset\n"); },
+        .vmShutdown =
+                []() { fprintf(stderr, "goldfish-opengl vm ops: vm reset\n"); },
+        .vmPause = []() -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: vm pause\n");
+            return true;
+        },
+        .vmResume = []() -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: vm resume\n");
+            return true;
+        },
+        .vmIsRunning = []() -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: vm is running\n");
+            return true;
+        },
+        .snapshotList =
+                [](void*, LineConsumerCallback, LineConsumerCallback) -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: snapshot list\n");
+            return true;
+        },
+        .snapshotSave = [](const char* name,
+                           void* opaque,
+                           LineConsumerCallback) -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: snapshot save\n");
+            sSnapshotCallbacks->ops[SNAPSHOT_SAVE].onStart(opaque, name);
+            auto testEnv = GoldfishOpenglTestEnv::get();
+            if (testEnv->snapshotStream)
+                delete testEnv->snapshotStream;
+            testEnv->snapshotStream = new android::base::MemStream;
+            testEnv->saveSnapshot(testEnv->snapshotStream);
+            sSnapshotCallbacks->ops[SNAPSHOT_SAVE].onEnd(opaque, name, 0);
+            return true;
+        },
+        .snapshotLoad = [](const char* name,
+                           void* opaque,
+                           LineConsumerCallback) -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: snapshot load\n");
+            sSnapshotCallbacks->ops[SNAPSHOT_LOAD].onStart(opaque, name);
+            auto testEnv = GoldfishOpenglTestEnv::get();
+            testEnv->loadSnapshot(testEnv->snapshotStream);
+            sSnapshotCallbacks->ops[SNAPSHOT_LOAD].onEnd(opaque, name, 0);
+            testEnv->snapshotStream->rewind();
+            return true;
+        },
+        .snapshotDelete = [](const char* name,
+                             void* opaque,
+                             LineConsumerCallback errConsumer) -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: snapshot delete\n");
+            return true;
+        },
+        .snapshotExport = [](const char* snapshot,
+                             const char* dest,
+                             void* opaque,
+                             LineConsumerCallback errConsumer) -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: snapshot export image\n");
+            return true;
+        },
+        .snapshotRemap = [](bool shared,
+                            void* opaque,
+                            LineConsumerCallback errConsumer) -> bool {
+            fprintf(stderr, "goldfish-opengl vm ops: snapshot remap\n");
+            return true;
+        },
+        .setSnapshotCallbacks =
+                [](void* opaque, const SnapshotCallbacks* callbacks) {
+                    fprintf(stderr,
+                            "goldfish-opengl vm ops: set snapshot callbacks\n");
+                    sSnapshotCallbacks = callbacks;
+                },
+        .mapUserBackedRam =
+                [](uint64_t gpa, void* hva, uint64_t size) {
+                    (void)size;
+                    HostAddressSpaceDevice::get()->setHostAddrByPhysAddr(gpa,
+                                                                         hva);
+                },
+        .unmapUserBackedRam =
+                [](uint64_t gpa, uint64_t size) {
+                    (void)size;
+                    HostAddressSpaceDevice::get()->unsetHostAddrByPhysAddr(gpa);
+                },
+        .getVmConfiguration =
+                [](VmConfiguration* out) {
+                    fprintf(stderr,
+                            "goldfish-opengl vm ops: get vm configuration\n");
+                },
+        .setFailureReason =
+                [](const char* name, int failureReason) {
+                    fprintf(stderr,
+                            "goldfish-opengl vm ops: set failure reason\n");
+                },
+        .setExiting =
+                []() {
+                    fprintf(stderr, "goldfish-opengl vm ops: set exiting\n");
+                },
+        .allowRealAudio =
+                [](bool allow) {
+                    fprintf(stderr,
+                            "goldfish-opengl vm ops: allow real audio\n");
+                },
+        .physicalMemoryGetAddr =
+                [](uint64_t gpa) {
+                    fprintf(stderr,
+                            "goldfish-opengl vm ops: physical memory get "
+                            "addr\n");
+                    void* res = HostAddressSpaceDevice::get()->getHostAddr(gpa);
+                    if (!res)
+                        return (void*)(uintptr_t)gpa;
+                    return res;
+                },
+        .isRealAudioAllowed =
+                [](void) {
+                    fprintf(stderr,
+                            "goldfish-opengl vm ops: is real audiop allowed\n");
+                    return true;
+                },
+        .setSkipSnapshotSave =
+                [](bool used) {
+                    fprintf(stderr,
+                            "goldfish-opengl vm ops: set skip snapshot save\n");
+                },
+        .isSnapshotSaveSkipped =
+                []() {
+                    fprintf(stderr,
+                            "goldfish-opengl vm ops: is snapshot save "
+                            "skipped\n");
+                    return false;
+                },
+        .hostmemRegister = android_emulation_hostmem_register,
+        .hostmemUnregister = android_emulation_hostmem_unregister,
+        .hostmemGetInfo = android_emulation_hostmem_get_info,
+};
+
+class GolfishMockConsoleFactory
+    : public android::emulation::AndroidConsoleFactory {
+    const QAndroidVmOperations* const android_get_QAndroidVmOperations()
+            const override {
+        return &sQAndroidVmOperations;
+    }
+};
+
+GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
+    android::emulation::injectConsoleAgents(GolfishMockConsoleFactory());
+    sTestEnv = this;
+    sTestContentDir =
+            new android::base::TestTempDir("goldfish_opengl_snapshot_test_dir");
+
+    android_avdInfo =
+            avdInfo_newCustom("goldfish_opengl_test", 28, "x86_64", "x86_64",
+                              true /* is google APIs */, AVD_PHONE);
 
     avdInfo_setCustomContentPath(android_avdInfo, sTestContentDir->path());
-    auto customHwIniPath =
-        pj(sTestContentDir->path(), "hardware.ini");
+    auto customHwIniPath = pj(sTestContentDir->path(), "hardware.ini");
 
     std::ofstream hwIniPathTouch(customHwIniPath, std::ios::out);
     hwIniPathTouch << "test ini";
@@ -119,16 +266,16 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLESDynamicVersion, true);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::GLDMA, false);
+    android::featurecontrol::setEnabledOverride(android::featurecontrol::GLDMA,
+                                                false);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLAsyncSwap, false);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::RefCountPipe, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLDirectMem, true);
-    android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::Vulkan, true);
+    android::featurecontrol::setEnabledOverride(android::featurecontrol::Vulkan,
+                                                true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanSnapshots, true);
     android::featurecontrol::setEnabledOverride(
@@ -154,14 +301,14 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     EmuglConfig config;
 
-    emuglConfig_init(&config, true /* gpu enabled */, "auto",
-                     useHostGpu ? "host" : "swiftshader_indirect", /* gpu mode, option */
-                     64,                     /* bitness */
-                     true,                   /* no window */
-                     false,                  /* blacklisted */
-                     false,                  /* has guest renderer */
-                     WINSYS_GLESBACKEND_PREFERENCE_AUTO,
-                     false);
+    emuglConfig_init(
+            &config, true /* gpu enabled */, "auto",
+            useHostGpu ? "host" : "swiftshader_indirect", /* gpu mode, option */
+            64,                                           /* bitness */
+            true,                                         /* no window */
+            false,                                        /* blacklisted */
+            false, /* has guest renderer */
+            WINSYS_GLESBACKEND_PREFERENCE_AUTO, false);
 
     emuglConfig_setupEnv(&config);
 
@@ -177,28 +324,28 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     int min;
 
     android_startOpenglesRenderer(
-        kWindowSize, kWindowSize, 1, 28, gQAndroidVmOperations,
-        gQAndroidEmulatorWindowAgent, gQAndroidMultiDisplayAgent,
-        &maj, &min);
+            kWindowSize, kWindowSize, 1, 28, getConsoleAgents()->vm,
+            getConsoleAgents()->emu, getConsoleAgents()->multi_display, &maj,
+            &min);
 
-    androidSnapshot_initialize(
-        gQAndroidVmOperations,
-        gQAndroidEmulatorWindowAgent);
+    androidSnapshot_initialize(getConsoleAgents()->vm, getConsoleAgents()->emu);
 
-    androidSnapshot_setDiskSpaceCheck(false /* do not check disk space > 2 GB */);
-    androidSnapshot_quickbootSetShortRunCheck(false /* do not check if running < 1500 ms */);
+    androidSnapshot_setDiskSpaceCheck(
+            false /* do not check disk space > 2 GB */);
+    androidSnapshot_quickbootSetShortRunCheck(
+            false /* do not check if running < 1500 ms */);
 
     char* vendor = nullptr;
     char* renderer = nullptr;
     char* version = nullptr;
 
-    android_getOpenglesHardwareStrings(
-        &vendor, &renderer, &version);
+    android_getOpenglesHardwareStrings(&vendor, &renderer, &version);
 
     printf("%s: GL strings; [%s] [%s] [%s].\n", __func__, vendor, renderer,
            version);
 
-    android::emulation::goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
+    android::emulation::goldfish_address_space_set_vm_operations(
+            getConsoleAgents()->vm);
 
     HostAddressSpaceDevice::get();
     HostGoldfishPipeDevice::get();
@@ -218,22 +365,22 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     auto openglesRenderer = android_getOpenglesRenderer().get();
 
     ConsumerInterface interface = {
-        // create
-        [openglesRenderer](struct asg_context context,
-           ConsumerCallbacks callbacks) {
-           return openglesRenderer->addressSpaceGraphicsConsumerCreate(
-               context, callbacks);
-        },
-        // destroy
-        [openglesRenderer](void* consumer) {
-           return openglesRenderer->addressSpaceGraphicsConsumerDestroy(
-               consumer);
-        },
-        // TODO
-        // save
-        [](void* consumer, android::base::Stream* stream) { },
-        // load
-        [](void* consumer, android::base::Stream* stream) { },
+            // create
+            [openglesRenderer](struct asg_context context,
+                               ConsumerCallbacks callbacks) {
+                return openglesRenderer->addressSpaceGraphicsConsumerCreate(
+                        context, callbacks);
+            },
+            // destroy
+            [openglesRenderer](void* consumer) {
+                return openglesRenderer->addressSpaceGraphicsConsumerDestroy(
+                        consumer);
+            },
+            // TODO
+            // save
+            [](void* consumer, android::base::Stream* stream) {},
+            // load
+            [](void* consumer, android::base::Stream* stream) {},
     };
     AddressSpaceGraphicsContext::setConsumer(interface);
 }
@@ -263,97 +410,3 @@ void GoldfishOpenglTestEnv::loadSnapshot(android::base::Stream* stream) {
     HostAddressSpaceDevice::get()->loadSnapshot(stream);
     HostGoldfishPipeDevice::get()->loadSnapshot(stream);
 }
-
-static const SnapshotCallbacks* sSnapshotCallbacks = nullptr;
-
-static const QAndroidVmOperations sQAndroidVmOperations = {
-    .vmStop = []() -> bool { fprintf(stderr, "goldfish-opengl vm ops: vm stop\n"); return true; },
-    .vmStart = []() -> bool { fprintf(stderr, "goldfish-opengl vm ops: vm start\n"); return true; },
-    .vmReset = []() { fprintf(stderr, "goldfish-opengl vm ops: vm reset\n"); },
-    .vmShutdown = []() { fprintf(stderr, "goldfish-opengl vm ops: vm reset\n"); },
-    .vmPause = []() -> bool { fprintf(stderr, "goldfish-opengl vm ops: vm pause\n"); return true; },
-    .vmResume = []() -> bool { fprintf(stderr, "goldfish-opengl vm ops: vm resume\n"); return true; },
-    .vmIsRunning = []() -> bool { fprintf(stderr, "goldfish-opengl vm ops: vm is running\n"); return true; },
-    .snapshotList = [](void*, LineConsumerCallback, LineConsumerCallback) -> bool { fprintf(stderr, "goldfish-opengl vm ops: snapshot list\n"); return true; },
-    .snapshotSave = [](const char* name, void* opaque, LineConsumerCallback) -> bool {
-        fprintf(stderr, "goldfish-opengl vm ops: snapshot save\n");
-        sSnapshotCallbacks->ops[SNAPSHOT_SAVE].onStart(opaque, name);
-        auto testEnv = GoldfishOpenglTestEnv::get();
-        if (testEnv->snapshotStream) delete testEnv->snapshotStream;
-        testEnv->snapshotStream = new android::base::MemStream;
-        testEnv->saveSnapshot(testEnv->snapshotStream);
-        sSnapshotCallbacks->ops[SNAPSHOT_SAVE].onEnd(opaque, name, 0);
-        return true;
-    },
-    .snapshotLoad = [](const char* name, void* opaque, LineConsumerCallback) -> bool {
-        fprintf(stderr, "goldfish-opengl vm ops: snapshot load\n");
-        sSnapshotCallbacks->ops[SNAPSHOT_LOAD].onStart(opaque, name);
-        auto testEnv = GoldfishOpenglTestEnv::get();
-        testEnv->loadSnapshot(testEnv->snapshotStream);
-        sSnapshotCallbacks->ops[SNAPSHOT_LOAD].onEnd(opaque, name, 0);
-        testEnv->snapshotStream->rewind();
-        return true;
-    },
-    .snapshotDelete = [](const char* name, void* opaque, LineConsumerCallback errConsumer) -> bool {
-        fprintf(stderr, "goldfish-opengl vm ops: snapshot delete\n");
-        return true;
-    },
-    .snapshotExport = [](const char* snapshot,
-                             const char* dest,
-                             void* opaque,
-                             LineConsumerCallback errConsumer) -> bool {
-        fprintf(stderr, "goldfish-opengl vm ops: snapshot export image\n");
-        return true;
-    },
-    .snapshotRemap = [](bool shared, void* opaque, LineConsumerCallback errConsumer) -> bool {
-        fprintf(stderr, "goldfish-opengl vm ops: snapshot remap\n");
-        return true;
-    },
-    .setSnapshotCallbacks = [](void* opaque, const SnapshotCallbacks* callbacks) {
-        fprintf(stderr, "goldfish-opengl vm ops: set snapshot callbacks\n");
-        sSnapshotCallbacks = callbacks;
-    },
-    .mapUserBackedRam = [](uint64_t gpa, void* hva, uint64_t size) {
-        (void)size;
-        HostAddressSpaceDevice::get()->setHostAddrByPhysAddr(gpa, hva);
-    },
-    .unmapUserBackedRam = [](uint64_t gpa, uint64_t size) {
-        (void)size;
-        HostAddressSpaceDevice::get()->unsetHostAddrByPhysAddr(gpa);
-    },
-    .getVmConfiguration = [](VmConfiguration* out) {
-        fprintf(stderr, "goldfish-opengl vm ops: get vm configuration\n");
-     },
-    .setFailureReason = [](const char* name, int failureReason) {
-        fprintf(stderr, "goldfish-opengl vm ops: set failure reason\n");
-     },
-    .setExiting = []() {
-        fprintf(stderr, "goldfish-opengl vm ops: set exiting\n");
-     },
-    .allowRealAudio = [](bool allow) {
-        fprintf(stderr, "goldfish-opengl vm ops: allow real audio\n");
-     },
-    .physicalMemoryGetAddr = [](uint64_t gpa) {
-        fprintf(stderr, "goldfish-opengl vm ops: physical memory get addr\n");
-        void* res = HostAddressSpaceDevice::get()->getHostAddr(gpa);
-        if (!res) return (void*)(uintptr_t)gpa;
-        return res;
-     },
-    .isRealAudioAllowed = [](void) {
-        fprintf(stderr, "goldfish-opengl vm ops: is real audiop allowed\n");
-        return true;
-    },
-    .setSkipSnapshotSave = [](bool used) {
-        fprintf(stderr, "goldfish-opengl vm ops: set skip snapshot save\n");
-    },
-    .isSnapshotSaveSkipped = []() {
-        fprintf(stderr, "goldfish-opengl vm ops: is snapshot save skipped\n");
-        return false;
-    },
-    .hostmemRegister = android_emulation_hostmem_register,
-    .hostmemUnregister = android_emulation_hostmem_unregister,
-    .hostmemGetInfo = android_emulation_hostmem_get_info,
-};
-
-const QAndroidVmOperations* const gQAndroidVmOperations =
-        &sQAndroidVmOperations;
