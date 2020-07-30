@@ -344,7 +344,7 @@ if(QTWEBENGINE)
 endif()
 
 if(NOT LINUX_AARCH64)
-target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
+  target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
 endif()
 
 # Target specific compiler flags for windows, since we include FFMPEG C sources
@@ -384,7 +384,8 @@ target_link_libraries(
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug.
 # This implies a direct dependency to libX11.so
 android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
-android_target_link_libraries(emulator-libui linux-aarch64 PRIVATE -lX11 -lxcb -lXau)
+android_target_link_libraries(emulator-libui linux-aarch64 PRIVATE -lX11 -lxcb
+                                                                   -lXau)
 android_target_link_libraries(emulator-libui darwin-x86_64
                               PRIVATE "-framework Carbon")
 # Windows-msvc specific dependencies. Need these for posix support.
@@ -393,57 +394,58 @@ android_target_link_libraries(emulator-libui windows_msvc-x86_64
 
 list(APPEND android-libui-testdata testdata/mp4/video.mp4)
 
-if (NOT LINUX_AARCH64)
-android_add_test(
-  TARGET emulator-libui_unittests
-  SRC # cmake-format: sortable
-      android/mp4/MP4Dataset_test.cpp
-      android/mp4/MP4Demuxer_test.cpp
-      android/mp4/SensorLocationEventProvider_test.cpp
-      android/mp4/VideoMetadataProvider_test.cpp
-      android/recording/FfmpegRecorder.cpp
-      android/recording/test/DummyAudioProducer.cpp
-      android/recording/test/DummyVideoProducer.cpp
-      android/recording/test/FfmpegRecorder_unittest.cpp
-      android/skin/keycode-buffer_unittest.cpp
-      android/skin/keycode_unittest.cpp
-      android/skin/qt/native-keyboard-event-handler_unittest.cpp
-      android/skin/qt/qtmain_dummy_test.cpp
-      android/skin/rect_unittest.cpp)
+if(NOT LINUX_AARCH64)
+  android_add_test(
+    TARGET emulator-libui_unittests
+    SRC # cmake-format: sortable
+        android/mp4/MP4Dataset_test.cpp
+        android/mp4/MP4Demuxer_test.cpp
+        android/mp4/SensorLocationEventProvider_test.cpp
+        android/mp4/VideoMetadataProvider_test.cpp
+        android/recording/FfmpegRecorder.cpp
+        android/recording/test/DummyAudioProducer.cpp
+        android/recording/test/DummyVideoProducer.cpp
+        android/recording/test/FfmpegRecorder_unittest.cpp
+        android/skin/keycode-buffer_unittest.cpp
+        android/skin/keycode_unittest.cpp
+        android/skin/qt/native-keyboard-event-handler_unittest.cpp
+        android/skin/qt/qtmain_dummy_test.cpp
+        android/skin/rect_unittest.cpp)
 
-android_copy_test_files(emulator-libui_unittests "${android-libui-testdata}"
-                        testdata)
+  android_copy_test_files(emulator-libui_unittests "${android-libui-testdata}"
+                          testdata)
 
-target_compile_options(emulator-libui_unittests
-                       PRIVATE -O0 -UNDEBUG -Wno-deprecated-declarations)
+  target_compile_options(emulator-libui_unittests
+                         PRIVATE -O0 -UNDEBUG -Wno-deprecated-declarations)
 
-# Target specific compiler flags for windows
-android_target_compile_options(
-  emulator-libui_unittests windows
-  PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+  # Target specific compiler flags for windows
+  android_target_compile_options(
+    emulator-libui_unittests windows
+    PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 
-# Linux compiler settings
-android_target_compile_options(emulator-libui_unittests linux-x86_64
-                               PRIVATE "-Wno-reserved-user-defined-literal")
+  # Linux compiler settings
+  android_target_compile_options(emulator-libui_unittests linux-x86_64
+                                 PRIVATE "-Wno-reserved-user-defined-literal")
 
-# Mac Os compiler settings
-android_target_compile_options(emulator-libui_unittests darwin-x86_64
-                               PRIVATE "-Wno-reserved-user-defined-literal")
+  # Mac Os compiler settings
+  android_target_compile_options(emulator-libui_unittests darwin-x86_64
+                                 PRIVATE "-Wno-reserved-user-defined-literal")
 
-android_target_dependency(emulator-libui_unittests all QT5_SHARED_DEPENDENCIES)
-android_target_properties(emulator-libui_unittests all
-                          "${QT5_SHARED_PROPERTIES}")
+  android_target_dependency(emulator-libui_unittests all
+                            QT5_SHARED_DEPENDENCIES)
+  android_target_properties(emulator-libui_unittests all
+                            "${QT5_SHARED_PROPERTIES}")
 
-# Make sure we disable rtti in gtest
-target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
+  # Make sure we disable rtti in gtest
+  target_compile_definitions(emulator-libui_unittests
+                             PRIVATE -DGTEST_HAS_RTTI=0)
 
-target_link_libraries(
-  emulator-libui_unittests
-  PRIVATE gmock_main emulator-libui android-mock-vm-operations android-emu
-  FFMPEG::FFMPEG)
+  target_link_libraries(
+    emulator-libui_unittests PRIVATE emulator-libui android-emu FFMPEG::FFMPEG
+                                     gmock_main)
 
-android_target_link_libraries(emulator-libui_unittests windows_msvc-x86_64
-                              PUBLIC dirent-win32)
+  android_target_link_libraries(emulator-libui_unittests windows_msvc-x86_64
+                                PUBLIC dirent-win32)
 
 endif()
 # Version of libui without Qt
@@ -458,8 +460,8 @@ android_add_library(
   MSVC ${emulator-libui-headless_windows_msvc-x86_64_src})
 
 target_compile_definitions(emulator-libui-headless PRIVATE -DCONFIG_HEADLESS)
-if (NOT LINUX_AARCH64)
-target_compile_options(emulator-libui-headless PRIVATE "-DUSE_MMX=1" "-mmmx")
+if(NOT LINUX_AARCH64)
+  target_compile_options(emulator-libui-headless PRIVATE "-DUSE_MMX=1" "-mmmx")
 endif()
 # Target specific compiler flags for windows, since we include FFMPEG C sources
 # from C++ we need to make sure this flag is set for c++ sources.
@@ -489,14 +491,13 @@ target_link_libraries(
   emulator-libui-headless PRIVATE android-emu emulator-libyuv FFMPEG::FFMPEG
                                   zlib android-hw-config)
 
-if (WINDOWS_MSVC_X86_64) 
-  # Qt in windows will call main from win-main v.s. calling qt_main.
-  # we have to make a separate launch library to make sure that we 
-  # do not end up with duplicate main symbols when linking emulator-libui
-  # (it used to work do to a cmake linker quirk).  
+if(WINDOWS_MSVC_X86_64)
+  # Qt in windows will call main from win-main v.s. calling qt_main. we have to
+  # make a separate launch library to make sure that we do not end up with
+  # duplicate main symbols when linking emulator-libui (it used to work do to a
+  # cmake linker quirk).
   android_add_library(
-    TARGET emulator-winqt-launcher
-    LICENSE Apache-2.0
+    TARGET emulator-winqt-launcher LICENSE Apache-2.0
     SRC # cmake-format: sortable
-    android/skin/qt/windows-qt-launcher.cpp)
+        android/skin/qt/windows-qt-launcher.cpp)
 endif()

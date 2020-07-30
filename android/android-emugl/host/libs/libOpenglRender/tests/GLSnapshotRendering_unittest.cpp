@@ -16,13 +16,13 @@
 #include "GLSnapshotTesting.h"
 #include "Standalone.h"
 #include "samples/HelloTriangle.h"
+#include "android/console.h"
 
 #include <gtest/gtest.h>
 
 
 namespace emugl {
 
-extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
 
 
 TEST(SnapshotGlRenderingSampleTest, OverrideDispatch) {
@@ -62,7 +62,7 @@ class SnapshotGlRenderingSampleTest : public ::testing::Test {
 protected:
     virtual void SetUp() override {
         setupStandaloneLibrarySearchPaths();
-        emugl::set_emugl_window_operations(*gQAndroidEmulatorWindowAgent);
+        emugl::set_emugl_window_operations(*getConsoleAgents()->emu);
         //const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
 
         const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
