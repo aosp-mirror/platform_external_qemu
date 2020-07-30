@@ -16,6 +16,24 @@
       "revId": "de1b86b7624850b6e331e6cbeea2671b13a1f4bf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ccd82c55_ee825421",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-07-30T23:59:27Z",
+      "side": 1,
+      "message": "This is the stack that triggers the read: http://go/paste/6304875287674880",
+      "parentUuid": "d841abc1_5a3bb191",
+      "revId": "de1b86b7624850b6e331e6cbeea2671b13a1f4bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
