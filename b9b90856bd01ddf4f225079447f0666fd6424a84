@@ -70,6 +70,24 @@
       "revId": "b9b90856bd01ddf4f225079447f0666fd6424a84",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82f77972_d5cee3ef",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-07-30T23:12:53Z",
+      "side": 1,
+      "message": "That\u0027s a really good point. I will look into it. The code would be a lot cleaner. It only needs to check if it is coming from ExtendedWindow.",
+      "parentUuid": "62ec9796_70965327",
+      "revId": "b9b90856bd01ddf4f225079447f0666fd6424a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
