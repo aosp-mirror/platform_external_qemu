@@ -1046,6 +1046,8 @@ uint64_t goldfish_address_space_get_phys_addr_start_locked(void)
 {
     uint64_t res;
 
+    if (!s_current_state) return 0;
+
     res = (uint64_t)s_current_state->registers.phys_start_low;
     res |= ((uint64_t)s_current_state->registers.phys_start_high) << 32;
 
