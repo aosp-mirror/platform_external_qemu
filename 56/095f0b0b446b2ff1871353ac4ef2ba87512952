@@ -1,0 +1,14 @@
+Verified+1: Weilun Du <wdu@google.com>
+Open-Source-Licensing+1: Weilun Du <wdu@google.com>
+Lint+1: Weilun Du <wdu@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Code-Review+2: Weilun Du <wdu@google.com>
+Code-Review+2: Yahan Zhou <yahan@google.com>
+Autosubmit+1: Weilun Du <wdu@google.com>
+Presubmit-Ready+1: Weilun Du <wdu@google.com>
+Bypass-Presubmit+1: Weilun Du <wdu@google.com>
+Submitted-by: Weilun Du <wdu@google.com>
+Submitted-at: Thu, 30 Jul 2020 02:54:09 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1377584
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
