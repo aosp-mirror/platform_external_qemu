@@ -656,9 +656,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                                                            &unused1,
                                                            &unused2,
                                                            PARAMETER_VALUE_TYPE_CURRENT);
-                if ((enum FoldablePostures)posture != POSTURE_CLOSED) {
+                struct FoldableState foldState;
+                android_foldable_get_state(&foldState);
+                if ((enum FoldablePostures)posture != foldState.config.foldAtPosture) {
                     sUiEmuAgent->sensors->setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
-                                                                     (float)POSTURE_CLOSED,
+                                                                     (float)foldState.config.foldAtPosture,
                                                                      0.0f,
                                                                      0.0f,
                                                                      PHYSICAL_INTERPOLATION_SMOOTH);
@@ -683,7 +685,9 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                                                            &unused1,
                                                            &unused2,
                                                            PARAMETER_VALUE_TYPE_CURRENT);
-                if ((enum FoldablePostures)posture == POSTURE_CLOSED) {
+                struct FoldableState foldState;
+                android_foldable_get_state(&foldState);
+                if ((enum FoldablePostures)posture == foldState.config.foldAtPosture) {
                     sUiEmuAgent->sensors->setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
                                                                      (float)POSTURE_OPENED,
                                                                      0.0f,
