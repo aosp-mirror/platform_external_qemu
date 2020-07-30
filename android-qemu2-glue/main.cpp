@@ -18,6 +18,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/Async.h"
 #include "android/base/system/Win32Utils.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
@@ -655,6 +656,20 @@ static void enableSignalTermination() {
 }
 
 }  // namespace
+#ifndef AEMU_GFXSTREAM_BACKEND
+extern "C" int run_hostapd_main(int argc,
+                                 const char** argv,
+                                 void (*on_main_loop_done)(void));
+
+static void enter_hostapd_event_loop() {
+    android::ParameterList args{"hostapd"};
+    std::string hostapdConf = PathUtils::join(
+                                  System::get()->getLauncherDirectory(), "lib", "hostapd.conf");
+    args.add(hostapdConf);
+    D("Starting hostapd main loop");
+    run_hostapd_main(args.size(), (const char**)args.array(), []{});
+}
+#endif
 
 extern "C" int run_qemu_main(int argc,
                              const char** argv,
@@ -2201,7 +2216,10 @@ extern "C" int main(int argc, char** argv) {
         // Dump final command-line option to make debugging the core easier
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
-
+#ifndef AEMU_GFXSTREAM_BACKEND
+    if (feature_is_enabled(kFeature_VirtioWifi))
+        async(&enter_hostapd_event_loop);
+#endif
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
 
