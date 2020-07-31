@@ -406,6 +406,46 @@ static void virgl_cmd_get_capset(VirtIOGPU *g,
     g_free(resp);
 }
 
+static void virgl_cmd_resource_create_blob(VirtIOGPU *g,
+        struct virtio_gpu_ctrl_command* cmd)
+{
+    struct virtio_gpu_resource_create_blob cb;
+    VIRTIO_GPU_FILL_CMD(cb);
+
+    // stream_renderer_resource_create_v2
+    // g->virgl->virgl_renderer_resource_create_blob(
+    //     cb.resource_id,
+    //     cb.blob_mem,
+    //     cb.blob_flags,
+    //     cb.blob_id,
+    //     cb.size,
+    //     cb.nr_entries);
+}
+
+static void virgl_cmd_resource_map(VirtIOGPU *g,
+        struct virtio_gpu_ctrl_command* cmd) {
+    struct virtio_gpu_resource_map m;
+    struct virtio_gpu_resp_map_info resp;
+
+    VIRTIO_GPU_FILL_CMD(m);
+
+    // memory_region_add_subregion
+
+    memset(&resp, 0, sizeof(resp));
+    resp.hdr.type = VIRTIO_GPU_RESP_OK_MAP_INFO;
+    resp.map_flags = 0x2;
+    resp.padding = 0;
+    virtio_gpu_ctrl_response(g, cmd, &resp.hdr, sizeof(resp));
+}
+
+static void virgl_cmd_resource_unmap(VirtIOGPU *g,
+        struct virtio_gpu_ctrl_command* cmd) {
+    struct virtio_gpu_resource_unmap u;
+    VIRTIO_GPU_FILL_CMD(u);
+
+    // memory_region_del_subregoin
+}
+
 void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
                                       struct virtio_gpu_ctrl_command *cmd)
 {
@@ -474,6 +514,15 @@ void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
 
     case VIRTIO_GPU_CMD_GET_DISPLAY_INFO:
         virtio_gpu_get_display_info(g, cmd);
+        break;
+    case VIRTIO_GPU_CMD_RESOURCE_CREATE_BLOB:
+        virgl_cmd_resource_create_blob(g, cmd);
+        break;
+    case VIRTIO_GPU_CMD_RESOURCE_MAP:
+        virgl_cmd_resource_map(g, cmd);
+        break;
+    case VIRTIO_GPU_CMD_RESOURCE_UNMAP:
+        virgl_cmd_resource_unmap(g, cmd);
         break;
     default:
         cmd->error = VIRTIO_GPU_RESP_ERR_UNSPEC;
