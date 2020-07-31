@@ -85,6 +85,7 @@ enum {
     VIRTIO_PCI_FLAG_INIT_DEVERR_BIT,
     VIRTIO_PCI_FLAG_INIT_LNKCTL_BIT,
     VIRTIO_PCI_FLAG_INIT_PM_BIT,
+    VIRTIO_PCI_FLAG_HOSTSHM_BIT,
 };
 
 /* Need to activate work-arounds for buggy guests at vmstate load. */
@@ -120,6 +121,9 @@ enum {
 
 /* Init Power Management */
 #define VIRTIO_PCI_FLAG_INIT_PM (1 << VIRTIO_PCI_FLAG_INIT_PM_BIT)
+
+/* Host coherent shared memory */
+#define VIRTIO_PCI_FLAG_HOSTSHM (1 << VIRTIO_PCI_FLAG_HOSTSHM_BIT)
 
 typedef struct {
     MSIMessage msg;
@@ -174,10 +178,12 @@ struct VirtIOPCIProxy {
     };
     MemoryRegion modern_bar;
     MemoryRegion io_bar;
+    MemoryRegion hostshm_bar;
     uint32_t legacy_io_bar_idx;
     uint32_t msix_bar_idx;
     uint32_t modern_io_bar_idx;
     uint32_t modern_mem_bar_idx;
+    uint32_t hostshm_mem_bar_idx;
     int config_cap;
     uint32_t flags;
     bool disable_modern;
