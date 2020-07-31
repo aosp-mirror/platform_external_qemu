@@ -18,6 +18,7 @@
 
 #include "android/base/CpuUsage.h"
 #include "android/base/files/Stream.h"
+#include "emugl/common/address_space_device_control_ops.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/dma_device.h"
 #include "emugl/common/feature_control.h"
@@ -82,6 +83,10 @@ void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
 
 void RenderLibImpl::setVmOps(const QAndroidVmOperations &vm_operations) {
     set_emugl_vm_operations(vm_operations);
+}
+
+void RenderLibImpl::setAddressSpaceDeviceControlOps(struct address_space_device_control_ops* ops) {
+    set_emugl_address_space_device_control_ops(ops);
 }
 
 void RenderLibImpl::setWindowOps(const QAndroidEmulatorWindowAgent &window_operations,

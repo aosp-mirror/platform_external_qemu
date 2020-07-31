@@ -660,14 +660,6 @@ static void enableSignalTermination() {
 extern "C" int run_hostapd_main(int argc,
                                  const char** argv,
                                  void (*on_main_loop_done)(void));
-extern "C" void eloop_terminate(void);
-
-// Hostapd is running in a functor thread with all signals masked.
-// Thus, SIGINT signal will not be delivered to the hostpad event
-// loop when emulator quits. So we explicity terminate hostapd.
-static void stop_hostapd() {
-    eloop_terminate();
-}
 
 static void enter_hostapd_event_loop() {
     android::ParameterList args{"hostapd"};
@@ -2236,9 +2228,6 @@ extern "C" int main(int argc, char** argv) {
     android::crashreport::CrashReporter::get()->hangDetector().pause(true);
 
     stopRenderer();
-#ifndef AEMU_GFXSTREAM_BACKEND
-    stop_hostapd();
-#endif
     emulator_finiUserInterface();
 
     process_late_teardown();

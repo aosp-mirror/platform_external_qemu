@@ -136,11 +136,15 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
                 new MediaCudaVideoHelper(oMode, fMode, cudaVideoCodec_H264);
 
         if (mUseGpuTexture) {
+            H264_DPRINT("use gpu texture");
             cudavid->resetTexturePool(mRenderer.getTexturePool());
         }
         mHwVideoHelper.reset(cudavid);
         if (!mHwVideoHelper->init()) {
             mHwVideoHelper.reset(nullptr);
+            H264_DPRINT("failed to init cuda decoder");
+        } else {
+            H264_DPRINT("succeeded to init cuda decoder");
         }
     }
 // TODO: add video toolbox for apple
@@ -149,7 +153,7 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
     mSnapshotHelper.reset(
             new MediaSnapshotHelper(MediaSnapshotHelper::CodecType::H264));
 
-    H264_DPRINT("Successfully created ffmpeg h264 decoder context %p", this);
+    H264_DPRINT("Successfully created h264 decoder context %p", this);
 }
 
 void MediaH264DecoderGeneric::createAndInitSoftVideoHelper() {

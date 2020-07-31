@@ -95,4 +95,8 @@ enum Feature {
     HardwareDecoder = 53;
 
     VirtioWifi = 54;
+
+    CarRotary = 55;
+    
+    ModemSimulator = 56;
 }

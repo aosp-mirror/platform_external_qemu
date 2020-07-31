@@ -1466,6 +1466,8 @@ void EmulatorQtWindow::slot_clearInstance() {
 #endif
 
     skin_winsys_save_window_pos();
+    // Force kill any parallel tasks that may be running, as this can make Qt hang on exit.
+    System::get()->cleanupWaitingPids();
     sInstance.get().reset();
 }
 

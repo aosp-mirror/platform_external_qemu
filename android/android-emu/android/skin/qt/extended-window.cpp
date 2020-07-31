@@ -44,6 +44,7 @@
 #include "android/skin/qt/extended-pages/bug-report-page.h"
 #include "android/skin/qt/extended-pages/camera-page.h"
 #include "android/skin/qt/extended-pages/car-data-page.h"
+#include "android/skin/qt/extended-pages/car-rotary-page.h"
 #include "android/skin/qt/extended-pages/cellular-page.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/dpad-page.h"
@@ -108,6 +109,8 @@ ExtendedWindow::ExtendedWindow(
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->bugreportPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
+    mExtendedUi->carRotaryPage->setAdbInterface(
+            mEmulatorWindow->getAdbInterface());
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)),
@@ -148,6 +151,7 @@ ExtendedWindow::ExtendedWindow(
     // clang-format off
     mPaneButtonMap = {
         {PANE_IDX_CAR,           mExtendedUi->carDataButton},
+        {PANE_IDX_CAR_ROTARY,    mExtendedUi->carRotaryButton},
         {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
         {PANE_IDX_CELLULAR,      mExtendedUi->cellularButton},
         {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
@@ -246,6 +250,8 @@ ExtendedWindow::ExtendedWindow(
         }
     }
 
+    mExtendedUi->carRotaryButton->setVisible(false);
+
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         mSidebarButtons.addButton(mExtendedUi->carDataButton);
         mExtendedUi->carDataButton->setVisible(true);
@@ -253,6 +259,14 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->batteryButton->setVisible(false);
         mExtendedUi->dpadButton->setVisible(false);
         mExtendedUi->telephoneButton->setVisible(false);
+
+        if (android::featurecontrol::isEnabled(android::featurecontrol::CarRotary) &&
+            avdInfo_getApiLevel(android_avdInfo) >= 30 /* Android 11 */) {
+            mSidebarButtons.addButton(mExtendedUi->carRotaryButton);
+            mExtendedUi->carRotaryButton->setVisible(true);
+        } else {
+            mExtendedUi->carRotaryButton->setVisible(false);
+        }
     }
 
 #ifdef __APPLE__
@@ -305,6 +319,7 @@ static std::string translate_idx(ExtendedWindowPane value) {
         PANE(PANE_IDX_SETTINGS)
         PANE(PANE_IDX_HELP)
         PANE(PANE_IDX_CAR)
+        PANE(PANE_IDX_CAR_ROTARY)
     }
 #undef PANE
     // Remove _IDX from the string.
@@ -465,6 +480,7 @@ void ExtendedWindow::on_snapshotButton_clicked()     { adjustTabs(PANE_IDX_SNAPS
 void ExtendedWindow::on_recordButton_clicked()       { adjustTabs(PANE_IDX_RECORD); }
 void ExtendedWindow::on_googlePlayButton_clicked()   { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
 void ExtendedWindow::on_carDataButton_clicked()      { adjustTabs(PANE_IDX_CAR); }
+void ExtendedWindow::on_carRotaryButton_clicked()    { adjustTabs(PANE_IDX_CAR_ROTARY); }
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);

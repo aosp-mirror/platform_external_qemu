@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "DecompressionShaders.h"
 #include "FrameBuffer.h"
 #include "GLcommon/etc.h"
 #include "VkAndroidNativeBuffer.h"
@@ -27,6 +28,7 @@
 #include "VkDecoderSnapshot.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
+#include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
 #include "android/base/containers/EntityManager.h"
 #include "android/base/containers/Lookup.h"
@@ -37,6 +39,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_dispatch.h"
+#include "emugl/common/address_space_device_control_ops.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/vm_operations.h"
@@ -46,6 +49,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
+using android::base::arraySize;
 using android::base::AutoLock;
 using android::base::ConditionVariable;
 using android::base::LazyInstance;
@@ -98,6 +102,10 @@ public:
                 android::featurecontrol::VulkanSnapshots);
         mVkCleanupEnabled = System::get()->envGet("ANDROID_EMU_VK_NO_CLEANUP") != "1";
         mLogging = System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1";
+        if (get_emugl_address_space_device_control_ops().control_get_hw_funcs &&
+            get_emugl_address_space_device_control_ops().control_get_hw_funcs()) {
+            mUseOldMemoryCleanupPath = 0 == get_emugl_address_space_device_control_ops().control_get_hw_funcs()->getPhysAddrStartLocked();
+        }
     }
 
     ~Impl() = default;
@@ -876,6 +884,12 @@ public:
         deviceInfo.physicalDevice = physicalDevice;
         deviceInfo.emulateTextureEtc2 = emulateTextureEtc2;
         deviceInfo.emulateTextureAstc = emulateTextureAstc;
+
+        for (uint32_t i = 0; i < createInfoFiltered.enabledExtensionCount;
+                ++i) {
+            deviceInfo.enabledExtensionNames.push_back(
+                createInfoFiltered.ppEnabledExtensionNames[i]);
+        }
 
         // First, get the dispatch table.
         VkDevice boxed = new_boxed_VkDevice(*pDevice, nullptr, true /* own dispatch */);
@@ -2089,6 +2103,7 @@ public:
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
         AutoLock lock(mLock);
+
         auto physicalDevice = mDeviceToPhysicalDevice[device];
         auto physdevInfo = android::base::find(mPhysdevInfo, physicalDevice);
 
@@ -2099,13 +2114,12 @@ public:
                     "FATAL: Could not get image memory requirement for "
                     "VkPhysicalDevice");
         }
-        auto instance = mPhysicalDeviceToInstance[physicalDevice];
 
         if ((physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) &&
             vk->vkGetImageMemoryRequirements2) {
             vk->vkGetImageMemoryRequirements2(device, pInfo,
                     pMemoryRequirements);
-        } else if (hasInstanceExtension(instance,
+        } else if (hasDeviceExtension(device,
                     "VK_KHR_get_memory_requirements2")) {
             vk->vkGetImageMemoryRequirements2KHR(device, pInfo,
                     pMemoryRequirements);
@@ -2117,10 +2131,7 @@ public:
                         "the extension!!!!11111\n",
                         __func__);
             }
-            *pMemoryRequirements = {
-                VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2,
-                nullptr,
-            };
+
             vk->vkGetImageMemoryRequirements(
                     device, pInfo->image,
                     &pMemoryRequirements->memoryRequirements);
@@ -2440,43 +2451,16 @@ public:
                     (unsigned long long)info->guestPhysAddr + info->sizeToPage);
         }
 
-        // Check for an existing memory at that address that may exist due to
-        // lack of proper synchronized cleanup guest/host.
-
         info->directMapped = true;
-
-        // Don't use |info| after this as freeMemoryLocked may change |mMapInfo|.
-
         uint64_t gpa = info->guestPhysAddr;
         void* hva = info->pageAlignedHva;
         size_t sizeToPage = info->sizeToPage;
 
-        std::vector<uint64_t> keysToDelete;
-        for (auto it: mOccupiedGpas) {
-            bool overlap =
-                gpa >= it.first &&
-                gpa < it.first + it.second.sizeToPage;
-            if (overlap) {
-                keysToDelete.push_back(it.first);
-            }
-        }
+        AutoLock occupiedGpasLock(mOccupiedGpasLock);
 
-        for (auto key: keysToDelete) {
-            auto existingMemoryInfo =
-                android::base::find(mOccupiedGpas, key);
-            if (existingMemoryInfo) {
-                fprintf(stderr, "%s: Warning: existing mapping at gpa 0x%llx, deleting\n",
-                        __func__,
-                        (unsigned long long)gpa);
-                freeMemoryLocked(
-                    existingMemoryInfo->vk,
-                    existingMemoryInfo->device,
-                    existingMemoryInfo->memory,
-                    nullptr);
-                // fprintf(stderr, "%s: waiting debug\n", __func__);
-                // usleep(1000000);
-                // fprintf(stderr, "%s: done\n", __func__);
-            }
+        if (mOccupiedGpas.find(gpa) != mOccupiedGpas.end()) {
+            emugl::emugl_crash_reporter(
+                    "FATAL: already mapped gpa 0x%llx! ", (unsigned long long)gpa);
         }
 
         get_emugl_vm_operations().mapUserBackedRam(
@@ -2490,7 +2474,33 @@ public:
             sizeToPage,
         };
 
+        if (!mUseOldMemoryCleanupPath) {
+            get_emugl_address_space_device_control_ops().register_deallocation_callback(
+                this, gpa, [](void* thisPtr, uint64_t gpa) {
+                Impl* implPtr = (Impl*)thisPtr;
+                implPtr->unmapMemoryAtGpaIfExists(gpa);
+            });
+        }
+
         return true;
+    }
+
+    // Only call this from the address space device deallocation operation's
+    // context, or it's possible that the guest/host view of which gpa's are
+    // occupied goes out of sync.
+    void unmapMemoryAtGpaIfExists(uint64_t gpa) {
+        AutoLock lock(mOccupiedGpasLock);
+
+        auto existingMemoryInfo =
+            android::base::find(mOccupiedGpas, gpa);
+
+        if (!existingMemoryInfo) return;
+
+        get_emugl_vm_operations().unmapUserBackedRam(
+            existingMemoryInfo->gpa,
+            existingMemoryInfo->sizeToPage);
+
+        mOccupiedGpas.erase(gpa);
     }
 
     VkResult on_vkAllocateMemory(
@@ -2727,18 +2737,19 @@ public:
 #endif
 
         if (info->directMapped) {
-            if (mLogging) {
-                fprintf(stderr, "%s: unmap: %p, [0x%llx 0x%llx]\n", __func__,
-                        info->ptr,
-                        (unsigned long long)info->guestPhysAddr,
-                        (unsigned long long)info->guestPhysAddr + info->sizeToPage);
+
+            // if direct mapped, we leave it up to the guest address space driver
+            // to control the unmapping of kvm slot on the host side
+            // in order to avoid situations where
+            //
+            // 1. we try to unmap here and deadlock
+            //
+            // 2. unmapping at the wrong time (possibility of a parallel call
+            // to unmap vs. address space allocate and mapMemory leading to
+            // mapping the same gpa twice)
+            if (mUseOldMemoryCleanupPath) {
+                unmapMemoryAtGpaIfExists(info->guestPhysAddr);
             }
-
-            get_emugl_vm_operations().unmapUserBackedRam(
-                    info->guestPhysAddr,
-                    info->sizeToPage);
-
-            mOccupiedGpas.erase(info->guestPhysAddr);
         }
 
         if (info->virtioGpuMapped) {
@@ -2756,6 +2767,8 @@ public:
         }
 
         vk->vkFreeMemory(device, memory, pAllocator);
+
+        mMapInfo.erase(memory);
     }
 
     void on_vkFreeMemory(
@@ -2770,8 +2783,6 @@ public:
         AutoLock lock(mLock);
 
         freeMemoryLocked(vk, device, memory, pAllocator);
-
-        mMapInfo.erase(memory);
     }
 
     VkResult on_vkMapMemory(
@@ -2879,6 +2890,17 @@ public:
 
     bool hasInstanceExtension(VkInstance instance, const std::string& name) {
         auto info = android::base::find(mInstanceInfo, instance);
+        if (!info) return false;
+
+        for (const auto& enabledName : info->enabledExtensionNames) {
+            if (name == enabledName) return true;
+        }
+
+        return false;
+    }
+
+    bool hasDeviceExtension(VkDevice device, const std::string& name) {
+        auto info = android::base::find(mDeviceInfo, device);
         if (!info) return false;
 
         for (const auto& enabledName : info->enabledExtensionNames) {
@@ -3475,6 +3497,43 @@ public:
         mCvWaitSequenceNumber.signal();
     }
 
+    void hostSyncQueue(
+        const char* tag,
+        VkQueue boxed_queue,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber) {
+
+        auto nextDeadline = []() {
+            return System::get()->getUnixTimeUs() + 10000; // 10 ms
+        };
+
+        auto timeoutDeadline = System::get()->getUnixTimeUs() + 5000000; // 5 s
+
+        auto queue = unbox_VkQueue(boxed_queue);
+
+        AutoLock lock(mLock);
+        auto& info = mQueueInfo[queue];
+
+        bool doWait = false;
+
+        if (needHostSync) {
+            while ((sequenceNumber - info.sequenceNumber) != 1) {
+                auto waitUntilUs = nextDeadline();
+                mCvWaitSequenceNumber.timedWait(
+                    &mLock, waitUntilUs);
+                doWait = true;
+
+                if (timeoutDeadline < System::get()->getUnixTimeUs()) {
+                    fprintf(stderr, "%s: warning: command buffer sync timed out! curr %u info %u\n", __func__, sequenceNumber, info.sequenceNumber);
+                    break;
+                }
+            }
+        }
+
+        info.sequenceNumber = sequenceNumber;
+        mCvWaitSequenceNumber.signal();
+    }
+
     VkResult on_vkCreateImageWithRequirementsGOOGLE(
         android::base::Pool* pool,
         VkDevice boxed_device,
@@ -3659,6 +3718,17 @@ public:
         *pRenderPass = new_boxed_non_dispatchable_VkRenderPass(*pRenderPass);
 
         return res;
+    }
+
+    void on_vkQueueBindSparseAsyncGOOGLE(
+        android::base::Pool* pool,
+        VkQueue boxed_queue,
+        uint32_t bindInfoCount,
+        const VkBindSparseInfo* pBindInfo, VkFence fence) {
+        auto queue = unbox_VkQueue(boxed_queue);
+        auto vk = dispatch_VkQueue(boxed_queue);
+        (void)pool;
+        vk->vkQueueBindSparse(queue, bindInfoCount, pBindInfo, fence);
     }
 
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
@@ -3928,22 +3998,23 @@ private:
         return false;
     }
 
-    static std::vector<char> loadShaderSource(const char* filename) {
-        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+    static SpvFileEntry loadDecompressionShaderSource(const char* filename) {
+        size_t numDecompressionShaderFileEntries = arraySize(sDecompressionShaderFileEntries);
 
-        if (!file.is_open()) {
-            fprintf(stderr, "WARNING: shader source open failed! %s\n",
-                    filename);
-            return {};
+        for (size_t i = 0; i < numDecompressionShaderFileEntries; ++i) {
+            if (!strcmp(filename, sDecompressionShaderFileEntries[i].name)) {
+                return sDecompressionShaderFileEntries[i];
+            }
         }
-        size_t fileSize = (size_t)file.tellg();
-        std::vector<char> buffer(fileSize);
-        file.seekg(0);
-        file.read(buffer.data(), fileSize);
-        file.close();
 
-        return buffer;
+        SpvFileEntry invalid = {
+            filename, nullptr, 0,
+        };
+        fprintf(stderr, "WARNING: shader source open failed! %s\n",
+                filename);
+        return invalid;
     }
+
     struct CompressedImageInfo {
         bool isCompressed = false;
         bool isEtc2 = false;
@@ -4156,25 +4227,20 @@ private:
                 shaderSrcFileName += "2DArray.spv";
             }
 
-            std::string fullPath =
-                pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
-                        "shaders", shaderSrcFileName);
-            std::vector<char> shaderSource = loadShaderSource(fullPath.c_str());
-            if (shaderSource.empty()) {
-                fullPath =
-                    pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
-                            "shaders", shaderSrcFileName);
-                shaderSource = loadShaderSource(fullPath.c_str());
-                if (shaderSource.empty()) {
-                    return VK_ERROR_OUT_OF_HOST_MEMORY;
-                }
+            SpvFileEntry shaderSource = VkDecoderGlobalState::Impl::loadDecompressionShaderSource(
+                    shaderSrcFileName.c_str());
+
+            if (!shaderSource.size)  {
+                return VK_ERROR_OUT_OF_HOST_MEMORY;
             }
+
             VkShaderModuleCreateInfo shaderInfo = {};
             shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-            shaderInfo.codeSize = shaderSource.size();
-            // std::vector aligns the pointer for us, so it is safe to cast
+            shaderInfo.codeSize = shaderSource.size;
+            // DecompressionShaders.h declares everything as aligned to 4 bytes,
+            // so it is safe to cast
             shaderInfo.pCode =
-                reinterpret_cast<const uint32_t*>(shaderSource.data());
+                reinterpret_cast<const uint32_t*>(shaderSource.base);
             _RETURN_ON_FAILURE(vk->vkCreateShaderModule(
                         device, &shaderInfo, nullptr, &decompShader));
 
@@ -4955,17 +5021,20 @@ private:
             // https://bugs.chromium.org/p/chromium/issues/detail?id=1074600
             // it's important to idle the device before destroying it!
             devicesToDestroyDispatches[i]->vkDeviceWaitIdle(devicesToDestroy[i]);
+            std::vector<VkDeviceMemory> toDestroy;
+
             auto it = mMapInfo.begin();
             while (it != mMapInfo.end()) {
                 if (it->second.device == devicesToDestroy[i]) {
-                    auto mem = it->first;
-                    freeMemoryLocked(devicesToDestroyDispatches[i],
-                            devicesToDestroy[i],
-                            mem, nullptr);
-                    it = mMapInfo.erase(it);
-                } else {
-                    ++it;
+                    toDestroy.push_back(it->first);
                 }
+                ++it;
+            }
+
+            for (auto mem: toDestroy) {
+                freeMemoryLocked(devicesToDestroyDispatches[i],
+                        devicesToDestroy[i],
+                        mem, nullptr);
             }
         }
 
@@ -5160,6 +5229,7 @@ private:
     bool mSnapshotsEnabled = false;
     bool mVkCleanupEnabled = true;
     bool mLogging = false;
+    bool mUseOldMemoryCleanupPath = false;
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
@@ -5198,6 +5268,7 @@ private:
 
     struct DeviceInfo {
         std::unordered_map<uint32_t, std::vector<VkQueue>> queues;
+        std::vector<std::string> enabledExtensionNames;
         bool emulateTextureEtc2 = false;
         bool emulateTextureAstc = false;
         VkPhysicalDevice physicalDevice;
@@ -5259,6 +5330,7 @@ private:
         VkDevice device;
         uint32_t queueFamilyIndex;
         VkQueue boxed = nullptr;
+        uint32_t sequenceNumber = 0;
     };
 
     struct BufferInfo {
@@ -5486,16 +5558,6 @@ private:
     std::unordered_map<VkBuffer, BufferInfo> mBufferInfo;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
-    // Back-reference to the VkDeviceMemory that is occupying a particular
-    // guest physical address
-    struct OccupiedGpaInfo {
-        VulkanDispatch* vk;
-        VkDevice device;
-        VkDeviceMemory memory;
-        uint64_t gpa;
-        size_t sizeToPage;
-    };
-    std::unordered_map<uint64_t, OccupiedGpaInfo> mOccupiedGpas;
 
     std::unordered_map<VkSemaphore, SemaphoreInfo> mSemaphoreInfo;
 
@@ -5523,6 +5585,18 @@ private:
 
     std::vector<uint64_t> mCreatedHandlesForSnapshotLoad;
     size_t mCreatedHandlesForSnapshotLoadIndex = 0;
+
+    Lock mOccupiedGpasLock;
+    // Back-reference to the VkDeviceMemory that is occupying a particular
+    // guest physical address
+    struct OccupiedGpaInfo {
+        VulkanDispatch* vk;
+        VkDevice device;
+        VkDeviceMemory memory;
+        uint64_t gpa;
+        size_t sizeToPage;
+    };
+    std::unordered_map<uint64_t, OccupiedGpaInfo> mOccupiedGpas;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -6436,6 +6510,37 @@ VkResult VkDecoderGlobalState::on_vkCreateRenderPass(
         VkRenderPass* pRenderPass) {
     return mImpl->on_vkCreateRenderPass(pool, boxed_device, pCreateInfo,
                                         pAllocator, pRenderPass);
+}
+
+void VkDecoderGlobalState::on_vkQueueHostSyncGOOGLE(
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t needHostSync,
+    uint32_t sequenceNumber) {
+    mImpl->hostSyncQueue("hostSyncQueue", queue, needHostSync, sequenceNumber);
+}
+
+void VkDecoderGlobalState::on_vkQueueSubmitAsyncGOOGLE(
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t submitCount,
+    const VkSubmitInfo* pSubmits,
+    VkFence fence) {
+    mImpl->on_vkQueueSubmit(pool, queue, submitCount, pSubmits, fence);
+}
+
+void VkDecoderGlobalState::on_vkQueueWaitIdleAsyncGOOGLE(
+    android::base::Pool* pool,
+    VkQueue queue) {
+    mImpl->on_vkQueueWaitIdle(pool, queue);
+}
+
+void VkDecoderGlobalState::on_vkQueueBindSparseAsyncGOOGLE(
+    android::base::Pool* pool,
+    VkQueue queue,
+    uint32_t bindInfoCount,
+    const VkBindSparseInfo* pBindInfo, VkFence fence) {
+    mImpl->on_vkQueueBindSparseAsyncGOOGLE(pool, queue, bindInfoCount, pBindInfo, fence);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(

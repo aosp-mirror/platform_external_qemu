@@ -1153,6 +1153,7 @@ TEST(PhysicalModel, FoldableInitialize) {
     android_hw->hw_sensor_hinge = true;
     android_hw->hw_sensor_hinge_count = 2;
     android_hw->hw_sensor_hinge_type = 0;
+    android_hw->hw_sensor_hinge_sub_type = 1;
     android_hw->hw_sensor_hinge_ranges = (char*)"0- 360, 0-180";
     android_hw->hw_sensor_hinge_defaults = (char*)"180,90";
     android_hw->hw_sensor_hinge_areas = (char*)"0-600-1260-10, 0-1200-1260-10";
@@ -1168,6 +1169,7 @@ TEST(PhysicalModel, FoldableInitialize) {
     EXPECT_EQ(90, ret.currentHingeDegrees[1]);
     EXPECT_EQ(2, ret.config.numHinges);
     EXPECT_EQ(ANDROID_FOLDABLE_HORIZONTAL_SPLIT, ret.config.hingesType);
+    EXPECT_EQ(ANDROID_FOLDABLE_HINGE_HINGE, ret.config.hingesSubType);
     EXPECT_EQ(0, ret.config.hingeParams[0].displayId);
     EXPECT_EQ(0, ret.config.hingeParams[0].x);
     EXPECT_EQ(600, ret.config.hingeParams[0].y);

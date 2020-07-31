@@ -294,14 +294,16 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             }
 
             // Foldable hinge area and posture update
-            if (android_hw->hw_sensor_hinge) {
+            if (android_foldable_hinge_configured()) {
                 FoldableState state;
                 if (!android_foldable_get_state(&state)) {
                     adbInterface->enqueueCommand({ "shell", "settings", "put",
                                                    "global", "device_posture",
                                                    std::to_string((int)state.currentPosture).c_str() });
                     char hingeArea[128];
-                    snprintf(hingeArea, 128, "hinge-[%d,%d,%d,%d]", state.config.hingeParams[0].x,
+                    snprintf(hingeArea, 128, "%s-[%d,%d,%d,%d]",
+                             (state.config.hingesSubType == ANDROID_FOLDABLE_HINGE_FOLD) ? "fold" : "hinge",
+                             state.config.hingeParams[0].x,
                              state.config.hingeParams[0].y,
                              state.config.hingeParams[0].x + state.config.hingeParams[0].width,
                              state.config.hingeParams[0].y + state.config.hingeParams[0].height);

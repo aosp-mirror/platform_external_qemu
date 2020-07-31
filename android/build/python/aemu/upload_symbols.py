@@ -17,8 +17,14 @@
 
 import json
 import os
+import sys
 import time
-import urllib.request, urllib.parse, urllib.error
+
+if sys.version_info[0] == 2:
+  from urllib import quote
+else:
+  from urllib.parse import quote
+  import urllib.request, urllib.error
 
 from absl import app, flags, logging
 
@@ -30,7 +36,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string(
     "environment",
     "prod",
-    "Which symbol server endpoint to use, cemuan be staging or prod",
+    "Which symbol server endpoint to use, can be staging or prod",
 )
 flags.DEFINE_string(
     "api_key",
@@ -142,7 +148,7 @@ class SymbolFileServer(object):
         if resp.status_code > 399:
             # Make sure we don't leak secret keys by accident.
             if not self.use_classic_api():
-                resp.url = resp.url.replace(urllib.parse.quote(self.api_key), "XX-HIDDEN-XX")
+                resp.url = resp.url.replace(quote(self.api_key), "XX-HIDDEN-XX")
             logging.error(
                 'Url: %s, Status: %s, response: "%s", in: %s',
                 resp.url,
@@ -241,6 +247,9 @@ def main(args):
         )
     else:
         print("Symbol already available, skipping upload.")
+
+    # api key -> symbol file should have been made available.
+    sys.exit(0 if not api_key or server.is_available(FLAGS.symbol_file) else 1)
 
 
 def launch():

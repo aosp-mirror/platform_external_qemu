@@ -29,16 +29,18 @@ _EMPTY_ = empty_pb2.Empty()
 class SnapshotService(object):
     """A SnapshotService can be used to manipulate snapshots in the emulator."""
 
-    def __init__(self, port, logger=logging.getLogger()):
+    def __init__(self, port=None, snapshot_service=None, logger=logging.getLogger()):
         """Connect to the emulator on the given port, and log on the given logger."""
-        if port:
-            self.stub = (
+        if port and not snapshot_service:
+            snapshot_service = (
                 EmulatorDiscovery()
                 .find_emulator("grpc.port", port)
                 .get_snapshot_service()
             )
-        else:
-            self.stub = get_default_emulator().get_snapshot_service()
+        if not snapshot_service:
+            snapshot_service = get_default_emulator().get_snapshot_service()
+
+        self.stub = snapshot_service
         self.logger = logger
 
     def _exec_unary_grpc(self, method, req):
@@ -49,7 +51,7 @@ class SnapshotService(object):
         self.logger.debug("Executing %s(%s)", method, req)
         method_to_call = getattr(self.stub, method)
         try:
-            msg = method_to_call(req, metadata=self.metadata)
+            msg = method_to_call(req)
             self.logger.debug("Response %s", msg)
             if not msg.success:
                 self.logger.error("Failed to %s snapshot: %s", method, msg.err)

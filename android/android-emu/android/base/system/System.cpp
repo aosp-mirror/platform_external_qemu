@@ -271,6 +271,7 @@ bool parseBooleanValue(const char *value, bool def) {
 class HostSystem : public System {
 public:
     HostSystem() : mProgramDir(), mHomeDir(), mAppDataDir() {
+        ::atexit(HostSystem::atexit_HostSystem);
         configureHost();
     }
 
@@ -1219,6 +1220,17 @@ public:
     #endif
     }
 
+    void cleanupWaitingPids() const override {
+        // Only seeing this type of hang-on-exit for linux/mac.
+#ifndef _WIN32
+        std::lock_guard<std::mutex> lock(mMutex);
+        for (auto pid : mWaitingPids) {
+            LOG(VERBOSE) << "Force killing pid=" << pid;
+            kill(pid, SIGKILL);
+        }
+#endif
+    }
+
     Optional<std::string> runCommandWithResult(
             const std::vector<std::string>& commandLine,
             System::Duration timeoutMs = kInfinite,
@@ -1504,7 +1516,16 @@ public:
         if (timeoutMs == kInfinite) {
             // Let's just wait forever and hope that the child process
             // exits.
+            {
+                std::lock_guard<std::mutex> lock(mMutex);
+                mWaitingPids.insert(pid);
+            }
             HANDLE_EINTR(waitpid(pid, &exitCode, 0));
+            {
+                std::lock_guard<std::mutex> lock(mMutex);
+                mWaitingPids.erase(pid);
+            }
+
             if (outExitCode) {
                 *outExitCode = WEXITSTATUS(exitCode);
             }
@@ -1514,7 +1535,15 @@ public:
         auto startTime = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::milliseconds::zero();
         while (elapsed.count() < timeoutMs) {
+            {
+                std::lock_guard<std::mutex> lock(mMutex);
+                mWaitingPids.insert(pid);
+            }
             pid_t waitPid = HANDLE_EINTR(waitpid(pid, &exitCode, WNOHANG));
+            {
+                std::lock_guard<std::mutex> lock(mMutex);
+                mWaitingPids.erase(pid);
+            }
             if (waitPid < 0) {
                 auto local_errno = errno;
                 LOG(VERBOSE) << "Error running command " << cmd
@@ -1704,6 +1733,11 @@ public:
 #endif  // !_WIN32
 
 private:
+    static void atexit_HostSystem();
+
+    mutable std::mutex mMutex;
+    std::unordered_set<int> mWaitingPids;
+
     mutable std::string mProgramDir;
     mutable std::string mLauncherDir;
     mutable std::string mHomeDir;
@@ -1712,6 +1746,13 @@ private:
 
 LazyInstance<HostSystem> sHostSystem = LAZY_INSTANCE_INIT;
 System* sSystemForTesting = NULL;
+
+// static
+void HostSystem::atexit_HostSystem() {
+    if (sHostSystem.hasInstance()) {
+        hostSystem()->cleanupWaitingPids();
+    }
+}
 
 #ifdef _WIN32
 // Return |path| as a Unicode string, while discarding trailing separators.

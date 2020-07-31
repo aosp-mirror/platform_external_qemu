@@ -685,6 +685,28 @@ public:
                                    const VkRenderPassCreateInfo* pCreateInfo,
                                    const VkAllocationCallbacks* pAllocator,
                                    VkRenderPass* pRenderPass);
+
+    // VK_GOOGLE_async_queue_submit
+    void on_vkQueueHostSyncGOOGLE(
+        android::base::Pool* pool,
+        VkQueue queue,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber);
+    void on_vkQueueSubmitAsyncGOOGLE(
+        android::base::Pool* pool,
+        VkQueue queue,
+        uint32_t submitCount,
+        const VkSubmitInfo* pSubmits,
+        VkFence fence);
+    void on_vkQueueWaitIdleAsyncGOOGLE(
+        android::base::Pool* pool,
+        VkQueue queue);
+    void on_vkQueueBindSparseAsyncGOOGLE(
+        android::base::Pool* pool,
+        VkQueue queue,
+        uint32_t bindInfoCount,
+        const VkBindSparseInfo* pBindInfo, VkFence fence);
+
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,

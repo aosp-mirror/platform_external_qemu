@@ -48,6 +48,7 @@ public:
                         CanReceive canReceive,
                         NICConf* conf,
                         OnFrameSentCallback onFrameSentCallback = {});
+    ~VirtioWifiForwarder();
     bool init();
     int forwardFrame(android::base::IOVector iov, bool toRemoteVM = false);
     void stop();

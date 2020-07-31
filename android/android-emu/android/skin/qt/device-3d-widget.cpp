@@ -59,7 +59,7 @@ static glm::vec3 clampPosition(glm::vec3 position) {
 static constexpr int kAnimationIntervalMs = 33;
 
 Device3DWidget::Device3DWidget(QWidget* parent)
-    : GLWidget(parent), mUseAbstractDevice(android_hw->hw_sensor_hinge) {
+    : GLWidget(parent), mUseAbstractDevice(android_foldable_hinge_configured()) {
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
 
@@ -382,9 +382,10 @@ bool Device3DWidget::initAbstractDeviceModel() {
                     r, t, 0.0, 0.0, 0.0, +1.0, ur, ut,
             };
             attribBack = {
-                    l,   b,    -d, 0.0, 0.0, -1.0, ul, ub,  // front
-                    r,   b,    -d, 0.0, 0.0, -1.0, ur, ub,  l,   t,    -d, 0.0,
-                    0.0, -1.0, ul, ut,  r,   t,    -d, 0.0, 0.0, -1.0, ur, ut,
+                    l, b, -d, 0.0, 0.0, -1.0, ul, ut,   // back
+                    r, b, -d, 0.0, 0.0, -1.0, ur, ut,
+                    l, t, -d, 0.0, 0.0, -1.0, ul, ub,
+                    r, t, -d, 0.0, 0.0, -1.0, ur, ub,
             };
         } else {
             // rotate 90 degree for vertical split texture sampling
@@ -395,9 +396,10 @@ bool Device3DWidget::initAbstractDeviceModel() {
                     r, t, 0.0, 0.0, 0.0, +1.0, ul, ut,
             };
             attribBack = {
-                    l,   b,    -d, 0.0, 0.0, -1.0, ur, ub,  // front
-                    r,   b,    -d, 0.0, 0.0, -1.0, ur, ut,  l,   t,    -d, 0.0,
-                    0.0, -1.0, ul, ub,  r,   t,    -d, 0.0, 0.0, -1.0, ul, ut,
+                    l, b, -d, 0.0, 0.0, -1.0, ul, ub,  // back
+                    r, b, -d, 0.0, 0.0, -1.0, ul, ut,
+                    l, t, -d, 0.0, 0.0, -1.0, ur, ub,
+                    r, t, -d, 0.0, 0.0, -1.0, ur, ut,
             };
         }
         std::vector<float> attribCommon =
@@ -888,9 +890,14 @@ void Device3DWidget::repaintGL() {
                                        &normal_transform[0][0]);
             mGLES2->glUniformMatrix4fv(mvp_matrix_uniform, 1, GL_FALSE,
                                        &model_view_projection[0][0]);
-            if (posture == POSTURE_CLOSED) {
-                mGLES2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
-                                       (void*)((i * 36 + 6) * sizeof(GLuint)));
+            if (ToolWindow::isFoldableConfigured()) {
+                if (posture == POSTURE_CLOSED) {
+                    mGLES2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
+                                           (void*)((i * 36 + 6) * sizeof(GLuint)));
+                } else {
+                    mGLES2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
+                                           (void*)(i * 36 * sizeof(GLuint)));
+                }
             } else {
                 mGLES2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
                                        (void*)(i * 36 * sizeof(GLuint)));

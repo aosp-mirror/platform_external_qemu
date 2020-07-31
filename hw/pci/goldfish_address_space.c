@@ -495,6 +495,12 @@ static uint32_t address_space_deallocate_block(struct address_space_state *state
     struct address_space_registers *regs = &state->registers;
     uint64_t offset = merge_u64(regs->offset_low, regs->offset_high);
 
+    uint64_t physStart = goldfish_address_space_get_phys_addr_start_locked();
+
+    if (physStart) {
+        qemu_get_address_space_device_control_ops()->run_deallocation_callbacks(
+                physStart + offset);
+    }
     return address_space_allocator_deallocate(&state->allocator, offset);
 }
 
@@ -1040,13 +1046,20 @@ uint64_t goldfish_address_space_get_phys_addr_start_locked(void)
 {
     uint64_t res;
 
+    if (!s_current_state) return 0;
+
     res = (uint64_t)s_current_state->registers.phys_start_low;
     res |= ((uint64_t)s_current_state->registers.phys_start_high) << 32;
 
-    if (!res)
-    {
-        qemu_abort("FATAL: Tried to ask for phys addr start without it being initialized!\n");
-    }
+    // BUG: 162435702, 162264185
+    // It's not fatal; just treat 0 as a invalid phys address start.
+    // Q system images might not have this.
+    // This depends on the guest kernel.
+    //
+    // if (!res)
+    // {
+    //     qemu_abort("FATAL: Tried to ask for phys addr start without it being initialized!\n");
+    // }
 
     return res;
 }

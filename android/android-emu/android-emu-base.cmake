@@ -147,6 +147,9 @@ if(OPTION_TCMALLOC)
     PUBLIC TCMALLOC::TCMALLOC LIBUNWIND::LIBUNWIND -ldl Threads::Threads -lrt)
 else()
   android_target_link_libraries(
+    android-emu-base linux-aarch64 PUBLIC LIBUNWIND::LIBUNWIND -ldl
+                                         Threads::Threads -lrt)
+  android_target_link_libraries(
     android-emu-base linux-x86_64 PUBLIC LIBUNWIND::LIBUNWIND -ldl
                                          Threads::Threads -lrt)
 endif()
