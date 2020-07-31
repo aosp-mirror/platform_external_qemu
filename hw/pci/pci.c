@@ -1307,6 +1307,13 @@ static void pci_update_mappings(PCIDevice *d)
         if (new_addr == r->addr)
             continue;
 
+        if (!strcmp("virtio-gpu-host-coherent", r->address_space->name)) {
+            fprintf(stderr, "%s: processing host coherent bar (address space)\n", __func__);
+        }
+        if (!strcmp("virtio-gpu-host-coherent", r->memory->name)) {
+            fprintf(stderr, "%s: processing host coherent bar (memory)\n", __func__);
+        }
+
         /* now do the real mapping */
         if (r->addr != PCI_BAR_UNMAPPED) {
             trace_pci_update_mappings_del(d, pci_dev_bus_num(d),

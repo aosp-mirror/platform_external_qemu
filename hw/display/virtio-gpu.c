@@ -208,6 +208,7 @@ static uint64_t virtio_gpu_get_features(VirtIODevice *vdev, uint64_t features,
 
     if (virtio_gpu_virgl_enabled(g->conf)) {
         features |= (1 << VIRTIO_GPU_F_VIRGL);
+        features |= (1 << VIRTIO_GPU_F_RESOURCE_BLOB);
     }
     return features;
 }
