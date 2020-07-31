@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ec3275db_b8b0912f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-07-31T16:23:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d4eb3f1_32b107aa",
+      "revId": "4a4ffaa68ff50eb2118e2108402161bfbf5c8bcf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eeebdf77_5bf8e26d",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2020-07-31T08:39:14Z",
       "side": 1,
       "message": "for (auto posture: mIndexToPosture)",
+      "revId": "4a4ffaa68ff50eb2118e2108402161bfbf5c8bcf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9483638_6ef66016",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-07-31T16:23:59Z",
+      "side": 1,
+      "message": "This index i is used to set the drop down menu\u0027s index. So..., choose this c style loop.",
+      "parentUuid": "eeebdf77_5bf8e26d",
       "revId": "4a4ffaa68ff50eb2118e2108402161bfbf5c8bcf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
