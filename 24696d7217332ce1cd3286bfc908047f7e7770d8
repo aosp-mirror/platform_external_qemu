@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd62a738_0d58fddf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-07-31T16:44:57Z",
+      "side": 1,
+      "message": "Great. We are using an older version of xcode cross compile toolchain with limited C++17 support.",
+      "revId": "24696d7217332ce1cd3286bfc908047f7e7770d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
