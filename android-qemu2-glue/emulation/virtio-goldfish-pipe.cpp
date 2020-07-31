@@ -1542,6 +1542,19 @@ VG_EXPORT int pipe_virgl_renderer_resource_get_info(
     return sRenderer->getResourceInfo(res_handle, info);
 }
 
+VG_EXPORT int pipe_virgl_renderer_resource_create_v2(uint32_t res_handle, uint64_t hvaId) {
+    sRenderer->createResourceV2(res_handle, hvaId);
+    return 0;
+}
+
+VG_EXPORT int pipe_virgl_renderer_resource_map(uint32_t res_handle, void** hvaOut, uint64_t* sizeOut) {
+    return sRenderer->resourceMap(res_handle, hvaOut, sizeOut);
+}
+
+VG_EXPORT int pipe_virgl_renderer_resource_unmap(uint32_t res_handle) {
+    return sRenderer->resourceUnmap(res_handle);
+}
+
 VG_EXPORT void stream_renderer_flush_resource_and_readback(
     uint32_t res_handle, uint32_t x, uint32_t y, uint32_t width, uint32_t height,
     void* pixels, uint32_t max_bytes) {
