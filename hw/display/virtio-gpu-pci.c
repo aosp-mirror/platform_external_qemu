@@ -18,6 +18,7 @@
 #include "hw/virtio/virtio-bus.h"
 #include "hw/virtio/virtio-pci.h"
 #include "hw/virtio/virtio-gpu.h"
+#include "standard-headers/linux/virtio_pci.h"
 
 static Property virtio_gpu_pci_properties[] = {
     DEFINE_VIRTIO_GPU_PCI_PROPERTIES(VirtIOPCIProxy),
@@ -27,15 +28,76 @@ static Property virtio_gpu_pci_properties[] = {
 static void virtio_gpu_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
 {
     VirtIOGPUPCI *vgpu = VIRTIO_GPU_PCI(vpci_dev);
+    fprintf(stderr, "%s: proxy: %p\n", __func__, vpci_dev);
     VirtIOGPU *g = &vgpu->vdev;
     DeviceState *vdev = DEVICE(&vgpu->vdev);
     int i;
     Error *local_error = NULL;
 
+    // Cool way to lay things out that should not affect stuff and is compat with the current android11-5.4 kernel:
+    // | 0 1 : modern | 2 msix | 4 5 hostshm |
+    //
+    // This is similar to the crosvm virtio gpu pci bar layout, same except maybe for different msix bar
+    vpci_dev->modern_mem_bar_idx = 0;
+    vpci_dev->msix_bar_idx = 2; 
+    vpci_dev->hostshm_mem_bar_idx = 4;
+
+    memory_region_init(
+            &g->host_coherent_memory, OBJECT(g),
+            "virtio-gpu-host-coherent", 1ULL << 32ULL);
+
+    struct virtio_pci_shm_cap shm_cap;
+    uint32_t mask32 = ~0;
+
+    shm_cap.cap.cap_len = sizeof(shm_cap);
+    shm_cap.cap.cfg_type = 8; // PciCapabilityType::SharedMemoryConfig
+    shm_cap.cap.bar = vpci_dev->hostshm_mem_bar_idx;
+
+    shm_cap.cap.length = cpu_to_le32(mask32 & (g->host_coherent_memory.size));
+    shm_cap.length_hi = cpu_to_le32(mask32 & (g->host_coherent_memory.size >> 32ULL));
+
+    shm_cap.cap.offset = mask32 & 0;
+    shm_cap.offset_hi = mask32 & 0;
+
+    shm_cap.id = 1;
+
+    fprintf(stderr, "%s: memory region ram addr: 0x%llx\n", __func__,
+            (unsigned long long)(memory_region_get_ram_addr(&g->host_coherent_memory)));
+
+    fprintf(stderr, "%s: adding shm mem cap. type 0x%x bar %d off 0x%llx length 0x%llx\n", __func__,
+            (uint32_t)(shm_cap.cap.cfg_type),
+            (int)(shm_cap.cap.bar),
+            (unsigned long long)(shm_cap.cap.offset),
+            (unsigned long long)(shm_cap.cap.length));
+
+    {
+
+
+        fprintf(stderr, "%s: memory region ram addr: 0x%llx\n", __func__,
+                (unsigned long long)(memory_region_get_ram_addr(&g->host_coherent_memory)));
+
+
+        pci_register_bar(&vpci_dev->pci_dev, vpci_dev->hostshm_mem_bar_idx,
+                PCI_BASE_ADDRESS_SPACE_MEMORY |
+                PCI_BASE_ADDRESS_MEM_TYPE_64, &g->host_coherent_memory);
+        fprintf(stderr, "%s: do hostshm init done\n", __func__);
+        fprintf(stderr, "%s: memory region ram addr: 0x%llx\n", __func__,
+                (unsigned long long)(memory_region_get_ram_addr(&g->host_coherent_memory)));
+
+        int offset = pci_add_capability(&vpci_dev->pci_dev, PCI_CAP_ID_VNDR, 0, shm_cap.cap.cap_len, &error_abort);
+        fprintf(stderr, "%s: offset of host shm: %d\n", __func__, offset);
+        memcpy(vpci_dev->pci_dev.config + offset + PCI_CAP_FLAGS, &shm_cap.cap.cap_len,
+                shm_cap.cap.cap_len - PCI_CAP_FLAGS);
+    }
+
     qdev_set_parent_bus(vdev, BUS(&vpci_dev->bus));
     virtio_pci_force_virtio_1(vpci_dev);
-    object_property_set_bool(OBJECT(vdev), true, "realized", &local_error);
 
+    object_property_set_bool(OBJECT(vdev), true, "realized", &local_error);
+    fprintf(stderr, "%s: proxy: %p (after)\n", __func__, vpci_dev);
+
+    fprintf(stderr, "%s: memory region ram addr: 0x%llx (right after register bar)\n", __func__,
+            (unsigned long long)(memory_region_get_ram_addr(&g->host_coherent_memory)));
     if (local_error) {
         error_propagate(errp, local_error);
         return;

@@ -126,6 +126,13 @@ struct virtio_pci_cap {
 	uint32_t length;		/* Length of the structure, in bytes. */
 };
 
+struct virtio_pci_shm_cap {
+    struct virtio_pci_cap cap;
+    uint32_t offset_hi;             /* Most sig 32 bits of offset */
+    uint32_t length_hi;             /* Most sig 32 bits of length */
+    uint8_t  id;                    /* To distinguish shm chunks */
+};
+
 struct virtio_pci_notify_cap {
 	struct virtio_pci_cap cap;
 	uint32_t notify_off_multiplier;	/* Multiplier for queue_notify_off. */
