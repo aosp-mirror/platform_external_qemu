@@ -161,4 +161,5 @@ private:
     bool mVirtualSceneControlsEngaged = false;
     QElapsedTimer mLastInteractionElapsed;
     enum FoldablePostures mCurrentPosture = POSTURE_UNKNOWN;
+    std::vector<enum FoldablePostures> mIndexToPosture;
 };
