@@ -1307,8 +1307,20 @@ static void pci_update_mappings(PCIDevice *d)
         if (new_addr == r->addr)
             continue;
 
+        bool trace = false;
+
+        if (!strcmp("virtio-gpu-host-coherent", r->address_space->name)) {
+            fprintf(stderr, "%s: processing host coherent bar (address space)\n", __func__);
+            trace= true;
+        }
+        if (!strcmp("virtio-gpu-host-coherent", r->memory->name)) {
+            fprintf(stderr, "%s: processing host coherent bar (memory)\n", __func__);
+            trace= true;
+        }
+
         /* now do the real mapping */
         if (r->addr != PCI_BAR_UNMAPPED) {
+            if (trace) { fprintf(stderr, "%s: delete region\n", __func__); }
             trace_pci_update_mappings_del(d, pci_dev_bus_num(d),
                                           PCI_SLOT(d->devfn),
                                           PCI_FUNC(d->devfn),
@@ -1316,7 +1328,12 @@ static void pci_update_mappings(PCIDevice *d)
             memory_region_del_subregion(r->address_space, r->memory);
         }
         r->addr = new_addr;
+        if (trace && r->addr == PCI_BAR_UNMAPPED) {
+            fprintf(stderr, "%s: oops, new addr is PCI_BAR_UNMAPPED (0x%llx)\n", __func__,
+                    (unsigned long long)(PCI_BAR_UNMAPPED));
+        }
         if (r->addr != PCI_BAR_UNMAPPED) {
+            if (trace) { fprintf(stderr, "%s: add subregion. offset: 0x%llx\n", __func__, (unsigned long long)(r->addr)); }
             trace_pci_update_mappings_add(d, pci_dev_bus_num(d),
                                           PCI_SLOT(d->devfn),
                                           PCI_FUNC(d->devfn),

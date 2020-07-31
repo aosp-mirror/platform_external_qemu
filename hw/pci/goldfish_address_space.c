@@ -765,6 +765,9 @@ static void address_space_pci_realize(PCIDevice *dev, Error **errp) {
                      PCI_BASE_ADDRESS_MEM_TYPE_64,
                      &state->area_mem);
 
+    fprintf(stderr, "%s: memory region ram addr: 0x%llx\n", __func__,
+            (unsigned long long)(memory_region_get_ram_addr(&state->area_mem)));
+
     state->irq = pci_allocate_irq(dev);
 
     qemu_mutex_init(&state->mutex);
