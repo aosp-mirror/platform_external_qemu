@@ -216,6 +216,9 @@ static constexpr android::base::StringView kVirtioGpuNativeSync = "ANDROID_EMU_v
 // Struct defs for VK_KHR_shader_float16_int8
 static constexpr android::base::StringView kVulkanShaderFloat16Int8 = "ANDROID_EMU_vulkan_shader_float16_int8";
 
+// Async queue submit
+static constexpr android::base::StringView kVulkanAsyncQueueSubmit = "ANDROID_EMU_vulkan_async_queue_submit";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -320,6 +323,10 @@ static bool shouldEnableCreateResourcesWithRequirements() {
 static bool shouldEnableVulkanShaderFloat16Int8() {
     return shouldEnableVulkan() &&
         emugl_feature_is_enabled(android::featurecontrol::VulkanShaderFloat16Int8);
+}
+
+static bool shouldEnableAsyncQueueSubmit() {
+    return shouldEnableVulkan();
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
@@ -445,6 +452,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     bool vulkanFreeMemorySyncEnabled =
         shouldEnableVulkan();
     bool vulkanShaderFloat16Int8Enabled = shouldEnableVulkanShaderFloat16Int8();
+    bool vulkanAsyncQueueSubmitEnabled = shouldEnableAsyncQueueSubmit();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -547,6 +555,12 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         glStr += kVulkanShaderFloat16Int8;
         glStr += " ";
     }
+
+    if (vulkanAsyncQueueSubmitEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanAsyncQueueSubmit;
+        glStr += " ";
+    }
+
 
     if (virtioGpuNativeSyncEnabled && name == GL_EXTENSIONS) {
         glStr += kVirtioGpuNativeSync;

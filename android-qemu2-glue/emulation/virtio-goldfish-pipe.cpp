@@ -1292,6 +1292,44 @@ public:
         return entry.hvaSize;
     }
 
+    int resourceMap(uint32_t res_handle, void** hvaOut, uint64_t* sizeOut) {
+        AutoLock lock(mLock);
+        auto it = mResources.find(res_handle);
+        if (it == mResources.end()) {
+            if (hvaOut) *hvaOut = nullptr;
+            if (sizeOut) *sizeOut = 0;
+            return -1;
+        }
+
+        const auto& entry = it->second;
+
+        static const uint64_t kPageSizeforBlob = 4096;
+        static const uint64_t kPageMaskForBlob = ~(0xfff);
+
+        uint64_t alignedHva =
+            entry.hva & kPageMaskForBlob;
+
+        uint64_t alignedSize =
+            kPageSizeforBlob *
+            ((entry.hvaSize + kPageSizeforBlob - 1) / kPageSizeforBlob);
+
+        if (hvaOut) *hvaOut = (void*)(uintptr_t)alignedHva;
+        if (sizeOut) *sizeOut = alignedSize;
+        return 0;
+    }
+
+    int resourceUnmap(uint32_t res_handle) {
+        AutoLock lock(mLock);
+        auto it = mResources.find(res_handle);
+        if (it == mResources.end()) {
+            return -1;
+        }
+
+        // TODO(lfy): Good place to run any registered cleanup callbacks.
+        // No-op for now.
+        return 0;
+    }
+
     void setResourceHvSlot(uint32_t res_handle, uint32_t slot) {
         AutoLock lock(mLock);
         auto it = mResources.find(res_handle);
@@ -1530,6 +1568,15 @@ VG_EXPORT void stream_renderer_resource_set_hv_slot(uint32_t res_handle, uint32_
 VG_EXPORT uint32_t stream_renderer_resource_get_hv_slot(uint32_t res_handle) {
     return sRenderer->getResourceHvSlot(res_handle);
 }
+
+VG_EXPORT int stream_renderer_resource_map(uint32_t res_handle, void** hvaOut, uint64_t* sizeOut) {
+    return sRenderer->resourceMap(res_handle, hvaOut, sizeOut);
+}
+
+VG_EXPORT int stream_renderer_resource_unmap(uint32_t res_handle) {
+    return sRenderer->resourceUnmap(res_handle);
+}
+
 
 #define VIRGLRENDERER_API_PIPE_STRUCT_DEF(api) pipe_##api,
 

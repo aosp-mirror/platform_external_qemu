@@ -468,6 +468,10 @@ static void set_post_callback(struct renderer_display_info* r, post_callback_t f
     android_setPostCallback(func, r, false, 0);
 }
 
+extern "C" VG_EXPORT void gfxstream_backend_teardown() {
+    android_stopOpenglesRenderer(true);
+}
+
 extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes) {
     //TODO: support display > 0
     sGetPixelsFunc(pixels, bytes, 0);

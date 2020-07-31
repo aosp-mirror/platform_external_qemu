@@ -7,7 +7,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     SRC
       ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp
       GfxStreamBackend.cpp
-      multi-display-agent-mock-impl.cpp 
+      multi-display-agent-mock-impl.cpp
       window-agent-mock-impl.cpp)
 
   target_compile_options(gfxstream_backend PRIVATE -fvisibility=hidden)
@@ -31,13 +31,25 @@ if(OPTION_GFXSTREAM_BACKEND)
   android_target_properties(gfxstream_backend darwin-x86_64
       "INSTALL_RPATH>=@loader_path")
 
-  target_link_libraries(
-    gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
-                              OpenglRender)
+  if (NOT LINUX_AARCH64)
+      target_link_libraries(
+          gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
+          OpenglRender)
+  else()
+      target_link_libraries(
+          gfxstream_backend PRIVATE GLIB2::GLIB2 android-emu-shared emugl_base OpenglRender)
+  endif()
 
-  android_target_dependency(gfxstream_backend all ANGLE_DEPENDENCIES)
+
+  if (NOT LINUX_AARCH64)
+    android_target_dependency(gfxstream_backend all ANGLE_DEPENDENCIES)
+  endif()
+
   android_install_shared(gfxstream_backend)
-  android_install_dependency(all ANGLE_DEPENDENCIES)
+
+  if (NOT LINUX_AARCH64)
+    android_install_dependency(all ANGLE_DEPENDENCIES)
+  endif()
 
   if (CROSVM)
     android_crosvm_build(gfxstream_backend)
@@ -47,6 +59,30 @@ if(OPTION_GFXSTREAM_BACKEND)
         "${CMAKE_BINARY_DIR}/crosvm-build-env/release/crosvm")
   endif()
 
+  android_add_test(TARGET gfxstream_unittests SRC gfxstream_unittest.cpp)
+  target_compile_options(gfxstream_unittests PRIVATE -fvisibility=default)
+  target_link_libraries(gfxstream_unittests PUBLIC gfxstream_backend android-emu-base gtest gtest_main)
+  target_include_directories(
+    gfxstream_unittests
+    PRIVATE
+      ${VIRGLRENDERER_INCLUDE_DIR}
+      ${ANDROID_QEMU2_TOP_DIR}/include
+      ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated
+      ${GOLDFISH_EMUGL_DIR}/host/include/libOpenglRender
+      ${GOLDFISH_EMUGL_DIR}/system/include
+      ${ANDROID_EMUGL_DIR}/guest
+      ${ANDROID_EMUGL_DIR}/guest/androidImpl
+      ${ANDROID_EMUGL_DIR}/host/include
+      ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/standalone_common/angle-util
+  )
+
+
+  android_target_properties(
+    gfxstream_unittests darwin-x86_64
+    "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+  android_target_properties(
+    gfxstream_unittests linux-x86_64
+    "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
 endif()
 
 if(NOT WINDOWS AND NOT LINUX_AARCH64)

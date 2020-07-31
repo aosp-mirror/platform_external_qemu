@@ -66,6 +66,8 @@ private:
     VpxPingInfoParser mParser;
     MediaHostRenderer mRenderer;
 
+    int mNumFramesDecoded = 0;
+
     bool mUseGpuTexture = false;
     bool mTrialPeriod = true;
     // at any point of time, only one of the following is valid

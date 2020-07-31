@@ -516,10 +516,16 @@ function(android_add_default_test_properties name)
         "/"
         "\\"
         WIN_PATH
-        "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib"
+        "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib;$ENV{PATH}"
     )
-    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT
-                                              "PATH=${WIN_PATH};$ENV{PATH}")
+    string(
+      REPLACE
+        ";"
+        "\;"
+        WIN_PATH
+        "${WIN_PATH}"
+    )
+    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH}")
   endif()
 endfunction()
 
@@ -897,6 +903,9 @@ endfunction()
 # ANDROID_AARCH The android architecture name STUBS The set of stub sources to
 # use.
 function(android_add_qemu_executable ANDROID_AARCH STUBS)
+  if (WINDOWS_MSVC_X86_64)
+    set(WINDOWS_LAUNCHER emulator-winqt-launcher)
+  endif()
   android_build_qemu_variant(
     INSTALL
     EXE qemu-system-${ANDROID_AARCH}
@@ -913,7 +922,8 @@ function(android_add_qemu_executable ANDROID_AARCH STUBS)
               android-emu
               android-qemu-deps
               android-qemu-deps-headful
-              emulator-libusb)
+              emulator-libusb
+              ${WINDOWS_LAUNCHER})
 endfunction()
 
 # Constructs the qemu headless executable.
@@ -989,6 +999,7 @@ endfunction()
 
 # Uploads the symbols to the breakpad crash server
 function(android_upload_symbols TGT)
+  find_package(PythonInterp)
   if(NOT ANDROID_EXTRACT_SYMBOLS)
     return()
   endif()
@@ -1005,7 +1016,7 @@ function(android_upload_symbols TGT)
                              ERROR_FILE ${LOG})\n
     if (EXISTS ${LOG})
       FILE(READ ${LOG} contents)
-      STRING(STRIP \$\{contents\} contents)
+      STRING(STRIP \"\$\{contents\}\" contents)
     else()
         SET(contents \"No logfile in ${LOG} for ${DEST} was created\")
     endif()

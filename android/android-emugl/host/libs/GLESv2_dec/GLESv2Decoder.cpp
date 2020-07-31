@@ -372,7 +372,10 @@ void GLESv2Decoder::s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offs
     *out_res = GL_TRUE;
 
     if (access & GL_MAP_WRITE_BIT) {
-        if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
+        if (!guest_buffer) {
+            // guest can flush 0 in some cases
+            return;
+        }
         void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
         if (!gpu_ptr) {
             fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
@@ -412,7 +415,10 @@ void GLESv2Decoder::s_glUnmapBufferDMA(void* self, GLenum target, GLintptr offse
     *out_res = GL_TRUE;
 
     if (access & GL_MAP_WRITE_BIT) {
-        if (!paddr) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
+        if (!paddr) {
+            // guest can flush 0 in some cases
+            return;
+        }
         void* guest_buffer = emugl::g_emugl_dma_get_host_addr(paddr);
         void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
         if (!gpu_ptr) {
@@ -475,7 +481,10 @@ void GLESv2Decoder::s_glUnmapBufferDirect(void* self, GLenum target, GLintptr of
 
 void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
+    if (!guest_buffer) {
+        // guest can end up flushing 0 bytes in a lot of cases
+        return;
+    }
     void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
 
     // map failed, no need to copy or unmap

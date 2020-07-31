@@ -85,6 +85,10 @@ public:
     }
 
     void freeBlock(uint32_t handle, uint64_t off) {
+        // mirror hw/pci/goldfish_address_space.c:
+        // first run deallocation callbacks, then update the state
+        mControlOps->run_deallocation_callbacks(kPciStart + off);
+
         AutoLock lock(mLock);
         freeBlockLocked(handle, off);
     }

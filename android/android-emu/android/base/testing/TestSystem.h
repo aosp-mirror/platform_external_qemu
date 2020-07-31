@@ -443,6 +443,8 @@ public:
 
     virtual void configureHost() const override {   }
 
+    virtual void cleanupWaitingPids() const override {   }
+
     System* host() {
         return hostSystem();
     }
