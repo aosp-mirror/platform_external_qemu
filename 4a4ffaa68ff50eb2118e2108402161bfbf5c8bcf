@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "f673cf27_52b1bc63",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-07-31T17:33:06Z",
+      "side": 1,
+      "message": "Thanks, forgot to upload patch.\nNow, done.",
+      "parentUuid": "4d43dcc3_801133ac",
+      "revId": "4a4ffaa68ff50eb2118e2108402161bfbf5c8bcf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "eeebdf77_5bf8e26d",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
         "patchSetId": 2
