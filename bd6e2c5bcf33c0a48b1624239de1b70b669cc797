@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99e7b659_ba083d3d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-31T17:13:42Z",
+      "side": 1,
+      "message": "stoi right here is dangerous, please check the value for errors and that it reports something reasonable",
+      "revId": "bd6e2c5bcf33c0a48b1624239de1b70b669cc797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e505dfe_cb3560da",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 793,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-07-31T17:13:42Z",
+      "side": 1,
+      "message": "also here",
+      "revId": "bd6e2c5bcf33c0a48b1624239de1b70b669cc797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
