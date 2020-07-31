@@ -1150,13 +1150,15 @@ TEST(PhysicalModel, SetVelocityAndPositionWhileRotating) {
 
 TEST(PhysicalModel, FoldableInitialize) {
     TestSystem mTestSystem("/", System::kProgramBitness);
+    android_hw->hw_lcd_width = 1260;
+    android_hw->hw_lcd_height = 2400;
     android_hw->hw_sensor_hinge = true;
     android_hw->hw_sensor_hinge_count = 2;
     android_hw->hw_sensor_hinge_type = 0;
     android_hw->hw_sensor_hinge_sub_type = 1;
     android_hw->hw_sensor_hinge_ranges = (char*)"0- 360, 0-180";
     android_hw->hw_sensor_hinge_defaults = (char*)"180,90";
-    android_hw->hw_sensor_hinge_areas = (char*)"0-600-1260-10, 0-1200-1260-10";
+    android_hw->hw_sensor_hinge_areas = (char*)"25-10, 50-10";
     android_hw->hw_sensor_posture_list = (char*)"1, 2,3 ,  4";
     android_hw->hw_sensor_hinge_angles_posture_definitions = (char*)"0-30&0-15,  30-150 & 15-75,150-330&75-165, 330-360&165-180";
 
