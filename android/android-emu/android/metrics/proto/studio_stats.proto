@@ -1434,7 +1434,9 @@ message EmulatorFeatureFlagState {
     VIRTIO_GPU_NATIVE_SYNC = 63;
     VIRTIO_WIFI = 64;
     VULKAN_SHADER_FLOAT16_INT8 = 65;
-    // Next tag: 66
+    CAR_ROTARY = 66;
+    MODEM_SIMULATOR = 67;
+    // Next tag: 67
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

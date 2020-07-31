@@ -105,11 +105,15 @@ void parseRadioConfigForAdbCommands(AdbCommands& cmds) {
     // read the data/misc/emulator/config/radioconfig.xml file
     // to figure out how to turn on/off meterness
 
-    char* avdPath(path_dirname(android_hw->disk_dataPartition_path));
+    char* sysPath(path_dirname(
+            android_hw->disk_systemPartition_initPath &&
+                            android_hw->disk_systemPartition_initPath[0]
+                    ? android_hw->disk_systemPartition_initPath
+                    : android_hw->disk_systemPartition_path));
     std::string xmlfile = android::base::PathUtils::join(
-            avdPath, "data", "misc", "emulator", "config", "radioconfig.xml");
+            sysPath, "data", "misc", "emulator", "config", "radioconfig.xml");
 
-    AFREE(avdPath);
+    AFREE(sysPath);
 
     if (!path_exists(xmlfile.c_str())) {
         DD("file %s does not exists", xmlfile.c_str());

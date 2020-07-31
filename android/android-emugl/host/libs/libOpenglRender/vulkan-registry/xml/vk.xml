@@ -6391,6 +6391,30 @@ server.
             <param optional="true" externsync="true" devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
             <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
         </command>
+        <command>
+            <proto><type>void</type> <name>vkQueueHostSyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkQueue</type> <name>queue</name></param>
+            <param><type>uint32_t</type> <name>needHostSync</name></param>
+            <param><type>uint32_t</type> <name>sequenceNumber</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkQueueSubmitAsyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkQueue</type> <name>queue</name></param>
+            <param optional="true"><type>uint32_t</type> <name>submitCount</name></param>
+            <param len="submitCount" externsync="pSubmits[].pWaitSemaphores[],pSubmits[].pSignalSemaphores[]">const <type>VkSubmitInfo</type>* <name>pSubmits</name></param>
+            <param optional="true" externsync="true"><type>VkFence</type> <name>fence</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkQueueWaitIdleAsyncGOOGLE</name></proto>
+            <param><type>VkQueue</type> <name>queue</name></param>
+        </command>
+        <command queues="sparse_binding">
+            <proto><type>void</type> <name>vkQueueBindSparseAsyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkQueue</type> <name>queue</name></param>
+            <param optional="true"><type>uint32_t</type> <name>bindInfoCount</name></param>
+            <param len="bindInfoCount" externsync="pBindInfo[].pWaitSemaphores[],pBindInfo[].pSignalSemaphores[],pBindInfo[].pBufferBinds[].buffer,pBindInfo[].pImageOpaqueBinds[].image,pBindInfo[].pImageBinds[].image">const <type>VkBindSparseInfo</type>* <name>pBindInfo</name></param>
+            <param optional="true" externsync="true"><type>VkFence</type> <name>fence</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -9274,6 +9298,17 @@ server.
                 <enum extends="VkStructureType"                           name="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FLOAT16_INT8_FEATURES_KHR" alias="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES"/>
                 <type name="VkPhysicalDeviceShaderFloat16Int8FeaturesKHR"/>
                 <type name="VkPhysicalDeviceFloat16Int8FeaturesKHR"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_async_queue_submit" number="226" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_ASYNC_QUEUE_SUBMIT_SPEC_VERSION"/>
+                <enum value="221"                                           name="VK_GOOGLE_ASYNC_QUEUE_SUBMIT_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_async_queue_submit&quot;"            name="VK_GOOGLE_QUEUE_SUBMIT_EXTENSION_NAME"/>
+                <command name="vkQueueHostSyncGOOGLE"/>
+                <command name="vkQueueSubmitAsyncGOOGLE"/>
+                <command name="vkQueueWaitIdleAsyncGOOGLE"/>
+                <command name="vkQueueBindSparseAsyncGOOGLE"/>
             </require>
         </extension>
     </extensions>

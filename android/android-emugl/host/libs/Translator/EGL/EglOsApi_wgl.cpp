@@ -358,7 +358,7 @@ public:
         }
 
         bool extensionListArbNull = extensionList == nullptr;
-        bool extensionListArbEmpty = !strcmp(extensionList, "");
+        bool extensionListArbEmpty = !extensionListArbNull && !strcmp(extensionList, "");
 
         bool foundExt = false;
         bool extensionListExtNull = false;
@@ -378,7 +378,7 @@ public:
         }
 
         extensionListExtNull = extensionList == nullptr;
-        extensionListExtEmpty = !strcmp(extensionList, "");
+        extensionListExtEmpty = !extensionListExtNull && !strcmp(extensionList, "");
 
         // Both failed, suicide.
         if (!extensionList || !strcmp(extensionList, "")) {

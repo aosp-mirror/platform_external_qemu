@@ -100,7 +100,7 @@ bool MediaCudaVideoHelper::init() {
         return false;
     }
     if (!MediaCudaDriverHelper::initCudaDrivers()) {
-        CUDA_DPRINT("Failed to initVpxContext because driver is not working");
+        CUDA_DPRINT("Failed to initCudaDrivers");
         mIsGood = false;
         mErrorCode = 1;
         s_isCudaDecoderGood = false;
@@ -214,7 +214,6 @@ int MediaCudaVideoHelper::HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat) {
 
     if (!decodecaps.bIsSupported) {
         mIsGood = false;
-        s_isCudaDecoderGood = false;
         mErrorCode = 4;
         CUDA_DPRINT("Codec not supported on this GPU.");
         return nDecodeSurface;
@@ -224,7 +223,6 @@ int MediaCudaVideoHelper::HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat) {
         (pVideoFormat->coded_height > decodecaps.nMaxHeight)) {
         CUDA_DPRINT("Resolution not supported on this GPU");
         mIsGood = false;
-        s_isCudaDecoderGood = false;
         mErrorCode = 5;
         return nDecodeSurface;
     }
@@ -233,7 +231,6 @@ int MediaCudaVideoHelper::HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat) {
         decodecaps.nMaxMBCount) {
         CUDA_DPRINT("MBCount not supported on this GPU");
         mIsGood = false;
-        s_isCudaDecoderGood = false;
         mErrorCode = 6;
         return nDecodeSurface;
     }

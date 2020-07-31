@@ -110,7 +110,10 @@ void EditableSliderWidget::setMinimum(double minimum, bool emit_signal) {
     setValue(mValue,
              emit_signal);  // Force the current value into the new bounds.
     mMinValueLabel.setText(QString::number(mMinimum));
-    mSlider.setMinimum(static_cast<int>(mMinimum * mSteps));
+    {
+        QSignalBlocker blocker(mSlider);
+        mSlider.setMinimum(static_cast<int>(mMinimum * mSteps));
+    }
 }
 
 void EditableSliderWidget::setMaximum(double maximum, bool emit_signal) {
@@ -119,7 +122,10 @@ void EditableSliderWidget::setMaximum(double maximum, bool emit_signal) {
     setValue(mValue,
              emit_signal);  // Force the current value into the new bounds.
     mMaxValueLabel.setText(QString::number(mMaximum));
-    mSlider.setMaximum(static_cast<int>(mMaximum * mSteps));
+    {
+        QSignalBlocker blocker(mSlider);
+        mSlider.setMaximum(static_cast<int>(mMaximum * mSteps));
+    }
 }
 
 void EditableSliderWidget::sliderValueChanged(int new_value) {

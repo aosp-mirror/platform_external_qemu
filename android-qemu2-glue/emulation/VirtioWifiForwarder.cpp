@@ -52,6 +52,7 @@ extern uint16_t android_wifi_server_port;
 /* The port to use for WiFi forwarding as a client */
 extern uint16_t android_wifi_client_port;
 
+extern "C" void eloop_terminate(void);
 }  // extern "C"
 
 namespace android {
@@ -94,6 +95,10 @@ VirtioWifiForwarder::VirtioWifiForwarder(
       mLooper(ThreadLooper::get()),
       mNicConf(conf),
       mRemotePeer(nullptr) {}
+
+VirtioWifiForwarder::~VirtioWifiForwarder() {
+    stop();
+}
 
 bool VirtioWifiForwarder::init() {
     // init socket pair.
@@ -179,8 +184,12 @@ int VirtioWifiForwarder::forwardFrame(IOVector sg, bool toRemoteVM) {
 }
 
 void VirtioWifiForwarder::stop() {
-    qemu_del_nic(mNic);
-    mRemotePeer->stop();
+    eloop_terminate();
+    mNic = nullptr;
+    if (mRemotePeer) {
+        mRemotePeer->stop();
+        mRemotePeer.reset(nullptr);
+    }
 }
 
 VirtioWifiForwarder* VirtioWifiForwarder::getInstance(NetClientState* nc) {

@@ -536,6 +536,12 @@ custom_decodes = {
     # VK_GOOGLE_create_resources_with_requirements
     "vkCreateImageWithRequirementsGOOGLE" : emit_global_state_wrapped_decoding,
     "vkCreateBufferWithRequirementsGOOGLE" : emit_global_state_wrapped_decoding,
+
+    # VK_GOOGLE_async_queue_submit
+    "vkQueueHostSyncGOOGLE" : emit_global_state_wrapped_decoding,
+    "vkQueueSubmitAsyncGOOGLE" : emit_global_state_wrapped_decoding,
+    "vkQueueWaitIdleAsyncGOOGLE" : emit_global_state_wrapped_decoding,
+    "vkQueueBindSparseAsyncGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):

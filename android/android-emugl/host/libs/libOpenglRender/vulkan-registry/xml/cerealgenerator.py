@@ -141,7 +141,6 @@ target_include_directories(OpenglRender_vulkan_cereal
 
         encoderInclude = """
 #include "goldfish_vk_private_defs.h"
-#include <functional>
 #include <memory>
 class IOStream;
 """
