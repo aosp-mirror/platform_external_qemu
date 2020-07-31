@@ -27,19 +27,36 @@ static Property virtio_gpu_pci_properties[] = {
 static void virtio_gpu_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
 {
     VirtIOGPUPCI *vgpu = VIRTIO_GPU_PCI(vpci_dev);
+    fprintf(stderr, "%s: proxy: %p\n", __func__, vpci_dev);
     VirtIOGPU *g = &vgpu->vdev;
     DeviceState *vdev = DEVICE(&vgpu->vdev);
     int i;
     Error *local_error = NULL;
 
+    vpci_dev->modern_mem_bar_idx = 5; // use 4 for the hostshm
+    vpci_dev->hostshm_mem_bar_idx = 4; // kernel wants 4
+
     qdev_set_parent_bus(vdev, BUS(&vpci_dev->bus));
     virtio_pci_force_virtio_1(vpci_dev);
     object_property_set_bool(OBJECT(vdev), true, "realized", &local_error);
+    fprintf(stderr, "%s: proxy: %p (after)\n", __func__, vpci_dev);
 
     if (local_error) {
         error_propagate(errp, local_error);
         return;
     }
+
+    memory_region_init(
+            &vpci_dev->hostshm_bar, OBJECT(vpci_dev),
+            "virtio-pci-hostshm", 1048576);
+
+    g->host_coherent_memory = &(vpci_dev->hostshm_bar);
+
+    pci_register_bar(&vpci_dev->pci_dev, vpci_dev->hostshm_mem_bar_idx,
+            PCI_BASE_ADDRESS_SPACE_MEMORY |
+            PCI_BASE_ADDRESS_MEM_TYPE_64, &vpci_dev->hostshm_bar);
+
+    fprintf(stderr, "%s: do hostshm init done\n", __func__);
 
     for (i = 0; i < g->conf.max_outputs; i++) {
         object_property_set_link(OBJECT(g->scanout[i].con),
