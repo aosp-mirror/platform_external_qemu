@@ -136,20 +136,42 @@ FoldableModel::FoldableModel() {
             std::vector<std::string> angles, area;
             android::base::splitTokens(hingeAngleRangeTokens[i], &angles, "-");
             android::base::splitTokens(hingeAreaTokens[i], &area, "-");
-            if (angles.size() != 2 || area.size() != 4) {
+            if (angles.size() != 2 || area.size() != 2) {
                 E("Incorrect hinge angle range %s or area %s\n",
                   hingeAngleRangeTokens[i].c_str(), hingeAreaTokens[i].c_str());
             } else {
-                defaultConfig.hingeParams[i] = {
-                        .x = std::stoi(area[0]),
-                        .y = std::stoi(area[1]),
-                        .width = std::stoi(area[2]),
-                        .height = std::stoi(area[3]),
-                        .displayId = 0,  // TODO: put 0 for now
-                        .minDegrees = std::stof(angles[0]),
-                        .maxDegrees = std::stof(angles[1]),
-                        .defaultDegrees = std::stof(hingeAngleDefaultTokens[i]),
-                };
+                switch(type) {
+                    case ANDROID_FOLDABLE_HORIZONTAL_SPLIT:
+                        defaultConfig.hingeParams[i] = {
+                            .x = 0,
+                            .y = (int)(std::stof(area[0]) * android_hw->hw_lcd_height / 100.0),
+                            .width = android_hw->hw_lcd_width,
+                            .height = std::stoi(area[1]),
+                            .displayId = 0,  // TODO: put 0 for now
+                            .minDegrees = std::stof(angles[0]),
+                            .maxDegrees = std::stof(angles[1]),
+                            .defaultDegrees = std::stof(hingeAngleDefaultTokens[i]),
+                        };
+                        break;
+                    case ANDROID_FOLDABLE_VERTICAL_SPLIT:
+                        defaultConfig.hingeParams[i] = {
+                            .x = (int)(std::stof(area[0]) * android_hw->hw_lcd_width / 100.0),
+                            .y = 0,
+                            .width = std::stoi(area[1]),
+                            .height = android_hw->hw_lcd_height,
+                            .displayId = 0,  // TODO: put 0 for now
+                            .minDegrees = std::stof(angles[0]),
+                            .maxDegrees = std::stof(angles[1]),
+                            .defaultDegrees = std::stof(hingeAngleDefaultTokens[i]),
+                        };
+                        break;
+                    default:
+                        E("Invalid hinge type %d", type);
+                }
+                printf("x %d y %d w %d h%d\n", defaultConfig.hingeParams[i].x,
+                    defaultConfig.hingeParams[i].y,
+                    defaultConfig.hingeParams[i].width,
+                    defaultConfig.hingeParams[i].height);
             }
         }
     }
