@@ -506,6 +506,7 @@ static MemoryRegion *virtio_address_space_lookup(VirtIOPCIProxy *proxy,
         }
     }
 
+    fprintf(stderr, "%s: failed with off 0x%llx\n", __func__, (unsigned long long)off);
     return NULL;
 }
 
@@ -1521,6 +1522,14 @@ static void virtio_pci_modern_io_region_map(VirtIOPCIProxy *proxy,
                                  &proxy->io_bar, proxy->modern_io_bar_idx);
 }
 
+static void virtio_pci_modern_hostshm_region_map(VirtIOPCIProxy *proxy,
+                                                 VirtIOPCIRegion *region,
+                                                 struct virtio_pci_cap *cap)
+{
+    virtio_pci_modern_region_map(proxy, region, cap,
+                                 &proxy->hostshm_bar, proxy->hostshm_mem_bar_idx);
+}
+
 static void virtio_pci_modern_mem_region_unmap(VirtIOPCIProxy *proxy,
                                                VirtIOPCIRegion *region)
 {
@@ -1555,6 +1564,7 @@ static void virtio_pci_device_plugged(DeviceState *d, Error **errp)
     bool legacy = virtio_pci_legacy(proxy);
     bool modern;
     bool modern_pio = proxy->flags & VIRTIO_PCI_FLAG_MODERN_PIO_NOTIFY;
+    bool hostshm = proxy->flags & VIRTIO_PCI_FLAG_HOSTSHM;
     uint8_t *config;
     uint32_t size;
     VirtIODevice *vdev = virtio_bus_get_device(&proxy->bus);
@@ -1656,6 +1666,7 @@ static void virtio_pci_device_plugged(DeviceState *d, Error **errp)
         pci_set_long((uint8_t *)&cfg_mask->cap.offset, ~0x0);
         pci_set_long((uint8_t *)&cfg_mask->cap.length, ~0x0);
         pci_set_long(cfg_mask->pci_cfg_data, ~0x0);
+
     }
 
     if (proxy->nvectors) {
