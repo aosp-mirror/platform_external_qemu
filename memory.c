@@ -2346,6 +2346,9 @@ void memory_region_add_subregion(MemoryRegion *mr,
                                  hwaddr offset,
                                  MemoryRegion *subregion)
 {
+    if (!strcmp(subregion->name, "virtio-gpu-host-coherent")) {
+        fprintf(stderr, "%s: adding the host coherent shm!\n", __func__);
+    }
     subregion->priority = 0;
     memory_region_add_subregion_common(mr, offset, subregion);
 }
@@ -2355,13 +2358,27 @@ void memory_region_add_subregion_overlap(MemoryRegion *mr,
                                          MemoryRegion *subregion,
                                          int priority)
 {
+    bool trace = false;
+        if (!strcmp("virtio-gpu-host-coherent", subregion->name)) {
+            fprintf(stderr, "%s: adding back the host coherent bar at offset 0x%llx\n", __func__,
+                    (unsigned long long)offset);
+            trace = true;
+        }
     subregion->priority = priority;
     memory_region_add_subregion_common(mr, offset, subregion);
+
+    if (trace) {
+        fprintf(stderr, "%s: memory region ram addr: 0x%llx\n", __func__,
+                (unsigned long long)(memory_region_get_ram_addr(mr)));
+    }
 }
 
 void memory_region_del_subregion(MemoryRegion *mr,
                                  MemoryRegion *subregion)
 {
+    if (!strcmp(subregion->name, "virtio-gpu-host-coherent")) {
+        fprintf(stderr, "%s: deleting the host coherent shm!\n", __func__);
+    }
     memory_region_transaction_begin();
     assert(subregion->container == mr);
     subregion->container = NULL;

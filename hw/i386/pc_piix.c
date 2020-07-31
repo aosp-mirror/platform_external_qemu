@@ -277,10 +277,10 @@ static void pc_init1(MachineState *machine,
                              pcms->gsi[GOLDFISH_ROTARY_IRQ]);
         g_assert(pci_bus);
         g_assert(piix3_devfn >= 0);
-        g_assert(pci_create_simple(pci_bus,
-                                   PCI_DEVFN(GOLDFISH_ADDRESS_SPACE_PCI_SLOT,
-                                             GOLDFISH_ADDRESS_SPACE_PCI_FUNCTION),
-                                   GOLDFISH_ADDRESS_SPACE_NAME));
+        // g_assert(pci_create_simple(pci_bus,
+        //                            PCI_DEVFN(GOLDFISH_ADDRESS_SPACE_PCI_SLOT,
+        //                                      GOLDFISH_ADDRESS_SPACE_PCI_FUNCTION),
+        //                            GOLDFISH_ADDRESS_SPACE_NAME));
     }
 #endif  // CONFIG_ANDROID
 
