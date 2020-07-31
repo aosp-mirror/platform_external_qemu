@@ -18,6 +18,7 @@
 #include "hw/virtio/virtio-bus.h"
 #include "hw/virtio/virtio-pci.h"
 #include "hw/virtio/virtio-gpu.h"
+#include "standard-headers/linux/virtio_pci.h"
 
 static Property virtio_gpu_pci_properties[] = {
     DEFINE_VIRTIO_GPU_PCI_PROPERTIES(VirtIOPCIProxy),
@@ -27,14 +28,56 @@ static Property virtio_gpu_pci_properties[] = {
 static void virtio_gpu_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
 {
     VirtIOGPUPCI *vgpu = VIRTIO_GPU_PCI(vpci_dev);
+    fprintf(stderr, "%s: proxy: %p\n", __func__, vpci_dev);
     VirtIOGPU *g = &vgpu->vdev;
     DeviceState *vdev = DEVICE(&vgpu->vdev);
     int i;
     Error *local_error = NULL;
 
+    vpci_dev->modern_mem_bar_idx = 4; // use 4 for the hostshm
+    vpci_dev->hostshm_mem_bar_idx = 5; // kernel wants 4
+
+    memory_region_init_ram_user_backed(
+            &g->host_coherent_memory, OBJECT(g),
+            "virtio-gpu-host-coherent", 512 * 1048576);
+
+    struct virtio_pci_cap shm_cap;
+    shm_cap.cap_len = sizeof(shm_cap);
+    shm_cap.cfg_type = 8; // PciCapabilityType::SharedMemoryConfig
+    shm_cap.bar = vpci_dev->hostshm_mem_bar_idx;
+    shm_cap.offset = 0;
+    shm_cap.length = cpu_to_le32(g->host_coherent_memory.size);
+
+    fprintf(stderr, "%s: memory region ram addr: 0x%llx\n", __func__,
+            (unsigned long long)(memory_region_get_ram_addr(&g->host_coherent_memory)));
+
+    fprintf(stderr, "%s: adding shm mem cap. type 0x%x bar %d off 0x%llx length 0x%llx\n", __func__,
+            (uint32_t)(shm_cap.cfg_type),
+            (int)(shm_cap.bar),
+            (unsigned long long)(shm_cap.offset),
+            (unsigned long long)(shm_cap.length));
+    int offset = pci_add_capability(&vpci_dev->pci_dev, PCI_CAP_ID_VNDR, 0, shm_cap.cap_len, &error_abort);
+    fprintf(stderr, "%s: offset of host shm: %d\n", __func__, offset);
+    memcpy(vpci_dev->pci_dev.config + offset + PCI_CAP_FLAGS, &shm_cap.cap_len,
+           shm_cap.cap_len - PCI_CAP_FLAGS);
+
+    pci_register_bar(&vpci_dev->pci_dev, vpci_dev->hostshm_mem_bar_idx,
+            PCI_BASE_ADDRESS_SPACE_MEMORY |
+            PCI_BASE_ADDRESS_MEM_TYPE_64, &g->host_coherent_memory);
+
+    fprintf(stderr, "%s: memory region ram addr: 0x%llx (right after register bar)\n", __func__,
+            (unsigned long long)(memory_region_get_ram_addr(&g->host_coherent_memory)));
+
+    fprintf(stderr, "%s: do hostshm init done\n", __func__);
+
     qdev_set_parent_bus(vdev, BUS(&vpci_dev->bus));
     virtio_pci_force_virtio_1(vpci_dev);
+
     object_property_set_bool(OBJECT(vdev), true, "realized", &local_error);
+    fprintf(stderr, "%s: proxy: %p (after)\n", __func__, vpci_dev);
+
+    fprintf(stderr, "%s: memory region ram addr: 0x%llx\n", __func__,
+            (unsigned long long)(memory_region_get_ram_addr(&g->host_coherent_memory)));
 
     if (local_error) {
         error_propagate(errp, local_error);
