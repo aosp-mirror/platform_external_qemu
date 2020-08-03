@@ -365,6 +365,7 @@ static void virtio_wifi_device_realize(DeviceState* dev, Error** errp) {
                 vdev, VIRTIO_WIFI_TX_QUEUE_DEFAULT_SIZE, virtio_wifi_handle_tx);
         n->vqs[index].tx_bh = qemu_bh_new(virtio_wifi_tx_bh, &n->vqs[index]);
         n->vqs[index].tx_waiting = 0;
+        n->vqs[index].async_tx.elem = nullptr;
     }
     n->tx_burst = kTXBurst;
     n->ctrl_vq = virtio_add_queue(vdev, VIRTIO_WIFI_CTRL_QUEUE_DEFAULT_SIZE,
@@ -372,6 +373,7 @@ static void virtio_wifi_device_realize(DeviceState* dev, Error** errp) {
     n->p2p.tx = virtio_add_queue(vdev, VIRTIO_WIFI_TX_QUEUE_DEFAULT_SIZE,
                                  virtio_wifi_handle_tx);
     n->p2p.tx_bh = qemu_bh_new(virtio_wifi_tx_bh, &n->p2p);
+    n->p2p.async_tx.elem = nullptr;
 
     memcpy(n->mac, kMacAddr, ETH_ALEN);
     n->mac[4] = (sGlobal.macPrefix >> 8) & 0xff;
@@ -439,7 +441,30 @@ static void virtio_wifi_reset(VirtIODevice* vdev) {
     VirtIOWifi* n = VIRTIO_WIFI(vdev);
 }
 
-static void virtio_wifi_set_status(struct VirtIODevice* vdev, uint8_t status) {}
+static bool virtio_wifi_started(VirtIOWifi *n, uint8_t status)
+{
+    VirtIODevice *vdev = VIRTIO_DEVICE(n);
+    return (status & VIRTIO_CONFIG_S_DRIVER_OK) &&
+        (n->status & VIRTIO_LINK_UP) && vdev->vm_running;
+}
+
+static void virtio_wifi_set_status(VirtIODevice* vdev, uint8_t status) {
+    VirtIOWifi* n = VIRTIO_WIFI(vdev);
+    for (size_t i = 0; i < kQueueSize; i++) {
+        VirtIOWifiQueue* q = &n->vqs[i];
+        if (virtio_wifi_started(n, status)) {
+            qemu_bh_schedule(q->tx_bh);
+        }
+        else {
+            qemu_bh_cancel(q->tx_bh);
+            if (status & VIRTIO_CONFIG_S_DRIVER_OK &&
+                vdev->vm_running) {
+                virtio_queue_set_notification(q->tx, 1);
+            }
+        }
+    }
+}
+
 
 static Property virtio_wifi_properties[] = {
         DEFINE_NIC_PROPERTIES(VirtIOWifi, nic_conf),
