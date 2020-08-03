@@ -56,6 +56,7 @@ struct hax_state {
     bool supports_implicit_ramblock;
     struct hax_slot memslots[HAX_MAX_SLOTS];
     QemuMutex io_mmio_lock;
+    QemuMutex mem_regions_lock;
 };
 
 #define HAX_MAX_VCPU 0x10
