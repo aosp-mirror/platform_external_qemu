@@ -34,6 +34,23 @@
       "revId": "de1b86b7624850b6e331e6cbeea2671b13a1f4bf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17f79ffd_1bdb9f9c",
+        "filename": "android/android-emugl/combined/GfxStreamAgents.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-03T17:10:08Z",
+      "side": 1,
+      "message": "looks like one of the agents here is making gfxstream think the window size is 0 on the onPost callback. Wonder if it is the multi display agent",
+      "revId": "de1b86b7624850b6e331e6cbeea2671b13a1f4bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
