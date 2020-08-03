@@ -1,6 +1,7 @@
 extern "C" {
 #include "hw/misc/goldfish_pipe.h"
 #include "hw/virtio/virtio-goldfish-pipe.h"
+#include "virgl_hw.h"
 }  // extern "C"
 
 enum BackendFlags {
