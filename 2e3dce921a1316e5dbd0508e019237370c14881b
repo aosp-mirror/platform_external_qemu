@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "700398ab_ae8fa46d",
+        "filename": "android/data/hostapd.conf",
+        "patchSetId": 4
+      },
+      "lineNbr": 856,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-08-03T23:43:08Z",
+      "side": 1,
+      "message": "is this intentional?",
+      "range": {
+        "startLine": 856,
+        "startChar": 0,
+        "endLine": 856,
+        "endChar": 26
+      },
+      "revId": "2e3dce921a1316e5dbd0508e019237370c14881b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
