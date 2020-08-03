@@ -1,0 +1,6 @@
+Code-Review+2: android-build-prod (mdb) <android-build-team-robot@google.com>
+Submitted-by: android-build-prod (mdb) <android-build-team-robot@google.com>
+Submitted-at: Mon, 03 Aug 2020 21:27:41 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1382049
+Project: platform/external/qemu
+Branch: refs/heads/emu-30-release
