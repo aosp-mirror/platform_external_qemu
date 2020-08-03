@@ -18,6 +18,7 @@
 #include "target/i386/hax-i386.h"
 #include "qemu/queue.h"
 #include "qemu/abort.h"
+#include "qemu/thread.h"
 
 // Memory slots/////////////////////////////////////////////////////////////////
 
@@ -134,6 +135,8 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
     int overlap_slot_count;
     int split_slot_id;
     int split_needed_free_slots;
+
+    qemu_mutex_lock(&hax_global.mem_regions_lock);
 
     end = start + size;
 
@@ -259,6 +262,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
     // need to split.
     if (overlap_slot_count > 1 &&
         split_slot_id != -1) {
+        qemu_mutex_unlock(&hax_global.mem_regions_lock);
         qemu_abort("%s: FATAL: Have more than one overlap slot, "
                    "but we are splitting a single slot.\n", __func__);
     }
@@ -272,6 +276,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
         slot = &hax_global.memslots[i];
 
         if (hax_set_ram(slot->start, slot->size, 0, HAX_RAM_INFO_INVALID)) {
+            qemu_mutex_unlock(&hax_global.mem_regions_lock);
             qemu_abort("%s: Failed to reset overlapping slot\n", __func__);
         }
     }
@@ -307,6 +312,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
         remaining_end = overlap_end < slot_end ? slot_end : overlap_start;
 
         if (remaining_start >= remaining_end) {
+            qemu_mutex_unlock(&hax_global.mem_regions_lock);
             qemu_abort("%s: FATAL: Invalid slot to restore\n", __func__);
         }
 
@@ -316,6 +322,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
                 (uint64_t)(uintptr_t)
                 (slot->hva + (uintptr_t)(remaining_start - slot_start)),
                 slot->flags)) {
+            qemu_mutex_unlock(&hax_global.mem_regions_lock);
             qemu_abort("%s: Failed to restore overlapping slot\n", __func__);
         }
 
@@ -350,6 +357,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
 
     // Validation: check that if we have to split, we have the free slots.
     if (split_needed_free_slots > free_slot_count) {
+        qemu_mutex_unlock(&hax_global.mem_regions_lock);
         qemu_abort("%s: FATAL: needed to split a slot, "
                    "but we have no free slots (%d needed).\n",
                    __func__,
@@ -391,6 +399,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
         }
 
         if (free_slot_id == -1) {
+            qemu_mutex_unlock(&hax_global.mem_regions_lock);
             qemu_abort("%s: FATAL: splitting slots, "
                        "could not find a free slot.\n",
                        __func__);
@@ -408,6 +417,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
                         right_slot->size,
                         (uint64_t)(uintptr_t)right_slot->hva,
                         right_slot->flags)) {
+            qemu_mutex_unlock(&hax_global.mem_regions_lock);
             qemu_abort("%s: FATAL: splitting slots, "
                        "could not allocate new slot\n",
                        __func__);
@@ -421,6 +431,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
                         slot->size,
                         (uint64_t)(uintptr_t)slot->hva,
                         slot->flags)) {
+            qemu_mutex_unlock(&hax_global.mem_regions_lock);
             qemu_abort("%s: FATAL: splitting slots, "
                        "could not allocate new slot\n",
                        __func__);
@@ -437,6 +448,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
     // Now make a new slot.
     // Validation: Check that we have free slots.
     if (free_slot_count == 0) {
+        qemu_mutex_unlock(&hax_global.mem_regions_lock);
         qemu_abort("%s: FATAL: no free slots for adding new region\n",
                    __func__);
     }
@@ -478,6 +490,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
                           (uint64_t)(uintptr_t)slot->hva,
                           slot->flags);
         if (ret) {
+            qemu_mutex_unlock(&hax_global.mem_regions_lock);
             qemu_abort("%s: FATAL: final hax_set_ram() failed, ret=%d\n",
                        __func__, ret);
         }
@@ -489,6 +502,7 @@ end:
     fprintf(stderr, "%s end=========================================================\n", __func__);
 #endif
 
+    qemu_mutex_unlock(&hax_global.mem_regions_lock);
     return;
 }
 

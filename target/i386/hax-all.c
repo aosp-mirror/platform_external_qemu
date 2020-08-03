@@ -490,6 +490,7 @@ static int hax_init(ram_addr_t ram_size)
     cpu_interrupt_handler = hax_handle_interrupt;
 
     qemu_mutex_init(&hax->io_mmio_lock);
+    qemu_mutex_init(&hax->mem_regions_lock);
 
     return ret;
   error:

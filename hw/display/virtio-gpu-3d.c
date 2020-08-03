@@ -455,6 +455,10 @@ static void virtio_gpu_map_slot(
     MemoryRegion* parent, uint32_t resource_id,
     uint64_t gpa, uint64_t offset, void *hva, uint64_t size, int flags) {
 
+    bool need_lock = !qemu_mutex_iothread_locked();
+
+    if (need_lock) qemu_mutex_lock_iothread();
+
     struct VirtioGpuRamSlotTable* table = virtio_gpu_ram_slot_table_get();
     int slot = virtio_gpu_ram_slot_infos_first_free_slot();
     MemoryRegion* mr = &(table->slots[slot].mr);
@@ -463,6 +467,9 @@ static void virtio_gpu_map_slot(
         fprintf(stderr, "%s: error: no free slots to "
                 "map hva %p -> gpa [0x%llx 0x%llx)\n", __func__,
                 hva, (unsigned long long)gpa, (unsigned long long)gpa + size);
+
+        if (need_lock) qemu_mutex_unlock_iothread();
+
         return;
     }
 
@@ -474,6 +481,8 @@ static void virtio_gpu_map_slot(
     table->slots[slot].offset = offset;
     table->slots[slot].used = 1;
     table->slots[slot].resource_id = resource_id;
+
+    if (need_lock) qemu_mutex_unlock_iothread();
 }
 
 static void virtio_gpu_unmap_slot(
@@ -481,14 +490,21 @@ static void virtio_gpu_unmap_slot(
 
     struct VirtioGpuRamSlotTable* table = virtio_gpu_ram_slot_table_get();
 
+    bool need_lock = !qemu_mutex_iothread_locked();
+
+    if (need_lock) qemu_mutex_lock_iothread();
+
     for (int i = 0; i < VIRTIO_GPU_MAX_RAM_SLOTS; ++i) {
         if (0 == table->slots[i].used) continue;
         if (resource_id != table->slots[i].resource_id) continue;
 
         memory_region_del_subregion(parent, &(table->slots[i].mr));
         table->slots[i].used = 0;
+        if (need_lock) qemu_mutex_unlock_iothread();
         return;
     }
+
+    if (need_lock) qemu_mutex_unlock_iothread();
 }
 
 static void virgl_cmd_resource_map(VirtIOGPU *g,
