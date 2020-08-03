@@ -2,6 +2,7 @@
 #include "ReadbackWorker.h"
 
 #include <string.h>                           // for memcpy
+#include <cassert>
 
 #include "ColorBuffer.h"                      // for ColorBuffer
 #include "DispatchTables.h"                   // for s_gles2
@@ -176,8 +177,17 @@ void ReadbackWorker::getPixels(uint32_t displayId, void* buf, uint32_t bytes) {
 
     GLuint buffer = r.mBuffers[r.mMapCopyIndex];
     s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, buffer);
+    assert(s_gles2.glGetError() == GL_NO_ERROR);
     void* pixels = s_gles2.glMapBufferRange(GL_COPY_READ_BUFFER, 0, bytes,
                                             GL_MAP_READ_BIT);
+    if (!pixels) {
+        auto error = s_gles2.glGetError();
+        GLint buffer_size = -1;
+        s_gles2.glGetBufferParameteriv(GL_COPY_READ_BUFFER, GL_BUFFER_SIZE, &buffer_size);
+        assert(s_gles2.glGetError() == GL_NO_ERROR);
+        fprintf(stderr, "%s: failed to call glMapBufferRange(), error = 0x%08x. offset + length = 0x%08x, buffer size = 0x%04x.\n",
+            __func__, error, bytes, buffer_size);
+    }
     memcpy(buf, pixels, bytes);
     s_gles2.glUnmapBuffer(GL_COPY_READ_BUFFER);
 
