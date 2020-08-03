@@ -105,6 +105,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp
     android/skin/qt/extended-pages/car-data-emulation/checkbox-dialog.cpp
+    android/skin/qt/extended-pages/car-data-emulation/sensor_session_playback.cpp
     android/skin/qt/extended-pages/car-data-emulation/vhal-item.cpp
     android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp
     android/skin/qt/extended-pages/car-data-page.cpp
@@ -231,6 +232,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-pages/camera-virtualscene-subpage.h
     android/skin/qt/extended-pages/car-data-emulation/car-property-utils.h
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h
+    android/skin/qt/extended-pages/car-data-emulation/sensor_session_playback.h
     android/skin/qt/extended-pages/car-data-page.h
     android/skin/qt/extended-pages/car-rotary-page.h
     android/skin/qt/extended-pages/cellular-page.h
@@ -489,11 +491,11 @@ target_link_libraries(
   emulator-libui-headless PRIVATE android-emu emulator-libyuv FFMPEG::FFMPEG
                                   zlib android-hw-config)
 
-if (WINDOWS_MSVC_X86_64) 
+if (WINDOWS_MSVC_X86_64)
   # Qt in windows will call main from win-main v.s. calling qt_main.
-  # we have to make a separate launch library to make sure that we 
+  # we have to make a separate launch library to make sure that we
   # do not end up with duplicate main symbols when linking emulator-libui
-  # (it used to work do to a cmake linker quirk).  
+  # (it used to work do to a cmake linker quirk).
   android_add_library(
     TARGET emulator-winqt-launcher
     LICENSE Apache-2.0

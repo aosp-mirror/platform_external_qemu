@@ -9,6 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
+#include "android/skin/qt/extended-pages/car-data-emulation/sensor_session_playback.h"
+
 
 #include <stdint.h>  // for int32_t
 
@@ -141,11 +143,11 @@ void CarSensorData::sendIgnitionChangeMsg(const int ignition,
 
 void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
     mUi->car_speedLabel->setText(QString::number(speed));
-    float speedMetersPerSecond = (float)speed * 
-        ((mUi->comboBox_speedUnit->currentIndex() == MILES_PER_HOUR) 
+    float speedMetersPerSecond = (float)speed *
+        ((mUi->comboBox_speedUnit->currentIndex() == MILES_PER_HOUR)
             ? MILES_PER_HOUR_TO_METERS_PER_SEC
             : KILOMETERS_PER_HOUR_TO_METERS_PER_SEC);
-    
+
     if (mSendEmulatorMsg != nullptr) {
         EmulatorMessage emulatorMsg = makeSetPropMsg();
         VehiclePropValue* value = emulatorMsg.add_value();
@@ -205,11 +207,18 @@ void CarSensorData::on_button_loadrecord_clicked() {
     prepareVhalLoader();
 
     QString fileName = QFileDialog::getOpenFileName(
-            this, tr("Open Json File"), ".", tr("Json files (*.json)"));
+            this, tr("Open Sensor Record File"), ".");
 
     if (fileName.isNull())
         return;
-    parseEventsFromJsonFile(fileName);
+    SensorSessionPlayback ssp;
+    if (ssp.LoadFrom(fileName) == SensorSessionPlayback::OK) {
+        D("filename parse OK for sensorsessionplayback");
+    } else {
+        D("filename parse not OK for sensorsessionplayback");
+    }
+    // parseEventsFromJsonFile(fileName);
+
 }
 
 void CarSensorData::prepareVhalLoader() {
