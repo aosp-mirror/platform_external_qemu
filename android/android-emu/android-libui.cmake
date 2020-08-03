@@ -489,11 +489,11 @@ target_link_libraries(
   emulator-libui-headless PRIVATE android-emu emulator-libyuv FFMPEG::FFMPEG
                                   zlib android-hw-config)
 
-if (WINDOWS_MSVC_X86_64) 
+if (WINDOWS_MSVC_X86_64)
   # Qt in windows will call main from win-main v.s. calling qt_main.
-  # we have to make a separate launch library to make sure that we 
+  # we have to make a separate launch library to make sure that we
   # do not end up with duplicate main symbols when linking emulator-libui
-  # (it used to work do to a cmake linker quirk).  
+  # (it used to work do to a cmake linker quirk).
   android_add_library(
     TARGET emulator-winqt-launcher
     LICENSE Apache-2.0
