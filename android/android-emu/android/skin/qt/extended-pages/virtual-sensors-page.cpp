@@ -32,6 +32,7 @@
 
 #include "android/avd/info.h"                         // for avdInfo_getAvdF...
 #include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
+#include "android/base/misc/StringUtils.h"
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/globals.h"                          // for android_avdInfo
 #include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
@@ -143,6 +144,23 @@ VirtualSensorsPage::~VirtualSensorsPage() {
     }
 }
 
+static QString postureString(FoldablePostures posture) {
+    switch(posture) {
+        case POSTURE_UNKNOWN:
+            return "Unknown";
+        case POSTURE_CLOSED:
+            return "Closed";
+        case POSTURE_HALF_OPENED:
+            return "Half open";
+        case POSTURE_OPENED:
+            return "Open";
+        case POSTURE_FLIPPED:
+            return "Flipped";
+        default:
+            return "Unknown";
+    }
+}
+
 void VirtualSensorsPage::setupHingeSensorUI() {
     // Hide the hinge sensors based on the config.
     mUi->hinge0Label->setHidden(true);
@@ -159,10 +177,27 @@ void VirtualSensorsPage::setupHingeSensorUI() {
         mUi->accelerometerSliders->setCurrentIndex(2);
         connect(mUi->posture, SIGNAL(activated(int)), this,
                 SLOT(on_posture_valueChanged(int)));
+
+        // read postures to build drop-down menu
+        std::string postureList(android_hw->hw_sensor_posture_list);
+        std::vector<std::string> postureListTokens;
+        android::base::splitTokens(postureList, &postureListTokens, ",");
+        mIndexToPosture.push_back(POSTURE_UNKNOWN);
+        for (auto entry : postureListTokens) {
+            FoldablePostures posture = (FoldablePostures)std::stoi(entry);
+            if (posture >= POSTURE_MAX || posture < POSTURE_UNKNOWN) {
+                LOG(ERROR) << "Invalid posture " << posture;
+                continue;
+            }
+            mIndexToPosture.push_back(posture);
+        }
+        std::sort(mIndexToPosture.begin(), mIndexToPosture.end());
+        for (auto entry : mIndexToPosture) {
+            mUi->posture->addItem(postureString(entry));
+        }
+
         struct FoldableState foldableState;
         android_foldable_get_state(&foldableState);
-        mUi->posture->addItems(
-                {"Unknown", "Closed", "Half open", "Open", "Flipped"});
         switch (foldableState.config.numHinges) {
             case 3:
                 mUi->hinge2Slider->setRange(
@@ -757,10 +792,15 @@ void VirtualSensorsPage::on_accelModeFold_toggled() {
 }
 
 void VirtualSensorsPage::on_posture_valueChanged(int index) {
-    if (mCurrentPosture == (enum FoldablePostures)index) {
+    if (index >= mIndexToPosture.size()) {
+        // cannot be here
+        LOG(ERROR) << "Invalid posture index " << index;
         return;
     }
-    mCurrentPosture = (enum FoldablePostures)index;
+    if (mCurrentPosture == mIndexToPosture[index]) {
+        return;
+    }
+    mCurrentPosture = mIndexToPosture[index];
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
                                PHYSICAL_INTERPOLATION_SMOOTH,
                                (double)mCurrentPosture);
@@ -815,6 +855,11 @@ void VirtualSensorsPage::updateUIPosture() {
                     PHYSICAL_PARAMETER_POSTURE);
     if (mCurrentPosture != posture) {
         mCurrentPosture = posture;
-        mUi->posture->setCurrentIndex(posture);
+        for (int i = 0; i < mIndexToPosture.size(); i++) {
+            if (mIndexToPosture[i] == mCurrentPosture) {
+                mUi->posture->setCurrentIndex(i);
+                break;
+            }
+        }
     }
 }
