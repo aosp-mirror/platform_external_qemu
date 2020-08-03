@@ -1170,7 +1170,7 @@ TEST(PhysicalModel, FoldableInitialize) {
     EXPECT_EQ(180, ret.currentHingeDegrees[0]);
     EXPECT_EQ(90, ret.currentHingeDegrees[1]);
     EXPECT_EQ(2, ret.config.numHinges);
-    EXPECT_EQ(ANDROID_FOLDABLE_HORIZONTAL_SPLIT, ret.config.hingesType);
+    EXPECT_EQ(ANDROID_FOLDABLE_HORIZONTAL_SPLIT, ret.config.type);
     EXPECT_EQ(ANDROID_FOLDABLE_HINGE_HINGE, ret.config.hingesSubType);
     EXPECT_EQ(0, ret.config.hingeParams[0].displayId);
     EXPECT_EQ(0, ret.config.hingeParams[0].x);
