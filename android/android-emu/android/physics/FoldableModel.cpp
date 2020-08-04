@@ -268,6 +268,7 @@ void FoldableModel::setHingeAngle(uint32_t hingeIndex,
         mState.currentPosture = p;
         lock.unlock();
         sendPostureToSystem(p);
+        updateFoldablePostureIndicator();
         lock.lock();
         if (mState.currentPosture == mState.config.foldAtPosture) {
             lock.unlock();
@@ -291,6 +292,7 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode,
     mState.currentPosture = p;
     lock.unlock();
     sendPostureToSystem(p);
+    updateFoldablePostureIndicator();
     lock.lock();
     // Update the hinge angles
     for (const auto i : mAnglesToPostures) {
@@ -367,6 +369,16 @@ bool FoldableModel::getFoldedArea(int* x, int* y, int* w, int* h) {
         *h = android_hw->hw_displayRegion_0_1_height;
     }
     return true;
+}
+
+void FoldableModel::updateFoldablePostureIndicator() {
+    const QAndroidEmulatorWindowAgent* windowAgent =
+        android_hw_sensors_get_window_agent();
+    if (windowAgent) {
+        windowAgent->updateFoldablePostureIndicator();
+    } else {
+        E("Could not update foldable posture indicator: null WindowAgent");
+    }
 }
 
 }  // namespace physics
