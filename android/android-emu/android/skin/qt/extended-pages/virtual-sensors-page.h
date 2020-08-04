@@ -93,6 +93,11 @@ private slots:
     void on_rotateToLandscape_clicked();
     void on_rotateToReversePortrait_clicked();
     void on_rotateToReverseLandscape_clicked();
+    void on_btn_postureClosed_clicked();
+    void on_btn_postureFlipped_clicked();
+    void on_btn_postureHalfOpen_clicked();
+    void on_btn_postureOpen_clicked();
+    void on_btn_postureTent_clicked();
     void on_helpMagneticField_clicked();
     void on_helpLight_clicked();
     void on_helpPressure_clicked();
@@ -136,6 +141,7 @@ private:
     void onPhysicalStateChanging();
     void onPhysicalStateStabilized();
     void setupHingeSensorUI();
+    void togglePostureButtonsVisibility(bool newVisibility);
     void updateUIPosture();
 
     static void onTargetStateChanged(void* context);
@@ -161,5 +167,6 @@ private:
     bool mVirtualSceneControlsEngaged = false;
     QElapsedTimer mLastInteractionElapsed;
     enum FoldablePostures mCurrentPosture = POSTURE_UNKNOWN;
-    std::vector<enum FoldablePostures> mIndexToPosture;
+
+    void updateCurrentPostureLabel();
 };
