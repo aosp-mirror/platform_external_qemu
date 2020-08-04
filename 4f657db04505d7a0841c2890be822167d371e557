@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19b9a67d_99991c85",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2262,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2020-08-04T01:04:49Z",
+      "side": 1,
+      "message": "Not a fan of localtime() API (with a shared struct pointer) but I\u0027m not sure of an alternate API that works in Window/Mac/Linux.  Suggestions are welcome.",
+      "revId": "4f657db04505d7a0841c2890be822167d371e557",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e94778b7_fbb97c3c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2263,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2020-08-04T01:04:49Z",
+      "side": 1,
+      "message": "Trying to look like adg logcat output here to simplify correlation with human eyes and with simple scripts.",
+      "revId": "4f657db04505d7a0841c2890be822167d371e557",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "40292668_7a1ba1e1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2265,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2020-08-04T01:04:49Z",
+      "side": 1,
+      "message": "C++20 has std::format but I\u0027m not sure if we are using c++20",
+      "revId": "4f657db04505d7a0841c2890be822167d371e557",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7ba89fa_95ca751f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2278,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2020-08-04T01:04:49Z",
+      "side": 1,
+      "message": "There is also system and user time but, since these aggregate multiple CPU\u0027s the data is less human-understandable than wall time.  I can change this or add other fields if there is a reason to do so.",
+      "revId": "4f657db04505d7a0841c2890be822167d371e557",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
