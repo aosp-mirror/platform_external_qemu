@@ -285,7 +285,7 @@ bool Device3DWidget::initAbstractDeviceModel() {
     // std::vector<float> model_vertex_data;
     // std::vector<GLuint> indices;
     struct FoldableConfig config = mFoldableState.config;
-    bool hSplit = (config.hingesType == ANDROID_FOLDABLE_HORIZONTAL_SPLIT)
+    bool hSplit = (config.type == ANDROID_FOLDABLE_HORIZONTAL_SPLIT)
                           ? true
                           : false;
     int32_t displayW =
@@ -681,7 +681,7 @@ void Device3DWidget::repaintGL() {
 
     if (mUseAbstractDevice) {
         glm::mat4 rotateLocal =
-                (mFoldableState.config.hingesType ==
+                (mFoldableState.config.type ==
                  ANDROID_FOLDABLE_HORIZONTAL_SPLIT)
                         ? glm::mat4()
                         : glm::rotate(glm::mat4(), glm::radians(90.0f),
