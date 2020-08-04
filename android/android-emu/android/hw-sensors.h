@@ -289,7 +289,7 @@ struct RollableParameters {
 };
 
 struct FoldableConfig {
-    enum FoldableDisplayType hingesType;
+    enum FoldableDisplayType type;
     enum FoldableHingeSubType hingesSubType;
     enum FoldablePostures foldAtPosture;
     // Display id where the folding occurs.  TODO: account for multiple

@@ -109,7 +109,7 @@ FoldableModel::FoldableModel() {
           android_hw->hw_sensor_hinge_count);
     }
     struct FoldableConfig defaultConfig = {
-            .hingesType = type,
+            .type = type,
             .hingesSubType = subType,
             .foldAtPosture = foldAtPosture,
             .numHinges = numHinge,
