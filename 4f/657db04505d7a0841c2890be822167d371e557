@@ -1,0 +1,12 @@
+Verified+1: Matt Wachowski <mattwach@google.com>
+Open-Source-Licensing+1: Matt Wachowski <mattwach@google.com>
+Lint+1: Matt Wachowski <mattwach@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+1: Lingfeng Yang <lfy@google.com>
+Code-Review+2: Matt Wachowski <mattwach@google.com>
+Submitted-by: Lingfeng Yang <lfy@google.com>
+Submitted-at: Tue, 04 Aug 2020 21:33:16 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1386868
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
