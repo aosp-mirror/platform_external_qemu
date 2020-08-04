@@ -100,7 +100,7 @@ INSTALL_DIR=$PARAMETER_1
 BUILD_HOST=$(get_build_os)
 BUILD_ARCH=$(get_build_arch)
 BUILD_BUILD_TARGET_TAG=${BUILD_HOST}-${BUILD_ARCH}
-log "Found current build machine: $BUILD_BUILD_TARGET_TAG"
+log2 "Found current build machine: $BUILD_BUILD_TARGET_TAG"
 
 # Handle CCACHE related arguments.
 CCACHE=
@@ -115,7 +115,7 @@ if [ "$OPT_CCACHE" ]; then
 elif [ -z "$OPT_NO_CCACHE" ]; then
     CCACHE=$(find_program ccache)
     if [ "$CCACHE" ]; then
-        log "Auto-config: --ccache=$CCACHE"
+        log2 "Auto-config: --ccache=$CCACHE"
     fi
 fi
 
@@ -138,7 +138,7 @@ if [ "$OPT_HOST" ]; then
     fi
 else
     HOST=$BUILD_BUILD_TARGET_TAG
-    log "Auto-config: --host=$HOST"
+    log2 "Auto-config: --host=$HOST"
 fi
 
 # Handle --binprefix option.
@@ -246,7 +246,7 @@ gen_wrapper_program ()
         # program
         DST_PROG=$(which "$PROG" 2>/dev/null || true)
         if [ -z "$DST_PROG" ]; then
-            log "Ignoring: ${SRC_PREFIX}$PROG"
+            log2 "Ignoring: ${SRC_PREFIX}$PROG"
             return
         fi
         DST_PREFIX=$(dirname "$DST_PROG")/
@@ -260,12 +260,12 @@ gen_wrapper_program ()
                 # let those use 'gcc' directly.
                 DST_PROG=gcc
                 if [ ! -f "${DST_PREFIX}$DST_PROG" ]; then
-                    log "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program, ${DST_PREFIX}$DST_PROG]"
+                    log2 "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program, ${DST_PREFIX}$DST_PROG]"
                     return
                 fi
                 ;;
             *)
-                log "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program, ${DST_PREFIX}$DST_PROG]"
+                log2 "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program, ${DST_PREFIX}$DST_PROG]"
                 return
                 ;;
          esac
@@ -285,7 +285,7 @@ ${DST_PREFIX}$DST_PROG $FLAGS "\$@" $POST_FLAGS
 
 EOF
     chmod +x "$DST_FILE"
-    log "  Generating: ${SRC_PREFIX}$PROG"
+    log2 "  Generating: ${SRC_PREFIX}$PROG"
 }
 
 gen_dbg_splitter() {
@@ -304,7 +304,7 @@ ${DST_PREFIX}objcopy --add-gnu-debuglink="build/debug_info/\$target.debug" "\$1"
 
 EOF
  chmod +x "$DST_FILE"
-  log "  Generating: ${SRC_PREFIX}strip"
+ log2 "  Generating: ${SRC_PREFIX}strip"
 }
 
 gen_dbg_splitter_darwin() {
@@ -323,7 +323,7 @@ target=\$(basename \$1)
 $CLANG_BINDIR/dsymutil --out build/debug_info/\$target.dSYM \$1
 EOF
  chmod +x "$DST_FILE"
-  log "  Generating: ${SRC_PREFIX}strip"
+  log2 "  Generating: ${SRC_PREFIX}strip"
 }
 
 # $1: source prefix
@@ -351,7 +351,7 @@ gen_wrapper_toolchain () {
     esac
 
     log "Generating toolchain wrappers in: $DST_DIR"
-    run mkdir -p "$DST_DIR"
+    silent_run mkdir -p "$DST_DIR"
 
     if [ -n "$SRC_PREFIX" ]; then
         SRC_PREFIX=${SRC_PREFIX%%-}-
@@ -415,14 +415,31 @@ gen_wrapper_toolchain () {
     EXTRA_ENV_SETUP=
 }
 
+please_install_proper_sdk_error() {
+    log "No supported OSX SDKs/Xcode version found on the machine at $OSX_SDK_ROOT (Need any of: [$OSX_SDK_SUPPORTED])"
+    log "You will need at least XCode version 10 to build!"
+    log "Please obtain MacOSX$OSX_REQUIRED.sdk.tar.gz and make it available as an sdk."
+    log "You can obtain this by tarring up the SDK directory from an XCode version that supports the SDK"
+    log "See https://developer.apple.com/documentation/macos-release-notes for wich XCode release ships with the sdk you need."
+    log "For example:"
+    log "tar chvf MacOSX$OSX_REQUIRED.sdk.tar.gz /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/ MacOSX$OSX_REQUIRED.sdk"
+    log "And making it available in your XCode (assuming it is in /Applications/Xcode.app):"
+    log "tar xzvf ~/Downloads/MacOSX$OSX_REQUIRED.sdk.tar.gz -C /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$OSX_REQUIRED.sdk/"
+    panic "Required sdk not available.."
+}
 
 # Configure the darwin toolchain.
 prepare_build_for_darwin() {
     OSX_VERSION=$(sw_vers -productVersion)
     OSX_DEPLOYMENT_TARGET=10.11
-    OSX_SDK_SUPPORTED="10.11 10.12 10.13 10.14 10.15"
+    OSX_REQUIRED=10.13
+    MIN_XCODE=10
+
+    # This is the list of supported SDKs,
+    OSX_SDK_SUPPORTED="${OSX_REQUIRED}"
+    OSX_XCODE=$(xcodebuild -version | tr '\n' ' ')
     OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
-            grep --color=never macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
+            egrep --color=never -o " macosx\d+.\d+$" | sed -e "s/.*macosx10\.//g" | sort -n | \
             sed -e 's/^/10./g' | tr '\n' ' ')
     if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
         panic "Please install XCode on this machine!"
@@ -435,21 +452,33 @@ prepare_build_for_darwin() {
             OSX_SDK_VERSION=$POSSIBLE_OSX_SDK_VERSION
         fi
     done
-    log "OSX: Using SDK version $OSX_SDK_VERSION"
-    if [ -z "$OSX_SDK_VERSION" ]; then
-        panic "No supported OSX SDKs found on the machine (Need any of: [$OSX_SDK_SUPPORTED], have: [$OSX_SDK_INSTALLED_LIST])"
+
+    # Extract the Xcode version, and use version sort to stack the installed version
+    # on top of what you have. If your version is to low it ends up on top.
+    OSX_XCODE_VERSION=$(xcodebuild -version | egrep 'Xcode (\d+.\d+)' | sed 's/Xcode //g')
+    VERSION_SORT=$(printf "$MIN_XCODE\n$OSX_XCODE_VERSION" | sort --version-sort | head -n 1)
+
+    if test "$VERSION_SORT" != "$MIN_XCODE"; then
+        log "You need to have at least XCode 10 installed, not ${OSX_XCODE}"
+        please_install_proper_sdk_error
     fi
 
     XCODE_PATH=$(xcode-select -print-path 2>/dev/null)
+
+    log "OSX: Using ${OSX_XCODE} with SDK version $OSX_SDK_VERSION"
     log "OSX: XCode path: $XCODE_PATH"
 
+    if [ -z "$OSX_SDK_VERSION" ]; then
+        please_install_proper_sdk_error
+    fi
+
     OSX_SDK_ROOT=$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${OSX_SDK_VERSION}.sdk
-    log "OSX: Looking for $OSX_SDK_ROOT"
+    log2 "OSX: Looking for $OSX_SDK_ROOT"
     if [ ! -d "$OSX_SDK_ROOT" ]; then
         OSX_SDK_ROOT=/Developer/SDKs/MacOSX${OSX_SDK_VERSION}.sdk
-        log "OSX: Looking for $OSX_SDK_ROOT"
+        log2 "OSX: Looking for $OSX_SDK_ROOT"
         if [ ! -d "$OSX_SDK_ROOT" ]; then
-            panic "Could not find SDK $OSX_SDK_VERSION at $OSX_SDK_ROOT"
+            please_install_proper_sdk_error
         fi
     fi
     log "OSX: Using SDK at $OSX_SDK_ROOT"
@@ -846,7 +875,7 @@ prepare_build_for_host () {
     esac
 
 
-    log "Exited prepare build. compiler bindir: $CLANG_BINDIR"
+    log2 "Exited prepare build. compiler bindir: $CLANG_BINDIR"
 
     if [ "$OPT_BINPREFIX" ]; then
         BINPREFIX=${OPT_BINPREFIX%%-}
@@ -866,7 +895,7 @@ prepare_build_for_host () {
         # so don't need to do anything here.
         return 0
     else
-        log "Generating ${BINPREFIX%%-} wrapper toolchain in $INSTALL_DIR"
+        log2 "Generating ${BINPREFIX%%-} wrapper toolchain in $INSTALL_DIR"
         gen_wrapper_toolchain "$BINPREFIX" "$DST_PREFIX" "$INSTALL_DIR" "$CLANG_BINDIR"
 
         # Create pkgconfig link for other scripts.
