@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "22380326_37809547",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2262,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-04T16:58:13Z",
+      "side": 1,
+      "message": "This seems fine to me, though the alternative I had in mind (your choice either way) was to not use localtime() and instead parse the raw unix time in seconds in a layer above this that consumes the output, since we\u0027re probably trying to make tables/charts out of it anyway, there\u0027s an opportunity to transform raw seconds to something more readable there, and won\u0027t have to re-parse something in the MM-DD H:MM:SS format.",
+      "parentUuid": "19b9a67d_99991c85",
+      "revId": "4f657db04505d7a0841c2890be822167d371e557",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e94778b7_fbb97c3c",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 1
@@ -33,6 +51,24 @@
       "revId": "4f657db04505d7a0841c2890be822167d371e557",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "506e8e2d_80af8415",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2263,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-04T16:58:13Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e94778b7_fbb97c3c",
+      "revId": "4f657db04505d7a0841c2890be822167d371e557",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "135a1b8f_de81d1ec",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2265,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-04T16:58:13Z",
+      "side": 1,
+      "message": "We\u0027re on c++17",
+      "parentUuid": "40292668_7a1ba1e1",
+      "revId": "4f657db04505d7a0841c2890be822167d371e557",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f7ba89fa_95ca751f",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 1
@@ -67,6 +121,24 @@
       "revId": "4f657db04505d7a0841c2890be822167d371e557",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9db8efc_e3ab64ce",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2278,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-04T16:58:13Z",
+      "side": 1,
+      "message": "This should be fine, wall time is what we\u0027re looking for here I guess.",
+      "parentUuid": "f7ba89fa_95ca751f",
+      "revId": "4f657db04505d7a0841c2890be822167d371e557",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
