@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c75837ef_a4b42680",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/sensor_session_playback.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-04T17:01:23Z",
+      "side": 1,
+      "message": "Hi, thanks for introducing this! Big piece of feedback: I would prefer sensors session playback to live outside of Qt. / not be coupled with the UI, in android/android-emu/android/emulation itself or something, so that we can replay sensors in a headless build that doesn\u0027t have Qt or UI.",
+      "revId": "d898f14337cffc6d90870baf5ce8c92c37d07019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51b3d037_182bd649",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/sensor_session_playback.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-04T17:01:23Z",
+      "side": 1,
+      "message": "Instead of QTimer, we can start a separate FunctorThread + MessageChannel that replays the sensor signals, and can also take an argument to cancel itself/exit.",
+      "revId": "d898f14337cffc6d90870baf5ce8c92c37d07019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "79aaf691_7ad01f5e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/sensor_session_playback.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-04T17:01:23Z",
+      "side": 1,
+      "message": "Instead of QString, we can use std::string or const char* for that",
+      "range": {
+        "startLine": 45,
+        "startChar": 37,
+        "endLine": 45,
+        "endChar": 44
+      },
+      "revId": "d898f14337cffc6d90870baf5ce8c92c37d07019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
