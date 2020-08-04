@@ -63,6 +63,8 @@ enum class QtUICommand {
     VIRTUAL_SCENE_CONTROL,
     FOLD,
     UNFOLD,
+    CHANGE_FOLDABLE_POSTURE,
+    UPDATE_FOLDABLE_POSTURE_INDICATOR,
 };
 
 enum class QtKeyEventSource {

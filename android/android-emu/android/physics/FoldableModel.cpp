@@ -264,6 +264,8 @@ void FoldableModel::setHingeAngle(uint32_t hingeIndex,
         mState.currentPosture = p;
         sendPostureToSystem();
         setToolBarFold(oldP);
+
+        updateFoldablePostureIndicator();
     }
 }
 
@@ -285,6 +287,8 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode) {
         }
     }
     setToolBarFold(oldP);
+
+    updateFoldablePostureIndicator();
 }
 
 float FoldableModel::getHingeAngle(uint32_t hingeIndex,
@@ -350,6 +354,16 @@ bool FoldableModel::getFoldedArea(int* x, int* y, int* w, int* h) {
         *h = android_hw->hw_displayRegion_0_1_height;
     }
     return true;
+}
+
+void FoldableModel::updateFoldablePostureIndicator() {
+    const QAndroidEmulatorWindowAgent* windowAgent =
+        android_hw_sensors_get_window_agent();
+    if (windowAgent) {
+        windowAgent->updateFoldablePostureIndicator();
+    } else {
+        E("Could not update foldable posture indicator: null WindowAgent");
+    }
 }
 
 }  // namespace physics
