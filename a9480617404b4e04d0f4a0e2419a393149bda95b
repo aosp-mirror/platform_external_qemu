@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4c8eb4e0_abf8fcc4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-08-04T07:36:07Z",
+      "side": 1,
+      "message": "All the cross build bots have been upgraded (and green). We need to upgrade our physical mac machines as well. They are running xcode 9.2 which does not have optional.",
+      "revId": "a9480617404b4e04d0f4a0e2419a393149bda95b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
