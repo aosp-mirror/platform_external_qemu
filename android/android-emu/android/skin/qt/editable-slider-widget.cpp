@@ -172,3 +172,8 @@ void EditableSliderWidget::updateValidatorStyle(QString colorGroup) {
         mLineEdit.style()->polish(&mLineEdit);
     }
 }
+
+void EditableSliderWidget::setLabelHidden() {
+    mMinValueLabel.hide();
+    mMaxValueLabel.hide();
+}
