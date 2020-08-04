@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>622</width>
-    <height>600</height>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>0</x>
      <y>20</y>
      <width>630</width>
-     <height>581</height>
+     <height>601</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -49,7 +49,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>361</y>
+       <y>352</y>
        <width>81</width>
        <height>25</height>
       </rect>
@@ -68,7 +68,7 @@
      <property name="geometry">
       <rect>
        <x>110</x>
-       <y>361</y>
+       <y>352</y>
        <width>81</width>
        <height>25</height>
       </rect>
@@ -84,7 +84,7 @@
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>361</y>
+       <y>352</y>
        <width>81</width>
        <height>25</height>
       </rect>
@@ -240,9 +240,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>390</y>
-       <width>300</width>
-       <height>170</height>
+       <y>380</y>
+       <width>311</width>
+       <height>231</height>
       </rect>
      </property>
      <property name="currentIndex">
@@ -391,90 +391,11 @@
       </widget>
      </widget>
      <widget class="QWidget" name="page_3">
-      <widget class="EditableSliderWidget" name="hinge0Slider" native="true">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>45</y>
-         <width>250</width>
-         <height>40</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="EditableSliderWidget" name="hinge1Slider" native="true">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>90</y>
-         <width>250</width>
-         <height>40</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="EditableSliderWidget" name="hinge2Slider" native="true">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>135</y>
-         <width>250</width>
-         <height>40</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="hinge0Label">
+      <widget class="QLabel" name="lbl_posture">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>45</y>
-         <width>40</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Hinge1</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="hinge1Label">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>90</y>
-         <width>40</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Hinge2</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="hinge2Label">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>135</y>
-         <width>40</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Hinge3</string>
-       </property>
-      </widget>
-      <widget class="QComboBox" name="posture">
-       <property name="geometry">
-        <rect>
-         <x>55</x>
-         <y>5</y>
-         <width>171</width>
-         <height>26</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="PostureLabel">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
+         <y>0</y>
          <width>45</width>
          <height>15</height>
         </rect>
@@ -482,6 +403,308 @@
        <property name="text">
         <string>Posture</string>
        </property>
+      </widget>
+      <widget class="QLabel" name="lbl_currentPosture">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>60</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Current posture:</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::AutoText</enum>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lbl_currentPostureValue">
+       <property name="geometry">
+        <rect>
+         <x>104</x>
+         <y>60</y>
+         <width>121</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Unknown</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::AutoText</enum>
+       </property>
+       <property name="ColorGroup" stdset="0">
+        <string>Title</string>
+       </property>
+      </widget>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>80</y>
+         <width>285</width>
+         <height>138</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="hinge0Label">
+          <property name="text">
+           <string>Hinge 1 angle</string>
+          </property>
+          <property name="ColorGroup" stdset="0">
+           <string>Title</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="EditableSliderWidget" name="hinge0Slider" native="true"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="hinge1Label">
+          <property name="text">
+           <string>Hinge 2 angle</string>
+          </property>
+          <property name="ColorGroup" stdset="0">
+           <string>Title</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="EditableSliderWidget" name="hinge1Slider" native="true"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="hinge2Label">
+          <property name="text">
+           <string>Hinge 3 angle</string>
+          </property>
+          <property name="ColorGroup" stdset="0">
+           <string>Title</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="EditableSliderWidget" name="hinge2Slider" native="true"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="horizontalLayoutWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>260</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <item>
+         <widget class="RaisedMaterialButton" name="btn_postureClosed">
+          <property name="toolTip">
+           <string>Closed</string>
+          </property>
+          <property name="minimumSize">
+            <size>
+             <width>36</width>
+             <height>36</height>
+            </size>
+          </property>
+          <property name="accessibleDescription">
+           <string>Device posture closed</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/all/posture_closed_0BA</normaloff>:/all/posture_closed_0BA</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="ColorGroup" stdset="0">
+           <string>Button</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="RaisedMaterialButton" name="btn_postureFlipped">
+          <property name="toolTip">
+           <string>Flipped</string>
+          </property>
+          <property name="minimumSize">
+            <size>
+             <width>36</width>
+             <height>36</height>
+            </size>
+          </property>
+          <property name="accessibleDescription">
+           <string>Device posture flipped</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/all/posture_flipped_0BA</normaloff>:/all/posture_flipped_0BA</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="ColorGroup" stdset="0">
+           <string>Button</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="RaisedMaterialButton" name="btn_postureHalfOpen">
+          <property name="toolTip">
+           <string>Half-Open</string>
+          </property>
+          <property name="minimumSize">
+            <size>
+             <width>36</width>
+             <height>36</height>
+            </size>
+          </property>
+          <property name="accessibleDescription">
+           <string>Device posture half-open</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/all/posture_half-open_0BA</normaloff>:/all/posture_half-open_0BA</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="ColorGroup" stdset="0">
+           <string>Button</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="RaisedMaterialButton" name="btn_postureOpen">
+          <property name="toolTip">
+           <string>Open</string>
+          </property>
+          <property name="minimumSize">
+            <size>
+             <width>36</width>
+             <height>36</height>
+            </size>
+          </property>
+          <property name="accessibleDescription">
+           <string>Device posture open</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/all/posture_open_0BA</normaloff>:/all/posture_open_0BA</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="ColorGroup" stdset="0">
+           <string>Button</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="RaisedMaterialButton" name="btn_postureTent">
+          <property name="toolTip">
+           <string>Tent</string>
+          </property>
+          <property name="minimumSize">
+            <size>
+             <width>36</width>
+             <height>36</height>
+            </size>
+          </property>
+          <property name="accessibleDescription">
+           <string>Device posture tent</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/all/posture_tent_0BA</normaloff>:/all/posture_tent_0BA</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="ColorGroup" stdset="0">
+           <string>Button</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </widget>
      </widget>
     </widget>
