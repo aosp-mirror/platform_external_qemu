@@ -32,7 +32,6 @@
 
 #include "android/avd/info.h"                         // for avdInfo_getAvdF...
 #include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
-#include "android/base/misc/StringUtils.h"
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/globals.h"                          // for android_avdInfo
 #include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
@@ -144,21 +143,16 @@ VirtualSensorsPage::~VirtualSensorsPage() {
     }
 }
 
-static QString postureString(FoldablePostures posture) {
-    switch(posture) {
-        case POSTURE_UNKNOWN:
-            return "Unknown";
-        case POSTURE_CLOSED:
-            return "Closed";
-        case POSTURE_HALF_OPENED:
-            return "Half open";
-        case POSTURE_OPENED:
-            return "Open";
-        case POSTURE_FLIPPED:
-            return "Flipped";
-        default:
-            return "Unknown";
-    }
+void VirtualSensorsPage::togglePostureButtonsVisibility(bool newVisibility) {
+    struct FoldableState foldableState;
+    android_foldable_get_state(&foldableState);
+    bool *supportedFoldablePostures = foldableState.config.supportedFoldablePostures;
+
+    mUi->btn_postureClosed->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_CLOSED]);
+    mUi->btn_postureFlipped->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_FLIPPED]);
+    mUi->btn_postureHalfOpen->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_HALF_OPENED]);
+    mUi->btn_postureOpen->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_OPENED]);
+    mUi->btn_postureTent->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_TENT]);
 }
 
 void VirtualSensorsPage::setupHingeSensorUI() {
@@ -169,33 +163,20 @@ void VirtualSensorsPage::setupHingeSensorUI() {
     mUi->hinge0Slider->setHidden(true);
     mUi->hinge1Slider->setHidden(true);
     mUi->hinge2Slider->setHidden(true);
+    mUi->hinge0Slider->setLabelHidden();
+    mUi->hinge1Slider->setLabelHidden();
+    mUi->hinge2Slider->setLabelHidden();
+    mUi->verticalLayout->setSpacing(1);
     mUi->accelModeFold->setHidden(true);
     if (android_foldable_hinge_configured()) {
+        mUi->lbl_posture->setHidden(false);
+        mUi->lbl_currentPosture->setHidden(false);
+        mUi->lbl_currentPostureValue->setHidden(false);
+        togglePostureButtonsVisibility(true);
         mUi->accelModeFold->setHidden(false);
         mUi->accelModeFold->setChecked(true);
         mUi->accelModeRotate->setChecked(false);
         mUi->accelerometerSliders->setCurrentIndex(2);
-        connect(mUi->posture, SIGNAL(activated(int)), this,
-                SLOT(on_posture_valueChanged(int)));
-
-        // read postures to build drop-down menu
-        std::string postureList(android_hw->hw_sensor_posture_list);
-        std::vector<std::string> postureListTokens;
-        android::base::splitTokens(postureList, &postureListTokens, ",");
-        mIndexToPosture.push_back(POSTURE_UNKNOWN);
-        for (auto entry : postureListTokens) {
-            FoldablePostures posture = (FoldablePostures)std::stoi(entry);
-            if (posture >= POSTURE_MAX || posture < POSTURE_UNKNOWN) {
-                LOG(ERROR) << "Invalid posture " << posture;
-                continue;
-            }
-            mIndexToPosture.push_back(posture);
-        }
-        std::sort(mIndexToPosture.begin(), mIndexToPosture.end());
-        for (auto entry : mIndexToPosture) {
-            mUi->posture->addItem(postureString(entry));
-        }
-
         struct FoldableState foldableState;
         android_foldable_get_state(&foldableState);
         switch (foldableState.config.numHinges) {
@@ -225,6 +206,26 @@ void VirtualSensorsPage::setupHingeSensorUI() {
 void VirtualSensorsPage::showEvent(QShowEvent* event) {
     emit windowVisible();
     mFirstShow = false;
+}
+
+void VirtualSensorsPage::on_btn_postureClosed_clicked() {
+    on_posture_valueChanged(POSTURE_CLOSED);
+}
+
+void VirtualSensorsPage::on_btn_postureFlipped_clicked() {
+    on_posture_valueChanged(POSTURE_FLIPPED);
+}
+
+void VirtualSensorsPage::on_btn_postureHalfOpen_clicked() {
+    on_posture_valueChanged(POSTURE_HALF_OPENED);
+}
+
+void VirtualSensorsPage::on_btn_postureOpen_clicked() {
+    on_posture_valueChanged(POSTURE_OPENED);
+}
+
+void VirtualSensorsPage::on_btn_postureTent_clicked() {
+    on_posture_valueChanged(POSTURE_TENT);
 }
 
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
@@ -683,7 +684,7 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
                     getPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE2),
                     false);
         }
-        if (!mUi->posture->isHidden()) {
+        if (android_foldable_hinge_configured()) {
             updateUIPosture();
         }
     }
@@ -792,15 +793,10 @@ void VirtualSensorsPage::on_accelModeFold_toggled() {
 }
 
 void VirtualSensorsPage::on_posture_valueChanged(int index) {
-    if (index >= mIndexToPosture.size()) {
-        // cannot be here
-        LOG(ERROR) << "Invalid posture index " << index;
+    if (mCurrentPosture == (enum FoldablePostures)index) {
         return;
     }
-    if (mCurrentPosture == mIndexToPosture[index]) {
-        return;
-    }
-    mCurrentPosture = mIndexToPosture[index];
+    mCurrentPosture = (enum FoldablePostures)index;
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
                                PHYSICAL_INTERPOLATION_SMOOTH,
                                (double)mCurrentPosture);
@@ -853,13 +849,26 @@ void VirtualSensorsPage::updateUIPosture() {
     enum FoldablePostures posture =
             (enum FoldablePostures)getPhysicalParameterTarget(
                     PHYSICAL_PARAMETER_POSTURE);
-    if (mCurrentPosture != posture) {
-        mCurrentPosture = posture;
-        for (int i = 0; i < mIndexToPosture.size(); i++) {
-            if (mIndexToPosture[i] == mCurrentPosture) {
-                mUi->posture->setCurrentIndex(i);
-                break;
-            }
-        }
+    mCurrentPosture = posture;
+    switch(mCurrentPosture) {
+        case POSTURE_CLOSED:
+            mUi->lbl_currentPostureValue->setText(tr("Closed"));
+            break;
+        case POSTURE_HALF_OPENED:
+            mUi->lbl_currentPostureValue->setText(tr("Half-Open"));
+            break;
+        case POSTURE_OPENED:
+            mUi->lbl_currentPostureValue->setText(tr("Open"));
+            break;
+        case POSTURE_FLIPPED:
+            mUi->lbl_currentPostureValue->setText(tr("Flipped"));
+            break;
+        case POSTURE_TENT:
+            mUi->lbl_currentPostureValue->setText(tr("Tent"));
+            break;
+        case POSTURE_UNKNOWN:
+        default:
+            mUi->lbl_currentPostureValue->setText(tr("Unknown"));
+            break;
     }
 }
