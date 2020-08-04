@@ -63,6 +63,9 @@ typedef struct QAndroidEmulatorWindowAgent {
     bool (*isFolded)(void);
     bool (*getFoldedArea)(int* x, int* y, int* w, int* h);
 
+    // Update UI indicator which shows which foldable posture device is in
+    void (*updateFoldablePostureIndicator)(void);
+
     // Set the UI display region
     void (*setUIDisplayRegion)(int, int, int, int);
     bool (*getMultiDisplay)(uint32_t,
