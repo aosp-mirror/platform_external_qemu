@@ -168,5 +168,5 @@ private:
     QElapsedTimer mLastInteractionElapsed;
     enum FoldablePostures mCurrentPosture = POSTURE_UNKNOWN;
 
-    void updateCurrentPostureLabel();
+    void updateCurrentPosture();
 };
