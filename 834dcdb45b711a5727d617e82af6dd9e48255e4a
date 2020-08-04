@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5bb789aa_e9fab2fd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-08-04T20:26:13Z",
+      "side": 1,
+      "message": "Do not yet submit, as this will break on our physical machines with the following:\n\nYou need to have at least XCode 10 installed, not Xcode 9.2 Build version 9C40b\nNo supported OSX SDKs/Xcode version found on the machine at  (Need any of: [10.13])\nYou will need at least XCode version 10 to build!\nPlease obtain MacOSX10.13.sdk.tar.gz and make it available as an sdk.\nYou can obtain this by tarring up the SDK directory from an XCode version that supports the SDK\nSee https://developer.apple.com/documentation/macos-release-notes for wich XCode release ships with the sdk you need.\nFor example:\ntar cvf MacOSX10.13.sdk.tar.gz -C /Applications/XCode_old.app/Platforms/MacOSX.platform/Developer/SDKs/ MacOSX10.13.sdk\nAnd making it available in your XCode version:\ntar xzvf ~/Downloads/MacOSX10.13.sdk.tar.gz -C /Platforms/MacOSX.platform/Developer/SDKs/\nERROR: Required sdk not available..\n\n",
+      "revId": "834dcdb45b711a5727d617e82af6dd9e48255e4a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
