@@ -223,6 +223,7 @@ enum FoldablePostures {
     POSTURE_HALF_OPENED = 2,
     POSTURE_OPENED = 3,
     POSTURE_FLIPPED = 4,
+    POSTURE_TENT = 5,
     POSTURE_MAX
 };
 
@@ -301,6 +302,8 @@ struct FoldableConfig {
     struct FoldableHingeParameters hingeParams[ANDROID_FOLDABLE_MAX_HINGES];
     // For rollables only
     struct RollableParameters rollableParams;
+
+    bool supportedFoldablePostures[POSTURE_MAX];
 };
 
 struct FoldableState {
