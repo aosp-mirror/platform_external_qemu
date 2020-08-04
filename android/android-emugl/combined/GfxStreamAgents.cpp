@@ -257,6 +257,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
             fprintf(stderr, "window-agent-GfxStream-impl: .getFoldedArea\n");
             return true;
         },
+        .updateFoldablePostureIndicator = [] {},
         .setUIDisplayRegion =
                 [](int x_offset, int y_offset, int w, int h) {
                     fprintf(stderr,
