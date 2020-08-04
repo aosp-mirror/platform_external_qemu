@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a7f1250_ec99b5ec",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 19
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1101621
+      },
+      "writtenOn": "2020-08-04T00:18:11Z",
+      "side": 1,
+      "message": "just some nits.  it\u0027s totally fine if you don\u0027t fix them.",
+      "revId": "e27fc0f02716edadfa8e05a0854031ffec4067d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f84133d7_1e23e86d",
+        "filename": "include/standard-headers/linux/virtio_gpu.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1101621
+      },
+      "writtenOn": "2020-08-04T00:18:11Z",
+      "side": 1,
+      "message": "nit: not in the newest spec -- remove when you are done.",
+      "range": {
+        "startLine": 310,
+        "startChar": 0,
+        "endLine": 312,
+        "endChar": 0
+      },
+      "revId": "e27fc0f02716edadfa8e05a0854031ffec4067d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "89cd8aea_665bc933",
+        "filename": "include/standard-headers/linux/virtio_pci.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1101621
+      },
+      "writtenOn": "2020-08-04T00:18:11Z",
+      "side": 1,
+      "message": "nit: not the newest shm cap.  see crrev.com/c/2160030 for details.",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 67
+      },
+      "revId": "e27fc0f02716edadfa8e05a0854031ffec4067d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
