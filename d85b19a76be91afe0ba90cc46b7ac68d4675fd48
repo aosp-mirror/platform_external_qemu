@@ -1,0 +1,31 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004204781",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1380577?revision\u003d6",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "ce28e1b1_6ea380b9",
+        "filename": "android/android-emugl/combined/GoldfishOpenglTestEnv.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-04T17:46:17Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027deny list\u0027 or \u0027allow list\u0027; see https://developers.google.com/style/word-list#blacklist for more details.",
+      "range": {
+        "startLine": 309,
+        "startChar": 61,
+        "endLine": 309,
+        "endChar": 70
+      },
+      "revId": "d85b19a76be91afe0ba90cc46b7ac68d4675fd48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
