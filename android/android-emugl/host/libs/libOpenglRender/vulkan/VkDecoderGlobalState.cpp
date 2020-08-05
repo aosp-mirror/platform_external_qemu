@@ -2573,16 +2573,82 @@ public:
                 VK_EXT_MEMORY_HANDLE_INVALID,
         };
 #endif
+
+        AutoLock lock(mLock);
+
+        auto physdev = android::base::find(mDeviceToPhysicalDevice, device);
+
+        if (!physdev) {
+            // User app gave an invalid VkDevice,
+            // but we don't really want to crash here.
+            // We should allow invalid apps.
+            return VK_ERROR_DEVICE_LOST;
+        }
+
+        auto physdevInfo = android::base::find(mPhysdevInfo, *physdev);
+
+        if (!physdevInfo) {
+            // If this fails, we crash, as we assume that the memory properties
+            // map should have the info.
+            emugl::emugl_crash_reporter(
+                    "FATAL: Could not get memory properties for "
+                    "VkPhysicalDevice");
+        }
+
+        // If the memory was allocated with a type index that corresponds
+        // to a memory type that is host visible, let's also map the entire
+        // thing.
+
+        // First, check validity of the user's type index.
+        if (localAllocInfo.memoryTypeIndex >=
+            physdevInfo->memoryProperties.memoryTypeCount) {
+            // Continue allowing invalid behavior.
+            return VK_ERROR_INCOMPATIBLE_DRIVER;
+        }
+
+        VkMemoryPropertyFlags memoryPropertyFlags =
+                physdevInfo->memoryProperties
+                        .memoryTypes[localAllocInfo.memoryTypeIndex]
+                        .propertyFlags;
+
+        lock.unlock();
+
         if (importCbInfoPtr) {
             // Ensure color buffer has Vulkan backing.
-            setupVkColorBuffer(
-                    importCbInfoPtr->colorBuffer,
-                    false /* not vulkan only */,
-                    nullptr,
-                    // Modify the allocation size and type index
-                    // to suit the resulting image memory size.
-                    &localAllocInfo.allocationSize,
-                    &localAllocInfo.memoryTypeIndex);
+            setupVkColorBuffer(importCbInfoPtr->colorBuffer,
+                               false /* not vulkan only */,
+                               android::base::kNullopt /* memoryProperty */,
+
+                               // Found an issue with setting this to
+                               // localAllocInfo.memoryTypeIndex:
+                               //
+                               // This type index mechanism breaks "Modify the
+                               // allocation size and type index to suit the
+                               // resulting image memory size." which seems to
+                               // be needed to keep the Android/Fuchsia guest
+                               // memory type index consistent across guest
+                               // allocations,, and without which those guests
+                               // might end up import allocating from a color
+                               // buffer with mismatched type indices.
+                               //
+                               // Hence, maybe we only keep the memoryProperty
+                               // part for now? It will still work, and
+                               // VkCommonOperations.cpp will have a mechanism
+                               // to ensure type index consistency of the host
+                               // visible buffer allocs.
+                               //
+                               // I suppose in the future we should make it so
+                               // the guest can only allocate external
+                               // images/buffers off one type index for image
+                               // and one type index for buffer to begin with,
+                               // via filtering from the host.
+
+                               android::base::kNullopt, nullptr,
+
+                               // Modify the allocation size and type index
+                               // to suit the resulting image memory size.
+                               &localAllocInfo.allocationSize,
+                               &localAllocInfo.memoryTypeIndex);
 
             if (m_emu->instanceSupportsExternalMemoryCapabilities) {
                 VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
@@ -2648,38 +2714,7 @@ public:
             return result;
         }
 
-        AutoLock lock(mLock);
-
-        auto physdev = android::base::find(mDeviceToPhysicalDevice, device);
-
-        if (!physdev) {
-            // User app gave an invalid VkDevice,
-            // but we don't really want to crash here.
-            // We should allow invalid apps.
-            return VK_ERROR_DEVICE_LOST;
-        }
-
-        auto physdevInfo =
-            android::base::find(mPhysdevInfo, *physdev);
-
-        if (!physdevInfo) {
-            // If this fails, we crash, as we assume that the memory properties
-            // map should have the info.
-            emugl::emugl_crash_reporter(
-                    "FATAL: Could not get memory properties for "
-                    "VkPhysicalDevice");
-        }
-
-        // If the memory was allocated with a type index that corresponds
-        // to a memory type that is host visible, let's also map the entire
-        // thing.
-
-        // First, check validity of the user's type index.
-        if (localAllocInfo.memoryTypeIndex >=
-                physdevInfo->memoryProperties.memoryTypeCount) {
-            // Continue allowing invalid behavior.
-            return VK_ERROR_INCOMPATIBLE_DRIVER;
-        }
+        lock.lock();
 
         mMapInfo[*pMemory] = MappedMemoryInfo();
         auto& mapInfo = mMapInfo[*pMemory];
@@ -2689,14 +2724,8 @@ public:
             mapInfo.ioSurface = getColorBufferIOSurface(importCbInfoPtr->colorBuffer);
         }
 
-        VkMemoryPropertyFlags flags =
-            physdevInfo->
-            memoryProperties
-            .memoryTypes[localAllocInfo.memoryTypeIndex]
-            .propertyFlags;
-
         bool hostVisible =
-            flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+                memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
 
         if (!hostVisible) {
             *pMemory = new_boxed_non_dispatchable_VkDeviceMemory(*pMemory);
