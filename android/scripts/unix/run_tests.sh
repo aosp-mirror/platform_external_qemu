@@ -168,7 +168,7 @@ esac
 export CTEST_OUTPUT_ON_FAILURE=1
 OLD_DIR=$PWD
 cd $OPT_OUT
-${CTEST} -j ${NUM_JOBS}  --output-on-failure || ${CTEST} --rerun-failed --output-on-failure || FAILURES="$FAILURES unittests"
+${CTEST} -j ${NUM_JOBS}  --output-on-failure --stop-on-failure || (${CTEST} --stop-on-failure --rerun-failed --output-on-failure 1>&2) || FAILURES="$FAILURES unittests"
 cd ..
 
 if [ "$OPT_SKIP_EMULATOR_CHECK" ] ; then
