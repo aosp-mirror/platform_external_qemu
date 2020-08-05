@@ -13,11 +13,12 @@
 // limitations under the License.
 #include "VkCommonOperations.h"
 
+#include "android/base/Log.h"
+#include "android/base/Optional.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/containers/StaticMap.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
-#include "android/base/Log.h"
 
 #include "FrameBuffer.h"
 #include "VulkanDispatch.h"
@@ -47,6 +48,7 @@
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
+using android::base::Optional;
 using android::base::StaticLock;
 using android::base::StaticMap;
 
@@ -1248,7 +1250,7 @@ bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle) {
 }
 
 static uint32_t lastGoodTypeIndex(uint32_t indices) {
-    for (uint32_t i = 31; i >= 0; --i) {
+    for (int32_t i = 31; i >= 0; --i) {
         if (indices & (1 << i)) {
             return i;
         }
@@ -1256,7 +1258,27 @@ static uint32_t lastGoodTypeIndex(uint32_t indices) {
     return 0;
 }
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* exported, VkDeviceSize* allocSize, uint32_t* typeIndex) {
+static uint32_t lastGoodTypeIndexWithMemoryProperties(
+        uint32_t indices,
+        VkMemoryPropertyFlags memoryProperty) {
+    for (int32_t i = 31; i >= 0; --i) {
+        if ((indices & (1u << i)) &&
+            (!memoryProperty ||
+             (sVkEmulation->deviceInfo.memProps.memoryTypes[i].propertyFlags &
+              memoryProperty))) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+bool setupVkColorBuffer(uint32_t colorBufferHandle,
+                        bool vulkanOnly,
+                        Optional<uint32_t> memoryProperty,
+                        Optional<uint32_t> memoryTypeIndex,
+                        bool* exported,
+                        VkDeviceSize* allocSize,
+                        uint32_t* typeIndex) {
     if (!isColorBufferVulkanCompatible(colorBufferHandle)) return false;
 
     auto vk = sVkEmulation->dvk;
@@ -1285,6 +1307,13 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
         // get VK_ERROR_DEVICE_LOST
         if (typeIndex) *typeIndex = infoPtr->memory.typeIndex;
         return true;
+    }
+
+    // Check arguments validity
+    if (memoryProperty.hasValue() && memoryTypeIndex.hasValue()) {
+        LOG(ERROR) << "memoryProperty and memoryTypeIndex cannot be both "
+                      "non-nullopt.";
+        return false;
     }
 
     VkFormat vkFormat = glFormat2VkFormat(internalformat);
@@ -1346,17 +1375,46 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
     vk->vkGetImageMemoryRequirements(sVkEmulation->device, res.image,
                                      &res.memReqs);
 
+    if (memoryProperty.hasValue()) {
+        memoryProperty = memoryProperty & (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
+                                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+    }
+
     res.memory.size = res.memReqs.size;
-    res.memory.typeIndex = lastGoodTypeIndex(res.memReqs.memoryTypeBits);
+
+    // Determine memory type.
+    if (memoryTypeIndex.hasValue()) {
+        // For ColorBuffers set up when handling vkAllocateMemory(),
+        // clients already passed the memory type index, so we can
+        // just use this index.
+        res.memory.typeIndex = *memoryTypeIndex;
+    } else if (memoryProperty.hasValue()) {
+        res.memory.typeIndex = lastGoodTypeIndexWithMemoryProperties(
+                res.memReqs.memoryTypeBits, *memoryProperty);
+    } else {
+        res.memory.typeIndex = lastGoodTypeIndex(res.memReqs.memoryTypeBits);
+    }
 
     LOG(VERBOSE) << "ColorBuffer " << colorBufferHandle
                  << "allocation size and type index: " << res.memory.size
-                 << ", " << res.memory.typeIndex;
+                 << ", " << res.memory.typeIndex
+                 << ", allocated memory property: "
+                 << sVkEmulation->deviceInfo.memProps
+                            .memoryTypes[res.memory.typeIndex]
+                            .propertyFlags;
+
+    if (memoryProperty.hasValue()) {
+        LOG(VERBOSE) << "requested memory property: " << *memoryProperty;
+    }
+    if (memoryTypeIndex.hasValue()) {
+        LOG(VERBOSE) << "requested memory type index: " << *memoryTypeIndex;
+    }
 
     bool allocRes = allocExternalMemory(vk, &res.memory);
 
     if (!allocRes) {
         LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
+        // TODO(liyl): should we early terminate here??
     }
 
     VkResult bindImageMemoryRes =
@@ -1366,6 +1424,22 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
         fprintf(stderr, "%s: Failed to bind image memory. %d\n", __func__,
         bindImageMemoryRes);
         return bindImageMemoryRes;
+    }
+
+    bool isHostVisibleMemory =
+            memoryProperty.hasValue() &&
+            (memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+    if (isHostVisibleMemory) {
+        VkResult mapMemoryRes =
+                vk->vkMapMemory(sVkEmulation->device, res.memory.memory, 0,
+                                res.memory.size, {}, &res.memory.mappedPtr);
+
+        if (mapMemoryRes != VK_SUCCESS) {
+            fprintf(stderr, "%s: Failed to map image memory. %d\n", __func__,
+                    mapMemoryRes);
+            return mapMemoryRes;
+        }
     }
 
     if (sVkEmulation->instanceSupportsMoltenVK) {
@@ -1807,6 +1881,37 @@ IOSurfaceRef getColorBufferIOSurface(uint32_t colorBuffer) {
     CFRetain(infoPtr->ioSurface);
 #endif
     return infoPtr->ioSurface;
+}
+
+int32_t mapGpaToColorBuffer(uint32_t colorBufferHandle, uint64_t gpa) {
+    if (!sVkEmulation || !sVkEmulation->live)
+        return VK_ERROR_DEVICE_LOST;
+
+    auto vk = sVkEmulation->dvk;
+
+    AutoLock lock(sVkEmulationLock);
+
+    auto infoPtr =
+            android::base::find(sVkEmulation->colorBuffers, colorBufferHandle);
+
+    if (!infoPtr) {
+        return VK_ERROR_INVALID_EXTERNAL_HANDLE;
+    }
+
+    // Pass gpa (guest physical address) to host Vulkan.
+    uint64_t address = gpa;
+    auto result = vk->vkMapMemoryIntoAddressSpaceGOOGLE(
+            sVkEmulation->device, infoPtr->memory.memory, &address);
+    if (result != VK_SUCCESS) {
+        return result;
+    }
+
+    // After calling vkMapMemoryIntoAddressSpaceGOOGLE, address stores hva (host
+    // virtual address) of the memory.
+    constexpr uint64_t kPageOffsetMask = 0xfffu;  // 4095
+    infoPtr->memory.pageOffset = address & kPageOffsetMask;
+
+    return infoPtr->memory.pageOffset;
 }
 
 bool setupVkBuffer(uint32_t bufferHandle,
