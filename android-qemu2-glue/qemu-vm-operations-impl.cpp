@@ -966,5 +966,5 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .getRunState = qemu_get_runstate,
 };
 
-const QAndroidVmOperations* const gQAndroidVmOperations =
+extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;
