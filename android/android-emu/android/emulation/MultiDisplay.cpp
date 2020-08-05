@@ -60,8 +60,10 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
     LOG(VERBOSE) << "setMultiDisplay id " << id << " "
                  << x << " " << y << " " << w << " " << h << " "
                 << dpi << " " << flag << " " << (add? "add":"del");
-    if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) ||
-        android_foldable_folded_area_configured()) {
+    if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
+        return -1;
+    }
+    if (android_foldable_any_folded_area_configured()) {
         return -1;
     }
     if (mGuestMode) {
@@ -647,8 +649,10 @@ void MultiDisplay::loadConfig() {
     // For snapshot, MultiDisplayPipe query will not happen, instead,
     // onLoad() function later may overwrite the multidisplay states to
     // in sync with guest states.
-    if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) ||
-        android_foldable_folded_area_configured()) {
+    if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
+        return;
+    }
+    if (android_foldable_any_folded_area_configured()) {
         return;
     }
     if (mGuestMode) {

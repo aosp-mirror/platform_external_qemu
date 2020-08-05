@@ -135,6 +135,9 @@ typedef enum{
     PHYSICAL_PARAMETER_(HINGE_ANGLE1,"hinge-angle1",HingeAngle1,float) \
     PHYSICAL_PARAMETER_(HINGE_ANGLE2,"hinge-angle2",HingeAngle2,float) \
     PHYSICAL_PARAMETER_(POSTURE,"posture",Posture,float) \
+    PHYSICAL_PARAMETER_(ROLLABLE0,"rollable0",Rollable0,float) \
+    PHYSICAL_PARAMETER_(ROLLABLE1,"rollable1",Rollable1,float) \
+    PHYSICAL_PARAMETER_(ROLLABLE2,"rollable2",Rollable2,float) \
 
 typedef enum {
 #define PHYSICAL_PARAMETER_(x,y,z,w)  PHYSICAL_PARAMETER_##x,
@@ -216,6 +219,13 @@ extern void android_hw_sensor_set_window_agent(void* agent);
 /* Foldable state */
 
 #define ANDROID_FOLDABLE_MAX_HINGES 3
+#define ANDROID_FOLDABLE_MAX_ROLLS 2
+#if ANDROID_FOLDABLE_MAX_HINGES > ANDROID_FOLDABLE_MAX_ROLLS
+#define ANDROID_FOLDABLE_MAX_HINGES_ROLLS ANDROID_FOLDABLE_MAX_HINGES
+#else
+#define ANDROID_FOLDABLE_MAX_HINGES_ROLLS ANDROID_FOLDABLE_MAX_ROLLS
+#endif
+#define ANDROID_FOLDABLE_MAX_DISPLAY_REGIONS 3
 
 enum FoldablePostures {
     POSTURE_UNKNOWN = 0,
@@ -231,7 +241,7 @@ struct AnglesToPosture {
     struct {
         float left;
         float right;
-    } angles[ANDROID_FOLDABLE_MAX_HINGES];
+    } angles[ANDROID_FOLDABLE_MAX_HINGES_ROLLS];
     enum FoldablePostures posture;
 };
 
@@ -284,41 +294,43 @@ struct FoldableHingeParameters {
 
 struct RollableParameters {
     float rollRadiusAsDisplayPercent; // % of display height (horiz. roll) or display width (vertical roll) that determines the radius of the rollable
+    int displayId;
     float minRolledPercent;
     float maxRolledPercent;
     float defaultRolledPercent;
+    int direction;
 };
 
 struct FoldableConfig {
     enum FoldableDisplayType type;
     enum FoldableHingeSubType hingesSubType;
-    enum FoldablePostures foldAtPosture;
-    // Display id where the folding occurs.  TODO: account for multiple
-    // displays that are related by a hinge, perhaps via folding (heh)
-    // displayId into hingeParams
+    bool supportedFoldablePostures[POSTURE_MAX];
 
     // For hinges only
     int numHinges;
+    enum FoldablePostures foldAtPosture;
     struct FoldableHingeParameters hingeParams[ANDROID_FOLDABLE_MAX_HINGES];
     // For rollables only
-    struct RollableParameters rollableParams;
-
-    bool supportedFoldablePostures[POSTURE_MAX];
+    int numRolls;
+    enum FoldablePostures resizeAtPosture[ANDROID_FOLDABLE_MAX_DISPLAY_REGIONS];
+    struct RollableParameters rollableParams[ANDROID_FOLDABLE_MAX_ROLLS];
 };
 
 struct FoldableState {
     struct FoldableConfig config;
     float currentHingeDegrees[ANDROID_FOLDABLE_MAX_HINGES];
-    float percentRolled;
+    float currentRolledPercent[ANDROID_FOLDABLE_MAX_ROLLS];
     enum FoldablePostures currentPosture;
 };
 
 int android_foldable_get_state(struct FoldableState* state);
 bool android_foldable_hinge_configured();
-bool android_foldable_folded_area_configured();
+bool android_foldable_any_folded_area_configured();
+bool android_foldable_folded_area_configured(int area);
 bool android_foldable_is_folded();
 bool android_foldable_fold();
 bool android_foldable_unfold();
 bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h);
+bool android_foldable_rollable_configured();
 
 ANDROID_END_HEADER
