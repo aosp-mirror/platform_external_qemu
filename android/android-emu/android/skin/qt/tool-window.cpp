@@ -157,7 +157,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
       mUserActionsCounter(user_actions_counter),
-      mPostureSelectionDialog(new PostureSelectionDialog(this)) {
+      mPostureSelectionDialog(new PostureSelectionDialog(this)),
+      mFoldableSyncToAndroidSuccess(false),
+      mFoldableSyncToAndroidTimeout(false),
+      mFoldableSyncToAndroid([this](FoldableSyncToAndroidItem&& item) {
+          return foldableSyncToAndroidItemFunction(item);
+      }) {
 
 // "Tool" type windows live in another layer on top of everything in OSX, which
 // is undesirable because it means the extended window must be on top of the
@@ -174,7 +179,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
-    if (android_foldable_folded_area_configured()) {
+    if (android_foldable_any_folded_area_configured()) {
         mToolsUi->zoom_button->hide();
         mToolsUi->zoom_button->setEnabled(false);
     }
@@ -309,8 +314,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     // smaller than this.
 
     if (!android_foldable_hinge_configured() &&
-        !android_foldable_folded_area_configured()) {
+        !android_foldable_folded_area_configured(0) &&
+        !android_foldable_rollable_configured()) {
         mToolsUi->change_posture_button->hide();
+    } else {
+        // show posture icon for rollable, foldable and legacy fold
+        mFoldableSyncToAndroid.start();
     }
 
     connect(mPostureSelectionDialog, SIGNAL(newPostureRequested(int)), this,
@@ -322,6 +331,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 }
 
 ToolWindow::~ToolWindow() {
+    if (mFoldableSyncToAndroid.isStarted()) {
+        mFoldableSyncToAndroid.enqueue({SEND_EXIT, });
+    }
+    mFoldableSyncToAndroid.join();
 }
 
 void ToolWindow::updateButtonUiCommand(QPushButton* button,
@@ -543,7 +556,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::SHOW_PANE_MULTIDISPLAY:
             if (down) {
                 if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
-                    && !android_foldable_folded_area_configured()) {
+                    && !android_foldable_any_folded_area_configured()) {
                     showOrRaiseExtendedWindow(PANE_IDX_MULTIDISPLAY);
                 }
             }
@@ -648,6 +661,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             }
             break;
         case QtUICommand::CHANGE_FOLDABLE_POSTURE:
+            printf("CHANGE_FOLDABLE_POSTURE %d\n", mLastRequestedFoldablePosture);
             if (down && mLastRequestedFoldablePosture != -1) {
                 sUiEmuAgent->sensors->setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
                                                                  (float)mLastRequestedFoldablePosture,
@@ -657,53 +671,62 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             }
             break;
         case QtUICommand::UPDATE_FOLDABLE_POSTURE_INDICATOR:
-            if (down &&
-                (android_foldable_hinge_configured() ||
-                 android_foldable_folded_area_configured())) {
+            if (down) {
                 float posture, unused1, unused2;
                 sUiEmuAgent->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_POSTURE,
-                                                           &posture,
-                                                           &unused1,
-                                                           &unused2,
-                                                           PARAMETER_VALUE_TYPE_CURRENT);
+                                                        &posture,
+                                                        &unused1,
+                                                        &unused2,
+                                                        PARAMETER_VALUE_TYPE_CURRENT);
+                printf("UPDATE_FOLDABLE_POSTURE_INDICATOR %f\n", posture);
                 switch ((enum FoldablePostures) posture) {
-                case POSTURE_OPENED:
-                    ChangeIcon(mToolsUi->change_posture_button,
-                               "posture_open", "Change posture");
-                    break;
-                case POSTURE_CLOSED:
-                    ChangeIcon(mToolsUi->change_posture_button,
-                               "posture_closed", "Change posture");
-                    break;
-                case POSTURE_HALF_OPENED:
-                    ChangeIcon(mToolsUi->change_posture_button,
-                               "posture_half-open", "Change posture");
-                    break;
-                case POSTURE_FLIPPED:
-                    ChangeIcon(mToolsUi->change_posture_button,
-                               "posture_flipped", "Change posture");
-                    break;
-                case POSTURE_TENT:
-                    ChangeIcon(mToolsUi->change_posture_button,
-                              "posture_tent", "Change posture");
-                    break;
-                default:;
+                    case POSTURE_OPENED:
+                        ChangeIcon(mToolsUi->change_posture_button,
+                                "posture_open", "Change posture");
+                        break;
+                    case POSTURE_CLOSED:
+                        ChangeIcon(mToolsUi->change_posture_button,
+                                "posture_closed", "Change posture");
+                        break;
+                    case POSTURE_HALF_OPENED:
+                        ChangeIcon(mToolsUi->change_posture_button,
+                                "posture_half-open", "Change posture");
+                        break;
+                    case POSTURE_FLIPPED:
+                        ChangeIcon(mToolsUi->change_posture_button,
+                                "posture_flipped", "Change posture");
+                        break;
+                    case POSTURE_TENT:
+                        ChangeIcon(mToolsUi->change_posture_button,
+                                "posture_tent", "Change posture");
+                        break;
+                    default:;
                 }
                 if (android_foldable_is_folded()) {
-                    if (!mFolded) {
-                        mFolded = true;
+                    int xOffset, yOffset, width, height; 
+                    if (android_foldable_get_folded_area(&xOffset, &yOffset, &width, &height)) {
                         mEmulatorWindow->resizeAndChangeAspectRatio(true);
-                        sendFoldedArea();
-                        forwardGenericEventToEmulator(EV_SW, SW_LID, true);
-                        forwardGenericEventToEmulator(EV_SYN, 0, 0);
+                        if (android_foldable_rollable_configured()) {
+                            // rollable has up to 3 folded-areas, need guarntee the folded-area
+                            // are updated in window manager before sending LID_CLOSE
+                            mFoldableSyncToAndroid.enqueue({SEND_LID_OPEN, });
+                            mFoldableSyncToAndroid.enqueue({SEND_AREA, xOffset, yOffset, width, height});
+                            mFoldableSyncToAndroid.enqueue({CONFIRM_AREA, xOffset, yOffset, width, height});
+                        }
+                        else {
+                            // hinge or legacy foldable has only one folded area. Once configured, no need
+                            // to configure again.
+                            if (!mFoldableSyncToAndroidSuccess) {
+                                mFoldableSyncToAndroid.enqueue({SEND_AREA, xOffset, yOffset, width, height});
+                                mFoldableSyncToAndroid.enqueue({CONFIRM_AREA, xOffset, yOffset, width, height});
+                            } else {
+                                mFoldableSyncToAndroid.enqueue({SEND_LID_CLOSE, });
+                            }
+                        }
                     }
                 } else {
-                    if (mFolded) {
-                        mFolded = false;
-                        mEmulatorWindow->resizeAndChangeAspectRatio(false);
-                        forwardGenericEventToEmulator(EV_SW, SW_LID, false);
-                        forwardGenericEventToEmulator(EV_SYN, 0, 0);
-                    }
+                    mEmulatorWindow->resizeAndChangeAspectRatio(false);
+                    mFoldableSyncToAndroid.enqueue({SEND_LID_OPEN, });
                 }
             }
 
@@ -823,10 +846,6 @@ void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     sUiEmuAgent = agentPtr;
     ExtendedWindow::setAgent(agentPtr);
     VirtualSceneControlWindow::setAgent(agentPtr);
-
-    if (android_foldable_folded_area_configured()) {
-        sendFoldedArea();
-    }
 
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (!avdPath) {
@@ -1217,31 +1236,102 @@ void ToolWindow::hideRotationButton(bool hide) {
     }
 }
 
-//static
-void ToolWindow::sendFoldedArea() {
-    EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
-    if (emuQtWindow == nullptr) return;
-
-    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-    int width   = android_hw->hw_displayRegion_0_1_width;
-    int height  = android_hw->hw_displayRegion_0_1_height;
-    char foldedArea[64];
-    sprintf(foldedArea, "folded-area %d,%d,%d,%d",
-            xOffset,
-            yOffset,
-            xOffset + width,
-            yOffset + height);
-    emuQtWindow->getAdbInterface()->enqueueCommand(
-            {"shell", "wm", foldedArea},
-            [](const android::emulation::OptionalAdbCommandResult& result) {
-                if (result && result->exit_code == 0) {
-                    VLOG(foldable) << "foldable-page: 'fold-area' command succeeded";
-                }});
-}
-
 void ToolWindow::on_new_posture_requested(int newPosture) {
     mEmulatorWindow->activateWindow();
     mLastRequestedFoldablePosture = newPosture;
     handleUICommand(QtUICommand::CHANGE_FOLDABLE_POSTURE, true);
+}
+
+android::base::WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const FoldableSyncToAndroidItem& item) {
+    switch (item.op) {
+        case SEND_AREA: {
+            EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
+            if (emuQtWindow == nullptr) {
+                break;
+            }
+            char foldedArea[64];
+            sprintf(foldedArea, "folded-area %d,%d,%d,%d",
+                    item.x,
+                    item.y,
+                    item.x + item.width,
+                    item.y + item.height);
+            emuQtWindow->getAdbInterface()->enqueueCommand(
+                    {"shell", "wm", foldedArea},
+                    [](const android::emulation::OptionalAdbCommandResult& result) {
+                        if (result && result->exit_code == 0) {
+                            VLOG(foldable) << "foldable-page: 'fold-area' command succeeded";
+                        }});
+            printf("%s send area %s\n", __func__, foldedArea);
+            break;
+        }
+        case CONFIRM_AREA: {
+            EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
+            if (emuQtWindow) {
+                mFoldableSyncToAndroidSuccess = false;
+                mFoldableSyncToAndroidTimeout = false;
+                int64_t timeOut = System::get()->getUnixTimeUs() + 5000 * 1000;   // 5 second time out
+                // Keep on querying folded area through adb,
+                // until query returns the expected values
+                while (!mFoldableSyncToAndroidSuccess && !mFoldableSyncToAndroidTimeout) {
+                    android::base::AutoLock lock(mLock);
+                    emuQtWindow->getAdbInterface()->enqueueCommand(
+                        {"shell", "wm", "folded-area"},
+                        [this, item, timeOut](const android::emulation::OptionalAdbCommandResult& result) {
+                            android::base::AutoLock lock(this->mLock);
+                            if (System::get()->getUnixTimeUs() > timeOut) {
+                                LOG(ERROR) << "time out waiting for window manager configuring folded area";
+                                this->mFoldableSyncToAndroidTimeout = true;
+                                this->mCv.signalAndUnlock(&lock);
+                                return;
+                            }
+                            if (!result || !result->output) {
+                                VLOG(foldable) << "Invalid output for wm adb-area, query again";
+                                this->mFoldableSyncToAndroidSuccess = false;
+                                this->mCv.signalAndUnlock(&lock);
+                                return;
+                            }
+                            std::string line;
+                            std::string expectedAdbOutput = "Folded area: " +
+                                                            std::to_string(item.x) +
+                                                            "," +
+                                                            std::to_string(item.y) +
+                                                            "," +
+                                                            std::to_string(item.x + item.width) +
+                                                            "," +
+                                                            std::to_string(item.y + item.height);
+                            while (getline(*(result->output), line)) {
+                                if (line.compare(expectedAdbOutput) == 0) {
+                                    this->mFoldableSyncToAndroidSuccess = true;
+                                    break;
+                                }
+                            }
+                            this->mCv.signalAndUnlock(&lock);
+                        }
+                    );
+                    // block thread until adb query for folded-area return
+                    mCv.wait(&lock);
+                    // send LID_CLOSE when expected folded-area is configured in window manager
+                    if (mFoldableSyncToAndroidSuccess) {
+                        forwardGenericEventToEmulator(EV_SW, SW_LID, true);
+                        forwardGenericEventToEmulator(EV_SYN, 0, 0);
+                        VLOG(foldable) << "send LID close";
+                    }
+                }
+            }
+            break;
+        }
+        case SEND_LID_CLOSE:
+            forwardGenericEventToEmulator(EV_SW, SW_LID, true);
+            forwardGenericEventToEmulator(EV_SYN, 0, 0);
+            printf("send close\n");
+            break;
+        case SEND_LID_OPEN:
+            forwardGenericEventToEmulator(EV_SW, SW_LID, false);
+            forwardGenericEventToEmulator(EV_SYN, 0, 0);
+            printf("send open\n");
+            break;
+        case SEND_EXIT:
+            return android::base::WorkerProcessingResult::Stop;
+    }
+    return android::base::WorkerProcessingResult::Continue;
 }

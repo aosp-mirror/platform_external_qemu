@@ -45,6 +45,9 @@ message PhysicalModelEvent {
         HINGE_ANGLE1 = 11;
         HINGE_ANGLE2 = 12;
         POSTURE = 13;
+        ROLLABLE0 = 14;
+        ROLLABLE1 = 15;
+        ROLLABLE2 = 16;
     }
 
     optional ParameterType type = 1;
