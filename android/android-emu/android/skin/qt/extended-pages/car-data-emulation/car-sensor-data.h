@@ -25,6 +25,8 @@
 
 #include "VehicleHalProto.pb.h"  // for EmulatorMessage
 #include "ui_car-sensor-data.h"                          // for CarSensorData
+#include "android/car_sensor_replay/sensor_session_playback.h"
+
 
 class QObject;
 class QWidget;
@@ -138,4 +140,5 @@ private:
                                 const QString& error_message,
                                 bool ignore_error);
     void prepareVhalLoader();
+    SensorSessionPlayback ssp;
 };
