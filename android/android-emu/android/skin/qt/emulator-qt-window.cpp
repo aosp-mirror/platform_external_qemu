@@ -2210,17 +2210,21 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     QRect windowGeo = this->geometry();
     QSize backingSize = mBackingSurface->bitmap->size();
     float scale = (float)windowGeo.width() / (float)backingSize.width();
-    int displayXFolded;
-    int displayYFolded;
     int displayX = android_hw->hw_lcd_width;
     int displayY = android_hw->hw_lcd_height;
-    android_foldable_get_folded_area(nullptr, nullptr, &displayXFolded, &displayYFolded);
 
     if (isFolded) {
+        int displayXFolded;
+        int displayYFolded;
+        android_foldable_get_folded_area(nullptr, nullptr, &displayXFolded, &displayYFolded);
             switch(mOrientation) {
                 default:
                 case SKIN_ROTATION_180:
                 case SKIN_ROTATION_0:
+                    if (backingSize.width() == displayXFolded &&
+                        backingSize.height() == displayYFolded) {
+                        return;
+                    }
                     windowGeo.setWidth((int)(displayXFolded * scale));
                     windowGeo.setHeight((int)(displayYFolded * scale));
                     backingSize.setWidth(displayXFolded);
@@ -2228,6 +2232,10 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
                     break;
                 case SKIN_ROTATION_90:
                 case SKIN_ROTATION_270:
+                    if (backingSize.width() == displayYFolded &&
+                        backingSize.height() == displayXFolded) {
+                        return;
+                    }
                     backingSize.setWidth(displayYFolded);
                     backingSize.setHeight(displayXFolded);
                     windowGeo.setWidth((int)(displayYFolded * scale));
@@ -2239,6 +2247,10 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
             default:
             case SKIN_ROTATION_0:
             case SKIN_ROTATION_180:
+                if (backingSize.width() == displayX &&
+                    backingSize.height() == displayY) {
+                    return;
+                }
                 windowGeo.setWidth((int)(displayX * scale));
                 windowGeo.setHeight((int)(displayY * scale));
                 backingSize.setWidth(displayX);
@@ -2246,6 +2258,10 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
                 break;
             case SKIN_ROTATION_90:
             case SKIN_ROTATION_270:
+                if (backingSize.width() == displayY &&
+                    backingSize.height() == displayX) {
+                    return;
+                }
                 windowGeo.setWidth((int)(displayY* scale));
                 windowGeo.setHeight((int)(displayX* scale));
                 backingSize.setWidth(displayY);
