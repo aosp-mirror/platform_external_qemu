@@ -1256,7 +1256,25 @@ static uint32_t lastGoodTypeIndex(uint32_t indices) {
     return 0;
 }
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* exported, VkDeviceSize* allocSize, uint32_t* typeIndex) {
+static uint32_t lastGoodTypeIndexWithMemoryProperties(
+        uint32_t indices,
+        VkMemoryPropertyFlags memoryProperty) {
+    for (uint32_t i = 31; i >= 0; --i) {
+        if ((indices & (1 << i)) &&
+            (sVkEmulation->deviceInfo.memProps.memoryTypes[i].propertyFlags &
+             memoryProperty)) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+bool setupVkColorBuffer(uint32_t colorBufferHandle,
+                        bool vulkanOnly,
+                        uint32_t memoryProperty,
+                        bool* exported,
+                        VkDeviceSize* allocSize,
+                        uint32_t* typeIndex) {
     if (!isColorBufferVulkanCompatible(colorBufferHandle)) return false;
 
     auto vk = sVkEmulation->dvk;
@@ -1346,17 +1364,27 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
     vk->vkGetImageMemoryRequirements(sVkEmulation->device, res.image,
                                      &res.memReqs);
 
+    memoryProperty = memoryProperty & (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
+                                       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
     res.memory.size = res.memReqs.size;
-    res.memory.typeIndex = lastGoodTypeIndex(res.memReqs.memoryTypeBits);
+    res.memory.typeIndex = lastGoodTypeIndexWithMemoryProperties(
+            res.memReqs.memoryTypeBits,
+            static_cast<VkMemoryPropertyFlags>(memoryProperty));
 
     LOG(VERBOSE) << "ColorBuffer " << colorBufferHandle
                  << "allocation size and type index: " << res.memory.size
-                 << ", " << res.memory.typeIndex;
+                 << ", " << res.memory.typeIndex
+                 << ", requested memory property: " << memoryProperty
+                 << ", allocated memory property: "
+                 << sVkEmulation->deviceInfo.memProps
+                            .memoryTypes[res.memory.typeIndex]
+                            .propertyFlags;
 
     bool allocRes = allocExternalMemory(vk, &res.memory);
 
     if (!allocRes) {
         LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
+        // TODO(liyl): should we early terminate here??
     }
 
     VkResult bindImageMemoryRes =
@@ -1366,6 +1394,21 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly, bool* expor
         fprintf(stderr, "%s: Failed to bind image memory. %d\n", __func__,
         bindImageMemoryRes);
         return bindImageMemoryRes;
+    }
+
+    bool isHostVisibleMemory =
+            memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+
+    if (isHostVisibleMemory) {
+        VkResult mapMemoryRes =
+                vk->vkMapMemory(sVkEmulation->device, res.memory.memory, 0,
+                                res.memory.size, {}, &res.memory.mappedPtr);
+
+        if (mapMemoryRes != VK_SUCCESS) {
+            fprintf(stderr, "%s: Failed to map image memory. %d\n", __func__,
+                    mapMemoryRes);
+            return mapMemoryRes;
+        }
     }
 
     if (sVkEmulation->instanceSupportsMoltenVK) {
@@ -1807,6 +1850,37 @@ IOSurfaceRef getColorBufferIOSurface(uint32_t colorBuffer) {
     CFRetain(infoPtr->ioSurface);
 #endif
     return infoPtr->ioSurface;
+}
+
+int32_t mapGpaToColorBuffer(uint32_t colorBufferHandle, uint64_t gpa) {
+    if (!sVkEmulation || !sVkEmulation->live)
+        return VK_ERROR_DEVICE_LOST;
+
+    auto vk = sVkEmulation->dvk;
+
+    AutoLock lock(sVkEmulationLock);
+
+    auto infoPtr =
+            android::base::find(sVkEmulation->colorBuffers, colorBufferHandle);
+
+    if (!infoPtr) {
+        return VK_ERROR_INVALID_EXTERNAL_HANDLE;
+    }
+
+    // Pass gpa (guest physical address) to host Vulkan.
+    uint64_t address = gpa;
+    auto result = vk->vkMapMemoryIntoAddressSpaceGOOGLE(
+            sVkEmulation->device, infoPtr->memory.memory, &address);
+    if (result != VK_SUCCESS) {
+        return result;
+    }
+
+    // After calling vkMapMemoryIntoAddressSpaceGOOGLE, address stores hva (host
+    // virtual address) of the memory.
+    constexpr uint64_t kPageOffsetMask = 0xfffu;  // 4095
+    infoPtr->memory.pageOffset = address & kPageOffsetMask;
+
+    return infoPtr->memory.pageOffset;
 }
 
 bool setupVkBuffer(uint32_t bufferHandle,
