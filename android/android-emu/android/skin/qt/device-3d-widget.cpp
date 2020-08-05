@@ -59,7 +59,7 @@ static glm::vec3 clampPosition(glm::vec3 position) {
 static constexpr int kAnimationIntervalMs = 33;
 
 Device3DWidget::Device3DWidget(QWidget* parent)
-    : GLWidget(parent), mUseAbstractDevice(android_foldable_hinge_configured()) {
+    : GLWidget(parent), mUseAbstractDevice(android_foldable_hinge_configured() || android_foldable_rollable_configured()) {
     toggleAA();
     setFocusPolicy(Qt::ClickFocus);
 
@@ -279,13 +279,13 @@ bool Device3DWidget::initModel() {
     }
 }
 
-bool Device3DWidget::initAbstractDeviceModel() {
-    android_foldable_get_state(&mFoldableState);
+bool Device3DWidget::initAbstractDeviceHingeModel(FoldableDisplayType type,
+                                                  int numHinges,
+                                                  FoldableHingeParameters* hingeParams) {
     // Create an abstract parameterized model
     // std::vector<float> model_vertex_data;
     // std::vector<GLuint> indices;
-    struct FoldableConfig config = mFoldableState.config;
-    bool hSplit = (config.type == ANDROID_FOLDABLE_HORIZONTAL_SPLIT)
+    bool hSplit = (type == ANDROID_FOLDABLE_HORIZONTAL_SPLIT)
                           ? true
                           : false;
     int32_t displayW =
@@ -296,18 +296,19 @@ bool Device3DWidget::initAbstractDeviceModel() {
     int32_t centerY = displayH / 2;
     if (!hSplit) {
         // rotate 90 degree for vertical split, the result is horizontal split
-        for (uint32_t i = 0; i < config.numHinges; i++) {
-            std::swap(config.hingeParams[i].x, config.hingeParams[i].y);
-            std::swap(config.hingeParams[i].width,
-                      config.hingeParams[i].height);
+        for (uint32_t i = 0; i < numHinges; i++) {
+            std::swap(hingeParams[i].x, hingeParams[i].y);
+            std::swap(hingeParams[i].width,
+                      hingeParams[i].height);
         }
     }
     int32_t x = 0, y = 0;
     int32_t l = x - centerX;
     int32_t r = -l;
     int32_t t, b;
-    struct FoldableHingeParameters* p = config.hingeParams;
-    for (int i = 0; i < config.numHinges; i++) {
+    struct FoldableHingeParameters* p = hingeParams;
+    mDisplaySegments.clear();
+    for (int i = 0; i < numHinges; i++) {
         // NOTE: fold default display only
         if (p[i].displayId != 0) {
             continue;
@@ -324,7 +325,10 @@ bool Device3DWidget::initAbstractDeviceModel() {
         b = t - p[i].height;
         mDisplaySegments.push_back({p[i].x - centerX,
                                     p[i].x - centerX + p[i].width, t, b, true,
-                                    0.0f, 0.0f, glm::mat4()});
+                                    p[i].defaultDegrees, 0.0f, glm::mat4()});
+        printf("add hinge segments %d %d %d %d degree %f\n", p[i].x - centerX,
+                                    p[i].x - centerX + p[i].width, t, b,
+                                    p[i].defaultDegrees);
         y = p[i].y + p[i].height;
     }
     // last display segment
@@ -345,6 +349,7 @@ bool Device3DWidget::initAbstractDeviceModel() {
         }
     }
     mDisplaySegments[mCenterIndex].rotate = 0;
+    printf("centerIndex %d\n", mCenterIndex);
 
     // Translate display segments into a new 3D space, ranging [-4, 4] in x and
     // y axis. This will grarantee the phone occpuied the whole widget screen.
@@ -459,6 +464,118 @@ bool Device3DWidget::initAbstractDeviceModel() {
 
     CHECK_GL_ERROR_RETURN("Failed to load model", false);
     return true;
+}
+
+#define ROLLABLE_SEGMENT_DEGREE 5
+#define PI 3.14125
+bool Device3DWidget::initAbstractDeviceRollModel() {
+    // Create an abstract parameterized model
+    // std::vector<float> model_vertex_data;
+    // std::vector<GLuint> indices;
+    struct FoldableConfig config = mFoldableState.config;
+    // TODO: start with horizontal roll
+    bool hRoll = config.type == ANDROID_FOLDABLE_HORIZONTAL_ROLL ? true : false;
+    int displayW =
+            hRoll ? android_hw->hw_lcd_width : android_hw->hw_lcd_height;
+    int displayH =
+            hRoll ? android_hw->hw_lcd_height : android_hw->hw_lcd_width;
+/*     if (!hRoll) {
+        // rotate 90 degree for vertical split, the result is horizontal split
+        for (uint32_t i = 0; i < config.numHinges; i++) {
+            std::swap(config.hingeParams[i].x, config.hingeParams[i].y);
+            std::swap(config.hingeParams[i].width,
+                      config.hingeParams[i].height);
+        }
+    }
+ */  
+    struct RollableParameters* p = config.rollableParams;
+    // sort the rolls by rolling area low to high
+    std::sort(p, p + config.numRolls, [](RollableParameters a, RollableParameters b)
+        {return a.minRolledPercent < b.minRolledPercent;} );
+    for (int i = 0; i < config.numRolls; i++) {
+        printf("%f  ", p[i].minRolledPercent);
+    }
+
+    // convert the rollable model to a hinge mode
+    int numHinges = 0;
+    std::vector<FoldableHingeParameters> hingeParam;
+    for (int i = 0; i < config.numRolls; i++) {
+        int left = config.rollableParams[i].minRolledPercent;
+        int right = config.rollableParams[i].maxRolledPercent;
+        int current = mFoldableState.currentRolledPercent[i] * displayH / 100.0f;
+        float radius = config.rollableParams[i].rollRadiusAsDisplayPercent * displayH / 100.0f;
+        int rollSurface = PI * radius;
+        printf("left %d right %d current %f %d surface %d\n", left, right, mFoldableState.currentRolledPercent[i], current, rollSurface);
+        if (left == 0) {
+            if (current < rollSurface) {
+                // not a 180 degree roll
+                int y = 0;
+                int numSegs = current * 180 / (rollSurface * ROLLABLE_SEGMENT_DEGREE);
+                for (int j = 0; j < numSegs; j++) {
+                    y += rollSurface * ROLLABLE_SEGMENT_DEGREE / 180;
+                    hingeParam.push_back({ 0, y, displayW, 0, 0, 0.0f, 360.0f, -ROLLABLE_SEGMENT_DEGREE });
+                    printf("add hinge %d %d %d %d\n", 0, y, displayW, 0);
+                }
+            } else {
+                // 180 degree roll
+                hingeParam.push_back({ 0, current - rollSurface, displayW, 0, 0, 0.0f, 360.0f, 0 });
+                int y = current - rollSurface;
+                int numSegs = 180 / ROLLABLE_SEGMENT_DEGREE;
+                for (int j = 0; j < numSegs; j++) {
+                    y += rollSurface * ROLLABLE_SEGMENT_DEGREE / 180;
+                    hingeParam.push_back({ 0, y, displayW, 0, 0, 0.0f, 360.0f, -ROLLABLE_SEGMENT_DEGREE });
+                    printf("add hinge %d %d %d %d\n", 0, y, displayW, 0);
+                }
+            }
+        } else if (right == 100) {
+            if (current + rollSurface < displayH) {
+                // not a 180 degree roll
+                int y = current;
+                int numSegs = (displayH - current) * 180 / (rollSurface * ROLLABLE_SEGMENT_DEGREE);
+                for (int j = 0; j < numSegs; j++) {
+                    hingeParam.push_back({ 0, y, displayW, 0, 0, 0.0f, 360.0f, -ROLLABLE_SEGMENT_DEGREE });
+                    printf("add hinge %d %d %d %d\n", 0, y, displayW, 0);
+                    y += rollSurface * ROLLABLE_SEGMENT_DEGREE / 180;
+                }            
+            } else {
+                // 180 degree roll
+                int y = current;
+                int numSegs = 180 / ROLLABLE_SEGMENT_DEGREE;
+                for (int j = 0; j < numSegs; j++) {
+                    hingeParam.push_back({ 0, y, displayW, 0, 0, 0.0f, 360.0f, -ROLLABLE_SEGMENT_DEGREE });
+                    printf("add hinge %d %d %d %d\n", 0, y, displayW, 0);
+                    y += rollSurface * ROLLABLE_SEGMENT_DEGREE / 180;
+                }
+                hingeParam.push_back({ 0, y, displayW, 0, 0, 0.0f, 360.0f, -ROLLABLE_SEGMENT_DEGREE });
+                    printf("add hinge %d %d %d %d\n", 0, y, displayW, 0);
+            }
+        } else {
+            printf("please config rollable area on either edge of the phone\n");
+            continue;
+        }
+        // Then divide the rollable surface to ROLLABLE_NUM_SEGMENTS of hinge segments
+    }
+    printf("hingpram size %d\n", hingeParam.size());
+    return initAbstractDeviceHingeModel(hRoll ? ANDROID_FOLDABLE_HORIZONTAL_SPLIT : ANDROID_FOLDABLE_VERTICAL_SPLIT,
+                                        hingeParam.size(), hingeParam.data());
+}
+
+bool Device3DWidget::initAbstractDeviceModel() {
+    android_foldable_get_state(&mFoldableState);
+    switch (mFoldableState.config.type)
+    {
+    case ANDROID_FOLDABLE_HORIZONTAL_SPLIT:
+    case ANDROID_FOLDABLE_VERTICAL_SPLIT:
+        return initAbstractDeviceHingeModel(mFoldableState.config.type,
+                                            mFoldableState.config.numHinges,
+                                            mFoldableState.config.hingeParams);
+    case ANDROID_FOLDABLE_HORIZONTAL_ROLL:
+    case ANDROID_FOLDABLE_VERTICAL_ROLL:
+        return initAbstractDeviceRollModel();
+    default:
+        qCWarning(emu, "invalid foldable type %d", mFoldableState.config.type);
+    }
+    return false;
 }
 
 static bool getVisibleArea(const QPixmap* pixMap, QRect& rect) {
@@ -682,18 +799,22 @@ void Device3DWidget::repaintGL() {
     if (mUseAbstractDevice) {
         glm::mat4 rotateLocal =
                 (mFoldableState.config.type ==
-                 ANDROID_FOLDABLE_HORIZONTAL_SPLIT)
+                 ANDROID_FOLDABLE_HORIZONTAL_SPLIT ||
+                 mFoldableState.config.type ==
+                 ANDROID_FOLDABLE_HORIZONTAL_ROLL)
                         ? glm::mat4()
                         : glm::rotate(glm::mat4(), glm::radians(90.0f),
                                       glm::vec3(0.0, 0.0, 1.0));
         if (updateHingeAngles() || mFirstAbstractDeviceRepaint) {
             mFirstAbstractDeviceRepaint = false;
-            for (int32_t i = 0, j = 0; i < mDisplaySegments.size(); i++) {
-                if (mDisplaySegments[i].isHinge) {
-                    mDisplaySegments[i].hingeAngle =
-                            180 - mFoldableState.currentHingeDegrees[j++];
-                } else {
-                    mDisplaySegments[i].hingeAngle = 0;
+            if (android_foldable_hinge_configured()) {
+                for (int32_t i = 0, j = 0; i < mDisplaySegments.size(); i++) {
+                    if (mDisplaySegments[i].isHinge) {
+                        mDisplaySegments[i].hingeAngle =
+                                180 - mFoldableState.currentHingeDegrees[j++];
+                    } else {
+                        mDisplaySegments[i].hingeAngle = 0;
+                    }
                 }
             }
 
@@ -1066,6 +1187,10 @@ constexpr float kHingeAngleDelta = 1.0f;
 
 bool Device3DWidget::updateHingeAngles() {
     bool ret = false;
+    if (mFoldableState.config.type != ANDROID_FOLDABLE_HORIZONTAL_SPLIT &&
+        mFoldableState.config.type != ANDROID_FOLDABLE_VERTICAL_SPLIT) {
+            return ret;
+    }
     if (mSensorsAgent) {
         glm::vec3 result;
         switch (mFoldableState.config.numHinges) {

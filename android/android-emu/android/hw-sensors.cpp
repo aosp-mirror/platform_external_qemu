@@ -1188,3 +1188,7 @@ bool android_foldable_is_folded() {
 bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h) {
     return physicalModel_getFoldedArea(android_physical_model_instance(), x, y, w, h);
 }
+
+bool android_foldable_rollable_configured() {
+    return (android_hw->hw_sensor_roll && android_hw->hw_sensor_roll_count > 0);
+}
