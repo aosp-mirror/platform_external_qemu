@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "26aa9d83_5657ad19",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1304,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-05T15:42:34Z",
+      "side": 1,
+      "message": "res.memory.typeIndex \u003d lastGoodTypeIndex vs\nres.memory.typeIndex \u003d lastGoodTypeIndexWithMemoryProperties\n\nmight be relevant here; will need to test to see if the type index decided on is happy with all layers of the stack",
+      "revId": "b53d0bee0be29cb7291d791ff1c9fd6a4ee13aec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d3b8501e_fc362446",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1370,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-05T15:42:34Z",
+      "side": 1,
+      "message": "NVIDIA GPUs have \"device local\" memory where property bits \u003d\u003d 0, corresponding to private heaps. It\u0027s possible for memory properties to end up with type bits only in those heaps, or we have to set the type index to one of those in order for consistent type indices to be used; I\u0027ll want to test this on Android with YUV formats in particular.\n\nI suppose one thing we can do is only restrict type index memory properties if the host visible bit is specified in setupVkCOlorBuffer, otherwise allow  both device local bit and 0 as the properties.",
+      "revId": "b53d0bee0be29cb7291d791ff1c9fd6a4ee13aec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
