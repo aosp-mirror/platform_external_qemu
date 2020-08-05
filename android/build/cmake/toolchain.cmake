@@ -43,18 +43,25 @@ function(toolchain_cmd HOST PARAM1 PARAM2)
     get_filename_component(AOSP "${CMAKE_CURRENT_LIST_DIR}/../../../../.." ABSOLUTE)
     get_clang_version(CLANG_VER)
 
-    message("Running ${GEN_SDK} '--host=${HOST}' '${PARAM1}' '${PARAM2}' '--aosp-dir=${AOSP}' '--aosp-clang_ver=${CLANG_VER}' '--verbosity=${VERBOSITY}'")
-    execute_process(COMMAND ${GEN_SDK} "--host=${HOST}" "${PARAM1}" "${PARAM2}"
+    if (VERBOSITY MATCHES "2")
+        message("Running ${GEN_SDK} '--host=${HOST}' '${PARAM1}' '${PARAM2}' '--aosp-dir=${AOSP}' '--aosp-clang_ver=${CLANG_VER}' '--verbosity=${VERBOSITY}'")
+    endif()
+    execute_process(COMMAND ${GEN_SDK} "--host=${HOST}"
                                        "--aosp-clang_ver=${CLANG_VER}"
                                        "--aosp-dir=${AOSP}"
                                        "--verbosity=${VERBOSITY}"
+                                       "${PARAM1}" "${PARAM2}"
         RESULT_VARIABLE GEN_SDK_RES
         OUTPUT_VARIABLE STD_OUT
         ERROR_VARIABLE STD_ERR)
     if(NOT "${GEN_SDK_RES}" STREQUAL "0")
         message(FATAL_ERROR "Unable to retrieve sdk info from ${GEN_SDK} --host=${HOST} ${PARAM1} ${PARAM2}: ${STD_OUT}, ${STD_ERR}")
     endif()
-    message("${STD_OUT}")
+
+    string(STRIP "${STD_OUT}" STD_OUT)
+    if (NOT STD_OUT STREQUAL "")
+        message("${STD_OUT}")
+    endif()
 
     # Clean up and make visibile
     string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
@@ -187,8 +194,6 @@ function(toolchain_configure_tags tag)
     if (NOT ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
         set(CROSSCOMPILE TRUE PARENT_SCOPE)
     endif()
-
-    message("toolchain_configure_tags: target tag: ${ANDROID_TARGET_TAG} host tag: ${ANDROID_HOST_TAG}")
 
     if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
       set(WINDOWS TRUE PARENT_SCOPE)
