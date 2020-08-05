@@ -436,7 +436,7 @@ class FuncLambdaParam(object):
 
 def parse_func_expr(parsed_sexp):
     if len(parsed_sexp) != 1:
-        print("Error: parsed # expressions != 1: %" (len(parsed_sexp)))
+        print("Error: parsed # expressions != 1: %d" % (len(parsed_sexp)))
         raise
 
     e = parsed_sexp[0]
