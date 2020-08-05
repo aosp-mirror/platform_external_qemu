@@ -99,11 +99,10 @@ def run_binary_exists(out_dir):
 
 
 def run_ctest(out_dir, jobs):
-    cmd = [get_ctest(), "-j", jobs, "--output-on-failure"]
+    cmd = [get_ctest(), "-j", jobs, "--output-on-failure", "--stop-on-failure"]
     with TemporaryDirectory() as tmpdir:
         logging.info("Running tests with TMP=%s", tmpdir)
         run(cmd, out_dir, {"TMP": tmpdir, "TEMP": tmpdir})
-
 
 def run_emugen_test(out_dir):
     emugen = os.path.abspath(os.path.join(out_dir, "emugen%s" % EXE_POSTFIX))

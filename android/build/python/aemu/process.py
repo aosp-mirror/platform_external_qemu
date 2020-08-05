@@ -23,33 +23,20 @@ from absl import logging
 
 from aemu.definitions import get_qemu_root, get_visual_studio
 
-if sys.version_info[0] == 3:
-    from queue import Queue
-else:
-    from Queue import Queue
 
-
-def _reader(pipe, queue):
+def _reader(pipe, logfn):
     try:
         with pipe:
             for line in iter(pipe.readline, b""):
-                queue.put((pipe, line[:-1]))
+                logfn(line[:-1].decode('utf-8'))
     finally:
-        queue.put(None)
+        pass
 
 
 def log_std_out(proc):
     """Logs the output of the given process."""
-    q = Queue()
-    Thread(target=_reader, args=[proc.stdout, q]).start()
-    Thread(target=_reader, args=[proc.stderr, q]).start()
-    for _ in range(2):
-        for _, line in iter(q.get, None):
-            try:
-                logging.info(line.decode("utf-8"))
-            except IOError:
-                # We sometimes see IOError, errno = 0 on windows.
-                pass
+    Thread(target=_reader, args=[proc.stdout, logging.info]).start()
+    Thread(target=_reader, args=[proc.stderr, logging.error]).start()
 
 
 _CACHED_ENV = None
