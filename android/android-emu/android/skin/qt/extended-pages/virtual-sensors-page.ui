@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>622</width>
-    <height>600</height>
+    <height>574</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -246,7 +246,7 @@
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="page">
       <widget class="QLabel" name="zRotLabel">
@@ -484,6 +484,77 @@
        </property>
       </widget>
      </widget>
+     <widget class="QWidget" name="page_4">
+      <widget class="EditableSliderWidget" name="roll0Slider" native="true">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>45</y>
+         <width>250</width>
+         <height>40</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="EditableSliderWidget" name="roll1Slider" native="true">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>90</y>
+         <width>250</width>
+         <height>40</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="EditableSliderWidget" name="roll2Slider" native="true">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>135</y>
+         <width>250</width>
+         <height>40</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="roll0Label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>45</y>
+         <width>40</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Roll1</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="roll1Label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>90</y>
+         <width>40</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Roll2</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="roll2Label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>135</y>
+         <width>40</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Roll3</string>
+       </property>
+      </widget>
+     </widget>
     </widget>
     <widget class="QLabel" name="label_15">
      <property name="geometry">
@@ -519,6 +590,22 @@
      </property>
      <property name="text">
       <string>Sensor values</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="accelModeRoll">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>361</y>
+       <width>81</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Rollable</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
    </widget>
