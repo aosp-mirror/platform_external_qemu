@@ -126,6 +126,11 @@ typedef void (*qemu_address_space_device_ping_at_hva_t)(uint32_t handle, void* h
 typedef void (*qemu_address_space_device_deallocation_callback_t)(void* context, uint64_t gpa);
 typedef void (*qemu_address_space_device_register_deallocation_callback_t)(void* context, uint64_t gpa, qemu_address_space_device_deallocation_callback_t);
 typedef void (*qemu_address_space_device_run_deallocation_callbacks_t)(uint64_t gpa);
+struct QemuAddressSpaceHwFuncs;
+typedef const struct QemuAddressSpaceHwFuncs* (*qemu_address_space_device_control_get_hw_funcs_t)(void);
+typedef void (*qemu_address_space_device_hostmem_callback_t)(void* context, uint64_t hostmemId, int add);
+typedef void (*qemu_address_space_device_register_hostmem_callback_t)(void* context, uint64_t hostmemId, qemu_address_space_device_hostmem_callback_t);
+typedef void (*qemu_address_space_device_run_hostmem_callbacks_t)(uint64_t hostmemId, int add);
 
 struct qemu_address_space_device_control_ops {
     qemu_address_space_device_gen_handle_t gen_handle;
@@ -142,6 +147,9 @@ struct qemu_address_space_device_control_ops {
     qemu_address_space_device_ping_at_hva_t ping_at_hva;
     qemu_address_space_device_register_deallocation_callback_t register_deallocation_callback;
     qemu_address_space_device_run_deallocation_callbacks_t run_deallocation_callbacks;
+    qemu_address_space_device_control_get_hw_funcs_t control_get_hw_funcs;
+    qemu_address_space_device_register_hostmem_callback_t register_hostmem_callback;
+    qemu_address_space_device_run_hostmem_callbacks_t run_hostmem_callbacks;
 };
 
 void qemu_set_address_space_device_control_ops(struct qemu_address_space_device_control_ops* ops);

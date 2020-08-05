@@ -2759,7 +2759,9 @@ public:
                         (unsigned long long)info->hostmemId);
             }
 
-            get_emugl_vm_operations().hostmemUnregister(info->hostmemId);
+            if (mUseOldMemoryCleanupPath) {
+                get_emugl_vm_operations().hostmemUnregister(info->hostmemId);
+            }
         }
 
         if (info->ptr) {
@@ -3069,6 +3071,7 @@ public:
         fprintf(stderr, "%s: hva, size: %p 0x%llx id 0x%llx\n", __func__,
                 info->ptr, (unsigned long long)(info->size),
                 (unsigned long long)(*pHostmemId));
+
         return VK_SUCCESS;
     }
 

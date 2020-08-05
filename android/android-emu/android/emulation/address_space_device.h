@@ -39,6 +39,9 @@ typedef void (*address_space_device_deallocation_callback_t)(void* context, uint
 typedef void (*address_space_device_register_deallocation_callback_t)(void* context, uint64_t gpa, address_space_device_deallocation_callback_t);
 typedef void (*address_space_device_run_deallocation_callbacks_t)(uint64_t gpa);
 typedef const struct AddressSpaceHwFuncs* (*address_space_device_control_get_hw_funcs_t)(void);
+typedef void (*address_space_device_hostmem_callback_t)(void* context, uint64_t hostmemId, int add);
+typedef void (*address_space_device_register_hostmem_callback_t)(void* context, uint64_t hostmemId, address_space_device_hostmem_callback_t);
+typedef void (*address_space_device_run_hostmem_callbacks_t)(uint64_t hostmemId, int add);
 
 struct address_space_device_control_ops {
     address_space_device_gen_handle_t gen_handle;
@@ -56,6 +59,8 @@ struct address_space_device_control_ops {
     address_space_device_register_deallocation_callback_t register_deallocation_callback;
     address_space_device_run_deallocation_callbacks_t run_deallocation_callbacks;
     address_space_device_control_get_hw_funcs_t control_get_hw_funcs;
+    address_space_device_register_hostmem_callback_t register_hostmem_callback;
+    address_space_device_run_hostmem_callbacks_t run_hostmem_callbacks;
 };
 
 AEMU_EXPORT struct address_space_device_control_ops*

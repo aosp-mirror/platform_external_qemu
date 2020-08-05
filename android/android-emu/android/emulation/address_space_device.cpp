@@ -167,6 +167,33 @@ public:
         mDeallocationCallbacks.erase(gpa);
     }
 
+    void registerHostmemCallback(void* context, uint64_t hostmemId, address_space_device_hostmem_callback_t func) {
+        AutoLock lock(mContextsLock);
+        auto& currentCallbacks = mHostmemCallbacks[hostmemId];
+
+        HostmemCallbackEntry entry = {
+            context,
+            func,
+        };
+
+        currentCallbacks.push_back(entry);
+    }
+
+    void runHostmemCallbacks(uint64_t hostmemId, int add) {
+        AutoLock lock(mContextsLock);
+
+        auto it = mHostmemCallbacks.find(hostmemId);
+        if (it == mHostmemCallbacks.end()) return;
+
+        auto& callbacks = it->second;
+
+        for (auto& entry: callbacks) {
+            entry.func(entry.context, hostmemId, add);
+        }
+
+        if (!add) mHostmemCallbacks.erase(hostmemId);
+    }
+
     AddressSpaceDeviceContext* handleToContext(uint32_t handle) {
         AutoLock lock(mContextsLock);
         if (mContexts.find(handle) == mContexts.end()) return nullptr;
@@ -395,7 +422,13 @@ private:
         address_space_device_deallocation_callback_t func;
     };
 
+    struct HostmemCallbackEntry {
+        void* context;
+        address_space_device_hostmem_callback_t func;
+    };
+
     std::map<uint64_t, std::vector<DeallocationCallbackEntry>> mDeallocationCallbacks; // do not save/load, users re-register on load
+    std::map<uint64_t, std::vector<HostmemCallbackEntry>> mHostmemCallbacks; // do not save/load, users re-register on load
 };
 
 static LazyInstance<AddressSpaceDeviceState> sAddressSpaceDeviceState =
@@ -466,6 +499,13 @@ static const struct AddressSpaceHwFuncs* sAddressSpaceDeviceControlGetHwFuncs() 
     return get_address_space_device_hw_funcs();
 }
 
+static void sAddressSpaceDeviceRegisterHostmemCallback(void* context, uint64_t hostmemId, address_space_device_hostmem_callback_t func) {
+    sAddressSpaceDeviceState->registerHostmemCallback(context, hostmemId, func);
+}
+
+static void sAddressSpaceDeviceRunHostmemCallbacks(uint64_t hostmemId, int add) {
+    sAddressSpaceDeviceState->runHostmemCallbacks(hostmemId, add);
+}
 
 } // namespace
 
@@ -487,6 +527,8 @@ static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
     &sAddressSpaceDeviceRegisterDeallocationCallback,  // register_deallocation_callback
     &sAddressSpaceDeviceRunDeallocationCallbacks,      // run_deallocation_callbacks
     &sAddressSpaceDeviceControlGetHwFuncs,             // control_get_hw_funcs
+    &sAddressSpaceDeviceRegisterHostmemCallback,       // register_hostmem_callback
+    &sAddressSpaceDeviceRunHostmemCallbacks,           // run_hostmem_callbacks
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
