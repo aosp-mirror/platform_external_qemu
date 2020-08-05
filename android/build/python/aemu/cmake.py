@@ -15,12 +15,14 @@
 # limitations under the License.
 
 
-
 import multiprocessing
 import os
 import platform
+import re
 import shutil
 import sys
+
+import logging as pylog
 
 from absl import app, flags, logging
 
@@ -39,6 +41,7 @@ from aemu.definitions import (
 from aemu.distribution import create_distribution
 from aemu.process import run
 from aemu.run_tests import run_tests
+from aemu.logging import LevelSplitter, NinjaLevelSplitter
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string(
@@ -74,7 +77,9 @@ flags.DEFINE_list(
     [],
     "List of sanitizers ([address, thread]) to enable in the built binaries.",
 )
-flags.DEFINE_enum("generator", "ninja", list(Generator.values()), "CMake generator to use.")
+flags.DEFINE_enum(
+    "generator", "ninja", list(Generator.values()), "CMake generator to use."
+)
 flags.DEFINE_enum(
     "target",
     platform.system().lower(),
@@ -116,6 +121,8 @@ flags.DEFINE_boolean(
 flags.DEFINE_boolean("gfxstream", False, "Build gfxstream libs/tests and crosvm")
 flags.DEFINE_boolean("crosvm", False, "Build crosvm")
 flags.DEFINE_boolean("gfxstream_only", False, "Build only gfxstream libs/tests")
+
+
 
 
 def configure():
@@ -180,7 +187,8 @@ def configure():
     if platform.system() == "Windows":
         fixup_windows_clang()
 
-    run(cmake_cmd, FLAGS.out)
+    with NinjaLevelSplitter() as split:
+        run(cmake_cmd, FLAGS.out, {"NINJA_STATUS": "[%f/%t] "})
 
 
 def get_build_cmd():
@@ -199,6 +207,11 @@ def get_build_cmd():
 def main(argv=None):
     del argv  # Unused.
 
+    # Let's configure our logging.
+    logging.get_absl_handler()._python_handler = LevelSplitter()
+    logging.get_absl_handler().activate_python_handler()
+    logging.get_absl_handler().setFormatter(pylog.Formatter("%(message)s"))
+
     version = sys.version_info
     logging.info(
         "Running under Python {0[0]}.{0[1]}.{0[2]}, Platform: {1}".format(
@@ -212,7 +225,8 @@ def main(argv=None):
         return
 
     # Build
-    run(get_build_cmd())
+    with NinjaLevelSplitter() as split:
+        run(get_build_cmd())
 
     # Test.
     if FLAGS.tests:
