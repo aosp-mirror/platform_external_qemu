@@ -1,0 +1,62 @@
+syntax = "proto2";
+
+
+package emulator;
+
+
+// Possibly-sensitive information related to location prediction when the
+// localizer is a wifi-based localizer. This proto may contain AP-specific
+// information such as MAC, signal strengths, etc., that is not appropriate
+// to store in WifiLocalizerPredictionInfoProto
+//
+// TODO(brimoor): Refactor this proto to avoid duplicating fields from
+//                WifiLocalizerPredictionInfoProto
+//
+// NextId = 8
+message SensitiveWifiLocalizerPredictionInfoProto {
+  // Status of position prediction when source is Wifi.
+  // It can be successful or not, in the latter case also the cause of the
+  // failure is specified.
+  // NextId = 2
+  enum Status {
+    // Successful prediction.
+    SUCCESSFUL = 0;
+    // Unsuccessful prediction for insufficient number of informative APs.
+    FEW_INFORMATIVE_APS = 1;
+  }
+
+  // Wifi-based localizers
+  // NextId = 6
+  enum LocalizerType {
+    UNKNOWN = 0;
+    CIRCLE_INTERSECTION = 1;
+    MAX_SIGNAL_STRENGTH = 2;
+    MAX_LRE = 3;
+    FREWLE = 4;
+    GPWLE = 5;
+  }
+
+  // The total number of Wifi APs in the current scan.
+  optional int32 num_aps_in_scan = 1;
+
+  // The number of Wifi APs based on which the prediction is effectively done.
+  // It can differ from the total number of seen Wifi APs, since some of them
+  // might be not informative to the algorithm in use, e.g. because the
+  // corresponding models are missing or not accurate enough.
+  optional int32 num_aps_informative = 2;
+
+  // Status of the prediction.
+  optional Status status = 3;
+
+  // Number of informative APs found in the primary lookup table
+  optional int32 num_aps_informative_in_primary_table = 4;
+
+  // Maximum signal strength of an informative AP
+  optional double max_signal_strength_of_informative_ap = 5;
+
+  // Wifi localizer used to make this prediction
+  optional LocalizerType localizer_type = 6;
+
+  // Forward MAC string of informative AP with maximum signal strength
+  optional string max_signal_strength_mac = 7;
+}

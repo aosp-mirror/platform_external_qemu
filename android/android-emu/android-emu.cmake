@@ -35,6 +35,7 @@ set(android-emu-common
     android/boot-properties.c
     android/car.cpp
     android/car-cluster.cpp
+    android/car_sensor_replay/sensor_session_playback.cpp
     android/cmdline-option.cpp
     android/CommonReportedInfo.cpp
     android/console_auth.cpp

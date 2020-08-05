@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+package emulator;
+
+import "descriptor.proto";
+
+message FieldIdOptions {
+    // A convenience field that stores the next available field id for this
+    // protocol buffer message. All field ids between 1 and this number must
+    // either be currently used in the message or be marked as reserved.
+    optional int32 next_available_field_id = 1;
+  }
+
+extend emulator.MessageOptions {
+    // A required set of options for all protocol buffer messages defined in the
+    // Geo Schema. Options are enforced via tests.
+    optional emulator.FieldIdOptions field_id_options = 38142873;
+}

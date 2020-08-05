@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+package emulator;
+// This is proto2's version of MessageSet.
+message MessageSet {
+    option message_set_wire_format = true;
+
+    extensions 4 to max;
+  }

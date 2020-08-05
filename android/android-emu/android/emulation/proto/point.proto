@@ -1,0 +1,142 @@
+syntax = "proto2";
+
+package emulator;
+
+import "message_set.proto";
+import "datasourceprovider.proto";
+import "descriptor.proto";
+
+message FieldIdOptions {
+    // A convenience field that stores the next available field id for this
+    // protocol buffer message. All field ids between 1 and this number must
+    // either be currently used in the message or be marked as reserved.
+    optional int32 next_available_field_id = 1;
+  }
+
+extend MessageOptions {
+    // A required set of options for all protocol buffer messages defined in the
+    // Geo Schema. Options are enforced via tests.
+    optional FieldIdOptions field_id_options = 38142873;
+}
+
+
+
+message PointProto {
+    // Required for MessageSet membership.
+    extend MessageSet {
+      optional PointProto message_set_extension = 14827556;
+    }
+
+
+    // Points are represented as latitude-longitude pairs in the E7
+    // representation (degrees multiplied by 10**7 and rounded to the nearest
+    // integer).  Latitudes should be in the range +/- 90 degrees and longitude
+    // should be in the range +/- 180 degrees (inclusive).
+    //
+    // This representation has a worst-case resolution of about 1cm near the
+    // equator.  The extra resolution seems preferable to the slight space
+    // savings we would achieve by using E6 lat/lng representations.
+    //
+    // lat_e7/lng_e7 are signed, but we store them as fixed32 because:
+    // 1) to keep the wire format unchanged - fixed32 was chosen initially
+    //   when sfixed32 did not exist.  If you are copying the design of this
+    //   proto to make another one to hold lat/lng, use sfixed32.
+    //   TODO(jrosenstock): Switch this to sfixed32 and update clients.
+    // 2) to optimize the space - Protocol Buffer uses
+    //   10-bytes for negative int32 vs always 4-bytes for fixed32.
+    // This requires some caution whenever using PointProto::{lat,lng}_e7()
+    // because they will return fixed32 - if the receiving type
+    // is int32, then the sign is "recovered" but if it's int64,
+    // we lose the sign and end up with a big positive integer.
+    // Make sure do static_cast<int32>() of {lat,lng}_e7() before
+    // using it for anything other than int32.
+    //
+    // In DremelSQL use int32(point.lat_e7), in GoogleSQL use
+    // BIT_CAST_TO_INT32(point.lat_e7).
+
+    required fixed32 lat_e7 = 1;  // no_forbid_required
+        // [
+        //   (jspb.use_broken_java_unsigned_serialization_behavior) = true,
+        //   (jspb.allow_broken_java_unsigned_deserialization_behavior) = true
+        // ];
+    required fixed32 lng_e7 = 2;  // no_forbid_required
+        // [
+        //   (jspb.use_broken_java_unsigned_serialization_behavior) = true,
+        //   (jspb.allow_broken_java_unsigned_deserialization_behavior) = true
+        // ];
+
+    // NOTE: If removing metadata, remove
+    // 'option objc_class_prefix = "GS";' together. See cl/189921100.
+    //
+    // Field-level metadata for this point.
+    //
+    // NOTE: there are multiple PointProto fields in the Geo Schema. Metadata
+    // here is only expected to be present on FeatureProto.point[] and
+    // FeatureProto.center.
+    optional FieldMetadataProto metadata = 500;
+
+    // A place for clients to attach arbitrary data to a point. Never
+    // set in MapFacts.
+    optional MessageSet temporary_data = 15;
+
+    option (field_id_options) = {
+      next_available_field_id: 3
+    };
+
+    option (protomesh.message) = {
+      custom: "PointConverter"
+      custom_proto: "uint64"
+    };
+}
+
+message FieldMetadataProto {
+option (field_id_options) = {
+    next_available_field_id: 1
+};
+
+optional InternalFieldMetadataProto internal = 15;
+}
+
+message InternalFieldMetadataProto {
+    // Information about the source providing the piece of data this metadata is
+    // attached to.
+    optional /* actually required */
+        InternalSourceSummaryProto source_summary = 1;
+
+    // Whether or not the piece of data has been generated automatically (i.e., by
+    // a bot/automated process based on heuristics/algorithms rather than coming
+    // as a fact set by some human user or data provider based on their
+    // knowledge). Note that this does NOT imply that the value was set as a
+    // result of a bot operation on the repository, since it is conceivable to use
+    // a bot/automated process simply as a way of convenience to ingest large
+    // amount of canonical/ground truth data.
+    optional bool is_auto = 2 [default = false];
+
+    option (field_id_options) = {
+      next_available_field_id: 3
+    };
+  }
+
+  message InternalSourceSummaryProto {
+    // The data provider from which this piece of data was generated.
+    // Equivalent to SourceInfoProto.provider in the public schema.
+    optional /* actually required */
+        DataSourceProvider.Provider provider = 1
+        [default = PROVIDER_UNKNOWN];
+
+    // Within the above provider, the dataset from which this piece of data was
+    // generated. For fields that are auto-generated the "dataset" is likely to
+    // be some algorithm's or program's name. Similar to SourceInfoProto.dataset
+    // but with the difference that it is required to always be set. Providers
+    // that don't have a concept of dataset may use "default".
+    optional /* actually required */ string dataset = 2;
+
+    option (field_id_options) = {
+      next_available_field_id: 3
+    };
+
+    option (protomesh.message) = {
+        custom: "PointConverter"
+        custom_proto: "uint64"
+      };
+  }

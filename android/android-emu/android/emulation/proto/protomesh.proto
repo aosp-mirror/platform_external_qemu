@@ -1,0 +1,295 @@
+syntax = "proto2";
+
+package emulator;
+
+import "descriptor.proto";
+
+
+// Holds annotations on a protobuf file, message, enum, or value.
+// TODO(b/70219202): renumber these fields sequentially once the dust has
+// settled.
+// TODO(b/70219204): Possibly this should be in package
+// knowledge.graph.protomesh.
+message SchemaAnnotation {
+  // A source ID associated with this entity.
+  // This may be a literal ID or a template string.
+  // In template strings, expressions are embedded as "{expr}".
+  // Expression syntax is TBD but mostly pointer-chasing.
+  optional string id = 1;
+
+  // An optional human-readable name for this property.
+  // If not present it will be generated from the field name.
+  optional string name = 21;
+
+  // An optional predicate (a.k.a. property) ID to associate
+  // with this field.
+  // If not present it will be generated from the field name.
+  // If the predicate does not start with '/' it is prefixed with the
+  // type ID.
+  optional string pred = 22;
+
+  // Key specifies an ID that will persist after reconciliation
+  // using a /type/object/key predicate.
+  optional string key = 23;
+
+  // A MID for this entity, if known.
+  optional string mid = 11;
+
+  // A base path for automatically generated KG identifiers.
+  // Defaults to "/proto/{PACKAGE}" where PACKAGE is the package name
+  // in the .proto file.
+  optional string base = 16;
+
+  // HRID (human-readable id) of a KG type (an instance of /type/type).
+  // Defaults to "{BASE}/{MESSAGE}" where base is defined above
+  // and MESSAGE is the message name in the .proto file.
+  optional string type = 2;
+
+  // A master_property id, if this is a reverse property.
+  // See /type/property/master_property in KG schema.
+  optional string master_property = 4;
+
+  // A reverse_property id, if this is a master property.
+  // See /type/property/reverse_property in KG schema.
+  optional string reverse_property = 5;
+
+  // The expected KG type HRID for a property.
+  // See /type/property/expected_type in KG schema.
+  // Defaults based on the type of the proto field.
+  optional string expected_type = 7;
+
+  // An English language description of the property.
+  // Defaults to the comment string on a proto message or field.
+  optional string description = 8;
+
+  // An optional custom translator (triplifier/protofier pair), for
+  // transformations that cannot be expressed easily in a declarative
+  // way. Use of this option is discouraged, but sometimes necessary.
+  // The string must correspond to a C++ class registered using
+  // the google3 "registerer" mechanism.
+  optional string custom = 10;
+
+  // Full name of the type of the proto produced by the custom converter.
+  // May also be a proto primitive type such as int64 or string.
+  // Currently only supports protos and string.
+  // TODO(matloob): Add support for other primitive types.
+  optional string custom_proto = 38;
+
+  // A property used to sort repeated ordered fields.
+  // The property here must refer to an existing field in the field type.
+  // It is used as a sort key (ascending) when converting triples to protos.
+  // By default, repeated field order is not preserved in triplification.
+  // TODO(b/70219206): make it possible to sort in descending order, and on
+  //  multiple properties. Follow the PathQuery sort syntax.
+  // TODO(b/70219207): define a syntax for primitive value rank, e.g. rank:".".
+  optional string rank = 14;
+
+  // If present, causes the field to be mediated using a CVT of the given type.
+  // This can be useful in preserving order in repeated fields, though it is
+  // expensive (creates many trivial entities).
+  // Schema will be created for the mediator type.
+  optional string mediator_type = 30;
+
+  // Predicate to use for materializing the ordinal value of an array
+  // element. The triplifier will generate a triple for each element
+  // of a repeated field, containing the integer position of that field.
+  // The predicate name is relative to the field type.
+  // Schema will be created for the new predicate.
+  // Note that if the field elements are referred to by multiple repeated
+  // fields, or more than once within the same repeated field, then the
+  // ordinal is not uniquely defined and a mediator is needed.
+  optional string ordinal = 31;
+
+  // A separator used to join repeated ordered fields into a single string.
+  // When dealing with "repeated string" fields, there is nowhere to store the
+  // rank in the triplification. If splice: "\n" is present, the repeated field
+  // will be joined into a single string-valued triple, with all values joined
+  // by newlines. When converting to a proto, the string will be split on
+  // newlines.
+  // TBD: define quoting.  define behavior for repeated int, etc.
+  // At most one of splice: and rank: may be specified.
+  optional string splice = 15;
+
+  // Property to store a binary proto blob containing the original proto.
+  // If present, fields will not be triplified unless annotations are present.
+  // When converting back to a proto, any redundant triples will be ignored
+  // and the binary proto will be used.
+  // TODO(b/70219208): rename this to blob_pred.
+  optional string blob = 17;
+
+  // If there is a legacy triplification for this proto, it can be specified
+  // as a nested annotation. This can be used while a schema migration
+  // is in progress, and should be cleaned up once all clients of the
+  // old schema are cleaned up.
+  // TBD: when converting to a proto, use the legacy triples only if none
+  //  of the preferred triples are present?
+  repeated SchemaAnnotation legacy = 19;
+
+  // Specifies that a field is denormalized in the proto representation.
+  // Triples will not be generated for this field, as the KG representation
+  // is more normalized.
+  optional bool proto_only = 20;
+
+  // Specifies that the field points to a different aspect of the same entity,
+  // rather than to a different entity. The field will be triplified using the
+  // same subject Id as the current message.
+  // The field type must be a Message type. If it is a repeated field, the
+  // message can have at most one protomesh-annotated field, because otherwise
+  // it is impossible to determine how to group the fields when protofying.
+  optional bool cotype = 32;
+
+  // Text_lang specifies the language code for a text-valued field, if known
+  // at annotation time. This will cause a string field to be mapped to KG's
+  // TEXT instead of RAWSTRING.
+  // Use text_lang_field if the language is contained in another field of the
+  // same proto.
+  optional string text_lang = 33;
+
+  // Specifies that the field should not be triplified.
+  optional bool suppress_triplification = 34;
+
+  // Specifies that the field should not be protofied.
+  optional bool suppress_protofication = 35;
+
+  // Specifies a namespace associated with a string value.
+  // Fields that have a non-empty namespace_pred are
+  // treated as "foreign keys" and will be triplified as links
+  // (ID rather than RAWSTRING), meaning the triple's object will be an ID
+  // prefixed by the given namespace_pred rather than a RAWSTRING. The
+  // namespace_pred must correspond to a predicate that acts like a "primary
+  // key" in SQL - this predicate must be declared on a field elsewhere. That
+  // predicate expects a rawstring and is both unique and reverse-unique:
+  // i.e. each entity has exactly one primary key and each primary key is
+  // associated with at most one entity. On protofication the RAWSTRING
+  // object of the associated primary key triple will be read instead of reading
+  // the id from the originally-output triple.
+  optional string namespace_pred = 36;
+
+  // If true, this message (or field) should be triplified as a binary
+  // proto instead of as an entity. This is distinct from the blob_pred
+  // annotation, which creates an entity with a single triple.
+  // This annotation causes the field value to be treated as a
+  // primitive type, with similar restrictions (e.g. the need
+  // for a mediator_type if using the ordinal annotation).
+  optional bool blob_value = 37;
+
+  // Text_lang_field refers to a field in the same proto which
+  // contains an III language code.  This will cause a string field
+  // be mapped to a KG text Triple, with the Triple's text_lang
+  // filled in from the named field.
+  // When converting back to a proto, the named field will be
+  // populated from the text_lang of the corresponding triple.
+  // If there are multiple text_lang_field annotations that refer
+  // to the same field, they should agree on what the language is
+  // or behavior is unspecified.
+  // Use text_lang instead if a string field always has the same language.
+  optional string text_lang_field = 40;
+
+  // message_set_target refers to an intermediate proto that
+  // extensions will be copied to and that will then be triplified
+  // instead of directly triplifying the annotated MessageSet.
+  // The intermediate proto is filled by copying each extension
+  // on the message set to the fields on the intermediate proto
+  // with the same type.
+  //
+  // TODO(matloob): Is there a better name than target to denote
+  // the intermediate proto?
+  optional string message_set_target = 41;
+
+  // Designates an enum-valued field that should be looked up
+  // to find the predicate for this field. Normally the KG
+  // predicate is chosen by field name, but this can be used
+  // to choose the predicate based on an enum value
+  // (e.g. geostore.RelationProto.RelationCategory).
+  optional string pred_enum_field = 43;
+
+  // Describes how to construct a proto field using a Pathquery
+  // expression. This is used when the proto representation is
+  // denormalized compared to the graph representation.
+  // Implies suppress_triplification.
+  optional string pq_expression = 45;
+
+  // This changes the namespace used for implicit naming,
+  // but does not declare a new KG type the way the "type"
+  // annotation does.
+  optional string extend_type = 46;
+
+  // If true, populates the default value set on a primitive or enum field
+  // during triplification. This annotation has no effect on protofication,
+  // though its result may be equivalent but unequal to the original message
+  // (pre-triplification).
+  optional bool create_default_value_triple = 47;
+
+  // FIELDS BELOW HERE ARE FOR INTERNAL USE ONLY
+
+  // The full proto name of this descriptor, including the package.
+  // TODO(b/70219211): consider moving these to a submessage.
+  optional string internal_full_proto_name = 24;
+  optional string internal_protofier_function = 25;
+  optional int32 internal_line = 27;
+  repeated string internal_extended_by = 39;
+  optional bool internal_custom_proto_primitive = 42;
+}
+
+// TODO(b/70219212): It would be nicer if all these extension fields had the
+// same name. The unique names are a requirement of the proto compiler,
+// which internally scopes the relevant identifiers to the current package
+// (e.g. "protomesh.file") instead of to the message being extended.
+
+// TODO(b/70219214): so why even specify the extended message?
+// try just defining the extension once?
+
+extend FileOptions {
+  optional SchemaAnnotation file = 68120272;
+}
+
+extend MessageOptions {
+  optional SchemaAnnotation message = 68120272;
+}
+
+extend FieldOptions {
+  optional SchemaAnnotation field = 68120272;
+}
+
+extend EnumOptions {
+  optional SchemaAnnotation enumeration = 68120272;
+}
+
+extend EnumValueOptions {
+  optional SchemaAnnotation enumeration_value = 68120272;
+}
+
+// This message must be able to hold any type used by a custom converter.
+// It should be extended by any custom Staging protos, similarly to MessageSet.
+// Field ids correspond to FieldDescriptorProto::Type but this is not relied on.
+message StagingProto {
+  optional double double_value = 1;
+  optional float float_value = 2;
+  optional int64 int64_value = 3;
+  optional uint64 uint64_value = 4;
+  optional int32 int32_value = 5;
+  optional fixed64 fixed64_value = 6;
+  optional fixed32 fixed32_value = 7;
+  optional bool bool_value = 8;
+  optional string string_value = 9;
+  optional bytes bytes_value = 12;
+  optional uint32 uint32_value = 13;
+  optional sfixed32 sfixed32_value = 15;
+  optional sfixed64 sfixed64_value = 16;
+  optional sint32 sint32_value = 17;
+  optional sint64 sint64_value = 18;
+
+  extensions 10000 to max;
+}
+
+// Text is a useful intermediate message for custom converters that produce
+// /type/text. Protomesh knows about this message type and will convert it
+// specially.
+message Text {
+  extend StagingProto {
+    optional Text text_extension = 10000;
+  }
+
+  optional string value = 1;
+  optional string lang = 2;
+}

@@ -1,0 +1,32 @@
+syntax = "proto2";
+
+package emulator;
+
+message DataSourceProvider {
+    // LINT.IfChange
+    //
+    // clang-format off
+    enum Provider {
+      /* ABSTRACT */ PROVIDER_ANY = 0x0;
+        // The root of all provider types. This should never be present on an
+        // actual feature, but can be useful when calling InCategory.
+
+      PROVIDER_UNKNOWN = 0x1111;  // not actually a legal value, used as sentinel
+      PROVIDER_NAVTEQ = 0x1112 [deprecated=true];
+      /* ABSTRACT */ PROVIDER_TELE_ATLAS = 0x1113;
+        PROVIDER_TELE_ATLAS_MULTINET = 0x11131 [deprecated=true];
+        PROVIDER_TELE_ATLAS_CODEPOINT = 0x11132 [deprecated=true];
+        PROVIDER_TELE_ATLAS_GEOPOST = 0x11133 [deprecated=true];
+        PROVIDER_TELE_ATLAS_DATAGEO = 0x11134 [deprecated=true];
+        PROVIDER_TELE_ATLAS_ADDRESS_POINTS = 0x11135 [deprecated=true];
+      PROVIDER_TELCONTAR = 0x1114;
+      PROVIDER_EUROPA = 0x1115;
+      PROVIDER_ROYAL_MAIL = 0x1116;
+      /* ABSTRACT */ PROVIDER_GOOGLE = 0x1117;
+        PROVIDER_GOOGLE_HAND_EDIT = 0x11171;
+        PROVIDER_GOOGLE_BORDERS = 0x11172;
+        // All new "Google" provider entries must be full ints. The next available
+        // ID is: 0x1117308A
+        /* ABSTRACT */ PROVIDER_GOOGLE_SUBRANGE = 0x11173;
+    }
+}

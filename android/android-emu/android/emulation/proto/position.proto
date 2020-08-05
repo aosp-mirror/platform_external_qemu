@@ -1,0 +1,90 @@
+syntax = "proto2";
+
+package emulator;
+
+import "point.proto";
+import "sensitive_wifi_prediction_info.proto";
+
+message PositionProto {
+    // Provider of the position.
+    // These should correspond to those defined in:
+    // java/com/google/googlex/insight/shared/base/Position.Provider
+    enum PositionProvider {
+      // Position came from gps
+      GPS = 0;
+      // Position came from wifi scans
+      WIFI = 1;
+      // Position came from cell tower
+      CELL = 2;
+      // Position came from an external gps source (not on the device)
+      GPS_INJECTED = 3;
+      // Position came from cell tower with at least one neighbors
+      CELL_WITH_NEIGHBORS = 5;
+      // No provider has been set
+      UNKNOWN = 4;
+
+      reserved 6;  // Was used for position from Project Tango [deprecated]
+    }
+
+    optional PointProto point = 1;
+    optional int32 accuracy_mm = 2;  // Accuracy estimate in millimeters.
+    optional string level_id = 3;
+    optional string cluster_id = 4;
+    optional float speed_mps = 5;
+    optional double altitude_m = 6;
+    optional double vertical_accuracy_meters = 11;
+    optional int32 level_number_e3 = 12;
+    optional string floor_label = 15;
+    // As cluster_id will be deprecated, we will use section_label for semantic
+    // labels for parts a trajectory.
+    optional string section_label = 16;
+    optional float speed_accuracy_mps = 13;
+    optional float bearing_accuracy_degrees = 14;
+    // Deprecated. Use bearing_deg_full_accuracy instead
+    // This was deprecated so float precision is available rather than int32.
+    optional int32 bearing_deg = 7;
+    optional PositionProvider provider = 8;
+    // This replaces bearing_deg and allows float precision rather than int32
+    optional float bearing_deg_full_accuracy = 9;
+    // Proto containing all information that we want to put in PositionProto
+    // but that we cannot put in Position.java. These are normally annotations
+    // that are inferred and not directly measured by the device.
+    optional PositionMetadataProto position_metadata = 10;
+}
+
+message PositionMetadataProto {
+    // Quality of the Gps position observation.
+    message GpsQualityProto {
+        // GPS measurement is trustworthy/untrustworthy. Bogus, stale and clustered
+        // GPS observations are examples of untrustworthy Gps observations
+        enum GpsTrustworthiness {
+        UNKNOWN = 0;
+        TRUSTWORTHY = 1;
+        UNTRUSTWORTHY = 2;
+        }
+        optional GpsTrustworthiness gps_trustworthiness = 1;
+    }
+    // GPS position observation quality
+    optional GpsQualityProto gps_quality = 1;
+
+    // Info about a wifi localizer prediction
+    //
+    // TODO(brimoor): Move this field somewhere else. It really doesn't belong
+    //                in this proto because this field contains information
+    //                about a wifi prediction used to produce a position, not
+    //                the position itself
+    optional SensitiveWifiLocalizerPredictionInfoProto
+        sensitive_wifi_localizer_info = 2;
+
+    // Elevation in meters above the sea level extracted from the terrain
+    // database at the associated position.
+    optional double elevation_from_terrain_m = 3;
+
+    // Arbritrary-formatted, human-readable debug information for convenience in
+    // visualization, etc. If you are tempted to parse something out of this,
+    // don't! Just add a new field to the metadata.
+    optional string debug_info = 4;
+
+    // 2D distance from ground truth, in meters. Excludes height error.
+    optional double distance_error_m = 5;
+  }
