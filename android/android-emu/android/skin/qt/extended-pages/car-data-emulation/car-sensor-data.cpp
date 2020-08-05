@@ -141,11 +141,11 @@ void CarSensorData::sendIgnitionChangeMsg(const int ignition,
 
 void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
     mUi->car_speedLabel->setText(QString::number(speed));
-    float speedMetersPerSecond = (float)speed * 
-        ((mUi->comboBox_speedUnit->currentIndex() == MILES_PER_HOUR) 
+    float speedMetersPerSecond = (float)speed *
+        ((mUi->comboBox_speedUnit->currentIndex() == MILES_PER_HOUR)
             ? MILES_PER_HOUR_TO_METERS_PER_SEC
             : KILOMETERS_PER_HOUR_TO_METERS_PER_SEC);
-    
+
     if (mSendEmulatorMsg != nullptr) {
         EmulatorMessage emulatorMsg = makeSetPropMsg();
         VehiclePropValue* value = emulatorMsg.add_value();
@@ -202,14 +202,24 @@ void CarSensorData::on_comboBox_gear_currentIndexChanged(int index) {
 }
 
 void CarSensorData::on_button_loadrecord_clicked() {
-    prepareVhalLoader();
+    // prepareVhalLoader();
 
     QString fileName = QFileDialog::getOpenFileName(
-            this, tr("Open Json File"), ".", tr("Json files (*.json)"));
+            this, tr("Open Sensor Record File"), ".");
 
     if (fileName.isNull())
         return;
-    parseEventsFromJsonFile(fileName);
+
+    // parseEventsFromJsonFile(fileName);
+
+    //vhal sensor replay v2
+    SensorSessionPlayback::SensorSessionStatus status = ssp.LoadFrom(fileName.toStdString());
+
+    if (status == SensorSessionPlayback::OK) {
+        D("filename parse OK for sensorsessionplayback");
+    } else if (status == SensorSessionPlayback::PROTO_PARSE_FAIL) {
+        D("proto parse fail");
+    }
 }
 
 void CarSensorData::prepareVhalLoader() {
@@ -227,8 +237,33 @@ void CarSensorData::prepareVhalLoader() {
 }
 
 void CarSensorData::on_button_playrecord_clicked() {
-    mTimedEmulatorMessages.setStatus(TimedEmulatorMessages::START);
-    mTimer.start(VHAL_REPLAY_INTERVAL);
+    //sensor replay v2
+    D ("start play button clicked in car data");
+    ssp.RegisterCallback([](emulator::SensorSession::SensorRecord record) {
+        D("map size %d", record.car_property_values_size());
+        D("event size %d", record.sensor_events_size());
+        D("timenstamp %" PRIu64, record.timestamp_ns());
+        D(record.DebugString().c_str());
+        if (record.car_property_values_size() <= 0) return ;
+        D(record.DebugString().c_str());
+        D("Try get the vhalproperty map size %d", record.car_property_values_size());
+        std::map<int32_t, emulator::SensorSession::SensorRecord::CarPropertyValue> vhal_property_map(record.car_property_values().begin(),
+                                    record.car_property_values().end());
+
+        std::map<int32_t, emulator::SensorSession::SensorRecord::CarPropertyValue>::iterator it;
+
+        for ( it = vhal_property_map.begin(); it != vhal_property_map.end(); it++ )
+        {
+            D("print vhalproperty");
+            D("id %d", it->first);
+            D("value %s", it->second.DebugString().c_str());
+        }
+
+    });
+    ssp.StartReplay(10.0);
+
+    // mTimedEmulatorMessages.setStatus(TimedEmulatorMessages::START);
+    // mTimer.start(VHAL_REPLAY_INTERVAL);
 }
 
 void CarSensorData::on_button_voice_assistant_clicked() {

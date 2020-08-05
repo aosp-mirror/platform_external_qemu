@@ -81,7 +81,7 @@ VhalTable::VhalTable(QWidget* parent)
 
     // start refresh thread
     mRefreshMsg.trySend(REFRESH_START);
-    mVhalPropertyTableRefreshThread.start();
+    // mVhalPropertyTableRefreshThread.start();
 }
 
 VhalTable::~VhalTable() {
