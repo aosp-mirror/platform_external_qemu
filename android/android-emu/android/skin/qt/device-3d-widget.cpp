@@ -279,8 +279,7 @@ bool Device3DWidget::initModel() {
     }
 }
 
-bool Device3DWidget::initAbstractDeviceModel() {
-    android_foldable_get_state(&mFoldableState);
+bool Device3DWidget::initAbstractDeviceHingeModel() {
     // Create an abstract parameterized model
     // std::vector<float> model_vertex_data;
     // std::vector<GLuint> indices;
@@ -459,6 +458,199 @@ bool Device3DWidget::initAbstractDeviceModel() {
 
     CHECK_GL_ERROR_RETURN("Failed to load model", false);
     return true;
+}
+
+bool Device3DWidget::initAbstractDeviceRollModel() {
+#if 0
+    // Create an abstract parameterized model
+    // std::vector<float> model_vertex_data;
+    // std::vector<GLuint> indices;
+    struct FoldableConfig config = mFoldableState.config;
+    // TODO: start with horizontal roll
+    bool hRoll = true;
+    int32_t displayW =
+            hRoll ? android_hw->hw_lcd_width : android_hw->hw_lcd_height;
+    int32_t displayH =
+            hRoll ? android_hw->hw_lcd_height : android_hw->hw_lcd_width;
+    int32_t centerX = displayW / 2;
+    int32_t centerY = displayH / 2;
+    if (!hRoll) {
+        // rotate 90 degree for vertical split, the result is horizontal split
+        for (uint32_t i = 0; i < config.numHinges; i++) {
+            std::swap(config.hingeParams[i].x, config.hingeParams[i].y);
+            std::swap(config.hingeParams[i].width,
+                      config.hingeParams[i].height);
+        }
+    }
+    int32_t x = 0, y = 0;
+    int32_t l = x - centerX;
+    int32_t r = -l;
+    int32_t t, b;
+    struct FoldableHingeParameters* p = config.hingeParams;
+    for (int i = 0; i < config.numHinges; i++) {
+        // NOTE: fold default display only
+        if (p[i].displayId != 0) {
+            continue;
+        }
+        // Re-position the display segments in the 2D space. Put (centerX,
+        // centerY) at point (0, 0).
+        t = centerY - y;
+        b = centerY - p[i].y;
+        // display segement above the hinge
+        mDisplaySegments.push_back(
+                {l, r, t, b, false, 0.0f, 0.0f, glm::mat4()});
+        // hinge
+        t = centerY - p[i].y;
+        b = t - p[i].height;
+        mDisplaySegments.push_back({p[i].x - centerX,
+                                    p[i].x - centerX + p[i].width, t, b, true,
+                                    0.0f, 0.0f, glm::mat4()});
+        y = p[i].y + p[i].height;
+    }
+    // last display segment
+    t = centerY - y;
+    b = -centerY;
+    mDisplaySegments.push_back({l, r, t, b, false, 0.0f, 0.0f, glm::mat4()});
+
+    // Find display segment in the middle of the whole display,
+    // which will be always placed perpendicular to Z axis
+    for (uint32_t i = 0; i < mDisplaySegments.size(); i++) {
+        if (mDisplaySegments[i].t >= 0 && mDisplaySegments[i].b < 0) {
+            if (mDisplaySegments[i].isHinge) {
+                mCenterIndex = i + 1;
+            } else {
+                mCenterIndex = i;
+            }
+            break;
+        }
+    }
+    mDisplaySegments[mCenterIndex].rotate = 0;
+
+    // Translate display segments into a new 3D space, ranging [-4, 4] in x and
+    // y axis. This will grarantee the phone occpuied the whole widget screen.
+    int32_t length = (displayW > displayH) ? displayW : displayH;
+    mFactor = 7.9f / (float)length;
+    float d = mDepth;
+    std::vector<float> attribs;
+    std::vector<GLuint> indices;
+    std::vector<GLuint> indice = {
+            0,  1,  2,  1,  3,  2,  4,  5,  6,  5,  7,  6,
+            8,  9,  10, 9,  11, 10, 12, 13, 14, 13, 15, 14,
+            16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22,
+    };
+    // Construct a cuboid for each segment.
+    for (uint32_t idx = 0, j = 0; idx < mDisplaySegments.size(); idx++) {
+        const auto i = mDisplaySegments[idx];
+        if (i.t == i.b) {
+            // do not draw zero-height hinge
+            continue;
+        }
+        float l = i.l * mFactor;
+        float r = i.r * mFactor;
+        float t = (idx <= mCenterIndex) ? (i.t - i.b) * mFactor : 0.0f;
+        float b = (idx <= mCenterIndex) ? 0.0f : (i.b - i.t) * mFactor;
+        float ul = (hSplit) ? 0.0f : float(centerY - i.t) / float(displayH);
+        float ur = (hSplit) ? 1.0f : float(centerY - i.b) / float(displayH);
+        float ub = (hSplit) ? float(i.b + centerY) / float(displayH) : 0.0f;
+        float ut = (hSplit) ? float(i.t + centerY) / float(displayH) : 1.0f;
+        std::vector<float> attribFront, attribBack;
+        if (hSplit) {
+            attribFront = {
+                    l, b, 0.0, 0.0, 0.0, +1.0, ul, ub,  // front
+                    r, b, 0.0, 0.0, 0.0, +1.0, ur, ub,
+                    l, t, 0.0, 0.0, 0.0, +1.0, ul, ut,
+                    r, t, 0.0, 0.0, 0.0, +1.0, ur, ut,
+            };
+            attribBack = {
+                    l, b, -d, 0.0, 0.0, -1.0, ul, ut,   // back
+                    r, b, -d, 0.0, 0.0, -1.0, ur, ut,
+                    l, t, -d, 0.0, 0.0, -1.0, ul, ub,
+                    r, t, -d, 0.0, 0.0, -1.0, ur, ub,
+            };
+        } else {
+            // rotate 90 degree for vertical split texture sampling
+            attribFront = {
+                    l, b, 0.0, 0.0, 0.0, +1.0, ur, ub,  // front
+                    r, b, 0.0, 0.0, 0.0, +1.0, ur, ut,
+                    l, t, 0.0, 0.0, 0.0, +1.0, ul, ub,
+                    r, t, 0.0, 0.0, 0.0, +1.0, ul, ut,
+            };
+            attribBack = {
+                    l, b, -d, 0.0, 0.0, -1.0, ul, ub,  // back
+                    r, b, -d, 0.0, 0.0, -1.0, ul, ut,
+                    l, t, -d, 0.0, 0.0, -1.0, ur, ub,
+                    r, t, -d, 0.0, 0.0, -1.0, ur, ut,
+            };
+        }
+        std::vector<float> attribCommon =
+                {
+                        //                        l, b, -d,  0.0,  0.0,  -1.0,
+                        //                        0.0, 0.0,  // back
+                        //                        r, b, -d,  0.0,  0.0,
+                        //                        -1.0, 1.0, 0.0,
+                        //                        l, t, -d,  0.0,  0.0,  -1.0,
+                        //                        0.0, 1.0,
+                        //                        r, t, -d,  0.0,  0.0,
+                        //                        -1.0, 1.0, 1.0,
+                        l, b, -d,  -1.0, 0.0,  0.0, 0.0, 0.0,  // left
+                        l, b, 0.0, -1.0, 0.0,  0.0, 1.0, 0.0,
+                        l, t, -d,  -1.0, 0.0,  0.0, 0.0, 1.0,
+                        l, t, 0.0, -1.0, 0.0,  0.0, 1.0, 1.0,
+                        r, b, -d,  +1.0, 0.0,  0.0, 0.0, 0.0,  // right
+                        r, b, 0.0, +1.0, 0.0,  0.0, 1.0, 0.0,
+                        r, t, -d,  +1.0, 0.0,  0.0, 0.0, 1.0,
+                        r, t, 0.0, +1.0, 0.0,  0.0, 1.0, 1.0,
+                        l, t, 0.0, 0.0,  +1.0, 0.0, 0.0, 0.0,  // top
+                        r, t, 0.0, 0.0,  +1.0, 0.0, 1.0, 0.0,
+                        l, t, -d,  0.0,  +1.0, 0.0, 0.0, 1.0,
+                        r, t, -d,  0.0,  +1.0, 0.0, 1.0, 1.0,
+                        l, b, 0.0, 0.0,  -1.0, 0.0, 0.0, 0.0,  // bottom
+                        r, b, 0.0, 0.0,  -1.0, 0.0, 1.0, 0.0,
+                        l, b, -d,  0.0,  -1.0, 0.0, 0.0, 1.0,
+                        r, b, -d,  0.0,  -1.0, 0.0, 1.0, 1.0,
+                };
+        attribs.insert(attribs.end(), attribFront.begin(), attribFront.end());
+        attribs.insert(attribs.end(), attribBack.begin(), attribBack.end());
+        attribs.insert(attribs.end(), attribCommon.begin(), attribCommon.end());
+        for (auto iter : indice) {
+            indices.push_back(iter + j * 24);
+        }
+        j++;
+    }
+
+    mDisplaySegments[mCenterIndex].hingeModelTransfrom = glm::translate(
+            glm::mat4(),
+            glm::vec3(0, mDisplaySegments[mCenterIndex].b * mFactor, 0));
+
+    mVertexPositionAttribute = mGLES2->glGetAttribLocation(mProgram, "vtx_pos");
+    mVertexNormalAttribute =
+            mGLES2->glGetAttribLocation(mProgram, "vtx_normal");
+    mVertexUVAttribute = mGLES2->glGetAttribLocation(mProgram, "vtx_uv");
+    mGLES2->glGenBuffers(1, &mVertexDataBuffer);
+    mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexDataBuffer);
+    mGLES2->glBufferData(GL_ARRAY_BUFFER, attribs.size() * sizeof(float),
+                         attribs.data(), GL_STATIC_DRAW);
+    mGLES2->glGenBuffers(1, &mVertexIndexBuffer);
+    mGLES2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVertexIndexBuffer);
+    mGLES2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                         indices.size() * sizeof(GLuint), indices.data(),
+                         GL_STATIC_DRAW);
+    mElementsCount = indices.size();
+
+    CHECK_GL_ERROR_RETURN("Failed to load model", false);
+#endif
+    return true;
+}
+
+bool Device3DWidget::initAbstractDeviceModel() {
+    android_foldable_get_state(&mFoldableState);
+    if (mFoldableState.config.type == ANDROID_FOLDABLE_HORIZONTAL_SPLIT ||
+        mFoldableState.config.type == ANDROID_FOLDABLE_VERTICAL_SPLIT) {
+        return initAbstractDeviceHingeModel();
+    } else {
+        return initAbstractDeviceRollModel();
+    }
+
 }
 
 static bool getVisibleArea(const QPixmap* pixMap, QRect& rect) {
