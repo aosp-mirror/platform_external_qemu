@@ -671,6 +671,36 @@ void PhysicalModelImpl::setTargetInternalPosture(float posture,
     targetStateChanged();
 }
 
+void PhysicalModelImpl::setTargetInternalRollable0(
+        float percentage, PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mFoldableModel.setRollable(0, percentage, mode);
+    }
+    targetStateChanged();
+}
+
+void PhysicalModelImpl::setTargetInternalRollable1(
+        float percentage, PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mFoldableModel.setRollable(1, percentage, mode);
+    }
+    targetStateChanged();
+}
+
+void PhysicalModelImpl::setTargetInternalRollable2(
+        float percentage, PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mFoldableModel.setRollable(2, percentage, mode);
+    }
+    targetStateChanged();
+}
+
 vec3 PhysicalModelImpl::getParameterPosition(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -755,6 +785,24 @@ float PhysicalModelImpl::getParameterPosture(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     return mFoldableModel.getPosture(parameterValueType);
+}
+
+float PhysicalModelImpl::getParameterRollable0(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return mFoldableModel.getRollable(0, parameterValueType);
+}
+
+float PhysicalModelImpl::getParameterRollable1(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return mFoldableModel.getRollable(1, parameterValueType);
+}
+
+float PhysicalModelImpl::getParameterRollable2(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return mFoldableModel.getRollable(2, parameterValueType);
 }
 
 #define GET_FUNCTION_NAME(x) get##x

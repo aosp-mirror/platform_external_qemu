@@ -34,18 +34,28 @@ public:
 
     void setPosture(float posture, PhysicalInterpolation mode);
 
+    void setRollable(uint32_t index,
+                     float percentage,
+                     PhysicalInterpolation mode);
+
     float getHingeAngle(uint32_t hingeIndex,
                         ParameterValueType parameterValueType =
                                 PARAMETER_VALUE_TYPE_CURRENT) const;
 
-    float getPosture(ParameterValueType parameterValueType =
-                           PARAMETER_VALUE_TYPE_CURRENT) const;
+    float getRollable(uint32_t index,
+                      ParameterValueType parameterValueType) const;
 
-    FoldableState getFoldableState() { return mState; }     // structure copy
+    float getPosture(ParameterValueType parameterValueType =
+                             PARAMETER_VALUE_TYPE_CURRENT) const;
+
+    FoldableState getFoldableState() { return mState; }  // structure copy
 
     bool isFolded();
 
 private:
+    void initPostures();
+    void initFoldableHinge();
+    void initFoldableRoll();
     enum FoldablePostures calculatePosture();
     void sendPostureToSystem();
     void setToolBarFold(enum FoldablePostures oldPosture);
