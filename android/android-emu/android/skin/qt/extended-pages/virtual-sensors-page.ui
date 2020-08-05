@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>622</width>
-    <height>620</height>
+    <height>594</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -533,14 +533,14 @@
         </property>
         <item>
          <widget class="RaisedMaterialButton" name="btn_postureClosed">
+          <property name="minimumSize">
+           <size>
+            <width>36</width>
+            <height>36</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Closed</string>
-          </property>
-          <property name="minimumSize">
-            <size>
-             <width>36</width>
-             <height>36</height>
-            </size>
           </property>
           <property name="accessibleDescription">
            <string>Device posture closed</string>
@@ -565,14 +565,14 @@
         </item>
         <item>
          <widget class="RaisedMaterialButton" name="btn_postureFlipped">
+          <property name="minimumSize">
+           <size>
+            <width>36</width>
+            <height>36</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Flipped</string>
-          </property>
-          <property name="minimumSize">
-            <size>
-             <width>36</width>
-             <height>36</height>
-            </size>
           </property>
           <property name="accessibleDescription">
            <string>Device posture flipped</string>
@@ -597,14 +597,14 @@
         </item>
         <item>
          <widget class="RaisedMaterialButton" name="btn_postureHalfOpen">
+          <property name="minimumSize">
+           <size>
+            <width>36</width>
+            <height>36</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Half-Open</string>
-          </property>
-          <property name="minimumSize">
-            <size>
-             <width>36</width>
-             <height>36</height>
-            </size>
           </property>
           <property name="accessibleDescription">
            <string>Device posture half-open</string>
@@ -629,14 +629,14 @@
         </item>
         <item>
          <widget class="RaisedMaterialButton" name="btn_postureOpen">
+          <property name="minimumSize">
+           <size>
+            <width>36</width>
+            <height>36</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Open</string>
-          </property>
-          <property name="minimumSize">
-            <size>
-             <width>36</width>
-             <height>36</height>
-            </size>
           </property>
           <property name="accessibleDescription">
            <string>Device posture open</string>
@@ -661,14 +661,14 @@
         </item>
         <item>
          <widget class="RaisedMaterialButton" name="btn_postureTent">
+          <property name="minimumSize">
+           <size>
+            <width>36</width>
+            <height>36</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Tent</string>
-          </property>
-          <property name="minimumSize">
-            <size>
-             <width>36</width>
-             <height>36</height>
-            </size>
           </property>
           <property name="accessibleDescription">
            <string>Device posture tent</string>
@@ -707,6 +707,77 @@
        </layout>
       </widget>
      </widget>
+     <widget class="QWidget" name="page_4">
+      <widget class="EditableSliderWidget" name="roll0Slider" native="true">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>45</y>
+         <width>250</width>
+         <height>40</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="EditableSliderWidget" name="roll1Slider" native="true">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>90</y>
+         <width>250</width>
+         <height>40</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="EditableSliderWidget" name="roll2Slider" native="true">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>135</y>
+         <width>250</width>
+         <height>40</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="roll0Label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>45</y>
+         <width>40</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Roll1</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="roll1Label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>90</y>
+         <width>40</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Roll2</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="roll2Label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>135</y>
+         <width>40</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Roll3</string>
+       </property>
+      </widget>
+     </widget>
     </widget>
     <widget class="QLabel" name="label_15">
      <property name="geometry">
@@ -742,6 +813,22 @@
      </property>
      <property name="text">
       <string>Sensor values</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="accelModeRoll">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>352</y>
+       <width>81</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Rollable</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
    </widget>

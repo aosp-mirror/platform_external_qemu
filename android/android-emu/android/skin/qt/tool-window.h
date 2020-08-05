@@ -173,7 +173,6 @@ private:
     bool mAskedWhetherToSaveSnapshot = false;
     bool mAllowExtWindow = false;
     bool mClipboardSupported = false;
-    bool mFolded = false;
 
     int mLastRequestedFoldablePosture = -1;
 

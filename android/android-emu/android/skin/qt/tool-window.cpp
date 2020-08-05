@@ -174,7 +174,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
-    if (android_foldable_folded_area_configured()) {
+    if (android_foldable_any_folded_area_configured()) {
         mToolsUi->zoom_button->hide();
         mToolsUi->zoom_button->setEnabled(false);
     }
@@ -309,7 +309,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     // smaller than this.
 
     if (!android_foldable_hinge_configured() &&
-        !android_foldable_folded_area_configured()) {
+        (!android_foldable_folded_area_configured(0) ||
+        android_foldable_rollable_configured())) {
         mToolsUi->change_posture_button->hide();
     }
 
@@ -543,7 +544,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::SHOW_PANE_MULTIDISPLAY:
             if (down) {
                 if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
-                    && !android_foldable_folded_area_configured()) {
+                    && !android_foldable_any_folded_area_configured()) {
                     showOrRaiseExtendedWindow(PANE_IDX_MULTIDISPLAY);
                 }
             }
@@ -657,53 +658,51 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             }
             break;
         case QtUICommand::UPDATE_FOLDABLE_POSTURE_INDICATOR:
-            if (down &&
-                (android_foldable_hinge_configured() ||
-                 android_foldable_folded_area_configured())) {
-                float posture, unused1, unused2;
-                sUiEmuAgent->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_POSTURE,
-                                                           &posture,
-                                                           &unused1,
-                                                           &unused2,
-                                                           PARAMETER_VALUE_TYPE_CURRENT);
-                switch ((enum FoldablePostures) posture) {
-                case POSTURE_OPENED:
-                    ChangeIcon(mToolsUi->change_posture_button,
-                               "posture_open", "Change posture");
-                    break;
-                case POSTURE_CLOSED:
-                    ChangeIcon(mToolsUi->change_posture_button,
-                               "posture_closed", "Change posture");
-                    break;
-                case POSTURE_HALF_OPENED:
-                    ChangeIcon(mToolsUi->change_posture_button,
-                               "posture_half-open", "Change posture");
-                    break;
-                case POSTURE_FLIPPED:
-                    ChangeIcon(mToolsUi->change_posture_button,
-                               "posture_flipped", "Change posture");
-                    break;
-                case POSTURE_TENT:
-                    ChangeIcon(mToolsUi->change_posture_button,
-                              "posture_tent", "Change posture");
-                    break;
-                default:;
+            if (down) {
+                if (android_foldable_hinge_configured() ||
+                    android_foldable_folded_area_configured(0) &&
+                    !android_foldable_rollable_configured()) {
+                    // show and update icon for hinge and legacy fold
+                    float posture, unused1, unused2;
+                    sUiEmuAgent->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_POSTURE,
+                                                            &posture,
+                                                            &unused1,
+                                                            &unused2,
+                                                            PARAMETER_VALUE_TYPE_CURRENT);
+                    switch ((enum FoldablePostures) posture) {
+                        case POSTURE_OPENED:
+                            ChangeIcon(mToolsUi->change_posture_button,
+                                    "posture_open", "Change posture");
+                            break;
+                        case POSTURE_CLOSED:
+                            ChangeIcon(mToolsUi->change_posture_button,
+                                    "posture_closed", "Change posture");
+                            break;
+                        case POSTURE_HALF_OPENED:
+                            ChangeIcon(mToolsUi->change_posture_button,
+                                    "posture_half-open", "Change posture");
+                            break;
+                        case POSTURE_FLIPPED:
+                            ChangeIcon(mToolsUi->change_posture_button,
+                                    "posture_flipped", "Change posture");
+                            break;
+                        case POSTURE_TENT:
+                            ChangeIcon(mToolsUi->change_posture_button,
+                                    "posture_tent", "Change posture");
+                            break;
+                        default:;
+                    }
                 }
                 if (android_foldable_is_folded()) {
-                    if (!mFolded) {
-                        mFolded = true;
-                        mEmulatorWindow->resizeAndChangeAspectRatio(true);
-                        sendFoldedArea();
-                        forwardGenericEventToEmulator(EV_SW, SW_LID, true);
-                        forwardGenericEventToEmulator(EV_SYN, 0, 0);
-                    }
+                    mEmulatorWindow->resizeAndChangeAspectRatio(true);
+                    forwardGenericEventToEmulator(EV_SW, SW_LID, true);
+                    forwardGenericEventToEmulator(EV_SYN, 0, 0);
+                    printf("send lid close\n");
                 } else {
-                    if (mFolded) {
-                        mFolded = false;
-                        mEmulatorWindow->resizeAndChangeAspectRatio(false);
-                        forwardGenericEventToEmulator(EV_SW, SW_LID, false);
-                        forwardGenericEventToEmulator(EV_SYN, 0, 0);
-                    }
+                    mEmulatorWindow->resizeAndChangeAspectRatio(false);
+                    forwardGenericEventToEmulator(EV_SW, SW_LID, false);
+                    forwardGenericEventToEmulator(EV_SYN, 0, 0);
+                    printf("send lid opem\n");
                 }
             }
 
@@ -824,9 +823,9 @@ void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     ExtendedWindow::setAgent(agentPtr);
     VirtualSceneControlWindow::setAgent(agentPtr);
 
-    if (android_foldable_folded_area_configured()) {
-        sendFoldedArea();
-    }
+//    if (android_foldable_folded_area_configured(0)) {
+  //      sendFoldedArea();
+   // }
 
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (!avdPath) {

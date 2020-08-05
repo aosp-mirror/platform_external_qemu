@@ -55,6 +55,7 @@ private slots:
     void on_accelModeRotate_toggled();
     void on_accelModeMove_toggled();
     void on_accelModeFold_toggled();
+    void on_accelModeRoll_toggled();
 
     void on_magNorthWidget_valueChanged(double value);
     void on_magEastWidget_valueChanged(double value);
@@ -113,6 +114,9 @@ private slots:
     void on_hinge0Slider_valueChanged(double);
     void on_hinge1Slider_valueChanged(double);
     void on_hinge2Slider_valueChanged(double);
+    void on_roll0Slider_valueChanged(double);
+    void on_roll1Slider_valueChanged(double);
+    void on_roll2Slider_valueChanged(double);
     void on_posture_valueChanged(int);
 
     void updateResultingValues(glm::vec3 acceleration,
@@ -142,6 +146,7 @@ private:
     void onPhysicalStateStabilized();
     void setupHingeSensorUI();
     void togglePostureButtonsVisibility(bool newVisibility);
+    void setupRollableUI();
     void updateUIPosture();
 
     static void onTargetStateChanged(void* context);
