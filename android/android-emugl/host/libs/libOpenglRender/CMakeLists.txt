@@ -219,8 +219,7 @@ android_add_test(
       tests/OpenGL_unittest.cpp
       tests/OpenGLTestContext.cpp
       tests/StalePtrRegistry_unittest.cpp
-      tests/TextureDraw_unittest.cpp
-      tests/Vulkan_unittest.cpp)
+      tests/TextureDraw_unittest.cpp)
 target_link_libraries(
   OpenglRender_unittests PRIVATE android-emu-base gmock_main
                                  OpenglRender_standalone_common)
@@ -232,8 +231,10 @@ add_opengl_dependencies(OpenglRender_unittests)
 android_add_test(
   TARGET OpenglRender_vulkan_unittests
   SRC # cmake-format: sortable
+      tests/Vulkan_unittest.cpp
       vulkan/VulkanStream_unittest.cpp)
-target_link_libraries(OpenglRender_vulkan_unittests PRIVATE emugl_base)
+add_opengl_dependencies(OpenglRender_vulkan_unittests)
+target_link_libraries(OpenglRender_vulkan_unittests PRIVATE android-emu-base emugl_base)
 target_link_libraries(
   OpenglRender_vulkan_unittests PUBLIC OpenglRender_standalone_common
                                        OpenglRender_vulkan gmock_main)
