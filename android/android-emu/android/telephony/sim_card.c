@@ -465,6 +465,7 @@ asimcard_io( ASimCard  sim, const char*  cmd )
         { "+CRSM=178,28480,1,4,32", "+CRSM: 144,0,ffffffffffffffffffffffffffffffffffff07815155258131f5ffffffffffff" },
 
         { "+CRSM=192,28615,0,0,15", "+CRSM: 144,0,000000406fc7040011a0aa01020120" },
+        // number=+15552175049
         { "+CRSM=178,28615,1,4,32", "+CRSM: 144,0,566f6963656d61696cffffffffffffffffff07915155125740f9ffffffffffff" },
 
         /* b/37718561
@@ -480,6 +481,21 @@ asimcard_io( ASimCard  sim, const char*  cmd )
     };
 
     assert( memcmp( cmd, "+CRSM=", 6 ) == 0 );
+
+#define SET_VOICE_MAIL_NUMBER_COMMAND "+CRSM=220,28615,1,4,32"
+
+    static char s_voice_mail_number[256] = "566f6963656d61696cffffffffffffffffff07915155125740f9ffffffffffff";
+    if (0 == strncmp(cmd, SET_VOICE_MAIL_NUMBER_COMMAND, strlen(SET_VOICE_MAIL_NUMBER_COMMAND))) {
+        snprintf(s_voice_mail_number, sizeof(s_voice_mail_number), "%s", cmd + strlen(SET_VOICE_MAIL_NUMBER_COMMAND));
+        return "+CRSM: 144,0";
+    }
+
+#define GET_VOICE_MAIL_NUMBER_COMMAND "+CRSM=178,28615,1,4,32"
+    if (0 == strncmp(cmd, GET_VOICE_MAIL_NUMBER_COMMAND, strlen(GET_VOICE_MAIL_NUMBER_COMMAND))) {
+        snprintf( sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0,%s", s_voice_mail_number);
+        return sim->out_buff;
+    }
+
 
 #if ENABLE_DYNAMIC_RECORDS
     if ( sscanf(cmd, "+CRSM=%d,%d,%d,%d,%d", &command, &id, &p1, &p2, &p3) == 5 ) {
@@ -575,6 +591,7 @@ asimcard_io( ASimCard  sim, const char*  cmd )
             return answers[nn].answer;
         }
     }
+
     return "ERROR: BAD COMMAND";
 }
 
