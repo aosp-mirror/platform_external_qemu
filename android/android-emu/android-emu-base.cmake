@@ -191,6 +191,7 @@ android_target_compile_options(android-emu-base windows_msvc-x86_64
 android_add_executable(
   TARGET android-emu_benchmark NODISTRIBUTE
   SRC # cmake-format: sortable
-      android/base/synchronization/Lock_benchmark.cpp)
+      android/base/synchronization/Lock_benchmark.cpp
+      android/base/Log_benchmark.cpp)
 target_link_libraries(android-emu_benchmark PRIVATE android-emu-base
                                                     emulator-gbench)
