@@ -111,7 +111,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
     uint32_t ringAvailable = 0;
     uint32_t ringLargeXferAvailable = 0;
 
-    const uint32_t maxSpins = 30;
+    const uint32_t maxSpins = 300000;
     uint32_t spins = 0;
 
     while (count < wanted) {

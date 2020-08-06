@@ -206,5 +206,9 @@ typedef struct QAndroidVmOperations {
     struct HostmemEntry (*hostmemGetInfo)(uint64_t id);
     EmuRunState (*getRunState)();
 
+    // hostmem register with remove callback, add ref
+    uint64_t (*hostmemRegisterWithRemoveCallback)(uint64_t hva, uint64_t size, void* context, void (*remove_callback)(void* context, uint64_t id));
+    void (*hostmemAddRef)(uint64_t id);
+
 } QAndroidVmOperations;
 ANDROID_END_HEADER

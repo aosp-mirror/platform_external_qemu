@@ -18,10 +18,18 @@
 // This file defines common structs used by the interfaces defined for
 // AndroidEmu <--> QEMU interaction.
 
+// Other classes can subscribe to register/unregister events
+// with this callback. The callback is called on the first and last reference.
+typedef void (*hostmem_remove_callback_t)(void* context, uint64_t id);
+
 // A struct describing the information about host memory associated
 // with a host memory id. Used with virtio-gpu-next.
 struct HostmemEntry {
     uint64_t id;
     uint64_t hva;
     uint64_t size;
+    uint32_t refcount;
+
+    void* context;
+    hostmem_remove_callback_t remove_callback;
 };

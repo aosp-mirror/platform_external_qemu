@@ -903,17 +903,23 @@ static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq)
     }
 #endif
 
-    cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
-    while (cmd) {
-        cmd->vq = vq;
-        cmd->error = 0;
-        cmd->finished = false;
-        cmd->waiting = false;
-        QTAILQ_INSERT_TAIL(&g->cmdq, cmd, next);
+    do {
+        virtio_queue_set_notification(vq, 0);
         cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
-    }
+        while (cmd) {
+            cmd->vq = vq;
+            cmd->error = 0;
+            cmd->finished = false;
+            cmd->waiting = false;
+            QTAILQ_INSERT_TAIL(&g->cmdq, cmd, next);
 
-    virtio_gpu_process_cmdq(g);
+            virtio_gpu_process_cmdq(g);
+
+            cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
+        }
+        virtio_queue_set_notification(vq, 1);
+    } while (!virtio_queue_empty(vq));
+
 
 #ifdef CONFIG_VIRGL
     if (g->use_virgl_renderer) {

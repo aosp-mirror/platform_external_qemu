@@ -47,11 +47,16 @@ public:
     static const Id kInvalidHostmemId;
 
     // Returns kInvalidHostmemId if hva or size is 0.
+    // Refcount is 1 starting out.
     AEMU_EXPORT Id add(uint64_t hva, uint64_t size);
+    AEMU_EXPORT Id addWithRemoveCallback(uint64_t hva, uint64_t size, void* context, hostmem_remove_callback_t remove_callback);
+
+    // Increments refcount.
+    AEMU_EXPORT void ref(Id id);
 
     // No-op if kInvalidHostmemId or a nonexistent entry
-    // is referenced.
-    AEMU_EXPORT void remove(Id id);
+    // is referenced. Decreases refcount and calls callback on the last reference.
+    AEMU_EXPORT void unref(Id id);
 
     // If id == kInvalidHostmemId or not found in map,
     // returns entry with id == kInvalidHostmemId,
@@ -62,6 +67,8 @@ public:
     AEMU_EXPORT void clear();
 
 private:
+    Id addCommon(uint64_t hva, uint64_t size, void* context, hostmem_remove_callback_t remove_callback);
+
     std::atomic<Id> mCurrentId {1};
     base::StaticMap<Id, Entry> mEntries;
     DISALLOW_COPY_ASSIGN_AND_MOVE(HostmemIdMapping);
@@ -76,5 +83,7 @@ extern "C" {
 AEMU_EXPORT uint64_t android_emulation_hostmem_register(uint64_t hva, uint64_t size);
 AEMU_EXPORT void android_emulation_hostmem_unregister(uint64_t id);
 AEMU_EXPORT HostmemEntry android_emulation_hostmem_get_info(uint64_t id);
+AEMU_EXPORT uint64_t android_emulation_hostmem_register_with_remove_callback(uint64_t hva, uint64_t size, void* context, hostmem_remove_callback_t remove_callback);
+AEMU_EXPORT void android_emulation_hostmem_add_ref(uint64_t id);
 
 } // extern "C"
