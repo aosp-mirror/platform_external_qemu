@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "26cfb14b_2fe17327",
+        "filename": "android/android-emu/android/telephony/sim_card.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-08-06T20:53:43Z",
+      "side": 1,
+      "message": "what is this number?",
+      "range": {
+        "startLine": 468,
+        "startChar": 19,
+        "endLine": 468,
+        "endChar": 30
+      },
+      "revId": "872fe064daa828850ac40f2e71df151980375a71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
