@@ -29,5 +29,17 @@ TEST(StaticMap, Basic) {
     EXPECT_EQ(android::base::kNullopt, map.get(nullptr));
 }
 
+TEST(StaticMap, Mutate) {
+    StaticMap<void*, int> map;
+
+    map.set(nullptr, 1);
+    map.mutate(nullptr, [](int& val) { val = 2; });
+    EXPECT_EQ(2, *map.get(nullptr));
+    map.mutate((void*)1, [](int& val) { val = 3; });
+    EXPECT_EQ(2, *map.get(nullptr));
+    map.erase(nullptr);
+    map.mutate(nullptr, [](int& val) { val = 4; });
+}
+
 } // namespace base
 } // namespace android

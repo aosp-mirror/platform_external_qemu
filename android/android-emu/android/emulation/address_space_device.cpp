@@ -183,6 +183,12 @@ public:
         sVmOps->hostmemUnregister(id);
     }
 
+    uint64_t hostmemRegisterWithRemoveCallback(
+        uint64_t hva, uint64_t size, void* context,
+        address_space_hostmem_remove_callback_t remove_callback) {
+        return sVmOps->hostmemRegisterWithRemoveCallback(hva, size, context, remove_callback);
+    }
+
     void save(Stream* stream) const {
         AddressSpaceSharedSlotsHostMemoryAllocatorContext::globalStateSave(stream);
 
@@ -464,6 +470,11 @@ static void sAddressSpaceDeviceRunDeallocationCallbacks(uint64_t gpa) {
 
 static const struct AddressSpaceHwFuncs* sAddressSpaceDeviceControlGetHwFuncs() {
     return get_address_space_device_hw_funcs();
+}
+
+static uint64_t sAddressSpaceDeviceHostmemRegisterWithRemoveCallback(
+    uint64_t hva, uint64_t size, void* context, address_space_hostmem_remove_callback_t remove_callback) {
+    return sAddressSpaceDeviceState->hostmemRegisterWithRemoveCallback(hva, size, context, remove_callback);
 }
 
 

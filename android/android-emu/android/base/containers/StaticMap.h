@@ -55,6 +55,18 @@ public:
         return it->second;
     }
 
+    using MutateFunc = android::base::FunctionView<void(V&)>;
+
+    void mutate(const K& key, MutateFunc func) {
+        AutoLock lock(mLock);
+        auto it = mItems.find(key);
+        if (it == mItems.end()) {
+            return;
+        }
+        auto& val = it->second;
+        func(val);
+    }
+
     using ErasePredicate = android::base::FunctionView<bool(K, V)>;
 
     void eraseIf(ErasePredicate p) {
