@@ -282,9 +282,14 @@ private:
                         ADDRESS_SPACE_GRAPHICS_PAGE_SIZE,
                         dedicatedSize);
 
-                uint64_t hostmemId = mControlOps->hostmem_register(
+                uint64_t hostmemId = mControlOps->hostmem_register_with_remove_callback(
                     (uint64_t)(uintptr_t)buf,
-                    dedicatedSize);
+                    dedicatedSize,
+                    buf,
+                    [](void* bufPtr, uint64_t id) {
+                        (void)id;
+                        aligned_buf_free(bufPtr);
+                    });
 
                 if (hostmemIdOut) *hostmemIdOut = hostmemId;
 
@@ -358,7 +363,9 @@ private:
 
         delete block.subAlloc;
 
-        aligned_buf_free(block.buffer);
+        if (!block.usesVirtioGpuHostmem) {
+            aligned_buf_free(block.buffer);
+        }
 
         block.isEmpty = true;
     }

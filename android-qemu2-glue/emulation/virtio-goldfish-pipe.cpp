@@ -1303,6 +1303,8 @@ public:
 
         const auto& entry = it->second;
 
+        HostmemIdMapping::get()->ref(entry.hvaId);
+
         static const uint64_t kPageSizeforBlob = 4096;
         static const uint64_t kPageMaskForBlob = ~(0xfff);
 
@@ -1325,8 +1327,8 @@ public:
             return -1;
         }
 
-        // TODO(lfy): Good place to run any registered cleanup callbacks.
-        // No-op for now.
+        HostmemIdMapping::get()->unref(it->second.hvaId);
+
         return 0;
     }
 

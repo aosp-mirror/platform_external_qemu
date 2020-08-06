@@ -29,9 +29,7 @@ HostmemIdMapping* HostmemIdMapping::get() {
     return sMapping.ptr();
 }
 
-// TODO: Add registerHostmemFixed version that takes a predetermined id,
-// for snapshots
-HostmemIdMapping::Id HostmemIdMapping::add(uint64_t hva, uint64_t size) {
+HostmemIdMapping::Id HostmemIdMapping::addCommon(uint64_t hva, uint64_t size, void* context, hostmem_remove_callback_t remove_callback) {
     if (0 == hva || 0 == size) return kInvalidHostmemId;
 
     Id wantedId = mCurrentId++;
@@ -39,12 +37,44 @@ HostmemIdMapping::Id HostmemIdMapping::add(uint64_t hva, uint64_t size) {
     entry.id = wantedId;
     entry.hva = hva;
     entry.size = size;
+    entry.context = context;
+    entry.remove_callback = remove_callback;
+    entry.refcount = 1;
     mEntries.set(wantedId, entry);
     return wantedId;
 }
 
-void HostmemIdMapping::remove(HostmemIdMapping::Id id) {
-    mEntries.erase(id);
+// TODO: Add registerHostmemFixed version that takes a predetermined id,
+// for snapshots
+HostmemIdMapping::Id HostmemIdMapping::add(uint64_t hva, uint64_t size) {
+    return addCommon(hva, size, nullptr, 0);
+}
+
+HostmemIdMapping::Id HostmemIdMapping::addWithRemoveCallback(uint64_t hva, uint64_t size, void* context, hostmem_remove_callback_t remove_callback) {
+    return addCommon(hva, size, context, remove_callback);
+}
+
+void HostmemIdMapping::ref(HostmemIdMapping::Id id) {
+    mEntries.mutate(id,
+        [id](HostmemIdMapping::Entry& entry) {
+            ++entry.refcount;
+        });
+}
+
+void HostmemIdMapping::unref(HostmemIdMapping::Id id) {
+    bool remove = false;
+    mEntries.mutate(id,
+        [&remove, id](HostmemIdMapping::Entry& entry) {
+            if (1 == entry.refcount) {
+                remove = true;
+                if (entry.context && entry.remove_callback) {
+                    entry.remove_callback(entry.context, id);
+                }
+            }
+            --entry.refcount;
+        });
+
+    if (remove) mEntries.erase(id);
 }
 
 HostmemIdMapping::Entry HostmemIdMapping::get(HostmemIdMapping::Id id) const {
@@ -77,12 +107,20 @@ uint64_t android_emulation_hostmem_register(uint64_t hva, uint64_t size) {
 }
 
 void android_emulation_hostmem_unregister(uint64_t id) {
-    android::emulation::HostmemIdMapping::get()->remove(id);
+    android::emulation::HostmemIdMapping::get()->unref(id);
 }
 
 HostmemEntry android_emulation_hostmem_get_info(uint64_t id) {
     return static_cast<HostmemEntry>(
         android::emulation::HostmemIdMapping::get()->get(id));
+}
+
+uint64_t android_emulation_hostmem_register_with_remove_callback(uint64_t hva, uint64_t size, void* context, hostmem_remove_callback_t remove_callback) {
+    return android::emulation::HostmemIdMapping::get()->addWithRemoveCallback(hva, size, context, remove_callback);
+}
+
+void android_emulation_hostmem_add_ref(uint64_t id) {
+    android::emulation::HostmemIdMapping::get()->ref(id);
 }
 
 } // extern "C"

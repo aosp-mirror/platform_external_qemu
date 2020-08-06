@@ -232,6 +232,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .hostmemRegister = android_emulation_hostmem_register,
         .hostmemUnregister = android_emulation_hostmem_unregister,
         .hostmemGetInfo = android_emulation_hostmem_get_info,
+        .hostmemRegisterWithRemoveCallback = android_emulation_hostmem_register_with_remove_callback,
+        .hostmemAddRef = android_emulation_hostmem_add_ref,
 };
 
 class GolfishMockConsoleFactory

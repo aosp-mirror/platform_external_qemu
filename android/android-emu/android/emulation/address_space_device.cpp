@@ -183,6 +183,12 @@ public:
         sVmOps->hostmemUnregister(id);
     }
 
+    uint64_t hostmemRegisterWithRemoveCallback(
+        uint64_t hva, uint64_t size, void* context,
+        address_space_hostmem_remove_callback_t remove_callback) {
+        return sVmOps->hostmemRegisterWithRemoveCallback(hva, size, context, remove_callback);
+    }
+
     void save(Stream* stream) const {
         AddressSpaceSharedSlotsHostMemoryAllocatorContext::globalStateSave(stream);
 
@@ -466,27 +472,33 @@ static const struct AddressSpaceHwFuncs* sAddressSpaceDeviceControlGetHwFuncs() 
     return get_address_space_device_hw_funcs();
 }
 
+static uint64_t sAddressSpaceDeviceHostmemRegisterWithRemoveCallback(
+    uint64_t hva, uint64_t size, void* context, address_space_hostmem_remove_callback_t remove_callback) {
+    return sAddressSpaceDeviceState->hostmemRegisterWithRemoveCallback(hva, size, context, remove_callback);
+}
+
 
 } // namespace
 
 extern "C" {
 
 static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
-    &sAddressSpaceDeviceGenHandle,                     // gen_handle
-    &sAddressSpaceDeviceDestroyHandle,                 // destroy_handle
-    &sAddressSpaceDeviceTellPingInfo,                  // tell_ping_info
-    &sAddressSpaceDevicePing,                          // ping
-    &sAddressSpaceDeviceAddMemoryMapping,              // add_memory_mapping
-    &sAddressSpaceDeviceRemoveMemoryMapping,           // remove_memory_mapping
-    &sAddressSpaceDeviceGetHostPtr,                    // get_host_ptr
-    &sAddressSpaceHandleToContext,                     // handle_to_context
-    &sAddressSpaceDeviceClear,                         // clear
-    &sAddressSpaceDeviceHostmemRegister,               // hostmem register
-    &sAddressSpaceDeviceHostmemUnregister,             // hostmem unregister
-    &sAddressSpaceDevicePingAtHva,                     // ping_at_hva
-    &sAddressSpaceDeviceRegisterDeallocationCallback,  // register_deallocation_callback
-    &sAddressSpaceDeviceRunDeallocationCallbacks,      // run_deallocation_callbacks
-    &sAddressSpaceDeviceControlGetHwFuncs,             // control_get_hw_funcs
+    &sAddressSpaceDeviceGenHandle,                         // gen_handle
+    &sAddressSpaceDeviceDestroyHandle,                     // destroy_handle
+    &sAddressSpaceDeviceTellPingInfo,                      // tell_ping_info
+    &sAddressSpaceDevicePing,                              // ping
+    &sAddressSpaceDeviceAddMemoryMapping,                  // add_memory_mapping
+    &sAddressSpaceDeviceRemoveMemoryMapping,               // remove_memory_mapping
+    &sAddressSpaceDeviceGetHostPtr,                        // get_host_ptr
+    &sAddressSpaceHandleToContext,                         // handle_to_context
+    &sAddressSpaceDeviceClear,                             // clear
+    &sAddressSpaceDeviceHostmemRegister,                   // hostmem register
+    &sAddressSpaceDeviceHostmemUnregister,                 // hostmem unregister
+    &sAddressSpaceDevicePingAtHva,                         // ping_at_hva
+    &sAddressSpaceDeviceRegisterDeallocationCallback,      // register_deallocation_callback
+    &sAddressSpaceDeviceRunDeallocationCallbacks,          // run_deallocation_callbacks
+    &sAddressSpaceDeviceControlGetHwFuncs,                 // control_get_hw_funcs
+    &sAddressSpaceDeviceHostmemRegisterWithRemoveCallback, // hostmem_register_with_remove_callback
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
