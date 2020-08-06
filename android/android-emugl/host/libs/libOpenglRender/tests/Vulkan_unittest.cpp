@@ -42,21 +42,33 @@ using android::base::TestSystem;
 
 namespace emugl {
 
-static std::string loaderAndMockTestLibsDir() {
+static std::string libDir() {
     return
         pj(TestSystem::getProgramDirectoryFromPlatform(),
-           "testlib64");
+#ifdef _WIN32
+           // Windows uses mock Vulkan ICD.
+           "testlib64"
+#else
+           "lib64", "vulkan"
+#endif
+        );
 }
 
 static std::string testIcdFilename() {
-    // TODO: Use Swiftshader for rendering tests
-    return pj(loaderAndMockTestLibsDir(), "VkICD_mock_icd.json");
+    return pj(libDir(),
+#ifdef _WIN32
+        // Windows uses mock Vulkan ICD.
+        "VkICD_mock_icd.json"
+#else
+        "vk_swiftshader_icd.json"
+#endif
+    );
 }
 
 static void* dlOpenFuncForTesting() {
 #ifdef _WIN32
     const Win32UnicodeString name(
-        pj(loaderAndMockTestLibsDir(), "vulkan-1.dll"));
+        pj(libDir(), "vulkan-1.dll"));
     return LoadLibraryW(name.c_str());
 #else
 
@@ -69,7 +81,7 @@ static void* dlOpenFuncForTesting() {
     std::string libName =
         std::string("libvulkan") + suffix;
 
-    auto name = pj(loaderAndMockTestLibsDir(), libName);
+    auto name = pj(libDir(), libName);
     return dlopen(name.c_str(), RTLD_NOW);
 #endif
 }
@@ -179,27 +191,11 @@ static void testInstanceCreation(const VulkanDispatch* vk,
         fprintf(stderr, "%s: ext: %s\n", __func__, props[i].extensionName);
     }
 
-    // Query the correct surface extensions, which we'll need.
-
-    const char* exts[] = {
-        "VK_KHR_surface",
-#ifdef _WIN32
-#define PLATFORM_SURFACE_INSTANCE_EXT "VK_KHR_win32_surface"
-#else
-#ifdef __APPLE__
-#define PLATFORM_SURFACE_INSTANCE_EXT "VK_MVK_macos_surface"
-#else
-#define PLATFORM_SURFACE_INSTANCE_EXT "VK_KHR_xlib_surface"
-#endif
-#endif
-        PLATFORM_SURFACE_INSTANCE_EXT,
-    };
-
     VkInstanceCreateInfo instanceCreateInfo = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO, 0, 0,
         nullptr,
         0, nullptr,
-        arraySize(exts), exts,
+        0, nullptr,
     };
 
     VkInstance instance;
