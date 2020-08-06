@@ -49,7 +49,7 @@ static void virtio_gpu_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
 
 #define VIRTIO_GPU_PCI_HOST_COHERENT_BAR_SIZE (1ULL << 32ULL)
 
-    memory_region_init(
+    memory_region_init_ram_user_backed(
         &g->host_coherent_memory, OBJECT(g),
         "virtio-gpu-host-coherent",
         VIRTIO_GPU_PCI_HOST_COHERENT_BAR_SIZE);
