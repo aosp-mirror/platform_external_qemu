@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "093a3395_7abbf99f",
+        "filename": "android/android-emu/android/hw-sensors.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-06T14:37:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d7e438b3_6708d31d",
+      "revId": "e4a34fc552dedbbd3fbad2a6ffa4bdaca70caa6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "05509e87_97e75f0a",
         "filename": "android/android-emu/android/skin/qt/editable-slider-widget.h",
         "patchSetId": 6
@@ -33,6 +51,24 @@
       "revId": "e4a34fc552dedbbd3fbad2a6ffa4bdaca70caa6e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "702e22f3_16bcffc5",
+        "filename": "android/android-emu/android/skin/qt/editable-slider-widget.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-06T14:37:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "05509e87_97e75f0a",
+      "revId": "e4a34fc552dedbbd3fbad2a6ffa4bdaca70caa6e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
