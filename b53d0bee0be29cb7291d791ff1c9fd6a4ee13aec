@@ -33,6 +33,24 @@
       "revId": "b53d0bee0be29cb7291d791ff1c9fd6a4ee13aec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c95bd3c2_86423602",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1370,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-06T08:44:26Z",
+      "side": 1,
+      "message": "\u003e I suppose one thing we can do is only restrict type index memory properties if the host visible bit is specified in setupVkCOlorBuffer, otherwise allow  both device local bit and 0 as the properties.\n\nSounds good to me; In the latest patchset I\u0027ve updated the signature of \"setupVkColorBuffer()\" to add two arguments:\n\n   Optional\u003cuint32_t\u003e memoryProperty,\n   Optional\u003cuint32_t\u003e memoryTypeIndex,\n\n1) For color buffer created by renderControl device (e.g. color buffers allocated through sysmem directly, or in vkCreateImage() for images with VkBufferCollectionFUCHSIA), since clients doesn\u0027t know anything about possible memoryTypeIndex for the images yet, it just sets memoryProperty: \n\nFor host-visible images, it sets memoryProperty to \"VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT\" and sets memoryTypeIndex to kNullopt.\n\nFor device-local images, it just leaves both fields empty so it doesn\u0027t have any memory type constraints.\n\n2) For color buffer created by host Vulkan decoder, these are created when clients call vkAllocateMemory() (for exportable dedicated images), and at that time clients already have the memoryTypeIndex, so they can just pass in that value.\n\n\u003d\u003d\u003d\n\nThis minimizes the difference this change makes to the behavior of setupVkColorBuffer() (only color buffers allocated with memoryProperty \u003d HOST_VISIBLE will behave differently), and supports the case you mentioned above where device memory types may have property bits \u003d 0.",
+      "parentUuid": "d3b8501e_fc362446",
+      "revId": "b53d0bee0be29cb7291d791ff1c9fd6a4ee13aec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
