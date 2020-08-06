@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e87e94f4_1e8c08f6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-08-06T16:31:59Z",
+      "side": 1,
+      "message": "Thanks for the update, Emilian.\nCould you rebase your CL to ToT? There might be some collision to solve with latest code.",
+      "revId": "82c6ca8837f49cb163f20fd88725a31ad0eb8e14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
