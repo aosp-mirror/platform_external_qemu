@@ -336,6 +336,19 @@
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QPushButton" name="dpad_assistantButton">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>470</y>
+     <width>85</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Assistant</string>
+   </property>
+  </widget>
  </widget>
  <resources>
   <include location="../resources.qrc"/>

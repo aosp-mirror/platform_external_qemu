@@ -37,6 +37,7 @@ private:
     void toggleButtonPressed(QPushButton* button,
                              const SkinKeyCode key_code,
                              const bool pressed);
+    void onAssistantButtonPressed();
 private:
     void remaskButtons();
     bool eventFilter(QObject*, QEvent*) override;

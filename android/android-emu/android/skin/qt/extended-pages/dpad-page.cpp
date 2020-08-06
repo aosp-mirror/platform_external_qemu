@@ -20,6 +20,7 @@
 #include <QBitmap>                                  // for QBitmap
 #include <QDesktopWidget>                           // for QDesktopWidget
 #include <QEvent>                                   // for QEvent
+#include <QFileDialog>
 #include <QHash>                                    // for QHash
 #include <QIcon>                                    // for QIcon
 #include <QLabel>                                   // for QLabel
@@ -30,6 +31,7 @@
 #include <QSize>                                    // for QSize
 #include <QVariant>                                 // for QVariant
 
+#include "android/emulation/control/adb/AdbInterface.h"         // for AdbInterface
 #include "android/globals.h"                        // for android_hw
 #include "android/settings-agent.h"                 // for SettingsTheme
 #include "android/skin/event.h"                     // for SkinEvent, (anony...
@@ -79,6 +81,9 @@ DPadPage::DPadPage(QWidget *parent) :
                     [button, key_code, this]() { toggleButtonPressed(button, key_code, false); });
         }
 
+        connect(mUi->dpad_assistantButton, &QPushButton::pressed,
+             [this]() {onAssistantButtonPressed();});
+
         // Don't show the overlay that obscures the buttons.
         mUi->dpad_noDPad_mask->hide();
         // Don't show the text saying that the D-Pad is disabled.
@@ -120,6 +125,49 @@ void DPadPage::toggleButtonPressed(
         QString resName =
             ":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] + "/" + iconName;
         button->setIcon(QIcon(resName));
+    }
+}
+
+void DPadPage::onAssistantButtonPressed() {
+    // QStringList paths =
+    //         QStandardPaths::standardLocations(
+    //             QStandardPaths::DesktopLocation);
+    // QString savePath;
+    // if (paths.size() > 0) {
+    //     savePath = QDir::toNativeSeparators(paths[0]);
+    // }
+
+    QMessageBox msgBox;
+    msgBox.setText("Trigger Assistant");
+    msgBox.setInformativeText("Do you want to trigger Assistant?");
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    int ret = msgBox.exec();
+
+    if (ret == QMessageBox::Ok) {
+         QFileDialog dialog(this);
+        dialog.setFileMode(QFileDialog::AnyFile);
+        dialog.setViewMode(QFileDialog::Detail);
+        dialog.exec();
+        QStringList fileNames = dialog.selectedFiles();
+        if (fileNames.size() > 0) {
+            android::emulation::AdbInterface* adbInterface = mEmulatorWindow->getAdbInterface();
+            QFileInfo sourceFile = QFileInfo(fileNames[0]);
+            QString sourceFilePath = sourceFile.absolutePath();
+            QString targetFilePath = "/scard/" + sourceFile.fileName();
+            sourceFilePath.insert(0, "\"");
+            sourceFilePath.append("\"");
+            targetFilePath.insert(0, "\"");
+            targetFilePath.append("\"");
+            adbInterface->enqueueCommand({"push", sourceFilePath.toStdString(), targetFilePath.toStdString()});
+            adbInterface->enqueueCommand({"shell", "am", "broadcast",  "-a", "\"com.google.android.tv.remote.service.ATV_AUDIO_FILE\"", "-e", sourceFilePath.toStdString(), targetFilePath.toStdString()});
+            adbInterface->enqueueCommand({"shell", "input", "keyevent", "KEYCODE_ASSIST"});
+        } else {
+            QMessageBox errBox;
+            errBox.setText("No audio file selected");
+            errBox.setInformativeText("Please select an audio file");
+            errBox.setStandardButtons(QMessageBox::Ok);
+            errBox.exec();
+        }
     }
 }
 
