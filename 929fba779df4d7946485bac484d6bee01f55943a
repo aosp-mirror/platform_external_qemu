@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b90bb60_99a6c955",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-06T17:06:49Z",
+      "side": 1,
+      "message": "Weird, the failure is now\n\n16:35:08(03:17.37) rel | [ RUN      ] VulkanFrameBufferTest.VkColorBufferWithMemoryPropertyFlags\n16:35:08(03:17.1 ) rel | \n16:35:08(03:17.80) rel | \n16:35:08(03:17.54) rel | 0% tests passed, 1 tests failed out of 1\n16:35:08(03:17.30) rel | \n16:35:08(03:17.10) rel | Total Test time (real) \u003d   0.19 sec\n16:35:08(03:17.96) rel | \n16:35:08(03:17.59) rel | The following tests FAILED:\n16:35:08(03:17.51) rel | 92 - OpenglRender_vulkan_unittests (SEGFAULT)\n\n\nbut it seems to passed on my machine",
+      "revId": "929fba779df4d7946485bac484d6bee01f55943a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
