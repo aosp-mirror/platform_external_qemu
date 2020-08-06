@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08907705_1094e589",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/CMakeLists.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-06T22:11:59Z",
+      "side": 1,
+      "message": "we need something like  android_target_compile_definitions(OpenglRender_vulkan_unittests windows PRIVATE\n                                     -DVK_USE_PLATFORM_WIN32_KHR)",
+      "revId": "34c7d7b36fb737873ccb9d850f979b16443d6b43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
