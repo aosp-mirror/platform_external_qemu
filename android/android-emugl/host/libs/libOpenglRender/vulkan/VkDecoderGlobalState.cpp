@@ -2503,6 +2503,22 @@ public:
         mOccupiedGpas.erase(gpa);
     }
 
+    void freeHostmemAtId(uint64_t id) {
+        AutoLock lock(mLock);
+
+        auto existingMemoryInfo =
+            android::base::find(mOccupiedHostmems, id);
+
+        if (!existingMemoryInfo) return;
+
+        auto vk = existingMemoryInfo->vk;
+        auto device = existingMemoryInfo->device;
+        auto memory = existingMemoryInfo->memory;
+
+        vk->vkUnmapMemory(device, memory);
+        vk->vkFreeMemory(device, memory, nullptr);
+    }
+
     VkResult on_vkAllocateMemory(
             android::base::Pool* pool,
             VkDevice boxed_device,
@@ -2762,11 +2778,13 @@ public:
             get_emugl_vm_operations().hostmemUnregister(info->hostmemId);
         }
 
-        if (info->ptr) {
-            vk->vkUnmapMemory(device, memory);
-        }
+        if (!info->virtioGpuMapped) {
+            if (info->ptr) {
+                vk->vkUnmapMemory(device, memory);
+            }
 
-        vk->vkFreeMemory(device, memory, pAllocator);
+            vk->vkFreeMemory(device, memory, pAllocator);
+        }
 
         mMapInfo.erase(memory);
     }
@@ -3055,13 +3073,26 @@ public:
         uint64_t size = (uint64_t)(uintptr_t)(info->size);
 
         auto id =
-            get_emugl_vm_operations().hostmemRegister(
+            get_emugl_vm_operations().hostmemRegisterWithRemoveCallback(
                     (uint64_t)(uintptr_t)(info->ptr),
-                    (uint64_t)(uintptr_t)(info->size));
+                    (uint64_t)(uintptr_t)(info->size),
+                    this,
+                    [](void* thisPtr, uint64_t id) {
+                        Impl* implPtr = (Impl*)thisPtr;
+                        implPtr->freeHostmemAtId(id);
+                    });
 
         *pAddress = hva & (0xfff); // Don't expose exact hva to guest
         *pSize = size;
         *pHostmemId = id;
+
+        mOccupiedHostmems[id] = {
+            .vk = vk,
+            .device = device,
+            .memory = memory,
+            .hostmemId = id,
+            .size = size,
+        };
 
         info->virtioGpuMapped = true;
         info->hostmemId = id;
@@ -5597,6 +5628,16 @@ private:
         size_t sizeToPage;
     };
     std::unordered_map<uint64_t, OccupiedGpaInfo> mOccupiedGpas;
+    // Back-reference to the VkDeviceMemory that is occupying a particular
+    // hostmem id
+    struct OccupiedHostmemInfo {
+        VulkanDispatch* vk;
+        VkDevice device;
+        VkDeviceMemory memory;
+        uint64_t hostmemId;
+        size_t size;
+    };
+    std::unordered_map<uint64_t, OccupiedHostmemInfo> mOccupiedHostmems;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()

@@ -964,6 +964,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .hostmemUnregister = android_emulation_hostmem_unregister,
         .hostmemGetInfo = android_emulation_hostmem_get_info,
         .getRunState = qemu_get_runstate,
+        .hostmemRegisterWithRemoveCallback = android_emulation_hostmem_register_with_remove_callback,
+        .hostmemAddRef = android_emulation_hostmem_add_ref,
 };
 
 extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =
