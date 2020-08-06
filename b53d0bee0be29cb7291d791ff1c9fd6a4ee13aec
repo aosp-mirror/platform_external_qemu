@@ -51,6 +51,24 @@
       "revId": "b53d0bee0be29cb7291d791ff1c9fd6a4ee13aec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4379be8e_986ab5e9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1370,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-06T15:19:23Z",
+      "side": 1,
+      "message": "Sounds good, thanks!",
+      "parentUuid": "c95bd3c2_86423602",
+      "revId": "b53d0bee0be29cb7291d791ff1c9fd6a4ee13aec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
