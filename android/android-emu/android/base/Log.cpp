@@ -15,7 +15,6 @@
 #include <stdio.h>                         // for fprintf, fflush, vsnprintf
 #include <stdlib.h>                        // for free, malloc
 #include <string.h>                        // for memcpy, strerror
-#include <unistd.h>                        // for _exit
 
 #include "android/base/ArraySize.h"        // for arraySize
 #include "android/base/Debug.h"            // for DebugBreak, IsDebuggerAtta...
