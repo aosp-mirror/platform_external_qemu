@@ -13,7 +13,9 @@
 // limitations under the License.
 #include "android-qemu2-glue/qemu-console-factory.h"
 
-#include "android/console.h"                                // for ANDROID_C...
+#include "android/base/Log.h"
+#include "android/console.h"  // for ANDROID_C...
+#include "android/emulation/control/AgentLogger.h"
 #include "android/emulation/control/AndroidAgentFactory.h"  // for initializ...
 #include "android/emulation/control/battery_agent.h"        // for QAndroidB...
 #include "android/emulation/control/car_data_agent.h"       // for QCarDataA...
@@ -85,7 +87,8 @@ extern "C" const QGrpcAgent* const gQGrpcAgent;
 // android-qemu2-glue/qemu-multi-display-agent-impl.cpp
 extern "C" const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
 
-extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
+extern "C" const QAndroidEmulatorWindowAgent* const
+        gQAndroidEmulatorWindowAgent;
 
 extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
 
@@ -100,6 +103,12 @@ class QemuAndroidConsoleAgentFactory
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_DEFINE_CONSOLE_GETTER_IMPL)
 };
 
+using android::emulation::AndroidLoggingConsoleFactory;
+
 void injectConsoleAgents(const char* factory) {
     android::emulation::injectConsoleAgents(QemuAndroidConsoleAgentFactory());
+    if (VERBOSE_CHECK(events)) {
+        LOG(INFO) << "-- Injecting logging agents for user events.";
+        android::emulation::injectConsoleAgents(AndroidLoggingConsoleFactory());
+    }
 }
