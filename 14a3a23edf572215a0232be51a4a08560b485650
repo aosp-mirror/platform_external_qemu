@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0737dca0_84a62fb4",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 2638,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-07T01:40:51Z",
+      "side": 1,
+      "message": "Sounds good to me. Maybe we should just check if the memory property of |localAllocInfo.memoryTypeIndex| contains HOST_VISIBLE, and set allocate host memory accordingly.",
+      "range": {
+        "startLine": 2633,
+        "startChar": 33,
+        "endLine": 2638,
+        "endChar": 56
+      },
+      "revId": "14a3a23edf572215a0232be51a4a08560b485650",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
