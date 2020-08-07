@@ -640,7 +640,6 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
          errno == EAGAIN ||
          errno == EINPROGRESS)) {
 
-#ifndef _WIN32
         // On Linux (at least), dont' actually use select(), because the fd
         // number can be > 1024
         // On other platforms, let
@@ -652,15 +651,6 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
             },
         };
         int numFdsReady = HANDLE_EINTR(::poll(fds, 1, tv.tv_usec / 1000));
-#else // !_WIN32
-        if (fd >= FD_SETSIZE) {
-            fprintf(stderr, "%s: error: fd %d above FD_SETSIZE (%d)\n",
-                    __func__, fd, FD_SETSIZE);
-            return -1;
-        }
-        FD_SET(fd, &my_set);
-        int numFdsReady = HANDLE_EINTR(::select(fd + 1, 0, &my_set, 0, &tv));
-#endif // _WIN32
 
         if (numFdsReady > 0) {
             int err = 0;
