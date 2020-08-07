@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "00518998_f231a767",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1378,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-07T01:39:43Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "56a361a0_cfb3ece8",
+      "revId": "d814bc2f7ece8d5cc679073b194ec3aa4e313d0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "10b8abf1_79698f6a",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
         "patchSetId": 9
@@ -30,6 +48,30 @@
       "writtenOn": "2020-08-07T01:37:15Z",
       "side": 1,
       "message": "Source of dEQP-VK android hardware buffer regression; fix here",
+      "range": {
+        "startLine": 2619,
+        "startChar": 0,
+        "endLine": 2647,
+        "endChar": 0
+      },
+      "revId": "d814bc2f7ece8d5cc679073b194ec3aa4e313d0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ffbcf87_8ba884c3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 2647,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-07T01:39:43Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "10b8abf1_79698f6a",
       "range": {
         "startLine": 2619,
         "startChar": 0,
