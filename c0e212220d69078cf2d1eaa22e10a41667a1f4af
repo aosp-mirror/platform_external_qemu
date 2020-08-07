@@ -16,6 +16,24 @@
       "revId": "c0e212220d69078cf2d1eaa22e10a41667a1f4af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f3ead9a9_a8540ba8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 12
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-07T06:04:27Z",
+      "side": 1,
+      "message": "Just saw the linker error... Thanks for fixing this!",
+      "parentUuid": "347da54f_54d39697",
+      "revId": "c0e212220d69078cf2d1eaa22e10a41667a1f4af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
