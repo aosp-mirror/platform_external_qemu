@@ -219,8 +219,7 @@ if(NOT LINUX_AARCH64)
         tests/OpenGL_unittest.cpp
         tests/OpenGLTestContext.cpp
         tests/StalePtrRegistry_unittest.cpp
-        tests/TextureDraw_unittest.cpp
-        tests/Vulkan_unittest.cpp)
+        tests/TextureDraw_unittest.cpp)
   target_link_libraries(
     OpenglRender_unittests PRIVATE OpenglRender_standalone_common android-emu-test-launcher android-emu)
   android_target_compile_definitions(OpenglRender_unittests windows PRIVATE
@@ -229,9 +228,12 @@ if(NOT LINUX_AARCH64)
 
   # Unit tests
   android_add_test(
-    TARGET OpenglRender_vulkan_unittests SRC # cmake-format: sortable
-                                             vulkan/VulkanStream_unittest.cpp)
-  target_link_libraries(OpenglRender_vulkan_unittests PRIVATE emugl_base)
+    TARGET OpenglRender_vulkan_unittests
+    SRC # cmake-format: sortable
+        tests/Vulkan_unittest.cpp
+        vulkan/VulkanStream_unittest.cpp)
+  add_opengl_dependencies(OpenglRender_vulkan_unittests)
+  target_link_libraries(OpenglRender_vulkan_unittests PRIVATE android-emu-test-launcher android-emu)
   target_link_libraries(
     OpenglRender_vulkan_unittests PUBLIC OpenglRender_standalone_common
                                          OpenglRender_vulkan gmock_main)
@@ -240,6 +242,8 @@ if(NOT LINUX_AARCH64)
     PRIVATE . cereal ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
             ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
             ${ANDROID_EMUGL_DIR}/host/include/vulkan)
+  android_target_compile_definitions(OpenglRender_vulkan_unittests windows PRIVATE
+                                     -DVK_USE_PLATFORM_WIN32_KHR)
 
   android_add_executable(
     TARGET HelloTriangle NODISTRIBUTE

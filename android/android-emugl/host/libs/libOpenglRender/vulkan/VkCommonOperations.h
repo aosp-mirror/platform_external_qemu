@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "android/base/Optional.h"
 #include "cereal/common/goldfish_vk_private_defs.h"
 
 namespace goldfish_vk {
@@ -150,6 +151,7 @@ struct VkEmulation {
         uint32_t id = 0;
         VkDeviceMemory memory = VK_NULL_HANDLE;
         void* mappedPtr = nullptr;
+        uint32_t pageOffset = 0u;
         VK_EXT_MEMORY_HANDLE exportedHandle =
             VK_EXT_MEMORY_HANDLE_INVALID;
         bool actuallyExternal = false;
@@ -321,7 +323,12 @@ bool importExternalMemoryDedicatedImage(
 
 bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle);
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly = false, bool* exported = nullptr, VkDeviceSize* allocSize = nullptr, uint32_t* typeIndex = nullptr);
+bool setupVkColorBuffer(uint32_t colorBufferHandle,
+                        bool vulkanOnly = false,
+                        uint32_t memoryProperty = 0,
+                        bool* exported = nullptr,
+                        VkDeviceSize* allocSize = nullptr,
+                        uint32_t* typeIndex = nullptr);
 bool teardownVkColorBuffer(uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);
@@ -329,6 +336,7 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);
 VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBufferHandle);
 IOSurfaceRef getColorBufferIOSurface(uint32_t colorBufferHandle);
 bool setColorBufferVulkanMode(uint32_t colorBufferHandle, uint32_t vulkanMode);
+int32_t mapGpaToColorBuffer(uint32_t colorBufferHandle, uint64_t gpa);
 
 // Data buffer operations
 

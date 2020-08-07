@@ -1281,38 +1281,6 @@ static int rcSetDisplayPose(uint32_t displayId,
     return fb->setDisplayPose(displayId, x, y, w, h);
 }
 
-static int rcSetColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode) {
-    if (!goldfish_vk::isColorBufferVulkanCompatible(colorBuffer)) {
-        fprintf(
-            stderr,
-            "%s: error: colorBuffer 0x%x is not Vulkan compatible\n",
-            __func__, colorBuffer);
-        return -1;
-    }
-
-#define VULKAN_MODE_VULKAN_ONLY 1
-
-    bool modeIsVulkanOnly = mode == VULKAN_MODE_VULKAN_ONLY;
-
-    if (!goldfish_vk::setupVkColorBuffer(colorBuffer, modeIsVulkanOnly)) {
-        fprintf(
-            stderr,
-            "%s: error: failed to create VkImage for colorBuffer 0x%x\n",
-            __func__, colorBuffer);
-        return -1;
-    }
-
-    if (!goldfish_vk::setColorBufferVulkanMode(colorBuffer, mode)) {
-        fprintf(
-            stderr,
-            "%s: error: failed to set Vulkan mode for colorBuffer 0x%x\n",
-            __func__, colorBuffer);
-        return -1;
-    }
-
-    return 0;
-}
-
 static void rcReadColorBufferYUV(uint32_t colorBuffer,
                                 GLint x, GLint y,
                                 GLint width, GLint height,
@@ -1365,6 +1333,53 @@ static void rcCloseBuffer(uint32_t buffer) {
         return;
     }
     fb->closeBuffer(buffer);
+}
+
+static int rcSetColorBufferVulkanMode2(uint32_t colorBuffer,
+                                       uint32_t mode,
+                                       uint32_t memoryProperty) {
+    if (!goldfish_vk::isColorBufferVulkanCompatible(colorBuffer)) {
+        fprintf(stderr,
+                "%s: error: colorBuffer 0x%x is not Vulkan compatible\n",
+                __func__, colorBuffer);
+        return -1;
+    }
+
+#define VULKAN_MODE_VULKAN_ONLY 1
+
+    bool modeIsVulkanOnly = mode == VULKAN_MODE_VULKAN_ONLY;
+
+    if (!goldfish_vk::setupVkColorBuffer(colorBuffer, modeIsVulkanOnly,
+                                         memoryProperty)) {
+        fprintf(stderr,
+                "%s: error: failed to create VkImage for colorBuffer 0x%x\n",
+                __func__, colorBuffer);
+        return -1;
+    }
+
+    if (!goldfish_vk::setColorBufferVulkanMode(colorBuffer, mode)) {
+        fprintf(stderr,
+                "%s: error: failed to set Vulkan mode for colorBuffer 0x%x\n",
+                __func__, colorBuffer);
+        return -1;
+    }
+
+    return 0;
+}
+
+static int rcSetColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode) {
+    return rcSetColorBufferVulkanMode2(colorBuffer, mode,
+                                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+}
+
+static int32_t rcMapGpaToColorBuffer(uint32_t colorBuffer, uint64_t gpa) {
+    int32_t result = goldfish_vk::mapGpaToColorBuffer(colorBuffer, gpa);
+    if (result < 0) {
+        fprintf(stderr,
+                "%s: error: failed to map gpa %lx to color buffer 0x%x: %d\n",
+                __func__, gpa, colorBuffer, result);
+    }
+    return result;
 }
 
 void initRenderControlContext(renderControl_decoder_context_t *dec)
@@ -1420,4 +1435,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferWithHandle = rcCreateColorBufferWithHandle;
     dec->rcCreateBuffer = rcCreateBuffer;
     dec->rcCloseBuffer = rcCloseBuffer;
+    dec->rcSetColorBufferVulkanMode2 = rcSetColorBufferVulkanMode2;
+    dec->rcMapGpaToColorBuffer = rcMapGpaToColorBuffer;
 }
