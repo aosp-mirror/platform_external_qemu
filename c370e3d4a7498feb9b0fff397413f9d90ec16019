@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d731fb41_0f2fdab9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/dpad-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-08-07T16:54:40Z",
+      "side": 1,
+      "message": "I wonder if this button is for Android TV emulator only or for all emulator? It looks like the assistant app is specific to ATV.",
+      "revId": "c370e3d4a7498feb9b0fff397413f9d90ec16019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
