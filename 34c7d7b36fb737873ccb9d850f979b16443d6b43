@@ -33,6 +33,24 @@
       "revId": "34c7d7b36fb737873ccb9d850f979b16443d6b43",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49e6757f_135f492c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/CMakeLists.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-07T01:37:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08907705_1094e589",
+      "revId": "34c7d7b36fb737873ccb9d850f979b16443d6b43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
