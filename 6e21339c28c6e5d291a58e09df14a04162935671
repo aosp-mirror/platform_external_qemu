@@ -51,6 +51,23 @@
       "revId": "6e21339c28c6e5d291a58e09df14a04162935671",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a1ce837_aff383ea",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 14
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-07T14:49:10Z",
+      "side": 1,
+      "message": "Verified: No dEQP_VK.api.external.memory.android_hardware_buffer* failures",
+      "revId": "6e21339c28c6e5d291a58e09df14a04162935671",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
