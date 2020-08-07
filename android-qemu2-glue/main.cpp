@@ -222,7 +222,7 @@ const TargetInfo kTarget = {
 #elif defined(TARGET_X86_64)
         "x86_64",
         "x86_64",
-        "android64",
+        "android64,+invtsc",
         "ttyS",
         "virtio-blk-pci",
         "virtio-net-pci",
@@ -232,7 +232,7 @@ const TargetInfo kTarget = {
 #elif defined(TARGET_I386)  // Both i386 and x86_64 targets define this macro
         "x86",
         "i386",
-        "android32",
+        "android32,+invtsc",
         "ttyS",
         "virtio-blk-pci",
         "virtio-net-pci",
