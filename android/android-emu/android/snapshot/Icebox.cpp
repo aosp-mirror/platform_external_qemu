@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <atomic>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "android/base/async/ThreadLooper.h"
@@ -593,6 +594,7 @@ bool track(int pid, const std::string snapshot_name) {
             _RECV_REPLY_PACKET_OK(reply, jdwp_header.id);
         }
     }
+    int snapshot_num = 0;
     while (1) {
         apacket reply;
         _RECV_PACKET(reply);
@@ -608,13 +610,15 @@ bool track(int pid, const std::string snapshot_name) {
             base::ConditionVariable snapshot_signal;
             base::Lock snapshot_lock;
             D("send out command for main thread");
+            std::string new_snapshot_name = snapshot_name + std::to_string(snapshot_num);
+            snapshot_num ++;
             android::base::ThreadLooper::runOnMainLooper(
                     [&snapshot_done, &snapshot_signal, &snapshot_lock,
-                     &snapshot_name]() {
+                     &new_snapshot_name]() {
                         D("ready to take snapshot");
                         gQAndroidVmOperations->vmStop();
                         const AndroidSnapshotStatus result =
-                                androidSnapshot_save(snapshot_name.c_str());
+                                androidSnapshot_save(new_snapshot_name.c_str());
                         D("Snapshot done, result %d (expect %d)", result,
                                 SNAPSHOT_STATUS_OK);
                         gQAndroidVmOperations->vmStart();
@@ -630,7 +634,7 @@ bool track(int pid, const std::string snapshot_name) {
             snapshot_lock.unlock();
             D("Icebox thread resume after snapshot");
             _SEND_PACKET(ok_out);
-            // Resume and quit
+            // Resume
             JdwpCommandHeader jdwp_command = {
                     11 /*length*/,
                     jdwp_id++ /*id*/,
@@ -643,16 +647,9 @@ bool track(int pid, const std::string snapshot_name) {
             jdwp_command.writeToBuffer(packet_out.data.data());
             _SEND_PACKET_OK(packet_out);
             _RECV_REPLY_PACKET_OK(reply, jdwp_command.id);
-            packet_out.mesg.command = ADB_CLSE;
-            packet_out.mesg.data_length = 0;
-            packet_out.data.resize(0);
-            packet_out.mesg.magic = packet_out.mesg.command ^ 0xffffffff;
-            D("Icebox thread ready to close");
-            _SEND_PACKET(packet_out);
-            _RECV_PACKET(reply);
-            return true;
+        } else {
+            _SEND_PACKET(ok_out);
         }
-        _SEND_PACKET(ok_out);
     }
     return true;
 #undef _SEND_PACKET
