@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a632139_eb80482f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 14
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-07T09:26:37Z",
+      "side": 1,
+      "message": "Updated setupVkColorBuffer() again to only use \"memoryProperty\" flags so it will do the same things as previously -- to allocate a new color buffer, and then adjust the localAllocInfo.memoryTypeIndex to reflect \"real\" memory type of that color buffer.",
+      "revId": "6e21339c28c6e5d291a58e09df14a04162935671",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
