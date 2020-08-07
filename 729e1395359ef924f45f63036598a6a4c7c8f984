@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebddd218_8ed3b5d6",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 654,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-08-07T15:20:24Z",
+      "side": 1,
+      "message": "return -1 ?",
+      "range": {
+        "startLine": 654,
+        "startChar": 12,
+        "endLine": 654,
+        "endChar": 101
+      },
+      "revId": "729e1395359ef924f45f63036598a6a4c7c8f984",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b72ad5f9_f6244b86",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 663,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-08-07T15:20:24Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 663,
+        "startChar": 12,
+        "endLine": 663,
+        "endChar": 26
+      },
+      "revId": "729e1395359ef924f45f63036598a6a4c7c8f984",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
