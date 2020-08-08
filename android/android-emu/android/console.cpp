@@ -3747,12 +3747,14 @@ static int do_icebox_track(ControlClient client, char* args) {
         control_write(client, "KO: pid required\r\n");
         return -1;
     }
-    sscanf(args, "%d", &pid);
+    int max_snapshot_count = -1;
+    sscanf(args, "%d %d", &pid, &max_snapshot_count);
     if (pid < 0) {
         control_write(client, "KO: Bad process ID %s\r\n", args);
         return -1;
     }
-    if (android::icebox::track_async(pid, "test_failure_snapshot")) {
+    if (android::icebox::track_async(pid, "test_failure_snapshot",
+            max_snapshot_count)) {
         control_write(client, "OK: Start tracking PID %d\r\n", pid);
         return 0;
     } else {
