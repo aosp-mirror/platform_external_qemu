@@ -1888,7 +1888,7 @@ IOSurfaceRef getColorBufferIOSurface(uint32_t colorBuffer) {
     return infoPtr->ioSurface;
 }
 
-int32_t mapGpaToColorBuffer(uint32_t colorBufferHandle, uint64_t gpa) {
+int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
     if (!sVkEmulation || !sVkEmulation->live)
         return VK_ERROR_DEVICE_LOST;
 
@@ -1896,15 +1896,25 @@ int32_t mapGpaToColorBuffer(uint32_t colorBufferHandle, uint64_t gpa) {
 
     AutoLock lock(sVkEmulationLock);
 
-    auto infoPtr =
-            android::base::find(sVkEmulation->colorBuffers, colorBufferHandle);
+    VkEmulation::ExternalMemoryInfo* memoryInfoPtr = nullptr;
 
-    if (!infoPtr) {
+    auto colorBufferInfoPtr =
+            android::base::find(sVkEmulation->colorBuffers, bufferHandle);
+    if (colorBufferInfoPtr) {
+        memoryInfoPtr = &colorBufferInfoPtr->memory;
+    }
+    auto bufferInfoPtr =
+            android::base::find(sVkEmulation->buffers, bufferHandle);
+    if (bufferInfoPtr) {
+        memoryInfoPtr = &bufferInfoPtr->memory;
+    }
+
+    if (!memoryInfoPtr) {
         return VK_ERROR_INVALID_EXTERNAL_HANDLE;
     }
 
     // memory should be already mapped to host.
-    if (!infoPtr->memory.mappedPtr) {
+    if (!memoryInfoPtr->mappedPtr) {
         return VK_ERROR_MEMORY_MAP_FAILED;
     }
 
@@ -1912,23 +1922,22 @@ int32_t mapGpaToColorBuffer(uint32_t colorBufferHandle, uint64_t gpa) {
     constexpr size_t kPageSize = 1u << kPageBits;
     constexpr size_t kPageOffsetMask = kPageSize - 1;
 
-    infoPtr->memory.gpa = gpa;
-    infoPtr->memory.pageOffset =
-            reinterpret_cast<uintptr_t>(infoPtr->memory.mappedPtr) &
+    memoryInfoPtr->gpa = gpa;
+    memoryInfoPtr->pageOffset =
+            reinterpret_cast<uintptr_t>(memoryInfoPtr->mappedPtr) &
             kPageOffsetMask;
-    infoPtr->memory.pageAlignedHva =
-            reinterpret_cast<uint8_t*>(infoPtr->memory.mappedPtr) -
-            infoPtr->memory.pageOffset;
-    infoPtr->memory.sizeToPage =
-            ((infoPtr->memory.size + infoPtr->memory.pageOffset + kPageSize -
-              1) >>
-             kPageBits)
-            << kPageBits;
+    memoryInfoPtr->pageAlignedHva =
+            reinterpret_cast<uint8_t*>(memoryInfoPtr->mappedPtr) -
+            memoryInfoPtr->pageOffset;
+    memoryInfoPtr->sizeToPage = ((memoryInfoPtr->size +
+                                  memoryInfoPtr->pageOffset + kPageSize - 1) >>
+                                 kPageBits)
+                                << kPageBits;
 
-    LOG(VERBOSE) << "mapGpaToColorBuffer: hva = " << infoPtr->memory.mappedPtr
-                 << ", pageAlignedHva = " << infoPtr->memory.pageAlignedHva
-                 << " -> [ " << infoPtr->memory.gpa << ", "
-                 << infoPtr->memory.gpa + infoPtr->memory.sizeToPage << " ]";
+    LOG(VERBOSE) << "mapGpaToColorBuffer: hva = " << memoryInfoPtr->mappedPtr
+                 << ", pageAlignedHva = " << memoryInfoPtr->pageAlignedHva
+                 << " -> [ " << memoryInfoPtr->gpa << ", "
+                 << memoryInfoPtr->gpa + memoryInfoPtr->sizeToPage << " ]";
 
     if (sVkEmulation->occupiedGpas.find(gpa) !=
         sVkEmulation->occupiedGpas.end()) {
@@ -1937,11 +1946,11 @@ int32_t mapGpaToColorBuffer(uint32_t colorBufferHandle, uint64_t gpa) {
     }
 
     get_emugl_vm_operations().mapUserBackedRam(
-            gpa, infoPtr->memory.pageAlignedHva, infoPtr->memory.sizeToPage);
+            gpa, memoryInfoPtr->pageAlignedHva, memoryInfoPtr->sizeToPage);
 
     sVkEmulation->occupiedGpas.insert(gpa);
 
-    return infoPtr->memory.pageOffset;
+    return memoryInfoPtr->pageOffset;
 }
 
 bool setupVkBuffer(uint32_t bufferHandle,

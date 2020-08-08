@@ -353,7 +353,7 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);
 VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBufferHandle);
 IOSurfaceRef getColorBufferIOSurface(uint32_t colorBufferHandle);
 bool setColorBufferVulkanMode(uint32_t colorBufferHandle, uint32_t vulkanMode);
-int32_t mapGpaToColorBuffer(uint32_t colorBufferHandle, uint64_t gpa);
+int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa);
 
 // Data buffer operations
 
