@@ -319,19 +319,22 @@ bool run_async(std::string cmd_str) {
     return s_workerThread->start();
 }
 
-bool track_async(int pid, const std::string snapshot_name) {
+bool track_async(int pid,
+                 const std::string snapshot_name,
+                 int max_snapshot_number) {
     if (s_workerThread) {
         if (!s_workerThread->tryWait(nullptr)) {
             return false;
         }
     }
-    s_workerThread.reset(new android::base::FunctorThread([pid, snapshot_name] {
-        bool result = track(pid, snapshot_name);
-        D("track result %d\n", result);
-    }));
+    s_workerThread.reset(new android::base::FunctorThread(
+            [pid, snapshot_name, max_snapshot_number] {
+                bool result = track(pid, snapshot_name, max_snapshot_number);
+                D("track result %d\n", result);
+            }));
     return s_workerThread->start();
 }
-bool track(int pid, const std::string snapshot_name) {
+bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
     if (s_adb_port == -1) {
         fprintf(stderr, "adb port uninitialized\n");
         return false;
@@ -571,8 +574,8 @@ bool track(int pid, const std::string snapshot_name) {
 #endif
     }
 
-    {
-        // The first several commands have the same size
+    if (max_snapshot_number != 0) {
+        // The following commands have the same size
         const int kInitBufferSize = 200;
         apacket reply;
         JdwpCommandHeader jdwp_header;
@@ -609,34 +612,40 @@ bool track(int pid, const std::string snapshot_name) {
         // issue between pipe receive and snapshots.
         if (reply.mesg.data_length > 11 &&
             reply.data[11] == SuspendPolicy::All) {  // Thread suspend all
-            // Take snapshot when AssertionError is thrown
-            bool snapshot_done = false;
-            base::ConditionVariable snapshot_signal;
-            base::Lock snapshot_lock;
-            D("send out command for main thread");
-            std::string new_snapshot_name = snapshot_name + std::to_string(snapshot_num);
-            snapshot_num ++;
-            android::base::ThreadLooper::runOnMainLooper(
-                    [&snapshot_done, &snapshot_signal, &snapshot_lock,
-                     &new_snapshot_name]() {
-                        D("ready to take snapshot");
-                        getConsoleAgents()->vm->vmStop();
-                        const AndroidSnapshotStatus result =
-                                androidSnapshot_save(new_snapshot_name.c_str());
-                        D("Snapshot done, result %d (expect %d)", result,
-                                SNAPSHOT_STATUS_OK);
-                        getConsoleAgents()->vm->vmStart();
-                        snapshot_lock.lock();
-                        snapshot_done = true;
-                        snapshot_signal.broadcastAndUnlock(&snapshot_lock);
-                        D("Snapshot thread done");
-                    });
-            D("Icebox thread waiting for snapshot");
-            snapshot_lock.lock();
-            snapshot_signal.wait(&snapshot_lock,
-                                 [&snapshot_done]() { return snapshot_done; });
-            snapshot_lock.unlock();
-            D("Icebox thread resume after snapshot");
+            if (max_snapshot_number == -1 ||
+                snapshot_num < max_snapshot_number) {
+                // Take snapshot when AssertionError is thrown
+                bool snapshot_done = false;
+                base::ConditionVariable snapshot_signal;
+                base::Lock snapshot_lock;
+                D("send out command for main thread");
+                std::string new_snapshot_name =
+                        snapshot_name + std::to_string(snapshot_num);
+                snapshot_num++;
+                android::base::ThreadLooper::runOnMainLooper(
+                        [&snapshot_done, &snapshot_signal, &snapshot_lock,
+                         &new_snapshot_name]() {
+                            D("ready to take snapshot");
+                            getConsoleAgents()->vm->vmStop();
+                            const AndroidSnapshotStatus result =
+                                    androidSnapshot_save(
+                                            new_snapshot_name.c_str());
+                            D("Snapshot done, result %d (expect %d)", result,
+                              SNAPSHOT_STATUS_OK);
+                            getConsoleAgents()->vm->vmStart();
+                            snapshot_lock.lock();
+                            snapshot_done = true;
+                            snapshot_signal.broadcastAndUnlock(&snapshot_lock);
+                            D("Snapshot thread done");
+                        });
+                D("Icebox thread waiting for snapshot");
+                snapshot_lock.lock();
+                snapshot_signal.wait(&snapshot_lock, [&snapshot_done]() {
+                    return snapshot_done;
+                });
+                snapshot_lock.unlock();
+                D("Icebox thread resume after snapshot");
+            }
             _SEND_PACKET(ok_out);
             // Resume
             JdwpCommandHeader jdwp_command = {
