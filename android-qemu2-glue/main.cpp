@@ -1304,8 +1304,11 @@ extern "C" int main(int argc, char** argv) {
     args.add2If("-dns-server", opts->dns_server);
     args.addIf("-skip-adb-auth", opts->skip_adb_auth);
 
-    if (opts->audio && !strcmp(opts->audio, "none"))
+    if (opts->audio && !strcmp(opts->audio, "none") ||
+        (!hw->hw_audioInput && !hw->hw_audioOutput)) {
+        // TODO(b/161814396): Be able to disable audio input/output separately
         args.add("-no-audio");
+    }
 
     if (opts->allow_host_audio)
         args.add("-allow-host-audio");
