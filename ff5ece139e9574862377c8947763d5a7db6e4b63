@@ -39,6 +39,30 @@
       "revId": "ff5ece139e9574862377c8947763d5a7db6e4b63",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "972ad3b0_a2577862",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3751,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-08-10T19:29:31Z",
+      "side": 1,
+      "message": "Good point. I updated the help text and make sure it fall back to default (-1 for unlimited snapshots) when there is only 1 parameter.",
+      "parentUuid": "f45b4d9e_4f527f7b",
+      "range": {
+        "startLine": 3750,
+        "startChar": 0,
+        "endLine": 3751,
+        "endChar": 53
+      },
+      "revId": "ff5ece139e9574862377c8947763d5a7db6e4b63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
