@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa55ad3_5a82906c",
+        "filename": "android/android-emu/android/base/Log.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-10T16:55:28Z",
+      "side": 1,
+      "message": "y not memcpy(\u0026mLongString[0], \u0026mStr[0], arraySize(mStr)) here too?",
+      "revId": "20826633c291b4c57fb872c81cde70dbdf3cf91f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
