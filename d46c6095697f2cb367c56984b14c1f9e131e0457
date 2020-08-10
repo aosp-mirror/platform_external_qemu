@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "c74930a8_5f1d723d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1069898
+      },
+      "writtenOn": "2020-08-10T20:08:31Z",
+      "side": 1,
+      "message": "I think it\u0027s part of https://developer.android.com/ndk/guides/abis : arm64-v8a\u0027s AArch64 mandates half-precision floating point, while for armeabi-v7a it\u0027s optional. But I\u0027m not sure if this requirement can automatically be transposed to x86_64.",
+      "revId": "d46c6095697f2cb367c56984b14c1f9e131e0457",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d0801d20_32407582",
         "filename": "target/i386/hvf-utils/x86_cpuid.c",
         "patchSetId": 1
