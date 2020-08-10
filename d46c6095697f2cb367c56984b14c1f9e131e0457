@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0801d20_32407582",
+        "filename": "target/i386/hvf-utils/x86_cpuid.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-08-10T17:17:17Z",
+      "side": 1,
+      "message": "Please merge this file in a separate change.",
+      "range": {
+        "startLine": 114,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 28
+      },
+      "revId": "d46c6095697f2cb367c56984b14c1f9e131e0457",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
