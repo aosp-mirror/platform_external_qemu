@@ -16,6 +16,29 @@
       "revId": "ff5ece139e9574862377c8947763d5a7db6e4b63",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f45b4d9e_4f527f7b",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3751,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-10T17:06:53Z",
+      "side": 1,
+      "message": "looks like we need to update the help text for the console at least, and to have a path that allows older users of the console without max snapshots to work, or error out?",
+      "range": {
+        "startLine": 3750,
+        "startChar": 0,
+        "endLine": 3751,
+        "endChar": 53
+      },
+      "revId": "ff5ece139e9574862377c8947763d5a7db6e4b63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
