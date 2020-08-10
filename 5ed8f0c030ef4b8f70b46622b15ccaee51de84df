@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0688045a_5f883fc6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-10T17:42:52Z",
+      "side": 1,
+      "message": "lets do the vm operation first before the unmap",
+      "range": {
+        "startLine": 1103,
+        "startChar": 0,
+        "endLine": 1110,
+        "endChar": 5
+      },
+      "revId": "5ed8f0c030ef4b8f70b46622b15ccaee51de84df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
