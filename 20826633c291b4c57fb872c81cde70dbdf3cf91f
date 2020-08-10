@@ -16,6 +16,24 @@
       "revId": "20826633c291b4c57fb872c81cde70dbdf3cf91f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7241705c_c9bba853",
+        "filename": "android/android-emu/android/base/Log.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-08-10T17:17:40Z",
+      "side": 1,
+      "message": "Add this point the data is managed by the std::vector, so the resize will take care of the relocation. I should probably add some documentation to clarify this behavior.\n\nThe additional unit test will fail in case we do this wrong.",
+      "parentUuid": "3aa55ad3_5a82906c",
+      "revId": "20826633c291b4c57fb872c81cde70dbdf3cf91f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
