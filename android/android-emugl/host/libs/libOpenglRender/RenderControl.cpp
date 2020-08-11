@@ -1372,12 +1372,12 @@ static int rcSetColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode) {
                                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 }
 
-static int32_t rcMapGpaToColorBuffer(uint32_t colorBuffer, uint64_t gpa) {
-    int32_t result = goldfish_vk::mapGpaToColorBuffer(colorBuffer, gpa);
+static int32_t rcMapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
+    int32_t result = goldfish_vk::mapGpaToBufferHandle(bufferHandle, gpa);
     if (result < 0) {
         fprintf(stderr,
-                "%s: error: failed to map gpa %lx to color buffer 0x%x: %d\n",
-                __func__, gpa, colorBuffer, result);
+                "%s: error: failed to map gpa %lx to buffer handle 0x%x: %d\n",
+                __func__, gpa, bufferHandle, result);
     }
     return result;
 }
@@ -1436,5 +1436,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateBuffer = rcCreateBuffer;
     dec->rcCloseBuffer = rcCloseBuffer;
     dec->rcSetColorBufferVulkanMode2 = rcSetColorBufferVulkanMode2;
-    dec->rcMapGpaToColorBuffer = rcMapGpaToColorBuffer;
+    dec->rcMapGpaToBufferHandle = rcMapGpaToBufferHandle;
 }

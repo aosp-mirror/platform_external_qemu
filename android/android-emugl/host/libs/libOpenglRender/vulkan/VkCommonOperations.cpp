@@ -23,6 +23,8 @@
 #include "VulkanDispatch.h"
 
 #include "common/goldfish_vk_dispatch.h"
+#include "emugl/common/crash_reporter.h"
+#include "emugl/common/vm_operations.h"
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -994,7 +996,7 @@ void teardownGlobalVkEmulation() {
     // Don't try to tear down something that did not set up completely; too risky
     if (!sVkEmulation->live) return;
 
-    freeExternalMemory(sVkEmulation->dvk, &sVkEmulation->staging.memory);
+    freeExternalMemoryLocked(sVkEmulation->dvk, &sVkEmulation->staging.memory);
 
     sVkEmulation->ivk->vkDestroyDevice(sVkEmulation->device, nullptr);
     sVkEmulation->gvk->vkDestroyInstance(sVkEmulation->instance, nullptr);
@@ -1086,16 +1088,25 @@ bool allocExternalMemory(
     return true;
 }
 
-void freeExternalMemory(VulkanDispatch* vk,
-                        VkEmulation::ExternalMemoryInfo* info) {
+void freeExternalMemoryLocked(VulkanDispatch* vk,
+                              VkEmulation::ExternalMemoryInfo* info) {
     if (!info->memory)
         return;
 
     if (sVkEmulation->deviceInfo.memProps.memoryTypes[info->typeIndex]
                 .propertyFlags &
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+        if (sVkEmulation->occupiedGpas.find(info->gpa) !=
+            sVkEmulation->occupiedGpas.end()) {
+            sVkEmulation->occupiedGpas.erase(info->gpa);
+            get_emugl_vm_operations().unmapUserBackedRam(info->gpa,
+                                                         info->sizeToPage);
+            info->gpa = 0u;
+        }
+
         vk->vkUnmapMemory(sVkEmulation->device, info->memory);
         info->mappedPtr = nullptr;
+        info->pageAlignedHva = nullptr;
     }
 
     vk->vkFreeMemory(sVkEmulation->device, info->memory, nullptr);
@@ -1490,7 +1501,7 @@ bool teardownVkColorBuffer(uint32_t colorBufferHandle) {
     auto& info = *infoPtr;
 
     vk->vkDestroyImage(sVkEmulation->device, info.image, nullptr);
-    freeExternalMemory(vk, &info.memory);
+    freeExternalMemoryLocked(vk, &info.memory);
 
 #ifdef __APPLE__
     if (info.ioSurface) {
@@ -1877,7 +1888,7 @@ IOSurfaceRef getColorBufferIOSurface(uint32_t colorBuffer) {
     return infoPtr->ioSurface;
 }
 
-int32_t mapGpaToColorBuffer(uint32_t colorBufferHandle, uint64_t gpa) {
+int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
     if (!sVkEmulation || !sVkEmulation->live)
         return VK_ERROR_DEVICE_LOST;
 
@@ -1885,27 +1896,61 @@ int32_t mapGpaToColorBuffer(uint32_t colorBufferHandle, uint64_t gpa) {
 
     AutoLock lock(sVkEmulationLock);
 
-    auto infoPtr =
-            android::base::find(sVkEmulation->colorBuffers, colorBufferHandle);
+    VkEmulation::ExternalMemoryInfo* memoryInfoPtr = nullptr;
 
-    if (!infoPtr) {
+    auto colorBufferInfoPtr =
+            android::base::find(sVkEmulation->colorBuffers, bufferHandle);
+    if (colorBufferInfoPtr) {
+        memoryInfoPtr = &colorBufferInfoPtr->memory;
+    }
+    auto bufferInfoPtr =
+            android::base::find(sVkEmulation->buffers, bufferHandle);
+    if (bufferInfoPtr) {
+        memoryInfoPtr = &bufferInfoPtr->memory;
+    }
+
+    if (!memoryInfoPtr) {
         return VK_ERROR_INVALID_EXTERNAL_HANDLE;
     }
 
-    // Pass gpa (guest physical address) to host Vulkan.
-    uint64_t address = gpa;
-    auto result = vk->vkMapMemoryIntoAddressSpaceGOOGLE(
-            sVkEmulation->device, infoPtr->memory.memory, &address);
-    if (result != VK_SUCCESS) {
-        return result;
+    // memory should be already mapped to host.
+    if (!memoryInfoPtr->mappedPtr) {
+        return VK_ERROR_MEMORY_MAP_FAILED;
     }
 
-    // After calling vkMapMemoryIntoAddressSpaceGOOGLE, address stores hva (host
-    // virtual address) of the memory.
-    constexpr uint64_t kPageOffsetMask = 0xfffu;  // 4095
-    infoPtr->memory.pageOffset = address & kPageOffsetMask;
+    constexpr size_t kPageBits = 12;
+    constexpr size_t kPageSize = 1u << kPageBits;
+    constexpr size_t kPageOffsetMask = kPageSize - 1;
 
-    return infoPtr->memory.pageOffset;
+    memoryInfoPtr->gpa = gpa;
+    memoryInfoPtr->pageOffset =
+            reinterpret_cast<uintptr_t>(memoryInfoPtr->mappedPtr) &
+            kPageOffsetMask;
+    memoryInfoPtr->pageAlignedHva =
+            reinterpret_cast<uint8_t*>(memoryInfoPtr->mappedPtr) -
+            memoryInfoPtr->pageOffset;
+    memoryInfoPtr->sizeToPage = ((memoryInfoPtr->size +
+                                  memoryInfoPtr->pageOffset + kPageSize - 1) >>
+                                 kPageBits)
+                                << kPageBits;
+
+    LOG(VERBOSE) << "mapGpaToColorBuffer: hva = " << memoryInfoPtr->mappedPtr
+                 << ", pageAlignedHva = " << memoryInfoPtr->pageAlignedHva
+                 << " -> [ " << memoryInfoPtr->gpa << ", "
+                 << memoryInfoPtr->gpa + memoryInfoPtr->sizeToPage << " ]";
+
+    if (sVkEmulation->occupiedGpas.find(gpa) !=
+        sVkEmulation->occupiedGpas.end()) {
+        emugl::emugl_crash_reporter("FATAL: already mapped gpa 0x%lx! ", gpa);
+        return VK_ERROR_MEMORY_MAP_FAILED;
+    }
+
+    get_emugl_vm_operations().mapUserBackedRam(
+            gpa, memoryInfoPtr->pageAlignedHva, memoryInfoPtr->sizeToPage);
+
+    sVkEmulation->occupiedGpas.insert(gpa);
+
+    return memoryInfoPtr->pageOffset;
 }
 
 bool setupVkBuffer(uint32_t bufferHandle,
@@ -2040,7 +2085,7 @@ bool teardownVkBuffer(uint32_t bufferHandle) {
     auto& info = *infoPtr;
 
     vk->vkDestroyBuffer(sVkEmulation->device, info.buffer, nullptr);
-    freeExternalMemory(vk, &info.memory);
+    freeExternalMemoryLocked(vk, &info.memory);
     sVkEmulation->buffers.erase(bufferHandle);
 
     return true;
