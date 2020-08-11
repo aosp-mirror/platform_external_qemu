@@ -208,6 +208,11 @@ public:
         return mFoldableModel.isFolded();
     }
 
+    bool getFoldedArea(int* x, int* y, int* w, int* h) {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        return mFoldableModel.getFoldedArea(x, y, w, h);
+    }
+
 private:
     /*
      * Sets the target value for the given physical parameter that the physical
@@ -1536,7 +1541,7 @@ int physicalModel_stopRecording(PhysicalModel* model) {
     return -1;
 }
 
-int physicalModel_getFoldableState(struct PhysicalModel* model,
+int physicalModel_getFoldableState(PhysicalModel* model,
                                    FoldableState* state) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
@@ -1548,11 +1553,20 @@ int physicalModel_getFoldableState(struct PhysicalModel* model,
     return -1;
 }
 
-bool physicalModel_foldableisFolded(struct PhysicalModel* model) {
+bool physicalModel_foldableisFolded(PhysicalModel* model) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         return impl->foldableIsFolded();
     }
     E("%s: Failed. Physical model not initiated", __FUNCTION__);
-    return false;  
+    return false;
+}
+
+bool physicalModel_getFoldedArea(PhysicalModel* model, int* x, int* y, int* w, int* h) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        return impl->getFoldedArea(x, y, w, h);
+    }
+    E("%s: Failed. Physical model not initiated", __FUNCTION__);
+    return false;
 }

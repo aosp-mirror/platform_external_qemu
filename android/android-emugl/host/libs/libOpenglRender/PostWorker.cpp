@@ -21,20 +21,16 @@ PostWorker::PostWorker(PostWorker::BindSubwinCallback&& cb) :
     mFb(FrameBuffer::getFB()),
     mBindSubwin(cb) {}
 
-void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l, int32_t x, int32_t y,
-                                            uint32_t w, uint32_t h, ColorBuffer* cb) {
+void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l,
+                                            hwc_rect_t displayArea,
+                                            hwc_frect_t cropArea,
+                                            hwc_transform_t transform) {
     l->composeMode = HWC2_COMPOSITION_DEVICE;
     l->blendMode = HWC2_BLEND_MODE_NONE;
-    l->transform = (hwc_transform_t)0;
+    l->transform = transform;
     l->alpha = 1.0;
-    l->displayFrame.left = x;
-    l->displayFrame.top = y;
-    l->displayFrame.right = x + w;
-    l->displayFrame.bottom =  y + h;
-    l->crop.left = 0.0;
-    l->crop.top = (float)cb->getHeight();
-    l->crop.right = (float)cb->getWidth();
-    l->crop.bottom = 0.0;
+    l->displayFrame = displayArea;
+    l->crop = cropArea;
 }
 
 void PostWorker::post(ColorBuffer* cb) {
@@ -49,6 +45,7 @@ void PostWorker::post(ColorBuffer* cb) {
     float px = mFb->getPx();
     float py = mFb->getPy();
     int zRot = mFb->getZrot();
+    hwc_transform_t rotation = (hwc_transform_t)0;
 
     cb->waitSync();
 
@@ -84,11 +81,51 @@ void PostWorker::post(ColorBuffer* cb) {
                 continue;
             }
             ComposeLayer l;
-            fillMultiDisplayPostStruct(&l, x, y, w, h, multiDisplayCb);
+            hwc_rect_t displayArea = { .left = (int)x,
+                                       .top = (int)y,
+                                       .right = (int)(x + w),
+                                       .bottom = (int)(y + h) };
+            hwc_frect_t cropArea = { .left = 0.0,
+                                     .top = (float)multiDisplayCb->getHeight(),
+                                     .right = (float)multiDisplayCb->getWidth(),
+                                     .bottom = 0.0 };
+            fillMultiDisplayPostStruct(&l, displayArea, cropArea, rotation);
             multiDisplayCb->postLayer(&l, combinedW, combinedH);
             start_id = id;
         }
-    } else {
+        mFb->getTextureDraw()->cleanupForDrawLayer();
+    }
+    else if (emugl::get_emugl_window_operations().isFolded()) {
+        mFb->getTextureDraw()->prepareForDrawLayer();
+        ComposeLayer l;
+        int x, y, w, h;
+        emugl::get_emugl_window_operations().getFoldedArea(&x, &y, &w, &h);
+        hwc_rect_t displayArea = { .left = 0,
+                                   .top = 0,
+                                   .right = windowWidth,
+                                   .bottom = windowHeight };
+        hwc_frect_t cropArea = { .left = (float)x,
+                                 .top = (float)(y + h),
+                                 .right = (float)(x + w),
+                                 .bottom = (float)y };
+        switch ((int)zRot/90) {
+            case 1:
+                rotation = HWC_TRANSFORM_ROT_270;
+                break;
+            case 2:
+                rotation = HWC_TRANSFORM_ROT_180;
+                break;
+            case 3:
+                rotation = HWC_TRANSFORM_ROT_90;
+                break;
+            default: ;
+        }
+
+        fillMultiDisplayPostStruct(&l, displayArea, cropArea, rotation);
+        cb->postLayer(&l, m_viewportWidth/dpr, m_viewportHeight/dpr);
+        mFb->getTextureDraw()->cleanupForDrawLayer();
+    }
+    else {
         // render the color buffer to the window and apply the overlay
         GLuint tex = cb->scale();
         cb->postWithOverlay(tex, zRot, dx, dy);
