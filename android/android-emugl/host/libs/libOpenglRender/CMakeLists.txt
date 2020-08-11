@@ -227,23 +227,25 @@ if(NOT LINUX_AARCH64)
   add_opengl_dependencies(OpenglRender_unittests)
 
   # Unit tests
-  android_add_test(
-    TARGET OpenglRender_vulkan_unittests
-    SRC # cmake-format: sortable
-        tests/Vulkan_unittest.cpp
-        vulkan/VulkanStream_unittest.cpp)
-  add_opengl_dependencies(OpenglRender_vulkan_unittests)
-  target_link_libraries(OpenglRender_vulkan_unittests PRIVATE android-emu-test-launcher android-emu)
-  target_link_libraries(
-    OpenglRender_vulkan_unittests PUBLIC OpenglRender_standalone_common
-                                         OpenglRender_vulkan gmock_main)
-  target_include_directories(
-    OpenglRender_vulkan_unittests
-    PRIVATE . cereal ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
-            ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
-            ${ANDROID_EMUGL_DIR}/host/include/vulkan)
-  android_target_compile_definitions(OpenglRender_vulkan_unittests windows PRIVATE
-                                     -DVK_USE_PLATFORM_WIN32_KHR)
+  if (NOT WINDOWS)
+    android_add_test(
+      TARGET OpenglRender_vulkan_unittests
+      SRC # cmake-format: sortable
+          tests/Vulkan_unittest.cpp
+          vulkan/VulkanStream_unittest.cpp)
+    add_opengl_dependencies(OpenglRender_vulkan_unittests)
+    target_link_libraries(OpenglRender_vulkan_unittests PRIVATE android-emu-test-launcher android-emu)
+    target_link_libraries(
+      OpenglRender_vulkan_unittests PUBLIC OpenglRender_standalone_common
+                                           OpenglRender_vulkan gmock_main)
+    target_include_directories(
+      OpenglRender_vulkan_unittests
+      PRIVATE . cereal ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
+              ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
+              ${ANDROID_EMUGL_DIR}/host/include/vulkan)
+    android_target_compile_definitions(OpenglRender_vulkan_unittests windows PRIVATE
+                                       -DVK_USE_PLATFORM_WIN32_KHR)
+  endif()
 
   android_add_executable(
     TARGET HelloTriangle NODISTRIBUTE
