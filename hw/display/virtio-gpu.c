@@ -222,6 +222,10 @@ static void virtio_gpu_set_features(VirtIODevice *vdev, uint64_t features)
 
     g->use_virgl_renderer = ((features & virgl) == virgl);
     trace_virtio_gpu_features(g->use_virgl_renderer);
+
+    if (virtio_vdev_has_feature(vdev, VIRTIO_RING_F_EVENT_IDX)) {
+        fprintf(stderr, "%s: virtio gpu has eventidx\n", __func__);
+    }
 }
 
 static void virtio_gpu_notify_event(VirtIOGPU *g, uint32_t event_type)
@@ -842,10 +846,12 @@ static void virtio_gpu_simple_process_cmd(VirtIOGPU *g,
     }
 }
 
+static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq);
+
 static void virtio_gpu_handle_ctrl_cb(VirtIODevice *vdev, VirtQueue *vq)
 {
     VirtIOGPU *g = VIRTIO_GPU(vdev);
-    qemu_bh_schedule(g->ctrl_bh);
+    virtio_gpu_handle_ctrl(vdev, vq);
 }
 
 static void virtio_gpu_handle_cursor_cb(VirtIODevice *vdev, VirtQueue *vq)
@@ -903,17 +909,23 @@ static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq)
     }
 #endif
 
+    virtio_queue_set_notification(vq, 0);
     cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
     while (cmd) {
+
         cmd->vq = vq;
         cmd->error = 0;
         cmd->finished = false;
         cmd->waiting = false;
         QTAILQ_INSERT_TAIL(&g->cmdq, cmd, next);
+            
+        virtio_gpu_process_cmdq(g);
+
         cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
     }
 
-    virtio_gpu_process_cmdq(g);
+    virtio_queue_set_notification(vq, 1);
+
 
 #ifdef CONFIG_VIRGL
     if (g->use_virgl_renderer) {

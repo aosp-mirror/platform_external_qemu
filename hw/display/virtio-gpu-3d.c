@@ -17,6 +17,7 @@
 #include "trace.h"
 #include "hw/virtio/virtio.h"
 #include "hw/virtio/virtio-gpu.h"
+#include "exec/memory-remap.h"
 #ifdef CONFIG_ANDROID
 #include "hw/virtio/virtio-goldfish-pipe.h"
 #endif
@@ -422,6 +423,7 @@ struct VirtioGpuRamSlotInfo {
     MemoryRegion mr;
     uint64_t gpa;
     uint64_t offset;
+    uint64_t size;
     uint32_t resource_id;
 };
 
@@ -466,12 +468,11 @@ static void virtio_gpu_map_slot(
         return;
     }
 
-    memory_region_init_ram_ptr(
-        mr, 0 /* unattached */, "virtio-gpu-blob", size, hva);
-    memory_region_add_subregion(parent, offset, mr);
+    qemu_user_backed_ram_map(gpa, hva, size, USER_BACKED_RAM_FLAGS_READ | USER_BACKED_RAM_FLAGS_WRITE);
 
     table->slots[slot].gpa = gpa;
     table->slots[slot].offset = offset;
+    table->slots[slot].size = size;
     table->slots[slot].used = 1;
     table->slots[slot].resource_id = resource_id;
 }
@@ -485,8 +486,9 @@ static void virtio_gpu_unmap_slot(
         if (0 == table->slots[i].used) continue;
         if (resource_id != table->slots[i].resource_id) continue;
 
-        memory_region_del_subregion(parent, &(table->slots[i].mr));
+        qemu_user_backed_ram_unmap(table->slots[i].gpa, table->slots[i].size);
         table->slots[i].used = 0;
+
         return;
     }
 }
