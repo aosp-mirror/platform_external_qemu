@@ -314,5 +314,6 @@ int android_foldable_get_state(struct FoldableState* state);
 bool android_foldable_hinge_configured();
 bool android_foldable_folded_area_configured();
 bool android_foldable_is_folded();
+bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h);
 
 ANDROID_END_HEADER

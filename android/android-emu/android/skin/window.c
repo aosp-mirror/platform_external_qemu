@@ -31,6 +31,8 @@
 #include "android/utils/duff.h"                 // for DUFF4
 #include "android/utils/system.h"               // for AFREE, AARRAY_NEW0
 
+#include "android/globals.h"
+
 /* when shrinking, we reduce the pixel ratio by this fixed amount */
 #define  SHRINK_SCALE  0.6
 
@@ -1084,16 +1086,24 @@ add_finger_event(SkinWindow* window,
 
     if (finger->display) {
         if (android_foldable_is_folded()) {
+            int fx, fy, fw, fh;
+            android_foldable_get_folded_area(&fx, &fy, &fw, &fh);
             switch (finger->display->rotation) {
             case SKIN_ROTATION_0:
+                posX = x + fx;
+                posY = y + fy;
+                break;
             case SKIN_ROTATION_180:
-                posX = x + finger->display->rect.pos.x;
-                posY = y + finger->display->rect.pos.y;
+                posX = x + fx + fw - android_hw->hw_lcd_width;
+                posY = y + fy + fh - android_hw->hw_lcd_height;
                 break;
             case SKIN_ROTATION_90:
+                posX = x + fy;
+                posY = y + fy + fh - android_hw->hw_lcd_height;
+                break;
             case SKIN_ROTATION_270:
-                posX = x + finger->display->rect.pos.y;
-                posY = y + finger->display->rect.pos.x;
+                posX = x + fx + fw - android_hw->hw_lcd_width;
+                posY = y + fx;
             break;
             }
         } else {

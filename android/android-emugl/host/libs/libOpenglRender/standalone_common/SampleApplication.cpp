@@ -40,7 +40,6 @@ using android::base::System;
 using android::base::TestSystem;
 
 namespace emugl {
-
 // Class holding the persistent test window.
 class TestWindow {
 public:
