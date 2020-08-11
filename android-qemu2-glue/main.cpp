@@ -1991,8 +1991,7 @@ extern "C" int main(int argc, char** argv) {
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
-    const UiEmuAgent uiEmuAgent =
-    {
+    const UiEmuAgent uiEmuAgent = {
         getConsoleAgents()->automation,
         getConsoleAgents()->battery,
         getConsoleAgents()->cellular,
