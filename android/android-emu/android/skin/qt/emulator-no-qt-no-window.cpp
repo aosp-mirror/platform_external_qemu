@@ -149,11 +149,8 @@ void EmulatorNoQtNoWindow::sendFoldedArea() {
     if (notSupoortFold()) {
         return;
     }
-    int xOffset = 0;
-    int yOffset = 0;
-//  TODO: support none-0 offset
-//    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-//    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
     int width   = android_hw->hw_displayRegion_0_1_width;
     int height  = android_hw->hw_displayRegion_0_1_height;
     char foldedArea[64];

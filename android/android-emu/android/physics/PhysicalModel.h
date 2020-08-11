@@ -165,4 +165,6 @@ int physicalModel_getFoldableState(PhysicalModel* model, struct FoldableState* s
 
 bool physicalModel_foldableisFolded(PhysicalModel* model);
 
+bool physicalModel_getFoldedArea(PhysicalModel* model, int* x, int* y, int* w, int* h);
+
 ANDROID_END_HEADER
