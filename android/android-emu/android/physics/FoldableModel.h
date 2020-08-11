@@ -45,6 +45,8 @@ public:
 
     bool isFolded();
 
+    bool getFoldedArea(int* x, int* y, int* w, int* h);
+
 private:
     enum FoldablePostures calculatePosture();
     void sendPostureToSystem();
