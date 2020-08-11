@@ -31,6 +31,8 @@
 #include "android/utils/duff.h"                 // for DUFF4
 #include "android/utils/system.h"               // for AFREE, AARRAY_NEW0
 
+#include "android/globals.h"
+
 /* when shrinking, we reduce the pixel ratio by this fixed amount */
 #define  SHRINK_SCALE  0.6
 
@@ -1087,8 +1089,10 @@ add_finger_event(SkinWindow* window,
             switch (finger->display->rotation) {
             case SKIN_ROTATION_0:
             case SKIN_ROTATION_180:
-                posX = x + finger->display->rect.pos.x;
-                posY = y + finger->display->rect.pos.y;
+                //posX = x + finger->display->rect.pos.x;
+                posX = x + android_hw->hw_displayRegion_0_1_xOffset;
+                posY = y + android_hw->hw_displayRegion_0_1_yOffset;;
+                //posY = y + finger->display->rect.pos.y;
                 break;
             case SKIN_ROTATION_90:
             case SKIN_ROTATION_270:
@@ -1384,7 +1388,7 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
     data->fbw = window->framebuffer.w;
     data->fbh = window->framebuffer.h;
 
-#if 0
+#if 1
     printf("%s pos %d %d, size %d %d, fb %d %d\n", __func__,
            data->wx, data->wy, data->ww, data->wh,
            data->fbw, data->fbh);

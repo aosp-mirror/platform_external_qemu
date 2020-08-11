@@ -55,8 +55,9 @@ public:
 
 private:
     void composeLayer(ComposeLayer* l);
-    void fillMultiDisplayPostStruct(ComposeLayer* l, int32_t x, int32_t y,
-                                    uint32_t w, uint32_t h, ColorBuffer* cb);
+    void fillMultiDisplayPostStruct(ComposeLayer* l, hwc_rect_t displayArea,
+                                    hwc_frect_t cropArea,
+                                    hwc_transform_t transform);
 
 private:
     EGLContext mContext;

@@ -109,6 +109,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                     return false;
                 },
+        .getFoldedArea =
+                [](int* x, int* y, int* w, int* h) {
+                    return android_foldable_get_folded_area(x, y, w, h);
+                },
         .setUIDisplayRegion = [](int x, int y, int w, int h) {},
         .getMultiDisplay = [](uint32_t id,
                               int32_t* x,

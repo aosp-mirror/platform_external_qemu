@@ -327,5 +327,22 @@ bool FoldableModel::isFolded() {
     }
     return false;
 }
+
+bool FoldableModel::getFoldedArea(int* x, int* y, int* w, int* h) {
+    if (x) {
+        *x = android_hw->hw_displayRegion_0_1_xOffset;
+    }
+    if (y) {
+        *y = android_hw->hw_displayRegion_0_1_yOffset;
+    }
+    if (w) {
+        *w = android_hw->hw_displayRegion_0_1_width;
+    }
+    if (h) {
+        *h = android_hw->hw_displayRegion_0_1_height;
+    }
+    return true;
+}
+
 }  // namespace physics
 }  // namespace android
