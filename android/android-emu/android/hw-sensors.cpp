@@ -1184,3 +1184,7 @@ bool android_foldable_is_folded() {
     return android_foldable_folded_area_configured() &&
            physicalModel_foldableisFolded(android_physical_model_instance());
 }
+
+bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h) {
+    return physicalModel_getFoldedArea(android_physical_model_instance(), x, y, w, h);
+}
