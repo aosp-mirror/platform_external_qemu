@@ -24,7 +24,7 @@ def main():
   # for linux/mac, the script we want to use is at
   #     external/qemu/android/scripts/unix/build-<prebuilt>.sh
   # for windows, the script is at
-  #     external/qemu/android/scripts/windows/build-<prebuilt>.bat
+  #     external/qemu/android/scripts/windows/build-<prebuilt>.cmd
   #
   # Use symlinks to build whatever prebuilt you want. So for example, to build
   # curl, we need to create a file called android/scripts/build-curl.py that
