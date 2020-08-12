@@ -309,6 +309,10 @@ function(android_add_library)
     target_link_libraries(${build_TARGET} PRIVATE msvc-posix-compat)
   endif()
   android_clang_tidy(${build_TARGET})
+  # Clang on mac os does not get properly recognized by cmake
+  if (NOT DARWIN_X86_64)
+      target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
+  endif()
 
   if(${build_SHARED})
     # We don't want cmake to binplace the shared libraries into the bin
@@ -607,6 +611,10 @@ function(android_add_executable)
                         "${multiValueArgs}" ${ARGN})
 
   add_executable(${build_TARGET} ${REGISTERED_SRC})
+  # Clang on mac os does not get properly recognized by cmake
+  if (NOT DARWIN_X86_64)
+      target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
+  endif()
 
   if(WINDOWS_MSVC_X86_64)
     target_link_libraries(${build_TARGET} PRIVATE msvc-posix-compat)

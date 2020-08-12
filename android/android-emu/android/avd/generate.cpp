@@ -73,6 +73,7 @@ void generateAvd(const AvdGenerateInfo& genInfo) {
     configIni.setString("hw.accelerometer", genInfo.hwAccelerometer);
     configIni.setString("hw.arc", genInfo.hwArc);
     configIni.setString("hw.audioInput", genInfo.hwAudioInput);
+    configIni.setString("hw.audioOutput", genInfo.hwAudioOutput);
     configIni.setString("hw.battery", genInfo.hwBattery);
     configIni.setString("hw.camera.back", genInfo.hwCameraBack);
     configIni.setString("hw.camera.front", genInfo.hwCameraFront);
@@ -169,6 +170,7 @@ void generateAvdWithDefaults(StringView avdName,
         /* hw.accelerometer */ "yes",
         /* hw.arc */ "false",
         /* hw.audioInput */ "yes",
+        /* hw.audioOutput */ "yes",
         /* hw.battery */ "yes",
         /* hw.camera.back */ "virtualscene",
         /* hw.camera.front */ "emulated",

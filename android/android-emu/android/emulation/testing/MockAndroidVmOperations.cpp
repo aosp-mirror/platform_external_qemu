@@ -100,7 +100,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .hostmemGetInfo = android_emulation_hostmem_get_info,
 };
 
-extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =
+extern "C" const QAndroidVmOperations* const gMockQAndroidVmOperations =
         &sQAndroidVmOperations;
 
 namespace android {

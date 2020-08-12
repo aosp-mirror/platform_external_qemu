@@ -6,6 +6,18 @@ extern "C" {
 #include "gtest/gtest.h"
 #include <inttypes.h>
 #include <cstdint>
+#include <string_view> // Make sure we can use C++17 std::string_view
+#include <optional>
+
+TEST(CompilerTest, stringview) {
+    std::string_view hello("Hello");
+    EXPECT_STREQ("Hello", hello.data());
+}
+
+TEST(CompilerTest, optional) {
+    auto godzilla = std::optional<std::string>{"Godzilla"};
+    EXPECT_TRUE(godzilla.has_value());
+}
 
 // This test makes sure that the definitions in tcg are correct.
 // Note, calling gtest from C doesn't work well, and using qemu from C++ doesn't

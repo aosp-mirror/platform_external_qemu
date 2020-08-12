@@ -14,21 +14,27 @@
 
 #include "android/emulation/control/ScreenCapturer.h"
 
-#include "android/base/Log.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/System.h"
-#include "android/emulation/control/display_agent.h"
-#include "android/emulation/control/window_agent.h"
-#include "observation.pb.h"
-#include "android/emulator-window.h"
-#include "android/loadpng.h"
-#include "android/opengles.h"
-#include "android/utils/string.h"
+#include <assert.h>                                   // for assert
+#include <png.h>                                      // for png_create_info...
+#include <stdio.h>                                    // for NULL, snprintf
+#include <string.h>                                   // for memcpy
+#include <fstream>                                    // for ofstream, basic...
+#include <memory>                                     // for shared_ptr
+#include <vector>                                     // for vector
 
-#include <png.h>
-#include <fstream>
-#include <iostream>
-#include <vector>
+#include "OpenglRender/Renderer.h"                    // for Renderer
+#include "android/base/Log.h"                         // for LOG, LogMessage
+#include "android/base/files/PathUtils.h"             // for PathUtils
+#include "android/base/system/System.h"               // for System
+#include "android/console.h"                          // for getConsoleAgents
+#include "android/emulation/control/display_agent.h"  // for QAndroidDisplay...
+#include "android/emulation/control/window_agent.h"   // for QAndroidEmulato...
+#include "android/emulator-window.h"                  // for emulator_window...
+#include "android/loadpng.h"                          // for savepng, write_...
+#include "android/opengles.h"                         // for android_getOpen...
+#include "android/utils/string.h"                     // for str_ends_with
+#include "observation.pb.h"                           // for Observation
+#include "pngconf.h"                                  // for png_byte, png_b...
 
 namespace android {
 namespace emulation {
@@ -37,7 +43,7 @@ bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* pOutputFilepath,
                        uint32_t displayId) {
     const auto& renderer = android_getOpenglesRenderer();
-    SkinRotation rotation = gQAndroidEmulatorWindowAgent->getRotation();
+    SkinRotation rotation = getConsoleAgents()->emu->getRotation();
     if (const auto renderer_ptr = renderer.get()) {
         return captureScreenshot(renderer_ptr, nullptr, rotation,
                                  outputDirectoryPath, pOutputFilepath, displayId);

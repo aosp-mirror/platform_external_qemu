@@ -12,25 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/address_space_graphics.h"
+#include <gtest/gtest.h>                                     // for Message
+#include <stdint.h>                                          // for uint32_t
+#include <stdio.h>                                           // for printf
+#include <string.h>                                          // for size_t
+#include <sys/types.h>                                       // for ssize_t
+#include <algorithm>                                         // for uniform_...
+#include <functional>                                        // for __base
+#include <random>                                            // for default_...
+#include <vector>                                            // for vector
 
-#include "android/base/files/Stream.h"
-#include "android/base/files/MemStream.h"
-#include "android/base/ring_buffer.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/emulation/AddressSpaceService.h"
-#include "android/emulation/address_space_device.hpp"
-#include "android/emulation/address_space_graphics_types.h"
-#include "android/emulation/hostdevices/HostAddressSpace.h"
-#include "android/emulation/control/vm_operations.h"
-#include "android/globals.h"
+#include "android/base/ring_buffer.h"                        // for ring_buf...
+#include "android/base/threads/FunctorThread.h"              // for FunctorT...
+#include "android/console.h"                                 // for getConso...
+#include "android/emulation/AddressSpaceService.h"           // for AddressS...
+#include "android/emulation/address_space_device.hpp"        // for goldfish...
+#include "android/emulation/address_space_graphics.h"        // for AddressS...
+#include "android/emulation/address_space_graphics_types.h"  // for asg_context
+#include "android/emulation/hostdevices/HostAddressSpace.h"  // for HostAddr...
+#include "android/globals.h"                                 // for android_hw
 
-#include <gtest/gtest.h>
-
-#include <random>
-#include <vector>
+namespace android {
+namespace base {
+class Stream;
+}  // namespace base
+}  // namespace android
 
 using android::base::FunctorThread;
+
+
 
 namespace android {
 namespace emulation {
@@ -462,7 +472,7 @@ public:
                 uint8_t* currentXferPtr = (uint8_t*)(&currentXfer);
 
                 EXPECT_EQ(0, ring_buffer_copy_contents(
-                    mContext.to_host, 0, 
+                    mContext.to_host, 0,
                     sizeof(currentXfer), currentXferPtr));
 
                 char* ptr = mContext.buffer + currentXfer.offset;
@@ -541,7 +551,7 @@ public:
 
 protected:
     static void SetUpTestCase() {
-        goldfish_address_space_set_vm_operations(gQAndroidVmOperations);
+        goldfish_address_space_set_vm_operations(getConsoleAgents()->vm);
     }
 
     static void TearDownTestCase() { }
