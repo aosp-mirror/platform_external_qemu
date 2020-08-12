@@ -1082,7 +1082,7 @@ add_finger_event(SkinWindow* window,
     uint32_t id = 0;
 
     if (finger->display) {
-        if (skin_winsys_is_folded()) {
+        if (android_foldable_is_folded()) {
             switch (finger->display->rotation) {
             case SKIN_ROTATION_0:
             case SKIN_ROTATION_180:

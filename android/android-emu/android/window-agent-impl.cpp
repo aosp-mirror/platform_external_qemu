@@ -16,6 +16,7 @@
 
 #include "android/emulator-window.h"
 #include "android/emulation/MultiDisplay.h"
+#include "android/hw-sensors.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/debug.h"
 
@@ -98,7 +99,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .fold =
                 [](bool is_fold) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
-                        if (win->isFoldableConfigured()) {
+                        if (android_foldable_folded_area_configured()) {
                             QtUICommand cmd = is_fold ? QtUICommand::FOLD
                                                       : QtUICommand::UNFOLD;
                             win->runOnUiThread([win, cmd]() {
@@ -111,10 +112,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .isFolded =
                 [] {
-                    if (const auto win = EmulatorQtWindow::getInstance()) {
-                        return win->isFolded();
-                    }
-                    return false;
+                    return android_foldable_is_folded();
                 },
         .setUIDisplayRegion =
                 [](int x, int y, int w, int h) {

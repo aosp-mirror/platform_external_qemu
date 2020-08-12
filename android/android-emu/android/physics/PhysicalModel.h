@@ -163,4 +163,6 @@ int physicalModel_stopRecording(PhysicalModel* model);
 
 int physicalModel_getFoldableState(PhysicalModel* model, struct FoldableState* state);
 
+bool physicalModel_foldableisFolded(PhysicalModel* model);
+
 ANDROID_END_HEADER
