@@ -425,7 +425,9 @@ void ToolWindow::mousePressEvent(QMouseEvent* event) {
 
 void ToolWindow::hideEvent(QHideEvent*) {
     mIsExtendedWindowVisibleOnShow =
-            mExtendedWindow.hasInstance() && mExtendedWindow.get()->isVisible();
+            mExtendedWindow.hasInstance() &&
+            mExtendedWindow.get()->isVisible() &&
+            mExtendedWindow.get()->isActiveWindow();
     mIsVirtualSceneWindowVisibleOnShow =
             mVirtualSceneControlWindow.hasInstance() &&
             mVirtualSceneControlWindow.get()->isVisible();

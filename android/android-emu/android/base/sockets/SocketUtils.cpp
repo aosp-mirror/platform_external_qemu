@@ -640,10 +640,39 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
          errno == EAGAIN ||
          errno == EINPROGRESS)) {
 
-#ifndef _WIN32
-        // On Linux (at least), dont' actually use select(), because the fd
-        // number can be > 1024
-        // On other platforms, let
+#ifdef _WIN32
+        // This is a replacement for select() on Windows. (WSAPoll did not work)
+        HANDLE event = CreateEvent(NULL, TRUE, FALSE, NULL);
+        long events =
+            FD_READ | FD_ACCEPT | FD_CLOSE | FD_CONNECT |
+            FD_WRITE;
+
+        int ret = WSAEventSelect(fd, event, events);
+
+        if (ret != 0) {
+            auto err = WSAGetLastError();
+            fprintf(stderr, "%s: failed eventsetup! res: %d err %d 0x%x\n", __func__, ret, err, err);
+            return -1;
+        }
+
+        ret = WaitForSingleObject(event, tv.tv_usec / 1000);
+
+        int numFdsReady = 0;
+
+        if (ret == WAIT_FAILED) {
+            auto err = GetLastError();
+            fprintf(stderr, "%s: WaitForSingleObject failed. err %d 0x%x\n", __func__, err, err);
+            return -1;
+        }
+
+        if (ret == WAIT_OBJECT_0) {
+            numFdsReady = 1;
+        }
+
+        // tear down the event
+        WSAEventSelect(fd, 0, 0);
+        CloseHandle(event);
+#else
         struct pollfd fds[] = {
             {
                 .fd = fd,
@@ -652,15 +681,7 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
             },
         };
         int numFdsReady = HANDLE_EINTR(::poll(fds, 1, tv.tv_usec / 1000));
-#else // !_WIN32
-        if (fd >= FD_SETSIZE) {
-            fprintf(stderr, "%s: error: fd %d above FD_SETSIZE (%d)\n",
-                    __func__, fd, FD_SETSIZE);
-            return -1;
-        }
-        FD_SET(fd, &my_set);
-        int numFdsReady = HANDLE_EINTR(::select(fd + 1, 0, &my_set, 0, &tv));
-#endif // _WIN32
+#endif
 
         if (numFdsReady > 0) {
             int err = 0;

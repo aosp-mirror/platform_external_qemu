@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <algorithm>
 #include <chrono>
 #include <functional>
@@ -46,7 +47,6 @@
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/net-android.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
-#include "android-qemu2-glue/qemu-control-impl.h"
 #include "android-qemu2-glue/snapshot_compression.h"
 #include "android/android.h"
 #include "android/avd/info.h"
@@ -79,7 +79,6 @@
 #include "android/emulation/control/window_agent.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
-#include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/Random.h"
@@ -217,8 +216,8 @@ bool qemu_android_emulation_early_setup() {
         return false;
     }
 
-    android::emulation::goldfish_address_space_set_vm_operations(
-            gQAndroidVmOperations);
+    auto vm = getConsoleAgents()->vm;
+    android::emulation::goldfish_address_space_set_vm_operations(vm);
 
     qemu_set_address_space_device_control_ops(
             (struct qemu_address_space_device_control_ops*)
@@ -226,8 +225,7 @@ bool qemu_android_emulation_early_setup() {
 
     qemu_android_address_space_device_init();
 
-    androidSnapshot_initialize(gQAndroidVmOperations,
-                               gQAndroidEmulatorWindowAgent);
+    androidSnapshot_initialize(vm, getConsoleAgents()->emu);
     qemu_snapshot_compression_setup();
 
     android::emulation::AudioCaptureEngine::set(
@@ -240,29 +238,6 @@ bool qemu_android_emulation_early_setup() {
 
 static std::unique_ptr<EmulatorAdvertisement> advertiser;
 static std::unique_ptr<EmulatorControllerService> grpcService;
-
-const AndroidConsoleAgents* getConsoleAgents() {
-    // Initialize UI/console agents.
-    static const AndroidConsoleAgents consoleAgents = {
-            gQAndroidBatteryAgent,
-            gQAndroidDisplayAgent,
-            gQAndroidEmulatorWindowAgent,
-            gQAndroidFingerAgent,
-            gQAndroidLocationAgent,
-            gQAndroidHttpProxyAgent,
-            gQAndroidRecordScreenAgent,
-            gQAndroidTelephonyAgent,
-            gQAndroidUserEventAgent,
-            gQAndroidVmOperations,
-            gQAndroidNetAgent,
-            gQAndroidLibuiAgent,
-            gQCarDataAgent,
-            gQGrpcAgent,
-            gQAndroidSensorsAgent,
-            gQAndroidMultiDisplayAgent,
-            gQAndroidClipboardAgent};
-    return &consoleAgents;
-}
 
 bool qemu_android_ports_setup() {
     return android_ports_setup(getConsoleAgents(), true);
@@ -455,7 +430,8 @@ bool qemu_android_emulation_setup() {
                         "stalled.")
                 .addPredicateCheck(
                         [] {
-                            return gQAndroidUserEventAgent->eventsDropped() >
+                            return getConsoleAgents()
+                                           ->user_event->eventsDropped() >
                                    kMaxEventsDropped;
                         },
                         "The goldfish event queue is overflowing, the "

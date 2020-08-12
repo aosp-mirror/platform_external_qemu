@@ -115,6 +115,8 @@ android_add_library(
       android/utils/utf8_utils.cpp
       android/utils/vector.c
       android/utils/x86_cpuid.cpp
+      # TODO(jansene): This needs to move to its own library.
+      android/emulation/control/AndroidAgentFactory.cpp
   LINUX android/base/memory/SharedMemory_posix.cpp
         android/base/threads/Thread_pthread.cpp
   DARWIN android/base/memory/SharedMemory_posix.cpp
@@ -189,6 +191,7 @@ android_target_compile_options(android-emu-base windows_msvc-x86_64
 android_add_executable(
   TARGET android-emu_benchmark NODISTRIBUTE
   SRC # cmake-format: sortable
-      android/base/synchronization/Lock_benchmark.cpp)
+      android/base/synchronization/Lock_benchmark.cpp
+      android/base/Log_benchmark.cpp)
 target_link_libraries(android-emu_benchmark PRIVATE android-emu-base
                                                     emulator-gbench)
