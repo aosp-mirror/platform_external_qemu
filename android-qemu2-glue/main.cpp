@@ -1071,9 +1071,6 @@ extern "C" int main(int argc, char** argv) {
     process_early_setup(argc, argv);
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
 
-    // Make the console agents available.
-    injectConsoleAgents("");
-
     // Start GPU information query to use it later for the renderer seleciton.
     async_query_host_gpu_start();
 
@@ -1092,6 +1089,10 @@ extern "C" int main(int argc, char** argv) {
                 &argc, &argv, kTarget.androidArch,
                 true,  // is_qemu2
                 opts, hw, &android_avdInfo, &exitStatus)) {
+
+
+        // Make the console agents available.
+        injectConsoleAgents("");
 
         // Special case for QEMU positional parameters (or Fuchsia path)
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
@@ -1169,6 +1170,9 @@ extern "C" int main(int argc, char** argv) {
         // Normal exit.
         return exitStatus;
     }
+
+    // Make the console agents available.
+    injectConsoleAgents("");
 
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
