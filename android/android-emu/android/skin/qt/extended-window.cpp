@@ -183,7 +183,7 @@ ExtendedWindow::ExtendedWindow(
     }
 
     if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) &&
-        !ToolWindow::isFoldableConfigured()) {
+        !android_foldable_folded_area_configured()) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);
         mExtendedUi->displaysButton->setVisible(true);
     } else {

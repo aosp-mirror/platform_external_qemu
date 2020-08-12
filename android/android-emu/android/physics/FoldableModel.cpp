@@ -321,5 +321,11 @@ void FoldableModel::setToolBarFold(enum FoldablePostures oldPosture) {
     }
 }
 
+bool FoldableModel::isFolded() {
+    if (mState.currentPosture == mState.config.foldAtPosture) {
+        return true;
+    }
+    return false;
+}
 }  // namespace physics
 }  // namespace android

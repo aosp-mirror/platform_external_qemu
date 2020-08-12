@@ -43,6 +43,8 @@ public:
 
     FoldableState getFoldableState() { return mState; }     // structure copy
 
+    bool isFolded();
+
 private:
     enum FoldablePostures calculatePosture();
     void sendPostureToSystem();

@@ -172,7 +172,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
-    if (!isFoldableConfigured()) {
+    if (!android_foldable_folded_area_configured()) {
         mToolsUi->fold_switch->hide();
         mToolsUi->fold_switch->setEnabled(false);
     } else {
@@ -534,7 +534,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::SHOW_PANE_MULTIDISPLAY:
             if (down) {
                 if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
-                    && !isFoldableConfigured()) {
+                    && !android_foldable_folded_area_configured()) {
                     showOrRaiseExtendedWindow(PANE_IDX_MULTIDISPLAY);
                 }
             }
@@ -639,7 +639,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             }
             break;
         case QtUICommand::FOLD:
-            if (down && isFoldableConfigured()) {
+            if (down && android_foldable_folded_area_configured()) {
                 if (mFolded) {
                     break;
                 }
@@ -668,7 +668,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             }
             break;
         case QtUICommand::UNFOLD:
-            if (down && isFoldableConfigured()) {
+            if (down && android_foldable_folded_area_configured()) {
                 if (!mFolded) {
                     break;
                 }
@@ -807,30 +807,12 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
 }
 
 // static
-bool ToolWindow::isFoldableConfigured() {
-    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-    int width   = android_hw->hw_displayRegion_0_1_width;
-    int height  = android_hw->hw_displayRegion_0_1_height;
-
-    bool enableFoldableByDefault =
-        !(xOffset < 0 || xOffset > 9999 ||
-          yOffset < 0 || yOffset > 9999 ||
-          width   < 1 || width   > 9999 ||
-          height  < 1 || height  > 9999 ||
-          // TODO: 29 needed
-          avdInfo_getApiLevel(android_avdInfo) < 28);
-
-    return enableFoldableByDefault;
-}
-
-// static
 void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     sUiEmuAgent = agentPtr;
     ExtendedWindow::setAgent(agentPtr);
     VirtualSceneControlWindow::setAgent(agentPtr);
 
-    if (isFoldableConfigured()) {
+    if (android_foldable_folded_area_configured()) {
         sendFoldedArea();
     }
 
@@ -1244,9 +1226,4 @@ void ToolWindow::sendFoldedArea() {
                 if (result && result->exit_code == 0) {
                     VLOG(foldable) << "foldable-page: 'fold-area' command succeeded";
                 }});
-}
-
-//static
-bool ToolWindow::isFolded() {
-    return sToolWindow->mFolded;
 }
