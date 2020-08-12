@@ -3729,18 +3729,6 @@ static const CommandDefRec screenrecord_commands[] = {
 /********************************************************************************************/
 /********************************************************************************************/
 
-static int do_icebox_run(ControlClient client, char* args) {
-    if (android::icebox::run_async(args)) {
-        control_write(client, "OK: run command: %s\r\n", args);
-        return 0;
-    } else {
-        control_write(client,
-                      "KO: Failed to run command, might have pending icebox "
-                      "operations, please try again\r\n");
-        return -1;
-    }
-}
-
 static int do_icebox_track(ControlClient client, char* args) {
     int pid = -1;
     if (!args || strlen(args) == 0) {
@@ -3774,8 +3762,6 @@ static const CommandDefRec icebox_commands[] = {
          "[max_snapshots]) snasphots when there are assert failures",
          "'icebox track <pid> [max_snapshots]'\r\n", NULL, do_icebox_track,
          NULL},
-        {"run", "(experimental) run adb open command",
-         "'icebox run \"command\"'\r\n", NULL, do_icebox_run, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
