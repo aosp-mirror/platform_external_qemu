@@ -17,6 +17,7 @@
 #include "trace.h"
 #include "hw/virtio/virtio.h"
 #include "hw/virtio/virtio-gpu.h"
+#include "exec/memory-remap.h"
 #ifdef CONFIG_ANDROID
 #include "hw/virtio/virtio-goldfish-pipe.h"
 #endif
@@ -219,9 +220,7 @@ static void virgl_cmd_submit_3d(VirtIOGPU *g,
         g->stats.bytes_3d += cs.size;
     }
 
-    // Use exact byte count instead of # dwords
-    // g->virgl->virgl_renderer_submit_cmd(buf, cs.hdr.ctx_id, cs.size / 4);
-    g->virgl->virgl_renderer_submit_cmd(buf, cs.hdr.ctx_id, cs.size);
+    g->virgl->virgl_renderer_submit_cmd(buf, cs.hdr.ctx_id, cs.size / 4);
 
 out:
     g_free(buf);
@@ -406,6 +405,148 @@ static void virgl_cmd_get_capset(VirtIOGPU *g,
     g_free(resp);
 }
 
+static void virgl_cmd_resource_create_blob(VirtIOGPU *g,
+        struct virtio_gpu_ctrl_command* cmd)
+{
+    struct virtio_gpu_resource_create_blob cb;
+    VIRTIO_GPU_FILL_CMD(cb);
+
+    g->virgl->virgl_renderer_resource_create_v2(
+        cb.resource_id,
+        cb.blob_id);
+}
+
+#define VIRTIO_GPU_MAX_RAM_SLOTS 2048
+
+struct VirtioGpuRamSlotInfo {
+    int used;
+    MemoryRegion mr;
+    uint64_t gpa;
+    uint64_t offset;
+    uint64_t size;
+    uint32_t resource_id;
+};
+
+struct VirtioGpuRamSlotTable {
+    struct VirtioGpuRamSlotInfo slots[VIRTIO_GPU_MAX_RAM_SLOTS];
+};
+
+static struct VirtioGpuRamSlotTable* s_virtio_gpu_ram_slot_table = NULL;
+
+static struct VirtioGpuRamSlotTable* virtio_gpu_ram_slot_table_get(void) {
+    static struct VirtioGpuRamSlotTable* s_table;
+    if (!s_table) {
+        struct VirtioGpuRamSlotTable* table =
+            (struct VirtioGpuRamSlotTable*)malloc(sizeof(*table));
+        memset(table, 0, sizeof(*table));
+        s_table = table;
+    }
+    return s_table;
+}
+
+static int virtio_gpu_ram_slot_infos_first_free_slot() {
+    struct VirtioGpuRamSlotTable* table = virtio_gpu_ram_slot_table_get();
+
+    for (int i = 0; i < VIRTIO_GPU_MAX_RAM_SLOTS; ++i) {
+        if (0 == table->slots[i].used) return i;
+    }
+    return -1;
+}
+
+static void virtio_gpu_map_slot(
+    MemoryRegion* parent, uint32_t resource_id,
+    uint64_t gpa, uint64_t offset, void *hva, uint64_t size, int flags) {
+
+    struct VirtioGpuRamSlotTable* table = virtio_gpu_ram_slot_table_get();
+    int slot = virtio_gpu_ram_slot_infos_first_free_slot();
+    MemoryRegion* mr = &(table->slots[slot].mr);
+
+    if (slot < 0) {
+        fprintf(stderr, "%s: error: no free slots to "
+                "map hva %p -> gpa [0x%llx 0x%llx)\n", __func__,
+                hva, (unsigned long long)gpa, (unsigned long long)gpa + size);
+        return;
+    }
+
+    qemu_user_backed_ram_map(gpa, hva, size, USER_BACKED_RAM_FLAGS_READ | USER_BACKED_RAM_FLAGS_WRITE);
+
+    table->slots[slot].gpa = gpa;
+    table->slots[slot].offset = offset;
+    table->slots[slot].size = size;
+    table->slots[slot].used = 1;
+    table->slots[slot].resource_id = resource_id;
+}
+
+static void virtio_gpu_unmap_slot(
+    MemoryRegion* parent, uint32_t resource_id) {
+
+    struct VirtioGpuRamSlotTable* table = virtio_gpu_ram_slot_table_get();
+
+    for (int i = 0; i < VIRTIO_GPU_MAX_RAM_SLOTS; ++i) {
+        if (0 == table->slots[i].used) continue;
+        if (resource_id != table->slots[i].resource_id) continue;
+
+        qemu_user_backed_ram_unmap(table->slots[i].gpa, table->slots[i].size);
+        table->slots[i].used = 0;
+
+        return;
+    }
+}
+
+static void virgl_cmd_resource_map(VirtIOGPU *g,
+        struct virtio_gpu_ctrl_command* cmd) {
+    struct virtio_gpu_resource_map m;
+    struct virtio_gpu_resp_map_info resp;
+
+    VIRTIO_GPU_FILL_CMD(m);
+
+    void* hva;
+    uint64_t size;
+    uint64_t offset = m.offset;
+
+    g->virgl->virgl_renderer_resource_map(m.resource_id, &hva, &size);
+
+    if (!hva || !size) {
+        fprintf(stderr, "%s: failed for resource %u\n", __func__, m.resource_id);
+        cmd->error = VIRTIO_GPU_RESP_ERR_OUT_OF_MEMORY;
+        return;
+    }
+
+    uint64_t host_coherent_start =
+        object_property_get_uint(OBJECT(&g->host_coherent_memory), "addr", NULL);
+
+    uint64_t phys_addr =
+        host_coherent_start + offset;
+
+    virtio_gpu_map_slot(
+        &g->host_coherent_memory,
+        m.resource_id,
+        phys_addr,
+        offset,
+        hva,
+        size,
+        0xff /* flags, unused */);
+
+    memset(&resp, 0, sizeof(resp));
+    resp.hdr.type = VIRTIO_GPU_RESP_OK_MAP_INFO;
+    resp.map_flags = 0x2;
+    resp.padding = 0;
+    virtio_gpu_ctrl_response(g, cmd, &resp.hdr, sizeof(resp));
+}
+
+static void virgl_cmd_resource_unmap(VirtIOGPU *g,
+        struct virtio_gpu_ctrl_command* cmd) {
+
+    struct virtio_gpu_resource_unmap u;
+    VIRTIO_GPU_FILL_CMD(u);
+
+    virtio_gpu_unmap_slot(
+        &g->host_coherent_memory,
+        u.resource_id);
+
+    g->virgl->virgl_renderer_resource_unmap(u.resource_id);
+}
+
 void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
                                       struct virtio_gpu_ctrl_command *cmd)
 {
@@ -474,6 +615,15 @@ void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
 
     case VIRTIO_GPU_CMD_GET_DISPLAY_INFO:
         virtio_gpu_get_display_info(g, cmd);
+        break;
+    case VIRTIO_GPU_CMD_RESOURCE_CREATE_BLOB:
+        virgl_cmd_resource_create_blob(g, cmd);
+        break;
+    case VIRTIO_GPU_CMD_RESOURCE_MAP:
+        virgl_cmd_resource_map(g, cmd);
+        break;
+    case VIRTIO_GPU_CMD_RESOURCE_UNMAP:
+        virgl_cmd_resource_unmap(g, cmd);
         break;
     default:
         cmd->error = VIRTIO_GPU_RESP_ERR_UNSPEC;

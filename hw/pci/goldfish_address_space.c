@@ -1051,15 +1051,9 @@ uint64_t goldfish_address_space_get_phys_addr_start_locked(void)
     res = (uint64_t)s_current_state->registers.phys_start_low;
     res |= ((uint64_t)s_current_state->registers.phys_start_high) << 32;
 
-    // BUG: 162435702, 162264185
-    // It's not fatal; just treat 0 as a invalid phys address start.
-    // Q system images might not have this.
-    // This depends on the guest kernel.
-    //
-    // if (!res)
-    // {
-    //     qemu_abort("FATAL: Tried to ask for phys addr start without it being initialized!\n");
-    // }
+    if (!res) {
+        res = object_property_get_uint(OBJECT(&s_current_state->area_mem), "addr", NULL);
+    }
 
     return res;
 }

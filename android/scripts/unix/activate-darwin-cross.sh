@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+set -x
 . $(dirname "$0")/utils/common.shi
 
 shell_import utils/option_parser.shi
@@ -42,11 +42,11 @@ PROGRAM_DESCRIPTION=\
  sudo ./llvm.sh 9
 "
 
-OPT_XCODE=
-option_register_var "--xcode=<path_to_sdk_xip>" OPT_XCODE "Path to Xcode sdk."
+OPT_SDK=
+option_register_var "--sdk=<path_to_sdk>" OPT_SDK "Path to the sdk you wish to use, generated from https://github.com/tpoechtrager/osxcross. Make sure the filename matches MacSDKxx.xx.sdk.tar.xz"
 
 OPT_CROSS_TAR=
-option_register_var "--xcode-tar=<path_to_osxcross.tar.gz>" OPT_CROSS_TAR "Path to a gz with osxcross compiler, (normally constructed by the --xcode flag."
+option_register_var "--xcode-tar=<path_to_osxcross.tar.gz>" OPT_CROSS_TAR "Path to a gz with osxcross compiler, (normally construced by the --sdks flag."
 
 
 # Fancy colors in the terminal
@@ -83,7 +83,7 @@ function build_sdk() {
     run rm -rf /tmp/xcode-build /tmp/osxcross
     run mkdir -p /tmp/xcode-build
     run mkdir -p /tmp/osxcross
-    run cp $OPT_XCODE /tmp/xcode-build/xcode.xip
+    run cp $OPT_SDK /tmp/xcode-build
     run cp $(dirname "$0")/Dockerfile.darwin.cross /tmp/xcode-build/Dockerfile
     run sudo docker build -t osxcross:1015 /tmp/xcode-build
     id=$(docker create osxcross:1015)
@@ -95,7 +95,7 @@ function build_sdk() {
 
 
 if [ -z $OPT_CROSS_TAR ]; then
-    [[ -f $OPT_XCODE ]] || panic "You must provide a valid path to xcode.xip, see --help for details"
+    [[ -f $OPT_SDK ]] || panic "You must provide a valid path to mac os sdk, see --help for details"
     OPT_CROSS_TAR=/tmp/osxcross.tar.gz
     build_sdk
 fi

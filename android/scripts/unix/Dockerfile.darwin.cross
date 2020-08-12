@@ -51,11 +51,9 @@ RUN update-alternatives \
     --slave   /usr/bin/llvm-symbolizer   llvm-symbolizer  /usr/bin/llvm-symbolizer-9 \
     --slave   /usr/bin/llvm-tblgen       llvm-tblgen      /usr/bin/llvm-tblgen-9
 
-# Make xcode distro available.
-COPY  xcode.xip /tmp/xcode.xip
+# Make xcode sdks available.
+COPY  *.xz /osxcross/tarballs/
 
-# Unpack it, and move the final tarball to the tarbalss directory
-RUN /osxcross/tools/gen_sdk_package_pbzx.sh /tmp/xcode.xip && mv /osxcross/*.xz /osxcross/tarballs
 # Now build the cross compiler.
 ENV UNATTENDED=1
 RUN cd /osxcross && ./build.sh

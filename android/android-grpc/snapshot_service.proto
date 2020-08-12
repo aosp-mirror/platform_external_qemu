@@ -182,6 +182,10 @@ message IceboxTarget {
 
   // [Output Only] Detailed error message that might provide more information.
   string err = 5;
+
+  // Maximum number of snapshots the emulator can take during one Icebox run.
+  // Set to -1 for unlimited number of snapshots.
+  int32 max_snapshot_number = 6;
 }
 
 

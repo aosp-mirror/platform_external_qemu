@@ -91,6 +91,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 $MY_FLAGS \
                 --enable-pic \
                 --enable-static \
+                --enable-vp9-highbitdepth \
                 --disable-tools \
                 --disable-unit-tests \
                 --extra-cxxflags="-Doff_t=__off64_t -fPIC"

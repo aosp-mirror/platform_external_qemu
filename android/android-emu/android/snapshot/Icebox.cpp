@@ -14,29 +14,34 @@
 
 #include "android/snapshot/Icebox.h"
 
-#include <openssl/pem.h>
-#include <openssl/rsa.h>
-#include <stdio.h>
-#include <atomic>
-#include <memory>
-#include <vector>
+#include <assert.h>                                          // for assert
+#include <openssl/pem.h>                                     // for PEM_read...
+#include <openssl/rsa.h>                                     // for RSA_free
+#include <stdio.h>                                           // for fprintf
+#include <string.h>                                          // for strlen
+#include <algorithm>                                         // for min
+#include <atomic>                                            // for atomic
+#include <cstdint>                                           // for uint8_t
+#include <functional>                                        // for __base
+#include <memory>                                            // for unique_ptr
+#include <vector>                                            // for vector
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/sockets/ScopedSocket.h"
-#include "android/base/sockets/SocketUtils.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/Async.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/base/threads/Thread.h"
-#include "android/emulation/apacket_utils.h"
-#include "android/emulation/AdbMessageSniffer.h"
-#include "android/emulation/control/vm_operations.h"
-#include "android/globals.h"
-#include "android/jdwp/Jdwp.h"
-#include "android/snapshot/interface.h"
+#include "android/base/Log.h"                                // for CHECK
+#include "android/base/async/ThreadLooper.h"                 // for ThreadLo...
+#include "android/base/files/PathUtils.h"                    // for pj
+#include "android/base/sockets/SocketUtils.h"                // for socketSe...
+#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/base/system/System.h"                      // for System
+#include "android/base/threads/FunctorThread.h"              // for FunctorT...
+#include "android/base/threads/Thread.h"                     // for Thread
+#include "android/console.h"                                 // for getConso...
+#include "android/emulation/apacket_utils.h"                 // for apacket
+#include "android/emulation/control/vm_operations.h"         // for QAndroid...
+#include "android/jdwp/Jdwp.h"                               // for JdwpComm...
+#include "android/snapshot/interface.h"                      // for androidS...
+#include "openssl/base.h"                                    // for RSA
+#include "openssl/nid.h"                                     // for NID_sha1
 
 #define DEBUG 1
 
@@ -314,19 +319,22 @@ bool run_async(std::string cmd_str) {
     return s_workerThread->start();
 }
 
-bool track_async(int pid, const std::string snapshot_name) {
+bool track_async(int pid,
+                 const std::string snapshot_name,
+                 int max_snapshot_number) {
     if (s_workerThread) {
         if (!s_workerThread->tryWait(nullptr)) {
             return false;
         }
     }
-    s_workerThread.reset(new android::base::FunctorThread([pid, snapshot_name] {
-        bool result = track(pid, snapshot_name);
-        D("track result %d\n", result);
-    }));
+    s_workerThread.reset(new android::base::FunctorThread(
+            [pid, snapshot_name, max_snapshot_number] {
+                bool result = track(pid, snapshot_name, max_snapshot_number);
+                D("track result %d\n", result);
+            }));
     return s_workerThread->start();
 }
-bool track(int pid, const std::string snapshot_name) {
+bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
     if (s_adb_port == -1) {
         fprintf(stderr, "adb port uninitialized\n");
         return false;
@@ -566,8 +574,8 @@ bool track(int pid, const std::string snapshot_name) {
 #endif
     }
 
-    {
-        // The first several commands have the same size
+    if (max_snapshot_number != 0) {
+        // The following commands have the same size
         const int kInitBufferSize = 200;
         apacket reply;
         JdwpCommandHeader jdwp_header;
@@ -593,6 +601,7 @@ bool track(int pid, const std::string snapshot_name) {
             _RECV_REPLY_PACKET_OK(reply, jdwp_header.id);
         }
     }
+    int snapshot_num = 0;
     while (1) {
         apacket reply;
         _RECV_PACKET(reply);
@@ -603,34 +612,42 @@ bool track(int pid, const std::string snapshot_name) {
         // issue between pipe receive and snapshots.
         if (reply.mesg.data_length > 11 &&
             reply.data[11] == SuspendPolicy::All) {  // Thread suspend all
-            // Take snapshot when AssertionError is thrown
-            bool snapshot_done = false;
-            base::ConditionVariable snapshot_signal;
-            base::Lock snapshot_lock;
-            D("send out command for main thread");
-            android::base::ThreadLooper::runOnMainLooper(
-                    [&snapshot_done, &snapshot_signal, &snapshot_lock,
-                     &snapshot_name]() {
-                        D("ready to take snapshot");
-                        gQAndroidVmOperations->vmStop();
-                        const AndroidSnapshotStatus result =
-                                androidSnapshot_save(snapshot_name.c_str());
-                        D("Snapshot done, result %d (expect %d)", result,
-                                SNAPSHOT_STATUS_OK);
-                        gQAndroidVmOperations->vmStart();
-                        snapshot_lock.lock();
-                        snapshot_done = true;
-                        snapshot_signal.broadcastAndUnlock(&snapshot_lock);
-                        D("Snapshot thread done");
-                    });
-            D("Icebox thread waiting for snapshot");
-            snapshot_lock.lock();
-            snapshot_signal.wait(&snapshot_lock,
-                                 [&snapshot_done]() { return snapshot_done; });
-            snapshot_lock.unlock();
-            D("Icebox thread resume after snapshot");
+            if (max_snapshot_number == -1 ||
+                snapshot_num < max_snapshot_number) {
+                // Take snapshot when AssertionError is thrown
+                bool snapshot_done = false;
+                base::ConditionVariable snapshot_signal;
+                base::Lock snapshot_lock;
+                D("send out command for main thread");
+                std::string new_snapshot_name =
+                        snapshot_name + std::to_string(snapshot_num);
+                snapshot_num++;
+                android::base::ThreadLooper::runOnMainLooper(
+                        [&snapshot_done, &snapshot_signal, &snapshot_lock,
+                         &new_snapshot_name]() {
+                            D("ready to take snapshot");
+                            getConsoleAgents()->vm->vmStop();
+                            const AndroidSnapshotStatus result =
+                                    androidSnapshot_save(
+                                            new_snapshot_name.c_str());
+                            D("Snapshot done, result %d (expect %d)", result,
+                              SNAPSHOT_STATUS_OK);
+                            getConsoleAgents()->vm->vmStart();
+                            snapshot_lock.lock();
+                            snapshot_done = true;
+                            snapshot_signal.broadcastAndUnlock(&snapshot_lock);
+                            D("Snapshot thread done");
+                        });
+                D("Icebox thread waiting for snapshot");
+                snapshot_lock.lock();
+                snapshot_signal.wait(&snapshot_lock, [&snapshot_done]() {
+                    return snapshot_done;
+                });
+                snapshot_lock.unlock();
+                D("Icebox thread resume after snapshot");
+            }
             _SEND_PACKET(ok_out);
-            // Resume and quit
+            // Resume
             JdwpCommandHeader jdwp_command = {
                     11 /*length*/,
                     jdwp_id++ /*id*/,
@@ -643,16 +660,9 @@ bool track(int pid, const std::string snapshot_name) {
             jdwp_command.writeToBuffer(packet_out.data.data());
             _SEND_PACKET_OK(packet_out);
             _RECV_REPLY_PACKET_OK(reply, jdwp_command.id);
-            packet_out.mesg.command = ADB_CLSE;
-            packet_out.mesg.data_length = 0;
-            packet_out.data.resize(0);
-            packet_out.mesg.magic = packet_out.mesg.command ^ 0xffffffff;
-            D("Icebox thread ready to close");
-            _SEND_PACKET(packet_out);
-            _RECV_PACKET(reply);
-            return true;
+        } else {
+            _SEND_PACKET(ok_out);
         }
-        _SEND_PACKET(ok_out);
     }
     return true;
 #undef _SEND_PACKET

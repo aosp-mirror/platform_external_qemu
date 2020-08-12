@@ -41,6 +41,7 @@
 #include "standard-headers/linux/types.h"
 
 #define VIRTIO_GPU_F_VIRGL 0
+#define VIRTIO_GPU_F_RESOURCE_BLOB 3
 
 enum virtio_gpu_ctrl_type {
 	VIRTIO_GPU_UNDEFINED = 0,
@@ -56,6 +57,11 @@ enum virtio_gpu_ctrl_type {
 	VIRTIO_GPU_CMD_RESOURCE_DETACH_BACKING,
 	VIRTIO_GPU_CMD_GET_CAPSET_INFO,
 	VIRTIO_GPU_CMD_GET_CAPSET,
+	VIRTIO_GPU_CMD_GET_EDID,
+	VIRTIO_GPU_CMD_RESOURCE_ASSIGN_UUID,
+	VIRTIO_GPU_CMD_RESOURCE_CREATE_BLOB,
+	VIRTIO_GPU_CMD_RESOURCE_MAP,
+	VIRTIO_GPU_CMD_RESOURCE_UNMAP,
 
 	/* 3d commands */
 	VIRTIO_GPU_CMD_CTX_CREATE = 0x0200,
@@ -76,6 +82,9 @@ enum virtio_gpu_ctrl_type {
 	VIRTIO_GPU_RESP_OK_DISPLAY_INFO,
 	VIRTIO_GPU_RESP_OK_CAPSET_INFO,
 	VIRTIO_GPU_RESP_OK_CAPSET,
+	VIRTIO_GPU_RESP_OK_EDID,
+	VIRTIO_GPU_RESP_OK_RESOURCE_UUID,
+	VIRTIO_GPU_RESP_OK_MAP_INFO,
 
 	/* error responses */
 	VIRTIO_GPU_RESP_ERR_UNSPEC = 0x1200,
@@ -289,6 +298,55 @@ struct virtio_gpu_get_capset {
 struct virtio_gpu_resp_capset {
 	struct virtio_gpu_ctrl_hdr hdr;
 	uint8_t capset_data[];
+};
+
+/* VIRTIO_GPU_CMD_RESOURCE_CREATE_BLOB */
+struct virtio_gpu_resource_create_blob {
+	struct virtio_gpu_ctrl_hdr hdr;
+	uint32_t resource_id;
+#define VIRTIO_GPU_BLOB_MEM_GUEST             0x0001
+#define VIRTIO_GPU_BLOB_MEM_HOST3D            0x0002
+#define VIRTIO_GPU_BLOB_MEM_HOST3D_GUEST      0x0003
+
+#define VIRTIO_GPU_BLOB_FLAG_USE_MAPPABLE     0x0001
+#define VIRTIO_GPU_BLOB_FLAG_USE_SHAREABLE    0x0002
+#define VIRTIO_GPU_BLOB_FLAG_USE_CROSS_DEVICE 0x0004
+	/* zero is invalid blob mem */
+	uint32_t blob_mem;
+	uint32_t blob_flags;
+	uint64_t blob_id;
+	uint64_t size;
+	uint32_t nr_entries;
+	/*
+	 * sizeof(nr_entries * virtio_gpu_mem_entry) bytes follow
+	 */
+};
+
+/* VIRTIO_GPU_CMD_RESOURCE_MAP */
+struct virtio_gpu_resource_map {
+	struct virtio_gpu_ctrl_hdr hdr;
+	uint32_t resource_id;
+	uint32_t padding;
+	uint64_t offset;
+};
+
+/* VIRTIO_GPU_RESP_OK_MAP_INFO */
+#define VIRTIO_GPU_MAP_CACHE_MASK      0x0f
+#define VIRTIO_GPU_MAP_CACHE_NONE      0x00
+#define VIRTIO_GPU_MAP_CACHE_CACHED    0x01
+#define VIRTIO_GPU_MAP_CACHE_UNCACHED  0x02
+#define VIRTIO_GPU_MAP_CACHE_WC        0x03
+struct virtio_gpu_resp_map_info {
+	struct virtio_gpu_ctrl_hdr hdr;
+	uint32_t map_flags;
+	uint32_t padding;
+};
+
+/* VIRTIO_GPU_CMD_RESOURCE_UNMAP */
+struct virtio_gpu_resource_unmap {
+	struct virtio_gpu_ctrl_hdr hdr;
+	uint32_t resource_id;
+	uint32_t padding;
 };
 
 #define VIRTIO_GPU_EVENT_DISPLAY (1 << 0)

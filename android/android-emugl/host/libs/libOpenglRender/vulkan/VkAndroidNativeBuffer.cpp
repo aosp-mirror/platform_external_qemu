@@ -75,9 +75,9 @@ VkResult prepareAndroidNativeBufferImage(
             emu->deviceInfo.supportsExternalMemory;
     }
 
-    if (colorBufferVulkanCompatible &&
-        externalMemoryCompatible &&
-        setupVkColorBuffer(out->colorBufferHandle, false /* not Vulkan only */, &out->isGlTexture)) {
+    if (colorBufferVulkanCompatible && externalMemoryCompatible &&
+        setupVkColorBuffer(out->colorBufferHandle, false /* not Vulkan only */,
+                           0u /* memoryProperty */, &out->isGlTexture)) {
         out->externallyBacked = true;
     }
 

@@ -133,7 +133,7 @@ typedef struct ControlClientRec_
 typedef struct ControlGlobalRec_
 {
     // Interfaces to call into QEMU specific code.
-#define ANDROID_CONSOLE_DEFINE_FIELD(type, name) type name ## _agent [1];
+#define ANDROID_CONSOLE_DEFINE_FIELD(type, name) const type * name ## _agent;
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_DEFINE_FIELD)
 
     /* IO */
@@ -789,7 +789,7 @@ int android_console_start(int control_port,
     // Copy the QEMU specific interfaces passed in to make lifetime management
     // simpler.
 #define ANDROID_CONSOLE_COPY_AGENT(type, name) \
-        global-> name ## _agent [0] = agents-> name [0];
+        global-> name ## _agent  = agents-> name ;
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_COPY_AGENT)
 
     int console_auth_status = android_console_auth_get_status();
@@ -3747,12 +3747,16 @@ static int do_icebox_track(ControlClient client, char* args) {
         control_write(client, "KO: pid required\r\n");
         return -1;
     }
-    sscanf(args, "%d", &pid);
+    int max_snapshot_count;
+    if (sscanf(args, "%d %d", &pid, &max_snapshot_count) < 2) {
+        max_snapshot_count = -1;
+    }
     if (pid < 0) {
         control_write(client, "KO: Bad process ID %s\r\n", args);
         return -1;
     }
-    if (android::icebox::track_async(pid, "test_failure_snapshot")) {
+    if (android::icebox::track_async(pid, "test_failure_snapshot",
+                                     max_snapshot_count)) {
         control_write(client, "OK: Start tracking PID %d\r\n", pid);
         return 0;
     } else {
@@ -3765,8 +3769,11 @@ static int do_icebox_track(ControlClient client, char* args) {
 }
 
 static const CommandDefRec icebox_commands[] = {
-        {"track", "(experimental) track exceptions in <pid>",
-         "'icebox track <pid>'\r\n", NULL, do_icebox_track, NULL},
+        {"track",
+         "(experimental) track exceptions in <pid> and take (up to "
+         "[max_snapshots]) snasphots when there are assert failures",
+         "'icebox track <pid> [max_snapshots]'\r\n", NULL, do_icebox_track,
+         NULL},
         {"run", "(experimental) run adb open command",
          "'icebox run \"command\"'\r\n", NULL, do_icebox_run, NULL},
 

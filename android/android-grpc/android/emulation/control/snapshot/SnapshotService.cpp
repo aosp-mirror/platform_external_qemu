@@ -32,6 +32,7 @@
 #include "android/base/files/PathUtils.h"                          // for pj
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/console.h"
 #include "android/emulation/control/LineConsumer.h"
 #include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
@@ -114,7 +115,7 @@ public:
         if (!snapshot->isImported()) {
             // Exports all qcow2 images..
             SnapshotLineConsumer slc(&result);
-            auto exp = gQAndroidVmOperations->snapshotExport(
+            auto exp = getConsoleAgents()->vm->snapshotExport(
                     snapshot->name().data(), tmpdir.data(), slc.opaque(),
                     LineConsumer::Callback);
 
@@ -311,7 +312,7 @@ public:
 
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
                 [&snapshot_success, &slc, &snapshot]() {
-                    snapshot_success = gQAndroidVmOperations->snapshotLoad(
+                    snapshot_success = getConsoleAgents()->vm->snapshotLoad(
                             snapshot->name().data(), slc.opaque(),
                             LineConsumer::Callback);
                 });
@@ -343,7 +344,7 @@ public:
         bool snapshot_success = false;
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
                 [&snapshot_success, &slc, &request]() {
-                    snapshot_success = gQAndroidVmOperations->snapshotSave(
+                    snapshot_success = getConsoleAgents()->vm->snapshotSave(
                             request->snapshot_id().c_str(), slc.opaque(),
                             LineConsumer::Callback);
                 });
@@ -390,7 +391,7 @@ public:
         std::string snapshotName = request->snapshot_id() == ""
                                            ? "icebox-" + std::to_string(pid)
                                            : request->snapshot_id();
-        icebox::track_async(pid, snapshotName);
+        icebox::track_async(pid, snapshotName, request->max_snapshot_number());
 
         reply->set_pid(pid);
         reply->set_snapshot_id(snapshotName);

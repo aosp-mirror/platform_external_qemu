@@ -5058,8 +5058,12 @@ static void x86_cpu_register_types(void)
     x86_cpu_update_enable_features(builtin_x86_defs,
                                    ARRAY_SIZE(builtin_x86_defs),
                                    "android64",
-                                   CPUID_EXT_AES | CPUID_EXT_PCLMULQDQ, /* extra ecx */
-                                   CPUID_FXSR                           /* extra edx */
+                                   /* Extra ECX bits */
+                                   CPUID_EXT_AES |
+                                   CPUID_EXT_PCLMULQDQ |
+                                   CPUID_EXT_F16C,
+                                   /* Extra EDX bits */
+                                   CPUID_FXSR
     );
 
     type_register_static(&x86_cpu_type_info);

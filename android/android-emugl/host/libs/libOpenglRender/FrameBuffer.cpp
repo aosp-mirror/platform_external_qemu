@@ -45,6 +45,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
@@ -2256,6 +2257,28 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     return res;
 }
 
+static std::string getTimeStampString() {
+    const time_t timestamp = System::get()->getUnixTime();
+    const struct tm *timeinfo = localtime(&timestamp);
+    // Target format: 07-31 4:44:33
+    char b[64];
+    snprintf(
+        b,
+        sizeof(b) - 1,
+        "%02u-%02u %02u:%02u:%02u",
+        timeinfo->tm_mon + 1,
+        timeinfo->tm_mday,
+        timeinfo->tm_hour,
+        timeinfo->tm_min,
+        timeinfo->tm_sec);
+    return std::string(b);
+}
+
+static unsigned int getUptimeMs() {
+    const System::Times times = System::get()->getProcessTimes();
+    return (unsigned int)(times.wallClockMs);
+}
+
 bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                            bool needLockAndBind,
                            bool repaint) {
@@ -2316,7 +2339,8 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                 auto cpuUsage = emugl::getCpuUsage();
                 std::string lastStats =
                     cpuUsage ? cpuUsage->printUsage() : "";
-                printf("Resident memory: %f mb %s \n%s\n",
+                printf("%s Uptime: %u ms Resident memory: %f mb %s \n%s\n",
+                    getTimeStampString().c_str(), getUptimeMs(),
                     (float)usage.resident / 1048576.0f, lastStats.c_str(),
                     memoryStats.c_str());
             }

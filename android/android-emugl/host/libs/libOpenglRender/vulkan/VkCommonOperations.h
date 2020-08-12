@@ -16,8 +16,10 @@
 #include <vulkan/vulkan.h>
 
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
+#include "android/base/Optional.h"
 #include "cereal/common/goldfish_vk_private_defs.h"
 
 namespace goldfish_vk {
@@ -149,7 +151,19 @@ struct VkEmulation {
         // Output fields
         uint32_t id = 0;
         VkDeviceMemory memory = VK_NULL_HANDLE;
+
+        // host-mapping fields
+        // host virtual address (hva).
         void* mappedPtr = nullptr;
+        // host virtual address, aligned to 4KB page.
+        void* pageAlignedHva = nullptr;
+        // the offset of |mappedPtr| off its memory page.
+        uint32_t pageOffset = 0u;
+        // the size of all the pages the mmeory uses.
+        size_t sizeToPage = 0u;
+        // guest physical address.
+        uintptr_t gpa = 0u;
+
         VK_EXT_MEMORY_HANDLE exportedHandle =
             VK_EXT_MEMORY_HANDLE_INVALID;
         bool actuallyExternal = false;
@@ -279,6 +293,10 @@ struct VkEmulation {
     // memory handles.
     std::unordered_map<uint32_t, ExternalMemoryInfo> externalMemories;
 
+    // The host keeps a set of occupied guest memory addresses to avoid a
+    // host memory address mapped to guest twice.
+    std::unordered_set<uint64_t> occupiedGpas;
+
     // We can also consider using a single external memory object to back all
     // host visible allocations in the guest. This would save memory, but we
     // would also need to automatically add
@@ -304,7 +322,8 @@ VkEmulation* getGlobalVkEmulation();
 void teardownGlobalVkEmulation();
 
 bool allocExternalMemory(VulkanDispatch* vk, VkEmulation::ExternalMemoryInfo* info, bool actuallyExternal = true);
-void freeExternalMemory(VulkanDispatch* vk, VkEmulation::ExternalMemoryInfo* info);
+void freeExternalMemoryLocked(VulkanDispatch* vk,
+                              VkEmulation::ExternalMemoryInfo* info);
 
 bool importExternalMemory(VulkanDispatch* vk,
                           VkDevice targetDevice,
@@ -321,7 +340,12 @@ bool importExternalMemoryDedicatedImage(
 
 bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle);
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle, bool vulkanOnly = false, bool* exported = nullptr, VkDeviceSize* allocSize = nullptr, uint32_t* typeIndex = nullptr);
+bool setupVkColorBuffer(uint32_t colorBufferHandle,
+                        bool vulkanOnly = false,
+                        uint32_t memoryProperty = 0,
+                        bool* exported = nullptr,
+                        VkDeviceSize* allocSize = nullptr,
+                        uint32_t* typeIndex = nullptr);
 bool teardownVkColorBuffer(uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);
@@ -329,6 +353,7 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);
 VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBufferHandle);
 IOSurfaceRef getColorBufferIOSurface(uint32_t colorBufferHandle);
 bool setColorBufferVulkanMode(uint32_t colorBufferHandle, uint32_t vulkanMode);
+int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa);
 
 // Data buffer operations
 
