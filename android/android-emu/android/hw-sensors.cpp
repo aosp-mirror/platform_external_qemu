@@ -1163,3 +1163,24 @@ int android_foldable_get_state(struct FoldableState* state) {
 bool android_foldable_hinge_configured() {
     return (android_hw->hw_sensor_hinge && android_hw->hw_sensor_hinge_count > 0);
 }
+
+bool android_foldable_folded_area_configured() {
+    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
+
+    bool enableFoldableByDefault =
+        !(xOffset < 0 || xOffset > 9999 ||
+          yOffset < 0 || yOffset > 9999 ||
+          width   < 1 || width   > 9999 ||
+          height  < 1 || height  > 9999 ||
+          avdInfo_getApiLevel(android_avdInfo) < 28);
+
+    return enableFoldableByDefault;
+}
+
+bool android_foldable_is_folded() {
+    return android_foldable_folded_area_configured() &&
+           physicalModel_foldableisFolded(android_physical_model_instance());
+}

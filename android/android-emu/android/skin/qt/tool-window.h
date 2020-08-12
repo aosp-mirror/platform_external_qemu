@@ -79,8 +79,6 @@ public:
     static void earlyInitialization(const UiEmuAgent* agentPtr);
     static void onMainLoopStart();
     static const UiEmuAgent* getUiEmuAgent() { return sUiEmuAgent; }
-    static bool isFolded();
-    static bool isFoldableConfigured();
 
     const ShortcutKeyStore<QtUICommand>* getShortcutKeyStore() {
         return &mShortcutKeyStore;

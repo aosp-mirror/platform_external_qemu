@@ -223,8 +223,6 @@ public:
                   bool isKbdShortcut = false);
     void resizeAndChangeAspectRatio(bool isFolded);
     void resizeAndChangeAspectRatio(int x, int y, int w, int h);
-    bool isFolded() const;
-    bool isFoldableConfigured() const;
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,
