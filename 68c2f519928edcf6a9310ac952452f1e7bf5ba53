@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bdd29e2e_717b5b83",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2466,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-12T20:50:08Z",
+      "side": 1,
+      "message": "If we want to replace the mapped gpa, do we need to unmap the existing userBackedRam first?",
+      "range": {
+        "startLine": 2463,
+        "startChar": 0,
+        "endLine": 2466,
+        "endChar": 0
+      },
+      "revId": "68c2f519928edcf6a9310ac952452f1e7bf5ba53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
