@@ -837,7 +837,7 @@ void Device3DWidget::repaintGL() {
                 mGLES2->glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT,
                                        (void*)(i * 36 * sizeof(GLuint)));
             } else {
-                if (ToolWindow::isFoldableConfigured()) {
+                if (android_foldable_folded_area_configured()){
                     if (posture == POSTURE_CLOSED) {
                         // legacy foldable configured, display moves to
                         // secondary smaller screen on the back of device
@@ -890,7 +890,7 @@ void Device3DWidget::repaintGL() {
                                        &normal_transform[0][0]);
             mGLES2->glUniformMatrix4fv(mvp_matrix_uniform, 1, GL_FALSE,
                                        &model_view_projection[0][0]);
-            if (ToolWindow::isFoldableConfigured()) {
+            if (android_foldable_folded_area_configured()) { 
                 if (posture == POSTURE_CLOSED) {
                     mGLES2->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,
                                            (void*)((i * 36 + 6) * sizeof(GLuint)));

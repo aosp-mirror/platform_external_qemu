@@ -31,6 +31,7 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/hw-sensors.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/metrics.h"
 #include "studio_stats.pb.h"
@@ -2274,10 +2275,6 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
     simulateSetScale(std::max(.2, (double)scale));
 }
 
-bool EmulatorQtWindow::isFolded() const { return ToolWindow::isFolded(); }
-
-bool EmulatorQtWindow::isFoldableConfigured() const { return ToolWindow::isFoldableConfigured(); }
-
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
         QMouseEvent* event) const {
     return (event->button() == Qt::RightButton) ? kMouseButtonRight
@@ -2898,7 +2895,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     event->u.layout_rotation.rotation = rot;
     queueSkinEvent(event);
 
-    if (ToolWindow::isFolded()) {
+    if (android_foldable_is_folded()) {
         resizeAndChangeAspectRatio(true);
     }
 }

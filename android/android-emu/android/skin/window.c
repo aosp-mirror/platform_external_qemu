@@ -19,6 +19,7 @@
 #include "android/crashreport/crash-handler.h"  // for crashhandler_die_format
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
+#include "android/hw-sensors.h"
 #include "android/multitouch-screen.h"          // for multitouch_create_but...
 #include "android/skin/event.h"                 // for SkinEvent, (anonymous...
 #include "android/skin/image.h"                 // for skin_image_unref, ski...
@@ -1082,7 +1083,7 @@ add_finger_event(SkinWindow* window,
     uint32_t id = 0;
 
     if (finger->display) {
-        if (skin_winsys_is_folded()) {
+        if (android_foldable_is_folded()) {
             switch (finger->display->rotation) {
             case SKIN_ROTATION_0:
             case SKIN_ROTATION_180:
