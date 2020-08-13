@@ -14,6 +14,7 @@
 #include "android/globals.h"
 #include "modem_main.h"
 
+//extern int android_modem_version;
 void amodem_receive_sms_vx(AModem modem, SmsPDU sms) {
     if (android_modem_version == 1) {
         amodem_receive_sms(modem, sms);

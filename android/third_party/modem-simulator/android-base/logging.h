@@ -15,7 +15,13 @@
  */
 
 #pragma once
+#ifdef ERROR
+#undef ERROR
 #include "android/base/Log.h"
+#else
+#include "android/base/Log.h"
+#endif
+
 /*
 #include <assert.h>
 #include <iostream>

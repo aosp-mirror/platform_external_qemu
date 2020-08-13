@@ -27,13 +27,13 @@ class StringView;
 
 enum LogSeverity {
     LOG_VERBOSE = -1,
-    LOG_DEBUG = -1,
     LOG_INFO = 0,
     LOG_WARNING = 1,
     LOG_ERROR = 2,
     LOG_FATAL = 3,
     LOG_NUM_SEVERITIES,
 
+    LOG_DEBUG = LOG_VERBOSE,
 // DFATAL will be ERROR in release builds, and FATAL in debug ones.
 #ifdef NDEBUG
     LOG_DFATAL = LOG_ERROR,

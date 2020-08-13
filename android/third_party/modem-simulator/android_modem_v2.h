@@ -18,6 +18,8 @@
 
 ANDROID_BEGIN_HEADER
 
+extern int android_modem_version;
+
 extern void amodem_receive_sms_vx(AModem modem, SmsPDU sms);
 
 extern int amodem_add_inbound_call_vx(AModem modem, const char* args);

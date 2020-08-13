@@ -17,11 +17,16 @@
 #include "android/avd/util.h"
 #include "android/base/files/PathUtils.h"
 #include "android/cmdline-option.h"
+#include "android/avd/info.h"
+#include "android/avd/hw-config.h"
+
 #include "android/globals.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 #include "device_config.h"
+
+//extern AndroidHwConfig   android_hw[1];
 
 extern "C" {
 uint16_t android_modem_simulator_port = 0;
