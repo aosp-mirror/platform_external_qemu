@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d81e3f07_9ff670b1",
+        "filename": "android/android-emu/android/window-agent-headless-impl.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-08-13T22:11:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a994e248_008cc67e",
+      "range": {
+        "startLine": 112,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 18
+      },
+      "revId": "4ccca216a914ffc29368cb525dafeab6eaf5ca00",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5752148a_271162fb",
         "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
         "patchSetId": 6
@@ -45,6 +69,30 @@
       "revId": "4ccca216a914ffc29368cb525dafeab6eaf5ca00",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "79aa6726_053e4f5a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-08-13T22:11:20Z",
+      "side": 1,
+      "message": "Yes, confirmed. Multi display works fine.",
+      "parentUuid": "5752148a_271162fb",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 23
+      },
+      "revId": "4ccca216a914ffc29368cb525dafeab6eaf5ca00",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
