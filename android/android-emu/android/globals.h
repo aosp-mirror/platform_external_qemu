@@ -59,7 +59,7 @@ extern int android_qemu_mode;
 
 /* whether we are using old modem: version 1*/
 /* whether we are using modem simulator: version 2*/
-extern int android_modem_version;
+//extern int android_modem_version;
 
 /* are we using android-emu libraries for a minimal configuration? */
 extern int min_config_qemu_mode;

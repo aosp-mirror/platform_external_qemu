@@ -211,7 +211,7 @@ void process_msgs() {
         if (s_stop_requested) {
             break;
         }
-        if (!guest_boot_completed) {
+        if (guest_boot_completed) {
             continue;
         }
         DD("waiting for new messages ...");
