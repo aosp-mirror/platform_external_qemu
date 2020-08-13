@@ -15,16 +15,10 @@
  */
 
 #pragma once
+#ifdef _WIN32
+// in /mnt/msvc/win8sdk/win_sdk/include/10.0.17134.0/um/wingdi.h
+// windows defines ERROR to 0 and that
+// confused the compiler to deduce LOG_ERROR to LOG_0 and fail
+#undef ERROR
+#endif
 #include "android/base/Log.h"
-/*
-#include <assert.h>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <string_view>
-#include <vector>
-
-// TODO: fix following
-#define LOG(LEVEL)  std::cout
-#define CHECK(exp)  (exp) || std::cout
-*/

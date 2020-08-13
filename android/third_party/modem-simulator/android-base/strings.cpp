@@ -19,6 +19,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <string>
 #include <vector>
 

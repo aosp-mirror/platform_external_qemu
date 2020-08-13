@@ -38,7 +38,9 @@
 #define DD(fmt, ...)
 #endif
 
+    extern "C" {
 int android_modem_version = 1;
+    }
 
 namespace cuttlefish {
 
@@ -211,7 +213,7 @@ void process_msgs() {
         if (s_stop_requested) {
             break;
         }
-        if (!guest_boot_completed) {
+        if (guest_boot_completed) {
             continue;
         }
         DD("waiting for new messages ...");
