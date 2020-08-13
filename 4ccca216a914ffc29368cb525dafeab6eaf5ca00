@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a994e248_008cc67e",
+        "filename": "android/android-emu/android/window-agent-headless-impl.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-13T21:29:29Z",
+      "side": 1,
+      "message": "we might also need getFoldedArea in GfxStremAgents.cpp",
+      "range": {
+        "startLine": 112,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 18
+      },
+      "revId": "4ccca216a914ffc29368cb525dafeab6eaf5ca00",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5752148a_271162fb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-13T21:29:29Z",
+      "side": 1,
+      "message": "cool! lets also make sure to test this with current multi display",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 23
+      },
+      "revId": "4ccca216a914ffc29368cb525dafeab6eaf5ca00",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
