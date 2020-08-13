@@ -171,6 +171,7 @@ if(NOT LINUX_AARCH64)
   target_link_libraries(
     OpenglRender_standalone_common
     PUBLIC OpenglCodecCommon
+           android-mock-agents
            emugl_common
            OpenglRender
            GLESv1_dec

@@ -141,7 +141,7 @@ private:
             gl_Position = vec4(pos, 0.0, 1.0);
             texcoord_varying = texcoord;
         })";
-         
+
         static constexpr char blitFshaderSrc[] = R"(
         precision highp float;
 
@@ -156,7 +156,7 @@ private:
         mProgram =
             compileAndLinkShaderProgram(
                 blitVshaderSrc, blitFshaderSrc);
-        
+
         GLint samplerLoc = glGetUniformLocation(mProgram, "tex");
 
         glGenBuffers(1, &mVbo);

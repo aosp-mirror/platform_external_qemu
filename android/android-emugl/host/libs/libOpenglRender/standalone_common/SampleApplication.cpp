@@ -25,6 +25,7 @@
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/MultiDisplay.h"
 #include "Standalone.h"
+#include "android/emulation/testing/MockAndroidAgentFactory.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -229,6 +230,8 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
     mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate), mIsCompose(compose) {
 
     setupStandaloneLibrarySearchPaths();
+    android::emulation::injectConsoleAgents(
+            android::emulation::MockAndroidConsoleFactory());
     emugl::setGLObjectCounter(android::base::GLObjectCounter::get());
     emugl::set_emugl_window_operations(*getConsoleAgents()->emu);;
     emugl::set_emugl_multi_display_operations(*getConsoleAgents()->multi_display);

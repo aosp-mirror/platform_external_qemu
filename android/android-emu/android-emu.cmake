@@ -735,17 +735,20 @@ endif()
 # your unit tests. you usually want to link against this library if you need to
 # make any calls to getConsoleAgents()
 android_add_library(
-  TARGET android-emu-test-launcher
+  TARGET android-mock-agents
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       android/emulation/testing/MockAndroidVmOperations.cpp
       android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
       android/emulation/testing/MockAndroidMultiDisplayAgent.cpp
       android/emulation/testing/MockAndroidAgentFactory.cpp)
-android_target_compile_options(android-emu-test-launcher Clang
-                               PRIVATE -O0 -Wno-invalid-constexpr)
-target_link_libraries(android-emu-test-launcher PRIVATE android-emu-base
-                      PUBLIC gmock)
+target_link_libraries(android-mock-agents PRIVATE android-emu-base gmock)
+android_add_library(
+  TARGET android-emu-test-launcher LICENSE Apache-2.0
+  SRC # cmake-format: sortable
+      android/emulation/testing/MockAgentsUnitTest.cpp)
+target_link_libraries(
+  android-emu-test-launcher PRIVATE android-mock-agents android-emu-base PUBLIC gmock)
 
 if(NOT LINUX_AARCH64)
   set(android-emu_unittests_common
