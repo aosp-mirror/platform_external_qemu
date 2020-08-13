@@ -242,7 +242,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                             message);
                 },
         .fold =
-                [](bool is_fold) {
+                [](bool is_fold) -> bool {
                     fprintf(stderr, "window-agent-GfxStream-impl: .fold %d\n",
                             is_fold);
                     sIsFolded = is_fold;
@@ -252,6 +252,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
             fprintf(stderr, "window-agent-GfxStream-impl: .isFolded ? %d\n",
                     sIsFolded);
             return sIsFolded;
+        },
+        .getFoldedArea = [](int* x, int* y, int* w, int* h) -> bool {
+            fprintf(stderr, "window-agent-GfxStream-impl: .getFoldedArea\n");
+            return true;
         },
         .setUIDisplayRegion =
                 [](int x_offset, int y_offset, int w, int h) {
@@ -268,7 +272,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     fprintf(stderr, "updateMultiDisplayPage\n");
                 },
         .getMonitorRect =
-                [](uint32_t* w, uint32_t* h) {
+                [](uint32_t* w, uint32_t* h) -> bool {
                     if (w)
                         *w = 2500;
                     if (h)

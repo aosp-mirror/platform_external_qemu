@@ -61,6 +61,7 @@ typedef struct QAndroidEmulatorWindowAgent {
     bool (*fold)(bool is_fold);
     // Query folded state
     bool (*isFolded)(void);
+    bool (*getFoldedArea)(int* x, int* y, int* w, int* h);
 
     // Set the UI display region
     void (*setUIDisplayRegion)(int, int, int, int);

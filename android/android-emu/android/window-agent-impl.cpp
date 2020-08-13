@@ -97,7 +97,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .fold =
-                [](bool is_fold) {
+                [](bool is_fold) -> bool {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         if (android_foldable_folded_area_configured()) {
                             QtUICommand cmd = is_fold ? QtUICommand::FOLD
@@ -111,8 +111,12 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return false;
                 },
         .isFolded =
-                [] {
+                []() -> bool {
                     return android_foldable_is_folded();
+                },
+        .getFoldedArea =
+                [](int* x, int* y, int* w, int* h) -> bool {
+                    return android_foldable_get_folded_area(x, y, w, h);
                 },
         .setUIDisplayRegion =
                 [](int x, int y, int w, int h) {
@@ -128,7 +132,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                    uint32_t* h,
                    uint32_t* dpi,
                    uint32_t* flag,
-                   bool* enabled) {
+                   bool* enabled) -> bool {
                     if (const auto ins = android::MultiDisplay::getInstance()) {
                         return ins->getMultiDisplay(id, x, y, w, h, dpi, flag, enabled);
                     }
@@ -153,7 +157,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .getMonitorRect =
-                [](uint32_t* w, uint32_t* h) {
+                [](uint32_t* w, uint32_t* h) -> bool {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         return win->getMonitorRect(w, h);
                     } else {
