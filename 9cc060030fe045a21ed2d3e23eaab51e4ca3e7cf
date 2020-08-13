@@ -16,6 +16,41 @@
       "revId": "9cc060030fe045a21ed2d3e23eaab51e4ca3e7cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7680a90_c7d87923",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2020-08-13T16:55:40Z",
+      "side": 1,
+      "message": "This should probably use the \u0027b\u0027 build instead. \u0027c\u0027 has issues with custom build rules on darwin (which TH doesn\u0027t test).",
+      "revId": "9cc060030fe045a21ed2d3e23eaab51e4ca3e7cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "efbec230_fe617f76",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2020-08-13T16:55:40Z",
+      "side": 1,
+      "message": "There will be another toolchain update probably later this week as well. Right now, you are on a toolchain that is quite old (which I am also trying to delete to save disk space for everyone).",
+      "parentUuid": "286ea38c_46a32df2",
+      "revId": "9cc060030fe045a21ed2d3e23eaab51e4ca3e7cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
