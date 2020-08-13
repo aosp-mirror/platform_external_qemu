@@ -26,8 +26,8 @@ namespace base {
 class StringView;
 
 enum LogSeverity {
+    LOG_DEBUG = -2,
     LOG_VERBOSE = -1,
-    LOG_DEBUG = -1,
     LOG_INFO = 0,
     LOG_WARNING = 1,
     LOG_ERROR = 2,

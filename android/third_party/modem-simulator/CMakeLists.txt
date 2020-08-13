@@ -25,6 +25,8 @@ set(emu_modem_sources
       common/libs/fs/shared_fd.cpp
       common/libs/utils/files.cpp
       emulator_config.cpp
+      ModemLegacy.cpp
+      ModemSimulator.cpp
       android_modem_v2.cpp
       modem_main.cpp
       json/jsoncpp.cpp

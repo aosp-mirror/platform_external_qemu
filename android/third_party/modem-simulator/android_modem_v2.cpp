@@ -11,72 +11,53 @@
 */
 
 #include "android_modem_v2.h"
-#include "android/globals.h"
-#include "modem_main.h"
+
+#include <functional>
+#include <mutex>
+#include <thread>
+#include "ModemLegacy.h"
+#include "ModemSimulator.h"
+
+static std::unique_ptr<android::modem::ModemBase> s_modem{
+        new android::modem::ModemLegacy()};
+
+extern "C" {
+void init_modem_simulator() {
+    static std::once_flag just_once;
+    std::call_once(just_once, [&]() {
+            s_modem.reset(new android::modem::ModemSimulator());
+    });
+}
+}
 
 void amodem_receive_sms_vx(AModem modem, SmsPDU sms) {
-    if (android_modem_version == 1) {
-        amodem_receive_sms(modem, sms);
-    } else if (android_modem_version == 2) {
-        cuttlefish::send_sms_msg(std::string(amodem_sms_to_string(modem, sms)));
-    }
+    s_modem->receive_sms(modem, sms);
 }
 
 int amodem_add_inbound_call_vx(AModem modem, const char* args) {
-    if (android_modem_version == 1) {
-        return amodem_add_inbound_call(modem, args);
-    } else if (android_modem_version == 2) {
-        cuttlefish::receive_inbound_call(std::string(args));
-    }
-    return 0;
+    return s_modem->add_inbound_call(modem, args);
 }
 
 int amodem_disconnect_call_vx(AModem modem, const char* args) {
-    if (android_modem_version == 1) {
-        return amodem_disconnect_call(modem, args);
-    } else if (android_modem_version == 2) {
-        cuttlefish::disconnect_call(std::string(args));
-    }
-    return 0;
+    return s_modem->disconnect_call(modem, args);
 }
 
 int amodem_update_call_vx(AModem modem, const char* args, int state) {
-    if (android_modem_version == 1) {
-        return amodem_update_call(modem, args, (ACallState)state);
-    } else if (android_modem_version == 2) {
-        cuttlefish::update_call(std::string(args), state);
-    }
-    return 0;
+    return s_modem->update_call(modem, args, state);
 }
 
 void amodem_set_data_network_type_vx(AModem modem, ADataNetworkType type) {
-    if (android_modem_version == 1) {
-        amodem_set_data_network_type(modem, type);
-    } else if (android_modem_version == 2) {
-        cuttlefish::set_data_network_type(type);
-    }
+    s_modem->set_data_network_type(modem, type);
 }
 
 void amodem_set_signal_strength_profile_vx(AModem modem, int quality) {
-    if (android_modem_version == 1) {
-        amodem_set_signal_strength_profile(modem, quality);
-    } else if (android_modem_version == 2) {
-        cuttlefish::set_signal_strength_profile(quality);
-    }
+    s_modem->set_signal_strength_profile(modem, quality);
 }
 
 void amodem_set_data_registration_vx(AModem modem, ARegistrationState state) {
-    if (android_modem_version == 1) {
-        amodem_set_data_registration(modem, state);
-    } else if (android_modem_version == 2) {
-        cuttlefish::set_data_registration(state);
-    }
+    s_modem->set_data_registration(modem, state);
 }
 
 void amodem_set_voice_registration_vx(AModem modem, ARegistrationState state) {
-    if (android_modem_version == 1) {
-        amodem_set_voice_registration(modem, state);
-    } else if (android_modem_version == 2) {
-        cuttlefish::set_voice_registration(state);
-    }
+    s_modem->set_voice_registration(modem, state);
 }
