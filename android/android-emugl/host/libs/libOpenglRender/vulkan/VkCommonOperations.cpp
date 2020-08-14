@@ -1345,11 +1345,39 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     res.extent = { (uint32_t)width, (uint32_t)height, 1 };
     res.format = vkFormat;
     res.type = VK_IMAGE_TYPE_2D;
-    res.tiling = VK_IMAGE_TILING_OPTIMAL;
-    res.usageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                     VK_IMAGE_USAGE_SAMPLED_BIT |
-                     VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                     VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+    res.tiling = (memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+                         ? VK_IMAGE_TILING_LINEAR
+                         : VK_IMAGE_TILING_OPTIMAL;
+
+    VkFormatProperties formatProperties = {};
+    for (const auto& supportInfo : sVkEmulation->imageSupportInfo) {
+        if (supportInfo.format == vkFormat && supportInfo.supported) {
+            formatProperties = supportInfo.formatProps2.formatProperties;
+            break;
+        }
+    }
+
+    constexpr std::pair<VkFormatFeatureFlags, VkImageUsageFlags>
+            formatUsagePairs[] = {
+                    {VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT,
+                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT},
+                    {VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT,
+                     VK_IMAGE_USAGE_SAMPLED_BIT},
+                    {VK_FORMAT_FEATURE_TRANSFER_SRC_BIT,
+                     VK_IMAGE_USAGE_TRANSFER_SRC_BIT},
+                    {VK_FORMAT_FEATURE_TRANSFER_DST_BIT,
+                     VK_IMAGE_USAGE_TRANSFER_DST_BIT},
+            };
+    VkFormatFeatureFlags tilingFeatures =
+            (res.tiling == VK_IMAGE_TILING_OPTIMAL)
+                    ? formatProperties.optimalTilingFeatures
+                    : formatProperties.linearTilingFeatures;
+    res.usageFlags = 0u;
+    for (const auto& formatUsage : formatUsagePairs) {
+        res.usageFlags |=
+                (tilingFeatures & formatUsage.first) ? formatUsage.second : 0u;
+    }
     res.createFlags = 0;
 
     res.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
