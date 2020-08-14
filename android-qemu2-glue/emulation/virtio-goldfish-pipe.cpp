@@ -1007,15 +1007,23 @@ public:
         auto glformat = virgl_format_to_gl(res->args.format);
         auto gltype = gl_format_to_natural_type(glformat);
 
-        // We always xfer the whole thing again to GL
+        // We always xfer the whole thing again from GL
         // since it's fiddly to calc / copy-out subregions
-        mVirtioGpuOps->read_color_buffer(
-            res->args.handle,
-            0, 0,
-            res->args.width, res->args.height,
-            glformat,
-            gltype,
-            res->linear);
+        if (virgl_format_is_yuv(res->args.format)) {
+            mVirtioGpuOps->read_color_buffer_yuv(
+                res->args.handle,
+                0, 0,
+                res->args.width, res->args.height,
+                res->linear, res->linearSize);
+        } else {
+            mVirtioGpuOps->read_color_buffer(
+                res->args.handle,
+                0, 0,
+                res->args.width, res->args.height,
+                glformat,
+                gltype,
+                res->linear);
+        }
 
         return false;
     }
