@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c08d2488_ebb42b29",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-08-14T18:37:02Z",
+      "side": 1,
+      "message": "If folded, reboot from snapshot, the toolbar icon still shows \"open\".",
+      "revId": "891bcf4c2e67fb5c88b987ea1d1f943c6358f89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
