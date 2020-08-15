@@ -51,6 +51,7 @@
 #include <unordered_set>
 
 #include <stdio.h>
+#include <cstring>
 
 using aemu::AndroidBufferQueue;
 using aemu::AndroidWindow;
@@ -139,6 +140,15 @@ public:
         mDisplay.loop();
     }
 
+    void flushResourceAndReadback(uint32_t width, uint32_t height, uint8_t *pixels, uint32_t max_bytes) {
+        (void) width;
+        (void) height;
+        // memset(pixels, 0, max_bytes);
+        for (uint32_t i = 0; i < max_bytes; i++) {
+            pixels[i] = static_cast<uint8_t>(i);
+        }
+    }
+
 private:
 
     void setupAndroidEmugl() {
@@ -219,6 +229,8 @@ private:
         android_init_opengles_pipe();
 
         android_init_refcount_pipe();
+
+        android_setPostCallback(nullptr, nullptr, false, 0);
     }
 
     void teardownAndroidEmugl() {
@@ -377,5 +389,9 @@ void Toplevel::teardownDisplay() {
 
 void Toplevel::loop() {
     mImpl->loop();
+}
+
+void Toplevel::flushResourceAndReadback(uint32_t width, uint32_t height, uint8_t *pixels, uint32_t max_bytes) {
+    mImpl->flushResourceAndReadback(width, height, pixels, max_bytes);
 }
 } // namespace aemu

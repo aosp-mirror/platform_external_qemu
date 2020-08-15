@@ -23,22 +23,100 @@
 #include <GLES2/gl2.h>
 
 #include <memory>
+#include <thread>
+#include <atomic>
+#include <chrono>
 
 using android::base::System;
 
 namespace aemu {
 
+static bool checkPixelsUniform(uint8_t *pixels, uint32_t size, uint8_t bytesPerPixel) {
+    if(size <= bytesPerPixel) {
+        return true;
+    }
+    auto pixel = std::make_unique<uint8_t[]>(bytesPerPixel);
+    memcpy(pixel.get(), pixels, bytesPerPixel);
+    for (uint32_t i = 0; i < size; i += bytesPerPixel) {
+        for (uint8_t j = 0; j < bytesPerPixel && i + j < size; j++) {
+            if(pixels[i + j] != pixel[j]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+using namespace std::chrono_literals;
+class ExternalReadbackWorker {
+public:
+    ExternalReadbackWorker(Toplevel& toplevel, uint32_t width, uint32_t height, uint8_t bytesPerPixel, double readRate = 60.0)
+    : width(width)
+    , height(height)
+    , bytesPerPixel(bytesPerPixel)
+    , shouldStop(false)
+    , readInterval(static_cast<uint64_t>((std::chrono::nanoseconds(1s) / readRate).count()))
+    , toplevel(toplevel)
+    , arePixelsUniform(true) {
+    }
+
+    ~ExternalReadbackWorker() {
+        shouldStop.store(true);
+        if(thread.joinable()) {
+            thread.join();
+        }
+
+        EXPECT_EQ(arePixelsUniform, true);
+    }
+
+    void start() {
+        assert(!thread.joinable());
+        thread = std::move(std::thread(ExternalReadbackWorker::run, this));
+    }
+
+private:
+
+    void run() {
+        auto nextLoop = std::chrono::high_resolution_clock::now();
+        auto size = width * height * bytesPerPixel;
+        auto pixels = std::make_unique<uint8_t[]>(size);
+        while(!shouldStop.load()) {
+            toplevel.flushResourceAndReadback(width, height, pixels.get(), size);
+            if (!arePixelsUniform) {
+                arePixelsUniform = checkPixelsUniform(pixels.get(), size, bytesPerPixel);
+            }
+            nextLoop += readInterval;
+            auto now = std::chrono::high_resolution_clock::now();
+            if(now < nextLoop) {
+                std::this_thread::sleep_for(nextLoop - now);
+            }
+        }
+    }
+    
+    uint32_t width;
+    uint32_t height;
+    uint8_t bytesPerPixel;
+    std::thread thread;
+    std::atomic_bool shouldStop;
+    std::chrono::nanoseconds readInterval;
+    Toplevel &toplevel;
+
+    bool arePixelsUniform;
+};
+
 TEST(Toplevel, Basic) {
+    int displayRefreshRate = 200, readbackRate = 60;
     std::vector<size_t> beforeTest, afterTest;
     System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", System::get()->getProgramDirectory());
-    auto t(std::make_unique<Toplevel>());
+    auto t(std::make_unique<Toplevel>(displayRefreshRate));
 
     // When framebuffer is finalized, not all gl resources will be released even
     // when Toplevel object is destroyed. The workaround is to get the gl object
     // counts after the Toplevel is created.
     beforeTest = android::base::GLObjectCounter::get()->getCounts();
 
-    auto win = t->createWindow();
+    int width = 256, height = 256;
+    auto win = t->createWindow(width, height);
     EGLDisplay d = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     EGLint maj, min;
     eglInitialize(d, &maj, &min);
@@ -84,14 +162,22 @@ TEST(Toplevel, Basic) {
 
     EGLSurface s = eglCreateWindowSurface(d, match, win, 0);
 
+    EGLint bytesPerPixel;
+    eglGetConfigAttrib(d, match, EGL_BUFFER_SIZE, &bytesPerPixel);
+    assert(bytesPerPixel % 8 == 0);
+    ExternalReadbackWorker readbackWorker(*t, width, height, bytesPerPixel, readbackRate);
+
     eglMakeCurrent(d, s, s, c);
-    for (int i = 0; i < 120; i++) {
-        glViewport(0, 0, 256, 256);
+    for (int i = 0; i < 5 * displayRefreshRate; i++) {
+        glViewport(0, 0, width, height);
         glClearColor(1.0f, 0.0f, i / 120.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glFinish();
         eglSwapBuffers(d, s);
         t->loop();
+        if (i == 0) {
+            readbackWorker.start();
+        }
     }
     EXPECT_EQ(EGL_TRUE, eglMakeCurrent(d, EGL_NO_SURFACE, EGL_NO_SURFACE,
                                        EGL_NO_CONTEXT));

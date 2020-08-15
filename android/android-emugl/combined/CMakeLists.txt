@@ -83,7 +83,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
 endif()
 
-if(NOT WINDOWS AND NOT LINUX_AARCH64)
+if(NOT LINUX_AARCH64)
 
   set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp
                        Toplevel.cpp)
