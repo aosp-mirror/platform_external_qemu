@@ -320,6 +320,14 @@ ReadPixelsFunc android_getReadPixelsFunc() {
     }
 }
 
+PostFrameBufferFunc android_getPostFrameBufferFunc() {
+    if (sRenderer) {
+        return sRenderer->getPostFrameBufferFunc();
+    } else {
+        return nullptr;
+    }
+}
+
 FlushReadPixelPipeline android_getFlushReadPixelPipeline() {
     if (sRenderer) {
         return sRenderer->getFlushReadPixelPipeline();

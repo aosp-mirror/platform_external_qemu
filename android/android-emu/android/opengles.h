@@ -63,6 +63,9 @@ AEMU_EXPORT void android_setPostCallback(OnPostFunc onPost,
 typedef void (*ReadPixelsFunc)(void* pixels, uint32_t bytes, uint32_t displayId);
 AEMU_EXPORT ReadPixelsFunc android_getReadPixelsFunc();
 
+typedef bool (*PostFrameBufferFunc)(uint32_t colorbuffer);
+AEMU_EXPORT PostFrameBufferFunc android_getPostFrameBufferFunc();
+
 
 typedef void (*FlushReadPixelPipeline)(int displayId);
 

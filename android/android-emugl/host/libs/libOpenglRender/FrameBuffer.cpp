@@ -2433,6 +2433,10 @@ static void sFrameBuffer_FlushReadPixelPipeline(int displayId) {
     FrameBuffer::getFB()->flushReadPipeline(displayId);
 }
 
+static bool sFrameBuffer_Post(uint32_t handle) {
+    return FrameBuffer::getFB()->post(handle);
+}
+
 bool FrameBuffer::asyncReadbackSupported() {
     return m_asyncReadbackSupported;
 }
@@ -2444,6 +2448,10 @@ FrameBuffer::getReadPixelsCallback() {
 
 emugl::Renderer::FlushReadPixelPipeline FrameBuffer::getFlushReadPixelPipeline() {
     return sFrameBuffer_FlushReadPixelPipeline;
+}
+
+emugl::Renderer::PostFrameBufferFunc FrameBuffer::getPostFrameBufferFunc() {
+    return sFrameBuffer_Post;
 }
 
 bool FrameBuffer::repost(bool needLockAndBind) {

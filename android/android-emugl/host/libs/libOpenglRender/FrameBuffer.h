@@ -423,6 +423,7 @@ public:
     bool asyncReadbackSupported();
     emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();
     emugl::Renderer::FlushReadPixelPipeline getFlushReadPixelPipeline();
+    emugl::Renderer::PostFrameBufferFunc getPostFrameBufferFunc();
 
     // Re-post the last ColorBuffer that was displayed through post().
     // This is useful if you detect that the sub-window content needs to

@@ -397,6 +397,12 @@ RendererImpl::getFlushReadPixelPipeline() {
     return mRenderWindow->getFlushReadPixelPipeline();
 }
 
+RendererImpl::PostFrameBufferFunc
+RendererImpl::getPostFrameBufferFunc() {
+    assert(mRenderWindow);
+    return mRenderWindow->getPostFrameBufferFunc();
+}
+
 bool RendererImpl::showOpenGLSubwindow(FBNativeWindowType window,
                                        int wx,
                                        int wy,

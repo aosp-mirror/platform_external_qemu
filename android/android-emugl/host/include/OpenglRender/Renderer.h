@@ -119,6 +119,9 @@ public:
     // active
     virtual FlushReadPixelPipeline getFlushReadPixelPipeline() = 0;
 
+    using PostFrameBufferFunc = bool (*)(uint32_t handle);
+    virtual PostFrameBufferFunc getPostFrameBufferFunc() = 0;
+
 
     // showOpenGLSubwindow -
     //     Create or modify a native subwindow which is a child of 'window'

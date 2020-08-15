@@ -147,6 +147,9 @@ public:
     FlushReadPixelPipeline getFlushReadPixelPipeline()  {
         return nullptr;
     }
+    PostFrameBufferFunc getPostFrameBufferFunc() {
+        return nullptr;
+    }
 
     bool showOpenGLSubwindow(FBNativeWindowType window,
                                      int wx,

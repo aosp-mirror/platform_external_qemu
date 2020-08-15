@@ -477,6 +477,10 @@ emugl::Renderer::FlushReadPixelPipeline
 RenderWindow::getFlushReadPixelPipeline() {
     return FrameBuffer::getFB()->getFlushReadPixelPipeline();
 }
+
+emugl::Renderer::PostFrameBufferFunc RenderWindow::getPostFrameBufferFunc() {
+    return FrameBuffer::getFB()->getPostFrameBufferFunc();
+}
 bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   int wx,
                                   int wy,

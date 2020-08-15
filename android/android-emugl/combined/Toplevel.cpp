@@ -51,6 +51,7 @@
 #include <unordered_set>
 
 #include <stdio.h>
+#include <cstring>
 
 using aemu::AndroidBufferQueue;
 using aemu::AndroidWindow;
@@ -79,7 +80,9 @@ public:
           mUseHostGpu(System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") ==
                       "1"),
           mDisplay(mUseWindow, kWindowSize, kWindowSize),
-          mComposeWindow(kWindowSize, kWindowSize) {
+          mComposeWindow(kWindowSize, kWindowSize),
+          mPostFrameBuffer(nullptr),
+          mReadPixels(nullptr) {
         setupAndroidEmugl();
         setupGralloc();
 
@@ -137,6 +140,23 @@ public:
 
     void loop() {
         mDisplay.loop();
+    }
+
+    void flushResourceAndReadback(uint32_t width, uint32_t height, uint8_t *pixels, uint32_t max_bytes) {
+        (void) width;
+        (void) height;
+
+        assert(mPostFrameBuffer != nullptr);
+        assert(mReadPixels != nullptr);
+
+        // mPostFrameBuffer(0);
+        // mReadPixels(pixels, max_bytes, 0);
+        memset(pixels, 0, max_bytes);
+        // for (uint32_t i = 0; i < max_bytes; i++) {
+        //     pixels[i] = static_cast<uint8_t>(i);
+        // }
+        // FrameBuffer::getFB()->post(0);
+        // FrameBuffer::getFB()->getPixels(pixels, max_bytes, 0);
     }
 
 private:
@@ -219,6 +239,14 @@ private:
         android_init_opengles_pipe();
 
         android_init_refcount_pipe();
+
+        android_setPostCallback(nullptr, nullptr, false, 0);
+
+        mPostFrameBuffer = android_getPostFrameBufferFunc();
+        mReadPixels = android_getReadPixelsFunc();
+
+        assert(mPostFrameBuffer);
+        assert(mReadPixels);
     }
 
     void teardownAndroidEmugl() {
@@ -320,7 +348,10 @@ private:
                 return new ClientComposer(composeWindow, fromApp, toApp);
 
             },
-            [this]() { mSf->advanceFrame(); this->clientPost(); }));
+            [this]() {
+              mSf->advanceFrame();
+              this->clientPost();
+            }));
 
         mSf->start();
     }
@@ -354,6 +385,9 @@ private:
     std::unique_ptr<SurfaceFlinger> mSf;
 
     std::unordered_set<AndroidWindow*> mWindows;
+
+    ReadPixelsFunc mReadPixels;
+    PostFrameBufferFunc mPostFrameBuffer;
 };
 
 Toplevel::Toplevel(int refreshRate) : mImpl(new Toplevel::Impl(refreshRate)) {}
@@ -377,5 +411,9 @@ void Toplevel::teardownDisplay() {
 
 void Toplevel::loop() {
     mImpl->loop();
+}
+
+void Toplevel::flushResourceAndReadback(uint32_t width, uint32_t height, uint8_t *pixels, uint32_t max_bytes) {
+    mImpl->flushResourceAndReadback(width, height, pixels, max_bytes);
 }
 } // namespace aemu
