@@ -34,6 +34,8 @@ public:
     void teardownDisplay();
 
     void loop();
+
+    void flushResourceAndReadback(uint32_t width, uint32_t height, uint8_t *pixels, uint32_t max_bytes);
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

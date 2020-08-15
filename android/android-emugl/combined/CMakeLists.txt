@@ -83,7 +83,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
 endif()
 
-if(NOT WINDOWS AND NOT LINUX_AARCH64)
+if(NOT LINUX_AARCH64)
 
   set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp
                        Toplevel.cpp)
@@ -138,10 +138,10 @@ if(NOT WINDOWS AND NOT LINUX_AARCH64)
   # binplace these (Xcode!) So let's just guarantee that it gets properly
   # binplaced
   android_copy_shared_lib(emugl_combined_unittests OpenglRender OpenglRender)
-  android_copy_shared_lib(emugl_combined_unittests gralloc.ranchu
-                          gralloc.ranchu)
-  android_copy_shared_lib(emugl_combined_unittests gralloc.goldfish
-                          gralloc.goldfish)
+  # android_copy_shared_lib(emugl_combined_unittests gralloc.ranchu
+  #                         gralloc.ranchu)
+  # android_copy_shared_lib(emugl_combined_unittests gralloc.goldfish
+  #                         gralloc.goldfish)
 
   android_target_dependency(emugl_combined_unittests all
                             EMULATOR_FEATURE_DEPENDENCIES)
