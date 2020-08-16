@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5c36958_ba69db55",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-16T05:17:57Z",
+      "side": 1,
+      "message": "See comments to virtual-sensors-page.cpp ",
+      "revId": "691bf12632dbf2c03b4b2d7204555e76dc4b96c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e03e0b8_6d702ac9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-16T05:17:57Z",
+      "side": 1,
+      "message": "If a posture button is unavailable, the buttons to the right should move to the left or the unavailable button should be disabled, but still visible.\n\nhttps://screenshot.googleplex.com/819e8239-04a6-422c-a2f1-1e4d63dd1b38",
+      "range": {
+        "startLine": 151,
+        "startChar": 2,
+        "endLine": 156,
+        "endChar": 0
+      },
+      "revId": "691bf12632dbf2c03b4b2d7204555e76dc4b96c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02f502e4_a475a542",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-16T05:17:57Z",
+      "side": 1,
+      "message": "insert \nmUi-\u003ehinge0Slider-\u003esetLabelHidden();\nmUi-\u003ehinge1Slider-\u003esetLabelHidden();\nmUi-\u003ehinge2Slider-\u003esetLabelHidden();\nmUi-\u003everticalLayout-\u003esetSpacing(1);\nto fit 3 hinge sliders",
+      "range": {
+        "startLine": 165,
+        "startChar": 0,
+        "endLine": 165,
+        "endChar": 39
+      },
+      "revId": "691bf12632dbf2c03b4b2d7204555e76dc4b96c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
