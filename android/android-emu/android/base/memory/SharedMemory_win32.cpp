@@ -9,16 +9,27 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 #include "android/base/memory/SharedMemory.h"
-#include "android/base/system/Win32UnicodeString.h"
 
 #include <cassert>
 #include <string>
 
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/Win32UnicodeString.h"
+
 namespace android {
 namespace base {
 
-SharedMemory::SharedMemory(StringView name, size_t size)
-    : mName(std::string("SHM_") + std::string(name)), mSize(size) { }
+SharedMemory::SharedMemory(StringView name, size_t size) : mSize(size) {
+    constexpr StringView kFileUri = "file://";
+    if (name.find(kFileUri, 0) == 0) {
+        mShareType = ShareType::FILE_BACKED;
+        auto path = name.substr(kFileUri.size());
+        mName = PathUtils::recompose(PathUtils::decompose(path));
+    } else {
+        mShareType = ShareType::SHARED_MEMORY;
+        mName = "SHM_" + name.str();
+    }
+}
 
 // Creates a shared region, you will be considered the owner, and will have
 // write access. Returns 0 on success, or an error code otheriwse.
@@ -52,14 +63,35 @@ int SharedMemory::openInternal(AccessMode access, bool doMapping) {
         protection = PAGE_READWRITE;
     }
     const Win32UnicodeString name(mName);
+    auto objectName = name.c_str();
+
+    if (mShareType == ShareType::FILE_BACKED) {
+        auto fileOptions = GENERIC_READ;
+        // File sharing permissions must be the same for readers/writers.
+        // otherwise readers will not be able to open the file.
+        auto fileShare = FILE_SHARE_READ | FILE_SHARE_WRITE;
+        auto openMode = OPEN_EXISTING;
+        if (access == AccessMode::READ_WRITE) {
+            fileOptions = GENERIC_READ | GENERIC_WRITE;
+            openMode = OPEN_ALWAYS;
+        }
+        mFile = CreateFileW(objectName, fileOptions, fileShare, NULL, openMode,
+                            FILE_FLAG_RANDOM_ACCESS, NULL);
+        if (mFile == INVALID_HANDLE_VALUE) {
+            int err = -GetLastError();
+            close();
+            return err;
+        }
+        objectName = nullptr;
+    }
 
     HANDLE hMapFile = CreateFileMappingW(
-            invalidHandle(),  // use paging file
+            mFile,
             NULL,             // default security
             protection,       // read/write access
             memory.HighPart,  // maximum object size (high-order DWORD)
             memory.LowPart,   // maximum object size (low-order DWORD)
-            name.c_str());    // name of mapping object
+            objectName);      // name of mapping object
 
     if (hMapFile == NULL) {
         int err = -GetLastError();
@@ -96,6 +128,14 @@ void SharedMemory::close(bool forceDestroy) {
     if (mFd) {
         CloseHandle(mFd);
         mFd = invalidHandle();
+    }
+    if (mFile) {
+        CloseHandle(mFile);
+        mFile = invalidHandle();
+        if ((forceDestroy || mCreate) && mShareType == ShareType::FILE_BACKED) {
+            const Win32UnicodeString name(mName);
+            DeleteFileW(name.c_str());
+        }
     }
 
     assert(!isOpen());
