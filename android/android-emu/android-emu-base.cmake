@@ -66,6 +66,7 @@ android_add_library(
       android/base/perflogger/Metric.cpp
       android/base/perflogger/WindowDeviationAnalyzer.cpp
       android/base/ring_buffer.c
+      android/base/strings.cpp
       android/base/synchronization/MessageChannel.cpp
       android/base/system/System.cpp
       android/base/threads/Async.cpp
