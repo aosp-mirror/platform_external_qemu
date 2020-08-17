@@ -8,17 +8,21 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/memory/SharedMemory.h"
-#include "android/base/system/Win32UnicodeString.h"
-
 #include <cassert>
 #include <string>
+
+#include "android/base/memory/SharedMemory.h"
+#include "android/base/system/Win32UnicodeString.h"
 
 namespace android {
 namespace base {
 
-SharedMemory::SharedMemory(StringView name, size_t size)
-    : mName(std::string("SHM_") + std::string(name)), mSize(size) { }
+SharedMemory::SharedMemory(StringView name, size_t size, ShareType shareType)
+    : mName(std::string(name)), mSize(size), mShareType(shareType) {
+    if (mShareType == ShareType::SHARED_MEMORY) {
+        mName.insert(0, "SHM_");
+    }
+}
 
 // Creates a shared region, you will be considered the owner, and will have
 // write access. Returns 0 on success, or an error code otheriwse.
@@ -52,14 +56,24 @@ int SharedMemory::openInternal(AccessMode access, bool doMapping) {
         protection = PAGE_READWRITE;
     }
     const Win32UnicodeString name(mName);
+    auto object_name = name.c_str();
+
+    HANDLE sharedFileHandle = invalidHandle();  // use paging file
+    if (mShareType == ShareType::FILE_BACKED) {
+        sharedFileHandle = CreateFileW(
+                object_name, 0,
+                FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        object_name = nullptr;
+    }
 
     HANDLE hMapFile = CreateFileMappingW(
-            invalidHandle(),  // use paging file
+            sharedFileHandle,
             NULL,             // default security
             protection,       // read/write access
             memory.HighPart,  // maximum object size (high-order DWORD)
             memory.LowPart,   // maximum object size (low-order DWORD)
-            name.c_str());    // name of mapping object
+            object_name);     // name of mapping object
 
     if (hMapFile == NULL) {
         int err = -GetLastError();
@@ -96,6 +110,10 @@ void SharedMemory::close(bool forceDestroy) {
     if (mFd) {
         CloseHandle(mFd);
         mFd = invalidHandle();
+    }
+    if (mShareType == ShareType::FILE_BACKED) {
+        const Win32UnicodeString name(mName);
+        DeleteFileW(name.c_str());
     }
 
     assert(!isOpen());
