@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "12749217_92f367a3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-08-18T23:25:38Z",
+      "side": 1,
+      "message": "\u003e guest won\u0027t be able to access memory not belong to that image.\n\nIs this a security concern?",
+      "revId": "8b13b7c0c2433df5c1b3d86dc2f64fc0d0dfb8cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fac01596_5f8cf0de",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
         "patchSetId": 1
@@ -30,6 +47,29 @@
       "writtenOn": "2020-08-18T20:32:25Z",
       "side": 1,
       "message": "We should make sure that the bindOffset is compatible with both the page size and |deviceAlignment|",
+      "revId": "8b13b7c0c2433df5c1b3d86dc2f64fc0d0dfb8cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7509822b_1b5bd4e9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2129,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-08-18T23:25:38Z",
+      "side": 1,
+      "message": "Maybe introduce a constant for \"don\u0027t care about alignment\"?",
+      "range": {
+        "startLine": 2129,
+        "startChar": 32,
+        "endLine": 2129,
+        "endChar": 56
+      },
       "revId": "8b13b7c0c2433df5c1b3d86dc2f64fc0d0dfb8cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
