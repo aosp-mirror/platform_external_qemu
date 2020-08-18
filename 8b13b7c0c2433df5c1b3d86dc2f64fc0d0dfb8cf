@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc84749a_272c745e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-18T20:30:23Z",
+      "side": 1,
+      "message": "No regressions in dEQP-VK.api.external.memory.android_hardware_buffer",
+      "revId": "8b13b7c0c2433df5c1b3d86dc2f64fc0d0dfb8cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
