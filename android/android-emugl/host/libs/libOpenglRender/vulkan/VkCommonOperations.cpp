@@ -54,6 +54,14 @@ using android::base::StaticMap;
 
 namespace goldfish_vk {
 
+namespace {
+
+constexpr size_t kPageBits = 12;
+constexpr size_t kPageSize = 1u << kPageBits;
+constexpr size_t kPageOffsetMask = kPageSize - 1;
+
+}  // namespace
+
 static LazyInstance<StaticMap<VkDevice, uint32_t>>
 sKnownStagingTypeIndices = LAZY_INSTANCE_INIT;
 
@@ -938,7 +946,9 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         return sVkEmulation;
     }
 
-    if (!allocExternalMemory(dvk, &sVkEmulation->staging.memory, false /* not external */)) {
+    if (!allocExternalMemory(dvk, &sVkEmulation->staging.memory,
+                             false /* not external */,
+                             0u /* deviceAlignment */)) {
         LOG(ERROR) << "Failed to allocate memory for staging buffer";
         return sVkEmulation;
     }
@@ -1003,10 +1013,10 @@ void teardownGlobalVkEmulation() {
 }
 
 // Precondition: sVkEmulation has valid device support info
-bool allocExternalMemory(
-    VulkanDispatch* vk, VkEmulation::ExternalMemoryInfo* info,
-    bool actuallyExternal) {
-
+bool allocExternalMemory(VulkanDispatch* vk,
+                         VkEmulation::ExternalMemoryInfo* info,
+                         bool actuallyExternal,
+                         uint64_t deviceAlignment) {
     VkExportMemoryAllocateInfo exportAi = {
         VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO, 0,
         VK_EXT_MEMORY_HANDLE_TYPE_BIT,
@@ -1019,36 +1029,75 @@ bool allocExternalMemory(
         exportAiPtr = &exportAi;
     }
 
+    info->actualSize = (info->size + 2 * kPageSize - 1) / kPageSize * kPageSize;
     VkMemoryAllocateInfo allocInfo = {
-        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        exportAiPtr,
-        info->size,
-        info->typeIndex,
+            VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+            exportAiPtr,
+            info->actualSize,
+            info->typeIndex,
     };
 
-    VkResult allocRes = vk->vkAllocateMemory(
-        sVkEmulation->device,
-        &allocInfo, nullptr,
-        &info->memory);
+    bool memoryAllocated = false;
+    std::vector<VkDeviceMemory> allocationAttempts;
+    constexpr size_t kMaxAllocationAttempts = 20u;
 
-    if (allocRes != VK_SUCCESS) {
-        LOG(VERBOSE) << "allocExternalMemory: failed in vkAllocateMemory: "
-                     << allocRes;
-        return false;
+    while (!memoryAllocated) {
+        VkResult allocRes = vk->vkAllocateMemory(
+                sVkEmulation->device, &allocInfo, nullptr, &info->memory);
+
+        if (allocRes != VK_SUCCESS) {
+            LOG(VERBOSE) << "allocExternalMemory: failed in vkAllocateMemory: "
+                         << allocRes;
+            break;
+        }
+
+        if (sVkEmulation->deviceInfo.memProps.memoryTypes[info->typeIndex]
+                    .propertyFlags &
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+            VkResult mapRes =
+                    vk->vkMapMemory(sVkEmulation->device, info->memory, 0,
+                                    info->actualSize, 0, &info->mappedPtr);
+            if (mapRes != VK_SUCCESS) {
+                LOG(VERBOSE) << "allocExternalMemory: failed in vkMapMemory: "
+                             << mapRes;
+                break;
+            }
+        }
+
+        uint64_t mappedPtrPageOffset =
+                reinterpret_cast<uint64_t>(info->mappedPtr) % kPageSize;
+
+        if (  // don't care about alignment (e.g. device-local memory)
+                !deviceAlignment ||
+                // mappedPtr is already aligned to page
+                mappedPtrPageOffset == 0u ||
+                // clients can set a offset when vkBindImageMemory so that it
+                // will be aligned to page.
+                deviceAlignment < mappedPtrPageOffset) {
+            // allocation success.
+            memoryAllocated = true;
+        } else {
+            allocationAttempts.push_back(info->memory);
+
+            LOG(VERBOSE) << "allocExternalMemory: attempt #"
+                         << allocationAttempts.size()
+                         << " failed; deviceAlignment: " << deviceAlignment
+                         << " mappedPtrPageOffset: " << mappedPtrPageOffset;
+
+            if (allocationAttempts.size() >= kMaxAllocationAttempts) {
+                LOG(VERBOSE) << "allocExternalMemory: unable to allocate"
+                             << " memory with CPU mapped ptr aligned to page";
+                break;
+            }
+        }
     }
 
-    if (sVkEmulation->deviceInfo
-            .memProps
-            .memoryTypes[info->typeIndex]
-            .propertyFlags &
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-        VkResult mapRes = vk->vkMapMemory(sVkEmulation->device, info->memory, 0,
-                                          info->size, 0, &info->mappedPtr);
-        if (mapRes != VK_SUCCESS) {
-            LOG(VERBOSE) << "allocExternalMemory: failed in vkMapMemory: "
-                         << mapRes;
-            return false;
-        }
+    // clean up previous failed attempts
+    for (const auto& mem : allocationAttempts) {
+        vk->vkFreeMemory(sVkEmulation->device, mem, nullptr /* allocator */);
+    }
+    if (!memoryAllocated) {
+        return false;
     }
 
     if (!sVkEmulation->deviceInfo.supportsExternalMemory ||
@@ -1444,15 +1493,24 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
                             .propertyFlags
                  << ", requested memory property: " << memoryProperty;
 
-    bool allocRes = allocExternalMemory(vk, &res.memory);
+    bool isHostVisible = memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+    uint64_t deviceAlignment = isHostVisible ? res.memReqs.alignment : 0u;
+    bool allocRes = allocExternalMemory(
+            vk, &res.memory, true /*actuallyExternal*/, deviceAlignment);
 
     if (!allocRes) {
         LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
         return false;
     }
 
+    res.memory.pageOffset =
+            reinterpret_cast<uint64_t>(res.memory.mappedPtr) % kPageSize;
+    res.memory.bindOffset =
+            res.memory.pageOffset ? kPageSize - res.memory.pageOffset : 0u;
+
     VkResult bindImageMemoryRes =
-        vk->vkBindImageMemory(sVkEmulation->device, res.image, res.memory.memory, 0);
+            vk->vkBindImageMemory(sVkEmulation->device, res.image,
+                                  res.memory.memory, res.memory.bindOffset);
 
     if (bindImageMemoryRes != VK_SUCCESS) {
         fprintf(stderr, "%s: Failed to bind image memory. %d\n", __func__,
@@ -1946,17 +2004,10 @@ int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
         return VK_ERROR_MEMORY_MAP_FAILED;
     }
 
-    constexpr size_t kPageBits = 12;
-    constexpr size_t kPageSize = 1u << kPageBits;
-    constexpr size_t kPageOffsetMask = kPageSize - 1;
-
     memoryInfoPtr->gpa = gpa;
-    memoryInfoPtr->pageOffset =
-            reinterpret_cast<uintptr_t>(memoryInfoPtr->mappedPtr) &
-            kPageOffsetMask;
     memoryInfoPtr->pageAlignedHva =
-            reinterpret_cast<uint8_t*>(memoryInfoPtr->mappedPtr) -
-            memoryInfoPtr->pageOffset;
+            reinterpret_cast<uint8_t*>(memoryInfoPtr->mappedPtr) +
+            memoryInfoPtr->bindOffset;
     memoryInfoPtr->sizeToPage = ((memoryInfoPtr->size +
                                   memoryInfoPtr->pageOffset + kPageSize - 1) >>
                                  kPageBits)
@@ -2073,7 +2124,9 @@ bool setupVkBuffer(uint32_t bufferHandle,
                  << "allocation size and type index: " << res.memory.size
                  << ", " << res.memory.typeIndex;
 
-    bool allocRes = allocExternalMemory(vk, &res.memory);
+    bool allocRes =
+            allocExternalMemory(vk, &res.memory, true /* actuallyExternal */,
+                                0u /* deviceAlignment */);
 
     if (!allocRes) {
         LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
