@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f9e1e57_60ef62c5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-18T00:28:11Z",
+      "side": 1,
+      "message": "Suggest merging this with android/android-emu/android/base/misc/StringUtils.cpp",
+      "revId": "424ed298464221a21d735d43279e69bae943f56d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
