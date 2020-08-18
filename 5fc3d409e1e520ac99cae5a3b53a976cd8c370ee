@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004471407",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1386262?revision\u003d6",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "1a07664b_73e94438",
+        "filename": "android/android-emu/android/emulation/proto/protomesh.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-18T00:34:39Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 48,
+        "startChar": 7,
+        "endLine": 48,
+        "endChar": 13
+      },
+      "revId": "5fc3d409e1e520ac99cae5a3b53a976cd8c370ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004471407",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1386262?revision\u003d6",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "caea3041_66b6e670",
+        "filename": "android/android-emu/android/emulation/proto/protomesh.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-18T00:34:39Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 49,
+        "startChar": 24,
+        "endLine": 49,
+        "endChar": 30
+      },
+      "revId": "5fc3d409e1e520ac99cae5a3b53a976cd8c370ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004471407",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1386262?revision\u003d6",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "3a59fcf9_5d8a2940",
+        "filename": "android/android-emu/android/emulation/proto/protomesh.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-18T00:34:39Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 50,
+        "startChar": 18,
+        "endLine": 50,
+        "endChar": 24
+      },
+      "revId": "5fc3d409e1e520ac99cae5a3b53a976cd8c370ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004471407",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1386262?revision\u003d6",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "ce0dc57b_49fd7250",
+        "filename": "android/android-emu/android/emulation/proto/protomesh.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-18T00:34:39Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 52,
+        "startChar": 41,
+        "endLine": 52,
+        "endChar": 47
+      },
+      "revId": "5fc3d409e1e520ac99cae5a3b53a976cd8c370ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
