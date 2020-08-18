@@ -151,6 +151,7 @@ struct VkEmulation {
         // Output fields
         uint32_t id = 0;
         VkDeviceMemory memory = VK_NULL_HANDLE;
+        VkDeviceSize actualSize;
 
         // host-mapping fields
         // host virtual address (hva).
@@ -159,6 +160,8 @@ struct VkEmulation {
         void* pageAlignedHva = nullptr;
         // the offset of |mappedPtr| off its memory page.
         uint32_t pageOffset = 0u;
+        // the offset set in |vkBindImageMemory| or |vkBindBufferMemory|.
+        uint32_t bindOffset = 0u;
         // the size of all the pages the mmeory uses.
         size_t sizeToPage = 0u;
         // guest physical address.
@@ -321,7 +324,11 @@ void setUseCreateResourcesWithRequirements(VkEmulation* emu, bool useCreateResou
 VkEmulation* getGlobalVkEmulation();
 void teardownGlobalVkEmulation();
 
-bool allocExternalMemory(VulkanDispatch* vk, VkEmulation::ExternalMemoryInfo* info, bool actuallyExternal = true);
+bool allocExternalMemory(VulkanDispatch* vk,
+                         VkEmulation::ExternalMemoryInfo* info,
+                         bool actuallyExternal = true,
+                         android::base::Optional<uint64_t> deviceAlignment =
+                                 android::base::kNullopt);
 void freeExternalMemoryLocked(VulkanDispatch* vk,
                               VkEmulation::ExternalMemoryInfo* info);
 
