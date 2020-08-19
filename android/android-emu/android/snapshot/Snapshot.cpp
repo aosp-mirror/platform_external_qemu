@@ -342,7 +342,7 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 59;
+static constexpr int kVersion = 60;
 static constexpr int kMaxSaveStatsHistory = 10;
 
 base::StringView Snapshot::dataDir(const char* name) {
@@ -444,7 +444,6 @@ bool Snapshot::save() {
     mSnapshotPb.set_guest_data_partition_mounted(guest_data_partition_mounted);
     mSnapshotPb.set_rotation(
             int(Snapshotter::get().windowAgent().getRotation()));
-    mSnapshotPb.set_folded(int(Snapshotter::get().windowAgent().isFolded()));
 
     mSnapshotPb.set_invalid_loads(mInvalidLoads);
     mSnapshotPb.set_successful_loads(mSuccessfulLoads);
@@ -694,11 +693,6 @@ bool Snapshot::load() {
                 SkinRotation(mSnapshotPb.rotation())) {
         Snapshotter::get().windowAgent().rotate(
                 SkinRotation(mSnapshotPb.rotation()));
-    }
-
-    if (mSnapshotPb.has_folded() &&
-        Snapshotter::get().windowAgent().isFolded() != mSnapshotPb.folded()) {
-        Snapshotter::get().windowAgent().fold(mSnapshotPb.folded());
     }
 
     return true;
