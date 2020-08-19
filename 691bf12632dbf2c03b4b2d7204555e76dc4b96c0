@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "69ebabff_6768cc0c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-19T14:02:26Z",
+      "side": 1,
+      "message": "I can\u0027t access the screenshot, but have updated the layout to remove any gaps between buttons. Please check and let me know if this was what you meant.",
+      "parentUuid": "4e03e0b8_6d702ac9",
+      "range": {
+        "startLine": 151,
+        "startChar": 2,
+        "endLine": 156,
+        "endChar": 0
+      },
+      "revId": "691bf12632dbf2c03b4b2d7204555e76dc4b96c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "02f502e4_a475a542",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
         "patchSetId": 9
@@ -62,6 +86,30 @@
       "revId": "691bf12632dbf2c03b4b2d7204555e76dc4b96c0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff718318_2a9dcd24",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-19T14:02:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02f502e4_a475a542",
+      "range": {
+        "startLine": 165,
+        "startChar": 0,
+        "endLine": 165,
+        "endChar": 39
+      },
+      "revId": "691bf12632dbf2c03b4b2d7204555e76dc4b96c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
