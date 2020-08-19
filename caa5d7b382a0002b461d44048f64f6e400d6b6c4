@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3a49ae5_257d1a47",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1080,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-19T16:01:29Z",
+      "side": 1,
+      "message": "need to check here for compatibility with device alignemnt and retry I think",
+      "range": {
+        "startLine": 1080,
+        "startChar": 16,
+        "endLine": 1080,
+        "endChar": 64
+      },
+      "revId": "caa5d7b382a0002b461d44048f64f6e400d6b6c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2a9b519_b35e98e4",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1525,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-08-19T16:01:29Z",
+      "side": 1,
+      "message": "Can we retry instead of crash if this is nonzero?",
+      "range": {
+        "startLine": 1525,
+        "startChar": 4,
+        "endLine": 1525,
+        "endChar": 48
+      },
+      "revId": "caa5d7b382a0002b461d44048f64f6e400d6b6c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
