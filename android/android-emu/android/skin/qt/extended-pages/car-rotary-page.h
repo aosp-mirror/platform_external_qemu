@@ -43,12 +43,15 @@ private:
     void executeLastPushButtonCmd();
     void remaskButtons();
     bool eventFilter(QObject*, QEvent*) override;
+    void checkRotaryControllerServiceTimer();
+    void checkRotaryControllerService();
 
     std::unique_ptr<Ui::CarRotaryPage> mUi;
     EmulatorQtWindow* mEmulatorWindow;
     android::emulation::AdbInterface* mAdb;
     QTime mAdbExecuteTime;
     QTimer mLongPressTimer;
+    QTimer mCheckTimer;
     std::string mLastPushButtonCmd;
     bool mAdbExecuteIsActive;
 };
