@@ -36,6 +36,42 @@
     },
     {
       "key": {
+        "uuid": "281de3c2_85ce7e9c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-19T00:55:30Z",
+      "side": 1,
+      "message": "Thanks for testing the change!",
+      "parentUuid": "dc84749a_272c745e",
+      "revId": "8b13b7c0c2433df5c1b3d86dc2f64fc0d0dfb8cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ca164fe_71b1e7cb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-19T00:55:30Z",
+      "side": 1,
+      "message": "Yes this is a security concern on both Fuchsia and Android. We map the whole pages to guest and both systems don\u0027t have access control of memory within a single page, it\u0027s possible for guest to tamper with host memory not bound to the host-mapped image.\n\nWe might want to do this for non-external host-visible memory in VkDecoderGlobalState.cpp as well -- maybe a later CL to address this.",
+      "parentUuid": "12749217_92f367a3",
+      "revId": "8b13b7c0c2433df5c1b3d86dc2f64fc0d0dfb8cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fac01596_5f8cf0de",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
         "patchSetId": 1
@@ -50,6 +86,24 @@
       "revId": "8b13b7c0c2433df5c1b3d86dc2f64fc0d0dfb8cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "61517d5c_a7ee0cdb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1512,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-19T00:55:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fac01596_5f8cf0de",
+      "revId": "8b13b7c0c2433df5c1b3d86dc2f64fc0d0dfb8cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -73,6 +127,30 @@
       "revId": "8b13b7c0c2433df5c1b3d86dc2f64fc0d0dfb8cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9dcb64b1_a3146bf9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2129,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-19T00:55:30Z",
+      "side": 1,
+      "message": "I made it a android::base::Optional indicating whether there\u0027s an device alignment requirement.",
+      "parentUuid": "7509822b_1b5bd4e9",
+      "range": {
+        "startLine": 2129,
+        "startChar": 32,
+        "endLine": 2129,
+        "endChar": 56
+      },
+      "revId": "8b13b7c0c2433df5c1b3d86dc2f64fc0d0dfb8cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
