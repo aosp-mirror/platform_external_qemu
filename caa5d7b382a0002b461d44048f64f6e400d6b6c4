@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "18c076c5_0d8dfa15",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1080,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-19T16:22:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a3a49ae5_257d1a47",
+      "range": {
+        "startLine": 1080,
+        "startChar": 16,
+        "endLine": 1080,
+        "endChar": 64
+      },
+      "revId": "caa5d7b382a0002b461d44048f64f6e400d6b6c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2a9b519_b35e98e4",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "caa5d7b382a0002b461d44048f64f6e400d6b6c4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "52bd3c53_86efc07d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1525,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-08-19T16:22:27Z",
+      "side": 1,
+      "message": "Done; let\u0027s just check this condition when trying instead.",
+      "parentUuid": "e2a9b519_b35e98e4",
+      "range": {
+        "startLine": 1525,
+        "startChar": 4,
+        "endLine": 1525,
+        "endChar": 48
+      },
+      "revId": "caa5d7b382a0002b461d44048f64f6e400d6b6c4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
