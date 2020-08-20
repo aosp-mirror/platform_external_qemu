@@ -552,6 +552,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_enc.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include <vector>\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
+    fprintf(fp, "#include \"android/base/Tracing.h\"\n");
     fprintf(fp, "namespace {\n\n");
 
     // unsupport printout
@@ -575,6 +576,8 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 #if DLOG_ALL_ENCODES
         fprintf(fp, "ALOGD(\"%%s: enter\", __FUNCTION__);\n");
 #endif
+
+        fprintf(fp, "\tAEMU_SCOPED_TRACE(\"%s encode\");\n", e->name().c_str());
 
 #if INSTRUMENT_TIMING_GUEST
         fprintf(fp, "\tstruct timespec ts0, ts1;\n");
