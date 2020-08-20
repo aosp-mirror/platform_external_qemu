@@ -17,6 +17,7 @@
 #pragma once
 
 #include <vector>
+#include <mutex>
 
 #include "android/hw-sensors.h"
 #include "android/physics/Physics.h"
@@ -30,9 +31,11 @@ public:
 
     void setHingeAngle(uint32_t hingeIndex,
                        float degrees,
-                       PhysicalInterpolation mode);
+                       PhysicalInterpolation mode,
+                       std::recursive_mutex& mutex);
 
-    void setPosture(float posture, PhysicalInterpolation mode);
+    void setPosture(float posture, PhysicalInterpolation mode,
+                    std::recursive_mutex& mutex);
 
     float getHingeAngle(uint32_t hingeIndex,
                         ParameterValueType parameterValueType =
@@ -49,8 +52,8 @@ public:
 
 private:
     enum FoldablePostures calculatePosture();
-    void sendPostureToSystem();
-    void setToolBarFold(enum FoldablePostures oldPosture);
+    void sendPostureToSystem(enum FoldablePostures p);
+    void setToolBarFold(bool fold);
 
     FoldableState mState;
     std::vector<struct AnglesToPosture> mAnglesToPostures;
