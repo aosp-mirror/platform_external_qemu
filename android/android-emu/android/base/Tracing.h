@@ -21,6 +21,20 @@
 namespace android {
 namespace base {
 
+// New tracing API that talks to an underlying tracing library, possibly perfetto.
+
+// Enable/disable tracing
+void enableTracing();
+void disableTracing();
+
+// Set the time of traces on the host to be at this guest time.
+// Not needed if we assume timestamps can be transferrable (e.g.,
+// when RDTSC with raw passthrough is used)
+void setGuestTime(uint64_t guestTime);
+
+// Record a counter of some kind.
+void traceCounter(const char* tag, int64_t value);
+
 class ScopedTrace {
 public:
     ScopedTrace(const char* name) {
@@ -37,6 +51,8 @@ private:
 };
 
 bool shouldEnableTracing();
+
+// TODO(b/168843698): Connect this up to an underlying tracing library.
 void beginTrace(const char* name);
 void endTrace();
 
