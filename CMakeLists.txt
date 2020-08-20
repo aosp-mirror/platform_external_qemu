@@ -91,6 +91,14 @@ set(CROSVM FALSE
 set(GFXSTREAM_ONLY FALSE
     CACHE BOOL "True if we should build only gfxstream")
 
+if(WINDOWS_MSVC_X86_64)
+    set(OPTION_PERFETTO_USE_SDK FALSE
+        CACHE BOOL "True if we should be building host side tracing on top of the official Perfetto SDK. Defaults false for Windows as it doesn't build on Windows.")
+else()
+    set(OPTION_PERFETTO_USE_SDK FALSE
+        CACHE BOOL "True if we should be building host side tracing on top of the official Perfetto SDK. Defaults false for Windows as it doesn't build on Windows.")
+endif()
+
 if (GFXSTREAM_ONLY)
     set(CROSVM FALSE)
     set(GFXSTREAM TRUE)
