@@ -94,7 +94,7 @@ typename T::mapped_type findOrDefault(const T& map,
     if (auto valPtr = find(map, key)) {
         return *valPtr;
     }
-    return std::forward<U>(defaultVal);
+    return defaultVal;
 }
 
 // Version that finds the first of the values passed in |keys| in the order they
