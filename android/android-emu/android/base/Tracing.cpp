@@ -295,5 +295,11 @@ void endThresholdTrace() {
     }
 }
 
+// TODO(b/168843698): Connect this up to an underlying tracing library.
+void enableTracing() { }
+void disableTracing() { }
+void setGuestTime(uint64_t guestTime) { (void)guestTime; }
+void traceCounter(const char* tag, int64_t value) { (void)tag; (void)value; }
+
 } // namespace base
 } // namespace android
