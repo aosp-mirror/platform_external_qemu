@@ -36,9 +36,14 @@ private:
     const char* const name_ = nullptr;
 };
 
+void setGuestTime(uint64_t t);
+void enableTracing();
+void disableTracing();
+
 bool shouldEnableTracing();
 void beginTrace(const char* name);
 void endTrace();
+void traceCounter(const char* name, int64_t value);
 
 class ScopedThresholdTrace {
 public:
