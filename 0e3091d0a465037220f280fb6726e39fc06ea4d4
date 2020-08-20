@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a8a09416_c45a2fea",
+        "filename": "android/android-emu/android/physics/FoldableModel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-08-20T22:26:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "84b7ca0d_6582af53",
+      "range": {
+        "startLine": 35,
+        "startChar": 23,
+        "endLine": 35,
+        "endChar": 50
+      },
+      "revId": "0e3091d0a465037220f280fb6726e39fc06ea4d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d348274_016195e2",
         "filename": "android/android-emu/android/physics/FoldableModel.h",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "0e3091d0a465037220f280fb6726e39fc06ea4d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5aa863a2_dec1829b",
+        "filename": "android/android-emu/android/physics/FoldableModel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-08-20T22:26:52Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "2d348274_016195e2",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 35
+      },
+      "revId": "0e3091d0a465037220f280fb6726e39fc06ea4d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
