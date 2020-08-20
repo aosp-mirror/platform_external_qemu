@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de8ce2d5_ce9fa4af",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2020-08-20T23:52:23Z",
+      "side": 1,
+      "message": "After some discussion with Huan, it seems non-trivial to move mutex out. I\u0027ll +2 for now, but I suggest we find a solution where FoldableModel does not need knowledge about a mutex on itself from the caller.",
+      "revId": "f00b00de5e42b974d21c728156cad824d7537556",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
