@@ -1,0 +1,129 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6201edf2_1bd0c7ca",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T04:02:05Z",
+      "side": 1,
+      "message": "Minor UI fixes to align with mocks and the existing toolbar design",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fd642df_9a26d2ec",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T04:02:05Z",
+      "side": 1,
+      "message": "172",
+      "range": {
+        "startLine": 10,
+        "startChar": 12,
+        "endLine": 10,
+        "endChar": 15
+      },
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46a765b0_821bf94a",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T04:02:05Z",
+      "side": 1,
+      "message": "Add property to make button appear and interact same as normal toolbar\n      \u003cproperty name\u003d\"flat\"\u003e\n        \u003cbool\u003etrue\u003c/bool\u003e\n       \u003c/property\u003e\n        \u003cproperty name\u003d\"ToolWindowButton\" stdset\u003d\"0\"\u003e\n        \u003cbool\u003etrue\u003c/bool\u003e\n       \u003c/property\u003e",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b879a9d_4e0dccaf",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T04:02:05Z",
+      "side": 1,
+      "message": "Add property to make button appear and interact same as normal toolbar\n      \u003cproperty name\u003d\"flat\"\u003e\n        \u003cbool\u003etrue\u003c/bool\u003e\n       \u003c/property\u003e\n        \u003cproperty name\u003d\"ToolWindowButton\" stdset\u003d\"0\"\u003e\n        \u003cbool\u003etrue\u003c/bool\u003e\n       \u003c/property\u003e",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c689d5e_06d6b72f",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T04:02:05Z",
+      "side": 1,
+      "message": "Add property to make button appear and interact same as normal toolbar\n      \u003cproperty name\u003d\"flat\"\u003e\n        \u003cbool\u003etrue\u003c/bool\u003e\n       \u003c/property\u003e\n        \u003cproperty name\u003d\"ToolWindowButton\" stdset\u003d\"0\"\u003e\n        \u003cbool\u003etrue\u003c/bool\u003e\n       \u003c/property\u003e",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "166fcbb8_7d69f1ac",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T04:02:05Z",
+      "side": 1,
+      "message": "Add property to make button appear and interact same as normal toolbar\n      \u003cproperty name\u003d\"flat\"\u003e\n        \u003cbool\u003etrue\u003c/bool\u003e\n       \u003c/property\u003e\n        \u003cproperty name\u003d\"ToolWindowButton\" stdset\u003d\"0\"\u003e\n        \u003cbool\u003etrue\u003c/bool\u003e\n       \u003c/property\u003e",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2602e11b_0a954665",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T04:02:05Z",
+      "side": 1,
+      "message": "Add property to make button appear and interact same as normal toolbar\n      \u003cproperty name\u003d\"flat\"\u003e\n        \u003cbool\u003etrue\u003c/bool\u003e\n       \u003c/property\u003e\n        \u003cproperty name\u003d\"ToolWindowButton\" stdset\u003d\"0\"\u003e\n        \u003cbool\u003etrue\u003c/bool\u003e\n       \u003c/property\u003e",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
