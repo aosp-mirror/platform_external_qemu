@@ -88,7 +88,9 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     // params.addFormat("androidboot.logcat=*:D");
 
     if (isX86ish) {
-        params.add("clocksource=pit");
+        params.add("clocksource=tsc");
+        params.add("tsc=reliable");
+
 
         KernelVersion kernelVersion = KERNEL_VERSION_0;
         if (!android_getKernelVersion(kernelPath, &kernelVersion)) {
@@ -102,9 +104,9 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         // only API 24 and API 25 have kvm clock enabled in goldfish kernel.
         //
         // kvm-clock seems to be stable for >= 5.4.
-        if (kernelVersion < KERNEL_VERSION_5_4_0) {
+        // if (kernelVersion < KERNEL_VERSION_5_4_0) {
             params.add("no-kvmclock");
-        }
+        // }
     }
 
     android::setupVirtualSerialPorts(

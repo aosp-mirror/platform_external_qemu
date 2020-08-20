@@ -862,6 +862,8 @@ static X86CPUDefinition builtin_x86_defs[] = {
         .features[FEAT_8000_0001_ECX] =
             CPUID_EXT3_LAHF_LM | CPUID_EXT3_SVM |
             CPUID_EXT3_ABM,
+        .features[FEAT_8000_0007_EDX] =
+            CPUID_APM_INVTSC,
         .xlevel = 0x8000000A,
         .model_id = "Android virtual processor"
     },
