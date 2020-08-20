@@ -219,6 +219,9 @@ static constexpr android::base::StringView kVulkanShaderFloat16Int8 = "ANDROID_E
 // Async queue submit
 static constexpr android::base::StringView kVulkanAsyncQueueSubmit = "ANDROID_EMU_vulkan_async_queue_submit";
 
+// Host side tracing
+static constexpr android::base::StringView kHostSideTracing = "ANDROID_EMU_host_side_tracing";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -584,6 +587,10 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
         // ASTC LDR compressed texture support.
         glStr += "GL_KHR_texture_compression_astc_ldr ";
+
+        // Host side tracing support.
+        glStr += kHostSideTracing;
+        glStr += " ";
 
         if (emugl_feature_is_enabled(android::featurecontrol::IgnoreHostOpenGLErrors)) {
             glStr += kGLESNoHostError;
