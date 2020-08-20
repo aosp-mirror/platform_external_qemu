@@ -124,6 +124,23 @@
       "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a813971_34cd2d9d",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1294,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-08-20T16:57:33Z",
+      "side": 1,
+      "message": "how about the \"dark\" button?",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
