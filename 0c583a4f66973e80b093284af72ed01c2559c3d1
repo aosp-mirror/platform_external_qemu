@@ -1,0 +1,221 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1e65cde7_7aaca315",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "Comments to add min button size and icons to have same dimensions as rotation button. After that, LGTM",
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16900000_2556d1ea",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 538,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "Insert a property to set button size the same as the Rotation buttons. \n\u003cproperty name\u003d\"minimumSize\"\u003e\n      \u003csize\u003e\n       \u003cwidth\u003e36\u003c/width\u003e\n       \u003cheight\u003e36\u003c/height\u003e\n      \u003c/size\u003e\n\u003c/property\u003e",
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3130f473_d5a41a81",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 552,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "24",
+      "range": {
+        "startLine": 552,
+        "startChar": 20,
+        "endLine": 552,
+        "endChar": 22
+      },
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5a6a558e_8b8b5c70",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "Insert a property to set button size the same as the Rotation buttons. \n\u003cproperty name\u003d\"minimumSize\"\u003e\n      \u003csize\u003e\n       \u003cwidth\u003e36\u003c/width\u003e\n       \u003cheight\u003e36\u003c/height\u003e\n      \u003c/size\u003e\n\u003c/property\u003e",
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0acf5372_d853c02b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "24",
+      "range": {
+        "startLine": 578,
+        "startChar": 20,
+        "endLine": 578,
+        "endChar": 22
+      },
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0ded8ed_ac661e1e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 591,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "Insert a property to set button size the same as the Rotation buttons. \n\u003cproperty name\u003d\"minimumSize\"\u003e\n      \u003csize\u003e\n       \u003cwidth\u003e36\u003c/width\u003e\n       \u003cheight\u003e36\u003c/height\u003e\n      \u003c/size\u003e\n\u003c/property\u003e",
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1fc5e9d_c3ff1f1d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 604,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "24",
+      "range": {
+        "startLine": 604,
+        "startChar": 20,
+        "endLine": 604,
+        "endChar": 22
+      },
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27a3caa5_0e7f6386",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "Insert a property to set button size the same as the Rotation buttons. \n\u003cproperty name\u003d\"minimumSize\"\u003e\n      \u003csize\u003e\n       \u003cwidth\u003e36\u003c/width\u003e\n       \u003cheight\u003e36\u003c/height\u003e\n      \u003c/size\u003e\n\u003c/property\u003e",
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4ae8ebcf_cf7bb111",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "24",
+      "range": {
+        "startLine": 630,
+        "startChar": 20,
+        "endLine": 630,
+        "endChar": 22
+      },
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b75c9d67_42b947aa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "Insert a property to set button size the same as the Rotation buttons. \n\u003cproperty name\u003d\"minimumSize\"\u003e\n      \u003csize\u003e\n       \u003cwidth\u003e36\u003c/width\u003e\n       \u003cheight\u003e36\u003c/height\u003e\n      \u003c/size\u003e\n\u003c/property\u003e",
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9ff77cd_7b5ab2ef",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 656,
+      "author": {
+        "id": 1715160
+      },
+      "writtenOn": "2020-08-20T00:41:17Z",
+      "side": 1,
+      "message": "24",
+      "range": {
+        "startLine": 656,
+        "startChar": 20,
+        "endLine": 656,
+        "endChar": 22
+      },
+      "revId": "0c583a4f66973e80b093284af72ed01c2559c3d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
