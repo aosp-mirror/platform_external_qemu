@@ -53,3 +53,5 @@ GL_ENTRY(GLint, rcSetColorBufferVulkanMode2, uint32_t colorBuffer, uint32_t mode
 GL_ENTRY(int, rcMapGpaToBufferHandle, uint32_t bufferHandle, uint64_t gpa)
 GL_ENTRY(uint32_t, rcCreateBuffer2, uint64_t size, uint32_t memoryProperty)
 GL_ENTRY(int, rcMapGpaToBufferHandle2, uint32_t bufferHandle, uint64_t gpa, uint64_t size)
+GL_ENTRY(void, rcFlushWindowColorBufferAsyncWithFrameNumber, uint32_t windowSurface, uint32_t frameNumber)
+GL_ENTRY(void, rcSetTracingForPuid, uint64_t puid, uint32_t enable, uint64_t guestTime)
