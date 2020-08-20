@@ -100,6 +100,8 @@ public:
     // construction failed.
     std::unique_ptr<EmulatorControllerService> build();
 
+    Builder& withLogging(bool logging);
+
 private:
     std::string readSecrets(const char* fname);
 
@@ -115,6 +117,7 @@ private:
     std::string mAuthToken;
     bool mValid{true};
     bool mVerbose{false};
+    bool mLogging{true};
 };
 
 }  // namespace control

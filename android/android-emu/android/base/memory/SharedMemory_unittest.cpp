@@ -131,7 +131,9 @@ TEST(SharedMemory, ShareFileDoesCleanedUp) {
 TEST(SharedMemory, CanShare4KVideo) {
     // Make sure we can use this for sharing video, for now 4K ought to be
     // enough for anybody.
-    // This test will likely segfault on a default MacOS config.
+    // This test will likely segfault/fail on a default MacOS config when using
+    // shared memory.
+    //
     // See:  sysctl -A | grep shm
     // which should produce something like:
     // kern.sysv.shmmax: 4194304
