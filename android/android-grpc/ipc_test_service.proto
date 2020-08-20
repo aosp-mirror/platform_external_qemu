@@ -18,24 +18,32 @@ option java_package = "com.android.emulator.control";
 option objc_class_prefix = "AEC";
 
 package android.emulation.control;
-import "google/protobuf/empty.proto";
 
 // A simplistic echo service that can be used by unit tests to validate
 // some of the grpc behavior.
-service TestEcho {
-  rpc streamEcho(Msg) returns (stream Msg) {}
-  rpc echo(Msg) returns (Msg) {}
-  rpc data(google.protobuf.Empty) returns (Msg) {}
-  rpc streamData(google.protobuf.Empty) returns (stream Msg) {}
+service TestRunner {
+  rpc runTest(Test) returns (Test) {}
 }
 
 // A simple message that can be send back and forth.
-message Msg {
-  // A message that you wish to send.
-  string msg = 1;
+message Test {
+  enum TestType {
+    Nothing = 0; // Just return, use this to measue gRPC overhead.
+    SharedMemory = 1; // Run a SharedMemory IPC test
+    Grpc = 2; // Run a gRPC based IPC test.
+    RawSocket = 3; // Run a raw socket based ipc test.
+  }
 
-  // A counter that the server will increment.
-  uint64 counter = 2;
-
-  bytes data = 3;
+  enum SharedMemoryMode {
+    Shared = 0;
+    File = 1;
+  }
+  TestType target = 1; // Test type
+  int32 size = 2; // Size of memory region to checksum
+  uint64 chksum = 3; // Calculated chksum of memory region
+  int32 port = 4; // Port for socket/grpc
+  SharedMemoryMode mode = 5; // Mode of shared memory
+  string handle = 6;  // Handle/File used by shared memoryu test
+  int64 cpuTime = 7;  // Cpu time spend running this test.
+  int64 wallTime = 8;
 }

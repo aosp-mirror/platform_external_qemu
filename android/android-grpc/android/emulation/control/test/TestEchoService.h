@@ -14,13 +14,15 @@
 // limitations under the License.
 #pragma once
 #include <grpcpp/grpcpp.h>
+
+#include <vector>
+
 #include "test_echo_service.grpc.pb.h"  // for TestEcho
 #include "test_echo_service.pb.h"       // for Msg
 
 namespace android {
 namespace emulation {
 namespace control {
-
 
 using grpc::ServerContext;
 using grpc::Status;
@@ -31,10 +33,17 @@ public:
                 const Msg* request,
                 Msg* response) override;
 
+    Status data(ServerContext* context,
+                const ::google::protobuf::Empty* empty,
+                Msg* response) override;
+
     int invocations() { return mCounter; }
+
+    void moveData(std::vector<uint8_t> data) { mData = std::move(data); }
 
 private:
     int mCounter{0};
+    std::vector<uint8_t> mData;
 };
 
 }  // namespace control
