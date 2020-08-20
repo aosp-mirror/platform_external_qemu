@@ -29,6 +29,7 @@
 #include "android/base/files/PathUtils.h"                    // for pj
 #include "android/base/system/System.h"                      // for System
 #include "android/base/testing/TestTempDir.h"                // for TestTempDir
+#include "android/base/Tracing.h"
 #include "android/cmdline-option.h"                          // for AndroidO...
 #include "android/console.h"                                 // for getConso...
 #include "android/emulation/AndroidPipe.h"                   // for AndroidPipe
@@ -244,6 +245,7 @@ class GolfishMockConsoleFactory
 
 GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     android::emulation::injectConsoleAgents(GolfishMockConsoleFactory());
+
     sTestEnv = this;
     sTestContentDir =
             new android::base::TestTempDir("goldfish_opengl_snapshot_test_dir");
