@@ -394,7 +394,6 @@ void removeExtension(std::string& currExts, const std::string& toRemove) {
 }
 
 static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
 
     // whatever we end up returning,
@@ -637,7 +636,6 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
 static EGLint rcGetNumConfigs(uint32_t* p_numAttribs)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     int numConfigs = 0, numAttribs = 0;
 
     FrameBuffer::getFB()->getConfigs()->getPackInfo(&numConfigs, &numAttribs);
@@ -649,7 +647,6 @@ static EGLint rcGetNumConfigs(uint32_t* p_numAttribs)
 
 static EGLint rcGetConfigs(uint32_t bufSize, GLuint* buffer)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     GLuint bufferSize = (GLuint)bufSize;
     return FrameBuffer::getFB()->getConfigs()->packConfigs(bufferSize, buffer);
 }
@@ -659,7 +656,6 @@ static EGLint rcChooseConfig(EGLint *attribs,
                              uint32_t *configs,
                              uint32_t configs_size)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
@@ -678,7 +674,6 @@ static EGLint rcChooseConfig(EGLint *attribs,
 
 static EGLint rcGetFBParam(EGLint param)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
@@ -718,7 +713,6 @@ static EGLint rcGetFBParam(EGLint param)
 static uint32_t rcCreateContext(uint32_t config,
                                 uint32_t share, uint32_t glVersion)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
@@ -730,7 +724,6 @@ static uint32_t rcCreateContext(uint32_t config,
 
 static void rcDestroyContext(uint32_t context)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -742,7 +735,6 @@ static void rcDestroyContext(uint32_t context)
 static uint32_t rcCreateWindowSurface(uint32_t config,
                                       uint32_t width, uint32_t height)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
@@ -753,7 +745,6 @@ static uint32_t rcCreateWindowSurface(uint32_t config,
 
 static void rcDestroyWindowSurface(uint32_t windowSurface)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -765,7 +756,6 @@ static void rcDestroyWindowSurface(uint32_t windowSurface)
 static uint32_t rcCreateColorBuffer(uint32_t width,
                                     uint32_t height, GLenum internalFormat)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
@@ -779,7 +769,6 @@ static uint32_t rcCreateColorBufferDMA(uint32_t width,
                                        uint32_t height, GLenum internalFormat,
                                        int frameworkFormat)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
@@ -791,7 +780,6 @@ static uint32_t rcCreateColorBufferDMA(uint32_t width,
 
 static int rcOpenColorBuffer2(uint32_t colorbuffer)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;
@@ -806,7 +794,6 @@ static void rcOpenColorBuffer(uint32_t colorbuffer)
 
 static void rcCloseColorBuffer(uint32_t colorbuffer)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -816,7 +803,6 @@ static void rcCloseColorBuffer(uint32_t colorbuffer)
 
 static int rcFlushWindowColorBuffer(uint32_t windowSurface)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     GRSYNC_DPRINT("waiting for gralloc cb lock");
     GrallocSyncPostLock lock(sGrallocSync.get());
     GRSYNC_DPRINT("lock gralloc cb lock {");
@@ -876,7 +862,6 @@ static void rcFlushWindowColorBufferAsync(uint32_t windowSurface)
 static void rcSetWindowColorBuffer(uint32_t windowSurface,
                                    uint32_t colorBuffer)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -887,7 +872,6 @@ static void rcSetWindowColorBuffer(uint32_t windowSurface,
 static EGLint rcMakeCurrent(uint32_t context,
                             uint32_t drawSurf, uint32_t readSurf)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return EGL_FALSE;
@@ -900,7 +884,6 @@ static EGLint rcMakeCurrent(uint32_t context,
 
 static void rcFBPost(uint32_t colorBuffer)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -919,7 +902,6 @@ static void rcFBSetSwapInterval(EGLint interval)
 
 static void rcBindTexture(uint32_t colorBuffer)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -933,7 +915,6 @@ static void rcBindTexture(uint32_t colorBuffer)
 
 static void rcBindRenderbuffer(uint32_t colorBuffer)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -948,7 +929,6 @@ static void rcBindRenderbuffer(uint32_t colorBuffer)
 static EGLint rcColorBufferCacheFlush(uint32_t colorBuffer,
                                       EGLint postCount, int forRead)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     // gralloc_lock() on the guest calls rcColorBufferCacheFlush
     GRSYNC_DPRINT("waiting for gralloc cb lock");
     sGrallocSync->lockColorBufferPrepare();
@@ -961,7 +941,6 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
                               GLint width, GLint height,
                               GLenum format, GLenum type, void* pixels)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -978,7 +957,6 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
                                GLint width, GLint height,
                                GLenum format, GLenum type, void* pixels)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
 
     if (!fb) {
@@ -1008,7 +986,6 @@ static int rcUpdateColorBufferDMA(uint32_t colorBuffer,
                                   GLenum format, GLenum type,
                                   void* pixels, uint32_t pixels_size)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
 
     if (!fb) {
@@ -1035,7 +1012,6 @@ static int rcUpdateColorBufferDMA(uint32_t colorBuffer,
 
 static uint32_t rcCreateClientImage(uint32_t context, EGLenum target, GLuint buffer)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
@@ -1046,7 +1022,6 @@ static uint32_t rcCreateClientImage(uint32_t context, EGLenum target, GLuint buf
 
 static int rcDestroyClientImage(uint32_t image)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
@@ -1056,7 +1031,6 @@ static int rcDestroyClientImage(uint32_t image)
 }
 
 static void rcSelectChecksumHelper(uint32_t protocol, uint32_t reserved) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     ChecksumCalculatorThreadInfo::setVersion(protocol);
 }
 
@@ -1068,7 +1042,6 @@ static void rcSelectChecksumHelper(uint32_t protocol, uint32_t reserved) {
 static void rcTriggerWait(uint64_t eglsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     if (thread_ptr == 1) {
         // Is vulkan sync fd;
         // just signal right away for now
@@ -1094,7 +1067,6 @@ static void rcCreateSyncKHR(EGLenum type,
                             int destroy_when_signaled,
                             uint64_t* eglsync_out,
                             uint64_t* syncthread_out) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     EGLSYNC_DPRINT("type=0x%x num_attribs=%d",
             type, num_attribs);
 
@@ -1131,7 +1103,6 @@ static void rcCreateSyncKHR(EGLenum type,
 static EGLint rcClientWaitSyncKHR(uint64_t handle,
                                   EGLint flags,
                                   uint64_t timeout) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
     FrameBuffer *fb = FrameBuffer::getFB();
 
@@ -1164,7 +1135,6 @@ static EGLint rcClientWaitSyncKHR(uint64_t handle,
 
 static void rcWaitSyncKHR(uint64_t handle,
                                   EGLint flags) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
     FrameBuffer *fb = FrameBuffer::getFB();
 
@@ -1192,7 +1162,6 @@ static void rcWaitSyncKHR(uint64_t handle,
 }
 
 static int rcDestroySyncKHR(uint64_t handle) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FenceSync* fenceSync = FenceSync::getFromHandle(handle);
     if (!fenceSync) return 0;
     fenceSync->decRef();
@@ -1200,13 +1169,11 @@ static int rcDestroySyncKHR(uint64_t handle) {
 }
 
 static void rcSetPuid(uint64_t puid) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
     tInfo->m_puid = puid;
 }
 
 static int rcCompose(uint32_t bufferSize, void* buffer) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;
@@ -1292,7 +1259,6 @@ static void rcReadColorBufferYUV(uint32_t colorBuffer,
                                 GLint width, GLint height,
                                 void* pixels, uint32_t pixels_size)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -1310,7 +1276,6 @@ static int rcIsSyncSignaled(uint64_t handle) {
 static void rcCreateColorBufferWithHandle(
     uint32_t width, uint32_t height, GLenum internalFormat, uint32_t handle)
 {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
 
     if (!fb) {
@@ -1323,7 +1288,6 @@ static void rcCreateColorBufferWithHandle(
 }
 
 static uint32_t rcCreateBuffer2(uint64_t size, uint32_t memoryProperty) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer* fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
@@ -1337,7 +1301,6 @@ static uint32_t rcCreateBuffer(uint32_t size) {
 }
 
 static void rcCloseBuffer(uint32_t buffer) {
-    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer* fb = FrameBuffer::getFB();
     if (!fb) {
         return;

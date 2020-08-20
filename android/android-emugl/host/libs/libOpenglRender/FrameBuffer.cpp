@@ -36,6 +36,7 @@
 #include "android/base/memory/MemoryTracker.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/base/Tracing.h"
 
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
@@ -329,6 +330,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     if (s_theFrameBuffer != NULL) {
         return true;
     }
+
+    android::base::initializeTracing();
 
     //
     // allocate space for the FrameBuffer object
