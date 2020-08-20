@@ -56,30 +56,43 @@ public:
     using IteratorFunc = std::function<void(bool live, EntityHandle h, Item& item)>;
     using ConstIteratorFunc = std::function<void(bool live, EntityHandle h, const Item& item)>;
 
+    template<class Int, int count> struct bit_repeater;
+    template<class Int>
+    struct bit_repeater<Int, 1> {
+        static const Int value = 0x1;
+    };
+    template<class Int, int count>
+    struct bit_repeater {
+        static const Int value = (bit_repeater<Int, count-1>::value << 1) | 0x1;
+    };
+
+    static constexpr uint64_t indexMaskBase = bit_repeater<uint64_t, indexBits>().value;
+    static constexpr uint64_t generationMaskBase = bit_repeater<uint64_t, generationBits>().value;
+    static constexpr uint64_t typeMaskBase = bit_repeater<uint64_t, typeBits>().value;
+
+    static constexpr uint64_t indexMask = indexMaskBase;
+    static constexpr uint64_t generationMask = generationMaskBase << indexBits;
+    static constexpr uint64_t typeMask = typeMaskBase << (indexBits + generationBits);
+
     static size_t getHandleIndex(EntityHandle h) {
-        return static_cast<size_t>(h & ((1ULL << indexBits) - 1ULL));
+        return static_cast<size_t>(h & indexMask);
     }
 
     static size_t getHandleGeneration(EntityHandle h) {
-        return static_cast<size_t>(
-            (h >> indexBits) &
-            ((1ULL << generationBits) - 1ULL));
+        return static_cast<size_t>((h & generationMask) >> indexBits);
     }
 
     static size_t getHandleType(EntityHandle h) {
-        return static_cast<size_t>(
-            (h >> (indexBits + generationBits)) &
-            ((1ULL << typeBits) - 1ULL));
-        return h & ((1ULL << indexBits) - 1ULL);
+        return static_cast<size_t>((h & typeMask) >> (indexBits + generationBits));
     }
 
     static EntityHandle makeHandle(
         size_t index,
         size_t generation,
         size_t type) {
-        EntityHandle res = index;
-        res |= generation << indexBits;
-        res |= type << (indexBits + generationBits);
+        EntityHandle res = (index & indexMask);
+        res |= (((uint64_t)generation) << indexBits) & generationMask;
+        res |= (((uint64_t)type) << (indexBits + generationBits)) & typeMask;
         return res;
     }
 
