@@ -219,6 +219,9 @@ static constexpr android::base::StringView kVulkanShaderFloat16Int8 = "ANDROID_E
 // Async queue submit
 static constexpr android::base::StringView kVulkanAsyncQueueSubmit = "ANDROID_EMU_vulkan_async_queue_submit";
 
+// Host side tracing
+static constexpr android::base::StringView kHostSideTracing = "ANDROID_EMU_host_side_tracing";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -561,7 +564,6 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         glStr += " ";
     }
 
-
     if (virtioGpuNativeSyncEnabled && name == GL_EXTENSIONS) {
         glStr += kVirtioGpuNativeSync;
         glStr += " ";
@@ -584,6 +586,10 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
         // ASTC LDR compressed texture support.
         glStr += "GL_KHR_texture_compression_astc_ldr ";
+
+        // Host side tracing support.
+        glStr += kHostSideTracing;
+        glStr += " ";
 
         if (emugl_feature_is_enabled(android::featurecontrol::IgnoreHostOpenGLErrors)) {
             glStr += kGLESNoHostError;
@@ -1382,6 +1388,15 @@ static int32_t rcMapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
     return result;
 }
 
+static void rcFlushWindowColorBufferAsyncWithFrameNumber(uint32_t windowSurface, uint32_t frameNumber) {
+    (void)frameNumber;
+    rcFlushWindowColorBufferAsync(windowSurface);
+}
+
+static void rcSetTracingForPuid(uint64_t puid, uint32_t enable) {
+    fprintf(stderr, "%s: puid 0x%llx tracing: %d\n", __func__, (unsigned long long)puid, enable);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1437,4 +1452,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCloseBuffer = rcCloseBuffer;
     dec->rcSetColorBufferVulkanMode2 = rcSetColorBufferVulkanMode2;
     dec->rcMapGpaToBufferHandle = rcMapGpaToBufferHandle;
+    dec->rcFlushWindowColorBufferAsyncWithFrameNumber = rcFlushWindowColorBufferAsyncWithFrameNumber;
+    dec->rcSetTracingForPuid = rcSetTracingForPuid;
 }
