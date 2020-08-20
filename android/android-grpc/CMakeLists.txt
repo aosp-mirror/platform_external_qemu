@@ -120,3 +120,27 @@ android_add_executable(
       android/emulation/control/snapshot/TarStreamPerf.cpp)
 target_link_libraries(grpc_benchmark PRIVATE android-grpc android-emu-base
                                              emulator-gbench)
+
+# Add the benchmark
+
+protobuf_generate_grpc_cpp(
+  SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} SOURCES ipc_test_service.proto
+  OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} GENERATED IPC_SERVICE_GRPC_SRC)
+
+# IPC benchmarks
+android_add_executable(
+  TARGET ipc_benchmark NODISTRIBUTE
+  SRC # cmake-format: sortable
+      ${ECHO_SERVICE_GRPC_SRC} ${IPC_SERVICE_GRPC_SRC}
+      android/emulation/control/test/IPC_benchmark.cpp)
+target_link_libraries(ipc_benchmark PRIVATE android-emu emulator-gbench
+                                            android-grpc)
+
+android_add_executable(
+  TARGET ipc_reader NODISTRIBUTE
+  SRC # cmake-format: sortable
+      ${ECHO_SERVICE_GRPC_SRC} ${IPC_SERVICE_GRPC_SRC}
+      android/emulation/control/test/TestEchoService.cpp
+      android/emulation/control/test/IPC_reader.cpp)
+target_link_libraries(ipc_reader PRIVATE android-emu android-grpc)
+add_dependencies(ipc_benchmark ipc_reader)
