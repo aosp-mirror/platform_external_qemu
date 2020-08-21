@@ -98,17 +98,11 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .fold =
                 [](bool is_fold) -> bool {
-                    if (const auto win = EmulatorQtWindow::getInstance()) {
-                        if (android_foldable_folded_area_configured()) {
-                            QtUICommand cmd = is_fold ? QtUICommand::FOLD
-                                                      : QtUICommand::UNFOLD;
-                            win->runOnUiThread([win, cmd]() {
-                                win->toolWindow()->handleUICommand(cmd);
-                            });
-                            return true;
-                        }
+                    if (is_fold) {
+                        return android_foldable_fold();
+                    } else {
+                        return android_foldable_unfold();
                     }
-                    return false;
                 },
         .isFolded =
                 []() -> bool {
