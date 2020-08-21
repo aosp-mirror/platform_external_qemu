@@ -109,6 +109,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/car-data-emulation/vhal-table.cpp
     android/skin/qt/extended-pages/car-data-page.cpp
     android/skin/qt/extended-pages/car-rotary-page.cpp
+    android/skin/qt/extended-pages/car-sensor-replay-page.cpp
     android/skin/qt/extended-pages/cellular-page.cpp
     android/skin/qt/extended-pages/common.cpp
     android/skin/qt/extended-pages/dpad-page.cpp
@@ -188,6 +189,7 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui
     android/skin/qt/extended-pages/car-data-page.ui
     android/skin/qt/extended-pages/car-rotary-page.ui
+    android/skin/qt/extended-pages/car-sensor-replay-page.ui
     android/skin/qt/extended-pages/cellular-page.ui
     android/skin/qt/extended-pages/dpad-page.ui
     android/skin/qt/extended-pages/finger-page.ui
@@ -233,6 +235,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h
     android/skin/qt/extended-pages/car-data-page.h
     android/skin/qt/extended-pages/car-rotary-page.h
+    android/skin/qt/extended-pages/car-sensor-replay-page.h
     android/skin/qt/extended-pages/cellular-page.h
     android/skin/qt/extended-pages/dpad-page.h
     android/skin/qt/extended-pages/finger-page.h
