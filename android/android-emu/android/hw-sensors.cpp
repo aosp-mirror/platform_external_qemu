@@ -1185,6 +1185,38 @@ bool android_foldable_is_folded() {
            physicalModel_foldableisFolded(android_physical_model_instance());
 }
 
+bool android_foldable_fold() {
+    if (!android_foldable_folded_area_configured()) {
+        return false;
+    }
+    struct FoldableState state;
+    if (android_foldable_get_state(&state) < 0) {
+        return false;
+    }
+    if (android_physical_model_set(PHYSICAL_PARAMETER_POSTURE,
+                                  (float)state.config.foldAtPosture,
+                                  0.0f,
+                                  0.0f,
+                                  PHYSICAL_INTERPOLATION_SMOOTH) < 0) {
+        return false;
+    }
+    return true;
+}
+
+bool android_foldable_unfold() {
+    if (!android_foldable_folded_area_configured()) {
+        return false;
+    }
+    if (android_physical_model_set(PHYSICAL_PARAMETER_POSTURE,
+                                  (float)POSTURE_OPENED,
+                                  0.0f,
+                                  0.0f,
+                                  PHYSICAL_INTERPOLATION_SMOOTH) < 0) {
+        return false;
+    }
+    return true;
+}
+
 bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h) {
     return physicalModel_getFoldedArea(android_physical_model_instance(), x, y, w, h);
 }

@@ -70,12 +70,19 @@ FoldableModel::FoldableModel() {
         return;
     }
     if (!android_foldable_hinge_configured()) {
-        // create a default hinge with 180 degree
+        // Create a default hinge with 180 degree.
+        // Also help back compatible with legacy foldable config which does not
+        // include hinge configs
         mState.config.numHinges = 1;
         mState.config.hingeParams[0].defaultDegrees = 180.0f;
         mState.currentHingeDegrees[0] = 180.0f;
         mState.currentPosture = POSTURE_OPENED;
         mState.config.foldAtPosture = POSTURE_CLOSED;
+        mState.config.supportedFoldablePostures[POSTURE_CLOSED] = true;
+        mState.config.supportedFoldablePostures[POSTURE_OPENED] = true;
+        mState.config.supportedFoldablePostures[POSTURE_HALF_OPENED] = false;
+        mState.config.supportedFoldablePostures[POSTURE_FLIPPED] = false;
+        mState.config.supportedFoldablePostures[POSTURE_TENT] = false;
         return;
     }
 
@@ -269,14 +276,6 @@ void FoldableModel::setHingeAngle(uint32_t hingeIndex,
         lock.unlock();
         sendPostureToSystem(p);
         updateFoldablePostureIndicator();
-        lock.lock();
-        if (mState.currentPosture == mState.config.foldAtPosture) {
-            lock.unlock();
-            setToolBarFold(true);
-        } else if (oldP == mState.config.foldAtPosture) {
-            lock.unlock();
-            setToolBarFold(false);
-        }
     }
 }
 
@@ -290,10 +289,6 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode,
         return;
     }
     mState.currentPosture = p;
-    lock.unlock();
-    sendPostureToSystem(p);
-    updateFoldablePostureIndicator();
-    lock.lock();
     // Update the hinge angles
     for (const auto i : mAnglesToPostures) {
         if (i.posture == mState.currentPosture) {
@@ -303,13 +298,9 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode,
             }
         }
     }
-    if (mState.currentPosture == mState.config.foldAtPosture) {
-        lock.unlock();
-        setToolBarFold(true);
-    } else if (oldP == mState.config.foldAtPosture) {
-        lock.unlock();
-        setToolBarFold(false);
-    }
+    lock.unlock();
+    sendPostureToSystem(p);
+    updateFoldablePostureIndicator();
 }
 
 float FoldableModel::getHingeAngle(uint32_t hingeIndex,
@@ -337,15 +328,6 @@ void FoldableModel::sendPostureToSystem(enum FoldablePostures p) {
                                     "global", "device_posture",
                                     std::to_string((int)p).c_str() });
 
-}
-
-void FoldableModel::setToolBarFold(bool fold) {
-    const QAndroidEmulatorWindowAgent* windowAgent =
-        android_hw_sensors_get_window_agent();
-    if (!windowAgent) {
-        return;
-    }
-    windowAgent->fold(fold);
 }
 
 bool FoldableModel::isFolded() {
