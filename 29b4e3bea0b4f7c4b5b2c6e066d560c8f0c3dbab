@@ -16,6 +16,24 @@
       "revId": "29b4e3bea0b4f7c4b5b2c6e066d560c8f0c3dbab",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "283bd440_822095ac",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2020-08-21T19:06:50Z",
+      "side": 1,
+      "message": "\u0027b\u0027 build is actually the good one. I\u0027ll abandon my \u0027c\u0027 change. r399163 is chugging along as well, so hopefully next week. :) Thanks for fixing this.",
+      "parentUuid": "9f79d5e2_4ac101b3",
+      "revId": "29b4e3bea0b4f7c4b5b2c6e066d560c8f0c3dbab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
