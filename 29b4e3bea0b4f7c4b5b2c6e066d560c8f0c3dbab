@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9f79d5e2_4ac101b3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2020-08-21T18:50:32Z",
+      "side": 1,
+      "message": "Please also wait for srhines\u0027s comments as well.  He has a -2 on his change, https://android-review.googlesource.com/c/platform/external/qemu/+/1395909.  He may also comment on whether we should use the \u0027b\u0027 or the \u0027c\u0027 build.",
+      "revId": "29b4e3bea0b4f7c4b5b2c6e066d560c8f0c3dbab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
