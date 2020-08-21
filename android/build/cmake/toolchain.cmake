@@ -22,7 +22,7 @@
 # Gets the desired clang version used by the various toolchains.
 # Update this if you need to change the compiler
 function(get_clang_version RET_VAL)
-  set(${RET_VAL} "clang-r370808" PARENT_SCOPE)
+  set(${RET_VAL} "clang-r383902b" PARENT_SCOPE)
 endfunction()
 
 
