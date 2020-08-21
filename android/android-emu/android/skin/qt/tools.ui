@@ -737,53 +737,6 @@ color: #f0f0f0</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="fold_switch">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>34</width>
-         <height>34</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Fold</string>
-       </property>
-       <property name="text">
-        <string notr="true"/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/light/compress_horiz</normaloff>:/light/compress_horiz</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-       <property name="themeIconName" stdset="0">
-        <string notr="true">compress_horiz</string>
-       </property>
-       <property name="uiCommand" stdset="0">
-        <string>FOLD</string>
-       </property>
-       <property name="ToolWindowButton" stdset="0">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="more_button">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

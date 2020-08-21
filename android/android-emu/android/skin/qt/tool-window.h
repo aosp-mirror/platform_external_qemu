@@ -208,7 +208,6 @@ private slots:
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
     void on_tablet_mode_button_clicked();
-    void on_fold_switch_clicked();
     void on_change_posture_button_clicked();
     void on_new_posture_requested(int newPosture);
     void on_dismiss_posture_selection_dialog();
