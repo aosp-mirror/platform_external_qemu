@@ -637,10 +637,7 @@ void PhysicalModelImpl::setTargetInternalHingeAngle0(
         float degrees,
         PhysicalInterpolation mode) {
     physicalStateChanging();
-    {
-        std::lock_guard<std::recursive_mutex> lock(mMutex);
-        mFoldableModel.setHingeAngle(0, degrees, mode);
-    }
+    mFoldableModel.setHingeAngle(0, degrees, mode, mMutex);
     targetStateChanged();
 }
 
@@ -648,10 +645,7 @@ void PhysicalModelImpl::setTargetInternalHingeAngle1(
         float degrees,
         PhysicalInterpolation mode) {
     physicalStateChanging();
-    {
-        std::lock_guard<std::recursive_mutex> lock(mMutex);
-        mFoldableModel.setHingeAngle(1, degrees, mode);
-    }
+    mFoldableModel.setHingeAngle(1, degrees, mode, mMutex);
     targetStateChanged();
 }
 
@@ -659,20 +653,14 @@ void PhysicalModelImpl::setTargetInternalHingeAngle2(
         float degrees,
         PhysicalInterpolation mode) {
     physicalStateChanging();
-    {
-        std::lock_guard<std::recursive_mutex> lock(mMutex);
-        mFoldableModel.setHingeAngle(2, degrees, mode);
-    }
+    mFoldableModel.setHingeAngle(2, degrees, mode, mMutex);
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalPosture(float posture,
                                                  PhysicalInterpolation mode) {
     physicalStateChanging();
-    {
-        std::lock_guard<std::recursive_mutex> lock(mMutex);
-        mFoldableModel.setPosture(posture, mode);
-    }
+    mFoldableModel.setPosture(posture, mode, mMutex);
     targetStateChanged();
 }
 
