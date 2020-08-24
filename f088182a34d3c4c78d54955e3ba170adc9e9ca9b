@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "22c8cfad_be73e2d0",
+        "filename": "android/android-emu/android/skin/qt/tool-window.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-24T11:09:00Z",
+      "side": 1,
+      "message": "We need to have this be persistent (not re-created every time it is being shown) so that it gets reported in QApplication::allWidgets() when the updated theme (Dark/Light) is applied.",
+      "revId": "f088182a34d3c4c78d54955e3ba170adc9e9ca9b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
