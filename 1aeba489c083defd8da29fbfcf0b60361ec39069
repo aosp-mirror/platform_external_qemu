@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "bd59795d_73c7cbcc",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-24T11:07:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5fd642df_9a26d2ec",
+      "range": {
+        "startLine": 10,
+        "startChar": 12,
+        "endLine": 10,
+        "endChar": 15
+      },
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "46a765b0_821bf94a",
         "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
         "patchSetId": 10
@@ -56,6 +80,24 @@
       "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a58d370_9709c73c",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-24T11:07:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46a765b0_821bf94a",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -76,6 +118,24 @@
     },
     {
       "key": {
+        "uuid": "117cb7bb_368991c2",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-24T11:07:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4b879a9d_4e0dccaf",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4c689d5e_06d6b72f",
         "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
         "patchSetId": 10
@@ -90,6 +150,24 @@
       "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7247e49_4855cefd",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-24T11:07:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4c689d5e_06d6b72f",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -110,6 +188,24 @@
     },
     {
       "key": {
+        "uuid": "995c4160_f781ac0a",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-24T11:07:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "166fcbb8_7d69f1ac",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2602e11b_0a954665",
         "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
         "patchSetId": 10
@@ -127,6 +223,24 @@
     },
     {
       "key": {
+        "uuid": "c42621cb_e462b724",
+        "filename": "android/android-emu/android/skin/qt/postureselectiondialog.ui",
+        "patchSetId": 10
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-24T11:07:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2602e11b_0a954665",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a813971_34cd2d9d",
         "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
         "patchSetId": 10
@@ -138,6 +252,24 @@
       "writtenOn": "2020-08-20T16:57:33Z",
       "side": 1,
       "message": "how about the \"dark\" button?",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9022f90c_2d5d1fd9",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1294,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-24T11:07:05Z",
+      "side": 1,
+      "message": "These are no longer needed, so I removed them. Icon change now done via call to \u0027ChangeIcon\u0027.",
+      "parentUuid": "8a813971_34cd2d9d",
       "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true

@@ -34,6 +34,24 @@
       "revId": "891bcf4c2e67fb5c88b987ea1d1f943c6358f89b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d2e8e6b_b1cdd50d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-24T11:07:05Z",
+      "side": 1,
+      "message": "Hi Huan, I tried to reproduce this but was unable to. When rebooting from a snapshot, the posture button in the Tools section gets auto-updated to reflect the posture the device had when the snapshot was taken.\n\nCould you please re-test with the last patchset?",
+      "parentUuid": "73398d0a_3206fe9b",
+      "revId": "891bcf4c2e67fb5c88b987ea1d1f943c6358f89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
