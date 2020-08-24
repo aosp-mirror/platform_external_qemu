@@ -17,6 +17,7 @@
 #define _LIBRENDER_FRAMEBUFFER_H
 
 #include "android/base/files/Stream.h"
+#include "android/base/threads/Thread.h"
 #include "android/base/threads/WorkerThread.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/snapshot/common.h"
@@ -647,6 +648,7 @@ private:
     int m_statsNumFrames = 0;
     long long m_statsStartTime = 0;
 
+    android::base::Thread* m_perfThread;
     emugl::Mutex m_lock;
     emugl::ReadWriteMutex m_contextStructureLock;
     FbConfigList* m_configs = nullptr;
