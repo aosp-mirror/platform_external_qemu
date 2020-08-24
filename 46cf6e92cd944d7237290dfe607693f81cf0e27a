@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6aa6ec27_9e6370af",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-08-24T11:06:02Z",
+      "side": 1,
+      "message": "Thank you for the comments, Dan! I have updated the .ui files.",
+      "revId": "46cf6e92cd944d7237290dfe607693f81cf0e27a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
