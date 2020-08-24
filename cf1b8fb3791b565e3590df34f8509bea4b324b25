@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "355def5b_1ad1f8d0",
+        "filename": "android/android-emu/android/skin/qt/posture-selection-dialog.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-08-24T17:41:35Z",
+      "side": 1,
+      "message": "UI initiates at very early stage, even before the sensor hinge structure initiated. Maybe try call this function at first ::show()",
+      "revId": "cf1b8fb3791b565e3590df34f8509bea4b324b25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

@@ -273,6 +273,24 @@
       "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1033072_111a3108",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1294,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-08-24T17:41:35Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "9022f90c_2d5d1fd9",
+      "revId": "1aeba489c083defd8da29fbfcf0b60361ec39069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
