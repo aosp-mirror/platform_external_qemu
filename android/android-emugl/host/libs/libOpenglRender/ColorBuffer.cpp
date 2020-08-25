@@ -394,11 +394,7 @@ void ColorBuffer::readPixelsScaled(int width,
     }
 }
 
-void ColorBuffer::readPixelsYUVCached(int x,
-                                      int y,
-                                      int width,
-                                      int height,
-                                      void* pixels,
+void ColorBuffer::readPixelsYUVCached(void* pixels,
                                       uint32_t pixels_size) {
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
@@ -575,14 +571,22 @@ bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
 }
 
 bool ColorBuffer::readContents(size_t* numBytes, void* pixels) {
-    RecursiveScopedHelperContext context(m_helper);
-    *numBytes = m_numBytes;
+    if (m_yuv_converter) {
+        *numBytes = m_yuv_converter->getDataSize();
+        if (pixels) {
+            readPixelsYUVCached(pixels, *numBytes);
+        }
+        return true;
+    } else {
+        RecursiveScopedHelperContext context(m_helper);
+        *numBytes = m_numBytes;
 
-    if (!pixels) return true;
+        if (!pixels) return true;
 
-    readPixels(0, 0, m_width, m_height, m_format, m_type, pixels);
+        readPixels(0, 0, m_width, m_height, m_format, m_type, pixels);
 
-    return true;
+        return true;
+    }
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer() {

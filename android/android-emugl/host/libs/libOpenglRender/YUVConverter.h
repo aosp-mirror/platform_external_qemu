@@ -56,6 +56,7 @@ public:
     // (rcUpdateColorBuffer)
     void drawConvert(int x, int y, int width, int height, char* pixels);
 
+    uint32_t getDataSize();
     // read YUV data into pixels, exactly pixels_size bytes;
     // if size mismatches, will read nothing.
     void readPixels(uint8_t* pixels, uint32_t pixels_size);
@@ -90,7 +91,6 @@ public:
                                GLsizei height,
                                GLuint* texName_out,
                                bool uvInterleaved);
-
 private:
     void init(int w, int h, FrameworkFormat format);
     void reset();

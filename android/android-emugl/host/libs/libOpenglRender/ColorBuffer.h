@@ -170,11 +170,7 @@ public:
                           void* pixels);
 
     // Read cached YUV pixel values into host memory.
-    void readPixelsYUVCached(int x,
-                             int y,
-                             int width,
-                             int height,
-                             void* pixels,
+    void readPixelsYUVCached(void* pixels,
                              uint32_t pixels_size);
 
     void swapYUVTextures(uint32_t texture_type, uint32_t* textures);
@@ -197,6 +193,7 @@ public:
     bool replaceContents(const void* pixels, size_t numBytes);
 
     // Reads back entire contents, tightly packed rows.
+    // If the framework format is YUV, it will read back as raw YUV data.
     bool readContents(size_t* numBytes, void* pixels);
 
     // Draw a ColorBuffer instance, i.e. blit it to the current guest
@@ -267,7 +264,7 @@ public:
     void waitSync(bool debug = false);
     void setDisplay(uint32_t displayId) { m_displayId = displayId; }
     uint32_t getDisplay() { return m_displayId; }
-
+    FrameworkFormat getFrameworkFormat() { return m_frameworkFormat; }
 public:
     void restore();
 

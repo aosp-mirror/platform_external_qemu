@@ -1802,7 +1802,7 @@ void FrameBuffer::readColorBufferYUV(HandleType p_colorbuffer,
         return;
     }
 
-    (*c).second.cb->readPixelsYUVCached(x, y, width, height, pixels, pixels_size);
+    (*c).second.cb->readPixelsYUVCached(pixels, pixels_size);
 }
 
 void FrameBuffer::createYUVTextures(uint32_t type,
@@ -1943,7 +1943,8 @@ bool FrameBuffer::readColorBufferContents(
 }
 
 bool FrameBuffer::getColorBufferInfo(
-    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat) {
+    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat,
+    FrameworkFormat* frameworkFormat) {
 
     AutoLock mutex(m_lock);
 
@@ -1958,6 +1959,9 @@ bool FrameBuffer::getColorBufferInfo(
     *width = cb->getWidth();
     *height = cb->getHeight();
     *internalformat = cb->getInternalFormat();
+    if (frameworkFormat) {
+        *frameworkFormat = cb->getFrameworkFormat();
+    }
 
     return true;
 }
