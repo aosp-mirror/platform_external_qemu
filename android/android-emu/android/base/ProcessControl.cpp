@@ -171,6 +171,7 @@ public:
     RestartGlobals() = default;
     bool disabled = false;
     bool doRestartOnExit = false;
+    Optional<ProcessLaunchParameters> launchParams = kNullopt;
     Optional<ProcessLaunchParameters> restartParams = kNullopt;
 };
 
@@ -194,6 +195,7 @@ void initializeEmulatorRestartParameters(int argc,
     android::base::saveLaunchParameters(
             createLaunchParametersForCurrentProcess(argc, argv),
             PathUtils::join(outPath, kLaunchParamsFileName));
+    sRestartGlobals->launchParams.emplace(params);
     sRestartGlobals->restartParams.emplace(params);
 }
 
@@ -228,6 +230,14 @@ void finalizeEmulatorRestartParameters(const char* dir) {
     }
 
     sRestartGlobals->restartParams.emplace(params);
+}
+
+const ProcessLaunchParameters* getLaunchParameters() {
+    if (sRestartGlobals->launchParams.hasValue()) {
+        return &(sRestartGlobals->launchParams.value());
+    } else {
+        return nullptr;
+    }
 }
 
 void setEmulatorRestartOnExit() {
