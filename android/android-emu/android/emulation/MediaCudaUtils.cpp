@@ -34,7 +34,7 @@ extern "C" {
 #include "android/emulation/dynlink_nvcuvid.h"
 }
 
-#define MEDIA_CUVID_DEBUG 0
+#define MEDIA_CUVID_DEBUG 1
 
 #if MEDIA_CUVID_DEBUG
 #define CUVID_DPRINT(fmt, ...)                                          \
@@ -106,9 +106,9 @@ void media_cuda_utils_nv12_updater(void* privData,
                                    uint32_t type,
                                    uint32_t* textures) {
     constexpr uint32_t kFRAMEWORK_FORMAT_NV12 = 3;
-    if (type != kFRAMEWORK_FORMAT_NV12) {
-        return;
-    }
+    //if (type != kFRAMEWORK_FORMAT_NV12) {
+    //    return;
+    //}
     CUVID_DPRINT("copyiong Ytex %d", textures[0]);
     CUVID_DPRINT("copyiong UVtex %d", textures[1]);
     media_cuda_copy_decoded_frame(privData, MEDIA_CUDA_COPY_Y_TEXTURE,

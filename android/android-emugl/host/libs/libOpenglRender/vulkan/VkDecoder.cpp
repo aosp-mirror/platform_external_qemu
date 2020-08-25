@@ -1335,6 +1335,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     fprintf(stderr, "stream %p: call vkAllocateMemory 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pAllocateInfo, (unsigned long long)pAllocator, (unsigned long long)pMemory);
                 }
+                printf("pAllocateInfo->pNext %p\n", pAllocateInfo->pNext);
                 VkResult vkAllocateMemory_VkResult_return = (VkResult)0;
                 vkAllocateMemory_VkResult_return = m_state->on_vkAllocateMemory(&m_pool, device, pAllocateInfo, pAllocator, pMemory);
                 vkStream->unsetHandleMapping();
@@ -8131,6 +8132,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkSamplerYcbcrConversionCreateInfo(m_state, (VkSamplerYcbcrConversionCreateInfo*)(pCreateInfo));
                 }
+                printf("decoder VkSamplerYcbcrConversionCreateInfo ycbcrModel %d\n", pCreateInfo->ycbcrModel);
                 if (pAllocator)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));

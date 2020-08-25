@@ -1853,6 +1853,7 @@ void FrameBuffer::updateYUVTextures(uint32_t type,
                                     uint32_t* textures,
                                     void* privData,
                                     void* func) {
+    printf("updateYUVTextures called\n");
     AutoLock mutex(m_lock);
     ScopedBind bind(m_colorBufferHelper);
 
@@ -1943,7 +1944,8 @@ bool FrameBuffer::readColorBufferContents(
 }
 
 bool FrameBuffer::getColorBufferInfo(
-    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat) {
+    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat,
+    FrameworkFormat* frameworkFormat) {
 
     AutoLock mutex(m_lock);
 
@@ -1958,6 +1960,9 @@ bool FrameBuffer::getColorBufferInfo(
     *width = cb->getWidth();
     *height = cb->getHeight();
     *internalformat = cb->getInternalFormat();
+    if (frameworkFormat) {
+        *frameworkFormat = cb->getFrameworkFormat();
+    }
 
     return true;
 }

@@ -16,7 +16,7 @@
 #include "android/emulation/YuvConverter.h"
 #include "android/utils/debug.h"
 
-#define MEDIA_VPX_DEBUG 0
+#define MEDIA_VPX_DEBUG 1
 
 #if MEDIA_VPX_DEBUG
 #define MEDIA_DPRINT(fmt, ...)                                           \
@@ -129,6 +129,7 @@ void MediaVpxVideoHelper::copyYV12FrameToOutputBuffer(size_t outputBufferWidth,
 
 void MediaVpxVideoHelper::copyImgToGuest(vpx_image_t* mImg,
                                          std::vector<uint8_t>& byteBuffer) {
+    printf("MediaVpxVideoHelper::copyImgToGuest");
     size_t outputBufferWidth = mImg->d_w;
     size_t outputBufferHeight = mImg->d_h;
     size_t mWidth = mImg->d_w;

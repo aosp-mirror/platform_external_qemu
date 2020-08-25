@@ -55,7 +55,7 @@ using ColorAspects = MediaSnapshotState::ColorAspects;
 MediaCudaVideoHelper::MediaCudaVideoHelper(OutputTreatmentMode oMode,
                                            FrameStorageMode fMode,
                                            cudaVideoCodec cudaVideoCodecType)
-    : mUseGpuTexture(fMode == FrameStorageMode::USE_GPU_TEXTURE),
+    : mUseGpuTexture(fMode == FrameStorageMode::USE_GPU_TEXTURE/*false*/),
       mCudaVideoCodecType(cudaVideoCodecType) {
     mIgnoreDecoderOutput = (oMode == OutputTreatmentMode::IGNORE_RESULT);
 }

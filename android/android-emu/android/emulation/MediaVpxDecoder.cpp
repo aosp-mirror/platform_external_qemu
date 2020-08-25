@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MEDIA_VPX_DEBUG 0
+#define MEDIA_VPX_DEBUG 1
 
 #if MEDIA_VPX_DEBUG
 #define VPX_DPRINT(fmt, ...)                                        \

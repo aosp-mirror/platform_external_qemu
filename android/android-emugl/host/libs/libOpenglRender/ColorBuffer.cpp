@@ -514,12 +514,18 @@ void ColorBuffer::subUpdate(int x,
     }
 
     if (m_frameworkFormat != FRAMEWORK_FORMAT_GL_COMPATIBLE) {
+        printf("m_yuv_converter->drawConvert\n");
         assert(m_yuv_converter.get());
 
         // This FBO will convert the YUV frame to RGB
         // and render it to |m_tex|.
         bindFbo(&m_yuv_conversion_fbo, m_tex);
         m_yuv_converter->drawConvert(x, y, width, height, (char*)pixels);
+        std::vector<uint8_t> drawn(width * height * 4);
+        s_gles2.glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, drawn.data());
+        //uint8_t* ptr = (uint8_t*)drawn.data() + (height - 1) * 4;
+        uint8_t* ptr = drawn.data();
+        printf("Converted rgb %x %x %x %x\n", ptr[0], ptr[1], ptr[2], ptr[3]);
         unbindFbo();
 
         // |m_tex| still needs to be bound afterwards
@@ -575,14 +581,25 @@ bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
 }
 
 bool ColorBuffer::readContents(size_t* numBytes, void* pixels) {
-    RecursiveScopedHelperContext context(m_helper);
-    *numBytes = m_numBytes;
+    if (m_yuv_converter) {
+        *numBytes = m_yuv_converter->getSrcDataSize();
+        //*numBytes = m_yuv_converter->getDataSize();
+        if (pixels) {
+            memcpy(pixels, m_yuv_converter->getSrcData(), *numBytes);
+            //m_yuv_converter->readPixels((uint8_t*)pixels, *numBytes);
+        }
+        printf("yuv read bytes %d\n", (int)*numBytes);
+        return true;
+    } else {    
+        RecursiveScopedHelperContext context(m_helper);
+        *numBytes = m_numBytes;
 
-    if (!pixels) return true;
+        if (!pixels) return true;
 
-    readPixels(0, 0, m_width, m_height, m_format, m_type, pixels);
+        readPixels(0, 0, m_width, m_height, m_format, m_type, pixels);
 
-    return true;
+        return true;
+    }
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer() {

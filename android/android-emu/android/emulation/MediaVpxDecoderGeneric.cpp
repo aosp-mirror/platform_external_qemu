@@ -29,7 +29,7 @@
 #include <cassert>
 #include <functional>
 
-#define MEDIA_VPX_DEBUG 0
+#define MEDIA_VPX_DEBUG 1
 
 #if MEDIA_VPX_DEBUG
 #define VPX_DPRINT(fmt, ...)                                                \
@@ -230,6 +230,7 @@ void MediaVpxDecoderGeneric::try_decode(const uint8_t* data,
 }
 
 void MediaVpxDecoderGeneric::fetchAllFrames() {
+    printf("MediaVpxDecoderGeneric::fetchAllFrames\n");
     while (true) {
         MediaSnapshotState::FrameInfo frame;
         bool success = mVideoHelper->receiveFrame(&frame);

@@ -16,7 +16,7 @@
 #include "android/emulation/YuvConverter.h"
 #include "android/utils/debug.h"
 
-#define MEDIA_FFMPEG_DEBUG 0
+#define MEDIA_FFMPEG_DEBUG 1
 
 #if MEDIA_FFMPEG_DEBUG
 #define MEDIA_DPRINT(fmt, ...)                                              \
@@ -177,6 +177,8 @@ void MediaFfmpegVideoHelper::fetchAllFrames() {
         }
         copyFrame();
         MEDIA_DPRINT("save frame");
+        //mDecodedFrame[0] = 0xab;
+        printf("decoded frame %x %x %x %x\n", mDecodedFrame[0], mDecodedFrame[1], mDecodedFrame[2], mDecodedFrame[3]);
         mSavedDecodedFrames.push_back(MediaSnapshotState::FrameInfo{
                 std::move(mDecodedFrame), std::vector<uint32_t>{},
                 (int)mFrame->width, (int)mFrame->height, (uint64_t)mFrame->pts,

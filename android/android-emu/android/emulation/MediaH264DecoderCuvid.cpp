@@ -36,7 +36,7 @@ extern "C" {
 #include "android/emulation/dynlink_cudaGL.h"
 #include "android/emulation/dynlink_nvcuvid.h"
 }
-#define MEDIA_H264_DEBUG 0
+#define MEDIA_H264_DEBUG 1
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt, ...)                                              \

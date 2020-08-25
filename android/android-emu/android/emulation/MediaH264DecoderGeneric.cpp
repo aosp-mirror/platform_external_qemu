@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MEDIA_H264_DEBUG 0
+#define MEDIA_H264_DEBUG 1
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt, ...)                                                \
@@ -53,6 +53,7 @@ using TextureFrame = MediaHostRenderer::TextureFrame;
 namespace {
 
 bool canUseCudaDecoder() {
+    return false;
 #ifndef __APPLE__
     if (MediaCudaDriverHelper::initCudaDrivers()) {
         H264_DPRINT("Using Cuvid decoder on Linux/Windows");
@@ -69,6 +70,7 @@ bool canUseCudaDecoder() {
 
 bool canDecodeToGpuTexture() {
 #ifndef __APPLE__
+    return false;
     if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
         return true;
     } else {
@@ -260,6 +262,7 @@ void MediaH264DecoderGeneric::try_decode(const uint8_t* data,
 }
 
 void MediaH264DecoderGeneric::fetchAllFrames() {
+    printf("MediaH264DecoderGeneric::fetchAllFrames\n");
     while (true) {
         MediaSnapshotState::FrameInfo frame;
         bool success =
@@ -286,7 +289,7 @@ void MediaH264DecoderGeneric::flush(void* ptr) {
 }
 
 void MediaH264DecoderGeneric::getImage(void* ptr) {
-    H264_DPRINT("getImage %p", ptr);
+    H264_DPRINT("getImage %p mUseGpuTexture %d", ptr, mUseGpuTexture);
     GetImageParam param{};
     mParser.parseGetImageParams(ptr, param);
 

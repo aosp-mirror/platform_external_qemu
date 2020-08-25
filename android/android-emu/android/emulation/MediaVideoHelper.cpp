@@ -14,7 +14,7 @@
 
 #include "android/emulation/MediaVideoHelper.h"
 
-#define MEDIA_VIDEO_DEBUG 0
+#define MEDIA_VIDEO_DEBUG 1
 
 #if MEDIA_VIDEO_DEBUG
 #define MEDIA_DPRINT(fmt, ...)                                                 \
