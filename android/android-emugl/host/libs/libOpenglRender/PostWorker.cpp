@@ -154,9 +154,12 @@ void PostWorker::viewport(int width, int height) {
 // displaying whatever happens to be in the back buffer,
 // clear() is useful for outputting consistent colors.
 void PostWorker::clear() {
+#ifndef __linux__
+    // Bug: 166317060 (Except it crashes on iris_dri.so)
     s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
                     GL_STENCIL_BUFFER_BIT);
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
+#endif
 }
 
 void PostWorker::compose(ComposeDevice* p) {
