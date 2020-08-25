@@ -535,7 +535,7 @@ void YUVConverter::init(int width, int height, FrameworkFormat format) {
 
     mWidth = width;
     mHeight = height;
-
+    mPixels.resize(ywidth * height + cwidth * cheight * 2);
     if (!mYtex)
         createYUVGLTex(GL_TEXTURE0, ywidth, height, &mYtex, false);
     switch (mFormat) {
@@ -616,6 +616,15 @@ void YUVConverter::restoreGLState() {
     s_gles2.glUseProgram(mCurrProgram);
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mCurrVbo);
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCurrIbo);
+}
+
+uint32_t YUVConverter::getDataSize() {
+    uint32_t align = (mFormat == FRAMEWORK_FORMAT_YV12) ? 16 : 1;
+    uint32_t yStride = (mWidth + (align - 1)) & ~(align - 1);
+    uint32_t uvStride = (yStride / 2 + (align - 1)) & ~(align - 1);
+    uint32_t uvHeight = mHeight / 2;
+    uint32_t dataSize = yStride * mHeight + 2 * (uvHeight * uvStride);
+    return dataSize;
 }
 
 void YUVConverter::readPixels(uint8_t* pixels, uint32_t pixels_size) {
@@ -728,10 +737,14 @@ void YUVConverter::drawConvert(int x, int y,
         return;
     }
 
+    memcpy(mPixels.data(), pixels, mPixels.size());
     subUpdateYUVGLTex(GL_TEXTURE0, mYtex,
                       x, y, ywidth, height,
                       pixels + yoff, false);
 
+    //for (int _y = y; _y < _y + height; _y++) {
+    //    memcpy(mPixels.data() + yoff + mWidth * mHeight, pixels + ywidth * height);
+    //}
     switch (mFormat) {
         case FRAMEWORK_FORMAT_YV12:
             subUpdateYUVGLTex(GL_TEXTURE1, mUtex,
