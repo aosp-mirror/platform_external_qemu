@@ -143,4 +143,7 @@ message Snapshot {
 
     // Folded state.
     optional bool folded = 16;
+
+    // Emulator boot parameters
+    repeated string launch_parameters = 17;
 }

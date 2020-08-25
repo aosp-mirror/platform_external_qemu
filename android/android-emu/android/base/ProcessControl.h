@@ -45,6 +45,7 @@ void saveLaunchParameters(const ProcessLaunchParameters& launchParams, StringVie
 void finalizeEmulatorRestartParameters(const char* dir);
 
 ProcessLaunchParameters loadLaunchParameters(StringView filename);
+const ProcessLaunchParameters* getLaunchParameters();
 void launchProcessFromParameters(const ProcessLaunchParameters& launchParams, bool useArgv0 = false);
 
 

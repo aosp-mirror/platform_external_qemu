@@ -13,6 +13,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/StringFormat.h"
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
@@ -464,6 +465,13 @@ bool Snapshot::save() {
         }
     }
 
+    const base::ProcessLaunchParameters* launchParameters =
+            base::getLaunchParameters();
+    if (launchParameters) {
+        for (const std::string& argv : launchParameters->argv) {
+            mSnapshotPb.add_launch_parameters(argv);
+        }
+    }
     return writeSnapshotToDisk();
 }
 
