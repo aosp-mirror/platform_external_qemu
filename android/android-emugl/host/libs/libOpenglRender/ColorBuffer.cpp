@@ -514,6 +514,7 @@ void ColorBuffer::subUpdate(int x,
     }
 
     if (m_frameworkFormat != FRAMEWORK_FORMAT_GL_COMPATIBLE) {
+        printf("m_yuv_converter->drawConvert\n");
         assert(m_yuv_converter.get());
 
         // This FBO will convert the YUV frame to RGB
@@ -575,14 +576,22 @@ bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
 }
 
 bool ColorBuffer::readContents(size_t* numBytes, void* pixels) {
-    RecursiveScopedHelperContext context(m_helper);
-    *numBytes = m_numBytes;
+    if (m_yuv_converter) {
+        *numBytes = m_yuv_converter->getSrcDataSize();
+        if (pixels) {
+            memcpy(pixels, m_yuv_converter->getSrcData(), *numBytes);
+        }
+        return true;
+    } else {    
+        RecursiveScopedHelperContext context(m_helper);
+        *numBytes = m_numBytes;
 
-    if (!pixels) return true;
+        if (!pixels) return true;
 
-    readPixels(0, 0, m_width, m_height, m_format, m_type, pixels);
+        readPixels(0, 0, m_width, m_height, m_format, m_type, pixels);
 
-    return true;
+        return true;
+    }
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer() {

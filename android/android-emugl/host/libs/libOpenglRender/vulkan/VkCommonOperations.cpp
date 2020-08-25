@@ -388,8 +388,11 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
 
         // TODO: YUV formats used in Android
         // Fails on Mac
-        // VK_FORMAT_G8_B8R8_2PLANE_420_UNORM,
-        // VK_FORMAT_G8_B8R8_2PLANE_422_UNORM,
+        VK_FORMAT_G8_B8R8_2PLANE_420_UNORM,
+        VK_FORMAT_G8_B8R8_2PLANE_422_UNORM,
+        VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM,
+        VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM,
+
     };
 
     std::vector<VkImageType> types = {
@@ -1371,9 +1374,10 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     int width;
     int height;
     GLint internalformat;
+    FrameworkFormat frameworkFormat;
 
     if (!fb->getColorBufferInfo(colorBufferHandle, &width, &height,
-                                &internalformat)) {
+                                &internalformat, &frameworkFormat)) {
         return false;
     }
 
@@ -1392,18 +1396,38 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
         return true;
     }
 
-    VkFormat vkFormat = glFormat2VkFormat(internalformat);
+    VkFormat vkFormat;
+    bool glCompatible = (frameworkFormat == FrameworkFormat::FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    switch (frameworkFormat) {
+        case FrameworkFormat::FRAMEWORK_FORMAT_GL_COMPATIBLE:
+            vkFormat = glFormat2VkFormat(internalformat);
+            break;
+        case FrameworkFormat::FRAMEWORK_FORMAT_NV12:
+            vkFormat = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
+            break;
+        case FrameworkFormat::FRAMEWORK_FORMAT_YUV_420_888:
+            vkFormat = VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM;
+            break;
+        default:
+            vkFormat = glFormat2VkFormat(internalformat);
+            fprintf(stderr, "WARNING: unsupported framework format %d\n", frameworkFormat);
+            break;
+    }
+    //vkFormat = glFormat2VkFormat(internalformat);
+
 
     VkEmulation::ColorBufferInfo res;
 
     res.handle = colorBufferHandle;
 
     // TODO
-    res.frameworkFormat = 0;
+    res.frameworkFormat = frameworkFormat;
     res.frameworkStride = 0;
 
     res.extent = { (uint32_t)width, (uint32_t)height, 1 };
     res.format = vkFormat;
+    printf("setupVkColorBuffer internal format %d frameworkFormat %d vkFormat %d\n",
+        internalformat, frameworkFormat, vkFormat);
     res.type = VK_IMAGE_TYPE_2D;
 
     res.tiling = (memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
@@ -1414,7 +1438,10 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     for (const auto& supportInfo : sVkEmulation->imageSupportInfo) {
         if (supportInfo.format == vkFormat && supportInfo.supported) {
             formatProperties = supportInfo.formatProps2.formatProperties;
+            printf("format supported 0x%x\n", vkFormat);
             break;
+        } else if (supportInfo.format == vkFormat) {
+            printf("format not supported 0x%x\n", vkFormat);
         }
     }
 
@@ -1495,8 +1522,9 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
         res.memory.typeIndex = lastGoodTypeIndex(res.memReqs.memoryTypeBits);
     }
 
-    LOG(VERBOSE) << "ColorBuffer " << colorBufferHandle
-                 << "allocation size and type index: " << res.memory.size
+    
+    LOG(WARNING) << "ColorBuffer " << colorBufferHandle
+                 << ", allocation size and type index: " << res.memory.size
                  << ", " << res.memory.typeIndex
                  << ", allocated memory property: "
                  << sVkEmulation->deviceInfo.memProps
@@ -1509,6 +1537,19 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
             isHostVisible ? Optional(res.memReqs.alignment) : kNullopt;
     bool allocRes = allocExternalMemory(
             vk, &res.memory, true /*actuallyExternal*/, deviceAlignment);
+    /*bool allocRes = allocExternalMemory(vk, &res.memory);
+    if (frameworkFormat != FrameworkFormat::FRAMEWORK_FORMAT_GL_COMPATIBLE && yuvData) {
+        void* mappedPtr = res.memory.mappedPtr;
+        printf("mappedPtr %p\n", mappedPtr);
+        if (res.memory.mappedPtr == nullptr) {
+            vk->vkMapMemory(sVkEmulation->device, res.memory.memory, 0,
+                            res.memory.size, 0, &mappedPtr);
+        }
+        memcpy(mappedPtr, yuvData, res.memory.size);
+        if (res.memory.mappedPtr == nullptr) {
+            vk->vkUnmapMemory(sVkEmulation->device, res.memory.memory);
+        }
+    }*/
 
     if (!allocRes) {
         LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
@@ -1566,6 +1607,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
 
     if (sVkEmulation->deviceInfo.supportsExternalMemory &&
         sVkEmulation->deviceInfo.glInteropSupported &&
+        glCompatible &&
         FrameBuffer::getFB()->importMemoryToColorBuffer(
             dupExternalMemory(res.memory.exportedHandle),
             res.memory.size,
@@ -1574,6 +1616,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
             vulkanOnly,
             colorBufferHandle)) {
         res.glExported = true;
+        // TODO: importMemoryToColorBuffer for YUV format import should return false
     }
 
     if (exported) *exported = res.glExported;
@@ -1645,7 +1688,8 @@ bool updateColorBufferFromVkImage(uint32_t colorBufferHandle) {
     }
 
     if (infoPtr->glExported ||
-        (infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly)) {
+        (infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly) ||
+        infoPtr->frameworkFormat != FrameworkFormat::FRAMEWORK_FORMAT_GL_COMPATIBLE) {
         // No sync needed if exported to GL or in Vulkan-only mode
         return true;
     }
@@ -1783,8 +1827,10 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
         return false;
     }
 
-    if (infoPtr->glExported ||
-        (infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly)) {
+    if (infoPtr->frameworkFormat == FrameworkFormat::FRAMEWORK_FORMAT_GL_COMPATIBLE && (
+        infoPtr->glExported ||
+        (infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly))
+        /*|| YUV (TODO)*/) {
         // No sync needed if exported to GL or in Vulkan-only mode
         return true;
     }
@@ -1866,19 +1912,6 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
         1, &presentToTransferSrc);
 
     // Copy to staging buffer
-    uint32_t bpp = 4; /* format always rgba8...not */
-    switch (infoPtr->format) {
-        case VK_FORMAT_R5G6B5_UNORM_PACK16:
-            bpp = 2;
-            break;
-        case VK_FORMAT_R8G8B8_UNORM:
-            bpp = 3;
-            break;
-        default:
-        case VK_FORMAT_R8G8B8A8_UNORM:
-            bpp = 4;
-            break;
-    }
     VkBufferImageCopy region = {
         0 /* buffer offset */,
         infoPtr->extent.width,
@@ -1930,6 +1963,7 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
 
     vk->vkInvalidateMappedMemoryRanges(
         sVkEmulation->device, 1, &toInvalidate);
+    printf("updateVkImageFromColorBuffer done, framework format %d\n", infoPtr->frameworkFormat);
     return true;
 }
 
