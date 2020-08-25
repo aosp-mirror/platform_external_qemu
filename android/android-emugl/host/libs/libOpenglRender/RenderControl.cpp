@@ -984,6 +984,7 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
     // Since this is a modify operation, also read the current contents
     // of the VkImage, if any.
     goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+    printf("rcUpdateColorBuffer called, cb %d\n", colorBuffer);
 
     fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 
@@ -1015,6 +1016,7 @@ static int rcUpdateColorBufferDMA(uint32_t colorBuffer,
     // of the VkImage, if any.
     goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
 
+    printf("rcUpdateColorBufferDMA called, cb %d size %d\n", colorBuffer, (int)pixels_size);
     fb->updateColorBuffer(colorBuffer, x, y, width, height,
                           format, type, pixels);
 

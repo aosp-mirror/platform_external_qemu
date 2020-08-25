@@ -795,6 +795,11 @@ public:
         auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
         auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
 
+        VkPhysicalDeviceSamplerYcbcrConversionFeatures yuvFeature;
+        yuvFeature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES;
+        yuvFeature.pNext = nullptr;
+        yuvFeature.samplerYcbcrConversion = true;
+
         std::vector<const char*> finalExts =
             filteredExtensionNames(
                     pCreateInfo->enabledExtensionCount,
@@ -802,6 +807,8 @@ public:
 
         // Run the underlying API call, filtering extensions.
         VkDeviceCreateInfo createInfoFiltered = *pCreateInfo;
+        //yuvFeature.pNext = createInfoFiltered.pNext;
+        createInfoFiltered.pNext = &yuvFeature;
         bool emulateTextureEtc2 = false;
         bool emulateTextureAstc = false;
         VkPhysicalDeviceFeatures featuresFiltered;
@@ -1210,6 +1217,10 @@ public:
         cmpInfo.device = device;
 
         AndroidNativeBufferInfo anbInfo;
+        const VkExternalMemoryImageCreateInfo* emi = vk_find_struct<VkExternalMemoryImageCreateInfo>(pCreateInfo);
+        if (emi) {
+            printf("vkCreateImage VkExternalMemoryImageCreateInfo found\n");
+        }
         const VkNativeBufferANDROID* nativeBufferANDROID =
             vk_find_struct<VkNativeBufferANDROID>(pCreateInfo);
 
@@ -2577,6 +2588,11 @@ public:
             //     and associate it with the physical address
         }
 
+        printf("pAllocateInfo->pNext %p\n", pAllocateInfo->pNext);
+        if (pAllocateInfo->pNext) {
+            printf("pAllocateInfo->pNext->sType %d\n",
+                ((VkImportColorBufferGOOGLE*)(pAllocateInfo->pNext))->sType);
+        }
         const VkImportColorBufferGOOGLE* importCbInfoPtr =
             vk_find_struct<VkImportColorBufferGOOGLE>(pAllocateInfo);
         const VkImportBufferGOOGLE* importBufferInfoPtr =
@@ -2636,14 +2652,16 @@ public:
         lock.unlock();
 
         if (importCbInfoPtr) {
+            printf("importCbInfoPtr\n");
             // Ensure color buffer has Vulkan backing.
             setupVkColorBuffer(importCbInfoPtr->colorBuffer,
                                false /* not vulkan only */,
-                               0u /* memoryProperty */, nullptr,
+                               0UL /* memoryProperty */, nullptr,
                                // Modify the allocation size and type index
                                // to suit the resulting image memory size.
                                &localAllocInfo.allocationSize,
                                &localAllocInfo.memoryTypeIndex);
+            updateVkImageFromColorBuffer(importCbInfoPtr->colorBuffer);
 
             if (m_emu->instanceSupportsExternalMemoryCapabilities) {
                 VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
@@ -2664,7 +2682,10 @@ public:
 #else
                 importInfo.fd = cbExtMemoryHandle;
 #endif
+                printf("importCbInfo appending import struct chain\n");
                 vk_append_struct(&structChainIter, &importInfo);
+            } else {
+                printf("importCbInfo failed\n");
             }
         }
 

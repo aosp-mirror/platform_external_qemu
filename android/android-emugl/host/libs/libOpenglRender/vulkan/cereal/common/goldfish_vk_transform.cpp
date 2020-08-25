@@ -10336,6 +10336,7 @@ void transform_fromhost_extension_struct(
             break;
         }
 #endif
+        if (VK_GOOGLE_color_buffer != 1) {}
 #ifdef VK_GOOGLE_color_buffer
         case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
         {
