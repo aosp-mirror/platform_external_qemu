@@ -90,3 +90,7 @@ rcGetDisplayPose
     len w sizeof(uint32_t)
     dir h out
     len h sizeof(uint32_t)
+
+rcCreateSyncKHR2
+    dir attribs in
+    len attribs num_attribs
