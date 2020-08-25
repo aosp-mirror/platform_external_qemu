@@ -12928,6 +12928,8 @@ void unmarshal_VkImportColorBufferGOOGLE(
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->colorBuffer, sizeof(uint32_t));
+    printf("unmarshal_VkImportColorBufferGOOGLE type %d colorbuffer %d\n",
+            forUnmarshaling->sType, forUnmarshaling->colorBuffer);
 }
 
 void marshal_VkImportBufferGOOGLE(

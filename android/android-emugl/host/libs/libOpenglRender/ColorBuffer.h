@@ -267,7 +267,9 @@ public:
     void waitSync(bool debug = false);
     void setDisplay(uint32_t displayId) { m_displayId = displayId; }
     uint32_t getDisplay() { return m_displayId; }
+    FrameworkFormat getFrameworkFormat() { return m_frameworkFormat; }
 
+    const uint8_t* getYuvData();
 public:
     void restore();
 

@@ -400,7 +400,9 @@ public:
     bool getColorBufferInfo(HandleType p_colorbuffer,
                             int* width,
                             int* height,
-                            GLint* internalformat);
+                            GLint* internalformat,
+                            FrameworkFormat* frameworkFormat = nullptr,
+                            const uint8_t** yuvData = nullptr);
     bool getBufferInfo(HandleType p_buffer, int* size);
 
     // Display the content of a given ColorBuffer into the framebuffer's
