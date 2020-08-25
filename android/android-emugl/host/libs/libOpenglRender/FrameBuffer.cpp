@@ -1883,7 +1883,8 @@ bool FrameBuffer::readColorBufferContents(
 }
 
 bool FrameBuffer::getColorBufferInfo(
-    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat) {
+    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat,
+    FrameworkFormat* frameworkFormat, const uint8_t** yuvData) {
 
     AutoLock mutex(m_lock);
 
@@ -1898,6 +1899,12 @@ bool FrameBuffer::getColorBufferInfo(
     *width = cb->getWidth();
     *height = cb->getHeight();
     *internalformat = cb->getInternalFormat();
+    if (frameworkFormat) {
+        *frameworkFormat = cb->getFrameworkFormat();
+    }
+    if (yuvData) {
+        *yuvData = cb->getYuvData();
+    }
 
     return true;
 }

@@ -90,7 +90,9 @@ public:
                                GLsizei height,
                                GLuint* texName_out,
                                bool uvInterleaved);
-
+    const uint8_t* getSrcData() {
+        return mPixels.data();
+    }
 private:
     void init(int w, int h, FrameworkFormat format);
     void reset();
@@ -141,4 +143,5 @@ private:
     GLint mCurrTexBind = 0;
     GLint mCurrVbo = 0;
     GLint mCurrIbo = 0;
+    std::vector<uint8_t> mPixels = {};
 };
