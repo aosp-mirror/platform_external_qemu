@@ -154,8 +154,9 @@ void PostWorker::viewport(int width, int height) {
 // displaying whatever happens to be in the back buffer,
 // clear() is useful for outputting consistent colors.
 void PostWorker::clear() {
-    s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
-                    GL_STENCIL_BUFFER_BIT);
+    // Bug: 166317060
+    // s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
+    //                 GL_STENCIL_BUFFER_BIT);
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 
