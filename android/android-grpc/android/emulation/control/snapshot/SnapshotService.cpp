@@ -150,6 +150,8 @@ public:
             result.set_err(tw.error_msg());
         }
         LOG(VERBOSE) << "Completed writing in " << sw.restartUs() << " us";
+        //int success = iniFile_saveToFile(avdInfo_getConfigini(android_avdInfo),
+        //    PathUtils::join(snapshot->dataDir(), CORE_CONFIG_INI).c_str());
 
         // Now add in the metadata.
         auto entries = System::get()->scanDirEntries(snapshot->dataDir(), true);
