@@ -535,7 +535,7 @@ void YUVConverter::init(int width, int height, FrameworkFormat format) {
 
     mWidth = width;
     mHeight = height;
-
+    mPixels.resize(ywidth * height + cwidth * cheight * 2);
     if (!mYtex)
         createYUVGLTex(GL_TEXTURE0, ywidth, height, &mYtex, false);
     switch (mFormat) {
@@ -728,10 +728,14 @@ void YUVConverter::drawConvert(int x, int y,
         return;
     }
 
+    memcpy(mPixels.data(), pixels, mPixels.size());
     subUpdateYUVGLTex(GL_TEXTURE0, mYtex,
                       x, y, ywidth, height,
                       pixels + yoff, false);
 
+    //for (int _y = y; _y < _y + height; _y++) {
+    //    memcpy(mPixels.data() + yoff + mWidth * mHeight, pixels + ywidth * height);
+    //}
     switch (mFormat) {
         case FRAMEWORK_FORMAT_YV12:
             subUpdateYUVGLTex(GL_TEXTURE1, mUtex,
