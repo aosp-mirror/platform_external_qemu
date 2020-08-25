@@ -22,14 +22,16 @@
 #include <string>
 #include <vector>
 
-#include "android/base/async/ThreadLooper.h"
+#include "android/android.h"
+#include "android/avd/info.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/Stopwatch.h"
 #include "android/base/StringView.h"
-#include "android/base/Uuid.h"                                     // for Uuid
+#include "android/base/Uuid.h"  // for Uuid
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/GzipStreambuf.h"
-#include "android/base/files/PathUtils.h"                          // for pj
+#include "android/base/files/PathUtils.h"  // for pj
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
@@ -38,6 +40,7 @@
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
 #include "android/emulation/control/snapshot/TarStream.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/globals.h"
 #include "android/snapshot/Icebox.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
@@ -150,6 +153,12 @@ public:
             result.set_err(tw.error_msg());
         }
         LOG(VERBOSE) << "Completed writing in " << sw.restartUs() << " us";
+        int success = iniFile_saveToFile(
+                avdInfo_getConfigIni(android_avdInfo),
+                PathUtils::join(snapshot->dataDir(), CORE_CONFIG_INI).c_str());
+        if (success != 0) {
+            result.set_err("Failed to save snapshot meta data");
+        }
 
         // Now add in the metadata.
         auto entries = System::get()->scanDirEntries(snapshot->dataDir(), true);
