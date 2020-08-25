@@ -387,12 +387,14 @@ public:
         HandleType p_colorbuffer,
         const void *pixels,
         size_t numBytes);
-    // Reads back the color buffer to |pixels|
+    // Reads back the raw color buffer to |pixels|
     // if |pixels| is not null.
     // Always returns in |numBytes| how many bytes were
     // planned to be transmitted.
     // |numBytes| is not an input parameter;
     // fewer or more bytes cannot be specified.
+    // If the framework format is YUV, it will read
+    // back as raw YUV data.
     bool readColorBufferContents(
         HandleType p_colorbuffer,
         size_t* numBytes,
@@ -401,7 +403,8 @@ public:
     bool getColorBufferInfo(HandleType p_colorbuffer,
                             int* width,
                             int* height,
-                            GLint* internalformat);
+                            GLint* internalformat,
+                            FrameworkFormat* frameworkFormat = nullptr);
     bool getBufferInfo(HandleType p_buffer, int* size);
 
     // Display the content of a given ColorBuffer into the framebuffer's

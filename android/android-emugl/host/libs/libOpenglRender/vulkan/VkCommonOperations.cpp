@@ -388,8 +388,11 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
 
         // TODO: YUV formats used in Android
         // Fails on Mac
-        // VK_FORMAT_G8_B8R8_2PLANE_420_UNORM,
-        // VK_FORMAT_G8_B8R8_2PLANE_422_UNORM,
+        VK_FORMAT_G8_B8R8_2PLANE_420_UNORM,
+        VK_FORMAT_G8_B8R8_2PLANE_422_UNORM,
+        VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM,
+        VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM,
+
     };
 
     std::vector<VkImageType> types = {
@@ -1371,9 +1374,10 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     int width;
     int height;
     GLint internalformat;
+    FrameworkFormat frameworkFormat;
 
     if (!fb->getColorBufferInfo(colorBufferHandle, &width, &height,
-                                &internalformat)) {
+                                &internalformat, &frameworkFormat)) {
         return false;
     }
 
@@ -1392,14 +1396,31 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
         return true;
     }
 
-    VkFormat vkFormat = glFormat2VkFormat(internalformat);
+    VkFormat vkFormat;
+    bool glCompatible = (frameworkFormat == FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    switch (frameworkFormat) {
+        case FrameworkFormat::FRAMEWORK_FORMAT_GL_COMPATIBLE:
+            vkFormat = glFormat2VkFormat(internalformat);
+            break;
+        case FrameworkFormat::FRAMEWORK_FORMAT_NV12:
+            vkFormat = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
+            break;
+        case FrameworkFormat::FRAMEWORK_FORMAT_YV12:
+        case FrameworkFormat::FRAMEWORK_FORMAT_YUV_420_888:
+            vkFormat = VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM;
+            break;
+        default:
+            vkFormat = glFormat2VkFormat(internalformat);
+            fprintf(stderr, "WARNING: unsupported framework format %d\n", frameworkFormat);
+            break;
+    }
 
     VkEmulation::ColorBufferInfo res;
 
     res.handle = colorBufferHandle;
 
     // TODO
-    res.frameworkFormat = 0;
+    res.frameworkFormat = frameworkFormat;
     res.frameworkStride = 0;
 
     res.extent = { (uint32_t)width, (uint32_t)height, 1 };
@@ -1496,7 +1517,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     }
 
     LOG(VERBOSE) << "ColorBuffer " << colorBufferHandle
-                 << "allocation size and type index: " << res.memory.size
+                 << ", allocation size and type index: " << res.memory.size
                  << ", " << res.memory.typeIndex
                  << ", allocated memory property: "
                  << sVkEmulation->deviceInfo.memProps
@@ -1566,6 +1587,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
 
     if (sVkEmulation->deviceInfo.supportsExternalMemory &&
         sVkEmulation->deviceInfo.glInteropSupported &&
+        glCompatible &&
         FrameBuffer::getFB()->importMemoryToColorBuffer(
             dupExternalMemory(res.memory.exportedHandle),
             res.memory.size,
@@ -1645,7 +1667,8 @@ bool updateColorBufferFromVkImage(uint32_t colorBufferHandle) {
     }
 
     if (infoPtr->glExported ||
-        (infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly)) {
+        (infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly) ||
+        infoPtr->frameworkFormat != FrameworkFormat::FRAMEWORK_FORMAT_GL_COMPATIBLE) {
         // No sync needed if exported to GL or in Vulkan-only mode
         return true;
     }
@@ -1783,8 +1806,9 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
         return false;
     }
 
-    if (infoPtr->glExported ||
-        (infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly)) {
+    if (infoPtr->frameworkFormat == FrameworkFormat::FRAMEWORK_FORMAT_GL_COMPATIBLE && (
+        infoPtr->glExported ||
+        infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly)) {
         // No sync needed if exported to GL or in Vulkan-only mode
         return true;
     }
@@ -1866,37 +1890,72 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
         1, &presentToTransferSrc);
 
     // Copy to staging buffer
-    uint32_t bpp = 4; /* format always rgba8...not */
-    switch (infoPtr->format) {
-        case VK_FORMAT_R5G6B5_UNORM_PACK16:
-            bpp = 2;
-            break;
-        case VK_FORMAT_R8G8B8_UNORM:
-            bpp = 3;
-            break;
-        default:
-        case VK_FORMAT_R8G8B8A8_UNORM:
-            bpp = 4;
-            break;
+    std::vector<VkBufferImageCopy> regions;
+    if (infoPtr->frameworkFormat == FrameworkFormat::FRAMEWORK_FORMAT_GL_COMPATIBLE) {
+        regions.push_back({
+            0 /* buffer offset */,
+            infoPtr->extent.width,
+            infoPtr->extent.height,
+            {
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                0, 0, 1,
+            },
+            { 0, 0, 0 },
+            infoPtr->extent,
+        });
+    } else {
+        // YUV formats
+        bool swapUV = infoPtr->frameworkFormat == FRAMEWORK_FORMAT_YV12;
+        VkExtent3D subplaneExtent = {
+            infoPtr->extent.width / 2,
+            infoPtr->extent.height / 2,
+            1
+        };
+        regions.push_back({
+            0 /* buffer offset */,
+            infoPtr->extent.width,
+            infoPtr->extent.height,
+            {
+                VK_IMAGE_ASPECT_PLANE_0_BIT,
+                0, 0, 1,
+            },
+            { 0, 0, 0 },
+            infoPtr->extent,
+        });
+        regions.push_back({
+            infoPtr->extent.width * infoPtr->extent.height /* buffer offset */,
+            subplaneExtent.width,
+            subplaneExtent.height,
+            {
+                swapUV ? VK_IMAGE_ASPECT_PLANE_2_BIT : VK_IMAGE_ASPECT_PLANE_1_BIT,
+                0, 0, 1,
+            },
+            { 0, 0, 0 },
+            subplaneExtent,
+        });
+        if (infoPtr->frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888
+            || infoPtr->frameworkFormat == FRAMEWORK_FORMAT_YV12) {
+            regions.push_back({
+                infoPtr->extent.width * infoPtr->extent.height
+                    + subplaneExtent.width * subplaneExtent.height,
+                subplaneExtent.width,
+                subplaneExtent.height,
+                {
+                    swapUV ? VK_IMAGE_ASPECT_PLANE_1_BIT : VK_IMAGE_ASPECT_PLANE_2_BIT,
+                    0, 0, 1,
+                },
+                { 0, 0, 0 },
+                subplaneExtent,
+            });
+        }
     }
-    VkBufferImageCopy region = {
-        0 /* buffer offset */,
-        infoPtr->extent.width,
-        infoPtr->extent.height,
-        {
-            VK_IMAGE_ASPECT_COLOR_BIT,
-            0, 0, 1,
-        },
-        { 0, 0, 0 },
-        infoPtr->extent,
-    };
-
+        
     vk->vkCmdCopyBufferToImage(
         sVkEmulation->commandBuffer,
         sVkEmulation->staging.buffer,
         infoPtr->image,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        1, &region);
+        regions.size(), regions.data());
 
     vk->vkEndCommandBuffer(sVkEmulation->commandBuffer);
 
