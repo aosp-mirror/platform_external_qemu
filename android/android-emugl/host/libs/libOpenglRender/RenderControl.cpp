@@ -30,6 +30,7 @@
 #include "vulkan/VkDecoderGlobalState.h"
 
 #include "android/utils/debug.h"
+#include "android/base/containers/StaticMap.h"
 #include "android/base/StringView.h"
 #include "android/base/Tracing.h"
 #include "emugl/common/feature_control.h"
@@ -218,6 +219,12 @@ static constexpr android::base::StringView kVulkanShaderFloat16Int8 = "ANDROID_E
 
 // Async queue submit
 static constexpr android::base::StringView kVulkanAsyncQueueSubmit = "ANDROID_EMU_vulkan_async_queue_submit";
+
+// Host side tracing
+static constexpr android::base::StringView kHostSideTracing = "ANDROID_EMU_host_side_tracing";
+
+// Guest sync handles
+static constexpr android::base::StringView kGuestSyncHandles = "ANDROID_EMU_guest_sync_handles";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
@@ -584,6 +591,14 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
         // ASTC LDR compressed texture support.
         glStr += "GL_KHR_texture_compression_astc_ldr ";
+
+        // Host side tracing support.
+        glStr += kHostSideTracing;
+        glStr += " ";
+
+        // Guest sync handle support.
+        glStr += kGuestSyncHandles;
+        glStr += " ";
 
         if (emugl_feature_is_enabled(android::featurecontrol::IgnoreHostOpenGLErrors)) {
             glStr += kGLESNoHostError;
@@ -1382,6 +1397,163 @@ static int32_t rcMapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
     return result;
 }
 
+static void rcFlushWindowColorBufferAsyncWithFrameNumber(uint32_t windowSurface, uint32_t frameNumber) {
+    (void)frameNumber;
+    rcFlushWindowColorBufferAsync(windowSurface);
+}
+
+static void rcSetTracingForPuid(uint64_t puid, uint32_t enable) {
+    fprintf(stderr, "%s: puid 0x%llx tracing: %d\n", __func__, (unsigned long long)puid, enable);
+}
+
+class GuestSyncState {
+public:
+    void addSync(uint64_t id, FenceSync* sync) {
+        mSyncs.set(id, sync);
+    }
+
+    FenceSync* getSync(uint64_t id) {
+        auto res = mSyncs.get(id);
+        if (res) return *res;
+        return nullptr;
+    }
+
+    void removeSync(uint64_t id) {
+        mSyncs.erase(id);
+    }
+
+    void addThread(uint64_t id, SyncThread* thread) {
+        mThreads.set(id, thread);
+    }
+
+    SyncThread* getThread(uint64_t id) {
+        auto res = mThreads.get(id);
+        if (res) return *res;
+        return nullptr;
+    }
+
+    void removeThread(uint64_t id) {
+        mThreads.erase(id);
+    }
+
+private:
+    android::base::StaticMap<uint64_t, FenceSync*> mSyncs;
+    android::base::StaticMap<uint64_t, SyncThread*> mThreads;
+};
+
+static GuestSyncState sGuestSyncState;
+
+uint64_t getGuestSync(uint64_t syncid) {
+    FenceSync* ret = sGuestSyncState.getSync(syncid);
+    return ret ? (uint64_t)ret : 0;
+}
+
+static void rcCreateSyncKHR2(EGLenum type, EGLint* attribs, uint32_t num_attribs, int destroy_when_signaled, uint64_t syncid, uint64_t threadid) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    EGLSYNC_DPRINT("type=0x%x num_attribs=%d",
+            type, num_attribs);
+
+    bool hasNativeFence =
+        type == EGL_SYNC_NATIVE_FENCE_ANDROID;
+
+    // Usually we expect rcTriggerWait to be registered
+    // at the beginning in rcGetRendererVersion, called
+    // on init for all contexts.
+    // But if we are loading from snapshot, that's not
+    // guaranteed, and we need to make sure
+    // rcTriggerWait is registered.
+    emugl_sync_register_trigger_wait(rcTriggerWait);
+    FenceSync* fenceSync = new FenceSync(hasNativeFence,
+                                         destroy_when_signaled);
+
+    // This MUST be present, or we get a deadlock effect.
+    s_gles2.glFlush();
+
+    sGuestSyncState.addSync(syncid, fenceSync);
+    sGuestSyncState.addThread(threadid, SyncThread::get());
+}
+
+
+static void rcDestroySyncKHR2(uint64_t syncid) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FenceSync* fenceSync = FenceSync::getFromHandle((uint64_t)sGuestSyncState.getSync(syncid));
+    if (!fenceSync) return;
+    fenceSync->decRef();
+}
+
+// |rcClientWaitSyncKHR| implements |eglClientWaitSyncKHR|
+// on the guest through using the host's existing
+// |eglClientWaitSyncKHR| implementation, which is done
+// through the FenceSync object.
+static EGLint rcClientWaitSyncKHR2(uint64_t syncid,
+                                   EGLint flags,
+                                   uint64_t timeout) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    FrameBuffer *fb = FrameBuffer::getFB();
+
+    EGLSYNC_DPRINT("syncid=0x%lx flags=0x%x timeout=%" PRIu64,
+                syncid, flags, timeout);
+
+    FenceSync* fenceSync = FenceSync::getFromHandle((uint64_t)sGuestSyncState.getSync(syncid));
+
+    if (!fenceSync) {
+        EGLSYNC_DPRINT("fenceSync null, return condition satisfied");
+        return EGL_CONDITION_SATISFIED_KHR;
+    }
+
+    // Sometimes a gralloc-buffer-only thread is doing stuff with sync.
+    // This happens all the time with YouTube videos in the browser.
+    // In this case, create a context on the host just for syncing.
+    if (!tInfo->currContext) {
+        uint32_t gralloc_sync_cxt, gralloc_sync_surf;
+        fb->createTrivialContext(0, // There is no context to share.
+                                 &gralloc_sync_cxt,
+                                 &gralloc_sync_surf);
+        fb->bindContext(gralloc_sync_cxt,
+                        gralloc_sync_surf,
+                        gralloc_sync_surf);
+        // This context is then cleaned up when the render thread exits.
+    }
+
+    return fenceSync->wait(timeout);
+}
+
+static void rcWaitSyncKHR2(uint64_t syncid,
+                           EGLint flags) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    FrameBuffer *fb = FrameBuffer::getFB();
+
+    EGLSYNC_DPRINT("syncid=0x%lx flags=0x%x", syncid, flags);
+
+    FenceSync* fenceSync = FenceSync::getFromHandle((uint64_t)sGuestSyncState.getSync(syncid));
+
+    if (!fenceSync) { return; }
+
+    // Sometimes a gralloc-buffer-only thread is doing stuff with sync.
+    // This happens all the time with YouTube videos in the browser.
+    // In this case, create a context on the host just for syncing.
+    if (!tInfo->currContext) {
+        uint32_t gralloc_sync_cxt, gralloc_sync_surf;
+        fb->createTrivialContext(0, // There is no context to share.
+                                 &gralloc_sync_cxt,
+                                 &gralloc_sync_surf);
+        fb->bindContext(gralloc_sync_cxt,
+                        gralloc_sync_surf,
+                        gralloc_sync_surf);
+        // This context is then cleaned up when the render thread exits.
+    }
+
+    fenceSync->waitAsync();
+}
+
+static int rcIsSyncSignaled2(uint64_t syncid) {
+    FenceSync* fenceSync = FenceSync::getFromHandle((uint64_t)sGuestSyncState.getSync(syncid));
+    if (!fenceSync) return 1; // assume destroyed => signaled
+    return fenceSync->isSignaled() ? 1 : 0;
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1437,4 +1609,11 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCloseBuffer = rcCloseBuffer;
     dec->rcSetColorBufferVulkanMode2 = rcSetColorBufferVulkanMode2;
     dec->rcMapGpaToBufferHandle = rcMapGpaToBufferHandle;
+    dec->rcFlushWindowColorBufferAsyncWithFrameNumber = rcFlushWindowColorBufferAsyncWithFrameNumber;
+    dec->rcSetTracingForPuid = rcSetTracingForPuid;
+    dec->rcCreateSyncKHR2 = rcCreateSyncKHR2;
+    dec->rcDestroySyncKHR2 = rcDestroySyncKHR2;
+    dec->rcClientWaitSyncKHR2 = rcClientWaitSyncKHR2;
+    dec->rcWaitSyncKHR2 = rcWaitSyncKHR2;
+    dec->rcIsSyncSignaled2 = rcIsSyncSignaled2;
 }

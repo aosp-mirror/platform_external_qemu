@@ -20,5 +20,6 @@
 
 void initRenderControlContext(renderControl_decoder_context_t *dec);
 void registerTriggerWait();
+uint64_t getGuestSync(uint64_t syncid);
 
 #endif
