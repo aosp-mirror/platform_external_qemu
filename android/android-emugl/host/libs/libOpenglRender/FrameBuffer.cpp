@@ -3003,10 +3003,11 @@ void FrameBuffer::sweepColorBuffersLocked() {
 }
 
 void FrameBuffer::waitForGpu(uint64_t eglsync) {
-    FenceSync* fenceSync = FenceSync::getFromHandle(eglsync);
+    uint64_t guestSync = getGuestSync(eglsync);
+    FenceSync* fenceSync = FenceSync::getFromHandle(guestSync);
 
     if (!fenceSync) {
-        fprintf(stderr, "%s: err: fence sync 0x%llx not found\n", __func__,
+        fprintf(stderr, "%s: err: fence sync 0x%11x not found\n", __func__,
                 (unsigned long long)eglsync);
         return;
     }
