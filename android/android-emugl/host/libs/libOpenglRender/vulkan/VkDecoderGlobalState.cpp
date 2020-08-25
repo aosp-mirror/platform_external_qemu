@@ -2644,6 +2644,7 @@ public:
                                // to suit the resulting image memory size.
                                &localAllocInfo.allocationSize,
                                &localAllocInfo.memoryTypeIndex);
+            updateVkImageFromColorBuffer(importCbInfoPtr->colorBuffer);
 
             if (m_emu->instanceSupportsExternalMemoryCapabilities) {
                 VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
