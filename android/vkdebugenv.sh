@@ -1,12 +1,10 @@
 #!/bin/bash
 # For debugging emulator Vulkan driver on the host side.
-BINDIR=objs
-LAYERDIR=$BINDIR/testlib64/layers
-export LD_LIBRARY_PATH=$LAYERDIR
-export VK_LAYER_PATH=$LAYERDIR
+#BINDIR=/usr/local/google/home/yahan/emu/external/qemu
+#LAYERDIR=$BINDIR/testlib64/layers
+#export LD_LIBRARY_PATH=$LAYERDIR
+#export VK_LAYER_PATH=$LAYERDIR
+source ~/vulkan/1.2.148.1/setup-env.sh
 export VK_INSTANCE_LAYERS=\
-VK_LAYER_LUNARG_parameter_validation:\
-VK_LAYER_LUNARG_device_limits:\
-VK_LAYER_LUNARG_object_tracker:\
-VK_LAYER_LUNARG_core_validation:\
+VK_LAYER_KHRONOS_validation:\
 VK_LAYER_LUNARG_api_dump
