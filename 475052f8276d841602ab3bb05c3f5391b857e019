@@ -16,6 +16,24 @@
       "revId": "475052f8276d841602ab3bb05c3f5391b857e019",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "949c7810_2331dd0a",
+        "filename": "android/android-emu/android/window-agent-headless-impl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-08-25T20:52:57Z",
+      "side": 1,
+      "message": "gfxstreamagents.cpp has its own implementation of the fake agent.",
+      "parentUuid": "e4bbcc73_8d94b52a",
+      "revId": "475052f8276d841602ab3bb05c3f5391b857e019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
