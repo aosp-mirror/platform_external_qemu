@@ -53,3 +53,8 @@ GL_ENTRY(GLint, rcSetColorBufferVulkanMode2, uint32_t colorBuffer, uint32_t mode
 GL_ENTRY(int, rcMapGpaToBufferHandle, uint32_t bufferHandle, uint64_t gpa)
 GL_ENTRY(void, rcFlushWindowColorBufferAsyncWithFrameNumber, uint32_t windowSurface, uint32_t frameNumber)
 GL_ENTRY(void, rcSetTracingForPuid, uint64_t puid, uint32_t enable)
+GL_ENTRY(void, rcCreateSyncKHR2, EGLenum type, EGLint* attribs, uint32_t num_attribs, int destroy_when_signaled, uint64_t syncid, uint64_t threadid)
+GL_ENTRY(void, rcDestroySyncKHR2, uint64_t syncid)
+GL_ENTRY(EGLint, rcClientWaitSyncKHR2, uint64_t syncid, EGLint flags, uint64_t timeout)
+GL_ENTRY(void, rcWaitSyncKHR2, uint64_t syncid, EGLint flags);
+GL_ENTRY(int, rcIsSyncSignaled2, uint64_t syncid)
