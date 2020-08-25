@@ -22,6 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <execinfo.h>
+#include <stdio.h>
+
+
 #define FATAL(fmt,...) do { \
     fprintf(stderr, "%s: FATAL: " fmt "\n", __func__, ##__VA_ARGS__); \
     assert(false); \
@@ -516,6 +520,19 @@ static void doYUVConversionDraw(GLuint program,
     s_gles2.glDisableVertexAttribArray(inCoordLoc);
 }
 
+namespace {
+void printCallStack() {
+    void* callstack[128];
+    int i, frames = backtrace(callstack, 128);
+    char** strs = backtrace_symbols(callstack, frames);
+    for (i = 0; i < frames; ++i) {
+        printf("%s\n", strs[i]);
+    }
+    free(strs);
+}
+}
+
+
 // initialize(): allocate GPU memory for YUV components,
 // and create shaders and vertex data.
 YUVConverter::YUVConverter(int width, int height, FrameworkFormat format)
@@ -527,6 +544,7 @@ YUVConverter::YUVConverter(int width, int height, FrameworkFormat format)
       mCbFormat(format) {}
 
 void YUVConverter::init(int width, int height, FrameworkFormat format) {
+    printCallStack();
     uint32_t yoff, uoff, voff, ywidth, cwidth, cheight;
     getYUVOffsets(width, height, mFormat,
                   &yoff, &uoff, &voff,
@@ -535,7 +553,7 @@ void YUVConverter::init(int width, int height, FrameworkFormat format) {
 
     mWidth = width;
     mHeight = height;
-
+    mPixels.resize(ywidth * height + cwidth * cheight * 2);
     if (!mYtex)
         createYUVGLTex(GL_TEXTURE0, ywidth, height, &mYtex, false);
     switch (mFormat) {
@@ -618,7 +636,17 @@ void YUVConverter::restoreGLState() {
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCurrIbo);
 }
 
+uint32_t YUVConverter::getDataSize() {
+    uint32_t align = (mFormat == FRAMEWORK_FORMAT_YV12) ? 16 : 1;
+    uint32_t yStride = (mWidth + (align - 1)) & ~(align - 1);
+    uint32_t uvStride = (yStride / 2 + (align - 1)) & ~(align - 1);
+    uint32_t uvHeight = mHeight / 2;
+    uint32_t dataSize = yStride * mHeight + 2 * (uvHeight * uvStride);
+    return dataSize;
+}
+
 void YUVConverter::readPixels(uint8_t* pixels, uint32_t pixels_size) {
+    printf("YUVConverter::readPixels Y %d\n", mYtex);
     int width = mWidth;
     int height = mHeight;
 
@@ -668,10 +696,19 @@ void YUVConverter::readPixels(uint8_t* pixels, uint32_t pixels_size) {
     }
     // read Y the last, because we can might used it as a scratch space
     readYUVTex(mYtex, pixels + yoff, false);
+    bool allZero = true;
+    for (uint32_t i = 0; i < uoff; i++) {
+        if (pixels[i] != 0) {
+            allZero = false;
+            break;
+        }
+    }
+    printf("Is Y All Zero: %d\n", allZero);
     DDD("done");
 }
 
 void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
+    printf("swapping yuv textures %d -> %d format %d\n", mYtex, textures[0], type);
     if (type == FRAMEWORK_FORMAT_NV12) {
         mFormat = FRAMEWORK_FORMAT_NV12;
         std::swap(textures[0], mYtex);
@@ -728,10 +765,14 @@ void YUVConverter::drawConvert(int x, int y,
         return;
     }
 
+    memcpy(mPixels.data(), pixels, mPixels.size());
     subUpdateYUVGLTex(GL_TEXTURE0, mYtex,
                       x, y, ywidth, height,
                       pixels + yoff, false);
 
+    //for (int _y = y; _y < _y + height; _y++) {
+    //    memcpy(mPixels.data() + yoff + mWidth * mHeight, pixels + ywidth * height);
+    //}
     switch (mFormat) {
         case FRAMEWORK_FORMAT_YV12:
             subUpdateYUVGLTex(GL_TEXTURE1, mUtex,
