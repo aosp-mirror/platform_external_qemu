@@ -74,6 +74,8 @@ FoldableModel::FoldableModel() {
         mState.config.numHinges = 1;
         mState.config.hingeParams[0].defaultDegrees = 180.0f;
         mState.currentHingeDegrees[0] = 180.0f;
+        mState.currentPosture = POSTURE_OPENED;
+        mState.config.foldAtPosture = POSTURE_CLOSED;
         return;
     }
 
