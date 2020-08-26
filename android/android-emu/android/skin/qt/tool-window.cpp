@@ -83,6 +83,7 @@
 #include "android/skin/qt/extended-pages/common.h"        // for adjustAllBu...
 #include "android/skin/qt/extended-window-styles.h"       // for PANE_IDX_BA...
 #include "android/skin/qt/extended-window.h"              // for ExtendedWindow
+#include "android/skin/qt/posture-selection-dialog.h"     // for PostureSelectionDialog
 #include "android/skin/qt/qt-settings.h"                  // for SaveSnapsho...
 #include "android/skin/qt/qt-ui-commands.h"               // for QtUICommand
 #include "android/skin/qt/shortcut-key-store.h"           // for ShortcutKey...
@@ -155,7 +156,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
                                  &ToolWindow::onVirtualSceneWindowCreated),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
-      mUserActionsCounter(user_actions_counter) {
+      mUserActionsCounter(user_actions_counter),
+      mPostureSelectionDialog(new PostureSelectionDialog(this)) {
 
 // "Tool" type windows live in another layer on top of everything in OSX, which
 // is undesirable because it means the extended window must be on top of the
@@ -172,10 +174,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
-    if (!android_foldable_folded_area_configured()) {
-        mToolsUi->fold_switch->hide();
-        mToolsUi->fold_switch->setEnabled(false);
-    } else {
+    if (android_foldable_folded_area_configured()) {
         mToolsUi->zoom_button->hide();
         mToolsUi->zoom_button->setEnabled(false);
     }
@@ -224,9 +223,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+O     OVERVIEW\n"
             "Ctrl+Backspace BACK\n"
             "Ctrl+Left ROTATE_LEFT\n"
-            "Ctrl+Right ROTATE_RIGHT\n"
-            "Ctrl+F     FOLD\n"
-            "Ctrl+U     UNFOLD\n";
+            "Ctrl+Right ROTATE_RIGHT\n";
 
     if (fc::isEnabled(fc::PlayStoreImage)) {
         default_shortcuts += "Ctrl+Shift+G SHOW_PANE_GPLAY\n";
@@ -310,6 +307,16 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     // How big is the toolbar naturally? This is just tall enough
     // to show all the buttons, so we should never shrink it
     // smaller than this.
+
+    if (!android_foldable_hinge_configured() &&
+        !android_foldable_folded_area_configured()) {
+        mToolsUi->change_posture_button->hide();
+    }
+
+    connect(mPostureSelectionDialog, SIGNAL(newPostureRequested(int)), this,
+            SLOT(on_new_posture_requested(int)));
+    connect(mPostureSelectionDialog, SIGNAL(finished(int)), this,
+            SLOT(on_dismiss_posture_selection_dialog()));
 
     sToolWindow = this;
 }
@@ -640,63 +647,66 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 mEmulatorWindow->queueSkinEvent(skin_event);
             }
             break;
-        case QtUICommand::FOLD:
-            if (down && android_foldable_folded_area_configured()) {
-                if (mFolded) {
-                    break;
-                }
-                mFolded = true;
-                ChangeIcon(mToolsUi->fold_switch, "expand_horiz", "Unfold");
-                updateButtonUiCommand(mToolsUi->fold_switch, "UNFOLD");
-                mEmulatorWindow->resizeAndChangeAspectRatio(true);
-                sendFoldedArea();
-                forwardGenericEventToEmulator(EV_SW, SW_LID, true);
-                forwardGenericEventToEmulator(EV_SYN, 0, 0);
-                float posture, unused1, unused2;
-                sUiEmuAgent->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_POSTURE,
-                                                           &posture,
-                                                           &unused1,
-                                                           &unused2,
-                                                           PARAMETER_VALUE_TYPE_CURRENT);
-                struct FoldableState foldState;
-                android_foldable_get_state(&foldState);
-                if ((enum FoldablePostures)posture != foldState.config.foldAtPosture) {
-                    sUiEmuAgent->sensors->setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
-                                                                     (float)foldState.config.foldAtPosture,
-                                                                     0.0f,
-                                                                     0.0f,
-                                                                     PHYSICAL_INTERPOLATION_SMOOTH);
-                }
+        case QtUICommand::CHANGE_FOLDABLE_POSTURE:
+            if (down && mLastRequestedFoldablePosture != -1) {
+                sUiEmuAgent->sensors->setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
+                                                                 (float)mLastRequestedFoldablePosture,
+                                                                 0.0f,
+                                                                 0.0f,
+                                                                 PHYSICAL_INTERPOLATION_SMOOTH);
             }
             break;
-        case QtUICommand::UNFOLD:
-            if (down && android_foldable_folded_area_configured()) {
-                if (!mFolded) {
-                    break;
-                }
-                mFolded = false;
-                ChangeIcon(mToolsUi->fold_switch, "compress_horiz", "Fold");
-                updateButtonUiCommand(mToolsUi->fold_switch, "FOLD");
-                mEmulatorWindow->resizeAndChangeAspectRatio(false);
-                forwardGenericEventToEmulator(EV_SW, SW_LID, false);
-                forwardGenericEventToEmulator(EV_SYN, 0, 0);
-                // unfold = { POSTURE_HALF_OPENED, POSTURE_OPENED, POSTURE_FLIPPED }
+        case QtUICommand::UPDATE_FOLDABLE_POSTURE_INDICATOR:
+            if (down &&
+                (android_foldable_hinge_configured() ||
+                 android_foldable_folded_area_configured())) {
                 float posture, unused1, unused2;
                 sUiEmuAgent->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_POSTURE,
                                                            &posture,
                                                            &unused1,
                                                            &unused2,
                                                            PARAMETER_VALUE_TYPE_CURRENT);
-                struct FoldableState foldState;
-                android_foldable_get_state(&foldState);
-                if ((enum FoldablePostures)posture == foldState.config.foldAtPosture) {
-                    sUiEmuAgent->sensors->setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
-                                                                     (float)POSTURE_OPENED,
-                                                                     0.0f,
-                                                                     0.0f,
-                                                                     PHYSICAL_INTERPOLATION_SMOOTH);
+                switch ((enum FoldablePostures) posture) {
+                case POSTURE_OPENED:
+                    ChangeIcon(mToolsUi->change_posture_button,
+                               "posture_open", "Change posture");
+                    break;
+                case POSTURE_CLOSED:
+                    ChangeIcon(mToolsUi->change_posture_button,
+                               "posture_closed", "Change posture");
+                    break;
+                case POSTURE_HALF_OPENED:
+                    ChangeIcon(mToolsUi->change_posture_button,
+                               "posture_half-open", "Change posture");
+                    break;
+                case POSTURE_FLIPPED:
+                    ChangeIcon(mToolsUi->change_posture_button,
+                               "posture_flipped", "Change posture");
+                    break;
+                case POSTURE_TENT:
+                    ChangeIcon(mToolsUi->change_posture_button,
+                              "posture_tent", "Change posture");
+                    break;
+                default:;
+                }
+                if (android_foldable_is_folded()) {
+                    if (!mFolded) {
+                        mFolded = true;
+                        mEmulatorWindow->resizeAndChangeAspectRatio(true);
+                        sendFoldedArea();
+                        forwardGenericEventToEmulator(EV_SW, SW_LID, true);
+                        forwardGenericEventToEmulator(EV_SYN, 0, 0);
+                    }
+                } else {
+                    if (mFolded) {
+                        mFolded = false;
+                        mEmulatorWindow->resizeAndChangeAspectRatio(false);
+                        forwardGenericEventToEmulator(EV_SW, SW_LID, false);
+                        forwardGenericEventToEmulator(EV_SYN, 0, 0);
+                    }
                 }
             }
+
             break;
         case QtUICommand::SHOW_MULTITOUCH:
         // Multitouch is handled in EmulatorQtWindow, and doesn't
@@ -1068,9 +1078,12 @@ void ToolWindow::on_tablet_mode_button_clicked() {
     handleUICommand(QtUICommand::TABLET_MODE, tablet_mode);
 }
 
-void ToolWindow::on_fold_switch_clicked() {
-    mEmulatorWindow->activateWindow();
-    handleUICommand(mFolded ? QtUICommand::UNFOLD : QtUICommand::FOLD, true);
+void ToolWindow::on_change_posture_button_clicked() {
+    mPostureSelectionDialog->show();
+}
+
+void ToolWindow::on_dismiss_posture_selection_dialog() {
+    mToolsUi->change_posture_button->setChecked(false);
 }
 
 void ToolWindow::on_volume_up_button_pressed() {
@@ -1225,4 +1238,10 @@ void ToolWindow::sendFoldedArea() {
                 if (result && result->exit_code == 0) {
                     VLOG(foldable) << "foldable-page: 'fold-area' command succeeded";
                 }});
+}
+
+void ToolWindow::on_new_posture_requested(int newPosture) {
+    mEmulatorWindow->activateWindow();
+    mLastRequestedFoldablePosture = newPosture;
+    handleUICommand(QtUICommand::CHANGE_FOLDABLE_POSTURE, true);
 }

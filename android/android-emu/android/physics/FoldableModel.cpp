@@ -70,10 +70,19 @@ FoldableModel::FoldableModel() {
         return;
     }
     if (!android_foldable_hinge_configured()) {
-        // create a default hinge with 180 degree
+        // Create a default hinge with 180 degree.
+        // Also help back compatible with legacy foldable config which does not
+        // include hinge configs
         mState.config.numHinges = 1;
         mState.config.hingeParams[0].defaultDegrees = 180.0f;
         mState.currentHingeDegrees[0] = 180.0f;
+        mState.currentPosture = POSTURE_OPENED;
+        mState.config.foldAtPosture = POSTURE_CLOSED;
+        mState.config.supportedFoldablePostures[POSTURE_CLOSED] = true;
+        mState.config.supportedFoldablePostures[POSTURE_OPENED] = true;
+        mState.config.supportedFoldablePostures[POSTURE_HALF_OPENED] = false;
+        mState.config.supportedFoldablePostures[POSTURE_FLIPPED] = false;
+        mState.config.supportedFoldablePostures[POSTURE_TENT] = false;
         return;
     }
 
@@ -186,6 +195,11 @@ FoldableModel::FoldableModel() {
             }
         }
     }
+
+    for (int i=0; i<POSTURE_MAX; ++i) {
+        defaultConfig.supportedFoldablePostures[i] = false;
+    }
+
     mState.config = defaultConfig;
 
     // hinge angles to posture mapping
@@ -220,8 +234,11 @@ FoldableModel::FoldableModel() {
                         anglesToPosture.angles[j].right = std::stof(angles[1]);
                     }
                 }
-                anglesToPosture.posture =
+                enum FoldablePostures parsedPosture =
                         (FoldablePostures)std::stoi(postureListTokens[i]);
+                mState.config.supportedFoldablePostures[parsedPosture] = true;
+
+                anglesToPosture.posture = parsedPosture;
                 mAnglesToPostures.push_back(anglesToPosture);
                 std::sort(mAnglesToPostures.begin(), mAnglesToPostures.end(),
                           compareAnglesToPosture);
@@ -258,14 +275,7 @@ void FoldableModel::setHingeAngle(uint32_t hingeIndex,
         mState.currentPosture = p;
         lock.unlock();
         sendPostureToSystem(p);
-        lock.lock();
-        if (mState.currentPosture == mState.config.foldAtPosture) {
-            lock.unlock();
-            setToolBarFold(true);
-        } else if (oldP == mState.config.foldAtPosture) {
-            lock.unlock();
-            setToolBarFold(false);
-        }
+        updateFoldablePostureIndicator();
     }
 }
 
@@ -279,9 +289,6 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode,
         return;
     }
     mState.currentPosture = p;
-    lock.unlock();
-    sendPostureToSystem(p);
-    lock.lock();
     // Update the hinge angles
     for (const auto i : mAnglesToPostures) {
         if (i.posture == mState.currentPosture) {
@@ -291,13 +298,9 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode,
             }
         }
     }
-    if (mState.currentPosture == mState.config.foldAtPosture) {
-        lock.unlock();
-        setToolBarFold(true);
-    } else if (oldP == mState.config.foldAtPosture) {
-        lock.unlock();
-        setToolBarFold(false);
-    }
+    lock.unlock();
+    sendPostureToSystem(p);
+    updateFoldablePostureIndicator();
 }
 
 float FoldableModel::getHingeAngle(uint32_t hingeIndex,
@@ -327,15 +330,6 @@ void FoldableModel::sendPostureToSystem(enum FoldablePostures p) {
 
 }
 
-void FoldableModel::setToolBarFold(bool fold) {
-    const QAndroidEmulatorWindowAgent* windowAgent =
-        android_hw_sensors_get_window_agent();
-    if (!windowAgent) {
-        return;
-    }
-    windowAgent->fold(fold);
-}
-
 bool FoldableModel::isFolded() {
     if (mState.currentPosture == mState.config.foldAtPosture) {
         return true;
@@ -357,6 +351,16 @@ bool FoldableModel::getFoldedArea(int* x, int* y, int* w, int* h) {
         *h = android_hw->hw_displayRegion_0_1_height;
     }
     return true;
+}
+
+void FoldableModel::updateFoldablePostureIndicator() {
+    const QAndroidEmulatorWindowAgent* windowAgent =
+        android_hw_sensors_get_window_agent();
+    if (windowAgent) {
+        windowAgent->updateFoldablePostureIndicator();
+    } else {
+        E("Could not update foldable posture indicator: null WindowAgent");
+    }
 }
 
 }  // namespace physics
