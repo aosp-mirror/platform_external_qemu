@@ -16,6 +16,23 @@
       "revId": "0b5e5a376234f461fcd32909e073583c7c3cfc97",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc179cd8_bf4fada6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-08-26T18:22:21Z",
+      "side": 1,
+      "message": "Sorry this CL has been open for so long. I am planning to submit within today and will address the window position issue in a different CL. ",
+      "revId": "0b5e5a376234f461fcd32909e073583c7c3cfc97",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
