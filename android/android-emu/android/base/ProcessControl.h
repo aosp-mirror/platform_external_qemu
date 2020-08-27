@@ -33,6 +33,7 @@ struct ProcessLaunchParameters {
     // TODO: save env variables, which is good for the case
     // where we are launching not from a child process
 };
+static constexpr char kLaunchParamsFileName[] = "emu-launch-params.txt";
 
 std::vector<std::string> makeArgvStrings(int argc, const char** argv);
 

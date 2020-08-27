@@ -13,6 +13,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/StringFormat.h"
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
@@ -464,6 +465,32 @@ bool Snapshot::save() {
         }
     }
 
+    auto path = PathUtils::join(avdInfo_getContentPath(android_avdInfo),
+                                base::kLaunchParamsFileName);
+    if (System::get()->pathExists(path)) {
+        // TODO(yahan@): -read-only emulators might not have this file.
+        base::ProcessLaunchParameters launchParameters =
+                base::loadLaunchParameters(path);
+        for (const std::string& argv : launchParameters.argv) {
+            mSnapshotPb.add_launch_parameters(argv);
+        }
+    }
+
+#ifndef STRINGIFY
+#define STRINGIFY(x) #x
+#endif
+
+#ifdef ANDROID_SDK_TOOLS_BUILD_NUMBER
+    mSnapshotPb.set_emulator_build_id(
+            STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER));
+#endif
+    const auto buildProps = avdInfo_getBuildProperties(android_avdInfo);
+    android::base::IniFile ini((const char*)buildProps->data, buildProps->size);
+    auto buildId = ini.getString("ro.build.fingerprint", "");
+    if (buildId.empty()) {
+        buildId = ini.getString("ro.build.display.id", "");
+    }
+    mSnapshotPb.set_system_image_build_id(buildId);
     return writeSnapshotToDisk();
 }
 
