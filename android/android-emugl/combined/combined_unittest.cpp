@@ -18,6 +18,7 @@
 #include "android/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/base/Tracing.h"
 #include "android/opengles.h"
 #include "android/emulation/testing/TestDmaMap.h"
 
@@ -1122,6 +1123,43 @@ const mat4x2 matB = mat4x2(1.0/2.0, 1.0/4.0, 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
     EXPECT_EQ(GL_TRUE, compileStatus);
     glDeleteShader(shader);
+}
+
+TEST_P(CombinedGoldfishOpenglTest, Tracing) {
+    android::base::enableTracing();
+
+    const char* vshaderSrc[] = {
+R"(#version 300 es
+precision mediump float;
+in highp vec4 dEQP_Position;
+out vec2 out0;
+
+
+void main()
+{
+const mat4x2 matA = mat4x2(2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0);
+const mat4x2 matB = mat4x2(1.0/2.0, 1.0/4.0, 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64.0, 1.0/128.0, 1.0/256.0);
+        mat4x2 result = matrixCompMult(matA, matB);
+
+        out0 = result * vec4(1.0, 1.0, 1.0, 1.0);
+        gl_Position = dEQP_Position;
+
+}
+)",
+    };
+
+    GLuint shader = glCreateShader(GL_VERTEX_SHADER);
+
+    EXPECT_NE(0, shader);
+
+    glShaderSource(shader, 1, (const GLchar* const*)vshaderSrc, nullptr);
+    glCompileShader(shader);
+    GLint compileStatus;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    EXPECT_EQ(GL_TRUE, compileStatus);
+    glDeleteShader(shader);
+
+    android::base::disableTracing();
 }
 
 INSTANTIATE_TEST_SUITE_P(
