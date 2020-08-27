@@ -14,13 +14,21 @@
 // limitations under the License.
 #include "android/base/Tracing.h"
 
-#include "android/base/system/System.h"
+#include "android/base/containers/BufferQueue.h"
+#include "android/base/containers/SmallVector.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/Thread.h"
 #include "android/base/threads/ThreadStore.h"
 
+#include "perfetto-tracing-only.h"
+
 #include <string>
 #include <vector>
+
+#include <fcntl.h>
 
 namespace android {
 namespace base {
@@ -218,25 +226,79 @@ static void thresholdTrace_end() {
     thresholdPrinter_getForThread()->end();
 }
 
-class TraceConfig {
+using TraceSinkBuffer = SmallFixedVector<uint8_t, 4096>;
+
+class MultithreadedTraceSink {
 public:
-    TraceConfig() {
-        mEnabled =
-            System::getEnvironmentVariable(
-                "ANDROID_EMU_TRACING") == "1";
+    MultithreadedTraceSink(const char* filename) :
+        mFilename(filename),
+        mFileHandle(fopen(filename, "wb")),
+        mToSink(1024, mLock), mThread([this] { threadFunction(); }) {
+        mThread.start();
     }
 
-    bool enabled() const { return mEnabled; }
+    ~MultithreadedTraceSink() {
+        mExiting = true;
+        mThread.wait();
+        fclose(mFileHandle);
+    }
+
+    void push(uint8_t* src, size_t bytes) {
+        TraceSinkBuffer res(src, src + bytes);
+        AutoLock lock(mLock);
+        mToSink.pushLocked(std::move(res));
+    }
 
 private:
-    bool mEnabled = false;
+    void threadFunction() {
+        const uint64_t kBlockIntervalUs = 1000000;
+        TraceSinkBuffer currentBufferToWrite;
+
+        while (!mExiting) {
+            auto currTime = System::get()->getUnixTimeUs();
+            AutoLock lock(mLock);
+            auto result = mToSink.popLockedBefore(&currentBufferToWrite, currTime + kBlockIntervalUs);
+            if (result == BufferQueueResult::Ok) {
+                fwrite(currentBufferToWrite.data(), currentBufferToWrite.size(), 1, mFileHandle);
+            }
+        }
+    }
+
+    mutable Lock mLock;
+    const char* mFilename;
+    FILE* mFileHandle;
+    BufferQueue<TraceSinkBuffer> mToSink;
+    bool mExiting = false;
+    FunctorThread mThread;
 };
 
-static LazyInstance<TraceConfig> sTraceConfig =
-    LAZY_INSTANCE_INIT;
+static MultithreadedTraceSink* sTraceSink = nullptr;
+
+static perfetto::TraceWriterOperations sAndroidEmuTraceWriterOperations = {
+    .openSink = []() {
+        sTraceSink = new MultithreadedTraceSink(perfetto::queryTraceConfig().filename);
+    },
+    .closeSink = []() {
+        delete sTraceSink;
+    },
+    .writeToSink = [](uint8_t* src, size_t bytes) {
+        sTraceSink->push(src, bytes);
+    },
+};
+
+void enableTracing() {
+    perfetto::setTraceConfig([](perfetto::TraceConfig& config) {
+        config.ops = sAndroidEmuTraceWriterOperations;
+    });
+    perfetto::enableTracing();
+}
+
+void disableTracing() {
+    perfetto::disableTracing();
+}
 
 bool shouldEnableTracing() {
-    return sTraceConfig->enabled();
+    return !(perfetto::queryTraceConfig().tracingDisabled);
 }
 
 #ifdef __cplusplus
@@ -248,15 +310,17 @@ bool shouldEnableTracing() {
 #endif
 
 void ScopedTrace::beginTraceImpl(const char* name) {
-    if (CC_UNLIKELY(shouldEnableTracing())) {
-        indentTrace_begin(name);
-    }
+    perfetto::beginTrace(name);
+    // if (CC_UNLIKELY(shouldEnableTracing())) {
+    //     indentTrace_begin(name);
+    // }
 }
 
 void ScopedTrace::endTraceImpl(const char*) {
-    if (CC_UNLIKELY(shouldEnableTracing())) {
-        indentTrace_end();
-    }
+    perfetto::endTrace();
+    // if (CC_UNLIKELY(shouldEnableTracing())) {
+    //     indentTrace_end();
+    // }
 }
 
 void beginTrace(const char* name) {

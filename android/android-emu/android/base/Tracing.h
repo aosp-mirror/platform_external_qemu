@@ -36,6 +36,9 @@ private:
     const char* const name_ = nullptr;
 };
 
+void enableTracing();
+void disableTracing();
+
 bool shouldEnableTracing();
 void beginTrace(const char* name);
 void endTrace();
