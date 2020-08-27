@@ -513,6 +513,7 @@ public:
 
         auto physdevInfo = android::base::find(mPhysdevInfo, physicalDevice);
         if (!physdevInfo) {
+            fprintf(stderr, "%s: physfail\n", __func__);
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
 
@@ -2732,6 +2733,7 @@ public:
                     mapInfo.size, 0, &mapInfo.ptr);
 
         if (mapResult != VK_SUCCESS) {
+            fprintf(stderr, "%s: mapfail\n", __func__);
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
 
