@@ -87,7 +87,7 @@ service EmulatorController {
   // Gets the latest gps state as delivered by the setGps call, or location ui
   // if active.
   //
-  // Note: this is not neccessarily the actual gps coordinate visible at the
+  // Note: this is not necessarily the actual gps coordinate visible at the
   // time, due to gps sample frequency (usually 1hz).
   rpc getGps(google.protobuf.Empty) returns (GpsState) {}
 
