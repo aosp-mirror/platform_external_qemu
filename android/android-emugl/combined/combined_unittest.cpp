@@ -376,7 +376,7 @@ TEST_P(CombinedGoldfishOpenglTest, ShowWindow) {
         EXPECT_NE(nullptr, disp.getNative());
         android_showOpenglesWindow(disp.getNative(), 0, 0, kWindowSize,
                                    kWindowSize, kWindowSize, kWindowSize, 1.0,
-                                   0, false);
+                                   0, false, false);
     }
 
     for (int i = 0; i < 10; i++) {
