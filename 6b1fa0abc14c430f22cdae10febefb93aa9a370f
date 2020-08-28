@@ -45,6 +45,29 @@
       "revId": "6b1fa0abc14c430f22cdae10febefb93aa9a370f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6f903b7b_22734a5d",
+        "filename": "android/docs/DARWIN-DEV.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-08-28T22:48:14Z",
+      "side": 1,
+      "message": "I don\u0027t see /Applications/Xcode.app, XCode looks running.",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 83
+      },
+      "revId": "6b1fa0abc14c430f22cdae10febefb93aa9a370f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
