@@ -22,6 +22,29 @@
       "revId": "6b1fa0abc14c430f22cdae10febefb93aa9a370f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83a63e5d_6760f952",
+        "filename": "android/docs/DARWIN-DEV.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-08-28T22:35:39Z",
+      "side": 1,
+      "message": "Where does gsutil come from?",
+      "range": {
+        "startLine": 40,
+        "startChar": 2,
+        "endLine": 40,
+        "endChar": 8
+      },
+      "revId": "6b1fa0abc14c430f22cdae10febefb93aa9a370f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
