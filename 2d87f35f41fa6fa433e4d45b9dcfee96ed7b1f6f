@@ -1,0 +1,139 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004688352",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1414060?revision\u003d15",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "8cb53157_2ac8b7f0",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 15
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-29T21:54:02Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 8,
+        "startChar": 80,
+        "endLine": 8,
+        "endChar": 86
+      },
+      "revId": "2d87f35f41fa6fa433e4d45b9dcfee96ed7b1f6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004688352",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1414060?revision\u003d15",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "e1f3db38_4ac3d236",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 15
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-29T21:54:02Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 11,
+        "startChar": 78,
+        "endLine": 11,
+        "endChar": 84
+      },
+      "revId": "2d87f35f41fa6fa433e4d45b9dcfee96ed7b1f6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004688352",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1414060?revision\u003d15",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "90157355_52c8ccb8",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 15
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-29T21:54:02Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 44,
+        "startChar": 80,
+        "endLine": 44,
+        "endChar": 86
+      },
+      "revId": "2d87f35f41fa6fa433e4d45b9dcfee96ed7b1f6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004688352",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1414060?revision\u003d15",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "669a8ee7_cce33642",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 15
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-29T21:54:02Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 54,
+        "startChar": 80,
+        "endLine": 54,
+        "endChar": 86
+      },
+      "revId": "2d87f35f41fa6fa433e4d45b9dcfee96ed7b1f6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004688352",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1414060?revision\u003d15",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "19f1fe0e_5c0fc1e1",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 15
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-29T21:54:02Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 57,
+        "startChar": 78,
+        "endLine": 57,
+        "endChar": 84
+      },
+      "revId": "2d87f35f41fa6fa433e4d45b9dcfee96ed7b1f6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
