@@ -31,6 +31,7 @@ struct TraceConfig {
     uint32_t currentThreadId;
     const char* filename;
     uint64_t guestStartTime;
+    uint64_t hostStartTime;
     bool useGuestStartTime;
     TraceWriterOperations ops;
 };
