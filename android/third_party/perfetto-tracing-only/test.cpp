@@ -14,6 +14,7 @@
 #include "perfetto-tracing-only.h"
 
 #include "trace_packet.pbzero.h"
+#include "track_descriptor.pbzero.h"
 #include "track_event.pbzero.h"
 #include "interned_data.pbzero.h"
 
@@ -28,6 +29,7 @@
 
 #include <thread>
 #include <unordered_map>
+#include <sstream>
 
 #include <fcntl.h>
 
@@ -76,6 +78,7 @@ static TraceConfig sTraceConfig = {
     .currentThreadId = 1,
     .filename = "testtrace.trace",
     .guestStartTime = 0,
+    .hostStartTime = 0,
     .useGuestStartTime = false,
 };
 
@@ -266,13 +269,21 @@ public:
         if (CC_UNLIKELY(mNeedToSetThreadId)) {
             mThreadId = __atomic_add_fetch(&sTraceConfig.currentThreadId, 1, __ATOMIC_RELAXED);
             mNeedToSetThreadId = false;
+            fprintf(stderr, "%s: found thread id: %u\n", __func__, mThreadId);
+            beginPacket();
+            auto desc = mPacket.set_track_descriptor();
+            desc->set_uuid(mThreadId);
+            std::stringstream ss;
+            ss << "EmulatorThread" << mThreadId;
+            desc->set_name(ss.str());
+            endPacket();
         }
 
         // Finally do the actual thing
         beginPacket();
         mPacket.set_trusted_packet_sequence_id(kSequenceId);
         mPacket.set_sequence_flags(2 /* incremental */);
-        mPacket.set_timestamp((uint64_t)(base::GetWallTimeNs().count()));
+        mPacket.set_timestamp(getTimestamp());
         auto trackevent = mPacket.set_track_event();
         trackevent->set_track_uuid(mThreadId); // thread id
         trackevent->add_category_iids(mCurrentCategoryIid[mStackDepth]);
@@ -286,13 +297,15 @@ public:
     void endTrace() {
         if (CC_LIKELY(sTraceConfig.tracingDisabled)) return;
         if (CC_UNLIKELY(mStackDepth == TRACE_STACK_DEPTH_MAX)) return;
+        if (CC_UNLIKELY(mStackDepth == 0)) return;
 
         --mStackDepth;
+
         // Finally do the actual thing
         beginPacket();
         mPacket.set_trusted_packet_sequence_id(kSequenceId);
         mPacket.set_sequence_flags(2 /* incremental */);
-        mPacket.set_timestamp((uint64_t)(base::GetWallTimeNs().count()));
+        mPacket.set_timestamp(getTimestamp());
         auto trackevent = mPacket.set_track_event();
         trackevent->add_category_iids(mCurrentCategoryIid[mStackDepth]);
         trackevent->set_track_uuid(mThreadId); // thread id
@@ -308,6 +321,27 @@ public:
     }
 
 private: 
+    inline uint64_t getTimestamp() {
+        uint64_t t = (uint64_t)(base::GetWallTimeNs().count());
+
+        if (CC_UNLIKELY(mNeedToConfigureGuestTime)) {
+            if (sTraceConfig.useGuestStartTime) {
+                fprintf(stderr, "%s: guest time: 0x%llx host time: 0x%llx\n", __func__,
+                        (unsigned long long)(sTraceConfig.guestStartTime),
+                        (unsigned long long)(sTraceConfig.hostStartTime));
+                mTimeDiff = sTraceConfig.guestStartTime - sTraceConfig.hostStartTime;
+                fprintf(stderr, "%s: adusted time from 0x%llx to 0x%llx\n", __func__,
+                        (unsigned long long)(t),
+                        (unsigned long long)(t + mTimeDiff));
+            }
+            mNeedToConfigureGuestTime = false;
+        }
+
+        t += mTimeDiff;
+
+        return t;
+    }
+
     void flushAndGetNewChunk() {
         if (mBuffersUsed > 0) {
             mChunkStore.flush(std::move(mChunk));
@@ -376,6 +410,8 @@ private:
 
     bool mNeedToSetThreadId = true;
     uint32_t mThreadId = 0;
+    bool mNeedToConfigureGuestTime = true;
+    uint64_t mTimeDiff = 0;
     uint64_t mBuffersUsed = 0;
     bool mCurrentlyTracing = false;
     bool mWritingPacket = false;
@@ -409,11 +445,14 @@ void enableTracing() {
     sTraceConfig.sequenceIdWritten = 0;
     sTraceConfig.currentInterningId = 1;
     sTraceConfig.currentThreadId = 1;
+    sTraceConfig.hostStartTime = (uint64_t)(base::GetWallTimeNs().count());
 }
 
 void disableTracing() {
     sTraceConfig.tracingDisabled = 1;
     sTraceConfig.ops.closeSink();
+    sTraceConfig.guestStartTime = 0;
+    sTraceConfig.useGuestStartTime = 0;
 }
 
 void beginTrace(const char* name) { sThreadLocalTraceContext.beginTrace(name); }

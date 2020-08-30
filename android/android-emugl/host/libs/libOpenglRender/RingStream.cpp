@@ -14,6 +14,7 @@
 #include "RingStream.h"
 
 #include "android/base/system/System.h"
+#include "android/base/Tracing.h"
 
 #define EMUGL_DEBUG_LEVEL  0
 
@@ -117,6 +118,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
     while (count < wanted) {
 
         if (mReadBufferLeft) {
+            AEMU_SCOPED_TRACE("RingRead(mReadBufferLeft)");
             size_t avail = std::min<size_t>(wanted - count, mReadBufferLeft);
             memcpy(dst + count,
                     mReadBuffer.data() + (mReadBuffer.size() - mReadBufferLeft),
@@ -148,6 +150,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
         auto ptrEnd = dst + wanted;
 
         if (ringAvailable) {
+            AEMU_SCOPED_TRACE("RingRead(ringAvailable)");
             uint32_t transferMode =
                 mContext.ring_config->transfer_mode;
             switch (transferMode) {
@@ -168,6 +171,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
                     break;
             }
         } else if (ringLargeXferAvailable) {
+            AEMU_SCOPED_TRACE("RingRead(ringLargeXferAvailable)");
             type3Read(ringLargeXferAvailable,
                       &count, &current, ptrEnd);
         } else {
