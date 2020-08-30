@@ -1401,8 +1401,14 @@ static void rcFlushWindowColorBufferAsyncWithFrameNumber(uint32_t windowSurface,
     rcFlushWindowColorBufferAsync(windowSurface);
 }
 
-static void rcSetTracingForPuid(uint64_t puid, uint32_t enable) {
-    fprintf(stderr, "%s: puid 0x%llx tracing: %d\n", __func__, (unsigned long long)puid, enable);
+static void rcSetTracingForPuid(uint64_t puid, uint32_t enable, uint64_t time) {
+    fprintf(stderr, "%s: puid 0x%llx tracing: %d time: 0x%llx\n", __func__, (unsigned long long)puid, enable, (unsigned long long)time);
+    if (enable) {
+        android::base::setGuestTime(time);
+        android::base::enableTracing();
+    } else {
+        android::base::disableTracing();
+    }
 }
 
 class GuestSyncState {

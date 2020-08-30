@@ -286,15 +286,26 @@ static perfetto::TraceWriterOperations sAndroidEmuTraceWriterOperations = {
     },
 };
 
-void enableTracing() {
-    perfetto::setTraceConfig([](perfetto::TraceConfig& config) {
-        config.ops = sAndroidEmuTraceWriterOperations;
+void setGuestTime(uint64_t t) {
+    perfetto::setTraceConfig([t](perfetto::TraceConfig& config) {
+        config.guestStartTime = t;
+        config.useGuestStartTime = true;
     });
-    perfetto::enableTracing();
+}
+
+void enableTracing() {
+    if (perfetto::queryTraceConfig().tracingDisabled) {
+        perfetto::setTraceConfig([](perfetto::TraceConfig& config) {
+            config.ops = sAndroidEmuTraceWriterOperations;
+        });
+        perfetto::enableTracing();
+    }
 }
 
 void disableTracing() {
-    perfetto::disableTracing();
+    if (!perfetto::queryTraceConfig().tracingDisabled) {
+        perfetto::disableTracing();
+    }
 }
 
 bool shouldEnableTracing() {
@@ -336,27 +347,27 @@ void endTrace() {
 }
 
 void ScopedThresholdTrace::beginTraceImpl(const char* name, uint64_t thresholdUs) {
-    if (CC_UNLIKELY(shouldEnableTracing())) {
-        thresholdTrace_begin(name, thresholdUs);
-    }
+    // if (CC_UNLIKELY(shouldEnableTracing())) {
+        // thresholdTrace_begin(name, thresholdUs);
+    // }
 }
 
 void ScopedThresholdTrace::endTraceImpl(const char*) {
-    if (CC_UNLIKELY(shouldEnableTracing())) {
-        thresholdTrace_end();
-    }
+    // if (CC_UNLIKELY(shouldEnableTracing())) {
+        // thresholdTrace_end();
+    // }
 }
 
 void beginThresholdTrace(const char* name, uint64_t thresholdUs) {
-    if (CC_UNLIKELY(shouldEnableTracing())) {
-        thresholdTrace_begin(name, thresholdUs);
-    }
+    // if (CC_UNLIKELY(shouldEnableTracing())) {
+        // thresholdTrace_begin(name, thresholdUs);
+    // }
 }
 
 void endThresholdTrace() {
-    if (CC_UNLIKELY(shouldEnableTracing())) {
-        thresholdTrace_end();
-    }
+    // if (CC_UNLIKELY(shouldEnableTracing())) {
+        // thresholdTrace_end();
+    // }
 }
 
 } // namespace base
