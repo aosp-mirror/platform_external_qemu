@@ -286,6 +286,13 @@ static perfetto::TraceWriterOperations sAndroidEmuTraceWriterOperations = {
     },
 };
 
+void setGuestTime(uint64_t t) {
+    perfetto::setTraceConfig([t](perfetto::TraceConfig& config) {
+        config.guestStartTime = t;
+        config.useGuestStartTime = true;
+    });
+}
+
 void enableTracing() {
     perfetto::setTraceConfig([](perfetto::TraceConfig& config) {
         config.ops = sAndroidEmuTraceWriterOperations;
