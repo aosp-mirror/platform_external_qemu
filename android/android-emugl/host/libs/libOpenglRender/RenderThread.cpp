@@ -358,6 +358,8 @@ intptr_t RenderThread::main() {
             }
         }
 
+        AEMU_SCOPED_TRACE("render stuff");
+
         DD("render thread read %d bytes, op %d, packet size %d",
            (int)readBuf.validData(), *(int32_t*)readBuf.buf(),
            *(int32_t*)(readBuf.buf() + 4));
@@ -429,6 +431,7 @@ intptr_t RenderThread::main() {
             // decoder
             //
             {
+                AEMU_SCOPED_TRACE("gl decode");
                 AEMU_SCOPED_THRESHOLD_TRACE("gl2Dec.decode");
                 last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
                                              ioStream, &checksumCalc);
@@ -445,6 +448,7 @@ intptr_t RenderThread::main() {
             // renderControl decoder
             //
             {
+                AEMU_SCOPED_TRACE("renderControl decode");
                 AEMU_SCOPED_THRESHOLD_TRACE("rcDec.decode");
                 last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
                                             ioStream, &checksumCalc);
@@ -459,6 +463,7 @@ intptr_t RenderThread::main() {
             // Vulkan decoder
             //
             {
+                AEMU_SCOPED_TRACE("vk decode");
                 AEMU_SCOPED_THRESHOLD_TRACE("vkDec.decode");
                 last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
                                             ioStream);
