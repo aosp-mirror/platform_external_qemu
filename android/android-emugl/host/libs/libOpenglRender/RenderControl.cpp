@@ -1397,7 +1397,7 @@ static int32_t rcMapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
 }
 
 static void rcFlushWindowColorBufferAsyncWithFrameNumber(uint32_t windowSurface, uint32_t frameNumber) {
-    (void)frameNumber;
+    android::base::traceCounter("gfxstreamFrameNumber", (int64_t)frameNumber);
     rcFlushWindowColorBufferAsync(windowSurface);
 }
 

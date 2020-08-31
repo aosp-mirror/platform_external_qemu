@@ -14,6 +14,7 @@
 #include "perfetto-tracing-only.h"
 
 #include "trace_packet.pbzero.h"
+#include "counter_descriptor.pbzero.h"
 #include "track_descriptor.pbzero.h"
 #include "track_event.pbzero.h"
 #include "interned_data.pbzero.h"
@@ -218,11 +219,45 @@ public:
 #endif
 
     static const uint32_t kSequenceId = 1;
+    static constexpr char kTrackNamePrefix[] = "emu-";
+    static constexpr char kCounterNamePrefix[] = "-count-";
 
     void beginTrace(const char* name) {
         if (CC_LIKELY(sTraceConfig.tracingDisabled)) return;
         if (CC_UNLIKELY(mStackDepth == TRACE_STACK_DEPTH_MAX)) return;
 
+        ensureThreadInfo();
+
+        bool needEmitEventIntern = false;
+        mCurrentEventNameIid[mStackDepth] = internEvent(name, &needEmitEventIntern);
+
+        if (CC_UNLIKELY(needEmitEventIntern)) {
+            beginPacket();
+            mPacket.set_trusted_packet_sequence_id(kSequenceId);
+            mPacket.set_sequence_flags(2 /* incremental */);
+            auto interned_data = mPacket.set_interned_data();
+            auto eventname = interned_data->add_event_names();
+            eventname->set_iid(mCurrentEventNameIid[mStackDepth]);
+            eventname->set_name(name);
+            endPacket();
+        }
+
+        // Finally do the actual thing
+        beginPacket();
+        mPacket.set_trusted_packet_sequence_id(kSequenceId);
+        mPacket.set_sequence_flags(2 /* incremental */);
+        mPacket.set_timestamp(getTimestamp());
+        auto trackevent = mPacket.set_track_event();
+        trackevent->set_track_uuid(mThreadId); // thread id
+        trackevent->add_category_iids(mCurrentCategoryIid[mStackDepth]);
+        trackevent->set_name_iid(mCurrentEventNameIid[mStackDepth]);
+        trackevent->set_type(protos::pbzero::TrackEvent::TYPE_SLICE_BEGIN);
+        endPacket();
+
+        ++mStackDepth;
+    }
+
+    inline void ensureThreadInfo() __attribute__((always_inline)) {
         // Write trusted sequence id if this is the first packet.
         if (CC_UNLIKELY(1 == __atomic_add_fetch(&sTraceConfig.packetsWritten, 1, __ATOMIC_SEQ_CST))) {
             sTraceConfig.sequenceIdWritten = true;
@@ -241,9 +276,6 @@ public:
         bool needEmitCategoryIntern = false;
         mCurrentCategoryIid[mStackDepth] = internCategory(kCategory, &needEmitCategoryIntern);
 
-        bool needEmitEventIntern = false;
-        mCurrentEventNameIid[mStackDepth] = internEvent(name, &needEmitEventIntern);
-
         if (CC_UNLIKELY(needEmitCategoryIntern)) {
             beginPacket();
             mPacket.set_trusted_packet_sequence_id(kSequenceId);
@@ -255,43 +287,18 @@ public:
             endPacket();
         }
 
-        if (CC_UNLIKELY(needEmitEventIntern)) {
-            beginPacket();
-            mPacket.set_trusted_packet_sequence_id(kSequenceId);
-            mPacket.set_sequence_flags(2 /* incremental */);
-            auto interned_data = mPacket.set_interned_data();
-            auto eventname = interned_data->add_event_names();
-            eventname->set_iid(mCurrentEventNameIid[mStackDepth]);
-            eventname->set_name(name);
-            endPacket();
-        }
-
         if (CC_UNLIKELY(mNeedToSetThreadId)) {
             mThreadId = __atomic_add_fetch(&sTraceConfig.currentThreadId, 1, __ATOMIC_RELAXED);
             mNeedToSetThreadId = false;
             fprintf(stderr, "%s: found thread id: %u\n", __func__, mThreadId);
             beginPacket();
+            mPacket.set_trusted_packet_sequence_id(kSequenceId);
+            mPacket.set_sequence_flags(2 /* incremental */);
             auto desc = mPacket.set_track_descriptor();
             desc->set_uuid(mThreadId);
-            std::stringstream ss;
-            ss << "EmulatorThread" << mThreadId;
-            desc->set_name(ss.str());
+            desc->set_name(getTrackNameFromThreadId(mThreadId));
             endPacket();
         }
-
-        // Finally do the actual thing
-        beginPacket();
-        mPacket.set_trusted_packet_sequence_id(kSequenceId);
-        mPacket.set_sequence_flags(2 /* incremental */);
-        mPacket.set_timestamp(getTimestamp());
-        auto trackevent = mPacket.set_track_event();
-        trackevent->set_track_uuid(mThreadId); // thread id
-        trackevent->add_category_iids(mCurrentCategoryIid[mStackDepth]);
-        trackevent->set_name_iid(mCurrentEventNameIid[mStackDepth]);
-        trackevent->set_type(protos::pbzero::TrackEvent::TYPE_SLICE_BEGIN);
-        endPacket();
-
-        ++mStackDepth;
     }
 
     void endTrace() {
@@ -311,6 +318,36 @@ public:
         trackevent->set_track_uuid(mThreadId); // thread id
         trackevent->set_name_iid(mCurrentEventNameIid[mStackDepth]);
         trackevent->set_type(protos::pbzero::TrackEvent::TYPE_SLICE_END);
+        endPacket();
+    }
+
+    void traceCounter(const char* name, int64_t val) {
+        if (CC_LIKELY(sTraceConfig.tracingDisabled)) return;
+
+        ensureThreadInfo();
+
+        bool first;
+        uint32_t counterId;
+        uint64_t counterTrackUuid = getOrCreateCounterTrackUuid(name, &counterId, &first);
+        if (CC_UNLIKELY(first)) {
+            fprintf(stderr, "%s: thread id: %u has a counter: %u. uuid: 0x%llx\n", __func__, mThreadId, counterId, (unsigned long long)(counterTrackUuid));
+            beginPacket();
+            auto desc = mPacket.set_track_descriptor();
+            desc->set_uuid(counterTrackUuid);
+            desc->set_name(getTrackNameFromThreadIdAndCounterName(mThreadId, name));
+            desc->set_counter();
+            endPacket();
+        }
+
+        // Do the actual counter track event
+        beginPacket();
+        mPacket.set_trusted_packet_sequence_id(kSequenceId);
+        mPacket.set_sequence_flags(2 /* incremental */);
+        mPacket.set_timestamp(getTimestamp());
+        auto trackevent = mPacket.set_track_event();
+        trackevent->set_track_uuid(counterTrackUuid);
+        trackevent->set_type(protos::pbzero::TrackEvent::TYPE_COUNTER);
+        trackevent->set_counter_value(val);
         endPacket();
     }
 
@@ -408,9 +445,43 @@ private:
         return res;
     }
 
+    static std::string getTrackNameFromThreadId(uint32_t threadId) {
+        std::stringstream ss;
+        ss << kTrackNamePrefix << threadId;
+        return ss.str();
+    }
+
+    static std::string getTrackNameFromThreadIdAndCounterName(uint32_t threadId, const char* counterName) {
+        std::stringstream ss;
+        ss << kTrackNamePrefix << threadId << kCounterNamePrefix << counterName;
+        return ss.str();
+    }
+
+    uint64_t getOrCreateCounterTrackUuid(const char* name, uint32_t* counterId, bool* firstTime) {
+        auto it = mCounterNameToTrackUuids.find(name);
+        uint64_t res;
+        if (CC_UNLIKELY(it == mCounterNameToTrackUuids.end())) {
+            // The counter track uuid is the thread id | shifted counter id.
+            res = (((uint64_t)mCurrentCounterId) << 32) | mThreadId;
+            mCounterNameToTrackUuids[name] = res;
+
+            *counterId = mCurrentCounterId;
+            *firstTime = true;
+
+            // Increment counter id for this thread.
+            ++mCurrentCounterId;
+        } else {
+            res = it->second;
+            *counterId = res >> 32;
+            *firstTime = false;
+        }
+        return res;
+    }
+
     bool mNeedToSetThreadId = true;
     uint32_t mThreadId = 0;
     bool mNeedToConfigureGuestTime = true;
+    uint32_t mCurrentCounterId = 1;
     uint64_t mTimeDiff = 0;
     uint64_t mBuffersUsed = 0;
     bool mCurrentlyTracing = false;
@@ -425,6 +496,7 @@ private:
     protozero::ScatteredStreamWriter mWriter; 
     std::unordered_map<const char*, uint32_t> mEventCategoryInterningIds;
     std::unordered_map<const char*, uint32_t> mEventNameInterningIds;
+    std::unordered_map<const char*, uint64_t> mCounterNameToTrackUuids;
 };
 
 static thread_local TraceContext sThreadLocalTraceContext;
@@ -457,6 +529,7 @@ void disableTracing() {
 
 void beginTrace(const char* name) { sThreadLocalTraceContext.beginTrace(name); }
 void endTrace() { sThreadLocalTraceContext.endTrace(); }
+void traceCounter(const char* name, int64_t val) { sThreadLocalTraceContext.traceCounter(name, val); }
 
 void basic_test() {
     setTraceConfig([](TraceConfig& config) {
@@ -464,9 +537,13 @@ void basic_test() {
     });
     enableTracing();
     for (uint32_t i = 0; i < 40; ++i) {
+        traceCounter("counter1", 1);
         beginTrace("test trace 1");
+        traceCounter("counter1", 2);
           beginTrace("test trace 1.1");
+        traceCounter("counter1", 3);
           endTrace();
+        traceCounter("counter1", 4);
         endTrace();
         beginTrace("test trace 2");
         endTrace();

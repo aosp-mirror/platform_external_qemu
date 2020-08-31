@@ -322,30 +322,25 @@ bool shouldEnableTracing() {
 
 void ScopedTrace::beginTraceImpl(const char* name) {
     perfetto::beginTrace(name);
-    // if (CC_UNLIKELY(shouldEnableTracing())) {
-    //     indentTrace_begin(name);
-    // }
 }
 
 void ScopedTrace::endTraceImpl(const char*) {
     perfetto::endTrace();
-    // if (CC_UNLIKELY(shouldEnableTracing())) {
-    //     indentTrace_end();
-    // }
 }
 
 void beginTrace(const char* name) {
-    if (CC_UNLIKELY(shouldEnableTracing())) {
-        indentTrace_begin(name);
-    }
+    perfetto::beginTrace(name);
 }
 
 void endTrace() {
-    if (CC_UNLIKELY(shouldEnableTracing())) {
-        indentTrace_end();
-    }
+    perfetto::endTrace();
 }
 
+void traceCounter(const char* name, int64_t value) {
+    perfetto::traceCounter(name, value);
+}
+
+// TODO: Remove threshold traces--easier to query from Perfetto
 void ScopedThresholdTrace::beginTraceImpl(const char* name, uint64_t thresholdUs) {
     // if (CC_UNLIKELY(shouldEnableTracing())) {
         // thresholdTrace_begin(name, thresholdUs);
