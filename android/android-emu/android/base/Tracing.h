@@ -43,6 +43,7 @@ void disableTracing();
 bool shouldEnableTracing();
 void beginTrace(const char* name);
 void endTrace();
+void traceCounter(const char* name, int64_t value);
 
 class ScopedThresholdTrace {
 public:

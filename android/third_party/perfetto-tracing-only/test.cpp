@@ -218,6 +218,8 @@ public:
 #endif
 
     static const uint32_t kSequenceId = 1;
+    static constexpr char kTrackNamePrefix[] = "emu-";
+    static constexpr char kCounterNamePrefix[] = "-count-";
 
     void beginTrace(const char* name) {
         if (CC_LIKELY(sTraceConfig.tracingDisabled)) return;
@@ -271,11 +273,11 @@ public:
             mNeedToSetThreadId = false;
             fprintf(stderr, "%s: found thread id: %u\n", __func__, mThreadId);
             beginPacket();
+            mPacket.set_trusted_packet_sequence_id(kSequenceId);
+            mPacket.set_sequence_flags(2 /* incremental */);
             auto desc = mPacket.set_track_descriptor();
             desc->set_uuid(mThreadId);
-            std::stringstream ss;
-            ss << "EmulatorThread" << mThreadId;
-            desc->set_name(ss.str());
+            desc->set_name(getTrackNameFromThreadId(mThreadId));
             endPacket();
         }
 
@@ -311,6 +313,33 @@ public:
         trackevent->set_track_uuid(mThreadId); // thread id
         trackevent->set_name_iid(mCurrentEventNameIid[mStackDepth]);
         trackevent->set_type(protos::pbzero::TrackEvent::TYPE_SLICE_END);
+        endPacket();
+    }
+
+    void traceCounter(const char* name, int64_t val) {
+        if (CC_LIKELY(sTraceConfig.tracingDisabled)) return;
+
+        bool first;
+        uint32_t counterId;
+        uint64_t counterTrackUuid = getOrCreateCounterTrackUuid(name, &counterId, &first);
+        if (CC_UNLIKELY(first)) {
+            fprintf(stderr, "%s: thread id: %u has a counter: %u\n", __func__, mThreadId, counterId);
+            beginPacket();
+            auto desc = mPacket.set_track_descriptor();
+            desc->set_uuid(counterTrackUuid);
+            desc->set_name(getTrackNameFromThreadIdAndCounterName(mThreadId, name));
+            endPacket();
+        }
+
+        // Do the actual counter track event
+        beginPacket();
+        mPacket.set_trusted_packet_sequence_id(kSequenceId);
+        mPacket.set_sequence_flags(2 /* incremental */);
+        mPacket.set_timestamp(getTimestamp());
+        auto trackevent = mPacket.set_track_event();
+        trackevent->set_track_uuid(counterTrackUuid);
+        trackevent->set_type(protos::pbzero::TrackEvent::TYPE_COUNTER);
+        trackevent->set_counter_value(val);
         endPacket();
     }
 
@@ -408,9 +437,43 @@ private:
         return res;
     }
 
+    static std::string getTrackNameFromThreadId(uint32_t threadId) {
+        std::stringstream ss;
+        ss << kTrackNamePrefix << threadId;
+        return ss.str();
+    }
+
+    static std::string getTrackNameFromThreadIdAndCounterName(uint32_t threadId, const char* counterName) {
+        std::stringstream ss;
+        ss << kTrackNamePrefix << threadId << kCounterNamePrefix << counterName;
+        return ss.str();
+    }
+
+    uint64_t getOrCreateCounterTrackUuid(const char* name, uint32_t* counterId, bool* firstTime) {
+        auto it = mCounterNameToTrackUuids.find(name);
+        uint64_t res;
+        if (CC_UNLIKELY(it == mCounterNameToTrackUuids.end())) {
+            // The counter track uuid is the thread id | shifted counter id.
+            res = (((uint64_t)mCurrentCounterId) << 32) | mThreadId;
+            mCounterNameToTrackUuids[name] = res;
+
+            *counterId = mCurrentCounterId;
+            *firstTime = true;
+
+            // Increment counter id for this thread.
+            ++mCurrentCounterId;
+        } else {
+            res = it->second;
+            *counterId = res >> 32;
+            *firstTime = false;
+        }
+        return res;
+    }
+
     bool mNeedToSetThreadId = true;
     uint32_t mThreadId = 0;
     bool mNeedToConfigureGuestTime = true;
+    uint32_t mCurrentCounterId = 1;
     uint64_t mTimeDiff = 0;
     uint64_t mBuffersUsed = 0;
     bool mCurrentlyTracing = false;
@@ -425,6 +488,7 @@ private:
     protozero::ScatteredStreamWriter mWriter; 
     std::unordered_map<const char*, uint32_t> mEventCategoryInterningIds;
     std::unordered_map<const char*, uint32_t> mEventNameInterningIds;
+    std::unordered_map<const char*, uint64_t> mCounterNameToTrackUuids;
 };
 
 static thread_local TraceContext sThreadLocalTraceContext;
@@ -457,6 +521,7 @@ void disableTracing() {
 
 void beginTrace(const char* name) { sThreadLocalTraceContext.beginTrace(name); }
 void endTrace() { sThreadLocalTraceContext.endTrace(); }
+void traceCounter(const char* name, int64_t val) { sThreadLocalTraceContext.traceCounter(name, val); }
 
 void basic_test() {
     setTraceConfig([](TraceConfig& config) {
@@ -464,9 +529,13 @@ void basic_test() {
     });
     enableTracing();
     for (uint32_t i = 0; i < 40; ++i) {
+        traceCounter("counter1", 1);
         beginTrace("test trace 1");
+        traceCounter("counter1", 2);
           beginTrace("test trace 1.1");
+        traceCounter("counter1", 3);
           endTrace();
+        traceCounter("counter1", 4);
         endTrace();
         beginTrace("test trace 2");
         endTrace();

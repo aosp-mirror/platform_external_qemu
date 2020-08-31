@@ -43,6 +43,7 @@ void disableTracing();
 
 void beginTrace(const char* eventName);
 void endTrace();
+void traceCounter(const char* name, int64_t value);
 
 void basic_test();
 
