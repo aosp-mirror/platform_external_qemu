@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de64b9b7_25418594",
+        "filename": "android/docs/DARWIN-DEV.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-08-31T19:22:27Z",
+      "side": 1,
+      "message": "I had to run\n\nxattr -dr com.apple.quarantine /path/to/emu/dir\n\nto make it to work.",
+      "range": {
+        "startLine": 21,
+        "startChar": 25,
+        "endLine": 21,
+        "endChar": 50
+      },
+      "revId": "e3b75368934643367360ba54cb902f0206578f44",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
