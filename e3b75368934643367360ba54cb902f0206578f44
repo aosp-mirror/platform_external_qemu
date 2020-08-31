@@ -46,6 +46,30 @@
       "revId": "e3b75368934643367360ba54cb902f0206578f44",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff9a92dd_a35d4a57",
+        "filename": "android/docs/DARWIN-DEV.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-08-31T20:07:42Z",
+      "side": 1,
+      "message": "For downloaded from go/ab.\n\nxattr -dr com.apple.quarantine /Users/rkir/Downloads/emulator",
+      "parentUuid": "d6c96380_e6372f09",
+      "range": {
+        "startLine": 21,
+        "startChar": 25,
+        "endLine": 21,
+        "endChar": 50
+      },
+      "revId": "e3b75368934643367360ba54cb902f0206578f44",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
