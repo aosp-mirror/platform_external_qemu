@@ -1,0 +1,31 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004701836",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1414753?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "9a38623d_8e94395f",
+        "filename": "android/docs/DARWIN-DEV.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-08-31T18:52:44Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 243,
+        "startChar": 104,
+        "endLine": 243,
+        "endChar": 110
+      },
+      "revId": "e3b75368934643367360ba54cb902f0206578f44",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
