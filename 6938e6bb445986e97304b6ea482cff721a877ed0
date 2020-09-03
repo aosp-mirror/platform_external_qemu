@@ -52,6 +52,24 @@
       "revId": "6938e6bb445986e97304b6ea482cff721a877ed0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e01b516e_dccf5f0b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1113708
+      },
+      "writtenOn": "2020-09-03T19:22:38Z",
+      "side": 1,
+      "message": "It looks like the sync id lookups on waitForGpu are done before the fence is actually added? From logs, for example:\n\nNO sync found for 0x9e300000004\nwaitForGpu: err: fence sync 0x9e300000004 not found\nadding sync 0x9e300000004 -\u003e 0x2433ee1f350",
+      "parentUuid": "c771cae0_a769479b",
+      "revId": "6938e6bb445986e97304b6ea482cff721a877ed0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
