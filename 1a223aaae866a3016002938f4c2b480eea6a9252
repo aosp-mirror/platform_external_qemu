@@ -33,6 +33,24 @@
       "revId": "1a223aaae866a3016002938f4c2b480eea6a9252",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eaa22e3b_f0d24df3",
+        "filename": "android/android-emu/android/skin/qt/device-3d-widget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1188,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-09-03T19:46:52Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a5a5e53a_e0ce4865",
+      "revId": "1a223aaae866a3016002938f4c2b480eea6a9252",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
