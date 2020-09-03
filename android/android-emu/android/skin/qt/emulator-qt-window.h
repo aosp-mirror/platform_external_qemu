@@ -203,7 +203,6 @@ signals:
 
     void showVirtualSceneControls(bool show);
     void updateMultiDisplayPage(int id);
-    void themeChanged(SettingsTheme theme);
 
 public:
     void pollEvent(SkinEvent* event, bool* hasEvent);
@@ -285,7 +284,6 @@ public:
                                    uint32_t dpi, uint32_t flag);
     void updateUIMultiDisplayPage(uint32_t id);
     void setUIDisplayRegion(int x, int y, int w, int h);
-    bool setUITheme(SettingsTheme theme);
     const QPixmap* getRawSkinPixmap() { getSkinPixmap(); return mRawSkinPixmap; }
 
     static bool sClosed;

@@ -3032,20 +3032,6 @@ void EmulatorQtWindow::setUIDisplayRegion(int x, int y, int w, int h) {
     runOnUiThread([this, x, y, w, h]() {this->resizeAndChangeAspectRatio(x, y, w, h);});
 }
 
-bool EmulatorQtWindow::setUITheme(SettingsTheme theme) {
-    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
-        // Out of range--ignore
-        return false;
-    }
-    QSettings settings;
-    settings.setValue(Ui::Settings::UI_THEME, (int)theme);
-    runOnUiThread([this, theme]() {
-        mToolWindow->touchExtendedWindow();
-        emit(themeChanged(theme));
-    });
-    return true;
-}
-
 bool EmulatorQtWindow::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
                                                  uint32_t dpi, uint32_t flag) {
     const auto uiAgent = mToolWindow->getUiEmuAgent();

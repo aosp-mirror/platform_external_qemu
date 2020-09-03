@@ -133,7 +133,7 @@ ExtendedWindow::ExtendedWindow(
         this, SLOT(switchToTheme(SettingsTheme)));
 
     connect(
-        mEmulatorWindow, SIGNAL(themeChanged(SettingsTheme)),
+        mToolWindow, SIGNAL(themeChanged(SettingsTheme)),
         mExtendedUi->settingsPage, SLOT(setUITheme(SettingsTheme)), Qt::DirectConnection);
 
     connect(mExtendedUi->settingsPage, SIGNAL(disableMouseWheelChanged(bool)),

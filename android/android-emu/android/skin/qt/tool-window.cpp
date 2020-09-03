@@ -414,6 +414,10 @@ void ToolWindow::hide() {
     QFrame::hide();
     mVirtualSceneControlWindow.ifExists(
             [&] { mVirtualSceneControlWindow.get()->hide(); });
+    hideExtendedWindow();
+}
+
+void ToolWindow::hideExtendedWindow() {
     mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
 }
 
@@ -457,6 +461,20 @@ void ToolWindow::ensureExtendedWindowExists() {
     if (mAllowExtWindow && !mIsExiting) {
         mExtendedWindow.get();
     }
+}
+
+bool ToolWindow::setUITheme(SettingsTheme theme) {
+    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
+        // Out of range--ignore
+        return false;
+    }
+    if (getSelectedTheme() != theme) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::UI_THEME, (int)theme);
+        ensureExtendedWindowExists();
+        emit(themeChanged(theme));
+    }
+    return true;
 }
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
