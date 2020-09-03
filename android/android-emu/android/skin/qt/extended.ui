@@ -70,6 +70,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="CameraPage" name="cameraPage"/>
    <widget class="TelephonyPage" name="telephonyPage"/>
    <widget class="DPadPage" name="dpadPage"/>
+   <widget class="TvRemotePage" name="tvRemotePage"/>
    <widget class="RotaryInputPage" name="rotaryInputPage"/>
    <widget class="MicrophonePage" name="microphonePage"/>
    <widget class="FingerPage" name="finger_page"/>
@@ -1331,6 +1332,12 @@ padding: 10px 0px 10px 16px;</string>
    <class>DPadPage</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/dpad-page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TvRemotePage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/tv-remote-page.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

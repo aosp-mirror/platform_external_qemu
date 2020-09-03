@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TvRemotePage</class>
+ <widget class="QWidget" name="TvRemotePage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>620</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QPushButton" name="tvRemote_downButton">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>206</y>
+     <width>142</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/dark/dpad_down</normaloff>:/dark/dpad_down</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>141</width>
+     <height>100</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>dpad_down</string>
+   </property>
+   <property name="themeIconNamePressed" stdset="0">
+    <string>dpad_down_pressed</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="tvRemote_leftButton">
+   <property name="geometry">
+    <rect>
+     <x>209</x>
+     <y>132</y>
+     <width>100</width>
+     <height>142</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/dark/dpad_left</normaloff>:/dark/dpad_left</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>100</width>
+     <height>141</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>dpad_left</string>
+   </property>
+   <property name="themeIconNamePressed" stdset="0">
+    <string>dpad_left_pressed</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="tvRemote_upButton">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>100</y>
+     <width>142</width>
+     <height>100</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/dark/dpad_up</normaloff>:/dark/dpad_up</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>141</width>
+     <height>100</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>dpad_up</string>
+   </property>
+   <property name="themeIconNamePressed" stdset="0">
+    <string>dpad_up_pressed</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="tvRemote_rightButton">
+   <property name="geometry">
+    <rect>
+     <x>313</x>
+     <y>132</y>
+     <width>100</width>
+     <height>142</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/dark/dpad_right</normaloff>:/dark/dpad_right</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>100</width>
+     <height>141</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>dpad_right</string>
+   </property>
+   <property name="themeIconNamePressed" stdset="0">
+    <string>dpad_right_pressed</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="tvRemote_selectButton">
+   <property name="geometry">
+    <rect>
+     <x>268</x>
+     <y>160</y>
+     <width>86</width>
+     <height>86</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string notr="true"/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/dark/dpad_select</normaloff>:/dark/dpad_select</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>85</width>
+     <height>85</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>dpad_select</string>
+   </property>
+   <property name="themeIconNamePressed" stdset="0">
+    <string>dpad_select_pressed</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
