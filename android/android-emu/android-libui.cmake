@@ -112,6 +112,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/cellular-page.cpp
     android/skin/qt/extended-pages/common.cpp
     android/skin/qt/extended-pages/dpad-page.cpp
+    android/skin/qt/extended-pages/tv-remote-page.cpp
     android/skin/qt/extended-pages/finger-page.cpp
     android/skin/qt/extended-pages/google-play-page.cpp
     android/skin/qt/extended-pages/help-page.cpp
@@ -191,6 +192,7 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/car-rotary-page.ui
     android/skin/qt/extended-pages/cellular-page.ui
     android/skin/qt/extended-pages/dpad-page.ui
+    android/skin/qt/extended-pages/tv-remote-page.ui
     android/skin/qt/extended-pages/finger-page.ui
     android/skin/qt/extended-pages/google-play-page.ui
     android/skin/qt/extended-pages/help-page.ui
@@ -237,6 +239,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-pages/car-rotary-page.h
     android/skin/qt/extended-pages/cellular-page.h
     android/skin/qt/extended-pages/dpad-page.h
+    android/skin/qt/extended-pages/tv-remote-page.h
     android/skin/qt/extended-pages/finger-page.h
     android/skin/qt/extended-pages/google-play-page.h
     android/skin/qt/extended-pages/help-page.h
