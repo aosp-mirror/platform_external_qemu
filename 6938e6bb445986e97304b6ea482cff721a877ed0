@@ -16,6 +16,24 @@
       "revId": "6938e6bb445986e97304b6ea482cff721a877ed0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c96e988a_0be8ed16",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1113708
+      },
+      "writtenOn": "2020-09-03T18:00:39Z",
+      "side": 1,
+      "message": "However, fixing the waitGpu() guest sync to lookup from the new cache does, in fact, work fine.",
+      "parentUuid": "5dd85cb6_91b76997",
+      "revId": "6938e6bb445986e97304b6ea482cff721a877ed0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
