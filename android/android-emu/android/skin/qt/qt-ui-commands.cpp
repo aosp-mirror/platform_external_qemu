@@ -39,6 +39,7 @@ constexpr CommandInfo kCommands[] = {
         INIT_COMMAND(SHOW_PANE_VIRTSENSORS, "Virtual sensors"),
         INIT_COMMAND(SHOW_PANE_SNAPSHOT, "Snapshots"),
         INIT_COMMAND(SHOW_PANE_DPAD, "D-Pad"),
+        INIT_COMMAND(SHOW_PANE_TV_REMOTE, "TV remote"),
         INIT_COMMAND(SHOW_PANE_FINGER, "Fingerprint"),
         INIT_COMMAND(SHOW_PANE_CAR, "Car Data"),
         INIT_COMMAND(SHOW_PANE_CAR_ROTARY, "Car Rotary"),
