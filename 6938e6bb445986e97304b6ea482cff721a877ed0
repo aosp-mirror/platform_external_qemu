@@ -70,6 +70,24 @@
       "revId": "6938e6bb445986e97304b6ea482cff721a877ed0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7b14c3d_c35b40d3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-09-03T21:03:03Z",
+      "side": 1,
+      "message": "The flickering could be a bug in the ReadbackWorker. We should test with OpenGL window to see if that\u0027s the case.",
+      "parentUuid": "e01b516e_dccf5f0b",
+      "revId": "6938e6bb445986e97304b6ea482cff721a877ed0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
