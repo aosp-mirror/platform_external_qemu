@@ -180,12 +180,15 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 []() {
                     if (auto* win = EmulatorQtWindow::getInstance()) {
                         win->runOnUiThread(
-                                [win]() { win->toolWindow()->hide(); });
+                                [win]() { win->toolWindow()->hideExtendedWindow(); });
                     }
                 },
         .setUITheme = [](SettingsTheme type) {
+                    skin_winsys_touch_qt_extended_virtual_sensors();
                     if (auto* win = EmulatorQtWindow::getInstance()) {
-                        return win->setUITheme(type);
+                        win->runOnUiThread(
+                                [win, type]() { win->toolWindow()->setUITheme(type); });
+                        return true;
                     } else {
                         return false;
                     }

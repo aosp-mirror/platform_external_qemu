@@ -71,6 +71,7 @@ public:
 
     void allowExtWindowCreation();
     void hide();
+    void hideExtendedWindow();
     void show();
     void dockMainWindow();
     void raiseMainWindow();
@@ -117,10 +118,12 @@ public:
         handleUICommand(cmd, false);
     }
     void hideRotationButton(bool hide);
+    bool setUITheme(SettingsTheme theme);
 
 signals:
     void guestClipboardChanged(QString text);
     void haveClipboardSharingKnown(bool have);
+    void themeChanged(SettingsTheme theme);
 
 private:
     static void forwardGenericEventToEmulator(int type, int code, int value);

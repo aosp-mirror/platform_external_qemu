@@ -4034,10 +4034,17 @@ static int do_quit_extended_window(ControlClient client, char* args) {
 }
 
 static int do_set_ui_theme(ControlClient client, char* args) {
+    if (!args) {
+        control_write(client, "KO: argument missing, try 'setUITheme <dark|light>'\r\n");
+        return -1;
+    }
     if (!strcmp(args,"dark")) {
         client->global->emu_agent->setUITheme(SETTINGS_THEME_DARK);
     } else if (!strcmp(args, "light")) {
         client->global->emu_agent->setUITheme(SETTINGS_THEME_LIGHT);
+    } else {
+        control_write( client, "KO: Failed to set UI theme to %s, try 'setUITheme <dark|light>'\r\n", args);
+                return -1;
     }
     return 0;
 }
