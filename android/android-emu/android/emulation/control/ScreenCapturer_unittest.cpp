@@ -81,16 +81,14 @@ protected:
         *lineSize = *w * *bytesPerPixel;
         *frameBufferData = pixels;
     }
-    static void verifyframebuffer4Pixels(SkinRotation rotation,
-            const uint8_t* data) {
-        static const uint8_t pixels_0[]   = {1, 0, 0, 255,    0, 1, 0, 255,
-                                             0, 0, 1, 255,    1, 1, 1, 255};
-        static const uint8_t pixels_90[]  = {0, 0, 1, 255,    1, 0, 0, 255,
-                                             1, 1, 1, 255,    0, 1, 0, 255};
-        static const uint8_t pixels_180[] = {1, 1, 1, 255,    0, 0, 1, 255,
-                                             0, 1, 0, 255,    1, 0, 0, 255};
-        static const uint8_t pixels_270[] = {0, 1, 0, 255,    1, 1, 1, 255,
-                                             1, 0, 0, 255,    0, 0, 1, 255};
+
+    static void verifyPixels(SkinRotation rotation,
+                             const uint8_t* data,
+                             const uint8_t* pixels_0,
+                             const uint8_t* pixels_90,
+                             const uint8_t* pixels_180,
+                             const uint8_t* pixels_270,
+                             size_t bufsize) {
         const uint8_t* pixels = nullptr;
         switch (rotation) {
             case SKIN_ROTATION_0:
@@ -106,11 +104,37 @@ protected:
                 pixels = pixels_270;
                 break;
         }
-        for (int i = 0; i < sizeof(pixels_0); i++) {
+        for (int i = 0; i < bufsize; i++) {
             EXPECT_EQ(pixels[i], data[i])
-                    << std::string("Bad value at position ")
-                        + std::to_string(i);
+                    << std::string("Bad value at position ") +
+                               std::to_string(i);
         }
+    }
+
+    static void verifyframebuffer4Pixels(SkinRotation rotation, const uint8_t* data) {
+        static const uint8_t pixels_0[]   = {1, 0, 0, 255,    0, 1, 0, 255,
+                                             0, 0, 1, 255,    1, 1, 1, 255};
+        static const uint8_t pixels_90[]  = {0, 0, 1, 255,    1, 0, 0, 255,
+                                             1, 1, 1, 255,    0, 1, 0, 255};
+        static const uint8_t pixels_180[] = {1, 1, 1, 255,    0, 0, 1, 255,
+                                             0, 1, 0, 255,    1, 0, 0, 255};
+        static const uint8_t pixels_270[] = {0, 1, 0, 255,    1, 1, 1, 255,
+                                             1, 0, 0, 255,    0, 0, 1, 255};
+
+        verifyPixels(rotation ,data, pixels_0, pixels_90, pixels_180, pixels_270, sizeof(pixels_0));
+    }
+
+    static void verifyframebuffer3Pixels(SkinRotation rotation, const uint8_t* data) {
+        static const uint8_t pixels_0[]   = {1, 0, 0,    0, 1, 0,
+                                             0, 0, 1,    1, 1, 1};
+        static const uint8_t pixels_90[]  = {0, 0, 1,    1, 0, 0,
+                                             1, 1, 1,    0, 1, 0};
+        static const uint8_t pixels_180[] = {1, 1, 1,    0, 0, 1,
+                                             0, 1, 0,    1, 0, 0};
+        static const uint8_t pixels_270[] = {0, 1, 0,    1, 1, 1,
+                                             1, 0, 0,    0, 0, 1};
+
+        verifyPixels(rotation, data, pixels_0, pixels_90, pixels_180, pixels_270, sizeof(pixels_0));
     }
 };
 
@@ -346,6 +370,24 @@ TEST_F(ScreenCapturerTest, takePngScreenShotRotations) {
 
         verifyframebuffer4Pixels(rotation, pixels);
         free(pixels);
+    }
+}
+
+TEST_F(ScreenCapturerTest, takeRGB888ScreenShotRotations) {
+    // Make sure that taking a screenshot that gets converted in place
+    // to a png actually works.
+    const SkinRotation rotations[] = {SKIN_ROTATION_0};
+
+    // Currently we do not do software rotation.
+    for (SkinRotation rotation : rotations) {
+        Image img = takeScreenshot(ImageFormat::RGB888, rotation, nullptr,
+                                   framebuffer4Pixels);
+        EXPECT_EQ(ImageFormat::RGB888, img.getImageFormat());
+
+        verifyframebuffer3Pixels(rotation, img.getPixelBuf());
+
+        // Nop conversion should not modify the pixel buffers.
+        verifyframebuffer3Pixels(rotation, img.asRGB888().getPixelBuf());
     }
 }
 

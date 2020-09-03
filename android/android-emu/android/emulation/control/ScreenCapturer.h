@@ -49,7 +49,12 @@ public:
     uint8_t getChannels() { return m_NChannels; }
     ImageFormat getImageFormat() { return m_Format; }
 
+    // Converts Image from RGBA8888 -> RGB888 if needed and possible.
+    Image& asRGB888();
+
 private:
+    void convertPerByte();
+    void convertPerHexlet();
     uint16_t m_Width;
     uint16_t m_Height;
     uint8_t m_NChannels;
