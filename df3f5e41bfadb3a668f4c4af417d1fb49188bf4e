@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "219b4e0f_1510bc54",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-09-03T22:41:16Z",
+      "side": 1,
+      "message": "how about -feature HardwareDecoder ?",
+      "range": {
+        "startLine": 15,
+        "startChar": 32,
+        "endLine": 15,
+        "endChar": 57
+      },
+      "revId": "df3f5e41bfadb3a668f4c4af417d1fb49188bf4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
