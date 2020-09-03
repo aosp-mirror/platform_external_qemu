@@ -48,6 +48,7 @@
 #include "android/skin/qt/extended-pages/cellular-page.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/dpad-page.h"
+#include "android/skin/qt/extended-pages/tv-remote-page.h"
 #include "android/skin/qt/extended-pages/finger-page.h"
 #include "android/skin/qt/extended-pages/google-play-page.h"
 #include "android/skin/qt/extended-pages/help-page.h"
@@ -103,6 +104,7 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->setupUi(this);
     mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
+    mExtendedUi->tvRemotePage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->microphonePage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->settingsPage->setAdbInterface(
@@ -162,6 +164,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_CAMERA,        mExtendedUi->cameraButton},
         {PANE_IDX_TELEPHONE,     mExtendedUi->telephoneButton},
         {PANE_IDX_DPAD,          mExtendedUi->dpadButton},
+        {PANE_IDX_TV_REMOTE,     mExtendedUi->dpadButton},
         {PANE_IDX_ROTARY,        mExtendedUi->rotaryInputButton},
         {PANE_IDX_MICROPHONE,    mExtendedUi->microphoneButton},
         {PANE_IDX_MULTIDISPLAY,  mExtendedUi->displaysButton},
@@ -312,6 +315,7 @@ static std::string translate_idx(ExtendedWindowPane value) {
         PANE(PANE_IDX_CAMERA)
         PANE(PANE_IDX_TELEPHONE)
         PANE(PANE_IDX_DPAD)
+        PANE(PANE_IDX_TV_REMOTE)
         PANE(PANE_IDX_ROTARY)
         PANE(PANE_IDX_MICROPHONE)
         PANE(PANE_IDX_FINGER)
@@ -470,7 +474,15 @@ void ExtendedWindow::on_batteryButton_clicked()      { adjustTabs(PANE_IDX_BATTE
 void ExtendedWindow::on_cameraButton_clicked()       { adjustTabs(PANE_IDX_CAMERA); }
 void ExtendedWindow::on_bugreportButton_clicked()    { adjustTabs(PANE_IDX_BUGREPORT); }
 void ExtendedWindow::on_cellularButton_clicked()     { adjustTabs(PANE_IDX_CELLULAR); }
-void ExtendedWindow::on_dpadButton_clicked()         { adjustTabs(PANE_IDX_DPAD); }
+void ExtendedWindow::on_dpadButton_clicked() {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::TvRemote)
+        && avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+        adjustTabs(PANE_IDX_TV_REMOTE);
+    } else {
+        adjustTabs(PANE_IDX_DPAD);
+    }
+
+}
 void ExtendedWindow::on_displaysButton_clicked()     { adjustTabs(PANE_IDX_MULTIDISPLAY); }
 void ExtendedWindow::on_rotaryInputButton_clicked()  { adjustTabs(PANE_IDX_ROTARY); }
 void ExtendedWindow::on_fingerButton_clicked()       { adjustTabs(PANE_IDX_FINGER); }
