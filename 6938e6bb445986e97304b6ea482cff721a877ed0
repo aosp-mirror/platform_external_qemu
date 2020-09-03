@@ -34,6 +34,24 @@
       "revId": "6938e6bb445986e97304b6ea482cff721a877ed0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c771cae0_a769479b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1113708
+      },
+      "writtenOn": "2020-09-03T18:33:37Z",
+      "side": 1,
+      "message": "I take it back, still extensive flickering.",
+      "parentUuid": "c96e988a_0be8ed16",
+      "revId": "6938e6bb445986e97304b6ea482cff721a877ed0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
