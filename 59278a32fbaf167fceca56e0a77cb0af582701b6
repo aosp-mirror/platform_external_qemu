@@ -52,6 +52,24 @@
       "revId": "59278a32fbaf167fceca56e0a77cb0af582701b6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b698915_222a0c8c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-04T01:06:40Z",
+      "side": 1,
+      "message": "This is to support RGB888 screenshots for the gRPC endpoint, not related to shared memory.",
+      "parentUuid": "ae8c432d_9875711d",
+      "revId": "59278a32fbaf167fceca56e0a77cb0af582701b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
