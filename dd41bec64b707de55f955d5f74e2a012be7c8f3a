@@ -16,6 +16,52 @@
       "revId": "dd41bec64b707de55f955d5f74e2a012be7c8f3a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92baa7c1_c619a949",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-04T01:27:45Z",
+      "side": 1,
+      "message": "Is it possible to do this conversion when writing to the proto? It would save an extra pixel array allocated by Image.asRGB888.",
+      "range": {
+        "startLine": 162,
+        "startChar": 19,
+        "endLine": 162,
+        "endChar": 31
+      },
+      "revId": "dd41bec64b707de55f955d5f74e2a012be7c8f3a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0366ef31_65b7c543",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-04T01:27:45Z",
+      "side": 1,
+      "message": "Adjust indentation.",
+      "range": {
+        "startLine": 252,
+        "startChar": 4,
+        "endLine": 252,
+        "endChar": 6
+      },
+      "revId": "dd41bec64b707de55f955d5f74e2a012be7c8f3a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
