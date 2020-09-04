@@ -15,6 +15,9 @@
 #include "android/hw-sensors.h"
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/memory/OnDemand.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/threads/WorkerThread.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/extended-window.h"
@@ -127,7 +130,6 @@ signals:
 
 private:
     static void forwardGenericEventToEmulator(int type, int code, int value);
-    static void sendFoldedArea();
     void handleUICommand(QtUICommand cmd, bool down);
     void ensureExtendedWindowExists();
 
@@ -176,13 +178,29 @@ private:
     bool mAskedWhetherToSaveSnapshot = false;
     bool mAllowExtWindow = false;
     bool mClipboardSupported = false;
-    bool mFolded = false;
 
     int mLastRequestedFoldablePosture = -1;
 
     static const UiEmuAgent* sUiEmuAgent;
 
     PostureSelectionDialog* mPostureSelectionDialog;
+    enum FoldableSyncToAndroidOp {
+        SEND_AREA = 0,
+        CONFIRM_AREA,
+        SEND_LID_CLOSE,
+        SEND_LID_OPEN,
+        SEND_EXIT,
+    };
+    struct FoldableSyncToAndroidItem {
+        enum FoldableSyncToAndroidOp op;
+        int x, y, width, height;
+    };
+    android::base::WorkerThread<FoldableSyncToAndroidItem> mFoldableSyncToAndroid;
+    android::base::WorkerProcessingResult foldableSyncToAndroidItemFunction(const FoldableSyncToAndroidItem& item);
+    android::base::Lock mLock;
+    android::base::ConditionVariable mCv;
+    bool mFoldableSyncToAndroidSuccess;
+    bool mFoldableSyncToAndroidTimeout;
 
 public slots:
     void raise();

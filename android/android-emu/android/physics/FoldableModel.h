@@ -41,20 +41,31 @@ public:
     void setPosture(float posture, PhysicalInterpolation mode,
                     std::recursive_mutex& mutex);
 
+    void setRollable(uint32_t index,
+                     float percentage,
+                     PhysicalInterpolation mode,
+                     std::recursive_mutex& mutex);
+
     float getHingeAngle(uint32_t hingeIndex,
                         ParameterValueType parameterValueType =
                                 PARAMETER_VALUE_TYPE_CURRENT) const;
 
-    float getPosture(ParameterValueType parameterValueType =
-                           PARAMETER_VALUE_TYPE_CURRENT) const;
+    float getRollable(uint32_t index,
+                      ParameterValueType parameterValueType) const;
 
-    FoldableState getFoldableState() { return mState; }     // structure copy
+    float getPosture(ParameterValueType parameterValueType =
+                             PARAMETER_VALUE_TYPE_CURRENT) const;
+
+    FoldableState getFoldableState() { return mState; }  // structure copy
 
     bool isFolded();
 
     bool getFoldedArea(int* x, int* y, int* w, int* h);
 
 private:
+    void initPostures();
+    void initFoldableHinge();
+    void initFoldableRoll();
     enum FoldablePostures calculatePosture();
     void sendPostureToSystem(enum FoldablePostures p);
     void updateFoldablePostureIndicator();
