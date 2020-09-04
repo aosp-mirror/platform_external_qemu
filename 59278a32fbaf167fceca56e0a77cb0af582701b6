@@ -16,6 +16,24 @@
       "revId": "59278a32fbaf167fceca56e0a77cb0af582701b6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09fe5771_8deb245a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-04T00:57:54Z",
+      "side": 1,
+      "message": "We don\u0027t do a straight forward copy we are dropping the alpha byte. I\u0027ve added some additional benchmarks:\n\nstandard memcpy\n\nBM_cnv_memcpy/4M                   137221 ns     137183 ns       4917   28.4747GB/s\nBM_cnv_memcpy/8M                   543341 ns     542949 ns       1235    14.389GB/s\nBM_cnv_memcpy/16M                 1922685 ns    1920804 ns        367   8.13462GB/s\nBM_cnv_memcpy/32M                 4168711 ns    4167094 ns        170   7.49923GB/s\n\nvs. hexlet\n\nBM_cnv_dma_hexlet_no_cpy/4M        461741 ns     461194 ns       1288   8.46986GB/s\nBM_cnv_dma_hexlet_no_cpy/8M       1094215 ns    1093343 ns        630   7.14552GB/s\nBM_cnv_dma_hexlet_no_cpy/16M      2202820 ns    2200347 ns        314   7.10115GB/s\nBM_cnv_dma_hexlet_no_cpy/32M      5157411 ns    5151412 ns        131    6.0663GB/s",
+      "parentUuid": "0cd1f471_17785a75",
+      "revId": "59278a32fbaf167fceca56e0a77cb0af582701b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
