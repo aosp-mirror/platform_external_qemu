@@ -2208,6 +2208,10 @@ void EmulatorQtWindow::doResize(const QSize& size,
 
 void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     QRect windowGeo = this->geometry();
+    if (!mBackingSurface) {
+        VLOG(foldable) << "backing surface not ready, cancel window adjustment";
+        return;
+    }
     QSize backingSize = mBackingSurface->bitmap->size();
     float scale = (float)windowGeo.width() / (float)backingSize.width();
     int displayX = android_hw->hw_lcd_width;
