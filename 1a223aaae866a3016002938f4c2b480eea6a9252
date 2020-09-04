@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ae5af3f6_80aaa440",
+        "filename": "android/android-emu/android/hw-sensors.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-09-04T00:34:10Z",
+      "side": 1,
+      "message": "good suggestion, thanks!\nAdded direction config.",
+      "parentUuid": "4bc534f5_3066d78c",
+      "revId": "1a223aaae866a3016002938f4c2b480eea6a9252",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a5a5e53a_e0ce4865",
         "filename": "android/android-emu/android/skin/qt/device-3d-widget.cpp",
         "patchSetId": 9
