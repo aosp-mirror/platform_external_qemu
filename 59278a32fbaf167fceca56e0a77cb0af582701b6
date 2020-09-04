@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0cd1f471_17785a75",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-04T00:28:43Z",
+      "side": 1,
+      "message": "these seem very very low for memory transfer speeds. are we using shared memory here? Expect up to like 17 GB/s with just memcpy",
+      "revId": "59278a32fbaf167fceca56e0a77cb0af582701b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
