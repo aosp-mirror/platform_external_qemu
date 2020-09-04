@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "402da1a4_28398771",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-04T17:15:56Z",
+      "side": 1,
+      "message": "Excellent, that will prevent a translation in that case.",
+      "parentUuid": "2b332880_417b5b0d",
+      "range": {
+        "startLine": 82,
+        "startChar": 32,
+        "endLine": 82,
+        "endChar": 41
+      },
+      "revId": "dd41bec64b707de55f955d5f74e2a012be7c8f3a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "92baa7c1_c619a949",
         "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
         "patchSetId": 4
@@ -53,6 +77,30 @@
       "writtenOn": "2020-09-04T01:27:45Z",
       "side": 1,
       "message": "Is it possible to do this conversion when writing to the proto? It would save an extra pixel array allocated by Image.asRGB888.",
+      "range": {
+        "startLine": 162,
+        "startChar": 19,
+        "endLine": 162,
+        "endChar": 31
+      },
+      "revId": "dd41bec64b707de55f955d5f74e2a012be7c8f3a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56d8c6c3_a35c8e14",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-04T17:15:56Z",
+      "side": 1,
+      "message": "Alas, bytes are stored as std::string in the protobuf. There are no std::move semantics from std::vector -\u003e std::string. Furthermore the conversion will not happen in every scenario.",
+      "parentUuid": "92baa7c1_c619a949",
       "range": {
         "startLine": 162,
         "startChar": 19,
@@ -85,6 +133,30 @@
       "revId": "dd41bec64b707de55f955d5f74e2a012be7c8f3a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "faff24d0_23768a23",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-04T17:15:56Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "0366ef31_65b7c543",
+      "range": {
+        "startLine": 252,
+        "startChar": 4,
+        "endLine": 252,
+        "endChar": 6
+      },
+      "revId": "dd41bec64b707de55f955d5f74e2a012be7c8f3a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
