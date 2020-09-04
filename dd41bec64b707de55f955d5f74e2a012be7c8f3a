@@ -19,6 +19,29 @@
     },
     {
       "key": {
+        "uuid": "2b332880_417b5b0d",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-09-04T03:10:51Z",
+      "side": 1,
+      "message": "nChannles \u003d 3, will capture RGB format",
+      "range": {
+        "startLine": 82,
+        "startChar": 32,
+        "endLine": 82,
+        "endChar": 41
+      },
+      "revId": "dd41bec64b707de55f955d5f74e2a012be7c8f3a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "92baa7c1_c619a949",
         "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
         "patchSetId": 4
