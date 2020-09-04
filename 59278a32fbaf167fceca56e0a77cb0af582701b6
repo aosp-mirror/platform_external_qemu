@@ -34,6 +34,24 @@
       "revId": "59278a32fbaf167fceca56e0a77cb0af582701b6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae8c432d_9875711d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-04T01:03:46Z",
+      "side": 1,
+      "message": "Not sure I understand the context then; why can\u0027t we use memcpy instead? We\u0027re using shared memory, right?",
+      "parentUuid": "09fe5771_8deb245a",
+      "revId": "59278a32fbaf167fceca56e0a77cb0af582701b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
