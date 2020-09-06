@@ -516,6 +516,9 @@ void ExtendedWindow::switchDisableDeviceFrame(bool disableDeviceFrame)
 }
 
 void ExtendedWindow::switchOnTop(bool isOnTop) {
+    if (android_cmdLineOptions && android_cmdLineOptions->qt_hide_window) {
+        setFrameOnTop(this, isOnTop);
+    }
     mEmulatorWindow->setOnTop(isOnTop);
     mToolWindow->notifySwitchOnTop();
 }
