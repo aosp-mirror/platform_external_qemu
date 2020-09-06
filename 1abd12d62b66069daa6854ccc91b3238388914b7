@@ -1,0 +1,85 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004799184",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1314949?revision\u003d72",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "9f791644_6d3d39be",
+        "filename": "android/third_party/modem-simulator/CMakeLists.txt",
+        "patchSetId": 72
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-09-06T03:45:16Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 40,
+        "startChar": 76,
+        "endLine": 40,
+        "endChar": 82
+      },
+      "revId": "1abd12d62b66069daa6854ccc91b3238388914b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004799184",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1314949?revision\u003d72",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "1d93f80b_2fa175af",
+        "filename": "android/third_party/modem-simulator/json/jsoncpp.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 2525,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-09-06T03:45:16Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027valid\u0027, \u0027validity check\u0027 or \u0027initial check\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 2525,
+        "startChar": 10,
+        "endLine": 2525,
+        "endChar": 14
+      },
+      "revId": "1abd12d62b66069daa6854ccc91b3238388914b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004799184",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1314949?revision\u003d72",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "77c51f64_16dce8b7",
+        "filename": "android/third_party/modem-simulator/json/jsoncpp.cpp",
+        "patchSetId": 72
+      },
+      "lineNbr": 2544,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-09-06T03:45:16Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027valid\u0027, \u0027validity check\u0027 or \u0027initial check\u0027; see https://source.android.com/setup/contribute/respectful-code for more details.",
+      "range": {
+        "startLine": 2544,
+        "startChar": 10,
+        "endLine": 2544,
+        "endChar": 14
+      },
+      "revId": "1abd12d62b66069daa6854ccc91b3238388914b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
