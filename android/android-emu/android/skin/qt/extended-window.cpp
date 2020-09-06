@@ -516,6 +516,7 @@ void ExtendedWindow::switchDisableDeviceFrame(bool disableDeviceFrame)
 }
 
 void ExtendedWindow::switchOnTop(bool isOnTop) {
+    setFrameOnTop(this, isOnTop);
     mEmulatorWindow->setOnTop(isOnTop);
     mToolWindow->notifySwitchOnTop();
 }
