@@ -69,6 +69,7 @@
 #include "android/emulation/address_space_device.hpp"
 #include "android/emulation/control/EmulatorAdvertisement.h"
 #include "android/emulation/control/EmulatorService.h"
+#include "android/emulation/control/ExtendedControls.h"
 #include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
@@ -291,6 +292,8 @@ int qemu_setup_grpc() {
     auto h2o = android::emulation::control::getWaterfallService(
             android_cmdLineOptions->waterfall);
     auto snapshot = android::emulation::control::getSnapshotService();
+    auto extendedControls = android::emulation::control::getExtendedControlsService(
+        getConsoleAgents());
     auto builder = EmulatorControllerService::Builder()
                            .withConsoleAgents(getConsoleAgents())
                            .withPortRange(grpc_start, grpc_end)
@@ -301,7 +304,8 @@ int qemu_setup_grpc() {
                            .withAddress(address)
                            .withService(emulator)
                            .withService(h2o)
-                           .withService(snapshot);
+                           .withService(snapshot)
+                           .withService(extendedControls);
 
     int timeout = 0;
     if (android_cmdLineOptions->idle_grpc_timeout &&

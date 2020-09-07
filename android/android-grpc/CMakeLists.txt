@@ -76,6 +76,25 @@ target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
 target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
 set_target_properties(android-grpc PROPERTIES CXX_STANDARD 17)
 
+protobuf_generate_grpc_cpp(
+  SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} SOURCES extended_controls_service.proto
+  OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} GENERATED EXTENDED_CONTROLS_SERVICE_GRPC_SRC)
+
+# Add extended controls service
+android_add_library(
+  TARGET extended-controls
+  LICENSE Apache-2.0
+  SRC # cmake-format: sortable
+      ${EXTENDED_CONTROLS_SERVICE_GRPC_SRC}
+      android/emulation/control/ExtendedControls.cpp)
+
+message(WARNING, "${CMAKE_CURRENT_BINARY_DIR}")
+message(WARNING, "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(extended-controls PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
+                                                    ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(extended-controls PUBLIC libprotobuf android-emu grpc++)
+
 if(NOT WINDOWS_MSVC_X86_64)
   target_link_libraries(android-grpc PRIVATE android-waterfall)
 endif()
