@@ -1483,3 +1483,8 @@ glFlushMappedBufferRangeAEMU2
     flag custom_decoder
     flag not_api
     custom_host_api glFlushMappedBufferRangeAEMU
+
+glReadnPixels
+    dir data out
+    len data bufSize
+
