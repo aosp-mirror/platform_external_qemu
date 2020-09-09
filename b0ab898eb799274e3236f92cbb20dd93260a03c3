@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "35db7c85_b82e3dad",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1743418
+      },
+      "writtenOn": "2020-09-09T13:35:53Z",
+      "side": 1,
+      "message": "I thought I would start by doing a separate component which duplicates the dpad functionality. And that later I could refactor the common behaviour so that it is reused, not duplicated. Or merge the dpad and tv remote and choose what to display based on the avd type. Please let me know what are your thoughts on this :) ",
+      "revId": "b0ab898eb799274e3236f92cbb20dd93260a03c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
