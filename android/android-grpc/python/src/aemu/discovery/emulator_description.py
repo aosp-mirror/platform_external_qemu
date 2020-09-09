@@ -22,6 +22,7 @@ from aemu.proto.emulator_controller_pb2_grpc import EmulatorControllerStub
 from aemu.proto.snapshot_service_pb2_grpc import SnapshotServiceStub
 from aemu.proto.waterfall_pb2_grpc import WaterfallStub
 from aemu.proto.rtc_service_pb2_grpc import RtcStub
+from aemu.proto.extended_controls_service_pb2_grpc import ExtendedControlsStub
 
 
 class EmulatorDescription(dict):
@@ -85,6 +86,10 @@ class EmulatorDescription(dict):
         means you are running the emulator under linux.
         """
         return RtcStub(self.get_grpc_channel())
+
+    def get_extended_controls_service(self):
+        """Returns a stub to the extended controls service."""
+        return ExtendedControlsStub(self.get_grpc_channel())
 
     def name(self):
         """Returns the name of the emulator.
