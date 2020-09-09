@@ -117,7 +117,8 @@ if(NOT WINDOWS AND NOT LINUX_AARCH64)
            EGL_emulation
            GLESv2_emulation
            emugl_base
-           OpenglRender_standalone_common)
+           OpenglRender_standalone_common
+           android-emu-test-launcher)
   android_target_link_libraries(
     aemugraphics darwin-x86_64 PUBLIC "-framework CoreFoundation"
                                       "-framework CoreGraphics")

@@ -41,7 +41,10 @@ const AndroidConsoleAgents* getConsoleAgents() {
 ANDROID_CONSOLE_AGENTS_LIST(ANDROID_DEFINE_CONSOLE_GETTER_IMPL)
 
 #define ANDROID_CONSOLE_AGENT_SETTER(typ, name) \
-    sConsoleAgents.name = factory.android_get_##typ();
+{auto agent = factory.android_get_##typ(); \
+    if (!agent) fprintf(stderr, "%s: agent for %s is null\n", __func__, #typ); \
+    else fprintf(stderr, "%s: agent for %s is not null\n", __func__, #typ); \
+    sConsoleAgents.name = factory.android_get_##typ(); }
 
 void android::emulation::injectConsoleAgents(const AndroidConsoleFactory& factory) {
     if (isInitialized) {
@@ -50,4 +53,5 @@ void android::emulation::injectConsoleAgents(const AndroidConsoleFactory& factor
     }
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_AGENT_SETTER);
     isInitialized = true;
+    fprintf(stderr, "%s: call\n", __func__);
 }
