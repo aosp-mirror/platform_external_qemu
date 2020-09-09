@@ -74,6 +74,7 @@
   X(void, glGetMultisamplefv, (GLenum pname, GLuint index, GLfloat * val), (pname, index, val)) \
   X(void, glFramebufferParameteri, (GLenum target, GLenum pname, GLint param), (target, pname, param)) \
   X(void, glGetFramebufferParameteriv, (GLenum target, GLenum pname, GLint * params), (target, pname, params)) \
+  X(void, glReadnPixels, (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLvoid* data), (x, y, width, height, format, type, bufSize, data)) \
 
 
 #endif  // GLES31_ONLY_FUNCTIONS_H

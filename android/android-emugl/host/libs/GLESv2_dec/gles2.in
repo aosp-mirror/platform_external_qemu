@@ -585,3 +585,6 @@ GL_ENTRY(void, glDrawElementsDataNullAEMU, GLenum mode, GLsizei count, GLenum ty
 # Async UnmapBuffer (also distinguishes sending arbitrary length buffer)
 GL_ENTRY(void, glUnmapBufferAsyncAEMU, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res)
 GL_ENTRY(void, glFlushMappedBufferRangeAEMU2, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer)
+
+# ES 3.2 stuff that leaked in ES 3.1
+GL_ENTRY(void, glReadnPixels, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLvoid *data );

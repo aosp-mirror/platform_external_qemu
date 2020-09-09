@@ -74,5 +74,6 @@ GL_APICALL void GL_APIENTRY glSampleMaski(GLuint maskNumber, GLbitfield mask);
 GL_APICALL void GL_APIENTRY glGetMultisamplefv(GLenum pname, GLuint index, GLfloat * val);
 GL_APICALL void GL_APIENTRY glFramebufferParameteri(GLenum target, GLenum pname, GLint param);
 GL_APICALL void GL_APIENTRY glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint * params);
+GL_APICALL void GL_APIENTRY glReadnPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLvoid* data);
 } // namespace translator
 } // namespace gles2

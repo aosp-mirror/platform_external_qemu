@@ -53,7 +53,6 @@ DEQP_GLES3_EXEC_NAME="./deqp-gles31 $DEQP_CASES"
 cd $DEQP_GLES3_EXEC_DIR
 
 # Set environment variables
-
 # Known issue: swiftshader not quite working yet due to library rpath issues.
 export ANDROID_EMU_TEST_WITH_HOST_GPU=1
 

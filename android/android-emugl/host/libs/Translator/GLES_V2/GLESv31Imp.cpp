@@ -733,3 +733,8 @@ GL_APICALL void GL_APIENTRY glGetTexLevelParameteriv(GLenum target, GLint level,
     }
 }
 
+GL_APICALL void GL_APIENTRY glReadnPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLvoid* data) {
+    GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetTexLevelParameteriv);
+    ctx->dispatcher().glReadnPixels(x, y, width, height, format, type, bufSize, data);
+}

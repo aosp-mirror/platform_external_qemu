@@ -97,6 +97,9 @@ void glGetMultisamplefv(GLenum pname, GLuint index, GLfloat *val);
 void glFramebufferParameteri(GLenum target, GLenum pname, GLint param);
 void glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint * params);
 
+## ES 3.2
+void glReadnPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLvoid* data);
+
 ## Texture LOD queries
 # Already used in Translator's validations.
 # void glGetTexLevelParameterfv(GLenum target, GLint level, GLenum pname, GLfloat * params);
