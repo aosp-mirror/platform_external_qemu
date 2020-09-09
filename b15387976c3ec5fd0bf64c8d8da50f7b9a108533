@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8cb3e9a7_118dfba8",
+        "filename": "android/android-grpc/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-09T18:43:09Z",
+      "side": 1,
+      "message": "You can remove this :-)",
+      "revId": "b15387976c3ec5fd0bf64c8d8da50f7b9a108533",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5a6e57a0_b1e2ef65",
+        "filename": "android/android-grpc/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-09T18:43:09Z",
+      "side": 1,
+      "message": "You can set current binary dir to private if nobody needs your protobuf headers.",
+      "revId": "b15387976c3ec5fd0bf64c8d8da50f7b9a108533",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "21d5c023_f0e66eed",
+        "filename": "android/android-grpc/android/emulation/control/ExtendedControls.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-09T18:43:09Z",
+      "side": 1,
+      "message": "nit: tabs.",
+      "revId": "b15387976c3ec5fd0bf64c8d8da50f7b9a108533",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6418b42_e23b4276",
+        "filename": "android/android-grpc/extended_controls_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-09T18:43:09Z",
+      "side": 1,
+      "message": "nit tabs",
+      "revId": "b15387976c3ec5fd0bf64c8d8da50f7b9a108533",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
