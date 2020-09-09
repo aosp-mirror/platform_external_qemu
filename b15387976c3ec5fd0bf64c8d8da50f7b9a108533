@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c78fc922_d2c59116",
+        "filename": "android/android-grpc/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-09T19:19:21Z",
+      "side": 1,
+      "message": "oops. My bad.",
+      "parentUuid": "8cb3e9a7_118dfba8",
+      "revId": "b15387976c3ec5fd0bf64c8d8da50f7b9a108533",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5a6e57a0_b1e2ef65",
         "filename": "android/android-grpc/CMakeLists.txt",
         "patchSetId": 1
@@ -33,6 +51,24 @@
       "revId": "b15387976c3ec5fd0bf64c8d8da50f7b9a108533",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff4154f3_e6c4d6d4",
+        "filename": "android/android-grpc/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-09T19:19:21Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5a6e57a0_b1e2ef65",
+      "revId": "b15387976c3ec5fd0bf64c8d8da50f7b9a108533",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "65264e3a_bba8b22b",
+        "filename": "android/android-grpc/android/emulation/control/ExtendedControls.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-09T19:19:21Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "21d5c023_f0e66eed",
+      "revId": "b15387976c3ec5fd0bf64c8d8da50f7b9a108533",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6418b42_e23b4276",
         "filename": "android/android-grpc/extended_controls_service.proto",
         "patchSetId": 1
@@ -67,6 +121,24 @@
       "revId": "b15387976c3ec5fd0bf64c8d8da50f7b9a108533",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d9e6934f_095890bc",
+        "filename": "android/android-grpc/extended_controls_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-09T19:19:21Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f6418b42_e23b4276",
+      "revId": "b15387976c3ec5fd0bf64c8d8da50f7b9a108533",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
