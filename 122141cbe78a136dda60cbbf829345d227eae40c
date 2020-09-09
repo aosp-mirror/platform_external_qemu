@@ -46,6 +46,30 @@
       "revId": "122141cbe78a136dda60cbbf829345d227eae40c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "42d45207_54e2a267",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-09T22:46:49Z",
+      "side": 1,
+      "message": "Don\u0027t we set nChannels \u003d 3 in line 83? It is not changed after that, is it?",
+      "parentUuid": "53a4ba6c_8dfed591",
+      "range": {
+        "startLine": 160,
+        "startChar": 1,
+        "endLine": 167,
+        "endChar": 9
+      },
+      "revId": "122141cbe78a136dda60cbbf829345d227eae40c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
