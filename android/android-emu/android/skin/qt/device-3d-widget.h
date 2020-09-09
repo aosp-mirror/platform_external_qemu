@@ -179,6 +179,6 @@ private:
     struct FoldableState mFoldableState;
     std::vector<DisplaySegment> mDisplaySegments;
     float mFactor;
-    uint32_t mCenterIndex = 0;
+    int32_t mCenterIndex = 0;
     float mDepth = 0.1;
 };

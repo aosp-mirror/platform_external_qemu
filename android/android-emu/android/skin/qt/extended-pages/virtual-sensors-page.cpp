@@ -221,7 +221,7 @@ void VirtualSensorsPage::setupRollableUI() {
         switch (foldableState.config.numRolls) {
             case 2:
                 mUi->roll1Slider->setRange(
-                        foldableState.config.rollableParams[1].maxRolledPercent,
+                        foldableState.config.rollableParams[1].minRolledPercent,
                         foldableState.config.rollableParams[1].maxRolledPercent, false);
                 mUi->roll1Label->setHidden(false);
                 mUi->roll1Slider->setHidden(false);

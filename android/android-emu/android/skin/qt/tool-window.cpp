@@ -718,7 +718,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                         ChangeIcon(mToolsUi->change_posture_button,
                                 "posture_tent", "Change posture");
                         break;
-                    default:;
+                    default: ;
                 }
                 if (android_foldable_is_folded()) {
                     int xOffset, yOffset, width, height;
