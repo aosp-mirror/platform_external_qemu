@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0d92d13f_6e2210ca",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-10T18:46:45Z",
+      "side": 1,
+      "message": "Just -no-window command line flag. I will update the commit message to be more accurate.",
+      "parentUuid": "f428ce0e_559332f0",
+      "range": {
+        "startLine": 11,
+        "startChar": 6,
+        "endLine": 11,
+        "endChar": 20
+      },
+      "revId": "6155036806db296cd5efdb412f8ebfa0ebbafed2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e0233dbb_63c056d7",
         "filename": "android/android-grpc/extended_controls_service.proto",
         "patchSetId": 5
