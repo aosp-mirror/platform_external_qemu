@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e0233dbb_63c056d7",
+        "filename": "android/android-grpc/extended_controls_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-10T18:27:37Z",
+      "side": 1,
+      "message": "It makes sense to call the service UiController or something like that. In future we may want to extend it to also show and hide the main emulator window.",
+      "range": {
+        "startLine": 24,
+        "startChar": 8,
+        "endLine": 24,
+        "endChar": 24
+      },
+      "revId": "6155036806db296cd5efdb412f8ebfa0ebbafed2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "87af070a_cd052852",
+        "filename": "android/android-grpc/extended_controls_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-10T18:27:37Z",
+      "side": 1,
+      "message": "Please add a description and mention that the method has no effect if the extended controls are already shown.",
+      "range": {
+        "startLine": 25,
+        "startChar": 8,
+        "endLine": 25,
+        "endChar": 28
+      },
+      "revId": "6155036806db296cd5efdb412f8ebfa0ebbafed2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "909f4a0c_0e40cc70",
+        "filename": "android/android-grpc/extended_controls_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-10T18:27:37Z",
+      "side": 1,
+      "message": "Please add a description and mention that the method has no effect if the extended controls are hidden.",
+      "range": {
+        "startLine": 27,
+        "startChar": 8,
+        "endLine": 27,
+        "endChar": 29
+      },
+      "revId": "6155036806db296cd5efdb412f8ebfa0ebbafed2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea86a248_43409838",
+        "filename": "android/android-grpc/extended_controls_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-10T18:27:37Z",
+      "side": 1,
+      "message": "setUITheme -\u003e setUiTheme\n\nDoes this method change the style if the extended controls are already shown? If not, it may be more straightforward to remove this method and to add ThemingStyle as a parameter to showExtendedControls.",
+      "range": {
+        "startLine": 29,
+        "startChar": 8,
+        "endLine": 29,
+        "endChar": 18
+      },
+      "revId": "6155036806db296cd5efdb412f8ebfa0ebbafed2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
