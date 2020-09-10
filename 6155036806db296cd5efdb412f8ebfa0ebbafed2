@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ca69bd94_12fc7a65",
+        "filename": "android/android-grpc/CMakeLists.txt",
+        "patchSetId": 5
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-10T21:01:27Z",
+      "side": 1,
+      "message": "Actually, it wasn\u0027t included in the distribution zip file for emulator. Let me check how to include that. Thanks!",
+      "parentUuid": "22ad5693_e321b8aa",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 78
+      },
+      "revId": "6155036806db296cd5efdb412f8ebfa0ebbafed2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e0233dbb_63c056d7",
         "filename": "android/android-grpc/extended_controls_service.proto",
         "patchSetId": 5
