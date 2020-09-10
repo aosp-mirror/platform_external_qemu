@@ -34,6 +34,14 @@ from PIL import Image, ImageTk
 SAMPLE_WIDTH = 540
 SAMPLE_HEIGHT = 960
 
+IMAGE_FORMATS = {
+    "RGB": p.ImageFormat.RGB888,
+    "RGBA": p.ImageFormat.RGBA8888,
+}
+
+# Change this to test different formats.
+desired_format = "RGB"
+
 
 def center_window(root, width=300, height=200):
     """Centers the tk window."""
@@ -54,7 +62,7 @@ def _img_producer(queue, lock):
     stub = get_default_emulator().get_emulator_controller()
 
     fmt = p.ImageFormat(
-        format=p.ImageFormat.RGBA8888,
+        format=IMAGE_FORMATS[desired_format],
         width=SAMPLE_WIDTH,
         height=SAMPLE_HEIGHT,
         display=0,
@@ -86,7 +94,7 @@ def _img_consumer(queue, lock, label, root):
         if img.format.width != 0:
             # Note, this thing is slow and probably cannot keep up..
             emu = Image.frombytes(
-                "RGBA", (img.format.width, img.format.height), img.image
+                desired_format, (img.format.width, img.format.height), img.image
             )
             visual = ImageTk.PhotoImage(emu)
             label.configure(image=visual)

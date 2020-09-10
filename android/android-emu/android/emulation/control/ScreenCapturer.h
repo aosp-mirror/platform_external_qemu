@@ -14,11 +14,15 @@
 
 #pragma once
 
-#include <functional>
-#include <vector>
+#include <stddef.h>                   // for NULL
+#include <cstdint>                    // for uint8_t, uint16_t, uint32_t
+#include <functional>                 // for function
+#include <string>                     // for string
+#include <utility>                    // for move
+#include <vector>                     // for vector
 
-#include "android/base/StringView.h"
-#include "android/skin/rect.h"
+#include "android/base/StringView.h"  // for StringView
+#include "android/skin/rect.h"        // for SkinRotation
 
 namespace emugl {
 class Renderer;
@@ -49,7 +53,12 @@ public:
     uint8_t getChannels() { return m_NChannels; }
     ImageFormat getImageFormat() { return m_Format; }
 
+    // Converts Image from RGBA8888 -> RGB888 if needed and possible.
+    Image& asRGB888();
+
 private:
+    void convertPerByte();
+    void convertPerHexlet();
     uint16_t m_Width;
     uint16_t m_Height;
     uint8_t m_NChannels;
