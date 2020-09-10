@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c9c2c743_456ee6fd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2020-09-10T09:35:54Z",
+      "side": 1,
+      "message": "\"toggleButtonEvent\" may be more appropriate to avoid confusion on the false case.\n\nAlso passing kEventKeyDown and kEventKeyUp instead of bool will be more informative and extensible",
+      "range": {
+        "startLine": 73,
+        "startChar": 45,
+        "endLine": 73,
+        "endChar": 64
+      },
+      "revId": "4e49e254d6a2188c1a0bcbeed5594f52e119c115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b0e4e7d_1a733517",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2020-09-10T09:35:54Z",
+      "side": 1,
+      "message": "Pixel densities evolve all the time. Is there a future-proof way to handle this in the general case, that maybe even treats all platforms the same and doesn\u0027t break when switching screens?\nMy gut feeling tells me masking buttons should be a relatively standard problem with a standard solution",
+      "revId": "4e49e254d6a2188c1a0bcbeed5594f52e119c115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77bf296e_0aa705e9",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2020-09-10T09:35:54Z",
+      "side": 1,
+      "message": "tvRemotePage",
+      "range": {
+        "startLine": 167,
+        "startChar": 46,
+        "endLine": 167,
+        "endChar": 56
+      },
+      "revId": "4e49e254d6a2188c1a0bcbeed5594f52e119c115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
