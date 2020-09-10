@@ -49,6 +49,29 @@
     },
     {
       "key": {
+        "uuid": "22ad5693_e321b8aa",
+        "filename": "android/android-grpc/CMakeLists.txt",
+        "patchSetId": 5
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-10T18:47:11Z",
+      "side": 1,
+      "message": "Will the new proto file be included in emulator installation along with other gRPC service definition files?",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 78
+      },
+      "revId": "6155036806db296cd5efdb412f8ebfa0ebbafed2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e0233dbb_63c056d7",
         "filename": "android/android-grpc/extended_controls_service.proto",
         "patchSetId": 5
