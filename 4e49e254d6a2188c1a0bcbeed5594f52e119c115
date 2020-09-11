@@ -78,6 +78,24 @@
     },
     {
       "key": {
+        "uuid": "ef41cd89_2a0b8b94",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-11T16:54:45Z",
+      "side": 1,
+      "message": "Looks like the screenshot has remote desktop compression artifacts; we\u0027d be looking for a smooth versus aliased set of buttons. Have to examine this in a non-remote-desktop setting.",
+      "parentUuid": "97c0d66f_65a05eea",
+      "revId": "4e49e254d6a2188c1a0bcbeed5594f52e119c115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "77bf296e_0aa705e9",
         "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
         "patchSetId": 4
