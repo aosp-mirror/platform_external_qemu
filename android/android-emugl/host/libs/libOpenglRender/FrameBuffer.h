@@ -234,7 +234,9 @@ public:
     // The buffer will be backed by a VkBuffer and VkDeviceMemory (if Vulkan
     // is available).
     // |size| is the requested size of Buffer in bytes.
-    HandleType createBuffer(int size);
+    // |memoryProperty| is the requested memory property bits of the device
+    // memory.
+    HandleType createBuffer(uint64_t size, uint32_t memoryProperty);
 
     // Call this function when a render thread terminates to destroy all
     // the remaining contexts it created. Necessary to avoid leaking host
