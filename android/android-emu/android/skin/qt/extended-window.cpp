@@ -45,6 +45,7 @@
 #include "android/skin/qt/extended-pages/camera-page.h"
 #include "android/skin/qt/extended-pages/car-data-page.h"
 #include "android/skin/qt/extended-pages/car-rotary-page.h"
+#include "android/skin/qt/extended-pages/sensor-replay-page.h"
 #include "android/skin/qt/extended-pages/cellular-page.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/dpad-page.h"
@@ -152,6 +153,7 @@ ExtendedWindow::ExtendedWindow(
     mPaneButtonMap = {
         {PANE_IDX_CAR,           mExtendedUi->carDataButton},
         {PANE_IDX_CAR_ROTARY,    mExtendedUi->carRotaryButton},
+        {PANE_IDX_SENSOR_REPLAY, mExtendedUi->sensorReplayButton},
         {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
         {PANE_IDX_CELLULAR,      mExtendedUi->cellularButton},
         {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
@@ -254,7 +256,9 @@ ExtendedWindow::ExtendedWindow(
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         mSidebarButtons.addButton(mExtendedUi->carDataButton);
+        mSidebarButtons.addButton(mExtendedUi->sensorReplayButton);
         mExtendedUi->carDataButton->setVisible(true);
+        mExtendedUi->sensorReplayButton->setVisible(true);
         mExtendedUi->fingerButton->setVisible(false);
         mExtendedUi->batteryButton->setVisible(false);
         mExtendedUi->dpadButton->setVisible(false);
@@ -320,6 +324,7 @@ static std::string translate_idx(ExtendedWindowPane value) {
         PANE(PANE_IDX_HELP)
         PANE(PANE_IDX_CAR)
         PANE(PANE_IDX_CAR_ROTARY)
+        PANE(PANE_IDX_SENSOR_REPLAY)
     }
 #undef PANE
     // Remove _IDX from the string.
@@ -367,6 +372,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         RecordScreenPage::setRecordScreenAgent(agentPtr->record);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             CarDataPage::setCarDataAgent(agentPtr->car);
+            SensorReplayPage::setCarDataAgent(agentPtr->car);
         }
     }
 }
@@ -481,6 +487,7 @@ void ExtendedWindow::on_recordButton_clicked()       { adjustTabs(PANE_IDX_RECOR
 void ExtendedWindow::on_googlePlayButton_clicked()   { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
 void ExtendedWindow::on_carDataButton_clicked()      { adjustTabs(PANE_IDX_CAR); }
 void ExtendedWindow::on_carRotaryButton_clicked()    { adjustTabs(PANE_IDX_CAR_ROTARY); }
+void ExtendedWindow::on_sensorReplayButton_clicked() { adjustTabs(PANE_IDX_SENSOR_REPLAY); }
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);
