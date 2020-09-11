@@ -241,6 +241,8 @@ bool Device3DWidget::initProgram() {
 
 bool Device3DWidget::initModel() {
     if (mUseAbstractDevice) {
+        mGLES2->glGenBuffers(1, &mVertexDataBuffer);
+        mGLES2->glGenBuffers(1, &mVertexIndexBuffer);
         return initAbstractDeviceModel();
     } else {
         // Load the model and set up buffers.
@@ -483,6 +485,7 @@ bool Device3DWidget::initAbstractDeviceRollModel() {
     // convert the rollable model to a hinge mode
     int numHinges = 0;
     std::vector<FoldableHingeParameters> hingeParam;
+    mCenterIndex = -1;
     for (int i = 0; i < config.numRolls; i++) {
         int left = config.rollableParams[i].minRolledPercent * displayH / 100.0f;
         int right = config.rollableParams[i].maxRolledPercent * displayH /100.0f;
@@ -499,7 +502,9 @@ bool Device3DWidget::initAbstractDeviceRollModel() {
                     y += rollSurface * ROLLABLE_SEGMENT_DEGREE / 180;
                     hingeParam.push_back({ 0, y, displayW, 0, 0, 0.0f, 360.0f, -ROLLABLE_SEGMENT_DEGREE });
                 }
-                mCenterIndex = numSegs * 2;
+                if (mCenterIndex < 0) {
+                    mCenterIndex = numSegs * 2;
+                }
             } else {
                 // 180 degree roll
                 hingeParam.push_back({ 0, current - rollSurface, displayW, 0, 0, 0.0f, 360.0f, -ROLLABLE_SEGMENT_DEGREE });
@@ -509,10 +514,14 @@ bool Device3DWidget::initAbstractDeviceRollModel() {
                     y += rollSurface * ROLLABLE_SEGMENT_DEGREE / 180;
                     hingeParam.push_back({ 0, y, displayW, 0, 0, 0.0f, 360.0f, -ROLLABLE_SEGMENT_DEGREE });
                 }
-                mCenterIndex = numSegs * 2 + 1;
+                if (mCenterIndex < 0) {
+                    mCenterIndex = numSegs * 2 + 1;
+                }
             }
         } else if (direction == 1) {
-            mCenterIndex = 0;
+            if (mCenterIndex < 0) {
+                mCenterIndex = 0;
+            }
             if (current + rollSurface > right) {
                 // not a 180 degree roll
                 int y = current;
@@ -549,8 +558,6 @@ bool Device3DWidget::initAbstractDeviceRollModel() {
 }
 
 bool Device3DWidget::initAbstractDeviceModel() {
-    mGLES2->glGenBuffers(1, &mVertexDataBuffer);
-    mGLES2->glGenBuffers(1, &mVertexIndexBuffer);
     android_foldable_get_state(&mFoldableState);
     switch (mFoldableState.config.type)
     {
@@ -1185,14 +1192,19 @@ bool Device3DWidget::updateHingeAngles() {
         return ret;
     }
     if (android_foldable_rollable_configured()) {
-        glm::vec3 result;
-        //TODO: read ROLL1, e.g., ROLL0 and ROLL1 at left and right edges of screen respectively
+        glm::vec3 result0, result1;
         mSensorsAgent->getPhysicalParameter(
-                        PHYSICAL_PARAMETER_ROLLABLE0, &result.x, &result.y,
-                        &result.z, PARAMETER_VALUE_TYPE_CURRENT);
-        if (abs(mFoldableState.currentRolledPercent[0] - result.x) >
+                        PHYSICAL_PARAMETER_ROLLABLE0, &result0.x, &result0.y,
+                        &result0.z, PARAMETER_VALUE_TYPE_CURRENT);
+        mSensorsAgent->getPhysicalParameter(
+                        PHYSICAL_PARAMETER_ROLLABLE1, &result1.x, &result1.y,
+                        &result1.z, PARAMETER_VALUE_TYPE_CURRENT);
+        if (abs(mFoldableState.currentRolledPercent[0] - result0.x) >
+                kHingeAngleDelta ||
+            abs(mFoldableState.currentRolledPercent[1] - result1.x) >
                 kHingeAngleDelta) {
-            mFoldableState.currentRolledPercent[0] = result.x;
+            mFoldableState.currentRolledPercent[0] = result0.x;
+            mFoldableState.currentRolledPercent[1] = result1.x;
             ret = true;
         }
         if (ret) {
