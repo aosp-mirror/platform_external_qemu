@@ -141,6 +141,30 @@
       "revId": "31cc8fb1dc71e1068531f063e82b64658d2732e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9da7a35_0f9287cc",
+        "filename": "android/android-emu/android/base/misc/StringUtils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-09-11T04:19:14Z",
+      "side": 1,
+      "message": "will follow up with cl to remove StringView (as we have string_view already)",
+      "parentUuid": "f9361cf6_5cebfe8c",
+      "range": {
+        "startLine": 86,
+        "startChar": 0,
+        "endLine": 100,
+        "endChar": 1
+      },
+      "revId": "31cc8fb1dc71e1068531f063e82b64658d2732e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
