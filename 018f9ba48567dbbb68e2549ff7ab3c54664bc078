@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "73322089_561e9ed8",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 76
+      },
+      "lineNbr": 1574,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-11T04:27:21Z",
+      "side": 1,
+      "message": "nit: remove",
+      "revId": "018f9ba48567dbbb68e2549ff7ab3c54664bc078",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "508a345f_8be5a319",
+        "filename": "android/third_party/modem-simulator/common/libs/fs/shared_fd.cpp",
+        "patchSetId": 76
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-11T04:27:21Z",
+      "side": 1,
+      "message": "We might run into problems with max fd number; it is easy to exceed FD_SETSIZE. We should print and error out if FD_SETSIZE is exceeded by anything in readfds/writefds.\n\nmacos/linux:\n\nemulate select with poll()\n\nWindows:\n\nactually recommend emulating select with WSAEventSelect on Windows.\n\nexample: android/android-emu/android/base/sockets/SocketUtils.cpp\n\nSelect all the fds and create an event for each one w/ createevent + wsaeventselect, then WaitForMultipleObjects",
+      "revId": "018f9ba48567dbbb68e2549ff7ab3c54664bc078",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
