@@ -366,6 +366,7 @@ int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa);
 
 bool setupVkBuffer(uint32_t bufferHandle,
                    bool vulkanOnly = false,
+                   uint32_t memoryProperty = 0,
                    bool* exported = nullptr,
                    VkDeviceSize* allocSize = nullptr,
                    uint32_t* typeIndex = nullptr);
