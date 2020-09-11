@@ -66,9 +66,9 @@ public:
         auto agent = mAgents->emu;
         android::base::ThreadLooper::runOnMainLooper([agent, request]() {
             if (request->style() == ThemingStyle::LIGHT)
-                agent->setUITheme(SETTINGS_THEME_LIGHT);
+                agent->setUiTheme(SETTINGS_THEME_LIGHT);
             else if (request->style() == ThemingStyle::DARK)
-                agent->setUITheme(SETTINGS_THEME_DARK);
+                agent->setUiTheme(SETTINGS_THEME_DARK);
         });
         return Status::OK;
     }

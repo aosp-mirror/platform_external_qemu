@@ -358,7 +358,7 @@ void SettingsPage::setHaveClipboardSharing(bool haveSharing) {
     }
 }
 
-void SettingsPage::setUITheme(SettingsTheme theme) {
+void SettingsPage::setUiTheme(SettingsTheme theme) {
     mUi->set_themeBox->setCurrentIndex(static_cast<int>(theme));
 }
 

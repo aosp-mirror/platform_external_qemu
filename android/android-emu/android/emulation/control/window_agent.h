@@ -83,7 +83,7 @@ typedef struct QAndroidEmulatorWindowAgent {
     bool (*getMonitorRect)(uint32_t*, uint32_t*);
     void (*startExtendedWindow)(void);
     void (*quitExtendedWindow)(void);
-    bool (*setUITheme)(SettingsTheme type);
+    bool (*setUiTheme)(SettingsTheme type);
 } QAndroidEmulatorWindowAgent;
 
 ANDROID_END_HEADER
