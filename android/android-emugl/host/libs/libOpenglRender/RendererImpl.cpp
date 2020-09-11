@@ -23,6 +23,7 @@
 #include "ErrorLog.h"
 #include "FenceSync.h"
 #include "FrameBuffer.h"
+#include "vulkan/VkCommonOperations.h"
 
 #include <algorithm>
 #include <utility>
@@ -510,7 +511,11 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
                             handle, x, y, width, height, pixels, pixels_size);
                 },
         .post_color_buffer =
-                [](uint32_t handle) { FrameBuffer::getFB()->post(handle); },
+                [](uint32_t handle) {
+                    FrameBuffer::getFB()->post(handle);
+
+                    goldfish_vk::presentForGraphicsDebugging();
+                },
         .repost = []() { FrameBuffer::getFB()->repost(); },
         .create_yuv_textures =
                 [](uint32_t type,
@@ -560,6 +565,9 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
         .wait_for_gpu = [](uint64_t eglsync) {
             FrameBuffer::getFB()->waitForGpu(eglsync);
         },
+        .wait_for_gpu_vulkan = [](uint64_t device, uint64_t fence) {
+            FrameBuffer::getFB()->waitForGpuVulkan(device, fence);
+        }
 };
 
 struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {

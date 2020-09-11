@@ -15,6 +15,9 @@
 
 #include <vulkan/vulkan.h>
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -314,6 +317,21 @@ struct VkEmulation {
     // external backing?
     // TODO: try switching to this
     ExternalMemoryInfo virtualHostVisibleHeap;
+
+
+    struct GraphicsDebuggerInfo {
+        bool initialized = false;
+
+        GLFWwindow* window = nullptr;
+
+        VkSurfaceKHR surface = VK_NULL_HANDLE;
+        VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+
+        uint32_t swapchainSemaphoreIndex = 0;
+        std::vector<VkSemaphore> swapchainSemaphores;
+    };
+
+    GraphicsDebuggerInfo graphicsDebuggerInfo;
 };
 
 VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk);
@@ -389,5 +407,7 @@ VkExternalMemoryProperties
 transformExternalMemoryProperties_fromhost(
     VkExternalMemoryProperties props,
     VkExternalMemoryHandleTypeFlags wantedGuestHandleType);
+
+bool presentForGraphicsDebugging();
 
 } // namespace goldfish_vk

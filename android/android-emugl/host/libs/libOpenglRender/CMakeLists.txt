@@ -53,9 +53,12 @@ android_add_library(
       vulkan/VulkanHandleMapping.cpp
       vulkan/VulkanStream.cpp)
 
+find_package(glfw3 3.3 REQUIRED)
+android_license(TARGET "glfw" LIBNAME None SPDX None LICENSE None LOCAL None)
+
 target_link_libraries(
   OpenglRender_vulkan PUBLIC emugl_common OpenglRender_vulkan_cereal
-  PRIVATE emugl_base GLcommon)
+  PRIVATE emugl_base GLcommon glfw)
 android_target_compile_definitions(OpenglRender_vulkan windows PRIVATE
                                    -DVK_USE_PLATFORM_WIN32_KHR)
 target_compile_options(
@@ -112,7 +115,8 @@ target_link_libraries(
          renderControl_dec
          OpenglRender_vulkan
          OpenGLESDispatch
-         GLSnapshot)
+         GLSnapshot
+         glfw)
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
 android_target_compile_definitions(OpenglRender windows PRIVATE
                                    -DVK_USE_PLATFORM_WIN32_KHR)
