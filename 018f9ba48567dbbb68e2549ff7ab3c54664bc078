@@ -33,6 +33,24 @@
       "revId": "018f9ba48567dbbb68e2549ff7ab3c54664bc078",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5f864d2_da57e9ff",
+        "filename": "android/third_party/modem-simulator/common/libs/fs/shared_fd.cpp",
+        "patchSetId": 76
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-11T04:32:58Z",
+      "side": 1,
+      "message": "(ideally we should not be using the host platform select() at all)",
+      "parentUuid": "508a345f_8be5a319",
+      "revId": "018f9ba48567dbbb68e2549ff7ab3c54664bc078",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
