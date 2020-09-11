@@ -478,7 +478,7 @@ void ToolWindow::ensureExtendedWindowExists() {
     }
 }
 
-bool ToolWindow::setUITheme(SettingsTheme theme) {
+bool ToolWindow::setUiTheme(SettingsTheme theme) {
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
         // Out of range--ignore
         return false;
@@ -490,6 +490,11 @@ bool ToolWindow::setUITheme(SettingsTheme theme) {
         emit(themeChanged(theme));
     }
     return true;
+}
+
+void ToolWindow::showExtendedWindow() {
+    ensureExtendedWindowExists();
+    on_more_button_clicked();
 }
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {

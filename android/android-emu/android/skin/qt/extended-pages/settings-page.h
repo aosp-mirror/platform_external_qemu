@@ -46,7 +46,7 @@ public:
 
 public slots:
     void setHaveClipboardSharing(bool haveSharing);
-    void setUITheme(SettingsTheme theme);
+    void setUiTheme(SettingsTheme theme);
 signals:
     void frameAlwaysChanged(bool showFrame);
     void onForwardShortcutsToDeviceChanged(int index);

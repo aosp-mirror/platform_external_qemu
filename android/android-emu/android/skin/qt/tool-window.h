@@ -121,7 +121,8 @@ public:
         handleUICommand(cmd, false);
     }
     void hideRotationButton(bool hide);
-    bool setUITheme(SettingsTheme theme);
+    bool setUiTheme(SettingsTheme theme);
+    void showExtendedWindow();
 
 signals:
     void guestClipboardChanged(QString text);
