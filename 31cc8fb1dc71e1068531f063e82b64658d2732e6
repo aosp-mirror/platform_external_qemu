@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "0dcc0800_c5b9b49c",
+        "filename": "android/android-emu/android/base/misc/StringUtils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-11T04:15:56Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c5c09073_729bcdd7",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 78,
+        "endChar": 52
+      },
+      "revId": "31cc8fb1dc71e1068531f063e82b64658d2732e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9cab2d8d_bef1315b",
         "filename": "android/android-emu/android/base/misc/StringUtils.h",
         "patchSetId": 4
@@ -93,6 +117,30 @@
       "revId": "31cc8fb1dc71e1068531f063e82b64658d2732e6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f9361cf6_5cebfe8c",
+        "filename": "android/android-emu/android/base/misc/StringUtils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-11T04:15:56Z",
+      "side": 1,
+      "message": "Check if its possible to dedup those; i think its ok as is though",
+      "parentUuid": "bd69856c_cec0c266",
+      "range": {
+        "startLine": 86,
+        "startChar": 0,
+        "endLine": 100,
+        "endChar": 1
+      },
+      "revId": "31cc8fb1dc71e1068531f063e82b64658d2732e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
