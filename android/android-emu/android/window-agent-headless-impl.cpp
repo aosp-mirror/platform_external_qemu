@@ -136,7 +136,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 []() {
                 // Not implemented
                 },
-        .setUITheme = [](SettingsTheme type) {
+        .setUiTheme = [](SettingsTheme type) {
                 // Not implemented
                 return false;
                 },
