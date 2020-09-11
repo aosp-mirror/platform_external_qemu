@@ -60,6 +60,24 @@
     },
     {
       "key": {
+        "uuid": "97c0d66f_65a05eea",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1743418
+      },
+      "writtenOn": "2020-09-11T13:57:34Z",
+      "side": 1,
+      "message": "I\u0027ve seen that that the car rotary page uses a similar approach but without the hack: https://android-review.googlesource.com/c/platform/external/qemu/+/1358219/9/android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp#174. Here the button size is used to scale the mask. It does seem to work for the dpad buttons as well: https://screenshot.googleplex.com/7yHaGcU9iGNBrnH. On the left is the dpad (which uses the hack) and on the right is the tv remote (using the solution found in the car-rotary-page). I can\u0027t pick a difference between the two of them. What are your thoughts on this? Could this be a good option?",
+      "parentUuid": "66c9fc99_f97834c1",
+      "revId": "4e49e254d6a2188c1a0bcbeed5594f52e119c115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "77bf296e_0aa705e9",
         "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
         "patchSetId": 4
@@ -71,6 +89,30 @@
       "writtenOn": "2020-09-10T09:35:54Z",
       "side": 1,
       "message": "tvRemotePage",
+      "range": {
+        "startLine": 167,
+        "startChar": 46,
+        "endLine": 167,
+        "endChar": 56
+      },
+      "revId": "4e49e254d6a2188c1a0bcbeed5594f52e119c115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9db242e_31d90982",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1743418
+      },
+      "writtenOn": "2020-09-11T13:57:34Z",
+      "side": 1,
+      "message": "I made it so that the same dpadButton opens either the dpadPage or the tvRemotePage (based on the avd type). Would you recommend to have two different buttons (one which opens the dpadPage, another which opens the tvRemotePage)?",
+      "parentUuid": "77bf296e_0aa705e9",
       "range": {
         "startLine": 167,
         "startChar": 46,
