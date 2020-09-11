@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9f595d0_51e736df",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-11T16:39:19Z",
+      "side": 1,
+      "message": "setUITheme -\u003e setUiTheme",
+      "range": {
+        "startLine": 31,
+        "startChar": 8,
+        "endLine": 31,
+        "endChar": 18
+      },
+      "revId": "e3add0297e187c43f16bb31b5c9a0f97c752d45b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
