@@ -2105,6 +2105,7 @@ int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
 
 bool setupVkBuffer(uint32_t bufferHandle,
                    bool vulkanOnly,
+                   uint32_t memoryProperty,
                    bool* exported,
                    VkDeviceSize* allocSize,
                    uint32_t* typeIndex) {
@@ -2188,20 +2189,45 @@ bool setupVkBuffer(uint32_t bufferHandle,
     vk->vkGetBufferMemoryRequirements(sVkEmulation->device, res.buffer,
                                       &res.memReqs);
 
+    // Currently we only care about two memory properties: DEVICE_LOCAL
+    // and HOST_VISIBLE; other memory properties specified in
+    // rcSetColorBufferVulkanMode2() call will be ignored for now.
+    memoryProperty = memoryProperty & (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT |
+                                       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
     res.memory.size = res.memReqs.size;
-    res.memory.typeIndex = lastGoodTypeIndex(res.memReqs.memoryTypeBits);
+
+    // Determine memory type.
+    if (memoryProperty) {
+        res.memory.typeIndex = lastGoodTypeIndexWithMemoryProperties(
+                res.memReqs.memoryTypeBits, memoryProperty);
+    } else {
+        res.memory.typeIndex = lastGoodTypeIndex(res.memReqs.memoryTypeBits);
+    }
 
     LOG(VERBOSE) << "Buffer " << bufferHandle
                  << "allocation size and type index: " << res.memory.size
-                 << ", " << res.memory.typeIndex;
+                 << ", " << res.memory.typeIndex
+                 << ", allocated memory property: "
+                 << sVkEmulation->deviceInfo.memProps
+                            .memoryTypes[res.memory.typeIndex]
+                            .propertyFlags
+                 << ", requested memory property: " << memoryProperty;
 
-    bool allocRes =
-            allocExternalMemory(vk, &res.memory, true /* actuallyExternal */,
-                                kNullopt /* deviceAlignment */);
+    bool isHostVisible = memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+    Optional<uint64_t> deviceAlignment =
+            isHostVisible ? Optional(res.memReqs.alignment) : kNullopt;
+    bool allocRes = allocExternalMemory(
+            vk, &res.memory, true /* actuallyExternal */, deviceAlignment);
 
     if (!allocRes) {
         LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
     }
+
+    res.memory.pageOffset =
+            reinterpret_cast<uint64_t>(res.memory.mappedPtr) % kPageSize;
+    res.memory.bindOffset =
+            res.memory.pageOffset ? kPageSize - res.memory.pageOffset : 0u;
 
     VkResult bindBufferMemoryRes = vk->vkBindBufferMemory(
             sVkEmulation->device, res.buffer, res.memory.memory, 0);
@@ -2210,6 +2236,21 @@ bool setupVkBuffer(uint32_t bufferHandle,
         fprintf(stderr, "%s: Failed to bind buffer memory. %d\n", __func__,
                 bindBufferMemoryRes);
         return bindBufferMemoryRes;
+    }
+
+    bool isHostVisibleMemory =
+            memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+
+    if (isHostVisibleMemory) {
+        VkResult mapMemoryRes =
+                vk->vkMapMemory(sVkEmulation->device, res.memory.memory, 0,
+                                res.memory.size, {}, &res.memory.mappedPtr);
+
+        if (mapMemoryRes != VK_SUCCESS) {
+            fprintf(stderr, "%s: Failed to map image memory. %d\n", __func__,
+                    mapMemoryRes);
+            return false;
+        }
     }
 
     res.glExported = false;

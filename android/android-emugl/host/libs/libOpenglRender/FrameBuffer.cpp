@@ -1205,13 +1205,13 @@ HandleType FrameBuffer::createColorBufferWithHandleLocked(
     return handle;
 }
 
-HandleType FrameBuffer::createBuffer(int p_size) {
+HandleType FrameBuffer::createBuffer(int p_size, int memoryProperty) {
     AutoLock mutex(m_lock);
     HandleType handle = createBufferLocked(p_size);
     m_lock.unlock();
 
     bool setupStatus =
-            goldfish_vk::setupVkBuffer(handle, /* vulkanOnly */ true);
+            goldfish_vk::setupVkBuffer(handle, /* vulkanOnly */ true, memoryProperty);
     assert(setupStatus);
     return handle;
 }

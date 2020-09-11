@@ -2672,7 +2672,8 @@ public:
         if (importBufferInfoPtr) {
             // Ensure buffer has Vulkan backing.
             setupVkBuffer(importBufferInfoPtr->buffer,
-                          true /* Buffers are Vulkan only */, nullptr,
+                          true /* Buffers are Vulkan only */,
+                          0u /* memoryProperty */, nullptr,
                           // Modify the allocation size and type index
                           // to suit the resulting image memory size.
                           &localAllocInfo.allocationSize,
