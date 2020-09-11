@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb24a482_45c8b355",
+        "filename": "android/android-emu/android/car_sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-11T03:55:40Z",
+      "side": 1,
+      "message": "Thanks! This looks fairly unit-testable. Could you add a playback test from a known sensor proto file? You can either add a LoadFrom() that takes a memory buffer instead of a filename as an argument, and then inline the file itself into the code using something similar to ./android/scripts/unix/generate-emulator-icons.sh, parse a textproto, or add files in https://android.googlesource.com/platform/prebuilts/android-emulator-build/common/+/refs/heads/emu-master-dev/testdata/ (and search for those filenames in the emulator codebase to see how to access).",
+      "revId": "f177050917fdaf17429fa54ec8fee2b1433e3a82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
