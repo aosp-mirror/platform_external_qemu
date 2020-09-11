@@ -22,6 +22,30 @@
       "revId": "e3add0297e187c43f16bb31b5c9a0f97c752d45b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8709a6a_12b18c52",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-11T16:40:55Z",
+      "side": 1,
+      "message": "Oops. My bad.",
+      "parentUuid": "b9f595d0_51e736df",
+      "range": {
+        "startLine": 31,
+        "startChar": 8,
+        "endLine": 31,
+        "endChar": 18
+      },
+      "revId": "e3add0297e187c43f16bb31b5c9a0f97c752d45b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
