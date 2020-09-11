@@ -1,0 +1,58 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004882354",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1425469?revision\u003d1",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "ca240ce3_41ae4d71",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2364,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-11T00:55:29Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027complex\u0027, \u0027unexpected\u0027, or \u0027placeholder\u0027; see https://developers.google.com/style/inclusive-documentation#ableist-language for more details.",
+      "range": {
+        "startLine": 2364,
+        "startChar": 36,
+        "endLine": 2364,
+        "endChar": 41
+      },
+      "revId": "024154297b637311b211aeaf82291b4373cf8b91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004882354",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1425469?revision\u003d1",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "dd9a2952_68240c84",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2398,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-11T00:55:29Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027complex\u0027, \u0027unexpected\u0027, or \u0027placeholder\u0027; see https://developers.google.com/style/inclusive-documentation#ableist-language for more details.",
+      "range": {
+        "startLine": 2398,
+        "startChar": 30,
+        "endLine": 2398,
+        "endChar": 35
+      },
+      "revId": "024154297b637311b211aeaf82291b4373cf8b91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
