@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faa2290c_61739156",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-11T16:56:54Z",
+      "side": 1,
+      "message": "make sure this and previou",
+      "revId": "f1648a69bdace813c89ac429f7f0c05c92dbcb81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cade3be7_2a68bd9b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-11T16:56:54Z",
+      "side": 1,
+      "message": "suggest uint64_t, uint32_t",
+      "range": {
+        "startLine": 239,
+        "startChar": 28,
+        "endLine": 239,
+        "endChar": 56
+      },
+      "revId": "f1648a69bdace813c89ac429f7f0c05c92dbcb81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
