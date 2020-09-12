@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ec878e0f_bff9aa4e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-09-12T01:33:49Z",
+      "side": 1,
+      "message": "squashed aosp/1424940 into this CL.",
+      "revId": "26e025731aa1ec7a13dc7a2fb54257cd36ea6703",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
