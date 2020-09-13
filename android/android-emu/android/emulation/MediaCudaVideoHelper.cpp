@@ -184,6 +184,8 @@ void MediaCudaVideoHelper::decode(const uint8_t* frame,
     packet.timestamp = inputPts;
     if (!frame || szBytes == 0) {
         packet.flags |= CUVID_PKT_ENDOFSTREAM;
+    } else {
+        ++mNumInputFrame;
     }
     NVDEC_API_CALL(cuvidParseVideoData(mCudaParser, &packet));
 }
@@ -321,6 +323,11 @@ int MediaCudaVideoHelper::HandlePictureDisplay(CUVIDPARSERDISPINFO* pDispInfo) {
     if (mIgnoreDecoderOutput) {
         return 1;
     }
+    if (mNumInputFrame > mNumOutputFrame + 8) {
+        // after more than 8 inputs, there is still no output,
+        // probably corrupted stream, ignore everything from now on
+        return 0;
+    }
 
     CUVIDPROCPARAMS videoProcessingParameters = {};
     videoProcessingParameters.progressive_frame = pDispInfo->progressive_frame;
@@ -396,6 +403,7 @@ int MediaCudaVideoHelper::HandlePictureDisplay(CUVIDPARSERDISPINFO* pDispInfo) {
                 ColorAspects{mColorPrimaries, mColorRange, mColorTransfer,
                              mColorSpace}});
     }
+    ++mNumOutputFrame;
     CUDA_DPRINT("successfully called.");
     return 1;
 }
