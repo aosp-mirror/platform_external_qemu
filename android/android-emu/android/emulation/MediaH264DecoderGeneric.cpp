@@ -281,7 +281,11 @@ void MediaH264DecoderGeneric::flush(void* ptr) {
     } else if (mVideoHelper) {
         mVideoHelper->flush();
     }
-    fetchAllFrames();
+    if (mSnapshotHelper->hasIFrame()) {
+        fetchAllFrames();
+    } else {
+        H264_DPRINT("no I frame yet, discard");
+    }
     H264_DPRINT("Flushing done");
 }
 

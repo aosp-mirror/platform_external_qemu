@@ -86,7 +86,11 @@ public:
               std::function<void(uint8_t* data, size_t len, uint64_t pts)>
                       oneShotDecode);
 
+public:
+    bool hasIFrame() const { return mHasIFrame; }
+
 private:
+    bool mHasIFrame{false};
     CodecType mType = CodecType::H264;
     mutable MediaSnapshotState mSnapshotState;
 
