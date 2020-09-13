@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "android/emulation/MediaSnapshotHelper.h"
 #include "android/emulation/H264NaluParser.h"
 #include "android/emulation/VpxFrameParser.h"
@@ -94,6 +93,7 @@ void MediaSnapshotHelper::saveH264Packet(const uint8_t* frame,
             } else {
                 bool isIFrame = H264NaluParser::checkIFrame(frame, szBytes);
                 if (isIFrame) {
+                    mHasIFrame = true;
                     mSnapshotState.savedPackets.clear();
                 }
                 mSnapshotState.savePacket(std::move(v), inputPts);

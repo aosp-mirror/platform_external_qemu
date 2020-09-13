@@ -270,7 +270,12 @@ void MediaH264DecoderGeneric::fetchAllFrames() {
         if (!success) {
             break;
         }
-        mSnapshotHelper->saveDecodedFrame(std::move(frame));
+        // when there is no i frame, something must be
+        // wrong: could be corrupted input, ignore them
+        if (mSnapshotHelper->hasIFrame()) {
+            H264_DPRINT("no I frame yet, discard");
+            mSnapshotHelper->saveDecodedFrame(std::move(frame));
+        }
     }
 }
 
