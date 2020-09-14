@@ -16,6 +16,24 @@
       "revId": "757fb515849ec4ecb339109aff4f21492e3e8feb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "839b300d_03e555bb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-14T19:18:21Z",
+      "side": 1,
+      "message": "The default is NOT \"always on top\".",
+      "parentUuid": "8f798619_a0c595bf",
+      "revId": "757fb515849ec4ecb339109aff4f21492e3e8feb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
