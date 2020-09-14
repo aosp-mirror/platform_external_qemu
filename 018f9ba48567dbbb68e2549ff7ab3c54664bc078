@@ -51,6 +51,24 @@
       "revId": "018f9ba48567dbbb68e2549ff7ab3c54664bc078",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f55aa3d3_80d32ef5",
+        "filename": "android/third_party/modem-simulator/common/libs/fs/shared_fd.cpp",
+        "patchSetId": 76
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-09-14T15:07:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d5f864d2_da57e9ff",
+      "revId": "018f9ba48567dbbb68e2549ff7ab3c54664bc078",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
