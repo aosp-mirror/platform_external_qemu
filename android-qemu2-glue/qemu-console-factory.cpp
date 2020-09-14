@@ -36,6 +36,7 @@
 #include "android/emulation/control/virtual_scene_agent.h"  // for QAndroidV...
 #include "android/emulation/control/vm_operations.h"        // for QAndroidV...
 #include "android/emulation/control/window_agent.h"         // for QAndroidE...
+#include "android/emulation/control/wifi_agent.h"
 
 extern "C" const QAndroidAutomationAgent* const gQAndroidAutomationAgent;
 
@@ -86,6 +87,9 @@ extern "C" const QGrpcAgent* const gQGrpcAgent;
 
 // android-qemu2-glue/qemu-multi-display-agent-impl.cpp
 extern "C" const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
+
+// android-qemu2-glue/qemu-wifi-agent-impl.cpp
+extern "C" const QAndroidWifiAgent* const gQAndroidWifiAgent;
 
 extern "C" const QAndroidEmulatorWindowAgent* const
         gQAndroidEmulatorWindowAgent;

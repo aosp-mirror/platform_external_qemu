@@ -43,7 +43,6 @@
 #include "android/network/constants.h"
 #include "android/network/control.h"
 #include "android/network/globals.h"
-#include "android/network/wifi.h"
 #include "android/recording/screen-recorder-constants.h"
 #include "android/shaper.h"
 #include "android/snapshot/Icebox.h"
@@ -159,18 +158,19 @@ static ControlGlobalRec _g_global;
 
 // Some commands may be controlled by a feature flag, so we need to check it.
 namespace {
-using android::featurecontrol::Feature;
+namespace fc = android::featurecontrol;
 
 typedef struct CmdFeatureFlag_
 {
     const char* name;
-    Feature feature;
+    std::vector<fc::Feature> features;
 } CmdFeatureFlag;
 
 const CmdFeatureFlag command_flags[] = {
-        {"screenrecord", android::featurecontrol::ScreenRecording},
-        {"wifi", android::featurecontrol::WifiConfigurable},
-        {NULL, android::featurecontrol::Feature_n_items}};
+        {"screenrecord", std::vector<fc::Feature>{fc::ScreenRecording}},
+        {"wifi", std::vector<fc::Feature>{fc::WifiConfigurable, fc::VirtioWifi}},
+        {NULL, std::vector<fc::Feature>{fc::Feature_n_items}},
+};
 }  // namespace
 
 static bool
@@ -181,8 +181,12 @@ isCommandEnabled(const char* command_name) {
 
     for (int i = 0; command_flags[i].name != nullptr; ++i) {
         if (!strcmp(command_name, command_flags[i].name)) {
-            return android::featurecontrol::isEnabled(
-                    command_flags[i].feature);
+            for (const auto f : command_flags[i].features) {
+                if (fc::isEnabled(f)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -1015,8 +1019,9 @@ static int do_wifi_add(ControlClient client, char* args)
         len = strcspn(passwordLocation, " ");
         password.assign(passwordLocation, passwordLocation + len);
     }
-    return android_wifi_add_ssid(ssid.c_str(),
-                                 password.empty() ? nullptr : password.c_str());
+    client->global->wifi_agent->add_ssid(ssid.c_str(),
+                            password.empty() ? nullptr : password.c_str());
+    return 0;
 }
 
 static void describe_wifi_add(ControlClient client)
@@ -1030,7 +1035,8 @@ static void describe_wifi_add(ControlClient client)
 
 static int do_wifi_block(ControlClient client, char* args)
 {
-    return android_wifi_set_ssid_block_on(args, true);
+    client->global->wifi_agent->set_ssid_block_on(args, true);
+    return 0;
 }
 
 static void describe_wifi_block(ControlClient client)
@@ -1043,7 +1049,8 @@ static void describe_wifi_block(ControlClient client)
 
 static int do_wifi_unblock(ControlClient client, char* args)
 {
-    return android_wifi_set_ssid_block_on(args, false);
+    client->global->wifi_agent->set_ssid_block_on(args, false);
+    return 0;
 }
 
 static void describe_wifi_unblock(ControlClient client)
