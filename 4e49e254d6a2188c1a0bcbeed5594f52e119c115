@@ -96,6 +96,24 @@
     },
     {
       "key": {
+        "uuid": "bbf9ecaf_9b1ec739",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1743418
+      },
+      "writtenOn": "2020-09-14T15:20:09Z",
+      "side": 1,
+      "message": "I tried to retake the screenshot from within the cloudtop and then I downloaded it on my laptop: https://screenshot.googleplex.com/349zGG67GBoiWZn. Is it more relevant this way?",
+      "parentUuid": "ef41cd89_2a0b8b94",
+      "revId": "4e49e254d6a2188c1a0bcbeed5594f52e119c115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "77bf296e_0aa705e9",
         "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
         "patchSetId": 4
