@@ -23,6 +23,7 @@
 #include "android/network/WifiForwardPeer.h"
 #include "android/network/WifiForwardPipe.h"
 #include "android/network/WifiForwardServer.h"
+#include "android-qemu2-glue/emulation/HostapdController.h"
 
 using android::base::IOVector;
 using android::base::ScopedSocket;
@@ -44,7 +45,6 @@ extern "C" {
 #include "qemu/osdep.h"
 #include "net/net.h"
 #include "common/ieee802_11_defs.h"
-#include "drivers/driver_virtio_wifi.h"
 
 /* The port to use for WiFi forwarding as a server */
 extern uint16_t android_wifi_server_port;
@@ -52,7 +52,6 @@ extern uint16_t android_wifi_server_port;
 /* The port to use for WiFi forwarding as a client */
 extern uint16_t android_wifi_client_port;
 
-extern "C" void eloop_terminate(void);
 }  // extern "C"
 
 namespace android {
@@ -101,14 +100,17 @@ VirtioWifiForwarder::~VirtioWifiForwarder() {
 }
 
 bool VirtioWifiForwarder::init() {
+    auto* hostapd = HostapdController::getInstance();
+    if (!hostapd) {
+        return false;
+    }
     // init socket pair.
     int fds[2];
     if (socketCreatePair(&fds[0], &fds[1])) {
         return false;
     }
-    mHostApdSock = ScopedSocket(fds[0]);
     mVirtIOSock = ScopedSocket(fds[1]);
-    ::set_virtio_sock(mHostApdSock.get());
+    hostapd->setDriverSocket(ScopedSocket(fds[0]));
     //  Looper FdWatch and set callback functions
     mFdWatch = mLooper->createFdWatch(mVirtIOSock.get(),
                                       &VirtioWifiForwarder::onHostApd, this);
@@ -184,7 +186,9 @@ int VirtioWifiForwarder::forwardFrame(IOVector sg, bool toRemoteVM) {
 }
 
 void VirtioWifiForwarder::stop() {
-    eloop_terminate();
+    auto* hostapd = HostapdController::getInstance();
+    if (hostapd)
+        hostapd->terminate(false);
     mNic = nullptr;
     if (mRemotePeer) {
         mRemotePeer->stop();
