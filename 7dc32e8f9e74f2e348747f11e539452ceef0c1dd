@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5bd4223d_0e54f56b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1743418
+      },
+      "writtenOn": "2020-09-15T14:58:05Z",
+      "side": 1,
+      "message": "As confirmed by Weilin, the button works if we add LINUX_KEY_CENTER to the list of mandatory Android keys. My question is wether this should be done only if the AVD has dpad? Or it doesn\u0027t matter at this level?",
+      "revId": "7dc32e8f9e74f2e348747f11e539452ceef0c1dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
