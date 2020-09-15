@@ -114,6 +114,24 @@
     },
     {
       "key": {
+        "uuid": "25353660_3fa0897e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2020-09-15T14:19:49Z",
+      "side": 1,
+      "message": "The solution for the car rotary is more elegant than the original D-pad one: it doesn\u0027t involve platform-specific hacks or magic numbers. I would go with that.",
+      "parentUuid": "bbf9ecaf_9b1ec739",
+      "revId": "4e49e254d6a2188c1a0bcbeed5594f52e119c115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "77bf296e_0aa705e9",
         "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
         "patchSetId": 4
@@ -158,6 +176,30 @@
       "revId": "4e49e254d6a2188c1a0bcbeed5594f52e119c115",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba2d901b_171489b1",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2020-09-15T14:19:49Z",
+      "side": 1,
+      "message": "OK, that makes sense",
+      "parentUuid": "e9db242e_31d90982",
+      "range": {
+        "startLine": 167,
+        "startChar": 46,
+        "endLine": 167,
+        "endChar": 56
+      },
+      "revId": "4e49e254d6a2188c1a0bcbeed5594f52e119c115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
