@@ -1689,5 +1689,7 @@ void handlemap_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_async_queue_submit
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+#endif
 
 } // namespace goldfish_vk

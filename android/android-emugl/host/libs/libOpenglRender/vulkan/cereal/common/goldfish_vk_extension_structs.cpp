@@ -292,6 +292,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_async_queue_submit
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+#endif
 uint32_t goldfish_vk_struct_type(
     const void* structExtension)
 {

@@ -3416,6 +3416,9 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #define OP_vkQueueWaitIdleAsyncGOOGLE 20331
 #define OP_vkQueueBindSparseAsyncGOOGLE 20332
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+#define OP_vkGetLinearImageLayoutGOOGLE 20333
+#endif
 const char* api_opcode_to_string(
     const uint32_t opcode);
 

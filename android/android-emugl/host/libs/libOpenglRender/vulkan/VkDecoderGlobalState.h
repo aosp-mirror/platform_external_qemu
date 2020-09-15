@@ -707,6 +707,14 @@ public:
         uint32_t bindInfoCount,
         const VkBindSparseInfo* pBindInfo, VkFence fence);
 
+    // VK_GOOGLE_linear_image_layout
+    void on_vkGetLinearImageLayoutGOOGLE(
+        android::base::Pool* pool,
+        VkDevice device,
+        VkFormat format,
+        VkDeviceSize* pOffset,
+        VkDeviceSize* pRowPitchAlignment);
+
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,

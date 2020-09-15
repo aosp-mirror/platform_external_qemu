@@ -671,6 +671,9 @@ PFN_vkQueueSubmitAsyncGOOGLE vkQueueSubmitAsyncGOOGLE;
 PFN_vkQueueWaitIdleAsyncGOOGLE vkQueueWaitIdleAsyncGOOGLE;
 PFN_vkQueueBindSparseAsyncGOOGLE vkQueueBindSparseAsyncGOOGLE;
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+PFN_vkGetLinearImageLayoutGOOGLE vkGetLinearImageLayoutGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk
