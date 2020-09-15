@@ -24,7 +24,7 @@ extern "C" {
 #include "android/emulation/dynlink_cudaGL.h"
 #include "android/emulation/dynlink_nvcuvid.h"
 }
-#define MEDIA_CUDA_DEBUG 0
+#define MEDIA_CUDA_DEBUG 1
 
 #if MEDIA_CUDA_DEBUG
 #define CUDA_DPRINT(fmt, ...)                                             \
