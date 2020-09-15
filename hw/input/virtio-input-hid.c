@@ -303,7 +303,7 @@ static void virtio_keyboard_init(Object *obj)
         LINUX_KEY_SOFT1, LINUX_KEY_VOLUMEUP, LINUX_KEY_VOLUMEDOWN,
         LINUX_KEY_SOFT2, LINUX_KEY_POWER, LINUX_KEY_SEARCH, LINUX_KEY_SLEEP,
         ANDROID_KEY_APPSWITCH, ANDROID_KEY_STEM_PRIMARY, ANDROID_KEY_STEM_1,
-        ANDROID_KEY_STEM_2, ANDROID_KEY_STEM_3,
+        ANDROID_KEY_STEM_2, ANDROID_KEY_STEM_3, LINUX_KEY_CENTER,
         // equivalent to LINUX_KEY_GRAVE in Android system qwerty.kl
         LINUX_KEY_GREEN};
     const size_t android_keycodes_len =
