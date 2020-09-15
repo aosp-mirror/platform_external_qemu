@@ -3757,6 +3757,83 @@ public:
         vk->vkQueueBindSparse(queue, bindInfoCount, pBindInfo, fence);
     }
 
+    void on_vkGetLinearImageLayoutGOOGLE(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        VkFormat format,
+        VkDeviceSize* pOffset,
+        VkDeviceSize* pRowPitchAlignment) {
+
+        if (!mLinearImageProperties.hasValue()) {
+            auto device = unbox_VkDevice(boxed_device);
+            auto vk = dispatch_VkDevice(boxed_device);
+
+            VkImageCreateInfo createInfo;
+            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+            createInfo.pNext = nullptr;
+            createInfo.flags = {};
+            createInfo.imageType = VK_IMAGE_TYPE_2D;
+            createInfo.format = format;
+            createInfo.extent = {/*width*/ 1, /*height*/ 64, 1};
+            createInfo.mipLevels = 0;
+            createInfo.arrayLayers = 0;
+            createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+            createInfo.tiling = VK_IMAGE_TILING_LINEAR;
+            createInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+            createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            createInfo.queueFamilyIndexCount = 0;
+            createInfo.pQueueFamilyIndices = nullptr;
+            createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+            VkImageSubresource subresource = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = 0,
+                .arrayLayer = 0,
+            };
+
+            VkImage image;
+            VkSubresourceLayout subresourceLayout;
+
+            VkDeviceSize offset;
+            VkDeviceSize rowPitchAlignment = UINT_MAX;
+
+            constexpr VkDeviceSize kMinWidth = 64;
+            constexpr VkDeviceSize kMaxWidth = 2048;
+            for (VkDeviceSize width = kMinWidth; width <= kMaxWidth; ++width) {
+                createInfo.extent.width = width;
+                vk->vkCreateImage(device, &createInfo, nullptr, &image);
+                vk->vkGetImageSubresourceLayout(device, image, &subresource, &subresourceLayout);
+                vk->vkDestroyImage(device, image, nullptr);
+
+                if (width > kMinWidth && subresourceLayout.offset != offset) {
+                    LOG(WARNING) << "Image size " << width << " x 1 has a different "
+                                 << "offset (offset = " << subresourceLayout.offset
+                                 << ", offset of other images = " << offset
+                                 << "), returned pOffset might be invalid.";
+                }
+                offset = subresourceLayout.offset;
+
+                uint64_t rowPitch = subresourceLayout.rowPitch;
+                uint64_t currentAlignment = rowPitch & (~rowPitch + 1);
+                if (currentAlignment < rowPitchAlignment) {
+                    rowPitchAlignment = currentAlignment;
+                }
+            }
+
+            mLinearImageProperties.emplace(LinearImageProperties {
+                .offset = offset,
+                .rowPitchAlignment = rowPitchAlignment,
+            });
+        }
+
+        if (pOffset != nullptr) {
+            *pOffset = mLinearImageProperties->offset;
+        }
+        if (pRowPitchAlignment != nullptr) {
+            *pRowPitchAlignment = mLinearImageProperties->rowPitchAlignment;
+        }
+    }
+
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
@@ -5624,6 +5701,12 @@ private:
         size_t sizeToPage;
     };
     std::unordered_map<uint64_t, OccupiedGpaInfo> mOccupiedGpas;
+
+    struct LinearImageProperties {
+        VkDeviceSize offset;
+        VkDeviceSize rowPitchAlignment;
+    };
+    android::base::Optional<LinearImageProperties> mLinearImageProperties;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -6568,6 +6651,15 @@ void VkDecoderGlobalState::on_vkQueueBindSparseAsyncGOOGLE(
     uint32_t bindInfoCount,
     const VkBindSparseInfo* pBindInfo, VkFence fence) {
     mImpl->on_vkQueueBindSparseAsyncGOOGLE(pool, queue, bindInfoCount, pBindInfo, fence);
+}
+
+void VkDecoderGlobalState::on_vkGetLinearImageLayoutGOOGLE(
+    android::base::Pool* pool,
+    VkDevice device,
+    VkFormat format,
+    VkDeviceSize* pOffset,
+    VkDeviceSize* pRowPitchAlignment) {
+    mImpl->on_vkGetLinearImageLayoutGOOGLE(pool, device, format, pOffset, pRowPitchAlignment);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(
