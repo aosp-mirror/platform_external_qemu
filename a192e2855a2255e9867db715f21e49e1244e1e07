@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004945721",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1423328?revision\u003d5",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "65a223d1_fdcbd3c7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-15T16:32:43Z",
+      "side": 1,
+      "message": "Lines longer than 100 characters should be wrapped to improve readability; see https://source.android.com/setup/contribute/code-style#limit-line-length for more details.",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 101,
+        "endChar": 108
+      },
+      "revId": "a192e2855a2255e9867db715f21e49e1244e1e07",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004945721",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1423328?revision\u003d5",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "1bfc2bba_ebd376ad",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-15T16:32:43Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 112,
+        "startChar": 0,
+        "endLine": 112,
+        "endChar": 8
+      },
+      "revId": "a192e2855a2255e9867db715f21e49e1244e1e07",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004945721",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1423328?revision\u003d5",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "39f27a70_64773d13",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-15T16:32:43Z",
+      "side": 1,
+      "message": "Lines longer than 100 characters should be wrapped to improve readability; see https://source.android.com/setup/contribute/code-style#limit-line-length for more details.",
+      "range": {
+        "startLine": 478,
+        "startChar": 0,
+        "endLine": 478,
+        "endChar": 131
+      },
+      "revId": "a192e2855a2255e9867db715f21e49e1244e1e07",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004945721",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1423328?revision\u003d5",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "44ccf009_2668a6cc",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-15T16:32:43Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 483,
+        "startChar": 0,
+        "endLine": 483,
+        "endChar": 4
+      },
+      "revId": "a192e2855a2255e9867db715f21e49e1244e1e07",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
