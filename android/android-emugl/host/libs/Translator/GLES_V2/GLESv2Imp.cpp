@@ -2752,11 +2752,11 @@ GL_APICALL const GLubyte* GL_APIENTRY glGetString(GLenum name){
     static const GLubyte SHADING32[] = "OpenGL ES GLSL ES 3.20";
     switch(name) {
         case GL_VENDOR:
-            return (const GLubyte*)ctx->getVendorString();
+            return (const GLubyte*)ctx->getVendorString(false /* not gles1 */);
         case GL_RENDERER:
-            return (const GLubyte*)ctx->getRendererString();
+            return (const GLubyte*)ctx->getRendererString(false /* not gles1 */);
         case GL_VERSION:
-            return (const GLubyte*)ctx->getVersionString();
+            return (const GLubyte*)ctx->getVersionString(false /* not gles1 */);
         case GL_SHADING_LANGUAGE_VERSION:
             switch (ctx->getMajorVersion()) {
             case 3:
@@ -2774,7 +2774,7 @@ GL_APICALL const GLubyte* GL_APIENTRY glGetString(GLenum name){
                 return SHADING;
              }
         case GL_EXTENSIONS:
-            return (const GLubyte*)ctx->getExtensionString();
+            return (const GLubyte*)ctx->getExtensionString(false /* not gles1 */);
         default:
             RET_AND_SET_ERROR_IF(true,GL_INVALID_ENUM,NULL);
     }

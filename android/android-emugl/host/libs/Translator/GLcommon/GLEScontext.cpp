@@ -173,8 +173,13 @@ void GLESConversionArrays::operator++(){
 
 GLDispatch     GLEScontext::s_glDispatch;
 emugl::Mutex   GLEScontext::s_lock;
+std::string*   GLEScontext::s_glExtensionsGles1 = NULL;
+bool           GLEScontext::s_glExtensionsGles1Initialized = false;
 std::string*   GLEScontext::s_glExtensions = NULL;
 bool           GLEScontext::s_glExtensionsInitialized = false;
+std::string    GLEScontext::s_glVendorGles1;
+std::string    GLEScontext::s_glRendererGles1;
+std::string    GLEScontext::s_glVersionGles1;
 std::string    GLEScontext::s_glVendor;
 std::string    GLEScontext::s_glRenderer;
 std::string    GLEScontext::s_glVersion;
@@ -378,12 +383,10 @@ void GLEScontext::initGlobal(EGLiface* iface) {
     if (!s_glExtensions) {
         initCapsLocked(reinterpret_cast<const GLubyte*>(
                 getHostExtensionsString(&s_glDispatch).c_str()));
-        // NOTE: the string below corresponds to the extensions reported
-        // by this context, which is initialized in each GLESv1 or GLESv2
-        // context implementation, based on the parsing of the host
-        // extensions string performed by initCapsLocked(). I.e. it will
-        // be populated after calling this ::init() method.
         s_glExtensions = new std::string();
+    }
+    if (!s_glExtensionsGles1) {
+        s_glExtensionsGles1 = new std::string();
     }
     s_lock.unlock();
 }
@@ -1645,27 +1648,34 @@ void GLEScontext::setClearStencil(GLint s) {
     m_clearStencil = s;
 }
 
-const char * GLEScontext::getExtensionString() {
+const char * GLEScontext::getExtensionString(bool isGles1) {
     const char * ret;
     s_lock.lock();
-    if (s_glExtensions)
-        ret = s_glExtensions->c_str();
-    else
-        ret="";
+    if (isGles1) {
+        if (s_glExtensionsGles1)
+            ret = s_glExtensionsGles1->c_str();
+        else
+            ret="";
+    } else {
+        if (s_glExtensions)
+            ret = s_glExtensions->c_str();
+        else
+            ret="";
+    }
     s_lock.unlock();
     return ret;
 }
 
-const char * GLEScontext::getVendorString() const {
-    return s_glVendor.c_str();
+const char * GLEScontext::getVendorString(bool isGles1) const {
+    return isGles1 ? s_glVendorGles1.c_str() : s_glVendor.c_str();
 }
 
-const char * GLEScontext::getRendererString() const {
-    return s_glRenderer.c_str();
+const char * GLEScontext::getRendererString(bool isGles1) const {
+    return isGles1 ? s_glRendererGles1.c_str() : s_glRenderer.c_str();
 }
 
-const char * GLEScontext::getVersionString() const {
-    return s_glVersion.c_str();
+const char * GLEScontext::getVersionString(bool isGles1) const {
+    return isGles1 ? s_glVersionGles1.c_str() : s_glVersion.c_str();
 }
 
 void GLEScontext::getGlobalLock() {
@@ -1787,7 +1797,7 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     }
 }
 
-void GLEScontext::buildStrings(const char* baseVendor,
+void GLEScontext::buildStrings(bool isGles1, const char* baseVendor,
         const char* baseRenderer, const char* baseVersion, const char* version)
 {
     static const char VENDOR[]   = {"Google ("};
@@ -1811,28 +1821,32 @@ void GLEScontext::buildStrings(const char* baseVendor,
         version = "N/A";
     }
 
+    std::string& vendorString = isGles1 ? s_glVendorGles1 : s_glVendor;
+    std::string& rendererString = isGles1 ? s_glRendererGles1 : s_glRenderer;
+    std::string& versionString = isGles1 ? s_glVersionGles1 : s_glVersion;
+
     size_t baseVendorLen = strlen(baseVendor);
-    s_glVendor.clear();
-    s_glVendor.reserve(baseVendorLen + VENDOR_LEN + 1);
-    s_glVendor.append(VENDOR, VENDOR_LEN);
-    s_glVendor.append(baseVendor, baseVendorLen);
-    s_glVendor.append(")", 1);
+    vendorString.clear();
+    vendorString.reserve(baseVendorLen + VENDOR_LEN + 1);
+    vendorString.append(VENDOR, VENDOR_LEN);
+    vendorString.append(baseVendor, baseVendorLen);
+    vendorString.append(")", 1);
 
     size_t baseRendererLen = strlen(baseRenderer);
-    s_glRenderer.clear();
-    s_glRenderer.reserve(baseRendererLen + RENDERER_LEN + 1);
-    s_glRenderer.append(RENDERER, RENDERER_LEN);
-    s_glRenderer.append(baseRenderer, baseRendererLen);
-    s_glRenderer.append(")", 1);
+    rendererString.clear();
+    rendererString.reserve(baseRendererLen + RENDERER_LEN + 1);
+    rendererString.append(RENDERER, RENDERER_LEN);
+    rendererString.append(baseRenderer, baseRendererLen);
+    rendererString.append(")", 1);
 
     size_t baseVersionLen = strlen(baseVersion);
     size_t versionLen = strlen(version);
-    s_glVersion.clear();
-    s_glVersion.reserve(baseVersionLen + versionLen + 3);
-    s_glVersion.append(version, versionLen);
-    s_glVersion.append(" (", 2);
-    s_glVersion.append(baseVersion, baseVersionLen);
-    s_glVersion.append(")", 1);
+    versionString.clear();
+    versionString.reserve(baseVersionLen + versionLen + 3);
+    versionString.append(version, versionLen);
+    versionString.append(" (", 2);
+    versionString.append(baseVersion, baseVersionLen);
+    versionString.append(")", 1);
 }
 
 bool GLEScontext::isTextureUnitEnabled(GLenum unit) {
