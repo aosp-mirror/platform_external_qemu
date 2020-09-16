@@ -72,7 +72,7 @@ public:
         int32_t* pDecoderErrorCode;
         uint32_t* pRetWidth;
         uint32_t* pRetHeight;
-        uint32_t* pRetPts;
+        uint64_t* pRetPts;
         uint32_t* pRetColorPrimaries;
         uint32_t* pRetColorRange;
         uint32_t* pRetColorTransfer;
