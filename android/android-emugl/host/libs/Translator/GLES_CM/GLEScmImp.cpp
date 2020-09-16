@@ -427,13 +427,13 @@ GL_API const GLubyte * GL_APIENTRY  glGetString( GLenum name) {
     GLES_CM_TRACE()
     switch(name) {
         case GL_VENDOR:
-            return (const GLubyte*)ctx->getVendorString();
+            return (const GLubyte*)ctx->getVendorString(true /* is gles1 */);
         case GL_RENDERER:
-            return (const GLubyte*)ctx->getRendererString();
+            return (const GLubyte*)ctx->getRendererString(true /* is gles1 */);
         case GL_VERSION:
-            return (const GLubyte*)ctx->getVersionString();
+            return (const GLubyte*)ctx->getVersionString(true /* is gles1 */);
         case GL_EXTENSIONS:
-            return (const GLubyte*)ctx->getExtensionString();
+            return (const GLubyte*)ctx->getExtensionString(true /* is gles1 */);
         default:
             RET_AND_SET_ERROR_IF(true,GL_INVALID_ENUM,NULL);
     }

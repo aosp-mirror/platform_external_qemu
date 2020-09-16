@@ -97,6 +97,8 @@ protected:
     }
 
     void TearDown() override {
+        EXPECT_EQ(EGL_TRUE, eglDestroyContext(mEGL.display, mEGLgles1.context));
+
         if (eglGetCurrentContext() != EGL_NO_CONTEXT) {
             glFinish(); // sync the pipe
         }
@@ -176,6 +178,17 @@ protected:
         EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, mEGL.surface,
                                            mEGL.surface, mEGL.context))
                 << "eglMakeCurrent failed!";
+
+        mEGLgles1 = mEGL;
+
+        static const EGLint contextAttribsGles1[] = {
+                EGL_CONTEXT_CLIENT_VERSION,
+                1,
+                EGL_NONE,
+        };
+
+        mEGLgles1.context = eglCreateContext(mEGL.display, mEGL.config, EGL_NO_CONTEXT, contextAttribsGles1);
+        EXPECT_NE(EGL_NO_CONTEXT, mEGLgles1.context) << "Could not create GLES1 context!";
     }
 
     void teardownEGL() {
@@ -189,8 +202,8 @@ protected:
         if (mEGL.display != EGL_NO_DISPLAY) {
             EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, EGL_NO_SURFACE,
                                                EGL_NO_SURFACE, EGL_NO_CONTEXT));
-            EXPECT_EQ(EGL_TRUE, eglDestroySurface(mEGL.display, mEGL.surface));
             EXPECT_EQ(EGL_TRUE, eglDestroyContext(mEGL.display, mEGL.context));
+            EXPECT_EQ(EGL_TRUE, eglDestroySurface(mEGL.display, mEGL.surface));
             EXPECT_EQ(EGL_TRUE, eglTerminate(mEGL.display));
             EXPECT_EQ(EGL_TRUE, eglReleaseThread());
         }
@@ -284,6 +297,7 @@ protected:
     TestDmaMap dmaMap;
     struct gralloc_implementation mGralloc;
     EGLState mEGL;
+    EGLState mEGLgles1;
     std::vector<size_t> mBeforeTest;
     std::vector<size_t> mAfterTest;
 
@@ -1122,6 +1136,39 @@ const mat4x2 matB = mat4x2(1.0/2.0, 1.0/4.0, 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
     EXPECT_EQ(GL_TRUE, compileStatus);
     glDeleteShader(shader);
+}
+
+TEST_P(CombinedGoldfishOpenglTest, GetStringTwiceCurrent) {
+    // current in non-gles1 in SetUp
+    {
+        const char* versionString = (const char*)glGetString(GL_VERSION);
+
+        printf("%s: GL version string (non-gles1): %s\n", __func__, versionString);
+
+        EXPECT_NE(nullptr, strstr(versionString, "ES 3"));
+    }
+
+    {
+        EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, mEGL.surface,
+                    mEGL.surface, mEGLgles1.context));
+
+        const char* versionStringGles1 = (const char*)glGetString(GL_VERSION);
+
+        printf("%s: GL version string (gles1 mode): %s\n", __func__, versionStringGles1);
+
+        EXPECT_NE(nullptr, strstr(versionStringGles1, "ES-CM"));
+    }
+
+    {
+        EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, mEGL.surface,
+                    mEGL.surface, mEGL.context));
+
+        const char* versionStringAfter = (const char*)glGetString(GL_VERSION);
+
+        printf("%s: GL version string: %s (after, back to non-gles1)\n", __func__, versionStringAfter);
+
+        EXPECT_NE(nullptr, strstr(versionStringAfter, "ES 3"));
+    }
 }
 
 INSTANTIATE_TEST_SUITE_P(
