@@ -1386,6 +1386,18 @@ static int32_t rcMapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
     return result;
 }
 
+static int32_t rcMapGpaToBufferHandle2(uint32_t bufferHandle,
+                                       uint64_t gpa,
+                                       uint64_t size) {
+    int32_t result = goldfish_vk::mapGpaToBufferHandle(bufferHandle, gpa, size);
+    if (result < 0) {
+        fprintf(stderr,
+                "%s: error: failed to map gpa %lx to buffer handle 0x%x: %d\n",
+                __func__, gpa, bufferHandle, result);
+    }
+    return result;
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1442,4 +1454,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCloseBuffer = rcCloseBuffer;
     dec->rcSetColorBufferVulkanMode2 = rcSetColorBufferVulkanMode2;
     dec->rcMapGpaToBufferHandle = rcMapGpaToBufferHandle;
+    dec->rcMapGpaToBufferHandle2 = rcMapGpaToBufferHandle2;
 }

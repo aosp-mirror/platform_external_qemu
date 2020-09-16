@@ -2045,7 +2045,9 @@ IOSurfaceRef getColorBufferIOSurface(uint32_t colorBuffer) {
     return infoPtr->ioSurface;
 }
 
-int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
+int32_t mapGpaToBufferHandle(uint32_t bufferHandle,
+                             uint64_t gpa,
+                             uint64_t size) {
     if (!sVkEmulation || !sVkEmulation->live)
         return VK_ERROR_DEVICE_LOST;
 
@@ -2079,9 +2081,13 @@ int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
     memoryInfoPtr->pageAlignedHva =
             reinterpret_cast<uint8_t*>(memoryInfoPtr->mappedPtr) +
             memoryInfoPtr->bindOffset;
-    memoryInfoPtr->sizeToPage = ((memoryInfoPtr->size +
-                                  memoryInfoPtr->pageOffset + kPageSize - 1) >>
-                                 kPageBits)
+
+    size_t rawSize = memoryInfoPtr->size + memoryInfoPtr->pageOffset;
+    if (size && size < rawSize) {
+        rawSize = size;
+    }
+
+    memoryInfoPtr->sizeToPage = ((rawSize + kPageSize - 1) >> kPageBits)
                                 << kPageBits;
 
     LOG(VERBOSE) << "mapGpaToColorBuffer: hva = " << memoryInfoPtr->mappedPtr
