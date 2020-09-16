@@ -56,6 +56,7 @@ CarRotaryPage::CarRotaryPage(QWidget* parent)
     mUi->setupUi(this);
 
     mAdbExecuteIsActive = false;
+    mIsBootCompleted = false;
 
     // Temporarily hide mouse wheel widgets until mouse wheel scroll is implemented.
     // TODO(agathaman): renable widgets when mouse wheel scroll is implemented.
@@ -214,13 +215,14 @@ void CarRotaryPage::checkRotaryControllerService() {
         D("ADB interface unavailable");
         return;
     }
-    mAdb->runAdbCommand(
-            {"shell", "ps | grep \"com.android.car.rotary\" | awk '{print $9}'"},
-            [this](const android::emulation::OptionalAdbCommandResult& result) {
-                if (result && result->exit_code == 0) {
+    if (isBootCompleted()) {
+        mAdb->runAdbCommand(
+                {"shell", "ps | grep \"com.android.car.rotary\" | awk '{print $9}'"},
+                [this](const android::emulation::OptionalAdbCommandResult& result) {
                     string line;
                     bool isRunning = false;
-                    if (result->output && getline(*(result->output), line)) {
+                    if (result && result->exit_code == 0 && result->output &&
+                            getline(*(result->output), line)) {
                         isRunning = line.find("com.android.car.rotary") != std::string::npos;
                     }
                     mUi->carrotary_warningMessage->setVisible(!isRunning);
@@ -228,8 +230,25 @@ void CarRotaryPage::checkRotaryControllerService() {
                         D("car rotary service is running, stopping check timer");
                         mCheckTimer.stop();
                     }
-                }
-            },
-            kAdbCommandTimeoutMs,
-            true);
+                },
+                kAdbCommandTimeoutMs,
+                true);
+    }
+}
+
+bool CarRotaryPage::isBootCompleted() {
+    if (!mIsBootCompleted) {
+        mAdb->runAdbCommand(
+                {"shell", "getprop sys.boot_completed"},
+                [this](const android::emulation::OptionalAdbCommandResult& result) {
+                    string line;
+                    if (result && result->exit_code == 0 && result->output &&
+                            getline(*(result->output), line) && line == "1") {
+                        mIsBootCompleted = true;
+                    }
+                },
+                kAdbCommandTimeoutMs,
+                true);
+    }
+    return mIsBootCompleted;
 }
