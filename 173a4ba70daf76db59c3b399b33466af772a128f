@@ -1,0 +1,139 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004966161",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1428288?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "b660b30a_80e65fa7",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-16T06:00:39Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 1
+      },
+      "revId": "173a4ba70daf76db59c3b399b33466af772a128f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004966161",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1428288?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "28dfecb4_d7b1092a",
+        "filename": "android-qemu2-glue/qemu-wifi-agent-impl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-16T06:00:39Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 33,
+        "startChar": 16,
+        "endLine": 33,
+        "endChar": 17
+      },
+      "revId": "173a4ba70daf76db59c3b399b33466af772a128f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004966161",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1428288?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "52da0ad7_6d6f8503",
+        "filename": "android-qemu2-glue/qemu-wifi-agent-impl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-16T06:00:39Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 35,
+        "startChar": 9,
+        "endLine": 35,
+        "endChar": 10
+      },
+      "revId": "173a4ba70daf76db59c3b399b33466af772a128f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004966161",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1428288?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "e2d18238_3e1750fa",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-16T06:00:39Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 1022,
+        "startChar": 54,
+        "endLine": 1022,
+        "endChar": 55
+      },
+      "revId": "173a4ba70daf76db59c3b399b33466af772a128f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000004966161",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1428288?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "b6e859df_22bc9944",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-16T06:00:39Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 1023,
+        "startChar": 75,
+        "endLine": 1023,
+        "endChar": 79
+      },
+      "revId": "173a4ba70daf76db59c3b399b33466af772a128f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
