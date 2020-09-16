@@ -43,6 +43,7 @@ set (android-qemu2-glue_src
     qemu-telephony-agent-impl.c
     qemu-user-event-agent-impl.c
     qemu-virtual-scene-agent-impl.cpp
+    qemu-wifi-agent-impl.cpp
     snapshot_compression.cpp
     telephony/modem_init.c
     utils/stream.cpp)
@@ -52,6 +53,8 @@ if (NOT OPTION_GFXSTREAM_BACKEND)
         "emulation/VirtioWifiForwarder.cpp")
     list(APPEND android-qemu2-glue_src
         "emulation/virtio-wifi.cpp")
+    list(APPEND android-qemu2-glue_src
+        "emulation/HostapdController.cpp")
 endif()
 
 android_add_library(
