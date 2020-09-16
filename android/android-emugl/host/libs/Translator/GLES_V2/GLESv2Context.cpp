@@ -71,7 +71,8 @@ void GLESv2Context::init() {
         setVertexArrayObject(0);
         setAttribute0value(0.0, 0.0, 0.0, 1.0);
 
-        buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
+        buildStrings(false /* not gles1 */,
+                     (const char*)dispatcher().glGetString(GL_VENDOR),
                      (const char*)dispatcher().glGetString(GL_RENDERER),
                      (const char*)dispatcher().glGetString(GL_VERSION),
                      sPickVersionStringPart(m_glesMajorVersion, m_glesMinorVersion));

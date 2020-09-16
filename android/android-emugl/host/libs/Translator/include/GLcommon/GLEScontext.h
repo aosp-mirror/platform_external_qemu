@@ -269,10 +269,10 @@ public:
     void getBufferUsage(GLenum target,GLint* param);
     bool setBufferData(GLenum target,GLsizeiptr size,const GLvoid* data,GLenum usage);
     bool setBufferSubData(GLenum target,GLintptr offset,GLsizeiptr size,const GLvoid* data);
-    const char * getExtensionString();
-    const char * getVendorString() const;
-    const char * getRendererString() const;
-    const char * getVersionString() const;
+    const char * getExtensionString(bool isGles1);
+    const char * getVendorString(bool isGles1) const;
+    const char * getRendererString(bool isGles1) const;
+    const char * getVersionString(bool isGles1) const;
     void getGlobalLock();
     void releaseGlobalLock();
     virtual GLSupport*  getCaps(){return &s_glSupport;};
@@ -480,7 +480,7 @@ protected:
     virtual void postLoadRestoreShareGroup();
     virtual void postLoadRestoreCtx();
 
-    static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
+    static void buildStrings(bool isGles1, const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
 
     void freeVAOState();
     virtual void addVertexArrayObject(GLuint array);
@@ -585,8 +585,12 @@ protected:
     GLclampf m_clearDepth = 1.0f;
     GLint m_clearStencil = 0;
 
+    static std::string*   s_glExtensionsGles1;
+    static bool           s_glExtensionsGles1Initialized;
     static std::string*   s_glExtensions;
     static bool           s_glExtensionsInitialized;
+
+    // Common for gles1/2
     static GLSupport      s_glSupport;
 
     int m_glesMajorVersion = 1;
@@ -637,6 +641,10 @@ private:
     GLuint                m_renderbuffer = 0;
     GLuint                m_drawFramebuffer = 0;
     GLuint                m_readFramebuffer = 0;
+
+    static std::string    s_glVendorGles1;
+    static std::string    s_glRendererGles1;
+    static std::string    s_glVersionGles1;
 
     static std::string    s_glVendor;
     static std::string    s_glRenderer;
