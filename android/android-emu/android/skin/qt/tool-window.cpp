@@ -553,6 +553,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 showOrRaiseExtendedWindow(PANE_IDX_DPAD);
             }
             break;
+        case QtUICommand::SHOW_PANE_TV_REMOTE:
+            if (down) {
+                showOrRaiseExtendedWindow(PANE_IDX_TV_REMOTE);
+            }
+            break;
         case QtUICommand::SHOW_PANE_FINGER:
             if (down) {
                 showOrRaiseExtendedWindow(PANE_IDX_FINGER);
