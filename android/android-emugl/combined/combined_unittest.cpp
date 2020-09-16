@@ -1124,6 +1124,20 @@ const mat4x2 matB = mat4x2(1.0/2.0, 1.0/4.0, 1.0/8.0, 1.0/16.0, 1.0/32.0, 1.0/64
     glDeleteShader(shader);
 }
 
+TEST_P(CombinedGoldfishOpenglTest, GetStringTwiceCurrent) {
+    // current in SetUp
+    fprintf(stderr, "%s: GL version string: %s\n", __func__,
+            glGetString(GL_VERSION));
+
+    EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, EGL_NO_SURFACE,
+                EGL_NO_SURFACE, EGL_NO_CONTEXT));
+    EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, mEGL.surface,
+                mEGL.surface, mEGL.context));
+
+    fprintf(stderr, "%s: GL version string: %s (after)\n", __func__,
+            glGetString(GL_VERSION));
+}
+
 INSTANTIATE_TEST_SUITE_P(
     MultipleTransports,
     CombinedGoldfishOpenglTest,
