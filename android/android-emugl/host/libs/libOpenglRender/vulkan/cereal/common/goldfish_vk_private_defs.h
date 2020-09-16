@@ -250,6 +250,10 @@ typedef void (VKAPI_PTR *PFN_vkQueueWaitIdleAsyncGOOGLE)(VkQueue queue);
 typedef void (VKAPI_PTR *PFN_vkQueueBindSparseAsyncGOOGLE)(
     VkQueue queue, uint32_t bindInfoCount, const VkBindSparseInfo* pBindInfo, VkFence fence);
 
+#define VK_GOOGLE_linear_image_layout 1
+
+typedef VkResult (VKAPI_PTR *PFN_vkGetLinearImageLayoutGOOGLE)(VkDevice device, VkFormat format, VkDeviceSize* pOffset, VkDeviceSize* pRowPitchAlignment);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

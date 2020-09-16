@@ -306,5 +306,7 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_GOOGLE_async_queue_submit
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+#endif
 
 } // namespace goldfish_vk
