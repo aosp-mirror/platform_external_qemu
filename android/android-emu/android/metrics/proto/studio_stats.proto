@@ -1437,7 +1437,8 @@ message EmulatorFeatureFlagState {
     CAR_ROTARY = 66;
     MODEM_SIMULATOR = 67;
     TV_REMOTE = 68;
-    // Next tag: 69
+    NATIVE_TEXTURE_DECOMPRESSION = 69;
+    // Next tag: 70
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

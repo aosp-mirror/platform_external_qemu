@@ -640,6 +640,7 @@ GL_APICALL void GL_APIENTRY glTexStorage2DMultisample(GLenum target, GLsizei sam
     GLint err = GL_NO_ERROR;
     GLenum format, type;
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
+
     sPrepareTexImage2D(target, 0, (GLint)internalformat, width, height, 0, format, type, samples, NULL, &type, (GLint*)&internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glTexStorage2DMultisample(target, samples, internalformat, width, height, fixedsamplelocations);
