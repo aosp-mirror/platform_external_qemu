@@ -18,6 +18,7 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "emugl/common/feature_control.h"
 
 #include <GLcommon/GLconversion_macros.h>
 #include <GLcommon/GLSnapshotSerializers.h>
@@ -40,6 +41,9 @@
 #include <string.h>
 
 #include <numeric>
+#include <map>
+
+using emugl::emugl_feature_is_enabled;
 
 //decleration
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize);
@@ -1717,6 +1721,66 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_DRAW_BUFFERS, &s_glSupport.maxDrawBuffers);
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
 
+    // Compressed texture format query
+    if(emugl_feature_is_enabled(android::featurecontrol::NativeTextureDecompression)) {
+        bool hasEtc2Support = false;
+        bool hasAstcSupport = false;
+        int numCompressedFormats = 0;
+        s_glDispatch.glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &numCompressedFormats);
+        if (numCompressedFormats > 0) {
+            int numEtc2Formats = 0;
+            int numAstcFormats = 0;
+            int numEtc2FormatsSupported = 0;
+            int numAstcFormatsSupported = 0;
+
+            std::map<GLint, bool> found;
+            forEachEtc2Format([&numEtc2Formats, &found](GLint format) { ++numEtc2Formats; found[format] = false;});
+            forEachAstcFormat([&numAstcFormats, &found](GLint format) { ++numAstcFormats; found[format] = false;});
+
+            std::vector<GLint> formats(numCompressedFormats);
+            s_glDispatch.glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, formats.data());
+
+            for (int i = 0; i < numCompressedFormats; ++i) {
+                GLint format = formats[i];
+                if (isEtc2Format(format)) {
+                    ++numEtc2FormatsSupported;
+                    found[format] = true;
+                } else if (isAstcFormat(format)) {
+                    ++numAstcFormatsSupported;
+                    found[format] = true;
+                }
+            }
+
+            if (numEtc2Formats == numEtc2FormatsSupported) {
+                hasEtc2Support = true; // Supports ETC2 underneath
+            } else {
+                // It is unusual to support only some. Record what happened.
+                fprintf(stderr, "%s: Not supporting etc2: %d vs %d\n", __func__,
+                        numEtc2FormatsSupported, numEtc2Formats);
+                for (auto it : found) {
+                    if (!it.second) {
+                        fprintf(stderr, "%s: Not found: 0x%x\n", __func__, it.first);
+                    }
+                }
+            }
+
+            if (numAstcFormats == numAstcFormatsSupported) {
+                hasAstcSupport = true; // Supports ASTC underneath
+            } else {
+                // It is unusual to support only some. Record what happened.
+                fprintf(stderr, "%s: Not supporting astc: %d vs %d\n", __func__,
+                        numAstcFormatsSupported, numAstcFormats);
+                for (auto it : found) {
+                    if (!it.second) {
+                        fprintf(stderr, "%s: Not found: 0x%x\n", __func__, it.first);
+                    }
+                }
+            }
+        }
+        s_glSupport.hasEtc2Support = hasEtc2Support;
+        s_glSupport.hasAstcSupport = hasAstcSupport;
+    }
+
     // Clear GL error in case these enums not supported.
     s_glDispatch.glGetError();
 
@@ -1794,6 +1858,11 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
 
     if (strstr(cstring, "GL_EXT_semaphore") != NULL) {
         s_glSupport.ext_GL_EXT_semaphore = true;
+    }
+
+    // ASTC
+    if (strstr(cstring, "GL_KHR_texture_compression_astc_ldr") != NULL) {
+        s_glSupport.ext_GL_KHR_texture_compression_astc_ldr = true;
     }
 }
 
