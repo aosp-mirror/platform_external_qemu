@@ -132,6 +132,14 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
 
     updateSensorValuesInUI();
 
+//    Device3DWidget* test = new Device3DWidget(parent);
+//    test->setSensorsAgent(sSensorsAgent);
+//    test->resize(800, 600);
+//    test->show();
+    testWidget* test = new testWidget(parent);
+//    test->resize(800, 600);
+    test->show();
+
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         mUi->tabWidget->removeTab(kAccelerometerTabIndex);
     }

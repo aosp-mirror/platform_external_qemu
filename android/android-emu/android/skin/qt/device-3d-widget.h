@@ -30,6 +30,28 @@ class QWheelEvent;
 class QWidget;
 struct QAndroidSensorsAgent;
 
+class testWidget : public GLWidget {
+    Q_OBJECT
+public:
+    testWidget(QWidget *parent = 0);
+
+private:
+    GLuint program;
+    GLuint mBuffer, VAO;
+
+
+protected:
+    // This is called once, after the GL context is created, to do some one-off
+    // setup work.
+    bool initGL() override;
+
+    // Called every time the widget changes its dimensions.
+    void resizeGL(int, int) override {}
+
+    // Called every time the widget needs to be repainted.
+    void repaintGL() override;
+};
+
 struct DisplaySegment {
     int32_t l, r, t, b;     // left, right, top, bottom
     bool isHinge;
