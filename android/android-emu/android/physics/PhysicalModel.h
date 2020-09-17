@@ -167,4 +167,6 @@ bool physicalModel_foldableisFolded(PhysicalModel* model);
 
 bool physicalModel_getFoldedArea(PhysicalModel* model, int* x, int* y, int* w, int* h);
 
+bool physicalModel_isLoadingSnapshot(PhysicalModel* model);
+
 ANDROID_END_HEADER
