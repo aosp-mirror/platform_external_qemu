@@ -735,9 +735,16 @@ GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLe
     SET_ERROR_IF(!GLEScmValidate::textureTargetEx(target),GL_INVALID_ENUM);
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
-    doCompressedTexImage2D(ctx, target, level, internalformat,
-                                width, height, border,
-                                imageSize, data, glTexImage2D);
+    if (ctx->getCaps()->hasFullCompressedSupport) {
+        ctx->dispatcher().glCompressedTexImage2D(target, level, internalformat,
+                                                         width, height, border,
+                                                         imageSize, data);
+    } else {
+        doCompressedTexImage2D(ctx, target, level, internalformat,
+                                    width, height, border,
+                                    imageSize, data, glTexImage2D);
+    }
+
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
         texData->compressed = true;
@@ -752,10 +759,17 @@ GL_API void GL_APIENTRY  glCompressedTexSubImage2D( GLenum target, GLint level, 
     SET_ERROR_IF(level < 0 || level > log2(ctx->getMaxTexSize()),GL_INVALID_VALUE)
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
-    GLenum uncompressedFrmt;
-    unsigned char* uncompressed = uncompressTexture(format,uncompressedFrmt,width,height,imageSize,data,level);
-    ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,uncompressedFrmt,GL_UNSIGNED_BYTE,uncompressed);
-    delete uncompressed;
+    if (ctx->getCaps()->hasFullCompressedSupport) {
+        ctx->dispatcher().glCompressedTexSubImage2D(target, level, xoffset, yoffset,
+                                                            width, height, format,
+                                                            imageSize, data);
+    } else {
+        GLenum uncompressedFrmt;
+        unsigned char* uncompressed = uncompressTexture(format,uncompressedFrmt,width,height,imageSize,data,level);
+        ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,uncompressedFrmt,GL_UNSIGNED_BYTE,uncompressed);
+        delete uncompressed;
+    }
+
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
         texData->setMipmapLevelAtLeast(level);

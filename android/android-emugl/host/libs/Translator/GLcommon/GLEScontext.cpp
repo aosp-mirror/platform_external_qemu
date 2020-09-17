@@ -1707,6 +1707,46 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_DRAW_BUFFERS, &s_glSupport.maxDrawBuffers);
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
 
+    // Compressed texture format query
+    bool hasFullCompressedSupport = false;
+    int numCompressedFormats = 0;
+    s_glDispatch.glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &numCompressedFormats);
+    if (numCompressedFormats > 0) {
+        int numEtcFormats = 0;
+        int numAstcFormats = 0;
+        int numEtcFormatsSupported = 0;
+        int numAstcFormatsSupported = 0;
+
+        forEachEtcFormat([&numEtcFormats](GLint) { ++numEtcFormats; });
+        forEachAstcFormat([&numAstcFormats](GLint) { ++numAstcFormats; });
+
+        std::vector<GLint> formats(numCompressedFormats);
+        s_glDispatch.glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, formats.data());
+
+        for (int i = 0; i < numCompressedFormats; ++i) {
+            GLint format = formats[i];
+            forEachEtcFormat([&numEtcFormatsSupported, format](GLenum etcFormat) {
+                if (format == etcFormat) ++numEtcFormatsSupported; });
+            forEachAstcFormat([&numAstcFormatsSupported, format](GLenum astcFormat) {
+                if (format == astcFormat) ++numAstcFormatsSupported; });
+        }
+
+        if (numEtcFormats == numEtcFormatsSupported) {
+            fprintf(stderr, "%s: Supports ETC underneath\n", __func__);
+        }
+
+        if (numAstcFormatsSupported == numAstcFormatsSupported) {
+            fprintf(stderr, "%s: Supports ASTC underneath\n", __func__);
+        }
+
+        if ((numEtcFormats == numEtcFormatsSupported) &&
+            (numAstcFormatsSupported == numAstcFormatsSupported)) {
+            fprintf(stderr, "%s: Supports both ETC and ASTC underneath\n", __func__);
+            hasFullCompressedSupport = true;
+        }
+    }
+    s_glSupport.hasFullCompressedSupport = hasFullCompressedSupport;
+
     // Clear GL error in case these enums not supported.
     s_glDispatch.glGetError();
 
@@ -1784,6 +1824,11 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
 
     if (strstr(cstring, "GL_EXT_semaphore") != NULL) {
         s_glSupport.ext_GL_EXT_semaphore = true;
+    }
+
+    // ASTC
+    if (strstr(cstring, "GL_KHR_texture_compression_astc_ldr") != NULL) {
+        s_glSupport.ext_GL_KHR_texture_compression_astc_ldr = true;
     }
 }
 
