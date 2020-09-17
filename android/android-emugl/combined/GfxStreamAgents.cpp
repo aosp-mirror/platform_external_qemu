@@ -248,11 +248,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     sIsFolded = is_fold;
                     return true;
                 },
-        .isFolded = [](void) -> bool {
-            fprintf(stderr, "window-agent-GfxStream-impl: .isFolded ? %d\n",
-                    sIsFolded);
-            return sIsFolded;
-        },
+        .isFolded = [](void) -> bool { return sIsFolded; },
         .getFoldedArea = [](int* x, int* y, int* w, int* h) -> bool {
             fprintf(stderr, "window-agent-GfxStream-impl: .getFoldedArea\n");
             return true;
