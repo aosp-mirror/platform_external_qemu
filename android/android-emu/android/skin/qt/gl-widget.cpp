@@ -69,6 +69,7 @@ GLWidget::GLWidget(QWidget* parent) :
 }
 
 void GLWidget::handleScreenChange(QScreen*) {
+    printf("enter %s\n", __func__);
     // Destroy the context, forcing its re-creation on
     // next paint event.
     destroyContext();
@@ -76,6 +77,7 @@ void GLWidget::handleScreenChange(QScreen*) {
 }
 
 bool GLWidget::ensureInit() {
+    printf("enter %s\n", __func__);
     // If an error occured when loading the EGL/GLESv2 libraries, return false.
     if (!mEGL || !mGLES2) {
         return false;
@@ -180,6 +182,7 @@ bool GLWidget::makeContextCurrent() {
 }
 
 void GLWidget::renderFrame() {
+    printf("enter %s\n", __func__);
     if (!readyForRendering()) {
         return;
     }
@@ -192,6 +195,7 @@ void GLWidget::renderFrame() {
         mCanvas->unbind();
     } else {
         mGLES2->glViewport(0, 0, realPixelsWidth(), realPixelsHeight());
+        printf("%s %d %d %f viewport %d %d\n", __func__, width(), height(), devicePixelRatioF(), realPixelsWidth(), realPixelsHeight());
         repaintGL();
     }
 
@@ -207,12 +211,14 @@ void GLWidget::renderFrame() {
 }
 
 void GLWidget::paintEvent(QPaintEvent*) {
+    printf("enter %s\n", __func__);
     if (ensureInit()) {
         renderFrame();
     }
 }
 
 void GLWidget::showEvent(QShowEvent*) {
+    printf("enter %s\n", __func__);   
     // When the widget first becomes visible, we ask it to render a frame,
     // which will force the necessary initialization.
     // It is important to make sure that the widget is actually
@@ -229,6 +235,10 @@ void GLWidget::showEvent(QShowEvent*) {
 }
 
 void GLWidget::resizeEvent(QResizeEvent* e) {
+    printf("enter %s\n", __func__);
+    destroyContext();
+    update();
+#if 0
     if (mEGLState) {
         // We should only call resizeGL and repaint if all the setup
         // has been done.
@@ -246,6 +256,7 @@ void GLWidget::resizeEvent(QResizeEvent* e) {
                  e->size().height() * devicePixelRatioF());
         update();
     }
+#endif
 }
 
 GLWidget::~GLWidget() {
