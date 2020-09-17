@@ -98,6 +98,7 @@ set(QT5_INCLUDE_DIRS
     ${PREBUILT_ROOT}/include.system/QtCore
     ${PREBUILT_ROOT}/include/QtCore
     ${PREBUILT_ROOT}/include/QtGui
+    ${PREBUILT_ROOT}/include/QtOpenGL
     ${PREBUILT_ROOT}/include/QtSvg
     ${PREBUILT_ROOT}/include/QtWidgets
     ${PREBUILT_ROOT}/include/QtWebChannel
@@ -116,6 +117,7 @@ if(DARWIN_X86_64)
       ${PREBUILT_ROOT}/lib/libQt5WidgetsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WidgetsAndroidEmu.${QT_LIB_VERSION}.dylib;
       ${PREBUILT_ROOT}/lib/libQt5GuiAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5GuiAndroidEmu.${QT_LIB_VERSION}.dylib;
       ${PREBUILT_ROOT}/lib/libQt5SvgAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5SvgAndroidEmu.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5OpenGLAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5OpenGLAndroidEmu.${QT_LIB_VERSION}.dylib;
       ${PREBUILT_ROOT}/lib/libQt5PrintSupportAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5PrintSupportAndroidEmu.${QT_LIB_VERSION}.dylib;
       ${PREBUILT_ROOT}/lib/libQt5NetworkAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5NetworkAndroidEmu.${QT_LIB_VERSION}.dylib;
       ${PREBUILT_ROOT}/lib/libQt5DBusAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5DBusAndroidEmu.${QT_LIB_VERSION}.dylib;
@@ -140,6 +142,7 @@ if(DARWIN_X86_64)
   add_qt_shared_lib(Gui "-lQt5GuiAndroidEmu" "Qt5::Core")
   add_qt_shared_lib(Widgets "-lQt5WidgetsAndroidEmu" "Qt5::Gui")
   add_qt_shared_lib(Svg "-lQt5SvgAndroidEmu" "Qt5::Widgets")
+  add_qt_shared_lib(OpenGL "-lQt5OpenGLAndroidEmu" "Qt5::OpenGL")
 
   if(QTWEBENGINE)
     add_qt_shared_lib(Network "-lQt5NetworkAndroidEmu" "Qt5::Core")
@@ -203,6 +206,7 @@ elseif(WINDOWS_MSVC_X86_64)
   # Obtained by running ListDlls.exe from sysinternals tool
   set(QT5_SHARED_DEPENDENCIES
       ${PREBUILT_ROOT}/bin/Qt5SvgAndroidEmu.dll>lib64/qt/lib/Qt5SvgAndroidEmu.dll;
+      ${PREBUILT_ROOT}/bin/Qt5OpenGLAndroidEmu.dll>lib64/qt/lib/Qt5OpenGLAndroidEmu.dll;
       ${PREBUILT_ROOT}/bin/Qt5CoreAndroidEmu.dll>lib64/qt/lib/Qt5CoreAndroidEmu.dll;
       ${PREBUILT_ROOT}/bin/Qt5GuiAndroidEmu.dll>lib64/qt/lib/Qt5GuiAndroidEmu.dll;
       ${PREBUILT_ROOT}/bin/Qt5WidgetsAndroidEmu.dll>lib64/qt/lib/Qt5WidgetsAndroidEmu.dll;
@@ -235,6 +239,8 @@ elseif(WINDOWS_MSVC_X86_64)
   add_qt_shared_lib(Widgets "${PREBUILT_ROOT}/lib/Qt5WidgetsAndroidEmu.lib"
                     "Qt5::Gui")
   add_qt_shared_lib(Svg "${PREBUILT_ROOT}/lib/Qt5SvgAndroidEmu.lib"
+                    "Qt5::Widgets")
+  add_qt_shared_lib(OpenGL "${PREBUILT_ROOT}/lib/Qt5OpenGLAndroidEmu.lib"
                     "Qt5::Widgets")
 
   add_qt_shared_lib(Network "${PREBUILT_ROOT}/lib/Qt5NetworkAndroidEmu.lib"
@@ -283,6 +289,7 @@ elseif(LINUX)
       ${PREBUILT_ROOT}/lib/libQt5GuiAndroidEmu.so.5>lib64/qt/lib/libQt5GuiAndroidEmu.so.5;
       ${PREBUILT_ROOT}/lib/libQt5WidgetsAndroidEmu.so.5>lib64/qt/lib/libQt5WidgetsAndroidEmu.so.5;
       ${PREBUILT_ROOT}/lib/libQt5SvgAndroidEmu.so.5>lib64/qt/lib/libQt5SvgAndroidEmu.so.5;
+      ${PREBUILT_ROOT}/lib/libQt5OpenGLAndroidEmu.so.5>lib64/qt/lib/libQt5OpenGLAndroidEmu.so.5;
       ${PREBUILT_ROOT}/lib/libQt5PrintSupportAndroidEmu.so.5>lib64/qt/lib/libQt5PrintSupportAndroidEmu.so.5;
       ${PREBUILT_ROOT}/lib/libQt5DBusAndroidEmu.so.5>lib64/qt/lib/libQt5DBusAndroidEmu.so.5;
       ${PREBUILT_ROOT}/lib/libQt5NetworkAndroidEmu.so.5>lib64/qt/lib/libQt5NetworkAndroidEmu.so.5;
@@ -312,6 +319,7 @@ elseif(LINUX)
   add_qt_shared_lib(Gui "-lQt5GuiAndroidEmu" "Qt5::Core")
   add_qt_shared_lib(Widgets "-lQt5WidgetsAndroidEmu" "Qt5::Gui")
   add_qt_shared_lib(Svg "-lQt5SvgAndroidEmu" "Qt5::Widgets")
+  add_qt_shared_lib(OpenGL "-lQt5OpenGLAndroidEmu" "Qt5::Widgets")
 
   get_filename_component(
     PREBUILT_WEBENGINE_DEPS_ROOT
@@ -395,7 +403,7 @@ elseif(LINUX)
 endif()
 
 set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5WidgetsAndroidEmu -lQt5GuiAndroidEmu
-                  -lQt5CoreAndroidEmu -lQt5SvgAndroidEmu)
+                  -lQt5CoreAndroidEmu -lQt5SvgAndroidEmu -lQt5OpenGLAndroidEmu)
 
 set(PACKAGE_EXPORT
     QT5_INCLUDE_DIR

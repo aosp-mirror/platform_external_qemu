@@ -471,7 +471,7 @@ void PerfStats3DWidget::resizeGL(int w, int h) {
     if (!mGLES2) {
         return;
     }
-
+    printf("PerfStats3DWidget::resizeGL %d %d\n", w, h);
     // Adjust for new viewport
     mGLES2->glViewport(0, 0, w, h);
 }

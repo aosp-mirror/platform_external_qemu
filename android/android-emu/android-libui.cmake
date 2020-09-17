@@ -383,6 +383,7 @@ target_link_libraries(
           Qt5::Core
           Qt5::Widgets
           Qt5::Gui
+          Qt5::OpenGL
           Qt5::Svg
           zlib
           android-hw-config)
