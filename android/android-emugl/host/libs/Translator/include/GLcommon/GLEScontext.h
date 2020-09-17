@@ -104,6 +104,8 @@ struct GLSupport {
 
     bool ext_GL_EXT_memory_object = false;
     bool ext_GL_EXT_semaphore = false;
+
+    bool ext_GL_KHR_texture_compression_astc_ldr = false;
 };
 
 struct ArrayData {

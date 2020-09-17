@@ -1785,6 +1785,10 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (strstr(cstring, "GL_EXT_semaphore") != NULL) {
         s_glSupport.ext_GL_EXT_semaphore = true;
     }
+
+    if (strstr(cstring, "GL_KHR_texture_compression_astc_ldr") != NULL) {
+        s_glSupport.ext_GL_KHR_texture_compression_astc_ldr = true;
+    }
 }
 
 void GLEScontext::buildStrings(const char* baseVendor,

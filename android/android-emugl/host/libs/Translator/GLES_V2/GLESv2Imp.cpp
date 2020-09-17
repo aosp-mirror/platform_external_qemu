@@ -861,9 +861,15 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
 
     auto funcPtr = translator::gles2::glTexImage2D;
 
-    doCompressedTexImage2D(ctx, target, level, internalformat,
-                                width, height, border,
-                                imageSize, data, funcPtr);
+    if (isAstcFormat(internalformat)) {
+        ctx->dispatcher().glCompressedTexImage2D(target, level, internalformat,
+                                                         width, height, border,
+                                                         imageSize, data);
+    } else {
+        doCompressedTexImage2D(ctx, target, level, internalformat,
+                                    width, height, border,
+                                    imageSize, data, funcPtr);
+    }
 
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
@@ -898,15 +904,21 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
             SET_ERROR_IF(format != texData->compressedFormat, GL_INVALID_OPERATION);
         }
         SET_ERROR_IF(ctx->getMajorVersion() < 3 && !data, GL_INVALID_OPERATION);
-        doCompressedTexImage2D(ctx, target, level, format,
-                width, height, 0, imageSize, data,
-                [xoffset, yoffset](GLenum target, GLint level,
-                GLint internalformat, GLsizei width, GLsizei height,
-                GLint border, GLenum format, GLenum type,
-                const GLvoid* data) {
-                    glTexSubImage2D(target, level, xoffset, yoffset,
-                        width, height, format, type, data);
-                });
+        if (isAstcFormat(format)) {
+            ctx->dispatcher().glCompressedTexSubImage2D(target, level, xoffset, yoffset,
+                                                                width, height, format,
+                                                                imageSize, data);
+        } else {
+            doCompressedTexImage2D(ctx, target, level, format,
+                    width, height, 0, imageSize, data,
+                    [xoffset, yoffset](GLenum target, GLint level,
+                    GLint internalformat, GLsizei width, GLsizei height,
+                    GLint border, GLenum format, GLenum type,
+                    const GLvoid* data) {
+                        glTexSubImage2D(target, level, xoffset, yoffset,
+                            width, height, format, type, data);
+                    });
+        }
     }
 }
 
