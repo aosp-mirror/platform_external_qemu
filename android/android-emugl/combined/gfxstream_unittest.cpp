@@ -19,57 +19,71 @@
 
 using android::base::System;
 
-static void sWriteFence(void* cookie, uint32_t fence) {
-    uint32_t current = *(uint32_t*) cookie;
-    if (current < fence) *(uint32_t*)(cookie) = fence;
+class GfxStreamBackendTest : public ::testing::Test {
+private:
+    static void sWriteFence(void* cookie, uint32_t fence) {
+        uint32_t current = *(uint32_t*)cookie;
+        if (current < fence)
+            *(uint32_t*)(cookie) = fence;
+    }
+
+protected:
+    uint32_t cookie;
+    struct virgl_renderer_callbacks callbacks;
+    static constexpr uint32_t width = 256;
+    static constexpr uint32_t height = 256;
+
+    GfxStreamBackendTest()
+        : cookie(0),
+          callbacks({
+                  0,
+                  sWriteFence,
+                  0,
+                  0,
+                  0,
+          }) {}
+
+    void SetUp() override {
+        System::setEnvironmentVariable("ANDROID_GFXSTREAM_EGL", "1");
+    }
+
+    void TearDown() override { gfxstream_backend_teardown(); }
+};
+
+TEST_F(GfxStreamBackendTest, Init) {
+    gfxstream_backend_init(width, height, 0, &cookie,
+                           GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT |
+                                   GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT,
+                           &callbacks);
 }
 
-TEST(GfxStreamBackend, Init) {
-    uint32_t cookie;
-    struct virgl_renderer_callbacks cbs = {
-        0,
-        sWriteFence,
-        0, 0, 0,
+TEST_F(GfxStreamBackendTest, SimpleFlush) {
+    gfxstream_backend_init(width, height, 0, &cookie,
+                           GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT |
+                                   GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT,
+                           &callbacks);
 
-    };
-    
-    System::setEnvironmentVariable("ANDROID_GFXSTREAM_EGL", "1");
-    gfxstream_backend_init(256, 256, 0, &cookie, GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT | GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT, &cbs);
-    gfxstream_backend_teardown();
-}
-
-TEST(GfxStreamBackend, SimpleFlush) {
-    uint32_t cookie;
-    struct virgl_renderer_callbacks cbs = {
-        0,
-        sWriteFence,
-        0, 0, 0,
-
-    };
-    
     const uint32_t res_id = 8;
-    const uint32_t width = 256, height = 256;
-    System::setEnvironmentVariable("ANDROID_GFXSTREAM_EGL", "1");
-    gfxstream_backend_init(width, height, 0, &cookie, GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT | GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT, &cbs);
-
     struct virgl_renderer_resource_create_args create_resource_args = {
-        .handle = res_id,
-        .target = 2, // PIPE_TEXTURE_2D
-        .format = VIRGL_FORMAT_R8G8B8A8_UNORM,
-        .bind = 0x140008, // VIRGL_BIND_SAMPLER_VIEW | VIRGL_BIND_SCANOUT | VIRGL_BIND_SHARED,
-        .width = width,
-        .height = height,
-        .depth = 1,
-        .array_size = 1,
-        .last_level = 0,
-        .nr_samples = 0,
-        .flags = 0,
+            .handle = res_id,
+            .target = 2,  // PIPE_TEXTURE_2D
+            .format = VIRGL_FORMAT_R8G8B8A8_UNORM,
+            .bind = 0x140008,  // VIRGL_BIND_SAMPLER_VIEW | VIRGL_BIND_SCANOUT |
+                               // VIRGL_BIND_SHARED,
+            .width = width,
+            .height = height,
+            .depth = 1,
+            .array_size = 1,
+            .last_level = 0,
+            .nr_samples = 0,
+            .flags = 0,
     };
-    EXPECT_EQ(pipe_virgl_renderer_resource_create(&create_resource_args, NULL, 0), 0);
+    EXPECT_EQ(
+            pipe_virgl_renderer_resource_create(&create_resource_args, NULL, 0),
+            0);
     // R8G8B8A8 is used, so 4 bytes per pixel
     auto fb = std::make_unique<uint32_t[]>(width * height);
     EXPECT_NE(fb, nullptr);
-    stream_renderer_flush_resource_and_readback(res_id, 0, 0, width, height, fb.get(), width * height);
-
-    gfxstream_backend_teardown();
+    stream_renderer_flush_resource_and_readback(res_id, 0, 0, width, height,
+                                                fb.get(), width * height);
 }
