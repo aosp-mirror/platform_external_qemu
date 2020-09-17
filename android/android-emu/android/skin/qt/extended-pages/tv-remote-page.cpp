@@ -62,6 +62,8 @@ TvRemotePage::TvRemotePage(QWidget *parent) :
         {mUi->tvRemote_rightButton, kKeyCodeDpadRight},
         {mUi->tvRemote_downButton, kKeyCodeDpadDown},
         {mUi->tvRemote_selectButton, kKeyCodeDpadCenter},
+        {mUi->tvRemote_backButton, kKeyCodeBack},
+        {mUi->tvRemote_homeButton, kKeyCodeHome},
     };
 
     for (const auto& button_info : buttons) {

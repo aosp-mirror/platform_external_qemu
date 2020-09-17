@@ -188,6 +188,32 @@
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QPushButton" name="tvRemote_backButton">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>360</y>
+     <width>85</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>BackButton</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="tvRemote_homeButton">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>360</y>
+     <width>85</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>HomeButton</string>
+   </property>
+  </widget>
  </widget>
  <resources>
   <include location="../resources.qrc"/>
