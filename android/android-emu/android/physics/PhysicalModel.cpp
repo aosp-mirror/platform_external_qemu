@@ -213,6 +213,7 @@ public:
         return mFoldableModel.getFoldedArea(x, y, w, h);
     }
 
+    bool isLoadingSnapshot = false;
 private:
     /*
      * Sets the target value for the given physical parameter that the physical
@@ -1045,6 +1046,7 @@ int PhysicalModelImpl::snapshotLoad(Stream* f) {
         return -EIO;
     }
 
+    isLoadingSnapshot = true;
     // Note: any new target params will remain at their defaults.
 
     for (int parameter = 0; parameter < num_physical_parameters; parameter++) {
@@ -1077,6 +1079,7 @@ int PhysicalModelImpl::snapshotLoad(Stream* f) {
         D("%s: cannot load: snapshot requires %d physical sensors, %d "
           "available\n",
           __FUNCTION__, num_sensors, MAX_SENSORS);
+        isLoadingSnapshot = false;
         return -EIO;
     }
 
@@ -1103,7 +1106,7 @@ int PhysicalModelImpl::snapshotLoad(Stream* f) {
             }
         }
     }
-
+    isLoadingSnapshot = false;
     return 0;
 }
 
@@ -1595,5 +1598,13 @@ bool physicalModel_getFoldedArea(PhysicalModel* model, int* x, int* y, int* w, i
         return impl->getFoldedArea(x, y, w, h);
     }
     E("%s: Failed. Physical model not initiated", __FUNCTION__);
+    return false;
+}
+
+bool physicalModel_isLoadingSnapshot(PhysicalModel* model) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        return impl->isLoadingSnapshot;
+    }
     return false;
 }

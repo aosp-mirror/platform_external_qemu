@@ -300,13 +300,14 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                          ".MultiDisplayServiceReceiver"});
             }
 
-            // Foldable hinge area and posture update
+            // Foldable hinge area and posture update. Called when cold boot or Android reboot itself
             if (android_foldable_hinge_configured()) {
                 FoldableState state;
                 if (!android_foldable_get_state(&state)) {
                     adbInterface->enqueueCommand({ "shell", "settings", "put",
                                                    "global", "device_posture",
                                                    std::to_string((int)state.currentPosture).c_str() });
+                    // Android accepts only one hinge area currently
                     char hingeArea[128];
                     snprintf(hingeArea, 128, "%s-[%d,%d,%d,%d]",
                              (state.config.hingesSubType == ANDROID_FOLDABLE_HINGE_FOLD) ? "fold" : "hinge",
@@ -318,6 +319,12 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                                                    "global", "display_features",
                                                    hingeArea });
                 }
+            }
+            // Sync folded area and LID open/close for foldable hinge/rollable/legacyFold
+            if (android_foldable_hinge_configured() ||
+                android_foldable_rollable_configured() ||
+                android_foldable_folded_area_configured(0)) {
+                getConsoleAgents()->emu->updateFoldablePostureIndicator(true);
             }
 
             if (changing_language_country_locale) {

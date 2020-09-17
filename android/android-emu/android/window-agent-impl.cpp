@@ -113,11 +113,15 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return android_foldable_get_folded_area(x, y, w, h);
                 },
         .updateFoldablePostureIndicator =
-                [] {
+                [](bool confirmFoldedArea) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         QtUICommand cmd = QtUICommand::UPDATE_FOLDABLE_POSTURE_INDICATOR;
-                        win->runOnUiThread([win, cmd]() {
-                            win->toolWindow()->handleUICommand(cmd);
+                        win->runOnUiThread([win, cmd, confirmFoldedArea]() {
+                            if (confirmFoldedArea) {
+                                win->toolWindow()->handleUICommand(cmd, std::string("confirmFoldedArea"));
+                            } else {
+                                win->toolWindow()->handleUICommand(cmd);
+                            }
                         });
                     }
                 },
