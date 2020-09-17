@@ -60,7 +60,8 @@ if(OPTION_GFXSTREAM_BACKEND)
 
   android_add_test(TARGET gfxstream_unittests SRC gfxstream_unittest.cpp)
   target_compile_options(gfxstream_unittests PRIVATE -fvisibility=default)
-  target_link_libraries(gfxstream_unittests PUBLIC gfxstream_backend android-emu-base gtest gtest_main)
+  target_link_libraries(gfxstream_unittests PUBLIC gfxstream_backend android-emu-base gtest
+                        gtest_main OSWindow)
   target_include_directories(
     gfxstream_unittests
     PRIVATE
