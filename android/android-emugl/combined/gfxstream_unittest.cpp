@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 
 #include "GfxStreamBackend.h"
+#include "OSWindow.h"
 #include "android/base/system/System.h"
 
 using android::base::System;
@@ -32,6 +33,7 @@ protected:
     struct virgl_renderer_callbacks callbacks;
     static constexpr uint32_t width = 256;
     static constexpr uint32_t height = 256;
+    static std::unique_ptr<OSWindow> window;
 
     GfxStreamBackendTest()
         : cookie(0),
@@ -43,18 +45,37 @@ protected:
                   0,
           }) {}
 
+    static void SetUpTestSuite() { window.reset(CreateOSWindow()); }
+
+    static void TearDownTestSuite() { window.reset(nullptr); }
+
     void SetUp() override {
         System::setEnvironmentVariable("ANDROID_GFXSTREAM_EGL", "1");
+        window->initialize("GfxStreamBackendTestWindow", width, height);
+        window->setVisible(true);
+        window->messageLoop();
     }
 
-    void TearDown() override { gfxstream_backend_teardown(); }
+    void TearDown() override {
+        window->destroy();
+        gfxstream_backend_teardown();
+    }
 };
+
+std::unique_ptr<OSWindow> GfxStreamBackendTest::window = nullptr;
 
 TEST_F(GfxStreamBackendTest, Init) {
     gfxstream_backend_init(width, height, 0, &cookie,
                            GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT |
                                    GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT,
                            &callbacks);
+}
+
+TEST_F(GfxStreamBackendTest, InitOpenGLWindow) {
+    gfxstream_backend_init(width, height, 0, &cookie,
+                           GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT, &callbacks);
+    gfxstream_backend_setup_window(window->getFramebufferNativeWindow(), 0, 0,
+                                   width, height, width, height);
 }
 
 TEST_F(GfxStreamBackendTest, SimpleFlush) {
@@ -68,8 +89,8 @@ TEST_F(GfxStreamBackendTest, SimpleFlush) {
             .handle = res_id,
             .target = 2,  // PIPE_TEXTURE_2D
             .format = VIRGL_FORMAT_R8G8B8A8_UNORM,
-            .bind = 0x140008,  // VIRGL_BIND_SAMPLER_VIEW | VIRGL_BIND_SCANOUT |
-                               // VIRGL_BIND_SHARED,
+            .bind = VIRGL_BIND_SAMPLER_VIEW | VIRGL_BIND_SCANOUT |
+                    VIRGL_BIND_SHARED,
             .width = width,
             .height = height,
             .depth = 1,
