@@ -861,14 +861,19 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
 
     auto funcPtr = translator::gles2::glTexImage2D;
 
-    doCompressedTexImage2D(ctx, target, level, internalformat,
-                                width, height, border,
-                                imageSize, data, funcPtr);
+    if (isEtc2OrAstcFormat(internalformat) && ctx->getCaps()->hasEtc2AstcSupport) {
+        doCompressedTexImage2DNative(ctx, target, level, internalformat, width, height, border, imageSize, data);
+    } else {
+        doCompressedTexImage2D(ctx, target, level, internalformat,
+                                    width, height, border,
+                                    imageSize, data, funcPtr);
+    }
 
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
         texData->compressed = true;
         texData->compressedFormat = internalformat;
+        if (isEtc2OrAstcFormat(internalformat) && ctx->getCaps()->hasEtc2AstcSupport) texData->internalFormat = internalformat;
     }
 }
 
@@ -898,15 +903,19 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
             SET_ERROR_IF(format != texData->compressedFormat, GL_INVALID_OPERATION);
         }
         SET_ERROR_IF(ctx->getMajorVersion() < 3 && !data, GL_INVALID_OPERATION);
-        doCompressedTexImage2D(ctx, target, level, format,
-                width, height, 0, imageSize, data,
-                [xoffset, yoffset](GLenum target, GLint level,
-                GLint internalformat, GLsizei width, GLsizei height,
-                GLint border, GLenum format, GLenum type,
-                const GLvoid* data) {
-                    glTexSubImage2D(target, level, xoffset, yoffset,
-                        width, height, format, type, data);
-                });
+        if (isEtc2OrAstcFormat(format) && ctx->getCaps()->hasEtc2AstcSupport) {
+            doCompressedTexSubImage2DNative(ctx, target, level, xoffset, yoffset, width, height, format, imageSize, data);
+        } else {
+            doCompressedTexImage2D(ctx, target, level, format,
+                    width, height, 0, imageSize, data,
+                    [xoffset, yoffset](GLenum target, GLint level,
+                    GLint internalformat, GLsizei width, GLsizei height,
+                    GLint border, GLenum format, GLenum type,
+                    const GLvoid* data) {
+                        glTexSubImage2D(target, level, xoffset, yoffset,
+                            width, height, format, type, data);
+                    });
+        }
     }
 }
 
@@ -930,9 +939,7 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
             if (GLESv2Validate::isCompressedFormat(internalformat)) {
                 texData->compressed = true;
                 texData->compressedFormat = internalformat;
-                texData->internalFormat =
-                    decompressedInternalFormat(ctx,
-                                               internalformat);
+                texData->internalFormat = (isEtc2OrAstcFormat(internalformat) && ctx->getCaps()->hasEtc2AstcSupport) ? internalformat : decompressedInternalFormat(ctx, internalformat);
             } else {
                 texData->internalFormat = internalformat;
             }
@@ -3415,7 +3422,6 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
                                GLint* internalformat_out,
                                GLint* err_out) {
     GET_CTX_V2();
-
 #define VALIDATE(cond, err) do { if (cond) { *err_out = err; fprintf(stderr, "%s:%d failed validation\n", __FUNCTION__, __LINE__); return; } } while(0) \
 
     bool isCompressedFormat =

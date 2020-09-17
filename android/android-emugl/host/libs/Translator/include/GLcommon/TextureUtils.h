@@ -78,4 +78,12 @@ bool isSwizzleParam(GLenum pname);
 
 bool isIntegerInternalFormat(GLint internalFormat);
 
+void doCompressedTexImage2DNative(GLEScontext* ctx, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data);
+void doCompressedTexSubImage2DNative(GLEScontext* ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data);
+
+void forEachEtc2Format(std::function<void(GLint format)>);
+void forEachAstcFormat(std::function<void(GLint format)>);
+
+bool isEtc2OrAstcFormat(GLenum format);
+
 #endif
