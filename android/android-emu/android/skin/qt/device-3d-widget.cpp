@@ -713,11 +713,13 @@ bool Device3DWidget::initTextures() {
     return true;
 }
 
+bool resized = false;
 void Device3DWidget::resizeGL(int w, int h) {
     if (!mGLES2) {
         return;
     }
-
+    printf("%s w %d h %d\n", __func__, w, h);
+    if (resized) {return;}
     // Adjust for new viewport
     mGLES2->glViewport(0, 0, w, h);
 
@@ -725,10 +727,13 @@ void Device3DWidget::resizeGL(int w, int h) {
     float min_move_aspect_ratio = (MaxX - MinX) / (MaxY - MinY);
     float plane_width = aspect_ratio > min_move_aspect_ratio
                                 ? (MaxY - MinY) * aspect_ratio
-                                : MaxX - MinY;
+                                : MaxX - MinX;
     float plane_height = aspect_ratio > min_move_aspect_ratio
                                  ? MaxY - MinY
-                                 : (MaxX - MinX) / min_move_aspect_ratio;
+                                 : (MaxX - MinX) / aspect_ratio;
+    plane_width = MaxX - MinX;
+    plane_height = MaxY - MinY;
+    printf("plane width %f height %f\n", plane_width, plane_height);
 
     // Moving the phone should not clip the near/far planes.  Note that the
     // camera is looking in the -z direction so MinZ is the farthest the phone
@@ -744,6 +749,7 @@ void Device3DWidget::resizeGL(int w, int h) {
                          plane_height * NearClip / (2.0f * CameraDistance),
                          NearClip, FarClip);
     mPerspectiveInverse = glm::inverse(mPerspective);
+    resized = true;
 }
 
 constexpr float kMetersPerInch = 0.0254f;
@@ -782,6 +788,10 @@ void Device3DWidget::repaintGL() {
         position = mLastTargetPosition;
     }
 
+    // hack
+    position = glm::vec3(0.0f);
+    rotation = glm::mat4();
+
     // Give the new MVP matrix to the shader.
     mGLES2->glUseProgram(mProgram);
     GLint mv_matrix_uniform =
@@ -803,6 +813,7 @@ void Device3DWidget::repaintGL() {
                         : glm::rotate(glm::mat4(), glm::radians(90.0f),
                                       glm::vec3(0.0, 0.0, 1.0));
         if (updateHingeAngles() || mFirstAbstractDeviceRepaint) {
+            printf("recalculate the hinge segments model\n");
             mFirstAbstractDeviceRepaint = false;
             if (android_foldable_hinge_configured()) {
                 for (int32_t i = 0, j = 0; i < mDisplaySegments.size(); i++) {
@@ -1110,6 +1121,7 @@ static float clamp(float a, float b, float x) {
 }
 
 void Device3DWidget::mouseMoveEvent(QMouseEvent* event) {
+    printf("enter %s\n", __func__);
     if (mTracking && mOperationMode == OperationMode::Rotate) {
         float diff_x = event->x() - mPrevMouseX,
               diff_y = event->y() - mPrevMouseY;
@@ -1149,6 +1161,7 @@ void Device3DWidget::wheelEvent(QWheelEvent* event) {
 }
 
 void Device3DWidget::mousePressEvent(QMouseEvent* event) {
+    printf("enter %s\n", __func__);
     mPrevMouseX = event->x();
     mPrevMouseY = event->y();
     mPrevDragOrigin = screenToWorldCoordinate(event->x(), event->y());
@@ -1166,6 +1179,7 @@ void Device3DWidget::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 glm::vec3 Device3DWidget::screenToWorldCoordinate(int x, int y) const {
+    printf("enter %s\n", __func__);
     const glm::vec4 screenSpace(
             (2.0f * x / static_cast<float>(width())) - 1.0f,
             1.0f - (2.0f * y / static_cast<float>(height())), -1.f, 1.f);
@@ -1248,14 +1262,108 @@ bool Device3DWidget::updateHingeAngles() {
 
 void Device3DWidget::showEvent(QShowEvent* event) {
     GLWidget::showEvent(event);
+    printf("%s device-3d\n", __func__);
     if (mUseAbstractDevice && !mAnimationTimer.isActive()) {
         mAnimationTimer.start();
     }
 }
 
 void Device3DWidget::hideEvent(QHideEvent* event) {
+    printf("%s device-3d\n", __func__);
     QWidget::hideEvent(event);
     if (mUseAbstractDevice && mAnimationTimer.isActive()) {
         mAnimationTimer.stop();
     }
+}
+
+testWidget::testWidget(QWidget *parent)
+    : GLWidget(parent){}
+
+bool testWidget::initGL() {
+    printf("enter testWidget %s\n", __func__);
+    if (!mGLES2) {
+        printf("mGLES2 not initiated\n");
+        return false;
+    }
+    const char vshaderSrc[] = R"(#version 300 es
+    precision mediump float;
+
+    layout (location = 0) in vec2 pos;
+
+    void main() {
+        gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
+    }
+    )";
+    const char fshaderSrc[] = R"(#version 300 es
+    precision mediump float;
+
+    out vec4 fragColor;
+
+    void main() {
+        fragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);;
+    }
+    )";
+
+    GLuint vshader = createShader(mGLES2, GL_VERTEX_SHADER,
+                                        vshaderSrc);
+    int success;
+    char infoLog[512];
+    mGLES2->glGetShaderiv(vshader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        mGLES2->glGetShaderInfoLog(vshader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+    GLuint fshader = createShader(mGLES2, GL_FRAGMENT_SHADER,
+                                        fshaderSrc);
+    mGLES2->glGetShaderiv(fshader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        mGLES2->glGetShaderInfoLog(fshader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    program = mGLES2->glCreateProgram();
+    mGLES2->glAttachShader(program, vshader);
+    mGLES2->glAttachShader(program, fshader);
+    mGLES2->glLinkProgram(program);
+
+    GLint linkStatus;
+    mGLES2->glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+    if (linkStatus != GL_TRUE) {
+        printf("error compile gl program\n");
+    }
+
+    mGLES2->glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
+
+    const float vertexAttrs[] = {
+        -1.0f, -1.0f, // left  
+         1.0f, -1.0f, // right 
+         0.0f,  1.0f, // top   
+    }; 
+
+    mGLES2->glGenVertexArrays(1, &VAO);
+    mGLES2->glGenBuffers(1, &mBuffer);
+    mGLES2->glBindVertexArray(VAO);
+    mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mBuffer);
+    mGLES2->glBufferData(GL_ARRAY_BUFFER, sizeof(vertexAttrs), vertexAttrs,
+                     GL_STATIC_DRAW);
+
+    mGLES2->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                              2 * sizeof(float), 0);
+    mGLES2->glEnableVertexAttribArray(0);
+
+    mGLES2->glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    mGLES2->glBindVertexArray(0); 
+
+    return true;
+}
+
+void testWidget::repaintGL() {
+    printf("enter %s\n", __func__);
+    mGLES2->glUseProgram(program);
+    mGLES2->glBindVertexArray(VAO); 
+
+    mGLES2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mGLES2->glDrawArrays(GL_TRIANGLES, 0, 3);
 }
