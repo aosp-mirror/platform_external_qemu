@@ -1126,7 +1126,10 @@ void ToolWindow::on_tablet_mode_button_clicked() {
 }
 
 void ToolWindow::on_change_posture_button_clicked() {
-    handleUICommand(QtUICommand::SHOW_PANE_VIRTSENSORS, true);
+    if (android_foldable_hinge_configured() ||
+        android_foldable_rollable_configured()) {
+        handleUICommand(QtUICommand::SHOW_PANE_VIRTSENSORS, true);
+    }
     mPostureSelectionDialog->show();
 }
 
