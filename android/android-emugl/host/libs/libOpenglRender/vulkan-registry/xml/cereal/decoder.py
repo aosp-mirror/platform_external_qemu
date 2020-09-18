@@ -308,7 +308,6 @@ def emit_decode_finish(cgen):
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
 def emit_pool_free(cgen):
-    cgen.stmt("m_pool.freeAll()")
     cgen.stmt("%s->clearPool()" % READ_STREAM)
 
 def emit_snapshot(typeInfo, api, cgen):
@@ -592,6 +591,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.stmt("auto vk = m_vk")
+        self.cgen.stmt("m_pool.freeAll()")
 
         self.cgen.line("switch (opcode)")
         self.cgen.beginBlock() # switch stmt
