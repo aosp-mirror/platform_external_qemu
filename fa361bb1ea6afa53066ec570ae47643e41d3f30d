@@ -22,6 +22,30 @@
       "revId": "fa361bb1ea6afa53066ec570ae47643e41d3f30d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "002f2ae7_ea07c32d",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1767,
+      "author": {
+        "id": 1753250
+      },
+      "writtenOn": "2020-09-18T23:16:52Z",
+      "side": 1,
+      "message": "I\u0027ve added a renderer flag to control if this check should be made.",
+      "parentUuid": "7618adfd_717695f2",
+      "range": {
+        "startLine": 1711,
+        "startChar": 1,
+        "endLine": 1767,
+        "endChar": 56
+      },
+      "revId": "fa361bb1ea6afa53066ec570ae47643e41d3f30d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
