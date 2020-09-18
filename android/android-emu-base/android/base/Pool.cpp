@@ -277,8 +277,11 @@ public:
         mMaxFastSize(maxSize),
         mChunksPerSize(chunksPerSize) {
 
+
         size_t numHeaps =
             1 + ilog2Floor(mMaxFastSize >> mMinAllocLog2);
+
+        mChunk = malloc(numHeaps * sizeof(Heap));
 
         for (size_t i = 0; i < numHeaps; i++) {
 
@@ -286,7 +289,8 @@ public:
 
             D("create heap for size %zu", allocSize);
 
-            Heap* newHeap = new Heap(allocSize, mChunksPerSize);
+            void* heapPtr = (Heap*)mChunk + i;
+            Heap* newHeap = new (heapPtr) Heap(allocSize, mChunksPerSize);
 
             HeapInfo info = {
                 newHeap,
@@ -300,8 +304,9 @@ public:
 
     ~Impl() {
         for (auto& info : mHeapInfos) {
-            delete info.heap;
+            info.heap->~Heap();
         }
+        free(mChunk);
     }
 
     void* alloc(size_t wantedSize) {
@@ -375,6 +380,7 @@ private:
         Interval interval;
     };
 
+    void* mChunk;
     std::vector<HeapInfo> mHeapInfos;
 };
 
