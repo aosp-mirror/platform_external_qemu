@@ -1559,6 +1559,7 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
     }
 
     GLsync res = iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    iface->flush();
     img->sync = res;
     return (void*)res;
 }

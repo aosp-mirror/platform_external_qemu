@@ -24,6 +24,7 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/hw-sensors.h"
 #include "android/skin/winsys.h"
 
 #include <set>
@@ -59,8 +60,10 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
     LOG(VERBOSE) << "setMultiDisplay id " << id << " "
                  << x << " " << y << " " << w << " " << h << " "
                 << dpi << " " << flag << " " << (add? "add":"del");
-    if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) ||
-        isFoldableConfigured()) {
+    if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
+        return -1;
+    }
+    if (android_foldable_any_folded_area_configured()) {
         return -1;
     }
     if (mGuestMode) {
@@ -597,23 +600,6 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h
     return true;
 }
 
-bool MultiDisplay::isFoldableConfigured() {
-    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-    int width   = android_hw->hw_displayRegion_0_1_width;
-    int height  = android_hw->hw_displayRegion_0_1_height;
-
-    bool enableFoldableByDefault =
-        !(xOffset < 0 || xOffset > 9999 ||
-          yOffset < 0 || yOffset > 9999 ||
-          width   < 1 || width   > 9999 ||
-          height  < 1 || height  > 9999 ||
-          // TODO: 29 needed
-          avdInfo_getApiLevel(android_avdInfo) < 28);
-
-    return enableFoldableByDefault;
-}
-
 std::map<uint32_t, MultiDisplayInfo> MultiDisplay::parseConfig() {
     std::map<uint32_t, MultiDisplayInfo> ret;
     if (!android_cmdLineOptions || !android_cmdLineOptions->multidisplay) {
@@ -663,8 +649,10 @@ void MultiDisplay::loadConfig() {
     // For snapshot, MultiDisplayPipe query will not happen, instead,
     // onLoad() function later may overwrite the multidisplay states to
     // in sync with guest states.
-    if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) ||
-        isFoldableConfigured()) {
+    if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
+        return;
+    }
+    if (android_foldable_any_folded_area_configured()) {
         return;
     }
     if (mGuestMode) {

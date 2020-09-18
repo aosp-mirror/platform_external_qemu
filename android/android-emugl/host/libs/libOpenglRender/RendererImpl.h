@@ -69,7 +69,8 @@ public:
                              int fbh,
                              float dpr,
                              float zRot,
-                             bool deleteExisting) final;
+                             bool deleteExisting,
+                             bool hideWindow) final;
     bool destroyOpenGLSubwindow() final;
     void setOpenGLDisplayRotation(float zRot) final;
     void setOpenGLDisplayTranslation(float px, float py) final;

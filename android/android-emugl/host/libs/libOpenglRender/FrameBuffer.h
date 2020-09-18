@@ -17,6 +17,7 @@
 #define _LIBRENDER_FRAMEBUFFER_H
 
 #include "android/base/files/Stream.h"
+#include "android/base/threads/Thread.h"
 #include "android/base/threads/WorkerThread.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/snapshot/common.h"
@@ -137,10 +138,16 @@ public:
     //
     // NOTE: This can return false for software-only EGL engines like OSMesa.
     bool setupSubWindow(FBNativeWindowType p_window,
-                        int wx, int wy,
-                        int ww, int wh,
-                        int fbw, int fbh, float dpr, float zRot,
-                        bool deleteExisting);
+                        int wx,
+                        int wy,
+                        int ww,
+                        int wh,
+                        int fbw,
+                        int fbh,
+                        float dpr,
+                        float zRot,
+                        bool deleteExisting,
+                        bool hideWindow);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
@@ -227,7 +234,9 @@ public:
     // The buffer will be backed by a VkBuffer and VkDeviceMemory (if Vulkan
     // is available).
     // |size| is the requested size of Buffer in bytes.
-    HandleType createBuffer(int size);
+    // |memoryProperty| is the requested memory property bits of the device
+    // memory.
+    HandleType createBuffer(uint64_t size, uint32_t memoryProperty);
 
     // Call this function when a render thread terminates to destroy all
     // the remaining contexts it created. Necessary to avoid leaking host
@@ -386,12 +395,14 @@ public:
         HandleType p_colorbuffer,
         const void *pixels,
         size_t numBytes);
-    // Reads back the color buffer to |pixels|
+    // Reads back the raw color buffer to |pixels|
     // if |pixels| is not null.
     // Always returns in |numBytes| how many bytes were
     // planned to be transmitted.
     // |numBytes| is not an input parameter;
     // fewer or more bytes cannot be specified.
+    // If the framework format is YUV, it will read
+    // back as raw YUV data.
     bool readColorBufferContents(
         HandleType p_colorbuffer,
         size_t* numBytes,
@@ -400,7 +411,8 @@ public:
     bool getColorBufferInfo(HandleType p_colorbuffer,
                             int* width,
                             int* height,
-                            GLint* internalformat);
+                            GLint* internalformat,
+                            FrameworkFormat* frameworkFormat = nullptr);
     bool getBufferInfo(HandleType p_buffer, int* size);
 
     // Display the content of a given ColorBuffer into the framebuffer's
@@ -647,6 +659,7 @@ private:
     int m_statsNumFrames = 0;
     long long m_statsStartTime = 0;
 
+    android::base::Thread* m_perfThread;
     emugl::Mutex m_lock;
     emugl::ReadWriteMutex m_contextStructureLock;
     FbConfigList* m_configs = nullptr;

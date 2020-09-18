@@ -1,0 +1,40 @@
+// Copyright 2020 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.android.emulator.control";
+option objc_class_prefix = "AEC";
+
+package android.emulation.control;
+import "google/protobuf/empty.proto";
+
+service UiController {
+    // this method has no effect if the extended contorls are already shown
+    rpc showExtendedControls(google.protobuf.Empty)
+            returns (google.protobuf.Empty) {}
+    // this method has no effect if the extended controls are hidden
+    rpc closeExtendedControls(google.protobuf.Empty)
+            returns (google.protobuf.Empty) {}
+    rpc setUiTheme(ThemingStyle) returns (google.protobuf.Empty) {}
+}
+
+message ThemingStyle {
+    enum Style {
+        LIGHT = 0;
+        DARK = 1;
+    }
+    Style style = 1;
+}

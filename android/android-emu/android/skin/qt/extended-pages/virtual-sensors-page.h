@@ -55,6 +55,7 @@ private slots:
     void on_accelModeRotate_toggled();
     void on_accelModeMove_toggled();
     void on_accelModeFold_toggled();
+    void on_accelModeRoll_toggled();
 
     void on_magNorthWidget_valueChanged(double value);
     void on_magEastWidget_valueChanged(double value);
@@ -93,6 +94,11 @@ private slots:
     void on_rotateToLandscape_clicked();
     void on_rotateToReversePortrait_clicked();
     void on_rotateToReverseLandscape_clicked();
+    void on_btn_postureClosed_clicked();
+    void on_btn_postureFlipped_clicked();
+    void on_btn_postureHalfOpen_clicked();
+    void on_btn_postureOpen_clicked();
+    void on_btn_postureTent_clicked();
     void on_helpMagneticField_clicked();
     void on_helpLight_clicked();
     void on_helpPressure_clicked();
@@ -108,6 +114,9 @@ private slots:
     void on_hinge0Slider_valueChanged(double);
     void on_hinge1Slider_valueChanged(double);
     void on_hinge2Slider_valueChanged(double);
+    void on_roll0Slider_valueChanged(double);
+    void on_roll1Slider_valueChanged(double);
+    void on_roll2Slider_valueChanged(double);
     void on_posture_valueChanged(int);
 
     void updateResultingValues(glm::vec3 acceleration,
@@ -136,6 +145,8 @@ private:
     void onPhysicalStateChanging();
     void onPhysicalStateStabilized();
     void setupHingeSensorUI();
+    void togglePostureButtonsVisibility(bool newVisibility);
+    void setupRollableUI();
     void updateUIPosture();
 
     static void onTargetStateChanged(void* context);
@@ -161,5 +172,6 @@ private:
     bool mVirtualSceneControlsEngaged = false;
     QElapsedTimer mLastInteractionElapsed;
     enum FoldablePostures mCurrentPosture = POSTURE_UNKNOWN;
-    std::vector<enum FoldablePostures> mIndexToPosture;
+
+    void updateCurrentPosture();
 };

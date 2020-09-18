@@ -326,12 +326,10 @@ void TelephonyPage::on_sms_sendButton_clicked()
             mUi->sms_messageBox->toPlainText().toStdString();
 
     // Convert the message text to UTF-8
-    unsigned char utf8Message[MAX_SMS_MSG_SIZE+1];
-    int           nUtf8Chars;
-    nUtf8Chars = sms_utf8_from_message_str(theMessage.c_str(),
-                                           theMessage.size(),
-                                           utf8Message,
-                                           MAX_SMS_MSG_SIZE);
+    const QByteArray utf8 = mUi->sms_messageBox->toPlainText().toUtf8();
+    const unsigned char* utf8Message = reinterpret_cast<const unsigned char*>(utf8.data());
+    int nUtf8Chars = utf8.size();
+
     if (nUtf8Chars == 0) {
         showErrorDialog(tr("The message is empty.<br>Please enter a message."), tr("SMS"));
         return;

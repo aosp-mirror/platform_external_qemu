@@ -23,6 +23,7 @@
 #include "android/base/system/System.h"
 #include "android/base/system/Win32Utils.h"
 #include "android/base/threads/Async.h"
+#include "android/cmdline-option.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
@@ -31,9 +32,9 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/hw-sensors.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/metrics.h"
-#include "studio_stats.pb.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
@@ -57,6 +58,7 @@
 #include "android/utils/filelock.h"
 #include "android/utils/x86_cpuid.h"
 #include "android/virtualscene/TextureUtils.h"
+#include "studio_stats.pb.h"
 
 #define DEBUG 1
 
@@ -881,7 +883,9 @@ void EmulatorQtWindow::slot_startupTick() {
     // It's been a while since we were launched, and the main
     // window still hasn't appeared.
     // Show a pop-up that lets the user know we are working.
-
+    if (android_cmdLineOptions->qt_hide_window) {
+        return;
+    }
     mStartupDialog->setWindowTitle(tr("Android Emulator"));
     // Hide close/minimize/maximize buttons
     mStartupDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
@@ -1781,6 +1785,9 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     if (mClosed) {
         return;
     }
+    if (android_cmdLineOptions->qt_hide_window) {
+        return;
+    }
     if (surface != mBackingSurface) {
         mBackingBitmapChanged = true;
         mBackingSurface = surface;
@@ -2002,7 +2009,8 @@ void EmulatorQtWindow::slot_adbPushCanceled() {
 void EmulatorQtWindow::slot_showMessage(QString text,
                                         Ui::OverlayMessageType messageType,
                                         int timeoutMs) {
-    mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
+    if (!android_cmdLineOptions->qt_hide_window)
+        mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
 }
 
 void EmulatorQtWindow::slot_showMessageWithDismissCallback(QString text,
@@ -2010,8 +2018,11 @@ void EmulatorQtWindow::slot_showMessageWithDismissCallback(QString text,
                                                            QString dismissText,
                                                            RunOnUiThreadFunc func,
                                                            int timeoutMs) {
-    auto msg = mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
-    msg->setDismissCallback(dismissText, std::move(func));
+    if (!android_cmdLineOptions->qt_hide_window) {
+        auto msg = mContainer.messageCenter().addMessage(text, messageType,
+                                                         timeoutMs);
+        msg->setDismissCallback(dismissText, std::move(func));
+    }
 }
 
 void EmulatorQtWindow::adbPushProgress(double progress, bool done) {
@@ -2197,39 +2208,38 @@ void EmulatorQtWindow::doResize(const QSize& size,
 
 void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     QRect windowGeo = this->geometry();
+    if (!mBackingSurface) {
+        VLOG(foldable) << "backing surface not ready, cancel window adjustment";
+        return;
+    }
     QSize backingSize = mBackingSurface->bitmap->size();
     float scale = (float)windowGeo.width() / (float)backingSize.width();
-    int displayXOffset = 0;
-    int displayYOffset = 0;
-//  TODO: non-0 offset
-//    int displayXOffset = isFolded ? android_hw->hw_displayRegion_0_1_xOffset : 0;
-//    int displayYOffset = isFolded ? android_hw->hw_displayRegion_0_1_yOffset : 0;
-    int displayXFolded = android_hw->hw_displayRegion_0_1_width;
-    int displayYFolded = android_hw->hw_displayRegion_0_1_height;
     int displayX = android_hw->hw_lcd_width;
     int displayY = android_hw->hw_lcd_height;
 
     if (isFolded) {
+        int displayXFolded;
+        int displayYFolded;
+        android_foldable_get_folded_area(nullptr, nullptr, &displayXFolded, &displayYFolded);
             switch(mOrientation) {
                 default:
                 case SKIN_ROTATION_180:
-                    displayXOffset = displayXOffset + displayXFolded - displayX;
-                    displayYOffset = displayYOffset + displayYFolded - displayY;
                 case SKIN_ROTATION_0:
+                    if (backingSize.width() == displayXFolded &&
+                        backingSize.height() == displayYFolded) {
+                        return;
+                    }
                     windowGeo.setWidth((int)(displayXFolded * scale));
                     windowGeo.setHeight((int)(displayYFolded * scale));
                     backingSize.setWidth(displayXFolded);
                     backingSize.setHeight(displayYFolded);
                     break;
                 case SKIN_ROTATION_90:
-                    displayXOffset = displayYOffset + displayYFolded - displayY;
-                    backingSize.setWidth(displayYFolded);
-                    backingSize.setHeight(displayXFolded);
-                    windowGeo.setWidth((int)(displayYFolded * scale));
-                    windowGeo.setHeight((int)(displayXFolded * scale));
-                    break;
                 case SKIN_ROTATION_270:
-                    displayYOffset = displayXOffset + displayXFolded - displayX;
+                    if (backingSize.width() == displayYFolded &&
+                        backingSize.height() == displayXFolded) {
+                        return;
+                    }
                     backingSize.setWidth(displayYFolded);
                     backingSize.setHeight(displayXFolded);
                     windowGeo.setWidth((int)(displayYFolded * scale));
@@ -2241,24 +2251,30 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
             default:
             case SKIN_ROTATION_0:
             case SKIN_ROTATION_180:
-                windowGeo.setWidth((int)(android_hw->hw_lcd_width * scale));
-                windowGeo.setHeight((int)(android_hw->hw_lcd_height * scale));
-                backingSize.setWidth(android_hw->hw_lcd_width);
-                backingSize.setHeight(android_hw->hw_lcd_height);
+                if (backingSize.width() == displayX &&
+                    backingSize.height() == displayY) {
+                    return;
+                }
+                windowGeo.setWidth((int)(displayX * scale));
+                windowGeo.setHeight((int)(displayY * scale));
+                backingSize.setWidth(displayX);
+                backingSize.setHeight(displayY);
                 break;
             case SKIN_ROTATION_90:
             case SKIN_ROTATION_270:
-                windowGeo.setWidth((int)(android_hw->hw_lcd_height * scale));
-                windowGeo.setHeight((int)(android_hw->hw_lcd_width * scale));
-                backingSize.setWidth(android_hw->hw_lcd_height);
-                backingSize.setHeight(android_hw->hw_lcd_width);
+                if (backingSize.width() == displayY &&
+                    backingSize.height() == displayX) {
+                    return;
+                }
+                windowGeo.setWidth((int)(displayY* scale));
+                windowGeo.setHeight((int)(displayX* scale));
+                backingSize.setWidth(displayY);
+                backingSize.setHeight(displayX);
                 break;
         }
     }
-    setDisplayRegion(displayXOffset, displayYOffset, backingSize.width(), backingSize.height());
-
+    setDisplayRegion(0, 0, backingSize.width(), backingSize.height());
     simulateSetScale(std::max(.2, (double)scale));
-
     QRect containerGeo = mContainer.geometry();
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(), windowGeo.width(), windowGeo.height());
 }
@@ -2273,10 +2289,6 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
     setDisplayRegionAndUpdate(x, y, w, h);
     simulateSetScale(std::max(.2, (double)scale));
 }
-
-bool EmulatorQtWindow::isFolded() const { return ToolWindow::isFolded(); }
-
-bool EmulatorQtWindow::isFoldableConfigured() const { return ToolWindow::isFoldableConfigured(); }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
         QMouseEvent* event) const {
@@ -2898,7 +2910,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     event->u.layout_rotation.rotation = rot;
     queueSkinEvent(event);
 
-    if (ToolWindow::isFolded()) {
+    if (android_foldable_is_folded()) {
         resizeAndChangeAspectRatio(true);
     }
 }

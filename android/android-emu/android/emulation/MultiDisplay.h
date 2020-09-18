@@ -127,7 +127,6 @@ private:
                          uint32_t* cb,
                          bool* enabled);
     int getNumberActiveMultiDisplaysLocked();
-    bool isFoldableConfigured();
 
     std::map<uint32_t, MultiDisplayInfo> parseConfig();
 };

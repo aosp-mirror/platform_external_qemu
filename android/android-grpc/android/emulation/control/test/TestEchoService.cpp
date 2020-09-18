@@ -33,6 +33,17 @@ Status TestEchoServiceImpl::echo(ServerContext* context,
     response->set_msg(request->msg());
     return Status::OK;
 }
+
+Status TestEchoServiceImpl::data(ServerContext* context,
+                                 const ::google::protobuf::Empty* empty,
+                                 Msg* response)  {
+    response->set_counter(mCounter++);
+    response->set_data(mData.data(), mData.size());
+    return Status::OK;
+}
+
+
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

@@ -3729,18 +3729,6 @@ static const CommandDefRec screenrecord_commands[] = {
 /********************************************************************************************/
 /********************************************************************************************/
 
-static int do_icebox_run(ControlClient client, char* args) {
-    if (android::icebox::run_async(args)) {
-        control_write(client, "OK: run command: %s\r\n", args);
-        return 0;
-    } else {
-        control_write(client,
-                      "KO: Failed to run command, might have pending icebox "
-                      "operations, please try again\r\n");
-        return -1;
-    }
-}
-
 static int do_icebox_track(ControlClient client, char* args) {
     int pid = -1;
     if (!args || strlen(args) == 0) {
@@ -3774,8 +3762,6 @@ static const CommandDefRec icebox_commands[] = {
          "[max_snapshots]) snasphots when there are assert failures",
          "'icebox track <pid> [max_snapshots]'\r\n", NULL, do_icebox_track,
          NULL},
-        {"run", "(experimental) run adb open command",
-         "'icebox run \"command\"'\r\n", NULL, do_icebox_run, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
@@ -3853,10 +3839,12 @@ do_multi_display_add( ControlClient  client, char*  args ) {
     int dpi = std::stoi(splitArgs[3]);
     int flag = std::stoi(splitArgs[4]);
 
-    return client->global->multi_display_agent->setMultiDisplay(id, -1,
-                                                                -1, width,
-                                                                height, dpi,
-                                                                flag, true);
+    if (client->global->multi_display_agent->setMultiDisplay(id, -1,
+                -1, width, height, dpi, flag, true) < 0) {
+        return -1;
+    }
+    client->global->emu_agent->updateUIMultiDisplayPage(id);
+    return 0;
 }
 
 static int
@@ -3882,9 +3870,12 @@ do_multi_display_del( ControlClient  client, char*  args ) {
         return -1;
     }
 
-    return client->global->multi_display_agent->setMultiDisplay(id, -1, -1,
-                                                                0, 0, 0, 0,
-                                                                false);
+    if (client->global->multi_display_agent->setMultiDisplay(id, -1, -1,
+                0, 0, 0, 0, false) < 0) {
+        return -1;
+    }
+    client->global->emu_agent->updateUIMultiDisplayPage(id);
+    return 0;
 }
 
 static const CommandDefRec  multi_display_commands[] =
@@ -4032,6 +4023,32 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
     return -1;
 }
 
+static int do_start_extended_window(ControlClient client, char* args) {
+    client->global->emu_agent->startExtendedWindow();
+    return 0;
+}
+
+static int do_quit_extended_window(ControlClient client, char* args) {
+    client->global->emu_agent->quitExtendedWindow();
+    return 0;
+}
+
+static int do_set_ui_theme(ControlClient client, char* args) {
+    if (!args) {
+        control_write(client, "KO: argument missing, try 'setUiTheme <dark|light>'\r\n");
+        return -1;
+    }
+    if (!strcmp(args,"dark")) {
+        client->global->emu_agent->setUiTheme(SETTINGS_THEME_DARK);
+    } else if (!strcmp(args, "light")) {
+        client->global->emu_agent->setUiTheme(SETTINGS_THEME_LIGHT);
+    } else {
+        control_write( client, "KO: Failed to set UI theme to %s, try 'setUiTheme <dark|light>'\r\n", args);
+                return -1;
+    }
+    return 0;
+}
+
 static int do_fold(ControlClient client, char* args) {
     if (client->global->emu_agent->fold(true)) {
           return 0;
@@ -4150,6 +4167,15 @@ extern const CommandDefRec main_commands[] = {
 
         {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
          do_rotate_90_clockwise, NULL},
+
+        {"startExtendedWindow", "Show the extended window", NULL, NULL,
+         do_start_extended_window, NULL},
+
+        {"quitExtendedWindow", "Show the extended window", NULL, NULL,
+         do_quit_extended_window, NULL},
+
+        {"setUiTheme", "Set emultaor's UI theme to either light or dark", NULL, NULL,
+        do_set_ui_theme, NULL},
 
         {"screenrecord", "Records the emulator's display", NULL, NULL, NULL,
          screenrecord_commands},

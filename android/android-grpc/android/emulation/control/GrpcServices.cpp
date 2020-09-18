@@ -176,7 +176,12 @@ Builder& Builder::withIdleTimeout(std::chrono::seconds timeout) {
     return *this;
 }
 
-Builder& Builder::withPortRange(int start, int end) {
+Builder& Builder::withLogging(bool logging) {
+    mLogging = logging;
+    return *this;
+}
+
+Builder& Builder::withPortRange(int start,  int end) {
     assert(end > start);
     int port = start;
     bool found = false;
@@ -263,7 +268,9 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
             grpc::experimental::ServerInterceptorFactoryInterface>>
             creators;
 
-    creators.emplace_back(std::make_unique<StdOutLoggingInterceptorFactory>());
+    if (mLogging) {
+        creators.emplace_back(std::make_unique<StdOutLoggingInterceptorFactory>());
+    }
     creators.emplace_back(std::make_unique<MetricsInterceptorFactory>());
     if (mTimeout.count() > 0 && mAgents != nullptr) {
         creators.emplace_back(

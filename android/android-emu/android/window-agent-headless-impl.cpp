@@ -92,23 +92,22 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     // user doesn't get a chance to dismiss.
                 },
         .fold =
-                [](bool is_fold) {
-                    if (const auto win = EmulatorNoQtNoWindow::getInstance()) {
-                        if (is_fold)
-                            win->fold();
-                        else
-                            win->unFold();
-                        return false;
+                [](bool is_fold) -> bool {
+                    if (is_fold) {
+                        return android_foldable_fold();
+                    } else {
+                        return android_foldable_unfold();
                     }
-                    return true;
                 },
         .isFolded =
-                [] {
-                    if (const auto win = EmulatorNoQtNoWindow::getInstance()) {
-                        return win->isFolded();
-                    }
-                    return false;
+                []() -> bool {
+                    return android_foldable_is_folded();
                 },
+        .getFoldedArea =
+                [](int* x, int* y, int* w, int* h) -> bool {
+                    return android_foldable_get_folded_area(x, y, w, h);
+                },
+        .updateFoldablePostureIndicator = []() {},
         .setUIDisplayRegion = [](int x, int y, int w, int h) {},
         .getMultiDisplay = [](uint32_t id,
                               int32_t* x,
@@ -117,17 +116,29 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                               uint32_t* h,
                               uint32_t* dpi,
                               uint32_t* flag,
-                              bool* enabled) { return false; },
+                              bool* enabled) -> bool { return false; },
         .setNoSkin = []() {},
         .restoreSkin = []() {},
         .updateUIMultiDisplayPage = [](uint32_t id) {},
         .getMonitorRect =
-                [](uint32_t* w, uint32_t* h) {
+                [](uint32_t* w, uint32_t* h) -> bool {
                     if (w)
                         *w = 2500;
                     if (h)
                         *h = 1600;
                     return true;
+                },
+        .startExtendedWindow =
+                []() {
+                // Not implemented
+                },
+        .quitExtendedWindow =
+                []() {
+                // Not implemented
+                },
+        .setUiTheme = [](SettingsTheme type) {
+                // Not implemented
+                return false;
                 },
 };
 

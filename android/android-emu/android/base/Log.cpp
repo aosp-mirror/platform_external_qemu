@@ -11,17 +11,15 @@
 
 #include "android/base/Log.h"
 
-#include "android/base/Debug.h"
-#include "android/base/StringFormat.h"
-#include "android/base/files/PathUtils.h"
+#include <stdarg.h>                        // for va_end, va_list, va_start
+#include <stdio.h>                         // for fprintf, fflush, vsnprintf
+#include <stdlib.h>                        // for free, malloc
+#include <string.h>                        // for memcpy, strerror
 
-#include <string>
-
-#include <limits.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "android/base/ArraySize.h"        // for arraySize
+#include "android/base/Debug.h"            // for DebugBreak, IsDebuggerAtta...
+#include "android/base/StringView.h"       // for StringView, c_str, CStrWra...
+#include "android/base/files/PathUtils.h"  // for PathUtils
 
 #define ENABLE_THREAD_ID 0
 
@@ -39,7 +37,10 @@ LogSeverity gMinLogLevel = LOG_INFO;
 // Convert a severity level into a string.
 const char* severityLevelToString(LogSeverity severity) {
     const char* kSeverityStrings[] = {
-        "INFO", "WARNING", "ERROR", "FATAL",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "FATAL",
     };
     if (severity >= 0 && severity < LOG_NUM_SEVERITIES)
         return kSeverityStrings[severity];
@@ -65,7 +66,9 @@ void defaultLogMessage(const LogParams& params,
 
     FILE* output = params.severity >= LOG_WARNING ? stderr : stdout;
     if (params.quiet) {
-        fprintf(output, "emulator: %s: %.*s\n", severityLevelToString(params.severity), int(messageLen), message);
+        fprintf(output, "emulator: %s: %.*s\n",
+                severityLevelToString(params.severity), int(messageLen),
+                message);
     } else {
         StringView path = params.file;
         StringView filename;
@@ -153,124 +156,75 @@ LogString::~LogString() {
 
 // LogStream
 
-LogStream::LogStream(const char* file, int lineno, LogSeverity severity, bool quiet) :
-        mParams(file, lineno, severity, quiet),
-        mString(nullptr),
-        mSize(0),
-        mCapacity(0) {}
+LogStream::LogStream(const char* file,
+                     int lineno,
+                     LogSeverity severity,
+                     bool quiet)
+    : mParams(file, lineno, severity, quiet), mStream(&mStreamBuf) {}
 
-LogStream::~LogStream() {
-    mSize = 0;
-    mCapacity = 0;
-    ::free(mString);
+std::ostream& operator<<(std::ostream& stream,
+                         const android::base::LogString& str) {
+    stream << str.string();
+    return stream;
 }
 
-LogStream& LogStream::operator<<(char ch) {
-    if (ch >= 32 && ch < 127) {
-        append(&ch, 1U);
+std::ostream& operator<<(std::ostream& stream,
+                         const android::base::StringView& str) {
+    if (!str.empty()) {
+        stream.write(str.data(), str.size());
+    }
+    return stream;
+}
+
+LogstreamBuf::LogstreamBuf() {
+    setp(mStr, mStr + arraySize(mStr));
+}
+
+size_t LogstreamBuf::size() {
+    return this->pptr() - this->pbase();
+}
+
+int LogstreamBuf::overflow(int c) {
+    if (mLongString.empty()) {
+        // Case 1, we have been using our fast small buffer, but decided to log a really long line.
+        // We now transfer ownership of the buffer to a std::vector that will manage allocation.
+        // We resize to 2x size of our current size.
+        mLongString.resize(arraySize(mStr) * 2);
+        memcpy(&mLongString[0], &mStr[0], arraySize(mStr));
     } else {
-        char temp[5];
-        snprintf(temp, sizeof temp, "\\x%02x", ch);
-        append(temp, 4U);
+        // Case 2: The std::vector is already managing the buffer, but the current log line no longer fits.
+        // We are going to resize the vector. The resize will reallocate the existing elements properly.
+        mLongString.resize(mLongString.size() * 2);
     }
-    return *this;
+
+    // We have just resized the std::vector so we know we have enough space available and can
+    // add our overflow character at the proper offset.
+    int offset = pptr() - pbase();
+    mLongString[offset] = c;
+
+    // We let std::streambuf know that it can use the memory area covered by std::vector.
+    // this call resets pptr, so we will move it back to the right offset later on.
+    setp(mLongString.data(), mLongString.data() + mLongString.size());
+
+    // We bump pptr to our offset + 1, which can be used for future writes.
+    pbump(offset + 1);
+    return c;
 }
 
-LogStream& LogStream::operator<<(const void* ptr) {
-    char temp[20];
-    int ret = snprintf(temp, sizeof temp, "%p", ptr);
-    append(temp, static_cast<size_t>(ret));
-    return *this;
-}
-
-LogStream& LogStream::operator<<(int v) {
-    char temp[20];
-    int ret = snprintf(temp, sizeof temp, "%d", v);
-    append(temp, static_cast<size_t>(ret));
-    return *this;
-}
-
-LogStream& LogStream::operator<<(unsigned v) {
-    char temp[20];
-    int ret = snprintf(temp, sizeof temp, "%u", v);
-    append(temp, static_cast<size_t>(ret));
-    return *this;
-}
-
-LogStream& LogStream::operator<<(long v) {
-    char temp[20];
-    int ret = snprintf(temp, sizeof temp, "%ld", v);
-    append(temp, static_cast<size_t>(ret));
-    return *this;
-}
-
-LogStream& LogStream::operator<<(unsigned long v) {
-    char temp[20];
-    int ret = snprintf(temp, sizeof temp, "%lu", v);
-    append(temp, static_cast<size_t>(ret));
-    return *this;
-}
-
-LogStream& LogStream::operator<<(long long v) {
-    char temp[20];
-    int ret = snprintf(temp, sizeof temp, "%lld", v);
-    append(temp, static_cast<size_t>(ret));
-    return *this;
-}
-
-LogStream& LogStream::operator<<(unsigned long long v) {
-    char temp[20];
-    int ret = snprintf(temp, sizeof temp, "%llu", v);
-    append(temp, static_cast<size_t>(ret));
-    return *this;
-}
-
-LogStream& LogStream::operator<<(float v) {
-    char temp[20];
-    int ret = snprintf(temp, sizeof temp, "%f", v);
-    append(temp, static_cast<size_t>(ret));
-    return *this;
-}
-
-LogStream& LogStream::operator<<(android::base::StringView v) {
-    if (!v.empty()) {
-        append(v.data(), v.size());
-    }
-    return *this;
-}
-
-void LogStream::append(const char* str) {
-    if (str && str[0])
-        append(str, strlen(str));
-}
-
-void LogStream::append(const char* str, size_t len) {
-    if (!len || len > INT32_MAX)
-        return;
-
-    size_t newSize = mSize + len;
-    if (newSize > mCapacity) {
-        size_t newCapacity = mCapacity;
-        while (newCapacity < newSize)
-            newCapacity += (newCapacity >> 2) + 32;
-        mString = reinterpret_cast<char*>(
-                ::realloc(mString, newCapacity + 1));
-        mCapacity = newCapacity;
-    }
-    ::memcpy(mString + mSize, str, len);
-    mSize += len;
-    mString[mSize] = '\0';
+char* LogstreamBuf::str() {
+    return this->pbase();
 }
 
 // LogMessage
 
-LogMessage::LogMessage(const char* file, int line, LogSeverity severity, bool quiet) :
-        mStream(new LogStream(file, line, severity, quiet)) {}
+LogMessage::LogMessage(const char* file,
+                       int line,
+                       LogSeverity severity,
+                       bool quiet)
+    : mStream(new LogStream(file, line, severity, quiet)) {}
 
 LogMessage::~LogMessage() {
-    logMessage(mStream->params(),
-               mStream->string(),
-               mStream->size());
+    logMessage(mStream->params(), mStream->str(), mStream->size());
     delete mStream;
 }
 
@@ -279,16 +233,14 @@ LogMessage::~LogMessage() {
 ErrnoLogMessage::ErrnoLogMessage(const char* file,
                                  int line,
                                  LogSeverity severity,
-                                 int errnoCode) :
-        mStream(nullptr), mErrno(errnoCode) {
+                                 int errnoCode)
+    : mStream(nullptr), mErrno(errnoCode) {
     mStream = new LogStream(file, line, severity, false);
 }
 
 ErrnoLogMessage::~ErrnoLogMessage() {
     (*mStream) << "Error message: " << strerror(mErrno);
-    logMessage(mStream->params(),
-               mStream->string(),
-               mStream->size());
+    logMessage(mStream->params(), mStream->str(), mStream->size());
     delete mStream;
     // Restore the errno.
     errno = mErrno;
@@ -307,5 +259,5 @@ LogOutput* LogOutput::setNewOutput(LogOutput* newOutput) {
 
 }  // namespace testing
 
-}  // naemspace base
+}  // namespace base
 }  // namespace android

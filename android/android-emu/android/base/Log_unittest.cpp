@@ -169,7 +169,7 @@ TEST(LogString, FormattedString) {
 
 TEST_F(LogTest, LogInfoEmpty) {
     setExpected(LOG_INFO, __LINE__ + 1, "");
-    LOG(INFO);
+    LOG(INFO) << "";
     CHECK_EXPECTATIONS();
 }
 
@@ -185,6 +185,17 @@ TEST_F(LogTest, LogInfoWithTwoStrings) {
     LOG(INFO) << "Hello " << "Globe!";
     CHECK_EXPECTATIONS();
 }
+
+TEST_F(LogTest, LogAReallyLongString) {
+    std::string longString = "Hello World!";
+    for(int i = 0; i < 8;  i++) {
+        longString += longString;
+    }
+    setExpected(LOG_INFO, __LINE__ + 1, longString.c_str());
+    LOG(INFO) << longString;
+    CHECK_EXPECTATIONS();
+}
+
 
 TEST_F(LogTest, LogInfoWithLogString) {
     LogString ls("Hello You!");
@@ -301,7 +312,7 @@ TEST_F(DCheckDisabledTest, DCheckTrue) {
 TEST_F(PLogTest, PLogInfoEmpty) {
     setExpectedErrno(LOG_INFO, __LINE__ + 2, EINVAL, "");
     errno = EINVAL;
-    PLOG(INFO);
+    PLOG(INFO) << "";
     CHECK_EXPECTATIONS();
 }
 
@@ -321,7 +332,7 @@ TEST_F(PLogTest, PLogInfoPreservesErrno) {
 TEST_F(PLogTest, DPlogInfoEmpty) {
     setExpectedErrno(LOG_INFO, __LINE__ + 2, EINVAL, "");
     errno = EINVAL;
-    DPLOG(INFO);
+    DPLOG(INFO) << "";
     CHECK_EXPECTATIONS();
 }
 

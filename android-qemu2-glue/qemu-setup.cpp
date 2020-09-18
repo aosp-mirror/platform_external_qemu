@@ -69,14 +69,15 @@
 #include "android/emulation/address_space_device.hpp"
 #include "android/emulation/control/EmulatorAdvertisement.h"
 #include "android/emulation/control/EmulatorService.h"
+#include "android/emulation/control/UiController.h"
 #include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
-#include "android/featurecontrol/feature_control.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
 #include "android/skin/winsys.h"
@@ -291,6 +292,9 @@ int qemu_setup_grpc() {
     auto h2o = android::emulation::control::getWaterfallService(
             android_cmdLineOptions->waterfall);
     auto snapshot = android::emulation::control::getSnapshotService();
+    auto uiController =
+            android::emulation::control::getUiControllerService(
+                    getConsoleAgents());
     auto builder = EmulatorControllerService::Builder()
                            .withConsoleAgents(getConsoleAgents())
                            .withPortRange(grpc_start, grpc_end)
@@ -301,7 +305,8 @@ int qemu_setup_grpc() {
                            .withAddress(address)
                            .withService(emulator)
                            .withService(h2o)
-                           .withService(snapshot);
+                           .withService(snapshot)
+                           .withService(uiController);
 
     int timeout = 0;
     if (android_cmdLineOptions->idle_grpc_timeout &&

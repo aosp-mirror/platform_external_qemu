@@ -415,18 +415,24 @@ static emugl::RenderOpt sOpt;
 static int sWidth, sHeight;
 static int sNewWidth, sNewHeight;
 
-int
-android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
-                           int fbw, int fbh, float dpr, float rotation,
-                           bool deleteExisting)
-{
+int android_showOpenglesWindow(void* window,
+                               int wx,
+                               int wy,
+                               int ww,
+                               int wh,
+                               int fbw,
+                               int fbh,
+                               float dpr,
+                               float rotation,
+                               bool deleteExisting,
+                               bool hideWindow) {
     if (!sRenderer) {
         return -1;
     }
     FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
-    bool success = sRenderer->showOpenGLSubwindow(
-            win, wx, wy, ww, wh, fbw, fbh, dpr, rotation,
-                       deleteExisting);
+    bool success = sRenderer->showOpenGLSubwindow(win, wx, wy, ww, wh, fbw, fbh,
+                                                  dpr, rotation, deleteExisting,
+                                                  hideWindow);
     sNewWidth = ww * dpr;
     sNewHeight = wh * dpr;
     return success ? 0 : -1;

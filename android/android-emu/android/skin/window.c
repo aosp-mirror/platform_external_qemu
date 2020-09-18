@@ -19,6 +19,8 @@
 #include "android/crashreport/crash-handler.h"  // for crashhandler_die_format
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
+#include "android/globals.h"
+#include "android/hw-sensors.h"
 #include "android/multitouch-screen.h"          // for multitouch_create_but...
 #include "android/skin/event.h"                 // for SkinEvent, (anonymous...
 #include "android/skin/image.h"                 // for skin_image_unref, ski...
@@ -1082,17 +1084,25 @@ add_finger_event(SkinWindow* window,
     uint32_t id = 0;
 
     if (finger->display) {
-        if (skin_winsys_is_folded()) {
+        if (android_foldable_is_folded()) {
+            int fx, fy, fw, fh;
+            android_foldable_get_folded_area(&fx, &fy, &fw, &fh);
             switch (finger->display->rotation) {
             case SKIN_ROTATION_0:
+                posX = x + fx;
+                posY = y + fy;
+                break;
             case SKIN_ROTATION_180:
-                posX = x + finger->display->rect.pos.x;
-                posY = y + finger->display->rect.pos.y;
+                posX = x + fx + fw - android_hw->hw_lcd_width;
+                posY = y + fy + fh - android_hw->hw_lcd_height;
                 break;
             case SKIN_ROTATION_90:
+                posX = x + fx;
+                posY = y + fy + fh - android_hw->hw_lcd_height;
+                break;
             case SKIN_ROTATION_270:
-                posX = x + finger->display->rect.pos.y;
-                posY = y + finger->display->rect.pos.x;
+                posX = x + fx + fw - android_hw->hw_lcd_width;
+                posY = y + fy;
             break;
             }
         } else {

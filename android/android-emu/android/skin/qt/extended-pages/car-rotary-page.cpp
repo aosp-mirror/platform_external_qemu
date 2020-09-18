@@ -48,8 +48,11 @@ using std::string;
 
 static const System::Duration kAdbCommandTimeoutMs = 3000;
 
+// Interval for mCheckTimer in milliseconds.
+static const int kCheckTimerIntervalMs = 5000;
+
 CarRotaryPage::CarRotaryPage(QWidget* parent)
-        : QWidget(parent), mUi(new Ui::CarRotaryPage()), mEmulatorWindow(NULL) {
+        : QWidget(parent), mAdb(nullptr), mUi(new Ui::CarRotaryPage()), mEmulatorWindow(NULL) {
     mUi->setupUi(this);
 
     mAdbExecuteIsActive = false;
@@ -58,6 +61,11 @@ CarRotaryPage::CarRotaryPage(QWidget* parent)
     // TODO(agathaman): renable widgets when mouse wheel scroll is implemented.
     mUi->carrotary_enableMouseWheel_label->setVisible(false);
     mUi->carrotary_enableMouseWheel_checkbox->setVisible(false);
+    mUi->carrotary_warningMessage->setVisible(false);
+
+    // Start a timer to check whether car rotary service is running.
+    // Timer will stop when detected that rotary service is running.
+    checkRotaryControllerServiceTimer();
 
     const struct {
         QPushButton* button;
@@ -168,7 +176,8 @@ void CarRotaryPage::executeLastPushButtonCmd() {
                         D("ADB cmd completed with error.");
                     }
                 },
-                kAdbCommandTimeoutMs, true);
+                kAdbCommandTimeoutMs,
+                true);
     }
 }
 
@@ -190,4 +199,37 @@ bool CarRotaryPage::eventFilter(QObject* o, QEvent* event) {
         remaskButtons();
     }
     return QWidget::eventFilter(o, event);
+}
+
+void CarRotaryPage::checkRotaryControllerServiceTimer() {
+    QObject::connect(&mCheckTimer, &QTimer::timeout, this,
+            &CarRotaryPage::checkRotaryControllerService);
+    mCheckTimer.setSingleShot(false);
+    mCheckTimer.setInterval(kCheckTimerIntervalMs);
+    mCheckTimer.start();
+}
+
+void CarRotaryPage::checkRotaryControllerService() {
+    if (!mAdb) {
+        D("ADB interface unavailable");
+        return;
+    }
+    mAdb->runAdbCommand(
+            {"shell", "ps | grep \"com.android.car.rotary\" | awk '{print $9}'"},
+            [this](const android::emulation::OptionalAdbCommandResult& result) {
+                if (result && result->exit_code == 0) {
+                    string line;
+                    bool isRunning = false;
+                    if (result->output && getline(*(result->output), line)) {
+                        isRunning = line.find("com.android.car.rotary") != std::string::npos;
+                    }
+                    mUi->carrotary_warningMessage->setVisible(!isRunning);
+                    if (isRunning) {
+                        D("car rotary service is running, stopping check timer");
+                        mCheckTimer.stop();
+                    }
+                }
+            },
+            kAdbCommandTimeoutMs,
+            true);
 }

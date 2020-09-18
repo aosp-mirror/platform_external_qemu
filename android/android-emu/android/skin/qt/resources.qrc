@@ -197,6 +197,13 @@
         <file alias="trip_destination">images/light/ic_directions_destination_24dp.svg</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
         <file alias="walk">images/light/ic_directions_walk_222_48dp.svg</file>
+
+        <!-- Used in the posture selection tool mini-window -->
+        <file alias="posture_closed">images/light/posture_closed.svg</file>
+        <file alias="posture_flipped">images/light/posture_flipped.svg</file>
+        <file alias="posture_half-open">images/light/posture_half-open.svg</file>
+        <file alias="posture_open">images/light/posture_open.svg</file>
+        <file alias="posture_tent">images/light/posture_tent.svg</file>
     </qresource>
     <qresource prefix="/dark">
         <!-- Main list of tool buttons -->
@@ -347,6 +354,11 @@
         <file alias="trip_destination">images/dark/ic_directions_destination_white_24dp.svg</file>
         <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
         <file alias="walk">images/dark/ic_directions_walk_EEE_48dp.svg</file>
+        <file alias="posture_closed">images/dark/posture_closed.svg</file>
+        <file alias="posture_flipped">images/dark/posture_flipped.svg</file>
+        <file alias="posture_half-open">images/dark/posture_half-open.svg</file>
+        <file alias="posture_open">images/dark/posture_open.svg</file>
+        <file alias="posture_tent">images/dark/posture_tent.svg</file>
     </qresource>
     <qresource prefix="/cursor">
         <file alias="zoom_cursor">images/cursor/zoom_cursor.svg</file>
@@ -385,5 +397,12 @@
         <file alias="warning_2x">images/all/warning_2x.svg</file>
         <file alias="success">images/all/success.svg</file>
         <file alias="success_2x">images/all/success_2x.svg</file>
+
+        <!-- Used in the "extended" window -->
+        <file alias="posture_closed_0BA">images/all/posture_closed_0BA.svg</file>
+        <file alias="posture_flipped_0BA">images/all/posture_flipped_0BA.svg</file>
+        <file alias="posture_half-open_0BA">images/all/posture_half-open_0BA.svg</file>
+        <file alias="posture_open_0BA">images/all/posture_open_0BA.svg</file>
+        <file alias="posture_tent_0BA">images/all/posture_tent_0BA.svg</file>
     </qresource>
 </RCC>

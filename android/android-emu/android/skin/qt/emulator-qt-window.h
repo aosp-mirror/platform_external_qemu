@@ -21,6 +21,7 @@
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/globals.h"
 #include "android/metrics/PeriodicReporter.h"
+#include "android/settings-agent.h"
 #include "android/skin/event.h"
 #include "android/skin/image.h"
 #include "android/skin/qt/car-cluster-window.h"
@@ -223,8 +224,6 @@ public:
                   bool isKbdShortcut = false);
     void resizeAndChangeAspectRatio(bool isFolded);
     void resizeAndChangeAspectRatio(int x, int y, int w, int h);
-    bool isFolded() const;
-    bool isFoldableConfigured() const;
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,

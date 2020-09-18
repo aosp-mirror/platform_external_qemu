@@ -13,6 +13,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "android/settings-agent.h"
 #include "android/skin/rect.h"
 #include "android/utils/compiler.h"
 
@@ -61,6 +62,10 @@ typedef struct QAndroidEmulatorWindowAgent {
     bool (*fold)(bool is_fold);
     // Query folded state
     bool (*isFolded)(void);
+    bool (*getFoldedArea)(int* x, int* y, int* w, int* h);
+
+    // Update UI indicator which shows which foldable posture device is in
+    void (*updateFoldablePostureIndicator)(void);
 
     // Set the UI display region
     void (*setUIDisplayRegion)(int, int, int, int);
@@ -76,6 +81,9 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*restoreSkin)(void);
     void (*updateUIMultiDisplayPage)(uint32_t);
     bool (*getMonitorRect)(uint32_t*, uint32_t*);
+    void (*startExtendedWindow)(void);
+    void (*quitExtendedWindow)(void);
+    bool (*setUiTheme)(SettingsTheme type);
 } QAndroidEmulatorWindowAgent;
 
 ANDROID_END_HEADER

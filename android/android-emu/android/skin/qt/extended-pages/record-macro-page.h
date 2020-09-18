@@ -13,6 +13,7 @@
 
 #include <qobjectdefs.h>                            // for Q_OBJECT, signals
 #include <stdint.h>                                 // for uint64_t, uint32_t
+#include <QItemSelection>                           // for QItemSelection
 #include <QString>                                  // for QString
 #include <QTime>                                    // for QTime
 #include <QTimer>                                   // for QTimer
@@ -68,10 +69,7 @@ public:
 
 private slots:
     void on_playStopButton_clicked();
-    void on_macroList_currentItemChanged(QListWidgetItem* current,
-                                         QListWidgetItem* previous);
     void on_macroList_itemPressed(QListWidgetItem* listItem);
-    void on_macroList_itemSelectionChanged();
     void on_recButton_clicked();
     void on_cancelButton_clicked();
     void updatePreviewVideoView();
@@ -79,6 +77,8 @@ private slots:
     void updateElapsedTime();
     void editButtonClicked(CCListItem* macroItem);
     void enablePresetMacros(bool enable);
+
+    void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;

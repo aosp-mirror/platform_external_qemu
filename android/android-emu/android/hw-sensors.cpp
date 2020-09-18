@@ -1163,3 +1163,101 @@ int android_foldable_get_state(struct FoldableState* state) {
 bool android_foldable_hinge_configured() {
     return (android_hw->hw_sensor_hinge && android_hw->hw_sensor_hinge_count > 0);
 }
+
+bool android_foldable_any_folded_area_configured() {
+    for (int i = 0; i < ANDROID_FOLDABLE_MAX_DISPLAY_REGIONS; i++) {
+        if (android_foldable_folded_area_configured(i)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool android_foldable_folded_area_configured(int area) {
+    if (area < 0 || area >= ANDROID_FOLDABLE_MAX_DISPLAY_REGIONS) {
+        return false;
+    }
+    int xOffset, yOffset, width, height;
+    switch (area) {
+        case 0:
+            xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+            yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+            width   = android_hw->hw_displayRegion_0_1_width;
+            height  = android_hw->hw_displayRegion_0_1_height;
+            break;
+        case 1:
+            xOffset = android_hw->hw_displayRegion_0_2_xOffset;
+            yOffset = android_hw->hw_displayRegion_0_2_yOffset;
+            width   = android_hw->hw_displayRegion_0_2_width;
+            height  = android_hw->hw_displayRegion_0_2_height;
+            break;
+        case 2:
+            xOffset = android_hw->hw_displayRegion_0_3_xOffset;
+            yOffset = android_hw->hw_displayRegion_0_3_yOffset;
+            width   = android_hw->hw_displayRegion_0_3_width;
+            height  = android_hw->hw_displayRegion_0_3_height;
+            break;
+        default:
+            E("Invalid area %d", area);
+    }
+    bool enableFoldableByDefault =
+        !(xOffset < 0 || xOffset > 9999 ||
+          yOffset < 0 || yOffset > 9999 ||
+          width   < 1 || width   > 9999 ||
+          height  < 1 || height  > 9999 ||
+          avdInfo_getApiLevel(android_avdInfo) < 28);
+
+    return enableFoldableByDefault;
+}
+
+bool android_foldable_is_folded() {
+    return physicalModel_foldableisFolded(android_physical_model_instance());
+}
+
+bool android_foldable_fold() {
+    if (!android_foldable_folded_area_configured(0)) {
+        return false;
+    }
+    if (android_foldable_rollable_configured()) {
+        // "fold" not clear for rollable
+        return false;
+    }
+    struct FoldableState state;
+    if (android_foldable_get_state(&state) < 0) {
+        return false;
+    }
+    if (android_physical_model_set(PHYSICAL_PARAMETER_POSTURE,
+                                  (float)state.config.foldAtPosture,
+                                  0.0f,
+                                  0.0f,
+                                  PHYSICAL_INTERPOLATION_SMOOTH) < 0) {
+        return false;
+    }
+    return true;
+}
+
+bool android_foldable_unfold() {
+    if (!android_foldable_folded_area_configured(0)) {
+        return false;
+    }
+    if (android_foldable_rollable_configured()) {
+        // "unfold" not clear for rollable
+        return false;
+    }
+    if (android_physical_model_set(PHYSICAL_PARAMETER_POSTURE,
+                                  (float)POSTURE_OPENED,
+                                  0.0f,
+                                  0.0f,
+                                  PHYSICAL_INTERPOLATION_SMOOTH) < 0) {
+        return false;
+    }
+    return true;
+}
+
+bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h) {
+    return physicalModel_getFoldedArea(android_physical_model_instance(), x, y, w, h);
+}
+
+bool android_foldable_rollable_configured() {
+    return (android_hw->hw_sensor_roll && android_hw->hw_sensor_roll_count > 0);
+}

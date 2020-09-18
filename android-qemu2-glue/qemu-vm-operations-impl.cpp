@@ -324,6 +324,8 @@ static std::vector<json> qcow2_drives() {
     return drives;
 }
 
+static void set_skip_snapshot_save(bool used);
+
 static bool import_snapshot(const char* name,
                             void* opaque,
                             LineConsumerCallback errConsumer) {
@@ -374,6 +376,7 @@ static bool import_snapshot(const char* name,
         success = qemu_swap_blockdriver(drive, dest.c_str(), opaque,
                                         errConsumer) &&
                   success;
+        set_skip_snapshot_save(true);
     }
 
     return success;
@@ -697,7 +700,6 @@ static void* tcg_gpa2hva(uint64_t gpa, bool *found) {
     return res;
 }
 
-static void set_skip_snapshot_save(bool used);
 static void set_snapshot_callbacks(void* opaque,
                                    const SnapshotCallbacks* callbacks) {
     if (!opaque || !callbacks) {

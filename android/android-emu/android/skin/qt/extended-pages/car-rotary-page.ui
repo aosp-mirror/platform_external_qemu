@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>242</y>
+     <y>280</y>
      <width>144</width>
      <height>200</height>
     </rect>
@@ -49,7 +49,7 @@
    <property name="geometry">
     <rect>
      <x>300</x>
-     <y>242</y>
+     <y>280</y>
      <width>144</width>
      <height>200</height>
     </rect>
@@ -81,7 +81,7 @@
    <property name="geometry">
     <rect>
      <x>250</x>
-     <y>172</y>
+     <y>210</y>
      <width>100</width>
      <height>100</height>
     </rect>
@@ -113,7 +113,7 @@
    <property name="geometry">
     <rect>
      <x>297</x>
-     <y>122</y>
+     <y>160</y>
      <width>100</width>
      <height>200</height>
     </rect>
@@ -145,7 +145,7 @@
    <property name="geometry">
     <rect>
      <x>200</x>
-     <y>122</y>
+     <y>160</y>
      <width>100</width>
      <height>200</height>
     </rect>
@@ -177,7 +177,7 @@
    <property name="geometry">
     <rect>
      <x>195</x>
-     <y>217</y>
+     <y>255</y>
      <width>212</width>
      <height>150</height>
     </rect>
@@ -209,7 +209,7 @@
    <property name="geometry">
     <rect>
      <x>153</x>
-     <y>112</y>
+     <y>150</y>
      <width>150</width>
      <height>212</height>
     </rect>
@@ -241,7 +241,7 @@
    <property name="geometry">
     <rect>
      <x>194</x>
-     <y>70</y>
+     <y>108</y>
      <width>212</width>
      <height>150</height>
     </rect>
@@ -273,7 +273,7 @@
    <property name="geometry">
     <rect>
      <x>300</x>
-     <y>112</y>
+     <y>150</y>
      <width>150</width>
      <height>212</height>
     </rect>
@@ -308,9 +308,9 @@
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>470</y>
+     <y>508</y>
      <width>171</width>
-     <height>41</height>
+     <height>44</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -349,7 +349,7 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>470</y>
+     <y>508</y>
      <width>171</width>
      <height>41</height>
     </rect>
@@ -377,6 +377,59 @@
     </item>
    </layout>
   </widget>
+  <widget class="QLabel" name="carrotary_warningMessage">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>20</y>
+     <width>451</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="Text">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="Text">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="Text">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>106</red>
+         <green>104</green>
+         <blue>100</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; color:#ff5500;&quot;&gt;Warning: CarRotaryService is not running!&lt;br/&gt;Please enable CarRotaryService for this controller to work properly.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
   <zorder>carrotary_upButton</zorder>
   <zorder>carrotary_backButton</zorder>
   <zorder>carrotary_homeButton</zorder>
@@ -388,7 +441,7 @@
   <zorder>carrotary_clickButton</zorder>
   <zorder>verticalLayoutWidget</zorder>
   <zorder>verticalLayoutWidget_2</zorder>
-  <zorder>label_2</zorder>
+  <zorder>carrotary_warningMessage</zorder>
  </widget>
  <resources>
   <include location="../resources.qrc"/>

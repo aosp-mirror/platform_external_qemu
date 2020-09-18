@@ -11,17 +11,19 @@
 
 #pragma once
 
-#include "android/utils/debug.h"
+#include <errno.h>                // for errno
+#include <stddef.h>               // for size_t
+#include <stdio.h>                // for EOF
+#include <iostream>               // for operator<<, ostream, streambuf
+#include <vector>                 // for vector
 
-#include <errno.h>
-#include <stdarg.h>
-#include <stddef.h>
-
-#include <string>
+#include "android/utils/debug.h"  // for VERBOSE_CHECK
 
 namespace android {
 namespace base {
 
+class LogStream;
+class LogStreamVoidify;
 // Forward declarations.
 class StringView;
 
@@ -47,7 +49,7 @@ void setMinLogLevel(LogSeverity level);
 
 // Convert a log level name (e.g. 'INFO') into the equivalent
 // ::android::base LOG_<name> constant.
-#define LOG_SEVERITY_FROM(x)  ::android::base::LOG_ ## x
+#define LOG_SEVERITY_FROM(x) ::android::base::LOG_##x
 
 // Helper macro used to test if logging for a given log level is
 // currently enabled. |severity| must be a log level without the LOG_
@@ -58,7 +60,7 @@ void setMinLogLevel(LogSeverity level);
 //  }
 //
 #define LOG_IS_ON(severity) \
-        (LOG_SEVERITY_FROM(severity) >=  ::android::base::getMinLogLevel())
+    (LOG_SEVERITY_FROM(severity) >= ::android::base::getMinLogLevel())
 
 // For performance reasons, it's important to avoid constructing a
 // LogMessage instance every time a LOG() or CHECK() statement is
@@ -83,7 +85,7 @@ void setMinLogLevel(LogSeverity level);
 //   error: second operand to the conditional operator is of type 'void',
 //   but the third operand is neither a throw-expression nor of type 'void'
 #define LOG_LAZY_EVAL(condition, expr) \
-  !(condition) ? (void)0 : ::android::base::LogStreamVoidify() & (expr)
+    !(condition) ? (void)0 : ::android::base::LogStreamVoidify() & (expr)
 
 // Send a message to the log if |severity| is higher or equal to the current
 // logging severity level. This macro expands to an expression that acts as
@@ -98,9 +100,8 @@ void setMinLogLevel(LogSeverity level);
 // if the severity level is disabled.
 //
 // It's possible to do conditional logging with LOG_IF()
-#define LOG(severity)  \
-        LOG_LAZY_EVAL(LOG_IS_ON(severity), \
-        LOG_MESSAGE_STREAM_COMPACT(severity))
+#define LOG(severity) \
+    LOG_LAZY_EVAL(LOG_IS_ON(severity), LOG_MESSAGE_STREAM_COMPACT(severity))
 
 // A variant of LOG() that only performs logging if a specific condition
 // is encountered. Note that |condition| is only evaluated if |severity|
@@ -112,17 +113,17 @@ void setMinLogLevel(LogSeverity level);
 //    LOG_IF(INFO, fuelInjector::hasOptimalLevel())
 //            << "Fuel injection at optimal level";
 //
-#define LOG_IF(severity, condition) \
-        LOG_LAZY_EVAL(LOG_IS_ON(severity) && (condition), \
-                      LOG_MESSAGE_STREAM_COMPACT(severity))
+#define LOG_IF(severity, condition)                   \
+    LOG_LAZY_EVAL(LOG_IS_ON(severity) && (condition), \
+                  LOG_MESSAGE_STREAM_COMPACT(severity))
 
 // A variant of LOG() that avoids printing debug information such as file/line
 // information, for user-visible output.
 #define QLOG(severity) \
     LOG_LAZY_EVAL(LOG_IS_ON(severity), QLOG_MESSAGE_STREAM_COMPACT(severity))
 
-// A variant of LOG_IF() that avoids printing debug information such as file/line
-// information, for user-visible output.
+// A variant of LOG_IF() that avoids printing debug information such as
+// file/line information, for user-visible output.
 #define QLOG_IF(severity, condition)                  \
     LOG_LAZY_EVAL(LOG_IS_ON(severity) && (condition), \
                   QLOG_MESSAGE_STREAM_COMPACT(severity))
@@ -137,25 +138,23 @@ void setMinLogLevel(LogSeverity level);
 // as a command line parameter.
 //
 // When logging is enabled, VLOG statements are logged at the INFO severity.
-#define VLOG(tag)                                         \
-    LOG_LAZY_EVAL(VERBOSE_CHECK(tag), \
-                  LOG_MESSAGE_STREAM_COMPACT(INFO))
+#define VLOG(tag) \
+    LOG_LAZY_EVAL(VERBOSE_CHECK(tag), LOG_MESSAGE_STREAM_COMPACT(INFO))
 
 // A variant of LOG() that also appends the string message corresponding
 // to the current value of 'errno' just before the macro is called. This
 // also preserves the value of 'errno' so it can be tested after the
 // macro call (i.e. any error during log output does not interfere).
-#define PLOG(severity)  \
-        LOG_LAZY_EVAL(LOG_IS_ON(severity), \
-        PLOG_MESSAGE_STREAM_COMPACT(severity))
+#define PLOG(severity) \
+    LOG_LAZY_EVAL(LOG_IS_ON(severity), PLOG_MESSAGE_STREAM_COMPACT(severity))
 
 // A variant of LOG_IF() that also appends the string message corresponding
 // to the current value of 'errno' just before the macro is called. This
 // also preserves the value of 'errno' so it can be tested after the
 // macro call (i.e. any error during log output does not interfere).
-#define PLOG_IF(severity, condition) \
-        LOG_LAZY_EVAL(LOG_IS_ON(severity) && (condition), \
-                      PLOG_MESSAGE_STREAM_COMPACT(severity))
+#define PLOG_IF(severity, condition)                  \
+    LOG_LAZY_EVAL(LOG_IS_ON(severity) && (condition), \
+                  PLOG_MESSAGE_STREAM_COMPACT(severity))
 
 // Evaluate |condition|, and if it fails, log a fatal message.
 // This is a better version of assert(), in the future, this will
@@ -168,22 +167,20 @@ void setMinLogLevel(LogSeverity level);
 #define CHECK(condition) \
     LOG_IF(FATAL, !(condition)) << "Check failed: " #condition ". "
 
-
 // A variant of CHECK() that also appends the errno message string at
 // the end of the log message before exiting the process.
 #define PCHECK(condition) \
     PLOG_IF(FATAL, !(condition)) << "Check failed: " #condition ". "
 
-
 // Define ENABLE_DLOG to 1 here if DLOG() statements should be compiled
 // as normal LOG() ones in the final binary. If 0, the statements will not
 // be compiled.
 #ifndef ENABLE_DLOG
-#  if defined(NDEBUG)
-#    define ENABLE_DLOG 0
-#  else
-#    define ENABLE_DLOG 1
-#  endif
+#if defined(NDEBUG)
+#define ENABLE_DLOG 0
+#else
+#define ENABLE_DLOG 1
+#endif
 #endif
 
 // ENABLE_DCHECK controls how DCHECK() statements are compiled:
@@ -192,32 +189,32 @@ void setMinLogLevel(LogSeverity level);
 //        the DCHECK level has been increased explicitely.
 //    2 - DCHECK() are always compiled as CHECK() in the final binary.
 #ifndef ENABLE_DCHECK
-#  if defined(NDEBUG)
-#    define ENABLE_DCHECK 1
-#  else
-#    define ENABLE_DCHECK 2
-#  endif
+#if defined(NDEBUG)
+#define ENABLE_DCHECK 1
+#else
+#define ENABLE_DCHECK 2
+#endif
 #endif
 
 // DLOG_IS_ON(severity) is used to indicate whether DLOG() should print
 // something for the current level.
 #if ENABLE_DLOG
-#  define DLOG_IS_ON(severity) LOG_IS_ON(severity)
+#define DLOG_IS_ON(severity) LOG_IS_ON(severity)
 #else
 // NOTE: The compile-time constant ensures that the DLOG() statements are
 //       not compiled in the final binary.
-#  define DLOG_IS_ON(severity) false
+#define DLOG_IS_ON(severity) false
 #endif
 
 // DCHECK_IS_ON() is used to indicate whether DCHECK() should do anything.
 #if ENABLE_DCHECK == 0
-    // NOTE: Compile-time constant ensures the DCHECK() statements are
-    // not compiled in the final binary.
-#  define DCHECK_IS_ON()  false
+// NOTE: Compile-time constant ensures the DCHECK() statements are
+// not compiled in the final binary.
+#define DCHECK_IS_ON() false
 #elif ENABLE_DCHECK == 1
-#  define DCHECK_IS_ON()  ::android::base::dcheckIsEnabled()
+#define DCHECK_IS_ON() ::android::base::dcheckIsEnabled()
 #else
-#  define DCHECK_IS_ON()  true
+#define DCHECK_IS_ON() true
 #endif
 
 // A function that returns true iff DCHECK() should actually do any checking.
@@ -230,33 +227,33 @@ bool setDcheckLevel(bool enabled);
 // DLOG() is like LOG() for debug builds, and doesn't do anything for
 // release one. This is useful to add log messages that you don't want
 // to see in the final binaries, but are useful during testing.
-#define DLOG(severity)  DLOG_IF(severity, true)
+#define DLOG(severity) DLOG_IF(severity, true)
 
 // DLOG_IF() is like DLOG() for debug builds, and doesn't do anything for
 // release one. See DLOG() comments.
-#define DLOG_IF(severity, condition)  \
-        LOG_LAZY_EVAL(DLOG_IS_ON(severity) && (condition), \
-                      LOG_MESSAGE_STREAM_COMPACT(severity))
+#define DLOG_IF(severity, condition)                   \
+    LOG_LAZY_EVAL(DLOG_IS_ON(severity) && (condition), \
+                  LOG_MESSAGE_STREAM_COMPACT(severity))
 
 // DCHECK(condition) is used to perform CHECK() in debug builds, or if
 // the program called setDcheckLevel(true) previously. Note that it is
 // also possible to completely remove them from the final binary by
 // using the compiler flag -DENABLE_DCHECK=0
-#define DCHECK(condition) \
-        LOG_IF(FATAL, DCHECK_IS_ON() && !(condition)) \
+#define DCHECK(condition)                         \
+    LOG_IF(FATAL, DCHECK_IS_ON() && !(condition)) \
             << "Check failed: " #condition ". "
 
 // DPLOG() is like DLOG() that also appends the string message corresponding
 // to the current value of 'errno' just before the macro is called. This
 // also preserves the value of 'errno' so it can be tested after the
 // macro call (i.e. any error during log output does not interfere).
-#define DPLOG(severity)  DPLOG_IF(severity, true)
+#define DPLOG(severity) DPLOG_IF(severity, true)
 
 // DPLOG_IF() tests whether |condition| is true before calling
 // DPLOG(severity)
-#define DPLOG_IF(severity, condition)  \
-        LOG_LAZY_EVAL(DLOG_IS_ON(severity) && (condition), \
-                      PLOG_MESSAGE_STREAM_COMPACT(severity))
+#define DPLOG_IF(severity, condition)                  \
+    LOG_LAZY_EVAL(DLOG_IS_ON(severity) && (condition), \
+                  PLOG_MESSAGE_STREAM_COMPACT(severity))
 
 // Convenience class used hold a formatted string for logging reasons.
 // Usage example:
@@ -268,6 +265,7 @@ public:
     LogString(const char* fmt, ...);
     ~LogString();
     const char* string() const { return mString; }
+
 private:
     char* mString;
 };
@@ -276,13 +274,31 @@ private:
 // statement.
 struct LogParams {
     LogParams() {}
-    LogParams(const char* a_file, int a_lineno, LogSeverity a_severity, bool quiet = false)
-            : file(a_file), lineno(a_lineno), severity(a_severity), quiet(quiet) {}
+    LogParams(const char* a_file,
+              int a_lineno,
+              LogSeverity a_severity,
+              bool quiet = false)
+        : file(a_file), lineno(a_lineno), severity(a_severity), quiet(quiet) {}
 
     const char* file = nullptr;
     int lineno = -1;
     LogSeverity severity = LOG_VERBOSE;
     bool quiet = false;
+};
+
+class LogstreamBuf : public std::streambuf {
+public:
+    LogstreamBuf();
+
+    size_t size();
+    char* str();
+
+protected:
+    int overflow (int c = EOF) override;
+
+private:
+    std::vector<char> mLongString;
+    char  mStr[256];
 };
 
 // Helper class used to implement an input stream similar to std::istream
@@ -295,55 +311,38 @@ struct LogParams {
 class LogStream {
 public:
     LogStream(const char* file, int lineno, LogSeverity severity, bool quiet);
-    ~LogStream();
+    ~LogStream() = default;
 
-    inline LogStream& operator<<(const char* str) {
-        append(str);
-        return *this;
+    template <typename T>
+    std::ostream& operator<<(const T& t) {
+        return mStream << t;
     }
 
-    inline LogStream& operator<<(const LogString& str) {
-        append(str.string());
-        return *this;
-    }
+    const char* str() { return mStreamBuf.str(); }
 
-    // Note: this prints the pointer value (address).
-    LogStream& operator<<(const void* v);
-
-    LogStream& operator<<(char ch);
-    LogStream& operator<<(int v);
-    LogStream& operator<<(unsigned v);
-    LogStream& operator<<(long v);
-    LogStream& operator<<(unsigned long v);
-    //LogStream& operator<<(size_t v);
-    LogStream& operator<<(long long v);
-    LogStream& operator<<(unsigned long long v);
-    LogStream& operator<<(float v);
-    LogStream& operator<<(double v);
-    LogStream& operator<<(android::base::StringView v);
-
-    const char* string() const { return mString ? mString : ""; }
-    size_t size() const { return mSize; }
+    const size_t size() { return mStreamBuf.size(); }
     const LogParams& params() const { return mParams; }
 
 private:
-    void append(const char* str);
-    void append(const char* str, size_t len);
-
     LogParams mParams;
-    char* mString;
-    size_t mSize;
-    size_t mCapacity;
+    LogstreamBuf mStreamBuf;
+    std::ostream mStream;
 };
+
+// Add your own types when needed:
+std::ostream& operator<<(std::ostream& stream,
+                         const android::base::LogString& str);
+std::ostream& operator<<(std::ostream& stream,
+                         const android::base::StringView& str);
 
 // Helper class used to avoid compiler errors, see LOG_LAZY_EVAL for
 // more information.
 class LogStreamVoidify {
- public:
-  LogStreamVoidify() { }
-  // This has to be an operator with a precedence lower than << but
-  // higher than ?:
-  void operator&(LogStream&) { }
+public:
+    LogStreamVoidify() {}
+    // This has to be an operator with a precedence lower than << but
+    // higher than ?:
+    void operator&(std::ostream&) {}
 };
 
 // This represents an log message. At creation time, provide the name of
@@ -357,10 +356,14 @@ class LogStreamVoidify {
 class LogMessage {
 public:
     // To suppress printing file/line, set quiet = true.
-    LogMessage(const char* file, int line, LogSeverity severity, bool quiet = false);
+    LogMessage(const char* file,
+               int line,
+               LogSeverity severity,
+               bool quiet = false);
     ~LogMessage();
 
     LogStream& stream() const { return *mStream; }
+
 protected:
     // Avoid that each LOG() statement
     LogStream* mStream;
@@ -370,18 +373,16 @@ protected:
 // instance with the appropriate file source path, file source line and
 // severity.
 #define LOG_MESSAGE_COMPACT(severity) \
-    ::android::base::LogMessage( \
-            __FILE__, \
-            __LINE__, \
-            LOG_SEVERITY_FROM(severity))
+    ::android::base::LogMessage(__FILE__, __LINE__, LOG_SEVERITY_FROM(severity))
 
 #define LOG_MESSAGE_STREAM_COMPACT(severity) \
     LOG_MESSAGE_COMPACT(severity).stream()
 
 // A variant of LogMessage for outputting user-visible messages to the console,
 // without debug information.
-#define QLOG_MESSAGE_COMPACT(severity) \
-    ::android::base::LogMessage(__FILE__, __LINE__, LOG_SEVERITY_FROM(severity), true)
+#define QLOG_MESSAGE_COMPACT(severity)              \
+    ::android::base::LogMessage(__FILE__, __LINE__, \
+                                LOG_SEVERITY_FROM(severity), true)
 
 #define QLOG_MESSAGE_STREAM_COMPACT(severity) \
     QLOG_MESSAGE_COMPACT(severity).stream()
@@ -403,18 +404,16 @@ public:
     ~ErrnoLogMessage();
 
     LogStream& stream() const { return *mStream; }
+
 private:
     LogStream* mStream;
     int mErrno;
 };
 
 // Helper macros to avoid too much typing.
-#define PLOG_MESSAGE_COMPACT(severity) \
-    ::android::base::ErrnoLogMessage( \
-            __FILE__, \
-            __LINE__, \
-            LOG_SEVERITY_FROM(severity), \
-            errno)
+#define PLOG_MESSAGE_COMPACT(severity)                   \
+    ::android::base::ErrnoLogMessage(__FILE__, __LINE__, \
+                                     LOG_SEVERITY_FROM(severity), errno)
 
 #define PLOG_MESSAGE_STREAM_COMPACT(severity) \
     PLOG_MESSAGE_COMPACT(severity).stream()

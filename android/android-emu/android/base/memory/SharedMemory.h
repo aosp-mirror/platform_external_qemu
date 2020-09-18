@@ -26,7 +26,15 @@ namespace android {
 
 namespace base {
 
-// SharedMemory - A class to share memory between 2 process.
+// SharedMemory - A class to share memory between 2 process. The region can
+// be shared in 2 modes:
+//
+// - As shared memory (/dev/shm, memory page file in windows)
+// - Using memory mapped files backed by a file on the file system.
+//
+// To use memory mapped files prefix the handle with "file://" followed
+// by an absolute path. For example: file:///c:/WINDOWS/shared.mem or
+// file:///tmp/shared.mem
 //
 // Usage examples:
 // Proc1: The owner
@@ -40,7 +48,19 @@ namespace base {
 //    reader.open(SharedMemory::AccessMode::READ_ONLY);
 //    StringView read((const char*) *reader));
 //
-// Quirks:
+// Using file backed ram:
+//
+// Proc1: The owner
+//    StringView message = "Hello world!";
+//    SharedMemory writer("file:///abs/path/to/a/file", 4096);
+//    writer.create(0600);
+//    memcpy(*writer, message.c_str(), message.size());
+//
+// Proc2: The observer
+//    SharedMemory reader("file::///abs/path/to/a/file", 4096);
+//    reader.open(SharedMemory::AccessMode::READ_ONLY);
+//    StringView read((const char*) *reader));
+//
 //   It is not possible to find out the size of an in memory shared region on
 //   Win32 (boo!), there are undocumented workaround (See:
 //   https://stackoverflow.com/questions/34860452/extracting-shared-memorys-size/47951175#47951175)
@@ -82,6 +102,31 @@ namespace base {
 //   - The access control lists (ACL) in the default security descriptor for
 //     a file mapping object come from the primary or impersonation token of
 //     the creator.
+//
+// If the shared memory region is backed by a file you must keep the following
+// things in mind:
+//
+// Win32:
+//  - If an application specifies a size for the file mapping object that
+//    is larger than the size of the actual named file on disk and if the page
+//    protection allows write access (that is, the flProtect parameter specifies
+//    PAGE_READWRITE or PAGE_EXECUTE_READWRITE), then the file on disk is
+//    increased to match the specified size of the file mapping object. If the
+//    file is extended, the contents of the file between the old end of the file
+//    and the new end of the file are not guaranteed to be zero; the behavior is
+//    defined by the file system. If the file on disk cannot be increased,
+//    CreateFileMapping fails and GetLastError returns ERROR_DISK_FULL.
+//    In practice this means that the shared memory region will not contain
+//    useful data upon creation.
+//  - A sharing object will be created for each view on the file.
+//  - The memory mapped file will be deleted by the owner upond destruction.
+//    this is however not guaranteed!
+// Posix:
+//  - The notion of ownership is handled at the filesystem level. Usually this
+//    means that a memory mapped file will be deleted once all references have
+//    been removed.
+//  - The memory mapped file will be deleted by the owner upond destruction.
+//    this is however not guaranteed!
 class SharedMemory {
 public:
 #ifdef _WIN32
@@ -98,11 +143,20 @@ public:
     using memory_type = void*;
     using handle_type = int;
     constexpr static handle_type invalidHandle() { return -1; }
-    static memory_type unmappedMemory() { return reinterpret_cast<memory_type>(-1); }
+    static memory_type unmappedMemory() {
+        return reinterpret_cast<memory_type>(-1);
+    }
 #endif
     enum class AccessMode { READ_ONLY, READ_WRITE };
+    enum class ShareType { SHARED_MEMORY, FILE_BACKED };
 
-    SharedMemory(const StringView name, size_t size);
+    // Creates a SharedMemory region either backed by a shared memory handle
+    // or by a file. If the string uriOrHandle starts with `file://` it will be
+    // file backed otherwise it will be a named shared memory region.
+    // |uriHandle| A file:// uri or handle
+    // |size| Size of the desired shared memory region. Cannot change after
+    // creation.
+    SharedMemory(const StringView uriOrHandle, size_t size);
     ~SharedMemory() { close(); }
 
     SharedMemory(SharedMemory&& other) {
@@ -111,6 +165,7 @@ public:
         mAddr = other.mAddr;
         mFd = other.mFd;
         mCreate = other.mCreate;
+        mShareType = other.mShareType;
         other.clear();
     }
 
@@ -118,6 +173,7 @@ public:
         mName = std::move(other.mName);
         mSize = other.mSize;
         mAddr = other.mAddr;
+        mShareType = other.mShareType;
         mFd = other.mFd;
         mCreate = other.mCreate;
 
@@ -143,7 +199,7 @@ public:
     int open(AccessMode access);
 
     bool isOpen() const;
-    void close(bool forceDestroy=false);
+    void close(bool forceDestroy = false);
 
     size_t size() const { return mSize; }
     StringView name() const { return mName; }
@@ -170,10 +226,12 @@ private:
 
     memory_type mAddr = unmappedMemory();
     handle_type mFd = invalidHandle();
+    handle_type mFile = invalidHandle();
     bool mCreate = false;
 
     std::string mName;
     size_t mSize;
+    ShareType mShareType;
 };
 }  // namespace base
 }  // namespace android

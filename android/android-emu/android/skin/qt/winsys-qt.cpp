@@ -852,7 +852,3 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
 void skin_winsys_report_entering_main_loop(void) {
     ToolWindow::onMainLoopStart();
 }
-
-extern bool skin_winsys_is_folded() {
-    return ToolWindow::isFolded();
-}

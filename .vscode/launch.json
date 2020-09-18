@@ -20,7 +20,7 @@
                     "name": "ASAN_OPTIONS",
                     "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
                  },
-                
+
                 {
                     "name": "PATH",
                     "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
@@ -67,26 +67,12 @@
             "args": [
                 // "--verbose"
               //  "--gtest_repeat=0", "--gtest_break_on_failure"
+              "--benchmark_filter=BM_cnv.*"
             ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                 "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
             },
-        },
-        {
-            "name": "(Google) Debug Cmake Target",
-            "type": "lldb-vscode", // sudo apt install google-lldb-vscode
-            "request": "launch",
-            "program": "${command:cmake.launchTargetPath}",
-            "cwd": "${workspaceFolder}",
-            "args": [
-                "--gtest_filter=AdbMessageSnifferTest.shell_commands_do_not_heartbeat",
-                //"--gtest_repeat=-1"
-            ],
-            "env": [
-                // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-                "ASAN_OPTIONS=detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-            ],
         },
         {
             "name": "(lldb) Debug Emulator",

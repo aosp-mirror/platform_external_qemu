@@ -252,7 +252,7 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
             mWindow->getFramebufferNativeWindow(),
             0, 0,
             mWidth, mHeight, mWidth, mHeight,
-            mWindow->getDevicePixelRatio(), 0, false);
+            mWindow->getDevicePixelRatio(), 0, false, false);
         mWindow->messageLoop();
     }
 

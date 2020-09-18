@@ -86,9 +86,17 @@ AEMU_EXPORT void android_getOpenglesHardwareStrings(char** vendor,
                                                     char** renderer,
                                                     char** version);
 
-AEMU_EXPORT int android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
-                                           int fbw, int fbh, float dpr, float rotation,
-                                           bool deleteExisting);
+AEMU_EXPORT int android_showOpenglesWindow(void* window,
+                                           int wx,
+                                           int wy,
+                                           int ww,
+                                           int wh,
+                                           int fbw,
+                                           int fbh,
+                                           float dpr,
+                                           float rotation,
+                                           bool deleteExisting,
+                                           bool hideWindow);
 
 AEMU_EXPORT int android_hideOpenglesWindow(void);
 
