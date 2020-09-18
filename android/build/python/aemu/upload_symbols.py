@@ -223,6 +223,7 @@ def main(args):
     logging.debug("-----------------------------------------------------------")
 
     api_key = FLAGS.api_key
+    available = False
     if not api_key:
         try:
             with open(SymbolFileServer.API_KEY_FILE) as f:
@@ -237,6 +238,8 @@ def main(args):
     if FLAGS.force or not server.is_available(FLAGS.symbol_file):
         start = time.time()
         status = server.upload(FLAGS.symbol_file)
+        # Let's assume that our symbols will now become available
+        available = (status == "OK")
         print(
             "{} after {} seconds".format(
                 SymbolFileServer.STATUS_MSG.get(
@@ -246,10 +249,11 @@ def main(args):
             )
         )
     else:
-        print("Symbol already available, skipping upload.")
+        print("Symbol {} already available, skipping upload.".format(FLAGS.symbol_file))
+        available = True
 
     # api key -> symbol file should have been made available.
-    sys.exit(0 if not api_key or server.is_available(FLAGS.symbol_file) else 1)
+    sys.exit(0 if not api_key or available else 1)
 
 
 def launch():
