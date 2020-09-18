@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7618adfd_717695f2",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1767,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-18T05:24:03Z",
+      "side": 1,
+      "message": "When we ask the host driver for support here, maybe we should protect this behind a flag if based on experiments, our existing astc-codec based emulation is faster.",
+      "range": {
+        "startLine": 1711,
+        "startChar": 1,
+        "endLine": 1767,
+        "endChar": 56
+      },
+      "revId": "fa361bb1ea6afa53066ec570ae47643e41d3f30d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
