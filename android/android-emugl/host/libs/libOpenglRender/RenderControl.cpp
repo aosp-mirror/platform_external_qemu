@@ -1316,14 +1316,18 @@ static void rcCreateColorBufferWithHandle(
         FRAMEWORK_FORMAT_GL_COMPATIBLE, handle);
 }
 
-static uint32_t rcCreateBuffer(uint32_t size) {
+static uint32_t rcCreateBuffer2(uint64_t size, uint32_t memoryProperty) {
     AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer* fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;
     }
 
-    return fb->createBuffer(size);
+    return fb->createBuffer(size, memoryProperty);
+}
+
+static uint32_t rcCreateBuffer(uint32_t size) {
+    return rcCreateBuffer2(size, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 }
 
 static void rcCloseBuffer(uint32_t buffer) {
@@ -1434,6 +1438,7 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcIsSyncSignaled = rcIsSyncSignaled;
     dec->rcCreateColorBufferWithHandle = rcCreateColorBufferWithHandle;
     dec->rcCreateBuffer = rcCreateBuffer;
+    dec->rcCreateBuffer2 = rcCreateBuffer2;
     dec->rcCloseBuffer = rcCloseBuffer;
     dec->rcSetColorBufferVulkanMode2 = rcSetColorBufferVulkanMode2;
     dec->rcMapGpaToBufferHandle = rcMapGpaToBufferHandle;

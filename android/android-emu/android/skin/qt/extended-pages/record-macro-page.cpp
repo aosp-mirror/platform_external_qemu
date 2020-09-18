@@ -67,6 +67,7 @@
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/record-macro-edit-dialog.h"
 #include "android/skin/qt/extended-pages/record-macro-saved-item.h"
+#include "android/skin/qt/logging-category.h"
 #include "android/skin/qt/raised-material-button.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
@@ -119,6 +120,8 @@ RecordMacroPage::RecordMacroPage(QWidget* parent)
 
     QObject::connect(this, &RecordMacroPage::playbackFinishedSignal, this,
                      &RecordMacroPage::playbackFinished);
+    QObject::connect(mUi->macroList->selectionModel(), &QItemSelectionModel::selectionChanged,
+                     this, &RecordMacroPage::onSelectionChanged);
 }
 
 RecordMacroPage::~RecordMacroPage() {
@@ -204,20 +207,13 @@ void RecordMacroPage::on_playStopButton_clicked() {
     }
 }
 
-void RecordMacroPage::on_macroList_currentItemChanged(
-        QListWidgetItem* current,
-        QListWidgetItem* previous) {
-    if (current && previous) {
-        RecordMacroSavedItem* macroSavedItem = getItemWidget(previous);
-        macroSavedItem->setSelected(false);
-    }
-    if (current) {
-        RecordMacroSavedItem* macroSavedItem = getItemWidget(current);
-        macroSavedItem->setSelected(true);
-    }
-}
-
 void RecordMacroPage::on_macroList_itemPressed(QListWidgetItem* listItem) {
+    // An item can be pressed, but deselected (via Ctrl + Click). Verify that the item
+    // is selected.
+    if (!listItem->isSelected()) {
+        return;
+    }
+
     const std::string macroName = getMacroNameFromItem(listItem);
 
     if (mMacroPlaying && mCurrentMacroName == macroName) {
@@ -229,13 +225,27 @@ void RecordMacroPage::on_macroList_itemPressed(QListWidgetItem* listItem) {
     }
 }
 
-// For dragging and clicking outside the items in the item list.
-void RecordMacroPage::on_macroList_itemSelectionChanged() {
+void RecordMacroPage::onSelectionChanged(
+        const QItemSelection& selected,
+        const QItemSelection& deselected) {
+    // Stop video playback.
     if (mVideoPlayer && mVideoPlayer->isRunning()) {
         mVideoPlayer->stop();
     }
-
     setMacroUiState(MacroUiState::Waiting);
+
+    if (!deselected.isEmpty()) {
+        for (auto i : deselected.indexes()) {
+            auto item = qobject_cast<RecordMacroSavedItem*>(mUi->macroList->indexWidget(i));
+            item->setSelected(false);
+        }
+    }
+    if (!selected.isEmpty()) {
+        for (auto i : selected.indexes()) {
+            auto item = qobject_cast<RecordMacroSavedItem*>(mUi->macroList->indexWidget(i));
+            item->setSelected(true);
+        }
+    }
 }
 
 std::string RecordMacroPage::getMacrosDirectory() {
@@ -420,6 +430,12 @@ void RecordMacroPage::updatePreviewVideoView() {
 }
 
 void RecordMacroPage::previewVideoPlayingFinished() {
+    // Preview can be stopped by deselecting the list item. Verify the item is still selected
+    // before reshowing the preview.
+    if (mUi->macroList->selectedItems().isEmpty()) {
+        return;
+    }
+
     setMacroUiState(MacroUiState::PreviewFinished);
 
     QListWidgetItem* listItem = mUi->macroList->selectedItems().first();
@@ -429,6 +445,12 @@ void RecordMacroPage::previewVideoPlayingFinished() {
 
 void RecordMacroPage::mousePressEvent(QMouseEvent* event) {
     if (mState == MacroUiState::PreviewFinished) {
+        // Preview could have been deselected. Verify the item is still selected before
+        // replaying the preview.
+        if (mUi->macroList->selectedItems().isEmpty()) {
+            return;
+        }
+
         QListWidgetItem* listItem = mUi->macroList->selectedItems().first();
         const std::string macroName = getMacroNameFromItem(listItem);
         setMacroUiState(MacroUiState::Selected);

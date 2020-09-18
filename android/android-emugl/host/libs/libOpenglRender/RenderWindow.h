@@ -111,7 +111,8 @@ public:
                         int fbh,
                         float dpr,
                         float rotation,
-                        bool deleteExisting);
+                        bool deleteExisting,
+                        bool hideWindow);
 
     // Remove the sub-window created by calling setupSubWindow().
     // Note that this doesn't discard the content of the emulated framebuffer,

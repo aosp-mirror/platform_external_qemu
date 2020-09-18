@@ -12,8 +12,12 @@
 
 #pragma once
 
+#include "android/hw-sensors.h"
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/memory/OnDemand.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/threads/WorkerThread.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/extended-window.h"
@@ -37,6 +41,7 @@
 
 class EmulatorQtWindow;
 class ExtendedWindow;
+class PostureSelectionDialog;
 
 class ToolWindow : public QFrame {
     Q_OBJECT
@@ -69,6 +74,7 @@ public:
 
     void allowExtWindowCreation();
     void hide();
+    void hideExtendedWindow();
     void show();
     void dockMainWindow();
     void raiseMainWindow();
@@ -79,8 +85,6 @@ public:
     static void earlyInitialization(const UiEmuAgent* agentPtr);
     static void onMainLoopStart();
     static const UiEmuAgent* getUiEmuAgent() { return sUiEmuAgent; }
-    static bool isFolded();
-    static bool isFoldableConfigured();
 
     const ShortcutKeyStore<QtUICommand>* getShortcutKeyStore() {
         return &mShortcutKeyStore;
@@ -117,14 +121,16 @@ public:
         handleUICommand(cmd, false);
     }
     void hideRotationButton(bool hide);
+    bool setUiTheme(SettingsTheme theme);
+    void showExtendedWindow();
 
 signals:
     void guestClipboardChanged(QString text);
     void haveClipboardSharingKnown(bool have);
+    void themeChanged(SettingsTheme theme);
 
 private:
     static void forwardGenericEventToEmulator(int type, int code, int value);
-    static void sendFoldedArea();
     void handleUICommand(QtUICommand cmd, bool down);
     void ensureExtendedWindowExists();
 
@@ -173,9 +179,29 @@ private:
     bool mAskedWhetherToSaveSnapshot = false;
     bool mAllowExtWindow = false;
     bool mClipboardSupported = false;
-    bool mFolded = false;
+
+    int mLastRequestedFoldablePosture = -1;
 
     static const UiEmuAgent* sUiEmuAgent;
+
+    PostureSelectionDialog* mPostureSelectionDialog;
+    enum FoldableSyncToAndroidOp {
+        SEND_AREA = 0,
+        CONFIRM_AREA,
+        SEND_LID_CLOSE,
+        SEND_LID_OPEN,
+        SEND_EXIT,
+    };
+    struct FoldableSyncToAndroidItem {
+        enum FoldableSyncToAndroidOp op;
+        int x, y, width, height;
+    };
+    android::base::WorkerThread<FoldableSyncToAndroidItem> mFoldableSyncToAndroid;
+    android::base::WorkerProcessingResult foldableSyncToAndroidItemFunction(const FoldableSyncToAndroidItem& item);
+    android::base::Lock mLock;
+    android::base::ConditionVariable mCv;
+    bool mFoldableSyncToAndroidSuccess;
+    bool mFoldableSyncToAndroidTimeout;
 
 public slots:
     void raise();
@@ -204,7 +230,9 @@ private slots:
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
     void on_tablet_mode_button_clicked();
-    void on_fold_switch_clicked();
+    void on_change_posture_button_clicked();
+    void on_new_posture_requested(int newPosture);
+    void on_dismiss_posture_selection_dialog();
 
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();

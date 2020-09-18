@@ -16,6 +16,7 @@
 
 #include "android/emulator-window.h"
 #include "android/emulation/MultiDisplay.h"
+#include "android/hw-sensors.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/debug.h"
 
@@ -96,25 +97,29 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .fold =
-                [](bool is_fold) {
-                    if (const auto win = EmulatorQtWindow::getInstance()) {
-                        if (win->isFoldableConfigured()) {
-                            QtUICommand cmd = is_fold ? QtUICommand::FOLD
-                                                      : QtUICommand::UNFOLD;
-                            win->runOnUiThread([win, cmd]() {
-                                win->toolWindow()->handleUICommand(cmd);
-                            });
-                            return true;
-                        }
+                [](bool is_fold) -> bool {
+                    if (is_fold) {
+                        return android_foldable_fold();
+                    } else {
+                        return android_foldable_unfold();
                     }
-                    return false;
                 },
         .isFolded =
+                []() -> bool {
+                    return android_foldable_is_folded();
+                },
+        .getFoldedArea =
+                [](int* x, int* y, int* w, int* h) -> bool {
+                    return android_foldable_get_folded_area(x, y, w, h);
+                },
+        .updateFoldablePostureIndicator =
                 [] {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
-                        return win->isFolded();
+                        QtUICommand cmd = QtUICommand::UPDATE_FOLDABLE_POSTURE_INDICATOR;
+                        win->runOnUiThread([win, cmd]() {
+                            win->toolWindow()->handleUICommand(cmd);
+                        });
                     }
-                    return false;
                 },
         .setUIDisplayRegion =
                 [](int x, int y, int w, int h) {
@@ -130,7 +135,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                    uint32_t* h,
                    uint32_t* dpi,
                    uint32_t* flag,
-                   bool* enabled) {
+                   bool* enabled) -> bool {
                     if (const auto ins = android::MultiDisplay::getInstance()) {
                         return ins->getMultiDisplay(id, x, y, w, h, dpi, flag, enabled);
                     }
@@ -155,13 +160,40 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .getMonitorRect =
-                [](uint32_t* w, uint32_t* h) {
+                [](uint32_t* w, uint32_t* h) -> bool {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         return win->getMonitorRect(w, h);
                     } else {
                         return false;
                     }
-                }
+                },
+        .startExtendedWindow =
+                []() {
+                    if (auto* win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread([win]() {
+                            win->toolWindow()->showExtendedWindow();
+                        });
+                    }
+                },
+        .quitExtendedWindow =
+                []() {
+                    if (auto* win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread(
+                                [win]() { win->toolWindow()->hideExtendedWindow(); });
+                    }
+                },
+        .setUiTheme = [](SettingsTheme type) {
+                    skin_winsys_touch_qt_extended_virtual_sensors();
+                    if (auto* win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread(
+                                [win, type]() { win->toolWindow()->setUiTheme(type); });
+                        return true;
+                    } else {
+                        return false;
+                    }
+
+                },
+
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

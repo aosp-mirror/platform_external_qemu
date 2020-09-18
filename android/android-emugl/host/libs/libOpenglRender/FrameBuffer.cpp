@@ -87,6 +87,60 @@ private:
 
 }  // namespace
 
+static std::string getTimeStampString() {
+    const time_t timestamp = System::get()->getUnixTime();
+    const struct tm *timeinfo = localtime(&timestamp);
+    // Target format: 07-31 4:44:33
+    char b[64];
+    snprintf(
+        b,
+        sizeof(b) - 1,
+        "%02u-%02u %02u:%02u:%02u",
+        timeinfo->tm_mon + 1,
+        timeinfo->tm_mday,
+        timeinfo->tm_hour,
+        timeinfo->tm_min,
+        timeinfo->tm_sec);
+    return std::string(b);
+}
+
+static unsigned int getUptimeMs() {
+    const System::Times times = System::get()->getProcessTimes();
+    return (unsigned int)(times.wallClockMs);
+}
+
+static void dumpPerfStats() {
+    auto usage = System::get()->getMemUsage();
+    std::string memoryStats =
+        emugl::getMemoryTracker()
+                ? emugl::getMemoryTracker()->printUsage()
+                : "";
+    auto cpuUsage = emugl::getCpuUsage();
+    std::string lastStats =
+        cpuUsage ? cpuUsage->printUsage() : "";
+    printf("%s Uptime: %u ms Resident memory: %f mb %s \n%s\n",
+        getTimeStampString().c_str(), getUptimeMs(),
+        (float)usage.resident / 1048576.0f, lastStats.c_str(),
+        memoryStats.c_str());
+}
+
+class PerfStatThread : public android::base::Thread {
+public:
+    PerfStatThread(bool* perfStatActive) :
+      Thread(), m_perfStatActive(perfStatActive) {}
+
+    virtual intptr_t main() {
+      while (*m_perfStatActive) {
+        sleepMs(1000);
+        dumpPerfStats();
+      }
+      return 0;
+    }
+
+private:
+    bool* m_perfStatActive;
+};
+
 FrameBuffer* FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
 
@@ -220,6 +274,8 @@ void FrameBuffer::waitUntilInitialized() {
 
 void FrameBuffer::finalize() {
     AutoLock lock(sGlobals->lock);
+    m_perfStats = false;
+    m_perfThread->wait(NULL);
     sInitialized.store(true, std::memory_order_relaxed);
     sGlobals->condVar.broadcastAndUnlock(&lock);
 
@@ -671,6 +727,7 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
       m_perfStats(
               !android::base::System::get()->envGet("SHOW_PERF_STATS").empty()),
+      m_perfThread(new PerfStatThread(&m_perfStats)),
       m_colorBufferHelper(new ColorBufferHelper(this)),
       m_refCountPipeEnabled(emugl::emugl_feature_is_enabled(
               android::featurecontrol::RefCountPipe)),
@@ -688,6 +745,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
      }
 
      setDisplayPose(displayId, 0, 0, getWidth(), getHeight(), 0);
+     m_perfThread->start();
+
 }
 
 FrameBuffer::~FrameBuffer() {
@@ -700,6 +759,7 @@ FrameBuffer::~FrameBuffer() {
     delete m_textureDraw;
     delete m_configs;
     delete m_colorBufferHelper;
+    delete m_perfThread;
 
     if (s_theFrameBuffer) {
         s_theFrameBuffer = nullptr;
@@ -846,7 +906,8 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  int fbh,
                                  float dpr,
                                  float zRot,
-                                 bool deleteExisting) {
+                                 bool deleteExisting,
+                                 bool hideWindow) {
     GL_LOG("Begin setupSubWindow");
     if (!m_useSubWindow) {
         ERR("%s: Cannot create native sub-window in this configuration\n",
@@ -916,7 +977,8 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         m_windowHeight = wh;
 
         m_subWin = ::createSubWindow(p_window, m_x, m_y, m_windowWidth,
-                                     m_windowHeight, subWindowRepaint, this);
+                                     m_windowHeight, subWindowRepaint, this,
+                                     hideWindow);
         if (m_subWin) {
             m_nativeWindow = p_window;
 
@@ -1143,13 +1205,13 @@ HandleType FrameBuffer::createColorBufferWithHandleLocked(
     return handle;
 }
 
-HandleType FrameBuffer::createBuffer(int p_size) {
+HandleType FrameBuffer::createBuffer(uint64_t p_size, uint32_t memoryProperty) {
     AutoLock mutex(m_lock);
     HandleType handle = createBufferLocked(p_size);
     m_lock.unlock();
 
     bool setupStatus =
-            goldfish_vk::setupVkBuffer(handle, /* vulkanOnly */ true);
+            goldfish_vk::setupVkBuffer(handle, /* vulkanOnly */ true, memoryProperty);
     assert(setupStatus);
     return handle;
 }
@@ -1883,7 +1945,8 @@ bool FrameBuffer::readColorBufferContents(
 }
 
 bool FrameBuffer::getColorBufferInfo(
-    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat) {
+    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat,
+    FrameworkFormat* frameworkFormat) {
 
     AutoLock mutex(m_lock);
 
@@ -1898,6 +1961,9 @@ bool FrameBuffer::getColorBufferInfo(
     *width = cb->getWidth();
     *height = cb->getHeight();
     *internalformat = cb->getInternalFormat();
+    if (frameworkFormat) {
+        *frameworkFormat = cb->getFrameworkFormat();
+    }
 
     return true;
 }
@@ -2257,28 +2323,6 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     return res;
 }
 
-static std::string getTimeStampString() {
-    const time_t timestamp = System::get()->getUnixTime();
-    const struct tm *timeinfo = localtime(&timestamp);
-    // Target format: 07-31 4:44:33
-    char b[64];
-    snprintf(
-        b,
-        sizeof(b) - 1,
-        "%02u-%02u %02u:%02u:%02u",
-        timeinfo->tm_mon + 1,
-        timeinfo->tm_mday,
-        timeinfo->tm_hour,
-        timeinfo->tm_min,
-        timeinfo->tm_sec);
-    return std::string(b);
-}
-
-static unsigned int getUptimeMs() {
-    const System::Times times = System::get()->getProcessTimes();
-    return (unsigned int)(times.wallClockMs);
-}
-
 bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                            bool needLockAndBind,
                            bool repaint) {
@@ -2320,7 +2364,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
     //
     // output FPS and performance usage statistics
     //
-    if (m_fpsStats || m_perfStats) {
+    if (m_fpsStats) {
         long long currTime = System::get()->getHighResTimeUs() / 1000;
         m_statsNumFrames++;
         if (currTime - m_statsStartTime >= 1000) {
@@ -2330,20 +2374,6 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                 m_statsNumFrames = 0;
             }
             m_statsStartTime = currTime;
-            if (m_perfStats) {
-                auto usage = System::get()->getMemUsage();
-                std::string memoryStats =
-                    emugl::getMemoryTracker()
-                            ? emugl::getMemoryTracker()->printUsage()
-                            : "";
-                auto cpuUsage = emugl::getCpuUsage();
-                std::string lastStats =
-                    cpuUsage ? cpuUsage->printUsage() : "";
-                printf("%s Uptime: %u ms Resident memory: %f mb %s \n%s\n",
-                    getTimeStampString().c_str(), getUptimeMs(),
-                    (float)usage.resident / 1048576.0f, lastStats.c_str(),
-                    memoryStats.c_str());
-            }
         }
     }
 

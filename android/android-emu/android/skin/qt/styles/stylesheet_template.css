@@ -81,7 +81,14 @@ QListWidget {
 QListWidget::item {
     border-bottom: 1px solid %%LIST_WIDGET_BORDER%%;
 }
-QListWidget::item:focus, QListWidget::item:selected {
+QListWidget::item:focus {
+    border: 2px solid %%LIST_WIDGET_BORDER%%;
+}
+QListWidget::item:!selected {
+    background-color: transparent;
+}
+QListWidget::item:selected {
+    border-bottom: 1px solid %%LIST_WIDGET_BORDER%%;
     background-color: #4285F4;
 }
 

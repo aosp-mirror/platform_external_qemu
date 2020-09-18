@@ -1,0 +1,49 @@
+// Copyright (C) 2020 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.android.emulator.control";
+option objc_class_prefix = "AEC";
+
+package android.emulation.control;
+
+// A simplistic echo service that can be used by unit tests to validate
+// some of the grpc behavior.
+service TestRunner {
+  rpc runTest(Test) returns (Test) {}
+}
+
+// A simple message that can be send back and forth.
+message Test {
+  enum TestType {
+    Nothing = 0; // Just return, use this to measue gRPC overhead.
+    SharedMemory = 1; // Run a SharedMemory IPC test
+    Grpc = 2; // Run a gRPC based IPC test.
+    RawSocket = 3; // Run a raw socket based ipc test.
+  }
+
+  enum SharedMemoryMode {
+    Shared = 0;
+    File = 1;
+  }
+  TestType target = 1; // Test type
+  int32 size = 2; // Size of memory region to checksum
+  uint64 chksum = 3; // Calculated chksum of memory region
+  int32 port = 4; // Port for socket/grpc
+  SharedMemoryMode mode = 5; // Mode of shared memory
+  string handle = 6;  // Handle/File used by shared memoryu test
+  int64 cpuTime = 7;  // Cpu time spend running this test.
+  int64 wallTime = 8;
+}

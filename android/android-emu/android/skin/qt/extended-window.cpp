@@ -132,6 +132,10 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
         this, SLOT(switchToTheme(SettingsTheme)));
 
+    connect(
+        mToolWindow, SIGNAL(themeChanged(SettingsTheme)),
+        mExtendedUi->settingsPage, SLOT(setUiTheme(SettingsTheme)), Qt::DirectConnection);
+
     connect(mExtendedUi->settingsPage, SIGNAL(disableMouseWheelChanged(bool)),
         this, SLOT(disableMouseWheel(bool)));
 
@@ -183,7 +187,7 @@ ExtendedWindow::ExtendedWindow(
     }
 
     if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) &&
-        !ToolWindow::isFoldableConfigured()) {
+        !android_foldable_any_folded_area_configured()) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);
         mExtendedUi->displaysButton->setVisible(true);
     } else {
@@ -512,6 +516,9 @@ void ExtendedWindow::switchDisableDeviceFrame(bool disableDeviceFrame)
 }
 
 void ExtendedWindow::switchOnTop(bool isOnTop) {
+    if (android_cmdLineOptions && android_cmdLineOptions->qt_hide_window) {
+        setFrameOnTop(this, isOnTop);
+    }
     mEmulatorWindow->setOnTop(isOnTop);
     mToolWindow->notifySwitchOnTop();
 }

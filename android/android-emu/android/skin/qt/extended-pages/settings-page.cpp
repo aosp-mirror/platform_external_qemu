@@ -358,6 +358,10 @@ void SettingsPage::setHaveClipboardSharing(bool haveSharing) {
     }
 }
 
+void SettingsPage::setUiTheme(SettingsTheme theme) {
+    mUi->set_themeBox->setCurrentIndex(static_cast<int>(theme));
+}
+
 bool SettingsPage::eventFilter(QObject* object, QEvent* event)
 {
     if (event->type() != QEvent::FocusIn && event->type() != QEvent::FocusOut) {

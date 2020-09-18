@@ -133,6 +133,10 @@ private:
     // that corresponds to the given point on the screen.
     glm::vec3 screenToWorldCoordinate(int x, int y) const;
     bool initAbstractDeviceModel();
+    bool initAbstractDeviceHingeModel(FoldableDisplayType type,
+                                      int numHinges,
+                                      FoldableHingeParameters* para);
+    bool initAbstractDeviceRollModel();
     GLuint createSkinTexture();
     bool updateHingeAngles();
 
@@ -175,6 +179,6 @@ private:
     struct FoldableState mFoldableState;
     std::vector<DisplaySegment> mDisplaySegments;
     float mFactor;
-    uint32_t mCenterIndex = 0;
+    int32_t mCenterIndex = 0;
     float mDepth = 0.1;
 };
