@@ -1,0 +1,58 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005021295",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1430253?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "3bb853f2_b024c79a",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-18T05:22:55Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 697,
+        "startChar": 72,
+        "endLine": 697,
+        "endChar": 73
+      },
+      "revId": "fa361bb1ea6afa53066ec570ae47643e41d3f30d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005021295",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1430253?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "b8cf537b_54552639",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-18T05:22:55Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 708,
+        "startChar": 72,
+        "endLine": 708,
+        "endChar": 73
+      },
+      "revId": "fa361bb1ea6afa53066ec570ae47643e41d3f30d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
