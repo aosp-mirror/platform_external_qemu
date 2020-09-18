@@ -17,16 +17,20 @@
 #include <QLabel>
 #include <memory>                                           // for unique_ptr
 
-
 #include "android/car_sensor_replay/sensor_session_playback.h"
+#include "android/skin/qt/common-controls/cc-list-item.h"
 
 #include "ui_sensor-replay-page.h"  // for SensorReplayPage
 
+class QEvent;
 class QObject;
+class QMessageBox;
 class QWidget;
 class QLabel;
 class QObject;
+class SensorReplayItem;
 struct QCarDataAgent;
+
 
 namespace emulator {
 class EmulatorMessage;
@@ -43,14 +47,23 @@ public:
 private slots:
     void on_sensor_LoadSensorButton_clicked();
     void on_sensor_playStopButton_clicked();
-
+    void editButtonClicked(CCListItem* item);
 
 private:
 
     void sensorReplayStart();
     void sensorReplayStop();
     float getPlaybackSpeed();
-
+    void addSensorRecord(QString fullPath, QString fileName);
+    QString getPreviewText(const std::vector<std::string> sensorList, const std::vector<int> carPropertyIdList);
+    bool eventFilter(QObject *obj, QEvent *ev) override;
+    void showSensorRecordDetail(bool show);
+    void createSensorRecordItem(std::string itemName, std::string itemPath);
+    void deleteRecord(SensorReplayItem* item);
+    QString toTimeLineSingle(SensorSessionPlayback::DurationNs time);
+    QString toConnectTimeLine(SensorSessionPlayback::DurationNs timeline1, SensorSessionPlayback::DurationNs timeline2, const QString& connector);
+    void addTimeLineTableRow(QTableWidget* table, const QString& timeline, const QString& eventCount, int tableRow);
+    void updateTimeLine(SensorSessionPlayback::DurationNs timestamp);
 
     static const QCarDataAgent* sCarDataAgent;
     static void sendCarEmulatorMessageLogged(const emulator::EmulatorMessage& msg,
@@ -61,5 +74,9 @@ private:
     bool isPlaying;
     std::unique_ptr<Ui::SensorReplayPage> mUi;
     std::unique_ptr<SensorSessionPlayback> ssp;
+    QMessageBox* mSensorInfoDialog;
+    SensorReplayItem* mSensorReplayItemSelected;
+    SensorSessionPlayback::DurationNs totalTime;
+
 
 };

@@ -34,6 +34,8 @@ public:
         MULTIPLIER_NEGATIVE
     };
 
+
+
     static SensorSessionPlayback Create() { return SensorSessionPlayback(); }
 
     explicit SensorSessionPlayback();
@@ -77,6 +79,11 @@ public:
     }
 
     int event_count() const { return session_.sensor_records().size(); }
+    std::string app_version() const;
+    const std::vector<std::string> sensor_list();
+    const std::vector<int> car_property_id_list();
+
+    void getSensorRecordTimeLine(DurationNs *total, std::vector<int> *recordCounts, DurationNs interval);
 
 private:
     void playSensor();

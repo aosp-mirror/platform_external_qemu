@@ -8,9 +8,15 @@
 
 #include "android/skin/qt/extended-pages/car-data-emulation/car-property-utils.h"
 #include "android/skin/qt/extended-pages/sensor-replay-page.h"
+#include "android/skin/qt/extended-pages/sensor-replay-item.h"
+
 
 #include <QFileDialog>    // for QFileDialog
+#include <qmessagebox.h>                               // for QMessageBox::C...f
+#include <QMenu>
 
+
+#include "android/base/StringFormat.h"                 // for StringFormat
 #include "android/emulation/control/car_data_agent.h"
 #include "android/utils/debug.h"
 #include "ui_sensor-replay-page.h"  // for CarSensorReplayPage
@@ -20,6 +26,7 @@ class QWidget;
 
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
 
+using android::base::StringFormat;
 using emulator::EmulatorMessage;
 using emulator::MsgType;
 using emulator::SensorSession;
@@ -28,6 +35,7 @@ using emulator::VehiclePropValue;
 using std::string;
 
 static constexpr float PLAYBACK_SPEED[5]  = {1, 2, 5, 10, 100};
+static constexpr SensorSessionPlayback::DurationNs TIMELINE_INTERVAL = 300000000;
 
 const QCarDataAgent* SensorReplayPage::sCarDataAgent = nullptr;
 
@@ -35,9 +43,32 @@ const QCarDataAgent* SensorReplayPage::sCarDataAgent = nullptr;
 SensorReplayPage::SensorReplayPage(QWidget* parent)
     :QWidget(parent), mUi(new Ui::SensorReplayPage) {
     mUi->setupUi(this);
-    mUi->noFileMask->setVisible(false);
+
+    showSensorRecordDetail(false);
 
     isPlaying = true;
+
+    mSensorInfoDialog = new QMessageBox(
+            QMessageBox::NoIcon,
+            QString::fromStdString(StringFormat("Sensors Detail")),
+            "", QMessageBox::Close, this);
+    mSensorInfoDialog->setModal(false);
+    mUi->sensorPreviewValue_expand->installEventFilter(this);
+}
+
+void SensorReplayPage::showSensorRecordDetail(bool show) {
+    mUi->noFileMask->setVisible(!show);
+    mUi->fileNameTitle->setVisible(show);
+    mUi->filenameValue->setVisible(show);
+    mUi->appVersionTitle->setVisible(show);
+    mUi->appVersionTitleValue->setVisible(show);
+    mUi->totalSensorEventsCountTitle->setVisible(show);
+    mUi->totalSensorEventsCountValue->setVisible(show);
+    mUi->sensorPreviewTitle->setVisible(show);
+    mUi->sensorPreviewValue->setVisible(show);
+    mUi->sensorPreviewValue_expand->setVisible(show);
+    mUi->eventTimelineTitle->setVisible(show);
+    mUi->eventTimelineTable->setVisible(show);
 }
 
 void SensorReplayPage::on_sensor_LoadSensorButton_clicked() {
@@ -56,12 +87,90 @@ void SensorReplayPage::on_sensor_LoadSensorButton_clicked() {
     SensorSessionPlayback::SensorSessionStatus status = ssp->LoadFrom(fileName.toStdString());
 
     if (status == SensorSessionPlayback::OK) {
-        D("filename parse OK for sensorsessionplayback");
+        D("filename parse OK for sensorsessionplayback, show status");
+
+        mUi->appVersionTitleValue->setText(QObject::tr(ssp->app_version().c_str()));
+        mUi->totalSensorEventsCountValue->setText(QObject::tr(std::to_string(ssp->event_count()).c_str()));
+
+        //get file name
+        auto parts = fileName.split(QLatin1Char('/'));
+        mUi->filenameValue->setText(parts.last());
+
+        addSensorRecord(fileName,parts.last());
+
+        //Set sensor info label
+        const std::vector<std::string> sensorList = ssp->sensor_list();
+        const std::vector<int> carPropertyIdList = ssp->car_property_id_list();
+        QString PreviewText = getPreviewText(sensorList, carPropertyIdList);
+        QFontMetrics metrics(mUi->sensorPreviewValue_expand->font());
+        QString elidedText = metrics.elidedText(
+            PreviewText, Qt::ElideRight,
+            mUi->sensorPreviewValue->width());
+        mUi->sensorPreviewValue->setText(elidedText);
+
+        mSensorInfoDialog->setInformativeText(PreviewText);
+        QString expand = tr(std::to_string(sensorList.size() + carPropertyIdList.size()).c_str()).append(" in total");
+        mUi->sensorPreviewValue_expand->setText(expand);
+
+        // Get time related data
+        SensorSessionPlayback::DurationNs total;
+        std::vector<int> recordCounts;
+
+        ssp->getSensorRecordTimeLine(&total, &recordCounts, TIMELINE_INTERVAL);
+        D("last timestamp %" PRId64", %s", total, toConnectTimeLine(0, total, "/").toStdString().c_str());
+
+        totalTime = total;
+        mUi->playback_time->setText(toConnectTimeLine(0,total,tr("/")));
+
+        // Update the table
+        mUi->eventTimelineTable->clear();
+        mUi->eventTimelineTable->setHorizontalHeaderItem(0, new QTableWidgetItem(tr("Time Range")));
+        mUi->eventTimelineTable->setHorizontalHeaderItem(1, new QTableWidgetItem(tr("Event Count")));
+
+        SensorSessionPlayback::DurationNs time = 0;
+        for (int row = 0; row < recordCounts.size(); row++) {
+            D ("record counts %d ", recordCounts[row]);
+            addTimeLineTableRow(mUi->eventTimelineTable, toConnectTimeLine(time, time + TIMELINE_INTERVAL, "~"), QString::number(recordCounts[row]), row);
+            time += TIMELINE_INTERVAL;
+            D("connect itemline %s", toConnectTimeLine(time, time + TIMELINE_INTERVAL, "~").toStdString().c_str());
+        }
+
+
+        showSensorRecordDetail(true);
+
     } else if (status == SensorSessionPlayback::PROTO_PARSE_FAIL) {
         D("proto parse fail");
     }
 
 }
+
+void SensorReplayPage::addTimeLineTableRow(QTableWidget* table, const QString& timeline, const QString& eventCount, int tableRow) {
+    table->insertRow(tableRow);
+    table->setItem(tableRow, 0, new QTableWidgetItem(timeline));
+    table->setItem(tableRow, 1, new QTableWidgetItem(eventCount));
+    D("timeline %s, %s", timeline.toStdString().c_str(), eventCount.toStdString().c_str());
+
+}
+
+// Let's assume that the total duration of the sensor record is less than 1 hr first
+QString SensorReplayPage::toTimeLineSingle(SensorSessionPlayback::DurationNs time) {
+    int secs = time / 1000000000;
+    int mins = secs / 60;
+    secs = secs % 60;
+    QString result = QString::number(mins).append(":");
+    if (secs < 10) {
+        result.append("0");
+    }
+    result.append(QString::number(secs));
+    return result;
+}
+
+
+QString SensorReplayPage::toConnectTimeLine(SensorSessionPlayback::DurationNs current, SensorSessionPlayback::DurationNs total, const QString& connector) {
+    QString result = toTimeLineSingle(current).append(connector).append(toTimeLineSingle(total));
+    return result;
+}
+
 
 void SensorReplayPage::on_sensor_playStopButton_clicked() {
     D("play button clicked");
@@ -77,6 +186,9 @@ void SensorReplayPage::sensorReplayStart() {
     D ("start play button clicked in car data");
     ssp->RegisterCallback([this](emulator::SensorSession::SensorRecord record) {
 
+        // update slider and time ticker
+        this->updateTimeLine(record.timestamp_ns());
+
         if (record.car_property_values_size() > 0) {
             std::map<int32_t, emulator::SensorSession::SensorRecord::CarPropertyValue> vhal_property_map(record.car_property_values().begin(),
                                         record.car_property_values().end());
@@ -86,7 +198,6 @@ void SensorReplayPage::sensorReplayStart() {
             {
                 EmulatorMessage emulatorMsg = carpropertyutils::makePropMsg((int) it->first, it->second);
                 sendCarEmulatorMessageLogged(emulatorMsg, "Replay record is sent");
-
             }
         }
     });
@@ -96,6 +207,17 @@ void SensorReplayPage::sensorReplayStart() {
     // Change the icon on the play/stop button.
     mUi->sensor_playStopButton->setIcon(getIconForCurrentTheme("pause"));
     mUi->sensor_playStopButton->setProperty("themeIconName", "pause");
+}
+
+void SensorReplayPage::updateTimeLine(SensorSessionPlayback::DurationNs timestamp) {
+    D("update timestamp %" PRId64, timestamp);
+
+    mUi->playback_slider->setValue(timestamp*100/totalTime);
+    mUi->playback_time->setText(toConnectTimeLine(timestamp,totalTime,tr("/")));
+
+    if (timestamp == totalTime) {
+        sensorReplayStop();
+    }
 }
 
 float SensorReplayPage::getPlaybackSpeed() {
@@ -173,4 +295,84 @@ EmulatorMessage SensorReplayPage::makePropMsg(int propId, SensorSession::SensorR
 
     return emulatorMsg;
 
+}
+
+void SensorReplayPage::addSensorRecord(QString fullPath, QString fileName) {
+    D("Add a record %s, %s", fullPath.toStdString().c_str(), fileName.toStdString().c_str());
+    createSensorRecordItem(fileName.toStdString(), fullPath.toStdString());
+}
+
+QString SensorReplayPage::getPreviewText(const std::vector<std::string> sensorList, const std::vector<int> carPropertyIdList) {
+    QString result;
+
+    for (int carPropertyId : carPropertyIdList) {
+        QString property = carpropertyutils::propMap.count(carPropertyId)? carpropertyutils::propMap[carPropertyId].label : QObject::tr(std::to_string(carPropertyId).c_str());
+        result.append(property);
+        result.append("; ");
+    }
+
+    for (std::string sensor : sensorList)
+    {
+        result.append(sensor.c_str());
+        result.append("; ");
+    }
+
+    return result;
+}
+
+bool SensorReplayPage::eventFilter(QObject* object, QEvent* event) {
+    if (event->type() != QEvent::MouseButtonPress) {
+        return false;
+    }
+    mSensorInfoDialog->show();
+    return true;
+}
+
+void SensorReplayPage::createSensorRecordItem(std::string itemName, std::string itemPath) {
+
+    SensorReplayItem* sensorReplayItem = new SensorReplayItem(mUi->savedSensorRecordList,
+    QString::fromStdString(itemName), QString::fromStdString(itemPath));
+
+    connect(sensorReplayItem,
+                SIGNAL(editButtonClickedSignal(CCListItem*)), this,
+                SLOT(editButtonClicked(CCListItem*)));
+
+}
+
+void SensorReplayPage::editButtonClicked(CCListItem* item) {
+    mUi->savedSensorRecordList->blockSignals(true);
+
+    auto* sensorReplayItem = reinterpret_cast<SensorReplayItem*>(item);
+    QMenu* popMenu = new QMenu(this);
+    popMenu->setMinimumWidth(100);
+    popMenu->setStyleSheet("QMenu::item {padding: 4px;}"
+        "QMenu::item:selected {background-color: #4285f4;}");
+    QAction* deleteAction = popMenu->addAction(tr("Delete"));
+
+    QAction* theAction = popMenu->exec(QCursor::pos());
+
+    if (theAction == deleteAction) {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QMessageBox msgBox(QMessageBox::Warning,
+                           tr("Delete record"),
+                           tr("Do you want to this record?"),
+                           QMessageBox::Cancel,
+                           this);
+        QPushButton *deleteButton = msgBox.addButton(QMessageBox::Apply);
+        deleteButton->setText(tr("Delete"));
+
+        int selection = msgBox.exec();
+
+        if (selection == QMessageBox::Apply) {
+            deleteRecord(sensorReplayItem);
+        }
+        QApplication::restoreOverrideCursor();
+    }
+    mUi->savedSensorRecordList->blockSignals(false);
+
+}
+
+void SensorReplayPage::deleteRecord(SensorReplayItem* item) {
+    item->removeFromListWidget();
+    showSensorRecordDetail(mUi->savedSensorRecordList->count() != 0);
 }

@@ -72,6 +72,56 @@ SensorSessionPlayback::SensorSessionStatus SensorSessionPlayback::LoadFrom(
     return SensorSessionPlayback::OK;
 }
 
+std::string SensorSessionPlayback::app_version() const {
+    if ( session_.has_session_metadata() && session_.session_metadata().has_version())
+    {
+        emulator::SensorSession::SessionMetadata::Version version = session_.session_metadata().version();
+        std::string versio_string = version.has_major() ? std::to_string(version.major()) : "0";
+        versio_string.append(".").append(version.has_minor()? std::to_string(version.minor()) : "0");
+        versio_string.append(".").append(version.has_patch()? std::to_string(version.patch()) : "0");
+        return versio_string;
+    }
+
+    return "N/A";
+}
+
+const std::vector<std::string> SensorSessionPlayback::sensor_list() {
+    std::vector<std::string> sensor_list;
+    auto subscribed_sensors = session_.session_metadata().subscribed_sensors();
+    for (auto it = subscribed_sensors.begin(); it != subscribed_sensors.end(); it++) {
+        sensor_list.push_back(it->first);
+    }
+
+    const std::vector<std::string> sensor_list_const = sensor_list;
+    return sensor_list_const;
+}
+
+const std::vector<int> SensorSessionPlayback::car_property_id_list() {
+    std::vector<int> car_property_id_list;
+    auto car_property_configs = session_.session_metadata().car_property_configs();
+    for (auto it = car_property_configs.begin(); it != car_property_configs.end(); it++) {
+        car_property_id_list.push_back(it->first);
+    }
+
+    const std::vector<int> car_property_id_list_const = car_property_id_list;
+    return car_property_id_list_const;
+}
+
+void SensorSessionPlayback::getSensorRecordTimeLine(DurationNs *total, std::vector<int> *recordCounts, DurationNs interval) {
+    DurationNs current_threshold = interval;
+    DurationNs threshold_interval = interval;
+    int count = 0;
+    for (auto it = session_.sensor_records().begin(); it != session_.sensor_records().end(); it++) {
+        count++;
+        if (it->timestamp_ns() > current_threshold) {
+            recordCounts->push_back(count);
+            count = 0;
+            current_threshold += threshold_interval;
+        }
+        *total = it->timestamp_ns();
+    }
+}
+
 SensorSessionPlayback::SensorSessionStatus SensorSessionPlayback::SeekToTime(
         DurationNs time) {
     //   Durations are signed. Make sure the given time is positive.
@@ -135,8 +185,8 @@ void SensorSessionPlayback::playSensor() {
 
     DurationNs current_start_time = getUnixTimeNs() - current_elapsed_time_;
 
-    int sensorrecordcount = 0;
-
+    int sensorrecordCount = 0;
+    D ("number of neg timestamp %d",sensorrecordCount );
     // Need add another channel msg for stop and start
     while (current_record_iterator_ != session_.sensor_records().end() &&
            replay_state == REPLAY_START) {
@@ -149,6 +199,7 @@ void SensorSessionPlayback::playSensor() {
             // Update the sensor record.
             current_sensor_aggregate_.MergeFrom(*current_record_iterator_);
             // Issue the callback if it's registered.
+            sensorrecordCount++;
             if (callback_)
                 callback_(*current_record_iterator_);
             // Advance to the next record
@@ -177,3 +228,4 @@ void SensorSessionPlayback::StopReplay() {
 SensorSessionPlayback::DurationNs SensorSessionPlayback::getUnixTimeNs() {
     return System::get()->getUnixTimeUs() * 1000;
 }
+
