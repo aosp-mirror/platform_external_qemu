@@ -965,8 +965,8 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             m_zRot = zRot;
             Post postCmd;
             postCmd.cmd = PostCmd::Viewport;
-            postCmd.viewport.width = fbw;
-            postCmd.viewport.height = fbh;
+            postCmd.viewport.width = ww;
+            postCmd.viewport.height = wh;
             sendPostWorkerCmd(postCmd);
 
             bool posted = false;
