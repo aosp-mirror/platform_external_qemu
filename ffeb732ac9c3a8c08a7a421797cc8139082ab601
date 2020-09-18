@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12b5d9d7_29c89b57",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-18T19:52:40Z",
+      "side": 1,
+      "message": "We will have to cherry-pick this change to aosp-emu-30-release reduce flakiness of builds.",
+      "revId": "ffeb732ac9c3a8c08a7a421797cc8139082ab601",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
