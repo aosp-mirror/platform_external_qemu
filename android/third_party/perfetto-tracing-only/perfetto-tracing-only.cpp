@@ -191,13 +191,13 @@ public:
         // Write trusted sequence id if this is the first packet.
         if (CC_UNLIKELY(1 == __atomic_add_fetch(&sTraceConfig.packetsWritten, 1, __ATOMIC_SEQ_CST))) {
             mFirst = true;
-            sTraceConfig.sequenceIdWritten = true;
             beginPacket();
             mPacket.set_trusted_packet_sequence_id(1);
             mPacket.set_sequence_flags(1);
             endPacket();
-        } else if (!CC_LIKELY(sTraceConfig.sequenceIdWritten)) { // Not the first packet, but some other thread is writing the sequence id at the moment, wait for it.
-            while (!sTraceConfig.sequenceIdWritten);
+            __atomic_store_n(&sTraceConfig.sequenceIdWritten, 1, __ATOMIC_RELEASE);
+        } else if (!CC_LIKELY(__atomic_load_n(&sTraceConfig.sequenceIdWritten, __ATOMIC_ACQUIRE))) { // Not the first packet, but some other thread is writing the sequence id at the moment, wait for it.
+            while (!__atomic_load_n(&sTraceConfig.sequenceIdWritten, __ATOMIC_ACQUIRE));
         }
         // TODO: Allow changing category
         static const char kCategory[] = "gfxstream";
@@ -643,7 +643,6 @@ PERFETTO_TRACING_ONLY_EXPORT void enableTracing() {
     fprintf(stderr, "%s: guest time diff to add to host time: %llu\n", __func__, (unsigned long long)sTraceConfig.guestTimeDiff);
 
     sTraceConfig.packetsWritten = 0;
-    sTraceConfig.sequenceIdWritten = 0;
     sTraceConfig.currentInterningId = 1;
     sTraceConfig.currentThreadId = 1;
 
@@ -663,7 +662,7 @@ PERFETTO_TRACING_ONLY_EXPORT void disableTracing() {
     }
 
     sTraceConfig.packetsWritten = 0;
-    sTraceConfig.sequenceIdWritten = 0;
+    __atomic_store_n(&sTraceConfig.sequenceIdWritten, 0, __ATOMIC_RELEASE);
     sTraceConfig.currentInterningId = 1;
     sTraceConfig.currentThreadId = 1;
     sTraceConfig.guestTimeDiff = 0;
