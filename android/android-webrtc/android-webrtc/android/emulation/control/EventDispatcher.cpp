@@ -80,7 +80,7 @@ void EventDispatcher::dispatchEvent(const json msg) {
     } else if (label == "touch" &&
                touchEvent.ParseFromArray(decoded.data(), decoded_size)) {
         android::base::ThreadLooper::runOnMainLooper(
-                [=]() { mTouchEventSender.send(&touchEvent); });
+                [=]() {mTouchEventSender.sendOnThisThread(&touchEvent); });
     } else {
         LOG(WARNING) << "Unable to handle " << label
                      << ", bad label or protobuf.";

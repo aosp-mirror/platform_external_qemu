@@ -333,9 +333,13 @@ int MediaCudaVideoHelper::HandlePictureDisplay(CUVIDPARSERDISPINFO* pDispInfo) {
 
     CUdeviceptr dpSrcFrame = 0;
     unsigned int nSrcPitch = 0;
-    NVDEC_API_CALL(cuvidMapVideoFrame(mCudaDecoder, pDispInfo->picture_index,
+    CUresult errorCode = cuvidMapVideoFrame(mCudaDecoder, pDispInfo->picture_index,
                                       &dpSrcFrame, &nSrcPitch,
-                                      &videoProcessingParameters));
+                                      &videoProcessingParameters);
+    if (errorCode != CUDA_SUCCESS) {
+        CUDA_DPRINT("failed to call cuvidMapVideoFrame with error code %d\n", (int)errorCode);
+        return 0;
+    }
 
     NVDEC_API_CALL(cuCtxPushCurrent(mCudaContext));
     unsigned int newOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;

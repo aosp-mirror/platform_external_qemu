@@ -8,13 +8,14 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include "android/base/EintrWrapper.h"
-#include "android/base/memory/SharedMemory.h"
-
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+
+#include "android/base/EintrWrapper.h"
+#include "android/base/memory/SharedMemory.h"
+#include "android/base/files/PathUtils.h"
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
@@ -22,8 +23,17 @@
 namespace android {
 namespace base {
 
-SharedMemory::SharedMemory(StringView name, size_t size)
-    : mName(name), mSize(size) { }
+SharedMemory::SharedMemory(StringView name, size_t size) : mSize(size) {
+    constexpr StringView kFileUri = "file://";
+    if (name.find(kFileUri, 0) == 0) {
+        mShareType = ShareType::FILE_BACKED;
+        auto path = name.substr(kFileUri.size());
+        mName = PathUtils::recompose(PathUtils::decompose(path));
+    } else {
+        mShareType = ShareType::SHARED_MEMORY;
+        mName = name;
+    }
+}
 
 int SharedMemory::create(mode_t mode) {
     return openInternal(O_CREAT | O_RDWR, mode);
@@ -54,8 +64,13 @@ void SharedMemory::close(bool forceDestroy) {
     }
 
     assert(!isOpen());
-    if (forceDestroy || mCreate)
-        shm_unlink(mName.c_str());
+    if (forceDestroy || mCreate) {
+        if (mShareType == ShareType::FILE_BACKED) {
+            remove(mName.c_str());
+        } else {
+            shm_unlink(mName.c_str());
+        }
+    }
 }
 
 bool SharedMemory::isOpen() const {
@@ -69,7 +84,11 @@ int SharedMemory::openInternal(int oflag, int mode, bool doMapping) {
 
     int err = 0;
     struct stat sb;
-    mFd = shm_open(mName.c_str(), oflag, mode);
+    if (mShareType == ShareType::SHARED_MEMORY) {
+        mFd = shm_open(mName.c_str(), oflag, mode);
+    } else {
+        mFd = ::open(mName.c_str(), oflag, mode);
+    }
     if (mFd == -1) {
         err = -errno;
         close();

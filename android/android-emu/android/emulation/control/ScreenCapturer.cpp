@@ -14,13 +14,14 @@
 
 #include "android/emulation/control/ScreenCapturer.h"
 
-#include <assert.h>                                   // for assert
-#include <png.h>                                      // for png_create_info...
-#include <stdio.h>                                    // for NULL, snprintf
-#include <string.h>                                   // for memcpy
-#include <fstream>                                    // for ofstream, basic...
-#include <memory>                                     // for shared_ptr
-#include <vector>                                     // for vector
+#include <assert.h>  // for assert
+#include <png.h>     // for png_create_info...
+#include <stdio.h>   // for NULL, snprintf
+#include <string.h>  // for memcpy
+
+#include <fstream>  // for ofstream, basic...
+#include <memory>   // for shared_ptr
+#include <vector>   // for vector
 
 #include "OpenglRender/Renderer.h"                    // for Renderer
 #include "android/base/Log.h"                         // for LOG, LogMessage
@@ -46,7 +47,8 @@ bool captureScreenshot(android::base::StringView outputDirectoryPath,
     SkinRotation rotation = getConsoleAgents()->emu->getRotation();
     if (const auto renderer_ptr = renderer.get()) {
         return captureScreenshot(renderer_ptr, nullptr, rotation,
-                                 outputDirectoryPath, pOutputFilepath, displayId);
+                                 outputDirectoryPath, pOutputFilepath,
+                                 displayId);
     } else {
         // renderer is nullptr in -gpu guest
         if (displayId > 0) {
@@ -70,16 +72,20 @@ Image takeScreenshot(
                            uint8_t** frameBufferData)> getFrameBuffer,
         int displayId,
         int desiredWidth,
-        int desiredHeight
-        ) {
+        int desiredHeight) {
     unsigned int nChannels = 4;
     unsigned int width;
     unsigned int height;
     ImageFormat outputFormat = ImageFormat::RGBA8888;
     std::vector<unsigned char> pixelBuffer;
     if (renderer) {
-        renderer->getScreenshot(nChannels, &width, &height, pixelBuffer, displayId,
-                                desiredWidth, desiredHeight, rotation);
+        if (desiredFormat == ImageFormat::RGB888) {
+            nChannels = 3;
+            outputFormat = ImageFormat::RGB888;
+        }
+        renderer->getScreenshot(nChannels, &width, &height, pixelBuffer,
+                                displayId, desiredWidth, desiredHeight,
+                                rotation);
     } else {
         unsigned char* pixels = nullptr;
         int bpp = 4;
@@ -123,33 +129,46 @@ Image takeScreenshot(
             pixels = pixelBuffer.data();
         } else {
             // Just copy the pixels to our buffer.
-            pixelBuffer.insert(pixelBuffer.end(), &pixels[0], &pixels[width * height * nChannels]);
+            pixelBuffer.insert(pixelBuffer.end(), &pixels[0],
+                               &pixels[width * height * nChannels]);
         }
     }
-    // We only convert png at this time..
-    if (desiredFormat == ImageFormat::PNG) {
-        std::vector<uint8_t> pngData;
-        png_structp p = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
-                                                NULL, NULL);
-        png_infop pi = png_create_info_struct(p);
-        png_set_write_fn(
-                p, &pngData,
-                [](png_structp png_ptr, png_bytep data, png_size_t length) {
-                    std::vector<uint8_t>* vec =
-                            reinterpret_cast<std::vector<uint8_t>*>(
-                                    png_get_io_ptr(png_ptr));
-                    vec->insert(vec->end(), &data[0], &data[length]);
-                },
-                [](png_structp png_ptr) {});
-        // already rotated through rendering
-        rotation = renderer ? SKIN_ROTATION_0 : rotation;
-        write_png_user_function(p, pi, nChannels, width,
-                                height, rotation,
-                                pixelBuffer.data());
-        png_destroy_write_struct(&p, &pi);
-        return Image((uint16_t)width, (uint16_t)height, nChannels, ImageFormat::PNG, pngData);
+    // We only convert png/ RGBA8888 -> RBG888 at this time..
+    switch (desiredFormat) {
+        case ImageFormat::PNG: {
+            std::vector<uint8_t> pngData;
+            png_structp p = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
+                                                    NULL, NULL);
+            png_infop pi = png_create_info_struct(p);
+            png_set_write_fn(
+                    p, &pngData,
+                    [](png_structp png_ptr, png_bytep data, png_size_t length) {
+                        std::vector<uint8_t>* vec =
+                                reinterpret_cast<std::vector<uint8_t>*>(
+                                        png_get_io_ptr(png_ptr));
+                        vec->insert(vec->end(), &data[0], &data[length]);
+                    },
+                    [](png_structp png_ptr) {});
+            // already rotated through rendering
+            rotation = renderer ? SKIN_ROTATION_0 : rotation;
+            write_png_user_function(p, pi, nChannels, width, height, rotation,
+                                    pixelBuffer.data());
+            png_destroy_write_struct(&p, &pi);
+            return Image((uint16_t)width, (uint16_t)height, nChannels,
+                         ImageFormat::PNG, pngData);
+        }
+        case ImageFormat::RGB888: {
+            if (nChannels == 4) {
+                outputFormat = ImageFormat::RGBA8888;
+            }
+            auto img = Image((uint16_t)width, (uint16_t)height, nChannels,
+                             outputFormat, pixelBuffer);
+            return img.asRGB888();
+        }
+        default:
+            return Image((uint16_t)width, (uint16_t)height, nChannels,
+                         outputFormat, pixelBuffer);
     }
-    return Image((uint16_t)width, (uint16_t)height, nChannels, outputFormat, pixelBuffer);
 }
 
 bool captureScreenshot(
@@ -168,7 +187,8 @@ bool captureScreenshot(
         return false;
     }
 
-    Image img = takeScreenshot(ImageFormat::RAW, rotation, renderer, getFrameBuffer, displayId);
+    Image img = takeScreenshot(ImageFormat::RAW, rotation, renderer,
+                               getFrameBuffer, displayId);
 
     if (img.getWidth() == 0 || img.getHeight() == 0) {
         LOG(ERROR) << "take screenshot failed";
@@ -221,6 +241,133 @@ bool captureScreenshot(
     savepng(outputFilePath.c_str(), img.getChannels(), img.getWidth(),
             img.getHeight(), rotation, img.getPixelBuf());
     return true;
+}
+
+// True if we are on a big endian system
+static int is_big_endian(void) {
+    static const union {
+        uint16_t w;
+        uint8_t b[2];
+    } tmp = {1};
+    return (tmp.b[0] != 1);
+}
+
+static std::vector<uint8_t>& convert_dma_byte(std::vector<uint8_t>& source,
+                                              std::vector<uint8_t>& dest) {
+    auto len = source.size() / 4 * 3;
+    uint8_t* dst = dest.data();
+    const uint8_t* src = source.data();
+    const uint8_t* src_end = source.data() + source.size();
+    int j = 0;
+    while (src < src_end) {
+        // Loop invariant when in place assert(dst <= src);
+        j++;
+        if (j % 4 != 0) {
+            *dst = *src;
+            dst++;
+        }
+        src++;
+    }
+    dest.resize(len);
+    return source;
+}
+
+static std::vector<uint8_t>& convert_dma_hexlet(std::vector<uint8_t>& source,
+                                                std::vector<uint8_t>& dest) {
+    // This only works if we have "native" support for uint128_t (which clang
+    // has)
+    static_assert(sizeof(__uint128_t) == 16);
+
+    // Dest should be large enough to hold what we need.
+    assert(dest.size() == source.size() ||
+           dest.size() >= source.size() / 4 * 3 + 16);
+
+    // an (uint32_t) ABGR value ends up like this in memory:
+    //               |||\- [0] R
+    //               ||\-- [1] G
+    //               |\--- [2] B
+    //               \-----[3] A
+
+    // in a uint64_t  ABGR2 ABRG1
+    // in a __uint128 ABGR4 ABGR3 ABGR2 ABRG1
+
+    // The idea is that we are going to mask the Alpha byte
+    // and move the bytes over so we turn
+
+    // in a __uint128 ABGR4 ABGR3 ABGR2 ABRG1 --> 0x00000000 BGR4 BGR3 BGR2 BGR1
+    // which end up in memory like:  R1,G1,B1,R2,G2,B2,R3,G3,B3,R4,G4,B4,0,0,0,0
+    auto final_size = source.size() / 4 * 3;
+
+    // Start & ending pointers.
+    const uint8_t* src = source.data();
+    const uint8_t* src_end = source.data() + source.size();
+    uint8_t* dst = dest.data();
+
+    // Various masks to mask out the alpha channel.
+    constexpr __uint128_t RGB1 = 0xFFFFFF, RGB2 = RGB1 << 32, RGB3 = RGB2 << 32,
+                          RGB4 = RGB3 << 32;
+
+    // Make sure we can read at least 16 bytes.. (128 bits)
+    // This guarantees that we do not access any memory we do not own.
+    while (src + 16 < src_end) {
+        // Only valid when doing in place: assert(dst <= src);
+        const __uint128_t pixel = *((__uint128_t*)src);
+        __uint128_t* to_write = (__uint128_t*)dst;
+        __uint128_t newValue = ((pixel & RGB4) >> 24) | ((pixel & RGB3) >> 16) |
+                               ((pixel & RGB2) >> 8) | (pixel & RGB1);
+
+        // Note that endianness is very important! the most significant bits end
+        // up in the address furthest away resulting in 4 zero bytes! which will
+        // be filled up in the next round (or will get chopped up in the end).
+        *to_write = newValue;
+
+        dst += 12;  // We wrote 12 bytes. (well 16 but the last 4 bytes we don't
+                    // care for)
+        src += 16;  // We read 16 bytes.
+    }
+
+    // Move the last 16 bytes if needed, this happens if we are not aligned to a
+    // 128 bit boundary.
+    int j = 0;
+    while (src < src_end) {
+        // assert(dst <= src); only true when doing in place.
+        j++;
+        if (j % 4 != 0) {
+            *dst = *src;
+            dst++;
+        }
+        src++;
+    }
+
+    // Shrink our vector
+    dest.resize(final_size);
+    return dest;
+}
+
+void Image::convertPerByte() {
+    convert_dma_byte(m_Pixels, m_Pixels);
+}
+
+void Image::convertPerHexlet() {
+    convert_dma_hexlet(m_Pixels, m_Pixels);
+}
+
+Image& Image::asRGB888() {
+    // No need to convert an already converted image.
+    if (m_Format == ImageFormat::RGB888) {
+        return *this;
+    }
+
+    m_Format = ImageFormat::RGB888;
+    // Let's just use the slow, default approach when
+    // When we are not little endian.
+    if (is_big_endian() || sizeof(__uint128_t) != 16) {
+        convertPerByte();
+    } else {
+        convertPerHexlet();
+    }
+
+    return *this;
 }
 
 }  // namespace emulation

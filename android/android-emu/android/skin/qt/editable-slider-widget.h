@@ -91,6 +91,9 @@ public:
         return mSlider.isSliderDown();
     }
 
+    // Hides min and max labels
+    void setLabelHidden();
+
 protected:
     bool eventFilter(QObject*, QEvent*) override;
 

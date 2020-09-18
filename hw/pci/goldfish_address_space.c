@@ -446,6 +446,7 @@ struct address_space_state {
 };
 
 static struct address_space_state* s_current_state = 0;
+static int s_verbose_logging = 0;
 
 #define GOLDFISH_ADDRESS_SPACE(obj) \
     OBJECT_CHECK(struct address_space_state, (obj), \
@@ -483,6 +484,14 @@ static uint32_t address_space_allocate_block(struct address_space_state *state)
     regs->size_low = lower_32_bits(aligned_size);
     regs->size_high = upper_32_bits(aligned_size);
 
+    if (s_verbose_logging) {
+        uint64_t physStart = goldfish_address_space_get_phys_addr_start_locked();
+        fprintf(stderr, "%s: allocate offset 0x%llx. physStart: 0x%llx. gpa: 0x%llx\n", __func__,
+                (unsigned long long)offset,
+                (unsigned long long)physStart,
+                (unsigned long long)physStart + offset);
+    }
+
     if (offset == ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET) {
         return ENOMEM;
     } else {
@@ -497,10 +506,18 @@ static uint32_t address_space_deallocate_block(struct address_space_state *state
 
     uint64_t physStart = goldfish_address_space_get_phys_addr_start_locked();
 
+    if (s_verbose_logging) {
+        fprintf(stderr, "%s: deallocate offset 0x%llx. physStart: 0x%llx. gpa: 0x%llx\n", __func__,
+                (unsigned long long)offset,
+                (unsigned long long)physStart,
+                (unsigned long long)physStart + offset);
+    }
+
     if (physStart) {
         qemu_get_address_space_device_control_ops()->run_deallocation_callbacks(
                 physStart + offset);
     }
+
     return address_space_allocator_deallocate(&state->allocator, offset);
 }
 
@@ -780,6 +797,12 @@ static void address_space_pci_realize(PCIDevice *dev, Error **errp) {
     }
 
     s_current_state = state;
+
+    const char* verbose_env = getenv("ANDROID_EMUGL_VERBOSE");
+
+    if (verbose_env && !strcmp("1", verbose_env)) {
+        s_verbose_logging = 1;
+    }
 }
 
 static void address_space_pci_unrealize(PCIDevice* dev) {

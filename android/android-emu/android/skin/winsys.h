@@ -159,8 +159,6 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent);
 
 void skin_winsys_report_entering_main_loop(void);
 
-bool skin_winsys_is_folded(void);
-
 // touch extended window and virtual sensor page objects
 void skin_winsys_touch_qt_extended_virtual_sensors(void);
 

@@ -192,6 +192,7 @@ android_add_executable(
   TARGET android-emu_benchmark NODISTRIBUTE
   SRC # cmake-format: sortable
       android/base/synchronization/Lock_benchmark.cpp
-      android/base/Log_benchmark.cpp)
+      android/base/Log_benchmark.cpp
+      android/base/TranslateBenchmark.cpp)
 target_link_libraries(android-emu_benchmark PRIVATE android-emu-base
                                                     emulator-gbench)

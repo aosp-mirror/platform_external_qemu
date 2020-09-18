@@ -102,6 +102,7 @@ public:
                 android::featurecontrol::VulkanSnapshots);
         mVkCleanupEnabled = System::get()->envGet("ANDROID_EMU_VK_NO_CLEANUP") != "1";
         mLogging = System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1";
+        mVerbosePrints = System::get()->envGet("ANDROID_EMUGL_VERBOSE") == "1";
         if (get_emugl_address_space_device_control_ops().control_get_hw_funcs &&
             get_emugl_address_space_device_control_ops().control_get_hw_funcs()) {
             mUseOldMemoryCleanupPath = 0 == get_emugl_address_space_device_control_ops().control_get_hw_funcs()->getPhysAddrStartLocked();
@@ -2458,13 +2459,29 @@ public:
 
         AutoLock occupiedGpasLock(mOccupiedGpasLock);
 
-        if (mOccupiedGpas.find(gpa) != mOccupiedGpas.end()) {
-            emugl::emugl_crash_reporter(
-                    "FATAL: already mapped gpa 0x%llx! ", (unsigned long long)gpa);
+        auto existingMemoryInfo =
+            android::base::find(mOccupiedGpas, gpa);
+
+        if (existingMemoryInfo) {
+
+            fprintf(stderr, "%s: WARNING: already mapped gpa 0x%llx, replacing",
+                    __func__,
+                    (unsigned long long)gpa);
+
+            get_emugl_vm_operations().unmapUserBackedRam(
+                existingMemoryInfo->gpa,
+                existingMemoryInfo->sizeToPage);
+
+            mOccupiedGpas.erase(gpa);
         }
 
         get_emugl_vm_operations().mapUserBackedRam(
             gpa, hva, sizeToPage);
+
+        if (mVerbosePrints) {
+            fprintf(stderr, "VERBOSE:%s: registering gpa 0x%llx to mOccupiedGpas\n", __func__,
+                    (unsigned long long)gpa);
+        }
 
         mOccupiedGpas[gpa] = {
             vk,
@@ -2490,6 +2507,11 @@ public:
     // occupied goes out of sync.
     void unmapMemoryAtGpaIfExists(uint64_t gpa) {
         AutoLock lock(mOccupiedGpasLock);
+
+        if (mVerbosePrints) {
+            fprintf(stderr, "VERBOSE:%s: deallocation callback for gpa 0x%llx\n", __func__,
+                    (unsigned long long)gpa);
+        }
 
         auto existingMemoryInfo =
             android::base::find(mOccupiedGpas, gpa);
@@ -2622,6 +2644,7 @@ public:
                                // to suit the resulting image memory size.
                                &localAllocInfo.allocationSize,
                                &localAllocInfo.memoryTypeIndex);
+            updateVkImageFromColorBuffer(importCbInfoPtr->colorBuffer);
 
             if (m_emu->instanceSupportsExternalMemoryCapabilities) {
                 VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
@@ -2649,7 +2672,8 @@ public:
         if (importBufferInfoPtr) {
             // Ensure buffer has Vulkan backing.
             setupVkBuffer(importBufferInfoPtr->buffer,
-                          true /* Buffers are Vulkan only */, nullptr,
+                          true /* Buffers are Vulkan only */,
+                          0u /* memoryProperty */, nullptr,
                           // Modify the allocation size and type index
                           // to suit the resulting image memory size.
                           &localAllocInfo.allocationSize,
@@ -5231,6 +5255,7 @@ private:
     bool mSnapshotsEnabled = false;
     bool mVkCleanupEnabled = true;
     bool mLogging = false;
+    bool mVerbosePrints = false;
     bool mUseOldMemoryCleanupPath = false;
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 

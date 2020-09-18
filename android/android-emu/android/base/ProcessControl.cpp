@@ -184,7 +184,6 @@ bool isRestartDisabled() {
     return sRestartGlobals->disabled;
 }
 
-static constexpr char kLaunchParamsFileName[] = "emu-launch-params.txt";
 static constexpr char kRestartParam[] = "-is-restart";
 
 void initializeEmulatorRestartParameters(int argc,

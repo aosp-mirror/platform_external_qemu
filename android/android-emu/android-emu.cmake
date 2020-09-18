@@ -70,6 +70,7 @@ set(android-emu-common
     android/emulation/control/adb/AdbInterface.cpp
     android/emulation/control/adb/AdbShellStream.cpp
     android/emulation/control/adb/adbkey.cpp
+    android/emulation/control/AgentLogger.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/EmulatorAdvertisement.cpp
     android/emulation/control/FilePusher.cpp
