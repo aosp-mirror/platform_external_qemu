@@ -21,6 +21,7 @@
 #include "android/emulation/address_space_shared_slots_host_memory_allocator.h"
 #include "android/emulation/control/vm_operations.h"
 
+#include "android/base/containers/HybridComponentManager.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
@@ -44,6 +45,9 @@ using namespace android::emulation;
 #endif
 
 const QAndroidVmOperations* sVmOps = nullptr;
+
+static android::base::HybridComponentManager<10000, uint32_t, AddressSpaceDeviceContext*> sDeviceContextsForPing;
+static android::base::HybridComponentManager<10000, uint32_t, AddressSpaceDevicePingInfo*> sDevicePingInfos;
 
 namespace {
 
@@ -72,6 +76,8 @@ public:
         AS_DEVICE_DPRINT("erase handle: %u", handle);
         AutoLock lock(mContextsLock);
         mContexts.erase(handle);
+        sDeviceContextsForPing.remove(handle);
+        sDevicePingInfos.remove(handle);
     }
 
     void tellPingInfo(uint32_t handle, uint64_t gpa) {
@@ -86,30 +92,50 @@ public:
     }
 
     void ping(uint32_t handle) {
-        AutoLock lock(mContextsLock);
-        auto& contextDesc = mContexts[handle];
-        AddressSpaceDevicePingInfo* pingInfo = contextDesc.pingInfo;
+        if (sDeviceContextsForPing.get_const(handle)) {
+            AddressSpaceDeviceContext* context = *(sDeviceContextsForPing.get(handle));
+            AddressSpaceDevicePingInfo* pingInfo = *(sDevicePingInfos.get(handle));
 
-        const uint64_t phys_addr = pingInfo->phys_addr;
-        const uint64_t size = pingInfo->size;
-        const uint64_t metadata = pingInfo->metadata;
+            const uint64_t phys_addr = pingInfo->phys_addr;
+            const uint64_t size = pingInfo->size;
+            const uint64_t metadata = pingInfo->metadata;
 
-        AS_DEVICE_DPRINT(
-                "handle %u data 0x%llx -> %p size %llu meta 0x%llx\n", handle,
-                (unsigned long long)phys_addr,
-                sVmOps->physicalMemoryGetAddr(phys_addr),
-                (unsigned long long)size, (unsigned long long)metadata);
+            AS_DEVICE_DPRINT(
+                    "handle %u data 0x%llx -> %p size %llu meta 0x%llx\n", handle,
+                    (unsigned long long)phys_addr,
+                    sVmOps->physicalMemoryGetAddr(phys_addr),
+                    (unsigned long long)size, (unsigned long long)metadata);
 
-        AddressSpaceDeviceContext *device_context = contextDesc.device_context.get();
-        if (device_context) {
-            device_context->perform(pingInfo);
+            context->perform(pingInfo);
         } else {
-            // The first ioctl establishes the device type
-            const AddressSpaceDeviceType device_type =
-                static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
+            AutoLock lock(mContextsLock);
+            auto& contextDesc = mContexts[handle];
+            AddressSpaceDevicePingInfo* pingInfo = contextDesc.pingInfo;
 
-            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr, false);
-            pingInfo->metadata = contextDesc.device_context ? 0 : -1;
+            const uint64_t phys_addr = pingInfo->phys_addr;
+            const uint64_t size = pingInfo->size;
+            const uint64_t metadata = pingInfo->metadata;
+
+            AS_DEVICE_DPRINT(
+                    "handle %u data 0x%llx -> %p size %llu meta 0x%llx\n", handle,
+                    (unsigned long long)phys_addr,
+                    sVmOps->physicalMemoryGetAddr(phys_addr),
+                    (unsigned long long)size, (unsigned long long)metadata);
+
+            AddressSpaceDeviceContext *device_context = contextDesc.device_context.get();
+            if (device_context) {
+                device_context->perform(pingInfo);
+            } else {
+                // The first ioctl establishes the device type
+                const AddressSpaceDeviceType device_type =
+                    static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
+
+                contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr, false);
+                pingInfo->metadata = contextDesc.device_context ? 0 : -1;
+
+                sDeviceContextsForPing.add(handle, contextDesc.device_context.get());
+                sDevicePingInfos.add(handle, pingInfo);
+            }
         }
     }
 
