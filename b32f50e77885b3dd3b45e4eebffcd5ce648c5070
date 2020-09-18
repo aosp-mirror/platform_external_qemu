@@ -1,0 +1,31 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005022112",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1431609?revision\u003d1",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "b9bb4d20_55f50519",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-18T06:12:02Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027deny list\u0027 or \u0027allow list\u0027; see https://developers.google.com/style/word-list#blacklist for more details.",
+      "range": {
+        "startLine": 423,
+        "startChar": 37,
+        "endLine": 423,
+        "endChar": 46
+      },
+      "revId": "b32f50e77885b3dd3b45e4eebffcd5ce648c5070",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
