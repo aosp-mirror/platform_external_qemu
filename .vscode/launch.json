@@ -121,7 +121,7 @@
             "type": "lldb",
             "request": "attach",
             // Replace this with the process executable you want to attach to
-            "pid": 79475, // replace pid with your real pid
+            "pid": 19837, // replace pid with your real pid
             // Ignore signal SIGUSR1
             "postRunCommands": [
                 "pro hand -p true -s false SIGUSR1",
