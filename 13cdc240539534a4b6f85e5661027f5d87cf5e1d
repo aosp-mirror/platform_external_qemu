@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "55249fd7_bbb69b67",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-09-18T23:54:57Z",
+      "side": 1,
+      "message": "Can we mention we just \"attempt\" to use the native way, because we may fall back when the GPU driver doesn\u0027t appear to support?",
+      "revId": "13cdc240539534a4b6f85e5661027f5d87cf5e1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed32dc77_ce3445ef",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1745,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-09-18T23:54:57Z",
+      "side": 1,
+      "message": "Can we write it like:\n```\nif (isEtc2Format(format)) {\n    found[format] \u003d true;\n    ++numEtc2FormatsSupported;\n}\n```\n\nwhich looks more natural?",
+      "revId": "13cdc240539534a4b6f85e5661027f5d87cf5e1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
