@@ -3697,9 +3697,9 @@ public:
             return result;
         }
         // TODO: Check VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT?
-        AutoLock lock(mLock);
-        mCmdBufferInfo[commandBuffer].preprocessFuncs.clear();
-        mCmdBufferInfo[commandBuffer].subCmds.clear();
+        // AutoLock lock(mLock);
+        // mCmdBufferInfo[commandBuffer].preprocessFuncs.clear();
+        // mCmdBufferInfo[commandBuffer].subCmds.clear();
         return VK_SUCCESS;
     }
 
@@ -4016,19 +4016,16 @@ public:
         mGlobalHandleStore.remove((uint64_t)boxed); \
     } \
     type unbox_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
         auto elt = mGlobalHandleStore.getLocked( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) return VK_NULL_HANDLE; \
         return (type)elt->underlying; \
     } \
     type unboxed_to_boxed_##type(type unboxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
         return (type)mGlobalHandleStore.getBoxedFromUnboxedLocked( \
                 (uint64_t)(uintptr_t)unboxed); \
     } \
     VulkanDispatch* dispatch_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
         auto elt = mGlobalHandleStore.getLocked( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) { fprintf(stderr, "%s: err not found boxed %p\n", __func__, boxed); return nullptr; } \
@@ -4046,12 +4043,10 @@ public:
         mGlobalHandleStore.remove((uint64_t)boxed); \
     } \
     type unboxed_to_boxed_non_dispatchable_##type(type unboxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
         return (type)mGlobalHandleStore.getBoxedFromUnboxedLocked( \
                 (uint64_t)(uintptr_t)unboxed); \
     } \
     type unbox_non_dispatchable_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
         auto elt = mGlobalHandleStore.getLocked( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); return VK_NULL_HANDLE; } \
