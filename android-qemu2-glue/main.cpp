@@ -9,6 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android-qemu2-glue/qemu-console-factory.h"
 #include "android/android.h"
 #include "android/avd/hw-config.h"
 #include "android/base/Log.h"
@@ -18,8 +19,8 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/Async.h"
 #include "android/base/system/Win32Utils.h"
+#include "android/base/threads/Async.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
 #include "android/camera/camera-virtualscene.h"
@@ -32,14 +33,14 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/LogcatPipe.h"
+#include "android/emulation/MultiDisplay.h"
 #include "android/emulation/ParameterList.h"
-#include "android/emulation/control/adb/adbkey.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/adb/adbkey.h"
 #include "android/emulation/control/automation_agent.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
-#include "android/emulation/MultiDisplay.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/feature_control.h"
@@ -59,6 +60,7 @@
 #include "android/process_setup.h"
 #include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
+#include "android/snapshot/check_snapshot_loadable.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -72,7 +74,6 @@
 #include "android/utils/tempfile.h"
 #include "android/utils/win32_cmdline_quote.h"
 #include "android/verified-boot/load_config.h"
-#include "android-qemu2-glue/qemu-console-factory.h"
 
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/winsys.h"
@@ -2234,6 +2235,11 @@ extern "C" int main(int argc, char** argv) {
     if (feature_is_enabled(kFeature_VirtioWifi))
         async(&enter_hostapd_event_loop);
 #endif
+    if (opts->check_snapshot_loadable) {
+        android_check_snapshot_loadable(opts->check_snapshot_loadable);
+        return 0;
+    }
+
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
 

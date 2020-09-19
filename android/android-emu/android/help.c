@@ -1933,6 +1933,12 @@ help_crostini(stralloc_t* out)
     "  Turn on optimizations for running in a VM on Chrome OS.\n"
     );
 }
+
+static void help_check_snapshot_loadable(stralloc_t* out) {
+    PRINTF("  Check if a snapshot is loadable.\n"
+           "  -check-snapshot-loadable <snapshot name|snapshot TAR file>\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
