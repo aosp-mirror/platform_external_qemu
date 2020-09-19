@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f0651866_22f738e3",
+        "filename": "android/android-emu/android/base/Pool.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-09-19T01:20:04Z",
+      "side": 1,
+      "message": "free(mChunk);",
+      "range": {
+        "startLine": 307,
+        "startChar": 31,
+        "endLine": 308,
+        "endChar": 9
+      },
+      "revId": "515f9abcf0c13efe230337271a5fdf8039ec2152",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b2f9afb_30665ff1",
+        "filename": "android/android-emu/android/base/Pool.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-09-19T01:20:04Z",
+      "side": 1,
+      "message": "move it after L370, make it private",
+      "range": {
+        "startLine": 309,
+        "startChar": 5,
+        "endLine": 311,
+        "endChar": 17
+      },
+      "revId": "515f9abcf0c13efe230337271a5fdf8039ec2152",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
