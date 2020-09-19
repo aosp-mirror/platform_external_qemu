@@ -4818,6 +4818,16 @@ STEXI
 Run periodic perf stat reporter in the background and write output to specified file.
 ETEXI
 
+DEF("check-snapshot-loadable", HAS_ARG, QEMU_OPTION_check_snapshot_loadable, \
+    "-check-snapshot-loadable [snapshop_id|snapshot_tar_file]\n" \
+    "                         Check if a snasphot is loadable\n",
+    QEMU_ARCH_ALL)
+STEXI
+@item -check-snapshot-loadable @var{file}
+@findex -check-snapshot-loadable
+Check if a snasphot is loadable
+ETEXI
+
 #endif  // CONFIG_ANDROID
 
 HXCOMM This is the last statement. Insert new options before this line!

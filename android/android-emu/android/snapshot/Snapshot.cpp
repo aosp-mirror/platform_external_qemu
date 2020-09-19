@@ -42,6 +42,8 @@
 #include <functional>
 #include <unordered_set>
 
+#define PLINE printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+
 #define ALLOW_CHANGE_RENDERER
 
 using android::base::c_str;
@@ -203,18 +205,23 @@ static Optional<std::string> currentGpuDriverString() {
 }
 
 bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
-    VmConfiguration vmConfig;
-    Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
-    if (host.has_hypervisor() && host.hypervisor() != vmConfig.hypervisorType) {
-        if (writeFailure)
-            saveFailure(FailureReason::ConfigMismatchHostHypervisor);
-        return false;
+    if (Snapshotter::get().vmOperations().getVmConfiguration != nullptr) {
+        VmConfiguration vmConfig;
+        PLINE
+        Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
+        PLINE
+        if (host.has_hypervisor() && host.hypervisor() != vmConfig.hypervisorType) {
+            if (writeFailure)
+                saveFailure(FailureReason::ConfigMismatchHostHypervisor);
+            return false;
+        }
     }
     // Do not worry about backend if in swiftshader_indirect
     if (emuglConfig_get_current_renderer() ==
         SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
         return true;
     }
+    PLINE
     if (auto gpuString = currentGpuDriverString()) {
         if (!host.has_gpu_driver() || host.gpu_driver() != *gpuString) {
             if (writeFailure)
@@ -226,6 +233,7 @@ bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
             saveFailure(FailureReason::ConfigMismatchHostGpu);
         return false;
     }
+    PLINE
     return true;
 }
 
@@ -285,19 +293,21 @@ bool Snapshot::verifyFeatureFlags(const pb::Config& config) {
 }
 
 bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
-    VmConfiguration vmConfig;
-    Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
-    if (config.has_cpu_core_count() &&
-        config.cpu_core_count() != vmConfig.numberOfCpuCores) {
-        if (writeFailure)
-            saveFailure(FailureReason::ConfigMismatchAvd);
-        return false;
-    }
-    if (config.has_ram_size_bytes() &&
-        config.ram_size_bytes() != vmConfig.ramSizeBytes) {
-        if (writeFailure)
-            saveFailure(FailureReason::ConfigMismatchAvd);
-        return false;
+    if (Snapshotter::get().vmOperations().getVmConfiguration != nullptr) {
+        VmConfiguration vmConfig;
+        Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
+        if (config.has_cpu_core_count() &&
+            config.cpu_core_count() != vmConfig.numberOfCpuCores) {
+            if (writeFailure)
+                saveFailure(FailureReason::ConfigMismatchAvd);
+            return false;
+        }
+        if (config.has_ram_size_bytes() &&
+            config.ram_size_bytes() != vmConfig.ramSizeBytes) {
+            if (writeFailure)
+                saveFailure(FailureReason::ConfigMismatchAvd);
+            return false;
+        }
     }
     if (config.has_selected_renderer() &&
         config.selected_renderer() != int(emuglConfig_get_current_renderer())) {
@@ -586,28 +596,34 @@ const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
 }
 
 const bool Snapshot::checkValid(bool writeFailure) {
+    PLINE
     if (!preload()) {
         return false;
     }
+    PLINE
 
     if (fc::isEnabled(fc::AllowSnapshotMigration)) {
         return true;
     }
+    PLINE
 
     if (mSnapshotPb.has_host() &&
         !verifyHost(mSnapshotPb.host(), writeFailure)) {
         return false;
     }
+    PLINE
     if (mSnapshotPb.has_config() &&
         !verifyConfig(mSnapshotPb.config(), writeFailure)) {
         return false;
     }
+    PLINE
     if (mSnapshotPb.images_size() > int(ARRAY_SIZE(kImages))) {
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
 
+    PLINE
     int matchedImages = 0;
     for (const auto& image : kImages) {
         ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
@@ -652,6 +668,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
             saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
+    PLINE
 
     IniFile expectedConfig(PathUtils::join(mDataDir, "hardware.ini"));
     if (!expectedConfig.read(false)) {
@@ -878,3 +895,53 @@ base::Optional<FailureReason> Snapshot::failureReason() const {
 
 }  // namespace snapshot
 }  // namespace android
+
+extern "C" int android_check_snapshot_loadable(const char* snapshot_name) {
+    PLINE
+    using namespace android::snapshot;
+    const char* const kExportedSnapshotExt[] = {
+        ".tar",
+        ".tar.gz"
+    };
+    bool exportedSnapshot = false;
+    size_t snapshotNameLength = strlen(snapshot_name);
+    for (const char* ext: kExportedSnapshotExt) {
+        size_t extLen = strlen(ext);
+        if (snapshotNameLength > extLen
+                && 0 == strcmp(snapshot_name
+                        + snapshotNameLength - extLen, ext)) {
+            exportedSnapshot = true;
+            break;
+        }
+    }
+    PLINE
+    if (exportedSnapshot) {
+        // TODO
+        printf("Loadable\n");
+        return 1;
+    } else {
+        PLINE
+        printf("snapshot name %s\n", snapshot_name);
+        android::base::Optional<Snapshot> snapshot
+                = Snapshot::getSnapshotById(snapshot_name);
+        PLINE
+        if (snapshot.ptr() == nullptr) {
+            printf("Not loadable\n");
+            printf("Reason: Snapshot not found with name: %s\n", snapshot_name);
+            return 0;
+        } else if (snapshot->checkValid(true)) {
+            printf("Loadable\n");
+            return 1;
+        } else {
+            PLINE
+            printf("Not loadable\n");
+            if (snapshot->failureReason().ptr() == nullptr) {
+                printf("Reason: Unknown.\n");
+            } else {
+                printf("Reason: %s",
+                    failureReasonToString(*snapshot->failureReason(), SNAPSHOT_LOAD));
+            }
+            return 0;
+        }
+    }
+}

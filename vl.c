@@ -181,6 +181,7 @@ int main(int argc, char **argv)
 #include "android/skin/winsys.h"
 #include "android/snaphost-android.h"
 #include "android/snapshot.h"
+#include "android/snapshot/check_snapshot_loadable.h"
 #include "android/snapshot/interface.h"
 #include "android/telephony/modem_driver.h"
 #include "android/ui-emu-agent.h"
@@ -3417,6 +3418,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     Error *err = NULL;
     bool list_data_dirs = false;
     char *dir, **dirs;
+    const char *snapshot_check_name = NULL;
     typedef struct BlockdevOptions_queue {
         BlockdevOptions *bdo;
         Location loc;
@@ -4058,6 +4060,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_snapshot_list:
                 snapshot_list = true;
                 break;
+            case QEMU_OPTION_check_snapshot_loadable:
+                snapshot_check_name = optarg;
+                break;
+
 #endif
             case QEMU_OPTION_full_screen:
                 dpy.has_full_screen = true;
@@ -5641,6 +5647,11 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #if SNAPSHOT_PROFILE > 1
         printf("Starting VM at uptime %lld ms\n", (long long)get_uptime_ms());
 #endif
+
+        if (snapshot_check_name) {
+            android_check_snapshot_loadable(snapshot_check_name);
+            exit(0);
+        }
 
         if (mem_path) {
             androidSnapshot_setRamFile(mem_path, mem_file_shared);

@@ -1618,7 +1618,6 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             *exit_status = 0;
             return false;
         }
-
     }
 
     // Both |argc| and |argv| have been modified by the big while loop above:
