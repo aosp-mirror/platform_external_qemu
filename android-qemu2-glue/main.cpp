@@ -59,6 +59,7 @@
 #include "android/process_setup.h"
 #include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
+#include "android/snapshot/check_snapshot_loadable.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -2234,6 +2235,11 @@ extern "C" int main(int argc, char** argv) {
     if (feature_is_enabled(kFeature_VirtioWifi))
         async(&enter_hostapd_event_loop);
 #endif
+    if (opts->check_snapshot_loadable) {
+        android_check_snapshot_loadable(opts->check_snapshot_loadable);
+        return 0;
+    }
+
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
 
