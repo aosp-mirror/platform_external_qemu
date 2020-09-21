@@ -240,7 +240,7 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
         self.deepcopyVars = ["from", "to"]
         self.deepcopyPoolVarName = "pool"
         self.deepcopyPoolParam = \
-            makeVulkanTypeSimple(False, "Pool", 1,
+            makeVulkanTypeSimple(False, "BumpPool", 1,
                                  self.deepcopyPoolVarName)
         self.voidType = makeVulkanTypeSimple(False, "void", 0)
 
