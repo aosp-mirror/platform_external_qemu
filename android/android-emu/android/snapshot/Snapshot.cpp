@@ -203,12 +203,16 @@ static Optional<std::string> currentGpuDriverString() {
 }
 
 bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
-    VmConfiguration vmConfig;
-    Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
-    if (host.has_hypervisor() && host.hypervisor() != vmConfig.hypervisorType) {
-        if (writeFailure)
-            saveFailure(FailureReason::ConfigMismatchHostHypervisor);
-        return false;
+    if (Snapshotter::get().vmOperations().getVmConfiguration != nullptr) {
+        VmConfiguration vmConfig;
+        Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
+        if (host.has_hypervisor() &&
+            host.hypervisor() != vmConfig.hypervisorType) {
+            if (writeFailure) {
+                saveFailure(FailureReason::ConfigMismatchHostHypervisor);
+            }
+            return false;
+        }
     }
     // Do not worry about backend if in swiftshader_indirect
     if (emuglConfig_get_current_renderer() ==
@@ -217,13 +221,15 @@ bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
     }
     if (auto gpuString = currentGpuDriverString()) {
         if (!host.has_gpu_driver() || host.gpu_driver() != *gpuString) {
-            if (writeFailure)
+            if (writeFailure) {
                 saveFailure(FailureReason::ConfigMismatchHostGpu);
+            }
             return false;
         }
     } else if (host.has_gpu_driver()) {
-        if (writeFailure)
+        if (writeFailure) {
             saveFailure(FailureReason::ConfigMismatchHostGpu);
+        }
         return false;
     }
     return true;
@@ -285,34 +291,40 @@ bool Snapshot::verifyFeatureFlags(const pb::Config& config) {
 }
 
 bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
-    VmConfiguration vmConfig;
-    Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
-    if (config.has_cpu_core_count() &&
-        config.cpu_core_count() != vmConfig.numberOfCpuCores) {
-        if (writeFailure)
-            saveFailure(FailureReason::ConfigMismatchAvd);
-        return false;
-    }
-    if (config.has_ram_size_bytes() &&
-        config.ram_size_bytes() != vmConfig.ramSizeBytes) {
-        if (writeFailure)
-            saveFailure(FailureReason::ConfigMismatchAvd);
-        return false;
+    if (Snapshotter::get().vmOperations().getVmConfiguration != nullptr) {
+        VmConfiguration vmConfig;
+        Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
+        if (config.has_cpu_core_count() &&
+            config.cpu_core_count() != vmConfig.numberOfCpuCores) {
+            if (writeFailure) {
+                saveFailure(FailureReason::ConfigMismatchAvd);
+            }
+            return false;
+        }
+        if (config.has_ram_size_bytes() &&
+            config.ram_size_bytes() != vmConfig.ramSizeBytes) {
+            if (writeFailure) {
+                saveFailure(FailureReason::ConfigMismatchAvd);
+            }
+            return false;
+        }
     }
     if (config.has_selected_renderer() &&
         config.selected_renderer() != int(emuglConfig_get_current_renderer())) {
 #ifdef ALLOW_CHANGE_RENDERER
         fprintf(stderr, "WARNING: change of renderer detected.\n");
 #else   // ALLOW_CHANGE_RENDERER
-        if (writeFailure)
+        if (writeFailure) {
             saveFailure(FailureReason::ConfigMismatchRenderer);
+        }
         return false;
 #endif  // ALLOW_CHANGE_RENDERER
     }
 
     if (!verifyFeatureFlags(config)) {
-        if (writeFailure)
+        if (writeFailure) {
             saveFailure(FailureReason::ConfigMismatchFeatures);
+        }
         return false;
     }
 
@@ -598,10 +610,12 @@ const bool Snapshot::checkValid(bool writeFailure) {
         !verifyHost(mSnapshotPb.host(), writeFailure)) {
         return false;
     }
+
     if (mSnapshotPb.has_config() &&
         !verifyConfig(mSnapshotPb.config(), writeFailure)) {
         return false;
     }
+
     if (mSnapshotPb.images_size() > int(ARRAY_SIZE(kImages))) {
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchAvd);
@@ -878,3 +892,45 @@ base::Optional<FailureReason> Snapshot::failureReason() const {
 
 }  // namespace snapshot
 }  // namespace android
+
+extern "C" int android_check_snapshot_loadable(const char* snapshot_name) {
+    using namespace android::snapshot;
+    const char* const kExportedSnapshotExt[] = {".tar", ".tar.gz"};
+    bool exportedSnapshot = false;
+    size_t snapshotNameLength = strlen(snapshot_name);
+    for (const char* ext : kExportedSnapshotExt) {
+        size_t extLen = strlen(ext);
+        if (snapshotNameLength > extLen &&
+            0 == strcmp(snapshot_name + snapshotNameLength - extLen, ext)) {
+            exportedSnapshot = true;
+            break;
+        }
+    }
+    if (exportedSnapshot) {
+        // TODO(b/166826352)
+        printf("Loadable\n");
+        return 1;
+    } else {
+        printf("snapshot name %s\n", snapshot_name);
+        android::base::Optional<Snapshot> snapshot =
+                Snapshot::getSnapshotById(snapshot_name);
+        if (snapshot.ptr() == nullptr) {
+            printf("Not loadable\n");
+            printf("Reason: Snapshot not found with name: %s\n", snapshot_name);
+            return 0;
+        } else if (snapshot->checkValid(true)) {
+            printf("Loadable\n");
+            return 1;
+        } else {
+            printf("Not loadable\n");
+            if (snapshot->failureReason().ptr() == nullptr) {
+                printf("Reason: Unknown.\n");
+            } else {
+                printf("Reason: %s\n",
+                       failureReasonToString(*snapshot->failureReason(),
+                                             SNAPSHOT_LOAD));
+            }
+            return 0;
+        }
+    }
+}
