@@ -305,6 +305,30 @@
       "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70e91d8b_fd475ec8",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2223,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-21T23:27:46Z",
+      "side": 1,
+      "message": "I used lazyinstance here instead. It seems like a common pattern in our codebase.",
+      "parentUuid": "c4e3e720_45eb92cf",
+      "range": {
+        "startLine": 2223,
+        "startChar": 8,
+        "endLine": 2223,
+        "endChar": 10
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
