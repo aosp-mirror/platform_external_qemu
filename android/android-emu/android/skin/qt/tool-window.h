@@ -116,9 +116,9 @@ public:
     void forwardKeyToEmulator(uint32_t keycode, bool down);
     void touchExtendedWindow();
     // Handle a full key press (down + up) in a single call.
-    void handleUICommand(QtUICommand cmd) {
-        handleUICommand(cmd, true);
-        handleUICommand(cmd, false);
+    void handleUICommand(QtUICommand cmd, std::string extra = "") {
+        handleUICommand(cmd, true, extra);
+        handleUICommand(cmd, false, extra);
     }
     void hideRotationButton(bool hide);
     bool setUiTheme(SettingsTheme theme);
@@ -131,7 +131,7 @@ signals:
 
 private:
     static void forwardGenericEventToEmulator(int type, int code, int value);
-    void handleUICommand(QtUICommand cmd, bool down);
+    void handleUICommand(QtUICommand cmd, bool down, std::string extra = "");
     void ensureExtendedWindowExists();
 
     void stopExtendedWindowCreation();
