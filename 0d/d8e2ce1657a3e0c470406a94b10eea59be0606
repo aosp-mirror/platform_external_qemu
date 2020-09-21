@@ -1,0 +1,10 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <android-build-ayeaye@system.gserviceaccount.com>
+Code-Review+1: Yahan Zhou <yahan@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Autosubmit+1: Yahan Zhou <yahan@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Mon, 21 Sep 2020 22:41:26 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1431627
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
