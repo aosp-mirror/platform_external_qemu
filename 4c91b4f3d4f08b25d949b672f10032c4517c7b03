@@ -70,6 +70,30 @@
       "revId": "4c91b4f3d4f08b25d949b672f10032c4517c7b03",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c6061c0_2c58ebae",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-21T23:53:52Z",
+      "side": 1,
+      "message": "In the next CL, the hostapd controller maintains states about what are the SSID/password will be used and which one are blocked. Initially, I was thinking this should be a singleton class. If we delete the sInstance, I will need to make it possible to have VirtioWifiForwarder have access to hostapdcontroller in some way non-trivial. Also, I need to copy the states from old instance to new instance.",
+      "parentUuid": "f3a6f13e_b36ca53a",
+      "range": {
+        "startLine": 88,
+        "startChar": 24,
+        "endLine": 88,
+        "endChar": 33
+      },
+      "revId": "4c91b4f3d4f08b25d949b672f10032c4517c7b03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
