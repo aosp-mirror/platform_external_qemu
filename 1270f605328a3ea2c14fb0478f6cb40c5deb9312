@@ -69,6 +69,75 @@
       "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b43566ee_73eb4192",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-09-21T22:11:16Z",
+      "side": 1,
+      "message": "Is this field useful?",
+      "range": {
+        "startLine": 55,
+        "startChar": 6,
+        "endLine": 55,
+        "endChar": 19
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58004580_ff15723a",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-09-21T22:11:16Z",
+      "side": 1,
+      "message": "You can\u0027t just write to a bool variable from different threads. You either need an atomic or a mutex.",
+      "range": {
+        "startLine": 79,
+        "startChar": 8,
+        "endLine": 79,
+        "endChar": 16
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70d7af5c_b677723a",
+        "filename": "android-qemu2-glue/emulation/HostapdController.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-09-21T22:11:16Z",
+      "side": 1,
+      "message": "Is there a reason it is unique_ptr instead of just Event?",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 19
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
