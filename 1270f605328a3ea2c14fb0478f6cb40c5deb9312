@@ -162,6 +162,30 @@
       "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9dee3310_57c16364",
+        "filename": "android-qemu2-glue/emulation/HostapdController.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-21T22:14:13Z",
+      "side": 1,
+      "message": "android::base::Event doesn\u0027t provide move assignment. In the next CL, I need to discard the current Event object and reset to a new Event instance when the hostapd is restarted. So we need to have a new fresh Event instance.",
+      "parentUuid": "70d7af5c_b677723a",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 19
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
