@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c65b19d5_a8f90495",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-09-21T22:06:01Z",
+      "side": 1,
+      "message": "Please add \n\n// extern \"C\"",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 1
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71047b63_384afc47",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-09-21T22:06:01Z",
+      "side": 1,
+      "message": "Should this be a reference instead of a pointer?",
+      "range": {
+        "startLine": 47,
+        "startChar": 17,
+        "endLine": 47,
+        "endChar": 18
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
