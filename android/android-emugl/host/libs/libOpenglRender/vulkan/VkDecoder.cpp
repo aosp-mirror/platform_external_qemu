@@ -29,7 +29,7 @@
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 #include "android/base/system/System.h"
 
 #include "IOStream.h"
@@ -76,7 +76,7 @@ private:
     BoxedHandleCreateMapping m_boxedHandleCreateMapping;
     BoxedHandleDestroyMapping m_boxedHandleDestroyMapping;
     BoxedHandleUnwrapAndDeleteMapping m_boxedHandleUnwrapAndDeleteMapping;
-    android::base::Pool m_pool { 8, 4096, 64 };
+    android::base::BumpPool m_pool;
     BoxedHandleUnwrapAndDeletePreserveBoxedMapping m_boxedHandleUnwrapAndDeletePreserveBoxedMapping;
 };
 

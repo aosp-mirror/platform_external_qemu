@@ -152,7 +152,7 @@ class IOStream;
 #include "%s.h"
 
 #include "android/base/AlignedBuf.h"
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 #include "android/base/synchronization/AndroidLock.h"
 
 #include <cutils/properties.h>
@@ -210,8 +210,8 @@ using OnFailCompareFunc = std::function<void(const char*)>;
 """
         poolInclude = """
 #include "goldfish_vk_private_defs.h"
-#include "android/base/Pool.h"
-using android::base::Pool;
+#include "android/base/BumpPool.h"
+using android::base::BumpPool;
 """
         handleMapInclude = """
 #include "goldfish_vk_private_defs.h"
@@ -236,23 +236,23 @@ using android::base::Pool;
 
 namespace android {
 namespace base {
-class Pool;
+class BumpPool;
 } // namespace base
 } // namespace android
 
-using android::base::Pool;
+using android::base::BumpPool;
 
 """
         unboxImplInclude = """
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 #include "VkDecoderGlobalState.h"
 #include "goldfish_vk_deepcopy.h"
 #include "goldfish_vk_handlemap.h"
 """
         poolIncludeGuest = """
 #include "goldfish_vk_private_defs.h"
-#include "android/base/Pool.h"
-using android::base::Pool;
+#include "android/base/BumpPool.h"
+using android::base::BumpPool;
 // Stuff we are not going to use but if included,
 // will cause compile errors. These are Android Vulkan
 // required extensions, but the approach will be to
@@ -330,7 +330,7 @@ using DlSymFunc = void* (void*, const char*);
 
 namespace android {
 namespace base {
-class Pool;
+class BumpPool;
 } // namespace android
 } // namespace base
 
@@ -341,7 +341,7 @@ class Pool;
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 #include "android/base/system/System.h"
 
 #include "IOStream.h"
