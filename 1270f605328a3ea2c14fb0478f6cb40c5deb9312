@@ -282,6 +282,29 @@
       "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c4e3e720_45eb92cf",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2223,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-09-21T22:44:29Z",
+      "side": 1,
+      "message": "Is it ok to skip if hostapd is null here? Should we say something, fail the whole thing or crash?",
+      "range": {
+        "startLine": 2223,
+        "startChar": 8,
+        "endLine": 2223,
+        "endChar": 10
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
