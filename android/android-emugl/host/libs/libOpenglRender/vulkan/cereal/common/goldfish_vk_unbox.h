@@ -32,11 +32,11 @@
 
 namespace android {
 namespace base {
-class Pool;
+class BumpPool;
 } // namespace base
 } // namespace android
 
-using android::base::Pool;
+using android::base::BumpPool;
 
 
 
@@ -44,829 +44,829 @@ namespace goldfish_vk {
 
 #ifdef VK_VERSION_1_0
 VkApplicationInfo* unbox_VkApplicationInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkApplicationInfo* toUnbox);
 
 VkInstanceCreateInfo* unbox_VkInstanceCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkInstanceCreateInfo* toUnbox);
 
 VkAllocationCallbacks* unbox_VkAllocationCallbacks(
-    Pool* pool,
+    BumpPool* pool,
     const VkAllocationCallbacks* toUnbox);
 
 VkPhysicalDeviceFeatures* unbox_VkPhysicalDeviceFeatures(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceFeatures* toUnbox);
 
 VkFormatProperties* unbox_VkFormatProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkFormatProperties* toUnbox);
 
 VkExtent3D* unbox_VkExtent3D(
-    Pool* pool,
+    BumpPool* pool,
     const VkExtent3D* toUnbox);
 
 VkImageFormatProperties* unbox_VkImageFormatProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageFormatProperties* toUnbox);
 
 VkPhysicalDeviceLimits* unbox_VkPhysicalDeviceLimits(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceLimits* toUnbox);
 
 VkPhysicalDeviceSparseProperties* unbox_VkPhysicalDeviceSparseProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceSparseProperties* toUnbox);
 
 VkPhysicalDeviceProperties* unbox_VkPhysicalDeviceProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceProperties* toUnbox);
 
 VkQueueFamilyProperties* unbox_VkQueueFamilyProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkQueueFamilyProperties* toUnbox);
 
 VkMemoryType* unbox_VkMemoryType(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryType* toUnbox);
 
 VkMemoryHeap* unbox_VkMemoryHeap(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryHeap* toUnbox);
 
 VkPhysicalDeviceMemoryProperties* unbox_VkPhysicalDeviceMemoryProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceMemoryProperties* toUnbox);
 
 VkDeviceQueueCreateInfo* unbox_VkDeviceQueueCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceQueueCreateInfo* toUnbox);
 
 VkDeviceCreateInfo* unbox_VkDeviceCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceCreateInfo* toUnbox);
 
 VkExtensionProperties* unbox_VkExtensionProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkExtensionProperties* toUnbox);
 
 VkLayerProperties* unbox_VkLayerProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkLayerProperties* toUnbox);
 
 VkSubmitInfo* unbox_VkSubmitInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkSubmitInfo* toUnbox);
 
 VkMemoryAllocateInfo* unbox_VkMemoryAllocateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryAllocateInfo* toUnbox);
 
 VkMappedMemoryRange* unbox_VkMappedMemoryRange(
-    Pool* pool,
+    BumpPool* pool,
     const VkMappedMemoryRange* toUnbox);
 
 VkMemoryRequirements* unbox_VkMemoryRequirements(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryRequirements* toUnbox);
 
 VkSparseImageFormatProperties* unbox_VkSparseImageFormatProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkSparseImageFormatProperties* toUnbox);
 
 VkSparseImageMemoryRequirements* unbox_VkSparseImageMemoryRequirements(
-    Pool* pool,
+    BumpPool* pool,
     const VkSparseImageMemoryRequirements* toUnbox);
 
 VkSparseMemoryBind* unbox_VkSparseMemoryBind(
-    Pool* pool,
+    BumpPool* pool,
     const VkSparseMemoryBind* toUnbox);
 
 VkSparseBufferMemoryBindInfo* unbox_VkSparseBufferMemoryBindInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkSparseBufferMemoryBindInfo* toUnbox);
 
 VkSparseImageOpaqueMemoryBindInfo* unbox_VkSparseImageOpaqueMemoryBindInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkSparseImageOpaqueMemoryBindInfo* toUnbox);
 
 VkImageSubresource* unbox_VkImageSubresource(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageSubresource* toUnbox);
 
 VkOffset3D* unbox_VkOffset3D(
-    Pool* pool,
+    BumpPool* pool,
     const VkOffset3D* toUnbox);
 
 VkSparseImageMemoryBind* unbox_VkSparseImageMemoryBind(
-    Pool* pool,
+    BumpPool* pool,
     const VkSparseImageMemoryBind* toUnbox);
 
 VkSparseImageMemoryBindInfo* unbox_VkSparseImageMemoryBindInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkSparseImageMemoryBindInfo* toUnbox);
 
 VkBindSparseInfo* unbox_VkBindSparseInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkBindSparseInfo* toUnbox);
 
 VkFenceCreateInfo* unbox_VkFenceCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkFenceCreateInfo* toUnbox);
 
 VkSemaphoreCreateInfo* unbox_VkSemaphoreCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkSemaphoreCreateInfo* toUnbox);
 
 VkEventCreateInfo* unbox_VkEventCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkEventCreateInfo* toUnbox);
 
 VkQueryPoolCreateInfo* unbox_VkQueryPoolCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkQueryPoolCreateInfo* toUnbox);
 
 VkBufferCreateInfo* unbox_VkBufferCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkBufferCreateInfo* toUnbox);
 
 VkBufferViewCreateInfo* unbox_VkBufferViewCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkBufferViewCreateInfo* toUnbox);
 
 VkImageCreateInfo* unbox_VkImageCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageCreateInfo* toUnbox);
 
 VkSubresourceLayout* unbox_VkSubresourceLayout(
-    Pool* pool,
+    BumpPool* pool,
     const VkSubresourceLayout* toUnbox);
 
 VkComponentMapping* unbox_VkComponentMapping(
-    Pool* pool,
+    BumpPool* pool,
     const VkComponentMapping* toUnbox);
 
 VkImageSubresourceRange* unbox_VkImageSubresourceRange(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageSubresourceRange* toUnbox);
 
 VkImageViewCreateInfo* unbox_VkImageViewCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageViewCreateInfo* toUnbox);
 
 VkShaderModuleCreateInfo* unbox_VkShaderModuleCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkShaderModuleCreateInfo* toUnbox);
 
 VkPipelineCacheCreateInfo* unbox_VkPipelineCacheCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineCacheCreateInfo* toUnbox);
 
 VkSpecializationMapEntry* unbox_VkSpecializationMapEntry(
-    Pool* pool,
+    BumpPool* pool,
     const VkSpecializationMapEntry* toUnbox);
 
 VkSpecializationInfo* unbox_VkSpecializationInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkSpecializationInfo* toUnbox);
 
 VkPipelineShaderStageCreateInfo* unbox_VkPipelineShaderStageCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineShaderStageCreateInfo* toUnbox);
 
 VkVertexInputBindingDescription* unbox_VkVertexInputBindingDescription(
-    Pool* pool,
+    BumpPool* pool,
     const VkVertexInputBindingDescription* toUnbox);
 
 VkVertexInputAttributeDescription* unbox_VkVertexInputAttributeDescription(
-    Pool* pool,
+    BumpPool* pool,
     const VkVertexInputAttributeDescription* toUnbox);
 
 VkPipelineVertexInputStateCreateInfo* unbox_VkPipelineVertexInputStateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineVertexInputStateCreateInfo* toUnbox);
 
 VkPipelineInputAssemblyStateCreateInfo* unbox_VkPipelineInputAssemblyStateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineInputAssemblyStateCreateInfo* toUnbox);
 
 VkPipelineTessellationStateCreateInfo* unbox_VkPipelineTessellationStateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineTessellationStateCreateInfo* toUnbox);
 
 VkViewport* unbox_VkViewport(
-    Pool* pool,
+    BumpPool* pool,
     const VkViewport* toUnbox);
 
 VkOffset2D* unbox_VkOffset2D(
-    Pool* pool,
+    BumpPool* pool,
     const VkOffset2D* toUnbox);
 
 VkExtent2D* unbox_VkExtent2D(
-    Pool* pool,
+    BumpPool* pool,
     const VkExtent2D* toUnbox);
 
 VkRect2D* unbox_VkRect2D(
-    Pool* pool,
+    BumpPool* pool,
     const VkRect2D* toUnbox);
 
 VkPipelineViewportStateCreateInfo* unbox_VkPipelineViewportStateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineViewportStateCreateInfo* toUnbox);
 
 VkPipelineRasterizationStateCreateInfo* unbox_VkPipelineRasterizationStateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineRasterizationStateCreateInfo* toUnbox);
 
 VkPipelineMultisampleStateCreateInfo* unbox_VkPipelineMultisampleStateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineMultisampleStateCreateInfo* toUnbox);
 
 VkStencilOpState* unbox_VkStencilOpState(
-    Pool* pool,
+    BumpPool* pool,
     const VkStencilOpState* toUnbox);
 
 VkPipelineDepthStencilStateCreateInfo* unbox_VkPipelineDepthStencilStateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineDepthStencilStateCreateInfo* toUnbox);
 
 VkPipelineColorBlendAttachmentState* unbox_VkPipelineColorBlendAttachmentState(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineColorBlendAttachmentState* toUnbox);
 
 VkPipelineColorBlendStateCreateInfo* unbox_VkPipelineColorBlendStateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineColorBlendStateCreateInfo* toUnbox);
 
 VkPipelineDynamicStateCreateInfo* unbox_VkPipelineDynamicStateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineDynamicStateCreateInfo* toUnbox);
 
 VkGraphicsPipelineCreateInfo* unbox_VkGraphicsPipelineCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkGraphicsPipelineCreateInfo* toUnbox);
 
 VkComputePipelineCreateInfo* unbox_VkComputePipelineCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkComputePipelineCreateInfo* toUnbox);
 
 VkPushConstantRange* unbox_VkPushConstantRange(
-    Pool* pool,
+    BumpPool* pool,
     const VkPushConstantRange* toUnbox);
 
 VkPipelineLayoutCreateInfo* unbox_VkPipelineLayoutCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineLayoutCreateInfo* toUnbox);
 
 VkSamplerCreateInfo* unbox_VkSamplerCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkSamplerCreateInfo* toUnbox);
 
 VkDescriptorSetLayoutBinding* unbox_VkDescriptorSetLayoutBinding(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorSetLayoutBinding* toUnbox);
 
 VkDescriptorSetLayoutCreateInfo* unbox_VkDescriptorSetLayoutCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorSetLayoutCreateInfo* toUnbox);
 
 VkDescriptorPoolSize* unbox_VkDescriptorPoolSize(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorPoolSize* toUnbox);
 
 VkDescriptorPoolCreateInfo* unbox_VkDescriptorPoolCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorPoolCreateInfo* toUnbox);
 
 VkDescriptorSetAllocateInfo* unbox_VkDescriptorSetAllocateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorSetAllocateInfo* toUnbox);
 
 VkDescriptorImageInfo* unbox_VkDescriptorImageInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorImageInfo* toUnbox);
 
 VkDescriptorBufferInfo* unbox_VkDescriptorBufferInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorBufferInfo* toUnbox);
 
 VkWriteDescriptorSet* unbox_VkWriteDescriptorSet(
-    Pool* pool,
+    BumpPool* pool,
     const VkWriteDescriptorSet* toUnbox);
 
 VkCopyDescriptorSet* unbox_VkCopyDescriptorSet(
-    Pool* pool,
+    BumpPool* pool,
     const VkCopyDescriptorSet* toUnbox);
 
 VkFramebufferCreateInfo* unbox_VkFramebufferCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkFramebufferCreateInfo* toUnbox);
 
 VkAttachmentDescription* unbox_VkAttachmentDescription(
-    Pool* pool,
+    BumpPool* pool,
     const VkAttachmentDescription* toUnbox);
 
 VkAttachmentReference* unbox_VkAttachmentReference(
-    Pool* pool,
+    BumpPool* pool,
     const VkAttachmentReference* toUnbox);
 
 VkSubpassDescription* unbox_VkSubpassDescription(
-    Pool* pool,
+    BumpPool* pool,
     const VkSubpassDescription* toUnbox);
 
 VkSubpassDependency* unbox_VkSubpassDependency(
-    Pool* pool,
+    BumpPool* pool,
     const VkSubpassDependency* toUnbox);
 
 VkRenderPassCreateInfo* unbox_VkRenderPassCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkRenderPassCreateInfo* toUnbox);
 
 VkCommandPoolCreateInfo* unbox_VkCommandPoolCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkCommandPoolCreateInfo* toUnbox);
 
 VkCommandBufferAllocateInfo* unbox_VkCommandBufferAllocateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkCommandBufferAllocateInfo* toUnbox);
 
 VkCommandBufferInheritanceInfo* unbox_VkCommandBufferInheritanceInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkCommandBufferInheritanceInfo* toUnbox);
 
 VkCommandBufferBeginInfo* unbox_VkCommandBufferBeginInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkCommandBufferBeginInfo* toUnbox);
 
 VkBufferCopy* unbox_VkBufferCopy(
-    Pool* pool,
+    BumpPool* pool,
     const VkBufferCopy* toUnbox);
 
 VkImageSubresourceLayers* unbox_VkImageSubresourceLayers(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageSubresourceLayers* toUnbox);
 
 VkImageCopy* unbox_VkImageCopy(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageCopy* toUnbox);
 
 VkImageBlit* unbox_VkImageBlit(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageBlit* toUnbox);
 
 VkBufferImageCopy* unbox_VkBufferImageCopy(
-    Pool* pool,
+    BumpPool* pool,
     const VkBufferImageCopy* toUnbox);
 
 VkClearColorValue* unbox_VkClearColorValue(
-    Pool* pool,
+    BumpPool* pool,
     const VkClearColorValue* toUnbox);
 
 VkClearDepthStencilValue* unbox_VkClearDepthStencilValue(
-    Pool* pool,
+    BumpPool* pool,
     const VkClearDepthStencilValue* toUnbox);
 
 VkClearValue* unbox_VkClearValue(
-    Pool* pool,
+    BumpPool* pool,
     const VkClearValue* toUnbox);
 
 VkClearAttachment* unbox_VkClearAttachment(
-    Pool* pool,
+    BumpPool* pool,
     const VkClearAttachment* toUnbox);
 
 VkClearRect* unbox_VkClearRect(
-    Pool* pool,
+    BumpPool* pool,
     const VkClearRect* toUnbox);
 
 VkImageResolve* unbox_VkImageResolve(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageResolve* toUnbox);
 
 VkMemoryBarrier* unbox_VkMemoryBarrier(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryBarrier* toUnbox);
 
 VkBufferMemoryBarrier* unbox_VkBufferMemoryBarrier(
-    Pool* pool,
+    BumpPool* pool,
     const VkBufferMemoryBarrier* toUnbox);
 
 VkImageMemoryBarrier* unbox_VkImageMemoryBarrier(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageMemoryBarrier* toUnbox);
 
 VkRenderPassBeginInfo* unbox_VkRenderPassBeginInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkRenderPassBeginInfo* toUnbox);
 
 VkDispatchIndirectCommand* unbox_VkDispatchIndirectCommand(
-    Pool* pool,
+    BumpPool* pool,
     const VkDispatchIndirectCommand* toUnbox);
 
 VkDrawIndexedIndirectCommand* unbox_VkDrawIndexedIndirectCommand(
-    Pool* pool,
+    BumpPool* pool,
     const VkDrawIndexedIndirectCommand* toUnbox);
 
 VkDrawIndirectCommand* unbox_VkDrawIndirectCommand(
-    Pool* pool,
+    BumpPool* pool,
     const VkDrawIndirectCommand* toUnbox);
 
 VkBaseOutStructure* unbox_VkBaseOutStructure(
-    Pool* pool,
+    BumpPool* pool,
     const VkBaseOutStructure* toUnbox);
 
 VkBaseInStructure* unbox_VkBaseInStructure(
-    Pool* pool,
+    BumpPool* pool,
     const VkBaseInStructure* toUnbox);
 
 #endif
 #ifdef VK_VERSION_1_1
 VkPhysicalDeviceSubgroupProperties* unbox_VkPhysicalDeviceSubgroupProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceSubgroupProperties* toUnbox);
 
 VkBindBufferMemoryInfo* unbox_VkBindBufferMemoryInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkBindBufferMemoryInfo* toUnbox);
 
 VkBindImageMemoryInfo* unbox_VkBindImageMemoryInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkBindImageMemoryInfo* toUnbox);
 
 VkPhysicalDevice16BitStorageFeatures* unbox_VkPhysicalDevice16BitStorageFeatures(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDevice16BitStorageFeatures* toUnbox);
 
 VkMemoryDedicatedRequirements* unbox_VkMemoryDedicatedRequirements(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryDedicatedRequirements* toUnbox);
 
 VkMemoryDedicatedAllocateInfo* unbox_VkMemoryDedicatedAllocateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryDedicatedAllocateInfo* toUnbox);
 
 VkMemoryAllocateFlagsInfo* unbox_VkMemoryAllocateFlagsInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryAllocateFlagsInfo* toUnbox);
 
 VkDeviceGroupRenderPassBeginInfo* unbox_VkDeviceGroupRenderPassBeginInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceGroupRenderPassBeginInfo* toUnbox);
 
 VkDeviceGroupCommandBufferBeginInfo* unbox_VkDeviceGroupCommandBufferBeginInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceGroupCommandBufferBeginInfo* toUnbox);
 
 VkDeviceGroupSubmitInfo* unbox_VkDeviceGroupSubmitInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceGroupSubmitInfo* toUnbox);
 
 VkDeviceGroupBindSparseInfo* unbox_VkDeviceGroupBindSparseInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceGroupBindSparseInfo* toUnbox);
 
 VkBindBufferMemoryDeviceGroupInfo* unbox_VkBindBufferMemoryDeviceGroupInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkBindBufferMemoryDeviceGroupInfo* toUnbox);
 
 VkBindImageMemoryDeviceGroupInfo* unbox_VkBindImageMemoryDeviceGroupInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkBindImageMemoryDeviceGroupInfo* toUnbox);
 
 VkPhysicalDeviceGroupProperties* unbox_VkPhysicalDeviceGroupProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceGroupProperties* toUnbox);
 
 VkDeviceGroupDeviceCreateInfo* unbox_VkDeviceGroupDeviceCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceGroupDeviceCreateInfo* toUnbox);
 
 VkBufferMemoryRequirementsInfo2* unbox_VkBufferMemoryRequirementsInfo2(
-    Pool* pool,
+    BumpPool* pool,
     const VkBufferMemoryRequirementsInfo2* toUnbox);
 
 VkImageMemoryRequirementsInfo2* unbox_VkImageMemoryRequirementsInfo2(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageMemoryRequirementsInfo2* toUnbox);
 
 VkImageSparseMemoryRequirementsInfo2* unbox_VkImageSparseMemoryRequirementsInfo2(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageSparseMemoryRequirementsInfo2* toUnbox);
 
 VkMemoryRequirements2* unbox_VkMemoryRequirements2(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryRequirements2* toUnbox);
 
 VkSparseImageMemoryRequirements2* unbox_VkSparseImageMemoryRequirements2(
-    Pool* pool,
+    BumpPool* pool,
     const VkSparseImageMemoryRequirements2* toUnbox);
 
 VkPhysicalDeviceFeatures2* unbox_VkPhysicalDeviceFeatures2(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceFeatures2* toUnbox);
 
 VkPhysicalDeviceProperties2* unbox_VkPhysicalDeviceProperties2(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceProperties2* toUnbox);
 
 VkFormatProperties2* unbox_VkFormatProperties2(
-    Pool* pool,
+    BumpPool* pool,
     const VkFormatProperties2* toUnbox);
 
 VkImageFormatProperties2* unbox_VkImageFormatProperties2(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageFormatProperties2* toUnbox);
 
 VkPhysicalDeviceImageFormatInfo2* unbox_VkPhysicalDeviceImageFormatInfo2(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceImageFormatInfo2* toUnbox);
 
 VkQueueFamilyProperties2* unbox_VkQueueFamilyProperties2(
-    Pool* pool,
+    BumpPool* pool,
     const VkQueueFamilyProperties2* toUnbox);
 
 VkPhysicalDeviceMemoryProperties2* unbox_VkPhysicalDeviceMemoryProperties2(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceMemoryProperties2* toUnbox);
 
 VkSparseImageFormatProperties2* unbox_VkSparseImageFormatProperties2(
-    Pool* pool,
+    BumpPool* pool,
     const VkSparseImageFormatProperties2* toUnbox);
 
 VkPhysicalDeviceSparseImageFormatInfo2* unbox_VkPhysicalDeviceSparseImageFormatInfo2(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceSparseImageFormatInfo2* toUnbox);
 
 VkPhysicalDevicePointClippingProperties* unbox_VkPhysicalDevicePointClippingProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDevicePointClippingProperties* toUnbox);
 
 VkInputAttachmentAspectReference* unbox_VkInputAttachmentAspectReference(
-    Pool* pool,
+    BumpPool* pool,
     const VkInputAttachmentAspectReference* toUnbox);
 
 VkRenderPassInputAttachmentAspectCreateInfo* unbox_VkRenderPassInputAttachmentAspectCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkRenderPassInputAttachmentAspectCreateInfo* toUnbox);
 
 VkImageViewUsageCreateInfo* unbox_VkImageViewUsageCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageViewUsageCreateInfo* toUnbox);
 
 VkPipelineTessellationDomainOriginStateCreateInfo* unbox_VkPipelineTessellationDomainOriginStateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineTessellationDomainOriginStateCreateInfo* toUnbox);
 
 VkRenderPassMultiviewCreateInfo* unbox_VkRenderPassMultiviewCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkRenderPassMultiviewCreateInfo* toUnbox);
 
 VkPhysicalDeviceMultiviewFeatures* unbox_VkPhysicalDeviceMultiviewFeatures(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceMultiviewFeatures* toUnbox);
 
 VkPhysicalDeviceMultiviewProperties* unbox_VkPhysicalDeviceMultiviewProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceMultiviewProperties* toUnbox);
 
 VkPhysicalDeviceVariablePointerFeatures* unbox_VkPhysicalDeviceVariablePointerFeatures(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceVariablePointerFeatures* toUnbox);
 
 VkPhysicalDeviceProtectedMemoryFeatures* unbox_VkPhysicalDeviceProtectedMemoryFeatures(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceProtectedMemoryFeatures* toUnbox);
 
 VkPhysicalDeviceProtectedMemoryProperties* unbox_VkPhysicalDeviceProtectedMemoryProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceProtectedMemoryProperties* toUnbox);
 
 VkDeviceQueueInfo2* unbox_VkDeviceQueueInfo2(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceQueueInfo2* toUnbox);
 
 VkProtectedSubmitInfo* unbox_VkProtectedSubmitInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkProtectedSubmitInfo* toUnbox);
 
 VkSamplerYcbcrConversionCreateInfo* unbox_VkSamplerYcbcrConversionCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkSamplerYcbcrConversionCreateInfo* toUnbox);
 
 VkSamplerYcbcrConversionInfo* unbox_VkSamplerYcbcrConversionInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkSamplerYcbcrConversionInfo* toUnbox);
 
 VkBindImagePlaneMemoryInfo* unbox_VkBindImagePlaneMemoryInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkBindImagePlaneMemoryInfo* toUnbox);
 
 VkImagePlaneMemoryRequirementsInfo* unbox_VkImagePlaneMemoryRequirementsInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkImagePlaneMemoryRequirementsInfo* toUnbox);
 
 VkPhysicalDeviceSamplerYcbcrConversionFeatures* unbox_VkPhysicalDeviceSamplerYcbcrConversionFeatures(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceSamplerYcbcrConversionFeatures* toUnbox);
 
 VkSamplerYcbcrConversionImageFormatProperties* unbox_VkSamplerYcbcrConversionImageFormatProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkSamplerYcbcrConversionImageFormatProperties* toUnbox);
 
 VkDescriptorUpdateTemplateEntry* unbox_VkDescriptorUpdateTemplateEntry(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorUpdateTemplateEntry* toUnbox);
 
 VkDescriptorUpdateTemplateCreateInfo* unbox_VkDescriptorUpdateTemplateCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorUpdateTemplateCreateInfo* toUnbox);
 
 VkExternalMemoryProperties* unbox_VkExternalMemoryProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkExternalMemoryProperties* toUnbox);
 
 VkPhysicalDeviceExternalImageFormatInfo* unbox_VkPhysicalDeviceExternalImageFormatInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceExternalImageFormatInfo* toUnbox);
 
 VkExternalImageFormatProperties* unbox_VkExternalImageFormatProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkExternalImageFormatProperties* toUnbox);
 
 VkPhysicalDeviceExternalBufferInfo* unbox_VkPhysicalDeviceExternalBufferInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceExternalBufferInfo* toUnbox);
 
 VkExternalBufferProperties* unbox_VkExternalBufferProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkExternalBufferProperties* toUnbox);
 
 VkPhysicalDeviceIDProperties* unbox_VkPhysicalDeviceIDProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceIDProperties* toUnbox);
 
 VkExternalMemoryImageCreateInfo* unbox_VkExternalMemoryImageCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkExternalMemoryImageCreateInfo* toUnbox);
 
 VkExternalMemoryBufferCreateInfo* unbox_VkExternalMemoryBufferCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkExternalMemoryBufferCreateInfo* toUnbox);
 
 VkExportMemoryAllocateInfo* unbox_VkExportMemoryAllocateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkExportMemoryAllocateInfo* toUnbox);
 
 VkPhysicalDeviceExternalFenceInfo* unbox_VkPhysicalDeviceExternalFenceInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceExternalFenceInfo* toUnbox);
 
 VkExternalFenceProperties* unbox_VkExternalFenceProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkExternalFenceProperties* toUnbox);
 
 VkExportFenceCreateInfo* unbox_VkExportFenceCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkExportFenceCreateInfo* toUnbox);
 
 VkExportSemaphoreCreateInfo* unbox_VkExportSemaphoreCreateInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkExportSemaphoreCreateInfo* toUnbox);
 
 VkPhysicalDeviceExternalSemaphoreInfo* unbox_VkPhysicalDeviceExternalSemaphoreInfo(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceExternalSemaphoreInfo* toUnbox);
 
 VkExternalSemaphoreProperties* unbox_VkExternalSemaphoreProperties(
-    Pool* pool,
+    BumpPool* pool,
     const VkExternalSemaphoreProperties* toUnbox);
 
 VkPhysicalDeviceMaintenance3Properties* unbox_VkPhysicalDeviceMaintenance3Properties(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceMaintenance3Properties* toUnbox);
 
 VkDescriptorSetLayoutSupport* unbox_VkDescriptorSetLayoutSupport(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorSetLayoutSupport* toUnbox);
 
 VkPhysicalDeviceShaderDrawParameterFeatures* unbox_VkPhysicalDeviceShaderDrawParameterFeatures(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceShaderDrawParameterFeatures* toUnbox);
 
 #endif
 #ifdef VK_KHR_surface
 VkSurfaceCapabilitiesKHR* unbox_VkSurfaceCapabilitiesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSurfaceCapabilitiesKHR* toUnbox);
 
 VkSurfaceFormatKHR* unbox_VkSurfaceFormatKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSurfaceFormatKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_swapchain
 VkSwapchainCreateInfoKHR* unbox_VkSwapchainCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSwapchainCreateInfoKHR* toUnbox);
 
 VkPresentInfoKHR* unbox_VkPresentInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkPresentInfoKHR* toUnbox);
 
 VkImageSwapchainCreateInfoKHR* unbox_VkImageSwapchainCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageSwapchainCreateInfoKHR* toUnbox);
 
 VkBindImageMemorySwapchainInfoKHR* unbox_VkBindImageMemorySwapchainInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkBindImageMemorySwapchainInfoKHR* toUnbox);
 
 VkAcquireNextImageInfoKHR* unbox_VkAcquireNextImageInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkAcquireNextImageInfoKHR* toUnbox);
 
 VkDeviceGroupPresentCapabilitiesKHR* unbox_VkDeviceGroupPresentCapabilitiesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceGroupPresentCapabilitiesKHR* toUnbox);
 
 VkDeviceGroupPresentInfoKHR* unbox_VkDeviceGroupPresentInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceGroupPresentInfoKHR* toUnbox);
 
 VkDeviceGroupSwapchainCreateInfoKHR* unbox_VkDeviceGroupSwapchainCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceGroupSwapchainCreateInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_display
 VkDisplayPropertiesKHR* unbox_VkDisplayPropertiesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayPropertiesKHR* toUnbox);
 
 VkDisplayModeParametersKHR* unbox_VkDisplayModeParametersKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayModeParametersKHR* toUnbox);
 
 VkDisplayModePropertiesKHR* unbox_VkDisplayModePropertiesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayModePropertiesKHR* toUnbox);
 
 VkDisplayModeCreateInfoKHR* unbox_VkDisplayModeCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayModeCreateInfoKHR* toUnbox);
 
 VkDisplayPlaneCapabilitiesKHR* unbox_VkDisplayPlaneCapabilitiesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayPlaneCapabilitiesKHR* toUnbox);
 
 VkDisplayPlanePropertiesKHR* unbox_VkDisplayPlanePropertiesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayPlanePropertiesKHR* toUnbox);
 
 VkDisplaySurfaceCreateInfoKHR* unbox_VkDisplaySurfaceCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplaySurfaceCreateInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_display_swapchain
 VkDisplayPresentInfoKHR* unbox_VkDisplayPresentInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayPresentInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_xlib_surface
 VkXlibSurfaceCreateInfoKHR* unbox_VkXlibSurfaceCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkXlibSurfaceCreateInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_xcb_surface
 VkXcbSurfaceCreateInfoKHR* unbox_VkXcbSurfaceCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkXcbSurfaceCreateInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_wayland_surface
 VkWaylandSurfaceCreateInfoKHR* unbox_VkWaylandSurfaceCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkWaylandSurfaceCreateInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_mir_surface
 VkMirSurfaceCreateInfoKHR* unbox_VkMirSurfaceCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkMirSurfaceCreateInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_android_surface
 VkAndroidSurfaceCreateInfoKHR* unbox_VkAndroidSurfaceCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkAndroidSurfaceCreateInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_win32_surface
 VkWin32SurfaceCreateInfoKHR* unbox_VkWin32SurfaceCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkWin32SurfaceCreateInfoKHR* toUnbox);
 
 #endif
@@ -890,39 +890,39 @@ VkWin32SurfaceCreateInfoKHR* unbox_VkWin32SurfaceCreateInfoKHR(
 #endif
 #ifdef VK_KHR_external_memory_win32
 VkImportMemoryWin32HandleInfoKHR* unbox_VkImportMemoryWin32HandleInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportMemoryWin32HandleInfoKHR* toUnbox);
 
 VkExportMemoryWin32HandleInfoKHR* unbox_VkExportMemoryWin32HandleInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkExportMemoryWin32HandleInfoKHR* toUnbox);
 
 VkMemoryWin32HandlePropertiesKHR* unbox_VkMemoryWin32HandlePropertiesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryWin32HandlePropertiesKHR* toUnbox);
 
 VkMemoryGetWin32HandleInfoKHR* unbox_VkMemoryGetWin32HandleInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryGetWin32HandleInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_external_memory_fd
 VkImportMemoryFdInfoKHR* unbox_VkImportMemoryFdInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportMemoryFdInfoKHR* toUnbox);
 
 VkMemoryFdPropertiesKHR* unbox_VkMemoryFdPropertiesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryFdPropertiesKHR* toUnbox);
 
 VkMemoryGetFdInfoKHR* unbox_VkMemoryGetFdInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryGetFdInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_win32_keyed_mutex
 VkWin32KeyedMutexAcquireReleaseInfoKHR* unbox_VkWin32KeyedMutexAcquireReleaseInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkWin32KeyedMutexAcquireReleaseInfoKHR* toUnbox);
 
 #endif
@@ -932,35 +932,35 @@ VkWin32KeyedMutexAcquireReleaseInfoKHR* unbox_VkWin32KeyedMutexAcquireReleaseInf
 #endif
 #ifdef VK_KHR_external_semaphore_win32
 VkImportSemaphoreWin32HandleInfoKHR* unbox_VkImportSemaphoreWin32HandleInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportSemaphoreWin32HandleInfoKHR* toUnbox);
 
 VkExportSemaphoreWin32HandleInfoKHR* unbox_VkExportSemaphoreWin32HandleInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkExportSemaphoreWin32HandleInfoKHR* toUnbox);
 
 VkD3D12FenceSubmitInfoKHR* unbox_VkD3D12FenceSubmitInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkD3D12FenceSubmitInfoKHR* toUnbox);
 
 VkSemaphoreGetWin32HandleInfoKHR* unbox_VkSemaphoreGetWin32HandleInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSemaphoreGetWin32HandleInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_external_semaphore_fd
 VkImportSemaphoreFdInfoKHR* unbox_VkImportSemaphoreFdInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportSemaphoreFdInfoKHR* toUnbox);
 
 VkSemaphoreGetFdInfoKHR* unbox_VkSemaphoreGetFdInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSemaphoreGetFdInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_push_descriptor
 VkPhysicalDevicePushDescriptorPropertiesKHR* unbox_VkPhysicalDevicePushDescriptorPropertiesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDevicePushDescriptorPropertiesKHR* toUnbox);
 
 #endif
@@ -968,15 +968,15 @@ VkPhysicalDevicePushDescriptorPropertiesKHR* unbox_VkPhysicalDevicePushDescripto
 #endif
 #ifdef VK_KHR_incremental_present
 VkRectLayerKHR* unbox_VkRectLayerKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkRectLayerKHR* toUnbox);
 
 VkPresentRegionKHR* unbox_VkPresentRegionKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkPresentRegionKHR* toUnbox);
 
 VkPresentRegionsKHR* unbox_VkPresentRegionsKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkPresentRegionsKHR* toUnbox);
 
 #endif
@@ -984,37 +984,37 @@ VkPresentRegionsKHR* unbox_VkPresentRegionsKHR(
 #endif
 #ifdef VK_KHR_create_renderpass2
 VkAttachmentDescription2KHR* unbox_VkAttachmentDescription2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkAttachmentDescription2KHR* toUnbox);
 
 VkAttachmentReference2KHR* unbox_VkAttachmentReference2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkAttachmentReference2KHR* toUnbox);
 
 VkSubpassDescription2KHR* unbox_VkSubpassDescription2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSubpassDescription2KHR* toUnbox);
 
 VkSubpassDependency2KHR* unbox_VkSubpassDependency2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSubpassDependency2KHR* toUnbox);
 
 VkRenderPassCreateInfo2KHR* unbox_VkRenderPassCreateInfo2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkRenderPassCreateInfo2KHR* toUnbox);
 
 VkSubpassBeginInfoKHR* unbox_VkSubpassBeginInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSubpassBeginInfoKHR* toUnbox);
 
 VkSubpassEndInfoKHR* unbox_VkSubpassEndInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSubpassEndInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_shared_presentable_image
 VkSharedPresentSurfaceCapabilitiesKHR* unbox_VkSharedPresentSurfaceCapabilitiesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSharedPresentSurfaceCapabilitiesKHR* toUnbox);
 
 #endif
@@ -1024,25 +1024,25 @@ VkSharedPresentSurfaceCapabilitiesKHR* unbox_VkSharedPresentSurfaceCapabilitiesK
 #endif
 #ifdef VK_KHR_external_fence_win32
 VkImportFenceWin32HandleInfoKHR* unbox_VkImportFenceWin32HandleInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportFenceWin32HandleInfoKHR* toUnbox);
 
 VkExportFenceWin32HandleInfoKHR* unbox_VkExportFenceWin32HandleInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkExportFenceWin32HandleInfoKHR* toUnbox);
 
 VkFenceGetWin32HandleInfoKHR* unbox_VkFenceGetWin32HandleInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkFenceGetWin32HandleInfoKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_external_fence_fd
 VkImportFenceFdInfoKHR* unbox_VkImportFenceFdInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportFenceFdInfoKHR* toUnbox);
 
 VkFenceGetFdInfoKHR* unbox_VkFenceGetFdInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkFenceGetFdInfoKHR* toUnbox);
 
 #endif
@@ -1050,15 +1050,15 @@ VkFenceGetFdInfoKHR* unbox_VkFenceGetFdInfoKHR(
 #endif
 #ifdef VK_KHR_get_surface_capabilities2
 VkPhysicalDeviceSurfaceInfo2KHR* unbox_VkPhysicalDeviceSurfaceInfo2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceSurfaceInfo2KHR* toUnbox);
 
 VkSurfaceCapabilities2KHR* unbox_VkSurfaceCapabilities2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSurfaceCapabilities2KHR* toUnbox);
 
 VkSurfaceFormat2KHR* unbox_VkSurfaceFormat2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkSurfaceFormat2KHR* toUnbox);
 
 #endif
@@ -1066,23 +1066,23 @@ VkSurfaceFormat2KHR* unbox_VkSurfaceFormat2KHR(
 #endif
 #ifdef VK_KHR_get_display_properties2
 VkDisplayProperties2KHR* unbox_VkDisplayProperties2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayProperties2KHR* toUnbox);
 
 VkDisplayPlaneProperties2KHR* unbox_VkDisplayPlaneProperties2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayPlaneProperties2KHR* toUnbox);
 
 VkDisplayModeProperties2KHR* unbox_VkDisplayModeProperties2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayModeProperties2KHR* toUnbox);
 
 VkDisplayPlaneInfo2KHR* unbox_VkDisplayPlaneInfo2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayPlaneInfo2KHR* toUnbox);
 
 VkDisplayPlaneCapabilities2KHR* unbox_VkDisplayPlaneCapabilities2KHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayPlaneCapabilities2KHR* toUnbox);
 
 #endif
@@ -1096,7 +1096,7 @@ VkDisplayPlaneCapabilities2KHR* unbox_VkDisplayPlaneCapabilities2KHR(
 #endif
 #ifdef VK_KHR_image_format_list
 VkImageFormatListCreateInfoKHR* unbox_VkImageFormatListCreateInfoKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkImageFormatListCreateInfoKHR* toUnbox);
 
 #endif
@@ -1110,25 +1110,25 @@ VkImageFormatListCreateInfoKHR* unbox_VkImageFormatListCreateInfoKHR(
 #endif
 #ifdef VK_KHR_8bit_storage
 VkPhysicalDevice8BitStorageFeaturesKHR* unbox_VkPhysicalDevice8BitStorageFeaturesKHR(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDevice8BitStorageFeaturesKHR* toUnbox);
 
 #endif
 #ifdef VK_KHR_shader_float16_int8
 VkPhysicalDeviceShaderFloat16Int8Features* unbox_VkPhysicalDeviceShaderFloat16Int8Features(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceShaderFloat16Int8Features* toUnbox);
 
 #endif
 #ifdef VK_ANDROID_native_buffer
 VkNativeBufferANDROID* unbox_VkNativeBufferANDROID(
-    Pool* pool,
+    BumpPool* pool,
     const VkNativeBufferANDROID* toUnbox);
 
 #endif
 #ifdef VK_EXT_debug_report
 VkDebugReportCallbackCreateInfoEXT* unbox_VkDebugReportCallbackCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDebugReportCallbackCreateInfoEXT* toUnbox);
 
 #endif
@@ -1140,7 +1140,7 @@ VkDebugReportCallbackCreateInfoEXT* unbox_VkDebugReportCallbackCreateInfoEXT(
 #endif
 #ifdef VK_AMD_rasterization_order
 VkPipelineRasterizationStateRasterizationOrderAMD* unbox_VkPipelineRasterizationStateRasterizationOrderAMD(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineRasterizationStateRasterizationOrderAMD* toUnbox);
 
 #endif
@@ -1150,15 +1150,15 @@ VkPipelineRasterizationStateRasterizationOrderAMD* unbox_VkPipelineRasterization
 #endif
 #ifdef VK_EXT_debug_marker
 VkDebugMarkerObjectNameInfoEXT* unbox_VkDebugMarkerObjectNameInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDebugMarkerObjectNameInfoEXT* toUnbox);
 
 VkDebugMarkerObjectTagInfoEXT* unbox_VkDebugMarkerObjectTagInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDebugMarkerObjectTagInfoEXT* toUnbox);
 
 VkDebugMarkerMarkerInfoEXT* unbox_VkDebugMarkerMarkerInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDebugMarkerMarkerInfoEXT* toUnbox);
 
 #endif
@@ -1166,15 +1166,15 @@ VkDebugMarkerMarkerInfoEXT* unbox_VkDebugMarkerMarkerInfoEXT(
 #endif
 #ifdef VK_NV_dedicated_allocation
 VkDedicatedAllocationImageCreateInfoNV* unbox_VkDedicatedAllocationImageCreateInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkDedicatedAllocationImageCreateInfoNV* toUnbox);
 
 VkDedicatedAllocationBufferCreateInfoNV* unbox_VkDedicatedAllocationBufferCreateInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkDedicatedAllocationBufferCreateInfoNV* toUnbox);
 
 VkDedicatedAllocationMemoryAllocateInfoNV* unbox_VkDedicatedAllocationMemoryAllocateInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkDedicatedAllocationMemoryAllocateInfoNV* toUnbox);
 
 #endif
@@ -1188,17 +1188,17 @@ VkDedicatedAllocationMemoryAllocateInfoNV* unbox_VkDedicatedAllocationMemoryAllo
 #endif
 #ifdef VK_AMD_texture_gather_bias_lod
 VkTextureLODGatherFormatPropertiesAMD* unbox_VkTextureLODGatherFormatPropertiesAMD(
-    Pool* pool,
+    BumpPool* pool,
     const VkTextureLODGatherFormatPropertiesAMD* toUnbox);
 
 #endif
 #ifdef VK_AMD_shader_info
 VkShaderResourceUsageAMD* unbox_VkShaderResourceUsageAMD(
-    Pool* pool,
+    BumpPool* pool,
     const VkShaderResourceUsageAMD* toUnbox);
 
 VkShaderStatisticsInfoAMD* unbox_VkShaderStatisticsInfoAMD(
-    Pool* pool,
+    BumpPool* pool,
     const VkShaderStatisticsInfoAMD* toUnbox);
 
 #endif
@@ -1208,45 +1208,45 @@ VkShaderStatisticsInfoAMD* unbox_VkShaderStatisticsInfoAMD(
 #endif
 #ifdef VK_NV_external_memory_capabilities
 VkExternalImageFormatPropertiesNV* unbox_VkExternalImageFormatPropertiesNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkExternalImageFormatPropertiesNV* toUnbox);
 
 #endif
 #ifdef VK_NV_external_memory
 VkExternalMemoryImageCreateInfoNV* unbox_VkExternalMemoryImageCreateInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkExternalMemoryImageCreateInfoNV* toUnbox);
 
 VkExportMemoryAllocateInfoNV* unbox_VkExportMemoryAllocateInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkExportMemoryAllocateInfoNV* toUnbox);
 
 #endif
 #ifdef VK_NV_external_memory_win32
 VkImportMemoryWin32HandleInfoNV* unbox_VkImportMemoryWin32HandleInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportMemoryWin32HandleInfoNV* toUnbox);
 
 VkExportMemoryWin32HandleInfoNV* unbox_VkExportMemoryWin32HandleInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkExportMemoryWin32HandleInfoNV* toUnbox);
 
 #endif
 #ifdef VK_NV_win32_keyed_mutex
 VkWin32KeyedMutexAcquireReleaseInfoNV* unbox_VkWin32KeyedMutexAcquireReleaseInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkWin32KeyedMutexAcquireReleaseInfoNV* toUnbox);
 
 #endif
 #ifdef VK_EXT_validation_flags
 VkValidationFlagsEXT* unbox_VkValidationFlagsEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkValidationFlagsEXT* toUnbox);
 
 #endif
 #ifdef VK_NN_vi_surface
 VkViSurfaceCreateInfoNN* unbox_VkViSurfaceCreateInfoNN(
-    Pool* pool,
+    BumpPool* pool,
     const VkViSurfaceCreateInfoNN* toUnbox);
 
 #endif
@@ -1256,83 +1256,83 @@ VkViSurfaceCreateInfoNN* unbox_VkViSurfaceCreateInfoNN(
 #endif
 #ifdef VK_EXT_conditional_rendering
 VkConditionalRenderingBeginInfoEXT* unbox_VkConditionalRenderingBeginInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkConditionalRenderingBeginInfoEXT* toUnbox);
 
 VkPhysicalDeviceConditionalRenderingFeaturesEXT* unbox_VkPhysicalDeviceConditionalRenderingFeaturesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceConditionalRenderingFeaturesEXT* toUnbox);
 
 VkCommandBufferInheritanceConditionalRenderingInfoEXT* unbox_VkCommandBufferInheritanceConditionalRenderingInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkCommandBufferInheritanceConditionalRenderingInfoEXT* toUnbox);
 
 #endif
 #ifdef VK_NVX_device_generated_commands
 VkDeviceGeneratedCommandsFeaturesNVX* unbox_VkDeviceGeneratedCommandsFeaturesNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceGeneratedCommandsFeaturesNVX* toUnbox);
 
 VkDeviceGeneratedCommandsLimitsNVX* unbox_VkDeviceGeneratedCommandsLimitsNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceGeneratedCommandsLimitsNVX* toUnbox);
 
 VkIndirectCommandsTokenNVX* unbox_VkIndirectCommandsTokenNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkIndirectCommandsTokenNVX* toUnbox);
 
 VkIndirectCommandsLayoutTokenNVX* unbox_VkIndirectCommandsLayoutTokenNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkIndirectCommandsLayoutTokenNVX* toUnbox);
 
 VkIndirectCommandsLayoutCreateInfoNVX* unbox_VkIndirectCommandsLayoutCreateInfoNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkIndirectCommandsLayoutCreateInfoNVX* toUnbox);
 
 VkCmdProcessCommandsInfoNVX* unbox_VkCmdProcessCommandsInfoNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkCmdProcessCommandsInfoNVX* toUnbox);
 
 VkCmdReserveSpaceForCommandsInfoNVX* unbox_VkCmdReserveSpaceForCommandsInfoNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkCmdReserveSpaceForCommandsInfoNVX* toUnbox);
 
 VkObjectTableCreateInfoNVX* unbox_VkObjectTableCreateInfoNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkObjectTableCreateInfoNVX* toUnbox);
 
 VkObjectTableEntryNVX* unbox_VkObjectTableEntryNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkObjectTableEntryNVX* toUnbox);
 
 VkObjectTablePipelineEntryNVX* unbox_VkObjectTablePipelineEntryNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkObjectTablePipelineEntryNVX* toUnbox);
 
 VkObjectTableDescriptorSetEntryNVX* unbox_VkObjectTableDescriptorSetEntryNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkObjectTableDescriptorSetEntryNVX* toUnbox);
 
 VkObjectTableVertexBufferEntryNVX* unbox_VkObjectTableVertexBufferEntryNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkObjectTableVertexBufferEntryNVX* toUnbox);
 
 VkObjectTableIndexBufferEntryNVX* unbox_VkObjectTableIndexBufferEntryNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkObjectTableIndexBufferEntryNVX* toUnbox);
 
 VkObjectTablePushConstantEntryNVX* unbox_VkObjectTablePushConstantEntryNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkObjectTablePushConstantEntryNVX* toUnbox);
 
 #endif
 #ifdef VK_NV_clip_space_w_scaling
 VkViewportWScalingNV* unbox_VkViewportWScalingNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkViewportWScalingNV* toUnbox);
 
 VkPipelineViewportWScalingStateCreateInfoNV* unbox_VkPipelineViewportWScalingStateCreateInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineViewportWScalingStateCreateInfoNV* toUnbox);
 
 #endif
@@ -1342,43 +1342,43 @@ VkPipelineViewportWScalingStateCreateInfoNV* unbox_VkPipelineViewportWScalingSta
 #endif
 #ifdef VK_EXT_display_surface_counter
 VkSurfaceCapabilities2EXT* unbox_VkSurfaceCapabilities2EXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkSurfaceCapabilities2EXT* toUnbox);
 
 #endif
 #ifdef VK_EXT_display_control
 VkDisplayPowerInfoEXT* unbox_VkDisplayPowerInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayPowerInfoEXT* toUnbox);
 
 VkDeviceEventInfoEXT* unbox_VkDeviceEventInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceEventInfoEXT* toUnbox);
 
 VkDisplayEventInfoEXT* unbox_VkDisplayEventInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDisplayEventInfoEXT* toUnbox);
 
 VkSwapchainCounterCreateInfoEXT* unbox_VkSwapchainCounterCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkSwapchainCounterCreateInfoEXT* toUnbox);
 
 #endif
 #ifdef VK_GOOGLE_display_timing
 VkRefreshCycleDurationGOOGLE* unbox_VkRefreshCycleDurationGOOGLE(
-    Pool* pool,
+    BumpPool* pool,
     const VkRefreshCycleDurationGOOGLE* toUnbox);
 
 VkPastPresentationTimingGOOGLE* unbox_VkPastPresentationTimingGOOGLE(
-    Pool* pool,
+    BumpPool* pool,
     const VkPastPresentationTimingGOOGLE* toUnbox);
 
 VkPresentTimeGOOGLE* unbox_VkPresentTimeGOOGLE(
-    Pool* pool,
+    BumpPool* pool,
     const VkPresentTimeGOOGLE* toUnbox);
 
 VkPresentTimesInfoGOOGLE* unbox_VkPresentTimesInfoGOOGLE(
-    Pool* pool,
+    BumpPool* pool,
     const VkPresentTimesInfoGOOGLE* toUnbox);
 
 #endif
@@ -1390,37 +1390,37 @@ VkPresentTimesInfoGOOGLE* unbox_VkPresentTimesInfoGOOGLE(
 #endif
 #ifdef VK_NVX_multiview_per_view_attributes
 VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX* unbox_VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX* toUnbox);
 
 #endif
 #ifdef VK_NV_viewport_swizzle
 VkViewportSwizzleNV* unbox_VkViewportSwizzleNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkViewportSwizzleNV* toUnbox);
 
 VkPipelineViewportSwizzleStateCreateInfoNV* unbox_VkPipelineViewportSwizzleStateCreateInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineViewportSwizzleStateCreateInfoNV* toUnbox);
 
 #endif
 #ifdef VK_EXT_discard_rectangles
 VkPhysicalDeviceDiscardRectanglePropertiesEXT* unbox_VkPhysicalDeviceDiscardRectanglePropertiesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceDiscardRectanglePropertiesEXT* toUnbox);
 
 VkPipelineDiscardRectangleStateCreateInfoEXT* unbox_VkPipelineDiscardRectangleStateCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineDiscardRectangleStateCreateInfoEXT* toUnbox);
 
 #endif
 #ifdef VK_EXT_conservative_rasterization
 VkPhysicalDeviceConservativeRasterizationPropertiesEXT* unbox_VkPhysicalDeviceConservativeRasterizationPropertiesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceConservativeRasterizationPropertiesEXT* toUnbox);
 
 VkPipelineRasterizationConservativeStateCreateInfoEXT* unbox_VkPipelineRasterizationConservativeStateCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineRasterizationConservativeStateCreateInfoEXT* toUnbox);
 
 #endif
@@ -1428,23 +1428,23 @@ VkPipelineRasterizationConservativeStateCreateInfoEXT* unbox_VkPipelineRasteriza
 #endif
 #ifdef VK_EXT_hdr_metadata
 VkXYColorEXT* unbox_VkXYColorEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkXYColorEXT* toUnbox);
 
 VkHdrMetadataEXT* unbox_VkHdrMetadataEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkHdrMetadataEXT* toUnbox);
 
 #endif
 #ifdef VK_MVK_ios_surface
 VkIOSSurfaceCreateInfoMVK* unbox_VkIOSSurfaceCreateInfoMVK(
-    Pool* pool,
+    BumpPool* pool,
     const VkIOSSurfaceCreateInfoMVK* toUnbox);
 
 #endif
 #ifdef VK_MVK_macos_surface
 VkMacOSSurfaceCreateInfoMVK* unbox_VkMacOSSurfaceCreateInfoMVK(
-    Pool* pool,
+    BumpPool* pool,
     const VkMacOSSurfaceCreateInfoMVK* toUnbox);
 
 #endif
@@ -1454,59 +1454,59 @@ VkMacOSSurfaceCreateInfoMVK* unbox_VkMacOSSurfaceCreateInfoMVK(
 #endif
 #ifdef VK_EXT_debug_utils
 VkDebugUtilsObjectNameInfoEXT* unbox_VkDebugUtilsObjectNameInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDebugUtilsObjectNameInfoEXT* toUnbox);
 
 VkDebugUtilsObjectTagInfoEXT* unbox_VkDebugUtilsObjectTagInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDebugUtilsObjectTagInfoEXT* toUnbox);
 
 VkDebugUtilsLabelEXT* unbox_VkDebugUtilsLabelEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDebugUtilsLabelEXT* toUnbox);
 
 VkDebugUtilsMessengerCallbackDataEXT* unbox_VkDebugUtilsMessengerCallbackDataEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDebugUtilsMessengerCallbackDataEXT* toUnbox);
 
 VkDebugUtilsMessengerCreateInfoEXT* unbox_VkDebugUtilsMessengerCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDebugUtilsMessengerCreateInfoEXT* toUnbox);
 
 #endif
 #ifdef VK_ANDROID_external_memory_android_hardware_buffer
 VkAndroidHardwareBufferUsageANDROID* unbox_VkAndroidHardwareBufferUsageANDROID(
-    Pool* pool,
+    BumpPool* pool,
     const VkAndroidHardwareBufferUsageANDROID* toUnbox);
 
 VkAndroidHardwareBufferPropertiesANDROID* unbox_VkAndroidHardwareBufferPropertiesANDROID(
-    Pool* pool,
+    BumpPool* pool,
     const VkAndroidHardwareBufferPropertiesANDROID* toUnbox);
 
 VkAndroidHardwareBufferFormatPropertiesANDROID* unbox_VkAndroidHardwareBufferFormatPropertiesANDROID(
-    Pool* pool,
+    BumpPool* pool,
     const VkAndroidHardwareBufferFormatPropertiesANDROID* toUnbox);
 
 VkImportAndroidHardwareBufferInfoANDROID* unbox_VkImportAndroidHardwareBufferInfoANDROID(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportAndroidHardwareBufferInfoANDROID* toUnbox);
 
 VkMemoryGetAndroidHardwareBufferInfoANDROID* unbox_VkMemoryGetAndroidHardwareBufferInfoANDROID(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryGetAndroidHardwareBufferInfoANDROID* toUnbox);
 
 VkExternalFormatANDROID* unbox_VkExternalFormatANDROID(
-    Pool* pool,
+    BumpPool* pool,
     const VkExternalFormatANDROID* toUnbox);
 
 #endif
 #ifdef VK_EXT_sampler_filter_minmax
 VkSamplerReductionModeCreateInfoEXT* unbox_VkSamplerReductionModeCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkSamplerReductionModeCreateInfoEXT* toUnbox);
 
 VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT* unbox_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT* toUnbox);
 
 #endif
@@ -1520,61 +1520,61 @@ VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT* unbox_VkPhysicalDeviceSamplerF
 #endif
 #ifdef VK_EXT_sample_locations
 VkSampleLocationEXT* unbox_VkSampleLocationEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkSampleLocationEXT* toUnbox);
 
 VkSampleLocationsInfoEXT* unbox_VkSampleLocationsInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkSampleLocationsInfoEXT* toUnbox);
 
 VkAttachmentSampleLocationsEXT* unbox_VkAttachmentSampleLocationsEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkAttachmentSampleLocationsEXT* toUnbox);
 
 VkSubpassSampleLocationsEXT* unbox_VkSubpassSampleLocationsEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkSubpassSampleLocationsEXT* toUnbox);
 
 VkRenderPassSampleLocationsBeginInfoEXT* unbox_VkRenderPassSampleLocationsBeginInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkRenderPassSampleLocationsBeginInfoEXT* toUnbox);
 
 VkPipelineSampleLocationsStateCreateInfoEXT* unbox_VkPipelineSampleLocationsStateCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineSampleLocationsStateCreateInfoEXT* toUnbox);
 
 VkPhysicalDeviceSampleLocationsPropertiesEXT* unbox_VkPhysicalDeviceSampleLocationsPropertiesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceSampleLocationsPropertiesEXT* toUnbox);
 
 VkMultisamplePropertiesEXT* unbox_VkMultisamplePropertiesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkMultisamplePropertiesEXT* toUnbox);
 
 #endif
 #ifdef VK_EXT_blend_operation_advanced
 VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT* unbox_VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT* toUnbox);
 
 VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT* unbox_VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT* toUnbox);
 
 VkPipelineColorBlendAdvancedStateCreateInfoEXT* unbox_VkPipelineColorBlendAdvancedStateCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineColorBlendAdvancedStateCreateInfoEXT* toUnbox);
 
 #endif
 #ifdef VK_NV_fragment_coverage_to_color
 VkPipelineCoverageToColorStateCreateInfoNV* unbox_VkPipelineCoverageToColorStateCreateInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineCoverageToColorStateCreateInfoNV* toUnbox);
 
 #endif
 #ifdef VK_NV_framebuffer_mixed_samples
 VkPipelineCoverageModulationStateCreateInfoNV* unbox_VkPipelineCoverageModulationStateCreateInfoNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineCoverageModulationStateCreateInfoNV* toUnbox);
 
 #endif
@@ -1584,33 +1584,33 @@ VkPipelineCoverageModulationStateCreateInfoNV* unbox_VkPipelineCoverageModulatio
 #endif
 #ifdef VK_EXT_validation_cache
 VkValidationCacheCreateInfoEXT* unbox_VkValidationCacheCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkValidationCacheCreateInfoEXT* toUnbox);
 
 VkShaderModuleValidationCacheCreateInfoEXT* unbox_VkShaderModuleValidationCacheCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkShaderModuleValidationCacheCreateInfoEXT* toUnbox);
 
 #endif
 #ifdef VK_EXT_descriptor_indexing
 VkDescriptorSetLayoutBindingFlagsCreateInfoEXT* unbox_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorSetLayoutBindingFlagsCreateInfoEXT* toUnbox);
 
 VkPhysicalDeviceDescriptorIndexingFeaturesEXT* unbox_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceDescriptorIndexingFeaturesEXT* toUnbox);
 
 VkPhysicalDeviceDescriptorIndexingPropertiesEXT* unbox_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceDescriptorIndexingPropertiesEXT* toUnbox);
 
 VkDescriptorSetVariableDescriptorCountAllocateInfoEXT* unbox_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT* toUnbox);
 
 VkDescriptorSetVariableDescriptorCountLayoutSupportEXT* unbox_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDescriptorSetVariableDescriptorCountLayoutSupportEXT* toUnbox);
 
 #endif
@@ -1618,21 +1618,21 @@ VkDescriptorSetVariableDescriptorCountLayoutSupportEXT* unbox_VkDescriptorSetVar
 #endif
 #ifdef VK_EXT_global_priority
 VkDeviceQueueGlobalPriorityCreateInfoEXT* unbox_VkDeviceQueueGlobalPriorityCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkDeviceQueueGlobalPriorityCreateInfoEXT* toUnbox);
 
 #endif
 #ifdef VK_EXT_external_memory_host
 VkImportMemoryHostPointerInfoEXT* unbox_VkImportMemoryHostPointerInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportMemoryHostPointerInfoEXT* toUnbox);
 
 VkMemoryHostPointerPropertiesEXT* unbox_VkMemoryHostPointerPropertiesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkMemoryHostPointerPropertiesEXT* toUnbox);
 
 VkPhysicalDeviceExternalMemoryHostPropertiesEXT* unbox_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceExternalMemoryHostPropertiesEXT* toUnbox);
 
 #endif
@@ -1640,21 +1640,21 @@ VkPhysicalDeviceExternalMemoryHostPropertiesEXT* unbox_VkPhysicalDeviceExternalM
 #endif
 #ifdef VK_AMD_shader_core_properties
 VkPhysicalDeviceShaderCorePropertiesAMD* unbox_VkPhysicalDeviceShaderCorePropertiesAMD(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceShaderCorePropertiesAMD* toUnbox);
 
 #endif
 #ifdef VK_EXT_vertex_attribute_divisor
 VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT* unbox_VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT* toUnbox);
 
 VkVertexInputBindingDivisorDescriptionEXT* unbox_VkVertexInputBindingDivisorDescriptionEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkVertexInputBindingDivisorDescriptionEXT* toUnbox);
 
 VkPipelineVertexInputDivisorStateCreateInfoEXT* unbox_VkPipelineVertexInputDivisorStateCreateInfoEXT(
-    Pool* pool,
+    BumpPool* pool,
     const VkPipelineVertexInputDivisorStateCreateInfoEXT* toUnbox);
 
 #endif
@@ -1662,11 +1662,11 @@ VkPipelineVertexInputDivisorStateCreateInfoEXT* unbox_VkPipelineVertexInputDivis
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
 VkQueueFamilyCheckpointPropertiesNV* unbox_VkQueueFamilyCheckpointPropertiesNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkQueueFamilyCheckpointPropertiesNV* toUnbox);
 
 VkCheckpointDataNV* unbox_VkCheckpointDataNV(
-    Pool* pool,
+    BumpPool* pool,
     const VkCheckpointDataNV* toUnbox);
 
 #endif
@@ -1674,15 +1674,15 @@ VkCheckpointDataNV* unbox_VkCheckpointDataNV(
 #endif
 #ifdef VK_GOOGLE_color_buffer
 VkImportColorBufferGOOGLE* unbox_VkImportColorBufferGOOGLE(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportColorBufferGOOGLE* toUnbox);
 
 VkImportBufferGOOGLE* unbox_VkImportBufferGOOGLE(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportBufferGOOGLE* toUnbox);
 
 VkImportPhysicalAddressGOOGLE* unbox_VkImportPhysicalAddressGOOGLE(
-    Pool* pool,
+    BumpPool* pool,
     const VkImportPhysicalAddressGOOGLE* toUnbox);
 
 #endif

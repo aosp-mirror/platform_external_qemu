@@ -30,7 +30,7 @@ class VulkanUnbox(VulkanWrapperGenerator):
         self.unboxPrefix = "unbox"
         self.toUnboxVar = "toUnbox"
         self.poolParam = \
-            makeVulkanTypeSimple(False, "Pool", 1, "pool")
+            makeVulkanTypeSimple(False, "BumpPool", 1, "pool")
 
         self.knownStructs = {}
         self.needsTransform = set([])

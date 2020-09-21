@@ -57,7 +57,7 @@ private:
     BoxedHandleCreateMapping m_boxedHandleCreateMapping;
     BoxedHandleDestroyMapping m_boxedHandleDestroyMapping;
     BoxedHandleUnwrapAndDeleteMapping m_boxedHandleUnwrapAndDeleteMapping;
-    android::base::Pool m_pool { 8, 4096, 64 };
+    android::base::BumpPool m_pool;
     BoxedHandleUnwrapAndDeletePreserveBoxedMapping m_boxedHandleUnwrapAndDeletePreserveBoxedMapping;
 };
 
@@ -311,7 +311,7 @@ def emit_snapshot(typeInfo, api, cgen):
     additionalParams = [ \
         makeVulkanTypeSimple(True, "uint8_t", 1, "snapshotTraceBegin"),
         makeVulkanTypeSimple(False, "size_t", 0, "snapshotTraceBytes"),
-        makeVulkanTypeSimple(False, "android::base::Pool", 1, "&m_pool"),
+        makeVulkanTypeSimple(False, "android::base::BumpPool", 1, "&m_pool"),
     ]
 
     retTypeName = api.getRetTypeExpr()

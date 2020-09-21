@@ -31,7 +31,7 @@
 
 namespace android {
 namespace base {
-class Pool;
+class BumpPool;
 } // namespace android
 } // namespace base
 
