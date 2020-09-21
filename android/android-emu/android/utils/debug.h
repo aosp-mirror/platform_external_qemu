@@ -71,6 +71,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(foldable, "Foldable Device")                                  \
     _VERBOSE_TAG(curl, "Libcurl requests")                                     \
     _VERBOSE_TAG(car_rotary, "Car rotary controller")                          \
+    _VERBOSE_TAG(wifi, "Virtio Wifi")
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
