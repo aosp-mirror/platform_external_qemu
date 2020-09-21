@@ -45,6 +45,30 @@
       "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de843df9_4fef0eb9",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-21T22:11:03Z",
+      "side": 1,
+      "message": "In case of using reference, sInstance will always be created during program startup. However, it is not always necessary to initialize HostapdController instance. I can switch to a lazy instance instead.",
+      "parentUuid": "71047b63_384afc47",
+      "range": {
+        "startLine": 47,
+        "startChar": 17,
+        "endLine": 47,
+        "endChar": 18
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
