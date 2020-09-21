@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4c6d86b0_6a6a8cf0",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-21T22:17:57Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c65b19d5_a8f90495",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 1
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "71047b63_384afc47",
         "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
         "patchSetId": 5
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "The return type.",
       "parentUuid": "de843df9_4fef0eb9",
+      "range": {
+        "startLine": 47,
+        "startChar": 17,
+        "endLine": 47,
+        "endChar": 18
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f68f8d0_4fd0e4ef",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-21T22:17:57Z",
+      "side": 1,
+      "message": "I did a quick search and most of the cases, getInstance() returns pointer.",
+      "parentUuid": "8c5d16ef_599efb3c",
       "range": {
         "startLine": 47,
         "startChar": 17,
@@ -163,6 +211,30 @@
       "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed9f86e7_be830617",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-21T22:17:57Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "58004580_ff15723a",
+      "range": {
+        "startLine": 79,
+        "startChar": 8,
+        "endLine": 79,
+        "endChar": 16
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
