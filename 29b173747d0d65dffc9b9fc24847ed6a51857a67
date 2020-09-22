@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8826d5e_aaed2259",
+        "filename": "android/android-emu/android/base/BumpPool.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-09-22T01:29:37Z",
+      "side": 1,
+      "message": "can we make it aligned to 8B?",
+      "range": {
+        "startLine": 44,
+        "startChar": 9,
+        "endLine": 48,
+        "endChar": 24
+      },
+      "revId": "29b173747d0d65dffc9b9fc24847ed6a51857a67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
