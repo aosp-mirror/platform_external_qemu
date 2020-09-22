@@ -545,6 +545,7 @@ void vmx_reset_vcpu(CPUState *cpu) {
 
     //wvmcs(cpu->hvf_fd, VMCS_GUEST_CR2, 0x0);
     wvmcs(cpu->hvf_fd, VMCS_GUEST_CR3, 0x0);
+    wvmcs(cpu->hvf_fd, VMCS_GUEST_DR7, 0x0);
 
     wreg(cpu->hvf_fd, HV_X86_RIP, 0xfff0);
     wreg(cpu->hvf_fd, HV_X86_RDX, 0x623);
@@ -1263,8 +1264,19 @@ again:
                 //     store_regs(cpu);
                 // }
                 break;
+            case EXIT_REASON_DR_ACCESS:
+                fprintf(stderr, "%llx: unhandled dr access %llx\n", rip, exit_reason);
+                load_regs(cpu);
+                {
+                    // Just skip the whole thing for now
+                    uint32_t insnLen = rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH);
+                    RIP(cpu) += insnLen;
+                }
+                store_regs(cpu);
+                break;
             default:
                 fprintf(stderr, "%llx: unhandled exit %llx\n", rip, exit_reason);
+                qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
         }
     } while (ret == 0);
 
