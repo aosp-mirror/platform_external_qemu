@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a9c5137e_6c5321e1",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1753250
+      },
+      "writtenOn": "2020-09-22T00:03:17Z",
+      "side": 1,
+      "message": "I\u0027ve changed it to \"Use native texture decompression if available?\"",
+      "parentUuid": "55249fd7_bbb69b67",
+      "revId": "13cdc240539534a4b6f85e5661027f5d87cf5e1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed32dc77_ce3445ef",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2020-09-18T23:54:57Z",
       "side": 1,
       "message": "Can we write it like:\n```\nif (isEtc2Format(format)) {\n    found[format] \u003d true;\n    ++numEtc2FormatsSupported;\n}\n```\n\nwhich looks more natural?",
+      "revId": "13cdc240539534a4b6f85e5661027f5d87cf5e1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b6d6e3c_75347924",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1745,
+      "author": {
+        "id": 1753250
+      },
+      "writtenOn": "2020-09-22T00:03:17Z",
+      "side": 1,
+      "message": "I don\u0027t see any reason not to? Also this made me realize a bug that I introduced since I used isEtcFormat in the other parts of the code, which also returns true for etc1 textures.",
+      "parentUuid": "ed32dc77_ce3445ef",
       "revId": "13cdc240539534a4b6f85e5661027f5d87cf5e1d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
