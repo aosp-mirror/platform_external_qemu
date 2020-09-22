@@ -104,9 +104,11 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->setupUi(this);
     mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
-    mExtendedUi->tvRemotePage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->microphonePage->setEmulatorWindow(mEmulatorWindow);
+    mExtendedUi->tvRemotePage->setEmulatorWindow(mEmulatorWindow);
+    mExtendedUi->tvRemotePage->setAdbInterface(
+            mEmulatorWindow->getAdbInterface());
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->bugreportPage->setAdbInterface(

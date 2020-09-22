@@ -26,22 +26,33 @@ class QObject;
 class QPushButton;
 class QWidget;
 
+
+namespace android {
+namespace emulation {
+class AdbInterface;
+}  // namespace emulation
+}  // namespace android
+
 class TvRemotePage : public QWidget
 {
     Q_OBJECT
 
 public:
     explicit TvRemotePage(QWidget *parent = 0);
-    void setEmulatorWindow(EmulatorQtWindow* eW);
+    void setEmulatorWindow(EmulatorQtWindow* emulator_window);
+    void setAdbInterface(android::emulation::AdbInterface* adb_interface);
 
 private:
     void toggleButtonEvent(QPushButton* button,
                              const SkinKeyCode key_code,
                              const SkinEventType event_type);
-private:
+    void onSettingsButtonPressed();
+    void onProgramGuideButtonPressed();
+    void onAssistantButtonPressed();
     void remaskButtons();
     bool eventFilter(QObject*, QEvent*) override;
 
     std::unique_ptr<Ui::TvRemotePage> mUi;
     EmulatorQtWindow* mEmulatorWindow;
+    android::emulation::AdbInterface* mAdbInterface;
 };
