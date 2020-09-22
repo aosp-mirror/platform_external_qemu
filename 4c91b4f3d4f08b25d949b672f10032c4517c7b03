@@ -94,6 +94,30 @@
       "revId": "4c91b4f3d4f08b25d949b672f10032c4517c7b03",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b06c2bb6_0dddf5e9",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-09-22T00:17:35Z",
+      "side": 1,
+      "message": "I don\u0027t see how this prevents from deleting the instance in terminate. You still access it via getInstance.",
+      "parentUuid": "3c6061c0_2c58ebae",
+      "range": {
+        "startLine": 88,
+        "startChar": 24,
+        "endLine": 88,
+        "endChar": 33
+      },
+      "revId": "4c91b4f3d4f08b25d949b672f10032c4517c7b03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
