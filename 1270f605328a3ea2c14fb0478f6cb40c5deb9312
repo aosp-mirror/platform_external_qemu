@@ -144,6 +144,30 @@
     },
     {
       "key": {
+        "uuid": "3b7480b3_f9516f9f",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-22T21:40:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f68f8d0_4fd0e4ef",
+      "range": {
+        "startLine": 47,
+        "startChar": 17,
+        "endLine": 47,
+        "endChar": 18
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b43566ee_73eb4192",
         "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
         "patchSetId": 5
@@ -188,6 +212,30 @@
       "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f7f4d8a_a8e93d05",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-22T21:40:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "75d248ae_60f07ee8",
+      "range": {
+        "startLine": 55,
+        "startChar": 6,
+        "endLine": 55,
+        "endChar": 19
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -282,6 +330,30 @@
       "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "28da5c20_d6c508d7",
+        "filename": "android-qemu2-glue/emulation/HostapdController.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-22T21:40:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9dee3310_57c16364",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 19
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
