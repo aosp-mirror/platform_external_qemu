@@ -16,6 +16,7 @@
 #include <QWidget>                 // for QWidget
 #include <memory>                  // for unique_ptr
 
+#include "android/emulation/control/adb/AdbInterface.h" // for AdbInterface
 #include "android/skin/event.h"    // for SkinEventType
 #include "android/skin/keycode.h"  // for SkinKeyCode
 #include "ui_tv-remote-page.h"     // for TvRemotePage
@@ -32,16 +33,20 @@ class TvRemotePage : public QWidget
 
 public:
     explicit TvRemotePage(QWidget *parent = 0);
-    void setEmulatorWindow(EmulatorQtWindow* eW);
+    void setEmulatorWindow(EmulatorQtWindow* emulator_window);
+    void setAdbInterface(android::emulation::AdbInterface* adb_interface);
 
 private:
     void toggleButtonEvent(QPushButton* button,
                              const SkinKeyCode key_code,
                              const SkinEventType event_type);
-private:
+    void onSettingsButtonPressed();
+    void onProgramGuideButtonPressed();
+    void onAssistantButtonPressed();
     void remaskButtons();
     bool eventFilter(QObject*, QEvent*) override;
 
     std::unique_ptr<Ui::TvRemotePage> mUi;
     EmulatorQtWindow* mEmulatorWindow;
+    android::emulation::AdbInterface* mAdbInterface;
 };
