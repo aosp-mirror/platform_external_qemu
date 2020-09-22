@@ -118,6 +118,30 @@
       "revId": "4c91b4f3d4f08b25d949b672f10032c4517c7b03",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9ea375d_bf33532a",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-22T21:39:57Z",
+      "side": 1,
+      "message": "I removed mEvent and use ConditionVariable instead.",
+      "parentUuid": "b06c2bb6_0dddf5e9",
+      "range": {
+        "startLine": 88,
+        "startChar": 24,
+        "endLine": 88,
+        "endChar": 33
+      },
+      "revId": "4c91b4f3d4f08b25d949b672f10032c4517c7b03",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

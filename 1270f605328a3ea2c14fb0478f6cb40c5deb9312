@@ -329,6 +329,30 @@
       "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a6ae5316_fe9d62f6",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2223,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-22T21:39:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "70e91d8b_fd475ec8",
+      "range": {
+        "startLine": 2223,
+        "startChar": 8,
+        "endLine": 2223,
+        "endChar": 10
+      },
+      "revId": "1270f605328a3ea2c14fb0478f6cb40c5deb9312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
