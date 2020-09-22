@@ -1606,7 +1606,7 @@ TEST_P(VulkanHalTest, GetImageMemoryRequirements2) {
 
 // Multithreaded benchmark
 TEST_P(VulkanHalTest, Multithreaded) {
-    constexpr uint32_t kThreadCount = 16;
+    constexpr uint32_t kThreadCount = 8;
     VkDescriptorPool pool;
     VkDescriptorSetLayout setLayout;
     std::vector<VkDescriptorSet> sets(kThreadCount);
