@@ -69,6 +69,24 @@
       "revId": "13cdc240539534a4b6f85e5661027f5d87cf5e1d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9271c994_7db67321",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1745,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-09-23T20:26:32Z",
+      "side": 1,
+      "message": "LGTM",
+      "parentUuid": "7b6d6e3c_75347924",
+      "revId": "13cdc240539534a4b6f85e5661027f5d87cf5e1d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
