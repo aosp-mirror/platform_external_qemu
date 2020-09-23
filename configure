@@ -840,7 +840,6 @@ Linux)
   vhost_net="yes"
   vhost_crypto="yes"
   vhost_scsi="yes"
-  vhost_vsock="yes"
   QEMU_INCLUDES="-I\$(SRC_PATH)/linux-headers -I$(pwd)/linux-headers $QEMU_INCLUDES"
   supported_os="yes"
 ;;
