@@ -11,36 +11,52 @@
 
 #include "android/snapshot/Snapshot.h"
 
-#include "android/base/ArraySize.h"
-#include "android/base/Optional.h"
-#include "android/base/ProcessControl.h"
-#include "android/base/StringFormat.h"
-#include "android/base/files/IniFile.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/ScopedFd.h"
-#include "android/base/memory/ScopedPtr.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/system/System.h"
-#include "android/emulation/ConfigDirs.h"
-#include "android/featurecontrol/Features.h"
-#include "android/globals.h"
-#include "android/opengl/emugl_config.h"
-#include "android/opengl/gpuinfo.h"
-#include "android/protobuf/LoadSave.h"
-#include "android/snapshot/PathUtils.h"
-#include "android/snapshot/Quickboot.h"
-#include "android/snapshot/Snapshotter.h"
-#include "android/utils/fd.h"
-#include "android/utils/file_io.h"
-#include "android/utils/path.h"
+#include <fcntl.h>                                    // for open, O_CLOEXEC
+#include <stdio.h>                                    // for printf, fprintf
+#include <string.h>                                   // for strcmp, strlen
+#include <sys/mman.h>                                 // for mmap, munmap
+#include <algorithm>                                  // for find_if, remove_if
+#include <fstream>                                    // for operator<<, ost...
+#include <functional>                                 // for __base
+#include <iterator>                                   // for end
+#include <memory>                                     // for unique_ptr
+#include <type_traits>                                // for decay<>::type
+#include <unordered_set>                              // for unordered_set<>...
+#include <utility>                                    // for hash
 
-#include <fcntl.h>
-#include <sys/mman.h>
-
-#include <algorithm>
-#include <fstream>
-#include <functional>
-#include <unordered_set>
+#include "android/avd/hw-config.h"                    // for androidHwConfig...
+#include "android/avd/info.h"                         // for avdInfo_getCach...
+#include "android/base/ArraySize.h"                   // for ARRAY_SIZE
+#include "android/base/Log.h"                         // for LogStreamVoidify
+#include "android/base/Optional.h"                    // for Optional, makeO...
+#include "android/base/ProcessControl.h"              // for loadLaunchParam...
+#include "android/base/StringFormat.h"                // for StringFormat
+#include "android/base/files/IniFile.h"               // for IniFile
+#include "android/base/files/PathUtils.h"             // for PathUtils, pj
+#include "android/base/files/ScopedFd.h"              // for ScopedFd
+#include "android/base/memory/ScopedPtr.h"            // for makeCustomScope...
+#include "android/base/misc/StringUtils.h"            // for endsWith
+#include "android/base/system/System.h"               // for System, System:...
+#include "android/emulation/ConfigDirs.h"             // for ConfigDirs
+#include "android/emulation/control/vm_operations.h"  // for VmConfiguration
+#include "android/emulation/control/window_agent.h"   // for QAndroidEmulato...
+#include "android/featurecontrol/FeatureControl.h"    // for getEnabled, isE...
+#include "android/featurecontrol/Features.h"          // for Feature, AllowS...
+#include "android/globals.h"                          // for android_avdInfo
+#include "android/opengl/emugl_config.h"              // for emuglConfig_get...
+#include "android/opengl/gpuinfo.h"                   // for GpuInfo, global...
+#include "android/protobuf/LoadSave.h"                // for ProtobufSaveResult
+#include "android/skin/rect.h"                        // for SkinRotation
+#include "android/snapshot/Loader.h"                  // for Loader
+#include "android/snapshot/PathUtils.h"               // for getAvdDir, getS...
+#include "android/snapshot/Snapshotter.h"             // for Snapshotter
+#include "android/utils/fd.h"                         // for O_CLOEXEC
+#include "android/utils/file_data.h"                  // for (anonymous)
+#include "android/utils/file_io.h"                    // for android_stat
+#include "android/utils/ini.h"                        // for CIniFile
+#include "android/utils/path.h"                       // for path_delete_file
+#include "android/utils/system.h"                     // for STRINGIFY
+#include "google/protobuf/stubs/port.h"               // for int32
 
 #define ALLOW_CHANGE_RENDERER
 
@@ -68,6 +84,7 @@ namespace pb = emulator_snapshot;
 
 namespace android {
 namespace snapshot {
+
 
 static void fillImageInfo(pb::Image::Type type,
                           StringView path,
@@ -331,6 +348,11 @@ bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
     return true;
 }
 
+bool Snapshot::isLoaded() {
+    auto loader = android::snapshot::Snapshotter::get().hasLoader();
+    return loader && android::snapshot::Snapshotter::get().loader().snapshot() == *this;
+}
+
 bool Snapshot::writeSnapshotToDisk() {
     auto res = saveProtobuf(PathUtils::join(mDataDir, kSnapshotProtobufName),
                             mSnapshotPb, &mSize);
@@ -548,6 +570,7 @@ void Snapshot::loadProtobufOnce() {
         return;
     }
     mSize = size;
+    mFolderSize = System::get()->recursiveSize(mDataDir);
 
     const auto fileMap = makeCustomScopedPtr(
             mmap(nullptr, size, PROT_READ, MAP_PRIVATE, file.get(), 0),
