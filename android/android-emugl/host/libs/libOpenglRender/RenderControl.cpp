@@ -44,6 +44,8 @@
 #include <inttypes.h>
 #include <string.h>
 
+#include <sys/time.h>
+
 using android::base::AutoLock;
 using android::base::Lock;
 using emugl::emugl_feature_is_enabled;
@@ -70,6 +72,11 @@ using emugl::emugl_sync_register_trigger_wait;
 #define EGLSYNC_DPRINT(...)
 #endif
 
+uint64_t curr_time_us() {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return (uint64_t)(tv.tv_usec + 1000000ULL * tv.tv_sec);
+}
 // GrallocSync is a class that helps to reflect the behavior of
 // grallock_lock/gralloc_unlock on the guest.
 // If we don't use this, apps that use gralloc buffers (such as webcam)
@@ -1200,12 +1207,18 @@ static void rcSetPuid(uint64_t puid) {
 }
 
 static int rcCompose(uint32_t bufferSize, void* buffer) {
+    auto start = curr_time_us();
     AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;
     }
-    return fb->compose(bufferSize, buffer);
+    int res = fb->compose(bufferSize, buffer);
+    static uint32_t count = 0;
+    auto end = curr_time_us();
+        fprintf(stderr, "%s: compose took %u us count %u\n", __func__, (uint32_t)(end - start), count);
+        ++count;
+    return res;
 }
 
 static int rcCreateDisplay(uint32_t* displayId) {
