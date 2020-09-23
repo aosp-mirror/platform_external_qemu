@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb02d6e1_56cd2884",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-09-23T19:37:05Z",
+      "side": 1,
+      "message": "Hi Frank, this CL is important for us to implement the OpenGL window, do you have a plan to merge this change?",
+      "revId": "a023724e3b796ba0dc2a8d07fb6a8b6c9771eb1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1ba1d3f6_1bf7198d",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-09-23T19:37:05Z",
+      "side": 1,
+      "message": "Is it necessary to use an atomic bool here with CAS to avoid the race condition?",
+      "revId": "a023724e3b796ba0dc2a8d07fb6a8b6c9771eb1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
