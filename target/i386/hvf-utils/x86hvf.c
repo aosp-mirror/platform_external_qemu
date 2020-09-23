@@ -383,14 +383,15 @@ int hvf_get_registers(CPUState *cpu_state)
 static void vmx_set_int_window_exiting(CPUState *cpu)
 {
      uint64_t val;
-     val = rvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS);
+     val = rvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS) & ~VMCS_PRI_PROC_BASED_CTLS_MOV_DR_EXITING;
+     fprintf(stderr, "val %llx\n", (unsigned long long)val);
      wvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS, val | VMCS_PRI_PROC_BASED_CTLS_INT_WINDOW_EXITING);
 }
 
 void vmx_clear_int_window_exiting(CPUState *cpu)
 {
      uint64_t val;
-     val = rvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS);
+     val = rvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS) & ~VMCS_PRI_PROC_BASED_CTLS_MOV_DR_EXITING;
      wvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS, val & ~VMCS_PRI_PROC_BASED_CTLS_INT_WINDOW_EXITING);
 }
 

@@ -184,7 +184,7 @@ static void inline vmx_set_nmi_blocking(CPUState *cpu)
 static void inline vmx_set_nmi_window_exiting(CPUState *cpu)
 {
     uint64_t val;
-    val = rvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS);
+    val = rvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS) & ~VMCS_PRI_PROC_BASED_CTLS_MOV_DR_EXITING;
     wvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS, val | VMCS_PRI_PROC_BASED_CTLS_NMI_WINDOW_EXITING);
 
 }
@@ -193,7 +193,7 @@ static void inline vmx_clear_nmi_window_exiting(CPUState *cpu)
 {
 
     uint64_t val;
-    val = rvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS);
+    val = rvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS) & ~VMCS_PRI_PROC_BASED_CTLS_MOV_DR_EXITING;
     wvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS, val & ~VMCS_PRI_PROC_BASED_CTLS_NMI_WINDOW_EXITING);
 }
 

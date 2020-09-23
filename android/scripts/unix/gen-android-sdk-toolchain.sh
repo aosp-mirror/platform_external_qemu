@@ -432,7 +432,7 @@ please_install_proper_sdk_error() {
 prepare_build_for_darwin() {
     OSX_VERSION=$(sw_vers -productVersion)
     OSX_DEPLOYMENT_TARGET=10.11
-    OSX_REQUIRED=10.13
+    OSX_REQUIRED=10.15
     MIN_XCODE=10
 
     # This is the list of supported SDKs,

@@ -595,6 +595,12 @@ int hvf_init_vcpu(CPUState * cpu) {
 
 	/* set VMCS control fields */
     wvmcs(cpu->hvf_fd, VMCS_PIN_BASED_CTLS, cap2ctrl(cpu->hvf_caps->vmx_cap_pinbased, 0));
+    fprintf(stderr, "init value %llx\n", (unsigned long long)(cap2ctrl(cpu->hvf_caps->vmx_cap_procbased,
+                                                   VMCS_PRI_PROC_BASED_CTLS_HLT |
+                                                   VMCS_PRI_PROC_BASED_CTLS_MWAIT |
+                                                   VMCS_PRI_PROC_BASED_CTLS_TSC_OFFSET |
+                                                   VMCS_PRI_PROC_BASED_CTLS_TPR_SHADOW) |
+                                                   VMCS_PRI_PROC_BASED_CTLS_SEC_CONTROL));
     wvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS, cap2ctrl(cpu->hvf_caps->vmx_cap_procbased,
                                                    VMCS_PRI_PROC_BASED_CTLS_HLT |
                                                    VMCS_PRI_PROC_BASED_CTLS_MWAIT |
