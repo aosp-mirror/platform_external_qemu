@@ -19,6 +19,7 @@
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #include "Hwc2.h"
+#include <memory>
 
 
 // Helper class used to draw a simple texture to the current framebuffer.
@@ -81,7 +82,7 @@ private:
     int    mMaskHeight;
     bool   mHaveNewMask;
     bool   mMaskIsValid;
-    const unsigned char* mMaskPixels;
+    std::unique_ptr<const unsigned char> mMaskPixels;
     bool   mBlendResetNeeded = false;
 };
 

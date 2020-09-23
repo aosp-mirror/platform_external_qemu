@@ -388,7 +388,7 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
         s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mMaskWidth, mMaskHeight, 0,
-                             GL_RGBA, GL_UNSIGNED_BYTE, mMaskPixels);
+                             GL_RGBA, GL_UNSIGNED_BYTE, mMaskPixels.get());
 
         s_gles2.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         s_gles2.glEnable(GL_BLEND);
@@ -452,7 +452,9 @@ void TextureDraw::setScreenMask(int width, int height, const unsigned char* rgba
         return;
     }
     // Save the data for use in the right context
-    mMaskPixels = rgbaData;
+    auto pixels = new unsigned char[width * height * 4];
+    memcpy(pixels, rgbaData, width * height * 4);
+    mMaskPixels.reset(pixels);
     mMaskWidth = width;
     mMaskHeight = height;
 
