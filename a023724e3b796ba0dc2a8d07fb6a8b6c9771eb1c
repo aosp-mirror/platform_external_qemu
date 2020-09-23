@@ -51,6 +51,24 @@
       "revId": "a023724e3b796ba0dc2a8d07fb6a8b6c9771eb1c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e61c7c0c_bd3a9fb5",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-09-23T20:58:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c91670a_749a0366",
+      "revId": "a023724e3b796ba0dc2a8d07fb6a8b6c9771eb1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
