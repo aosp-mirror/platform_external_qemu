@@ -138,7 +138,7 @@ class SnapshotService(object):
         self.logger.debug("Retrieving snapshots")
         response = self.stub.ListSnapshots(_EMPTY_)
         self.logger.debug("Response %s", response)
-        return [f.snapshot_id for f in response.snapshots]
+        return [f for f in response.snapshots]
 
     def load(self, snap_id):
         """Loads a snapshot inside the emulator."""

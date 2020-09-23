@@ -28,10 +28,10 @@
 #include "android/base/Optional.h"
 #include "android/base/Stopwatch.h"
 #include "android/base/StringView.h"
-#include "android/base/Uuid.h"  // for Uuid
+#include "android/base/Uuid.h"                                     // for Uuid
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/GzipStreambuf.h"
-#include "android/base/files/PathUtils.h"  // for pj
+#include "android/base/files/PathUtils.h"                          // for pj
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
@@ -46,6 +46,7 @@
 #include "android/snapshot/Snapshot.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/utils/file_io.h"
+#include "android/utils/ini.h"
 #include "android/utils/path.h"
 #include "snapshot.pb.h"
 #include "snapshot_service.grpc.pb.h"
@@ -146,7 +147,8 @@ public:
             stream = std::make_unique<std::ostream>(&csb);
         }
 
-        // Use of  a 64 KB  buffer gives good performance (see performance tests.)
+        // Use of  a 64 KB  buffer gives good performance (see performance
+        // tests.)
         TarWriter tw(tmpdir, *stream, k64KB);
         result.set_success(tw.addDirectory("."));
         if (tw.fail()) {
@@ -171,7 +173,8 @@ public:
             char buf[k64KB];
             PathUtils::split(fname, nullptr, &name);
 
-            // Use of  a 64 KB  buffer gives good performance (see performance tests.)
+            // Use of  a 64 KB  buffer gives good performance (see performance
+            // tests.)
             std::ifstream ifs(fname, std::ios_base::in | std::ios_base::binary);
             ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
 
@@ -291,9 +294,19 @@ public:
         for (auto snapshot : snapshot::Snapshot::getExistingSnapshots()) {
             auto protobuf = snapshot.getGeneralInfo();
 
-            if (protobuf && snapshot.checkValid(false)) {
+            if (protobuf) {
                 auto details = reply->add_snapshots();
                 details->set_snapshot_id(snapshot.name());
+                details->set_size(snapshot.folderSize());
+                if (snapshot.isLoaded()) {
+                    details->set_status(SnapshotDetails::Loaded);
+                } else {
+                    if (snapshot.checkValid(false)) {
+                        details->set_status(SnapshotDetails::Compatible);
+                    } else {
+                        details->set_status(SnapshotDetails::Incompatible);
+                    }
+                }
                 *details->mutable_details() = *protobuf;
             }
         }

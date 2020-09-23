@@ -146,7 +146,41 @@ message SnapshotPackage {
   Format format = 5;
 }
 
+// Provides detailed information regarding the snapshot.
 message SnapshotDetails {
+
+  enum LoadStatus {
+    // The emulator believes that the snapshot is compatible with the emulator
+    // that provided this information.  The emulator will attempt to load this
+    // snapshot when requested.
+    //
+    // A snapshot is usually compatible when the following statements are true:
+    // - The snapshot was taken by the current emulator version. i.e.
+    //   emulator_build_id in the details field matches the build_id of the
+    //   emulator that provided this information.
+    //
+    // - The snapshot was taken on the current running machine, and no hardware
+    //  changes have taken place between taking and loading the snapshot.
+    //
+    // - The avd configuration has not changed between when this snapshot was
+    //   taken  and when the snapshot was loaded.
+    //
+    // - The system images on which the avd is based have not changed.
+    Compatible = 0;
+
+    // The emulator will not allow loading of the snapshot, as it deems the
+    // snapshot to be incompatible. Loading of snapshots can be forced by
+    // launching the emulator with the feature "AllowSnapshotMigration" enabled.
+    Incompatible = 1;
+
+    // This snapshot was successfully loaded in the emulator, and was used at
+    // the starting point of the current running emulator. The following holds:
+    //
+    // A loaded snapshot is a compatible snapshot
+    // There is at most one snapshot_id that is in the "Loaded" state
+    Loaded = 2;
+  }
+
   // The id of this snapshot. Use this id to load/delete/pull the
   // snapshot.
   string snapshot_id = 1;
@@ -157,6 +191,12 @@ message SnapshotDetails {
   // Look at the import file for a detailed description of the available
   // fields.
   emulator_snapshot.Snapshot details = 2;
+
+  // Provides information about the ability to restore this snapshot.
+  LoadStatus status = 3;
+
+  // The size of the folder that stores required information to load a snapshot.
+  uint64 size = 4;
 }
 
 // A List of on snapshot details.
@@ -187,7 +227,6 @@ message IceboxTarget {
   // Set to -1 for unlimited number of snapshots.
   int32 max_snapshot_number = 6;
 }
-
 
 // List of deleted methods:
 //
