@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "688b13f1_93c1d8dc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-23T17:27:37Z",
+      "side": 1,
+      "message": "The stylesheet values are based on the doc shared by Dan.",
+      "revId": "419601a090e6ef4abb9c8bbcdb54227368caff5e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
