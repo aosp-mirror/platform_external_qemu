@@ -33,6 +33,24 @@
       "revId": "a023724e3b796ba0dc2a8d07fb6a8b6c9771eb1c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c91670a_749a0366",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-23T20:58:22Z",
+      "side": 1,
+      "message": "Private to the surface and synced externally, no need.",
+      "parentUuid": "1ba1d3f6_1bf7198d",
+      "revId": "a023724e3b796ba0dc2a8d07fb6a8b6c9771eb1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
