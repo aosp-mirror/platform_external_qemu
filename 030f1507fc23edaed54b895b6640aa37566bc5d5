@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1448de6_bd10d506",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-23T20:54:22Z",
+      "side": 1,
+      "message": "lets try do a size check here and glTexSubImage2D",
+      "range": {
+        "startLine": 390,
+        "startChar": 8,
+        "endLine": 390,
+        "endChar": 28
+      },
+      "revId": "030f1507fc23edaed54b895b6640aa37566bc5d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "854dd51b_91583bcc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 457,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-23T20:54:22Z",
+      "side": 1,
+      "message": "why not memcpy directly to mMaskPixels?",
+      "range": {
+        "startLine": 455,
+        "startChar": 2,
+        "endLine": 457,
+        "endChar": 30
+      },
+      "revId": "030f1507fc23edaed54b895b6640aa37566bc5d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
