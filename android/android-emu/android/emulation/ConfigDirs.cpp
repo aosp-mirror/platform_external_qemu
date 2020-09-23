@@ -68,7 +68,15 @@ std::string ConfigDirs::getUserDirectory() {
         // preferring the one from AS.
         auto homeOldWay = PathUtils::join(home, kAndroidSubDir);
         return system->pathIsDir(homeOldWay) ? homeOldWay : home;
+    } else {
+        // New key: ANDROID_PREFS_ROOT
+        home = system->envGet("ANDROID_PREFS_ROOT");
+        if (!home.empty()) {
+            auto homeNewWay = PathUtils::join(home, kAndroidSubDir);
+            return system->pathIsDir(homeNewWay) ? homeNewWay : home;
+        }
     }
+
     home = system->getHomeDirectory();
     if (home.empty()) {
         home = system->getTempDir();
@@ -77,6 +85,45 @@ std::string ConfigDirs::getUserDirectory() {
         }
     }
     return PathUtils::join(home, kAndroidSubDir);
+}
+
+static std::string getAvdRootDirectoryWithPrefsRoot(const std::string& avdRoot) {
+    if (path.empty()) return {};
+
+    // ANDROID_PREFS_ROOT is defined
+    if (isValidAvdRoot(avdRoot)) {
+        // ANDROID_PREFS_ROOT is good
+        return PathUtils::join(avdRoot, kAvdSubDir);
+    }
+    avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+    if (isValidAvdRoot(avdRoot)) {
+        // ANDROID_PREFS_ROOT/.android is good
+        return PathUtils::join(avdRoot, kAvdSubDir);
+    }
+    // ANDROID_PREFS_ROOT is defined but bad. In this case,
+    // Android Studio tries $TEST_TMPDIR, $USER_HOME, and
+    // $HOME. We'll do the same.
+    avdRoot = system->envGet("TEST_TMPDIR");
+    if (!avdRoot.empty()) {
+        avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+        if (isValidAvdRoot(avdRoot)) {
+            return PathUtils::join(avdRoot, kAvdSubDir);
+        }
+    }
+    avdRoot = system->envGet("USER_HOME");
+    if (!avdRoot.empty()) {
+        avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+        if (isValidAvdRoot(avdRoot)) {
+            return PathUtils::join(avdRoot, kAvdSubDir);
+        }
+    }
+    avdRoot = system->envGet("HOME");
+    if (!avdRoot.empty()) {
+        avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+        if (isValidAvdRoot(avdRoot)) {
+            return PathUtils::join(avdRoot, kAvdSubDir);
+        }
+    }
 }
 
 // static
@@ -95,38 +142,16 @@ std::string ConfigDirs::getAvdRootDirectory() {
     // No luck with ANDROID_AVD_HOME, try ANDROID_SDK_HOME
     avdRoot = system->envGet("ANDROID_SDK_HOME");
     if (!avdRoot.empty()) {
-        // ANDROID_SDK_HOME is defined
-        if (isValidAvdRoot(avdRoot)) {
-            // ANDROID_SDK_HOME is good
-            return PathUtils::join(avdRoot, kAvdSubDir);
+        auto avdRootPath = getAvdRootDirectoryWithPrefsRoot(avdRoot);
+        if (!avdRootPath.empty()) {
+            return avdRootPath;
         }
-        avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-        if (isValidAvdRoot(avdRoot)) {
-            // ANDROID_SDK_HOME/.android is good
-            return PathUtils::join(avdRoot, kAvdSubDir);
-        }
-        // ANDROID_SDK_HOME is defined but bad. In this case,
-        // Android Studio tries $TEST_TMPDIR, $USER_HOME, and
-        // $HOME. We'll do the same.
-        avdRoot = system->envGet("TEST_TMPDIR");
+    } else {
+        avdRoot = system->envGet("ANDROID_PREFS_ROOT");
         if (!avdRoot.empty()) {
-            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-            if (isValidAvdRoot(avdRoot)) {
-                return PathUtils::join(avdRoot, kAvdSubDir);
-            }
-        }
-        avdRoot = system->envGet("USER_HOME");
-        if (!avdRoot.empty()) {
-            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-            if (isValidAvdRoot(avdRoot)) {
-                return PathUtils::join(avdRoot, kAvdSubDir);
-            }
-        }
-        avdRoot = system->envGet("HOME");
-        if (!avdRoot.empty()) {
-            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-            if (isValidAvdRoot(avdRoot)) {
-                return PathUtils::join(avdRoot, kAvdSubDir);
+            auto avdRootPath = getAvdRootDirectoryWithPrefsRoot(avdRoot);
+            if (!avdRootPath.empty()) {
+                return avdRootPath;
             }
         }
     }
