@@ -41,12 +41,23 @@ TEST(ConfigDirs, getUserDirectoryWithAndroidSdkHome) {
                  ConfigDirs::getUserDirectory().c_str());
 }
 
+TEST(ConfigDirs, getUserDirectoryWithAndroidSdkHomeAndPrefsRoot) {
+    TestSystem sys(PATH_SEP "bin", 32, PATH_SEP "myhome");
+    sys.envSet("ANDROID_SDK_HOME", PATH_SEP "android-sdk");
+    sys.envSet("ANDROID_SDK_HOME", PATH_SEP "android-sdk-new");
+    EXPECT_STREQ(PATH_SEP "android-sdk-new", ConfigDirs::getUserDirectory().c_str());
+
+    sys.getTempRoot()->makeSubDir("android-sdk-new");
+    sys.getTempRoot()->makeSubDir("android-sdk-new" PATH_SEP ".android");
+    EXPECT_STREQ(PathUtils::join(PATH_SEP "android-sdk-new", ".android").c_str(),
+                 ConfigDirs::getUserDirectory().c_str());
+}
+
 TEST(ConfigDirs, getUserDirectoryWithAndroidEmulatorHome) {
     TestSystem sys(PATH_SEP "bin", 32, PATH_SEP "myhome");
     sys.envSet("ANDROID_EMULATOR_HOME", PATH_SEP "android" PATH_SEP "home");
     EXPECT_STREQ(PATH_SEP "android" PATH_SEP "home", ConfigDirs::getUserDirectory().c_str());
 }
-
 
 TEST(ConfigDirs, getSdkRootDirectory) {
     TestSystem sys("", 32, PATH_SEP "myhome");
@@ -97,35 +108,44 @@ TEST(ConfigDirs, getAvdRootDirectory) {
     ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_5"));
     ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_5" PATH_SEP ".android"));
     ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_5" PATH_SEP ".android" PATH_SEP "avd"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_6"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_6" PATH_SEP ".android"));
+    ASSERT_TRUE(sys.getTempRoot()->makeSubDir("Area_6" PATH_SEP ".android" PATH_SEP "avd"));
     ASSERT_TRUE(sys.pathIsDir(PATH_SEP "Area_1" PATH_SEP ".android" PATH_SEP "avd"));
     ASSERT_TRUE(sys.pathIsDir(PATH_SEP "Area_2" PATH_SEP ".android" PATH_SEP "avd"));
     ASSERT_TRUE(sys.pathIsDir(PATH_SEP "Area_3" PATH_SEP ".android" PATH_SEP "avd"));
     ASSERT_TRUE(sys.pathIsDir(PATH_SEP "Area_4" PATH_SEP ".android" PATH_SEP "avd"));
     ASSERT_TRUE(sys.pathIsDir(PATH_SEP "Area_5" PATH_SEP ".android" PATH_SEP "avd"));
+    ASSERT_TRUE(sys.pathIsDir(PATH_SEP "Area_6" PATH_SEP ".android" PATH_SEP "avd"));
 
     // Order of precedence is
     //   ANDROID_AVD_HOME
+    //   ANDROID_PREFS_ROOT
     //   ANDROID_SDK_HOME
     //   TEMP_TSTDIR
     //   USER_HOME or HOME
     //   ANDROID_EMULATOR_HOME
 
     sys.envSet("ANDROID_AVD_HOME", PATH_SEP "Area_1" PATH_SEP ".android" PATH_SEP "avd");
-    sys.envSet("ANDROID_SDK_HOME", PATH_SEP "Area_2");
-    sys.envSet("TEST_TMPDIR", PATH_SEP "Area_3");
-    sys.envSet("USER_HOME", PATH_SEP "Area_4");
-    sys.envSet("ANDROID_EMULATOR_HOME", PATH_SEP "Area_5" PATH_SEP ".android");
+    sys.envSet("ANDROID_PREFS_ROOT", PATH_SEP "Area_2");
+    sys.envSet("ANDROID_SDK_HOME", PATH_SEP "Area_3");
+    sys.envSet("TEST_TMPDIR", PATH_SEP "Area_4");
+    sys.envSet("USER_HOME", PATH_SEP "Area_5");
+    sys.envSet("ANDROID_EMULATOR_HOME", PATH_SEP "Area_6" PATH_SEP ".android");
     EXPECT_STREQ(PATH_SEP "Area_1" PATH_SEP ".android" PATH_SEP "avd", ConfigDirs::getAvdRootDirectory().c_str());
 
     sys.envSet("ANDROID_AVD_HOME", "bogus");
     EXPECT_STREQ(PATH_SEP "Area_2" PATH_SEP ".android" PATH_SEP "avd", ConfigDirs::getAvdRootDirectory().c_str());
 
-    sys.envSet("ANDROID_SDK_HOME", "bogus");
+    sys.envSet("ANDROID_PREFS_ROOT", "bogus");
     EXPECT_STREQ(PATH_SEP "Area_3" PATH_SEP ".android" PATH_SEP "avd", ConfigDirs::getAvdRootDirectory().c_str());
 
-    sys.envSet("TEST_TMPDIR", "bogus");
+    sys.envSet("ANDROID_SDK_HOME", "bogus");
     EXPECT_STREQ(PATH_SEP "Area_4" PATH_SEP ".android" PATH_SEP "avd", ConfigDirs::getAvdRootDirectory().c_str());
 
-    sys.envSet("USER_HOME", "bogus");
+    sys.envSet("TEST_TMPDIR", "bogus");
     EXPECT_STREQ(PATH_SEP "Area_5" PATH_SEP ".android" PATH_SEP "avd", ConfigDirs::getAvdRootDirectory().c_str());
+
+    sys.envSet("USER_HOME", "bogus");
+    EXPECT_STREQ(PATH_SEP "Area_6" PATH_SEP ".android" PATH_SEP "avd", ConfigDirs::getAvdRootDirectory().c_str());
 }
