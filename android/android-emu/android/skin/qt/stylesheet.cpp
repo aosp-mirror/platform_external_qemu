@@ -257,91 +257,93 @@ struct StylesheetValues {
 
     // These are the colors used in the two themes
     QHash<QString, QString> lightValues = {
-        {"BOX_COLOR",                       "#e0e0e0"},  // Boundary around SMS text area
-        {"BKG_COLOR",                       "#f0f0f0"},  // Main page background
+        {"BOX_COLOR",                       "#d9d9d9"},  // Boundary around SMS text area
+        {"BKG_COLOR",                       "#F2F2F2"},  // Main page background
         {"DISABLED_BKG_COLOR","rgba(240,240,240,60%)"},  // Main page background (disabled)
         {"BKG_COLOR_OVERLAY", "rgba(236,236,236,175)"},  // Overlay background
-        {"BUTTON_BKG_COLOR",                "#F9F9F9"},  // Background of push buttons
-        {"BUTTON_COLOR",                    "#757575"},  // Text in push buttons
-        {"DISABLED_BUTTON_COLOR",           "#bbbbbb"},  // Text in disabled push buttons
-        {"DISABLED_PULLDOWN_COLOR",         "#c0c0c0"},  // Text in disabled combo box
-        {"DISABLED_TOOL_COLOR",             "#baeae4"},  // Grayed-out tool text
-        {"DIVIDER_COLOR",                   "#e0e0e0"},  // Line between items
-        {"EDIT_COLOR",                      "#e0e0e0"},  // Line under editable fields
-        {"INSTRUCTION_COLOR",               "#91a4ad"},  // Large instruction string
-        {"LARGE_DIVIDER_COLOR",    "rgba(0,0,0,2.1%)"},  // Start of large divider's gradient
-        {MAJOR_TAB_COLOR_VAR,               "#91a4ad"},  // Text of major tabs
-        {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
-        {"SCROLL_BKG_COLOR",                "#f6f6f6"},  // Background of scroll bar
-        {"SCROLL_HANDLE_COLOR",             "#d9d9d9"},  // Handle of scroller
-        {"SNAPSHOT_INFO_BKG",               "#f9f9f9"},  // Background of snapshot description text
-        {TAB_BKG_COLOR_VAR,                 "#ffffff"},  // Background of major tabs
-        {TAB_SELECTED_COLOR_VAR,            "#f5f5f5"},  // Background of the selected major tab
-        {"TAB_DARKENED_COLOR",              "#e6e6e6"},
-        {"TABLE_BOTTOM_COLOR",              "#e0e0e0"},
-        {"TABLE_SELECTED",                  "#72a4fb"},  // Background of selected table row
-        {"TEXT_COLOR",                      "#212121"},  // Main page text
-        {"INACTIVE_TEXT_COLOR",  "rgba(33,33,33,50%)"},
-        {"TITLE_COLOR",                     "#757575"},  // Main page titles
-        {"DISABLED_TITLE_COLOR", "rgba(117,117,117,60%)"},  // Main page titles (disabled color)
-        {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
-        {"TOOL_ON_COLOR",                   "#d6d6d6"},  // Main toolbar button ON
+        {"BUTTON_BKG_COLOR",                "#FFFFFF"},  // Background of push buttons
+        {"BUTTON_COLOR",                    "#1D1D1D"},  // Text in push buttons
+        {"DISABLED_BUTTON_COLOR",           "#8C8C8C"},  // Text in disabled push buttons
+        {"DISABLED_BUTTON_BKG_COLOR",       "#F2F2F2"},
+        {"DISABLED_PULLDOWN_COLOR",         "#8C8C8C"},  // Text in disabled combo box
+        {"DISABLED_TOOL_COLOR",             "#8C8C8C"},  // Grayed-out tool text
+        {"DIVIDER_COLOR",                   "#D1D1D1"},  // Line between items
+        {"EDIT_COLOR",                      "#C4C4C4"},  // Line under editable fields
+        {"INSTRUCTION_COLOR",               "#808080"},  // Large instruction string
+        {"LARGE_DIVIDER_COLOR",             "#D1D1D1"},  // Start of large divider's gradient
+        {MAJOR_TAB_COLOR_VAR,               "#1D1D1D"},  // Text of major tabs
+        {"MAJOR_TITLE_COLOR",               "#FFFFFF"},  // Text of major tab separators
+        {"SCROLL_BKG_COLOR",                "rgba(0,0,0,0%)"},  // Background of scroll bar
+        {"SCROLL_HANDLE_COLOR",             "#999999"},  // Handle of scroller
+        {"SNAPSHOT_INFO_BKG",               "#FFFFFF"},  // Background of snapshot description text
+        {TAB_BKG_COLOR_VAR,                 "#FFFFFF"},  // Background of major tabs
+        {TAB_SELECTED_COLOR_VAR,            "#DAE4ED"},  // Background of the selected major tab
+        {"TAB_DARKENED_COLOR",              "#FFFFFF"},
+        {"TABLE_BOTTOM_COLOR",              "#D1D1D1"},
+        {"TABLE_SELECTED",                  "#87AFDA"},  // Background of selected table row
+        {"TEXT_COLOR",                      "#1D1D1D"},  // Main page text
+        {"INACTIVE_TEXT_COLOR",             "#8C8C8C"},
+        {"TITLE_COLOR",                     "#1D1D1D"},  // Main page titles
+        {"DISABLED_TITLE_COLOR",            "#8C8C8C"},  // Main page titles (disabled color)
+        {"TOOL_COLOR",                      "#4083C9"},  // Checkboxes, sliders, etc.
+        {"TOOL_ON_COLOR",                   "#CFCfCF"},  // Main toolbar button ON
         {"TREE_WIDGET_BKG",                 "#ffffff"},  // List of Snapshots
-        {"TREE_WIDGET_BORDER",              "#e3e3e3"},
-        {"LIST_WIDGET_BORDER",      "rgba(0,0,0,11%)"},
-        {MACRO_BKG_COLOR_VAR,       "rgba(234,67,53,88%)"},
-        {"LINK_COLOR",                      "#0288D1"},  // Highlighted link
-        {"PREVIEW_IMAGE_BKG",               "#e3e3e3"},  // Behind snapshot preview image
-        {"RAISED_COLORED_BKG_COLOR",        "#459388"},  // Colored raised button background color.
-        {"RAISED_COLORED_PRESSED_COLOR",    "#5faca0"},  // Colored raised button pressed color.
+        {"TREE_WIDGET_BORDER",              "#D1D1D1"},
+        {"LIST_WIDGET_BORDER",              "#D1D1D1"},
+        {MACRO_BKG_COLOR_VAR,       "rgba(224,85,85, 70%)"},
+        {"LINK_COLOR",                      "#2470B3"},  // Highlighted link
+        {"PREVIEW_IMAGE_BKG",               "#F2F2F2"},  // Behind snapshot preview image
+        {"RAISED_COLORED_BKG_COLOR",        "#87AFDA"},  // Colored raised button background color.
+        {"RAISED_COLORED_PRESSED_COLOR",    "#E9EEF5"},  // Colored raised button pressed color.
         {"RAISED_COLORED_COLOR",            "#ffffff"},  // Colored raised button text color.
-        {"DROP_TARGET_BKG_COLOR", "rgba(0,190,64,10%)"},  // Drop target background color.
+        {"DROP_TARGET_BKG_COLOR", "rgba(98,181,67,60%)"},  // Drop target background color.
         {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
         {"VHAL_PROPERTY_BKG",               "#f2f2f2"},  // Vhal property background color.
     };
 
     QHash<QString, QString> darkValues = {
-        {"BOX_COLOR",                    "#414a50"},
-        {"BKG_COLOR",                    "#273238"},
+        {"BOX_COLOR",                    "#4A4A4A"},
+        {"BKG_COLOR",                    "#3C3F41"},
         {"DISABLED_BKG_COLOR","rgba(39,50,56,60%)"},
         {"BKG_COLOR_OVERLAY", "rgba(35,46,52,175)"},
-        {"BUTTON_BKG_COLOR",             "#37474f"},
-        {"BUTTON_COLOR",                 "#bec1c3"},
-        {"DISABLED_BUTTON_COLOR",        "#5f6162"},
-        {"DISABLED_PULLDOWN_COLOR",      "#808080"},
-        {"DISABLED_TOOL_COLOR",          "#1b5c58"},
-        {"DIVIDER_COLOR",                "#e0e0e0"},
-        {"EDIT_COLOR",                   "#808080"},
-        {"INSTRUCTION_COLOR",            "#ffffff"},
+        {"BUTTON_BKG_COLOR",             "#4C5052"},
+        {"BUTTON_COLOR",                 "#BBBBBB"},
+        {"DISABLED_BUTTON_COLOR",        "#777777"},
+        {"DISABLED_BUTTON_BKG_COLOR",    "#3C3F41"},
+        {"DISABLED_PULLDOWN_COLOR",      "#777777"},
+        {"DISABLED_TOOL_COLOR",          "#777777"},
+        {"DIVIDER_COLOR",                "#4A4A4A"},
+        {"EDIT_COLOR",                   "#4A4A4A"},
+        {"INSTRUCTION_COLOR",            "#878787"},
         {"LARGE_DIVIDER_COLOR",  "rgba(0,0,0,20%)"},
-        {MAJOR_TAB_COLOR_VAR,            "#bdc0c3"},
-        {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
-        {"SCROLL_BKG_COLOR",             "#333b43"},
-        {"SCROLL_HANDLE_COLOR",          "#1d272c"},
+        {MAJOR_TAB_COLOR_VAR,            "#BBBBBB"},
+        {"MAJOR_TITLE_COLOR",            "#FFFFFF"},
+        {"SCROLL_BKG_COLOR",             "#2B2B2B"},
+        {"SCROLL_HANDLE_COLOR",          "rgba(133,133,133,50%)"},
         {"SNAPSHOT_INFO_BKG",            "#273238"},
-        {TAB_BKG_COLOR_VAR,              "#394249"},
-        {TAB_SELECTED_COLOR_VAR,         "#313c42"},
-        {"TAB_DARKENED_COLOR",           "#20292e"},
-        {"TABLE_BOTTOM_COLOR",           "#1d272c"},
-        {"TABLE_SELECTED",               "#4286f5"},
-        {"TEXT_COLOR",                   "#eeeeee"},
-        {"INACTIVE_TEXT_COLOR", "rgba(238,238,238,50%)"},
-        {"TITLE_COLOR",                  "#bec1c3"},
-        {"DISABLED_TITLE_COLOR", "rgba(206,209,211,60%)"},
-        {"TOOL_COLOR",                   "#00bea4"},
-        {"TOOL_ON_COLOR",                "#586670"},
-        {"TREE_WIDGET_BKG",              "#394249"},
-        {"TREE_WIDGET_BORDER",           "#494949"},
-        {"LIST_WIDGET_BORDER", "rgba(255,255,255,22%)"},
+        {TAB_BKG_COLOR_VAR,              "#3C3F41"},
+        {TAB_SELECTED_COLOR_VAR,         "#1E67CE"},
+        {"TAB_DARKENED_COLOR",           "#3C3F41"},
+        {"TABLE_BOTTOM_COLOR",           "#BBBBBB"},
+        {"TABLE_SELECTED",               "#4A4A4A"},
+        {"TEXT_COLOR",                   "#BBBBBB"},
+        {"INACTIVE_TEXT_COLOR",          "#777777"},
+        {"TITLE_COLOR",                  "#BBBBBB"},
+        {"DISABLED_TITLE_COLOR",         "#777777"},
+        {"TOOL_COLOR",                   "#4A88C7"},
+        {"TOOL_ON_COLOR",                "#5C6164"},
+        {"TREE_WIDGET_BKG",              "#45494A"},
+        {"TREE_WIDGET_BORDER",           "#4A4A4A"},
+        {"LIST_WIDGET_BORDER",           "4A4A4A"},
         {MACRO_BKG_COLOR_VAR, "rgba(234,67,53,55%)"},
-        {"LINK_COLOR",                   "#29B6F6"},
-        {"PREVIEW_IMAGE_BKG",            "#343d43"},
-        {"RAISED_COLORED_BKG_COLOR",     "#459388"},
-        {"RAISED_COLORED_PRESSED_COLOR", "#5faca0"},
+        {"LINK_COLOR",                   "#589DF6"},
+        {"PREVIEW_IMAGE_BKG",            "#3C3F41"},
+        {"RAISED_COLORED_BKG_COLOR",     "#87AFDA"},
+        {"RAISED_COLORED_PRESSED_COLOR", "#E9EEF5"},
         {"RAISED_COLORED_COLOR",         "#ffffff"},
-        {"DROP_TARGET_BKG_COLOR", "rgba(0,190,64,7%)"},
+        {"DROP_TARGET_BKG_COLOR", "rgba(98,181,67,60%)"},
         {THEME_PATH_VAR,                    "dark"},
-        {"VHAL_PROPERTY_BKG",            "#394249"},
+        {"VHAL_PROPERTY_BKG",            "#3C3F41"},
     };
 
     StylesheetValues() {
