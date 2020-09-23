@@ -99,6 +99,8 @@ private:
     // It is considered valid if it has a 'platforms' subdirectory
     // and a 'platform-tools' subdirectory.
     static bool isValidSdkRoot(android::base::StringView rootPath);
+
+    static std::string getAvdRootDirectoryWithPrefsRoot(const std::string& path);
 };
 
 }  // namespace android
