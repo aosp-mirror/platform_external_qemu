@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6d660790_da8c1416",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-24T17:07:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c404fcc8_150977cf",
+      "revId": "ab6b31ecd32d79d90ed4798e34d53dbd77d45d22",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c168ba6b_464c6b12",
         "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
         "patchSetId": 8
@@ -30,6 +48,30 @@
       "writtenOn": "2020-09-24T17:03:34Z",
       "side": 1,
       "message": "Should you acquire this lock first before calling wait()?",
+      "range": {
+        "startLine": 95,
+        "startChar": 26,
+        "endLine": 95,
+        "endChar": 31
+      },
+      "revId": "ab6b31ecd32d79d90ed4798e34d53dbd77d45d22",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84f97e55_086c8ca6",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-09-24T17:07:24Z",
+      "side": 1,
+      "message": "So I guess it should be \nmLock.lock();\nmCvLoopExit.wait(\u0026mLock, [this]() {});\n\nNo other thread should contend for mLock because we don\u0027t need to protect any data here.",
+      "parentUuid": "c168ba6b_464c6b12",
       "range": {
         "startLine": 95,
         "startChar": 26,
