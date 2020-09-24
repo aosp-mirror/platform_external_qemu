@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "40fd3479_510b1d93",
+        "filename": "android/android-emu/android/base/Log.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-09-24T19:20:10Z",
+      "side": 1,
+      "message": "why not just use a vector\u003cchar*\u003e so we dont need to worry about resizing ?",
+      "range": {
+        "startLine": 140,
+        "startChar": 1,
+        "endLine": 142,
+        "endChar": 62
+      },
+      "revId": "86aed1802423574d5c040e19cc5301b3aeddf250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
