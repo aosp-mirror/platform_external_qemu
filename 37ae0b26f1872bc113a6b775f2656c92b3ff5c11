@@ -63,6 +63,30 @@
       "revId": "37ae0b26f1872bc113a6b775f2656c92b3ff5c11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "40af6e70_2edfc4e0",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-24T22:54:25Z",
+      "side": 1,
+      "message": "Current Studio code relies on ListSnapshots returning only the compatible snapshots. This change is breaking this assumption.\n\nDid you measure performance overhead (absolute and relative) of adding disk size?",
+      "parentUuid": "9f3d4dff_d47eb69d",
+      "range": {
+        "startLine": 174,
+        "startChar": 4,
+        "endLine": 174,
+        "endChar": 21
+      },
+      "revId": "37ae0b26f1872bc113a6b775f2656c92b3ff5c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
