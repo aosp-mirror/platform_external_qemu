@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c404fcc8_150977cf",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-09-24T17:03:34Z",
+      "side": 1,
+      "message": "Please remove this line.",
+      "revId": "ab6b31ecd32d79d90ed4798e34d53dbd77d45d22",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c168ba6b_464c6b12",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-09-24T17:03:34Z",
+      "side": 1,
+      "message": "Should you acquire this lock first before calling wait()?",
+      "range": {
+        "startLine": 95,
+        "startChar": 26,
+        "endLine": 95,
+        "endChar": 31
+      },
+      "revId": "ab6b31ecd32d79d90ed4798e34d53dbd77d45d22",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
