@@ -79,7 +79,6 @@ private:
     OnFrameSentCallback mOnFrameSentCallback;
     CanReceive mCanReceive;
     android::base::Looper* mLooper;
-    android::base::ScopedSocket mHostApdSock;
     android::base::ScopedSocket mVirtIOSock;
     NICState* mNic = nullptr;
     std::unique_ptr<android::network::WifiForwardPeer> mRemotePeer;
