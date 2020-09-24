@@ -22,6 +22,30 @@
       "revId": "86aed1802423574d5c040e19cc5301b3aeddf250",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e72ab09a_78cd6092",
+        "filename": "android/android-emu/android/base/Log.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-24T22:38:48Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "40fd3479_510b1d93",
+      "range": {
+        "startLine": 140,
+        "startChar": 1,
+        "endLine": 142,
+        "endChar": 62
+      },
+      "revId": "86aed1802423574d5c040e19cc5301b3aeddf250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
