@@ -81,6 +81,30 @@
       "revId": "ab6b31ecd32d79d90ed4798e34d53dbd77d45d22",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54ee7ce3_7bb40959",
+        "filename": "android-qemu2-glue/emulation/HostapdController.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-09-24T17:14:28Z",
+      "side": 1,
+      "message": "https://android.googlesource.com/device/generic/goldfish-opengl/+/refs/heads/master/android-emu/android/base/synchronization/AndroidMessageChannel.cpp#44",
+      "parentUuid": "84f97e55_086c8ca6",
+      "range": {
+        "startLine": 95,
+        "startChar": 26,
+        "endLine": 95,
+        "endChar": 31
+      },
+      "revId": "ab6b31ecd32d79d90ed4798e34d53dbd77d45d22",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
