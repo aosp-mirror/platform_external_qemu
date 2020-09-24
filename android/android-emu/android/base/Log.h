@@ -263,11 +263,10 @@ bool setDcheckLevel(bool enabled);
 class LogString {
 public:
     LogString(const char* fmt, ...);
-    ~LogString();
-    const char* string() const { return mString; }
+    const char* string() const { return mString.data(); }
 
 private:
-    char* mString;
+    std::vector<char> mString;
 };
 
 // Helper structure used to group the parameters of a LOG() or CHECK()
