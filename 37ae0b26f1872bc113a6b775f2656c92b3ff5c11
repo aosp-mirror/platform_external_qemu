@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1e9c478b_eeb64879",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-24T00:38:32Z",
+      "side": 1,
+      "message": "If emulator suddenly starts returning incompatible snapshots from the ListSnapshots method, it would be a breaking change for Studio (and potentially other gRPC clients). We can solve this problem in Studio by introducing the behavioral change gradually, first add the status field, then change Studio code, then start returning the incompatible snapshots. Another, simpler, option is to add a field to the ListSnapshots request controlling whether incompatible snapshots are returned or not. We can also add a field for determining whether the size on disk is returned or not since determining that size is a potentially expensive operation.",
+      "range": {
+        "startLine": 174,
+        "startChar": 4,
+        "endLine": 174,
+        "endChar": 21
+      },
+      "revId": "37ae0b26f1872bc113a6b775f2656c92b3ff5c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
