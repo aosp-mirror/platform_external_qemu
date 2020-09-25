@@ -2041,5 +2041,12 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+void checkEqual_VkSemaphoreSignalInfoGOOGLE(
+    const VkSemaphoreSignalInfoGOOGLE* a,
+    const VkSemaphoreSignalInfoGOOGLE* b,
+    OnFailCompareFunc onFail);
+
+#endif
 
 } // namespace goldfish_vk

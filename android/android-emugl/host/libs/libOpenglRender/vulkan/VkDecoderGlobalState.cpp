@@ -1021,9 +1021,11 @@ public:
             const VkAllocationCallbacks* pAllocator) {
 
         auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
 
         AutoLock lock(mLock);
 
+        teardownDeviceQueueStateLocked(device, vk);
         destroyDeviceLocked(device, pAllocator);
 
         mDeviceInfo.erase(device);
@@ -3834,6 +3836,149 @@ public:
         }
     }
 
+    bool setupDeviceQueueStateLocked(VkDevice device, VulkanDispatch* vk) {
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (deviceInfoIt == mDeviceInfo.end()) {
+            return false;
+        }
+        auto& deviceInfo = deviceInfoIt->second;
+
+        if (deviceInfo.defaultQueueState.initialized < 0) {
+            return false;
+        }
+        if (deviceInfo.defaultQueueState.initialized > 0) {
+            return true;
+        }
+
+        VkQueue defaultQueue;
+        uint32_t defaultQueueFamilyIndex;
+        if (!getDefaultQueueForDeviceLocked(device, &defaultQueue,
+                                            &defaultQueueFamilyIndex)) {
+            fprintf(stderr, "%s: cant get the default queue\n", __func__);
+            deviceInfo.defaultQueueState.initialized =
+                    VK_ERROR_INITIALIZATION_FAILED;
+            return false;
+        }
+
+        VkCommandPoolCreateInfo poolCreateInfo = {
+                VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+                0,
+                VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+                defaultQueueFamilyIndex,
+        };
+        VkCommandPool pool;
+        VkResult result = vk->vkCreateCommandPool(device, &poolCreateInfo,
+                                                  nullptr, &pool);
+        if (result != VK_SUCCESS) {
+            fprintf(stderr, "%s: vkCreateCommandPool failed: %d\n", __func__,
+                    result);
+            deviceInfo.defaultQueueState.initialized = -abs(result);
+            return false;
+        }
+
+        VkCommandBufferAllocateInfo cbAllocInfo = {
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+                0,
+                pool,
+                VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+                1,
+        };
+        VkCommandBuffer cb;
+        result = vk->vkAllocateCommandBuffers(device, &cbAllocInfo, &cb);
+        if (result != VK_SUCCESS) {
+            fprintf(stderr, "%s: vkAllocateCommandBuffers failed: %d\n",
+                    __func__, result);
+            deviceInfo.defaultQueueState.initialized = -abs(result);
+            return false;
+        }
+
+        deviceInfo.defaultQueueState.initialized = 1;
+        deviceInfo.defaultQueueState.queue = defaultQueue;
+        deviceInfo.defaultQueueState.queueFamilyIndex = defaultQueueFamilyIndex;
+        deviceInfo.defaultQueueState.pool = pool;
+        deviceInfo.defaultQueueState.cb = cb;
+        return true;
+    }
+
+    void teardownDeviceQueueStateLocked(VkDevice device, VulkanDispatch* vk) {
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (deviceInfoIt == mDeviceInfo.end()) {
+            return;
+        }
+        auto& deviceInfo = deviceInfoIt->second;
+
+        if (deviceInfo.defaultQueueState.cb) {
+            vk->vkFreeCommandBuffers(device, deviceInfo.defaultQueueState.pool,
+                                     1, &deviceInfo.defaultQueueState.cb);
+        }
+
+        if (deviceInfo.defaultQueueState.pool) {
+            vk->vkDestroyCommandPool(device, deviceInfo.defaultQueueState.pool,
+                                     nullptr);
+        }
+
+        deviceInfo.defaultQueueState.queue = VK_NULL_HANDLE;
+        deviceInfo.defaultQueueState.queueFamilyIndex = 0;
+        deviceInfo.defaultQueueState.pool = VK_NULL_HANDLE;
+        deviceInfo.defaultQueueState.cb = VK_NULL_HANDLE;
+        deviceInfo.defaultQueueState.initialized = 0;
+    }
+
+    VkResult on_vkSignalSemaphoreGOOGLE(
+            android::base::Pool* pool,
+            VkDevice boxed_device,
+            const VkSemaphoreSignalInfoGOOGLE* pSignalInfo) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        AutoLock lock(mLock);
+
+        // Lazy setup of device's defaultQueueState.
+        if (!setupDeviceQueueStateLocked(device, vk)) {
+            LOG(ERROR) << "failed to intialize device queue state";
+            return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+        }
+
+        auto deviceInfo = mDeviceInfo.find(device);
+        if (deviceInfo == mDeviceInfo.end()) {
+            return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+        }
+
+        VkQueue queue = deviceInfo->second.defaultQueueState.queue;
+        VkCommandBuffer cb = deviceInfo->second.defaultQueueState.cb;
+
+        VkCommandBufferBeginInfo beginInfo = {
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+                0,
+                VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+                nullptr /* no inheritance info */,
+        };
+        VkResult result = vk->vkBeginCommandBuffer(cb, &beginInfo);
+        if (result != VK_SUCCESS) {
+            LOG(ERROR) << "vkBeginCommandBuffer failed: " << result;
+            return result;
+        }
+        result = vk->vkEndCommandBuffer(cb);
+        if (result != VK_SUCCESS) {
+            LOG(ERROR) << "vkEndCommandBuffer failed: " << result;
+            return result;
+        }
+
+        VkSemaphore semaphore = pSignalInfo->semaphore;
+        VkSubmitInfo submitInfo = {
+                VK_STRUCTURE_TYPE_SUBMIT_INFO, nullptr,
+                /* waitSemaphore */ 0,         nullptr,    nullptr,
+                /* commandBuffer */ 1,         &cb,
+                /* signalSemaphore */ 1,       &semaphore,
+        };
+
+        result = vk->vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+        if (result != VK_SUCCESS) {
+            LOG(ERROR) << "vkQueueSubmit failed: " << result;
+            return result;
+        }
+        return VK_SUCCESS;
+    }
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
@@ -5372,6 +5517,16 @@ private:
 
     struct DeviceInfo {
         std::unordered_map<uint32_t, std::vector<VkQueue>> queues;
+        struct QueueState {
+            // positive: successfully initialized; zero: not initialized yet;
+            // negative: errors occurred.
+            int initialized = 0;
+            VkQueue queue = VK_NULL_HANDLE;
+            uint32_t queueFamilyIndex = 0u;
+            VkCommandPool pool = VK_NULL_HANDLE;
+            VkCommandBuffer cb = VK_NULL_HANDLE;
+        } defaultQueueState;
+
         std::vector<std::string> enabledExtensionNames;
         bool emulateTextureEtc2 = false;
         bool emulateTextureAstc = false;
@@ -6660,6 +6815,13 @@ void VkDecoderGlobalState::on_vkGetLinearImageLayoutGOOGLE(
     VkDeviceSize* pOffset,
     VkDeviceSize* pRowPitchAlignment) {
     mImpl->on_vkGetLinearImageLayoutGOOGLE(pool, device, format, pOffset, pRowPitchAlignment);
+}
+
+VkResult VkDecoderGlobalState::on_vkSignalSemaphoreGOOGLE(
+        android::base::Pool* pool,
+        VkDevice device,
+        const VkSemaphoreSignalInfoGOOGLE* pSignalInfo) {
+    return mImpl->on_vkSignalSemaphoreGOOGLE(pool, device, pSignalInfo);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(

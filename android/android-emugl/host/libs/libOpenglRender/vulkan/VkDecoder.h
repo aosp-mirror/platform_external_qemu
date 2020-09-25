@@ -319,5 +319,7 @@ private:
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+#endif
 
 

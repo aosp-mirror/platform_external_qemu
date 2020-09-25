@@ -4519,6 +4519,18 @@ void vkGetLinearImageLayoutGOOGLE(
     // TODO: Implement
 }
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+void vkSignalSemaphoreGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    const VkSemaphoreSignalInfoGOOGLE* pSignalInfo)
+{
+    // TODO: Implement
+}
+#endif
 
 private:
     android::base::Lock mLock;
@@ -8905,6 +8917,18 @@ void VkDecoderSnapshot::vkGetLinearImageLayoutGOOGLE(
     VkDeviceSize* pRowPitchAlignment)
 {
     mImpl->vkGetLinearImageLayoutGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, device, format, pOffset, pRowPitchAlignment);
+}
+#endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+void VkDecoderSnapshot::vkSignalSemaphoreGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkResult input_result,
+    VkDevice device,
+    const VkSemaphoreSignalInfoGOOGLE* pSignalInfo)
+{
+    mImpl->vkSignalSemaphoreGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, pSignalInfo);
 }
 #endif
 

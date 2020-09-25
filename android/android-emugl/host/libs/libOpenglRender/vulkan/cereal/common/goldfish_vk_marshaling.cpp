@@ -13011,6 +13011,41 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+void marshal_VkSemaphoreSignalInfoGOOGLE(
+    VulkanStream* vkStream,
+    const VkSemaphoreSignalInfoGOOGLE* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_372;
+    vkStream->handleMapping()->mapHandles_VkSemaphore_u64(&forMarshaling->semaphore, &cgen_var_372, 1);
+    vkStream->write((uint64_t*)&cgen_var_372, 1 * 8);
+}
+
+void unmarshal_VkSemaphoreSignalInfoGOOGLE(
+    VulkanStream* vkStream,
+    VkSemaphoreSignalInfoGOOGLE* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_373;
+    vkStream->read((uint64_t*)&cgen_var_373, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkSemaphore(&cgen_var_373, (VkSemaphore*)&forUnmarshaling->semaphore, 1);
+}
+
+#endif
 void marshal_extension_struct(
     VulkanStream* vkStream,
     const void* structExtension)
@@ -15882,6 +15917,12 @@ const char* api_opcode_to_string(
         case OP_vkGetLinearImageLayoutGOOGLE:
         {
             return "OP_vkGetLinearImageLayoutGOOGLE";
+        }
+#endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+        case OP_vkSignalSemaphoreGOOGLE:
+        {
+            return "OP_vkSignalSemaphoreGOOGLE";
         }
 #endif
         default:

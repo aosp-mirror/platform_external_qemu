@@ -254,6 +254,18 @@ typedef void (VKAPI_PTR *PFN_vkQueueBindSparseAsyncGOOGLE)(
 
 typedef VkResult (VKAPI_PTR *PFN_vkGetLinearImageLayoutGOOGLE)(VkDevice device, VkFormat format, VkDeviceSize* pOffset, VkDeviceSize* pRowPitchAlignment);
 
+#define VK_GOOGLE_host_semaphore_ops 1
+
+typedef struct {
+    VkStructureType sType;
+    const void*     pNext;
+    VkSemaphore     semaphore;
+} VkSemaphoreSignalInfoGOOGLE;
+
+#define VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO_GOOGLE ((VkStructureType)1000221000)
+
+typedef VkResult (VKAPI_PTR *PFN_vkSignalSemaphoreGOOGLE)(VkDevice device, const VkSemaphoreSignalInfoGOOGLE* pSignalInfo);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

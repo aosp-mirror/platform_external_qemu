@@ -298,6 +298,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+#endif
 
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -800,6 +802,9 @@ void init_vulkan_dispatch_from_system_loader(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)dlSymFunc(lib, "vkGetLinearImageLayoutGOOGLE");
+#endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+    out->vkSignalSemaphoreGOOGLE = (PFN_vkSignalSemaphoreGOOGLE)dlSymFunc(lib, "vkSignalSemaphoreGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
@@ -1331,6 +1336,9 @@ void init_vulkan_dispatch_from_instance(
 #ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetLinearImageLayoutGOOGLE");
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+    out->vkSignalSemaphoreGOOGLE = (PFN_vkSignalSemaphoreGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkSignalSemaphoreGOOGLE");
+#endif
 }
 
 void init_vulkan_dispatch_from_device(
@@ -1832,6 +1840,9 @@ void init_vulkan_dispatch_from_device(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetLinearImageLayoutGOOGLE");
+#endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+    out->vkSignalSemaphoreGOOGLE = (PFN_vkSignalSemaphoreGOOGLE)vk->vkGetDeviceProcAddr(device, "vkSignalSemaphoreGOOGLE");
 #endif
 }
 

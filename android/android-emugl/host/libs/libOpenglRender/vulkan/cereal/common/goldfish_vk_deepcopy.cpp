@@ -6428,6 +6428,24 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+void deepcopy_VkSemaphoreSignalInfoGOOGLE(
+    Pool* pool,
+    const VkSemaphoreSignalInfoGOOGLE* from,
+    VkSemaphoreSignalInfoGOOGLE* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (const void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+}
+
+#endif
 void deepcopy_extension_struct(
     Pool* pool,
     const void* structExtension,

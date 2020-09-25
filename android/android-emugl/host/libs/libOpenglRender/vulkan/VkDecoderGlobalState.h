@@ -715,6 +715,12 @@ public:
         VkDeviceSize* pOffset,
         VkDeviceSize* pRowPitchAlignment);
 
+    // VK_GOOGLE_host_semaphore_ops
+    VkResult on_vkSignalSemaphoreGOOGLE(
+            android::base::Pool* pool,
+            VkDevice device,
+            const VkSemaphoreSignalInfoGOOGLE* pSignalInfo);
+
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,

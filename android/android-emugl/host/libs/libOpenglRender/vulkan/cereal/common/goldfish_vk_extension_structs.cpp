@@ -294,6 +294,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+#endif
 uint32_t goldfish_vk_struct_type(
     const void* structExtension)
 {

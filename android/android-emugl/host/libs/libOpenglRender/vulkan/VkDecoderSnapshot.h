@@ -3015,6 +3015,15 @@ public:
         VkDeviceSize* pOffset,
         VkDeviceSize* pRowPitchAlignment);
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+    void vkSignalSemaphoreGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkResult input_result,
+        VkDevice device,
+        const VkSemaphoreSignalInfoGOOGLE* pSignalInfo);
+#endif
 
 private:
     class Impl;

@@ -3247,6 +3247,11 @@ server.
         </type>
         <type category="struct" name="VkPhysicalDeviceShaderFloat16Int8FeaturesKHR"            alias="VkPhysicalDeviceShaderFloat16Int8Features" optional="streamFeature:VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT"/>
         <type category="struct" name="VkPhysicalDeviceFloat16Int8FeaturesKHR"                  alias="VkPhysicalDeviceShaderFloat16Int8Features" optional="streamFeature:VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT"/>
+        <type category="struct" name="VkSemaphoreSignalInfoGOOGLE">
+            <member values="VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
+            <member>const <type>void</type>*            <name>pNext</name></member>
+            <member><type>VkSemaphore</type>            <name>semaphore</name></member>
+        </type>
     </types>
 
     <comment>Vulkan enumerant (token) definitions</comment>
@@ -6422,6 +6427,11 @@ server.
             <param><type>VkDeviceSize</type>* <name>pOffset</name></param>
             <param><type>VkDeviceSize</type>* <name>pRowPitchAlignment</name></param>
         </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY">
+            <proto><type>VkResult</type> <name>vkSignalSemaphoreGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param>const <type>VkSemaphoreSignalInfoGOOGLE</type>* <name>pSignalInfo</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -9324,6 +9334,20 @@ server.
                 <enum value="227"                                           name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_NUMBER"/>
                 <enum value="&quot;VK_GOOGLE_linear_image_layout&quot;"     name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_EXTENSION_NAME"/>
                 <command name="vkGetLinearImageLayoutGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_host_semaphore_ops" number="228" type="device" author="GOOGLE" contact="Yilong Li @gnoliyil" supported="vulkan">
+            <comment>
+                This extension uses some of the types and commands in VK_KHR_timeline_semaphore extension.
+                We separate the extension from its original version to avoid conflicts in drivers, and we
+                keep the APIs similar for easy transition to timeline semaphores once it is widely supported.
+            </comment>
+            <require>
+                <enum value="2"                                         name="VK_GOOGLE_HOST_SEMAPHORE_OPS_SPEC_VERSION"/>
+                <enum value="&quot;VK_GOOGLE_host_semaphore_ops&quot;"  name="VK_GOOGLE_HOST_SEMAPHORE_OPS_EXTENSION_NAME"/>
+                <enum offset="0" extends="VkStructureType"              name="VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO_GOOGLE"/>
+                <type name="VkSemaphoreSignalInfoGOOGLE"/>
+                <command name="vkSignalSemaphoreGOOGLE"/>
             </require>
         </extension>
     </extensions>

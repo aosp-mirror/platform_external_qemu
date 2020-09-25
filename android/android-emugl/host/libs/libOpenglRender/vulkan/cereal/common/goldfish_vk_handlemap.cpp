@@ -4784,6 +4784,21 @@ void handlemap_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+void handlemap_VkSemaphoreSignalInfoGOOGLE(
+    VulkanHandleMapping* handlemap,
+    VkSemaphoreSignalInfoGOOGLE* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
+}
+
+#endif
 void handlemap_extension_struct(
     VulkanHandleMapping* handlemap,
     void* structExtension_out)

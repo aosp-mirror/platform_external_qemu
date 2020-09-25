@@ -9002,6 +9002,32 @@ void transform_fromhost_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+void transform_tohost_VkSemaphoreSignalInfoGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkSemaphoreSignalInfoGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkSemaphoreSignalInfoGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkSemaphoreSignalInfoGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+#endif
 void transform_tohost_extension_struct(
     VkDecoderGlobalState* resourceTracker,
     void* structExtension_out)

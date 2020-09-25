@@ -16,11 +16,14 @@
 
 #include "FrameBuffer.h"
 #include "VkCommonOperations.h"
+#include "VkDecoderGlobalState.h"
 #include "VulkanDispatch.h"
 #include "emugl/common/feature_control.h"
+#include "emugl/common/vm_operations.h"
 
 #include "android/base/ArraySize.h"
 #include "android/base/GLObjectCounter.h"
+#include "android/base/Pool.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
@@ -603,5 +606,174 @@ TEST_F(VulkanFrameBufferTest, VkColorBufferWithMemoryPropertyFlags) {
     EXPECT_TRUE(goldfish_vk::teardownVkColorBuffer(colorBuffer));
     mFb->closeColorBuffer(colorBuffer);
 }
+
+TEST(VulkanDecoderGlobalStateTest, Semaphore) {
+    android::base::Pool pool{8, 4096, 64};
+
+    QAndroidVmOperations ops;
+    ops.setSkipSnapshotSave = [](bool) {};
+    set_emugl_vm_operations(ops);
+
+    auto* vkEmulation = goldfish_vk::getGlobalVkEmulation();
+    goldfish_vk::VkDecoderGlobalState globalDecoderState;
+
+    VkInstance instance;
+    VkInstanceCreateInfo instanceCi = {
+            VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            nullptr,
+            0,
+            nullptr,
+            0,
+            nullptr,
+            0,
+            nullptr,
+    };
+    VkResult result = globalDecoderState.on_vkCreateInstance(
+            &pool, &instanceCi, nullptr, &instance);
+    ASSERT_EQ(result, VK_SUCCESS);
+
+    uint32_t physdevCount = 0;
+    std::vector<VkPhysicalDevice> physdevs;
+    EXPECT_EQ(VK_SUCCESS, globalDecoderState.on_vkEnumeratePhysicalDevices(
+                                  &pool, instance, &physdevCount, nullptr));
+
+    physdevs.resize(physdevCount);
+    EXPECT_EQ(VK_SUCCESS,
+              globalDecoderState.on_vkEnumeratePhysicalDevices(
+                      &pool, instance, &physdevCount, physdevs.data()));
+
+    VkPhysicalDevice physdev = physdevs[0];
+    uint32_t queueFamilyCount = 0;
+    std::vector<VkQueueFamilyProperties> queueFamilyProps;
+    vkEmulation->ivk->vkGetPhysicalDeviceQueueFamilyProperties(
+            globalDecoderState.unbox_VkPhysicalDevice(physdev),
+            &queueFamilyCount, nullptr);
+    queueFamilyProps.resize(queueFamilyCount);
+    vkEmulation->ivk->vkGetPhysicalDeviceQueueFamilyProperties(
+            globalDecoderState.unbox_VkPhysicalDevice(physdev),
+            &queueFamilyCount, queueFamilyProps.data());
+
+    uint32_t graphicsQueueFamily = 0;
+    for (uint32_t j = 0; j < queueFamilyCount; ++j) {
+        auto count = queueFamilyProps[j].queueCount;
+        auto flags = queueFamilyProps[j].queueFlags;
+        if (count > 0 && (flags & VK_QUEUE_GRAPHICS_BIT)) {
+            graphicsQueueFamily = j;
+            break;
+        }
+    }
+
+    float priority = 1.0f;
+    VkDeviceQueueCreateInfo dqCi = {
+            VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            0,
+            0,
+            graphicsQueueFamily,
+            1,
+            &priority,
+    };
+
+    VkDeviceCreateInfo dCi = {
+            VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+            0,
+            0,
+            1,
+            &dqCi,
+            0,
+            nullptr,  // no layers
+            0,
+            nullptr,  // no extensions
+            nullptr,  // no features
+    };
+
+    VkDevice device;
+    EXPECT_EQ(VK_SUCCESS, globalDecoderState.on_vkCreateDevice(
+                                  &pool, physdev, &dCi, nullptr, &device));
+
+    VkQueue queue;
+    globalDecoderState.on_vkGetDeviceQueue(&pool, device, graphicsQueueFamily,
+                                           0, &queue);
+
+    // Setup command buffers
+    VkCommandPoolCreateInfo poolCi = {
+            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+            0,
+            0,
+            graphicsQueueFamily,
+    };
+
+    VkCommandPool commandPool;
+    EXPECT_EQ(VK_SUCCESS,
+              globalDecoderState.on_vkCreateCommandPool(&pool, device, &poolCi,
+                                                        nullptr, &commandPool));
+
+    VkCommandBuffer cb;
+    VkCommandBufferAllocateInfo cbAi = {
+            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+            0,
+            globalDecoderState.unbox_non_dispatchable_VkCommandPool(
+                    commandPool),
+            VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+            1,
+    };
+    EXPECT_EQ(VK_SUCCESS, globalDecoderState.on_vkAllocateCommandBuffers(
+                                  &pool, device, &cbAi, &cb));
+
+    VkSemaphore semaphore;
+    VkSemaphoreCreateInfo sCi = {VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, 0, 0};
+    EXPECT_EQ(VK_SUCCESS, globalDecoderState.on_vkCreateSemaphore(
+                                  &pool, device, &sCi, nullptr, &semaphore));
+
+    VkSemaphoreSignalInfoGOOGLE signalInfo = {
+            VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO_GOOGLE,
+            nullptr,
+            globalDecoderState.unbox_non_dispatchable_VkSemaphore(semaphore),
+    };
+    EXPECT_EQ(VK_SUCCESS, globalDecoderState.on_vkSignalSemaphoreGOOGLE(
+                                  &pool, device, &signalInfo));
+
+    // Try submit the command buffer and wait on semaphore.
+    VkCommandBufferBeginInfo cbBi = {
+            VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+            nullptr,
+            VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+            nullptr,
+    };
+    globalDecoderState.on_vkBeginCommandBuffer(&pool, cb, &cbBi);
+    globalDecoderState.on_vkEndCommandBufferAsyncGOOGLE(&pool, cb);
+
+    VkSemaphore unboxSemaphore =
+            globalDecoderState.unbox_non_dispatchable_VkSemaphore(semaphore);
+    VkCommandBuffer unboxCb = globalDecoderState.unbox_VkCommandBuffer(cb);
+    VkCommandBufferUsageFlags flag = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+    VkSubmitInfo qSi = {
+            VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            nullptr,
+            1,
+            &unboxSemaphore,
+            &flag,
+            1,
+            &unboxCb,
+            0,
+            nullptr,
+    };
+    globalDecoderState.on_vkQueueSubmit(&pool, queue, 1, &qSi, VK_NULL_HANDLE);
+    globalDecoderState.on_vkQueueWaitIdle(&pool, queue);
+
+    // Cleanup
+    globalDecoderState.on_vkFreeCommandBuffers(
+            &pool, device,
+            globalDecoderState.unbox_non_dispatchable_VkCommandPool(
+                    commandPool),
+            1, &unboxCb);
+    globalDecoderState.on_vkDestroyCommandPool(
+            &pool, device,
+            globalDecoderState.unbox_non_dispatchable_VkCommandPool(
+                    commandPool),
+            nullptr);
+    globalDecoderState.on_vkDestroyDevice(&pool, device, nullptr);
+    globalDecoderState.on_vkDestroyInstance(&pool, instance, nullptr);
+}
+
 #endif // !_WIN32
 } // namespace emugl

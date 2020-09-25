@@ -17672,6 +17672,45 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 break;
             }
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+            case OP_vkSignalSemaphoreGOOGLE:
+            {
+                VkDevice device;
+                const VkSemaphoreSignalInfoGOOGLE* pSignalInfo;
+                // Begin manual dispatchable handle unboxing for device;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_855;
+                vkReadStream->read((uint64_t*)&cgen_var_855, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_855, (VkDevice*)&device, 1);
+                auto unboxed_device = unbox_VkDevice(device);
+                auto vk = dispatch_VkDevice(device);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for device;
+                vkReadStream->alloc((void**)&pSignalInfo, sizeof(const VkSemaphoreSignalInfoGOOGLE));
+                unmarshal_VkSemaphoreSignalInfoGOOGLE(vkReadStream, (VkSemaphoreSignalInfoGOOGLE*)(pSignalInfo));
+                if (pSignalInfo)
+                {
+                    transform_tohost_VkSemaphoreSignalInfoGOOGLE(m_state, (VkSemaphoreSignalInfoGOOGLE*)(pSignalInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkSignalSemaphoreGOOGLE 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pSignalInfo);
+                }
+                VkResult vkSignalSemaphoreGOOGLE_VkResult_return = (VkResult)0;
+                vkSignalSemaphoreGOOGLE_VkResult_return = m_state->on_vkSignalSemaphoreGOOGLE(&m_pool, device, pSignalInfo);
+                vkStream->unsetHandleMapping();
+                vkStream->write(&vkSignalSemaphoreGOOGLE_VkResult_return, sizeof(VkResult));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkSignalSemaphoreGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSignalSemaphoreGOOGLE_VkResult_return, device, pSignalInfo);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+#endif
             default:
             {
                 return ptr - (unsigned char *)buf;

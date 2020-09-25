@@ -2040,5 +2040,12 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+void deepcopy_VkSemaphoreSignalInfoGOOGLE(
+    Pool* pool,
+    const VkSemaphoreSignalInfoGOOGLE* from,
+    VkSemaphoreSignalInfoGOOGLE* to);
+
+#endif
 
 } // namespace goldfish_vk

@@ -1700,5 +1700,11 @@ VkImportPhysicalAddressGOOGLE* unbox_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+VkSemaphoreSignalInfoGOOGLE* unbox_VkSemaphoreSignalInfoGOOGLE(
+    Pool* pool,
+    const VkSemaphoreSignalInfoGOOGLE* toUnbox);
+
+#endif
 
 } // namespace goldfish_vk

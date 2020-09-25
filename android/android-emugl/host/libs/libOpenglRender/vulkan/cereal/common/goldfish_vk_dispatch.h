@@ -674,6 +674,9 @@ PFN_vkQueueBindSparseAsyncGOOGLE vkQueueBindSparseAsyncGOOGLE;
 #ifdef VK_GOOGLE_linear_image_layout
 PFN_vkGetLinearImageLayoutGOOGLE vkGetLinearImageLayoutGOOGLE;
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+PFN_vkSignalSemaphoreGOOGLE vkSignalSemaphoreGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk

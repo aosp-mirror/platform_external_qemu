@@ -6331,6 +6331,21 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_GOOGLE_host_semaphore_ops
+void checkEqual_VkSemaphoreSignalInfoGOOGLE(
+    const VkSemaphoreSignalInfoGOOGLE* a,
+    const VkSemaphoreSignalInfoGOOGLE* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->semaphore) == (b->semaphore))) { onFail("a->semaphore (Error: Value not equal)"); };
+}
+
+#endif
 void checkEqual_extension_struct(
     const void* structExtension,
     const void* structExtension2,
