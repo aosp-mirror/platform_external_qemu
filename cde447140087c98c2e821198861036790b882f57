@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7d4b97e0_842bd57a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2020-09-25T08:16:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3cb4dba_da8b0ba3",
+      "revId": "cde447140087c98c2e821198861036790b882f57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7bea7e_a484bde1",
         "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
         "patchSetId": 4
@@ -69,6 +87,24 @@
       "revId": "cde447140087c98c2e821198861036790b882f57",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e12abe08_045ff80a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2020-09-25T08:16:46Z",
+      "side": 1,
+      "message": "Actually Sabrina doesn\u0027t have  Live PG button, so it\u0027s fine",
+      "parentUuid": "33fef94e_8a1458bb",
+      "revId": "cde447140087c98c2e821198861036790b882f57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
