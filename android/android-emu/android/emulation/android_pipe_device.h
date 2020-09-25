@@ -187,4 +187,7 @@ ANDROID_PIPE_DEVICE_EXPORT void* android_pipe_lookup_by_id(int id);
 ANDROID_PIPE_DEVICE_EXPORT void android_pipe_append_lookup_by_id_callback(
     void*(*callback)(int), const char* tag);
 
+ANDROID_PIPE_DEVICE_EXPORT const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_vsock_funcs(
+        const AndroidPipeHwFuncs* hw_funcs);
+
 ANDROID_END_HEADER
