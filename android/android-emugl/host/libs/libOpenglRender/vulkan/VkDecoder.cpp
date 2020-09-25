@@ -55,7 +55,14 @@ using android::base::System;
 
 class VkDecoder::Impl {
 public:
-    Impl() : m_logCalls(System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1"), m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) { }
+    Impl() : m_logCalls(System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1"),
+             m_vk(vkDispatch()),
+             m_state(VkDecoderGlobalState::get()),
+             m_boxedHandleUnwrapMapping(m_state),
+             m_boxedHandleCreateMapping(m_state),
+             m_boxedHandleDestroyMapping(m_state),
+             m_boxedHandleUnwrapAndDeleteMapping(m_state),
+             m_boxedHandleUnwrapAndDeletePreserveBoxedMapping(m_state) { }
     VulkanStream* stream() { return &m_vkStream; }
     VulkanMemReadingStream* readStream() { return &m_vkMemReadingStream; }
 
