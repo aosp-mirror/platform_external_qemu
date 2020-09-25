@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3f2f68a4_74e7b62c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-09-25T00:02:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f1448de6_bd10d506",
+      "range": {
+        "startLine": 390,
+        "startChar": 8,
+        "endLine": 390,
+        "endChar": 28
+      },
+      "revId": "030f1507fc23edaed54b895b6640aa37566bc5d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "854dd51b_91583bcc",
         "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "030f1507fc23edaed54b895b6640aa37566bc5d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db230d60_33653e1a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 457,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-09-25T00:02:06Z",
+      "side": 1,
+      "message": "The size may be different, we can always check the size and only reallocate when the newly uploaded rgbaData is larger.",
+      "parentUuid": "854dd51b_91583bcc",
+      "range": {
+        "startLine": 455,
+        "startChar": 2,
+        "endLine": 457,
+        "endChar": 30
+      },
+      "revId": "030f1507fc23edaed54b895b6640aa37566bc5d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
