@@ -53,6 +53,7 @@
 
 static const AndroidPipeHwFuncs* sPipeHwFuncs = nullptr;
 static const AndroidPipeHwFuncs* sPipeHwVirtioFuncs = nullptr;
+static const AndroidPipeHwFuncs* sPipeHwVirtioVsockFuncs = nullptr;
 
 using namespace android::base;
 
@@ -263,9 +264,16 @@ public:
           pipeName);
 
         newPipe->setFlags(mFlags);
-        if (newPipe->getFlags() & ANDROID_PIPE_VIRTIO_GPU_BIT) {
+        const AndroidPipeFlags newFlags = newPipe->getFlags();
+
+        if (newFlags & ANDROID_PIPE_VIRTIO_VSOCK_BIT) {
+            fprintf(stderr, "rkir555 %s:%d this=%p newPipe=%p\n", __func__, __LINE__, this, newPipe);
+            sPipeHwVirtioVsockFuncs->resetPipe(mHwPipe, newPipe);
+        } else if (newFlags & ANDROID_PIPE_VIRTIO_GPU_BIT) {
+            fprintf(stderr, "rkir555 %s:%d this=%p newPipe=%p\n", __func__, __LINE__, this, newPipe);
             sPipeHwVirtioFuncs->resetPipe(mHwPipe, newPipe);
         } else {
+            fprintf(stderr, "rkir555 %s:%d this=%p newPipe=%p\n", __func__, __LINE__, this, newPipe);
             sPipeHwFuncs->resetPipe(mHwPipe, newPipe);
         }
         delete this;
@@ -374,6 +382,7 @@ private:
         if (flags & PIPE_WAKE_CLOSED) {
             sPipeHwFuncs->closeFromHost(hwPipe);
         } else {
+            fprintf(stderr, "rkir555 %s:%d signalWake\n", __func__, __LINE__);
             sPipeHwFuncs->signalWake(hwPipe, flags);
         }
     }
@@ -478,6 +487,7 @@ void AndroidPipe::initThreadingForTest(VmLock* vmLock, base::Looper* looper) {
 }
 
 AndroidPipe::~AndroidPipe() {
+    fprintf(stderr, "rkir555 %s:%d this=%p\n", __func__, __LINE__, this);
     DD("%s: for hwpipe=%p (host %p '%s')", __FUNCTION__, mHwPipe, this,
        mService->name().c_str());
 }
@@ -617,6 +627,13 @@ const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_funcs(
     return result;
 }
 
+const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_vsock_funcs(
+        const AndroidPipeHwFuncs* hwFuncs) {
+    const AndroidPipeHwFuncs* result = sPipeHwVirtioVsockFuncs;
+    sPipeHwVirtioVsockFuncs = hwFuncs;
+    return result;
+}
+
 void android_pipe_reset_services() {
     AndroidPipe::Service::resetAll();
 }
@@ -624,7 +641,9 @@ void android_pipe_reset_services() {
 void* android_pipe_guest_open(void* hwpipe) {
     CHECK_VM_STATE_LOCK();
     DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
-    return android::sGlobals->connectorService.create(hwpipe, nullptr);
+    void *pipe = android::sGlobals->connectorService.create(hwpipe, nullptr);
+    fprintf(stderr, "rkir555 %s:%d hwpipe=%p pipe=%p\n", __func__, __LINE__, hwpipe, pipe);
+    return pipe;
 }
 
 void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags) {
@@ -816,6 +835,8 @@ void android_pipe_host_close(void* hwpipe) {
 }
 
 void android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
+    fprintf(stderr, "rkir555 %s:%d signalWake\n", __func__, __LINE__);
+
     android::sGlobals->pipeWaker.signalWake(hwpipe, flags);
 }
 

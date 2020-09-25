@@ -202,4 +202,7 @@ ANDROID_PIPE_DEVICE_EXPORT const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
 ANDROID_PIPE_DEVICE_EXPORT const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_funcs(
         const AndroidPipeHwFuncs* hw_funcs);
 
+ANDROID_PIPE_DEVICE_EXPORT const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_vsock_funcs(
+        const AndroidPipeHwFuncs* hw_funcs);
+
 ANDROID_END_HEADER

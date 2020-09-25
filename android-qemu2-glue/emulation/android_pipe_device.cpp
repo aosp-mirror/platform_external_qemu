@@ -27,6 +27,7 @@
 extern "C" {
 #include "hw/misc/goldfish_pipe.h"
 #include "hw/virtio/virtio-goldfish-pipe.h"
+#include "hw/virtio/virtio-vsock.h"
 }  // extern "C"
 
 // Technical note: This file contains the glue code used between the
@@ -199,6 +200,8 @@ static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
         },
         // signalWake()
         [](void* hwPipe, unsigned flags) {
+            fprintf(stderr, "rkir555 %s:%d signalWake\n", __func__, __LINE__);
+
             static_assert(
                     (int)GOLDFISH_PIPE_WAKE_CLOSED == (int)PIPE_WAKE_CLOSED,
                     "Invalid PIPE_WAKE_CLOSED values");
@@ -250,10 +253,37 @@ static const AndroidPipeHwFuncs android_pipe_hw_virtio_funcs = {
         }
 };
 
+static const AndroidPipeHwFuncs android_pipe_hw_virtio_vsock_funcs = {
+        // resetPipe()
+        [](void* hwPipe, void* hostPipe) {
+            fprintf(stderr, "rkir555 %s:%d hwPipe=%p hostPipe=%p\n", __func__, __LINE__, hwPipe, hostPipe);
+            virtio_vsock_pipe_reset(hwPipe, hostPipe);
+        },
+        // closeFromHost()
+        [](void* hwPipe) {
+            fprintf(stderr, "rkir555 %s:%d closeFromHost not supported!\n", __func__, __LINE__);
+        },
+        // signalWake()
+        [](void* hwPipe, unsigned flags) {
+            fprintf(stderr, "rkir555 %s:%d signalWake not supported!\n", __func__, __LINE__);
+        },
+        // getPipeId()
+        [](void* hwPipe) {
+            fprintf(stderr, "rkir555 %s:%d getPipeId not supported!\n", __func__, __LINE__);
+            return 0;
+        },
+        // lookupPipeById()
+        [](int id) -> void* {
+            fprintf(stderr, "rkir555 %s:%d lookupPipeById not supported!\n", __func__, __LINE__);
+            return nullptr;
+        }
+};
+
 bool qemu_android_pipe_init(android::VmLock* vmLock) {
     goldfish_pipe_set_service_ops(&goldfish_pipe_service_ops);
     android_pipe_set_hw_funcs(&android_pipe_hw_funcs);
     android_pipe_set_hw_virtio_funcs(&android_pipe_hw_virtio_funcs);
+    android_pipe_set_hw_virtio_vsock_funcs(&android_pipe_hw_virtio_vsock_funcs);
     android::AndroidPipe::initThreading(vmLock);
     return true;
 }
