@@ -56,7 +56,7 @@ TvRemotePage::TvRemotePage(QWidget *parent) :
     const struct {
         QPushButton* button;
         SkinKeyCode key_code;
-    } buttons[] = {
+    } navigation_buttons[] = {
         {mUi->tvRemote_leftButton, kKeyCodeDpadLeft},
         {mUi->tvRemote_upButton, kKeyCodeDpadUp},
         {mUi->tvRemote_rightButton, kKeyCodeDpadRight},
@@ -66,7 +66,7 @@ TvRemotePage::TvRemotePage(QWidget *parent) :
         {mUi->tvRemote_homeButton, kKeyCodeHome},
     };
 
-    for (const auto& button_info : buttons) {
+    for (const auto& button_info : navigation_buttons) {
         QPushButton* button = button_info.button;
         const SkinKeyCode key_code = button_info.key_code;
         connect(button, &QPushButton::pressed,
@@ -75,13 +75,25 @@ TvRemotePage::TvRemotePage(QWidget *parent) :
                 [button, key_code, this]() { toggleButtonEvent(button, key_code, kEventKeyUp); });
     }
 
+    connect(mUi->tvRemote_settingsButton, &QPushButton::pressed,
+             [this]() {onSettingsButtonPressed();});
+    connect(mUi->tvRemote_programGuideButton, &QPushButton::pressed,
+             [this]() {onProgramGuideButtonPressed();});
+    connect(mUi->tvRemote_assistantButton, &QPushButton::pressed,
+             [this]() {onAssistantButtonPressed();});
+
     remaskButtons();
     installEventFilter(this);
 }
 
-void TvRemotePage::setEmulatorWindow(EmulatorQtWindow* eW)
+void TvRemotePage::setEmulatorWindow(EmulatorQtWindow* emulator_window)
 {
-    mEmulatorWindow = eW;
+    mEmulatorWindow = emulator_window;
+}
+
+void TvRemotePage::setAdbInterface(android::emulation::AdbInterface* adb_interface)
+{
+    mAdbInterface = adb_interface;
 }
 
 void TvRemotePage::toggleButtonEvent(
@@ -107,6 +119,39 @@ void TvRemotePage::toggleButtonEvent(
             ":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] + "/" + iconName;
         button->setIcon(QIcon(resName));
     }
+}
+
+void TvRemotePage::onSettingsButtonPressed() {
+    std::vector<std::string> adb_command = {
+        "shell",
+        "am",
+        "start",
+        "com.android.tv.settings/com.android.tv.settings.MainSettings"
+    };
+
+    mAdbInterface->enqueueCommand(adb_command);
+}
+
+void TvRemotePage::onProgramGuideButtonPressed() {
+    std::vector<std::string> adb_command = {
+        "shell",
+        "am",
+        "start",
+        "com.google.android.tv/com.android.tv.MainActivity"
+    };
+
+    mAdbInterface->enqueueCommand(adb_command);
+}
+
+void TvRemotePage::onAssistantButtonPressed() {
+    std::vector<std::string> adb_command = {
+        "shell",
+        "input",
+        "keyevent",
+        "KEYCODE_ASSIST"
+    };
+
+    mAdbInterface->enqueueCommand(adb_command);
 }
 
 void TvRemotePage::remaskButtons() {
