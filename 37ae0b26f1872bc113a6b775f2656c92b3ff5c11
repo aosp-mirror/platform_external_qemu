@@ -111,6 +111,30 @@
       "revId": "37ae0b26f1872bc113a6b775f2656c92b3ff5c11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "57d1f708_778713a3",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-09-25T00:37:03Z",
+      "side": 1,
+      "message": "So obtaining disk size is not an issue.",
+      "parentUuid": "cc54e254_fa04c82b",
+      "range": {
+        "startLine": 174,
+        "startChar": 4,
+        "endLine": 174,
+        "endChar": 21
+      },
+      "revId": "37ae0b26f1872bc113a6b775f2656c92b3ff5c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
