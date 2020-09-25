@@ -87,6 +87,30 @@
       "revId": "37ae0b26f1872bc113a6b775f2656c92b3ff5c11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc54e254_fa04c82b",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-25T00:33:35Z",
+      "side": 1,
+      "message": "I misunderstood, you are correct. We need a mechanism to differentiate old v.s. new behavior. Here are some quick metrics that I will add to the e2e tests.\n\nMetrics from perf test listing 10 snapshots, 50,000 times:\n\n\nWithout diskSize\n------------------------------------------ benchmark \u0027snapshot\u0027: 1 tests -------------------------------------------\nName (time in ms)              Min      Max    Mean  StdDev  Median     IQR   Outliers       OPS  Rounds  Iterations\n--------------------------------------------------------------------------------------------------------------------\ntest_list_snapshot_perf     5.7377  15.5937  6.5834  0.5405  6.4500  0.4697  8683;3774  151.8983   50000           1\n--------------------------------------------------------------------------------------------------------------------\n\nWith diskSize\n------------------------------------------ benchmark \u0027snapshot\u0027: 1 tests -------------------------------------------\nName (time in ms)              Min      Max    Mean  StdDev  Median     IQR   Outliers       OPS  Rounds  Iterations\n--------------------------------------------------------------------------------------------------------------------\ntest_list_snapshot_perf     5.4284  23.3697  7.1573  0.7071  7.0727  0.6291  9267;3255  139.7169   50000           1\n--------------------------------------------------------------------------------------------------------------------",
+      "parentUuid": "40af6e70_2edfc4e0",
+      "range": {
+        "startLine": 174,
+        "startChar": 4,
+        "endLine": 174,
+        "endChar": 21
+      },
+      "revId": "37ae0b26f1872bc113a6b775f2656c92b3ff5c11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
