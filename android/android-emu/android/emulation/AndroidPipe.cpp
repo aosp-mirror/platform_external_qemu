@@ -478,6 +478,7 @@ void AndroidPipe::initThreadingForTest(VmLock* vmLock, base::Looper* looper) {
 }
 
 AndroidPipe::~AndroidPipe() {
+    fprintf(stderr, "rkir555 %s:%d this=%p\n", __func__, __LINE__, this);
     DD("%s: for hwpipe=%p (host %p '%s')", __FUNCTION__, mHwPipe, this,
        mService->name().c_str());
 }
@@ -624,7 +625,9 @@ void android_pipe_reset_services() {
 void* android_pipe_guest_open(void* hwpipe) {
     CHECK_VM_STATE_LOCK();
     DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
-    return android::sGlobals->connectorService.create(hwpipe, nullptr);
+    void *pipe = android::sGlobals->connectorService.create(hwpipe, nullptr);
+    fprintf(stderr, "rkir555 %s:%d hwpipe=%p pipe=%p\n", __func__, __LINE__, hwpipe, pipe);
+    return pipe;
 }
 
 void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags) {
