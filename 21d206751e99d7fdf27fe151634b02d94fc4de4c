@@ -33,6 +33,33 @@
       "url": "https://android-build.googleplex.com/builds/treetop/android-review/1439831?revision\u003d1",
       "fixSuggestions": [],
       "key": {
+        "uuid": "95d85bd7_65c4e16d",
+        "filename": "android/android-emu/android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-25T22:58:34Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 281,
+        "startChar": 28,
+        "endLine": 281,
+        "endChar": 29
+      },
+      "revId": "21d206751e99d7fdf27fe151634b02d94fc4de4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005190514",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1439831?revision\u003d1",
+      "fixSuggestions": [],
+      "key": {
         "uuid": "0c7475a6_054c2ff9",
         "filename": "android/android-emu/android/base/synchronization/Lock.h",
         "patchSetId": 1
@@ -42,6 +69,33 @@
         "id": 1757831
       },
       "writtenOn": "2020-09-25T22:58:33Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 286,
+        "startChar": 2,
+        "endLine": 286,
+        "endChar": 3
+      },
+      "revId": "21d206751e99d7fdf27fe151634b02d94fc4de4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005190514",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1439831?revision\u003d1",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "34d71ae6_3ad0e378",
+        "filename": "android/android-emu/android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-25T22:58:34Z",
       "side": 1,
       "message": "Please remove the trailing whitespace.",
       "range": {
