@@ -522,6 +522,10 @@ extern "C" VG_EXPORT void gfxstream_backend_teardown() {
     android_stopOpenglesRenderer(true);
 }
 
+extern "C" VG_EXPORT void gfxstream_backend_set_screen_mask(int width, int height, const unsigned char* rgbaData) {
+    android_setOpenglesScreenMask(width, height, rgbaData);
+}
+
 extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes) {
     //TODO: support display > 0
     sGetPixelsFunc(pixels, bytes, 0);
