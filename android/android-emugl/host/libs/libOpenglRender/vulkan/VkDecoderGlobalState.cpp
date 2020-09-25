@@ -2635,6 +2635,7 @@ public:
 
         lock.unlock();
 
+        void* mappedPtr = nullptr;
         if (importCbInfoPtr) {
             // Ensure color buffer has Vulkan backing.
             setupVkColorBuffer(importCbInfoPtr->colorBuffer,
@@ -2643,7 +2644,7 @@ public:
                                // Modify the allocation size and type index
                                // to suit the resulting image memory size.
                                &localAllocInfo.allocationSize,
-                               &localAllocInfo.memoryTypeIndex);
+                               &localAllocInfo.memoryTypeIndex, &mappedPtr);
             updateVkImageFromColorBuffer(importCbInfoPtr->colorBuffer);
 
             if (m_emu->instanceSupportsExternalMemoryCapabilities) {
@@ -2729,12 +2730,16 @@ public:
             return result;
         }
 
-        VkResult mapResult =
-            vk->vkMapMemory(device, *pMemory, 0,
-                    mapInfo.size, 0, &mapInfo.ptr);
-
-        if (mapResult != VK_SUCCESS) {
-            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        if (mappedPtr) {
+            mapInfo.needUnmap = false;
+            mapInfo.ptr = mappedPtr;
+        } else {
+            mapInfo.needUnmap = true;
+            VkResult mapResult = vk->vkMapMemory(device, *pMemory, 0,
+                                                 mapInfo.size, 0, &mapInfo.ptr);
+            if (mapResult != VK_SUCCESS) {
+                return VK_ERROR_OUT_OF_HOST_MEMORY;
+            }
         }
 
         *pMemory = new_boxed_non_dispatchable_VkDeviceMemory(*pMemory);
@@ -2788,7 +2793,7 @@ public:
             get_emugl_vm_operations().hostmemUnregister(info->hostmemId);
         }
 
-        if (info->ptr) {
+        if (info->needUnmap && info->ptr) {
             vk->vkUnmapMemory(device, memory);
         }
 
@@ -5343,6 +5348,10 @@ private:
     // This makes it much easier to implement
     // the memory map API.
     struct MappedMemoryInfo {
+        // This indicates whether the VkDecoderGlobalState needs to clean up
+        // and unmap the mapped memory; only the owner of the mapped memory
+        // should call unmap.
+        bool needUnmap = false;
         // When ptr is null, it means the VkDeviceMemory object
         // was not allocated with the HOST_VISIBLE property.
         void* ptr = nullptr;
