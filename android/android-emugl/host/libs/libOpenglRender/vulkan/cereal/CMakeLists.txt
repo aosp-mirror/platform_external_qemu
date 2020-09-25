@@ -8,7 +8,7 @@
 # CEREAL_OUTPUT_DIR: Where to put the generated sources.
 # python3 $VULKAN_REGISTRY_XML_DIR/genvk.py -registry $VULKAN_REGISTRY_XML_DIR/vk.xml cereal -o $CEREAL_OUTPUT_DIR
 
-android_add_library(TARGET OpenglRender_vulkan_cereal LICENSE Apache-2.0 SRC     common/goldfish_vk_extension_structs.cpp     common/goldfish_vk_marshaling.cpp     common/goldfish_vk_testing.cpp     common/goldfish_vk_deepcopy.cpp     common/goldfish_vk_handlemap.cpp     common/goldfish_vk_dispatch.cpp     common/goldfish_vk_transform.cpp     common/goldfish_vk_unbox.cpp )
+android_add_library(TARGET OpenglRender_vulkan_cereal LICENSE Apache-2.0 SRC     common/goldfish_vk_extension_structs.cpp     common/goldfish_vk_marshaling.cpp     common/goldfish_vk_testing.cpp     common/goldfish_vk_deepcopy.cpp     common/goldfish_vk_handlemap.cpp     common/goldfish_vk_dispatch.cpp     common/goldfish_vk_transform.cpp )
 target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer -DVK_GOOGLE_address_space)
 android_target_compile_definitions(OpenglRender_vulkan_cereal windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_link_libraries(OpenglRender_vulkan_cereal PRIVATE emugl_base)
