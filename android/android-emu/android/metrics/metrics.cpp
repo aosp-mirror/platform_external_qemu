@@ -457,6 +457,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::MODEM_SIMULATOR;
         case android::featurecontrol::TvRemote:
             return android_studio::EmulatorFeatureFlagState::TV_REMOTE;
+        case android::featurecontrol::NativeTextureDecompression:
+            return android_studio::EmulatorFeatureFlagState::NATIVE_TEXTURE_DECOMPRESSION;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
