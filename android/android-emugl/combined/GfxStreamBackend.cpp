@@ -85,6 +85,15 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     int renderer_flags,
     struct virgl_renderer_callbacks* virglrenderer_callbacks);
 
+extern "C" VG_EXPORT void gfxstream_backend_setup_window(
+        void* native_window_handle,
+        int32_t window_x,
+        int32_t window_y,
+        int32_t window_width,
+        int32_t window_height,
+        int32_t fb_width,
+        int32_t fb_height);
+
 // For reading back rendered contents to display
 extern "C" VG_EXPORT void get_pixels(void* pixels, uint32_t bytes);
 
@@ -346,12 +355,15 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     bool ignoreHostGlErrorsFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_IGNORE_HOST_GL_ERRORS_BIT;
     bool nativeTextureDecompression = renderer_flags & GFXSTREAM_RENDERER_FLAGS_NATIVE_TEXTURE_DECOMPRESSION_BIT;
     bool syncFdDisabledByFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT;
+    bool surfaceless =
+            renderer_flags & GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT;
 
     GFXS_LOG("Vulkan enabled? %d", enableVk);
     GFXS_LOG("egl2egl enabled? %d", enable_egl2egl);
     GFXS_LOG("ignore host gl errors enabled? %d", ignoreHostGlErrorsFlag);
     GFXS_LOG("syncfd enabled? %d", !syncFdDisabledByFlag);
     GFXS_LOG("use native texture decompression if available? %d", nativeTextureDecompression);
+    GFXS_LOG("surfaceless? %d", surfaceless);
 
     // Need to manually set the GLES backend paths in gfxstream environment
     // because the library search paths are not automatically set to include
@@ -416,12 +428,12 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     emuglConfig_init(&config, true /* gpu enabled */, "auto",
                      enable_egl2egl ? "swiftshader_indirect" : "host",
-                     64,                     /* bitness */
-                     true,                   /* no window */
-                     false,                  /* blacklisted */
-                     false,                  /* has guest renderer */
+                     64,          /* bitness */
+                     surfaceless, /* no window */
+                     false,       /* blacklisted */
+                     false,       /* has guest renderer */
                      WINSYS_GLESBACKEND_PREFERENCE_AUTO,
-                     false                   /* force host gpu vulkan */);
+                     false /* force host gpu vulkan */);
 
     emuglConfig_setupEnv(&config);
 
@@ -464,7 +476,22 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     GFXS_LOG("Started renderer");
 
-    set_post_callback(nullptr, default_post_callback, display_type);
+    if (surfaceless) {
+        set_post_callback(nullptr, default_post_callback, display_type);
+    }
+}
+
+extern "C" VG_EXPORT void gfxstream_backend_setup_window(
+        void* native_window_handle,
+        int32_t window_x,
+        int32_t window_y,
+        int32_t window_width,
+        int32_t window_height,
+        int32_t fb_width,
+        int32_t fb_height) {
+    android_showOpenglesWindow(native_window_handle, window_x, window_y,
+                               window_width, window_height, fb_width, fb_height,
+                               1.0f, 0, false, false);
 }
 
 static void set_post_callback(struct renderer_display_info* r, post_callback_t func, uint32_t display_type) {
@@ -490,6 +517,8 @@ static void set_post_callback(struct renderer_display_info* r, post_callback_t f
 }
 
 extern "C" VG_EXPORT void gfxstream_backend_teardown() {
+    android_finishOpenglesRenderer();
+    android_hideOpenglesWindow();
     android_stopOpenglesRenderer(true);
 }
 
