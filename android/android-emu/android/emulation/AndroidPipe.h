@@ -239,7 +239,9 @@ protected:
 
     // Constructor used by derived classes only.
     AndroidPipe(void* hwPipe, Service* service)
-        : mHwPipe(hwPipe), mService(service) {}
+        : mHwPipe(hwPipe), mService(service) {
+//        fprintf(stderr, "rkir555 %s:%d this=%p hwPipe=%p\n", __func__, __LINE__, this, hwPipe);
+    }
 
     void* const mHwPipe = nullptr;
     Service* mService = nullptr;

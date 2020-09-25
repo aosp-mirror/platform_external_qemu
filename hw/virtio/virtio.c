@@ -1699,7 +1699,7 @@ static void virtio_irq(VirtQueue *vq)
     virtio_notify_vector(vq->vdev, vq->vector);
 }
 
-void virtio_notify(VirtIODevice *vdev, VirtQueue *vq)
+int virtio_notify(VirtIODevice *vdev, VirtQueue *vq)
 {
     bool should_notify;
     rcu_read_lock();
@@ -1707,11 +1707,12 @@ void virtio_notify(VirtIODevice *vdev, VirtQueue *vq)
     rcu_read_unlock();
 
     if (!should_notify) {
-        return;
+        return 0;
     }
 
     trace_virtio_notify(vdev, vq);
     virtio_irq(vq);
+    return 1;
 }
 
 void virtio_notify_config(VirtIODevice *vdev)
