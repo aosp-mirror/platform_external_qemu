@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c996837f_94447b39",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-09-25T21:01:52Z",
+      "side": 1,
+      "message": "buggy, IMO",
+      "range": {
+        "startLine": 747,
+        "startChar": 62,
+        "endLine": 747,
+        "endChar": 73
+      },
+      "revId": "1281835fa886d9f82c75311d642e4141ca7449f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
