@@ -91,5 +91,33 @@ TEST_F(ProcessControlTest, LaunchParametersEscapedProperly) {
     std::string expect_str = R"#("foo" " zoo " "A \"quote\"" "\\t\\n\"")#";
     EXPECT_EQ(expect_str, createEscapedLaunchString(argc, argv));
 }
+
+TEST_F(ProcessControlTest, ParseEscapedLaunchStringProperly) {
+    std::vector<std::string> expect{"foo", " zoo ", "A \"quote\"",
+                                    R"#(\t\n")#"};
+    std::string parse_str = R"#("foo" " zoo " "A \"quote\"" "\\t\\n\"")#";
+    EXPECT_EQ(expect, parseEscapedLaunchString(parse_str));
+}
+
+TEST_F(ProcessControlTest, ParseEscapedQuotedLaunchStringProperly) {
+    std::vector<std::string> expect{"I'm", "doing", "great"};
+    std::string parse_str = R"#("I'm" doing great)#";
+    EXPECT_EQ(expect, parseEscapedLaunchString(parse_str));
+
+    expect = {"I can't believe it's snowing", "again"};
+    parse_str = R"#("I can't believe it's snowing" 'again')#";
+    EXPECT_EQ(expect, parseEscapedLaunchString(parse_str));
+
+    expect = {"\"This is fine", "it's true"};
+    parse_str = R"#('"This is fine' "it's true")#";
+    EXPECT_EQ(expect, parseEscapedLaunchString(parse_str));
+
+    expect = {"\"Quotes ' are ' everwhere\" in this one block \" string"};
+    parse_str = R"#('"Quotes \' are \' everwhere" in this one block \" string')#";
+    EXPECT_EQ(expect, parseEscapedLaunchString(parse_str));
+
+}
+
+
 }  // namespace base
 }  // namespace android
