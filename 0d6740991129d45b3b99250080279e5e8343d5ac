@@ -1,0 +1,31 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005196997",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435854?revision\u003d7",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "04548f95_aebddeb6",
+        "filename": "hw/virtio/virtio-vsock.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-26T08:17:06Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 151,
+        "startChar": 77,
+        "endLine": 151,
+        "endChar": 78
+      },
+      "revId": "0d6740991129d45b3b99250080279e5e8343d5ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
