@@ -1,0 +1,58 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005193056",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435854?revision\u003d6",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "4f20cf42_00e30e18",
+        "filename": "hw/virtio/virtio-vsock.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-26T00:59:35Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 131,
+        "startChar": 86,
+        "endLine": 131,
+        "endChar": 87
+      },
+      "revId": "d6f980d116e4c02c8bff6a150e2b4c261478da78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005193056",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435854?revision\u003d6",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "51ec1e45_d271e18d",
+        "filename": "hw/virtio/virtio-vsock.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-26T00:59:35Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 395,
+        "startChar": 0,
+        "endLine": 395,
+        "endChar": 4
+      },
+      "revId": "d6f980d116e4c02c8bff6a150e2b4c261478da78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
