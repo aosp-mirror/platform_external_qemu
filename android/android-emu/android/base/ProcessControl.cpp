@@ -101,6 +101,56 @@ std::string createEscapedLaunchString(int argc, const char* const* argv) {
     return result;
 }
 
+/**
+ * Parses a command line string into individual arguments. The arguments are
+ * separated by whitespace characters. Each argument is optionally enclosed into
+ * double quotes. Double quotes inside quoted arguments and whitespaces inside a
+ * non-quoted ones are escaped by backslashes. Backslashes inside arguments are
+ * doubled. A character preceded by a single backslash is taken literally and
+ * doesn't have any special meaning.
+ */
+std::vector<std::string> parseEscapedLaunchString(std::string launch,
+                                                  char quote) {
+    std::vector<std::string> args;
+    std::string argBuilder;
+    bool insideArgument = false;
+    bool quoted = false;
+    bool escaped = false;
+    for (char c : launch) {
+        if (insideArgument) {
+            if (escaped) {
+                argBuilder.push_back(c);
+                escaped = false;
+            } else {
+                if (quoted && c == quote || !quoted && isspace(c)) {
+                    args.push_back(argBuilder);
+                    argBuilder.clear();
+                    insideArgument = false;
+                    quoted = false;
+                } else if (c == '\\')
+                    escaped = true;
+                else
+                    argBuilder.push_back(c);
+            }
+        } else {
+            if (!isspace(c)) {
+                insideArgument = true;
+                if (c == quote) {
+                    quoted = true;
+                } else if (c == '\\') {
+                    escaped = true;
+                } else {
+                    argBuilder.push_back(c);
+                }
+            }
+        }
+    }
+    if (!argBuilder.empty()) {
+        args.push_back(argBuilder);
+    }
+    return args;
+}
+
 ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc,
                                                                 char** argv) {
     ProcessLaunchParameters currentLaunchParams = {

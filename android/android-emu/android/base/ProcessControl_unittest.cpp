@@ -91,5 +91,12 @@ TEST_F(ProcessControlTest, LaunchParametersEscapedProperly) {
     std::string expect_str = R"#("foo" " zoo " "A \"quote\"" "\\t\\n\"")#";
     EXPECT_EQ(expect_str, createEscapedLaunchString(argc, argv));
 }
+
+TEST_F(ProcessControlTest, ParseEscapedLaunchStringProperly) {
+    std::vector<std::string> expect{"foo", " zoo ", "A \"quote\"",
+                                    R"#(\t\n")#"};
+    std::string parse_str = R"#("foo" " zoo " "A \"quote\"" "\\t\\n\"")#";
+    EXPECT_EQ(expect, parseEscapedLaunchString(parse_str));
+}
 }  // namespace base
 }  // namespace android
