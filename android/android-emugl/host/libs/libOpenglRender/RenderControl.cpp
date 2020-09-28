@@ -564,7 +564,6 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         glStr += " ";
     }
 
-
     if (virtioGpuNativeSyncEnabled && name == GL_EXTENSIONS) {
         glStr += kVirtioGpuNativeSync;
         glStr += " ";
@@ -1405,6 +1404,21 @@ static int32_t rcMapGpaToBufferHandle2(uint32_t bufferHandle,
     return result;
 }
 
+static void rcFlushWindowColorBufferAsyncWithFrameNumber(uint32_t windowSurface, uint32_t frameNumber) {
+    android::base::traceCounter("gfxstreamFrameNumber", (int64_t)frameNumber);
+    rcFlushWindowColorBufferAsync(windowSurface);
+}
+
+static void rcSetTracingForPuid(uint64_t puid, uint32_t enable, uint64_t time) {
+    fprintf(stderr, "%s: puid 0x%llx tracing: %d time: 0x%llx\n", __func__, (unsigned long long)puid, enable, (unsigned long long)time);
+    if (enable) {
+        android::base::setGuestTime(time);
+        android::base::enableTracing();
+    } else {
+        android::base::disableTracing();
+    }
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1462,4 +1476,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcSetColorBufferVulkanMode2 = rcSetColorBufferVulkanMode2;
     dec->rcMapGpaToBufferHandle = rcMapGpaToBufferHandle;
     dec->rcMapGpaToBufferHandle2 = rcMapGpaToBufferHandle2;
+    dec->rcFlushWindowColorBufferAsyncWithFrameNumber = rcFlushWindowColorBufferAsyncWithFrameNumber;
+    dec->rcSetTracingForPuid = rcSetTracingForPuid;
 }
