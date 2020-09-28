@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "cb55ae9c_b6f03d20",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1614,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-09-28T18:28:37Z",
+      "side": 1,
+      "message": "We unmap the memory in freeExternalMemoryLocked below; and this will be the only place where color buffer-backed memory is unmapped.",
+      "parentUuid": "fe93f643_cd16308e",
+      "revId": "3d984ecf8bbf32c7f5b67bd996f80bfb0e04b0ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d07897b8_84042adf",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2020-09-28T18:19:09Z",
       "side": 1,
       "message": "this is so the color buffer host visible is only unmapped by VkCommonOperations?",
+      "range": {
+        "startLine": 2733,
+        "startChar": 0,
+        "endLine": 2735,
+        "endChar": 36
+      },
+      "revId": "3d984ecf8bbf32c7f5b67bd996f80bfb0e04b0ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0419814e_9115b4d3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2735,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-09-28T18:28:37Z",
+      "side": 1,
+      "message": "Yes; color buffer allocated memory should be only unmapped by color buffer operations.",
+      "parentUuid": "d07897b8_84042adf",
       "range": {
         "startLine": 2733,
         "startChar": 0,
