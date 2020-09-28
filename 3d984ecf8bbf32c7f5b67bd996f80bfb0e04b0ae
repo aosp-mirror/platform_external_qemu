@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fe93f643_cd16308e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1614,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-28T18:19:09Z",
+      "side": 1,
+      "message": "a chance to unmap",
+      "revId": "3d984ecf8bbf32c7f5b67bd996f80bfb0e04b0ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d07897b8_84042adf",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2735,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-09-28T18:19:09Z",
+      "side": 1,
+      "message": "this is so the color buffer host visible is only unmapped by VkCommonOperations?",
+      "range": {
+        "startLine": 2733,
+        "startChar": 0,
+        "endLine": 2735,
+        "endChar": 36
+      },
+      "revId": "3d984ecf8bbf32c7f5b67bd996f80bfb0e04b0ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
