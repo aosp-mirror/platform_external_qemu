@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "474ea6a7_e2ad87d2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-09-29T17:42:23Z",
+      "side": 1,
+      "message": "Let me add support for \" as well as \u0027, this will make it easier for post configuration steps in docker.",
+      "revId": "bb4408c1464fbf675120a39774ce8e35d1053b71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
