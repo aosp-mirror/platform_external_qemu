@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "124a6ea9_6359569e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1753250
+      },
+      "writtenOn": "2020-09-30T20:45:07Z",
+      "side": 1,
+      "message": "Test BPTC app is pending. I\u0027m uploading this now in case we get access to an updated build from the developer before I\u0027ve finished building my app.",
+      "revId": "9fc6a5ba041a0ca728924b8dfbeac93dc13e96e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
