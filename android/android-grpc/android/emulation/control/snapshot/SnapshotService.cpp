@@ -103,7 +103,6 @@ public:
             writer->Write(result);
             return Status::OK;
         }
-
         Stopwatch sw;
         auto tmpdir = pj(System::get()->getTempDir(), snapshot->name());
         const auto tmpdir_deleter =
@@ -117,10 +116,20 @@ public:
         // directory, so they are already in a good state.
         if (!snapshot->isImported()) {
             // Exports all qcow2 images..
+            bool exp = false;
             SnapshotLineConsumer slc(&result);
-            auto exp = getConsoleAgents()->vm->snapshotExport(
-                    snapshot->name().data(), tmpdir.data(), slc.opaque(),
-                    LineConsumer::Callback);
+            android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                    [&slc, &exp, &snapshot, tmpdir] {
+                        bool isVmRunning =
+                                getConsoleAgents()->vm->vmIsRunning();
+                        getConsoleAgents()->vm->vmStop();
+                        exp = getConsoleAgents()->vm->snapshotExport(
+                                snapshot->name().data(), tmpdir.data(),
+                                slc.opaque(), LineConsumer::Callback);
+                        if (isVmRunning) {
+                            getConsoleAgents()->vm->vmStart();
+                        }
+                    });
 
             if (!exp) {
                 writer->Write(*slc.error());
