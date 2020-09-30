@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da8a2ef4_87138265",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2020-09-30T10:31:04Z",
+      "side": 1,
+      "message": "I would leave whitespace OCD to automated tooling. Reviewing it is just noise.",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 37
+      },
+      "revId": "015a794b11c9de8f35b0e22a262c186fa64d3ec4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
