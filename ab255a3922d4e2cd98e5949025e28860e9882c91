@@ -1,0 +1,31 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005267254",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1442418?revision\u003d1",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "54ddd168_507f5ad5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-09-30T10:03:47Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 52,
+        "startChar": 42,
+        "endLine": 52,
+        "endChar": 46
+      },
+      "revId": "ab255a3922d4e2cd98e5949025e28860e9882c91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
