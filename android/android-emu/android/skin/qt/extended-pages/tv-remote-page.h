@@ -37,7 +37,7 @@ public:
     void setAdbInterface(android::emulation::AdbInterface* adb_interface);
 
 private:
-    void toggleButtonEvent(QPushButton* button,
+    void toggleButtonEvent(QPushButton* button,i
                            const SkinKeyCode key_code,
                            const SkinEventType event_type);
     void handleAdbCommand(const std::vector<std::string>& adb_command,
@@ -49,7 +49,7 @@ private:
     void remaskButtons();
     bool eventFilter(QObject*, QEvent*) override;
 
-    std::unique_ptr<Ui::TvRemotePage> mUi;
+    std::unique_ptr<Ui::TvRemotePage> mUi;    
     EmulatorQtWindow* mEmulatorWindow;
     android::emulation::AdbInterface* mAdbInterface;
 };
