@@ -39,6 +39,7 @@ std::vector<std::string> makeArgvStrings(int argc, const char** argv);
 
 ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc, const char** argv);
 std::string createEscapedLaunchString(int argc, const char* const* argv);
+std::vector<std::string> parseEscapedLaunchString(std::string launch);
 
 void saveLaunchParameters(const ProcessLaunchParameters& launchParams, StringView filename);
 
