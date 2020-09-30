@@ -1,0 +1,206 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// TODO: clean up sensor_session.proto and VehicleHalProto.proto
+// File format for storing recorded sensor sessions.
+syntax = "proto2";
+
+package emulator;
+
+// Data structure for sensor session files.
+// NEXT TAG: 3
+message SensorSession {
+    // A header containing information pertaining to the session.
+    // NEXT TAG: 8
+    message SessionMetadata {
+        optional int64 unix_timestamp_ms = 1;
+
+        message Version {
+            optional uint32 major = 1;
+            optional uint32 minor = 2;
+            optional uint32 patch = 3;
+        }
+        optional Version version = 2;
+
+        optional string name = 3
+                [default = ""];  // Reserved for future functionality.
+        optional string description = 4
+                [default = ""];  // Reserved for future functionality.
+
+        // List of supported sensors.
+        enum SensorType {
+            SENSOR_TYPE_PLATFORM_LOCATION = 0;
+            SENSOR_TYPE_CAR_PROPERTY = 1;
+            SENSOR_TYPE_CAMERA = 2;
+            SENSOR_TYPE_SENSOR_EVENT = 3;
+            SENSOR_TYPE_FUSED_LOCATION = 4;
+        }
+        // List of sensors recorded in this session.
+        repeated SensorType sensors = 5;
+
+        // Message stores the data of a CarPropertyConfig object.
+        // NEXT TAG: 10
+        message CarPropertyConfig {
+            optional int32 access = 1;
+            optional int32 area_type = 2;
+            optional int32 change_mode = 3;
+            repeated int32 config_array = 4;
+            optional string config_string = 5;
+            optional float max_sample_rate = 6;
+            optional float min_sample_rate = 7;
+            message SupportedArea {
+                optional int32 area_id = 1;
+                message AreaConfig {
+                    optional sint32 min_int32_value = 1;
+                    optional sint32 max_int32_value = 2;
+                    optional sint64 min_int64_value = 3;
+                    optional sint64 max_int64_value = 4;
+                    optional float min_float_value = 5;
+                    optional float max_float_value = 6;
+                }
+                optional AreaConfig area_config = 2;
+            }
+            repeated SupportedArea supported_areas = 8;
+            optional string type = 9;
+        }
+        // A map of all the car properties subscribed to during this session.
+        // The map's key is the property ID.
+        map<int32, CarPropertyConfig> car_property_configs = 6;
+
+        // Message stores the data of a Sensor object.
+        // This is defined outside the metadata and record
+        // messages below because it is used by both.
+        // NEXT TAG: 24
+        message Sensor {
+            optional string name = 1;
+            optional string vendor = 2;
+            optional int32 version = 3;
+            optional int32 handle = 4;
+            optional int32 type = 5;
+            optional float max_range = 6;
+            optional float resolution = 7;
+            optional float power_ma = 8;
+            optional int32 min_delay_us = 9;
+            optional int32 fifo_reserved_event_count = 10;
+            optional int32 fifo_max_event_count = 11;
+            optional string string_type = 12;
+            optional string required_permission = 13;
+            optional int32 max_delay_us = 14;
+            optional int32 flags = 15;
+            optional int32 id = 16;
+
+            // Since mFlags in Sensor.java is marked @UnsupportedAppUsage, these
+            // members record the different information stored in mFlags that is
+            // available through getters.
+            optional int32 reporting_mode = 17;
+            optional int32 highest_direct_report_rate_level = 18;
+            optional bool direct_channel_memory_file_supported = 19;
+            optional bool direct_channel_hardware_buffer_supported = 20;
+            optional bool wake_up_sensor = 21;
+            optional bool dynamic_sensor = 22;
+            optional bool additional_info_supported = 23;
+        }
+        // A map of all the sensors subscribed to during this session. The map's
+        // key is the sensor's string type concatenated with its name with an
+        // underscore between the two. For example, the key for an accelerometer
+        // with the name of TestAccel:
+        // "android.sensor.accelerometer_TestAccell". Type and name allows a
+        // sensor to be uniquely identified.
+        map<string, Sensor> subscribed_sensors = 7;
+    }
+    optional SessionMetadata session_metadata = 1;
+
+    // A record of a captured on-device sensor event.
+    // NEXT TAG: 6
+    message SensorRecord {
+        // Timestamp of the record relative to session start.
+        optional int64 timestamp_ns = 1;
+
+        message PositionProto {
+            reserved 7, 10, 13 to 16;
+
+            enum PositionProvider {
+                // Position came from gps
+                GPS = 0;
+                // Position came from wifi scans
+                WIFI = 1;
+                // Position came from cell tower
+                CELL = 2;
+                // Position came from an external gps source (not on the device)
+                GPS_INJECTED = 3;
+                // Position came from cell tower with at least one neighbors
+                CELL_WITH_NEIGHBORS = 5;
+                // No provider has been set
+                UNKNOWN = 4;
+            }
+            optional PositionProvider provider = 8;
+
+            message PointProto {
+                optional fixed32 lat_e7 = 1;
+                optional fixed32 lng_e7 = 2;
+            }
+            optional PointProto point = 1;
+            optional int32 accuracy_mm = 2;
+            optional float bearing_deg_full_accuracy = 9;
+            optional float speed_mps = 5;
+            optional double altitude_m = 6;
+            optional double vertical_accuracy_meters = 11;
+
+            // These fields are only used in the unit test. Should we keep them?
+            optional string level_id = 3;
+            optional string cluster_id = 4;
+            optional int32 level_number_e3 = 12;
+        }
+        repeated PositionProto locations = 2;
+
+        // Location data is stored with the PositionProto which is a platform
+        // agnostic way of storing location data in Google.
+        // repeated insight.PositionProto locations = 2;
+
+        // Message stores the data of a CarPropertyValue object.
+        message CarPropertyValue {
+            optional int32 area_id = 1;
+            optional int32 status = 2;
+            optional bool bool_value = 3;
+            repeated sint32 int32_values = 4;
+            repeated sint64 int64_values = 5;
+            repeated float float_values = 6;
+            optional string string_value = 7;
+            optional bytes bytes_value = 8;
+        }
+        // The map's key is the property ID.
+        map<int32, CarPropertyValue> car_property_values = 3;
+
+        // For VPS testing.
+        // Records image from usb camera in png format.
+        optional bytes image = 4;
+
+        // Message stores the data of a SensorEvent object.
+        // We are not storing the sensor information here
+        // because it is already saved in the metadata.
+        message SensorEvent {
+            repeated float values = 1;
+            optional int32 accuracy = 2;
+        }
+        // The map's key is the sensor's string type concatenated with its name
+        // with an underscore between the two. For example, the key for an
+        // accelerometer with the name of TestAccel:
+        // "android.sensor.accelerometer_TestAccell". Type and name allows a
+        // sensor to be uniquely identified.
+        map<string, SensorEvent> sensor_events = 5;
+    }
+    repeated SensorRecord sensor_records = 2;
+}

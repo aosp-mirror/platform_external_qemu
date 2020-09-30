@@ -205,6 +205,7 @@ set(android-emu-common
     android/qt/qt_path.cpp
     android/qt/qt_setup.cpp
     android/resource.c
+    android/sensor_replay/sensor_session_playback.cpp
     android/sdk-controller-socket.c
     android/sensor_mock/SensorMockUtils.cpp
     android/session_phase_reporter.cpp
@@ -882,7 +883,8 @@ if(NOT LINUX_AARCH64)
       android/virtualscene/TextureUtils_unittest.cpp
       android/wear-agent/PairUpWearPhone_unittest.cpp
       android/wear-agent/testing/WearAgentTestUtils.cpp
-      android/wear-agent/WearAgent_unittest.cpp)
+      android/wear-agent/WearAgent_unittest.cpp
+      android/sensor_replay/sensor_session_playback_unittest.cpp)
 
   if(NOT OPTION_GFXSTREAM_BACKEND)
     list(APPEND android-emu_unittests_common
