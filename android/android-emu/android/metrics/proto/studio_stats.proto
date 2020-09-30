@@ -1438,7 +1438,8 @@ message EmulatorFeatureFlagState {
     MODEM_SIMULATOR = 67;
     TV_REMOTE = 68;
     NATIVE_TEXTURE_DECOMPRESSION = 69;
-    // Next tag: 70
+    BPTC_TEXTURE_SUPPORT = 70;
+    // Next tag: 71
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
