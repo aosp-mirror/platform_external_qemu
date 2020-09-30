@@ -38,11 +38,14 @@ public:
 
 private:
     void toggleButtonEvent(QPushButton* button,
-                             const SkinKeyCode key_code,
-                             const SkinEventType event_type);
+                           const SkinKeyCode key_code,
+                           const SkinEventType event_type);
+    void handleAdbCommand(const std::vector<std::string>& adb_command,
+                          const std::string& command_tag);
     void onSettingsButtonPressed();
     void onProgramGuideButtonPressed();
     void onAssistantButtonPressed();
+    void onWatchlistButtonPressed();
     void remaskButtons();
     bool eventFilter(QObject*, QEvent*) override;
 
