@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"
-#include "android/emulation/hostdevices/host_goldfish_pipe.h"
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/Result.h"
@@ -492,42 +491,3 @@ void HostGoldfishPipeDevice::signalWakeCallback(void* hwpipe, unsigned wakes) {
 }
 
 } // namespace android
-
-extern "C" {
-
-void android_host_pipe_device_initialize() {
-    android::HostGoldfishPipeDevice::get();
-}
-
-void* android_host_pipe_connect(const char* name) {
-    return android::HostGoldfishPipeDevice::get()->connect(name);
-}
-
-void android_host_pipe_close(void* pipe) {
-    android::HostGoldfishPipeDevice::get()->close(pipe);
-}
-
-ssize_t android_host_pipe_read(void* pipe, void* buffer, size_t len) {
-    return android::HostGoldfishPipeDevice::get()->read(pipe, buffer, len);
-}
-
-ssize_t android_host_pipe_write(void* pipe, const void* buffer, size_t len) {
-    return android::HostGoldfishPipeDevice::get()->write(pipe, buffer, len);
-}
-
-unsigned android_host_pipe_poll(void* pipe) {
-    return android::HostGoldfishPipeDevice::get()->poll(pipe);
-}
-
-android_host_pipe_dispatch make_host_pipe_dispatch() {
-    android::HostGoldfishPipeDevice::get();
-    android_host_pipe_dispatch res;
-    res.connect = android_host_pipe_connect;
-    res.close = android_host_pipe_close;
-    res.read = android_host_pipe_read;
-    res.write = android_host_pipe_write;
-    res.poll = android_host_pipe_poll;
-    return res;
-}
-
-}
