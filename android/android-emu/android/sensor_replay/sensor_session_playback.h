@@ -1,0 +1,152 @@
+/* Copyright (C) 2020 The Android Open Source Project
+**
+** This software is licensed under the terms of the GNU General Public
+** License version 2, as published by the Free Software Foundation, and
+** may be copied, distributed, and modified under those terms.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+*/
+
+#pragma once
+
+// TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this undef
+#undef ERROR_INVALID_OPERATION
+
+#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/base/synchronization/MessageChannel.h"     // for MessageC...
+#include "android/base/threads/FunctorThread.h"              // for FunctorT...
+#include "google/protobuf/repeated_field.h"
+
+#include "sensor_session.pb.h"
+
+namespace android {
+namespace sensorsessionplayback {
+
+class SensorSessionPlayback {
+public:
+    typedef int64_t DurationNs;
+
+    enum SensorSessionStatus {
+        OK,
+        PROTO_PARSE_FAIL,
+        SEEK_TIME_NEGATIVE,
+        MULTIPLIER_NEGATIVE
+    };
+
+    explicit SensorSessionPlayback();
+
+    virtual ~SensorSessionPlayback();
+
+    // Loads a sensor session file into memory. This method blocks if called
+    // while playback is running.
+    SensorSessionStatus LoadFrom(std::string filename);
+
+    // Sets playback to begin at a specified point in time. Given duration is
+    // relative to session start time.
+    SensorSessionStatus SeekToTime(DurationNs time);
+
+    // Returns the current sensor data.
+    emulator::SensorSession::SensorRecord GetCurrentSensorData() const {
+        return current_sensor_aggregate_;
+    }
+
+    // Register a callback to be run whenever a new event occurs.
+    void RegisterCallback(
+            std::function<void(emulator::SensorSession::SensorRecord)> fn) {
+        callback_ = fn;
+    }
+
+    // Begins sensor playback.
+    SensorSessionStatus StartReplay(float multiplier = 1);
+
+    // Pauses sensor playback.
+    void StopReplay();
+
+    // Metadata accessors.
+    inline emulator::SensorSession::SessionMetadata metadata() const {
+        return session_.session_metadata();
+    }
+
+    // Return the duration of current session
+    inline DurationNs session_duration() const {
+        return session_.sensor_records().empty()
+                       ? 0
+                       : session_.sensor_records().rbegin()->timestamp_ns();
+    }
+
+    // Return the event count of current session
+    inline int event_count() const { return session_.sensor_records().size(); }
+
+    // Return the version of the Sensor Record app that produced current session
+    std::string app_version() const;
+
+    // Return a list of sensors that captured by the Sensor Record app, e.g.,
+    // Accelerometer, Gyroscope
+    std::vector<std::string> sensor_list();
+
+    // Return a list of car property ids captured by the Sensor Record app
+    std::vector<int> car_property_id_list();
+
+    // Gathering timeline info for the current session
+    std::vector<int> getSensorRecordTimeLine(DurationNs interval);
+
+private:
+    // The main playback function used in playback thread
+    void playSensor();
+
+    inline void sensorRecordsSort(
+            google::protobuf::RepeatedPtrField<
+                    emulator::SensorSession::SensorRecord>* array) {
+        std::sort(array->pointer_begin(), array->pointer_end(),
+                  sensor_comparator);
+    }
+
+    // Reset current playback session, so the session will be ready for next
+    // play action
+    void resetSession();
+
+    // Return current system time in ns
+    DurationNs getUnixTimeNs();
+
+    static bool sensor_comparator(
+            const emulator::SensorSession::SensorRecord* z,
+            const emulator::SensorSession::SensorRecord* y) {
+        return z->timestamp_ns() < y->timestamp_ns();
+    }
+
+    // Currently loaded session data.
+    emulator::SensorSession session_;
+
+    // Tracks currently elapsed time during playback.
+    DurationNs current_elapsed_time_ = 0;
+
+    // Tracks current position in data during playback.
+    google::protobuf::RepeatedPtrField<
+            const emulator::SensorSession::SensorRecord>::iterator
+            current_record_iterator_;
+
+    // Collection of current sensor data.
+    emulator::SensorSession::SensorRecord current_sensor_aggregate_;
+
+    // Function to be called when data is available. Set with
+    // RegisterCallback().
+    std::function<void(emulator::SensorSession::SensorRecord)> callback_;
+
+    // SensorSessionPlayback is neither copyable nor movable.
+    SensorSessionPlayback(const SensorSessionPlayback&) = delete;
+    SensorSessionPlayback& operator=(const SensorSessionPlayback&) = delete;
+
+    // Playback thread
+    std::unique_ptr<android::base::FunctorThread> playThread_;
+    android::base::ConditionVariable carVhalReplayCV_;
+    android::base::Lock carVhalReplaytLock_;
+    android::base::MessageChannel<float, 4> carVhalReplayMultiMsg_;
+    android::base::MessageChannel<int, 2> carVhalReplayMsg_;
+};
+
+}  // namespace sensorsessionplayback
+}  // namespace android
