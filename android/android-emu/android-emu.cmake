@@ -35,6 +35,7 @@ set(android-emu-common
     android/boot-properties.c
     android/car.cpp
     android/car-cluster.cpp
+    android/car_sensor_replay/sensor_session_playback.cpp
     android/cmdline-option.cpp
     android/CommonReportedInfo.cpp
     android/console_auth.cpp
@@ -944,7 +945,8 @@ if(NOT LINUX_AARCH64)
       android/virtualscene/TextureUtils_unittest.cpp
       android/wear-agent/PairUpWearPhone_unittest.cpp
       android/wear-agent/testing/WearAgentTestUtils.cpp
-      android/wear-agent/WearAgent_unittest.cpp)
+      android/wear-agent/WearAgent_unittest.cpp
+      android/car_sensor_replay/sensor_session_playback_unittest.cpp)
 
   if(NOT OPTION_GFXSTREAM_BACKEND)
     list(APPEND android-emu_unittests_common
@@ -999,6 +1001,7 @@ if(NOT LINUX_AARCH64)
   list(
     APPEND
     android-emu-testdata
+    testdata/sensor-replay/sensor_proto_with_location
     testdata/snapshots/random-ram-100.bin
     testdata/textureutils/gray_alpha_golden.bmp
     testdata/textureutils/gray_alpha.png
