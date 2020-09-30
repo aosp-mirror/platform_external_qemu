@@ -14,7 +14,8 @@
 
 #include <grpcpp/grpcpp.h>
 #include <stdint.h>
-#include <sys/stat.h>                                              // for stat
+#include <sys/stat.h>  // for stat
+
 #include <cstdio>
 #include <fstream>
 #include <functional>
@@ -46,6 +47,7 @@
 #include "android/snapshot/Snapshot.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/utils/file_io.h"
+#include "android/utils/ini.h"
 #include "android/utils/path.h"
 #include "snapshot.pb.h"
 #include "snapshot_service.grpc.pb.h"
@@ -146,7 +148,8 @@ public:
             stream = std::make_unique<std::ostream>(&csb);
         }
 
-        // Use of  a 64 KB  buffer gives good performance (see performance tests.)
+        // Use of  a 64 KB  buffer gives good performance (see performance
+        // tests.)
         TarWriter tw(tmpdir, *stream, k64KB);
         result.set_success(tw.addDirectory("."));
         if (tw.fail()) {
@@ -171,7 +174,8 @@ public:
             char buf[k64KB];
             PathUtils::split(fname, nullptr, &name);
 
-            // Use of  a 64 KB  buffer gives good performance (see performance tests.)
+            // Use of  a 64 KB  buffer gives good performance (see performance
+            // tests.)
             std::ifstream ifs(fname, std::ios_base::in | std::ios_base::binary);
             ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
 
@@ -286,14 +290,31 @@ public:
     }
 
     Status ListSnapshots(ServerContext* context,
-                         const ::google::protobuf::Empty* request,
+                         const SnapshotFilter* request,
                          SnapshotList* reply) override {
         for (auto snapshot : snapshot::Snapshot::getExistingSnapshots()) {
             auto protobuf = snapshot.getGeneralInfo();
 
-            if (protobuf && snapshot.checkValid(false)) {
+            bool keep =
+                    (request->statusfilter() == SnapshotFilter::CompatibleOnly &&
+                     snapshot.checkValid(false)) ||
+                    request->statusfilter() == SnapshotFilter::All;
+            if (protobuf && keep) {
                 auto details = reply->add_snapshots();
                 details->set_snapshot_id(snapshot.name());
+                details->set_size(snapshot.folderSize());
+                if (snapshot.isLoaded()) {
+                    // Invariant: SnapshotDetails::Loaded -> SnapshotDetails::Compatible
+                    details->set_status(SnapshotDetails::Loaded);
+                } else {
+                    // We only need to check for snapshot validity once.
+                    // Invariant: SnapshotFilter::CompatbileOnly -> snapshot.checkValid(false)
+                    if (request->statusfilter() == SnapshotFilter::CompatibleOnly || snapshot.checkValid(false)) {
+                        details->set_status(SnapshotDetails::Compatible);
+                    } else {
+                        details->set_status(SnapshotDetails::Incompatible);
+                    }
+                }
                 *details->mutable_details() = *protobuf;
             }
         }
