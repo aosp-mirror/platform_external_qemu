@@ -233,7 +233,7 @@
   <widget class="QPushButton" name="tvRemote_programGuideButton">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>160</x>
      <y>420</y>
      <width>85</width>
      <height>27</height>
@@ -246,7 +246,7 @@
   <widget class="QPushButton" name="tvRemote_assistantButton">
    <property name="geometry">
     <rect>
-     <x>320</x>
+     <x>270</x>
      <y>420</y>
      <width>85</width>
      <height>27</height>
@@ -254,6 +254,19 @@
    </property>
    <property name="text">
     <string>Assistant</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="tvRemote_watchlistButton">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>420</y>
+     <width>85</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Watchlist</string>
    </property>
   </widget>
  </widget>
