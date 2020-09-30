@@ -735,8 +735,7 @@ GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLe
     SET_ERROR_IF(!GLEScmValidate::textureTargetEx(target),GL_INVALID_ENUM);
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
-    if ((isEtc2Format(internalformat) && ctx->getCaps()->hasEtc2Support)
-        || (isAstcFormat(internalformat) && ctx->getCaps()->hasAstcSupport)) {
+    if (shouldPassthroughCompressedFormat(ctx, internalformat)) {
         doCompressedTexImage2DNative(ctx, target, level, internalformat, width,
                                           height, border, imageSize, data);
     } else {
@@ -749,8 +748,7 @@ GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLe
     if (texData) {
         texData->compressed = true;
         texData->compressedFormat = internalformat;
-        if ((isEtc2Format(internalformat) && ctx->getCaps()->hasEtc2Support)
-            || (isAstcFormat(internalformat) && ctx->getCaps()->hasAstcSupport)) {
+        if (shouldPassthroughCompressedFormat(ctx, internalformat)) {
             texData->internalFormat = internalformat;
         }
     }
@@ -763,8 +761,7 @@ GL_API void GL_APIENTRY  glCompressedTexSubImage2D( GLenum target, GLint level, 
     SET_ERROR_IF(level < 0 || level > log2(ctx->getMaxTexSize()),GL_INVALID_VALUE)
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
-    if ((isEtc2Format(format) && ctx->getCaps()->hasEtc2Support)
-        || (isAstcFormat(format) && ctx->getCaps()->hasAstcSupport)) {
+    if (shouldPassthroughCompressedFormat(ctx, format)) {
         doCompressedTexSubImage2DNative(ctx, target, level, xoffset, yoffset, width,
                                              height, format, imageSize, data);
     } else {

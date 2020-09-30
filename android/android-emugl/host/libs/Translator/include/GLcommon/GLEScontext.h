@@ -109,6 +109,7 @@ struct GLSupport {
 
     bool hasEtc2Support = false;
     bool hasAstcSupport = false;
+    bool hasBptcSupport = false;
 };
 
 struct ArrayData {

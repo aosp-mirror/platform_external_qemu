@@ -34,6 +34,7 @@ void getAstcFormats(const GLint** formats, size_t* formatsCount);
 bool isAstcFormat(GLenum internalformat);
 bool isEtcFormat(GLenum internalformat);
 bool isEtc2Format(GLenum internalformat);
+bool isBptcFormat(GLenum internalformat);
 bool isPaletteFormat(GLenum internalformat);
 int getCompressedFormats(int* formats);
 void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
@@ -84,7 +85,9 @@ void doCompressedTexSubImage2DNative(GLEScontext* ctx, GLenum target, GLint leve
 
 void forEachEtc2Format(std::function<void(GLint format)>);
 void forEachAstcFormat(std::function<void(GLint format)>);
+void forEachBptcFormat(std::function<void(GLint format)>);
 
 bool isEtc2OrAstcFormat(GLenum format);
 
+bool shouldPassthroughCompressedFormat(GLEScontext* ctx, GLenum internalformat);
 #endif
