@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4d30111_786af6f9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-09-30T21:51:23Z",
+      "side": 1,
+      "message": "The manual retention test passes 6/6 with this CL. But it still require more testing because it is flaky.",
+      "revId": "6bc1c18147577e7732b4e9348932ad4964d0c542",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
