@@ -862,7 +862,8 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
     auto funcPtr = translator::gles2::glTexImage2D;
 
     if ((isEtc2Format(internalformat) && ctx->getCaps()->hasEtc2Support)
-        || (isAstcFormat(internalformat) && ctx->getCaps()->hasAstcSupport)) {
+        || (isAstcFormat(internalformat) && ctx->getCaps()->hasAstcSupport)
+        || (isBptcFormat(internalformat) && ctx->getCaps()->hasBptcSupport)) {
         doCompressedTexImage2DNative(ctx, target, level, internalformat,
                                           width, height, border, imageSize, data);
     } else {
@@ -876,7 +877,8 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
         texData->compressed = true;
         texData->compressedFormat = internalformat;
         if ((isEtc2Format(internalformat) && ctx->getCaps()->hasEtc2Support)
-            || (isAstcFormat(internalformat) && ctx->getCaps()->hasAstcSupport)) {
+            || (isAstcFormat(internalformat) && ctx->getCaps()->hasAstcSupport)
+            || (isBptcFormat(internalformat) && ctx->getCaps()->hasBptcSupport)) {
             texData->internalFormat = internalformat;
         }
     }
@@ -909,7 +911,8 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
         }
         SET_ERROR_IF(ctx->getMajorVersion() < 3 && !data, GL_INVALID_OPERATION);
 	if ((isEtc2Format(format) && ctx->getCaps()->hasEtc2Support)
-            || (isAstcFormat(format) && ctx->getCaps()->hasAstcSupport)) {
+            || (isAstcFormat(format) && ctx->getCaps()->hasAstcSupport)
+            || (isBptcFormat(format) && ctx->getCaps()->hasBptcSupport)) {
             doCompressedTexSubImage2DNative(ctx, target, level, xoffset, yoffset,
                                                  width, height, format, imageSize, data);
         } else {
@@ -946,7 +949,7 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
             if (GLESv2Validate::isCompressedFormat(internalformat)) {
                 texData->compressed = true;
                 texData->compressedFormat = internalformat;
-                texData->internalFormat = ((isEtc2Format(internalformat) && ctx->getCaps()->hasEtc2Support) || (isAstcFormat(internalformat) && ctx->getCaps()->hasAstcSupport)) ? internalformat : decompressedInternalFormat(ctx, internalformat);
+                texData->internalFormat = ((isEtc2Format(internalformat) && ctx->getCaps()->hasEtc2Support) || (isAstcFormat(internalformat) && ctx->getCaps()->hasAstcSupport) || (isBptcFormat(internalformat) && ctx->getCaps()->hasBptcSupport)) ? internalformat : decompressedInternalFormat(ctx, internalformat);
             } else {
                 texData->internalFormat = internalformat;
             }
