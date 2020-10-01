@@ -16,6 +16,23 @@
       "revId": "6bc1c18147577e7732b4e9348932ad4964d0c542",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65ee57f5_9ca00461",
+        "filename": "android/android-grpc/android/emulation/control/snapshot/SnapshotService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-10-01T18:31:55Z",
+      "side": 1,
+      "message": "We should already be stopping and resuming the vm inside qemu_snapshot_export_qcow, maybe al that is needed is running on the mainloop?",
+      "revId": "6bc1c18147577e7732b4e9348932ad4964d0c542",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
