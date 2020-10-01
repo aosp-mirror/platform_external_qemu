@@ -1364,7 +1364,8 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
                         uint32_t memoryProperty,
                         bool* exported,
                         VkDeviceSize* allocSize,
-                        uint32_t* typeIndex) {
+                        uint32_t* typeIndex,
+                        void** mappedPtr) {
     if (!isColorBufferVulkanCompatible(colorBufferHandle)) return false;
 
     auto vk = sVkEmulation->dvk;
@@ -1393,6 +1394,10 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
         // Update the type index to what the host driver wanted, or we might
         // get VK_ERROR_DEVICE_LOST
         if (typeIndex) *typeIndex = infoPtr->memory.typeIndex;
+        // Update the mappedPtr to what the host driver wanted, otherwise we
+        // may map the same memory twice.
+        if (mappedPtr)
+            *mappedPtr = infoPtr->memory.mappedPtr;
         return true;
     }
 
@@ -1551,21 +1556,6 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
         return false;
     }
 
-    bool isHostVisibleMemory =
-            memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-
-    if (isHostVisibleMemory) {
-        VkResult mapMemoryRes =
-                vk->vkMapMemory(sVkEmulation->device, res.memory.memory, 0,
-                                res.memory.size, {}, &res.memory.mappedPtr);
-
-        if (mapMemoryRes != VK_SUCCESS) {
-            fprintf(stderr, "%s: Failed to map image memory. %d\n", __func__,
-                    mapMemoryRes);
-            return false;
-        }
-    }
-
     if (sVkEmulation->instanceSupportsMoltenVK) {
         // Create IOSurface by passing null surface argument.
         VkResult useIOSurfaceRes = sVkEmulation->useIOSurfaceFunc(res.image, nullptr);
@@ -1601,6 +1591,8 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     if (exported) *exported = res.glExported;
     if (allocSize) *allocSize = res.memory.size;
     if (typeIndex) *typeIndex = res.memory.typeIndex;
+    if (mappedPtr)
+        *mappedPtr = res.memory.mappedPtr;
 
     sVkEmulation->colorBuffers[colorBufferHandle] = res;
 
@@ -2045,7 +2037,9 @@ IOSurfaceRef getColorBufferIOSurface(uint32_t colorBuffer) {
     return infoPtr->ioSurface;
 }
 
-int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
+int32_t mapGpaToBufferHandle(uint32_t bufferHandle,
+                             uint64_t gpa,
+                             uint64_t size) {
     if (!sVkEmulation || !sVkEmulation->live)
         return VK_ERROR_DEVICE_LOST;
 
@@ -2079,9 +2073,13 @@ int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
     memoryInfoPtr->pageAlignedHva =
             reinterpret_cast<uint8_t*>(memoryInfoPtr->mappedPtr) +
             memoryInfoPtr->bindOffset;
-    memoryInfoPtr->sizeToPage = ((memoryInfoPtr->size +
-                                  memoryInfoPtr->pageOffset + kPageSize - 1) >>
-                                 kPageBits)
+
+    size_t rawSize = memoryInfoPtr->size + memoryInfoPtr->pageOffset;
+    if (size && size < rawSize) {
+        rawSize = size;
+    }
+
+    memoryInfoPtr->sizeToPage = ((rawSize + kPageSize - 1) >> kPageBits)
                                 << kPageBits;
 
     LOG(VERBOSE) << "mapGpaToColorBuffer: hva = " << memoryInfoPtr->mappedPtr

@@ -118,7 +118,7 @@ void H264PingInfoParser::parseGetImageParams(void* ptr, GetImageParam& param) {
     param.pDecoderErrorCode = (int*)(retptr);
     param.pRetWidth = (uint32_t*)(retptr + 8);
     param.pRetHeight = (uint32_t*)(retptr + 16);
-    param.pRetPts = (uint32_t*)(retptr + 24);
+    param.pRetPts = (uint64_t*)(retptr + 24);
     param.pRetColorPrimaries = (uint32_t*)(retptr + 32);
     param.pRetColorRange = (uint32_t*)(retptr + 40);
     param.pRetColorTransfer = (uint32_t*)(retptr + 48);

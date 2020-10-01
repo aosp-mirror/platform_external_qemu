@@ -211,6 +211,23 @@ bool isEtcFormat(GLenum internalformat) {
     return false;
 }
 
+bool isEtc2Format(GLenum internalformat) {
+    switch (internalformat) {
+    case GL_COMPRESSED_RGB8_ETC2:
+    case GL_COMPRESSED_SRGB8_ETC2:
+    case GL_COMPRESSED_RGBA8_ETC2_EAC:
+    case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
+    case GL_COMPRESSED_R11_EAC:
+    case GL_COMPRESSED_SIGNED_R11_EAC:
+    case GL_COMPRESSED_RG11_EAC:
+    case GL_COMPRESSED_SIGNED_RG11_EAC:
+    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+    case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+        return true;
+    }
+    return false;
+}
+
 bool isPaletteFormat(GLenum internalformat)  {
     switch (internalformat) {
     case GL_PALETTE4_RGB8_OES:
@@ -341,7 +358,6 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
                             GLsizei height, GLint border,
                             GLsizei imageSize, const GLvoid* data,
                             glTexImage2D_t glTexImage2DPtr) {
-
     /* XXX: This is just a hack to fix the resolve of glTexImage2D problem
        It will be removed when we'll no longer link against ligGL */
     /*typedef void (GLAPIENTRY *glTexImage2DPtr_t ) (
@@ -686,4 +702,66 @@ bool isIntegerInternalFormat(GLint internalformat) {
         default:
             return false;
     }
+}
+
+void doCompressedTexImage2DNative(GLEScontext* ctx, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data) {
+    // AlignedBuf<uint8_t, 64> alignedData(imageSize);
+    // memcpy(alignedData.data(), data, imageSize);
+    // GLint err = ctx->dispatcher().glGetError();
+    ctx->dispatcher().glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
+    //     fprintf(stderr, "%s: tex %u target 0x%x level 0x%x iformat 0x%x w h b %d %d %d imgSize %d\n", __func__, ctx->getBindedTexture(target), target, level, internalformat, width, height, border, imageSize);
+    // err = ctx->dispatcher().glGetError(); if (err) {
+    //     fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err);
+    // }
+}
+
+void doCompressedTexSubImage2DNative(GLEScontext* ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data) {
+    // AlignedBuf<uint8_t, 64> alignedData(imageSize);
+    // memcpy(alignedData.data(), data, imageSize);
+    // GLint err = ctx->dispatcher().glGetError();
+    ctx->dispatcher().glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
+    //     fprintf(stderr, "%s: tex %u target 0x%x level 0x%x format 0x%x x y w h %d %d %d %d imgSize %d\n", __func__, ctx->getBindedTexture(target), target, level, format, xoffset, yoffset, width, height, imageSize);
+    // err = ctx->dispatcher().glGetError(); if (err) {
+    //     fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err);
+    // }
+}
+
+void forEachEtc2Format(std::function<void(GLint format)> f) {
+    f(GL_COMPRESSED_RGB8_ETC2);
+    f(GL_COMPRESSED_SRGB8_ETC2);
+    f(GL_COMPRESSED_RGBA8_ETC2_EAC);
+    f(GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC);
+    f(GL_COMPRESSED_R11_EAC);
+    f(GL_COMPRESSED_SIGNED_R11_EAC);
+    f(GL_COMPRESSED_RG11_EAC);
+    f(GL_COMPRESSED_SIGNED_RG11_EAC);
+    f(GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2);
+    f(GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2);
+}
+
+void forEachAstcFormat(std::function<void(GLint format)> f) {
+
+#define CALL_ON_ASTC_FORMAT(typeName, footprintType, srgbValue) \
+    f(typeName);
+
+    ASTC_FORMATS_LIST(CALL_ON_ASTC_FORMAT)
+}
+
+bool isEtc2OrAstcFormat(GLenum format) {
+    switch (format) {
+    case GL_COMPRESSED_RGB8_ETC2:
+    case GL_COMPRESSED_SRGB8_ETC2:
+    case GL_COMPRESSED_RGBA8_ETC2_EAC:
+    case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
+    case GL_COMPRESSED_R11_EAC:
+    case GL_COMPRESSED_SIGNED_R11_EAC:
+    case GL_COMPRESSED_RG11_EAC:
+    case GL_COMPRESSED_SIGNED_RG11_EAC:
+    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+    case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+        return true;
+    default:
+        break;
+    }
+    return isAstcFormat(format);
 }

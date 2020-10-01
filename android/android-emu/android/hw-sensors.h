@@ -134,10 +134,10 @@ typedef enum{
     PHYSICAL_PARAMETER_(HINGE_ANGLE0,"hinge-angle0",HingeAngle0,float) \
     PHYSICAL_PARAMETER_(HINGE_ANGLE1,"hinge-angle1",HingeAngle1,float) \
     PHYSICAL_PARAMETER_(HINGE_ANGLE2,"hinge-angle2",HingeAngle2,float) \
-    PHYSICAL_PARAMETER_(POSTURE,"posture",Posture,float) \
     PHYSICAL_PARAMETER_(ROLLABLE0,"rollable0",Rollable0,float) \
     PHYSICAL_PARAMETER_(ROLLABLE1,"rollable1",Rollable1,float) \
     PHYSICAL_PARAMETER_(ROLLABLE2,"rollable2",Rollable2,float) \
+    PHYSICAL_PARAMETER_(POSTURE,"posture",Posture,float) \
 
 typedef enum {
 #define PHYSICAL_PARAMETER_(x,y,z,w)  PHYSICAL_PARAMETER_##x,
@@ -332,5 +332,6 @@ bool android_foldable_fold();
 bool android_foldable_unfold();
 bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h);
 bool android_foldable_rollable_configured();
+bool android_hw_sensors_is_loading_snapshot();
 
 ANDROID_END_HEADER

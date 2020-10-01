@@ -4506,6 +4506,19 @@ void vkQueueBindSparseAsyncGOOGLE(
     // TODO: Implement
 }
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+void vkGetLinearImageLayoutGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkDevice device,
+    VkFormat format,
+    VkDeviceSize* pOffset,
+    VkDeviceSize* pRowPitchAlignment)
+{
+    // TODO: Implement
+}
+#endif
 
 private:
     android::base::Lock mLock;
@@ -8879,6 +8892,19 @@ void VkDecoderSnapshot::vkQueueBindSparseAsyncGOOGLE(
     VkFence fence)
 {
     mImpl->vkQueueBindSparseAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, bindInfoCount, pBindInfo, fence);
+}
+#endif
+#ifdef VK_GOOGLE_linear_image_layout
+void VkDecoderSnapshot::vkGetLinearImageLayoutGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::Pool* pool,
+    VkDevice device,
+    VkFormat format,
+    VkDeviceSize* pOffset,
+    VkDeviceSize* pRowPitchAlignment)
+{
+    mImpl->vkGetLinearImageLayoutGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, device, format, pOffset, pRowPitchAlignment);
 }
 #endif
 

@@ -1436,7 +1436,9 @@ message EmulatorFeatureFlagState {
     VULKAN_SHADER_FLOAT16_INT8 = 65;
     CAR_ROTARY = 66;
     MODEM_SIMULATOR = 67;
-    // Next tag: 67
+    TV_REMOTE = 68;
+    NATIVE_TEXTURE_DECOMPRESSION = 69;
+    // Next tag: 70
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

@@ -4,7 +4,7 @@ package emulator_features;
 
 // Must match emulator's featurecontrol defs.
 
-// Next tag: 46
+// Next tag: 58
 
 enum Feature {
     GLPipeChecksum = 0;
@@ -99,4 +99,6 @@ enum Feature {
     CarRotary = 55;
     
     ModemSimulator = 56;
+
+    TvRemote = 57;
 }
