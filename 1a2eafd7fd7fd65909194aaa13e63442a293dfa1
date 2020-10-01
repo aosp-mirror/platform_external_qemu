@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97e1f4e4_5d98f35c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-01T20:02:23Z",
+      "side": 1,
+      "message": "Thanks! You\u0027ll need to rebase the change though",
+      "revId": "1a2eafd7fd7fd65909194aaa13e63442a293dfa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
