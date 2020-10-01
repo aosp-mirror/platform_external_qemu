@@ -1,0 +1,8 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <android-build-ayeaye@system.gserviceaccount.com>
+Code-Review+2: Orlin Georgiev <orlin@google.com>
+Submitted-by: Teodora Tica <teodoratica@google.com>
+Submitted-at: Thu, 01 Oct 2020 08:41:38 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1442418
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
