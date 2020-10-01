@@ -576,7 +576,7 @@ private:
 }  // namespace
 
 void registerPipeService() {
-    android::AndroidPipe::Service::add(new EmuglPipe::Service());
+    android::AndroidPipe::Service::add(std::make_unique<EmuglPipe::Service>());
     registerGLProcessPipeService();
 }
 

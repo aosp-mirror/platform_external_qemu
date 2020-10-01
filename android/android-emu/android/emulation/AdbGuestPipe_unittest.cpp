@@ -48,7 +48,7 @@ public:
     MockAdbHostAgent() {
         auto service = new AdbGuestPipe::Service(this);
         mGuestAgent = service;
-        AndroidPipe::Service::add(service);
+        AndroidPipe::Service::add(std::unique_ptr<AdbGuestPipe::Service>(service));
     }
 
     ~MockAdbHostAgent() {
@@ -249,7 +249,7 @@ TEST(AdbGuestPipe, DISABLED_createGuestWithCloseOnReply) {
     TestAndroidPipeDevice testDevice;
 
     MockAdbHostAgent adbHost;
-    AndroidPipe::Service::add(new AdbGuestPipe::Service(&adbHost));
+    AndroidPipe::Service::add(std::make_unique<AdbGuestPipe::Service>(&adbHost));
 
     // Create a new guest connection from the test device.
     auto guest = TestGuest::create();

@@ -85,14 +85,14 @@ public:
             sOffworldInstance = nullptr;
         }
 
-        static Service* create(
+        static std::unique_ptr<Service> create(
             AutomationController& automationController,
             VideoInjectionController& videoInjectionController) {
             android::base::AutoLock lock(sOffworldLock);
             CHECK(!sOffworldInstance) << "OffworldPipe already exists";
             sOffworldInstance = new Service(automationController,
                                             videoInjectionController);
-            return sOffworldInstance;
+            return std::unique_ptr<Service>(sOffworldInstance);
         }
 
         static Service* get() {
