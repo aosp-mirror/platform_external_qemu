@@ -117,6 +117,7 @@ static const MemMapEntry memmap[] = {
     [RANCHU_GOLDFISH_EVDEV] = { 0x9040000, 0x1000 },
     [RANCHU_MMIO] = { 0xa000000, 0x200 },
     [RANCHU_GOLDFISH_PIPE] = {0xa010000, 0x2000 },
+    [RANCHU_GOLDFISH_SYNC] = {0xa020000, 0x2000 },
     /* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */
     /* 0x10000000 .. 0x40000000 reserved for PCI */
     [RANCHU_MEM] = { 0x40000000, 30ULL * 1024 * 1024 * 1024 },
@@ -129,6 +130,7 @@ static const int irqmap[] = {
     [RANCHU_GOLDFISH_AUDIO] = 4,
     [RANCHU_GOLDFISH_EVDEV] = 5,
     [RANCHU_GOLDFISH_PIPE] = 6,
+    [RANCHU_GOLDFISH_SYNC] = 7,
     [RANCHU_MMIO] = 16, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
 };
 
