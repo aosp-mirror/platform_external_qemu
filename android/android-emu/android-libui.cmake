@@ -135,6 +135,8 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/rotary-input-dial.cpp
     android/skin/qt/extended-pages/rotary-input-page.cpp
     android/skin/qt/extended-pages/settings-page-proxy.cpp
+    android/skin/qt/extended-pages/sensor-replay-item.cpp
+    android/skin/qt/extended-pages/sensor-replay-page.cpp
     android/skin/qt/extended-pages/settings-page.cpp
     android/skin/qt/extended-pages/snapshot-page.cpp
     android/skin/qt/extended-pages/telephony-page.cpp
@@ -205,6 +207,7 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/record-settings-page.ui
     android/skin/qt/extended-pages/rotary-input-page.ui
     android/skin/qt/extended-pages/settings-page.ui
+    android/skin/qt/extended-pages/sensor-replay-page.ui
     android/skin/qt/extended-pages/snapshot-page.ui
     android/skin/qt/extended-pages/telephony-page.ui
     android/skin/qt/extended-pages/tv-remote-page.ui
@@ -256,6 +259,8 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-pages/record-settings-page.h
     android/skin/qt/extended-pages/rotary-input-dial.h
     android/skin/qt/extended-pages/rotary-input-page.h
+    android/skin/qt/extended-pages/sensor-replay-item.h
+    android/skin/qt/extended-pages/sensor-replay-page.h
     android/skin/qt/extended-pages/settings-page.h
     android/skin/qt/extended-pages/snapshot-page.h
     android/skin/qt/extended-pages/telephony-page.h
