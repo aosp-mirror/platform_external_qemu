@@ -285,6 +285,7 @@ enum RendererFlags {
     GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT = 1 << 5, // for disabling vk
     GFXSTREAM_RENDERER_FLAGS_IGNORE_HOST_GL_ERRORS_BIT = 1 << 6, // control IgnoreHostOpenGLErrors flag
     GFXSTREAM_RENDERER_FLAGS_NATIVE_TEXTURE_DECOMPRESSION_BIT = 1 << 7, // Attempt GPU texture decompression
+    GFXSTREAM_RENDERER_FLAGS_ENABLE_GLES31_BIT = 1 << 9, // disables the PlayStoreImage flag
 
     GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT = 1 << 20, // for disabling syncfd
 };
@@ -357,6 +358,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     bool syncFdDisabledByFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT;
     bool surfaceless =
             renderer_flags & GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT;
+    bool enableGlEs31Flag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_ENABLE_GLES31_BIT;
 
     GFXS_LOG("Vulkan enabled? %d", enableVk);
     GFXS_LOG("egl2egl enabled? %d", enable_egl2egl);
@@ -364,6 +366,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     GFXS_LOG("syncfd enabled? %d", !syncFdDisabledByFlag);
     GFXS_LOG("use native texture decompression if available? %d", nativeTextureDecompression);
     GFXS_LOG("surfaceless? %d", surfaceless);
+    GFXS_LOG("OpenGL ES 3.1 enabled? %d", enableGlEs31Flag);
 
     // Need to manually set the GLES backend paths in gfxstream environment
     // because the library search paths are not automatically set to include
@@ -384,7 +387,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLESDynamicVersion, true);
     android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::PlayStoreImage, true);
+            android::featurecontrol::PlayStoreImage, !enableGlEs31Flag);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLDMA, false);
     android::featurecontrol::setEnabledOverride(
