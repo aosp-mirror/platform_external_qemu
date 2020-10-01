@@ -68,6 +68,10 @@ public:
     // does not work out.
     const bool checkValid(bool writeResult);
 
+    // Checks to see whether the snapshot can be loaded,
+    // ignoring any virtual machine and gpu configuration.
+    const bool checkOfflineValid(bool writeResult = false);
+
     base::Optional<FailureReason> failureReason() const;
 
     static base::StringView dataDir(const char* name);
