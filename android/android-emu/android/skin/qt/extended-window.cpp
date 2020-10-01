@@ -48,7 +48,6 @@
 #include "android/skin/qt/extended-pages/cellular-page.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/dpad-page.h"
-#include "android/skin/qt/extended-pages/tv-remote-page.h"
 #include "android/skin/qt/extended-pages/finger-page.h"
 #include "android/skin/qt/extended-pages/google-play-page.h"
 #include "android/skin/qt/extended-pages/help-page.h"
@@ -59,8 +58,10 @@
 #include "android/skin/qt/extended-pages/record-macro-page.h"
 #include "android/skin/qt/extended-pages/record-screen-page.h"
 #include "android/skin/qt/extended-pages/rotary-input-page.h"
+#include "android/skin/qt/extended-pages/sensor-replay-page.h"
 #include "android/skin/qt/extended-pages/settings-page.h"
 #include "android/skin/qt/extended-pages/telephony-page.h"
+#include "android/skin/qt/extended-pages/tv-remote-page.h"
 #include "android/skin/qt/extended-pages/virtual-sensors-page.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-settings.h"
@@ -117,8 +118,9 @@ ExtendedWindow::ExtendedWindow(
                 mEmulatorWindow->getAdbInterface());
     }
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO && 
-        android::featurecontrol::isEnabled(android::featurecontrol::CarRotary) &&
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO &&
+        android::featurecontrol::isEnabled(
+                android::featurecontrol::CarRotary) &&
         android_qemu_mode) {
         mExtendedUi->carRotaryPage->setAdbInterface(
                 mEmulatorWindow->getAdbInterface());
@@ -168,6 +170,7 @@ ExtendedWindow::ExtendedWindow(
     mPaneButtonMap = {
         {PANE_IDX_CAR,           mExtendedUi->carDataButton},
         {PANE_IDX_CAR_ROTARY,    mExtendedUi->carRotaryButton},
+        {PANE_IDX_SENSOR_REPLAY, mExtendedUi->sensorReplayButton},
         {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
         {PANE_IDX_CELLULAR,      mExtendedUi->cellularButton},
         {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
@@ -279,6 +282,14 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->dpadButton->setVisible(false);
         mExtendedUi->telephoneButton->setVisible(false);
 
+        if (android::featurecontrol::isEnabled(
+                    android::featurecontrol::CarVhalReplay)) {
+            mSidebarButtons.addButton(mExtendedUi->sensorReplayButton);
+            mExtendedUi->sensorReplayButton->setVisible(true);
+        } else {
+            mExtendedUi->sensorReplayButton->setVisible(false);
+        }
+
         if (android::featurecontrol::isEnabled(android::featurecontrol::CarRotary) &&
             avdInfo_getApiLevel(android_avdInfo) >= 30 /* Android 11 */) {
             mSidebarButtons.addButton(mExtendedUi->carRotaryButton);
@@ -340,6 +351,7 @@ static std::string translate_idx(ExtendedWindowPane value) {
         PANE(PANE_IDX_HELP)
         PANE(PANE_IDX_CAR)
         PANE(PANE_IDX_CAR_ROTARY)
+        PANE(PANE_IDX_SENSOR_REPLAY)
     }
 #undef PANE
     // Remove _IDX from the string.
@@ -387,6 +399,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         RecordScreenPage::setRecordScreenAgent(agentPtr->record);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             CarDataPage::setCarDataAgent(agentPtr->car);
+            SensorReplayPage::setAgent(agentPtr->car, agentPtr->location);
         }
     }
 }
@@ -509,6 +522,7 @@ void ExtendedWindow::on_recordButton_clicked()       { adjustTabs(PANE_IDX_RECOR
 void ExtendedWindow::on_googlePlayButton_clicked()   { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
 void ExtendedWindow::on_carDataButton_clicked()      { adjustTabs(PANE_IDX_CAR); }
 void ExtendedWindow::on_carRotaryButton_clicked()    { adjustTabs(PANE_IDX_CAR_ROTARY); }
+void ExtendedWindow::on_sensorReplayButton_clicked() { adjustTabs(PANE_IDX_SENSOR_REPLAY); }
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);
