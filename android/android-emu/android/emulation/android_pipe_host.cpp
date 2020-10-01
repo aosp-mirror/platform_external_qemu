@@ -114,7 +114,7 @@ const AndroidPipeFuncs* LegacyPipe::getFuncs() const {
 void android_pipe_add_type(const char* pipeName,
                            void* pipeOpaque,
                            const AndroidPipeFuncs* pipeFuncs) {
-    auto service =
-            new android::LegacyPipeService(pipeName, pipeOpaque, pipeFuncs);
-    android::Service::add(service);
+    android::Service::add(
+        std::make_unique<android::LegacyPipeService>(
+                pipeName, pipeOpaque, pipeFuncs));
 }

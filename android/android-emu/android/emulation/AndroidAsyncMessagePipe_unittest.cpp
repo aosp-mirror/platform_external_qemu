@@ -136,7 +136,7 @@ public:
 
 TEST_F(AndroidAsyncMessagePipeTest, Basic) {
     registerAsyncMessagePipeService(
-            new AndroidAsyncMessagePipe::Service<SimpleMessagePipe>(
+        std::make_unique<AndroidAsyncMessagePipe::Service<SimpleMessagePipe>>(
                     "TestPipe"));
 
     auto pipe = mDevice->connect("TestPipe");
@@ -247,9 +247,9 @@ public:
 
 // Attempt to close the pipe in the onMessage callback.
 TEST_F(AndroidAsyncMessagePipeTest, CloseOnMessage) {
-    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
-            "ClosePipe");
-    registerAsyncMessagePipeService(pipeService);
+    registerAsyncMessagePipeService(
+        std::make_unique<AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>>(
+            "ClosePipe"));
 
     auto pipe = mDevice->connect("ClosePipe");
 
@@ -272,9 +272,9 @@ TEST_F(AndroidAsyncMessagePipeTest, CloseOnMessage) {
 // Verify closing the pipe skips processing future messages, with multiple
 // simultaneous messages.
 TEST_F(AndroidAsyncMessagePipeTest, CloseWithQueuedMessages) {
-    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
-            "ClosePipe");
-    registerAsyncMessagePipeService(pipeService);
+    registerAsyncMessagePipeService(
+        std::make_unique<AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>>(
+            "ClosePipe"));
 
     auto pipe = mDevice->connect("ClosePipe");
 
@@ -305,9 +305,9 @@ TEST_F(AndroidAsyncMessagePipeTest, CloseWithQueuedMessages) {
 }
 
 TEST_F(AndroidAsyncMessagePipeTest, QueueCloseOnMessage) {
-    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
-            "ClosePipe");
-    registerAsyncMessagePipeService(pipeService);
+    registerAsyncMessagePipeService(
+        std::make_unique<AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>>(
+            "ClosePipe"));
 
     auto pipe = mDevice->connect("ClosePipe");
 
@@ -367,8 +367,9 @@ private:
 // bug: 118512307
 TEST_F(AndroidAsyncMessagePipeTest, DISABLED_Multithreaded) {
     registerAsyncMessagePipeService(
-            new AndroidAsyncMessagePipe::Service<MultithreadedEchoMessagePipe>(
-                    "Multithreaded"));
+        std::make_unique<AndroidAsyncMessagePipe::Service<MultithreadedEchoMessagePipe>>(
+            "Multithreaded"));
+
     auto pipe = mDevice->connect("Multithreaded");
 
     std::deque<std::vector<uint8_t>> packets;
@@ -453,9 +454,9 @@ TEST_F(AndroidAsyncMessagePipeTest, Snapshot) {
 
 // Verifies that getPipe can restore the pipe after snapshot load.
 TEST_F(AndroidAsyncMessagePipeTest, SnapshotGetPipe) {
-    auto pipeService =
-            new AndroidAsyncMessagePipe::Service<SimpleMessagePipe>("TestPipe");
-    registerAsyncMessagePipeService(pipeService);
+    typedef AndroidAsyncMessagePipe::Service<SimpleMessagePipe> PipeService;
+    auto pipeService = new PipeService("TestPipe");
+    registerAsyncMessagePipeService(std::unique_ptr<PipeService>(pipeService));
 
     auto pipe = mDevice->connect("TestPipe");
 

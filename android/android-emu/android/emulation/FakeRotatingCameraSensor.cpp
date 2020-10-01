@@ -32,7 +32,7 @@ void fakeCameraSensorDecodeAndExecute(const std::vector<uint8_t>& input,
 }
 
 void registerFakeRotatingCameraSensorServicePipe() {
-    android::AndroidPipe::Service::add(new android::AndroidMessagePipe::Service(
+    AndroidPipe::Service::add(std::make_unique<AndroidMessagePipe::Service>(
             "FakeRotatingCameraSensor", fakeCameraSensorDecodeAndExecute));
 }
 }  // namespace android

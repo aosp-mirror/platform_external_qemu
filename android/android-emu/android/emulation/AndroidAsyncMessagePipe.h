@@ -292,10 +292,8 @@ typedef std::function<void(const std::vector<uint8_t>&,
 
 // Register a AndroidAsyncMessagePipe service.  Takes ownership of the pointer,
 // and will delete on cleanup.
-template <typename T>
-void registerAsyncMessagePipeService(
-        android::AndroidAsyncMessagePipe::Service<T>* service) {
-    android::AndroidPipe::Service::add(service);
+template <typename T> void registerAsyncMessagePipeService(T service) {
+    android::AndroidPipe::Service::add(std::move(service));
 }
 
 // Helper to register a message pipe service with a lambda as an onMessage

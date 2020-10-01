@@ -257,7 +257,8 @@ static WifiForwardPipe::Service* sWifiForwardPipeService = nullptr;
 void registerWifiForwardPipeService(WifiForwardMode mode, uint16_t port) {
     if (sWifiForwardPipeService == nullptr) {
         sWifiForwardPipeService = new WifiForwardPipe::Service(mode, port);
-        android::AndroidPipe::Service::add(sWifiForwardPipeService);
+        android::AndroidPipe::Service::add(
+            std::unique_ptr<WifiForwardPipe::Service>(sWifiForwardPipeService));
     }
 }
 

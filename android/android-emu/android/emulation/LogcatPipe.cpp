@@ -84,7 +84,7 @@ void registerLogcatPipeService() {
         }
     }
 
-    android::AndroidPipe::Service::add(new LogcatPipe::Service());
+    android::AndroidPipe::Service::add(std::make_unique<LogcatPipe::Service>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

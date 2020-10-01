@@ -128,7 +128,7 @@ public:
         // Register a new |service| instance. After the call, the object
         // is owned by the global service manager, and will be destroyed
         // when resetAll() is called.
-        static void add(Service* service);
+        static void add(std::unique_ptr<Service> service);
 
         // Reset the list of registered services. Useful at the start and
         // end of a unit-test.

@@ -24,7 +24,7 @@ using android::base::StringView;
 
 TEST(AdbDebugPipe, noOutput) {
     TestAndroidPipeDevice testDevice;
-    AndroidPipe::Service::add(new AdbDebugPipe::Service(nullptr));
+    AndroidPipe::Service::add(std::make_unique<AdbDebugPipe::Service>(nullptr));
 
     auto guest = TestAndroidPipeDevice::Guest::create();
     EXPECT_EQ(0, guest->connect("qemud:adb-debug"));
@@ -36,7 +36,7 @@ TEST(AdbDebugPipe, noOutput) {
 TEST(AdbDebugPipe, withOutput) {
     TestAndroidPipeDevice testDevice;
     auto outStream = new android::base::TestMemoryOutputStream();
-    AndroidPipe::Service::add(new AdbDebugPipe::Service(outStream));
+    AndroidPipe::Service::add(std::make_unique<AdbDebugPipe::Service>(outStream));
 
     auto guest = TestAndroidPipeDevice::Guest::create();
     EXPECT_EQ(0, guest->connect("qemud:adb-debug"));

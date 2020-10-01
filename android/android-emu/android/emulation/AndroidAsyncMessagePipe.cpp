@@ -364,7 +364,8 @@ private:
 void registerAsyncMessagePipeService(
         const char* serviceName,
         OnMessageCallbackFunction onMessageCallback) {
-    registerAsyncMessagePipeService(new CallbackMessagePipeService::Service(
+    registerAsyncMessagePipeService(
+        std::make_unique<CallbackMessagePipeService::Service>(
             serviceName, onMessageCallback));
 }
 
