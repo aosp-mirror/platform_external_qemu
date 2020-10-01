@@ -16,6 +16,23 @@
       "revId": "130f322836b4b778b3208b5c18bda6d74917c449",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "086d4d46_b3a69fe9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-01T15:09:53Z",
+      "side": 1,
+      "message": "apparently, when sync was added, this setup was missed\n\ncreate_simple_device(vbi, pic, RANCHU_GOLDFISH_SYNC, \"goldfish_sync\",\n                         \"google,goldfish-sync\\0\"\n                         \"generic,goldfish-sync\", 2, 0, 0);",
+      "revId": "130f322836b4b778b3208b5c18bda6d74917c449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
