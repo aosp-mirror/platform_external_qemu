@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "25775cff_1fdae857",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1870,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-10-01T22:26:34Z",
+      "side": 1,
+      "message": "It seems to me that GL_EXT_texture_compression_bptc is an OpenGLES only extension, we probably should check the GL_ARB_texture_compression_bptc extension for desktop OpenGL or just simply call glCompressedTexImage2D with BPTC format to see if that works?",
+      "revId": "1dd5f93e542b7982fca483ad0ec241e2383b3bc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
