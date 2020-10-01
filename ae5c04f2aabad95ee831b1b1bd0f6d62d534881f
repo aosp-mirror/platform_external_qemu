@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "650cc309_da2ae6fc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1707289
+      },
+      "writtenOn": "2020-10-01T21:06:37Z",
+      "side": 1,
+      "message": "Looks like I need approval again for this (thanks for noticing it before!). I had to change the flag to accommodate recent and in-flight changes.",
+      "revId": "ae5c04f2aabad95ee831b1b1bd0f6d62d534881f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
