@@ -16,9 +16,9 @@
 
 #include <stddef.h>                            // for size_t
 #include <stdint.h>                            // for uint32_t, uint64_t
+#include <atomic>                              // for atomic
 #include <memory>                              // for unique_ptr
 #include <string>                              // for string, basic_string
-
 #include "android/base/memory/SharedMemory.h"  // for SharedMemory
 #include "android/opengles.h"                  // for ReadPixelsFunc
 
@@ -78,6 +78,8 @@ private:
     ReadPixelsFunc mReadPixels;
     std::unique_ptr<Producer> mVideoProducer;
     size_t mPixelBufferSize;
+
+    static std::atomic<uint64_t> sFrameCounter;
 };
 }  // namespace recording
 }  // namespace android

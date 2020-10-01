@@ -410,9 +410,12 @@ void FoldableModel::setHingeAngle(uint32_t hingeIndex,
     enum FoldablePostures p = calculatePosture();
     if (mState.currentPosture != p) {
         mState.currentPosture = p;
-        lock.unlock();
-        sendPostureToSystem(p);
-        updateFoldablePostureIndicator();
+        if (!android_hw_sensors_is_loading_snapshot()) {
+            // during snapshot load, setPosture will handle the following
+            lock.unlock();
+            sendPostureToSystem(p);
+            updateFoldablePostureIndicator();
+        }
     }
 }
 
@@ -421,6 +424,16 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode,
     std::unique_lock<std::recursive_mutex> lock(mutex);
     enum FoldablePostures p = (enum FoldablePostures)posture;
     VLOG(foldable) << "setPosture " << posture << " current posture " << mState.currentPosture;
+
+    // E.g., if initial config is folded, and snapshot also foled.
+    // Need force sending this status to UI, and adjust the host window size
+    if (android_hw_sensors_is_loading_snapshot()) {
+        mState.currentPosture = p;
+        lock.unlock();
+        sendPostureToSystem(p);
+        updateFoldablePostureIndicator();
+        return;
+    }
 
     if (mState.currentPosture == p) {
         return;
@@ -473,8 +486,11 @@ void FoldableModel::setRollable(uint32_t index,
     enum FoldablePostures p = calculatePosture();
     if (mState.currentPosture != p) {
         mState.currentPosture = p;
-        lock.unlock();
-        updateFoldablePostureIndicator();
+        if (!android_hw_sensors_is_loading_snapshot()) {
+            // during snapshot load, setPosture will handle the following
+            lock.unlock();
+            updateFoldablePostureIndicator();
+        }
     }
 }
 
@@ -612,7 +628,7 @@ void FoldableModel::updateFoldablePostureIndicator() {
     const QAndroidEmulatorWindowAgent* windowAgent =
         android_hw_sensors_get_window_agent();
     if (windowAgent) {
-        windowAgent->updateFoldablePostureIndicator();
+        windowAgent->updateFoldablePostureIndicator(false);
     } else {
         E("Could not update foldable posture indicator: null WindowAgent");
     }

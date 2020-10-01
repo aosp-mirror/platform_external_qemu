@@ -6415,6 +6415,13 @@ server.
             <param len="bindInfoCount" externsync="pBindInfo[].pWaitSemaphores[],pBindInfo[].pSignalSemaphores[],pBindInfo[].pBufferBinds[].buffer,pBindInfo[].pImageOpaqueBinds[].image,pBindInfo[].pImageBinds[].image">const <type>VkBindSparseInfo</type>* <name>pBindInfo</name></param>
             <param optional="true" externsync="true"><type>VkFence</type> <name>fence</name></param>
         </command>
+        <command>
+            <proto><type>void</type> <name>vkGetLinearImageLayoutGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param><type>VkFormat</type> <name>format</name></param>
+            <param><type>VkDeviceSize</type>* <name>pOffset</name></param>
+            <param><type>VkDeviceSize</type>* <name>pRowPitchAlignment</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -9309,6 +9316,14 @@ server.
                 <command name="vkQueueSubmitAsyncGOOGLE"/>
                 <command name="vkQueueWaitIdleAsyncGOOGLE"/>
                 <command name="vkQueueBindSparseAsyncGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_linear_image_layout" number="227" author="GOOGLE" contact="Yilong Li @gnoliyil" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_SPEC_VERSION"/>
+                <enum value="227"                                           name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_linear_image_layout&quot;"     name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_EXTENSION_NAME"/>
+                <command name="vkGetLinearImageLayoutGOOGLE"/>
             </require>
         </extension>
     </extensions>

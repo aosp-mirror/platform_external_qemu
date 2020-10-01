@@ -352,7 +352,8 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
                         uint32_t memoryProperty = 0,
                         bool* exported = nullptr,
                         VkDeviceSize* allocSize = nullptr,
-                        uint32_t* typeIndex = nullptr);
+                        uint32_t* typeIndex = nullptr,
+                        void** mappedPtr = nullptr);
 bool teardownVkColorBuffer(uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);
@@ -360,7 +361,9 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);
 VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBufferHandle);
 IOSurfaceRef getColorBufferIOSurface(uint32_t colorBufferHandle);
 bool setColorBufferVulkanMode(uint32_t colorBufferHandle, uint32_t vulkanMode);
-int32_t mapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa);
+int32_t mapGpaToBufferHandle(uint32_t bufferHandle,
+                             uint64_t gpa,
+                             uint64_t size = 0);
 
 // Data buffer operations
 

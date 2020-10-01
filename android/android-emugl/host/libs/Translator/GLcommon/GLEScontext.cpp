@@ -18,6 +18,7 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "emugl/common/feature_control.h"
 
 #include <GLcommon/GLconversion_macros.h>
 #include <GLcommon/GLSnapshotSerializers.h>
@@ -40,6 +41,9 @@
 #include <string.h>
 
 #include <numeric>
+#include <map>
+
+using emugl::emugl_feature_is_enabled;
 
 //decleration
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize);
@@ -173,8 +177,13 @@ void GLESConversionArrays::operator++(){
 
 GLDispatch     GLEScontext::s_glDispatch;
 emugl::Mutex   GLEScontext::s_lock;
+std::string*   GLEScontext::s_glExtensionsGles1 = NULL;
+bool           GLEScontext::s_glExtensionsGles1Initialized = false;
 std::string*   GLEScontext::s_glExtensions = NULL;
 bool           GLEScontext::s_glExtensionsInitialized = false;
+std::string    GLEScontext::s_glVendorGles1;
+std::string    GLEScontext::s_glRendererGles1;
+std::string    GLEScontext::s_glVersionGles1;
 std::string    GLEScontext::s_glVendor;
 std::string    GLEScontext::s_glRenderer;
 std::string    GLEScontext::s_glVersion;
@@ -378,12 +387,10 @@ void GLEScontext::initGlobal(EGLiface* iface) {
     if (!s_glExtensions) {
         initCapsLocked(reinterpret_cast<const GLubyte*>(
                 getHostExtensionsString(&s_glDispatch).c_str()));
-        // NOTE: the string below corresponds to the extensions reported
-        // by this context, which is initialized in each GLESv1 or GLESv2
-        // context implementation, based on the parsing of the host
-        // extensions string performed by initCapsLocked(). I.e. it will
-        // be populated after calling this ::init() method.
         s_glExtensions = new std::string();
+    }
+    if (!s_glExtensionsGles1) {
+        s_glExtensionsGles1 = new std::string();
     }
     s_lock.unlock();
 }
@@ -1645,27 +1652,34 @@ void GLEScontext::setClearStencil(GLint s) {
     m_clearStencil = s;
 }
 
-const char * GLEScontext::getExtensionString() {
+const char * GLEScontext::getExtensionString(bool isGles1) {
     const char * ret;
     s_lock.lock();
-    if (s_glExtensions)
-        ret = s_glExtensions->c_str();
-    else
-        ret="";
+    if (isGles1) {
+        if (s_glExtensionsGles1)
+            ret = s_glExtensionsGles1->c_str();
+        else
+            ret="";
+    } else {
+        if (s_glExtensions)
+            ret = s_glExtensions->c_str();
+        else
+            ret="";
+    }
     s_lock.unlock();
     return ret;
 }
 
-const char * GLEScontext::getVendorString() const {
-    return s_glVendor.c_str();
+const char * GLEScontext::getVendorString(bool isGles1) const {
+    return isGles1 ? s_glVendorGles1.c_str() : s_glVendor.c_str();
 }
 
-const char * GLEScontext::getRendererString() const {
-    return s_glRenderer.c_str();
+const char * GLEScontext::getRendererString(bool isGles1) const {
+    return isGles1 ? s_glRendererGles1.c_str() : s_glRenderer.c_str();
 }
 
-const char * GLEScontext::getVersionString() const {
-    return s_glVersion.c_str();
+const char * GLEScontext::getVersionString(bool isGles1) const {
+    return isGles1 ? s_glVersionGles1.c_str() : s_glVersion.c_str();
 }
 
 void GLEScontext::getGlobalLock() {
@@ -1706,6 +1720,66 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
     s_glDispatch.glGetIntegerv(GL_MAX_DRAW_BUFFERS, &s_glSupport.maxDrawBuffers);
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
+
+    // Compressed texture format query
+    if(emugl_feature_is_enabled(android::featurecontrol::NativeTextureDecompression)) {
+        bool hasEtc2Support = false;
+        bool hasAstcSupport = false;
+        int numCompressedFormats = 0;
+        s_glDispatch.glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &numCompressedFormats);
+        if (numCompressedFormats > 0) {
+            int numEtc2Formats = 0;
+            int numAstcFormats = 0;
+            int numEtc2FormatsSupported = 0;
+            int numAstcFormatsSupported = 0;
+
+            std::map<GLint, bool> found;
+            forEachEtc2Format([&numEtc2Formats, &found](GLint format) { ++numEtc2Formats; found[format] = false;});
+            forEachAstcFormat([&numAstcFormats, &found](GLint format) { ++numAstcFormats; found[format] = false;});
+
+            std::vector<GLint> formats(numCompressedFormats);
+            s_glDispatch.glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, formats.data());
+
+            for (int i = 0; i < numCompressedFormats; ++i) {
+                GLint format = formats[i];
+                if (isEtc2Format(format)) {
+                    ++numEtc2FormatsSupported;
+                    found[format] = true;
+                } else if (isAstcFormat(format)) {
+                    ++numAstcFormatsSupported;
+                    found[format] = true;
+                }
+            }
+
+            if (numEtc2Formats == numEtc2FormatsSupported) {
+                hasEtc2Support = true; // Supports ETC2 underneath
+            } else {
+                // It is unusual to support only some. Record what happened.
+                fprintf(stderr, "%s: Not supporting etc2: %d vs %d\n", __func__,
+                        numEtc2FormatsSupported, numEtc2Formats);
+                for (auto it : found) {
+                    if (!it.second) {
+                        fprintf(stderr, "%s: Not found: 0x%x\n", __func__, it.first);
+                    }
+                }
+            }
+
+            if (numAstcFormats == numAstcFormatsSupported) {
+                hasAstcSupport = true; // Supports ASTC underneath
+            } else {
+                // It is unusual to support only some. Record what happened.
+                fprintf(stderr, "%s: Not supporting astc: %d vs %d\n", __func__,
+                        numAstcFormatsSupported, numAstcFormats);
+                for (auto it : found) {
+                    if (!it.second) {
+                        fprintf(stderr, "%s: Not found: 0x%x\n", __func__, it.first);
+                    }
+                }
+            }
+        }
+        s_glSupport.hasEtc2Support = hasEtc2Support;
+        s_glSupport.hasAstcSupport = hasAstcSupport;
+    }
 
     // Clear GL error in case these enums not supported.
     s_glDispatch.glGetError();
@@ -1785,9 +1859,14 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (strstr(cstring, "GL_EXT_semaphore") != NULL) {
         s_glSupport.ext_GL_EXT_semaphore = true;
     }
+
+    // ASTC
+    if (strstr(cstring, "GL_KHR_texture_compression_astc_ldr") != NULL) {
+        s_glSupport.ext_GL_KHR_texture_compression_astc_ldr = true;
+    }
 }
 
-void GLEScontext::buildStrings(const char* baseVendor,
+void GLEScontext::buildStrings(bool isGles1, const char* baseVendor,
         const char* baseRenderer, const char* baseVersion, const char* version)
 {
     static const char VENDOR[]   = {"Google ("};
@@ -1811,28 +1890,32 @@ void GLEScontext::buildStrings(const char* baseVendor,
         version = "N/A";
     }
 
+    std::string& vendorString = isGles1 ? s_glVendorGles1 : s_glVendor;
+    std::string& rendererString = isGles1 ? s_glRendererGles1 : s_glRenderer;
+    std::string& versionString = isGles1 ? s_glVersionGles1 : s_glVersion;
+
     size_t baseVendorLen = strlen(baseVendor);
-    s_glVendor.clear();
-    s_glVendor.reserve(baseVendorLen + VENDOR_LEN + 1);
-    s_glVendor.append(VENDOR, VENDOR_LEN);
-    s_glVendor.append(baseVendor, baseVendorLen);
-    s_glVendor.append(")", 1);
+    vendorString.clear();
+    vendorString.reserve(baseVendorLen + VENDOR_LEN + 1);
+    vendorString.append(VENDOR, VENDOR_LEN);
+    vendorString.append(baseVendor, baseVendorLen);
+    vendorString.append(")", 1);
 
     size_t baseRendererLen = strlen(baseRenderer);
-    s_glRenderer.clear();
-    s_glRenderer.reserve(baseRendererLen + RENDERER_LEN + 1);
-    s_glRenderer.append(RENDERER, RENDERER_LEN);
-    s_glRenderer.append(baseRenderer, baseRendererLen);
-    s_glRenderer.append(")", 1);
+    rendererString.clear();
+    rendererString.reserve(baseRendererLen + RENDERER_LEN + 1);
+    rendererString.append(RENDERER, RENDERER_LEN);
+    rendererString.append(baseRenderer, baseRendererLen);
+    rendererString.append(")", 1);
 
     size_t baseVersionLen = strlen(baseVersion);
     size_t versionLen = strlen(version);
-    s_glVersion.clear();
-    s_glVersion.reserve(baseVersionLen + versionLen + 3);
-    s_glVersion.append(version, versionLen);
-    s_glVersion.append(" (", 2);
-    s_glVersion.append(baseVersion, baseVersionLen);
-    s_glVersion.append(")", 1);
+    versionString.clear();
+    versionString.reserve(baseVersionLen + versionLen + 3);
+    versionString.append(version, versionLen);
+    versionString.append(" (", 2);
+    versionString.append(baseVersion, baseVersionLen);
+    versionString.append(")", 1);
 }
 
 bool GLEScontext::isTextureUnitEnabled(GLenum unit) {

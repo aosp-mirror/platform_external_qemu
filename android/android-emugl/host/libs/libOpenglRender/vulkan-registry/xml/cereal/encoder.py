@@ -17,9 +17,7 @@ public:
     VkEncoder(IOStream* stream);
     ~VkEncoder();
 
-    void flush();
-    void lock();
-    void unlock();
+#include "VkEncoder.h.inl"
 """
 
 encoder_decl_postamble = """
@@ -39,105 +37,7 @@ using android::base::guest::AutoLock;
 using android::base::guest::Lock;
 using android::base::Pool;
 
-class VkEncoder::Impl {
-public:
-    Impl(IOStream* stream) : m_stream(stream), m_logEncodes(false) {
-        const char* emuVkLogEncodesPropName = "qemu.vk.log";
-        char encodeProp[PROPERTY_VALUE_MAX];
-        if (property_get(emuVkLogEncodesPropName, encodeProp, nullptr) > 0) {
-            m_logEncodes = atoi(encodeProp) > 0;
-        }
-    }
-
-    ~Impl() { }
-
-    VulkanCountingStream* countingStream() { return &m_countingStream; }
-    %s* stream() { return &m_stream; }
-    Pool* pool() { return &m_pool; }
-    ResourceTracker* resources() { return ResourceTracker::get(); }
-    Validation* validation() { return &m_validation; }
-
-    void log(const char* text) {
-        if (!m_logEncodes) return;
-        ALOGD(\"encoder log: %%s\", text);
-    }
-
-    void flush() {
-        lock();
-        m_stream.flush();
-        unlock();
-    }
-
-    // can be recursive
-    void lock() {
-        if (this == sAcquiredEncoderThreadLocal) {
-            ++sAcquiredEncoderThreadLockLevels;
-            return; // recursive
-        }
-        while (mLock.test_and_set(std::memory_order_acquire));
-        sAcquiredEncoderThreadLocal = this;
-        sAcquiredEncoderThreadLockLevels = 1;
-    }
-
-    void unlock() {
-        if (this != sAcquiredEncoderThreadLocal) {
-            // error, trying to unlock without having locked first
-            return;
-        }
-
-        --sAcquiredEncoderThreadLockLevels;
-        if (0 == sAcquiredEncoderThreadLockLevels) {
-            mLock.clear(std::memory_order_release);
-            sAcquiredEncoderThreadLocal = nullptr;
-        }
-    }
-
-private:
-    VulkanCountingStream m_countingStream;
-    %s m_stream;
-    Pool m_pool { 8, 4096, 64 };
-
-    Validation m_validation;
-    bool m_logEncodes;
-    std::atomic_flag mLock = ATOMIC_FLAG_INIT;
-    static thread_local Impl* sAcquiredEncoderThreadLocal;
-    static thread_local uint32_t sAcquiredEncoderThreadLockLevels;
-};
-
-VkEncoder::~VkEncoder() {
-    auto rt = ResourceTracker::get();
-    if (!rt) return;
-    rt->onEncoderDeleted(this);
-}
-
-// static
-thread_local VkEncoder::Impl* VkEncoder::Impl::sAcquiredEncoderThreadLocal = nullptr;
-thread_local uint32_t VkEncoder::Impl::sAcquiredEncoderThreadLockLevels = 0;
-
-struct EncoderAutoLock {
-    EncoderAutoLock(VkEncoder* enc) : mEnc(enc) {
-        mEnc->lock();
-    }
-    ~EncoderAutoLock() {
-        mEnc->unlock();
-    }
-    VkEncoder* mEnc;
-};
-
-VkEncoder::VkEncoder(IOStream *stream) :
-    mImpl(new VkEncoder::Impl(stream)) { }
-
-void VkEncoder::flush() {
-    mImpl->flush();
-}
-
-void VkEncoder::lock() {
-    mImpl->lock();
-}
-
-void VkEncoder::unlock() {
-    mImpl->unlock();
-}
+#include "VkEncoder.cpp.inl"
 
 #define VALIDATE_RET(retType, success, validate) \\
     retType goldfish_vk_validateResult = validate; \\
@@ -147,7 +47,7 @@ void VkEncoder::unlock() {
     VkResult goldfish_vk_validateResult = validate; \\
     if (goldfish_vk_validateResult != VK_SUCCESS) return; \\
 
-""" % (VULKAN_STREAM_TYPE_GUEST, VULKAN_STREAM_TYPE_GUEST)
+"""
 
 COUNTING_STREAM = "countingStream"
 STREAM = "stream"
@@ -343,7 +243,6 @@ class EncodingParameters(object):
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
     cgen.stmt("EncoderAutoLock encoderLock(this)")
-    cgen.stmt("AEMU_SCOPED_TRACE(\"%s encode\")" % api.name)
 
     cgen.stmt("mImpl->log(\"start %s\")" % api.name)
     emit_custom_pre_validate(typeInfo, api, cgen);
@@ -431,8 +330,6 @@ def emit_parameter_encode_do_parameter_write(typeInfo, api, cgen):
 def emit_parameter_encode_read(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
 
-    cgen.stmt("AEMU_SCOPED_TRACE(\"%s readParams\")" % api.name)
-
     for p in encodingParams.toRead:
         if p.action == "create":
             cgen.stmt(
@@ -461,7 +358,6 @@ def emit_pool_free(cgen):
     cgen.stmt("%s->clearPool()" % STREAM)
 
 def emit_return_unmarshal(typeInfo, api, cgen):
-    cgen.stmt("AEMU_SCOPED_TRACE(\"%s returnUnmarshal\")" % api.name)
 
     retType = api.getRetTypeExpr()
 
@@ -495,7 +391,6 @@ def emit_default_encoding(typeInfo, api, cgen):
 ## Custom encoding definitions##################################################
 
 def emit_only_goldfish_custom(typeInfo, api, cgen):
-    cgen.stmt("AEMU_SCOPED_TRACE(\"%s custom\")" % api.name)
 
     cgen.stmt("mImpl->log(\"custom start %s\");" % api.name)
     cgen.vkApiCall( \
@@ -506,7 +401,6 @@ def emit_only_goldfish_custom(typeInfo, api, cgen):
     emit_return(typeInfo, api, cgen)
 
 def emit_only_resource_event(typeInfo, api, cgen):
-    cgen.stmt("AEMU_SCOPED_TRACE(\"%s resourceEvent\")" % api.name)
 
     input_result = None
     retExpr = api.getRetVarExpr()

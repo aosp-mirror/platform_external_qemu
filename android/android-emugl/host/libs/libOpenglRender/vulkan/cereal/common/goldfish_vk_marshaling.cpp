@@ -13009,6 +13009,8 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_async_queue_submit
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+#endif
 void marshal_extension_struct(
     VulkanStream* vkStream,
     const void* structExtension)
@@ -15874,6 +15876,12 @@ const char* api_opcode_to_string(
         case OP_vkQueueBindSparseAsyncGOOGLE:
         {
             return "OP_vkQueueBindSparseAsyncGOOGLE";
+        }
+#endif
+#ifdef VK_GOOGLE_linear_image_layout
+        case OP_vkGetLinearImageLayoutGOOGLE:
+        {
+            return "OP_vkGetLinearImageLayoutGOOGLE";
         }
 #endif
         default:

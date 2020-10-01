@@ -427,13 +427,13 @@ GL_API const GLubyte * GL_APIENTRY  glGetString( GLenum name) {
     GLES_CM_TRACE()
     switch(name) {
         case GL_VENDOR:
-            return (const GLubyte*)ctx->getVendorString();
+            return (const GLubyte*)ctx->getVendorString(true /* is gles1 */);
         case GL_RENDERER:
-            return (const GLubyte*)ctx->getRendererString();
+            return (const GLubyte*)ctx->getRendererString(true /* is gles1 */);
         case GL_VERSION:
-            return (const GLubyte*)ctx->getVersionString();
+            return (const GLubyte*)ctx->getVersionString(true /* is gles1 */);
         case GL_EXTENSIONS:
-            return (const GLubyte*)ctx->getExtensionString();
+            return (const GLubyte*)ctx->getExtensionString(true /* is gles1 */);
         default:
             RET_AND_SET_ERROR_IF(true,GL_INVALID_ENUM,NULL);
     }
@@ -735,13 +735,24 @@ GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLe
     SET_ERROR_IF(!GLEScmValidate::textureTargetEx(target),GL_INVALID_ENUM);
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
-    doCompressedTexImage2D(ctx, target, level, internalformat,
-                                width, height, border,
-                                imageSize, data, glTexImage2D);
+    if ((isEtc2Format(internalformat) && ctx->getCaps()->hasEtc2Support)
+        || (isAstcFormat(internalformat) && ctx->getCaps()->hasAstcSupport)) {
+        doCompressedTexImage2DNative(ctx, target, level, internalformat, width,
+                                          height, border, imageSize, data);
+    } else {
+        doCompressedTexImage2D(ctx, target, level, internalformat,
+                                    width, height, border,
+                                    imageSize, data, glTexImage2D);
+    }
+
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
         texData->compressed = true;
         texData->compressedFormat = internalformat;
+        if ((isEtc2Format(internalformat) && ctx->getCaps()->hasEtc2Support)
+            || (isAstcFormat(internalformat) && ctx->getCaps()->hasAstcSupport)) {
+            texData->internalFormat = internalformat;
+        }
     }
 }
 
@@ -752,10 +763,17 @@ GL_API void GL_APIENTRY  glCompressedTexSubImage2D( GLenum target, GLint level, 
     SET_ERROR_IF(level < 0 || level > log2(ctx->getMaxTexSize()),GL_INVALID_VALUE)
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
-    GLenum uncompressedFrmt;
-    unsigned char* uncompressed = uncompressTexture(format,uncompressedFrmt,width,height,imageSize,data,level);
-    ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,uncompressedFrmt,GL_UNSIGNED_BYTE,uncompressed);
-    delete uncompressed;
+    if ((isEtc2Format(format) && ctx->getCaps()->hasEtc2Support)
+        || (isAstcFormat(format) && ctx->getCaps()->hasAstcSupport)) {
+        doCompressedTexSubImage2DNative(ctx, target, level, xoffset, yoffset, width,
+                                             height, format, imageSize, data);
+    } else {
+        GLenum uncompressedFrmt;
+        unsigned char* uncompressed = uncompressTexture(format,uncompressedFrmt,width,height,imageSize,data,level);
+        ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,uncompressedFrmt,GL_UNSIGNED_BYTE,uncompressed);
+        delete uncompressed;
+    }
+
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
         texData->setMipmapLevelAtLeast(level);

@@ -75,6 +75,8 @@ public:
 private:
     static bool s_isCudaDecoderGood;
 
+    uint64_t mNumInputFrame{0};
+    uint64_t mNumOutputFrame{0};
     int mErrorCode = 0;
     bool mIsGood = true;
     bool mUseGpuTexture = false;

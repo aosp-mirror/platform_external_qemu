@@ -2635,6 +2635,7 @@ public:
 
         lock.unlock();
 
+        void* mappedPtr = nullptr;
         if (importCbInfoPtr) {
             // Ensure color buffer has Vulkan backing.
             setupVkColorBuffer(importCbInfoPtr->colorBuffer,
@@ -2643,7 +2644,7 @@ public:
                                // Modify the allocation size and type index
                                // to suit the resulting image memory size.
                                &localAllocInfo.allocationSize,
-                               &localAllocInfo.memoryTypeIndex);
+                               &localAllocInfo.memoryTypeIndex, &mappedPtr);
             updateVkImageFromColorBuffer(importCbInfoPtr->colorBuffer);
 
             if (m_emu->instanceSupportsExternalMemoryCapabilities) {
@@ -2729,12 +2730,16 @@ public:
             return result;
         }
 
-        VkResult mapResult =
-            vk->vkMapMemory(device, *pMemory, 0,
-                    mapInfo.size, 0, &mapInfo.ptr);
-
-        if (mapResult != VK_SUCCESS) {
-            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        if (mappedPtr) {
+            mapInfo.needUnmap = false;
+            mapInfo.ptr = mappedPtr;
+        } else {
+            mapInfo.needUnmap = true;
+            VkResult mapResult = vk->vkMapMemory(device, *pMemory, 0,
+                                                 mapInfo.size, 0, &mapInfo.ptr);
+            if (mapResult != VK_SUCCESS) {
+                return VK_ERROR_OUT_OF_HOST_MEMORY;
+            }
         }
 
         *pMemory = new_boxed_non_dispatchable_VkDeviceMemory(*pMemory);
@@ -2788,7 +2793,7 @@ public:
             get_emugl_vm_operations().hostmemUnregister(info->hostmemId);
         }
 
-        if (info->ptr) {
+        if (info->needUnmap && info->ptr) {
             vk->vkUnmapMemory(device, memory);
         }
 
@@ -3755,6 +3760,83 @@ public:
         auto vk = dispatch_VkQueue(boxed_queue);
         (void)pool;
         vk->vkQueueBindSparse(queue, bindInfoCount, pBindInfo, fence);
+    }
+
+    void on_vkGetLinearImageLayoutGOOGLE(
+        android::base::Pool* pool,
+        VkDevice boxed_device,
+        VkFormat format,
+        VkDeviceSize* pOffset,
+        VkDeviceSize* pRowPitchAlignment) {
+
+        if (!mLinearImageProperties.hasValue()) {
+            auto device = unbox_VkDevice(boxed_device);
+            auto vk = dispatch_VkDevice(boxed_device);
+
+            VkImageCreateInfo createInfo;
+            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+            createInfo.pNext = nullptr;
+            createInfo.flags = {};
+            createInfo.imageType = VK_IMAGE_TYPE_2D;
+            createInfo.format = format;
+            createInfo.extent = {/*width*/ 1, /*height*/ 64, 1};
+            createInfo.mipLevels = 0;
+            createInfo.arrayLayers = 0;
+            createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+            createInfo.tiling = VK_IMAGE_TILING_LINEAR;
+            createInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+            createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            createInfo.queueFamilyIndexCount = 0;
+            createInfo.pQueueFamilyIndices = nullptr;
+            createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+            VkImageSubresource subresource = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = 0,
+                .arrayLayer = 0,
+            };
+
+            VkImage image;
+            VkSubresourceLayout subresourceLayout;
+
+            VkDeviceSize offset;
+            VkDeviceSize rowPitchAlignment = UINT_MAX;
+
+            constexpr VkDeviceSize kMinWidth = 64;
+            constexpr VkDeviceSize kMaxWidth = 2048;
+            for (VkDeviceSize width = kMinWidth; width <= kMaxWidth; ++width) {
+                createInfo.extent.width = width;
+                vk->vkCreateImage(device, &createInfo, nullptr, &image);
+                vk->vkGetImageSubresourceLayout(device, image, &subresource, &subresourceLayout);
+                vk->vkDestroyImage(device, image, nullptr);
+
+                if (width > kMinWidth && subresourceLayout.offset != offset) {
+                    LOG(WARNING) << "Image size " << width << " x 1 has a different "
+                                 << "offset (offset = " << subresourceLayout.offset
+                                 << ", offset of other images = " << offset
+                                 << "), returned pOffset might be invalid.";
+                }
+                offset = subresourceLayout.offset;
+
+                uint64_t rowPitch = subresourceLayout.rowPitch;
+                uint64_t currentAlignment = rowPitch & (~rowPitch + 1);
+                if (currentAlignment < rowPitchAlignment) {
+                    rowPitchAlignment = currentAlignment;
+                }
+            }
+
+            mLinearImageProperties.emplace(LinearImageProperties {
+                .offset = offset,
+                .rowPitchAlignment = rowPitchAlignment,
+            });
+        }
+
+        if (pOffset != nullptr) {
+            *pOffset = mLinearImageProperties->offset;
+        }
+        if (pRowPitchAlignment != nullptr) {
+            *pRowPitchAlignment = mLinearImageProperties->rowPitchAlignment;
+        }
     }
 
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
@@ -5266,6 +5348,10 @@ private:
     // This makes it much easier to implement
     // the memory map API.
     struct MappedMemoryInfo {
+        // This indicates whether the VkDecoderGlobalState needs to clean up
+        // and unmap the mapped memory; only the owner of the mapped memory
+        // should call unmap.
+        bool needUnmap = false;
         // When ptr is null, it means the VkDeviceMemory object
         // was not allocated with the HOST_VISIBLE property.
         void* ptr = nullptr;
@@ -5624,6 +5710,12 @@ private:
         size_t sizeToPage;
     };
     std::unordered_map<uint64_t, OccupiedGpaInfo> mOccupiedGpas;
+
+    struct LinearImageProperties {
+        VkDeviceSize offset;
+        VkDeviceSize rowPitchAlignment;
+    };
+    android::base::Optional<LinearImageProperties> mLinearImageProperties;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -6568,6 +6660,15 @@ void VkDecoderGlobalState::on_vkQueueBindSparseAsyncGOOGLE(
     uint32_t bindInfoCount,
     const VkBindSparseInfo* pBindInfo, VkFence fence) {
     mImpl->on_vkQueueBindSparseAsyncGOOGLE(pool, queue, bindInfoCount, pBindInfo, fence);
+}
+
+void VkDecoderGlobalState::on_vkGetLinearImageLayoutGOOGLE(
+    android::base::Pool* pool,
+    VkDevice device,
+    VkFormat format,
+    VkDeviceSize* pOffset,
+    VkDeviceSize* pRowPitchAlignment) {
+    mImpl->on_vkGetLinearImageLayoutGOOGLE(pool, device, format, pOffset, pRowPitchAlignment);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(

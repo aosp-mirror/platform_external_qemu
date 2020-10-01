@@ -296,6 +296,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_async_queue_submit
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+#endif
 
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -795,6 +797,9 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)dlSymFunc(lib, "vkQueueSubmitAsyncGOOGLE");
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)dlSymFunc(lib, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)dlSymFunc(lib, "vkQueueBindSparseAsyncGOOGLE");
+#endif
+#ifdef VK_GOOGLE_linear_image_layout
+    out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)dlSymFunc(lib, "vkGetLinearImageLayoutGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
@@ -1323,6 +1328,9 @@ void init_vulkan_dispatch_from_instance(
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueBindSparseAsyncGOOGLE");
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+    out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetLinearImageLayoutGOOGLE");
+#endif
 }
 
 void init_vulkan_dispatch_from_device(
@@ -1821,6 +1829,9 @@ void init_vulkan_dispatch_from_device(
     out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueSubmitAsyncGOOGLE");
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueBindSparseAsyncGOOGLE");
+#endif
+#ifdef VK_GOOGLE_linear_image_layout
+    out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetLinearImageLayoutGOOGLE");
 #endif
 }
 

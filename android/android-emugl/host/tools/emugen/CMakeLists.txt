@@ -42,18 +42,3 @@ target_include_directories(emugen
 android_add_test(TARGET emugen_unittests SRC # cmake-format: sortable
                                              Parser.cpp Parser_unittest.cpp)
 target_link_libraries(emugen_unittests PRIVATE gmock_main)
-
-# Shell based tests, only possible if we have a shell runner
-find_program(BASH_PROGRAM bash)
-
-# We don't want to run this on our windows build bots.
-if(BASH_PROGRAM AND NOT WIN32)
-  add_test(
-    NAME emugen_shell_tests
-    COMMAND
-      ${BASH_PROGRAM}
-      ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/tools/emugen/tests/run-tests.sh
-      --emugen=$<TARGET_FILE:emugen>
-    WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR})
-
-endif()

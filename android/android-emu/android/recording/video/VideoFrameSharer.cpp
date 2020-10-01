@@ -39,6 +39,8 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
 
+std::atomic<uint64_t> VideoFrameSharer::sFrameCounter{1};
+
 VideoFrameSharer::VideoFrameSharer(uint32_t fbWidth,
                                    uint32_t fbHeight,
                                    const std::string& handle)
@@ -97,7 +99,7 @@ void VideoFrameSharer::frameAvailable() {
     mReadPixels(bPixels, mPixelBufferSize, 0);
 
     // Update frame information.
-    info->frameNumber++;
+    info->frameNumber = sFrameCounter++;
     info->tsUs = base::System::get()->getUnixTimeUs();
     DD("Marshall, frame: %d, ts: %d", info->frameNumber, info->tsUs);
 }

@@ -45,6 +45,7 @@ private:
     bool eventFilter(QObject*, QEvent*) override;
     void checkRotaryControllerServiceTimer();
     void checkRotaryControllerService();
+    bool isBootCompleted();
 
     std::unique_ptr<Ui::CarRotaryPage> mUi;
     EmulatorQtWindow* mEmulatorWindow;
@@ -54,4 +55,5 @@ private:
     QTimer mCheckTimer;
     std::string mLastPushButtonCmd;
     bool mAdbExecuteIsActive;
+    bool mIsBootCompleted;
 };
