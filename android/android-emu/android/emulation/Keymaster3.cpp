@@ -41,7 +41,7 @@ void keymasterDecodeAndExecute(const std::vector<uint8_t>& input,
 }
 
 void registerKeymaster3PipeService() {
-    android::AndroidPipe::Service::add(new android::AndroidMessagePipe::Service(
+    AndroidPipe::Service::add(std::make_unique<AndroidMessagePipe::Service>(
             "KeymasterService3", keymasterDecodeAndExecute));
 }
 }  // namespace android

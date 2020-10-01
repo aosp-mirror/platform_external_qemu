@@ -150,7 +150,8 @@ static NetworkPipe::Service* sNetworkPipeService = nullptr;
 void registerNetworkPipeService() {
     if (sNetworkPipeService == nullptr) {
         sNetworkPipeService = new NetworkPipe::Service;
-        android::AndroidPipe::Service::add(sNetworkPipeService);
+        AndroidPipe::Service::add(
+            std::unique_ptr<NetworkPipe::Service>(sNetworkPipeService));
     }
 }
 

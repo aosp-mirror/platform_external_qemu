@@ -78,7 +78,7 @@ void RefcountPipe::onSave(base::Stream* stream) {
 }
 
 void registerRefcountPipeService() {
-    android::AndroidPipe::Service::add(new RefcountPipe::Service());
+    AndroidPipe::Service::add(std::make_unique<RefcountPipe::Service>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

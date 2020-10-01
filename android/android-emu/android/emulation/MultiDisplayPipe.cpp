@@ -125,6 +125,6 @@ MultiDisplayPipe* MultiDisplayPipe::getInstance() {
 
 void android_init_multi_display_pipe() {
     android::AndroidPipe::Service::add(
-        new android::MultiDisplayPipe::Service("multidisplay"));
+        std::make_unique<android::MultiDisplayPipe::Service>("multidisplay"));
 }
 
