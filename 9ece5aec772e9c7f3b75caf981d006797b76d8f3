@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "151de5b6_96c269d6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2020-10-01T11:18:18Z",
+      "side": 1,
+      "message": "Generally speaking, a CL should ideally be self-contained, atomic and include everything related to the change: code, tests, resources, etc. This makes it easier to review and easier to roll-back",
+      "revId": "9ece5aec772e9c7f3b75caf981d006797b76d8f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
