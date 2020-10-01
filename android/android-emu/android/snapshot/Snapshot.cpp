@@ -11,18 +11,19 @@
 
 #include "android/snapshot/Snapshot.h"
 
-#include <fcntl.h>                                    // for open, O_CLOEXEC
-#include <stdio.h>                                    // for printf, fprintf
-#include <string.h>                                   // for strcmp, strlen
-#include <sys/mman.h>                                 // for mmap, munmap
-#include <algorithm>                                  // for find_if, remove_if
-#include <fstream>                                    // for operator<<, ost...
-#include <functional>                                 // for __base
-#include <iterator>                                   // for end
-#include <memory>                                     // for unique_ptr
-#include <type_traits>                                // for decay<>::type
-#include <unordered_set>                              // for unordered_set<>...
-#include <utility>                                    // for hash
+#include <fcntl.h>     // for open, O_CLOEXEC
+#include <stdio.h>     // for printf, fprintf
+#include <string.h>    // for strcmp, strlen
+#include <sys/mman.h>  // for mmap, munmap
+
+#include <algorithm>      // for find_if, remove_if
+#include <fstream>        // for operator<<, ost...
+#include <functional>     // for __base
+#include <iterator>       // for end
+#include <memory>         // for unique_ptr
+#include <type_traits>    // for decay<>::type
+#include <unordered_set>  // for unordered_set<>...
+#include <utility>        // for hash
 
 #include "android/avd/hw-config.h"                    // for androidHwConfig...
 #include "android/avd/info.h"                         // for avdInfo_getCach...
@@ -84,7 +85,6 @@ namespace pb = emulator_snapshot;
 
 namespace android {
 namespace snapshot {
-
 
 static void fillImageInfo(pb::Image::Type type,
                           StringView path,
@@ -350,7 +350,8 @@ bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
 
 bool Snapshot::isLoaded() {
     auto loader = android::snapshot::Snapshotter::get().hasLoader();
-    return loader && android::snapshot::Snapshotter::get().loader().snapshot() == *this;
+    return loader &&
+           android::snapshot::Snapshotter::get().loader().snapshot() == *this;
 }
 
 bool Snapshot::writeSnapshotToDisk() {
@@ -561,9 +562,9 @@ void Snapshot::loadProtobufOnce() {
     if (mSnapshotPb.has_version()) {
         return;
     }
-    const auto file =
-            ScopedFd(::open(PathUtils::join(mDataDir, kSnapshotProtobufName).c_str(),
-                            O_RDONLY | O_BINARY | O_CLOEXEC, 0755));
+    const auto file = ScopedFd(
+            ::open(PathUtils::join(mDataDir, kSnapshotProtobufName).c_str(),
+                   O_RDONLY | O_BINARY | O_CLOEXEC, 0755));
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
         saveFailure(FailureReason::NoSnapshotPb);
@@ -620,22 +621,8 @@ const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
     return &mSnapshotPb;
 }
 
-const bool Snapshot::checkValid(bool writeFailure) {
+const bool Snapshot::checkOfflineValid(bool writeFailure) {
     if (!preload()) {
-        return false;
-    }
-
-    if (fc::isEnabled(fc::AllowSnapshotMigration)) {
-        return true;
-    }
-
-    if (mSnapshotPb.has_host() &&
-        !verifyHost(mSnapshotPb.host(), writeFailure)) {
-        return false;
-    }
-
-    if (mSnapshotPb.has_config() &&
-        !verifyConfig(mSnapshotPb.config(), writeFailure)) {
         return false;
     }
 
@@ -709,10 +696,32 @@ const bool Snapshot::checkValid(bool writeFailure) {
     IniFile actualStripped;
     androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&actualConfig),
                                   reinterpret_cast<CIniFile*>(&actualStripped));
+
     if (!areHwConfigsEqual(expectedStripped, actualStripped)) {
-        fprintf(stderr, "%s: hw configs not eq\n", __func__);
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchAvd);
+        return false;
+    }
+
+    return true;
+}
+
+const bool Snapshot::checkValid(bool writeFailure) {
+    if (!checkOfflineValid(writeFailure)) {
+        return false;
+    }
+
+    if (fc::isEnabled(fc::AllowSnapshotMigration)) {
+        return true;
+    }
+
+    if (mSnapshotPb.has_host() &&
+        !verifyHost(mSnapshotPb.host(), writeFailure)) {
+        return false;
+    }
+
+    if (mSnapshotPb.has_config() &&
+        !verifyConfig(mSnapshotPb.config(), writeFailure)) {
         return false;
     }
 
@@ -787,14 +796,15 @@ static bool replace(std::string& src,
 
 static bool createEmptyQcow() {
     auto qemu_img = System::get()->findBundledExecutable("qemu-img");
-    auto dst_img = android::base::pj(android::snapshot::getAvdDir(), "empty.qcow2");
+    auto dst_img =
+            android::base::pj(android::snapshot::getAvdDir(), "empty.qcow2");
     if (!System::get()->pathExists(dst_img)) {
         // TODO(jansene): replace with internal functions, vs calling qemu-img.
         // See qemu-img.c: static int img_create(int argc, char **argv)
         auto res = android::base::System::get()->runCommandWithResult(
                 {qemu_img, "create", "-f", "qcow2", dst_img, "0"});
         if (!res) {
-            LOG(ERROR)  << "Could not create empty qcow2: " << dst_img;
+            LOG(ERROR) << "Could not create empty qcow2: " << dst_img;
             return false;
         }
     }
