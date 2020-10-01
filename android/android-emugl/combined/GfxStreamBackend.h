@@ -29,4 +29,13 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     int renderer_flags,
     struct virgl_renderer_callbacks* virglrenderer_callbacks);
 
+extern "C" VG_EXPORT void gfxstream_backend_setup_window(
+        void* native_window_handle,
+        int32_t window_x,
+        int32_t window_y,
+        int32_t window_width,
+        int32_t window_height,
+        int32_t fb_width,
+        int32_t fb_height);
+
 extern "C" VG_EXPORT void gfxstream_backend_teardown(void);

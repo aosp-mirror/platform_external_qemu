@@ -527,10 +527,11 @@ private:
 
 class WinSurface : public EglOS::Surface {
 public:
-    explicit WinSurface(HWND wnd) :
+    explicit WinSurface(HWND wnd, const WglExtensionsDispatch* dispatch) :
             Surface(WINDOW),
             m_hwnd(wnd),
-            m_hdc(GetDC(wnd)) {}
+            m_hdc(GetDC(wnd)),
+            m_dispatch(dispatch) {}
 
     explicit WinSurface(HPBUFFERARB pb, const EglOS::PixelFormat* pixelFormat, const WglExtensionsDispatch* dispatch) :
             Surface(PBUFFER),
@@ -571,6 +572,14 @@ public:
         }
     }
 
+    void onMakeCurrent() {
+        if (m_everMadeCurrent) return;
+        if (m_dispatch->wglSwapInterval) {
+            m_dispatch->wglSwapInterval(0);
+        }
+        m_everMadeCurrent = true;
+    }
+
     HWND getHwnd() const { return m_hwnd; }
     HDC  getDC() const { return m_hdc; }
     HPBUFFERARB getPbuffer() const { return m_pb; }
@@ -581,6 +590,7 @@ public:
     }
 
 private:
+    bool        m_everMadeCurrent = false;
     bool        m_dcReleased = true;
     HWND        m_hwnd = nullptr;
     HPBUFFERARB m_pb = nullptr;
@@ -1129,12 +1139,15 @@ public:
                              EglOS::Surface* draw,
                              EglOS::Context* context) {
         android::base::AutoLock lock(sGlobalLock);
-        HDC hdcRead = read ? WinSurface::from(read)->getDC() : NULL;
-        HDC hdcDraw = draw ? WinSurface::from(draw)->getDC() : NULL;
+        WinSurface* readWinSurface = WinSurface::from(read);
+        WinSurface* drawWinSurface = WinSurface::from(draw);
+        HDC hdcRead = read ? readWinSurface->getDC() : NULL;
+        HDC hdcDraw = draw ? drawWinSurface->getDC() : NULL;
         HGLRC hdcContext = context ? WinContext::from(context) : 0;
 
         const WglExtensionsDispatch* dispatch = mDispatch;
 
+        bool ret = false;
         if (hdcRead == hdcDraw){
             // The following loop is a work-around for a problem when
             // occasionally the rendering is incorrect after hibernating and
@@ -1162,13 +1175,19 @@ public:
                 D("Error: wglMakeCurrent() failed, error %d\n", (int)GetLastError());
                 return false;
             }
-            return true;
+            ret = true;
         } else if (!dispatch->wglMakeContextCurrent) {
             return false;
+        } else {
+            ret = dispatch->wglMakeContextCurrent(
+                    hdcDraw, hdcRead, hdcContext);
         }
-        bool retVal = dispatch->wglMakeContextCurrent(
-                hdcDraw, hdcRead, hdcContext);
-        return retVal;
+
+        if (ret) {
+            if (readWinSurface) readWinSurface->onMakeCurrent();
+            if (drawWinSurface) drawWinSurface->onMakeCurrent();
+        }
+        return ret;
     }
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
@@ -1279,7 +1298,7 @@ public:
     virtual EglOS::Surface* createWindowSurface(EglOS::PixelFormat* cfg,
                                                 EGLNativeWindowType wnd) {
         (void)cfg;
-        return new WinSurface(wnd);
+        return new WinSurface(wnd, mDispatch);
     }
 
 private:

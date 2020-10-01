@@ -295,7 +295,7 @@ void MediaH264DecoderCuvid::getImage(void* ptr) {
     int* retErr = param.pDecoderErrorCode;
     uint32_t* retWidth = param.pRetWidth;
     uint32_t* retHeight = param.pRetHeight;
-    uint32_t* retPts = param.pRetPts;
+    uint64_t* retPts = param.pRetPts;
     uint32_t* retColorPrimaries = param.pRetColorPrimaries;
     uint32_t* retColorRange = param.pRetColorRange;
     uint32_t* retColorTransfer = param.pRetColorTransfer;

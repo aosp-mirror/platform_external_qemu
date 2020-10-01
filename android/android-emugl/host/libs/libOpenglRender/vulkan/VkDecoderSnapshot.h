@@ -3005,6 +3005,16 @@ public:
         const VkBindSparseInfo* pBindInfo,
         VkFence fence);
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+    void vkGetLinearImageLayoutGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::Pool* pool,
+        VkDevice device,
+        VkFormat format,
+        VkDeviceSize* pOffset,
+        VkDeviceSize* pRowPitchAlignment);
+#endif
 
 private:
     class Impl;

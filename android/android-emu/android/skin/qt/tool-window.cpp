@@ -497,7 +497,7 @@ void ToolWindow::showExtendedWindow() {
     on_more_button_clicked();
 }
 
-void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
+void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) {
 
     // Many UI commands require the extended window
     ensureExtendedWindowExists();
@@ -551,6 +551,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::SHOW_PANE_DPAD:
             if (down) {
                 showOrRaiseExtendedWindow(PANE_IDX_DPAD);
+            }
+            break;
+        case QtUICommand::SHOW_PANE_TV_REMOTE:
+            if (down) {
+                showOrRaiseExtendedWindow(PANE_IDX_TV_REMOTE);
             }
             break;
         case QtUICommand::SHOW_PANE_FINGER:
@@ -738,8 +743,9 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                         }
                         else {
                             // hinge or legacy foldable has only one folded area. Once configured, no need
-                            // to configure again.
-                            if (!mFoldableSyncToAndroidSuccess) {
+                            // to configure again. Unless explicitly required, e.g., in case of rebooting
+                            // Android itselft only.
+                            if (!mFoldableSyncToAndroidSuccess || extra == "confirmFoldedArea") {
                                 mFoldableSyncToAndroid.enqueue({SEND_AREA, xOffset, yOffset, width, height});
                                 mFoldableSyncToAndroid.enqueue({CONFIRM_AREA, xOffset, yOffset, width, height});
                             } else {
@@ -1121,7 +1127,10 @@ void ToolWindow::on_tablet_mode_button_clicked() {
 }
 
 void ToolWindow::on_change_posture_button_clicked() {
-    handleUICommand(QtUICommand::SHOW_PANE_VIRTSENSORS, true);
+    if (android_foldable_hinge_configured() ||
+        android_foldable_rollable_configured()) {
+        handleUICommand(QtUICommand::SHOW_PANE_VIRTSENSORS, true);
+    }
     mPostureSelectionDialog->show();
 }
 
@@ -1279,11 +1288,12 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
                     item.y,
                     item.x + item.width,
                     item.y + item.height);
+            std::string sendArea(foldedArea);
             emuQtWindow->getAdbInterface()->enqueueCommand(
                     {"shell", "wm", foldedArea},
-                    [](const OptionalAdbCommandResult& result) {
+                    [sendArea](const OptionalAdbCommandResult& result) {
                         if (result && result->exit_code == 0) {
-                            VLOG(foldable) << "foldable-page: 'send fold-area' command succeeded";
+                            VLOG(foldable) << "foldable-page: 'send " << sendArea <<"' command succeeded";
                         }});
             break;
         }
@@ -1292,7 +1302,7 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
             if (emuQtWindow) {
                 mFoldableSyncToAndroidSuccess = false;
                 mFoldableSyncToAndroidTimeout = false;
-                int64_t timeOut = System::get()->getUnixTimeUs() + 5000 * 1000;   // 5 second time out
+                int64_t timeOut = System::get()->getUnixTimeUs() + 30000 * 1000;   // 30 second time out
                 // Keep on querying folded area through adb,
                 // until query returns the expected values
                 while (!mFoldableSyncToAndroidSuccess && !mFoldableSyncToAndroidTimeout) {
@@ -1302,7 +1312,7 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
                         [this, item, timeOut](const OptionalAdbCommandResult& result) {
                             android::base::AutoLock lock(this->mLock);
                             if (System::get()->getUnixTimeUs() > timeOut) {
-                                LOG(ERROR) << "time out (5 sec) waiting for window manager configuring folded area";
+                                LOG(ERROR) << "time out (30 sec) waiting for window manager configuring folded area";
                                 this->mFoldableSyncToAndroidTimeout = true;
                                 this->mCv.signalAndUnlock(&lock);
                                 return;
@@ -1335,7 +1345,7 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
                     if (!mCv.timedWait(&mLock, timeOut)) {
                         // Something unexpected along adb communication thread, call back function
                         // not been called after timeOut
-                        LOG(ERROR) << "adb no response for more than 5 seconds, time out";
+                        LOG(ERROR) << "adb no response for more than 30 seconds, time out";
                         mFoldableSyncToAndroidTimeout = true;
                     }
                     // send LID_CLOSE when expected folded-area is configured in window manager

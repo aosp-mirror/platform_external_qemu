@@ -17624,6 +17624,54 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 break;
             }
 #endif
+#ifdef VK_GOOGLE_linear_image_layout
+            case OP_vkGetLinearImageLayoutGOOGLE:
+            {
+                VkDevice device;
+                VkFormat format;
+                VkDeviceSize* pOffset;
+                VkDeviceSize* pRowPitchAlignment;
+                // Begin manual dispatchable handle unboxing for device;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_854;
+                vkReadStream->read((uint64_t*)&cgen_var_854, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_854, (VkDevice*)&device, 1);
+                auto unboxed_device = unbox_VkDevice(device);
+                auto vk = dispatch_VkDevice(device);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for device;
+                vkReadStream->read((VkFormat*)&format, sizeof(VkFormat));
+                // Begin manual dispatchable handle unboxing for pOffset;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pOffset, sizeof(VkDeviceSize));
+                vkReadStream->read((VkDeviceSize*)pOffset, sizeof(VkDeviceSize));
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pOffset;
+                // Begin manual dispatchable handle unboxing for pRowPitchAlignment;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pRowPitchAlignment, sizeof(VkDeviceSize));
+                vkReadStream->read((VkDeviceSize*)pRowPitchAlignment, sizeof(VkDeviceSize));
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pRowPitchAlignment;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetLinearImageLayoutGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)format, (unsigned long long)pOffset, (unsigned long long)pRowPitchAlignment);
+                }
+                m_state->on_vkGetLinearImageLayoutGOOGLE(&m_pool, device, format, pOffset, pRowPitchAlignment);
+                vkStream->unsetHandleMapping();
+                vkStream->write((VkDeviceSize*)pOffset, sizeof(VkDeviceSize));
+                vkStream->write((VkDeviceSize*)pRowPitchAlignment, sizeof(VkDeviceSize));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkGetLinearImageLayoutGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, format, pOffset, pRowPitchAlignment);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+#endif
             default:
             {
                 return ptr - (unsigned char *)buf;
