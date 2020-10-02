@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2bc0aa6c_c17006ab",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-02T01:03:10Z",
+      "side": 1,
+      "message": "watch out when merging this with tdeck\u0027s flag",
+      "revId": "3b303c8b360cd4586e5915f879ca28b5c6701b43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
