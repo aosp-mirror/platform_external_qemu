@@ -448,7 +448,7 @@ class VulkanBaseProtoConversion(VulkanWrapperGenerator):
             VulkanAPI(FROM_PROTO_PREFIX + "extension_struct",
                       makeVulkanTypeSimple(False, "void", 0),
                       [ \
-                          makeVulkanTypeSimple(False, "Pool", 1, PROTO_CONVERSION_POOL_VAR_NAME),
+                          makeVulkanTypeSimple(False, "BumpPool", 1, PROTO_CONVERSION_POOL_VAR_NAME),
                           makeVulkanTypeSimple(False, "VulkanHandleMapping", 1, PROTO_CONVERSION_HANDLEMAP_VAR_NAME),
                           makeVulkanTypeSimple(False, "void", 1, PROTO_CONVERSION_INPUT_VAR_NAME),
                           STRUCT_EXTENSION_PARAM_FOR_WRITE])
@@ -503,7 +503,7 @@ class VulkanBaseProtoConversion(VulkanWrapperGenerator):
                 VulkanAPI(FROM_PROTO_PREFIX + name,
                           makeVulkanTypeSimple(False, "void", 0),
                           [ \
-                              makeVulkanTypeSimple(False, "Pool", 1, PROTO_CONVERSION_POOL_VAR_NAME),
+                              makeVulkanTypeSimple(False, "BumpPool", 1, PROTO_CONVERSION_POOL_VAR_NAME),
                               makeVulkanTypeSimple(False, "VulkanHandleMapping", 1, PROTO_CONVERSION_HANDLEMAP_VAR_NAME),
                               makeVulkanTypeSimple(False, "goldfish_vk_proto::%s" % name, 1, PROTO_CONVERSION_INPUT_VAR_NAME),
                               makeVulkanTypeSimple(False, name, 1, PROTO_CONVERSION_OUTPUT_VAR_NAME)])
