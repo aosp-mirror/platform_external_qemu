@@ -16,6 +16,24 @@
       "revId": "1dd5f93e542b7982fca483ad0ec241e2383b3bc6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b605c59_03e94ea0",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1870,
+      "author": {
+        "id": 1753250
+      },
+      "writtenOn": "2020-10-02T00:19:34Z",
+      "side": 1,
+      "message": "Ah, good catch. I\u0027ve updated to check for both of them just in case.",
+      "parentUuid": "25775cff_1fdae857",
+      "revId": "1dd5f93e542b7982fca483ad0ec241e2383b3bc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
