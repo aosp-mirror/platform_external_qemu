@@ -16,6 +16,29 @@
       "revId": "3b303c8b360cd4586e5915f879ca28b5c6701b43",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9e5935cf_6db1c339",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 866,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-02T01:04:56Z",
+      "side": 1,
+      "message": "should we make this into one common func canPassthroughCompressedFormat(ctx, internalformat) or something",
+      "range": {
+        "startLine": 864,
+        "startChar": 8,
+        "endLine": 866,
+        "endChar": 77
+      },
+      "revId": "3b303c8b360cd4586e5915f879ca28b5c6701b43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
