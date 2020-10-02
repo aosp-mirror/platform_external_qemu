@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "40c14070_6d352aac",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2020-10-02T11:25:26Z",
+      "side": 1,
+      "message": "Are the outside quotes before and after needed if the whole thing is passed as a vector element anyway? If yes, do we also need escaping of quotes in the raw text input?",
+      "revId": "04098f45b4d61703fcf3e88c0e596959bc4d41ea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
