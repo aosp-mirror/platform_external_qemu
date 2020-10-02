@@ -16,6 +16,52 @@
       "revId": "92e247b66348f95be737c6824aca8a3bf552500f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54b147b7_3a37fcda",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-10-02T19:15:44Z",
+      "side": 1,
+      "message": "Leftover?",
+      "range": {
+        "startLine": 701,
+        "startChar": 8,
+        "endLine": 701,
+        "endChar": 64
+      },
+      "revId": "92e247b66348f95be737c6824aca8a3bf552500f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77d91d44_137a9738",
+        "filename": "android/android-grpc/android/emulation/control/QueryEmulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-10-02T19:15:44Z",
+      "side": 1,
+      "message": "Please mention the proto message defining the format.",
+      "range": {
+        "startLine": 51,
+        "startChar": 59,
+        "endLine": 52,
+        "endChar": 18
+      },
+      "revId": "92e247b66348f95be737c6824aca8a3bf552500f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
