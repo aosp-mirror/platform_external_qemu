@@ -170,12 +170,21 @@ void TvRemotePage::onProgramGuideButtonPressed() {
 void TvRemotePage::onAssistantButtonPressed() {
     std::vector<std::string> adb_command = {
         "shell",
-        "input",
-        "keyevent",
-        "KEYCODE_ASSIST"
+        "am",
+        "start",
+        "-a",
+        "android.intent.action.ASSIST",
+        "--ei",
+        "search_type",
+        "1",
+        "--es",
+        "query"
     };
     std::string command_tag = "Trigger Assistant";
+    std::string query(
+        sanitizeUserInput(mUi->tvRemote_assistantTextBox->toPlainText().toStdString()));
 
+    adb_command.push_back(query);
     handleAdbCommand(adb_command, command_tag);
 }
 
@@ -210,4 +219,17 @@ bool TvRemotePage::eventFilter(QObject* o, QEvent* event) {
         remaskButtons();
     }
     return QWidget::eventFilter(o, event);
+}
+
+std::string TvRemotePage::sanitizeUserInput(const std::string& raw_input) {
+    std::string sanitized_input("\"");
+    for (const char& c : raw_input) {
+        if (c == '"' || c == '\'' || c == '\\') {
+            sanitized_input += '\\';
+        }
+        sanitized_input += c;
+    }
+    sanitized_input += '\"';
+
+    return sanitized_input;
 }
