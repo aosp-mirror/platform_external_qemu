@@ -15,6 +15,7 @@
 #include <qcoreevent.h>                             // for QEvent (ptr only)
 #include <qsize.h>                                  // for operator*
 #include <qstring.h>                                // for operator+, operat...
+#include <regex>                                    // for std::regex_replace()
 #include <stddef.h>                                 // for NULL
 #include <QAbstractButton>                          // for QAbstractButton
 #include <QBitmap>                                  // for QBitmap
@@ -170,12 +171,21 @@ void TvRemotePage::onProgramGuideButtonPressed() {
 void TvRemotePage::onAssistantButtonPressed() {
     std::vector<std::string> adb_command = {
         "shell",
-        "input",
-        "keyevent",
-        "KEYCODE_ASSIST"
+        "am",
+        "start",
+        "-a",
+        "android.intent.action.ASSIST",
+        "--ei",
+        "search_type",
+        "1",
+        "--es",
+        "query"
     };
     std::string command_tag = "Trigger Assistant";
+    std::string query(
+        sanitizeUserInput(mUi->tvRemote_assistantTextBox->toPlainText().toStdString()));
 
+    adb_command.push_back(query);
     handleAdbCommand(adb_command, command_tag);
 }
 
@@ -210,4 +220,12 @@ bool TvRemotePage::eventFilter(QObject* o, QEvent* event) {
         remaskButtons();
     }
     return QWidget::eventFilter(o, event);
+}
+
+std::string TvRemotePage::sanitizeUserInput(const std::string& raw_input) {
+    std::regex special_characters {R"(\\|")"};
+    std::string sanitized_input =
+        "\"" + std::regex_replace(raw_input, special_characters, R"(\$&)") + "\"";
+
+    return sanitized_input;
 }
