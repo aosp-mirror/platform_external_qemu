@@ -236,9 +236,30 @@ public:
             finalExts.push_back("VK_MVK_moltenvk");
         }
 
+        // Create higher version instance whenever it is possible.
+        uint32_t apiVersion = VK_MAKE_VERSION(1, 0, 0);
+        if (pCreateInfo->pApplicationInfo) {
+            apiVersion = pCreateInfo->pApplicationInfo->apiVersion;
+        }
+        if (m_vk->vkEnumerateInstanceVersion) {
+            uint32_t instanceVersion;
+            VkResult result =
+                m_vk->vkEnumerateInstanceVersion(&instanceVersion);
+            if (result == VK_SUCCESS &&
+                instanceVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+                apiVersion = instanceVersion;
+            }
+        }
+
         VkInstanceCreateInfo createInfoFiltered = *pCreateInfo;
+        VkApplicationInfo applicationInfo = {};
         createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
+        if (createInfoFiltered.pApplicationInfo) {
+            applicationInfo = *createInfoFiltered.pApplicationInfo;
+            createInfoFiltered.pApplicationInfo = &applicationInfo;
+        }
+        applicationInfo.apiVersion = apiVersion;
 
         // bug: 155795731 (see below)
         AutoLock lock(mLock);
@@ -259,6 +280,7 @@ public:
                     android::featurecontrol::VulkanSnapshots));
 
         InstanceInfo info;
+        info.apiVersion = apiVersion;
         for (uint32_t i = 0; i < createInfoFiltered.enabledExtensionCount;
                 ++i) {
             info.enabledExtensionNames.push_back(
@@ -422,8 +444,11 @@ public:
         if (!physdevInfo) return;
 
         auto instance = mPhysicalDeviceToInstance[physicalDevice];
+        auto instanceInfo = android::base::find(mInstanceInfo, instance);
+        if (!instanceInfo) return;
 
-        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+        if (instanceInfo->apiVersion >= VK_MAKE_VERSION(1, 1, 0) &&
+            physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
             vk->vkGetPhysicalDeviceFeatures2(physicalDevice, pFeatures);
         } else if (hasInstanceExtension(instance, "VK_KHR_get_physical_device_properties2")) {
             vk->vkGetPhysicalDeviceFeatures2KHR(physicalDevice, pFeatures);
@@ -516,11 +541,16 @@ public:
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
 
-        auto instance = mPhysicalDeviceToInstance[physicalDevice];
-
         VkResult res = VK_ERROR_INITIALIZATION_FAILED;
 
-        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+        auto instance = mPhysicalDeviceToInstance[physicalDevice];
+        auto instanceInfo = android::base::find(mInstanceInfo, instance);
+        if (!instanceInfo) {
+            return res;
+        }
+
+        if (instanceInfo->apiVersion >= VK_MAKE_VERSION(1, 1, 0) &&
+            physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
             res = vk->vkGetPhysicalDeviceImageFormatProperties2(
                 physicalDevice, pImageFormatInfo, pImageFormatProperties);
         } else if (hasInstanceExtension(
@@ -595,8 +625,11 @@ public:
             return;
 
         auto instance = mPhysicalDeviceToInstance[physicalDevice];
+        auto instanceInfo = android::base::find(mInstanceInfo, instance);
+        if (!instanceInfo) return;
 
-        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+        if (instanceInfo->apiVersion >= VK_MAKE_VERSION(1, 1, 0) &&
+            physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
             getPhysicalDeviceFormatPropertiesCore<VkFormatProperties2>(
                     [vk](VkPhysicalDevice physicalDevice, VkFormat format,
                         VkFormatProperties2* pFormatProperties) {
@@ -666,8 +699,11 @@ public:
         if (!physdevInfo) return;
 
         auto instance = mPhysicalDeviceToInstance[physicalDevice];
+        auto instanceInfo = android::base::find(mInstanceInfo, instance);
+        if (!instanceInfo) return;
 
-        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+        if (instanceInfo->apiVersion >= VK_MAKE_VERSION(1, 1, 0) &&
+            physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
             vk->vkGetPhysicalDeviceProperties2(physicalDevice, pProperties);
         } else if (hasInstanceExtension(instance, "VK_KHR_get_physical_device_properties2")) {
             vk->vkGetPhysicalDeviceProperties2KHR(physicalDevice, pProperties);
@@ -738,8 +774,11 @@ public:
         if (!physdevInfo) return;
 
         auto instance = mPhysicalDeviceToInstance[physicalDevice];
+        auto instanceInfo = android::base::find(mInstanceInfo, instance);
+        if (!instanceInfo) return;
 
-        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+        if (instanceInfo->apiVersion >= VK_MAKE_VERSION(1, 1, 0) &&
+            physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
             vk->vkGetPhysicalDeviceMemoryProperties2(physicalDevice, pMemoryProperties);
         } else if (hasInstanceExtension(instance, "VK_KHR_get_physical_device_properties2")) {
             vk->vkGetPhysicalDeviceMemoryProperties2KHR(physicalDevice, pMemoryProperties);
@@ -5369,6 +5408,7 @@ private:
 
     struct InstanceInfo {
         std::vector<std::string> enabledExtensionNames;
+        uint32_t apiVersion = VK_MAKE_VERSION(1, 0, 0);
         VkInstance boxed = nullptr;
     };
 
