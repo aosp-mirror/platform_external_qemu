@@ -48,6 +48,7 @@ private:
     void onWatchlistButtonPressed();
     void remaskButtons();
     bool eventFilter(QObject*, QEvent*) override;
+    std::string sanitizeUserInput(const std::string& raw_input);
 
     std::unique_ptr<Ui::TvRemotePage> mUi;
     EmulatorQtWindow* mEmulatorWindow;
