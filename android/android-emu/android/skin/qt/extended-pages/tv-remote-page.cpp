@@ -170,12 +170,21 @@ void TvRemotePage::onProgramGuideButtonPressed() {
 void TvRemotePage::onAssistantButtonPressed() {
     std::vector<std::string> adb_command = {
         "shell",
-        "input",
-        "keyevent",
-        "KEYCODE_ASSIST"
+        "am",
+        "start",
+        "-a",
+        "android.intent.action.ASSIST",
+        "--ei",
+        "search_type",
+        "1",
+        "--es",
+        "query"
     };
     std::string command_tag = "Trigger Assistant";
+    std::string query(
+        "\"" + mUi->tvRemote_assistantTextBox->toPlainText().toStdString() + "\"");
 
+    adb_command.push_back(query);
     handleAdbCommand(adb_command, command_tag);
 }
 
