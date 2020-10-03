@@ -8,7 +8,7 @@ if(NOT TARGET msvc-posix-compat)
   android_add_library(
     TARGET msvc-posix-compat LICENSE Apache-2.0
     SRC # cmake-format: sortable
-        src/msvc-posix.c src/getopt.c src/gettimeofday.c)
+        src/getopt.c src/gettimeofday.c src/msvc-posix.c)
 
   # Msvc posix needs the file-io libs from android-emu-base.
   target_link_libraries(msvc-posix-compat PRIVATE setjmp_asm_lib)
