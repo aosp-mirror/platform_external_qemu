@@ -916,6 +916,7 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
                   success;
 
         // And move it to the export destination..
+        path_delete_file(final_overlay.c_str());
         if (std::rename(tmp_overlay.c_str(), final_overlay.c_str()) != 0) {
             std::string err = "Failed to rename " + tmp_overlay + " to " +
                               final_overlay +
