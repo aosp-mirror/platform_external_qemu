@@ -1148,7 +1148,7 @@ public:
                     ((char*)entry.linear) + box->x + writtenBytes,
                     wantedBytes - writtenBytes,
                 };
-                auto status = ops->guest_send(hostPipe, &buf, 1);
+                auto status = ops->guest_send(&hostPipe, &buf, 1);
 
                 if (status > 0) {
                     writtenBytes += status;

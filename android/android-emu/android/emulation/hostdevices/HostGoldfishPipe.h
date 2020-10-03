@@ -106,7 +106,7 @@ private:
                                InternalPipe* hostPipe);
     bool eraseFdInfo(int fd);
 
-    ssize_t writeInternal(InternalPipe* pipe, const void* buffer, size_t len);
+    ssize_t writeInternal(InternalPipe** pipe, const void* buffer, size_t len);
 
     // Returns the host-side pipe for a connector pipe, if the pipe has been
     // reset.
