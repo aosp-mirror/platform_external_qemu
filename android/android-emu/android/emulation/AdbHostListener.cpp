@@ -15,6 +15,7 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
+#include "android/snapshot/Icebox.h"
 #include "android/emulation/AdbHostServer.h"
 #include "android/emulation/AdbTypes.h"
 
@@ -52,17 +53,17 @@ bool AdbHostListener::reset(int adbPort) {
                     return onHostServerConnection(socket, AdbPortType::RegularAdb);
                 },
                 mode, android::base::ThreadLooper::get());
-        if (!mJdwpServer) {
-            mJdwpServer = AsyncSocketServer::createTcpLoopbackServer(
-                    0,  // Get a random port
-                    [this](int socket) {
-                        return onHostServerConnection(socket, AdbPortType::Jdwp);
-                    },
-                    mode, android::base::ThreadLooper::get());
-            if (!mJdwpServer) {
-                fprintf(stderr, "WARNING: jdwp port creation fails,"
-                        " Icebox will not work.\n");
-            }
+        mJdwpServer = AsyncSocketServer::createTcpLoopbackServer(
+                0,  // Get a random port
+                [this](int socket) {
+                    return onHostServerConnection(socket, AdbPortType::Jdwp);
+                },
+                mode, android::base::ThreadLooper::get());
+        if (mJdwpServer) {
+            android::icebox::set_jdwp_port(mJdwpServer->port());
+        } else {
+            fprintf(stderr, "WARNING: jdwp port creation fails,"
+                    " Icebox will not work.\n");
         }
         // Don't start listening until startListening() is called.
         if (!mRegularAdbServer) {
@@ -75,6 +76,7 @@ bool AdbHostListener::reset(int adbPort) {
 }
 
 void AdbHostListener::startListening() {
+    printf("AdbHostListener::startListening\n");
     if (mRegularAdbServer) {
         mRegularAdbServer->startListening();
     }
@@ -84,6 +86,7 @@ void AdbHostListener::startListening() {
 }
 
 void AdbHostListener::stopListening() {
+    printf("AdbHostListener::stopListening\n");
     if (mRegularAdbServer) {
         mRegularAdbServer->stopListening();
     }
@@ -99,6 +102,7 @@ void AdbHostListener::notifyServer() {
 }
 
 bool AdbHostListener::onHostServerConnection(int socket, AdbPortType portType) {
+    printf("AdbHostListener::onHostServerConnection port type %d\n", (int)portType);
     mGuestAgent->onHostConnection(ScopedSocket(socket), portType);
     return true;
 }

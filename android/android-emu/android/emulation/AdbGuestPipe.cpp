@@ -206,13 +206,15 @@ void AdbGuestPipe::Service::removeAdbGuestPipe(AdbGuestPipe* pipe) {
 
 void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket,
                                              AdbPortType portType) {
+    if (portType == AdbPortType::Jdwp) {
+        printf("onHostConnection port type jdwp\n");
+    }
     D("%s", __func__);
-    // There must be no active pipe yet, but at least one waiting
-    // for activation in mPipes.
-    // We have one connection from adb sever, stop listening for now.
-    mHostAgent->stopListening();
     AdbGuestPipe* activePipe = searchForActivePipe();
     CHECK(activePipe != nullptr);
+    if (!hasActivePipe()) {
+        mHostAgent->stopListening();
+    }
     activePipe->onHostConnection(std::move(socket), portType);
 }
 
@@ -279,6 +281,13 @@ AdbGuestPipe* AdbGuestPipe::Service::searchForActivePipe() {
         return activePipe;
     }
     return nullptr;
+}
+
+bool AdbGuestPipe::Service::hasActivePipe() const {
+    return mPipes.end() != std::find_if(
+                mPipes.begin(), mPipes.end(), [](const AdbGuestPipe* pipe) {
+                    return pipe->mState == State::WaitingForHostAdbConnection;
+                });
 }
 
 void AdbGuestPipe::Service::resetActiveGuestPipeConnection() {
@@ -404,7 +413,7 @@ void AdbGuestPipe::onSave(android::base::Stream* stream) {
     } else {
         stream->putBe32(0);
     }
-    if (mAdbHub) {
+    if (mPortType == Jdwp) {
         int proxyCount = mAdbHub->getProxyCount();
         D("Saving %d jdwp proxies", (int)proxyCount);
         stream->putBe32(proxyCount);
@@ -596,6 +605,9 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
 
 void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
                                     AdbPortType portType) {
+    if (portType == AdbPortType::Jdwp) {
+        printf("AdbGuestPipe::onHostConnection resused from snapshot %d\n", mReuseFromSnapshot);
+    }
     DD("%s: [%p] host connection", __func__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);
 
@@ -617,7 +629,7 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
 
     mHostSocket = CrossSessionSocket(std::move(socket));
     mPortType = portType;
-    DD("set up pipe type %d\n", portType);
+    D("set up pipe type %d\n", portType);
 
     if (mReuseFromSnapshot) {
         mState = State::ProxyingData;
@@ -627,7 +639,7 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
         signalWake(PIPE_WAKE_READ | PIPE_WAKE_WRITE);
         D("Reuse pipe %p from snapshot", this);
     } else {
-        DD("%s: [%p] sending reply", __func__, this);
+        D("%s: [%p] sending reply", __func__, this);
         setReply("ok", State::SendingAcceptReplyOk);
         signalWake(PIPE_WAKE_READ);
     }

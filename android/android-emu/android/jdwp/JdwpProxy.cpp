@@ -25,6 +25,8 @@
 
 #if DEBUG >= 2
 
+#include <sys/time.h>
+
 #define DD(...) D(__VA_ARGS__)
 static void debugPrintJdwp(const char* prefix, const uint8_t* data) {
     struct timeval tp;
