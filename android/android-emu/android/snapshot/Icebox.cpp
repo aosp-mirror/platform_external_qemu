@@ -43,7 +43,7 @@
 #include "openssl/base.h"                                    // for RSA
 #include "openssl/nid.h"                                     // for NID_sha1
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG >= 1
 #define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
@@ -62,7 +62,6 @@ using namespace android::emulation;
 using namespace android::jdwp;
 
 static int s_adb_port = -1;
-static int s_adb_scoket = -1;
 static std::atomic<std::uint32_t> s_id = {6000};
 static std::unique_ptr<android::base::Thread> s_workerThread = {};
 static int s_version = A_VERSION_MIN;
@@ -142,13 +141,6 @@ static void assignChecksum(apacket* packet) {
 
 static int tryConnect() {
     using namespace android::base;
-    if (s_adb_scoket > 0) {
-        return s_adb_scoket;
-    }
-    if (s_adb_port == -1) {
-        fprintf(stderr, "adb port uninitialized\n");
-        return false;
-    }
 
     int s = socketTcp4LoopbackClient(s_adb_port);
     if (s < 0) {
@@ -163,12 +155,14 @@ static int tryConnect() {
     {                                  \
         assignChecksum(&packet);       \
         if (!sendPacket(s, &packet)) { \
+            close(s);                  \
             return -1;                 \
         }                              \
     }
 #define _RECV_PACKET(packet)           \
     {                                  \
         if (!recvPacket(s, &packet)) { \
+            close(s);                  \
             return -1;                 \
         }                              \
     }
@@ -218,7 +212,8 @@ static int tryConnect() {
                                  pack_recv.mesg.data_length,
                                  (char*)pack_send.data.data(), sigLen)) {
                 fprintf(stderr, "Fail to authenticate adb\n");
-                return false;
+                close(s);
+                return -1;
             }
             assert(sigLen <= pack_send.data.size());
             pack_send.mesg.data_length = sigLen;
@@ -231,11 +226,11 @@ static int tryConnect() {
             _RECV_PACKET(pack_recv);
         }
         if (pack_recv.mesg.command != ADB_CNXN) {
+            close(s);
             return -1;
         }
         s_version = std::min((unsigned)A_VERSION, pack_recv.mesg.arg0);
     }
-    s_adb_scoket = s;
 #undef _SEND_PACKET
 #undef _RECV_PACKET
     return s;
@@ -263,6 +258,7 @@ namespace icebox {
 
 void set_jdwp_port(int adb_port) {
     s_adb_port = adb_port;
+    D("Set jdwp port %d\n", s_adb_port);
 }
 
 bool run_async(std::string cmd_str) {
@@ -282,12 +278,14 @@ bool run_async(std::string cmd_str) {
     {                                  \
         assignChecksum(&packet);       \
         if (!sendPacket(s, &packet)) { \
+            close(s);                  \
             return -1;                 \
         }                              \
     }
 #define _RECV_PACKET(packet)                           \
     {                                                  \
         if (!recvPacketWithId(s, local_id, &packet)) { \
+            close(s);                                  \
             return -1;                                 \
         }                                              \
     }
@@ -307,11 +305,13 @@ bool run_async(std::string cmd_str) {
             apacket connect_ok;
             _RECV_PACKET(connect_ok);
             if (connect_ok.mesg.command != ADB_OKAY) {
+                close(s);
                 return -1;
             }
             remote_id = connect_ok.mesg.arg0;
             local_id = connect_ok.mesg.arg1;
         }
+        close(s);
         return 0;
 #undef _SEND_PACKET
 #undef _RECV_PACKET
@@ -355,16 +355,20 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
     }
     D("Connect succeeded");
 
-#define _SEND_PACKET(packet)           \
-    {                                  \
-        assignChecksum(&packet);       \
-        if (!sendPacket(s, &packet)) { \
-            return false;              \
-        }                              \
+#define _SEND_PACKET(packet)                        \
+    {                                               \
+        assignChecksum(&packet);                    \
+        if (!sendPacket(s, &packet)) {              \
+            D("Send packet failed %d\n", __LINE__); \
+            close(s);                               \
+            return false;                           \
+        }                                           \
     }
 #define _RECV_PACKET(packet)                           \
     {                                                  \
         if (!recvPacketWithId(s, local_id, &packet)) { \
+            D("Recv packet failed %d\n", __LINE__);    \
+            close(s);                                  \
             return false;                              \
         }                                              \
     }
@@ -372,6 +376,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
     {                                       \
         _SEND_PACKET(packet);               \
         if (!recvOkayWithId(s, local_id)) { \
+            close(s);                       \
             return false;                   \
         }                                   \
     }
@@ -391,6 +396,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         apacket connect_ok;
         _RECV_PACKET(connect_ok);
         if (connect_ok.mesg.command != ADB_OKAY) {
+            close(s);
             return false;
         }
         remote_id = connect_ok.mesg.arg0;
@@ -437,6 +443,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         _RECV_PACKET_OK(handshake_recv);
         D("Handshake recv OK");
         if (memcmp(handshake_recv.data.data(), "JDWP-Handshake", 14) != 0) {
+            close(s);
             return false;
         }
     }
@@ -606,6 +613,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         apacket reply;
         _RECV_PACKET(reply);
         if (reply.mesg.command == ADB_CLSE) {
+            close(s);
             return true;
         }
         // we wait for the snapshot before replying OK, to avoid any concurrency
@@ -615,35 +623,35 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
             if (max_snapshot_number == -1 ||
                 snapshot_num < max_snapshot_number) {
                 // Take snapshot when AssertionError is thrown
-                bool snapshot_done = false;
-                base::ConditionVariable snapshot_signal;
-                base::Lock snapshot_lock;
                 D("send out command for main thread");
                 std::string new_snapshot_name =
                         snapshot_name + std::to_string(snapshot_num);
                 snapshot_num++;
-                android::base::ThreadLooper::runOnMainLooper(
-                        [&snapshot_done, &snapshot_signal, &snapshot_lock,
-                         &new_snapshot_name]() {
+                android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                        [&new_snapshot_name]() {
                             D("ready to take snapshot");
                             getConsoleAgents()->vm->vmStop();
+                            bool snapshotSkipped =
+                                    getConsoleAgents()
+                                            ->vm->isSnapshotSaveSkipped();
+                            if (snapshotSkipped) {
+                                D("Temporarily re-enabling snapshot");
+                                getConsoleAgents()->vm->setSkipSnapshotSave(
+                                        false);
+                            }
+                            androidSnapshot_delete(new_snapshot_name.c_str());
                             const AndroidSnapshotStatus result =
                                     androidSnapshot_save(
                                             new_snapshot_name.c_str());
                             D("Snapshot done, result %d (expect %d)", result,
                               SNAPSHOT_STATUS_OK);
+                            if (snapshotSkipped) {
+                                getConsoleAgents()->vm->setSkipSnapshotSave(
+                                        true);
+                            }
                             getConsoleAgents()->vm->vmStart();
-                            snapshot_lock.lock();
-                            snapshot_done = true;
-                            snapshot_signal.broadcastAndUnlock(&snapshot_lock);
                             D("Snapshot thread done");
                         });
-                D("Icebox thread waiting for snapshot");
-                snapshot_lock.lock();
-                snapshot_signal.wait(&snapshot_lock, [&snapshot_done]() {
-                    return snapshot_done;
-                });
-                snapshot_lock.unlock();
                 D("Icebox thread resume after snapshot");
             }
             _SEND_PACKET(ok_out);
@@ -664,6 +672,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
             _SEND_PACKET(ok_out);
         }
     }
+    close(s);
     return true;
 #undef _SEND_PACKET
 #undef _RECV_PACKET
