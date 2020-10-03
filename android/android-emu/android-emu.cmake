@@ -6,18 +6,19 @@ prebuilt(FFMPEG)
 # archive. We currently have to split them up due to dependencies on external
 # variables/functions that are implemented in other libraries.
 set(android-emu-common
+    # cmake-format: sortable
     android/adb-server.cpp
+    android/async-console.c
+    android/async-socket-connector.c
+    android/async-socket.c
+    android/async-utils.c
+    android/avd/BugreportInfo.cpp
     android/avd/generate.cpp
     android/avd/hw-config.c
     android/avd/info.c
     android/avd/scanner.c
     android/avd/util.c
     android/avd/util_wrapper.cpp
-    android/avd/BugreportInfo.cpp
-    android/async-console.c
-    android/async-socket.c
-    android/async-socket-connector.c
-    android/async-utils.c
     android/base/async/AsyncReader.cpp
     android/base/async/AsyncSocket.cpp
     android/base/async/AsyncSocketServer.cpp
@@ -33,43 +34,48 @@ set(android-emu-common
     android/base/sockets/SocketWaiter.cpp
     android/base/threads/internal/ParallelTaskBase.cpp
     android/boot-properties.c
-    android/car.cpp
     android/car-cluster.cpp
+    android/car.cpp
     android/cmdline-option.cpp
     android/CommonReportedInfo.cpp
     android/console_auth.cpp
     android/cpu_accelerator.cpp
-    android/crashreport/CrashSystem.cpp
     android/crashreport/CrashReporter_common.cpp
-    android/crashreport/HangDetector.cpp
+    android/crashreport/CrashSystem.cpp
     android/crashreport/detectors/CrashDetectors.cpp
+    android/crashreport/HangDetector.cpp
     android/cros.c
     android/curl-support.c
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
-    android/emulation/AdbMessageSniffer.cpp
     android/emulation/AdbHostListener.cpp
     android/emulation/AdbHostServer.cpp
     android/emulation/AdbHub.cpp
-    android/emulation/AndroidAsyncMessagePipe.cpp
-    android/emulation/AndroidMessagePipe.cpp
-    android/emulation/AndroidPipe.cpp
+    android/emulation/AdbMessageSniffer.cpp
+    android/emulation/address_space_device.cpp
+    android/emulation/address_space_graphics.cpp
+    android/emulation/address_space_host_media.cpp
+    android/emulation/address_space_host_memory_allocator.cpp
+    android/emulation/address_space_shared_slots_host_memory_allocator.cpp
     android/emulation/android_pipe_host.cpp
-    android/emulation/AudioCaptureEngine.cpp
-    android/emulation/AudioOutputEngine.cpp
     android/emulation/android_pipe_pingpong.c
     android/emulation/android_pipe_throttle.c
     android/emulation/android_pipe_unix.cpp
     android/emulation/android_pipe_zero.c
     android/emulation/android_qemud.cpp
+    android/emulation/AndroidAsyncMessagePipe.cpp
+    android/emulation/AndroidMessagePipe.cpp
+    android/emulation/AndroidPipe.cpp
+    android/emulation/AudioCaptureEngine.cpp
+    android/emulation/AudioOutputEngine.cpp
     android/emulation/bufprint_config_dirs.cpp
     android/emulation/ClipboardPipe.cpp
     android/emulation/ComponentVersion.cpp
     android/emulation/ConfigDirs.cpp
     android/emulation/control/adb/AdbConnection.cpp
     android/emulation/control/adb/AdbInterface.cpp
-    android/emulation/control/adb/AdbShellStream.cpp
     android/emulation/control/adb/adbkey.cpp
+    android/emulation/control/adb/AdbShellStream.cpp
     android/emulation/control/AgentLogger.cpp
     android/emulation/control/ApkInstaller.cpp
     android/emulation/control/EmulatorAdvertisement.cpp
@@ -80,35 +86,28 @@ set(android-emu-common
     android/emulation/CpuAccelerator.cpp
     android/emulation/CrossSessionSocket.cpp
     android/emulation/DmaMap.cpp
+    android/emulation/goldfish_sync.cpp
     android/emulation/GoldfishDma.cpp
     android/emulation/GoldfishSyncCommandQueue.cpp
-    android/emulation/goldfish_sync.cpp
-    android/emulation/hostdevices/HostGoldfishPipe.cpp
-    android/emulation/address_space_device.cpp
-    android/emulation/address_space_graphics.cpp
-    android/emulation/address_space_host_memory_allocator.cpp
-    android/emulation/address_space_shared_slots_host_memory_allocator.cpp
-    android/emulation/address_space_host_media.cpp
     android/emulation/H264NaluParser.cpp
-    android/emulation/VpxFrameParser.cpp
-    android/emulation/VpxPingInfoParser.cpp
-    android/emulation/MediaVpxVideoHelper.cpp
-    android/emulation/MediaVpxDecoderGeneric.cpp
     android/emulation/H264PingInfoParser.cpp
-    android/emulation/HostmemIdMapping.cpp
-    android/emulation/MediaVpxDecoder.cpp
-    android/emulation/MediaH264DecoderDefault.cpp
-    android/emulation/MediaH264DecoderGeneric.cpp
-    android/emulation/MediaFfmpegVideoHelper.cpp
-    android/emulation/MediaH264DecoderFfmpeg.cpp
-    android/emulation/MediaH264Decoder.cpp
-    android/emulation/MediaTexturePool.cpp
-    android/emulation/MediaHostRenderer.cpp
-    android/emulation/MediaSnapshotState.cpp
-    android/emulation/MediaSnapshotHelper.cpp
-    android/emulation/MediaVideoHelper.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
+    android/emulation/hostdevices/HostGoldfishPipe.cpp
+    android/emulation/HostmemIdMapping.cpp
     android/emulation/LogcatPipe.cpp
+    android/emulation/MediaFfmpegVideoHelper.cpp
+    android/emulation/MediaH264Decoder.cpp
+    android/emulation/MediaH264DecoderDefault.cpp
+    android/emulation/MediaH264DecoderFfmpeg.cpp
+    android/emulation/MediaH264DecoderGeneric.cpp
+    android/emulation/MediaHostRenderer.cpp
+    android/emulation/MediaSnapshotHelper.cpp
+    android/emulation/MediaSnapshotState.cpp
+    android/emulation/MediaTexturePool.cpp
+    android/emulation/MediaVideoHelper.cpp
+    android/emulation/MediaVpxDecoder.cpp
+    android/emulation/MediaVpxDecoderGeneric.cpp
+    android/emulation/MediaVpxVideoHelper.cpp
     android/emulation/MultiDisplay.cpp
     android/emulation/MultiDisplayPipe.cpp
     android/emulation/nand_limits.c
@@ -124,10 +123,12 @@ set(android-emu-common
     android/emulation/SetupParameters.cpp
     android/emulation/testing/TestVmLock.cpp
     android/emulation/VmLock.cpp
+    android/emulation/VpxFrameParser.cpp
+    android/emulation/VpxPingInfoParser.cpp
     android/error-messages.cpp
+    android/featurecontrol/feature_control.cpp
     android/featurecontrol/FeatureControl.cpp
     android/featurecontrol/FeatureControlImpl.cpp
-    android/featurecontrol/feature_control.cpp
     android/featurecontrol/HWMatching.cpp
     android/filesystems/ext4_resize.cpp
     android/filesystems/ext4_utils.cpp
@@ -137,9 +138,9 @@ set(android-emu-common
     android/filesystems/partition_types.cpp
     android/filesystems/ramdisk_extractor.cpp
     android/framebuffer.c
+    android/gps.c
     android/gps/GpxParser.cpp
     android/gps/KmlParser.cpp
-    android/gps.c
     android/gpu_frame.cpp
     android/help.c
     android/HostHwInfo.cpp
@@ -158,8 +159,8 @@ set(android-emu-common
     android/location/Point.cpp
     android/location/Route.cpp
     android/location/StudioMapsKey.cpp
-    android/main-help.cpp
     android/main-emugl.cpp
+    android/main-help.cpp
     android/main-kernel-parameters.cpp
     android/metrics/AdbLivenessChecker.cpp
     android/metrics/AsyncMetricsReporter.cpp
@@ -175,14 +176,14 @@ set(android-emu-common
     android/metrics/PerfStatReporter.cpp
     android/metrics/PeriodicReporter.cpp
     android/metrics/PlaystoreMetricsWriter.cpp
-    android/metrics/SyncMetricsReporter.cpp
     android/metrics/StudioConfig.cpp
+    android/metrics/SyncMetricsReporter.cpp
     android/metrics/TextMetricsWriter.cpp
     android/multi-instance.cpp
     android/multitouch-port.c
     android/multitouch-screen.c
-    android/network/control.cpp
     android/network/constants.c
+    android/network/control.cpp
     android/network/globals.c
     android/network/NetworkPipe.cpp
     android/network/wifi.cpp
@@ -190,11 +191,11 @@ set(android-emu-common
     android/network/WifiForwardPeer.cpp
     android/network/WifiForwardPipe.cpp
     android/network/WifiForwardServer.cpp
+    android/opengl/emugl_config.cpp
     android/opengl/EmuglBackendList.cpp
     android/opengl/EmuglBackendScanner.cpp
-    android/opengl/emugl_config.cpp
-    android/opengl/GpuFrameBridge.cpp
     android/opengl/GLProcessPipe.cpp
+    android/opengl/GpuFrameBridge.cpp
     android/opengl/gpuinfo.cpp
     android/opengl/logger.cpp
     android/opengl/OpenglEsPipe.cpp
@@ -224,12 +225,12 @@ set(android-emu-common
     android/snapshot/Compressor.cpp
     android/snapshot/Decompressor.cpp
     android/snapshot/GapTracker.cpp
+    android/snapshot/Hierarchy.cpp
     android/snapshot/IncrementalStats.cpp
     android/snapshot/interface.cpp
     android/snapshot/Loader.cpp
     android/snapshot/MemoryWatch_common.cpp
     android/snapshot/PathUtils.cpp
-    android/snapshot/Hierarchy.cpp
     android/snapshot/Quickboot.cpp
     android/snapshot/RamLoader.cpp
     android/snapshot/RamSaver.cpp
@@ -241,13 +242,13 @@ set(android-emu-common
     android/snapshot/TextureSaver.cpp
     android/telephony/debug.c
     android/telephony/gsm.c
-    android/telephony/modem.c
     android/telephony/MeterService.cpp
+    android/telephony/modem.c
     android/telephony/modem_driver.c
-    android/telephony/remote_call.c
     android/telephony/phone_number.cpp
-    android/telephony/SimAccessRules.cpp
+    android/telephony/remote_call.c
     android/telephony/sim_card.c
+    android/telephony/SimAccessRules.cpp
     android/telephony/sms.c
     android/telephony/sysdeps.c
     android/telephony/TagLengthValue.cpp
@@ -256,18 +257,19 @@ set(android-emu-common
     android/update-check/VersionExtractor.cpp
     android/user-config.cpp
     android/utils/dns.cpp
-    android/utils/Random.cpp
-    android/utils/sockets.c
-    android/utils/socket_drainer.cpp
     android/utils/looper.cpp
+    android/utils/Random.cpp
+    android/utils/socket_drainer.cpp
+    android/utils/sockets.c
     android/verified-boot/load_config.cpp
     android/wear-agent/android_wear_agent.cpp
-    android/wear-agent/WearAgent.cpp
-    android/wear-agent/PairUpWearPhone.cpp)
+    android/wear-agent/PairUpWearPhone.cpp
+    android/wear-agent/WearAgent.cpp)
 
 # These are the set of sources for which we know we have dependencies. You can
 # use this as a starting point to figure out what can move to a seperate library
 set(android_emu_dependent_src
+    # cmake-format: sortable
     android/automation/AutomationController.cpp
     android/automation/AutomationEventSink.cpp
     android/camera/camera-common.cpp
@@ -275,31 +277,31 @@ set(android_emu_dependent_src
     android/camera/camera-list.cpp
     android/camera/camera-metrics.cpp
     android/camera/camera-service.cpp
-    android/camera/camera-videoplayback.cpp
     android/camera/camera-videoplayback-default-renderer.cpp
     android/camera/camera-videoplayback-render-multiplexer.cpp
     android/camera/camera-videoplayback-video-renderer.cpp
-    android/camera/camera-virtualscene.cpp
+    android/camera/camera-videoplayback.cpp
     android/camera/camera-virtualscene-utils.cpp
+    android/camera/camera-virtualscene.cpp
+    android/console.cpp
     android/emulation/control/ScreenCapturer.cpp
     android/emulation/FakeRotatingCameraSensor.cpp
     android/emulation/HostMemoryService.cpp
     android/emulation/Keymaster3.cpp
     android/emulation/QemuMiscPipe.cpp
-    android/console.cpp
     android/http_proxy.c
     android/hw-sensors.cpp
     android/main-common.c
     android/main-qemu-parameters.cpp
     android/offworld/OffworldPipe.cpp
     android/physics/AmbientEnvironment.cpp
+    android/physics/FoldableModel.cpp
     android/physics/InertialModel.cpp
     android/physics/PhysicalModel.cpp
-    android/physics/FoldableModel.cpp
     android/qemu-setup.cpp
     android/sensors-port.c
-    android/snapshot/SnapshotAPI.cpp
     android/snapshot/Icebox.cpp
+    android/snapshot/SnapshotAPI.cpp
     android/test/checkboot.cpp
     android/videoinjection/VideoInjectionController.cpp
     android/videoplayback/VideoplaybackRenderTarget.cpp
@@ -330,37 +332,37 @@ android_add_library(
   LICENSE Apache-2.0
   SRC ${android-emu_src}
   WINDOWS # cmake-format: sortable
+          android/camera/camera-capture-windows.cpp
+          android/crashreport/CrashReporter_windows.cpp
+          android/emulation/dynlink_cuda.cpp
+          android/emulation/dynlink_nvcuvid.cpp
+          android/emulation/MediaCudaDriverHelper.cpp
+          android/emulation/MediaCudaUtils.cpp
+          android/emulation/MediaCudaVideoHelper.cpp
+          android/emulation/MediaH264DecoderCuvid.cpp
           android/opengl/NativeGpuInfo_windows.cpp
           android/snapshot/MemoryWatch_windows.cpp
           android/windows_installer.cpp
-          android/emulation/MediaH264DecoderCuvid.cpp
-          android/emulation/MediaCudaUtils.cpp
-          android/emulation/MediaCudaDriverHelper.cpp
-          android/emulation/MediaCudaVideoHelper.cpp
-          android/emulation/dynlink_cuda.cpp
-          android/emulation/dynlink_nvcuvid.cpp
-          android/camera/camera-capture-windows.cpp
-          android/crashreport/CrashReporter_windows.cpp
   LINUX # cmake-format: sortable
-        android/opengl/NativeGpuInfo_linux.cpp
-        android/snapshot/MemoryWatch_linux.cpp
-        android/emulation/MediaH264DecoderCuvid.cpp
-        android/emulation/MediaCudaUtils.cpp
-        android/emulation/MediaCudaDriverHelper.cpp
-        android/emulation/MediaCudaVideoHelper.cpp
-        android/emulation/dynlink_cuda.cpp
-        android/emulation/dynlink_nvcuvid.cpp
         android/camera/camera-capture-linux.c
         android/crashreport/CrashReporter_linux.cpp
+        android/emulation/dynlink_cuda.cpp
+        android/emulation/dynlink_nvcuvid.cpp
+        android/emulation/MediaCudaDriverHelper.cpp
+        android/emulation/MediaCudaUtils.cpp
+        android/emulation/MediaCudaVideoHelper.cpp
+        android/emulation/MediaH264DecoderCuvid.cpp
+        android/opengl/NativeGpuInfo_linux.cpp
+        android/snapshot/MemoryWatch_linux.cpp
   DARWIN # cmake-format: sortable
          android/camera/camera-capture-mac.m
+         android/crashreport/CrashReporter_darwin.cpp
          android/emulation/MediaH264DecoderVideoToolBox.cpp
          android/emulation/MediaH264DecoderVideoToolBoxProxy.cpp
-         android/opengl/NativeGpuInfo_darwin.cpp
-         android/snapshot/MemoryWatch_darwin.cpp
          android/opengl/macTouchOpenGL.m
+         android/opengl/NativeGpuInfo_darwin.cpp
          android/snapshot/MacSegvHandler.cpp
-         android/crashreport/CrashReporter_darwin.cpp)
+         android/snapshot/MemoryWatch_darwin.cpp)
 
 # Note that all these dependencies will propagate to whoever relies on android-
 # emu It will also setup the proper include directories, so that android-emu can
@@ -506,24 +508,29 @@ endif()
 add_dependencies(android-emu emulator_make_ext4fs)
 
 set(android-emu-min
+    # cmake-format: sortable
     android/avd/hw-config.c
     android/avd/info.c
     android/avd/util.c
     android/avd/util_wrapper.cpp
-    android/base/async/ScopedSocketWatch.cpp
     android/base/async/CallbackRegistry.cpp
     android/base/async/DefaultLooper.cpp
     android/base/async/Looper.cpp
     android/base/async/ScopedSocketWatch.cpp
+    android/base/async/ScopedSocketWatch.cpp
     android/base/async/ThreadLooper.cpp
     android/base/sockets/SocketDrainer.cpp
-    android/base/sockets/SocketWaiter.cpp
     android/base/sockets/SocketUtils.cpp
+    android/base/sockets/SocketWaiter.cpp
     android/cmdline-option.cpp
+    android/emulation/address_space_device.cpp
+    android/emulation/address_space_graphics.cpp
+    android/emulation/address_space_host_memory_allocator.cpp
+    android/emulation/address_space_shared_slots_host_memory_allocator.cpp
+    android/emulation/android_pipe_host.cpp
     android/emulation/AndroidAsyncMessagePipe.cpp
     android/emulation/AndroidMessagePipe.cpp
     android/emulation/AndroidPipe.cpp
-    android/emulation/android_pipe_host.cpp
     android/emulation/AudioCaptureEngine.cpp
     android/emulation/AudioOutputEngine.cpp
     android/emulation/bufprint_config_dirs.cpp
@@ -534,16 +541,12 @@ set(android-emu-min
     android/emulation/control/LineConsumer.cpp
     android/emulation/control/NopRtcBridge.cpp
     android/emulation/DmaMap.cpp
+    android/emulation/goldfish_sync.cpp
     android/emulation/GoldfishDma.cpp
     android/emulation/GoldfishSyncCommandQueue.cpp
-    android/emulation/goldfish_sync.cpp
-    android/emulation/hostdevices/HostGoldfishPipe.cpp
-    android/emulation/address_space_device.cpp
-    android/emulation/address_space_graphics.cpp
-    android/emulation/address_space_host_memory_allocator.cpp
-    android/emulation/address_space_shared_slots_host_memory_allocator.cpp
-    android/emulation/HostmemIdMapping.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
+    android/emulation/hostdevices/HostGoldfishPipe.cpp
+    android/emulation/HostmemIdMapping.cpp
     android/emulation/LogcatPipe.cpp
     android/emulation/nand_limits.c
     android/emulation/ParameterList.cpp
@@ -554,9 +557,9 @@ set(android-emu-min
     android/emulation/testing/TestVmLock.cpp
     android/emulation/VmLock.cpp
     android/error-messages.cpp
+    android/featurecontrol/feature_control.cpp
     android/featurecontrol/FeatureControl.cpp
     android/featurecontrol/FeatureControlImpl.cpp
-    android/featurecontrol/feature_control.cpp
     android/framebuffer.c
     android/gps.c
     android/gpu_frame.cpp
@@ -565,11 +568,11 @@ set(android-emu-min
     android/hw-lcd.c
     android/kernel/kernel_utils.cpp
     android/loadpng.c
+    android/opengl/emugl_config.cpp
     android/opengl/EmuglBackendList.cpp
     android/opengl/EmuglBackendScanner.cpp
-    android/opengl/emugl_config.cpp
-    android/opengl/GpuFrameBridge.cpp
     android/opengl/GLProcessPipe.cpp
+    android/opengl/GpuFrameBridge.cpp
     android/opengl/gpuinfo.cpp
     android/opengl/logger.cpp
     android/opengl/OpenglEsPipe.cpp
@@ -581,12 +584,12 @@ set(android-emu-min
     android/snapshot/Compressor.cpp
     android/snapshot/Decompressor.cpp
     android/snapshot/GapTracker.cpp
+    android/snapshot/Hierarchy.cpp
     android/snapshot/IncrementalStats.cpp
     android/snapshot/interface.cpp
     android/snapshot/Loader.cpp
     android/snapshot/MemoryWatch_common.cpp
     android/snapshot/PathUtils.cpp
-    android/snapshot/Hierarchy.cpp
     android/snapshot/Quickboot.cpp
     android/snapshot/RamLoader.cpp
     android/snapshot/RamSaver.cpp
@@ -605,30 +608,33 @@ set(android-emu-min
 
 # Shared version of the library. Note that this only has the set of common
 # sources, otherwise you will get a lot of linker errors.
-set(android-emu-shared_src ${android-emu-min} stubs/stubs.cpp
-                           stubs/gfxstream-stubs.cpp)
+set(android-emu-shared_src
+    # cmake-format: sortable
+    ${android-emu-min} stubs/gfxstream-stubs.cpp stubs/stubs.cpp)
 # The dependent target os specific sources, they are pretty much the same as
 # above, excluding camera support, because that brings in a whole slew of
 # dependencies
 android_add_library(
-  TARGET android-emu-shared SHARED
+  TARGET android-emu-shared
+  SHARED
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       ${android-emu-shared_src}
   WINDOWS # cmake-format: sortable
-          android/opengl/NativeGpuInfo_windows.cpp
-          android/snapshot/MemoryWatch_windows.cpp
           android/emulation/dynlink_cuda.cpp
           android/emulation/dynlink_nvcuvid.cpp
+          android/opengl/NativeGpuInfo_windows.cpp
+          android/snapshot/MemoryWatch_windows.cpp
           android/windows_installer.cpp
   LINUX # cmake-format: sortable
+        android/emulation/dynlink_cuda.cpp android/emulation/dynlink_nvcuvid.cpp
         android/opengl/NativeGpuInfo_linux.cpp
         android/snapshot/MemoryWatch_linux.cpp
-        android/emulation/dynlink_cuda.cpp android/emulation/dynlink_nvcuvid.cpp
   DARWIN # cmake-format: sortable
+         android/opengl/macTouchOpenGL.m
          android/opengl/NativeGpuInfo_darwin.cpp
-         android/snapshot/MemoryWatch_darwin.cpp
-         android/opengl/macTouchOpenGL.m android/snapshot/MacSegvHandler.cpp)
+         android/snapshot/MacSegvHandler.cpp
+         android/snapshot/MemoryWatch_darwin.cpp)
 # Note that these are basically the same as android-emu-shared. We should clean
 # this up
 target_link_libraries(
@@ -738,10 +744,10 @@ android_add_library(
   TARGET android-emu-test-launcher
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
-      android/emulation/testing/MockAndroidVmOperations.cpp
+      android/emulation/testing/MockAndroidAgentFactory.cpp
       android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
       android/emulation/testing/MockAndroidMultiDisplayAgent.cpp
-      android/emulation/testing/MockAndroidAgentFactory.cpp)
+      android/emulation/testing/MockAndroidVmOperations.cpp)
 android_target_compile_options(android-emu-test-launcher Clang
                                PRIVATE -O0 -Wno-invalid-constexpr)
 target_link_libraries(android-emu-test-launcher PRIVATE android-emu-base
@@ -749,17 +755,17 @@ target_link_libraries(android-emu-test-launcher PRIVATE android-emu-base
 
 if(NOT LINUX_AARCH64)
   set(android-emu_unittests_common
+      # cmake-format: sortable
       android/automation/AutomationController_unittest.cpp
       android/automation/AutomationEventSink_unittest.cpp
       android/avd/util_unittest.cpp
       android/avd/util_wrapper_unittest.cpp
-      android/base/ArraySize_unittest.cpp
       android/base/AlignedBuf_unittest.cpp
-      android/base/ContiguousRangeMapper_unittest.cpp
-      android/base/async/Looper_unittest.cpp
+      android/base/ArraySize_unittest.cpp
       android/base/async/AsyncSocketServer_unittest.cpp
       # bug: 153381599: disabled until flakiness is addressed
       android/base/async/CallbackRegistry_unittest.cpp
+      android/base/async/Looper_unittest.cpp
       android/base/async/RecurrentTask_unittest.cpp
       android/base/async/ScopedSocketWatch_unittest.cpp
       android/base/async/SubscriberList_unittest.cpp
@@ -770,6 +776,7 @@ if(NOT LINUX_AARCH64)
       android/base/containers/Lookup_unittest.cpp
       android/base/containers/SmallVector_unittest.cpp
       android/base/containers/StaticMap_unittest.cpp
+      android/base/ContiguousRangeMapper_unittest.cpp
       android/base/EintrWrapper_unittest.cpp
       android/base/files/FileShareOpen_unittest.cpp
       android/base/files/GzipStreambuf_unittest.cpp
@@ -784,11 +791,11 @@ if(NOT LINUX_AARCH64)
       android/base/FunctionView_unittest.cpp
       android/base/IOVector_unittest.cpp
       android/base/JsonWriter_unittest.cpp
-      android/base/Log_unittest.cpp
       android/base/LayoutResolver_unittest.cpp
+      android/base/Log_unittest.cpp
       android/base/memory/LazyInstance_unittest.cpp
-      android/base/memory/MemoryHints_unittest.cpp
       android/base/memory/MallocUsableSize_unittest.cpp
+      android/base/memory/MemoryHints_unittest.cpp
       android/base/memory/OnDemand_unittest.cpp
       android/base/memory/ScopedPtr_unittest.cpp
       android/base/memory/SharedMemory_unittest.cpp
@@ -817,8 +824,8 @@ if(NOT LINUX_AARCH64)
       android/base/synchronization/ConditionVariable_unittest.cpp
       android/base/synchronization/Event_unittest.cpp
       android/base/synchronization/Lock_unittest.cpp
-      android/base/synchronization/ReadWriteLock_unittest.cpp
       android/base/synchronization/MessageChannel_unittest.cpp
+      android/base/synchronization/ReadWriteLock_unittest.cpp
       android/base/system/System_unittest.cpp
       android/base/testing/MockUtils_unittest.cpp
       android/base/testing/ProtobufMatchers.cpp
@@ -852,24 +859,24 @@ if(NOT LINUX_AARCH64)
       android/emulation/bufprint_config_dirs_unittest.cpp
       android/emulation/ComponentVersion_unittest.cpp
       android/emulation/ConfigDirs_unittest.cpp
-      android/emulation/control/EmulatorAdvertisement_unittest.cpp
-      android/emulation/DeviceContextRunner_unittest.cpp
-      android/emulation/DmaMap_unittest.cpp
       android/emulation/control/adb/AdbConnection_unittest.cpp
-      android/emulation/control/adb/adbkey_unittest.cpp
       android/emulation/control/adb/AdbInterface_unittest.cpp
+      android/emulation/control/adb/adbkey_unittest.cpp
       android/emulation/control/ApkInstaller_unittest.cpp
+      android/emulation/control/EmulatorAdvertisement_unittest.cpp
       android/emulation/control/FilePusher_unittest.cpp
       android/emulation/control/GooglePlayServices_unittest.cpp
-      android/emulation/control/ScreenCapturer_unittest.cpp
       android/emulation/control/LineConsumer_unittest.cpp
+      android/emulation/control/ScreenCapturer_unittest.cpp
       android/emulation/CpuAccelerator_unittest.cpp
       android/emulation/CrossSessionSocket_unittest.cpp
+      android/emulation/DeviceContextRunner_unittest.cpp
+      android/emulation/DmaMap_unittest.cpp
+      android/emulation/hostdevices/HostAddressSpace_unittest.cpp
+      android/emulation/hostdevices/HostGoldfishPipe_unittest.cpp
       android/emulation/HostmemIdMapping_unittest.cpp
       android/emulation/HostMemoryService_unittest.cpp
       android/emulation/Hypervisor_unittest.cpp
-      android/emulation/hostdevices/HostAddressSpace_unittest.cpp
-      android/emulation/hostdevices/HostGoldfishPipe_unittest.cpp
       android/emulation/ParameterList_unittest.cpp
       android/emulation/RefcountPipe_unittest.cpp
       android/emulation/serial_line_unittest.cpp
@@ -897,13 +904,13 @@ if(NOT LINUX_AARCH64)
       android/location/MapsKeyFileParser_unittest.cpp
       android/location/Point_unittest.cpp
       android/location/Route_unittest.cpp
-      android/network/MacAddress_unittest.cpp
-      android/network/control_unittest.cpp
       android/network/constants_unittest.cpp
+      android/network/control_unittest.cpp
+      android/network/MacAddress_unittest.cpp
       android/offworld/OffworldPipe_unittest.cpp
+      android/opengl/emugl_config_unittest.cpp
       android/opengl/EmuglBackendList_unittest.cpp
       android/opengl/EmuglBackendScanner_unittest.cpp
-      android/opengl/emugl_config_unittest.cpp
       android/opengl/GpuFrameBridge_unittest.cpp
       android/opengl/gpuinfo_unittest.cpp
       android/physics/AmbientEnvironment_unittest.cpp
@@ -919,8 +926,8 @@ if(NOT LINUX_AARCH64)
       android/snapshot/Snapshot_unittest.cpp
       android/telephony/gsm_unittest.cpp
       android/telephony/modem_unittest.cpp
-      android/telephony/sms_unittest.cpp
       android/telephony/SimAccessRules_unittest.cpp
+      android/telephony/sms_unittest.cpp
       android/telephony/TagLengthValue_unittest.cpp
       android/update-check/UpdateChecker_unittest.cpp
       android/update-check/VersionExtractor_unittest.cpp
@@ -936,8 +943,8 @@ if(NOT LINUX_AARCH64)
       android/utils/path_unittest.cpp
       android/utils/property_file_unittest.cpp
       android/utils/Random_unittest.cpp
-      android/utils/string_unittest.cpp
       android/utils/sockets_unittest.cpp
+      android/utils/string_unittest.cpp
       android/utils/x86_cpuid_unittest.cpp
       android/verified-boot/load_config_unittest.cpp
       android/videoinjection/VideoInjectionController_unittest.cpp
@@ -958,17 +965,20 @@ if(NOT LINUX_AARCH64)
     TARGET android-emu_unittests
     SRC # cmake-format: sortable
         ${android-emu_unittests_common}
-    WINDOWS android/base/files/ScopedFileHandle_unittest.cpp
+    WINDOWS # cmake-format: sortable
+            android/base/files/ScopedFileHandle_unittest.cpp
             android/base/files/ScopedRegKey_unittest.cpp
             android/base/system/Win32UnicodeString_unittest.cpp
             android/base/system/Win32Utils_unittest.cpp
             android/utils/win32_cmdline_quote_unittest.cpp
             android/windows_installer_unittest.cpp
     MSVC android/base/system/WinMsvcSystem_unittest.cpp
-    DARWIN android/emulation/nand_limits_unittest.cpp
+    DARWIN # cmake-format: sortable
            android/emulation/control/adb/AdbShellStream_unittest.cpp
-    LINUX android/emulation/nand_limits_unittest.cpp
-          android/emulation/control/adb/AdbShellStream_unittest.cpp)
+           android/emulation/nand_limits_unittest.cpp
+    LINUX # cmake-format: sortable
+          android/emulation/control/adb/AdbShellStream_unittest.cpp
+          android/emulation/nand_limits_unittest.cpp)
   # Setup the targets compile config etc..
   android_target_compile_options(
     android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr
@@ -998,6 +1008,7 @@ if(NOT LINUX_AARCH64)
 
   list(
     APPEND
+    # cmake-format: sortable
     android-emu-testdata
     testdata/snapshots/random-ram-100.bin
     testdata/textureutils/gray_alpha_golden.bmp

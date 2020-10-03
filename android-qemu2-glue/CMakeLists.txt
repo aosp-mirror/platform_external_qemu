@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-set (android-qemu2-glue_src
+set(android-qemu2-glue_src
     android_qemud.cpp
     audio-capturer.cpp
     audio-output.cpp
@@ -47,19 +47,14 @@ set (android-qemu2-glue_src
     telephony/modem_init.c
     utils/stream.cpp)
 
-if (NOT OPTION_GFXSTREAM_BACKEND)
-    list(APPEND android-qemu2-glue_src
-        "emulation/VirtioWifiForwarder.cpp"
-        "emulation/virtio-wifi.cpp"
-        "emulation/HostapdController.cpp")
+if(NOT OPTION_GFXSTREAM_BACKEND)
+  list(APPEND android-qemu2-glue_src "emulation/VirtioWifiForwarder.cpp"
+       "emulation/virtio-wifi.cpp" "emulation/HostapdController.cpp")
 endif()
 
 android_add_library(
-  TARGET libqemu2-glue
-  LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      ${android-qemu2-glue_src}
-)
+  TARGET libqemu2-glue LICENSE Apache-2.0 SRC # cmake-format: sortable
+                                              ${android-qemu2-glue_src})
 
 target_include_directories(
   libqemu2-glue
@@ -74,7 +69,7 @@ endif()
 target_link_libraries(libqemu2-glue PRIVATE android-emu GLIB2::GLIB2
                                             PIXMAN::PIXMAN emulator-libdtb ssl)
 
-if (NOT OPTION_GFXSTREAM_BACKEND)
+if(NOT OPTION_GFXSTREAM_BACKEND)
   target_link_libraries(libqemu2-glue PRIVATE hostapd)
 endif()
 
