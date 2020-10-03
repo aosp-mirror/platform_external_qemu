@@ -511,6 +511,8 @@ static int poll_rest(gboolean poll_msgs, HANDLE *handles, gint nhandles,
     return 0;
 }
 
+extern int win32_wait_for_objects(GPollFD *fds, guint nfds, gint timeout);
+
 gint g_poll(GPollFD *fds, guint nfds, gint timeout)
 {
     HANDLE handles[MAXIMUM_WAIT_OBJECTS];
@@ -537,8 +539,7 @@ gint g_poll(GPollFD *fds, guint nfds, gint timeout)
 
             if (i == nhandles) {
                 if (nhandles == MAXIMUM_WAIT_OBJECTS) {
-                    g_warning("Too many handles to wait for!\n");
-                    break;
+                    return win32_wait_for_objects(fds, nfds, timeout);
                 } else {
                     handles[nhandles++] = (HANDLE) f->fd;
                 }
