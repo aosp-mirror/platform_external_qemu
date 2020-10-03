@@ -176,7 +176,8 @@ public:
         return static_cast<int>(totalRead);
     }
 
-    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) override {
+    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers,
+                    void** newPipePtr) override {
         int transferred = 0;
         for (int i = 0; i < numBuffers; ++i) {
             size_t sent = mService->send(buffers[i].data, buffers[i].size);

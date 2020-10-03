@@ -151,7 +151,8 @@ public:
     // initialization), PIPE_ERROR_INVAL will be returned, otherwise, the
     // number of bytes accepted from the guest is returned.
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+                            int numBuffers,
+                            void** newPipePtr) override {
         int result = 0;
         size_t avail = kBufferSize - mPos;
         bool foundZero = false;
@@ -263,11 +264,7 @@ public:
           pipeName);
 
         newPipe->setFlags(mFlags);
-        if (newPipe->getFlags() & ANDROID_PIPE_VIRTIO_GPU_BIT) {
-            sPipeHwVirtioFuncs->resetPipe(mHwPipe, newPipe);
-        } else {
-            sPipeHwFuncs->resetPipe(mHwPipe, newPipe);
-        }
+        *newPipePtr = newPipe;
         delete this;
 
         return result;
@@ -792,14 +789,14 @@ int android_pipe_guest_recv(void* internalPipe,
     return pipe->onGuestRecv(buffers, numBuffers);
 }
 
-int android_pipe_guest_send(void* internalPipe,
+int android_pipe_guest_send(void** internalPipe,
                             const AndroidPipeBuffer* buffers,
                             int numBuffers) {
     CHECK_VM_STATE_LOCK();
-    auto pipe = static_cast<AndroidPipe*>(internalPipe);
+    auto pipe = static_cast<AndroidPipe*>(*internalPipe);
     // Note that pipe may be deleted during this call, so it's not safe to
     // access pipe after this point.
-    return pipe->onGuestSend(buffers, numBuffers);
+    return pipe->onGuestSend(buffers, numBuffers, internalPipe);
 }
 
 void android_pipe_guest_wake_on(void* internalPipe, unsigned wakes) {

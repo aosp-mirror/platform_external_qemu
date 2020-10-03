@@ -89,7 +89,8 @@ public:
     }
 
     int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+                            int numBuffers,
+                            void** newPipePtr) override {
         // The guest is supposed to send us a confirm code first. The code is
         // 100 (4 byte integer).
         assert(buffers[0].size >= 4);

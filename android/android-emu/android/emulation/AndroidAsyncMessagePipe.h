@@ -227,7 +227,8 @@ private:
         return writeBuffers(buffers, numBuffers);
     }
 
-    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) final {
+    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers,
+                    void** newPipePtr) final {
         return readBuffers(buffers, numBuffers);
     }
 

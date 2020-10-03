@@ -152,11 +152,11 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
                     numBuffers);
         },
         // guest_send()
-        [](GoldfishHostPipe* hostPipe,
+        [](GoldfishHostPipe** hostPipe,
            const GoldfishPipeBuffer* buffers,
            int numBuffers) -> int {
             return android_pipe_guest_send(
-                    hostPipe,
+                    reinterpret_cast<void**>(hostPipe),
                     reinterpret_cast<const AndroidPipeBuffer*>(buffers),
                     numBuffers);
         },
@@ -188,11 +188,6 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
 
 // These callbacks are called from the pipe service into the virtual device.
 static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
-        // resetPipe()
-        [](void* hwPipe, void* hostPipe) {
-            goldfish_pipe_reset(static_cast<GoldfishHwPipe*>(hwPipe),
-                                static_cast<GoldfishHostPipe*>(hostPipe));
-        },
         // closeFromHost()
         [](void* hwPipe) {
             goldfish_pipe_close_from_host(static_cast<GoldfishHwPipe*>(hwPipe));
@@ -226,10 +221,6 @@ static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
 
 // android_pipe_hw_funcs but for virtio-gpu
 static const AndroidPipeHwFuncs android_pipe_hw_virtio_funcs = {
-        // resetPipe()
-        [](void* hwPipe, void* hostPipe) {
-            virtio_goldfish_pipe_reset(hwPipe, hostPipe);
-        },
         // closeFromHost()
         [](void* hwPipe) {
             fprintf(stderr, "%s: closeFromHost not supported!\n", __func__);

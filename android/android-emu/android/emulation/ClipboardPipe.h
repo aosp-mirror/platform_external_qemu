@@ -45,7 +45,8 @@ public:
     void onGuestClose(PipeCloseReason reason) override;
     unsigned onGuestPoll() const override;
     int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override;
-    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) override;
+    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers,
+                    void** newPipePtr) override;
     void onGuestWantWakeOn(int flags) override {
         android::base::AutoLock lock(mLock);
         mWakeOnRead = (flags & PIPE_WAKE_READ) != 0;
