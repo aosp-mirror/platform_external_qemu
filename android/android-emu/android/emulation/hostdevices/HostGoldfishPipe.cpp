@@ -369,7 +369,6 @@ void HostGoldfishPipeDevice::setWakeCallback(
 }
 
 static const AndroidPipeHwFuncs sHostGoldfishPipeHwFuncs = {
-    &HostGoldfishPipeDevice::resetPipeCallback,
     &HostGoldfishPipeDevice::closeFromHostCallback,
     &HostGoldfishPipeDevice::signalWakeCallback,
 };
@@ -396,7 +395,7 @@ ssize_t HostGoldfishPipeDevice::writeInternal(void* pipe,
                                               const void* buffer,
                                               size_t len) {
     AndroidPipeBuffer buf = {(uint8_t*)buffer, len};
-    ssize_t res = android_pipe_guest_send(pipe, &buf, 1);
+    ssize_t res = android_pipe_guest_send(&pipe, &buf, 1);
     setErrno(res);
     return res;
 }
@@ -470,12 +469,6 @@ HostGoldfishPipeDevice* HostGoldfishPipeDevice::get() {
 }
 
 // Callbacks for AndroidPipeHwFuncs.
-// static
-void HostGoldfishPipeDevice::resetPipeCallback(void* hwpipe,
-                                               void* internal_pipe) {
-    HostGoldfishPipeDevice::get()->resetPipe(hwpipe, internal_pipe);
-}
-
 // static
 void HostGoldfishPipeDevice::closeFromHostCallback(void* hwpipe) {
     // PIPE_WAKE_CLOSED gets translated to closeFromHostCallback.

@@ -76,7 +76,6 @@ public:
     void setWakeCallback(void* pipe, std::function<void(int)> callback);
 
     // Callbacks for AndroidPipeHwFuncs.
-    static void resetPipeCallback(void* hwpipe, void* internal_pipe);
     static void closeFromHostCallback(void* hwpipe);
     static void signalWakeCallback(void* hwpipe, unsigned wakes);
 
