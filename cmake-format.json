@@ -10,7 +10,7 @@
       "kwargs": {
         "SOURCE_DIR": "*",
         "INCLUDES": "*",
-        "SOURCES": "*",
+        "SOURCES": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "OUTPUT_DIR": "*",
         "GENERATED": "*"
       }
@@ -36,12 +36,11 @@
         "LICENSE": "*",
         "REPO_DIR": "*",
         "NOTICE": "*",
-        "DARWIN": "*",
-        "WINDOWS": "*",
-        "MSVC": "*",
-        "MINGW": "*",
-        "LINUX": "*",
-        "SRC": "*"
+        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
       }
     },
     "android_nasm_compile": {
@@ -55,12 +54,11 @@
         "LICENSE": "*",
         "REPO_DIR": "*",
         "NOTICE": "*",
-        "DARWIN": "*",
-        "WINDOWS": "*",
-        "MSVC": "*",
-        "MINGW": "*",
-        "LINUX": "*",
-        "SRC": "*"
+        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
       }
     },
     "android_add_interface": {
@@ -93,12 +91,11 @@
       "flags": [],
       "kwargs": {
         "TARGET": "*",
-        "DARWIN": "*",
-        "WINDOWS": "*",
-        "MSVC": "*",
-        "MINGW": "*",
-        "LINUX": "*",
-        "SRC": "*"
+        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
       }
     },
     "android_build_qemu_variant": {
@@ -108,7 +105,7 @@
       "kwargs": {
         "EXE": "*",
         "CPU": "*",
-        "SOURCES": "*",
+        "SOURCES": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "DEFINITIONS": "*",
         "LIBRARIES": "*"
       }
@@ -152,12 +149,11 @@
         "LICENSE": "*",
         "REPO_DIR": "*",
         "NOTICE": "*",
-        "DARWIN": "*",
-        "WINDOWS": "*",
-        "MSVC": "*",
-        "MINGW": "*",
-        "LINUX": "*",
-        "SRC": "*"
+        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
       }
     }
   },
@@ -165,7 +161,6 @@
   "always_wrap": [],
   "separate_ctrl_name_with_space": false,
   "max_subgroups_hwrap": 10,
-  "max-pargs-hwrap": 10,
   "fence_pattern": "^\\s*([`~]{3}[`~]*)(.*)$",
   "enable_markup": true,
   "enable_sort": true,

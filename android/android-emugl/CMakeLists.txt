@@ -50,7 +50,7 @@ function(generate_emugen_lib LIBNAME LOCATION NAME SOURCES)
            host/libs/libGLSnapshot shared/OpenglCodecCommon
            ${CMAKE_CURRENT_BINARY_DIR})
   target_compile_options(${LIBNAME} PRIVATE -fvisibility=hidden)
-  if (OPTION_GFXSTREAM_BACKEND)
+  if(OPTION_GFXSTREAM_BACKEND)
     target_link_libraries(${LIBNAME} PUBLIC android-emu-shared GLSnapshot)
   else()
     target_link_libraries(${LIBNAME} PUBLIC android-emu GLSnapshot)
