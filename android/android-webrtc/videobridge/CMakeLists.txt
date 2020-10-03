@@ -7,13 +7,13 @@ android_add_executable(
       emulator/main/GoldfishBridge.cpp
       emulator/net/EmulatorConnection.cpp
       emulator/net/RtcAsyncSocketAdapter.cpp
-      emulator/webrtc/Participant.cpp
-      emulator/webrtc/Switchboard.cpp
       emulator/webrtc/capture/AudioSource.cpp
       emulator/webrtc/capture/GrpcAudioSource.cpp
       emulator/webrtc/capture/VideoCapturerFactory.cpp
       emulator/webrtc/capture/VideoShareCapturer.cpp
-      emulator/webrtc/capture/VideoTrackSource.cpp)
+      emulator/webrtc/capture/VideoTrackSource.cpp
+      emulator/webrtc/Participant.cpp
+      emulator/webrtc/Switchboard.cpp)
 
 android_target_compile_options(goldfish-webrtc-bridge darwin-x86_64
                                PRIVATE "-fvisibility=hidden")

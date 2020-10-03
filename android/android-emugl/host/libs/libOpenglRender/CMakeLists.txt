@@ -25,8 +25,8 @@ android_add_library(
       standalone_common/angle-util/OSWindow.cpp
   DARWIN standalone_common/angle-util/osx/OSXWindow.mm
   LINUX standalone_common/angle-util/x11/X11Window.cpp
-  WINDOWS standalone_common/angle-util/windows/WindowsTimer.cpp
-          standalone_common/angle-util/windows/win32/Win32Window.cpp)
+  WINDOWS standalone_common/angle-util/windows/win32/Win32Window.cpp
+          standalone_common/angle-util/windows/WindowsTimer.cpp)
 
 android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt"
                                                            android-emu-shared)
@@ -72,7 +72,8 @@ target_include_directories(
           ${ANDROID_EMUGL_DIR}/host/include/OpenglRender)
 
 android_add_library(
-  TARGET OpenglRender SHARED
+  TARGET OpenglRender
+  SHARED
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       ChannelStream.cpp
@@ -84,6 +85,7 @@ android_add_library(
       PostWorker.cpp
       ReadbackWorker.cpp
       ReadBuffer.cpp
+      render_api.cpp
       RenderChannelImpl.cpp
       RenderContext.cpp
       RenderControl.cpp
@@ -91,7 +93,6 @@ android_add_library(
       RenderLibImpl.cpp
       RenderThread.cpp
       RenderThreadInfo.cpp
-      render_api.cpp
       RenderWindow.cpp
       RingStream.cpp
       SyncThread.cpp
@@ -136,6 +137,7 @@ if(NOT LINUX_AARCH64)
     TARGET OpenglRender_standalone_common
     LICENSE Apache-2.0
     SRC # cmake-format: sortable
+        ../Translator/GLES_V2/ANGLEShaderParser.cpp
         ChannelStream.cpp
         ColorBuffer.cpp
         FbConfig.cpp
@@ -145,6 +147,7 @@ if(NOT LINUX_AARCH64)
         PostWorker.cpp
         ReadbackWorker.cpp
         ReadBuffer.cpp
+        render_api.cpp
         RenderChannelImpl.cpp
         RenderContext.cpp
         RenderControl.cpp
@@ -152,18 +155,16 @@ if(NOT LINUX_AARCH64)
         RenderLibImpl.cpp
         RenderThread.cpp
         RenderThreadInfo.cpp
-        render_api.cpp
         RenderWindow.cpp
         RingStream.cpp
+        standalone_common/SampleApplication.cpp
+        standalone_common/SearchPathsSetup.cpp
+        standalone_common/ShaderUtils.cpp
         SyncThread.cpp
         TextureDraw.cpp
         TextureResize.cpp
         WindowSurface.cpp
         YUVConverter.cpp
-        ../Translator/GLES_V2/ANGLEShaderParser.cpp
-        standalone_common/SampleApplication.cpp
-        standalone_common/SearchPathsSetup.cpp
-        standalone_common/ShaderUtils.cpp
     LINUX NativeSubWindow_x11.cpp
     DARWIN NativeSubWindow_cocoa.m
     WINDOWS NativeSubWindow_win32.cpp)
@@ -221,20 +222,21 @@ if(NOT LINUX_AARCH64)
         tests/StalePtrRegistry_unittest.cpp
         tests/TextureDraw_unittest.cpp)
   target_link_libraries(
-    OpenglRender_unittests PRIVATE OpenglRender_standalone_common android-emu-test-launcher android-emu)
+    OpenglRender_unittests PRIVATE OpenglRender_standalone_common
+                                   android-emu-test-launcher android-emu)
   android_target_compile_definitions(OpenglRender_unittests windows PRIVATE
                                      -DVK_USE_PLATFORM_WIN32_KHR)
   add_opengl_dependencies(OpenglRender_unittests)
 
   # Unit tests
-  if (NOT WINDOWS)
+  if(NOT WINDOWS)
     android_add_test(
       TARGET OpenglRender_vulkan_unittests
       SRC # cmake-format: sortable
-          tests/Vulkan_unittest.cpp
-          vulkan/VulkanStream_unittest.cpp)
+          tests/Vulkan_unittest.cpp vulkan/VulkanStream_unittest.cpp)
     add_opengl_dependencies(OpenglRender_vulkan_unittests)
-    target_link_libraries(OpenglRender_vulkan_unittests PRIVATE android-emu-test-launcher android-emu)
+    target_link_libraries(OpenglRender_vulkan_unittests
+                          PRIVATE android-emu-test-launcher android-emu)
     target_link_libraries(
       OpenglRender_vulkan_unittests PUBLIC OpenglRender_standalone_common
                                            OpenglRender_vulkan gmock_main)
@@ -243,8 +245,8 @@ if(NOT LINUX_AARCH64)
       PRIVATE . cereal ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
               ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
               ${ANDROID_EMUGL_DIR}/host/include/vulkan)
-    android_target_compile_definitions(OpenglRender_vulkan_unittests windows PRIVATE
-                                       -DVK_USE_PLATFORM_WIN32_KHR)
+    android_target_compile_definitions(OpenglRender_vulkan_unittests windows
+                                       PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
   endif()
 
   android_add_executable(
