@@ -8,7 +8,7 @@ set(WINDOWS_ICON ../images/emulator_icon.rc)
 android_add_executable(
   TARGET emulator INSTALL . LICENSE Apache-2.0
   SRC # cmake-format: sortable
-      main-emulator.cpp ${WINDOWS_ICON})
+      ${WINDOWS_ICON} main-emulator.cpp)
 target_link_libraries(emulator PRIVATE android-emu)
 target_compile_definitions(
   emulator
@@ -18,8 +18,7 @@ target_compile_definitions(
 
 # Make sure we have the qemu dependencies available
 if(LINUX_AARCH64)
-  add_dependencies(emulator qemu-system-aarch64
-                   qemu-system-aarch64-headless)
+  add_dependencies(emulator qemu-system-aarch64 qemu-system-aarch64-headless)
 elseif(OPTION_MINBUILD)
   add_dependencies(emulator qemu-system-x86_64 qemu-system-aarch64
                    qemu-system-x86_64-headless qemu-system-aarch64-headless)
@@ -76,8 +75,8 @@ android_target_dependency(emulator all EMULATOR_FEATURE_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_KEYMAP_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_BIOS_DEPENDENCIES)
 android_target_dependency(emulator all SWIFTSHADER_DEPENDENCIES)
-if (NOT LINUX_AARCH64)
-    android_target_dependency(emulator all ANGLE_DEPENDENCIES)
+if(NOT LINUX_AARCH64)
+  android_target_dependency(emulator all ANGLE_DEPENDENCIES)
 endif()
 android_target_dependency(emulator all RUNTIME_OS_DEPENDENCIES)
 android_target_dependency(emulator all E2FSPROGS_DEPENDENCIES)
@@ -104,7 +103,7 @@ android_install_dependency(all EMULATOR_FEATURE_DEPENDENCIES)
 android_install_dependency(all EMULATOR_KEYMAP_DEPENDENCIES)
 android_install_dependency(all EMULATOR_BIOS_DEPENDENCIES)
 android_install_dependency(all SWIFTSHADER_DEPENDENCIES)
-if (NOT LINUX_AARCH64)
+if(NOT LINUX_AARCH64)
   android_install_dependency(all ANGLE_DEPENDENCIES)
 endif()
 android_install_dependency(all RUNTIME_OS_DEPENDENCIES)
