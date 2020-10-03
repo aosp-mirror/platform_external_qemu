@@ -799,8 +799,8 @@ static bool is_real_audio_allowed() {
 
 static bool need_skip_snapshot_save = false;
 
-static void set_skip_snapshot_save(bool used) {
-    need_skip_snapshot_save = true;
+static void set_skip_snapshot_save(bool skip) {
+    need_skip_snapshot_save = skip;
 }
 
 static bool is_snapshot_save_skipped() {
@@ -916,6 +916,7 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
                   success;
 
         // And move it to the export destination..
+        path_delete_file(final_overlay.c_str());
         if (std::rename(tmp_overlay.c_str(), final_overlay.c_str()) != 0) {
             std::string err = "Failed to rename " + tmp_overlay + " to " +
                               final_overlay +
