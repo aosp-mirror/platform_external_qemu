@@ -69,7 +69,7 @@ public:
         }
         AndroidPipeBuffer buf = {
                 (uint8_t*)buffer, len };
-        return android_pipe_guest_send(mPipe, &buf, 1);
+        return android_pipe_guest_send(&mPipe, &buf, 1);
     }
 
     virtual void close() override {
@@ -87,10 +87,6 @@ public:
     }
 
     virtual void* getPipe() const override { return mPipe; }
-
-    void resetPipe(void* internal_pipe) {
-        mPipe = internal_pipe;
-    }
 
     void closeFromHost() {
         mClosed = true;
@@ -125,15 +121,9 @@ TestAndroidPipeDevice::~TestAndroidPipeDevice() {
 
 // static
 const AndroidPipeHwFuncs TestAndroidPipeDevice::sHwFuncs = {
-    &TestAndroidPipeDevice::resetPipe,
     &TestAndroidPipeDevice::closeFromHost,
     &TestAndroidPipeDevice::signalWake,
 };
-
-// static
-void TestAndroidPipeDevice::resetPipe(void* hwpipe, void* internal_pipe) {
-    static_cast<TestGuest*>(hwpipe)->resetPipe(internal_pipe);
-}
 
 // static
 void TestAndroidPipeDevice::closeFromHost(void* hwpipe) {

@@ -106,33 +106,21 @@ private:
                                InternalPipe* hostPipe);
     bool eraseFdInfo(int fd);
 
-    ssize_t writeInternal(InternalPipe* pipe, const void* buffer, size_t len);
+    ssize_t writeInternal(InternalPipe** pipe, const void* buffer, size_t len);
 
-    // Returns the host-side pipe for a connector pipe, if the pipe has been
-    // reset.
-    InternalPipe* popHostPipe(InternalPipe* connectorPipe);
     void setErrno(ssize_t res);
-
-    // Called to associate a given hwpipe with a host-side pipe.
-    //
-    // |hwpipe| - hwpipe pointer, the goldfish pipe pointer.
-    // |internal_pipe| - Host-side pipe, corresponding to AndroidPipe*.
-    void resetPipe(void* hwpipe, void* internal_pipe);
 
     // Wake a hwpipe.
     void signalWake(int fd, int wakes);
 
     // Callbacks for AndroidPipeHwFuncs.
-    static void resetPipeCallback(void* hwpipe, void* internal_pipe);
     static void closeFromHostCallback(void* hwpipe);
     static void signalWakeCallback(void* hwpipe, unsigned wakes);
 
     bool mInitialized = false;
     int mFdGenerator = 0;
     int mErrno = 0;
-    InternalPipe* mCurrentPipeWantingConnection = nullptr;
 
-    std::unordered_map<InternalPipe*, InternalPipe*> mResettedPipes;
     std::unordered_map<InternalPipe*, HostHwPipe*> mPipeToHwPipe;
     std::unordered_map<int, FdInfo> mFdInfo;
 };

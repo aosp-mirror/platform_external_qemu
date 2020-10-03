@@ -740,7 +740,7 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
             break;
         }
         buffer.size = dev->size;
-        dev->status = service_ops->guest_send(pipe->host_pipe, &buffer, 1);
+        dev->status = service_ops->guest_send(&pipe->host_pipe, &buffer, 1);
         DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%16llx size=%d > "
            "status=%d", __func__, (unsigned long long)dev->channel,
            (unsigned long long)dev->address, dev->size, dev->status);
@@ -993,7 +993,7 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             int32_t status = 0;
             int32_t consumed_size = 0;
             if (send_buffers_count) {
-                status = service_ops->guest_send(pipe->host_pipe,
+                status = service_ops->guest_send(&pipe->host_pipe,
                                                  send_buffers,
                                                  send_buffers_count);
                 if (status > 0) {

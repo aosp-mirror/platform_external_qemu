@@ -52,7 +52,8 @@ public:
     }
 
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+                            int numBuffers,
+                            void** newPipePtr) override {
         return getFuncs()->sendBuffers(mInstance, buffers, numBuffers);
     }
 

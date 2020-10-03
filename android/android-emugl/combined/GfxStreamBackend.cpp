@@ -191,11 +191,11 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
                     numBuffers);
         },
         // guest_send()
-        [](GoldfishHostPipe* hostPipe,
+        [](GoldfishHostPipe** hostPipe,
            const GoldfishPipeBuffer* buffers,
            int numBuffers) -> int {
             return android_pipe_guest_send(
-                    hostPipe,
+                    reinterpret_cast<void**>(hostPipe),
                     reinterpret_cast<const AndroidPipeBuffer*>(buffers),
                     numBuffers);
         },
@@ -227,32 +227,6 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         [](QEMUFile* file) {
             (void)file;
         },
-};
-
-// android_pipe_hw_funcs but for virtio-gpu
-static const AndroidPipeHwFuncs android_pipe_hw_virtio_funcs = {
-        // resetPipe()
-        [](void* hwPipe, void* hostPipe) {
-            virtio_goldfish_pipe_reset(hwPipe, hostPipe);
-        },
-        // closeFromHost()
-        [](void* hwPipe) {
-            fprintf(stderr, "%s: closeFromHost not supported!\n", __func__);
-        },
-        // signalWake()
-        [](void* hwPipe, unsigned flags) {
-            fprintf(stderr, "%s: signalWake not supported!\n", __func__);
-        },
-        // getPipeId()
-        [](void* hwPipe) {
-            fprintf(stderr, "%s: getPipeId not supported!\n", __func__);
-            return 0;
-        },
-        // lookupPipeById()
-        [](int id) -> void* {
-            fprintf(stderr, "%s: lookupPipeById not supported!\n", __func__);
-            return nullptr;
-        }
 };
 
 static android::base::TestTempDir* sTestContentDir = nullptr;
@@ -486,7 +460,6 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     android_init_opengles_pipe();
     android_opengles_pipe_set_recv_mode(2 /* virtio-gpu */);
     android_init_refcount_pipe();
-    android_pipe_set_hw_virtio_funcs(&android_pipe_hw_virtio_funcs);
 
     sGetPixelsFunc = android_getReadPixelsFunc();
 
