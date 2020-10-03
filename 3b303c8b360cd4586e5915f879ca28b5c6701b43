@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "578ad083_e03f5416",
+        "filename": "android/android-emugl/combined/GfxStreamBackend.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1753250
+      },
+      "writtenOn": "2020-10-03T01:28:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2bc0aa6c_c17006ab",
+      "revId": "3b303c8b360cd4586e5915f879ca28b5c6701b43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9e5935cf_6db1c339",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 5
@@ -39,6 +57,30 @@
       "revId": "3b303c8b360cd4586e5915f879ca28b5c6701b43",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ca5a924_2c444d04",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 866,
+      "author": {
+        "id": 1753250
+      },
+      "writtenOn": "2020-10-03T01:28:32Z",
+      "side": 1,
+      "message": "Thanks, I\u0027ve added a shouldPassthroughCompressedFormat to make it easier to read.",
+      "parentUuid": "9e5935cf_6db1c339",
+      "range": {
+        "startLine": 864,
+        "startChar": 8,
+        "endLine": 866,
+        "endChar": 77
+      },
+      "revId": "3b303c8b360cd4586e5915f879ca28b5c6701b43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
