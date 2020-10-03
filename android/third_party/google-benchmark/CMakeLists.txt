@@ -14,8 +14,8 @@ android_add_library(
       ${src}/csv_reporter.cc
       ${src}/json_reporter.cc
       ${src}/log.cc
-      ${src}/reporter.cc
       ${src}/re_posix.cc
+      ${src}/reporter.cc
       ${src}/sleep.cc
       ${src}/string_util.cc
       ${src}/sysinfo.cc

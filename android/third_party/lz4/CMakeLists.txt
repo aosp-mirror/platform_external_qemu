@@ -21,6 +21,6 @@ android_add_library(
   REPO "${ANDROID_QEMU2_TOP_DIR}/../lz4"
   NOTICE "REPO/NOTICE"
   SRC # cmake-format: sortable
-      ${LIBLZ4_SRC}/lz4.c ${LIBLZ4_SRC}/lz4hc.c ${LIBLZ4_SRC}/lz4frame.c
+      ${LIBLZ4_SRC}/lz4.c ${LIBLZ4_SRC}/lz4frame.c ${LIBLZ4_SRC}/lz4hc.c
       ${LIBLZ4_SRC}/xxhash.c)
 target_include_directories(lz4 PUBLIC ${LIBLZ4_SRC})

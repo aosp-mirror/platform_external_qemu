@@ -63,7 +63,8 @@ endif()
 set(QEMU_UPSTREAM TRUE
     CACHE BOOL "True if the upstream version of qemu should be build.")
 set(ANDROIDSTUDIO FALSE
-    CACHE BOOL "Deprecated. Android studio is using the gRPC interface directly.")
+    CACHE BOOL
+          "Deprecated. Android studio is using the gRPC interface directly.")
 set(OPTION_MINBUILD
     FALSE
     CACHE
@@ -76,46 +77,52 @@ set(OPTION_TCMALLOC
       BOOL
       "True if we should use TCMalloc on its supported platforms (currently, linux)."
 )
-set(OPTION_GFXSTREAM_BACKEND FALSE
-    CACHE BOOL "True if we should build the gfxstream backend (plus everything else).")
+set(OPTION_GFXSTREAM_BACKEND
+    FALSE
+    CACHE
+      BOOL
+      "True if we should build the gfxstream backend (plus everything else).")
 
-set(GFXSTREAM FALSE
-    CACHE BOOL "True if we should build gfxstream, crosvm, and its accompanying libraries/tests.")
+set(GFXSTREAM
+    FALSE
+    CACHE
+      BOOL
+      "True if we should build gfxstream, crosvm, and its accompanying libraries/tests."
+)
 
 set(OPTION_AEMU_LIBS_ONLY FALSE
     CACHE BOOL "True if we should build only AEMU libraries and their tests.")
 
-set(CROSVM FALSE
-    CACHE BOOL "True if we should build crosvm (also builds gfxstream)")
+set(CROSVM FALSE CACHE BOOL
+                       "True if we should build crosvm (also builds gfxstream)")
 
-set(GFXSTREAM_ONLY FALSE
-    CACHE BOOL "True if we should build only gfxstream")
+set(GFXSTREAM_ONLY FALSE CACHE BOOL "True if we should build only gfxstream")
 
-if (GFXSTREAM_ONLY)
-    set(CROSVM FALSE)
-    set(GFXSTREAM TRUE)
+if(GFXSTREAM_ONLY)
+  set(CROSVM FALSE)
+  set(GFXSTREAM TRUE)
 endif()
 
-if (LINUX_AARCH64)
-    set(OPTION_MINBUILD TRUE)
-    set(QTWEBENGINE FALSE)
-    set(QEMU_UPSTREAM FALSE)
-    set(WEBRTC FALSE)
+if(LINUX_AARCH64)
+  set(OPTION_MINBUILD TRUE)
+  set(QTWEBENGINE FALSE)
+  set(QEMU_UPSTREAM FALSE)
+  set(WEBRTC FALSE)
 endif()
 
-if (CROSVM OR GFXSTREAM)
-    set(OPTION_AEMU_LIBS_ONLY TRUE)
-    set(OPTION_GFXSTREAM_BACKEND TRUE)
-    set(OPTION_TCMALLOC FALSE)
-    set(WEBRTC FALSE)
-    set(ANDROIDSTUDIO FALSE)
+if(CROSVM OR GFXSTREAM)
+  set(OPTION_AEMU_LIBS_ONLY TRUE)
+  set(OPTION_GFXSTREAM_BACKEND TRUE)
+  set(OPTION_TCMALLOC FALSE)
+  set(WEBRTC FALSE)
+  set(ANDROIDSTUDIO FALSE)
 endif()
 
 string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
 string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
 
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
-  set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
+set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
 
 # Symbol extraction is not supported when cross compiling.
 if(OPTION_CRASHUPLOAD STREQUAL "NONE")
@@ -138,9 +145,8 @@ endif()
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
-# Enable C++17 in C++
-# (Note, cmake does not set the proper flags when using CXX_STANDARD) with our
-# custom clang.
+# Enable C++17 in C++ (Note, cmake does not set the proper flags when using
+# CXX_STANDARD) with our custom clang.
 add_cxx_flag("-std=c++17")
 
 # Gather compile time statistics
@@ -166,25 +172,25 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 prebuilt(Threads)
 
 # Configure OS depdendency licensenses
-if (LINUX_AARCH64)
-      message("Cross build aarch64 libstdc++")
-      android_license(
-        TARGET "RUNTIME_OS_DEPENDENCIES"
-        LIBNAME "libstdc++"
-        URL "https://packages.debian.org/sid/crossbuild-essential-arm64"
-        SPDX "LLVM-exception"
-        LICENSE
-          "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/LICENSE.TXT"
-        LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LLVM")
+if(LINUX_AARCH64)
+  message("Cross build aarch64 libstdc++")
+  android_license(
+    TARGET "RUNTIME_OS_DEPENDENCIES"
+    LIBNAME "libstdc++"
+    URL "https://packages.debian.org/sid/crossbuild-essential-arm64"
+    SPDX "LLVM-exception"
+    LICENSE
+      "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/LICENSE.TXT"
+    LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LLVM")
 elseif(LINUX_X86_64)
-      android_license(
-        TARGET "RUNTIME_OS_DEPENDENCIES"
-        LIBNAME "libc++"
-        URL "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/"
-        SPDX "LLVM-exception"
-        LICENSE
-          "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/LICENSE.TXT"
-        LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LLVM")
+  android_license(
+    TARGET "RUNTIME_OS_DEPENDENCIES"
+    LIBNAME "libc++"
+    URL "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/"
+    SPDX "LLVM-exception"
+    LICENSE
+      "https://android.googlesource.com/toolchain/clang/+/refs/heads/master/LICENSE.TXT"
+    LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.LLVM")
 else()
   android_license(TARGET "RUNTIME_OS_DEPENDENCIES" LIBNAME None SPDX None
                   LICENSE None LOCAL None)
@@ -230,11 +236,12 @@ endif()
 # version.
 if(LINUX_X86_64)
   add_c_flag("-Werror")
-  add_c_flag("-Wno-deprecated-declarations") # Protobuf generates deprecation warnings for deprecated enums
+  add_c_flag("-Wno-deprecated-declarations") # Protobuf generates deprecation
+                                             # warnings for deprecated enums
   # And the asm type if we are compiling with yasm
   set(ANDROID_NASM_TYPE elf64)
-  # This should make sure we have sufficient information left to properly print std::string etc.
-  # see b/156534499 for details.
+  # This should make sure we have sufficient information left to properly print
+  # std::string etc. see b/156534499 for details.
   add_c_flag("-fno-limit-debug-info")
 elseif(LINUX_AARCH64)
   set(ANDROID_NASM_TYPE elf64)
@@ -384,13 +391,12 @@ set(EMULATOR_FEATURE_DEPENDENCIES
     "${ANDROID_QEMU2_TOP_DIR}/android/data/advancedFeatures.ini>lib/advancedFeatures.ini"
     "${ANDROID_QEMU2_TOP_DIR}/android/data/advancedFeaturesCanary.ini>lib/advancedFeaturesCanary.ini"
     "${ANDROID_QEMU2_TOP_DIR}/android/data/emu-original-feature-flags.protobuf>lib/emu-original-feature-flags.protobuf"
-    "${ANDROID_QEMU2_TOP_DIR}/android/data/hostapd.conf>lib/hostapd.conf"
-)
+    "${ANDROID_QEMU2_TOP_DIR}/android/data/hostapd.conf>lib/hostapd.conf")
 
 if(LINUX_AARCH64)
-    set(ANDROID_TARGET_ARCH "aarch64")
+  set(ANDROID_TARGET_ARCH "aarch64")
 else()
-    set(ANDROID_TARGET_ARCH "x86_64")
+  set(ANDROID_TARGET_ARCH "x86_64")
 endif()
 
 set(SWIFTSHADER_DEPENDENCIES
@@ -412,20 +418,20 @@ android_license(
     "https://android.googlesource.com/platform/external/swiftshader/+/refs/heads/emu-master-dev/LICENSE.txt"
   LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2")
 
-if (NOT LINUX_AARCH64)
-    # Angle shader translator (and possibly also vk renderer) dependencies
-set(ANGLE_DEPENDENCIES
-    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libshadertranslator${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/libshadertranslator${CMAKE_SHARED_LIBRARY_SUFFIX}")
+if(NOT LINUX_AARCH64)
+  # Angle shader translator (and possibly also vk renderer) dependencies
+  set(ANGLE_DEPENDENCIES
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libshadertranslator${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/libshadertranslator${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  )
 
-android_license(
-  TARGET ANGLE_DEPENDENCIES
-  LIBNAME angle
-  EXECUTABLES
-    "libshadertranslator${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  URL "https://chromium.googlesource.com/angle/angle"
-  SPDX "BSD-3-Clause"
-  LICENSE "https://chromium.googlesource.com/angle/angle/LICENSE"
-  LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.ANGLE")
+  android_license(
+    TARGET ANGLE_DEPENDENCIES
+    LIBNAME angle
+    EXECUTABLES "libshadertranslator${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    URL "https://chromium.googlesource.com/angle/angle"
+    SPDX "BSD-3-Clause"
+    LICENSE "https://chromium.googlesource.com/angle/angle/LICENSE"
+    LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.ANGLE")
 
 endif()
 
@@ -489,10 +495,10 @@ android_add_interface(
 
 # This defines all the include directories needed to compile the libqemu
 # libraries. There should be no need to make additions here.
-if (LINUX_AARCH64)
-    set(TCG_ARCH_DIR "tcg/aarch64")
+if(LINUX_AARCH64)
+  set(TCG_ARCH_DIR "tcg/aarch64")
 else()
-    set(TCG_ARCH_DIR "tcg/i386")
+  set(TCG_ARCH_DIR "tcg/i386")
 endif()
 target_include_directories(
   android-qemu-deps
@@ -529,7 +535,7 @@ target_compile_options(
             # activates optimizations based on the type of expressions. In
             # particular, an object of one type is assumed never to reside at
             # the same address as an object of a different type, unless the
-            # types are almost the same.  Supposedly this can introduce weird
+            # types are almost the same. Supposedly this can introduce weird
             # failures esp. on older gcc versions (MINGW) (See
             # http://thiemonagel.de/2010/01/no-strict-aliasing/)
             "-fno-strict-aliasing")
@@ -680,33 +686,33 @@ android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE
                               android-emu-base)
 
 set(ANDROID_AUTOGEN "qemu2-auto-generated")
-if (LINUX_AARCH64)
-    set(ASM_DIR_TARGET "../linux-headers/asm-arm64" )
+if(LINUX_AARCH64)
+  set(ASM_DIR_TARGET "../linux-headers/asm-arm64")
 else()
-    set(ASM_DIR_TARGET "../linux-headers/asm-x86" )
+  set(ASM_DIR_TARGET "../linux-headers/asm-x86")
 endif()
 
 set(NEED_RELINK_ASM FALSE)
-if (EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm)
+if(EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm)
   # check the link is correct
-  if (LINUX_AARCH64)
-    if (EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm/unistd_x32.h)
-    set(NEED_RELINK_ASM TRUE)
+  if(LINUX_AARCH64)
+    if(EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm/unistd_x32.h)
+      set(NEED_RELINK_ASM TRUE)
     endif()
   else()
-    if (NOT EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm/unistd_x32.h)
-    set(NEED_RELINK_ASM TRUE)
+    if(NOT EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm/unistd_x32.h)
+      set(NEED_RELINK_ASM TRUE)
     endif()
   endif()
 else()
   set(NEED_RELINK_ASM TRUE)
 endif()
 
-if (NEED_RELINK_ASM)
-message("create_symlink ${ASM_DIR_TARGET} ${ANDROID_AUTOGEN}/asm")
-execute_process(
-        COMMAND ${CMAKE_COMMAND} -E create_symlink "${ASM_DIR_TARGET}" "${ANDROID_AUTOGEN}/asm"
-        WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR})
+if(NEED_RELINK_ASM)
+  message("create_symlink ${ASM_DIR_TARGET} ${ANDROID_AUTOGEN}/asm")
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E create_symlink "${ASM_DIR_TARGET}"
+            "${ANDROID_AUTOGEN}/asm" WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR})
 endif()
 
 set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
@@ -724,13 +730,13 @@ android_add_library(
   REPO "${ANDROID_QEMU2_TOP_DIR}"
   NOTICE "REPO/LICENSE"
   SRC # cmake-format: sortable
-      ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
+      ${qemu2-shared_generated_sources} ${qemu2-shared_sources})
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_compile_options(qemu2-common PRIVATE "-Wno-string-plus-int"
                                             "-Wno-return-type")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps emulator-libusb)
 
-if (NOT OPTION_AEMU_LIBS_ONLY)
+if(NOT OPTION_AEMU_LIBS_ONLY)
 
   # Not allowed to have libraries without source files.
   android_add_library(
@@ -745,13 +751,13 @@ if (NOT OPTION_AEMU_LIBS_ONLY)
     SRC # cmake-format: sortable
         audio/paaudio-headless-impl-placeholder.c
     LINUX audio/paaudio-headless-impl.c)
-if (LINUX_AARCH64)
-  target_include_directories(
-        headless-paaudio
-        PUBLIC
+  if(LINUX_AARCH64)
+    target_include_directories(
+      headless-paaudio
+      PUBLIC
         ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-aarch64/include
-        )
-endif()
+    )
+  endif()
 
   android_add_interface(
     TARGET android-qemu-deps-headful
@@ -762,8 +768,8 @@ endif()
       "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
     REPO "${ANDROID_QEMU2_TOP_DIR}"
     NOTICE "REPO/LICENSE")
-  android_target_link_libraries(android-qemu-deps-headful linux-x86_64 INTERFACE
-                                "-lpulse")
+  android_target_link_libraries(android-qemu-deps-headful linux-x86_64
+                                INTERFACE "-lpulse")
 
   android_add_interface(
     TARGET android-qemu-deps-headless
@@ -774,11 +780,11 @@ endif()
       "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
     REPO "${ANDROID_QEMU2_TOP_DIR}"
     NOTICE "REPO/LICENSE")
-  android_target_link_libraries(android-qemu-deps-headless linux-x86_64 INTERFACE
-                                headless-paaudio)
+  android_target_link_libraries(android-qemu-deps-headless linux-x86_64
+                                INTERFACE headless-paaudio)
 
-  android_target_link_libraries(android-qemu-deps-headless linux-aarch64 INTERFACE
-                                headless-paaudio)
+  android_target_link_libraries(android-qemu-deps-headless linux-aarch64
+                                INTERFACE headless-paaudio)
 
   android_add_library(
     TARGET libqemu2-util
@@ -790,10 +796,10 @@ endif()
     REPO "${ANDROID_QEMU2_TOP_DIR}"
     NOTICE "REPO/LICENSE"
     SRC # cmake-format: sortable
-        ${libqemuutil_sources} ${libqemuutil_generated_sources})
+        ${libqemuutil_generated_sources} ${libqemuutil_sources})
   target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
-  android_target_link_libraries(libqemu2-util windows
-                                PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
+  android_target_link_libraries(
+    libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
   target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
 
   android_add_library(
@@ -828,13 +834,13 @@ endif()
 
   # Create the qemu targets.
   if(NOT LINUX_AARCH64)
-  android_add_qemu_executable(
-    x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_headless_executable(
-    x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+    android_add_qemu_executable(
+      x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+    android_add_qemu_headless_executable(
+      x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
-  android_add_qemu_executable(aarch64
-                              "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+  android_add_qemu_executable(
+    aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   android_add_qemu_headless_executable(
     aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
 

@@ -20,13 +20,13 @@ android_add_library(
       attestation_record.cpp
       auth_encrypted_key_blob.cpp
       authorization_set.cpp
-      ecdsa_keymaster1_operation.cpp
-      ecdsa_operation.cpp
-      ecies_kem.cpp
       ec_key.cpp
       ec_key_factory.cpp
       ec_keymaster0_key.cpp
       ec_keymaster1_key.cpp
+      ecdsa_keymaster1_operation.cpp
+      ecdsa_operation.cpp
+      ecies_kem.cpp
       hkdf.cpp
       hmac.cpp
       hmac_key.cpp

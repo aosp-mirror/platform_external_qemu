@@ -13,8 +13,8 @@ endif()
 # stderr/stdout/stdin in the gRPC compiler. See b/148079576 for details.
 if(NOT WINDOWS_MSVC_X86_64)
   protobuf_generate_grpc_cpp(
-    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} SOURCES waterfall.proto
-                                                 control_socket.proto
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} SOURCES control_socket.proto
+                                                 waterfall.proto
     OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} GENERATED WATERFALL_GRPC_SRC)
   android_add_library(
     TARGET android-waterfall
@@ -49,9 +49,9 @@ android_add_library(
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       ${EMULATOR_GRPC_SRC}
+      android/emulation/control/clipboard/Clipboard.cpp
       android/emulation/control/EmulatorService.cpp
       android/emulation/control/GrpcServices.cpp
-      android/emulation/control/clipboard/Clipboard.cpp
       android/emulation/control/interceptor/IdleInterceptor.cpp
       android/emulation/control/interceptor/LoggingInterceptor.cpp
       android/emulation/control/interceptor/MetricsInterceptor.cpp
@@ -62,9 +62,9 @@ android_add_library(
       android/emulation/control/secure/BasicTokenAuth.cpp
       android/emulation/control/snapshot/SnapshotService.cpp
       android/emulation/control/snapshot/TarStream.cpp
+      android/emulation/control/utils/AudioUtils.cpp
       android/emulation/control/utils/EventWaiter.cpp
       android/emulation/control/utils/GrpcAndroidLogAdapter.cpp
-      android/emulation/control/utils/AudioUtils.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp
       android/emulation/control/utils/ServiceUtils.cpp
       android/emulation/control/waterfall/WaterfallFactory.cpp)
@@ -112,9 +112,9 @@ android_add_test(
       android/emulation/control/logcat/LogcatParser_unittest.cpp
       android/emulation/control/logcat/RingStreambuf_unittest.cpp
       android/emulation/control/snapshot/TarStream_unittest.cpp
-      android/emulation/control/utils/EventWaiter_unittest.cpp
-      android/emulation/control/test/TestEchoService.cpp
       android/emulation/control/test/CertificateFactory.cpp
+      android/emulation/control/test/TestEchoService.cpp
+      android/emulation/control/utils/EventWaiter_unittest.cpp
   DARWIN android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp
   LINUX android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp)
 target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++
@@ -169,7 +169,7 @@ android_add_executable(
   NODISTRIBUTE
   SRC # cmake-format: sortable
       ${ECHO_SERVICE_GRPC_SRC} ${IPC_SERVICE_GRPC_SRC}
-      android/emulation/control/test/TestEchoService.cpp
-      android/emulation/control/test/IPC_reader.cpp)
+      android/emulation/control/test/IPC_reader.cpp
+      android/emulation/control/test/TestEchoService.cpp)
 target_link_libraries(ipc_reader PRIVATE android-emu android-grpc)
 add_dependencies(ipc_benchmark ipc_reader)

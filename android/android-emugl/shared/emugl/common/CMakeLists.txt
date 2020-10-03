@@ -12,8 +12,8 @@ set(emugl_common_src
     sync_device.cpp)
 
 android_add_library(
- TARGET emugl_common SHARED LICENSE Apache-2.0 SRC # cmake-format: sortable
-                                                   ${emugl_common_src})
+  TARGET emugl_common SHARED LICENSE Apache-2.0 SRC # cmake-format: sortable
+                                                    ${emugl_common_src})
 
 android_target_compile_definitions(emugl_common windows_msvc-x86_64 PRIVATE
                                    "-DBUILDING_EMUGL_COMMON_SHARED")
