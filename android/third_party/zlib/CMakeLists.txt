@@ -22,10 +22,10 @@ android_add_library(
       ${ZLIB_SOURCE_DIR}/gzlib.c
       ${ZLIB_SOURCE_DIR}/gzread.c
       ${ZLIB_SOURCE_DIR}/gzwrite.c
-      ${ZLIB_SOURCE_DIR}/inflate.c
       ${ZLIB_SOURCE_DIR}/infback.c
-      ${ZLIB_SOURCE_DIR}/inftrees.c
       ${ZLIB_SOURCE_DIR}/inffast.c
+      ${ZLIB_SOURCE_DIR}/inflate.c
+      ${ZLIB_SOURCE_DIR}/inftrees.c
       ${ZLIB_SOURCE_DIR}/trees.c
       ${ZLIB_SOURCE_DIR}/uncompr.c
       ${ZLIB_SOURCE_DIR}/zutil.c)
