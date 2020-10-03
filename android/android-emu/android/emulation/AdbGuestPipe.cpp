@@ -404,7 +404,7 @@ void AdbGuestPipe::onSave(android::base::Stream* stream) {
     } else {
         stream->putBe32(0);
     }
-    if (mAdbHub) {
+    if (mPortType == Jdwp) {
         int proxyCount = mAdbHub->getProxyCount();
         D("Saving %d jdwp proxies", (int)proxyCount);
         stream->putBe32(proxyCount);

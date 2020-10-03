@@ -627,6 +627,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
                          &new_snapshot_name]() {
                             D("ready to take snapshot");
                             getConsoleAgents()->vm->vmStop();
+                            androidSnapshot_delete(new_snapshot_name.c_str());
                             const AndroidSnapshotStatus result =
                                     androidSnapshot_save(
                                             new_snapshot_name.c_str());
