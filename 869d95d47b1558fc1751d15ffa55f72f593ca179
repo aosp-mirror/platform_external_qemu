@@ -1,0 +1,58 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005354005",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1446758?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "de60f5d8_ec6084fc",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-05T22:57:25Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 4
+      },
+      "revId": "869d95d47b1558fc1751d15ffa55f72f593ca179",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005354005",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1446758?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "f5c8abb7_2afb24eb",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-05T22:57:25Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 120,
+        "startChar": 0,
+        "endLine": 120,
+        "endChar": 8
+      },
+      "revId": "869d95d47b1558fc1751d15ffa55f72f593ca179",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
