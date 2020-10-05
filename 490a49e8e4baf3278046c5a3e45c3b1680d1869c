@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "481aaf09_f4726f2a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T15:36:31Z",
+      "side": 1,
+      "message": "this is a new vector and we\u0027re not updating it, so getSensorRecordTimeLine could return a std::vector instead (communicates intent of the function usage better, as the current one that takes a pointer makes us think that there is a std::vector somewhere whos lifetime isn\u0027t tied to getSensorRecordTimeLine and it must be updated fast)",
+      "revId": "490a49e8e4baf3278046c5a3e45c3b1680d1869c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
