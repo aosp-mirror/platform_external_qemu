@@ -1,0 +1,124 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9320bef2_0a859b8d",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T16:21:07Z",
+      "side": 1,
+      "message": "kNumFdsPerItem, kmaxNumFdsPerItem",
+      "range": {
+        "startLine": 58,
+        "startChar": 14,
+        "endLine": 58,
+        "endChar": 30
+      },
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fde0fee0_e29e8015",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T16:21:07Z",
+      "side": 1,
+      "message": "wrap these items up into a class, then declare it as\n\nstatic PollWorkerState sPollWorkerState;\n\nor something\n\nthis makes it clear when we\u0027re working with the shared state",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 35
+      },
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "117c311e_d696c3b5",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T16:21:07Z",
+      "side": 1,
+      "message": "4 space indent",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fa73f2c_416ff872",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T16:21:07Z",
+      "side": 1,
+      "message": "should this be x_num_fds_per_item \u003d nfds / nthreads instead?\n\nthis rebalances based on making it so that the number of fds per thread is calculated based on nfds / work, instead of leaving a few remainders at the end, and then we spawn nwork threads.\n\nbut shouldn\u0027t it be balanced based on the number of threads we want in the first place? Which can be determined based on a combination of experiment plus spawning more threads of there are to many fds.\n\nalso, if we have more threads started in the beginning, does it make the broadcast any faster?",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "293588bd_745406d4",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T16:21:07Z",
+      "side": 1,
+      "message": "we have contention from multiple threads on s_works. is there a way to get rid of this contention?\n\nfor instance, since we calculate the balance of the work up front, we should already know which thread is going to run which work, which means we can keep a local vector of WorkItem* per thread (they could also be combined into a MessageChannel\u003cWorkItem, 1\u003e to allow the thread to block quietly once there\u0027s no work, using its own lock/cv instead of having a global one (see SyncThread.cpp for an example of using a MessageChannel)",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2b5cc53_4276ecb4",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T16:21:07Z",
+      "side": 1,
+      "message": "start_work_threads",
+      "range": {
+        "startLine": 205,
+        "startChar": 6,
+        "endLine": 205,
+        "endChar": 22
+      },
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
