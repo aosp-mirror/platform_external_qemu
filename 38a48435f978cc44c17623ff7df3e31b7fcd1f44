@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "01486964_961a17bc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T21:45:44Z",
+      "side": 1,
+      "message": "looks like psq fails on many targets, i\u0027d test thoroughly on all platforms and with the distribution dir emulator as well",
+      "revId": "38a48435f978cc44c17623ff7df3e31b7fcd1f44",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
