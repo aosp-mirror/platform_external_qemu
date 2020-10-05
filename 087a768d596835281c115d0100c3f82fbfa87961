@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "84bf68cc_e646de12",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-05T16:43:30Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "fde0fee0_e29e8015",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 35
+      },
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "117c311e_d696c3b5",
         "filename": "util/oslib-win32poll.cpp",
         "patchSetId": 10
@@ -59,6 +83,24 @@
       "writtenOn": "2020-10-05T16:21:07Z",
       "side": 1,
       "message": "4 space indent",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a2db556_c66fa99e",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-05T16:43:30Z",
+      "side": 1,
+      "message": "clang-format keeps 2; there must be some thing wrong in my config",
+      "parentUuid": "117c311e_d696c3b5",
       "revId": "087a768d596835281c115d0100c3f82fbfa87961",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -100,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "26eaa695_91f0d814",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-05T16:43:30Z",
+      "side": 1,
+      "message": "from my experience testing this on windows, here is the lessons\n1. if fds \u003c\u003d 64, use the calling thread is fastest;\n2. if fds \u003e 64 but \u003c\u003d128, 2 is fastest; more threads wont help, as the\nfired events are sparse; this is the case when modem simulator is on, 82\nto be exact. (75 on linux/mac).\n\nso the number of threads are most likely 2.\n\nhere I propose to do it this way:\n1. when fds \u003c\u003d64, use the old implementation (as is done in this cl, oslib-win32.c)\n2. fires 2 dedicated threads that will cover 65 to 120 (inclusing).\n3. more than that use std::async to let the system to handle (either fire up new\nor use system threads)\n\nthe devideWork tries to use as fewer threads as possible, that is the reason for the logic here\nfor the case of 82 fd,\nit let first thread handles 60, second 22, then rebalance the work load\nto 41 and 41.",
+      "parentUuid": "55e51532_5cf8d857",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "293588bd_745406d4",
         "filename": "util/oslib-win32poll.cpp",
         "patchSetId": 10
@@ -117,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "0f65ca77_6423b2aa",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-05T16:43:30Z",
+      "side": 1,
+      "message": "agreed, it seems each thread should have its own lock and condition variable",
+      "parentUuid": "293588bd_745406d4",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e2b5cc53_4276ecb4",
         "filename": "util/oslib-win32poll.cpp",
         "patchSetId": 10
@@ -128,6 +206,30 @@
       "writtenOn": "2020-10-05T16:21:07Z",
       "side": 1,
       "message": "start_work_threads",
+      "range": {
+        "startLine": 205,
+        "startChar": 6,
+        "endLine": 205,
+        "endChar": 22
+      },
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5cbb5d70_381b35c1",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-05T16:43:30Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "e2b5cc53_4276ecb4",
       "range": {
         "startLine": 205,
         "startChar": 6,
