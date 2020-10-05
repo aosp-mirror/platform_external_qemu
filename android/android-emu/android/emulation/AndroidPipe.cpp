@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/android_pipe_base.h"
 
 #include "android/base/async/Looper.h"
 #include "android/base/async/ThreadLooper.h"
@@ -51,8 +52,9 @@
 
 #define E(...) fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
 
-static const AndroidPipeHwFuncs* sPipeHwFuncs = nullptr;
-static const AndroidPipeHwFuncs* sPipeHwVirtioFuncs = nullptr;
+static const AndroidPipeHwFuncs* getPipeHwFuncs(const void* hwPipe) {
+    return *static_cast<const AndroidPipeHwFuncs* const *>(hwPipe);
+}
 
 using namespace android::base;
 
@@ -263,11 +265,7 @@ public:
           pipeName);
 
         newPipe->setFlags(mFlags);
-        if (newPipe->getFlags() & ANDROID_PIPE_VIRTIO_GPU_BIT) {
-            sPipeHwVirtioFuncs->resetPipe(mHwPipe, newPipe);
-        } else {
-            sPipeHwFuncs->resetPipe(mHwPipe, newPipe);
-        }
+        getPipeHwFuncs(mHwPipe)->resetPipe(mHwPipe, newPipe);
         delete this;
 
         return result;
@@ -372,9 +370,9 @@ private:
 
         // Not used when in virtio mode.
         if (flags & PIPE_WAKE_CLOSED) {
-            sPipeHwFuncs->closeFromHost(hwPipe);
+            getPipeHwFuncs(hwPipe)->closeFromHost(hwPipe);
         } else {
-            sPipeHwFuncs->signalWake(hwPipe, flags);
+            getPipeHwFuncs(hwPipe)->signalWake(hwPipe, flags);
         }
     }
 };
@@ -603,20 +601,6 @@ AndroidPipe* AndroidPipe::loadFromStreamLegacy(BaseStream* stream,
 
 // API for the virtual device.
 
-const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
-        const AndroidPipeHwFuncs* hwFuncs) {
-    const AndroidPipeHwFuncs* result = sPipeHwFuncs;
-    sPipeHwFuncs = hwFuncs;
-    return result;
-}
-
-const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_funcs(
-        const AndroidPipeHwFuncs* hwFuncs) {
-    const AndroidPipeHwFuncs* result = sPipeHwVirtioFuncs;
-    sPipeHwVirtioFuncs = hwFuncs;
-    return result;
-}
-
 void android_pipe_reset_services() {
     AndroidPipe::Service::resetAll();
 }
@@ -821,9 +805,10 @@ void android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
 
 // Not used when in virtio mode.
 int android_pipe_get_id(void* hwpipe) {
-    return sPipeHwFuncs->getPipeId(hwpipe);
+    return getPipeHwFuncs(hwpipe)->getPipeId(hwpipe);
 }
 
 void* android_pipe_lookup_by_id(int id) {
-    return sPipeHwFuncs->lookupPipeById(id);
+    fprintf(stderr, "rkir555 %s:%d id=%d\n", __func__, __LINE__, id);
+    return nullptr; // TODO
 }
