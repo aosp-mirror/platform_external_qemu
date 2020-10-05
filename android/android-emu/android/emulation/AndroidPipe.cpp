@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/android_pipe_base.h"
 
 #include "android/base/async/Looper.h"
 #include "android/base/async/ThreadLooper.h"
@@ -51,8 +52,9 @@
 
 #define E(...) fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
 
-static const AndroidPipeHwFuncs* sPipeHwFuncs = nullptr;
-static const AndroidPipeHwFuncs* sPipeHwVirtioFuncs = nullptr;
+static const AndroidPipeHwFuncs* getPipeHwFuncs(const void* hwPipe) {
+    return *static_cast<const AndroidPipeHwFuncs* const *>(hwPipe);
+}
 
 using namespace android::base;
 
@@ -369,9 +371,9 @@ private:
 
         // Not used when in virtio mode.
         if (flags & PIPE_WAKE_CLOSED) {
-            sPipeHwFuncs->closeFromHost(hwPipe);
+            getPipeHwFuncs(hwPipe)->closeFromHost(hwPipe);
         } else {
-            sPipeHwFuncs->signalWake(hwPipe, flags);
+            getPipeHwFuncs(hwPipe)->signalWake(hwPipe, flags);
         }
     }
 };
@@ -600,20 +602,6 @@ AndroidPipe* AndroidPipe::loadFromStreamLegacy(BaseStream* stream,
 
 // API for the virtual device.
 
-const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
-        const AndroidPipeHwFuncs* hwFuncs) {
-    const AndroidPipeHwFuncs* result = sPipeHwFuncs;
-    sPipeHwFuncs = hwFuncs;
-    return result;
-}
-
-const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_funcs(
-        const AndroidPipeHwFuncs* hwFuncs) {
-    const AndroidPipeHwFuncs* result = sPipeHwVirtioFuncs;
-    sPipeHwVirtioFuncs = hwFuncs;
-    return result;
-}
-
 void android_pipe_reset_services() {
     AndroidPipe::Service::resetAll();
 }
@@ -818,9 +806,34 @@ void android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
 
 // Not used when in virtio mode.
 int android_pipe_get_id(void* hwpipe) {
-    return sPipeHwFuncs->getPipeId(hwpipe);
+    return getPipeHwFuncs(hwpipe)->getPipeId(hwpipe);
 }
 
-void* android_pipe_lookup_by_id(int id) {
-    return sPipeHwFuncs->lookupPipeById(id);
+static std::vector<std::pair<void*(*)(int), const char*>> lookup_by_id_callbacks;
+
+void android_pipe_append_lookup_by_id_callback(void*(*cb)(int), const char* tag) {
+    lookup_by_id_callbacks.push_back({cb, tag});
+}
+
+void* android_pipe_lookup_by_id(const int id) {
+    void* hwPipeFound = nullptr;
+    const char* tagFound = "(null)";
+
+    for (const auto &cb : lookup_by_id_callbacks) {
+        void* hwPipe = (*cb.first)(id);
+        if (hwPipe) {
+            if (hwPipeFound) {
+                CrashReporter::get()->GenerateDumpAndDie(
+                    StringFormat("Pipe id (%d) is not unique, at least two "
+                                 "pipes are found: `%s` and `%s`",
+                                 __func__, id, tagFound, cb.second).c_str());
+                abort();
+            } else {
+                hwPipeFound = hwPipe;
+                tagFound = cb.second;
+            }
+        }
+    }
+
+    return hwPipeFound;
 }

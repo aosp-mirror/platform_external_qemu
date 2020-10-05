@@ -35,7 +35,7 @@ extern "C" {
 //
 // The host service pipe expects a device implementation that will
 // implement the callbacks in AndroidHwPipeFuncs. These are injected
-// into the service by calling android_pipe_set_hw_funcs().
+// into the service by vtbl in hwPipe.
 //
 // The virtual device expects a service implementation that will
 // implement the callbacks in GoldfishPipeServiceOps. These are injected
@@ -186,65 +186,15 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         },
 };
 
-// These callbacks are called from the pipe service into the virtual device.
-static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
-        // closeFromHost()
-        [](void* hwPipe) {
-            goldfish_pipe_close_from_host(static_cast<GoldfishHwPipe*>(hwPipe));
-        },
-        // signalWake()
-        [](void* hwPipe, unsigned flags) {
-            static_assert(
-                    (int)GOLDFISH_PIPE_WAKE_CLOSED == (int)PIPE_WAKE_CLOSED,
-                    "Invalid PIPE_WAKE_CLOSED values");
-            static_assert((int)GOLDFISH_PIPE_WAKE_READ == (int)PIPE_WAKE_READ,
-                          "Invalid PIPE_WAKE_READ values");
-            static_assert((int)GOLDFISH_PIPE_WAKE_WRITE == (int)PIPE_WAKE_WRITE,
-                          "Invalid PIPE_WAKE_WRITE values");
-            static_assert((int)GOLDFISH_PIPE_WAKE_UNLOCK_DMA ==
-                                  (int)PIPE_WAKE_UNLOCK_DMA,
-                          "Invalid PIPE_WAKE_WRITE values");
-
-            goldfish_pipe_signal_wake(
-                    static_cast<GoldfishHwPipe*>(hwPipe),
-                    static_cast<GoldfishPipeWakeFlags>(flags));
-        },
-        // getPipeId()
-        [](void* hwPipe) {
-            return goldfish_pipe_get_id(static_cast<GoldfishHwPipe*>(hwPipe));
-        },
-        // lookupPipeById()
-        [](int id) {
-            return (void*)goldfish_pipe_lookup_by_id(id);
-        }
-};
-
-// android_pipe_hw_funcs but for virtio-gpu
-static const AndroidPipeHwFuncs android_pipe_hw_virtio_funcs = {
-        // closeFromHost()
-        [](void* hwPipe) {
-            fprintf(stderr, "%s: closeFromHost not supported!\n", __func__);
-        },
-        // signalWake()
-        [](void* hwPipe, unsigned flags) {
-            fprintf(stderr, "%s: signalWake not supported!\n", __func__);
-        },
-        // getPipeId()
-        [](void* hwPipe) {
-            fprintf(stderr, "%s: getPipeId not supported!\n", __func__);
-            return 0;
-        },
-        // lookupPipeById()
-        [](int id) -> void* {
-            fprintf(stderr, "%s: lookupPipeById not supported!\n", __func__);
-            return nullptr;
-        }
-};
+static void* goldfish_pipe_lookup_by_id_wrapper(int id) {
+    return goldfish_pipe_lookup_by_id(id);
+}
 
 bool qemu_android_pipe_init(android::VmLock* vmLock) {
     goldfish_pipe_set_service_ops(&goldfish_pipe_service_ops);
-    android_pipe_set_hw_funcs(&android_pipe_hw_funcs);
-    android_pipe_set_hw_virtio_funcs(&android_pipe_hw_virtio_funcs);
+    android_pipe_append_lookup_by_id_callback(
+        &goldfish_pipe_lookup_by_id_wrapper,
+        "goldfish_pipe");
     android::AndroidPipe::initThreading(vmLock);
     return true;
 }

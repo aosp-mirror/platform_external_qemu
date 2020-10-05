@@ -15,6 +15,7 @@
 
 #include "android/base/Result.h"
 #include "android/base/files/Stream.h"
+#include "android/emulation/android_pipe_base.h"
 
 #include <cstdint>
 #include <functional>
@@ -88,8 +89,13 @@ private:
         static std::unique_ptr<HostHwPipe> create(int fd);
 
     private:
+        static const AndroidPipeHwFuncs vtbl;
+
+        const AndroidPipeHwFuncs* const vtblPtr;
         int mFd;
     };
+
+    friend HostHwPipe;
 
     struct FdInfo {
         std::unique_ptr<HostHwPipe> hwPipe;
@@ -116,6 +122,7 @@ private:
     // Callbacks for AndroidPipeHwFuncs.
     static void closeFromHostCallback(void* hwpipe);
     static void signalWakeCallback(void* hwpipe, unsigned wakes);
+    static int getPipeIdCallback(void* hwpipe);
 
     bool mInitialized = false;
     int mFdGenerator = 0;
