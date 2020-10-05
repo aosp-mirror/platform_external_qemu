@@ -176,30 +176,8 @@ ANDROID_PIPE_DEVICE_EXPORT int android_pipe_guest_send(
 ANDROID_PIPE_DEVICE_EXPORT void android_pipe_guest_wake_on(
     void* internal_pipe, unsigned wakes);
 
-// A set of functions that must be implemented by the virtual device
-// implementation. Used with call android_pipe_set_hw_funcs().
-typedef struct AndroidPipeHwFuncs {
-    // Change the internal pipe associated with |hwpipe| to be |internal_pipe|
-    void (*resetPipe)(void* hwpipe, void* internal_pipe);
-    void (*closeFromHost)(void* hwpipe);
-    void (*signalWake)(void* hwpipe, unsigned flags);
-    // Lookup functions for pipe instances and ids.
-    int (*getPipeId)(void* hwpipe);
-    void* (*lookupPipeById)(int id);
-} AndroidPipeHwFuncs;
-
 // Utility functions to look up pipe instances and ids.
 ANDROID_PIPE_DEVICE_EXPORT int android_pipe_get_id(void* internal_pipe);
 ANDROID_PIPE_DEVICE_EXPORT void* android_pipe_lookup_by_id(int id);
-
-// Change the set of AndroidPipeHwFuncs corresponding to the hardware virtual
-// device, return the old value. This must be called from the virtual device
-// when it is realized / initialized.
-ANDROID_PIPE_DEVICE_EXPORT const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
-        const AndroidPipeHwFuncs* hw_funcs);
-
-// Similar to android_pipe_set_hw_funcs, but if in virtio mode.
-ANDROID_PIPE_DEVICE_EXPORT const AndroidPipeHwFuncs* android_pipe_set_hw_virtio_funcs(
-        const AndroidPipeHwFuncs* hw_funcs);
 
 ANDROID_END_HEADER
