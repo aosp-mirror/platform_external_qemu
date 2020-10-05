@@ -160,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "10882600_a00257d8",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T17:05:02Z",
+      "side": 1,
+      "message": "thanks! let\u0027s have these comments in the code itself so people know why it\u0027s this way.\n\nbut why not start more threads in response to more than 120 instead of using std::async? that could lead to mysterious performance problems that are hard to debug down the line due to std::async slowness + more work to repro \u003e 120 fds",
+      "parentUuid": "26eaa695_91f0d814",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "293588bd_745406d4",
         "filename": "util/oslib-win32poll.cpp",
         "patchSetId": 10
