@@ -16,6 +16,24 @@
       "revId": "011181f260bc5b83c21810bd7666f006c692689c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d6d47c8_5ce01626",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1743418
+      },
+      "writtenOn": "2020-10-05T10:37:32Z",
+      "side": 1,
+      "message": "From my understanding, string::replace doesn\u0027t replace all occurences, so I would still need to loop through the string. I found an alternative solution using std::regex_replace (which might be less readable). What are your thoughts?",
+      "parentUuid": "c7a6132b_d7db43ba",
+      "revId": "011181f260bc5b83c21810bd7666f006c692689c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
