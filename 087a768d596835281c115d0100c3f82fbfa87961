@@ -82,6 +82,24 @@
     },
     {
       "key": {
+        "uuid": "55e51532_5cf8d857",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T16:23:49Z",
+      "side": 1,
+      "message": "in any case i think the number of threads to wait should be explicitly specified, as that impacts overall resource footprint (also see android/base/threads/ThreadPool.h for ideas plus if it can be used)",
+      "parentUuid": "2fa73f2c_416ff872",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "293588bd_745406d4",
         "filename": "util/oslib-win32poll.cpp",
         "patchSetId": 10
