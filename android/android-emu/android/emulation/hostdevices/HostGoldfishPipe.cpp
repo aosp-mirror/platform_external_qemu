@@ -59,7 +59,13 @@ using android::base::Err;
 
 namespace android {
 
-HostGoldfishPipeDevice::HostHwPipe::HostHwPipe(int fd) : mFd(fd) {}
+const AndroidPipeHwFuncs HostGoldfishPipeDevice::HostHwPipe::vtbl = {
+    &HostGoldfishPipeDevice::resetPipeCallback,
+    &HostGoldfishPipeDevice::closeFromHostCallback,
+    &HostGoldfishPipeDevice::signalWakeCallback,
+};
+
+HostGoldfishPipeDevice::HostHwPipe::HostHwPipe(int fd) : vtblPtr(&vtbl), mFd(fd) {}
 
 HostGoldfishPipeDevice::HostHwPipe::~HostHwPipe() {}
 
@@ -351,14 +357,7 @@ void HostGoldfishPipeDevice::clear() {
 }
 
 void HostGoldfishPipeDevice::initialize() {
-    static const AndroidPipeHwFuncs hwFuncs = {
-        &HostGoldfishPipeDevice::resetPipeCallback,
-        &HostGoldfishPipeDevice::closeFromHostCallback,
-        &HostGoldfishPipeDevice::signalWakeCallback,
-    };
-
     if (mInitialized) return;
-    android_pipe_set_hw_funcs(&hwFuncs);
     AndroidPipe::Service::resetAll();
     AndroidPipe::initThreading(android::HostVmLock::getInstance());
     mInitialized = true;
