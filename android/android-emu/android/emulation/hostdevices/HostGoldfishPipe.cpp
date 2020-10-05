@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"
+#include "android/emulation/android_pipe_base.h"
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/Result.h"
@@ -376,7 +377,6 @@ static const AndroidPipeHwFuncs sHostGoldfishPipeHwFuncs = {
 
 void HostGoldfishPipeDevice::initialize() {
     if (mInitialized) return;
-    android_pipe_set_hw_funcs(&sHostGoldfishPipeHwFuncs);
     AndroidPipe::Service::resetAll();
     AndroidPipe::initThreading(android::HostVmLock::getInstance());
     mInitialized = true;
