@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ccab321_62a6bf2d",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T15:34:05Z",
+      "side": 1,
+      "message": "can we return sensor_list directly? (similar below)",
+      "revId": "5f17ab41cd211456bd840ef4e7e65aac9c7fbb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "944010e6_128da10b",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T15:34:05Z",
+      "side": 1,
+      "message": "what\u0027s the expectedusage of this method? can we return the std::vector?",
+      "range": {
+        "startLine": 126,
+        "startChar": 6,
+        "endLine": 126,
+        "endChar": 39
+      },
+      "revId": "5f17ab41cd211456bd840ef4e7e65aac9c7fbb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "26e0c459_e570cef7",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-05T15:34:05Z",
+      "side": 1,
+      "message": "Need more comments describing the structure of the sensor files and whether it\u0027s expected that the records are sorted. Best way would probably be to have a validate() method at the beginning that checks/enforces all these invariants, so the other code can assume it and do less checking of it themselves",
+      "revId": "5f17ab41cd211456bd840ef4e7e65aac9c7fbb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
