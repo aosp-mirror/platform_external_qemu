@@ -3819,8 +3819,8 @@ public:
             createInfo.imageType = VK_IMAGE_TYPE_2D;
             createInfo.format = format;
             createInfo.extent = {/*width*/ 1, /*height*/ 64, 1};
-            createInfo.mipLevels = 0;
-            createInfo.arrayLayers = 0;
+            createInfo.mipLevels = 1;
+            createInfo.arrayLayers = 1;
             createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
             createInfo.tiling = VK_IMAGE_TILING_LINEAR;
             createInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
@@ -3838,14 +3838,20 @@ public:
             VkImage image;
             VkSubresourceLayout subresourceLayout;
 
-            VkDeviceSize offset;
+            VkDeviceSize offset = 0u;
             VkDeviceSize rowPitchAlignment = UINT_MAX;
 
             constexpr VkDeviceSize kMinWidth = 64;
             constexpr VkDeviceSize kMaxWidth = 2048;
             for (VkDeviceSize width = kMinWidth; width <= kMaxWidth; ++width) {
                 createInfo.extent.width = width;
-                vk->vkCreateImage(device, &createInfo, nullptr, &image);
+                VkResult result =
+                        vk->vkCreateImage(device, &createInfo, nullptr, &image);
+                if (result != VK_SUCCESS) {
+                    LOG(ERROR) << "vkCreateImage failed. width: " << width
+                               << " result: " << result;
+                    continue;
+                }
                 vk->vkGetImageSubresourceLayout(device, image, &subresource, &subresourceLayout);
                 vk->vkDestroyImage(device, image, nullptr);
 
