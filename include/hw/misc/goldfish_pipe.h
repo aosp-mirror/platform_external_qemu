@@ -161,27 +161,6 @@ extern void goldfish_pipe_set_service_ops(
  * virtio. */
 extern const GoldfishPipeServiceOps* goldfish_pipe_get_service_ops(void);
 
-/* Function to look up id of hwpipe and vice versa. */
-extern int goldfish_pipe_get_id(GoldfishHwPipe* hw_pipe);
 extern GoldfishHwPipe* goldfish_pipe_lookup_by_id(int id);
-
-/* Implemented by the virtual device, always called from the service in
- * a thread that owns the BQL. */
-
-/* Reset the association of |hw_pipe| with a new |host_pipe|
- * value. This is called once the guest has written the service name
- * to the initial pipe connection, and the host decided of the right
- * implementation for it. */
-extern void goldfish_pipe_reset(GoldfishHwPipe *hw_pipe,
-                                GoldfishHostPipe *host_pipe);
-
-/* Called by the host to notify the virtual device that it has
- * closed its side of the pipe. */
-extern void goldfish_pipe_close_from_host(GoldfishHwPipe *hw_pipe);
-
-/* Called by the host to notify that one or more conditions identified
- * by |flags| has been met for a given pipe identified by |hw_pipe|. */
-extern void goldfish_pipe_signal_wake(GoldfishHwPipe *hw_pipe,
-                                      GoldfishPipeWakeFlags flags);
 
 #endif /* _HW_GOLDFISH_PIPE_H */
