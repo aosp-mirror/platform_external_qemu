@@ -59,7 +59,13 @@ using android::base::Err;
 
 namespace android {
 
-HostGoldfishPipeDevice::HostHwPipe::HostHwPipe(int fd) : mFd(fd) {}
+const AndroidPipeHwFuncs HostGoldfishPipeDevice::HostHwPipe::vtbl = {
+    &closeFromHostCallback,
+    &signalWakeCallback,
+    &getPipeIdCallback,
+};
+
+HostGoldfishPipeDevice::HostHwPipe::HostHwPipe(int fd) : vtblPtr(&vtbl), mFd(fd) {}
 
 HostGoldfishPipeDevice::HostHwPipe::~HostHwPipe() {}
 
@@ -330,13 +336,7 @@ void HostGoldfishPipeDevice::clear() {
 }
 
 void HostGoldfishPipeDevice::initialize() {
-    static const AndroidPipeHwFuncs hwFuncs = {
-        &HostGoldfishPipeDevice::closeFromHostCallback,
-        &HostGoldfishPipeDevice::signalWakeCallback,
-    };
-
     if (mInitialized) return;
-    android_pipe_set_hw_funcs(&hwFuncs);
     AndroidPipe::Service::resetAll();
     AndroidPipe::initThreading(android::HostVmLock::getInstance());
     mInitialized = true;
@@ -468,6 +468,11 @@ void HostGoldfishPipeDevice::closeFromHostCallback(void* hwPipeRaw) {
 void HostGoldfishPipeDevice::signalWakeCallback(void* hwPipeRaw, unsigned wakes) {
     const int fd = static_cast<const HostHwPipe*>(hwPipeRaw)->getFd();
     HostGoldfishPipeDevice::get()->signalWake(fd, wakes);
+}
+
+// static
+int HostGoldfishPipeDevice::getPipeIdCallback(void* hwPipeRaw) {
+    return static_cast<const HostHwPipe*>(hwPipeRaw)->getFd();
 }
 
 } // namespace android
