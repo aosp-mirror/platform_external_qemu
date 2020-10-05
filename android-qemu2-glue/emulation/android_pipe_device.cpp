@@ -35,7 +35,7 @@ extern "C" {
 //
 // The host service pipe expects a device implementation that will
 // implement the callbacks in AndroidHwPipeFuncs. These are injected
-// into the service by calling android_pipe_set_hw_funcs().
+// into the service by vtbl in hwPipe.
 //
 // The virtual device expects a service implementation that will
 // implement the callbacks in GoldfishPipeServiceOps. These are injected
@@ -186,6 +186,7 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         },
 };
 
+#if 0
 // These callbacks are called from the pipe service into the virtual device.
 static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
         // resetPipe()
@@ -249,11 +250,10 @@ static const AndroidPipeHwFuncs android_pipe_hw_virtio_funcs = {
             return nullptr;
         }
 };
+#endif
 
 bool qemu_android_pipe_init(android::VmLock* vmLock) {
     goldfish_pipe_set_service_ops(&goldfish_pipe_service_ops);
-    android_pipe_set_hw_funcs(&android_pipe_hw_funcs);
-    android_pipe_set_hw_virtio_funcs(&android_pipe_hw_virtio_funcs);
     android::AndroidPipe::initThreading(vmLock);
     return true;
 }
