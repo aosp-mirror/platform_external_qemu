@@ -123,6 +123,7 @@ void HostGoldfishPipeDevice::close(void* hwpipe) {
         LOG(INFO) << "Could not close pipe, ENOENT.";
         mErrno = ENOENT;
     }
+    free(hwpipe);
 }
 
 void HostGoldfishPipeDevice::clear() {
@@ -432,7 +433,7 @@ void HostGoldfishPipeDevice::setErrno(ssize_t res) {
 }
 
 void* HostGoldfishPipeDevice::createNewHwPipeId() {
-    return reinterpret_cast<void*>(mNextHwPipe++);
+    return malloc(1);
 }
 
 // locked
