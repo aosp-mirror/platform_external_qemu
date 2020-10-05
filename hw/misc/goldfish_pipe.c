@@ -28,7 +28,9 @@
 ** should give some thought to if this needs re-writing to take
 ** advantage of that infrastructure to create the pipes.
 */
+
 #include "hw/misc/goldfish_pipe.h"
+#include "android/emulation/android_pipe_base.h"
 
 #include "qemu/osdep.h"
 #include "hw/hw.h"
@@ -152,6 +154,12 @@ enum {
     MAX_SUPPORTED_DRIVER_VERSION = 4,
     PIPE_DRIVER_VERSION_v1 = 0,  // used to not report its version at all
 };
+
+static uint64_t pipe_dev_curr_time_us() {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return tv.tv_usec + tv.tv_sec * 1000000ULL;
+}
 
 /* These default callbacks are provided to detect when emulation setup
  * didn't register a pipe service implementation correctly! There is no
@@ -290,6 +298,7 @@ typedef struct PipeCommand {
 } PipeCommand;
 
 struct GoldfishHwPipe {
+    const AndroidPipeHwFuncs *vtbl;
     struct GoldfishHwPipe *wanted_next;
     struct GoldfishHwPipe *wanted_prev;
     PipeDevice* dev;
@@ -453,9 +462,58 @@ static void hwpipe_set_wanted(HwPipe* pipe, unsigned char val) {
     pipe->wanted |= val;
 }
 
+void goldfish_pipe_signal_wake(void *pipe_raw, unsigned flags_raw) {
+    if (!pipe_raw) return;
+
+    GoldfishHwPipe *pipe = pipe_raw;
+    GoldfishPipeWakeFlags flags = flags_raw;
+    PipeDevice *dev = pipe->dev;
+
+    DD("%s: id=%d channel=0x%llx flags=%d", __func__, (int)pipe->id,
+       pipe->channel, flags);
+
+    hwpipe_set_wanted(pipe, (unsigned char)flags);
+    dev->ops->wanted_list_add(dev, pipe);
+
+    /* Raise IRQ to indicate there are items on our list ! */
+    qemu_set_irq(dev->ps->irq, 1);
+    DD("%s: raising IRQ", __func__);
+
+    if (dev->measure_latency) {
+        dev->wake_us = pipe_dev_curr_time_us();
+    }
+}
+
+void goldfish_pipe_close_from_host(void *pipe_raw) {
+    GoldfishHwPipe *pipe = pipe_raw;
+
+    D("%s: id=%d channel=0x%llx (closed=%d)", __func__, (int)pipe->id,
+        pipe->channel, pipe->closed);
+
+    if (!pipe->closed) {
+        pipe->closed = 1;
+        goldfish_pipe_signal_wake(pipe, GOLDFISH_PIPE_WAKE_CLOSED);
+    }
+}
+
+/* Function to look up hwpipe by pipe id and vice versa. */
+int goldfish_pipe_get_id(void *pipe_raw) {
+    GoldfishHwPipe* pipe = pipe_raw;
+
+    assert(pipe->dev->device_version == PIPE_DEVICE_VERSION);
+    return pipe->id;
+}
+
 static HwPipe* hwpipe_new0(PipeDevice* dev) {
+    static const AndroidPipeHwFuncs vtbl = {
+        .closeFromHost = &goldfish_pipe_close_from_host,
+        .signalWake = &goldfish_pipe_signal_wake,
+        .getPipeId = &goldfish_pipe_get_id,
+    };
+
     HwPipe* pipe;
     pipe = g_malloc0(sizeof(HwPipe));
+    pipe->vtbl = &vtbl;
     pipe->dev = dev;
     return pipe;
 }
@@ -1195,12 +1253,6 @@ static void pipe_dev_write_v1(PipeDevice* dev,
     }
 }
 
-static uint64_t pipe_dev_curr_time_us() {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return tv.tv_usec + tv.tv_sec * 1000000ULL;
-}
-
 #define LONG_PIPE_TRANSACTION_THRESHOLD_MS 1.0f
 
 static void pipe_dev_warn_long_duration(
@@ -1827,51 +1879,9 @@ static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {
             goldfish_pipe_save, goldfish_pipe_load, goldfish_pipe_post_load, s);
 }
 
-void goldfish_pipe_reset(GoldfishHwPipe *pipe, GoldfishHostPipe *host_pipe) {
-    pipe->host_pipe = host_pipe;
-}
-
-void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
-                               GoldfishPipeWakeFlags flags) {
-    if (!pipe) return;
-
-    PipeDevice *dev = pipe->dev;
-
-    DD("%s: id=%d channel=0x%llx flags=%d", __func__, (int)pipe->id,
-       pipe->channel, flags);
-
-    hwpipe_set_wanted(pipe, (unsigned char)flags);
-    dev->ops->wanted_list_add(dev, pipe);
-
-    /* Raise IRQ to indicate there are items on our list ! */
-    qemu_set_irq(dev->ps->irq, 1);
-    DD("%s: raising IRQ", __func__);
-
-    if (dev->measure_latency) {
-        dev->wake_us = pipe_dev_curr_time_us();
-    }
-}
-
-/* Function to look up hwpipe by pipe id and vice versa. */
-int goldfish_pipe_get_id(GoldfishHwPipe* pipe) {
-    assert(pipe->dev->device_version == PIPE_DEVICE_VERSION);
-    return pipe->id;
-}
-
 GoldfishHwPipe* goldfish_pipe_lookup_by_id(int id) {
     assert(s_goldfish_pipe_state->dev->device_version == PIPE_DEVICE_VERSION);
     return s_goldfish_pipe_state->dev->pipes[id];
-}
-
-void goldfish_pipe_close_from_host(GoldfishHwPipe *pipe)
-{
-    D("%s: id=%d channel=0x%llx (closed=%d)", __func__, (int)pipe->id,
-        pipe->channel, pipe->closed);
-
-    if (!pipe->closed) {
-        pipe->closed = 1;
-        goldfish_pipe_signal_wake(pipe, GOLDFISH_PIPE_WAKE_CLOSED);
-    }
 }
 
 static void goldfish_pipe_class_init(ObjectClass* klass, void* data) {

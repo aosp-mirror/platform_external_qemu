@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/emulation/android_pipe_device.h"
+#include "android/emulation/android_pipe_base.h"
 #include "android/emulation/testing/TestVmLock.h"
 
 #include <memory>
@@ -30,63 +31,60 @@ namespace android {
 //
 class TestAndroidPipeDevice {
 public:
-    // Default constructor, this registers the device by calling
-    // android_pipe_set_hw_funcs()
     TestAndroidPipeDevice();
-
-    // Destructor, this calls android_pipe_set_hw_funcs() to reset
-    // android_pipe.c to its previous state.
     ~TestAndroidPipeDevice();
 
     class Guest {
     public:
+        ~Guest();
+
         // Create new Guest instance.
         static Guest* create();
-
-        // Destructor, closes the connection, if any.
-        virtual ~Guest() {}
 
         // Try to connect to a named service. |name| can be
         // either <service> or <service>:<args>. Returns 0 on
         // success, or -errno on failure.
-        virtual int connect(const char* name) = 0;
+        int connect(const char* name);
 
         // Try to read data from the host service. Return the
         // number of bytes transfered. 0 for EOF, and -errno for
         // i/o error.
-        virtual ssize_t read(void* buffer, size_t len) = 0;
+        ssize_t read(void* buffer, size_t len);
 
         // Try to write data to the host service. Return the
         // number of bytes transfered. 0 for EOF, and -errno
         // for i/o error.
-        virtual ssize_t write(const void* buffer, size_t len) = 0;
+        ssize_t write(const void* buffer, size_t len);
 
         // Force-close the connection from the guest.
-        virtual void close() = 0;
+        void close();
 
         // Poll the current state of the guest connection.
         // Returns a combination of PIPE_POLL_IN and PIPE_POLL_OUT
         // flags.
-        virtual unsigned poll() const = 0;
+        unsigned poll() const;
 
         // Return the AndroidPipe associated with this guest.
-        virtual void* getPipe() const = 0;
+        void* getPipe() const;
 
-    protected:
-        // Private constructor.
-        Guest() {}
+    private:
+        Guest();
+
+        static void resetPipe(void* hwpipe, void* internal_pipe);
+        static void closeFromHost(void* hwpipe);
+        static void signalWake(void* hwpipe, unsigned flags);
+        static int  getPipeId(void* hwpipe);
+
+        const AndroidPipeHwFuncs* const vtblPtr;
+        void* mPipe = nullptr;
+        unsigned mWakes = 0;
+        bool mClosed = true;
+
+        static const AndroidPipeHwFuncs vtbl;
     };
 
 private:
-    // AndroidPipeHwFuncs callbacks.
-    static void closeFromHost(void* hwpipe);
-    static void signalWake(void* hwpipe, unsigned wakes);
-    static void resetPipe(void* hwpipe, void* internal_pipe);
-
-    static const AndroidPipeHwFuncs sHwFuncs;
-
     TestVmLock mVmLock;
-    const AndroidPipeHwFuncs* mOldHwFuncs;
 };
 
 }  // namespace android
