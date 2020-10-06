@@ -1,0 +1,274 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ce8541f6_668b856a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 28
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "Thank you for putting this together. I haven\u0027t looked through the tests because there are a few questions about behavior that might change the tests.",
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6728e271_d196d6d9",
+        "filename": "android/android-emu/android/emulation/proto/sensor_session.proto",
+        "patchSetId": 28
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "Are links to internal services appropriate in this repo?",
+      "range": {
+        "startLine": 55,
+        "startChar": 8,
+        "endLine": 56,
+        "endChar": 28
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9609f617_4ff3e8de",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "There shouldn\u0027t be records with negative timestamps. If there are, that\u0027s a bug in the recording app. Please file it against me.\n\nFor behavioral consistency, do not skip these records. The lib in g3 doesn\u0027t, but rather treats them as timestamp 0 as a size effect.",
+      "range": {
+        "startLine": 75,
+        "startChar": 29,
+        "endLine": 75,
+        "endChar": 47
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7fd4a1c2_a2ef839b",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "nit: version_string",
+      "range": {
+        "startLine": 88,
+        "startChar": 20,
+        "endLine": 88,
+        "endChar": 33
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2b28e2cd_b3dc05ba",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "This reset is redundant with the one in StopReplay and should not be here.",
+      "range": {
+        "startLine": 239,
+        "startChar": 4,
+        "endLine": 239,
+        "endChar": 19
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "986f7a79_2a683286",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "Session should not reset on stop. It should instead pause, leaving the cursor (current_record_iterator_) wherever it is when stop is called. If the user wants to reset the current session to the beginning, they should call SeekToTime(0). This library should not presume to do it for them.",
+      "range": {
+        "startLine": 247,
+        "startChar": 4,
+        "endLine": 247,
+        "endChar": 19
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7d653a05_877d3497",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "nit: should be defined as a constant \"us_to_ns \u003d 1000\" or something similar.",
+      "range": {
+        "startLine": 251,
+        "startChar": 44,
+        "endLine": 251,
+        "endChar": 48
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "55cdea55_7845c7b1",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "Specify that this callback is where the user\u0027s desired responses to data should happen.",
+      "range": {
+        "startLine": 102,
+        "startChar": 16,
+        "endLine": 102,
+        "endChar": 67
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b9de048f_3c36e770",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "Do these need to be enumerated? None of the functions return more than one type of failure. It would make more sense for all of these to instead return bool true/false for success/failure.\n\nLoadFrom only returns OK or PROTO_PARSE_FAIL\nSeekToTime only returns OK or SEEK_TIME_NEGATIVE\nStartReplay only returns OK or MULTIPLIER_NEGATIVE",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 6
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "be8e97ac_ca69832f",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "These functions are redundant with the metadata() accessor. It is inappropriate to add them to this library. It\u0027d be much cleaner to include these as helper functions in the parent library.",
+      "range": {
+        "startLine": 186,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 44
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cab954ad_a8fe8789",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "nit: title case \"GetSensorRecordTimeline\", also please file a bug on me to backport this function into g3.",
+      "range": {
+        "startLine": 197,
+        "startChar": 21,
+        "endLine": 197,
+        "endChar": 44
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5e047574_8e22f7ee",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-06T22:55:19Z",
+      "side": 1,
+      "message": "This and the comparator are complex enough that I\u0027m not convinced inline definitions are appropriate, even if they are one-liners.",
+      "range": {
+        "startLine": 203,
+        "startChar": 0,
+        "endLine": 208,
+        "endChar": 5
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
