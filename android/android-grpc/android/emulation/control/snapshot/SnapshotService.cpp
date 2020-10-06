@@ -115,22 +115,18 @@ public:
                 });
         android_mkdir(tmpdir.data(), 0700);
 
-        // An imported snapshot already has the qcow2 images inside its snapshot
-        // directory, so they are already in a good state.
-        if (!snapshot->isImported()) {
-            // Exports all qcow2 images..
-            SnapshotLineConsumer slc(&result);
-            auto exp = getConsoleAgents()->vm->snapshotExport(
-                    snapshot->name().data(), tmpdir.data(), slc.opaque(),
-                    LineConsumer::Callback);
+        // Exports all qcow2 images..
+        SnapshotLineConsumer slc(&result);
+        auto exp = getConsoleAgents()->vm->snapshotExport(
+                snapshot->name().data(), tmpdir.data(), slc.opaque(),
+                LineConsumer::Callback);
 
-            if (!exp) {
-                writer->Write(*slc.error());
-                return Status::OK;
-            }
-
-            LOG(VERBOSE) << "Exported snapshot in " << sw.restartUs() << " us";
+        if (!exp) {
+            writer->Write(*slc.error());
+            return Status::OK;
         }
+
+        LOG(VERBOSE) << "Exported snapshot in " << sw.restartUs() << " us";
 
         // Stream the tmpdir out as a tar.gz..
         CallbackStreambufWriter csb(

@@ -114,8 +114,10 @@ public:
 
         // search for an item in |mPipes| that is in the WaitingForHostAdbConnection state,
         // remove it from |mPipes| and return it.
-
         AdbGuestPipe* searchForActivePipe();
+
+        // Check if there is a pipe in WaitingForHostAdbConnection state.
+        bool hasActivePipe() const;
 
         // Resets the current ADB guest pipe connection.
         void resetActiveGuestPipeConnection();
