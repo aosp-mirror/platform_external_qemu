@@ -37,10 +37,17 @@ public:
     void setEmulatorWindow(EmulatorQtWindow* eW);
 
 private:
-    void toggleButtonPressed(QPushButton* button, const std::string cmd, const std::string label);
-    void toggleButtonReleased(QPushButton* button, const std::string cmd, const std::string label);
+    void toggleButtonPressed(QPushButton* button,
+                             const std::string cmd,
+                             const bool useActionArg,
+                             const std::string label);
+    void toggleButtonReleased(QPushButton* button,
+                              const std::string cmd,
+                              const bool useActionArg,
+                              const std::string label);
     void toggleIconTheme(QPushButton* button, const bool pressed);
     void executeLastPushButtonCmd();
+    void executeCmd(const std::string cmd, const std::string arg);
     void remaskButtons();
     bool eventFilter(QObject*, QEvent*) override;
     void checkRotaryControllerServiceTimer();
@@ -56,4 +63,5 @@ private:
     std::string mLastPushButtonCmd;
     bool mAdbExecuteIsActive;
     bool mIsBootCompleted;
+    bool mSupportsActionArg;
 };
