@@ -70,6 +70,8 @@ set(OPTION_MINBUILD
       BOOL
       "True if we should build a minimum set of components to support 64-bit guets only."
 )
+set(OPTION_WIN_LTO TRUE
+    CACHE BOOL "True if we should enable global link optimizations in windows (slow)")
 set(OPTION_TCMALLOC
     TRUE
     CACHE
@@ -283,7 +285,7 @@ if(WINDOWS_MSVC_X86_64)
     add_c_flag("-GR-")
 
     # Link time optization tragically fails when cross compiling.
-    if(NOT CROSSCOMPILE)
+    if(NOT CROSSCOMPILE AND OPTION_WIN_LTO)
       # Do a global optimization pass (note, link times --> infinity)
       add_c_flag("-flto=thin")
       # Optimize a bit more on the vtables in use, note this requires -flto
