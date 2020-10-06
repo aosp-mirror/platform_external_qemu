@@ -127,6 +127,16 @@ void get_cpuid_func(struct CPUState* cpu, int func, int cnt, uint32_t *eax, uint
 
     *eax = *ebx = *ecx = *edx = 0;
     switch(func) {
+        case 0x15:
+        case 0x16:
+            fprintf(stderr, "%s: frequency query, passthrough 0x%x\n", __func__, func);
+            *eax = h_rax;
+            *ebx = h_rbx;
+            *ecx = h_rcx;
+            *edx = h_rdx;
+            fprintf(stderr, "%s: eax ebx ecx edx %u %u %u %u\n", __func__,
+                    *eax, *ebx, *ecx, *edx);
+            break;
         case 0:
             *eax = _cpuid->level;
             *ebx = _cpuid->vendor1;

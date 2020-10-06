@@ -681,6 +681,18 @@ static void exec_lods(struct CPUState *cpu, struct x86_decode *decode)
 
 #define MSR_IA32_UCODE_REV 		0x00000017
 
+static uint64_t rdtsc(void)
+{
+	uint64_t var;
+	uint32_t hi, lo;
+
+	__asm volatile
+	    ("rdtsc" : "=a" (lo), "=d" (hi));
+
+	var = ((uint64_t)hi << 32) | lo;
+	return (var);
+}
+
 void simulate_rdmsr(struct CPUState *cpu)
 {
     X86CPU *x86_cpu = X86_CPU(cpu);
@@ -690,7 +702,9 @@ void simulate_rdmsr(struct CPUState *cpu)
 
     switch (msr) {
         case MSR_IA32_TSC:
-            val = rdtscp() + rvmcs(cpu->hvf_fd, VMCS_TSC_OFFSET);
+            val = rdtsc();
+            fprintf(stderr, "%s: rdmsr 0x%llx\n", __func__, (unsigned long long)val);
+            env->tsc = val;
             break;
         case MSR_IA32_APICBASE:
             val = cpu_get_apic_base(X86_CPU(cpu)->apic_state);
@@ -787,9 +801,8 @@ void simulate_wrmsr(struct CPUState *cpu)
 
     switch (msr) {
         case MSR_IA32_TSC:
-            // if (!osx_is_sierra())
-            //     wvmcs(cpu->hvf_fd, VMCS_TSC_OFFSET, data - rdtscp());
-            //hv_vm_sync_tsc(data);
+            wvmcs(cpu->hvf_fd, VMCS_TSC_OFFSET, 0);
+            fprintf(stderr, "%s: wrmsr tsc================================================================================\n", __func__);
             break;
         case MSR_IA32_APICBASE:
             cpu_set_apic_base(X86_CPU(cpu)->apic_state, data);

@@ -36,6 +36,77 @@
 
 #include <fcntl.h>
 
+using u64 = uint64_t;
+using u32 = uint32_t;
+
+/**
+ * fls - find last set bit in word
+ * @x: the word to search
+ *
+ * This is defined in a similar way as the libc and compiler builtin
+ * ffs, but returns the position of the most significant set bit.
+ *
+ * fls(value) returns 0 if value is 0 or the position of the last
+ * set bit if value is nonzero. The last (most significant) bit is
+ * at position 32.
+ */
+static inline int fls(unsigned int x)
+{
+	int r;
+
+	/*
+	 * AMD64 says BSRL won't clobber the dest reg if x==0; Intel64 says the
+	 * dest reg is undefined if x==0, but their CPU architect says its
+	 * value is written to set it to the same as before, except that the
+	 * top 32 bits will be cleared.
+	 *
+	 * We cannot do this on 32 bits because at the very least some
+	 * 486 CPUs did not behave this way.
+	 */
+	asm("bsrl %1,%0"
+	    : "=r" (r)
+	    : "rm" (x), "0" (-1));
+	return r + 1;
+}
+static int fls64(u64 x)
+{
+	int bitpos = -1;
+	/*
+	 * AMD64 says BSRQ won't clobber the dest reg if x==0; Intel64 says the
+	 * dest reg is undefined if x==0, but their CPU architect says its
+	 * value is written to set it to the same as before.
+	 */
+	asm("bsrq %1,%q0"
+	    : "+r" (bitpos)
+	    : "rm" (x));
+	return bitpos + 1;
+}
+
+static inline __attribute__((const))
+int __ilog2_u32(u32 n)
+{
+	return fls(n) - 1;
+}
+
+static inline __attribute__((const))
+int __ilog2_u64(u64 n)
+{
+	return fls64(n) - 1;
+}
+
+static inline __attribute__((const))
+bool is_power_of_2(unsigned long n)
+{
+	return (n != 0 && ((n & (n - 1)) == 0));
+}
+
+#define ilog2(n) \
+( \
+	(sizeof(n) <= 4) ?		\
+	__ilog2_u32(n) :		\
+	__ilog2_u64(n)			\
+ )
+
 namespace virtualdeviceperfetto {
 
 static __attribute__((aligned(4096))) uint8_t sBuffer[4096];
@@ -202,12 +273,16 @@ private:
 
 static TraceContextStorage sTraceContextStorage;
 
+
+#define NSEC_PER_MSEC	1000000L
+
 class TraceContext : public protozero::ScatteredStreamWriter::Delegate {
 public:
     TraceContext() :
         mChunkStore((uint8_t*)(4096 * ((((uintptr_t)mBuffer) + 4096 - 1) / 4096)), 4096),
         mWriter(this) {
             sTraceContextStorage.add(this);
+            clocks_calc_mult_shift(&mClockMult, &mClockShift, 2800000, NSEC_PER_MSEC, 0);
         }
 
     virtual ~TraceContext() {
@@ -357,8 +432,93 @@ public:
         mWriter.Reset(protozero::ContiguousMemoryRange{mChunk.payload_begin(), mChunk.end() });
     }
 private: 
+
+static uint64_t readTsc(void)
+{
+	uint64_t var;
+	uint32_t hi, lo;
+
+	__asm volatile
+	    ("rdtsc" : "=a" (lo), "=d" (hi));
+
+	var = ((uint64_t)hi << 32) | lo;
+	return (var);
+}
+
+static inline u64 mul_u32_u32(u32 a, u32 b)
+{
+	u32 high, low;
+
+	asm ("mull %[b]" : "=a" (low), "=d" (high)
+			 : [a] "a" (a), [b] "rm" (b) );
+
+	return low | ((u64)high) << 32;
+}
+
+static inline u64 mul_u64_u32_shr(u64 a, u32 mul, unsigned int shift)
+{
+	u32 ah, al;
+	u64 ret;
+
+	al = a;
+	ah = a >> 32;
+
+	ret = mul_u32_u32(al, mul) >> shift;
+	if (ah)
+		ret += mul_u32_u32(ah, mul) << (32 - shift);
+
+	return ret;
+}
+
+static void
+clocks_calc_mult_shift(uint32_t *mult, uint32_t *shift, uint32_t from, uint32_t to, uint32_t maxsec)
+{
+	uint64_t tmp;
+	uint32_t sft, sftacc= 32;
+
+	/*
+	 * Calculate the shift factor which is limiting the conversion
+	 * range:
+	 */
+	tmp = ((uint64_t)maxsec * from) >> 32;
+	while (tmp) {
+		tmp >>=1;
+		sftacc--;
+	}
+
+	/*
+	 * Find the conversion shift/mult pair which has the best
+	 * accuracy and fits the maxsec conversion range:
+	 */
+	for (sft = 32; sft > 0; sft--) {
+		tmp = (uint64_t) to << sft;
+		tmp += from / 2;
+        fprintf(stderr, "%s: tmp 0x%llx\n", __func__, (unsigned long long)(tmp));
+        tmp = tmp / from;
+        fprintf(stderr, "%s: tmp 0x%llx (after)\n", __func__, (unsigned long long)(tmp));
+		if ((tmp >> sftacc) == 0)
+			break;
+	}
+
+    if (sft == 32) {
+      sft = 31;
+      tmp >>= 1;
+    }
+
+	*mult = tmp;
+	*shift = sft;
+}
+
     inline uint64_t getTimestamp() {
-        uint64_t t = (uint64_t)(::perfetto::base::GetWallTimeNs().count());
+        uint64_t tsc = readTsc();
+        // 764773379
+        // uint64_t t = mul_u64_u32_shr(tsc, mClockMult, mClockShift);
+        uint64_t t = mul_u64_u32_shr(tsc, 764773379, mClockShift);
+        // fprintf(stderr, "%s: tsc: %llu ns: %llu mult %u shift %u s: %f\n", __func__,
+        //         (unsigned long long)tsc,
+        //         (unsigned long long)t,
+        //         mClockMult, mClockShift,
+        //         (float)(t) / 1000000000.0f);
         if (CC_UNLIKELY(mNeedToConfigureGuestTime)) {
             if (sTraceConfig.useGuestStartTime) {
                 fprintf(stderr, "%s: guest time: 0x%llx host time: 0x%llx\n", __func__,
@@ -438,6 +598,7 @@ private:
         ss << kTrackNamePrefix << threadId << kCounterNamePrefix << counterName;
         return ss.str();
     }
+
     uint64_t getOrCreateCounterTrackUuid(const char* name, uint32_t* counterId, bool* firstTime) {
         auto it = mCounterNameToTrackUuids.find(name);
         uint64_t res;
@@ -456,6 +617,10 @@ private:
         }
         return res;
     }
+
+uint32_t mClockMult;
+uint32_t mClockShift;
+
     bool mNeedToSetThreadId = true;
     uint32_t mThreadId = 0;
     bool mNeedToConfigureGuestTime = true;

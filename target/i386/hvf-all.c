@@ -485,6 +485,17 @@ int hvf_enabled() { return !hvf_disabled; }
 void hvf_disable(int shouldDisable) {
     hvf_disabled = shouldDisable;
 }
+static uint64_t rdtsc(void)
+{
+	uint64_t var;
+	uint32_t hi, lo;
+
+	__asm volatile
+	    ("rdtsc" : "=a" (lo), "=d" (hi));
+
+	var = ((uint64_t)hi << 32) | lo;
+	return (var);
+}
 
 void vmx_reset_vcpu(CPUState *cpu) {
 
@@ -561,7 +572,8 @@ void vmx_reset_vcpu(CPUState *cpu) {
     for (int i = 0; i < 8; i++)
          wreg(cpu->hvf_fd, HV_X86_R8+i, 0x0);
 
-    hv_vm_sync_tsc(0);
+    fprintf(stderr, "%s: rdtsc: %llu\n", __func__, (unsigned long long)(rdtsc()));
+    hv_vm_sync_tsc(rdtsc());
     cpu->halted = 0;
     hv_vcpu_invalidate_tlb(cpu->hvf_fd);
     hv_vcpu_flush(cpu->hvf_fd);
@@ -609,11 +621,13 @@ int hvf_init_vcpu(CPUState * cpu) {
 	wvmcs(cpu->hvf_fd, VMCS_EXCEPTION_BITMAP, 0); /* Double fault */
 
     wvmcs(cpu->hvf_fd, VMCS_TPR_THRESHOLD, 0);
+    wvmcs(cpu->hvf_fd, VMCS_TSC_OFFSET, 0);
 
     vmx_reset_vcpu(cpu);
 
     x86cpu = X86_CPU(cpu);
     x86cpu->env.kvm_xsave_buf = qemu_memalign(4096, sizeof(struct hvf_xsave_buf));
+    x86cpu->env.tsc = rdtsc();
 
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_STAR, 1);
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_LSTAR, 1);
@@ -623,10 +637,13 @@ int hvf_init_vcpu(CPUState * cpu) {
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_GSBASE, 1);
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_KERNELGSBASE, 1);
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_TSC_AUX, 1);
-    //hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_TSC, 1);
+    hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_TSC_ADJUST, 1);
+    hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_TSC, 1);
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_SYSENTER_CS, 1);
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_SYSENTER_EIP, 1);
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_SYSENTER_ESP, 1);
+    fprintf(stderr, "%s: rdtsc: %llu\n", __func__, (unsigned long long)(rdtsc()));
+    hv_vm_sync_tsc(rdtsc());
 
     return 0;
 }
@@ -1024,6 +1041,11 @@ again:
 
         qemu_mutex_lock_iothread();
 
+        static int syncs = 0;
+        ++syncs;
+        if (syncs < 1000) {
+            hv_vm_sync_tsc(rdtsc());
+        }
         update_apic_tpr(cpu);
         current_cpu = cpu;
 

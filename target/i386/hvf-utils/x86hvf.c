@@ -177,7 +177,7 @@ void hvf_put_msrs(CPUState *cpu_state)
     hv_vcpu_write_msr(cpu_state->hvf_fd, MSR_FSBASE, env->segs[R_FS].base);
 
     // if (!osx_is_sierra())
-    //     wvmcs(cpu_state->hvf_fd, VMCS_TSC_OFFSET, env->tsc - rdtscp());
+    wvmcs(cpu_state->hvf_fd, VMCS_TSC_OFFSET, 0);
     hv_vm_sync_tsc(env->tsc);
 }
 
@@ -264,6 +264,20 @@ void hvf_get_segments(CPUState *cpu_state)
     env->efer = rvmcs(cpu_state->hvf_fd, VMCS_GUEST_IA32_EFER);
 }
 
+static uint64_t rdtsc(void)
+{
+	uint64_t var;
+	uint32_t hi, lo;
+
+	__asm volatile
+	    ("rdtsc" : "=a" (lo), "=d" (hi));
+
+	var = ((uint64_t)hi << 32) | lo;
+	return (var);
+}
+
+
+
 void hvf_get_msrs(CPUState *cpu_state)
 {
     CPUX86State *env = &X86_CPU(cpu_state)->env;
@@ -289,7 +303,7 @@ void hvf_get_msrs(CPUState *cpu_state)
 
     int r = hv_vcpu_read_msr(cpu_state->hvf_fd, MSR_IA32_APICBASE, &tmp);
     
-    env->tsc = rdtscp() + rvmcs(cpu_state->hvf_fd, VMCS_TSC_OFFSET);
+    env->tsc = rdtsc();;
 }
 
 int hvf_put_registers(CPUState *cpu_state)

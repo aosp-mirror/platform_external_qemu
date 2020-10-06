@@ -128,13 +128,30 @@ android_add_pbzero_library(${perfetto}/protos/perfetto/trace/track_event track_d
 android_add_pbzero_library(${perfetto}/protos/perfetto/trace/track_event track_event)
 
 if (OPTION_PERFETTO_USE_SDK)
+    # set(PERFETTO_TRACING_ONLY_SOURCES
+    #     perfetto.cc
+    #     perfetto-sdk-tracing-only.cpp)
+    # set(PERFETTO_TRACING_ONLY_INCLUDE
+    #     ${ANDROID_QEMU2_TOP_DIR}/android/third_party/perfetto-tracing-only)
+    # set(PERFETTO_TRACING_ONLY_LIBRARIES
+    #     perfetto-tracing-only-dummy)
     set(PERFETTO_TRACING_ONLY_SOURCES
-        perfetto.cc
-        perfetto-sdk-tracing-only.cpp)
+        ${perfetto}/src/tracing/core/shared_memory_abi.cc
+        perfetto-tracing-only.cpp)
     set(PERFETTO_TRACING_ONLY_INCLUDE
-        ${ANDROID_QEMU2_TOP_DIR}/android/third_party/perfetto-tracing-only)
+        ${ANDROID_QEMU2_TOP_DIR}/android/third_party/perfetto-tracing-only
+        ${perfetto}/include)
     set(PERFETTO_TRACING_ONLY_LIBRARIES
-        perfetto-tracing-only-dummy)
+        pbzero-trace_stats
+        pbzero-trace_config
+        pbzero-clock_snapshot
+        pbzero-trace
+        pbzero-trace_packet
+        pbzero-interned_data
+        pbzero-process_descriptor
+        pbzero-thread_descriptor
+        pbzero-track_descriptor
+        pbzero-track_event)
 else()
     set(PERFETTO_TRACING_ONLY_SOURCES
         ${perfetto}/src/tracing/core/shared_memory_abi.cc
