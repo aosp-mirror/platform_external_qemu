@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "97a2715a_ba26c594",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-10-06T20:52:04Z",
+      "side": 1,
+      "message": "Done, except that I kept useActionArg since it\u0027s still false for rotation, home, and back.",
+      "parentUuid": "a479a02d_b5e274f5",
+      "range": {
+        "startLine": 78,
+        "startChar": 72,
+        "endLine": 78,
+        "endChar": 77
+      },
+      "revId": "211427b1a639a996305a28e1e4e9f48708125387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6deee011_dc08da7e",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-10-06T18:11:12Z",
       "side": 1,
       "message": "nit: string\u0026",
+      "range": {
+        "startLine": 94,
+        "startChar": 14,
+        "endLine": 94,
+        "endChar": 20
+      },
+      "revId": "211427b1a639a996305a28e1e4e9f48708125387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "aea0f473_078d98ab",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-10-06T20:52:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6deee011_dc08da7e",
       "range": {
         "startLine": 94,
         "startChar": 14,
@@ -117,6 +165,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fecf4daa_56e41433",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-10-06T20:52:04Z",
+      "side": 1,
+      "message": "This is typically only called once, after boot completes. However, if the rotary service isn\u0027t running, it will be called every 5 seconds. I moved it to its own timer so it will only run once and so that it will run more quickly after boot completes.",
+      "parentUuid": "98ac35c2_275bdb5b",
+      "range": {
+        "startLine": 252,
+        "startChar": 7,
+        "endLine": 264,
+        "endChar": 22
+      },
+      "revId": "211427b1a639a996305a28e1e4e9f48708125387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f3377543_34edb4e8",
@@ -130,6 +202,30 @@
       "writtenOn": "2020-10-06T18:11:12Z",
       "side": 1,
       "message": "nit: const std::string\u0026\nand other places.",
+      "range": {
+        "startLine": 50,
+        "startChar": 20,
+        "endLine": 50,
+        "endChar": 37
+      },
+      "revId": "211427b1a639a996305a28e1e4e9f48708125387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2cbb4145_60a02d1b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1060361
+      },
+      "writtenOn": "2020-10-06T20:52:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f3377543_34edb4e8",
       "range": {
         "startLine": 50,
         "startChar": 20,
