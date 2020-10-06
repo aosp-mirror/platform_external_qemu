@@ -118,7 +118,7 @@ void HostGoldfishPipeDevice::close(void* hwpipe) {
         HOST_PIPE_DLOG("Erased host pipe %p corresponding to %p",
                        it->second, hwpipe);
         mPipeToHwPipe.erase(it->second);
-        mHwPipeToPipe.erase(hwpipe);
+        mHwPipeToPipe.erase(it);
     } else {
         LOG(INFO) << "Could not close pipe, ENOENT.";
         mErrno = ENOENT;
@@ -408,7 +408,7 @@ void* HostGoldfishPipeDevice::popHostPipe(void* pipe) {
         return nullptr;
     } else {
         auto res = it->second;
-        mResettedPipes.erase(pipe);
+        mResettedPipes.erase(it);
         return res;
     }
 }
