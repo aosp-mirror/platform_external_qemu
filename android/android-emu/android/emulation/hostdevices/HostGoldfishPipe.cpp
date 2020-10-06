@@ -408,7 +408,7 @@ void* HostGoldfishPipeDevice::popHostPipe(void* pipe) {
         return nullptr;
     } else {
         auto res = it->second;
-        mResettedPipes.erase(pipe);
+        mResettedPipes.erase(it);
         return res;
     }
 }
