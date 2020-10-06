@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "99b78b7d_c3eeab45",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-06T21:02:54Z",
+      "side": 1,
+      "message": "scoped fd?",
+      "revId": "11e9cf4b6795fe99e07cc42ae815ae095ac7591a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
