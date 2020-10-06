@@ -16,6 +16,24 @@
       "revId": "490a49e8e4baf3278046c5a3e45c3b1680d1869c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "847e536b_c83a0b1b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-06T02:07:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "481aaf09_f4726f2a",
+      "revId": "490a49e8e4baf3278046c5a3e45c3b1680d1869c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
