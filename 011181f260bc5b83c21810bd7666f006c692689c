@@ -34,6 +34,24 @@
       "revId": "011181f260bc5b83c21810bd7666f006c692689c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d35d6fe6_2356b8d7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1743418
+      },
+      "writtenOn": "2020-10-06T07:35:18Z",
+      "side": 1,
+      "message": "Resolved",
+      "parentUuid": "1d6d47c8_5ce01626",
+      "revId": "011181f260bc5b83c21810bd7666f006c692689c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
