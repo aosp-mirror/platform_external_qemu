@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "330be0dd_e8f3bbe4",
+        "filename": "cmake-main.windows-x86_64.inc",
+        "patchSetId": 10
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-06T18:25:15Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "69cd3916_e33f0c77",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "da8cb39a_f61acb8b",
@@ -53,6 +71,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "69896c1b_5099aa91",
+        "filename": "cmake-main.windows_msvc-x86_64.inc",
+        "patchSetId": 10
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-06T18:25:15Z",
+      "side": 1,
+      "message": "given that the script is not working; I just updated the .inc file for this time.",
+      "parentUuid": "5e0d8495_c6e83317",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9320bef2_0a859b8d",
@@ -66,6 +102,30 @@
       "writtenOn": "2020-10-05T16:21:07Z",
       "side": 1,
       "message": "kNumFdsPerItem, kmaxNumFdsPerItem",
+      "range": {
+        "startLine": 58,
+        "startChar": 14,
+        "endLine": 58,
+        "endChar": 30
+      },
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d477f06c_7c2630fd",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-06T18:25:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9320bef2_0a859b8d",
       "range": {
         "startLine": 58,
         "startChar": 14,
@@ -123,6 +183,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c6eb4703_9b2872d3",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-06T18:25:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "84bf68cc_e646de12",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 35
+      },
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "117c311e_d696c3b5",
@@ -154,6 +238,24 @@
       "side": 1,
       "message": "clang-format keeps 2; there must be some thing wrong in my config",
       "parentUuid": "117c311e_d696c3b5",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99a5a7cc_b47ebd7c",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-06T18:25:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a2db556_c66fa99e",
       "revId": "087a768d596835281c115d0100c3f82fbfa87961",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
@@ -247,6 +349,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f2d2c6fd_60a07983",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-06T18:25:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ef0c2e7_b509bcda",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "293588bd_745406d4",
@@ -278,6 +398,24 @@
       "side": 1,
       "message": "agreed, it seems each thread should have its own lock and condition variable",
       "parentUuid": "293588bd_745406d4",
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "48631916_5cb41eff",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-06T18:25:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0f65ca77_6423b2aa",
       "revId": "087a768d596835281c115d0100c3f82fbfa87961",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
@@ -319,6 +457,30 @@
       "side": 1,
       "message": "will fix",
       "parentUuid": "e2b5cc53_4276ecb4",
+      "range": {
+        "startLine": 205,
+        "startChar": 6,
+        "endLine": 205,
+        "endChar": 22
+      },
+      "revId": "087a768d596835281c115d0100c3f82fbfa87961",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b3ca3937_0dbc3d57",
+        "filename": "util/oslib-win32poll.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-10-06T18:25:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5cbb5d70_381b35c1",
       "range": {
         "startLine": 205,
         "startChar": 6,
