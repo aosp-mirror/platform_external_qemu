@@ -102,6 +102,7 @@ private:
     void enableProxyApply();
     void initProxy();
     void proxyDtor();
+    void disableForEmbeddedEmulator();
 
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
