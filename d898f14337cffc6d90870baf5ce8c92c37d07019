@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fe57d487_4bdd3cf4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/sensor_session_playback.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-06T02:07:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c75837ef_a4b42680",
+      "revId": "d898f14337cffc6d90870baf5ce8c92c37d07019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "51b3d037_182bd649",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/sensor_session_playback.h",
         "patchSetId": 2
@@ -33,6 +51,24 @@
       "revId": "d898f14337cffc6d90870baf5ce8c92c37d07019",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20daf12f_03363367",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/sensor_session_playback.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-06T02:07:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "51b3d037_182bd649",
+      "revId": "d898f14337cffc6d90870baf5ce8c92c37d07019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -56,6 +92,30 @@
       "revId": "d898f14337cffc6d90870baf5ce8c92c37d07019",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "21f2daad_3f8ef3d7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/sensor_session_playback.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-06T02:07:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "79aaf691_7ad01f5e",
+      "range": {
+        "startLine": 45,
+        "startChar": 37,
+        "endLine": 45,
+        "endChar": 44
+      },
+      "revId": "d898f14337cffc6d90870baf5ce8c92c37d07019",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

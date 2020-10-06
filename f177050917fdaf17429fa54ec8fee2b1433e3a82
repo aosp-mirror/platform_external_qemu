@@ -16,6 +16,24 @@
       "revId": "f177050917fdaf17429fa54ec8fee2b1433e3a82",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c92150f_50edaae5",
+        "filename": "android/android-emu/android/car_sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-06T02:07:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb24a482_45c8b355",
+      "revId": "f177050917fdaf17429fa54ec8fee2b1433e3a82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

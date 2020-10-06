@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a2d405cf_3efcb95b",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-06T02:07:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ccab321_62a6bf2d",
+      "revId": "5f17ab41cd211456bd840ef4e7e65aac9c7fbb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "944010e6_128da10b",
         "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
         "patchSetId": 21
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "82599a19_8d01d665",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-06T02:07:07Z",
+      "side": 1,
+      "message": "Done, This functions is used in Extended control UI, sensor replay page -\u003e timeline table, to get record count in each time interval.",
+      "parentUuid": "944010e6_128da10b",
+      "range": {
+        "startLine": 126,
+        "startChar": 6,
+        "endLine": 126,
+        "endChar": 39
+      },
+      "revId": "5f17ab41cd211456bd840ef4e7e65aac9c7fbb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "26e0c459_e570cef7",
         "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
         "patchSetId": 21
@@ -56,6 +98,24 @@
       "revId": "5f17ab41cd211456bd840ef4e7e65aac9c7fbb14",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0eb17f1b_0a43ed68",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-06T02:07:07Z",
+      "side": 1,
+      "message": "Agree, added comment to the top of sensor_session_playback.h.\nI believe the \"validation\" part is already done by the ParseFromString function in LoadFrom. The sensor files are actually proto binaries. If the sensor files don\u0027t fit the proto definition, the parse will fail. After successfully parsing the sensor files, sensor records will be sorted.\n\nFor this function, The time argument is passed in by user, not a part of sensor files. So I added a check here, incase user/the other code accidentally pass in negative value.",
+      "parentUuid": "26e0c459_e570cef7",
+      "revId": "5f17ab41cd211456bd840ef4e7e65aac9c7fbb14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
