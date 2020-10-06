@@ -37,14 +37,23 @@ public:
     void setEmulatorWindow(EmulatorQtWindow* eW);
 
 private:
-    void toggleButtonPressed(QPushButton* button, const std::string cmd, const std::string label);
-    void toggleButtonReleased(QPushButton* button, const std::string cmd, const std::string label);
+    void toggleButtonPressed(QPushButton* button,
+                             const std::string& cmd,
+                             const bool useActionArg,
+                             const std::string& label);
+    void toggleButtonReleased(QPushButton* button,
+                              const std::string& cmd,
+                              const bool useActionArg,
+                              const std::string& label);
     void toggleIconTheme(QPushButton* button, const bool pressed);
     void executeLastPushButtonCmd();
+    void executeCmd(const std::string& cmd, const std::string& arg);
     void remaskButtons();
     bool eventFilter(QObject*, QEvent*) override;
     void checkRotaryControllerServiceTimer();
     void checkRotaryControllerService();
+    void startSupportsActionTimer();
+    void determineWhetherInjectKeySupportsActionArg();
     bool isBootCompleted();
 
     std::unique_ptr<Ui::CarRotaryPage> mUi;
@@ -53,7 +62,9 @@ private:
     QTime mAdbExecuteTime;
     QTimer mLongPressTimer;
     QTimer mCheckTimer;
+    QTimer mSupportsActionTimer;
     std::string mLastPushButtonCmd;
     bool mAdbExecuteIsActive;
     bool mIsBootCompleted;
+    bool mSupportsActionArg;
 };
