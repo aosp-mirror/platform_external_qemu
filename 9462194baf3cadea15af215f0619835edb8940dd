@@ -1,0 +1,82 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005377625",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1448256?revision\u003d5",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "9a3da77d_06d24cc0",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 5
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-06T21:40:05Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 183,
+        "startChar": 69,
+        "endLine": 183,
+        "endChar": 75
+      },
+      "revId": "9462194baf3cadea15af215f0619835edb8940dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005377625",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1448256?revision\u003d5",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "3d516612_4bbb906c",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 5
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-06T21:40:05Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 189,
+        "startChar": 71,
+        "endLine": 189,
+        "endChar": 77
+      },
+      "revId": "9462194baf3cadea15af215f0619835edb8940dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005377625",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1448256?revision\u003d5",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "24512e61_baa6ff60",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 5
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-06T21:40:05Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 192,
+        "startChar": 69,
+        "endLine": 192,
+        "endChar": 75
+      },
+      "revId": "9462194baf3cadea15af215f0619835edb8940dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
