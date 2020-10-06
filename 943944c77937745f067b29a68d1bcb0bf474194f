@@ -1,0 +1,31 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005371139",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1450995?revision\u003d1",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "1808fc72_4f94e053",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-06T17:06:42Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027complex\u0027, \u0027unexpected\u0027, or \u0027placeholder\u0027; see https://developers.google.com/style/inclusive-documentation#ableist-language for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 137,
+        "startChar": 32,
+        "endLine": 137,
+        "endChar": 37
+      },
+      "revId": "943944c77937745f067b29a68d1bcb0bf474194f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
