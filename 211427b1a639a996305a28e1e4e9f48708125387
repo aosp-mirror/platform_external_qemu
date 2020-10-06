@@ -96,6 +96,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "98ac35c2_275bdb5b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-10-06T18:52:25Z",
+      "side": 1,
+      "message": "is this needed every time the previous car_service inject is sent? Can we wrap this around DEBUG? If not, can we combine the two commands with \"\u0026\u0026\" or \";\"?",
+      "range": {
+        "startLine": 252,
+        "startChar": 7,
+        "endLine": 264,
+        "endChar": 22
+      },
+      "revId": "211427b1a639a996305a28e1e4e9f48708125387",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "f3377543_34edb4e8",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.h",
         "patchSetId": 3
