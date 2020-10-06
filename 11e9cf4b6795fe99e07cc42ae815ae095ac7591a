@@ -16,6 +16,24 @@
       "message": "scoped fd?",
       "revId": "11e9cf4b6795fe99e07cc42ae815ae095ac7591a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d87625da_10435085",
+        "filename": "android/android-emu/android/snapshot/Icebox.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-10-06T21:38:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99b78b7d_c3eeab45",
+      "revId": "11e9cf4b6795fe99e07cc42ae815ae095ac7591a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
