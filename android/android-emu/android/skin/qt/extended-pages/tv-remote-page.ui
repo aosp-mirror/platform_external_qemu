@@ -13,6 +13,27 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <widget class="QGroupBox" name="tvRemote_clusterTitle">
+    <property name="geometry">
+    <rect>
+      <x>24</x>
+      <y>17</y>
+      <width>181</width>
+      <height>21</height>
+    </rect>
+    </property>
+    <property name="font">
+    <font>
+      <family>Roboto</family>
+    </font>
+    </property>
+    <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+    </property>
+    <property name="title">
+    <string>Cluster</string>
+    </property>
+  </widget>
   <widget class="QPushButton" name="tvRemote_downButton">
    <property name="geometry">
     <rect>
@@ -328,19 +349,6 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="tvRemote_assistantButton">
-   <property name="geometry">
-    <rect>
-     <x>151</x>
-     <y>420</y>
-     <width>85</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Assistant</string>
-   </property>
-  </widget>
 <widget class="QPushButton" name="tvRemote_watchlistButton">
    <property name="geometry">
     <rect>
@@ -376,7 +384,86 @@
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QGroupBox" name="tvRemote_assistantTitle">
+    <property name="geometry">
+    <rect>
+      <x>425</x>
+      <y>17</y>
+      <width>181</width>
+      <height>21</height>
+    </rect>
+    </property>
+    <property name="font">
+    <font>
+      <family>Roboto</family>
+    </font>
+    </property>
+    <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+    </property>
+    <property name="title">
+    <string>Google Assistant</string>
+    </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="tvRemote_assistantTextBox">
+   <property name="geometry">
+    <rect>
+     <x>425</x>
+     <y>50</y>
+     <width>185</width>
+     <height>148</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 4px 2px 2px 2px;</string>
+   </property>
+   <property name="plainText">
+    <string>Hey Google</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>TextInputBox</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="RaisedMaterialButton" name="tvRemote_assistantButton">
+    <property name="geometry">
+    <rect>
+      <x>548</x>
+      <y>214</y>
+      <width>62</width>
+      <height>34</height>
+    </rect>
+    </property>
+    <property name="font">
+    <font>
+      <family>Roboto</family>
+      <weight>75</weight>
+      <bold>true</bold>
+    </font>
+    </property>
+    <property name="text">
+    <string>SEND</string>
+    </property>
+    <property name="flat">
+    <bool>true</bool>
+    </property>
+    <property name="ColorGroup" stdset="0">
+    <string>Button</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+    </property>
+  </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RaisedMaterialButton</class>
+   <extends>QPushButton</extends>
+   <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resources.qrc"/>
  </resources>
