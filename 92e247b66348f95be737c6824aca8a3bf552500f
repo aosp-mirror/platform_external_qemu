@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": false,
       "key": {
         "uuid": "217ad9f8_9648ea6d",
         "filename": "/PATCHSET_LEVEL",
@@ -14,10 +15,28 @@
       "side": 1,
       "message": "Should there be a test?",
       "revId": "92e247b66348f95be737c6824aca8a3bf552500f",
-      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
-      "unresolved": false
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3883ddc4_e272c094",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-10-06T18:42:14Z",
+      "side": 1,
+      "message": "I will add some tests in the e2e module.",
+      "parentUuid": "217ad9f8_9648ea6d",
+      "revId": "92e247b66348f95be737c6824aca8a3bf552500f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "54b147b7_3a37fcda",
         "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
@@ -37,10 +56,34 @@
         "endChar": 64
       },
       "revId": "92e247b66348f95be737c6824aca8a3bf552500f",
-      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
-      "unresolved": true
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "08bcc007_85a624c1",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-10-06T18:42:14Z",
+      "side": 1,
+      "message": "I will remove this, as it will make the tool unusable in case we see this.",
+      "parentUuid": "54b147b7_3a37fcda",
+      "range": {
+        "startLine": 701,
+        "startChar": 8,
+        "endLine": 701,
+        "endChar": 64
+      },
+      "revId": "92e247b66348f95be737c6824aca8a3bf552500f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "77d91d44_137a9738",
         "filename": "android/android-grpc/android/emulation/control/QueryEmulator.cpp",
@@ -60,8 +103,31 @@
         "endChar": 18
       },
       "revId": "92e247b66348f95be737c6824aca8a3bf552500f",
-      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
-      "unresolved": true
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "234b6ab1_3a440133",
+        "filename": "android/android-grpc/android/emulation/control/QueryEmulator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-10-06T18:42:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "77d91d44_137a9738",
+      "range": {
+        "startLine": 51,
+        "startChar": 59,
+        "endLine": 52,
+        "endChar": 18
+      },
+      "revId": "92e247b66348f95be737c6824aca8a3bf552500f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
