@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "61324758_f60cdd0e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 24
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-06T16:48:15Z",
+      "side": 1,
+      "message": "Looks like the test proto is not loaded properly on windows.  ",
+      "revId": "b540d74ed232000b19233c94ae5a196835f29a0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
