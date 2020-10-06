@@ -1408,11 +1408,6 @@ private:
         resIt->second.ctxId = 0;
     }
 
-
-    GoldfishHwPipe* createNewHwPipeId() {
-        return reinterpret_cast<GoldfishHwPipe*>(mNextHwPipe++);
-    }
-
     inline const GoldfishPipeServiceOps* ensureAndGetServiceOps() {
         if (mServiceOps) return mServiceOps;
         mServiceOps = goldfish_pipe_get_service_ops();
@@ -1429,7 +1424,6 @@ private:
     struct address_space_device_control_ops* mAddressSpaceDeviceControlOps =
         nullptr;
 
-    uint32_t mNextHwPipe = 1;
     const GoldfishPipeServiceOps* mServiceOps = nullptr;
 
     std::unordered_map<VirglCtxId, PipeCtxEntry> mContexts;
