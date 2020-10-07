@@ -781,6 +781,8 @@ extern void skin_winsys_start(bool no_window) {
         quitMenu->addAction(quitAction);
         mainBar->addMenu(quitMenu);
         qt_mac_set_dock_menu(quitMenu);
+        if (android_cmdLineOptions->qt_hide_window)
+            System::get()->hideDockIcon();
 #endif
     }
 }
