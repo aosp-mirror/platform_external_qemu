@@ -74,7 +74,6 @@ public:
 
     void allowExtWindowCreation();
     void hide();
-    void hideExtendedWindow();
     void show();
     void dockMainWindow();
     void raiseMainWindow();
@@ -94,6 +93,7 @@ public:
     void reportMouseButtonDown();
 
     bool isExtendedWindowFocused();
+    bool isExtendedWindowVisible();
     void closeExtendedWindow();
 
     // Observed only on Windows:
@@ -123,6 +123,7 @@ public:
     void hideRotationButton(bool hide);
     bool setUiTheme(SettingsTheme theme);
     void showExtendedWindow();
+    void hideExtendedWindow();
 
 signals:
     void guestClipboardChanged(QString text);

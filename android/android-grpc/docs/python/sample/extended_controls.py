@@ -15,6 +15,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import grpc
+import time
 from google.protobuf import empty_pb2
 from aemu.proto.ui_controller_service_pb2 import ThemingStyle
 
@@ -37,6 +38,8 @@ def main(args):
 	setUiTheme(theme)
 	print("Show extended window")
 	stub.showExtendedControls(_EMPTY_)
+	# sleep for 3 seconds
+	time.sleep(3)
 	print("Close extended window")
 	stub.closeExtendedControls(_EMPTY_)
 
