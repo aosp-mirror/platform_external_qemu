@@ -158,7 +158,7 @@ endif()
 
 android_target_link_libraries(
   android-emu-base darwin-x86_64
-  PUBLIC "-framework IOKit" "-framework Foundation")
+  PUBLIC "-framework IOKit" "-framework Foundation" "-framework AppKit")
 
 android_target_compile_definitions(
   android-emu-base darwin-x86_64 PRIVATE "-D_DARWIN_C_SOURCE=1"

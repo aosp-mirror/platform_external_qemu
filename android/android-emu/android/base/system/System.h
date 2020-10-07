@@ -482,6 +482,7 @@ public:
     // On other platforms, this function doesn't do anything.
     static void disableAppNap();
 
+    static void hideDockIcon();
     // Returns the wallclock (high res time us) user, and system time spent
     // in the current thread.
     static CpuTime cpuTime();
