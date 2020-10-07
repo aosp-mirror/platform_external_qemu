@@ -1,0 +1,30 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005381364",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1449294?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "74d3157c_58253355",
+        "filename": "android/android-emu/android/emulation/hostdevices/HostGoldfishPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 552,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T00:13:43Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 552,
+        "startChar": 9,
+        "endLine": 552,
+        "endChar": 10
+      },
+      "revId": "2ea9f81ae2bfe95169bb0c9a1701c8d35d6b00d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
