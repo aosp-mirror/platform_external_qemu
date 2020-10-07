@@ -1,0 +1,498 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "567e977b_1bc72ca8",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 16
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027complex\u0027, \u0027unexpected\u0027, or \u0027placeholder\u0027; see https://developers.google.com/style/inclusive-documentation#ableist-language for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 6,
+        "startChar": 31,
+        "endLine": 6,
+        "endChar": 36
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "28755637_a92a1df5",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 16
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027complex\u0027, \u0027unexpected\u0027, or \u0027placeholder\u0027; see https://developers.google.com/style/inclusive-documentation#ableist-language for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 7,
+        "startChar": 35,
+        "endLine": 7,
+        "endChar": 40
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "41485867_be0ead05",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 16
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027complex\u0027, \u0027unexpected\u0027, or \u0027placeholder\u0027; see https://developers.google.com/style/inclusive-documentation#ableist-language for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 10,
+        "startChar": 2,
+        "endLine": 10,
+        "endChar": 7
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "c3f49f30_26e5f6f9",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 16
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 15,
+        "startChar": 80,
+        "endLine": 15,
+        "endChar": 86
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "9639c7c8_8e5bbd3c",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 16
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 18,
+        "startChar": 78,
+        "endLine": 18,
+        "endChar": 84
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "1b0fa5be_4061bddf",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 16
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 50,
+        "startChar": 80,
+        "endLine": 50,
+        "endChar": 86
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "0589722f_dfc01ff5",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 16
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 60,
+        "startChar": 80,
+        "endLine": 60,
+        "endChar": 86
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "868219ac_4b6d3578",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 16
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 63,
+        "startChar": 78,
+        "endLine": 63,
+        "endChar": 84
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "c1a654ee_e9045aa6",
+        "filename": "android/third_party/perfetto-tracing-only/CMakeLists.txt",
+        "patchSetId": 16
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027complex\u0027, \u0027unexpected\u0027, or \u0027placeholder\u0027; see https://developers.google.com/style/inclusive-documentation#ableist-language for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 138,
+        "startChar": 30,
+        "endLine": 138,
+        "endChar": 35
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "e0c05755_2138f413",
+        "filename": "android/third_party/perfetto-tracing-only/perfetto-tracing-only.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 359,
+        "startChar": 8,
+        "endLine": 359,
+        "endChar": 9
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "afdce9bd_ff6bf06a",
+        "filename": "android/third_party/perfetto-tracing-only/perfetto-tracing-only.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 474,
+        "startChar": 45,
+        "endLine": 474,
+        "endChar": 46
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "646d11d3_f603697b",
+        "filename": "android/third_party/perfetto-tracing-only/perfetto.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027they\u0027, \u0027them\u0027, or \u0027person\u0027; see https://developers.google.com/style/word-list#gender for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 196,
+        "startChar": 3,
+        "endLine": 196,
+        "endChar": 6
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "1f8c73dc_143b685c",
+        "filename": "android/third_party/perfetto-tracing-only/perfetto.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 2155,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 2155,
+        "startChar": 52,
+        "endLine": 2155,
+        "endChar": 58
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "dbe873d5_2ff4ff6f",
+        "filename": "android/third_party/perfetto-tracing-only/perfetto.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 3368,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027they\u0027, \u0027them\u0027, or \u0027person\u0027; see https://developers.google.com/style/word-list#gender for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 3368,
+        "startChar": 33,
+        "endLine": 3368,
+        "endChar": 36
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "a1e0d9e5_ce491164",
+        "filename": "android/third_party/perfetto-tracing-only/perfetto.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 4186,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027complex\u0027, \u0027unexpected\u0027, or \u0027placeholder\u0027; see https://developers.google.com/style/inclusive-documentation#ableist-language for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 4186,
+        "startChar": 11,
+        "endLine": 4186,
+        "endChar": 16
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "a4827b85_bf9c597e",
+        "filename": "android/third_party/perfetto-tracing-only/perfetto.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 4187,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027complex\u0027, \u0027unexpected\u0027, or \u0027placeholder\u0027; see https://developers.google.com/style/inclusive-documentation#ableist-language for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 4187,
+        "startChar": 40,
+        "endLine": 4187,
+        "endChar": 45
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "5b3c5e9d_fabdbb5d",
+        "filename": "android/third_party/perfetto-tracing-only/perfetto.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 37176,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027valid\u0027, \u0027validity check\u0027 or \u0027initial check\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 37176,
+        "startChar": 50,
+        "endLine": 37176,
+        "endChar": 54
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "3ba6d663_c9c87649",
+        "filename": "android/third_party/perfetto-tracing-only/perfetto.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 38616,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027valid\u0027, \u0027validity check\u0027 or \u0027initial check\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 38616,
+        "startChar": 56,
+        "endLine": 38616,
+        "endChar": 60
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005384895",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1440582?revision\u003d16",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "6a2cbbc0_669f69a1",
+        "filename": "android/third_party/perfetto-tracing-only/perfetto.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 49136,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-07T03:57:41Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027they\u0027, \u0027them\u0027, or \u0027person\u0027; see https://developers.google.com/style/word-list#gender for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 49136,
+        "startChar": 62,
+        "endLine": 49136,
+        "endChar": 65
+      },
+      "revId": "41fb15266ddff0600d87a68b75f11ce8309dc8e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
