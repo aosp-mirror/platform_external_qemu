@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c0f4eb46_416fa2f4",
+        "filename": "android/android-emu/android/base/system/system-native-mac.mm",
+        "patchSetId": 3
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-10-07T18:32:53Z",
+      "side": 1,
+      "message": "nit: extra blank line",
+      "revId": "f2d98988cfc1428b874d7de00de8380d505d73db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
