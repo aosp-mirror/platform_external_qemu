@@ -987,6 +987,7 @@ public:
 
                 auto boxed = new_boxed_VkQueue(queueOut, dispatch_VkDevice(deviceInfo.boxed), false /* does not own dispatch */);
                 mQueueInfo[queueOut].boxed = boxed;
+                mQueueInfo[queueOut].lock = new Lock;
             }
         }
 
@@ -1041,6 +1042,7 @@ public:
         auto eraseIt = mQueueInfo.begin();
         for(; eraseIt != mQueueInfo.end();) {
             if (eraseIt->second.device == device) {
+                delete eraseIt->second.lock;
                 delete_boxed_VkQueue(eraseIt->second.boxed);
                 eraseIt = mQueueInfo.erase(eraseIt);
             } else {
@@ -3302,6 +3304,14 @@ public:
                 executePreprocessRecursive(0, submit.pCommandBuffers[c]);
             }
         }
+
+        auto queueInfo = android::base::find(mQueueInfo, queue);
+        if (!queueInfo) return VK_SUCCESS;
+        Lock* ql = queueInfo->lock;
+        lock.unlock();
+
+        AutoLock qlock(*ql);
+
         return vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
     }
 
@@ -3311,8 +3321,16 @@ public:
 
         auto queue = unbox_VkQueue(boxed_queue);
         auto vk = dispatch_VkQueue(boxed_queue);
+
         if (!queue) return VK_SUCCESS;
 
+        AutoLock lock(mLock);
+        auto queueInfo = android::base::find(mQueueInfo, queue);
+        if (!queueInfo) return VK_SUCCESS;
+        Lock* ql = queueInfo->lock;
+        lock.unlock();
+
+        AutoLock qlock(*ql);
         return vk->vkQueueWaitIdle(queue);
     }
 
@@ -5486,6 +5504,7 @@ private:
     };
 
     struct QueueInfo {
+        Lock* lock = nullptr;
         VkDevice device;
         uint32_t queueFamilyIndex;
         VkQueue boxed = nullptr;
