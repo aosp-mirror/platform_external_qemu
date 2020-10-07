@@ -53,22 +53,22 @@ android_add_library(
       jidctint.c
       jidctintelsse.c
       jidctred.c
-      jmemmgr.c
       jmem-android.c
+      jmemmgr.c
       jquant1.c
       jquant2.c
       jutils.c)
 target_include_directories(emulator-libjpeg PUBLIC .)
-if (NOT LINUX_AARCH64)
-target_compile_options(emulator-libjpeg PRIVATE -O3 -fstrict-aliasing -msse2
-                                                -Wno-all)
-target_compile_definitions(
-  emulator-libjpeg PRIVATE -DAVOID_TABLES -DANDROID_INTELSSE2_IDCT
-                           -DANDROID_TILE_BASED_DECODE)
+if(NOT LINUX_AARCH64)
+  target_compile_options(emulator-libjpeg PRIVATE -O3 -fstrict-aliasing -msse2
+                                                  -Wno-all)
+  target_compile_definitions(
+    emulator-libjpeg PRIVATE -DAVOID_TABLES -DANDROID_INTELSSE2_IDCT
+                             -DANDROID_TILE_BASED_DECODE)
 else()
-target_compile_options(emulator-libjpeg PRIVATE -O3 -fstrict-aliasing
-                                                -Wno-all)
-target_compile_definitions(
-  emulator-libjpeg PRIVATE -DAVOID_TABLES -DANDROID_TILE_BASED_DECODE)
+  target_compile_options(emulator-libjpeg PRIVATE -O3 -fstrict-aliasing
+                                                  -Wno-all)
+  target_compile_definitions(emulator-libjpeg
+                             PRIVATE -DAVOID_TABLES -DANDROID_TILE_BASED_DECODE)
 endif()
 target_link_libraries(emulator-libjpeg PRIVATE android-emu-base)

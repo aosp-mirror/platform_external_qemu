@@ -12,7 +12,8 @@ endif(WIN32)
 
 externalproject_add(
   depot-tools
-  GIT_REPOSITORY https://chromium.googlesource.com/chromium/tools/depot_tools.git
+  GIT_REPOSITORY
+    https://chromium.googlesource.com/chromium/tools/depot_tools.git
   PREFIX ${PROJECT_BINARY_DIR}/depot_tools
   CONFIGURE_COMMAND ""
   UPDATE_COMMAND ""

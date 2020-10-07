@@ -2,12 +2,10 @@ if(OPTION_GFXSTREAM_BACKEND)
   android_add_library(
     TARGET gfxstream_backend
     SHARED
-    LICENSE
-      Apache-2.0
-    SRC
-      ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp
-      GfxStreamBackend.cpp
-      GfxStreamAgents.cpp)
+    LICENSE Apache-2.0
+    SRC ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp
+        GfxStreamAgents.cpp
+        GfxStreamBackend.cpp)
 
   target_compile_options(gfxstream_backend PRIVATE -fvisibility=hidden)
 
@@ -26,42 +24,43 @@ if(OPTION_GFXSTREAM_BACKEND)
   )
 
   android_target_properties(gfxstream_backend linux-x86_64
-      "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN'")
+                            "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN'")
   android_target_properties(gfxstream_backend darwin-x86_64
-      "INSTALL_RPATH>=@loader_path")
+                            "INSTALL_RPATH>=@loader_path")
 
-  if (NOT LINUX_AARCH64)
-      target_link_libraries(
-          gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared emugl_base
-          OpenglRender)
+  if(NOT LINUX_AARCH64)
+    target_link_libraries(
+      gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared
+                                emugl_base OpenglRender)
   else()
-      target_link_libraries(
-          gfxstream_backend PRIVATE GLIB2::GLIB2 android-emu-shared emugl_base OpenglRender)
+    target_link_libraries(
+      gfxstream_backend PRIVATE GLIB2::GLIB2 android-emu-shared emugl_base
+                                OpenglRender)
   endif()
 
-
-  if (NOT LINUX_AARCH64)
+  if(NOT LINUX_AARCH64)
     android_target_dependency(gfxstream_backend all ANGLE_DEPENDENCIES)
   endif()
 
   android_install_shared(gfxstream_backend)
 
-  if (NOT LINUX_AARCH64)
+  if(NOT LINUX_AARCH64)
     android_install_dependency(all ANGLE_DEPENDENCIES)
   endif()
 
-  if (CROSVM)
+  if(CROSVM)
     android_crosvm_build(gfxstream_backend)
-    set(CMAKE_CROSVM_SRC_PATH
-        "${ANDROID_QEMU2_TOP_DIR}/../../platform/crosvm")
-    add_custom_target(crosvm_gfxstream ALL DEPENDS
-        "${CMAKE_BINARY_DIR}/crosvm-build-env/release/crosvm")
+    set(CMAKE_CROSVM_SRC_PATH "${ANDROID_QEMU2_TOP_DIR}/../../platform/crosvm")
+    add_custom_target(
+      crosvm_gfxstream ALL
+      DEPENDS "${CMAKE_BINARY_DIR}/crosvm-build-env/release/crosvm")
   endif()
 
   android_add_test(TARGET gfxstream_unittests SRC gfxstream_unittest.cpp)
   target_compile_options(gfxstream_unittests PRIVATE -fvisibility=default)
-  target_link_libraries(gfxstream_unittests PUBLIC gfxstream_backend android-emu-base gtest
-                        gtest_main OSWindow)
+  target_link_libraries(
+    gfxstream_unittests PUBLIC gfxstream_backend android-emu-base gtest
+                               gtest_main OSWindow)
   target_include_directories(
     gfxstream_unittests
     PRIVATE
@@ -126,7 +125,8 @@ if(NOT WINDOWS AND NOT LINUX_AARCH64)
   # Combined unit tests
   android_add_test(TARGET emugl_combined_unittests SRC # cmake-format: sortable
                                                        combined_unittest.cpp)
-  target_link_libraries(emugl_combined_unittests PUBLIC aemugraphics OSWindow android-emu-test-launcher)
+  target_link_libraries(emugl_combined_unittests
+                        PUBLIC aemugraphics OSWindow android-emu-test-launcher)
   target_compile_definitions(emugl_combined_unittests
                              PRIVATE -D__ANDROID_API__=28)
   target_include_directories(
@@ -167,8 +167,9 @@ if(NOT WINDOWS AND NOT LINUX_AARCH64)
     aemugraphics_toplevel_unittests
     PRIVATE ${GOLDFISH_EMUGL_DIR}/host/include/libOpenglRender
             ${GOLDFISH_EMUGL_DIR}/system/include)
-  target_link_libraries(aemugraphics_toplevel_unittests
-                        PUBLIC aemugraphics OSWindow gtest gmock  android-emu-test-launcher)
+  target_link_libraries(
+    aemugraphics_toplevel_unittests PUBLIC aemugraphics OSWindow gtest gmock
+                                           android-emu-test-launcher)
   android_target_dependency(aemugraphics_toplevel_unittests all
                             SWIFTSHADER_DEPENDENCIES)
   android_target_dependency(aemugraphics_toplevel_unittests all

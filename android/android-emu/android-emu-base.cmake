@@ -21,22 +21,6 @@ android_add_library(
       android/base/CpuTime.cpp
       android/base/CpuUsage.cpp
       android/base/Debug.cpp
-      android/base/GLObjectCounter.cpp
-      android/base/IOVector.cpp
-      android/base/JsonWriter.cpp
-      android/base/LayoutResolver.cpp
-      android/base/Log.cpp
-      android/base/Pool.cpp
-      android/base/ProcessControl.cpp
-      android/base/Stopwatch.cpp
-      android/base/StringFormat.cpp
-      android/base/StringParse.cpp
-      android/base/StringView.cpp
-      android/base/SubAllocator.cpp
-      android/base/Tracing.cpp
-      android/base/Uri.cpp
-      android/base/Uuid.cpp
-      android/base/Version.cpp
       android/base/files/CompressingStream.cpp
       android/base/files/DecompressingStream.cpp
       android/base/files/Fd.cpp
@@ -51,6 +35,11 @@ android_add_library(
       android/base/files/Stream.cpp
       android/base/files/StreamSerializing.cpp
       android/base/gl_object_counter.cpp
+      android/base/GLObjectCounter.cpp
+      android/base/IOVector.cpp
+      android/base/JsonWriter.cpp
+      android/base/LayoutResolver.cpp
+      android/base/Log.cpp
       android/base/memory/LazyInstance.cpp
       android/base/memory/MemoryHints.cpp
       android/base/memory/MemoryTracker.cpp
@@ -65,12 +54,24 @@ android_add_library(
       android/base/perflogger/BenchmarkLibrary.cpp
       android/base/perflogger/Metric.cpp
       android/base/perflogger/WindowDeviationAnalyzer.cpp
+      android/base/Pool.cpp
+      android/base/ProcessControl.cpp
       android/base/ring_buffer.c
+      android/base/Stopwatch.cpp
+      android/base/StringFormat.cpp
+      android/base/StringParse.cpp
+      android/base/StringView.cpp
+      android/base/SubAllocator.cpp
       android/base/synchronization/MessageChannel.cpp
       android/base/system/System.cpp
       android/base/threads/Async.cpp
       android/base/threads/FunctorThread.cpp
       android/base/threads/ThreadStore.cpp
+      android/base/Tracing.cpp
+      android/base/Uri.cpp
+      android/base/Uuid.cpp
+      android/base/Version.cpp
+      android/emulation/control/AndroidAgentFactory.cpp
       android/utils/aconfig-file.c
       android/utils/assert.c
       android/utils/async.cpp
@@ -116,17 +117,16 @@ android_add_library(
       android/utils/vector.c
       android/utils/x86_cpuid.cpp
       # TODO(jansene): This needs to move to its own library.
-      android/emulation/control/AndroidAgentFactory.cpp
   LINUX android/base/memory/SharedMemory_posix.cpp
         android/base/threads/Thread_pthread.cpp
   DARWIN android/base/memory/SharedMemory_posix.cpp
-         android/base/threads/Thread_pthread.cpp
          android/base/system/system-native-mac.mm
+         android/base/threads/Thread_pthread.cpp
   WINDOWS android/base/files/preadwrite.cpp
           android/base/memory/SharedMemory_win32.cpp
-          android/base/threads/Thread_win32.cpp
-          android/base/system/Win32Utils.cpp
           android/base/system/Win32UnicodeString.cpp
+          android/base/system/Win32Utils.cpp
+          android/base/threads/Thread_win32.cpp
           android/utils/win32_cmdline_quote.cpp
           android/utils/win32_unicode.cpp
           stubs/win32-stubs.c)
@@ -150,7 +150,7 @@ if(OPTION_TCMALLOC)
 else()
   android_target_link_libraries(
     android-emu-base linux-aarch64 PUBLIC LIBUNWIND::LIBUNWIND -ldl
-                                         Threads::Threads -lrt)
+                                          Threads::Threads -lrt)
   android_target_link_libraries(
     android-emu-base linux-x86_64 PUBLIC LIBUNWIND::LIBUNWIND -ldl
                                          Threads::Threads -lrt)
@@ -189,10 +189,11 @@ android_target_compile_options(android-emu-base windows_msvc-x86_64
 
 # Add the benchmark
 android_add_executable(
-  TARGET android-emu_benchmark NODISTRIBUTE
+  TARGET android-emu_benchmark
+  NODISTRIBUTE
   SRC # cmake-format: sortable
-      android/base/synchronization/Lock_benchmark.cpp
       android/base/Log_benchmark.cpp
+      android/base/synchronization/Lock_benchmark.cpp
       android/base/TranslateBenchmark.cpp)
 target_link_libraries(android-emu_benchmark PRIVATE android-emu-base
                                                     emulator-gbench)
