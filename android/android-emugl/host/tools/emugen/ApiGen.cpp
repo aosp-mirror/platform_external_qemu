@@ -552,6 +552,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_enc.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include <vector>\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
+    fprintf(fp, "#include \"android/base/Tracing.h\"\n");
     fprintf(fp, "namespace {\n\n");
 
     // unsupport printout
@@ -575,6 +576,8 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 #if DLOG_ALL_ENCODES
         fprintf(fp, "ALOGD(\"%%s: enter\", __FUNCTION__);\n");
 #endif
+
+        fprintf(fp, "\tAEMU_SCOPED_TRACE(\"%s encode\");\n", e->name().c_str());
 
 #if INSTRUMENT_TIMING_GUEST
         fprintf(fp, "\tstruct timespec ts0, ts1;\n");
@@ -973,10 +976,6 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "#include <stdio.h>\n\n");
     fprintf(fp, "typedef unsigned int tsize_t; // Target \"size_t\", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.\n\n");
 
-    // helper macro for debug print
-    fprintf(fp,
-            "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n");
-
     fprintf(fp,
 #if DECODER_CHECK_GL_ERRORS
             "#define CHECK_GL_ERRORS\n"
@@ -1043,6 +1042,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
         // TODO - add for return value;
         fprintf(fp, "\t\tcase OP_%s: {\n", e->name().c_str());
+        fprintf(fp, "\t\t\tandroid::base::beginTrace(\"%s decode\");\n", e->name().c_str());
 
 #if INSTRUMENT_TIMING_HOST
         fprintf(fp, "\t\t\tstruct timespec ts0, ts1, ts2;\n");
@@ -1058,7 +1058,13 @@ R"(        // Do this on every iteration, as some commands may change the checks
             retvalType = e->retval().type()->name();
         }
 
+#define SKIP_DEBUG_PRINT 1
+
         for (int pass = PASS_FIRST; pass < PASS_LAST; pass++) {
+#if SKIP_DEBUG_PRINT
+            if (pass == PASS_DebugPrint) continue;
+#endif
+
 #if INSTRUMENT_TIMING_HOST
             if (pass == PASS_FunctionCall) {
                 fprintf(fp, "\t\t\tclock_gettime(CLOCK_REALTIME, &ts2);\n");
@@ -1434,6 +1440,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                     "ts1.tv_sec, ts1.tv_nsec/1000, timeDiff, timeDiff2);\n", e->name().c_str());
 #endif
         fprintf(fp, "\t\t\tSET_LASTCALL(\"%s\");\n", e->name().c_str());
+        fprintf(fp, "\t\t\tandroid::base::endTrace();\n");
         fprintf(fp, "\t\t\tbreak;\n");
         fprintf(fp, "\t\t}\n");
 

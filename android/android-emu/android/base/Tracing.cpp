@@ -232,11 +232,10 @@ private:
     bool mEnabled = false;
 };
 
-static LazyInstance<TraceConfig> sTraceConfig =
-    LAZY_INSTANCE_INIT;
+static TraceConfig sTraceConfig;
 
 bool shouldEnableTracing() {
-    return sTraceConfig->enabled();
+    return sTraceConfig.enabled();
 }
 
 #ifdef __cplusplus
@@ -294,6 +293,12 @@ void endThresholdTrace() {
         thresholdTrace_end();
     }
 }
+
+// TODO(b/168843698): Connect this up to an underlying tracing library.
+void enableTracing() { }
+void disableTracing() { }
+void setGuestTime(uint64_t guestTime) { (void)guestTime; }
+void traceCounter(const char* tag, int64_t value) { (void)tag; (void)value; }
 
 } // namespace base
 } // namespace android
