@@ -44,7 +44,12 @@
 #define GFXSTREAM_DEBUG_LEVEL 1
 
 #if GFXSTREAM_DEBUG_LEVEL >= 1
-#define GFXS_LOG(fmt,...) printf("%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#define GFXS_LOG(fmt, ...)                                                     \
+    do {                                                                       \
+        fprintf(stdout, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__); \
+        fflush(stdout);                                                        \
+    } while (0)
+
 #else
 #define GFXS_LOG(fmt,...)
 #endif
