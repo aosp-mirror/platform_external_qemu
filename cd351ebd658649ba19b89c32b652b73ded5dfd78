@@ -16,6 +16,23 @@
       "message": "New tests are passing ",
       "revId": "cd351ebd658649ba19b89c32b652b73ded5dfd78",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a63758c8_33d5ad78",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 29
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T19:21:23Z",
+      "side": 1,
+      "message": "All the tests are passing but still get android-emu_unittests (SEGFAULT), Weird. https://android-build.googleplex.com/builds/pending/P17135886/gfxstream_sdk_tools_linux/latest/view/logs/build_error.log. ",
+      "revId": "cd351ebd658649ba19b89c32b652b73ded5dfd78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
