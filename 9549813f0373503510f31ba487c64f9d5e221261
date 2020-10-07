@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "acdf5d2f_64dbeb97",
+        "filename": "android/android-emu/android/physics/FoldableModel.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-10-07T05:25:08Z",
+      "side": 1,
+      "message": "||android_foldable_folded_area_configured()\n\nTo compatible with legacy fold",
+      "revId": "9549813f0373503510f31ba487c64f9d5e221261",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
