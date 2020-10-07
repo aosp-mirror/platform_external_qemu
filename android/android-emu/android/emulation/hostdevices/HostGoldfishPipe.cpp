@@ -59,65 +59,117 @@ using android::base::Err;
 
 namespace android {
 
-HostGoldfishPipeDevice::~HostGoldfishPipeDevice() {
-    for (auto it : mHwPipeToPipe) {
-        close(it.first);
+HostGoldfishPipeDevice::HostHwPipe::HostHwPipe(uint32_t i)
+        : magic(kMagicAlive), id(i) {
+    fprintf(stderr, "rkir555 %s:%d this=%p id=%u\n", __func__, __LINE__, this, id);
+}
+
+HostGoldfishPipeDevice::HostHwPipe::~HostHwPipe() {
+    magic = kMagicDead;
+    fprintf(stderr, "rkir555 %s:%d this=%p id=%u\n", __func__, __LINE__, this, id);
+}
+
+uint32_t HostGoldfishPipeDevice::HostHwPipe::getId() const { return id; }
+
+std::unique_ptr<HostGoldfishPipeDevice::HostHwPipe>
+HostGoldfishPipeDevice::HostHwPipe::create() {
+    static uint32_t nextId = 1;
+    return create(nextId++);
+}
+
+std::unique_ptr<HostGoldfishPipeDevice::HostHwPipe>
+HostGoldfishPipeDevice::HostHwPipe::create(uint32_t id) {
+    return std::make_unique<HostHwPipe>(id);
+}
+
+HostGoldfishPipeDevice::HostHwPipe*
+HostGoldfishPipeDevice::HostHwPipe::from(void* ptr) {
+    HostHwPipe* pipe = static_cast<HostHwPipe*>(ptr);
+    const auto magic = pipe->magic;
+
+    switch (magic) {
+    case kMagicAlive:
+        return pipe;
+
+    case kMagicDead:
+        crashhandler_die_format("%s:%d dead pipe, ptr=%p\n",
+                __func__, __LINE__, ptr, magic);
+        break;
+
+    default:
+        crashhandler_die_format("%s:%d not a pipe, ptr=%p, magic=0x%08X\n",
+                __func__, __LINE__, ptr, magic);
+        break;
     }
 
-    ScopedVmLock lock;
-    mHwPipeWakeCallbacks.clear();
-    mPipeToHwPipe.clear();
-    mHwPipeToPipe.clear();
+    return nullptr;
+}
+
+HostGoldfishPipeDevice::~HostGoldfishPipeDevice() {
+    while (true) {
+        const auto i = mHwPipeToPipe.begin();
+        if (i == mHwPipeToPipe.end()) {
+            break;
+        } else {
+            close(i->second.hwPipe.get());
+        }
+    }
 }
 
 // Also opens.
 void* HostGoldfishPipeDevice::connect(const char* name) {
+    const auto handshake = std::string("pipe:") + name;
+
     ScopedVmLock lock;
-    void* pipe = open(createNewHwPipeId());
-
-    mCurrentPipeWantingConnection = pipe;
-
-    std::string handshake("pipe:");
-
-    handshake += name;
+    std::unique_ptr<HostHwPipe> hwpipe = HostHwPipe::create();
+    void* hostPipe = open(hwpipe.get());
+    mCurrentPipeWantingConnection = hostPipe;
 
     const ssize_t len = static_cast<ssize_t>(handshake.size()) + 1;
-    const ssize_t ret = writeInternal(pipe, handshake.c_str(), len);
+    const ssize_t ret = writeInternal(hostPipe, handshake.c_str(), len);
 
     if (ret == len) {
         // pipe is currently refencing the connect pipe.  After writing the pipe
         // name we should have received a resetPipe, which returns the real
         // host-side pipe.
-        void* hostPipe = popHostPipe(pipe);
+        void* newHostPipe = popHostPipe(hostPipe);
         if (!hostPipe) {
             crashhandler_die_format(
                     "FATAL: Tried to connect with %s, "
                     "but could not get host pipe.",
                     handshake.c_str());
         }
+
+        HostHwPipe* newHwPipe = mPipeToHwPipe[newHostPipe];
+
         HOST_PIPE_DLOG("New pipe: service: [%s] hwpipe: %p hostpipe: %p",
-                       name, mPipeToHwPipe[hostPipe], hostPipe);
-        return mPipeToHwPipe[hostPipe];
+                       name, newHwPipe, newHostPipe);
+
+        return newHwPipe;
     } else {
         LOG(ERROR) << "Could not connect to goldfish pipe name: " << name;
-        mResettedPipes.erase(pipe);
-        android_pipe_guest_close(pipe, PIPE_CLOSE_GRACEFUL);
+        mResettedPipes.erase(hwpipe->getId());
+        android_pipe_guest_close(hwpipe.get(), PIPE_CLOSE_GRACEFUL);
         mErrno = EIO;
         return nullptr;
     }
 }
 
-void HostGoldfishPipeDevice::close(void* hwpipe) {
-    HOST_PIPE_DLOG("Close hw pipe %p", hwpipe);
+void HostGoldfishPipeDevice::close(void* hwpipe_raw) {
+    close(HostHwPipe::from(hwpipe_raw)->getId());
+}
+
+void HostGoldfishPipeDevice::close(uint32_t hwPipeId) {
+    HOST_PIPE_DLOG("Close hwPipeId=%u", hwPipeId);
     ScopedVmLock lock;
 
-    auto it = mHwPipeToPipe.find(hwpipe);
+    auto it = mHwPipeToPipe.find(hwPipeId);
     if (it != mHwPipeToPipe.end()) {
-        android_pipe_guest_close(it->second, PIPE_CLOSE_GRACEFUL);
-        mHwPipeWakeCallbacks.erase(hwpipe);
-        HOST_PIPE_DLOG("Erased host pipe %p corresponding to %p",
-                       it->second, hwpipe);
-        mPipeToHwPipe.erase(it->second);
+        void* hostPipe = it->second.hostPipe;
+        android_pipe_guest_close(hostPipe, PIPE_CLOSE_GRACEFUL);
+        HOST_PIPE_DLOG("Erased hostPipe=%p corresponding to hwPipe=%p",
+                       hostPipe, it->second.hwPipe.get());
+        mPipeToHwPipe.erase(hostPipe);
         mHwPipeToPipe.erase(it);
     } else {
         LOG(INFO) << "Could not close pipe, ENOENT.";
@@ -432,7 +484,7 @@ void HostGoldfishPipeDevice::setErrno(ssize_t res) {
 }
 
 void* HostGoldfishPipeDevice::createNewHwPipeId() {
-    return reinterpret_cast<void*>(mNextHwPipe++);
+    return new uint32_t(mNextHwPipeId++);
 }
 
 // locked
@@ -449,7 +501,7 @@ void HostGoldfishPipeDevice::closeHwPipe(void* hwpipe) {
     close(hwpipe);
 }
 
-void HostGoldfishPipeDevice::signalWake(void* hwpipe, int wakes) {
+void HostGoldfishPipeDevice::signalWake(HostHwPipe* hwpipe, int wakes) {
     ScopedVmLock lock;
     auto callbackIt = mHwPipeWakeCallbacks.find(hwpipe);
     if (callbackIt != mHwPipeWakeCallbacks.end()) {
@@ -471,13 +523,16 @@ HostGoldfishPipeDevice* HostGoldfishPipeDevice::get() {
 
 // Callbacks for AndroidPipeHwFuncs.
 // static
-void HostGoldfishPipeDevice::resetPipeCallback(void* hwpipe,
+void HostGoldfishPipeDevice::resetPipeCallback(void* hwpipe_raw,
                                                void* internal_pipe) {
-    HostGoldfishPipeDevice::get()->resetPipe(hwpipe, internal_pipe);
+    HostGoldfishPipeDevice::get()->resetPipe(HostHwPipe::from(hwpipe_raw),
+                                             internal_pipe);
 }
 
 // static
-void HostGoldfishPipeDevice::closeFromHostCallback(void* hwpipe) {
+void HostGoldfishPipeDevice::closeFromHostCallback(void* hwpipe_raw) {
+    HostHwPipe* hwpipe = HostHwPipe::from(hwpipe_raw);
+
     // PIPE_WAKE_CLOSED gets translated to closeFromHostCallback.
     // To simplify detecting a close-from-host, signal a wake callback so that
     // the event can be detected.
@@ -486,8 +541,14 @@ void HostGoldfishPipeDevice::closeFromHostCallback(void* hwpipe) {
 }
 
 // static
-void HostGoldfishPipeDevice::signalWakeCallback(void* hwpipe, unsigned wakes) {
-    HostGoldfishPipeDevice::get()->signalWake(hwpipe, wakes);
+void HostGoldfishPipeDevice::signalWakeCallback(void* hwpipe_raw, unsigned wakes) {
+    HostGoldfishPipeDevice::get()->signalWake(HostHwPipe::from(hwpipe_raw),
+                                              wakes);
+}
+
+// static 
+int HostGoldfishPipeDevice::getPipeIdCallback(void* hwpipe_raw) {
+    return HostHwPipe::from(hwpipe_raw)->getId();
 }
 
 } // namespace android
