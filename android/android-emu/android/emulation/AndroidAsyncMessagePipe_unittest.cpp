@@ -62,7 +62,7 @@ protected:
         mLooper.reset();
     }
 
-    void writePacket(void* pipe, const std::vector<uint8_t>& data) {
+    void writePacket(int pipe, const std::vector<uint8_t>& data) {
         const uint32_t payloadSize = static_cast<uint32_t>(data.size());
         EXPECT_EQ(sizeof(uint32_t),
                   mDevice->write(pipe, &payloadSize, sizeof(uint32_t)));
@@ -70,7 +70,7 @@ protected:
         EXPECT_THAT(mDevice->write(pipe, data), IsOk());
     }
 
-    std::vector<uint8_t> readPacket(void* pipe) {
+    std::vector<uint8_t> readPacket(int pipe) {
         uint32_t responseSize = 0;
         EXPECT_EQ(sizeof(uint32_t),
                   mDevice->read(pipe, &responseSize, sizeof(uint32_t)));
@@ -101,15 +101,15 @@ protected:
         event.wait();
     }
 
-    void snapshotSave(void* pipe, base::Stream* stream) {
+    void snapshotSave(int pipe, base::Stream* stream) {
         RecursiveScopedVmLock lock;
         mDevice->saveSnapshot(stream, pipe);
     }
 
-    void* snapshotLoad(base::Stream* stream) {
+    int snapshotLoad(base::Stream* stream) {
         RecursiveScopedVmLock lock;
-        void* pipe = mDevice->loadSnapshotSinglePipe(stream);
-        EXPECT_NE(pipe, nullptr);
+        int pipe = mDevice->loadSnapshotSinglePipe(stream);
+        EXPECT_GE(pipe, 0);
         return pipe;
     }
 
