@@ -81,8 +81,9 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*restoreSkin)(void);
     void (*updateUIMultiDisplayPage)(uint32_t);
     bool (*getMonitorRect)(uint32_t*, uint32_t*);
-    void (*startExtendedWindow)(void);
-    void (*quitExtendedWindow)(void);
+    // return true if extended controls window's visibility has changed.
+    bool (*startExtendedWindow)(void);
+    bool (*quitExtendedWindow)(void);
     bool (*setUiTheme)(SettingsTheme type);
 } QAndroidEmulatorWindowAgent;
 

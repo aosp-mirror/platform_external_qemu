@@ -432,10 +432,6 @@ void ToolWindow::hide() {
     hideExtendedWindow();
 }
 
-void ToolWindow::hideExtendedWindow() {
-    mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
-}
-
 void ToolWindow::closeEvent(QCloseEvent* ce) {
     mIsExiting = true;
     // make sure only parent processes the event - otherwise some
@@ -495,6 +491,10 @@ bool ToolWindow::setUiTheme(SettingsTheme theme) {
 void ToolWindow::showExtendedWindow() {
     ensureExtendedWindowExists();
     on_more_button_clicked();
+}
+
+void ToolWindow::hideExtendedWindow() {
+    mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
 }
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) {
@@ -830,6 +830,13 @@ bool ToolWindow::isExtendedWindowFocused() {
         return mExtendedWindow.get()->isActiveWindow();
     }
 
+    return false;
+}
+
+bool ToolWindow::isExtendedWindowVisible() {
+    if (mExtendedWindow.hasInstance()) {
+        return mExtendedWindow.get()->isVisible();
+    }
     return false;
 }
 
