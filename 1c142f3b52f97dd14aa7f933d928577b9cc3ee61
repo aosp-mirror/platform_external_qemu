@@ -41,6 +41,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "61c36653_e2c3cec1",
+        "filename": "android/android-emu/android/emulation/proto/sensor_session.proto",
+        "patchSetId": 28
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Done, removed all the links that point to internal codebase",
+      "parentUuid": "6728e271_d196d6d9",
+      "range": {
+        "startLine": 55,
+        "startChar": 8,
+        "endLine": 56,
+        "endChar": 28
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9609f617_4ff3e8de",
@@ -54,6 +78,30 @@
       "writtenOn": "2020-10-06T22:55:19Z",
       "side": 1,
       "message": "There shouldn\u0027t be records with negative timestamps. If there are, that\u0027s a bug in the recording app. Please file it against me.\n\nFor behavioral consistency, do not skip these records. The lib in g3 doesn\u0027t, but rather treats them as timestamp 0 as a size effect.",
+      "range": {
+        "startLine": 75,
+        "startChar": 29,
+        "endLine": 75,
+        "endChar": 47
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6eaa6057_cbb2beec",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Bug filed b/170262561",
+      "parentUuid": "9609f617_4ff3e8de",
       "range": {
         "startLine": 75,
         "startChar": 29,
@@ -87,6 +135,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9bfa22fd_f41bd098",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7fd4a1c2_a2ef839b",
+      "range": {
+        "startLine": 88,
+        "startChar": 20,
+        "endLine": 88,
+        "endChar": 33
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2b28e2cd_b3dc05ba",
@@ -100,6 +172,30 @@
       "writtenOn": "2020-10-06T22:55:19Z",
       "side": 1,
       "message": "This reset is redundant with the one in StopReplay and should not be here.",
+      "range": {
+        "startLine": 239,
+        "startChar": 4,
+        "endLine": 239,
+        "endChar": 19
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fe6cc9f2_0ee2fd47",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2b28e2cd_b3dc05ba",
       "range": {
         "startLine": 239,
         "startChar": 4,
@@ -133,6 +229,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ee57cd6e_3a463346",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "986f7a79_2a683286",
+      "range": {
+        "startLine": 247,
+        "startChar": 4,
+        "endLine": 247,
+        "endChar": 19
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7d653a05_877d3497",
@@ -146,6 +266,30 @@
       "writtenOn": "2020-10-06T22:55:19Z",
       "side": 1,
       "message": "nit: should be defined as a constant \"us_to_ns \u003d 1000\" or something similar.",
+      "range": {
+        "startLine": 251,
+        "startChar": 44,
+        "endLine": 251,
+        "endChar": 48
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "660882a4_5059ba87",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 28
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7d653a05_877d3497",
       "range": {
         "startLine": 251,
         "startChar": 44,
@@ -179,6 +323,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "081e710f_d778ba38",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "55cdea55_7845c7b1",
+      "range": {
+        "startLine": 102,
+        "startChar": 16,
+        "endLine": 102,
+        "endChar": 67
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b9de048f_3c36e770",
@@ -192,6 +360,30 @@
       "writtenOn": "2020-10-06T22:55:19Z",
       "side": 1,
       "message": "Do these need to be enumerated? None of the functions return more than one type of failure. It would make more sense for all of these to instead return bool true/false for success/failure.\n\nLoadFrom only returns OK or PROTO_PARSE_FAIL\nSeekToTime only returns OK or SEEK_TIME_NEGATIVE\nStartReplay only returns OK or MULTIPLIER_NEGATIVE",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 6
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "306e054b_d0b65181",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Done, switch to bool",
+      "parentUuid": "b9de048f_3c36e770",
       "range": {
         "startLine": 135,
         "startChar": 0,
@@ -225,6 +417,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "90aba304_dcec89d1",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Done, move them to UI part",
+      "parentUuid": "be8e97ac_ca69832f",
+      "range": {
+        "startLine": 186,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 44
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cab954ad_a8fe8789",
@@ -248,6 +464,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0146e0f4_631f261a",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cab954ad_a8fe8789",
+      "range": {
+        "startLine": 197,
+        "startChar": 21,
+        "endLine": 197,
+        "endChar": 44
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5e047574_8e22f7ee",
@@ -261,6 +501,30 @@
       "writtenOn": "2020-10-06T22:55:19Z",
       "side": 1,
       "message": "This and the comparator are complex enough that I\u0027m not convinced inline definitions are appropriate, even if they are one-liners.",
+      "range": {
+        "startLine": 203,
+        "startChar": 0,
+        "endLine": 208,
+        "endChar": 5
+      },
+      "revId": "1c142f3b52f97dd14aa7f933d928577b9cc3ee61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "162272ec_49fb7682",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-07T18:42:30Z",
+      "side": 1,
+      "message": "Done, remove the \"inline\"",
+      "parentUuid": "5e047574_8e22f7ee",
       "range": {
         "startLine": 203,
         "startChar": 0,
