@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <memory>
 
 #include <sys/types.h>
 
@@ -33,6 +34,26 @@ public:
     using ReadResult = android::base::Result<std::vector<uint8_t>, int>;
     using WriteResult = android::base::Result<ssize_t, int>;
 
+    struct InternalPipe {};
+
+    struct HostHwPipe {
+        static constexpr uint32_t kMagicAlive = 0x70697065;
+        static constexpr uint32_t kMagicDead = kMagicAlive - 1;
+
+        explicit HostHwPipe(uint32_t i);
+        ~HostHwPipe();
+
+        uint32_t getId() const;
+
+        static std::unique_ptr<HostHwPipe> create();
+        static std::unique_ptr<HostHwPipe> create(uint32_t id);
+        static HostHwPipe* from(void* ptr);
+
+    private:
+        uint32_t magic;
+        uint32_t id;
+    };
+
     HostGoldfishPipeDevice() = default;
     ~HostGoldfishPipeDevice();
 
@@ -40,14 +61,15 @@ public:
 
     // Opens/closes pipe services.
     void* connect(const char* name);
-    void close(void* pipe);
+    void close(void* hwPipe);
+    void close(uint32_t hwPipeId);
 
     // Closes all pipes and resets to initial state.
     void clear();
 
     // Gets the host side pipe object corresponding to hwpipe.
     // Not persistent across snapshot save/load.
-    void* getHostPipe(void* hwpipe) const;
+    InternalPipe* getHostPipe(const HostHwPipe* hwpipe) const;
 
     // Loads a single pipe from a stream, returns null if the pipe can't be loaded.
     void* load(base::Stream* stream);
@@ -57,7 +79,7 @@ public:
     void loadSnapshot(base::Stream* stream);
 
     // Save/load the device, but only for a particular hwpipe.
-    void saveSnapshot(base::Stream* stream, void* hwpipe);
+//    void saveSnapshot1(base::Stream* stream, void* hwpipe);
     void* loadSnapshotSinglePipe(base::Stream* stream);
 
     // Read/write for a particular pipe, along with C++ versions.
@@ -79,43 +101,44 @@ public:
     static void resetPipeCallback(void* hwpipe, void* internal_pipe);
     static void closeFromHostCallback(void* hwpipe);
     static void signalWakeCallback(void* hwpipe, unsigned wakes);
+    static int getPipeIdCallback(void* hwpipe);
 
 private:
     void initialize();
-    // Opens a new pipe connection, returns a pointer to the host connector
-    // pipe.
-    //
-    // hwpipe is an opaque pointer that will be used as the hwpipe id, generate
-    // one with createNewHwPipeId().
-    void* open(void* hwpipe);
+    HostHwPipe* associatePipes(std::unique_ptr<HostHwPipe> hwPipe,
+                               InternalPipe* hostPipe);
+
     ssize_t writeInternal(void* pipe, const void* buffer, size_t len);
+
     // Returns the host-side pipe for a connector pipe, if the pipe has been
     // reset.
-    void* popHostPipe(void* connectorPipe);
+    InternalPipe* popHostPipe(InternalPipe* connectorPipe);
     void setErrno(ssize_t res);
-
-    void* createNewHwPipeId();
 
     // Called to associate a given hwpipe with a host-side pipe.
     //
     // |hwpipe| - hwpipe pointer, the goldfish pipe pointer.
     // |internal_pipe| - Host-side pipe, corresponding to AndroidPipe*.
-    void resetPipe(void* hwpipe, void* internal_pipe);
+    void resetPipe(HostHwPipe* hwpipe, InternalPipe* internal_pipe);
 
     // Close a hwpipe.
-    void closeHwPipe(void* hwpipe);
+    void closeHwPipe(HostHwPipe* hwpipe);
     // Wake a hwpipe.
-    void signalWake(void* hwpipe, int wakes);
-
-    uintptr_t mNextHwPipe = 1;
+    void signalWake(const HostHwPipe* hwpipe, int wakes);
 
     bool mInitialized = false;
     int mErrno = 0;
-    void* mCurrentPipeWantingConnection = nullptr;
-    std::unordered_map<void*, void*> mResettedPipes;
-    std::unordered_map<void*, void*> mPipeToHwPipe;
-    std::unordered_map<void*, void*> mHwPipeToPipe;
-    std::unordered_map<void*, std::function<void(int)>> mHwPipeWakeCallbacks;
+    InternalPipe* mCurrentPipeWantingConnection = nullptr;
+
+    struct HostHwPipeInfo {
+        std::unique_ptr<HostHwPipe> hwPipe;
+        InternalPipe* hostPipe = nullptr;
+        std::function<void(int)> wakeCallback = [](int){};
+    };
+
+    std::unordered_map<InternalPipe*, InternalPipe*> mResettedPipes;
+    std::unordered_map<InternalPipe*, HostHwPipe*> mPipeToHwPipe;
+    std::unordered_map<uint32_t, HostHwPipeInfo> mHwPipeInfo;
 };
 
 // Initializes a global pipe instance for the current process.
