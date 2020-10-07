@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c72018fe_c27233b9",
+        "filename": "android/android-emu/android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-10-07T17:37:07Z",
+      "side": 1,
+      "message": "Add description.",
+      "range": {
+        "startLine": 485,
+        "startChar": 16,
+        "endLine": 485,
+        "endChar": 28
+      },
+      "revId": "4bcbca610863ef537f196f79d2475aa2a8db450c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "070ed511_a52dd344",
+        "filename": "android/android-emu/android/base/system/system-native-mac.mm",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-10-07T17:37:07Z",
+      "side": 1,
+      "message": "This line can be moved outside of the \"if\" statement.",
+      "range": {
+        "startLine": 156,
+        "startChar": 8,
+        "endLine": 156,
+        "endChar": 76
+      },
+      "revId": "4bcbca610863ef537f196f79d2475aa2a8db450c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
