@@ -15,6 +15,7 @@
 
 #include <hardware/fb.h>
 #include <hardware/gralloc.h>
+#include <stdio.h>
 
 // Consolidates all framebuffer device, alloc device,
 // and gralloc module operations into one convenient struct.
@@ -32,14 +33,17 @@ struct gralloc_implementation {
               int usage,
               buffer_handle_t* handle,
               int* stride) {
+        fprintf(stderr, "rkir555 %s:%d alloc_dev=%p\n", __func__, __LINE__, alloc_dev);
         return alloc_dev->alloc(alloc_dev, w, h, format, usage, handle, stride);
     }
 
     int free(buffer_handle_t handle) {
+        fprintf(stderr, "rkir555 %s:%d alloc_dev=%p\n", __func__, __LINE__, alloc_dev);
         return alloc_dev->free(alloc_dev, handle);
     }
 
     void dumpAlloc(char* buffer, int buff_len) {
+        fprintf(stderr, "rkir555 %s:%d alloc_dev=%p\n", __func__, __LINE__, alloc_dev);
         if (!alloc_dev->dump) return;
         alloc_dev->dump(alloc_dev, buffer, buff_len);
     }
@@ -47,21 +51,25 @@ struct gralloc_implementation {
 // Gralloc module===============================================================
 
     int registerBuffer(buffer_handle_t handle) {
+        fprintf(stderr, "rkir555 %s:%d alloc_module=%p\n", __func__, __LINE__, alloc_module);
         return alloc_module->registerBuffer(alloc_module, handle);
     }
 
     int unregisterBuffer(buffer_handle_t handle) {
+        fprintf(stderr, "rkir555 %s:%d alloc_module=%p\n", __func__, __LINE__, alloc_module);
         return alloc_module->unregisterBuffer(alloc_module, handle);
     }
 
     int lock(buffer_handle_t handle, int usage,
              int l, int t, int w, int h,
              void** vaddr) {
+        fprintf(stderr, "rkir555 %s:%d alloc_module=%p\n", __func__, __LINE__, alloc_module);
         return alloc_module->lock(alloc_module, handle, usage, l, t, w, h,
                                   vaddr);
     }
 
     int unlock(buffer_handle_t handle) {
+        fprintf(stderr, "rkir555 %s:%d alloc_module=%p\n", __func__, __LINE__, alloc_module);
         return alloc_module->unlock(alloc_module, handle);
     }
 
@@ -72,6 +80,7 @@ struct gralloc_implementation {
                    int w,
                    int h,
                    struct android_ycbcr* ycbcr) {
+        fprintf(stderr, "rkir555 %s:%d alloc_module=%p\n", __func__, __LINE__, alloc_module);
         return alloc_module->lock_ycbcr(alloc_module, handle, usage, l, t, w, h,
                                         ycbcr);
     }
@@ -84,11 +93,13 @@ struct gralloc_implementation {
                   int h,
                   void** vaddr,
                   int fenceFd) {
+        fprintf(stderr, "rkir555 %s:%d alloc_module=%p\n", __func__, __LINE__, alloc_module);
         return alloc_module->lockAsync(alloc_module, handle, usage, l, t, w, h,
                                        vaddr, fenceFd);
     }
 
     int unlockAsync(buffer_handle_t handle, int* fenceFd) {
+        fprintf(stderr, "rkir555 %s:%d alloc_module=%p\n", __func__, __LINE__, alloc_module);
         return alloc_module->unlockAsync(alloc_module, handle, fenceFd);
     }
 
@@ -100,6 +111,7 @@ struct gralloc_implementation {
                         int h,
                         struct android_ycbcr* ycbcr,
                         int fenceFd) {
+        fprintf(stderr, "rkir555 %s:%d alloc_module=%p\n", __func__, __LINE__, alloc_module);
         return alloc_module->lockAsync_ycbcr(alloc_module, handle, usage, l, t,
                                              w, h, ycbcr, fenceFd);
     }
