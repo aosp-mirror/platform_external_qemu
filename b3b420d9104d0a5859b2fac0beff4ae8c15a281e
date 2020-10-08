@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "c8ef05a6_256ca197",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 35
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-08T02:26:43Z",
+      "side": 1,
+      "message": "They are used to control the thread, kind of like thread::Cancelled() in the original library.\n\nThe thread/fiber/fiber.h is not available in emulator codebase, the most closer one is external/qemu/android/android-emu/android/base/threads/FunctorThread.h. But it doesn\u0027t provide the cancel() function.\n\ncarVhalReplayMsg is a MessageChannel, message in it can be shared between threads. It\u0027s very convenient to tell the while loop in the play thread to stop with MessageChannel.",
+      "parentUuid": "500214ae_4bcf960d",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 42
+      },
+      "revId": "b3b420d9104d0a5859b2fac0beff4ae8c15a281e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "718aaf42_71550061",
         "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
         "patchSetId": 35
@@ -37,6 +61,30 @@
       "writtenOn": "2020-10-08T01:52:25Z",
       "side": 1,
       "message": "This can be a file constant in an anonymous namespace in the cc file. It does not need to be scoped to the class.",
+      "range": {
+        "startLine": 185,
+        "startChar": 4,
+        "endLine": 185,
+        "endChar": 37
+      },
+      "revId": "b3b420d9104d0a5859b2fac0beff4ae8c15a281e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2749702b_b61cd4d0",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 35
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-08T02:26:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "718aaf42_71550061",
       "range": {
         "startLine": 185,
         "startChar": 4,
