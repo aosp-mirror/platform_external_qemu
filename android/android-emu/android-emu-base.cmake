@@ -139,7 +139,7 @@ android_target_link_libraries(android-emu-base windows_msvc-x86_64
 target_include_directories(android-emu-base PUBLIC .)
 # Library dependencies, these are public so they will propagate, if you link
 # against the base you will link against LZ4 & UUID
-target_link_libraries(android-emu-base PRIVATE zlib lz4 UUID::UUID)
+target_link_libraries(android-emu-base PRIVATE zlib lz4 UUID::UUID perfetto-tracing-only)
 if(OPTION_TCMALLOC)
   android_target_link_libraries(
     android-emu-base linux-x86_64
