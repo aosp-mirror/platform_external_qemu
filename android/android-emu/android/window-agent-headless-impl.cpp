@@ -131,10 +131,12 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .startExtendedWindow =
                 []() {
                 // Not implemented
+                return false;
                 },
         .quitExtendedWindow =
                 []() {
                 // Not implemented
+                return false;
                 },
         .setUiTheme = [](SettingsTheme type) {
                 // Not implemented
