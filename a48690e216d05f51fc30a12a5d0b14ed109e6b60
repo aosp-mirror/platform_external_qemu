@@ -46,6 +46,30 @@
       },
       "revId": "a48690e216d05f51fc30a12a5d0b14ed109e6b60",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b6db3fbe_c32ff187",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1909,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-08T15:38:23Z",
+      "side": 1,
+      "message": "it\u0027s probably ok to have both since we don\u0027t know what other system images have this problem",
+      "parentUuid": "e0a8a628_109e00ef",
+      "range": {
+        "startLine": 1908,
+        "startChar": 0,
+        "endLine": 1909,
+        "endChar": 26
+      },
+      "revId": "a48690e216d05f51fc30a12a5d0b14ed109e6b60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
