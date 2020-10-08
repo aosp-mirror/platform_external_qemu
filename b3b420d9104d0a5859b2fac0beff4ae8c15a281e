@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "500214ae_4bcf960d",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 35
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-08T01:52:25Z",
+      "side": 1,
+      "message": "I don\u0027t understand where and how these are used. I see they\u0027re used with carVhalReplayMsg, but I can\u0027t recall an analogous structure in the original library. How does this mechanism work?",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 42
+      },
+      "revId": "b3b420d9104d0a5859b2fac0beff4ae8c15a281e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "718aaf42_71550061",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 35
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-08T01:52:25Z",
+      "side": 1,
+      "message": "This can be a file constant in an anonymous namespace in the cc file. It does not need to be scoped to the class.",
+      "range": {
+        "startLine": 185,
+        "startChar": 4,
+        "endLine": 185,
+        "endChar": 37
+      },
+      "revId": "b3b420d9104d0a5859b2fac0beff4ae8c15a281e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
