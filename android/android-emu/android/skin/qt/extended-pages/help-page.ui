@@ -28,7 +28,7 @@
    <property name="currentIndex">
     <number>0</number>
    </property>
-   <widget class="QWidget" name="keyboard_shortcuts_tab">
+   <widget class="QWidget" name="tab_3">
     <attribute name="title">
      <string>Keyboard shortcuts</string>
     </attribute>
@@ -92,7 +92,7 @@
      </column>
     </widget>
    </widget>
-   <widget class="QWidget" name="emulator_help_tab">
+   <widget class="QWidget" name="tab_4">
     <attribute name="title">
      <string>Emulator help</string>
     </attribute>
@@ -161,7 +161,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="license_tab">
+   <widget class="QWidget" name="tab">
     <attribute name="title">
      <string>Licenses</string>
     </attribute>
@@ -184,7 +184,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="about_tab">
+   <widget class="QWidget" name="tab_5">
     <attribute name="title">
      <string>About</string>
     </attribute>

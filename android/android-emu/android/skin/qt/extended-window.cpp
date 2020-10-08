@@ -192,8 +192,7 @@ ExtendedWindow::ExtendedWindow(
     }
 
     if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) &&
-        !android_foldable_any_folded_area_configured() &&
-        !android_cmdLineOptions->qt_hide_window) {
+        !android_foldable_any_folded_area_configured()) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);
         mExtendedUi->displaysButton->setVisible(true);
     } else {
@@ -225,8 +224,7 @@ ExtendedWindow::ExtendedWindow(
 
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
 
-    if (android::featurecontrol::isEnabled(android::featurecontrol::GenericSnapshotsUI) &&
-        !android_cmdLineOptions->qt_hide_window) {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::GenericSnapshotsUI)) {
         mSidebarButtons.addButton(mExtendedUi->snapshotButton);
         mExtendedUi->snapshotButton->setVisible(true);
     } else {
@@ -532,7 +530,7 @@ void ExtendedWindow::switchDisableDeviceFrame(bool disableDeviceFrame)
 }
 
 void ExtendedWindow::switchOnTop(bool isOnTop) {
-    if (android_cmdLineOptions->qt_hide_window) {
+    if (android_cmdLineOptions && android_cmdLineOptions->qt_hide_window) {
         setFrameOnTop(this, isOnTop);
     }
     mEmulatorWindow->setOnTop(isOnTop);
