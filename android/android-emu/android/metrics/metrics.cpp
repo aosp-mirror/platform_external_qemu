@@ -455,6 +455,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::CAR_ROTARY;
         case android::featurecontrol::ModemSimulator:
             return android_studio::EmulatorFeatureFlagState::MODEM_SIMULATOR;
+        case android::featurecontrol::GuestUsesAngle:
+            return android_studio::EmulatorFeatureFlagState::GUEST_USES_ANGLE;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

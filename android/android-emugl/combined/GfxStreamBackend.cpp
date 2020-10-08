@@ -277,6 +277,7 @@ enum RendererFlags {
     GFXSTREAM_RENDERER_FLAGS_IGNORE_HOST_GL_ERRORS_BIT = 1 << 6, // control IgnoreHostOpenGLErrors flag
 
     GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT = 1 << 20, // for disabling syncfd
+    GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE = 1 << 21,
 };
 
 // Sets backend flags for different kinds of initialization.
@@ -344,11 +345,13 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     bool ignoreHostGlErrorsFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_IGNORE_HOST_GL_ERRORS_BIT;
     bool syncFdDisabledByFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT;
+    bool guestUsesAngle = renderer_flags & GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE;
 
     GFXS_LOG("Vulkan enabled? %d", enableVk);
     GFXS_LOG("egl2egl enabled? %d", enable_egl2egl);
     GFXS_LOG("ignore host gl errors enabled? %d", ignoreHostGlErrorsFlag);
     GFXS_LOG("syncfd enabled? %d", !syncFdDisabledByFlag);
+    GFXS_LOG("guest using ANGLE? %d", guestUsesAngle);
 
     // Need to manually set the GLES backend paths in gfxstream environment
     // because the library search paths are not automatically set to include
@@ -394,6 +397,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::VirtioGpuNext, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VirtioGpuNativeSync, !syncFdDisabledByFlag);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::GuestUsesAngle, guestUsesAngle);
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
