@@ -16,6 +16,29 @@
       "message": "all the important issues are addressed, IIRC, please take a look,\n\nin case I missed something.\nwould like to get it in so to have wider test.\n\nshould not impact existing flow.",
       "revId": "2581a195d185d6982991564c4c32bf17fbd9cd3f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ede93489_5973990e",
+        "filename": "android/third_party/modem-simulator/emulator_config.cpp",
+        "patchSetId": 102
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-10-08T21:58:13Z",
+      "side": 1,
+      "message": "nit: remove",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 41
+      },
+      "revId": "2581a195d185d6982991564c4c32bf17fbd9cd3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
