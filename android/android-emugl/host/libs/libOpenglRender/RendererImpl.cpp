@@ -560,6 +560,9 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
         .wait_for_gpu = [](uint64_t eglsync) {
             FrameBuffer::getFB()->waitForGpu(eglsync);
         },
+        .wait_for_gpu_vulkan = [](uint64_t device, uint64_t fence) {
+            FrameBuffer::getFB()->waitForGpuVulkan(device, fence);
+        },
 };
 
 struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {

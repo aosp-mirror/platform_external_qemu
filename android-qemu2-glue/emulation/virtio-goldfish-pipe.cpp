@@ -486,6 +486,9 @@ const uint32_t kVirtioGpuAddressSpacePingWithResponse = 0x1003;
 const uint32_t kVirtioGpuNativeSyncCreateExportFd = 0x9000;
 const uint32_t kVirtioGpuNativeSyncCreateImportFd = 0x9001;
 
+const uint32_t kVirtioGpuNativeSyncVulkanCreateExportFd = 0xa000;
+const uint32_t kVirtioGpuNativeSyncVulkanCreateImportFd = 0xa001;
+
 class PipeVirglRenderer {
 public:
     PipeVirglRenderer() = default;
@@ -788,10 +791,22 @@ public:
             case kVirtioGpuNativeSyncCreateImportFd: {
                 uint32_t sync_handle_lo = dwords[1];
                 uint32_t sync_handle_hi = dwords[2];
-                uint64_t sync_handle =
-                    (((uint64_t)sync_handle_hi) << 32) |
-                    ((uint64_t)sync_handle_lo);
+                uint64_t sync_handle = convert32to64(sync_handle_lo, sync_handle_hi);
+
                 mVirtioGpuOps->wait_for_gpu(sync_handle);
+                break;
+            }
+            case kVirtioGpuNativeSyncVulkanCreateExportFd:
+            case kVirtioGpuNativeSyncVulkanCreateImportFd: {
+                uint32_t device_handle_lo = dwords[1];
+                uint32_t device_handle_hi = dwords[2];
+                uint64_t device_handle = convert32to64(device_handle_lo, device_handle_hi);
+
+                uint32_t fence_handle_lo = dwords[3];
+                uint32_t fence_handle_hi = dwords[4];
+                uint64_t fence_handle = convert32to64(fence_handle_lo, fence_handle_hi);
+
+                mVirtioGpuOps->wait_for_gpu_vulkan(device_handle, fence_handle);
                 break;
             }
             default:
