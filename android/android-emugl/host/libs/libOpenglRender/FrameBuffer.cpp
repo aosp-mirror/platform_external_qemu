@@ -3025,3 +3025,13 @@ void FrameBuffer::waitForGpu(uint64_t eglsync) {
 
     SyncThread::get()->triggerBlockedWaitNoTimeline(fenceSync);
 }
+
+void FrameBuffer::waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle) {
+    (void)deviceHandle;
+
+    // Note: this will always be nullptr.
+    FenceSync* fenceSync = FenceSync::getFromHandle(fenceHandle);
+
+    // Note: this will always signal right away.
+    SyncThread::get()->triggerBlockedWaitNoTimeline(fenceSync);
+}
