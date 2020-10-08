@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7d54de33_ebea8b27",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 17
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-08T01:11:01Z",
+      "side": 1,
+      "message": "Hi Jim \u0026 Agatha, \n\nCould you help review the code here? \nHere is the ux mock\nhttps://docs.google.com/presentation/d/1RsqXQrpzDAAmcwfKuAayPsFi8qnpvQ3WI79dayh7L5I/edit#slide\u003did.g8601752db2_0_467\n\nThanks,\nCalvin",
+      "revId": "c16670238463ea19f7d5196b35ce1a410bb7ed3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
