@@ -76,6 +76,7 @@ add_subdirectory(ext4_utils)
 add_subdirectory(google-benchmark)
 add_subdirectory(mksdcard)
 add_subdirectory(breakpad)
+add_subdirectory(modem-simulator)
 
 add_subdirectory(boringssl)
 if(NOT OPTION_GFXSTREAM_BACKEND)

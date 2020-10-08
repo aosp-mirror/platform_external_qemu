@@ -61,6 +61,7 @@ extern "C" {
 #include "sysemu/kvm.h"                               // for kvm_enabled
 #include "sysemu/sysemu.h"                            // for vm_start, vm_stop
 #include "sysemu/whpx.h"                              // for whpx_gpa2hva
+extern   int guest_boot_completed;
 }
 
 // Qemu includes can redefine some windows behavior..
@@ -441,6 +442,10 @@ static bool qemu_snapshot_load(const char* name,
             // Normal load, resume
             vm_start();
         }
+    }
+
+    if (!failed) {
+        guest_boot_completed = 1;
     }
 
     return !failed;
