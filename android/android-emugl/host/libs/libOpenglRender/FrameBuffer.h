@@ -817,6 +817,7 @@ private:
 
     bool m_fastBlitSupported = false;
     bool m_vulkanInteropSupported = false;
+    bool m_guestUsesAngle = false;
 
     android::base::MessageChannel<HandleType, 1024>
         mOutstandingColorBufferDestroys;

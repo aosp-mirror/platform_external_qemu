@@ -107,6 +107,9 @@ public:
             get_emugl_address_space_device_control_ops().control_get_hw_funcs()) {
             mUseOldMemoryCleanupPath = 0 == get_emugl_address_space_device_control_ops().control_get_hw_funcs()->getPhysAddrStartLocked();
         }
+        mGuestUsesAngle =
+            emugl::emugl_feature_is_enabled(
+                android::featurecontrol::GuestUsesAngle);
     }
 
     ~Impl() = default;
@@ -2678,15 +2681,20 @@ public:
 
         void* mappedPtr = nullptr;
         if (importCbInfoPtr) {
+            bool vulkanOnly = mGuestUsesAngle;
+
             // Ensure color buffer has Vulkan backing.
             setupVkColorBuffer(importCbInfoPtr->colorBuffer,
-                               false /* not vulkan only */,
+                               vulkanOnly,
                                0u /* memoryProperty */, nullptr,
                                // Modify the allocation size and type index
                                // to suit the resulting image memory size.
                                &localAllocInfo.allocationSize,
                                &localAllocInfo.memoryTypeIndex, &mappedPtr);
-            updateVkImageFromColorBuffer(importCbInfoPtr->colorBuffer);
+
+            if (!vulkanOnly) {
+                updateVkImageFromColorBuffer(importCbInfoPtr->colorBuffer);
+            }
 
             if (m_emu->instanceSupportsExternalMemoryCapabilities) {
                 VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
@@ -5402,6 +5410,7 @@ private:
     bool mLogging = false;
     bool mVerbosePrints = false;
     bool mUseOldMemoryCleanupPath = false;
+    bool mGuestUsesAngle = false;
     PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;

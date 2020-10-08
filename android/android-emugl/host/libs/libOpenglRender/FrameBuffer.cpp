@@ -415,6 +415,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
          emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
          emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
 
+    fb->m_guestUsesAngle =
+        emugl::emugl_feature_is_enabled(
+            android::featurecontrol::GuestUsesAngle);
+
     //
     // if GLES2 plugin has loaded - try to make GLES2 context and
     // get GLES2 extension string
@@ -2322,6 +2326,10 @@ void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
 }
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
+    if (m_guestUsesAngle) {
+        goldfish_vk::updateColorBufferFromVkImage(p_colorbuffer);
+    }
+
     bool res = postImpl(p_colorbuffer, needLockAndBind);
     if (res) setGuestPostedAFrame();
     return res;
