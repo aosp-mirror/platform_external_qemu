@@ -1904,6 +1904,10 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     GLenum format,
                                     GLenum type,
                                     void* pixels) {
+    if (width == 0 || height == 0) {
+        return false;
+    }
+
     AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
