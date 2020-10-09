@@ -382,7 +382,6 @@ target_link_libraries(
          emulator-tinyobjloader
          emulator-libkeymaster3
          emulator-murmurhash
-         modem_simulator_lib
          emulator-tinyepoxy
          emulator-libyuv
          picosha2
@@ -410,7 +409,8 @@ target_link_libraries(
          android-hw-config)
 
 if(NOT OPTION_GFXSTREAM_BACKEND)
-  target_link_libraries(android-emu PRIVATE hostapd)
+  target_link_libraries(android-emu PRIVATE hostapd modem_simulator_lib)
+  target_link_libraries(android-emu PUBLIC modem_simulator_lib)
 endif()
 
 # Here are the windows library and link dependencies. They are public and will
