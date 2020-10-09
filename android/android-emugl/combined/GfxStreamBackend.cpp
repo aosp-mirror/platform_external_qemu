@@ -294,6 +294,7 @@ enum RendererFlags {
     GFXSTREAM_RENDERER_FLAGS_ENABLE_GLES31_BIT = 1 << 9, // disables the PlayStoreImage flag
 
     GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT = 1 << 20, // for disabling syncfd
+    GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE = 1 << 21,
 };
 
 // Sets backend flags for different kinds of initialization.
@@ -366,6 +367,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     bool surfaceless =
             renderer_flags & GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT;
     bool enableGlEs31Flag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_ENABLE_GLES31_BIT;
+    bool guestUsesAngle = renderer_flags & GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE;
 
     GFXS_LOG("Vulkan enabled? %d", enableVk);
     GFXS_LOG("egl2egl enabled? %d", enable_egl2egl);
@@ -375,6 +377,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     GFXS_LOG("enable BPTC support if available? %d", bptcTextureSupport);
     GFXS_LOG("surfaceless? %d", surfaceless);
     GFXS_LOG("OpenGL ES 3.1 enabled? %d", enableGlEs31Flag);
+    GFXS_LOG("guest using ANGLE? %d", guestUsesAngle);
 
     // Need to manually set the GLES backend paths in gfxstream environment
     // because the library search paths are not automatically set to include
@@ -424,6 +427,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::VirtioGpuNext, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VirtioGpuNativeSync, !syncFdDisabledByFlag);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::GuestUsesAngle, guestUsesAngle);
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
