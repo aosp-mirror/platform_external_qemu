@@ -47,7 +47,7 @@ static VirtualDeviceTraceConfig sTraceConfig = {
     .sequenceIdWritten = 0,
     .currentInterningId = 1,
     .currentThreadId = 1,
-    .hostFilename = "vmm.trace",
+    .hostFilename = nullptr,
     .guestFilename = nullptr,
     .combinedFilename = nullptr,
     .hostStartTime = 0,
@@ -628,7 +628,10 @@ void enableTracing() {
     if (useFilenameByEnv(combinedFilenameByEnv)) {
         sTraceConfig.combinedFilename = combinedFilenameByEnv;
     }
-    
+
+    // Don't enable tracing if host filename is null
+    if (!sTraceConfig.hostFilename) return;
+
     fprintf(stderr, "%s: Tracing begins================================================================================\n", __func__);
     fprintf(stderr, "%s: Configuration:\n", __func__);
     fprintf(stderr, "%s: host filename: %s (possibly set via $VPERFETTO_HOST_FILE)\n", __func__, sTraceConfig.hostFilename);
@@ -646,6 +649,9 @@ void enableTracing() {
 }
 
 void disableTracing() {
+    // Don't enable or disable tracing if host filename is null
+    if (!sTraceConfig.hostFilename) return;
+
     uint32_t tracingWasDisabled = sTraceConfig.tracingDisabled;
     sTraceConfig.tracingDisabled = 1;
 
