@@ -42,6 +42,7 @@ private slots:
 private:
     void initializeLicenseText();
     void initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand>* key_store);
+    void disableForEmbeddedEmulator();
 
     std::unique_ptr<Ui::HelpPage> mUi;
     android::avd::BugreportInfo mBugreportInfo;
