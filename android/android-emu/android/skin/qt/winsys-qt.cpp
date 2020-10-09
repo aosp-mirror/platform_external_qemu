@@ -782,8 +782,8 @@ extern void skin_winsys_start(bool no_window) {
         mainBar->addMenu(quitMenu);
         qt_mac_set_dock_menu(quitMenu);
         // Hide icon on macOS dock in embedded emulator mode.
-        if (android_cmdLineOptions->qt_hide_window)
-            System::get()->hideDockIcon();
+        //if (android_cmdLineOptions->qt_hide_window)
+        //    System::get()->hideDockIcon();
 #endif
     }
 }
