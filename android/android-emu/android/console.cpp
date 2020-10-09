@@ -51,7 +51,13 @@
 #include "android/snapshot/PathUtils.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
+
+#if defined(AEMU_GFXSTREAM_BACKEND)
+#include "android_modem_v2_stubs.h"
+#else
 #include "android_modem_v2.h"
+#endif
+
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
