@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "003bf72e_e525cf72",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-10-09T18:25:46Z",
+      "side": 1,
+      "message": "I\u0027ve done some basic testing on all platforms. Let me know if this is sufficient.  Emu-base is a static library that is linked on demand so hopefully we are not missing anything. Tests:\n\n\nTest: Mac OS: Boot, able to use youtube, sensor settings behave properly, basic camera works, embedded emulator works.\nTest: Linux: Boot, Automated CTS verifier tests succeed, able to play youtube, sensor settings behave properly, basic camera works. \nTest: Windows: Boot, able to use youtube, sensor settings behave properly, basic camera works, embedded emulator works.\n\nGFXStream is validated through unit tests. \n\n@kaiyili I will not submit without +2 from you. ",
+      "revId": "ef7ca60ac8579f75e0b8060079458bab9473a1f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
