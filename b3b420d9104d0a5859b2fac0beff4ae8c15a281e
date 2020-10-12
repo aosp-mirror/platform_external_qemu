@@ -48,6 +48,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "36924dc1_9ac90b2b",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 35
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-12T22:43:44Z",
+      "side": 1,
+      "message": "Understood. Thank you for the explanation.",
+      "parentUuid": "c8ef05a6_256ca197",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 42
+      },
+      "revId": "b3b420d9104d0a5859b2fac0beff4ae8c15a281e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "718aaf42_71550061",
