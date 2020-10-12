@@ -787,6 +787,7 @@ void simulate_wrmsr(struct CPUState *cpu)
 
     switch (msr) {
         case MSR_IA32_TSC:
+            fprintf(stderr, "%s: WRITE TSC FROM GUEST\n", __func__);
             // if (!osx_is_sierra())
             //     wvmcs(cpu->hvf_fd, VMCS_TSC_OFFSET, data - rdtscp());
             //hv_vm_sync_tsc(data);
