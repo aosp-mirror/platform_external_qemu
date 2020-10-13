@@ -145,7 +145,8 @@ public:
     virtual unsigned onGuestPoll() const override;
     virtual int onGuestRecv(AndroidPipeBuffer* buffers, int count) override;
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int count) override;
+                            int count,
+                            void** newPipePtr) override;
     virtual void onGuestWantWakeOn(int flags) override;
 
     // Called when a host connection occurs. Transfers ownership of

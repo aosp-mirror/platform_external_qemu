@@ -170,7 +170,7 @@ ANDROID_PIPE_DEVICE_EXPORT int android_pipe_guest_recv(
 
 // Call the sendBuffers() callback of the client associated with |pipe|.
 ANDROID_PIPE_DEVICE_EXPORT int android_pipe_guest_send(
-    void* internal_pipe, const AndroidPipeBuffer* buffer, int numBuffer);
+    void** internal_pipe, const AndroidPipeBuffer* buffer, int numBuffer);
 
 // Call the wakeOn() callback of the client associated with |pipe|.
 ANDROID_PIPE_DEVICE_EXPORT void android_pipe_guest_wake_on(
@@ -179,8 +179,6 @@ ANDROID_PIPE_DEVICE_EXPORT void android_pipe_guest_wake_on(
 // A set of functions that must be implemented by the virtual device
 // implementation. Used with call android_pipe_set_hw_funcs().
 typedef struct AndroidPipeHwFuncs {
-    // Change the internal pipe associated with |hwpipe| to be |internal_pipe|
-    void (*resetPipe)(void* hwpipe, void* internal_pipe);
     void (*closeFromHost)(void* hwpipe);
     void (*signalWake)(void* hwpipe, unsigned flags);
     // Lookup functions for pipe instances and ids.

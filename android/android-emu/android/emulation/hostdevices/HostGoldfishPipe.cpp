@@ -94,43 +94,22 @@ int HostGoldfishPipeDevice::connect(const char* name) {
         return kNoFd;
     }
 
-    mCurrentPipeWantingConnection = hostPipe;
-
     const ssize_t len = static_cast<ssize_t>(handshake.size()) + 1;
-    const ssize_t ret = writeInternal(hostPipe, handshake.c_str(), len);
+    const ssize_t ret = writeInternal(&hostPipe, handshake.c_str(), len);
 
     if (ret == len) {
-        // pipe is currently refencing the connect pipe.  After writing the pipe
-        // name we should have received a resetPipe, which returns the real
-        // host-side pipe.
-        InternalPipe* newHostPipe = popHostPipe(hostPipe);
-        if (!newHostPipe) {
-            crashhandler_die_format(
-                    "FATAL: Tried to connect with %s, "
-                    "but could not get host pipe.",
-                    handshake.c_str());
-        }
+        HostHwPipe* hwPipeWeak = associatePipes(std::move(hwPipe), hostPipe);
+        if (hwPipeWeak) {
+            HOST_PIPE_DLOG("New pipe: service: for '%s', hwpipe: %p hostpipe: %p",
+                           name, hwPipeWeak, hostPipe);
 
-        const FdInfo* fdInfo = lookupFdInfo(hwPipeFd);
-        if (fdInfo && (fdInfo->hwPipe.get() == hwPipe.get())) {
-            hwPipe.release();  // hwPipe was moved to mFdInfo
-        }
-
-        const auto i = mPipeToHwPipe.find(newHostPipe);
-        if (i == mPipeToHwPipe.end()) {
+            return hwPipeWeak->getFd();
+        } else {
             mErrno = ENOENT;
             return kNoFd;
         }
-
-        HostHwPipe* newHwPipe = i->second;
-
-        HOST_PIPE_DLOG("New pipe: service: [%s] hwpipe: %p hostpipe: %p",
-                       name, newHwPipe, newHostPipe);
-
-        return newHwPipe->getFd();
     } else {
         LOG(ERROR) << "Could not connect to goldfish pipe name: " << name;
-        mResettedPipes.erase(hostPipe);
         android_pipe_guest_close(hostPipe, PIPE_CLOSE_GRACEFUL);
         mErrno = EIO;
         return kNoFd;
@@ -188,7 +167,7 @@ ssize_t HostGoldfishPipeDevice::write(const int fd, const void* buffer, size_t l
         return PIPE_ERROR_INVAL;
     }
 
-    return writeInternal(fdInfo->hostPipe, buffer, len);
+    return writeInternal(&fdInfo->hostPipe, buffer, len);
 }
 
 HostGoldfishPipeDevice::WriteResult
@@ -352,7 +331,6 @@ void HostGoldfishPipeDevice::clear() {
 
 void HostGoldfishPipeDevice::initialize() {
     static const AndroidPipeHwFuncs hwFuncs = {
-        &HostGoldfishPipeDevice::resetPipeCallback,
         &HostGoldfishPipeDevice::closeFromHostCallback,
         &HostGoldfishPipeDevice::signalWakeCallback,
     };
@@ -427,26 +405,13 @@ bool HostGoldfishPipeDevice::eraseFdInfo(const int fd) {
     return true;
 }
 
-ssize_t HostGoldfishPipeDevice::writeInternal(InternalPipe* pipe,
+ssize_t HostGoldfishPipeDevice::writeInternal(InternalPipe** ppipe,
                                               const void* buffer,
                                               size_t len) {
     AndroidPipeBuffer buf = {(uint8_t*)buffer, len};
-    ssize_t res = android_pipe_guest_send(pipe, &buf, 1);
+    ssize_t res = android_pipe_guest_send((void**)ppipe, &buf, 1);
     setErrno(res);
     return res;
-}
-
-// locked
-HostGoldfishPipeDevice::InternalPipe*
-HostGoldfishPipeDevice::popHostPipe(InternalPipe* pipe) {
-    auto it = mResettedPipes.find(pipe);
-    if (it == mResettedPipes.end()) {
-        return nullptr;
-    } else {
-        auto res = it->second;
-        mResettedPipes.erase(it);
-        return res;
-    }
 }
 
 void HostGoldfishPipeDevice::setErrno(ssize_t res) {
@@ -465,22 +430,6 @@ void HostGoldfishPipeDevice::setErrno(ssize_t res) {
             mErrno = EIO;
             break;
     }
-}
-
-// locked
-void HostGoldfishPipeDevice::resetPipe(void* hwPipeRaw, void* internalPipeRaw) {
-    HOST_PIPE_DLOG("Set host pipe %p for hw pipe %p",
-                   internalPipeRaw, hwPipeRaw);
-    HostHwPipe* hwPipe = static_cast<HostHwPipe*>(hwPipeRaw);
-    InternalPipe* internalPipe = static_cast<InternalPipe*>(internalPipeRaw);
-    const int hwPipeFd = hwPipe->getFd();
-
-    if (!associatePipes(std::unique_ptr<HostHwPipe>(hwPipe), internalPipe)) {
-        crashhandler_die_format("%s:%d associatePipes failed for hwPipe=%p fd=%d internalPipe=%p",
-                                __func__, __LINE__, hwPipe, hwPipeFd, internalPipe);
-    }
-
-    mResettedPipes[mCurrentPipeWantingConnection] = internalPipe;
 }
 
 void HostGoldfishPipeDevice::signalWake(const int fd, const int wakes) {
@@ -504,14 +453,6 @@ HostGoldfishPipeDevice* HostGoldfishPipeDevice::get() {
 }
 
 // Callbacks for AndroidPipeHwFuncs.
-// static
-void HostGoldfishPipeDevice::resetPipeCallback(void* hwPipeRaw,
-                                               void* internalPipe) {
-    HostGoldfishPipeDevice::get()->resetPipe(
-        static_cast<HostHwPipe*>(hwPipeRaw),
-        static_cast<InternalPipe*>(internalPipe));
-}
-
 // static
 void HostGoldfishPipeDevice::closeFromHostCallback(void* hwPipeRaw) {
     const int fd = static_cast<const HostHwPipe*>(hwPipeRaw)->getFd();

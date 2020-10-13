@@ -126,7 +126,7 @@ typedef struct {
     // decribed by the array |buffers| or |num_buffers| items.
     // Return number of bytes transferred, or a (negative) GoldfishPipeError
     // value otherwise.
-    int (*guest_send)(GoldfishHostPipe *host_pipe,
+    int (*guest_send)(GoldfishHostPipe **host_pipe,
                       const GoldfishPipeBuffer *buffers,
                       int num_buffers);
 

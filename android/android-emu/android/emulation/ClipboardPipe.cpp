@@ -122,7 +122,8 @@ int ClipboardPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 }
 
 int ClipboardPipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                               int numBuffers) {
+                               int numBuffers,
+                               void** newPipePtr) {
     if (!sEnabled) {
         // Fake out that we've processed the data, and don't do anything.
         int total = 0;

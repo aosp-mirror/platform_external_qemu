@@ -39,7 +39,8 @@ public:
     void onGuestClose(PipeCloseReason reason) override;
     unsigned onGuestPoll() const override;
     int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override;
-    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) override;
+    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers,
+                    void** newPipePtr) override;
     void onGuestWantWakeOn(int flags) override {}
 
     static void registerStream(std::ostream* stream);

@@ -169,7 +169,8 @@ public:
     // value otherwise, including PIPE_ERROR_AGAIN which indicates the pipe
     // is not ready to receive any data yet.
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) = 0;
+                            int numBuffers,
+                            void** newPipePtr) = 0;
 
     // Called from the device thread when the guest wants to indicate it
     // wants to be woken up when the set of PIPE_WAKE_XXX event bits in |flags|
