@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.5)
 
 set(perfetto "${ANDROID_QEMU2_TOP_DIR}/../perfetto")
 
+# Add the full perfetto_trace proto library. This is necessary to
+# post-process traces with the full Perfetto tracing SDK
+add_subdirectory(proto)
+
 android_add_library(
   TARGET perfetto-tracing-only-dummy
   LIBNAME libperfetto-tracing-only-dummy
@@ -128,33 +132,13 @@ android_add_pbzero_library(${perfetto}/protos/perfetto/trace/track_event thread_
 android_add_pbzero_library(${perfetto}/protos/perfetto/trace/track_event track_descriptor)
 android_add_pbzero_library(${perfetto}/protos/perfetto/trace/track_event track_event)
 
-if (OPTION_PERFETTO_USE_SDK)
-    set(PERFETTO_TRACING_ONLY_SOURCES
-        perfetto.cc
-        perfetto-sdk-tracing-only.cpp)
-    set(PERFETTO_TRACING_ONLY_INCLUDE
-        ${ANDROID_QEMU2_TOP_DIR}/android/third_party/perfetto-tracing-only)
-    set(PERFETTO_TRACING_ONLY_LIBRARIES
-        perfetto-tracing-only-dummy)
-else()
-    set(PERFETTO_TRACING_ONLY_SOURCES
-        perfetto-tracing-only.cpp)
-    set(PERFETTO_TRACING_ONLY_INCLUDE
-        ${ANDROID_QEMU2_TOP_DIR}/android/third_party/perfetto-tracing-only
-        ${perfetto}/include)
-    set(PERFETTO_TRACING_ONLY_LIBRARIES
-        pbzero-trace_stats
-        pbzero-trace_config
-        pbzero-clock_snapshot
-        pbzero-trace
-        pbzero-trace_packet
-        pbzero-interned_data
-        pbzero-process_descriptor
-        pbzero-counter_descriptor
-        pbzero-thread_descriptor
-        pbzero-track_descriptor
-        pbzero-track_event)
-endif()
+set(PERFETTO_TRACING_ONLY_SOURCES
+    perfetto.cc
+    perfetto-sdk-tracing-only.cpp)
+set(PERFETTO_TRACING_ONLY_INCLUDE
+    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/perfetto-tracing-only)
+set(PERFETTO_TRACING_ONLY_LIBRARIES
+    perfetto_trace)
 
 android_add_library(
     TARGET perfetto-tracing-only
