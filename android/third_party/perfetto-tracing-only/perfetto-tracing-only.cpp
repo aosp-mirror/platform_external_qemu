@@ -600,11 +600,11 @@ PERFETTO_TRACING_ONLY_EXPORT void setTraceConfig(std::function<void(VirtualDevic
     f(sTraceConfig);
 }
 
-VirtualDeviceTraceConfig queryTraceConfig() {
+PERFETTO_TRACING_ONLY_EXPORT VirtualDeviceTraceConfig queryTraceConfig() {
     return sTraceConfig;
 }
 
-void initialize(const bool** tracingDisabledPtr) {
+PERFETTO_TRACING_ONLY_EXPORT void initialize(const bool** tracingDisabledPtr) {
     *tracingDisabledPtr = &sTraceConfig.tracingDisabled;
 }
 
@@ -612,7 +612,7 @@ bool useFilenameByEnv(const char* s) {
     return s && ("" != std::string(s));
 }
 
-void enableTracing() {
+PERFETTO_TRACING_ONLY_EXPORT void enableTracing() {
     const char* hostFilenameByEnv = std::getenv("VPERFETTO_HOST_FILE");
     const char* guestFilenameByEnv = std::getenv("VPERFETTO_GUEST_FILE");
     const char* combinedFilenameByEnv = std::getenv("VPERFETTO_COMBINED_FILE");
@@ -632,6 +632,9 @@ void enableTracing() {
     // Don't enable tracing if host filename is null
     if (!sTraceConfig.hostFilename) return;
 
+    // Don't enable it twice
+    if (!sTraceConfig.tracingDisabled) return;
+
     fprintf(stderr, "%s: Tracing begins================================================================================\n", __func__);
     fprintf(stderr, "%s: Configuration:\n", __func__);
     fprintf(stderr, "%s: host filename: %s (possibly set via $VPERFETTO_HOST_FILE)\n", __func__, sTraceConfig.hostFilename);
@@ -648,7 +651,7 @@ void enableTracing() {
     sTraceConfig.tracingDisabled = 0;
 }
 
-void disableTracing() {
+PERFETTO_TRACING_ONLY_EXPORT void disableTracing() {
     // Don't enable or disable tracing if host filename is null
     if (!sTraceConfig.hostFilename) return;
 
@@ -666,22 +669,22 @@ void disableTracing() {
     sTraceConfig.guestTimeDiff = 0;
 }
 
-void beginTrace(const char* name) {
+PERFETTO_TRACING_ONLY_EXPORT void beginTrace(const char* name) {
     if (CC_LIKELY(sTraceConfig.tracingDisabled)) return;
     sThreadLocalTraceContext.beginTrace(name);
 }
 
-void endTrace() {
+PERFETTO_TRACING_ONLY_EXPORT void endTrace() {
     if (CC_LIKELY(sTraceConfig.tracingDisabled)) return;
     sThreadLocalTraceContext.endTrace();
 }
 
-void traceCounter(const char* name, int64_t val) {
+PERFETTO_TRACING_ONLY_EXPORT void traceCounter(const char* name, int64_t val) {
     if (CC_LIKELY(sTraceConfig.tracingDisabled)) return;
     sThreadLocalTraceContext.traceCounter(name, val);
 }
 
-void setGuestTime(uint64_t t) {
+PERFETTO_TRACING_ONLY_EXPORT void setGuestTime(uint64_t t) {
     virtualdeviceperfetto::setTraceConfig([t](virtualdeviceperfetto::VirtualDeviceTraceConfig& config) {
         // can only be set before tracing
         if (!config.tracingDisabled) {
