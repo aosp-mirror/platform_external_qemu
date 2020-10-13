@@ -131,6 +131,21 @@ android_target_link_libraries(
   PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 android_install_shared(OpenglRender)
 
+if(LINUX)
+# a stub for xlib and GL functions used by headless
+
+android_add_library(
+  TARGET StubXlib
+  SHARED
+  LICENSE Apache-2.0
+  SRC # cmake-format: sortable
+      stub/StubXlib.cpp
+      )
+
+android_install_shared(StubXlib)
+endif()
+
+
 if(NOT LINUX_AARCH64)
 
   android_add_library(
