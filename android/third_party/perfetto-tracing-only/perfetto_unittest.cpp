@@ -22,6 +22,12 @@ TEST(PerfettoTracingOnly, Basic) {
         config.hostFilename = "test1.trace";
         config.guestFilename = nullptr;
     });
+
+    const bool* tracingDisabledPtr;
+    initialize(&tracingDisabledPtr);
+
+    EXPECT_TRUE(*tracingDisabledPtr);
+
     enableTracing();
     for (uint32_t i = 0; i < 4000; ++i) {
         traceCounter("counter1", 1);
