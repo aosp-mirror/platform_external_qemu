@@ -1,0 +1,1278 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "25ab16ba_4ec908c2",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_height_white_48dp.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 8,
+        "startChar": 7,
+        "endLine": 8,
+        "endChar": 13
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "05814838_3edcd712",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 1,
+        "startChar": 43,
+        "endLine": 1,
+        "endChar": 44
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "5ccdb8f2_66716106",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 2,
+        "startChar": 94,
+        "endLine": 2,
+        "endChar": 95
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "d6124800_455b1da5",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 3,
+        "startChar": 106,
+        "endLine": 3,
+        "endChar": 107
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "8f9f020c_44b553f0",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 4,
+        "startChar": 125,
+        "endLine": 4,
+        "endChar": 126
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "5bf04a22_8aa6e4e9",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 5,
+        "startChar": 77,
+        "endLine": 5,
+        "endChar": 78
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "57c3a0cf_a7f9ea1b",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 6,
+        "startChar": 126,
+        "endLine": 6,
+        "endChar": 127
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "3a737801_534fb1ac",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 7,
+        "startChar": 99,
+        "endLine": 7,
+        "endChar": 100
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "c3368d55_24e9250d",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 8,
+        "startChar": 122,
+        "endLine": 8,
+        "endChar": 123
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "26c2c4ac_196d1b50",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 9,
+        "startChar": 122,
+        "endLine": 9,
+        "endChar": 123
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "dce2632c_d5086253",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 10,
+        "startChar": 122,
+        "endLine": 10,
+        "endChar": 123
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "63ad9145_b139660b",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 11,
+        "startChar": 109,
+        "endLine": 11,
+        "endChar": 110
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "7d335f2f_4c2aed0f",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 12,
+        "startChar": 121,
+        "endLine": 12,
+        "endChar": 122
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "036d4661_51431acd",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 13,
+        "startChar": 118,
+        "endLine": 13,
+        "endChar": 119
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "25b89779_c8243d35",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 14,
+        "startChar": 120,
+        "endLine": 14,
+        "endChar": 121
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "95aa11d8_7148aa13",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 15,
+        "startChar": 64,
+        "endLine": 15,
+        "endChar": 65
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "2dc68245_f716381e",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 16,
+        "startChar": 6,
+        "endLine": 16,
+        "endChar": 7
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "aa6e5a32_cf96a763",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_height_666_48dp.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Prefer to use inclusive terms like \u0027primary/secondary\u0027 or \u0027manager/worker\u0027; see https://source.android.com/setup/contribute/respectful-code for more details. In the case of a false positive add BYPASS_INCLUSIVE_LANGUAGE_REASON\u003dmy_reason_here to your commit message to disable this check.",
+      "range": {
+        "startLine": 8,
+        "startChar": 7,
+        "endLine": 8,
+        "endChar": 13
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "6561e7cb_d81ed957",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 1,
+        "startChar": 43,
+        "endLine": 1,
+        "endChar": 44
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "8a2b3116_b27a3a01",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 2,
+        "startChar": 94,
+        "endLine": 2,
+        "endChar": 95
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "0cf495d4_b2ae99c1",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 3,
+        "startChar": 106,
+        "endLine": 3,
+        "endChar": 107
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "092e948c_74d1acb5",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 4,
+        "startChar": 125,
+        "endLine": 4,
+        "endChar": 126
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "35d31d17_f66d0ec8",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 5,
+        "startChar": 77,
+        "endLine": 5,
+        "endChar": 78
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "19cbe974_030661e6",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 6,
+        "startChar": 126,
+        "endLine": 6,
+        "endChar": 127
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "9370fd9c_8b309ee7",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 7,
+        "startChar": 99,
+        "endLine": 7,
+        "endChar": 100
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "f88f7a18_5a02449b",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 8,
+        "startChar": 122,
+        "endLine": 8,
+        "endChar": 123
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "612ad575_e37b8239",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 9,
+        "startChar": 122,
+        "endLine": 9,
+        "endChar": 123
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "78db9cbc_327b8605",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 10,
+        "startChar": 122,
+        "endLine": 10,
+        "endChar": 123
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "9ed531f7_8de7c0e3",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 11,
+        "startChar": 109,
+        "endLine": 11,
+        "endChar": 110
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "4e85df88_5b22f191",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 12,
+        "startChar": 121,
+        "endLine": 12,
+        "endChar": 122
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "0c0ca730_a92da8d7",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 13,
+        "startChar": 118,
+        "endLine": 13,
+        "endChar": 119
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "787abaa3_0517dfd9",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 14,
+        "startChar": 120,
+        "endLine": 14,
+        "endChar": 121
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "da1a928d_1e640954",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 15,
+        "startChar": 64,
+        "endLine": 15,
+        "endChar": 65
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "55645523_48550e38",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 16,
+        "startChar": 6,
+        "endLine": 16,
+        "endChar": 7
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "a2b09226_74a95d2c",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 1,
+        "startChar": 43,
+        "endLine": 1,
+        "endChar": 44
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "ed2192f8_5d657328",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 2,
+        "startChar": 94,
+        "endLine": 2,
+        "endChar": 95
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "dfef7166_f6dcbe40",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 3,
+        "startChar": 106,
+        "endLine": 3,
+        "endChar": 107
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "da29b11e_36041192",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 4,
+        "startChar": 125,
+        "endLine": 4,
+        "endChar": 126
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "7ed7278e_7e7de377",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 5,
+        "startChar": 95,
+        "endLine": 5,
+        "endChar": 96
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "82e1dba9_9bd614f4",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 6,
+        "startChar": 111,
+        "endLine": 6,
+        "endChar": 112
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "0bd5f4d3_63b824e2",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 7,
+        "startChar": 111,
+        "endLine": 7,
+        "endChar": 112
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "d75f4b46_7b555961",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 8,
+        "startChar": 109,
+        "endLine": 8,
+        "endChar": 110
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "762173ba_125a7419",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 9,
+        "startChar": 122,
+        "endLine": 9,
+        "endChar": 123
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "062bbe61_056f0f99",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 10,
+        "startChar": 12,
+        "endLine": 10,
+        "endChar": 13
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "27da2dc1_50c33be9",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 11,
+        "startChar": 81,
+        "endLine": 11,
+        "endChar": 82
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "a866231b_2972ef25",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 12,
+        "startChar": 119,
+        "endLine": 12,
+        "endChar": 120
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "6435ffbc_6bea7d09",
+        "filename": "android/android-emu/android/skin/qt/images/studio-light/side_on_watch.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 13,
+        "startChar": 6,
+        "endLine": 13,
+        "endChar": 7
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "8363f0c6_a34dc8b3",
+        "filename": "android/android-emu/android/skin/qt/stylesheet.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 470,
+        "startChar": 77,
+        "endLine": 470,
+        "endChar": 89
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005510050",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1435631?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "01d133e4_37187d21",
+        "filename": "android/android-emu/android/skin/qt/stylesheet.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-13T23:13:15Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 475,
+        "startChar": 79,
+        "endLine": 475,
+        "endChar": 91
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
