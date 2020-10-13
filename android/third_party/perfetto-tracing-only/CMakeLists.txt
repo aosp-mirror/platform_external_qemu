@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.5)
 
 set(perfetto "${ANDROID_QEMU2_TOP_DIR}/../perfetto")
 
+# Add the full perfetto_trace proto library. This is necessary to
+# post-process traces with the full Perfetto tracing SDK
+add_subdirectory(proto)
+
 android_add_library(
   TARGET perfetto-tracing-only-dummy
   LIBNAME libperfetto-tracing-only-dummy
