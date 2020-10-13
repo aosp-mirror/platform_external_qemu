@@ -1,0 +1,388 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b4be1768_971be00c",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "05814838_3edcd712",
+      "range": {
+        "startLine": 1,
+        "startChar": 43,
+        "endLine": 1,
+        "endChar": 44
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f15a6deb_91512c69",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "5ccdb8f2_66716106",
+      "range": {
+        "startLine": 2,
+        "startChar": 94,
+        "endLine": 2,
+        "endChar": 95
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ab17112f_789b8a96",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "d6124800_455b1da5",
+      "range": {
+        "startLine": 3,
+        "startChar": 106,
+        "endLine": 3,
+        "endChar": 107
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "59ad09f4_f0c4aaa7",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "8f9f020c_44b553f0",
+      "range": {
+        "startLine": 4,
+        "startChar": 125,
+        "endLine": 4,
+        "endChar": 126
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c83a932b_26c76120",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "5bf04a22_8aa6e4e9",
+      "range": {
+        "startLine": 5,
+        "startChar": 77,
+        "endLine": 5,
+        "endChar": 78
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3b58af6b_1a730961",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "57c3a0cf_a7f9ea1b",
+      "range": {
+        "startLine": 6,
+        "startChar": 126,
+        "endLine": 6,
+        "endChar": 127
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "20c4d6b0_43cf99e7",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "3a737801_534fb1ac",
+      "range": {
+        "startLine": 7,
+        "startChar": 99,
+        "endLine": 7,
+        "endChar": 100
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7722f8a2_68b312d9",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "c3368d55_24e9250d",
+      "range": {
+        "startLine": 8,
+        "startChar": 122,
+        "endLine": 8,
+        "endChar": 123
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f42bfef5_501c50d0",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "26c2c4ac_196d1b50",
+      "range": {
+        "startLine": 9,
+        "startChar": 122,
+        "endLine": 9,
+        "endChar": 123
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dd7fa736_57da78d4",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "dce2632c_d5086253",
+      "range": {
+        "startLine": 10,
+        "startChar": 122,
+        "endLine": 10,
+        "endChar": 123
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2a5c1ab4_1b3601a5",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "63ad9145_b139660b",
+      "range": {
+        "startLine": 11,
+        "startChar": 109,
+        "endLine": 11,
+        "endChar": 110
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3c9accbf_192219af",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "7d335f2f_4c2aed0f",
+      "range": {
+        "startLine": 12,
+        "startChar": 121,
+        "endLine": 12,
+        "endChar": 122
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9689a922_c72c8df5",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "036d4661_51431acd",
+      "range": {
+        "startLine": 13,
+        "startChar": 118,
+        "endLine": 13,
+        "endChar": 119
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2b8928e7_687a0ad2",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "25b89779_c8243d35",
+      "range": {
+        "startLine": 14,
+        "startChar": 120,
+        "endLine": 14,
+        "endChar": 121
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f3fae8ae_d397cb47",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "95aa11d8_7148aa13",
+      "range": {
+        "startLine": 15,
+        "startChar": 64,
+        "endLine": 15,
+        "endChar": 65
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9851a481_e73ff946",
+        "filename": "android/android-emu/android/skin/qt/images/studio-dark/ic_rotary_input.svg",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-13T23:15:16Z",
+      "side": 1,
+      "message": "\u003e Please remove the trailing whitespace.\n\nPlease fix.",
+      "parentUuid": "2dc68245_f716381e",
+      "range": {
+        "startLine": 16,
+        "startChar": 6,
+        "endLine": 16,
+        "endChar": 7
+      },
+      "revId": "86f0fc69fd9dce7d8ff54c5824a05b46815e166c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
