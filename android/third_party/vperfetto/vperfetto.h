@@ -23,7 +23,7 @@
     #endif // !_MSC_VER
 #endif // !PERFETTO_TRACING_ONLY_EXPORT
 
-namespace virtualdeviceperfetto {
+namespace vperfetto {
 
 struct VirtualDeviceTraceConfig {
     bool initialized;
@@ -41,11 +41,11 @@ struct VirtualDeviceTraceConfig {
     uint32_t perThreadStorageMb;
 };
 
+PERFETTO_TRACING_ONLY_EXPORT void initialize(const bool** tracingDisabledPtr = nullptr);
+
 PERFETTO_TRACING_ONLY_EXPORT void setTraceConfig(std::function<void(VirtualDeviceTraceConfig&)>);
 PERFETTO_TRACING_ONLY_EXPORT VirtualDeviceTraceConfig queryTraceConfig();
 
-// An optimization to have faster queries of whether tracing is enabled.
-PERFETTO_TRACING_ONLY_EXPORT void initialize(const bool** tracingDisabledPtr);
 
 PERFETTO_TRACING_ONLY_EXPORT void enableTracing();
 PERFETTO_TRACING_ONLY_EXPORT void disableTracing();
@@ -56,4 +56,4 @@ PERFETTO_TRACING_ONLY_EXPORT void traceCounter(const char* name, int64_t value);
 
 PERFETTO_TRACING_ONLY_EXPORT void setGuestTime(uint64_t guestTime);
 
-} // namespace virtualdeviceperfetto
+} // namespace vperfetto

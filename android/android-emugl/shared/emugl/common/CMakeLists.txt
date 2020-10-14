@@ -20,6 +20,7 @@ android_target_compile_definitions(emugl_common windows_msvc-x86_64 PRIVATE
 target_compile_options(emugl_common PRIVATE -fvisibility=default)
 target_link_libraries(emugl_common PRIVATE emugl_base)
 target_link_libraries(emugl_common PRIVATE android-emu-base)
+target_link_libraries(emugl_common PUBLIC vperfetto)
 target_include_directories(
   emugl_common PRIVATE ${ANDROID_EMUGL_DIR}/host/include
                        ${ANDROID_EMUGL_DIR}/shared)

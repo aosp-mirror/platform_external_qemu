@@ -1,5 +1,5 @@
 #include "perfetto.h"
-#include "perfetto-tracing-only.h"
+#include "vperfetto.h"
 #include "perfetto_trace.pb.h"
 
 #include <string>
@@ -26,7 +26,7 @@ PERFETTO_TRACK_EVENT_STATIC_STORAGE();
 #   define CC_UNLIKELY( exp )  (__builtin_expect( !!(exp), 0 ))
 #endif
 
-namespace virtualdeviceperfetto {
+namespace vperfetto {
 
 static bool sPerfettoInitialized = false;
 
@@ -64,7 +64,9 @@ PERFETTO_TRACING_ONLY_EXPORT void initialize(const bool** tracingDisabledPtr) {
     }
 
     // An optimization to have faster queries of whether tracing is enabled.
-    *tracingDisabledPtr = &sTraceConfig.tracingDisabled;
+    if (tracingDisabledPtr) {
+        *tracingDisabledPtr = &sTraceConfig.tracingDisabled;
+    }
 }
 
 static std::unique_ptr<::perfetto::TracingSession> sTracingSession;
@@ -332,7 +334,7 @@ PERFETTO_TRACING_ONLY_EXPORT void traceCounter(const char* name, int64_t value) 
 }
 
 PERFETTO_TRACING_ONLY_EXPORT void setGuestTime(uint64_t t) {
-    virtualdeviceperfetto::setTraceConfig([t](virtualdeviceperfetto::VirtualDeviceTraceConfig& config) {
+    vperfetto::setTraceConfig([t](vperfetto::VirtualDeviceTraceConfig& config) {
         // can only be set before tracing
         if (!config.tracingDisabled) {
             return;
@@ -343,5 +345,4 @@ PERFETTO_TRACING_ONLY_EXPORT void setGuestTime(uint64_t t) {
     });
 }
 
-
-} // namespace perfetto
+} // namespace vperfetto
