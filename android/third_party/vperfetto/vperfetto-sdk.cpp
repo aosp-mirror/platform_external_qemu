@@ -1,10 +1,11 @@
 #include "perfetto.h"
-#include "perfetto-tracing-only.h"
+#include "vperfetto.h"
 #include "perfetto_trace.pb.h"
 
 #include <string>
 #include <thread>
 #include <fstream>
+#include <unordered_map>
 
 PERFETTO_DEFINE_CATEGORIES(
     ::perfetto::Category("gfx")
@@ -26,7 +27,7 @@ PERFETTO_TRACK_EVENT_STATIC_STORAGE();
 #   define CC_UNLIKELY( exp )  (__builtin_expect( !!(exp), 0 ))
 #endif
 
-namespace virtualdeviceperfetto {
+namespace vperfetto {
 
 static bool sPerfettoInitialized = false;
 
@@ -46,6 +47,15 @@ static VirtualDeviceTraceConfig sTraceConfig = {
     .perThreadStorageMb = 1,
 };
 
+struct TraceProgress {
+    bool saving = false;
+    std::vector<char> hostTrace;
+    std::vector<char> guestTrace;
+    std::vector<char> combinedTrace;
+};
+
+static TraceProgress sTraceProgress;
+
 PERFETTO_TRACING_ONLY_EXPORT void setTraceConfig(std::function<void(VirtualDeviceTraceConfig&)> f) {
     f(sTraceConfig);
 }
@@ -64,7 +74,9 @@ PERFETTO_TRACING_ONLY_EXPORT void initialize(const bool** tracingDisabledPtr) {
     }
 
     // An optimization to have faster queries of whether tracing is enabled.
-    *tracingDisabledPtr = &sTraceConfig.tracingDisabled;
+    if (tracingDisabledPtr) {
+        *tracingDisabledPtr = &sTraceConfig.tracingDisabled;
+    }
 }
 
 static std::unique_ptr<::perfetto::TracingSession> sTracingSession;
@@ -96,6 +108,9 @@ PERFETTO_TRACING_ONLY_EXPORT void enableTracing() {
     // Don't enable it twice
     if (!sTraceConfig.tracingDisabled) return;
 
+    // Don't enable if we are saving
+    if (sTraceProgress.saving) return;
+
     if (!sTracingSession) {
         fprintf(stderr, "%s: Tracing begins================================================================================\n", __func__);
         fprintf(stderr, "%s: Configuration:\n", __func__);
@@ -125,6 +140,167 @@ PERFETTO_TRACING_ONLY_EXPORT void enableTracing() {
         sTracingSession->StartBlocking();
         sTraceConfig.tracingDisabled = false;
     }
+}
+
+static void iterateTraceTimestamps(
+    ::perfetto::protos::Trace& pbtrace,
+    std::function<uint64_t(uint64_t)> forEachTimestamp) {
+
+    for (int i = 0; i < pbtrace.packet_size(); ++i) {
+        auto* packet = pbtrace.mutable_packet(i);
+        if (packet->has_timestamp()) {
+            packet->set_timestamp(forEachTimestamp(packet->timestamp()));
+        }
+    }
+}
+
+// A higher-order function to conveniently iterate over all sequence ids and pids.
+// TODO: What other Ids are important?
+static void iterateTraceIds(
+    ::perfetto::protos::Trace& pbtrace,
+    std::function<uint32_t(uint32_t)> forEachSequenceId,
+    std::function<int32_t(int32_t)> forEachPid) {
+
+    for (int i = 0; i < pbtrace.packet_size(); ++i) {
+        auto* packet = pbtrace.mutable_packet(i);
+
+        if (packet->has_trusted_packet_sequence_id()) {
+            packet->set_trusted_packet_sequence_id(
+                forEachSequenceId(packet->trusted_packet_sequence_id()));
+        }
+
+        if (packet->has_ftrace_events()) {
+            auto* ftevts = packet->mutable_ftrace_events();
+            for (int j = 0; j < ftevts->event_size(); ++j) {
+                auto* ftev = ftevts->mutable_event(j);
+                if (ftev->has_pid()) {
+                    ftev->set_pid(
+                        forEachPid(ftev->pid()));
+                }
+            }
+        }
+
+        if (packet->has_track_descriptor()) {
+            auto* trd = packet->mutable_track_descriptor();
+
+            if (trd->has_process()) {
+                auto* p = trd->mutable_process();
+                if (p->has_pid()) {
+                    p->set_pid(
+                        forEachPid(p->pid()));
+                }
+            }
+
+            if (trd->has_thread()) {
+                auto* t = trd->mutable_thread();
+                if (t->has_pid()) {
+                    t->set_pid(
+                        forEachPid(t->pid()));
+                }
+            }
+        }
+
+        if (packet->has_process_tree()) {
+            auto* pt = packet->mutable_process_tree();
+            for (int j = 0; j < pt->processes_size(); ++j) {
+                auto* p = pt->mutable_processes(i);
+                if (p->has_pid()) {
+                    p->set_pid(forEachPid(p->pid()));
+                }
+            }
+
+            for (int j = 0; j < pt->threads_size(); ++j) {
+                auto* t = pt->mutable_threads(i);
+                if (t->has_tid()) {
+                    t->set_tid(forEachPid(t->tid()));
+                }
+                if (t->has_tgid()) {
+                    t->set_tgid(forEachPid(t->tgid()));
+                }
+            }
+        }
+    }
+}
+
+static void sCalcMaxIds(
+    const std::vector<char>& trace,
+    uint32_t* maxSequenceIdOut,
+    uint32_t* maxPidOut) {
+
+    uint32_t maxSequenceId = 0;
+    uint32_t maxPid = 0;
+    *maxSequenceIdOut = maxSequenceId;
+    *maxPidOut = maxPid;
+
+    ::perfetto::protos::Trace pbtrace;
+    std::string traceStr(trace.begin(), trace.end());
+
+    if (!pbtrace.ParseFromString(traceStr)) {
+        fprintf(stderr, "%s: Failed to parse protobuf as a string\n", __func__);
+        return;
+    }
+
+    iterateTraceIds(pbtrace,
+        [&maxSequenceId](uint32_t seqid) {
+            if (seqid > maxSequenceId) {
+                maxSequenceId = seqid;
+            }
+            return seqid;
+        },
+        [&maxPid](uint32_t pid) {
+            if (pid > maxPid) {
+                maxPid = pid;
+            }
+            return pid;
+        });
+
+    fprintf(stderr, "%s: trace's max seq %u pid %u\n", __func__, maxSequenceId, maxPid);
+
+    *maxSequenceIdOut = maxSequenceId;
+    *maxPidOut = maxPid;
+}
+
+static std::vector<char> constructCombinedTrace(
+    const std::vector<char>& guestTrace,
+    const std::vector<char>& hostTrace) {
+
+    // Calculate the max seqid/pid/tid in the guest
+    uint32_t maxGuestSequenceId = 0;
+    uint32_t maxGuestPid = 0;
+
+    sCalcMaxIds(guestTrace, &maxGuestSequenceId, &maxGuestPid);
+
+    ::perfetto::protos::Trace host_pbtrace;
+    std::string traceStr(hostTrace.begin(), hostTrace.end());
+
+    if (!host_pbtrace.ParseFromString(traceStr)) {
+        fprintf(stderr, "%s: Failed to parse protobuf as a string\n", __func__);
+        return {};
+    }
+
+    fprintf(stderr, "%s: postprocessing trace with guest time diff of %llu, and offseting by guest max seqid %u, max pid %u\n", __func__,
+            (unsigned long long)sTraceConfig.guestTimeDiff,
+            maxGuestSequenceId,
+            maxGuestPid);
+
+    iterateTraceTimestamps(host_pbtrace,
+        [](uint64_t ts) {
+            return ts + sTraceConfig.guestTimeDiff;
+        });
+
+    iterateTraceIds(host_pbtrace,
+        [maxGuestSequenceId](uint32_t seqid) {
+            return seqid + maxGuestSequenceId;
+        },
+        [maxGuestPid](uint32_t pid) {
+            return pid + maxGuestPid;
+        });
+
+    std::string traceAfter;
+    host_pbtrace.SerializeToString(&traceAfter);
+    std::vector<char> res2(traceAfter.begin(), traceAfter.end());
+
+    return res2;
 }
 
 void asyncTraceSaveFunc() {
@@ -172,116 +348,48 @@ void asyncTraceSaveFunc() {
 
     if (!good) {
         fprintf(stderr, "%s: Timed out when waiting for guest file to stabilize, skipping combined trace saving.\n", __func__);
+        sTraceProgress.hostTrace.clear();
+        sTraceProgress.guestTrace.clear();
+        sTraceProgress.combinedTrace.clear();
         return;
     }
 
-    std::ifstream hostFile(hostFilename, std::ios_base::binary);
-    std::ifstream guestFile(guestFilename, std::ios_base::binary);
-    std::ofstream combinedFile(combinedFilename, std::ios::out | std::ios_base::binary);
+    std::ifstream guestFile(guestFilename, std::ios::binary | std::ios::ate);
+    std::ifstream::pos_type end = guestFile.tellg();
+    guestFile.seekg(0, std::ios::beg);
+    sTraceProgress.guestTrace.resize(end);
+    guestFile.read(sTraceProgress.guestTrace.data(), end);
 
-    combinedFile << guestFile.rdbuf() << hostFile.rdbuf();
+    sTraceProgress.combinedTrace =
+        constructCombinedTrace(sTraceProgress.guestTrace, sTraceProgress.hostTrace);
 
+    std::ofstream hostFile(hostFilename, std::ios::out | std::ios::binary);
+    hostFile.write(sTraceProgress.hostTrace.data(), sTraceProgress.hostTrace.size());
+    hostFile.close();
+    sTraceProgress.hostTrace.clear();
+    sTraceProgress.guestTrace.clear();
+
+    std::ofstream combinedFile(combinedFilename, std::ios::out | std::ios::binary);
+    combinedFile.write(sTraceProgress.combinedTrace.data(), sTraceProgress.combinedTrace.size());
+    combinedFile.close();
+    sTraceProgress.combinedTrace.clear();
+
+    fprintf(stderr, "%s: Wrote host trace (%s)\n", __func__, hostFilename);
     fprintf(stderr, "%s: Wrote combined trace (%s)\n", __func__, combinedFilename);
-}
 
-template <typename T>
-static inline size_t varIntEncodingSize(T value) {
-    // If value is <= 0 we must first sign extend to int64_t (see [1]).
-    // Finally we always cast to an unsigned value to to avoid arithmetic
-    // (sign expanding) shifts in the while loop.
-    // [1]: "If you use int32 or int64 as the type for a negative number, the
-    // resulting varint is always ten bytes long".
-    // - developers.google.com/protocol-buffers/docs/encoding
-    // So for each input type we do the following casts:
-    // uintX_t -> uintX_t -> uintX_t
-    // int8_t  -> int64_t -> uint64_t
-    // int16_t -> int64_t -> uint64_t
-    // int32_t -> int64_t -> uint64_t
-    // int64_t -> int64_t -> uint64_t
-    using MaybeExtendedType =
-        typename std::conditional<std::is_unsigned<T>::value, T, int64_t>::type;
-    using UnsignedType = typename std::make_unsigned<MaybeExtendedType>::type;
-
-    MaybeExtendedType extended_value = static_cast<MaybeExtendedType>(value);
-    UnsignedType unsigned_value = static_cast<UnsignedType>(extended_value);
-
-    size_t bytes = 0;
-
-    while (unsigned_value >= 0x80) {
-        ++bytes;
-        unsigned_value >>= 7;
-    }
-
-    return bytes + 1;
-}
-
-template <typename T>
-static inline uint8_t* writeVarInt(T value, uint8_t* target) {
-    // If value is <= 0 we must first sign extend to int64_t (see [1]).
-    // Finally we always cast to an unsigned value to to avoid arithmetic
-    // (sign expanding) shifts in the while loop.
-    // [1]: "If you use int32 or int64 as the type for a negative number, the
-    // resulting varint is always ten bytes long".
-    // - developers.google.com/protocol-buffers/docs/encoding
-    // So for each input type we do the following casts:
-    // uintX_t -> uintX_t -> uintX_t
-    // int8_t  -> int64_t -> uint64_t
-    // int16_t -> int64_t -> uint64_t
-    // int32_t -> int64_t -> uint64_t
-    // int64_t -> int64_t -> uint64_t
-    using MaybeExtendedType =
-        typename std::conditional<std::is_unsigned<T>::value, T, int64_t>::type;
-    using UnsignedType = typename std::make_unsigned<MaybeExtendedType>::type;
-
-    MaybeExtendedType extended_value = static_cast<MaybeExtendedType>(value);
-    UnsignedType unsigned_value = static_cast<UnsignedType>(extended_value);
-
-    while (unsigned_value >= 0x80) {
-        *target++ = static_cast<uint8_t>(unsigned_value) | 0x80;
-        unsigned_value >>= 7;
-    }
-    *target = static_cast<uint8_t>(unsigned_value);
-    return target + 1;
-}
-
-static std::vector<char> sProcessTrace(const std::vector<char>& trace) {
-    std::vector<char> res;
-
-    ::perfetto::protos::Trace pbtrace;
-    std::string traceStr(trace.begin(), trace.end());
-
-    if (pbtrace.ParseFromString(traceStr)) {
-    } else {
-        fprintf(stderr, "%s: Failed to parse protobuf as a string\n", __func__);
-        return res;
-    }
-
-    fprintf(stderr, "%s: postprocessing trace with guest time diff of %llu\n", __func__,
-            (unsigned long long)sTraceConfig.guestTimeDiff);
-
-    for (int i = 0; i < pbtrace.packet_size(); ++i) {
-        // Process one trace packet.
-        auto* packet = pbtrace.mutable_packet(i);
-        if (packet->has_timestamp()) {
-            packet->set_timestamp(packet->timestamp() + sTraceConfig.guestTimeDiff);
-        }
-    }
-
-    std::string traceAfter;
-    pbtrace.SerializeToString(&traceAfter);
-
-    std::vector<char> res2(traceAfter.begin(), traceAfter.end());
-    return res2;
+    sTraceProgress.saving = false;
 }
 
 PERFETTO_TRACING_ONLY_EXPORT void disableTracing() {
     if (sTracingSession) {
         sTraceConfig.tracingDisabled = true;
-        sTracingSession->StopBlocking();
-        std::vector<char> trace_data(sTracingSession->ReadTraceBlocking());
 
-        std::vector<char> processed =
-            sProcessTrace(trace_data);
+        // Don't disable again if we are saving.
+        if (sTraceProgress.saving) return;
+        sTraceProgress.saving = true;
+
+        sTracingSession->StopBlocking();
+        sTraceProgress.hostTrace = sTracingSession->ReadTraceBlocking();
 
         fprintf(stderr, "%s: Tracing ended================================================================================\n", __func__);
         fprintf(stderr, "%s: Saving trace to disk. Configuration:\n", __func__);
@@ -289,16 +397,7 @@ PERFETTO_TRACING_ONLY_EXPORT void disableTracing() {
         fprintf(stderr, "%s: guest filename: %s\n", __func__, sTraceConfig.guestFilename);
         fprintf(stderr, "%s: combined filename: %s\n", __func__, sTraceConfig.combinedFilename);
 
-        fprintf(stderr, "%s: Saving host trace first...\n", __func__);
-
-        // Write the trace into a file.
-        std::ofstream output;
-        output.open(sTraceConfig.hostFilename, std::ios::out | std::ios::binary);
-        output.write(&processed[0], processed.size());
-        output.close();
         sTracingSession.reset();
-
-        fprintf(stderr, "%s: Saving host trace first...(done)\n", __func__);
 
         if (!sTraceConfig.guestFilename || !sTraceConfig.combinedFilename) {
             fprintf(stderr, "%s: skipping guest combined trace, "
@@ -332,7 +431,7 @@ PERFETTO_TRACING_ONLY_EXPORT void traceCounter(const char* name, int64_t value) 
 }
 
 PERFETTO_TRACING_ONLY_EXPORT void setGuestTime(uint64_t t) {
-    virtualdeviceperfetto::setTraceConfig([t](virtualdeviceperfetto::VirtualDeviceTraceConfig& config) {
+    vperfetto::setTraceConfig([t](vperfetto::VirtualDeviceTraceConfig& config) {
         // can only be set before tracing
         if (!config.tracingDisabled) {
             return;
@@ -343,5 +442,4 @@ PERFETTO_TRACING_ONLY_EXPORT void setGuestTime(uint64_t t) {
     });
 }
 
-
-} // namespace perfetto
+} // namespace vperfetto

@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "perfetto-tracing-only.h"
+#include "vperfetto.h"
 
 #include "trace_packet.pbzero.h"
 #include "counter_descriptor.pbzero.h"
@@ -36,7 +36,7 @@
 #include <unordered_set>
 #include <sstream>
 
-namespace virtualdeviceperfetto {
+namespace vperfetto {
 
 static FILE* sDefaultFileHandle = nullptr;
 
@@ -605,7 +605,9 @@ PERFETTO_TRACING_ONLY_EXPORT VirtualDeviceTraceConfig queryTraceConfig() {
 }
 
 PERFETTO_TRACING_ONLY_EXPORT void initialize(const bool** tracingDisabledPtr) {
-    *tracingDisabledPtr = &sTraceConfig.tracingDisabled;
+    if (tracingDisabledPtr) {
+        *tracingDisabledPtr = &sTraceConfig.tracingDisabled;
+    }
 }
 
 bool useFilenameByEnv(const char* s) {
@@ -685,7 +687,7 @@ PERFETTO_TRACING_ONLY_EXPORT void traceCounter(const char* name, int64_t val) {
 }
 
 PERFETTO_TRACING_ONLY_EXPORT void setGuestTime(uint64_t t) {
-    virtualdeviceperfetto::setTraceConfig([t](virtualdeviceperfetto::VirtualDeviceTraceConfig& config) {
+    vperfetto::setTraceConfig([t](vperfetto::VirtualDeviceTraceConfig& config) {
         // can only be set before tracing
         if (!config.tracingDisabled) {
             return;
@@ -696,4 +698,4 @@ PERFETTO_TRACING_ONLY_EXPORT void setGuestTime(uint64_t t) {
     });
 }
 
-} // namespace virtualdeviceperfetto
+} // namespace vperfetto
