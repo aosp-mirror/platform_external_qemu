@@ -39,7 +39,7 @@
 #include "android/emulation/control/LineConsumer.h"
 #include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
-#include "android/emulation/control/snapshot/TarStream.h"
+#include "android/base/files/TarStream.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/globals.h"
 #include "android/snapshot/Icebox.h"
