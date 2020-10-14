@@ -18,6 +18,23 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7385d786_d3a402ed",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-10-14T18:29:42Z",
+      "side": 1,
+      "message": "wondering this impose extra workload on UI thread.. maybe considering a mac only CL?",
+      "revId": "13a4d03dadbe8efbc915219cdc7eeb07d2a8728f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6a664653_9442cdec",
