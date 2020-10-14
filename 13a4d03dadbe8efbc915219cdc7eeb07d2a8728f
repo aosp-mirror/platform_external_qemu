@@ -1,6 +1,24 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "31b6a44c_deb022d2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-10-14T18:27:50Z",
+      "side": 1,
+      "message": "please resolve the conflict.",
+      "revId": "13a4d03dadbe8efbc915219cdc7eeb07d2a8728f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "6a664653_9442cdec",
         "filename": "android/android-emu/android/window-agent-impl.cpp",
@@ -20,8 +38,7 @@
         "endChar": 48
       },
       "revId": "13a4d03dadbe8efbc915219cdc7eeb07d2a8728f",
-      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
-      "unresolved": true
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
