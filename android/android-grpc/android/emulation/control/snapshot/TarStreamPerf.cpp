@@ -21,17 +21,16 @@
 #include <utility>   // for pair
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/files/TarStream.h"
 #include "android/base/system/System.h"
-#include "android/emulation/control/snapshot/TarStream.h"
 #include "android/utils/Random.h"
 #include "benchmark/benchmark_api.h"  // for State
-
 
 #define BASIC_BENCHMARK_TEST(x) \
     BENCHMARK(x)->RangeMultiplier(2)->Range(1 << 10, 1 << 20)
 
 using android::base::System;
-using android::emulation::control::TarWriter;
+using android::base::TarWriter;
 
 void SetUp() {
     auto tmpdir = System::get()->getTempDir();

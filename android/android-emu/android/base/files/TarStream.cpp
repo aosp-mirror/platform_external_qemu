@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/snapshot/TarStream.h"
+#include "android/base/files/TarStream.h"
 
 #include <assert.h>  // for assert
 #include <stdio.h>   // for sprintf
@@ -58,8 +58,7 @@ using android::base::System;
 using PaxMap = std::unordered_map<std::string, std::string>;
 
 namespace android {
-namespace emulation {
-namespace control {
+namespace base {
 
 // The chksum field represents the simple sum of all bytes in the header block.
 // Each 8-bit byte in the header is added to an unsigned integer, initialized to
@@ -459,6 +458,5 @@ bool TarReader::extract(TarInfo src) {
     return true;
 }
 
-}  // namespace control
-}  // namespace emulation
+}  // namespace base
 }  // namespace android
