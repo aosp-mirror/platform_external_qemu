@@ -30,6 +30,7 @@
 #include <tuple>                                     // for tuple
 #include <utility>                                   // for move
 
+#include "android/cmdline-option.h"                  // for android_cmdLineOptions
 #include "android/skin/qt/ModalOverlay.h"            // for ModalOverlay
 #include "android/skin/qt/OverlayMessageCenter.h"    // for OverlayMessageCe...
 #include "android/skin/qt/VirtualSceneInfoDialog.h"  // for VirtualSceneInfo...
@@ -328,6 +329,11 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
 void EmulatorContainer::showEvent(QShowEvent* event) {
 // Disable the minimize and maximize buttons on OSX. See the comment in the
 // constructor for an explanation of why this is necessary.
+    if (android_cmdLineOptions->qt_hide_window) {
+        hide();
+        return;
+    }
+
 #ifdef __APPLE__
     WId wid = effectiveWinId();
     wid = (WId)getNSWindow((void*)wid);

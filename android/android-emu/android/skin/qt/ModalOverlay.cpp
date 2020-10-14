@@ -27,6 +27,7 @@
 #include <QVBoxLayout>                          // for QVBoxLayout
 #include <algorithm>                            // for max, min
 
+#include "android/cmdline-option.h"             // for android_cmdLineOptions
 #include "android/settings-agent.h"             // for SETTINGS_THEME_DARK
 #include "android/skin/qt/stylesheet.h"         // for stylesheetFontSize
 
@@ -153,6 +154,10 @@ void ModalOverlay::slot_handleButtonFunc() {
 }
 
 void ModalOverlay::showEvent(QShowEvent* event) {
+    if (android_cmdLineOptions->qt_hide_window) {
+        hide();
+        return;
+    }
 #ifdef __APPLE__
     // See EmulatorContainer::showEvent() for explanation on why this is needed
     WId parentWid = parentWidget()->effectiveWinId();
