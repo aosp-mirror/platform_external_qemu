@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "96062cc6_26b74221",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-14T02:29:51Z",
+      "side": 1,
+      "message": "weird, thought i tested this but apparently i was using stale artifacts",
+      "revId": "aaa5b566c0f6e36420f76f02d64dc43285244e02",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
