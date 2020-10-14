@@ -67,7 +67,6 @@ android_add_library(
       android/base/threads/Async.cpp
       android/base/threads/FunctorThread.cpp
       android/base/threads/ThreadStore.cpp
-      android/base/Tracing.cpp
       android/base/Uri.cpp
       android/base/Uuid.cpp
       android/base/Version.cpp
@@ -139,7 +138,7 @@ android_target_link_libraries(android-emu-base windows_msvc-x86_64
 target_include_directories(android-emu-base PUBLIC .)
 # Library dependencies, these are public so they will propagate, if you link
 # against the base you will link against LZ4 & UUID
-target_link_libraries(android-emu-base PRIVATE zlib lz4 UUID::UUID perfetto-tracing-only)
+target_link_libraries(android-emu-base PRIVATE zlib lz4 UUID::UUID)
 if(OPTION_TCMALLOC)
   android_target_link_libraries(
     android-emu-base linux-x86_64

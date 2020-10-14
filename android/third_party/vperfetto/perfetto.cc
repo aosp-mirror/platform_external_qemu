@@ -4333,6 +4333,11 @@ Uuid Uuidv4() {
   return uuid;
 }
 
+uint64_t GenUuidv4Lsb() {
+    Uuid u = Uuidv4();
+    return (uint64_t)(u.lsb());
+}
+
 Uuid::Uuid() {}
 
 Uuid::Uuid(const std::string& s) {
