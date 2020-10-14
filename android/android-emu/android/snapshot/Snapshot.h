@@ -29,7 +29,10 @@ namespace snapshot {
 class Snapshot final {
 public:
     Snapshot(const char* name);
-    explicit Snapshot(const char* name, const char* dataDir);
+    explicit Snapshot(const char* name,
+                      const char* dataDir,
+                      bool verifyQcow = true);
+    Snapshot(const emulator_snapshot::Snapshot& snapshotPb);
 
     static std::vector<Snapshot> getExistingSnapshots();
     static base::Optional<Snapshot> getSnapshotById(std::string id);
@@ -99,6 +102,8 @@ private:
     std::string mName;
     std::string mDataDir;
     emulator_snapshot::Snapshot mSnapshotPb;
+    // We might not load the qcow files when validating an exported snapshot.
+    bool mVerifyQcow = true;
     uint64_t mSize = 0;
     uint64_t mFolderSize = 0;
     int32_t mInvalidLoads = 0;

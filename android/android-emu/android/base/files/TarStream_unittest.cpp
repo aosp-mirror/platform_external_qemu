@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/snapshot/TarStream.h"
+#include "android/base/files/TarStream.h"
 
 #include <gtest/gtest.h>  // for Assert...
 #include <string.h>       // for memcmp
@@ -26,19 +26,18 @@
 #include "android/base/testing/TestSystem.h"   // for TestSy...
 #include "android/base/testing/TestTempDir.h"  // for TestTe...
 
+using android::base::GzipInputStream;
+using android::base::GzipOutputStream;
 using android::base::PathUtils;
 using android::base::pj;
 using android::base::System;
 using android::base::TestSystem;
 using android::base::TestTempDir;
-using android::base::GzipInputStream;
-using android::base::GzipOutputStream;
 
 namespace android {
-namespace emulation {
-namespace control {
+namespace base {
 
-class TarStreamTest : public testing::Test {
+class TarStreamTest : public ::testing::Test {
 protected:
     TarStreamTest() : mTestSystem("/", System::kProgramBitness) {}
 
@@ -292,6 +291,5 @@ TEST_F(TarStreamTest, stream_can_extract_tar) {
     }
 }
 
-}  // namespace control
-}  // namespace emulation
+}  // namespace base
 }  // namespace android
