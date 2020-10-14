@@ -34,6 +34,7 @@ android_add_library(
       android/base/files/StdioStream.cpp
       android/base/files/Stream.cpp
       android/base/files/StreamSerializing.cpp
+      android/base/files/TarStream.cpp
       android/base/gl_object_counter.cpp
       android/base/GLObjectCounter.cpp
       android/base/IOVector.cpp
