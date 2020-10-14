@@ -119,8 +119,7 @@ size_t AndroidMessagePipe::copyData(uint8_t** bufdatap,
 }
 
 int AndroidMessagePipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                                    int numBuffers,
-                                    void** newPipePtr) {
+                                    int numBuffers) {
     if (!readyForGuestToSend()) {
         return PIPE_ERROR_AGAIN;
     }

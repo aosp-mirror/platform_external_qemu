@@ -55,8 +55,7 @@ int RefcountPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 }
 
 int RefcountPipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                              int numBuffers,
-                              void** newPipePtr) {
+                              int numBuffers) {
     int result = 0;
     char forRecv[4] = {};
 

@@ -457,8 +457,7 @@ public:
     }
 
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers,
-                            void** newPipePtr) override {
+                            int numBuffers) override {
         DD("%s", __func__);
 
         if (!mIsWorking) {

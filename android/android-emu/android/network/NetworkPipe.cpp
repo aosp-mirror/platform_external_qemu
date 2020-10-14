@@ -119,8 +119,7 @@ public:
     }
 
     int onGuestSend(const AndroidPipeBuffer* buffers,
-                    int numBuffers,
-                    void** newPipePtr) override {
+                    int numBuffers) override {
         int transferred = 0;
         for (int i = 0; i < numBuffers; ++i) {
             transferred += buffers[i].size;

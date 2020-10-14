@@ -527,8 +527,7 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 }
 
 int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                              int numBuffers,
-                              void** newPipePtr) {
+                              int numBuffers) {
     D("%s: [%p] numBuffers=%d state=%s", __func__, this, numBuffers,
       toString(mState));
     if (mState == State::ProxyingData) {
