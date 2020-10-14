@@ -1148,7 +1148,15 @@ public:
                     ((char*)entry.linear) + box->x + writtenBytes,
                     wantedBytes - writtenBytes,
                 };
+
+                // guest_send can now reallocate the pipe.
+                void* hostPipeBefore = hostPipe;
                 auto status = ops->guest_send(&hostPipe, &buf, 1);
+                if (hostPipe != hostPipeBefore) {
+                    resetPipe((GoldfishHwPipe*)(uintptr_t)(entry.ctxId), hostPipe);
+                    it = mResources.find(resId);
+                    entry = it->second;
+                }
 
                 if (status > 0) {
                     writtenBytes += status;
