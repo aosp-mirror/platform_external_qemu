@@ -48,9 +48,32 @@ private:
     static constexpr std::size_t k16KB = 16 * 1024;
 };
 
+// An input stream buffer that inflates/decompresses a gzip stream.
+class GzipInputFileStreambuf : public std::streambuf {
+public:
+    GzipInputFileStreambuf(const char* fileName, std::size_t chunk = k16KB);
+    ~GzipInputFileStreambuf();
+
+protected:
+    int underflow() override;
+    std::streampos seekoff(std::streamoff off,
+                           std::ios_base::seekdir way,
+                           std::ios_base::openmode which) override;
+    std::streampos seekpos(std::streampos pos,
+                           std::ios_base::openmode which) override;
+
+private:
+    std::unique_ptr<char[]> mOut;
+    static constexpr std::size_t k16KB = 16 * 1024;
+    gzFile mFile;
+    std::size_t mCapacity;
+    int mErr{Z_OK};
+};
+
 class GzipInputStream : public std::istream {
 public:
     GzipInputStream(std::istream& os);
+    GzipInputStream(const char* fileName);
     explicit GzipInputStream(std::streambuf* sbuf);
     virtual ~GzipInputStream();
 };
