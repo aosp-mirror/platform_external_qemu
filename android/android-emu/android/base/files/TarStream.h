@@ -26,8 +26,7 @@ using gid_t = uint32_t;
 #endif
 
 namespace android {
-namespace emulation {
-namespace control {
+namespace base {
 
 enum TarType {
     REGTYPE = 0,   // regular file
@@ -151,6 +150,5 @@ private:
     bool mSeek = false;
 };
 
-}  // namespace control
-}  // namespace emulation
+}  // namespace base
 }  // namespace android
