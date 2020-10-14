@@ -5556,6 +5556,8 @@ inline TimeNanos FromPosixTimespec(const struct timespec& ts) {
 
 void SleepMicroseconds(unsigned interval_us);
 
+uint64_t GenUuidv4Lsb();
+
 #if PERFETTO_BUILDFLAG(PERFETTO_OS_WIN)
 
 TimeNanos GetWallTimeNs();

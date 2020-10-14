@@ -552,6 +552,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_enc.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include <vector>\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
+    // this Tracing.h is guest side
     fprintf(fp, "#include \"android/base/Tracing.h\"\n");
     fprintf(fp, "namespace {\n\n");
 
@@ -1042,7 +1043,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
         // TODO - add for return value;
         fprintf(fp, "\t\tcase OP_%s: {\n", e->name().c_str());
-        fprintf(fp, "\t\t\tandroid::base::beginTrace(\"%s decode\");\n", e->name().c_str());
+        fprintf(fp, "\t\t\tvperfetto::beginTrace(\"%s decode\");\n", e->name().c_str());
 
 #if INSTRUMENT_TIMING_HOST
         fprintf(fp, "\t\t\tstruct timespec ts0, ts1, ts2;\n");
@@ -1440,7 +1441,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                     "ts1.tv_sec, ts1.tv_nsec/1000, timeDiff, timeDiff2);\n", e->name().c_str());
 #endif
         fprintf(fp, "\t\t\tSET_LASTCALL(\"%s\");\n", e->name().c_str());
-        fprintf(fp, "\t\t\tandroid::base::endTrace();\n");
+        fprintf(fp, "\t\t\tvperfetto::endTrace();\n");
         fprintf(fp, "\t\t\tbreak;\n");
         fprintf(fp, "\t\t}\n");
 
