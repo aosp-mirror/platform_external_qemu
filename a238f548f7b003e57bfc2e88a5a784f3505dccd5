@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f1fc5263_a12fcbcb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-14T02:52:51Z",
+      "side": 1,
+      "message": "fwd fix in https://android-review.googlesource.com/c/platform/external/qemu/+/1459247",
+      "revId": "a238f548f7b003e57bfc2e88a5a784f3505dccd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
