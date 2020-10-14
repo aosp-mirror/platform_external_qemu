@@ -31,7 +31,6 @@
 
 #include "android/utils/debug.h"
 #include "android/base/StringView.h"
-#include "android/base/Tracing.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/sync_device.h"
@@ -39,6 +38,8 @@
 #include "emugl/common/misc.h"
 #include "emugl/common/thread.h"
 #include "math.h"
+
+#include "vperfetto.h"
 
 #include <atomic>
 #include <inttypes.h>
@@ -1373,16 +1374,16 @@ static int32_t rcMapGpaToBufferHandle2(uint32_t bufferHandle,
 }
 
 static void rcFlushWindowColorBufferAsyncWithFrameNumber(uint32_t windowSurface, uint32_t frameNumber) {
-    android::base::traceCounter("gfxstreamFrameNumber", (int64_t)frameNumber);
+    vperfetto::traceCounter("gfxstreamFrameNumber", (int64_t)frameNumber);
     rcFlushWindowColorBufferAsync(windowSurface);
 }
 
 static void rcSetTracingForPuid(uint64_t puid, uint32_t enable, uint64_t time) {
     if (enable) {
-        android::base::setGuestTime(time);
-        android::base::enableTracing();
+        vperfetto::setGuestTime(time);
+        vperfetto::enableTracing();
     } else {
-        android::base::disableTracing();
+        vperfetto::disableTracing();
     }
 }
 
