@@ -36,13 +36,14 @@
 #include "android/base/memory/MemoryTracker.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
-#include "android/base/Tracing.h"
 
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
 #include "emugl/common/vm_operations.h"
+
+#include "vperfetto.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -331,7 +332,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         return true;
     }
 
-    android::base::initializeTracing();
+    vperfetto::initialize();
 
     //
     // allocate space for the FrameBuffer object
