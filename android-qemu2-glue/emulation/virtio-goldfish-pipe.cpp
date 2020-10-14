@@ -514,6 +514,7 @@ public:
     }
 
     void resetPipe(GoldfishHwPipe* hwPipe, GoldfishHostPipe* hostPipe) {
+        fprintf(stderr, "%s: call\n", __func__);
         VGPLOG("Want to reset hwpipe %p to hostpipe %p", hwPipe, hostPipe);
         VirglCtxId asCtxId = (VirglCtxId)(uintptr_t)hwPipe;
         auto it = mContexts.find(asCtxId);
