@@ -1,6 +1,6 @@
-#include "../perfetto-tracing-only/perfetto-tracing-only.h"
+#include "../vperfetto/vperfetto.h"
 
-namespace virtualdeviceperfetto {
+namespace vperfetto {
 
 // A stub implementation of perfetto tracing only.
 
@@ -45,5 +45,12 @@ void traceCounter(const char* name, int64_t value) {
 void setGuestTime(uint64_t t) {
     (void)t;
 }
+
+// Miscellanous APIs that are useful but fall outside the standard workflow
+// Obtains BOOTTIME nanoseconds the way perfetto sdk calculates it.
+uint64_t bootTimeNs() { return 0; }
+// Microsecond sleep according to perfetto sdk.
+void sleepUs(unsigned) { }
+void waitSavingDone() { }
 
 } // namespace perfetto

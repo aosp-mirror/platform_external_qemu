@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "perfetto-tracing-only.h"
+#include "vperfetto.h"
 
 #include "trace_packet.pbzero.h"
 #include "counter_descriptor.pbzero.h"
@@ -36,7 +36,7 @@
 #include <unordered_set>
 #include <sstream>
 
-namespace virtualdeviceperfetto {
+namespace vperfetto {
 
 static FILE* sDefaultFileHandle = nullptr;
 
@@ -345,7 +345,7 @@ private:
     }
 
     inline uint64_t getTimestamp() {
-        uint64_t t = (uint64_t)(::perfetto::base::GetWallTimeNs().count());
+        uint64_t t = bootTimeNs();
         t += sTraceConfig.guestTimeDiff;
         return t;
     }
@@ -532,6 +532,7 @@ void asyncTraceSaveFunc() {
 
     if (!good) {
         fprintf(stderr, "%s: Timed out when waiting for guest file to stabilize, skipping combined trace saving.\n", __func__);
+        sTraceConfig.saving = false;
         return;
     }
 
@@ -541,7 +542,12 @@ void asyncTraceSaveFunc() {
 
     combinedFile << guestFile.rdbuf() << hostFile.rdbuf();
 
+    combinedFile.close();
+    guestFile.close();
+    hostFile.close();
+
     fprintf(stderr, "%s: Wrote combined trace (%s)\n", __func__, combinedFilename);
+    sTraceConfig.saving = false;
 }
 
 void TraceStorage::saveTracesToDisk() {
@@ -587,6 +593,7 @@ void TraceStorage::saveTracesToDisk() {
                         "combined file name (%p) not specified\n", __func__,
                 sTraceConfig.guestFilename,
                 sTraceConfig.combinedFilename);
+        sTraceConfig.saving = false;
         return;
     }
 
@@ -605,7 +612,9 @@ PERFETTO_TRACING_ONLY_EXPORT VirtualDeviceTraceConfig queryTraceConfig() {
 }
 
 PERFETTO_TRACING_ONLY_EXPORT void initialize(const bool** tracingDisabledPtr) {
-    *tracingDisabledPtr = &sTraceConfig.tracingDisabled;
+    if (tracingDisabledPtr) {
+        *tracingDisabledPtr = &sTraceConfig.tracingDisabled;
+    }
 }
 
 bool useFilenameByEnv(const char* s) {
@@ -635,6 +644,9 @@ PERFETTO_TRACING_ONLY_EXPORT void enableTracing() {
     // Don't enable it twice
     if (!sTraceConfig.tracingDisabled) return;
 
+    // Don't enable if we are saving
+    if (sTraceConfig.saving) return;
+
     fprintf(stderr, "%s: Tracing begins================================================================================\n", __func__);
     fprintf(stderr, "%s: Configuration:\n", __func__);
     fprintf(stderr, "%s: host filename: %s (possibly set via $VPERFETTO_HOST_FILE)\n", __func__, sTraceConfig.hostFilename);
@@ -659,6 +671,8 @@ PERFETTO_TRACING_ONLY_EXPORT void disableTracing() {
     sTraceConfig.tracingDisabled = 1;
 
     if (!tracingWasDisabled) {
+        // Set saving on
+        sTraceConfig.saving = false;
         sTraceStorage.onTracingDisabled();
     }
 
@@ -685,15 +699,32 @@ PERFETTO_TRACING_ONLY_EXPORT void traceCounter(const char* name, int64_t val) {
 }
 
 PERFETTO_TRACING_ONLY_EXPORT void setGuestTime(uint64_t t) {
-    virtualdeviceperfetto::setTraceConfig([t](virtualdeviceperfetto::VirtualDeviceTraceConfig& config) {
+    vperfetto::setTraceConfig([t](vperfetto::VirtualDeviceTraceConfig& config) {
         // can only be set before tracing
         if (!config.tracingDisabled) {
             return;
         }
         config.guestStartTime = t;
-        config.hostStartTime = (uint64_t)(::perfetto::base::GetWallTimeNs().count());
+        config.hostStartTime = bootTimeNs();
         config.guestTimeDiff = config.guestStartTime - config.hostStartTime;
     });
 }
 
-} // namespace virtualdeviceperfetto
+PERFETTO_TRACING_ONLY_EXPORT uint64_t bootTimeNs() {
+    return (uint64_t)(::perfetto::base::GetBootTimeNs().count());
+}
+
+PERFETTO_TRACING_ONLY_EXPORT void sleepUs(unsigned interval) {
+    ::perfetto::base::SleepMicroseconds(interval);
+}
+
+PERFETTO_TRACING_ONLY_EXPORT void waitSavingDone() {
+    fprintf(stderr, "%s: waiting for trace saving to be done...\n", __func__);
+    while (sTraceConfig.saving) {
+        sleepUs(1000000);
+    }
+    fprintf(stderr, "%s: waiting for trace saving to be done...(done)\n", __func__);
+}
+
+
+} // namespace vperfetto

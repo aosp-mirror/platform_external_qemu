@@ -18,7 +18,6 @@
 #include "android/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
-#include "android/base/Tracing.h"
 #include "android/opengles.h"
 #include "android/emulation/testing/TestDmaMap.h"
 
@@ -36,6 +35,8 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
+
+#include "vperfetto.h"
 
 #include <sstream>
 #include <string>
@@ -1185,7 +1186,7 @@ TEST_P(CombinedGoldfishOpenglTest, GetStringTwiceCurrent) {
 }
 
 TEST_P(CombinedGoldfishOpenglTest, CombinedGuestHostTracing) {
-    android::base::enableTracing();
+    vperfetto::enableTracing();
 
     const char* versionString = (const char*)glGetString(GL_VERSION);
     const char* extensionString = (const char*)glGetString(GL_EXTENSIONS);
@@ -1287,7 +1288,7 @@ TEST_P(CombinedGoldfishOpenglTest, CombinedGuestHostTracing) {
     glDeleteProgram(program);
 
     glFinish();
-    android::base::disableTracing();
+    vperfetto::disableTracing();
 }
 
 INSTANTIATE_TEST_SUITE_P(

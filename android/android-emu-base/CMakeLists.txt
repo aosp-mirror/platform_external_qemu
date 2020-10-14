@@ -78,7 +78,6 @@ android_add_library(
       android/base/threads/FunctorThread.cpp
       android/base/threads/internal/ParallelTaskBase.cpp
       android/base/threads/ThreadStore.cpp
-      android/base/Tracing.cpp
       android/base/Uri.cpp
       android/base/Uuid.cpp
       android/base/Version.cpp
@@ -127,7 +126,7 @@ target_include_directories(android-emu-base PUBLIC .)
 # Library dependencies, these are public so they will propagate, if you link
 # against the base you will link against LZ4 & UUID
 target_link_libraries(
-  android-emu-base PRIVATE lz4 UUID::UUID perfetto-tracing-only
+  android-emu-base PRIVATE lz4 UUID::UUID
   PUBLIC libprotobuf Threads::Threads)
 
 if(OPTION_TCMALLOC)
