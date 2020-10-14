@@ -6,13 +6,6 @@ set(perfetto "${ANDROID_QEMU2_TOP_DIR}/../perfetto")
 # post-process traces with the full Perfetto tracing SDK
 add_subdirectory(proto)
 
-android_add_library(
-  TARGET perfetto-tracing-only-dummy
-  LIBNAME libperfetto-tracing-only-dummy
-  LICENSE Apache
-  SRC
-  dummy.cc)
-
 android_license(
   TARGET perfetto-libperfettobase
   LIBNAME libperfettobase
@@ -43,7 +36,7 @@ android_add_library(
 
 target_include_directories(
     perfetto-libperfettobase PUBLIC
-    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/perfetto-tracing-only
+    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/vperfetto
     ${perfetto}/include)
 
 android_add_executable(
@@ -86,7 +79,7 @@ android_add_library(
 
 target_include_directories(
     perfetto-libprotozero PUBLIC
-    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/perfetto-tracing-only
+    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/vperfetto
     ${perfetto}/include)
 
 target_link_libraries(
@@ -135,16 +128,16 @@ android_add_pbzero_library(${perfetto}/protos/perfetto/trace/track_event track_e
 if (OPTION_PERFETTO_USE_SDK)
     set(PERFETTO_TRACING_ONLY_SOURCES
         perfetto.cc
-        perfetto-sdk-tracing-only.cpp)
+        vperfetto-sdk.cpp)
     set(PERFETTO_TRACING_ONLY_INCLUDE
-        ${ANDROID_QEMU2_TOP_DIR}/android/third_party/perfetto-tracing-only)
+        ${ANDROID_QEMU2_TOP_DIR}/android/third_party/vperfetto)
     set(PERFETTO_TRACING_ONLY_LIBRARIES
-        perfetto-tracing-only-dummy)
+        perfetto_trace)
 else()
     set(PERFETTO_TRACING_ONLY_SOURCES
-        perfetto-tracing-only.cpp)
+        vperfetto.cpp)
     set(PERFETTO_TRACING_ONLY_INCLUDE
-        ${ANDROID_QEMU2_TOP_DIR}/android/third_party/perfetto-tracing-only
+        ${ANDROID_QEMU2_TOP_DIR}/android/third_party/vperfetto
         ${perfetto}/include)
     set(PERFETTO_TRACING_ONLY_LIBRARIES
         pbzero-trace_stats
@@ -161,19 +154,19 @@ else()
 endif()
 
 android_add_library(
-    TARGET perfetto-tracing-only
+    TARGET vperfetto
     LICENSE Apache-2.0
     SRC
     ${PERFETTO_TRACING_ONLY_SOURCES})
 target_include_directories(
-    perfetto-tracing-only PUBLIC
+    vperfetto PUBLIC
     ${PERFETTO_TRACING_ONLY_INCLUDE})
-target_link_libraries(perfetto-tracing-only
+target_link_libraries(vperfetto
     PRIVATE
     ${PERFETTO_TRACING_ONLY_LIBRARIES})
 
 android_add_test(
-    TARGET perfetto_unittests
-    SRC perfetto_unittest.cpp)
-target_link_libraries(perfetto_unittests PUBLIC perfetto-tracing-only gtest gtest_main)
+    TARGET vperfetto_unittests
+    SRC vperfetto_unittest.cpp)
+target_link_libraries(vperfetto_unittests PUBLIC vperfetto gtest gtest_main)
 
