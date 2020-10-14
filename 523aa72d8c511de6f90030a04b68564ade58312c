@@ -33,6 +33,23 @@
       "message": "Thread 15 \"virtio_gpu\" received signal SIGSEGV, Segmentation fault.\n[Switching to Thread 0x7f275fdfe700 (LWP 904719)]\n0x00007f280e1aae69 in android_pipe_guest_send (internalPipe\u003d0x7f275fdfcaa0, buffers\u003d0x7f275fdfcaa8, numBuffers\u003d1)\n    at ../android/android-emu/android/emulation/AndroidPipe.cpp:787\n787         return pipe-\u003eonGuestSend(buffers, numBuffers, internalPipe);\n(gdb) bt\n#0  0x00007f280e1aae69 in android_pipe_guest_send (internalPipe\u003d0x7f275fdfcaa0, buffers\u003d0x7f275fdfcaa8, numBuffers\u003d1)\n    at ../android/android-emu/android/emulation/AndroidPipe.cpp:787\n#1  0x00007f280eed953f in PipeVirglRenderer::transferWriteIov (this\u003d0x7f280eee8340 \u003csRenderer+8\u003e, resId\u003d\u003coptimized out\u003e, offset\u003d\u003coptimized out\u003e,\n    box\u003d0x7f275fdfcb10) at ../android-qemu2-glue/emulation/virtio-goldfish-pipe.cpp:1151\n#2  0x000055692eddb72c in \u003cdevices::virtio::gpu::virtio_gfxstream_backend::VirtioGfxStreamBackend as devices::virtio::gpu::Backend\u003e::transfer_to_resource_3d ()\n#3  0x000055692ede4e34 in devices::virtio::gpu::Frontend::process_descriptor ()\n#4  0x000055692ede277c in devices::virtio::gpu::Frontend::process_queue ()\n#5  0x000055692ede0f1d in std::sys_common::backtrace::__rust_begin_short_backtrace ()\n#6  0x000055692eddeb1a in core::ops::function::FnOnce::call_once{{vtable-shim}} ()\n#7  0x000055692ee4b015 in std::sys::unix::thread::Thread::new::thread_start ()\n#8  0x00007f280ec4fea7 in start_thread (arg\u003d\u003coptimized out\u003e) at pthread_create.c:477\n#9  0x00007f280ed79eaf in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:95\n(gdb) print pipe\n$1 \u003d (android::AndroidPipe *) 0x7f274cb27d10\n(gdb)",
       "revId": "523aa72d8c511de6f90030a04b68564ade58312c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3a1378d0_9f5c7075",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 12
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-14T03:00:28Z",
+      "side": 1,
+      "message": "Never mind, error was in previous cl and I have a fwd fix for that. testing this one now",
+      "revId": "523aa72d8c511de6f90030a04b68564ade58312c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
