@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <sys/types.h>  // for gid_t, mode_t, uid_t
-#include <cstdint>      // for uint64_t, uint8_t
-#include <iosfwd>       // for basic_ios
-#include <ostream>      // for istream, ostream
-#include <string>       // for string
-#include "android/utils/file_io.h"         // for android_mkdir, android_stat
+#include <sys/types.h>              // for gid_t, mode_t, uid_t
+#include <cstdint>                  // for uint64_t, uint8_t
+#include <iosfwd>                   // for basic_ios
+#include <ostream>                  // for istream, ostream
+#include <string>                   // for string
+#include "android/utils/file_io.h"  // for android_mkdir, android_stat
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -26,8 +26,7 @@ using gid_t = uint32_t;
 #endif
 
 namespace android {
-namespace emulation {
-namespace control {
+namespace base {
 
 enum TarType {
     REGTYPE = 0,   // regular file
@@ -96,11 +95,13 @@ static_assert(sizeof(posix_header) == TARBLOCK,
 // Make sure to call close when you are finished adding files.
 class TarWriter : public std::ios {
 public:
-    TarWriter(std::string cwd, std::ostream& dest, size_t bufsize=4096);
+    TarWriter(std::string cwd, std::ostream& dest, size_t bufsize = 4096);
     ~TarWriter();
 
     // Add a file entry using the given stream, filename and stats.
-    bool addFileEntryFromStream(std::istream& src, std::string fname, struct stat sb);
+    bool addFileEntryFromStream(std::istream& src,
+                                std::string fname,
+                                struct stat sb);
     bool addFileEntry(std::string fname);
     bool addDirectoryEntry(std::string dname);
     bool addDirectory(std::string dname);
@@ -121,22 +122,22 @@ private:
 };
 
 struct TarInfo {
-    std::string name;         // member name
-    mode_t mode = 0644;       // file permissions
-    uid_t uid = 0;            // user id
-    gid_t gid = 0;            // group id
-    uint64_t size = 0;        // file size
-    uint64_t mtime = 0;       // modification time
-    TarType type = REGTYPE;   // member type
-    std::string uname = "";   // user name
-    std::string gname = "";   // group name
-    uint64_t offset = 0;      // offset in stream
-    bool valid = false;       // True if this is a valid entry.
+    std::string name;        // member name
+    mode_t mode = 0644;      // file permissions
+    uid_t uid = 0;           // user id
+    gid_t gid = 0;           // group id
+    uint64_t size = 0;       // file size
+    uint64_t mtime = 0;      // modification time
+    TarType type = REGTYPE;  // member type
+    std::string uname = "";  // user name
+    std::string gname = "";  // group name
+    uint64_t offset = 0;     // offset in stream
+    bool valid = false;      // True if this is a valid entry.
 };
 
 class TarReader : public std::ios {
 public:
-    TarReader(std::string cwd, std::istream& src, bool has_seek=false);
+    TarReader(std::string cwd, std::istream& src, bool has_seek = false);
     TarInfo next(TarInfo from);
     TarInfo first() { return next({}); }
     bool extract(TarInfo src);
@@ -151,6 +152,5 @@ private:
     bool mSeek = false;
 };
 
-}  // namespace control
-}  // namespace emulation
+}  // namespace base
 }  // namespace android

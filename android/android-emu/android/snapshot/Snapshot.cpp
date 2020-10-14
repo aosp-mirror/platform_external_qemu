@@ -15,6 +15,8 @@
 #include <stdio.h>     // for printf, fprintf
 #include <string.h>    // for strcmp, strlen
 #include <sys/mman.h>  // for mmap, munmap
+#include <cstdlib>
+#include <string>
 
 #include <algorithm>      // for find_if, remove_if
 #include <fstream>        // for operator<<, ost...
@@ -25,16 +27,18 @@
 #include <unordered_set>  // for unordered_set<>...
 #include <utility>        // for hash
 
-#include "android/avd/hw-config.h"                    // for androidHwConfig...
-#include "android/avd/info.h"                         // for avdInfo_getCach...
-#include "android/base/ArraySize.h"                   // for ARRAY_SIZE
-#include "android/base/Log.h"                         // for LogStreamVoidify
-#include "android/base/Optional.h"                    // for Optional, makeO...
-#include "android/base/ProcessControl.h"              // for loadLaunchParam...
-#include "android/base/StringFormat.h"                // for StringFormat
-#include "android/base/files/IniFile.h"               // for IniFile
-#include "android/base/files/PathUtils.h"             // for PathUtils, pj
-#include "android/base/files/ScopedFd.h"              // for ScopedFd
+#include "android/avd/hw-config.h"        // for androidHwConfig...
+#include "android/avd/info.h"             // for avdInfo_getCach...
+#include "android/base/ArraySize.h"       // for ARRAY_SIZE
+#include "android/base/Log.h"             // for LogStreamVoidify
+#include "android/base/Optional.h"        // for Optional, makeO...
+#include "android/base/ProcessControl.h"  // for loadLaunchParam...
+#include "android/base/StringFormat.h"    // for StringFormat
+#include "android/base/files/GzipStreambuf.h"
+#include "android/base/files/IniFile.h"    // for IniFile
+#include "android/base/files/PathUtils.h"  // for PathUtils, pj
+#include "android/base/files/ScopedFd.h"   // for ScopedFd
+#include "android/base/files/TarStream.h"
 #include "android/base/memory/ScopedPtr.h"            // for makeCustomScope...
 #include "android/base/misc/StringUtils.h"            // for endsWith
 #include "android/base/system/System.h"               // for System, System:...
@@ -378,7 +382,7 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 61;
+static constexpr int kVersion = 62;
 static constexpr int kMaxSaveStatsHistory = 10;
 
 base::StringView Snapshot::dataDir(const char* name) {
@@ -396,10 +400,13 @@ base::Optional<std::string> Snapshot::parent() {
 }
 
 Snapshot::Snapshot(const char* name)
-    : Snapshot(name, getSnapshotDir(name).c_str()) {}
+    : Snapshot(name, getSnapshotDir(name).c_str(), false) {}
 
-Snapshot::Snapshot(const char* name, const char* dataDir)
-    : mName(name), mDataDir(dataDir), mSaveStats(kMaxSaveStatsHistory) {
+Snapshot::Snapshot(const char* name, const char* dataDir, bool verifyQcow)
+    : mName(name),
+      mDataDir(dataDir),
+      mSaveStats(kMaxSaveStatsHistory),
+      mVerifyQcow(verifyQcow) {
     // All persisted snapshot protobuf fields across
     // saves / loads go here.
     if (preload()) {
@@ -632,49 +639,51 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
         return false;
     }
 
-    int matchedImages = 0;
-    for (const auto& image : kImages) {
-        ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
-        const auto type = image.type;
-        const auto it = std::find_if(
-                mSnapshotPb.images().begin(), mSnapshotPb.images().end(),
-                [type](const pb::Image& im) {
-                    return im.has_type() && im.type() == type;
-                });
-        if (it != mSnapshotPb.images().end()) {
-            if (!verifyImageInfo(image.type, path.get(), *it)) {
-                // If in build env, nuke the qcow2 as well.
-                if (avdInfo_inAndroidBuild(android_avdInfo)) {
-                    std::string qcow2Path(path.get());
-                    qcow2Path += ".qcow2";
-                    path_delete_file(qcow2Path.c_str());
-                }
+    if (mVerifyQcow) {
+        int matchedImages = 0;
+        for (const auto& image : kImages) {
+            ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
+            const auto type = image.type;
+            const auto it = std::find_if(
+                    mSnapshotPb.images().begin(), mSnapshotPb.images().end(),
+                    [type](const pb::Image& im) {
+                        return im.has_type() && im.type() == type;
+                    });
+            if (it != mSnapshotPb.images().end()) {
+                if (!verifyImageInfo(image.type, path.get(), *it)) {
+                    // If in build env, nuke the qcow2 as well.
+                    if (avdInfo_inAndroidBuild(android_avdInfo)) {
+                        std::string qcow2Path(path.get());
+                        qcow2Path += ".qcow2";
+                        path_delete_file(qcow2Path.c_str());
+                    }
 
-                if (writeFailure)
-                    saveFailure(FailureReason::SystemImageChanged);
-                return false;
-            }
-            ++matchedImages;
-        } else {
-            // Should match an empty image info
-            if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
-                // If in build env, nuke the qcow2 as well.
-                if (avdInfo_inAndroidBuild(android_avdInfo)) {
-                    std::string qcow2Path(path.get());
-                    qcow2Path += ".qcow2";
-                    path_delete_file(qcow2Path.c_str());
+                    if (writeFailure)
+                        saveFailure(FailureReason::SystemImageChanged);
+                    return false;
                 }
+                ++matchedImages;
+            } else {
+                // Should match an empty image info
+                if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
+                    // If in build env, nuke the qcow2 as well.
+                    if (avdInfo_inAndroidBuild(android_avdInfo)) {
+                        std::string qcow2Path(path.get());
+                        qcow2Path += ".qcow2";
+                        path_delete_file(qcow2Path.c_str());
+                    }
 
-                if (writeFailure)
-                    saveFailure(FailureReason::NoSnapshotInImage);
-                return false;
+                    if (writeFailure)
+                        saveFailure(FailureReason::NoSnapshotInImage);
+                    return false;
+                }
             }
         }
-    }
-    if (matchedImages != mSnapshotPb.images_size()) {
-        if (writeFailure)
-            saveFailure(FailureReason::ConfigMismatchAvd);
-        return false;
+        if (matchedImages != mSnapshotPb.images_size()) {
+            if (writeFailure)
+                saveFailure(FailureReason::ConfigMismatchAvd);
+            return false;
+        }
     }
 
     IniFile expectedConfig(PathUtils::join(mDataDir, "hardware.ini"));
@@ -926,9 +935,27 @@ base::Optional<FailureReason> Snapshot::failureReason() const {
 }  // namespace snapshot
 }  // namespace android
 
+static int checkLoadable(android::snapshot::Snapshot& snapshot) {
+    if (snapshot.checkValid(true)) {
+        printf("Loadable\n");
+        return 1;
+    } else {
+        printf("Not loadable\n");
+        if (snapshot.failureReason().ptr() == nullptr) {
+            printf("Reason: Unknown.\n");
+        } else {
+            printf("Reason: %s\n",
+                   failureReasonToString(*snapshot.failureReason(),
+                                         SNAPSHOT_LOAD));
+        }
+        return 0;
+    }
+}
+
 extern "C" int android_check_snapshot_loadable(const char* snapshot_name) {
     using namespace android::snapshot;
     const char* const kExportedSnapshotExt[] = {".tar", ".tar.gz"};
+    const char* format = nullptr;
     bool exportedSnapshot = false;
     size_t snapshotNameLength = strlen(snapshot_name);
     for (const char* ext : kExportedSnapshotExt) {
@@ -936,13 +963,40 @@ extern "C" int android_check_snapshot_loadable(const char* snapshot_name) {
         if (snapshotNameLength > extLen &&
             0 == strcmp(snapshot_name + snapshotNameLength - extLen, ext)) {
             exportedSnapshot = true;
+            format = ext;
             break;
         }
     }
     if (exportedSnapshot) {
-        // TODO(b/166826352)
-        printf("Loadable\n");
-        return 1;
+        std::unique_ptr<std::istream> stream;
+        if (0 == strcmp(format, ".tar.gz")) {
+            stream.reset(new android::base::GzipInputStream(snapshot_name));
+        } else {
+            stream.reset(new std::ifstream(snapshot_name));
+            if (!static_cast<std::ifstream*>(stream.get())->is_open()) {
+                printf("Not loadable\n");
+                printf("Reason: File not exist: %s\n", snapshot_name);
+                return 0;
+            }
+        }
+        std::string temp_parent = System::get()->getTempDir();
+        std::string temp_dir;
+        // Create a random temp dir
+        do {
+            temp_dir = android::base::pj(temp_parent,
+                                         ("snapshot" + std::to_string(rand())));
+        } while (path_exists(temp_dir.c_str()) || path_is_dir(temp_dir.c_str()));
+        path_android_mkdir(temp_dir.c_str(), 0777);
+        android::base::TarReader tr(temp_dir, *stream, true);
+        for (auto entry = tr.first(); tr.good(); entry = tr.next(entry)) {
+            if (entry.name == "snapshot.pb" || entry.name == "hardware.ini") {
+                tr.extract(entry);
+            }
+        }
+        Snapshot snapshot("", temp_dir.c_str(), false);
+        int ret = checkLoadable(snapshot);
+        path_delete_dir(temp_dir.c_str());
+        return ret;
     } else {
         printf("snapshot name %s\n", snapshot_name);
         android::base::Optional<Snapshot> snapshot =
@@ -951,19 +1005,8 @@ extern "C" int android_check_snapshot_loadable(const char* snapshot_name) {
             printf("Not loadable\n");
             printf("Reason: Snapshot not found with name: %s\n", snapshot_name);
             return 0;
-        } else if (snapshot->checkValid(true)) {
-            printf("Loadable\n");
-            return 1;
         } else {
-            printf("Not loadable\n");
-            if (snapshot->failureReason().ptr() == nullptr) {
-                printf("Reason: Unknown.\n");
-            } else {
-                printf("Reason: %s\n",
-                       failureReasonToString(*snapshot->failureReason(),
-                                             SNAPSHOT_LOAD));
-            }
-            return 0;
+            return checkLoadable(*snapshot);
         }
     }
 }
