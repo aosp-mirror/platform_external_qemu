@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "daa86b71_2025ed1a",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-10-15T00:45:50Z",
+      "side": 1,
+      "message": "Shouldn\u0027t there be\n\n   if (android_cmdLineOptions-\u003eqt_hide_window) {\n       return;\n   }\n\nhere?",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 24
+      },
+      "revId": "039d3a0bb603a3938db69ca1229411678e3aac63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a6631d63_81c24a5b",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-10-15T00:45:50Z",
+      "side": 1,
+      "message": "Same here.",
+      "range": {
+        "startLine": 113,
+        "startChar": 4,
+        "endLine": 113,
+        "endChar": 71
+      },
+      "revId": "039d3a0bb603a3938db69ca1229411678e3aac63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
