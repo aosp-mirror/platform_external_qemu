@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5d9975ac_127807d5",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-15T19:22:20Z",
+      "side": 1,
+      "message": "shoudl we increment version anyway on the side to help with feature flag issues?",
+      "revId": "3b04ea8b1aa4d06a44a6688ae9c04518d5460507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
