@@ -204,10 +204,13 @@ typedef struct VkMemoryGetZirconHandleInfoFUCHSIA {
 #define VK_MVK_MOLTENVK_SPEC_VERSION            3
 #define VK_MVK_MOLTENVK_EXTENSION_NAME          "VK_MVK_moltenvk"
 
-typedef struct __IOSurface *IOSurfaceRef;
+typedef struct __MTLTexture *MTLTextureRef;
+typedef struct __MTLBuffer *MTLBufferRef;
 
-typedef VkResult (VKAPI_PTR *PFN_vkUseIOSurfaceMVK)(VkImage image, IOSurfaceRef ioSurface);
-typedef void (VKAPI_PTR *PFN_vkGetIOSurfaceMVK)(VkImage image, IOSurfaceRef* pIOSurface);
+typedef VkResult (VKAPI_PTR *PFN_vkSetMTLTextureMVK)(VkImage image, MTLTextureRef mtlTexture);
+typedef void (VKAPI_PTR *PFN_vkGetMTLTextureMVK)(VkImage image, MTLTextureRef* pMTLTexture);
+typedef VkResult (VKAPI_PTR *PFN_vkSetMTLBufferMVK)(VkBuffer buffer, MTLBufferRef mtlBuffer);
+typedef void (VKAPI_PTR *PFN_vkGetMTLBufferMVK)(VkBuffer buffer, MTLBufferRef* pMTLBuffer);
 
 #endif  // VK_MVK_moltenvk
 
