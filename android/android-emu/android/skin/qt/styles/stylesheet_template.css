@@ -38,7 +38,7 @@
 *[ColorGroup="SliderLabel"]  { color: %%TEXT_COLOR%% }
 *[ColorGroup="SmsBox"] { border: 1px solid %%BOX_COLOR%% }
 *[ColorGroup="HorizDivider"] {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0  %%LARGE_DIVIDER_COLOR%%, stop: 1 %%TAB_SELECTED_COLOR%%);
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0  %%LARGE_DIVIDER_COLOR%%, stop: 1 %%HORIZ_DIVIDER_COLOR%%);
     border: 0px;
 }
 *[ColorGroup="HorizDivider2"] { color: %%TITLE_COLOR%% }
