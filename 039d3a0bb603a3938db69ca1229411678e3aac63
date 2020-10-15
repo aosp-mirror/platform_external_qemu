@@ -98,6 +98,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "2a2fe050_81ff1fe0",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-10-15T17:26:12Z",
+      "side": 1,
+      "message": "Would it still happen if a similar condition is added to the show method? The hide method does a fade out animation, so the best approach seems to be not to show the window in the first place.",
+      "parentUuid": "4e9c0eec_cffd88dc",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 24
+      },
+      "revId": "039d3a0bb603a3938db69ca1229411678e3aac63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a6631d63_81c24a5b",
         "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
         "patchSetId": 3
