@@ -196,7 +196,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     skin_winsys_touch_qt_extended_virtual_sensors();
                     if (auto* win = EmulatorQtWindow::getInstance()) {
                         win->runOnUiThread(
-                                [win, type]() { win->toolWindow()->setUiTheme(type); });
+                                [win, type]() { win->toolWindow()->setUiTheme(type, false); });
                         return true;
                     } else {
                         return false;

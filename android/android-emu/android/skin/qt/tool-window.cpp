@@ -474,14 +474,16 @@ void ToolWindow::ensureExtendedWindowExists() {
     }
 }
 
-bool ToolWindow::setUiTheme(SettingsTheme theme) {
+bool ToolWindow::setUiTheme(SettingsTheme theme, bool persist) {
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
         // Out of range--ignore
         return false;
     }
     if (getSelectedTheme() != theme) {
-        QSettings settings;
-        settings.setValue(Ui::Settings::UI_THEME, (int)theme);
+        if (persist) {
+            QSettings settings;
+            settings.setValue(Ui::Settings::UI_THEME, (int)theme);
+        }
         ensureExtendedWindowExists();
         emit(themeChanged(theme));
     }
