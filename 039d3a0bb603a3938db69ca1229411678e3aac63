@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "14c5d0e3_e6ae6e07",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-15T00:56:59Z",
+      "side": 1,
+      "message": "I think showevent() is more inclusive than show(). Show will trigger showevent being called but showevent can also be trigger by other means. https://doc.qt.io/qt-5/qwidget.html#showEvent",
+      "parentUuid": "daa86b71_2025ed1a",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 24
+      },
+      "revId": "039d3a0bb603a3938db69ca1229411678e3aac63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a6631d63_81c24a5b",
         "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
         "patchSetId": 3
