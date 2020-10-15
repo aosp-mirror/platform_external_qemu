@@ -121,7 +121,7 @@ public:
         handleUICommand(cmd, false, extra);
     }
     void hideRotationButton(bool hide);
-    bool setUiTheme(SettingsTheme theme);
+    bool setUiTheme(SettingsTheme theme, bool persist);
     void showExtendedWindow();
     void hideExtendedWindow();
 
