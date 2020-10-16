@@ -252,6 +252,9 @@ struct asg_ring_config {
 
     // error state
     uint32_t in_error;
+
+    // host transitioning to sleep
+    uint32_t host_will_sleep;
 };
 
 // State/config changes may only occur if the ring is empty, or the state

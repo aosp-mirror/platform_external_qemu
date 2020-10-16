@@ -402,12 +402,14 @@ intptr_t RenderThread::main() {
             // Vulkan decoder
             //
             {
+                vperfetto::beginTrace("vkConsume");
                 last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
                                             ioStream);
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;
                 }
+                vperfetto::endTrace();
             }
 
             if (progress) continue;

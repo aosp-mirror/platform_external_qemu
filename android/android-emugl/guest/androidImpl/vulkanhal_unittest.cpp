@@ -37,6 +37,8 @@
 #include <android/hardware_buffer.h>
 #include <cutils/properties.h>
 
+#include "vperfetto.h"
+
 #include <atomic>
 #include <random>
 #include <memory>
@@ -1606,7 +1608,9 @@ TEST_P(VulkanHalTest, GetImageMemoryRequirements2) {
 
 // Multithreaded benchmark
 TEST_P(VulkanHalTest, Multithreaded) {
-    constexpr uint32_t kThreadCount = 16;
+    // vperfetto::enableTracing();
+
+    constexpr uint32_t kThreadCount = 1;
     VkDescriptorPool pool;
     VkDescriptorSetLayout setLayout;
     std::vector<VkDescriptorSet> sets(kThreadCount);
@@ -1636,7 +1640,7 @@ TEST_P(VulkanHalTest, Multithreaded) {
 
     std::vector<FunctorThread*> threads;
 
-    constexpr uint32_t kRecordsPerThread = 500000;
+    constexpr uint32_t kRecordsPerThread = 5000000;
     constexpr uint32_t kTotalRecords = kThreadCount * kRecordsPerThread;
 
     for (uint32_t i = 0; i < kThreadCount; ++i) {
@@ -1646,11 +1650,17 @@ TEST_P(VulkanHalTest, Multithreaded) {
                 VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, 0,
             };
 
+            vk->vkBeginCommandBuffer(cbs[i], &beginInfo);
+            VkRect2D scissor = {
+            { 0, 0, },
+            { 256, 256, },
+            };
             for (uint32_t j = 0; j < kRecordsPerThread; ++j) {
-                vk->vkBeginCommandBuffer(cbs[i], &beginInfo);
-                vk->vkEndCommandBuffer(cbs[i]);
+                vk->vkCmdSetScissor(cbs[i], 0, 1, &scissor);
+
             }
 
+            vk->vkEndCommandBuffer(cbs[i]);
             VkSubmitInfo si = {
                 VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
                 0, 0,
@@ -1697,6 +1707,9 @@ TEST_P(VulkanHalTest, Multithreaded) {
         mDevice, pool, kThreadCount, sets.data()));
 
     vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
+
+    // vperfetto::disableTracing();
+    // vperfetto::waitSavingDone();
 }
 
 INSTANTIATE_TEST_SUITE_P(
