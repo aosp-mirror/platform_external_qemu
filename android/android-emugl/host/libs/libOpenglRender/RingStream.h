@@ -60,6 +60,7 @@ protected:
     void type1Read(uint32_t available, char* begin, size_t* count, char** current, const char* ptrEnd);
     void type2Read(uint32_t available, size_t* count, char** current, const char* ptrEnd);
     void type3Read(uint32_t available, size_t* count, char** current, const char* ptrEnd);
+    void type4Read(uint32_t available, char* begin, size_t* count, char** current, const char* ptrEnd);
 
     struct asg_context mContext;
     android::emulation::asg::ConsumerCallbacks mCallbacks;
