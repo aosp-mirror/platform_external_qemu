@@ -51,7 +51,8 @@ class QWidget;
 TvRemotePage::TvRemotePage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::TvRemotePage()),
-    mEmulatorWindow(NULL)
+    mEmulatorWindow(NULL),
+    mAdbInterface(NULL)
 {
     mUi->setupUi(this);
     const struct {
@@ -78,6 +79,8 @@ TvRemotePage::TvRemotePage(QWidget *parent) :
 
     connect(mUi->tvRemote_settingsButton, &QPushButton::pressed,
             [this]() {onSettingsButtonPressed();});
+        connect(mUi->tvRemote_dashboardButton, &QPushButton::pressed,
+            [this]() {onDashboardButtonPressed();});
     connect(mUi->tvRemote_programGuideButton, &QPushButton::pressed,
             [this]() {onProgramGuideButtonPressed();});
     connect(mUi->tvRemote_assistantButton, &QPushButton::pressed,
@@ -97,6 +100,28 @@ void TvRemotePage::setEmulatorWindow(EmulatorQtWindow* emulator_window)
 void TvRemotePage::setAdbInterface(android::emulation::AdbInterface* adb_interface)
 {
     mAdbInterface = adb_interface;
+
+    if (!mAdbInterface) {
+        VLOG(tvremote) << "No adb connection.";
+        return;
+    }
+
+    std::vector<std::string> adb_command = {
+    "shell",
+    "pm",
+    "list",
+    "packages"
+    };
+    std::string command_tag = "Query packages";
+    std::string command_result = handleAdbCommand(adb_command, command_tag);
+
+    if (command_result.find("launcherx") != std::string::npos) {
+        mUi->tvRemote_settingsButton->hide();
+        VLOG(tvremote) << "Hide the Settings button.";
+    } else {
+        mUi->tvRemote_dashboardButton->hide();
+        VLOG(tvremote) << "Hide the Dashboard button.";
+    }
 }
 
 void TvRemotePage::toggleButtonEvent(QPushButton* button,
@@ -123,11 +148,12 @@ void TvRemotePage::toggleButtonEvent(QPushButton* button,
     }
 }
 
-void TvRemotePage::handleAdbCommand(const std::vector<std::string>& adb_command,
-                                    const std::string& command_tag) {
+std::string TvRemotePage::handleAdbCommand(const std::vector<std::string>& adb_command,
+                                           const std::string& command_tag) {
+    std::string command_result = "";
     mAdbInterface->enqueueCommand(
         adb_command,
-        [command_tag](const android::emulation::OptionalAdbCommandResult& result) {
+        [command_tag, &command_result](const android::emulation::OptionalAdbCommandResult& result) {
             if (result && result->output && result->exit_code == 0) {
                 VLOG(tvremote) << "[" << command_tag <<"] ADB command completed.";
 
@@ -136,12 +162,15 @@ void TvRemotePage::handleAdbCommand(const std::vector<std::string>& adb_command,
                 if (!command_output.empty()) {
                     VLOG(tvremote) << "[" << command_tag <<"] ADB command output: "
                                    << command_output;
+                    command_result = command_output;
                 }
             } else {
                 VLOG(tvremote) << "[" << command_tag <<"] ADB command failed.";
             }
         }
     );
+
+    return command_result;
 }
 
 void TvRemotePage::onSettingsButtonPressed() {
@@ -152,6 +181,18 @@ void TvRemotePage::onSettingsButtonPressed() {
         "com.android.tv.settings/com.android.tv.settings.MainSettings"
     };
     std::string command_tag = "Open Settings";
+
+    handleAdbCommand(adb_command, command_tag);
+}
+
+void TvRemotePage::onDashboardButtonPressed() {
+    std::vector<std::string> adb_command = {
+        "shell",
+        "input",
+        "keyevent",
+        "KEYCODE_DASHBOARD"
+    };
+    std::string command_tag = "Open Dashboard";
 
     handleAdbCommand(adb_command, command_tag);
 }
