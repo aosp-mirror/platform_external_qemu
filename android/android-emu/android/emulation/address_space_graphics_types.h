@@ -230,28 +230,31 @@ struct __attribute__((__packed__)) asg_type2_xfer {
 //
 struct asg_ring_config {
     // config[0]: size of the auxiliary buffer
-    uint32_t buffer_size;
+    volatile uint32_t buffer_size;
 
     // config[1]: flush interval for the auxiliary buffer
-    uint32_t flush_interval;
+    volatile uint32_t flush_interval;
 
     // the position of the interval in the auxiliary buffer
     // that the host has read so far
-    uint32_t host_consumed_pos;
+    volatile uint32_t host_consumed_pos;
 
     // the start of the places the guest might write to next
-    uint32_t guest_write_pos;
+    volatile uint32_t guest_write_pos;
 
     // 1 if transfers are of type 1, 2 if transfers of type 2,
     // 3 if the overall transfer size is known and we are sending something large.
-    uint32_t transfer_mode;
+    volatile uint32_t transfer_mode;
 
     // the size of the transfer, used if transfer size is known.
     // Set before setting config[2] to 3.
-    uint32_t transfer_size;
+    volatile uint32_t transfer_size;
 
     // error state
-    uint32_t in_error;
+    volatile uint32_t in_error;
+
+    // for type4 write
+    volatile uint32_t transfer_id;
 };
 
 // State/config changes may only occur if the ring is empty, or the state
