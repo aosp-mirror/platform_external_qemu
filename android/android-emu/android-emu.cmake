@@ -789,6 +789,7 @@ if(NOT LINUX_AARCH64)
       android/base/files/ScopedStdioFile_unittest.cpp
       android/base/files/Stream_unittest.cpp
       android/base/files/StreamSerializing_unittest.cpp
+      android/base/files/TarStream_unittest.cpp
       android/base/FunctionView_unittest.cpp
       android/base/IOVector_unittest.cpp
       android/base/JsonWriter_unittest.cpp

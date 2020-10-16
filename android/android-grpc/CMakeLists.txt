@@ -61,7 +61,6 @@ android_add_library(
       android/emulation/control/logcat/RingStreambuf.cpp
       android/emulation/control/secure/BasicTokenAuth.cpp
       android/emulation/control/snapshot/SnapshotService.cpp
-      android/emulation/control/snapshot/TarStream.cpp
       android/emulation/control/utils/AudioUtils.cpp
       android/emulation/control/utils/EventWaiter.cpp
       android/emulation/control/utils/GrpcAndroidLogAdapter.cpp
@@ -111,7 +110,6 @@ android_add_test(
       android/emulation/control/GrpcServices_unittest.cpp
       android/emulation/control/logcat/LogcatParser_unittest.cpp
       android/emulation/control/logcat/RingStreambuf_unittest.cpp
-      android/emulation/control/snapshot/TarStream_unittest.cpp
       android/emulation/control/test/CertificateFactory.cpp
       android/emulation/control/test/TestEchoService.cpp
       android/emulation/control/utils/EventWaiter_unittest.cpp
