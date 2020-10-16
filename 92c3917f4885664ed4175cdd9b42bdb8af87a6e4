@@ -1,0 +1,56 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005579115",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1459248?revision\u003d9",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "3ff85c5e_ce84c0ce",
+        "filename": "android/third_party/vperfetto/vperfetto-sdk.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-16T15:54:26Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 96,
+        "startChar": 41,
+        "endLine": 96,
+        "endChar": 42
+      },
+      "revId": "92c3917f4885664ed4175cdd9b42bdb8af87a6e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005579115",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1459248?revision\u003d9",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "7f52b24d_efef2079",
+        "filename": "android/third_party/vperfetto/vperfetto_unittest.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-16T15:54:26Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 3
+      },
+      "revId": "92c3917f4885664ed4175cdd9b42bdb8af87a6e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
