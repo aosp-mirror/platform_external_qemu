@@ -43,6 +43,7 @@ private:
     void handleAdbCommand(const std::vector<std::string>& adb_command,
                           const std::string& command_tag);
     void onSettingsButtonPressed();
+    void onDashboardButtonPressed();
     void onProgramGuideButtonPressed();
     void onAssistantButtonPressed();
     void onWatchlistButtonPressed();
