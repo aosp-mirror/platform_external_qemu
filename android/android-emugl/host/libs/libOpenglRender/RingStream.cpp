@@ -21,6 +21,8 @@
 #include "emugl/common/debug.h"
 #include "emugl/common/dma_device.h"
 
+#include "android/base/Tracing.h"
+
 #include <assert.h>
 #include <memory.h>
 
@@ -110,8 +112,9 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
     size_t hostTx = 0;
     uint32_t ringAvailable = 0;
     uint32_t ringLargeXferAvailable = 0;
+    uint32_t type4Available = 0;
 
-    const uint32_t maxSpins = 30;
+    const uint32_t maxSpins = 1000;
     uint32_t spins = 0;
 
     while (count < wanted) {
@@ -143,16 +146,28 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             ring_buffer_available_read(
                 mContext.to_host_large_xfer.ring,
                 &mContext.to_host_large_xfer.view);
+        type4Available = mContext.ring_config->guest_write_pos - mContext.ring_config->host_consumed_pos;
 
         auto current = dst + count;
         auto ptrEnd = dst + wanted;
 
-        if (ringAvailable) {
+        // Check the current transfer id twice, before reading and after exhausting.
+        uint32_t currTransferId = __atomic_load_n(&mContext.ring_config->transfer_id, __ATOMIC_ACQUIRE);
+
+        if (ringAvailable || type4Available) {
+            android::base::beginTrace("ringAvail");
+            if (!ringAvailable && type4Available) {
+                android::base::beginTrace("type4Wake");
+            }
+            *(mContext.host_state) = ASG_HOST_STATE_CAN_CONSUME;
             uint32_t transferMode =
                 mContext.ring_config->transfer_mode;
             switch (transferMode) {
                 case 1:
                     type1Read(ringAvailable, dst, &count, &current, ptrEnd);
+                    break;
+                case 4:
+                    type4Read(ringAvailable, dst, &count, &current, ptrEnd);
                     break;
                 case 2:
                     type2Read(ringAvailable, &count, &current, ptrEnd);
@@ -167,23 +182,49 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
                         transferMode);
                     break;
             }
+            if (!ringAvailable && type4Available) {
+                android::base::endTrace();
+            }
+            android::base::endTrace();
         } else if (ringLargeXferAvailable) {
             type3Read(ringLargeXferAvailable,
                       &count, &current, ptrEnd);
         } else {
+            android::base::beginTrace("unavail");
+
             if (++spins < maxSpins) {
                 ring_buffer_yield();
+                if (spins > 100) {
+                    usleep(1);
+                }
+                android::base::endTrace();
                 continue;
             } else {
                 spins = 0;
             }
 
+            // Unavailable, so cmpxchg the transfer id. If successful, keep going to sleep.
+            if (!__atomic_compare_exchange_n(
+                    &mContext.ring_config->transfer_id,
+                    &currTransferId,
+                    currTransferId + 1,
+                    /* strong */ false,
+                    __ATOMIC_ACQ_REL,
+                    __ATOMIC_RELAXED)) {
+                spins = 0;
+                continue;
+            }
+           
             if (mShouldExit) {
+                android::base::endTrace();
                 return nullptr;
             }
+            android::base::beginTrace("UNAVAIL");
             if (-1 == mCallbacks.onUnavailableRead()) {
                 mShouldExit = true;
             }
+            android::base::endTrace();
+            android::base::endTrace();
             continue;
         }
     }
@@ -230,6 +271,50 @@ void RingStream::type1Read(
                 mContext.to_host, sizeof(struct asg_type1_xfer), 1);
         *current += xfersPtr[i].size;
         *count += xfersPtr[i].size;
+
+        // TODO: Figure out why running multiple xfers here can result in data
+        // corruption.
+        return;
+    }
+}
+
+void RingStream::type4Read(
+    uint32_t available,
+    char* begin,
+    size_t* count, char** current, const char* ptrEnd) {
+
+    uint32_t xferTotal = available / sizeof(struct asg_type1_xfer);
+
+    if (mType1Xfers.size() < xferTotal) {
+        mType1Xfers.resize(xferTotal * 2);
+    }
+
+    auto xfersPtr = mType1Xfers.data();
+
+    ring_buffer_copy_contents(
+        mContext.to_host, 0, xferTotal * sizeof(struct asg_type1_xfer), (uint8_t*)xfersPtr);
+
+    for (uint32_t i = 0; i < xferTotal; ++i) {
+        if (*current + xfersPtr[i].size > ptrEnd) {
+            // Save in a temp buffer or we'll get stuck
+            if (begin == *current && i == 0) {
+                const char* src = mContext.buffer + xfersPtr[i].offset;
+                mReadBuffer.resize_noinit(xfersPtr[i].size);
+                memcpy(mReadBuffer.data(), src, xfersPtr[i].size);
+                mReadBufferLeft = xfersPtr[i].size;
+                ring_buffer_advance_read(
+                        mContext.to_host, sizeof(struct asg_type1_xfer), 1);
+                mContext.ring_config->host_consumed_pos += sizeof(struct asg_type1_xfer);
+            }
+            return;
+        }
+        const char* src = mContext.buffer + xfersPtr[i].offset;
+        memcpy(*current, src, xfersPtr[i].size);
+        ring_buffer_advance_read(
+                mContext.to_host, sizeof(struct asg_type1_xfer), 1);
+        *current += xfersPtr[i].size;
+        *count += xfersPtr[i].size;
+        mContext.ring_config->host_consumed_pos += sizeof(struct asg_type1_xfer);
 
         // TODO: Figure out why running multiple xfers here can result in data
         // corruption.
