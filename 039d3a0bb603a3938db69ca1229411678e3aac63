@@ -122,6 +122,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "b732da3c_80cdab02",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-19T20:49:35Z",
+      "side": 1,
+      "message": "Ok, that makes a lot of sense. I have uploaded a newer version.",
+      "parentUuid": "2a2fe050_81ff1fe0",
+      "range": {
+        "startLine": 103,
+        "startChar": 4,
+        "endLine": 103,
+        "endChar": 24
+      },
+      "revId": "039d3a0bb603a3938db69ca1229411678e3aac63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a6631d63_81c24a5b",
         "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
         "patchSetId": 3
