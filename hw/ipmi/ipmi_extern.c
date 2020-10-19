@@ -145,11 +145,25 @@ void ipmi_extern_handle_command(IPMIExtern *ibe,
     if (err) {
         IPMIInterfaceClass *k = IPMI_INTERFACE_GET_CLASS(s);
         unsigned char rsp[3];
+
         rsp[0] = cmd[0] | 0x04;
         rsp[1] = cmd[1];
         rsp[2] = err;
-        ibe->waiting_rsp = false;
-        k->handle_msg(s, msg_id, rsp, 3);
+
+        if (ibe->bmc_side) {
+            /* For BMC Side, send out an error message. */
+            addchar(ibe, msg_id);
+            for (i = 0; i < 3; ++i) {
+                addchar(ibe, rsp[i]);
+            }
+            csum = ipmb_checksum(&msg_id, 1, 0);
+            addchar(ibe, -ipmb_checksum(rsp, 3, csum));
+            continue_send(ibe);
+        } else {
+            /* For Core side, handle an error message. */
+            ibe->waiting_rsp = false;
+            k->handle_msg(s, msg_id, rsp, 3);
+        }
         goto out;
     }
 
