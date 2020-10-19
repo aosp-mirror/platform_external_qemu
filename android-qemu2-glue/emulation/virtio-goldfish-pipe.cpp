@@ -890,6 +890,9 @@ public:
         uint32_t fwkformat = virgl_format_to_fwk_format(args->format);
         mVirtioGpuOps->create_color_buffer_with_handle(
             args->width, args->height, glformat, fwkformat, args->handle);
+        mVirtioGpuOps->set_guest_managed_color_buffer_lifetime(true /* guest manages lifetime */);
+        mVirtioGpuOps->open_color_buffer(
+            args->handle);
     }
 
     int createResource(
@@ -967,6 +970,8 @@ public:
         entry.hvaSize = 0;
         entry.hvaId = 0;
         entry.hvSlot = 0;
+
+        mResources.erase(it);
     }
 
     int attachIov(int resId, iovec* iov, int num_iovs) {
