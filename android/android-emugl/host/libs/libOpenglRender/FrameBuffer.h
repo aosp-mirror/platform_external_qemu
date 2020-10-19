@@ -601,6 +601,8 @@ public:
     void waitForGpu(uint64_t eglsync);
     void waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle);
 
+    void setGuestManagedColorBufferLifetime(bool guestManaged);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -819,6 +821,9 @@ private:
     bool m_fastBlitSupported = false;
     bool m_vulkanInteropSupported = false;
     bool m_guestUsesAngle = false;
+    // Whether the guest manages ColorBuffer lifetime
+    // so we don't need refcounting on the host side.
+    bool m_guestManagedColorBufferLifetime = false;
 
     android::base::MessageChannel<HandleType, 1024>
         mOutstandingColorBufferDestroys;
