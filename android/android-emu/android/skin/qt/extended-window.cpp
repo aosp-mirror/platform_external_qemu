@@ -111,10 +111,18 @@ ExtendedWindow::ExtendedWindow(
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
-    mExtendedUi->bugreportPage->setAdbInterface(
-            mEmulatorWindow->getAdbInterface());
-    mExtendedUi->carRotaryPage->setAdbInterface(
-            mEmulatorWindow->getAdbInterface());
+
+    if (android_qemu_mode) {
+        mExtendedUi->bugreportPage->setAdbInterface(
+                mEmulatorWindow->getAdbInterface());
+    }
+
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO && 
+        android::featurecontrol::isEnabled(android::featurecontrol::CarRotary) &&
+        android_qemu_mode) {
+        mExtendedUi->carRotaryPage->setAdbInterface(
+                mEmulatorWindow->getAdbInterface());
+    }
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)),

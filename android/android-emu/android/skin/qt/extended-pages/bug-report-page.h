@@ -69,7 +69,7 @@ private:
                     const char* content,
                     size_t length);
     std::string generateUniqueBugreportName();
-    android::emulation::AdbInterface* mAdb;
+    android::emulation::AdbInterface* mAdb = nullptr;
     QMessageBox* mDeviceDetailsDialog;
     bool mFirstShowEvent = true;
     std::unique_ptr<Ui::BugreportPage> mUi;

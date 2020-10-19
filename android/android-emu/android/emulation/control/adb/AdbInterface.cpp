@@ -393,6 +393,7 @@ std::vector<std::string> AdbLocatorImpl::availableAdb() {
 // Gets the reported adb protocol version from the given executable
 // This is the last digit in the adb version string.
 Optional<int> AdbLocatorImpl::getAdbProtocolVersion(StringView adbPath) {
+    if (!android_qemu_mode) return {};
     const std::vector<std::string> adbVersion = {adbPath, "version"};
     int protocol = 0;
     // Retrieve the adb version.
@@ -473,6 +474,7 @@ AdbInterfaceImpl::AdbInterfaceImpl(Looper* looper,
                                    AdbLocator* locator,
                                    AdbDaemon* daemon)
     : mLooper(looper), mLocator(locator), mDaemon(daemon) {
+    if (!android_qemu_mode) return;
     discoverAdbInstalls();
     selectAdbPath();
 }
@@ -482,6 +484,13 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         ResultCallback&& result_callback,
         System::Duration timeout_ms,
         bool want_output) {
+
+    if (!android_qemu_mode) {
+        fprintf(stderr, "%s: tried to run adb in non-android mode\n", __func__);
+        *(uint32_t*)(1234) = 5;
+        return {};
+    }
+
     AdbCommandPtr command;
     if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) && AdbConnection::failed() &&
         (args[0] == "shell" || args[0] == "logcat")) {

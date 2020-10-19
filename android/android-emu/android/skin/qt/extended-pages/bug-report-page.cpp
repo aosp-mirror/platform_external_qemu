@@ -304,6 +304,9 @@ void BugreportPage::loadAdbBugreport() {
     if (mAdbBugreport && mAdbBugreport->inFlight())
         return;
 
+    // No-op if no adb interface
+    if (!mAdb) return;
+
     mSavingStates.adbBugreportSucceed = false;
     enableInput(false);
     mUi->bug_circularSpinner->show();
@@ -375,6 +378,9 @@ void BugreportPage::loadAdbLogcat() {
     if (mAdbLogcat && mAdbLogcat->inFlight()) {
         return;
     }
+
+    if (!mAdb) return;
+
     // After apiLevel 19, buffer "all" become available
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     mAdbLogcat = mAdb->runAdbCommand(
