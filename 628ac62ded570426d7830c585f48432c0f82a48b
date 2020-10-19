@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "085868ae_76adfbe8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-19T18:06:53Z",
+      "side": 1,
+      "message": "Note that I\u0027m still seeing an adb process, but I\u0027m seeing it with fx qemu as well.",
+      "revId": "628ac62ded570426d7830c585f48432c0f82a48b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
