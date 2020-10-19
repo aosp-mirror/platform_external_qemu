@@ -827,7 +827,7 @@ void SaveableTexture::onSave(
     } else if (m_target != 0) {
         // SaveableTexture is uninitialized iff a texture hasn't been bound,
         // which will give m_target==0
-        GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not supported\n", m_target);
+        GL_LOG("SaveableTexture::onSave: warning: texture target 0x%x not supported\n", m_target);
         fprintf(stderr, "Warning: texture target 0x%x not supported\n", m_target);
     }
 }
