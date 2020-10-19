@@ -318,6 +318,7 @@ public:
               unbox_VkInstance(boxed),
               [this, boxed] {
 
+              fprintf(stderr, "%s: process cleanup callback: destroy instance\n", __func__);
                 vkDestroyInstanceImpl(
                     unbox_VkInstance(boxed),
                     nullptr);
@@ -1056,6 +1057,7 @@ public:
         // Run the underlying API call.
         m_vk->vkDestroyDevice(device, pAllocator);
 
+        fprintf(stderr, "%s: delete the boxed device\n", __func__);
         delete_boxed_VkDevice(it->second.boxed);
     }
 

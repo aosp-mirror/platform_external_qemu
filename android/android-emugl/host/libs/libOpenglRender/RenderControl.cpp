@@ -233,6 +233,7 @@ void registerTriggerWait() {
 
 static GLint rcGetRendererVersion()
 {
+    fprintf(stderr, "%s: call\n", __func__);
     registerTriggerWait();
 
     sGrallocSync.ptr();

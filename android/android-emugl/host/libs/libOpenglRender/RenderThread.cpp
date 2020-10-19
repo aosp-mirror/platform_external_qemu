@@ -491,6 +491,7 @@ intptr_t RenderThread::main() {
     setFinished();
 
     DBG("Exited a RenderThread @%p\n", this);
+    fprintf(stderr, "Exited a RenderThread @%p puid 0x%llx\n", this, (unsigned long long)tInfo.m_puid);
     return 0;
 }
 
