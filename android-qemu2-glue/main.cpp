@@ -1995,6 +1995,10 @@ extern "C" int main(int argc, char** argv) {
         args.add("virtio-wifi-pci,netdev=virtio-wifi");
     }
 #endif
+
+    args.add("-device");
+    args.add("virtio-vsock-pci,guest-cid=77");
+
     if (opts->tcpdump) {
         args.add("-object");
         args.addFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
