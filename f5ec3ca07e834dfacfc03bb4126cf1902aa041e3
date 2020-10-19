@@ -16,6 +16,23 @@
       "message": "Thanks!",
       "revId": "f5ec3ca07e834dfacfc03bb4126cf1902aa041e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e1ddf506_c158ca12",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1783870
+      },
+      "writtenOn": "2020-10-19T16:57:09Z",
+      "side": 1,
+      "message": "Thanks for the quick fix.",
+      "revId": "f5ec3ca07e834dfacfc03bb4126cf1902aa041e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
