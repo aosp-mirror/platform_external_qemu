@@ -50,6 +50,23 @@
       "message": "oops, theres another adb process started later on for some other reason",
       "revId": "f5ec3ca07e834dfacfc03bb4126cf1902aa041e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ec81690_362a46ed",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-19T18:06:36Z",
+      "side": 1,
+      "message": "Nope, I\u0027m seeing adb get started even if I\u0027m using fx qemu. This should be good as-is (no child adb processes spa",
+      "revId": "f5ec3ca07e834dfacfc03bb4126cf1902aa041e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
