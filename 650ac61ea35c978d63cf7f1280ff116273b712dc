@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "109d60cd_c74efea8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-10-19T22:11:59Z",
+      "side": 1,
+      "message": "I have tested on the emulator, and I can see m_colorbuffers.erase(...) is called in FrameBuffer::closeColorBufferLocked().",
+      "revId": "650ac61ea35c978d63cf7f1280ff116273b712dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
