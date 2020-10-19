@@ -27,6 +27,7 @@
 extern "C" {
 #include "hw/misc/goldfish_pipe.h"
 #include "hw/virtio/virtio-goldfish-pipe.h"
+#include "hw/virtio/virtio-vsock.h"
 }  // extern "C"
 
 // Technical note: This file contains the glue code used between the
