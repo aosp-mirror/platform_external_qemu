@@ -33,6 +33,23 @@
       "message": "Thanks for the quick fix.",
       "revId": "f5ec3ca07e834dfacfc03bb4126cf1902aa041e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5fbacabc_dc3a73cf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-19T17:02:52Z",
+      "side": 1,
+      "message": "oops, theres another adb process started later on for some other reason",
+      "revId": "f5ec3ca07e834dfacfc03bb4126cf1902aa041e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
