@@ -378,7 +378,9 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLAsyncSwap, false);
     android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::RefCountPipe, true);
+            android::featurecontrol::RefCountPipe, false);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::NoDelayCloseColorBuffer, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::IgnoreHostOpenGLErrors, ignoreHostGlErrorsFlag);
     android::featurecontrol::setEnabledOverride(
