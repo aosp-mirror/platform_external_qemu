@@ -157,7 +157,7 @@ void hideDockIcon_macImpl(void) {
         // Initialize the global variable "NSApp"
         [NSApplication sharedApplication];
     }
-    [NSApp setActivationPolicy:NSApplicationActivationPolicyProhibited];
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
 
 }
 
