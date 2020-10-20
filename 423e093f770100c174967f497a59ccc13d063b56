@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1dc9a595_d15abf10",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-10-20T18:24:35Z",
+      "side": 1,
+      "message": "Oops, search and replace was too aggressive! Do not submit",
+      "revId": "423e093f770100c174967f497a59ccc13d063b56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
