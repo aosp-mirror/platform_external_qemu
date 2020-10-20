@@ -34,7 +34,7 @@ if(WIN32)
   message(STATUS "Configuring native windows build using clang-cl: ${CLANG_VER}")
   get_filename_component(CLANG_DIR "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/clang/host/windows-x86/${CLANG_VER}"
                          REALPATH)
-  set(CLANG_CL ${CLANG_DIR}/bin/clang-cl.exe)
+  set(CLANG_CL ${CLANG_DIR}/bin/clang.exe)
   if(NOT EXISTS "${CLANG_CL}")
     message(
       FATAL_ERROR
@@ -50,23 +50,24 @@ if(WIN32)
     "For example CLCACHE_DIR=C:\\clcache")
 
     # Create a clcache wrapper.
-    file(WRITE ${CMAKE_BINARY_DIR}/clang_cl.bat "@echo off\r\n")
-    file(APPEND ${CMAKE_BINARY_DIR}/clang_cl.bat "${CLCACHE} ${CLANG_CL} %*")
-
-    set(CMAKE_C_COMPILER "${CMAKE_BINARY_DIR}/clang_cl.bat")
-    set(CMAKE_CXX_COMPILER "${CMAKE_C_COMPILER}")
+    file(WRITE ${CMAKE_BINARY_DIR}/clang_cl.cmd "@echo off\r\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/clang_cl.cmd "${CLCACHE} ${CLANG_CL} --driver-mode=cl %*")
   else()
-    set(CMAKE_C_COMPILER "${CLANG_CL}")
-    set(CMAKE_CXX_COMPILER "${CLANG_CL}")
+    # Create a clang-cl wrapper.
+    file(WRITE ${CMAKE_BINARY_DIR}/clang_cl.cmd "@echo off\r\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/clang_cl.cmd "${CLANG_CL} --driver-mode=cl %*")  
   endif()
   set(ANDROID_LLVM_SYMBOLIZER "${CLANG_DIR}/bin/llvm-symbolizer.exe")
+  
+  set(CMAKE_C_COMPILER "${CMAKE_BINARY_DIR}/clang_cl.cmd")
+  set(CMAKE_CXX_COMPILER "${CMAKE_BINARY_DIR}/clang_cl.cmd")
   # Set the debug flags, erasing whatever cmake stuffs in there.
   # We are going to produce "fat" binaries with all debug information in there.
-  set(CMAKE_CXX_FLAGS_DEBUG "/MD /Z7")
-  set(CMAKE_C_FLAGS_DEBUG "/MD /Z7")
+  set(CMAKE_CXX_FLAGS_DEBUG "-MD -Z7")
+  set(CMAKE_C_FLAGS_DEBUG "-MD -Z7")
   # Set release flags such that we create pdbs..
-  set(CMAKE_C_FLAGS_RELEASE "/MD /Zi")
-  set(CMAKE_CXX_FLAGS_RELEASE "/MD /Zi")
+  set(CMAKE_C_FLAGS_RELEASE "-MD -Zi")
+  set(CMAKE_CXX_FLAGS_RELEASE "-MD -Zi")
 
   # Add compiler definition for Win7>
   add_definitions("-D_WIN32_WINNT=0x0601")
@@ -75,18 +76,18 @@ if(WIN32)
   # CMake will call the linker directly, v.s. through clang when cross building.
   set(CMAKE_LINKER "${CLANG_DIR}/bin/lld-link.exe"  CACHE STRING ""  FORCE)
 
-  # See https://www.wintellect.com/correctly-creating-native-c-release-build-pdbs/
-  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT /OPT:REF /OPT:ICF"
+  # See https:--www.wintellect.com-correctly-creating-native-c-release-build-pdbs-
+  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "-IGNORE:4099 -DEBUG -NODEFAULTLIB:LIBCMT -OPT:REF -OPT:ICF"
       CACHE STRING ""
       FORCE)
-   set(CMAKE_EXE_LINKER_FLAGS "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT")
+   set(CMAKE_EXE_LINKER_FLAGS "-IGNORE:4099 -DEBUG -NODEFAULTLIB:LIBCMT")
 
   # The Mt.exe file is a tool that generates signed files and catalogs. This normally gets invoked at the end of
   # executable creation, however anti virus software can easily interfer resulting in build breaks, so lets just not do
   # it.
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
-  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /MANIFEST:NO")
-  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /MANIFEST:NO")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -MANIFEST:NO")
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -MANIFEST:NO")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -MANIFEST:NO")
 
   # Including windows.h will cause issues with std::min/std::max
   add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES -DWIN32_LEAN_AND_MEAN)
