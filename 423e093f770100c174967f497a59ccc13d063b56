@@ -1,0 +1,56 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005632987",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1467693?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "8a2f7f87_110d449f",
+        "filename": "android/build/cmake/toolchain-windows_msvc-x86_64.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-20T17:00:45Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 58,
+        "startChar": 83,
+        "endLine": 58,
+        "endChar": 85
+      },
+      "revId": "423e093f770100c174967f497a59ccc13d063b56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005632987",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1467693?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "706f5c57_05eadebd",
+        "filename": "android/build/cmake/toolchain-windows_msvc-x86_64.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-20T17:00:45Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 2
+      },
+      "revId": "423e093f770100c174967f497a59ccc13d063b56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
