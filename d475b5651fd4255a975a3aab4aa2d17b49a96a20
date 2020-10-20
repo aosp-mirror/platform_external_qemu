@@ -16,6 +16,193 @@
       "message": "Friendly ping for review",
       "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0f0cb65e_d38dd3d6",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "If I understand correctly, this lock is protecting changes on \"session_\".\nIs there a way to annotate or indicate what fields need lock protection? Is \"session_\" the only field that needs this protection?\n\nFor example, the method below (\"GetSensorRecordTimeLine\") doesn\u0027t acquire the lock but is referring to \"session_\". Is that correct?",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "45020146_1bb04343",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "Similar comment about using lowerCamelCase for local variables. See emu codestyle (https://source.corp.google.com/android/external/qemu/android/docs/ANDROID-CODING-STYLE.md)",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d37c2c75_9131567d",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "Please check emu codestyle: https://source.corp.google.com/android/external/qemu/android/docs/ANDROID-CODING-STYLE.md;l\u003d220?q\u003dCODING-STYLE\u0026sq\u003dpackage:android",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0094157d_5b3e29c1",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "This means that this thread will be blocked for as long as it takes to get to the next event.\nIf the session file is corrupted or if something went wrong during the recording, this could block this thread for a long time and \"StopReplay()\" wouldn\u0027t work.\n\nIs that correct?\nShouldn\u0027t we unblock periodically to check if a REPLAY_STOP message is available?",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5bcd6f1e_3cb48bd4",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "I\u0027m not familiar with C++ coding style, but I see method with upper case names and others with lower case names (e.g. \"metadata()\" vs \"LoadFrom()\").\n\nShouldn\u0027t all method names be lowerCamelCase? (we should be good citizens and follow the style of the code around us).\n\nhttps://source.corp.google.com/android/external/qemu/android/docs/ANDROID-CODING-STYLE.md",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5ed79564_8d24c458",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "I thought camel_case names were only used for extern C functions, or for slots. Shouldn\u0027t this be \"sessionDuration()\"?",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "652681ff_d7db9245",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "This is not clear to me. What are the integers returned by this method mean?\nAre they positions in the list of session records?",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "68cad3e9_44a3b5f0",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "Is the final \"_\" to indicate that this is private?\nChecking the code around I don\u0027t see other examples of this in the android-emu codebase.",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9d32c128_de8796b0",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "Nit: why is there a \"t\" before \"Lock\"?",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b5acb4f5_52f6339f",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "I see you already have the \"android\" namespace around this class. Do you still need this \"android::\" prefix?",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "467f9828_f67f77d4",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback_unittest.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:28:00Z",
+      "side": 1,
+      "message": "Nit: If you were doing ++timestampNs above, you wouldn\u0027t need this",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
