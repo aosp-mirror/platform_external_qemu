@@ -18,6 +18,23 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0446af91_c8e663bd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 36
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-20T22:53:25Z",
+      "side": 1,
+      "message": "Adding some quick style comments.",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0f0cb65e_d38dd3d6",
@@ -31,6 +48,29 @@
       "writtenOn": "2020-10-20T22:28:00Z",
       "side": 1,
       "message": "If I understand correctly, this lock is protecting changes on \"session_\".\nIs there a way to annotate or indicate what fields need lock protection? Is \"session_\" the only field that needs this protection?\n\nFor example, the method below (\"GetSensorRecordTimeLine\") doesn\u0027t acquire the lock but is referring to \"session_\". Is that correct?",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a13f22ed_9a12e5c8",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-20T22:53:25Z",
+      "side": 1,
+      "message": "This function is only used once, in the lines above. There may not be value in having it as a separate helper function.",
+      "range": {
+        "startLine": 71,
+        "startChar": 28,
+        "endLine": 71,
+        "endChar": 40
+      },
       "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
@@ -105,6 +145,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "cb709516_763b4178",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-20T22:53:25Z",
+      "side": 1,
+      "message": "Seems that you are correct about qemu style. This file currently follows g3 style (TitleCase for functions with accessor functions as an exception and should be lower_case_with_underscore), so it\u0027s not arbitrary. \n\nWhen we set up release automation, we will have fewer problems if the function names stay the same, but at the same time, I also understand wanting to be good stewards of the code we\u0027re contributing, so I\u0027m fine with it either way.",
+      "parentUuid": "5bcd6f1e_3cb48bd4",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "5ed79564_8d24c458",
         "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
         "patchSetId": 36
@@ -150,6 +208,24 @@
       "writtenOn": "2020-10-20T22:28:00Z",
       "side": 1,
       "message": "Is the final \"_\" to indicate that this is private?\nChecking the code around I don\u0027t see other examples of this in the android-emu codebase.",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f530b310_37abaf76",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1765730
+      },
+      "writtenOn": "2020-10-20T22:53:25Z",
+      "side": 1,
+      "message": "This is also an artifact of g3 style.",
+      "parentUuid": "68cad3e9_44a3b5f0",
       "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
