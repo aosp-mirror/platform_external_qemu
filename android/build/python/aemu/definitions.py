@@ -121,30 +121,6 @@ def get_visual_studio():
     return None
 
 
-def fixup_windows_clang():
-    """Fixes the clang-cl symlinks in our repo.
-
-    clang-cl.exe is a frontend to clang.exe that configures clang to work with MSVC on windowws.
-    The current release of clang do not contain clang-cl.exe. Setting this as a symlink will
-    treat clang.exe as clang-cl.exe, so it will properly configure it self."""
-
-    clang_base_dir = os.path.join(
-        get_aosp_root(), "prebuilts", "clang", "host", "windows-x86"
-    )
-    for clang_ver in os.listdir(clang_base_dir):
-        if clang_ver.startswith("clang") and os.path.isdir(
-            os.path.join(clang_base_dir, clang_ver)
-        ):
-            clang_dir = os.path.join(clang_base_dir, clang_ver, "bin")
-            clang_cl = os.path.join(clang_dir, "clang-cl.exe")
-            if not os.path.exists(clang_cl):
-                logging.info("Setting symlink for %s", clang_cl)
-                subprocess.call(
-                    ["mklink", clang_cl, os.path.join(clang_dir, "clang.exe")],
-                    shell=True,
-                )
-
-
 # Functions that determine if a file is executable.
 is_executable = {
     "Windows": [lambda f: f.endswith(".exe") or f.endswith(".dll")],
