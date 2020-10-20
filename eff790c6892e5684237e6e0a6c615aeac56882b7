@@ -16,6 +16,23 @@
       "message": "Friendly ping for review",
       "revId": "eff790c6892e5684237e6e0a6c615aeac56882b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "33d11eb3_6175b0cc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-item.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-20T22:37:23Z",
+      "side": 1,
+      "message": "This doesn\u0027t seem correctly indented.",
+      "revId": "eff790c6892e5684237e6e0a6c615aeac56882b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
