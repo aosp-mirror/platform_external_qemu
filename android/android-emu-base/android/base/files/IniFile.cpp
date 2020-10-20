@@ -95,14 +95,14 @@ void IniFile::parseStream(std::istream* in, bool keepComments) {
 
         // Handle empty lines, comments.
         if (citer == cend) {
-            VLOG(avd_config) << "Line " << lineno << ": Skipped empty line.";
+            LOG(VERBOSE) << "Line " << lineno << ": Skipped empty line.";
             if (keepComments) {
                 mComments.emplace_back(outputLineno, std::move(line));
             }
             continue;
         }
         if (*citer == '#' || *citer == ';') {
-            VLOG(avd_config) << "Line " << lineno << ": Skipped comment line.";
+            LOG(VERBOSE) << "Line " << lineno << ": Skipped comment line.";
             if (keepComments) {
                 mComments.emplace_back(outputLineno, std::move(line));
             }
@@ -112,7 +112,7 @@ void IniFile::parseStream(std::istream* in, bool keepComments) {
         // Extract and validate key.
         const auto keyStartIter = citer;
         if (!isKeyStartChar(*citer)) {
-            VLOG(avd_config) << "Line " << lineno
+            LOG(INFO) << "Line " << lineno
                              << ": Key does not start with a valid character."
                              << " Skipped line.";
             --outputLineno;
@@ -125,7 +125,7 @@ void IniFile::parseStream(std::istream* in, bool keepComments) {
         // Gobble the = sign.
         citer = eat(citer, cend, isSpaceChar);
         if (citer == cend || *citer != '=') {
-            VLOG(avd_config) << "Line " << lineno
+            LOG(INFO) << "Line " << lineno
                              << ": Missing expected assignment operator (=)."
                              << " Skipped line.";
             --outputLineno;
@@ -145,7 +145,7 @@ void IniFile::parseStream(std::istream* in, bool keepComments) {
         // Ensure there's no invalid remainder.
         citer = eat(citer, cend, isSpaceChar);
         if (citer != cend) {
-            VLOG(avd_config) << "Line " << lineno
+            LOG(INFO) << "Line " << lineno
                              << ": Contains invalid character in the value."
                              << " Skipped line.";
             --outputLineno;
@@ -174,7 +174,7 @@ bool IniFile::read(bool keepComments) {
 
     ifstream inFile(mBackingFilePath, ios_base::in | ios_base::ate);
     if (!inFile) {
-        VLOG(avd_config) << "Failed to process .ini file " << mBackingFilePath
+        LOG(INFO) << "Failed to process .ini file " << mBackingFilePath
                          << " for reading.";
         return false;
     }
@@ -385,7 +385,7 @@ int IniFile::getInt(const string& key, int defaultValue) const {
     errno = 0;
     const int result = strtol(value.c_str(), &end, 10);
     if (errno || *end != 0) {
-        VLOG(avd_config) << "Malformed int value " << value << " for key "
+        LOG(INFO) << "Malformed int value " << value << " for key "
                          << key;
         return defaultValue;
     }
@@ -402,7 +402,7 @@ int64_t IniFile::getInt64(const string& key, int64_t defaultValue) const {
     errno = 0;
     const int64_t result = strtoll(value.c_str(), &end, 10);
     if (errno || *end != 0) {
-        VLOG(avd_config) << "Malformed int64 value " << value << " for key "
+        LOG(INFO) << "Malformed int64 value " << value << " for key "
                          << key;
         return defaultValue;
     }
@@ -419,7 +419,7 @@ double IniFile::getDouble(const string& key, double defaultValue) const {
     errno = 0;
     const double result = strtod(value.c_str(), &end);
     if (errno || *end != 0) {
-        VLOG(avd_config) << "Malformed double value " << value << " for key "
+        LOG(INFO) << "Malformed double value " << value << " for key "
                          << key;
         return defaultValue;
     }
@@ -454,7 +454,7 @@ bool IniFile::getBool(const string& key, bool defaultValue) const {
     } else if (isBoolFalse(value)) {
         return false;
     } else {
-        VLOG(avd_config) << "Malformed bool value " << value << " for key "
+        LOG(INFO) << "Malformed bool value " << value << " for key "
                          << key;
         return defaultValue;
     }
