@@ -266,7 +266,7 @@ enum RendererFlags {
     GFXSTREAM_RENDERER_FLAGS_NATIVE_TEXTURE_DECOMPRESSION_BIT = 1 << 7, // Attempt GPU texture decompression
     GFXSTREAM_RENDERER_FLAGS_ENABLE_BPTC_TEXTURES_BIT = 1 << 8, // enable BPTC texture support if available
     GFXSTREAM_RENDERER_FLAGS_ENABLE_GLES31_BIT = 1 << 9, // disables the PlayStoreImage flag
-
+    GFXSTREAM_RENDERER_FLAGS_ENABLE_S3TC_TEXTURES_BIT = 1 << 10, // enable S3TC texture support if available
     GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT = 1 << 20, // for disabling syncfd
     GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE = 1 << 21,
 };
@@ -337,6 +337,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     bool ignoreHostGlErrorsFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_IGNORE_HOST_GL_ERRORS_BIT;
     bool nativeTextureDecompression = renderer_flags & GFXSTREAM_RENDERER_FLAGS_NATIVE_TEXTURE_DECOMPRESSION_BIT;
     bool bptcTextureSupport = renderer_flags & GFXSTREAM_RENDERER_FLAGS_ENABLE_BPTC_TEXTURES_BIT;
+    bool s3tcTextureSupport = renderer_flags & GFXSTREAM_RENDERER_FLAGS_ENABLE_S3TC_TEXTURES_BIT;
     bool syncFdDisabledByFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT;
     bool surfaceless =
             renderer_flags & GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT;
@@ -349,6 +350,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     GFXS_LOG("syncfd enabled? %d", !syncFdDisabledByFlag);
     GFXS_LOG("use native texture decompression if available? %d", nativeTextureDecompression);
     GFXS_LOG("enable BPTC support if available? %d", bptcTextureSupport);
+    GFXS_LOG("enable S3TC support if available? %d", s3tcTextureSupport);
     GFXS_LOG("surfaceless? %d", surfaceless);
     GFXS_LOG("OpenGL ES 3.1 enabled? %d", enableGlEs31Flag);
     GFXS_LOG("guest using ANGLE? %d", guestUsesAngle);
@@ -387,6 +389,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::NativeTextureDecompression, nativeTextureDecompression);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::BptcTextureSupport, bptcTextureSupport);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::S3tcTextureSupport, s3tcTextureSupport);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLDirectMem, false);
     android::featurecontrol::setEnabledOverride(
