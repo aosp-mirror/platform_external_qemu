@@ -268,6 +268,10 @@ static android::base::AsyncThreadWithLooper* sAdbInterfaceThread = nullptr;
 
 // static
 AdbInterface* AdbInterface::createGlobal(Looper* looper) {
+    if (!android_qemu_mode) {
+        return nullptr;
+    }
+
     if (sAdbInterface)
         return sAdbInterface;
 
@@ -280,6 +284,10 @@ AdbInterface* AdbInterface::createGlobal(Looper* looper) {
 
 // static
 AdbInterface* AdbInterface::createGlobalOwnThread() {
+    if (!android_qemu_mode) {
+        return nullptr;
+    }
+
     if (sAdbInterface)
         return sAdbInterface;
 
