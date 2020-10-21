@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "android/emulation/control/EmulatorService.h"
 
 #ifdef _MSC_VER
@@ -23,7 +22,6 @@
 #include <grpcpp/grpcpp.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -39,7 +37,9 @@
 
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
+#include "android/base/Stopwatch.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/memory/SharedMemory.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
@@ -63,6 +63,7 @@
 #include "android/emulation/control/utils/EventWaiter.h"
 #include "android/emulation/control/utils/ScreenshotUtils.h"
 #include "android/emulation/control/utils/ServiceUtils.h"
+#include "android/emulation/control/utils/SharedMemoryLibrary.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/globals.h"
@@ -208,14 +209,16 @@ public:
         auto agent = mAgents->location;
         GpsState request = *requestPtr;
 
-        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion([agent, request]() {
-            struct timeval tVal;
-            memset(&tVal, 0, sizeof(tVal));
-            gettimeofday(&tVal, NULL);
-            agent->gpsSendLoc(request.latitude(), request.longitude(),
-                              request.altitude(), request.speed(),
-                              request.bearing(), request.satellites(), &tVal);
-        });
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [agent, request]() {
+                    struct timeval tVal;
+                    memset(&tVal, 0, sizeof(tVal));
+                    gettimeofday(&tVal, NULL);
+                    agent->gpsSendLoc(request.latitude(), request.longitude(),
+                                      request.altitude(), request.speed(),
+                                      request.bearing(), request.satellites(),
+                                      &tVal);
+                });
 
         return Status::OK;
     }
@@ -492,6 +495,13 @@ public:
         EventWaiter frameEvent(&gpu_register_shared_memory_callback,
                                &gpu_unregister_shared_memory_callback);
 
+        SharedMemoryLibrary::LibraryEntry entry;
+        if (request->transport().channel() == ImageTransport::mmap) {
+            entry = mSharedMemoryLibrary.borrow(
+                    request->transport().handle(),
+                    request->width() * request->height() * 4);
+        }
+
         // Make sure we always write the first frame, this can be
         // a completely empty frame if the screen is not active.
         Image first;
@@ -622,12 +632,24 @@ public:
             return Status::CANCELLED;
         }
 
+        Stopwatch sw;
         android::emulation::Image img = android::emulation::takeScreenshot(
                 desiredFormat, desiredRotation, renderer.get(),
                 mAgents->display->getFrameBuffer, request->display(), newWidth,
                 newHeight);
+        LOG(VERBOSE) << "Screenshot " << newWidth << "x" << newHeight
+                     << ", in: " << sw.elapsedUs() << " us";
 
-        reply->set_image(img.getPixelBuf(), img.getPixelCount());
+        if (request->transport().channel() == ImageTransport::mmap) {
+            // TODO(jansene): have takeScreenshot write directly to the region
+            auto shm = mSharedMemoryLibrary.borrow(
+                    request->transport().handle(), img.getPixelCount());
+            if (shm->isOpen() && shm->isMapped()) {
+                memcpy(shm->get(), img.getPixelBuf(), img.getPixelCount());
+            }
+        } else {
+            reply->set_image(img.getPixelBuf(), img.getPixelCount());
+        }
 
         // Update format information with the retrieved width, height..
         auto format = reply->mutable_format();
@@ -773,6 +795,7 @@ private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
     TouchEventSender mTouchEventSender;
+    SharedMemoryLibrary mSharedMemoryLibrary;
 
     Clipboard* mClipboard;
     Looper* mLooper;
