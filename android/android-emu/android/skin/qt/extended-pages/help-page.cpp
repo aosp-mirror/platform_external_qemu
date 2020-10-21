@@ -35,7 +35,6 @@
 #include "android/base/Uri.h"                       // for Uri
 #include "android/base/Version.h"                   // for Version
 #include "android/base/system/System.h"             // for System
-#include "android/cmdline-option.h"                 // for android_cmdLineOptions
 #include "android/globals.h"                        // for android_avdInfo
 #include "android/metrics/StudioConfig.h"           // for UpdateChannel
 #include "android/skin/qt/shortcut-key-store.h"     // for ShortcutKeyStore
@@ -60,13 +59,7 @@ static const char FEATURE_REQUEST_TEMPLATE[] =
 Use Case or Problem this feature helps you with:)";
 HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage) {
     mUi->setupUi(this);
-    if (android_cmdLineOptions->qt_hide_window) {
-        std::vector<QWidget*> widgetsToHide{
-            {mUi->keyboard_shortcuts_tab, mUi->emulator_help_tab, mUi->license_tab}};
-        for (auto* w : widgetsToHide) {
-            mUi->help_tabs->removeTab(mUi->help_tabs->indexOf(w));
-        }
-    }
+
     // Get the version of this code
     android::update_check::VersionExtractor vEx;
 
@@ -98,10 +91,8 @@ HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage) {
 }
 
 void HelpPage::initialize(const ShortcutKeyStore<QtUICommand>* key_store) {
-    if (!android_cmdLineOptions->qt_hide_window) {
-        initializeLicenseText();
-        initializeKeyboardShortcutList(key_store);
-    }
+    initializeLicenseText();
+    initializeKeyboardShortcutList(key_store);
 }
 
 void HelpPage::initializeLicenseText() {
