@@ -983,6 +983,8 @@ void setGlInteropSupported(bool supported) {
         return;
     }
 
+    supported = false;
+
     LOG(VERBOSE) << "Setting gl interop support for Vk to: " << supported;
     sVkEmulation->deviceInfo.glInteropSupported = supported;
 }
@@ -1640,7 +1642,7 @@ VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle) {
     return res;
 }
 
-bool updateColorBufferFromVkImage(uint32_t colorBufferHandle) {
+bool updateColorBufferFromVkImage(uint32_t colorBufferHandle, bool force = false) {
     if (!sVkEmulation || !sVkEmulation->live) return false;
 
     auto vk = sVkEmulation->dvk;
@@ -1659,7 +1661,8 @@ bool updateColorBufferFromVkImage(uint32_t colorBufferHandle) {
         return false;
     }
 
-    if (infoPtr->glExported ||
+    if ((!force) ||
+        infoPtr->glExported ||
         (infoPtr->vulkanMode == VkEmulation::VulkanMode::VulkanOnly) ||
         infoPtr->frameworkFormat != FrameworkFormat::FRAMEWORK_FORMAT_GL_COMPATIBLE) {
         // No sync needed if exported to GL or in Vulkan-only mode
