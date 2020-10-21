@@ -16,6 +16,24 @@
       "message": "It looks like wee need two icons to match Studio. See https://b.corp.google.com/issues/170776596#comment10.",
       "revId": "25bbc49f1ce2b96310ed11b033e4844bb0c373eb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "29f3e38f_b969018c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-10-21T18:21:05Z",
+      "side": 1,
+      "message": "Good point. This cl currently will eventually call QApplication::setWindowIcon(), therefore changing the task bar window icon. For windows, I believe we need to explicitly call setWindowIcon for the extended controls window itself.",
+      "parentUuid": "91fbde9b_07c6e983",
+      "revId": "25bbc49f1ce2b96310ed11b033e4844bb0c373eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
