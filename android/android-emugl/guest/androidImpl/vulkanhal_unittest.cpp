@@ -34,6 +34,9 @@
 #include "android/opengles.h"
 #include "android/snapshot/interface.h"
 
+#include "OpenglSystemCommon/HostConnection.h"
+#include "OpenglSystemCommon/ProcessPipe.h"
+
 #include <android/hardware_buffer.h>
 #include <cutils/properties.h>
 
@@ -97,6 +100,8 @@ protected:
     }
 
     void SetUp() override {
+        mProcessPipeRestarted = false;
+
         property_set("ro.kernel.qemu.gltransport", GetParam());
         printf("%s: using transport: %s\n", __func__, GetParam());
 
@@ -105,8 +110,19 @@ protected:
     }
 
     void TearDown() override {
+        if (mProcessPipeRestarted) return;
+
         teardownVulkan();
         teardownGralloc();
+    }
+
+    void restartProcessPipe() {
+        processPipeRestart();
+        mProcessPipeRestarted = true;
+    }
+
+    void cutHostConnectionUnclean() {
+        HostConnection::exitUnclean();
     }
 
     void setupGralloc() {
@@ -727,6 +743,7 @@ protected:
     bool mInstanceHasGetPhysicalDeviceProperties2Support = false;
     bool mInstanceHasExternalMemorySupport = false;
     bool mDeviceHasExternalMemorySupport = false;
+    bool mProcessPipeRestarted = false;
 
     VkInstance mInstance;
     VkPhysicalDevice mPhysicalDevice;
@@ -1603,6 +1620,14 @@ TEST_P(VulkanHalTest, GetImageMemoryRequirements2) {
     func(mDevice, &info2, &reqs2);
 
     vk->vkDestroyImage(mDevice, testImage, nullptr);
+}
+
+TEST_P(VulkanHalTest, ProcessCleanup) {
+    restartProcessPipe();
+    cutHostConnectionUnclean();
+
+    usleep(1000000);
+    fprintf(stderr, "%s: end of test body\n", __func__);
 }
 
 INSTANTIATE_TEST_SUITE_P(

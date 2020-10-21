@@ -1617,6 +1617,7 @@ void FrameBuffer::eraseDelayedCloseColorBufferLocked(
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
+    fprintf(stderr, "%s: for puid %llu\n", __func__, (unsigned long long)(puid));
     AutoLock mutex(m_lock);
     auto colorBuffersToCleanup = cleanupProcGLObjects_locked(puid);
 
