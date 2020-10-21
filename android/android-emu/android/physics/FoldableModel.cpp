@@ -362,12 +362,21 @@ void FoldableModel::initPostures() {
                 struct AnglesToPosture valuesToPosture;
                 for (int j = 0; j < valuesToken.size(); j++) {
                     android::base::splitTokens(valuesToken[j], &values, "-");
-                    if (values.size() != 2) {
+                    size_t tokenCount = values.size();
+                    if (tokenCount != 2 && tokenCount != 3) {
                         E("Incorrect posture mapping %s\n",
                           valuesToken[j].c_str());
                     } else {
-                        valuesToPosture.angles[j].left = std::stof(values[0]);
-                        valuesToPosture.angles[j].right = std::stof(values[1]);
+                        float left = std::stof(values[0]);
+                        float right = std::stof(values[1]);
+                        valuesToPosture.angles[j].left = left;
+                        valuesToPosture.angles[j].right = right;
+
+                        if (tokenCount > 2) {
+                            valuesToPosture.angles[j].default_value = std::stof(values[2]);
+                        } else {
+                            valuesToPosture.angles[j].default_value = (left + right) / 2.0f;
+                        }
                     }
                 }
                 enum FoldablePostures parsedPosture =
@@ -447,8 +456,7 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode,
         for (const auto i : mAnglesToPostures) {
             if (i.posture == mState.currentPosture) {
                 for (uint32_t j = 0; j < mState.config.numHinges; j++) {
-                    mState.currentHingeDegrees[j] =
-                            (i.angles[j].left + i.angles[j].right) / 2.0f;
+                    mState.currentHingeDegrees[j] = i.angles[j].default_value;
                 }
             }
         }
