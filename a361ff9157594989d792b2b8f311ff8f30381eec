@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "14e83ce6_2e0a6d98",
+        "filename": "android/android-emugl/guest/androidImpl/vulkanhal_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-10-21T20:26:39Z",
+      "side": 1,
+      "message": "Could we remove mProcessPipeRestarted since we still do teardownVulkan() and teardownGralloc() at the end of the test?",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 5
+      },
+      "revId": "a361ff9157594989d792b2b8f311ff8f30381eec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
