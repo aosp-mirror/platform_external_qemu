@@ -65,6 +65,7 @@ android_add_library(
       android/emulation/control/utils/EventWaiter.cpp
       android/emulation/control/utils/GrpcAndroidLogAdapter.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp
+      android/emulation/control/utils/SharedMemoryLibrary.cpp
       android/emulation/control/waterfall/WaterfallFactory.cpp)
 
 target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu
@@ -129,8 +130,7 @@ install(
   DESTINATION lib)
 
 android_add_executable(
-  TARGET qsn INSTALL .
-  LICENSE Apache-2.0
+  TARGET qsn INSTALL . LICENSE Apache-2.0
   SRC # cmake-format: sortable
       android/emulation/control/QueryEmulator.cpp)
 target_link_libraries(qsn PRIVATE android-emu android-grpc libqemu2-glue)

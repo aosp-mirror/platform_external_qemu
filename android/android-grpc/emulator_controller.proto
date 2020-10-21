@@ -644,6 +644,29 @@ message BatteryState {
   BatteryStatus status = 6;
 }
 
+// An ImageTransport allows for specifying a side channel for
+// delivering image frames versus using the standard bytes array that is
+// returned with the gRPC request.
+message ImageTransport {
+  enum TransportChannel {
+    // Return full frames over the gRPC transport
+    TRANSPORT_CHANNEL_UNSPECIFIED = 0;
+
+    // Write images to the a file/shared memory handle.
+    MMAP = 1;
+  }
+
+  // The desired transport channel used for delivering image frames. Only
+  // relevant when streaming screenshots.
+  TransportChannel channel = 1;
+
+  // Handle used for writing image frames if transport is mmap. The client sets
+  // and owns this handle. It can be either a shm region, or a mmap. A mmap
+  // should be a url that starts with `file:///`
+  // Note: the mmap can result in tearing.
+  string handle = 2;
+}
+
 message ImageFormat {
   enum ImgFormat {
     // Portable Network Graphics format
@@ -685,6 +708,10 @@ message ImageFormat {
   // The (desired) display id of the device. Setting this to 0 (or omitting)
   // indicates the main display.
   uint32 display = 5;
+
+  // Set this if you wish to use a different transport channel to deliver image
+  // frames.
+  ImageTransport transport = 6;
 }
 
 message Image {
@@ -694,7 +721,9 @@ message Image {
   uint32 height = 3 [ deprecated = true ]; // height is contained in format.
 
   // The organization of the pixels in the image buffer is from left to
-  // right and bottom up.
+  // right and bottom up. This will be empty if an alternative image transport
+  // is requested in the image format. In that case the side channel should
+  // be used to obtain the image data.
   bytes image = 4;
 
   // [Output Only] Monotonically increasing sequence number in a stream of
