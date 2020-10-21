@@ -35,7 +35,6 @@
 #include "android/base/Uri.h"                       // for Uri
 #include "android/base/Version.h"                   // for Version
 #include "android/base/system/System.h"             // for System
-#include "android/cmdline-option.h"                 // for android_cmdLineOptions
 #include "android/globals.h"                        // for android_avdInfo
 #include "android/metrics/StudioConfig.h"           // for UpdateChannel
 #include "android/skin/qt/shortcut-key-store.h"     // for ShortcutKeyStore
@@ -92,10 +91,8 @@ HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage) {
 }
 
 void HelpPage::initialize(const ShortcutKeyStore<QtUICommand>* key_store) {
-    if (!android_cmdLineOptions->qt_hide_window) {
-        initializeLicenseText();
-        initializeKeyboardShortcutList(key_store);
-    }
+    initializeLicenseText();
+    initializeKeyboardShortcutList(key_store);
 }
 
 void HelpPage::initializeLicenseText() {
