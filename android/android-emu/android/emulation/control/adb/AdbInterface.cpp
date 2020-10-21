@@ -486,8 +486,6 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         bool want_output) {
 
     if (!android_qemu_mode) {
-        fprintf(stderr, "%s: tried to run adb in non-android mode\n", __func__);
-        *(uint32_t*)(1234) = 5;
         return {};
     }
 
