@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "91fbde9b_07c6e983",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-10-21T18:14:16Z",
+      "side": 1,
+      "message": "It looks like wee need two icons to match Studio. See https://b.corp.google.com/issues/170776596#comment10.",
+      "revId": "25bbc49f1ce2b96310ed11b033e4844bb0c373eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
