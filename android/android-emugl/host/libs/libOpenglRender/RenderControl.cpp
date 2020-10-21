@@ -895,7 +895,7 @@ static void rcFBPost(uint32_t colorBuffer)
     }
 
     // Update from Vulkan if necessary
-    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer, true /* forced update */);
 
     fb->post(colorBuffer);
 }

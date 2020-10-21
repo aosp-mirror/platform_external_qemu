@@ -356,7 +356,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
                         void** mappedPtr = nullptr);
 bool teardownVkColorBuffer(uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
-bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);
+bool updateColorBufferFromVkImage(uint32_t colorBufferHandle, bool force);
 bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);
 VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBufferHandle);
 IOSurfaceRef getColorBufferIOSurface(uint32_t colorBufferHandle);
