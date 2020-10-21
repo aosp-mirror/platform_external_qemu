@@ -318,9 +318,11 @@ public:
               unbox_VkInstance(boxed),
               [this, boxed] {
 
+              fprintf(stderr, "%s: RUN VK CLEANUP\n", __func__);
                 vkDestroyInstanceImpl(
                     unbox_VkInstance(boxed),
                     nullptr);
+              fprintf(stderr, "%s: RUN VK CLEANUP (done)\n", __func__);
               });
         }
 
@@ -1297,6 +1299,7 @@ public:
             VkImage image,
             const VkAllocationCallbacks* pAllocator) {
 
+        fprintf(stderr, "%s: call\n", __func__);
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
 

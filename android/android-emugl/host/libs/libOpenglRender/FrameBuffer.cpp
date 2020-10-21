@@ -1617,6 +1617,21 @@ void FrameBuffer::eraseDelayedCloseColorBufferLocked(
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
+    fprintf(stderr, "%s: for puid %llu\n", __func__, (unsigned long long)(puid));
+    bool renderThreadWithThisPuidExists = false;
+
+    // do {
+        renderThreadWithThisPuidExists = false;
+        // RenderThreadInfo::forAllRenderThreadInfos([puid, &renderThreadWithThisPuidExists](RenderThreadInfo* i) {
+        //         if (i->m_puid == puid) {
+        //         // fprintf(stderr, "%s: a rt with this puid exists, wait.\n", __func__);
+        //         renderThreadWithThisPuidExists = true;
+        //         }
+        //         // fprintf(stderr, "%s: rt info %p puid %llu\n", __func__, i, i->m_puid);
+        //         });
+        // System::get()->sleepUs(10000);
+    // } while (renderThreadWithThisPuidExists);
+
     AutoLock mutex(m_lock);
     auto colorBuffersToCleanup = cleanupProcGLObjects_locked(puid);
 
