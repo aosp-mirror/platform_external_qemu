@@ -463,6 +463,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::BPTC_TEXTURE_SUPPORT;
         case android::featurecontrol::GuestUsesAngle:
             return android_studio::EmulatorFeatureFlagState::GUEST_USES_ANGLE;
+        case android::featurecontrol::S3tcTextureSupport:
+            return android_studio::EmulatorFeatureFlagState::S3TC_TEXTURE_SUPPORT;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
