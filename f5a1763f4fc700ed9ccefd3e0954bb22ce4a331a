@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d8788f3b_b8cee606",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1632,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-10-21T21:16:57Z",
+      "side": 1,
+      "message": "We can probably do some optimization here but let\u0027s merge this first.",
+      "range": {
+        "startLine": 1623,
+        "startChar": 0,
+        "endLine": 1632,
+        "endChar": 45
+      },
+      "revId": "f5a1763f4fc700ed9ccefd3e0954bb22ce4a331a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
