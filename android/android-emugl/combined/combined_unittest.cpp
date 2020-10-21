@@ -92,8 +92,8 @@ protected:
         property_set("ro.kernel.qemu.gltransport", GetParam());
         printf("%s: using transport: %s\n", __func__, GetParam());
 
-        setupGralloc();
         setupEGLAndMakeCurrent();
+        setupGralloc();
         mBeforeTest = android::base::GLObjectCounter::get()->getCounts();
     }
 
@@ -114,8 +114,9 @@ protected:
                     "Leaked objects of type " << i << "; before: " << mBeforeTest[i] << " after: " << mAfterTest[i];
             }
         }
-        teardownEGL();
         teardownGralloc();
+        teardownEGL();
+        teardownHostThreads();
 
         mDisableLeakCheck = false;
 
@@ -194,8 +195,9 @@ protected:
 
     void teardownEGL() {
         eglRelease();
+    }
 
-        // Cancel all host threads as well
+    void teardownHostThreads() {
         android_finishOpenglesRenderer();
     }
 
