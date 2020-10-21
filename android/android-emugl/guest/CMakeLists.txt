@@ -104,7 +104,10 @@ if(NOT LINUX_AARCH64)
   target_include_directories(
     vulkanhal_unittests
     PRIVATE ${ANDROID_EMUGL_DIR}/host/include ${ANDROID_EMUGL_DIR}/combined
-            ${ANDROID_EMUGL_DIR}/guest/grallocusage)
+            ${ANDROID_EMUGL_DIR}/guest/grallocusage
+            ${GOLDFISH_EMUGL_DIR}/shared/OpenglCodecCommon
+            ${GOLDFISH_EMUGL_DIR}/system
+            ${GOLDFISH_EMUGL_DIR}/system/renderControl_enc)
   target_link_libraries(vulkanhal_unittests PRIVATE grallocusage aemugraphics
                         PRIVATE android-emu-test-launcher)
   target_compile_definitions(vulkanhal_unittests PRIVATE -D__ANDROID_API__=28)
