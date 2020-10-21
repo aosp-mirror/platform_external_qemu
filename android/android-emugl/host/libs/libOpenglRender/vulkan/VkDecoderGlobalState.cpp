@@ -318,6 +318,7 @@ public:
               unbox_VkInstance(boxed),
               [this, boxed] {
 
+              fprintf(stderr, "%s: RUN VK CLEANUP\n", __func__);
                 vkDestroyInstanceImpl(
                     unbox_VkInstance(boxed),
                     nullptr);
