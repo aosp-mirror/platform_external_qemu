@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "61ec6a6f_f3ee0590",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-10-21T18:58:49Z",
+      "side": 1,
+      "message": "Hello!\n\nThis PR adds a way for the config.ini file to specify a default hinge angle for each posture. This can be added as a third value in the hw.sensor.hinge_angles_posture_definitions config.\n\nRationale is possible need for posture definition to specify a different default value from the current calculation [(start_angle + end_angle) / 2.0]. This default value is used when using the UI posture buttons to quickly jump between postures.\n\nWithout this patch: posture config can only be e.g. 120-360, with default hinge value for that posture being automatically set to (120+360)/2\nWith this patch: a posture config of 120-360 is still possible and will have the same auto-calculation as before. a posture config of 120-360-120 translates to a posture between 120 and 360 degrees, with the default value being 120 degrees.\n\nThank you for considering this PR.",
+      "revId": "96aa5ecea4eeb6420aa68d3ae50cb8d58518519c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
