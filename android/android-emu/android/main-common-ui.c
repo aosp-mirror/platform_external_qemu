@@ -536,14 +536,17 @@ ui_init(const AConfig* skinConfig,
 #  else
         static const char kIconFile[] = "emulator_icon_128.png";
 #  endif
+        static const char kStudioIconFile[] = "android_studio_small.png";
         size_t icon_size;
+        const char* iconFile =
+                opts->qt_hide_window ? kStudioIconFile : kIconFile;
         const unsigned char* icon_data =
-                android_emulator_icon_find(kIconFile, &icon_size);
+                android_emulator_icon_find(iconFile, &icon_size);
 
         if (icon_data) {
             skin_winsys_set_window_icon(icon_data, icon_size);
         } else {
-            derror("Could not find emulator icon resource: %s", kIconFile);
+            derror("Could not find emulator icon resource: %s", iconFile);
         }
     }
 
