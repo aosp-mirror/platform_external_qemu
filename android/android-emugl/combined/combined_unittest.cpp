@@ -116,6 +116,7 @@ protected:
         }
         teardownEGL();
         teardownGralloc();
+        teardownHostThreads();
 
         mDisableLeakCheck = false;
 
@@ -194,8 +195,9 @@ protected:
 
     void teardownEGL() {
         eglRelease();
+    }
 
-        // Cancel all host threads as well
+    void teardownHostThreads() {
         android_finishOpenglesRenderer();
     }
 

@@ -1617,6 +1617,19 @@ void FrameBuffer::eraseDelayedCloseColorBufferLocked(
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
+    bool renderThreadWithThisPuidExists = false;
+
+    do {
+        renderThreadWithThisPuidExists = false;
+        RenderThreadInfo::forAllRenderThreadInfos(
+            [puid, &renderThreadWithThisPuidExists](RenderThreadInfo* i) {
+            if (i->m_puid == puid) {
+                renderThreadWithThisPuidExists = true;
+            }
+        });
+        System::get()->sleepUs(10000);
+    } while (renderThreadWithThisPuidExists);
+
     AutoLock mutex(m_lock);
     auto colorBuffersToCleanup = cleanupProcGLObjects_locked(puid);
 

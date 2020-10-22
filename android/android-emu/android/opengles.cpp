@@ -514,6 +514,18 @@ void android_cleanupProcGLObjects(uint64_t puid) {
     }
 }
 
+void android_cleanupProcGLObjectsAndWaitFinished(uint64_t puid) {
+    if (sRenderer) {
+        sRenderer->cleanupProcGLObjects(puid);
+    }
+}
+
+void android_waitForOpenglesProcessCleanup() {
+    if (sRenderer) {
+        sRenderer->waitForProcessCleanup();
+    }
+}
+
 static void* sContext, * sRenderContext, * sSurface;
 static EGLint s_gles_attr[5];
 

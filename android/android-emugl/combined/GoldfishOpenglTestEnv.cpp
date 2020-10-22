@@ -401,6 +401,7 @@ GoldfishOpenglTestEnv* GoldfishOpenglTestEnv::get() {
 void GoldfishOpenglTestEnv::clear() {
     HostGoldfishPipeDevice::get()->clear();
     HostAddressSpaceDevice::get()->clear();
+    android_waitForOpenglesProcessCleanup();
 }
 
 void GoldfishOpenglTestEnv::saveSnapshot(android::base::Stream* stream) {

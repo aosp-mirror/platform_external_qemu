@@ -89,6 +89,7 @@ public:
                          bool add) final;
     void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) override;
     void cleanupProcGLObjects(uint64_t puid) final;
+    void waitForProcessCleanup() final;
     struct AndroidVirtioGpuOps* getVirtioGpuOps() final;
 
     void pauseAllPreSave() final;
@@ -114,8 +115,6 @@ private:
     // Stop all render threads and wait until they exit,
     // and also delete them.
     void cleanupRenderThreads();
-    // Wait for process cleanup to complete.
-    void waitForProcessCleanup();
 
     std::unique_ptr<RenderWindow> mRenderWindow;
 
