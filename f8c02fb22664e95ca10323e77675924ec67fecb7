@@ -33,6 +33,24 @@
       "message": "I am wondering why DXT1 formats like COMPRESSED_RGB_S3TC_DXT1_EXT and COMPRESSED_RGBA_S3TC_DXT1_EXT are missing. It seems to me that implementing the EXT_texture_compression_s3tc extension requires the support for those 2 DXT1 formats.",
       "revId": "f8c02fb22664e95ca10323e77675924ec67fecb7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "46e77764_b5b7343e",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 1113708
+      },
+      "writtenOn": "2020-10-22T00:16:46Z",
+      "side": 1,
+      "message": "Hmm, I thought they were limited to GL_EXT_texture_compression_dxt1, but doing a bit more research you might be right in that we should be supporting them here as well.",
+      "parentUuid": "efcd073a_09c93c38",
+      "revId": "f8c02fb22664e95ca10323e77675924ec67fecb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
