@@ -382,7 +382,23 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 63;
+// Calculate snapshot version based on a base version plus featurecontrol-derived integer.
+static constexpr int kVersionBase = 63;
+static_assert(kVersionBase < (1 << 20), "Base version number is too high.");
+
+#define FEATURE_CONTROL_ITEM(item) + 1
+
+// 0 + 1 + 1 + 1 (+ 1) for each item in feature control
+static constexpr int kFeatureOffset = 0
+    #include "android/featurecontrol/FeatureControlDefHost.h"
+    #include "android/featurecontrol/FeatureControlDefGuest.h"
+;
+
+#undef FEATURE_CONTROL_ITEM
+
+static_assert(kFeatureOffset < 1024, "Too many features to include in the feature offset component of the snapshot version");
+
+static constexpr int kVersion = (kVersionBase << 10) + kFeatureOffset;
 static constexpr int kMaxSaveStatsHistory = 10;
 
 base::StringView Snapshot::dataDir(const char* name) {
@@ -406,7 +422,7 @@ Snapshot::Snapshot(const char* name, const char* dataDir, bool verifyQcow)
     : mName(name),
       mDataDir(dataDir),
       mSaveStats(kMaxSaveStatsHistory),
-      mVerifyQcow(verifyQcow) {
+     mVerifyQcow(verifyQcow) {
     // All persisted snapshot protobuf fields across
     // saves / loads go here.
     if (preload()) {
