@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c647365c_0395a3f1",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-10-22T18:37:42Z",
+      "side": 1,
+      "message": "I was never aware that we could do this. So neat!",
+      "revId": "c8a5f4fc2710b9c0205aad980531d87bf77ec81d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}

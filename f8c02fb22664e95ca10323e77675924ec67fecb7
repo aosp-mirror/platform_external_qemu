@@ -51,6 +51,24 @@
       "parentUuid": "efcd073a_09c93c38",
       "revId": "f8c02fb22664e95ca10323e77675924ec67fecb7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a8222873_f08a8e04",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2020-10-22T18:37:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46e77764_b5b7343e",
+      "revId": "f8c02fb22664e95ca10323e77675924ec67fecb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
