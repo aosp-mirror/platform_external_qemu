@@ -1,0 +1,56 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005677278",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1469627?revision\u003d1",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "19d25a22_11d0143d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-22T09:41:23Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 201,
+        "startChar": 0,
+        "endLine": 201,
+        "endChar": 4
+      },
+      "revId": "14a9c7509161706455e7a42fd79da2156e89fa4d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005677278",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1469627?revision\u003d1",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "0b2ae4ad_74460865",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/tv-remote-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-10-22T09:41:23Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 238,
+        "endChar": 4
+      },
+      "revId": "14a9c7509161706455e7a42fd79da2156e89fa4d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
