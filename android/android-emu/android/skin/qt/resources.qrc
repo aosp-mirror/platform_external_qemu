@@ -199,6 +199,8 @@
         <file alias="tv_remote_back_pressed">images/light/tv_remote_back_pressed.svg</file>
         <file alias="tv_remote_bookmark">images/light/tv_remote_bookmark.svg</file>
         <file alias="tv_remote_bookmark_pressed">images/light/tv_remote_bookmark_pressed.svg</file>
+        <file alias="tv_remote_dashboard">images/light/tv_remote_dashboard.svg</file>
+        <file alias="tv_remote_dashboard_pressed">images/light/tv_remote_dashboard_pressed.svg</file>
         <file alias="tv_remote_home">images/light/tv_remote_home.svg</file>
         <file alias="tv_remote_home_pressed">images/light/tv_remote_home_pressed.svg</file>
         <file alias="tv_remote_live_tv">images/light/tv_remote_live_tv.svg</file>
@@ -366,6 +368,8 @@
         <file alias="tv_remote_back_pressed">images/dark/tv_remote_back_pressed.svg</file>
         <file alias="tv_remote_bookmark">images/dark/tv_remote_bookmark.svg</file>
         <file alias="tv_remote_bookmark_pressed">images/dark/tv_remote_bookmark_pressed.svg</file>
+        <file alias="tv_remote_dashboard">images/dark/tv_remote_dashboard.svg</file>
+        <file alias="tv_remote_dashboard_pressed">images/dark/tv_remote_dashboard_pressed.svg</file>
         <file alias="tv_remote_home">images/dark/tv_remote_home.svg</file>
         <file alias="tv_remote_home_pressed">images/dark/tv_remote_home_pressed.svg</file>
         <file alias="tv_remote_live_tv">images/dark/tv_remote_live_tv.svg</file>

@@ -51,7 +51,8 @@ class QWidget;
 TvRemotePage::TvRemotePage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::TvRemotePage()),
-    mEmulatorWindow(NULL)
+    mEmulatorWindow(NULL),
+    mAdbInterface(NULL)
 {
     mUi->setupUi(this);
     const struct {
@@ -78,6 +79,8 @@ TvRemotePage::TvRemotePage(QWidget *parent) :
 
     connect(mUi->tvRemote_settingsButton, &QPushButton::pressed,
             [this]() {onSettingsButtonPressed();});
+        connect(mUi->tvRemote_dashboardButton, &QPushButton::pressed,
+            [this]() {onDashboardButtonPressed();});
     connect(mUi->tvRemote_programGuideButton, &QPushButton::pressed,
             [this]() {onProgramGuideButtonPressed();});
     connect(mUi->tvRemote_assistantButton, &QPushButton::pressed,
@@ -97,6 +100,11 @@ void TvRemotePage::setEmulatorWindow(EmulatorQtWindow* emulator_window)
 void TvRemotePage::setAdbInterface(android::emulation::AdbInterface* adb_interface)
 {
     mAdbInterface = adb_interface;
+
+    if (!mAdbInterface) {
+        VLOG(tvremote) << "No adb connection.";
+        return;
+    }
 }
 
 void TvRemotePage::toggleButtonEvent(QPushButton* button,
@@ -152,6 +160,18 @@ void TvRemotePage::onSettingsButtonPressed() {
         "com.android.tv.settings/com.android.tv.settings.MainSettings"
     };
     std::string command_tag = "Open Settings";
+
+    handleAdbCommand(adb_command, command_tag);
+}
+
+void TvRemotePage::onDashboardButtonPressed() {
+    std::vector<std::string> adb_command = {
+        "shell",
+        "input",
+        "keyevent",
+        "KEYCODE_NOTIFICATION"
+    };
+    std::string command_tag = "Toggle Dashboard";
 
     handleAdbCommand(adb_command, command_tag);
 }
