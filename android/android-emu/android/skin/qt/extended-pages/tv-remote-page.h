@@ -40,8 +40,10 @@ private:
     void toggleButtonEvent(QPushButton* button,
                            const SkinKeyCode key_code,
                            const SkinEventType event_type);
+    void updateButtonIcon(QPushButton* button, const SkinEventType event_type);
     void handleAdbCommand(const std::vector<std::string>& adb_command,
                           const std::string& command_tag);
+    void onButtonReleased(QPushButton* button);
     void onSettingsButtonPressed();
     void onDashboardButtonPressed();
     void onProgramGuideButtonPressed();
