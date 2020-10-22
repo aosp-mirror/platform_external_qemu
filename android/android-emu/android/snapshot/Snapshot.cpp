@@ -382,7 +382,20 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 63;
+// Calculate snapshot version based on a base version plus featurecontrol-derived integer.
+static constexpr int kVersionBase = 63;
+
+#define FEATURE_CONTROL_ITEM(item) + 1
+
+// 0 + 1 + 1 + 1 (+ 1) for each item in feature control
+static constexpr int kFeatureOffset = 0
+    #include "android/featurecontrol/FeatureControlDefHost.h"
+    #include "android/featurecontrol/FeatureControlDefGuest.h"
+;
+
+#undef FEATURE_CONTROL_ITEM
+
+static constexpr int kVersion = kVersionBase + kFeatureOffset;
 static constexpr int kMaxSaveStatsHistory = 10;
 
 base::StringView Snapshot::dataDir(const char* name) {
