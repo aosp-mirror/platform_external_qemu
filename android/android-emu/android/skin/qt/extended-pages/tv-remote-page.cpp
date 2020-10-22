@@ -79,14 +79,28 @@ TvRemotePage::TvRemotePage(QWidget *parent) :
 
     connect(mUi->tvRemote_settingsButton, &QPushButton::pressed,
             [this]() {onSettingsButtonPressed();});
-        connect(mUi->tvRemote_dashboardButton, &QPushButton::pressed,
-            [this]() {onDashboardButtonPressed();});
+    connect(mUi->tvRemote_settingsButton, &QPushButton::released,
+            [this]() {onButtonReleased(this->mUi->tvRemote_settingsButton);});
+
+    connect(mUi->tvRemote_dashboardButton, &QPushButton::pressed,
+        [this]() {onDashboardButtonPressed();});
+    connect(mUi->tvRemote_dashboardButton, &QPushButton::released,
+            [this]() {onButtonReleased(this->mUi->tvRemote_dashboardButton);});
+
     connect(mUi->tvRemote_programGuideButton, &QPushButton::pressed,
             [this]() {onProgramGuideButtonPressed();});
+    connect(mUi->tvRemote_programGuideButton, &QPushButton::released,
+            [this]() {onButtonReleased(this->mUi->tvRemote_programGuideButton);});
+
     connect(mUi->tvRemote_assistantButton, &QPushButton::pressed,
             [this]() {onAssistantButtonPressed();});
+    connect(mUi->tvRemote_assistantButton, &QPushButton::released,
+            [this]() {onButtonReleased(this->mUi->tvRemote_assistantButton);});
+
     connect(mUi->tvRemote_watchlistButton, &QPushButton::pressed,
             [this]() {onWatchlistButtonPressed();});
+    connect(mUi->tvRemote_watchlistButton, &QPushButton::released,
+            [this]() {onButtonReleased(this->mUi->tvRemote_watchlistButton);});
 
     remaskButtons();
     installEventFilter(this);
@@ -118,6 +132,10 @@ void TvRemotePage::toggleButtonEvent(QPushButton* button,
         mEmulatorWindow->queueSkinEvent(skin_event);
     }
 
+    updateButtonIcon(button, event_type);
+}
+
+void TvRemotePage::updateButtonIcon(QPushButton* button, const SkinEventType event_type) {
     QSettings settings;
     SettingsTheme theme = getSelectedTheme();
 
@@ -152,6 +170,10 @@ void TvRemotePage::handleAdbCommand(const std::vector<std::string>& adb_command,
     );
 }
 
+void TvRemotePage::onButtonReleased(QPushButton* button) {
+    updateButtonIcon(button, kEventKeyUp);
+}
+
 void TvRemotePage::onSettingsButtonPressed() {
     std::vector<std::string> adb_command = {
         "shell",
@@ -162,6 +184,8 @@ void TvRemotePage::onSettingsButtonPressed() {
     std::string command_tag = "Open Settings";
 
     handleAdbCommand(adb_command, command_tag);
+
+    updateButtonIcon(mUi->tvRemote_settingsButton, kEventKeyDown);
 }
 
 void TvRemotePage::onDashboardButtonPressed() {
@@ -174,6 +198,8 @@ void TvRemotePage::onDashboardButtonPressed() {
     std::string command_tag = "Toggle Dashboard";
 
     handleAdbCommand(adb_command, command_tag);
+
+    updateButtonIcon(mUi->tvRemote_dashboardButton, kEventKeyDown);
 }
 
 void TvRemotePage::onProgramGuideButtonPressed() {
@@ -186,6 +212,8 @@ void TvRemotePage::onProgramGuideButtonPressed() {
     std::string command_tag = "Open Live Channels";
 
     handleAdbCommand(adb_command, command_tag);
+
+    updateButtonIcon(mUi->tvRemote_programGuideButton, kEventKeyDown);
 }
 
 void TvRemotePage::onAssistantButtonPressed() {
@@ -207,6 +235,8 @@ void TvRemotePage::onAssistantButtonPressed() {
 
     adb_command.push_back(query);
     handleAdbCommand(adb_command, command_tag);
+
+    updateButtonIcon(mUi->tvRemote_assistantButton, kEventKeyDown);
 }
 
 void TvRemotePage::onWatchlistButtonPressed() {
@@ -219,6 +249,8 @@ void TvRemotePage::onWatchlistButtonPressed() {
     std::string command_tag = "Toggle Watchlist";
 
     handleAdbCommand(adb_command, command_tag);
+
+    updateButtonIcon(mUi->tvRemote_watchlistButton, kEventKeyDown);
 }
 
 void TvRemotePage::remaskButtons() {
