@@ -9,8 +9,8 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _HW_ANDROID_PIPE_H
-#define _HW_ANDROID_PIPE_H
+#ifndef _HW_ANDROID_PIPE_BASE_H
+#define _HW_ANDROID_PIPE_BASE_H
 
 // vtbl in Android pipe.
 typedef struct AndroidPipeHwFuncs {
@@ -19,4 +19,4 @@ typedef struct AndroidPipeHwFuncs {
     int (*getPipeId)(void* hwpipe);
 } AndroidPipeHwFuncs;
 
-#endif /* _HW_ANDROID_PIPE_H */
+#endif /* _HW_ANDROID_PIPE_BASE_H */
