@@ -22,6 +22,30 @@
       },
       "revId": "3f2f922b0830c8d5523f5c789fd373fc4df05032",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "91cbdc62_2155d762",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlDefHost.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-10-23T23:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1869b223_003de5b3",
+      "range": {
+        "startLine": 69,
+        "startChar": 1,
+        "endLine": 69,
+        "endChar": 37
+      },
+      "revId": "3f2f922b0830c8d5523f5c789fd373fc4df05032",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
