@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d42e5505_d9065769",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 21
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-23T17:16:59Z",
+      "side": 1,
+      "message": "Just small comments. Please address those before merging.",
+      "revId": "d82d6949dfb62bd0638a7843b7f497347e387996",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3d843333_1473bdaa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-page.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-23T17:16:59Z",
+      "side": 1,
+      "message": "Should we include slower speeds as well? (.5, .25, .1) \nThis could allow to repro problem in slow motion.",
+      "revId": "d82d6949dfb62bd0638a7843b7f497347e387996",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3708b7cb_08f73179",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-page.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-23T17:16:59Z",
+      "side": 1,
+      "message": "What happens if the duration is more?\nAlso, can we add some unit tests for these methods (toTimeString and toPlaybackTimeString)?",
+      "revId": "d82d6949dfb62bd0638a7843b7f497347e387996",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f28721c1_44f2031c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-page.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-23T17:16:59Z",
+      "side": 1,
+      "message": "Wouldn\u0027t be better to move the \"connector\" inside the \"toPlaybackTimeString()\"?\nIn my mind, a text \"formatting\" method should only receive the values to be formatted. All formatting connectors and extra characters should be managed by the method itself.",
+      "revId": "d82d6949dfb62bd0638a7843b7f497347e387996",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
