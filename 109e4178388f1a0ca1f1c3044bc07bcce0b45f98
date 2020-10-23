@@ -16,6 +16,24 @@
       "message": "Lingfeng, it\u0027s a low-risk change, but do you think we should enable on Canary first to be sure?",
       "revId": "109e4178388f1a0ca1f1c3044bc07bcce0b45f98",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e77935e5_b03ed00f",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-23T15:29:55Z",
+      "side": 1,
+      "message": "It should be fine to enable on both.",
+      "parentUuid": "7547c7a0_47119539",
+      "revId": "109e4178388f1a0ca1f1c3044bc07bcce0b45f98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
