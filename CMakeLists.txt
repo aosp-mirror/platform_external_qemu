@@ -578,7 +578,7 @@ target_link_libraries(android-qemu-deps INTERFACE virglrenderer-headers)
 add_subdirectory(android)
 add_subdirectory(android-qemu2-glue)
 
-set(ANDROID_QEMU_ARM_DEVICES "hw/pci/goldfish_address_space.c")
+set(ANDROID_QEMU_ARM_DEVICES "hw/pci/goldfish_address_space.c;hw/virtio/virtio-vsock.c")
 set(ANDROID_QEMU_COMMON_DEVICES "${ANDROID_QEMU_ARM_DEVICES};hw/i386/pc_piix.c")
 
 # Darwin definitions

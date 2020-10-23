@@ -20,6 +20,7 @@ set(android-qemu2-glue_src
     emulation/virtio-goldfish-pipe.cpp
     emulation/virtio-input-multi-touch.c
     emulation/virtio-input-rotary.c
+    emulation/virtio_vsock_device.cpp
     looper-qemu.cpp
     net-android.cpp
     proxy/slirp_proxy.cpp
