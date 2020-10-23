@@ -52,6 +52,24 @@
       "parentUuid": "e77935e5_b03ed00f",
       "revId": "109e4178388f1a0ca1f1c3044bc07bcce0b45f98",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3f05e24d_7099478b",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-23T22:34:02Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4488fc7c_5a504a08",
+      "revId": "109e4178388f1a0ca1f1c3044bc07bcce0b45f98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
