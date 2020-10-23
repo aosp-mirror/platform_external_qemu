@@ -33,6 +33,24 @@
       "message": "This doesn\u0027t seem correctly indented.",
       "revId": "eff790c6892e5684237e6e0a6c615aeac56882b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "78c6ef84_d2614406",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-item.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-23T00:43:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "33d11eb3_6175b0cc",
+      "revId": "eff790c6892e5684237e6e0a6c615aeac56882b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
