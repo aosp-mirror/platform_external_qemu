@@ -314,9 +314,9 @@ struct virtio_gpu_resource_create_blob {
 	/* zero is invalid blob mem */
 	uint32_t blob_mem;
 	uint32_t blob_flags;
+	uint32_t nr_entries;
 	uint64_t blob_id;
 	uint64_t size;
-	uint32_t nr_entries;
 	/*
 	 * sizeof(nr_entries * virtio_gpu_mem_entry) bytes follow
 	 */
