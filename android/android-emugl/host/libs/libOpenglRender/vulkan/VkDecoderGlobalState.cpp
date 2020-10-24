@@ -3134,20 +3134,30 @@ public:
         uint64_t hva = (uint64_t)(uintptr_t)(info->ptr);
         uint64_t size = (uint64_t)(uintptr_t)(info->size);
 
+        constexpr size_t kPageBits = 12;
+        constexpr size_t kPageSize = 1u << kPageBits;
+        constexpr size_t kPageOffsetMask = kPageSize - 1;
+
+        uint64_t pageOffset = hva & kPageOffsetMask;
+        uint64_t sizeToPage =
+            ((size + pageOffset + kPageSize - 1) >>
+             kPageBits) << kPageBits;
+
         auto id =
             get_emugl_vm_operations().hostmemRegister(
                     (uint64_t)(uintptr_t)(info->ptr),
                     (uint64_t)(uintptr_t)(info->size));
 
         *pAddress = hva & (0xfff); // Don't expose exact hva to guest
-        *pSize = size;
+        *pSize = sizeToPage;
         *pHostmemId = id;
 
         info->virtioGpuMapped = true;
         info->hostmemId = id;
 
-        fprintf(stderr, "%s: hva, size: %p 0x%llx id 0x%llx\n", __func__,
+        fprintf(stderr, "%s: hva, size, sizeToPage: %p 0x%llx 0x%llx id 0x%llx\n", __func__,
                 info->ptr, (unsigned long long)(info->size),
+                (unsigned long long)(sizeToPage),
                 (unsigned long long)(*pHostmemId));
         return VK_SUCCESS;
     }
