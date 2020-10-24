@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b273b5ad_aa66d815",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1999,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-10-24T01:26:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8aece76c_b6f75f4e",
+      "revId": "5d6a888aa1bce54f25e5c36150f92d47f4d3c453",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "fcf35e12_519830ea",
@@ -31,6 +49,24 @@
       "writtenOn": "2020-10-24T00:17:59Z",
       "side": 1,
       "message": "VIRTIO_VSOCK_PIPE",
+      "revId": "5d6a888aa1bce54f25e5c36150f92d47f4d3c453",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c51b35e_fad9df24",
+        "filename": "android/android-emu/android/metrics/metrics.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-10-24T01:26:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fcf35e12_519830ea",
       "revId": "5d6a888aa1bce54f25e5c36150f92d47f4d3c453",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
