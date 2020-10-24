@@ -1660,6 +1660,7 @@ TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
     constexpr uint32_t kThreadCount = 4;
     VkDescriptorPool pool;
     VkDescriptorSetLayout setLayout;
+
     std::vector<VkDescriptorSet> sets(kThreadCount);
 
     // Setup descriptor sets
@@ -1668,6 +1669,15 @@ TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
         VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
         VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
         &pool, &setLayout, sets.data()));
+
+    VkPipelineLayout pipelineLayout;
+
+    VkPipelineLayoutCreateInfo pipelineLayoutCi = {
+        VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO, 0, 0,
+        1, &setLayout,
+        0, nullptr,
+    };
+    vk->vkCreatePipelineLayout(mDevice, &pipelineLayoutCi, nullptr, &pipelineLayout);
 
     // Setup command buffers
     VkCommandPoolCreateInfo poolCi = {
@@ -1691,7 +1701,7 @@ TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
     constexpr uint32_t kTotalRecords = kThreadCount * kRecordsPerThread;
 
     for (uint32_t i = 0; i < kThreadCount; ++i) {
-        FunctorThread* thread = new FunctorThread([this, cbs, i]() {
+        FunctorThread* thread = new FunctorThread([this, cbs, sets, pipelineLayout, i]() {
             VkCommandBufferBeginInfo beginInfo = {
                 VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, 0,
                 VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, 0,
@@ -1704,7 +1714,10 @@ TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
             };
 
             for (uint32_t j = 0; j < kRecordsPerThread; ++j) {
-                vk->vkCmdSetScissor(cbs[i], 0, 1, &scissor);
+                vk->vkCmdBindDescriptorSets(
+                    cbs[i],
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    pipelineLayout, 0, 1, &sets[i], 0, nullptr);
             }
 
             vk->vkEndCommandBuffer(cbs[i]);
