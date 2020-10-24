@@ -401,12 +401,14 @@ intptr_t RenderThread::main() {
             // Vulkan decoder
             //
             {
+                android::base::beginTrace("vkConsume");
                 last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
                                             ioStream);
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;
                 }
+                android::base::endTrace();
             }
 
             if (progress) continue;
