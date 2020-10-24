@@ -604,6 +604,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         api = typeInfo.apis[name]
 
         cgen.line("case OP_%s:" % name)
+        cgen.stmt("android::base::beginTrace(\"%s decode\")" % name)
         cgen.beginBlock()
 
         if api.name in custom_decodes.keys():
@@ -611,6 +612,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         else:
             emit_default_decoding(typeInfo, api, cgen)
 
+        cgen.stmt("android::base::endTrace()")
         cgen.stmt("break")
         cgen.endBlock()
         self.module.appendImpl(self.cgen.swapCode())
