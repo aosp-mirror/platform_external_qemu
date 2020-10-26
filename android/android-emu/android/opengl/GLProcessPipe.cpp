@@ -64,6 +64,7 @@ public:
         : AndroidPipe(hwPipe, service) {
         if (loadStream) {
             m_uniqueId = loadStream->getBe64();
+            m_hasData = (loadStream->getByte() != 0);
         } else {
             m_uniqueId = ++s_headId;
         }
@@ -71,6 +72,7 @@ public:
 
     void onSave(base::Stream* stream) override {
         stream->putBe64(m_uniqueId);
+        stream->putByte(m_hasData ? 1 : 0);
     }
 
     void onGuestClose(PipeCloseReason reason) override {
@@ -84,8 +86,13 @@ public:
 
     int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override {
         assert(buffers[0].size >= 8);
-        memcpy(buffers[0].data, (const char*)&m_uniqueId, sizeof(m_uniqueId));
-        return sizeof(m_uniqueId);
+        if (m_hasData) {
+            m_hasData = false;
+            memcpy(buffers[0].data, (const char*)&m_uniqueId, sizeof(m_uniqueId));
+            return sizeof(m_uniqueId);
+        } else {
+            return 0;
+        }
     }
 
     int onGuestSend(const AndroidPipeBuffer* buffers,
@@ -97,6 +104,7 @@ public:
         int32_t confirmInt = *((int32_t*)buffers[0].data);
         assert(confirmInt == 100);
         (void)confirmInt;
+        m_hasData = true;
         return buffers[0].size;
     }
 
@@ -109,6 +117,7 @@ private:
     // space.
     // Please change it if you ever have a use case that exhausts them
     uint64_t m_uniqueId;
+    bool m_hasData = false;
     static std::atomic<uint64_t> s_headId;
 
 };
