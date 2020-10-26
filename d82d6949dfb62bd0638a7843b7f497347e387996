@@ -35,6 +35,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "26451614_c09918c4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-page.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-26T23:53:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3d843333_1473bdaa",
+      "revId": "d82d6949dfb62bd0638a7843b7f497347e387996",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3708b7cb_08f73179",
@@ -52,6 +70,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "408e0f4d_9cc5e5e1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-page.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-26T23:53:45Z",
+      "side": 1,
+      "message": "Transfer the code to use native functions gmtime \u0026 strftime to avoid adding tests.\nNow if the limitation for duration is 1 day.\nSeems like there is not place to put test for UI code.",
+      "parentUuid": "3708b7cb_08f73179",
+      "revId": "d82d6949dfb62bd0638a7843b7f497347e387996",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f28721c1_44f2031c",
@@ -65,6 +101,24 @@
       "writtenOn": "2020-10-23T17:16:59Z",
       "side": 1,
       "message": "Wouldn\u0027t be better to move the \"connector\" inside the \"toPlaybackTimeString()\"?\nIn my mind, a text \"formatting\" method should only receive the values to be formatted. All formatting connectors and extra characters should be managed by the method itself.",
+      "revId": "d82d6949dfb62bd0638a7843b7f497347e387996",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e2d6b654_f40b253d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-page.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-26T23:53:45Z",
+      "side": 1,
+      "message": "Change the function name to getConnectedTimeString. Hope this name make more sense.\nThis function is used in 2 places, 1 is the playback time ticker, where 2 formatted time strings are connected with \"/\". The other one is in the timeline table, where 2 formatted time strings are connected with \"~\". \n\nMaking the connector an arguments helps save the code.",
+      "parentUuid": "f28721c1_44f2031c",
       "revId": "d82d6949dfb62bd0638a7843b7f497347e387996",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
