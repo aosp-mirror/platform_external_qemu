@@ -88,6 +88,11 @@ int SharedMemory::openInternal(int oflag, int mode, bool doMapping) {
         mFd = shm_open(mName.c_str(), oflag, mode);
     } else {
         mFd = ::open(mName.c_str(), oflag, mode);
+        // Make sure the file can hold at least mSize bytes..
+        struct stat stat;
+        if (!fstat(mFd, &stat) && stat.st_size < mSize) {
+            ftruncate(mFd, mSize);
+        }
     }
     if (mFd == -1) {
         err = -errno;
