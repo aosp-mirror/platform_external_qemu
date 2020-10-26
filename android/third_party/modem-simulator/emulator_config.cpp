@@ -67,17 +67,17 @@ std::string DeviceConfig::DefaultHostArtifactsPath(const std::string& file) {
     return PerInstancePath(file.c_str());
 }
 
-const char* DeviceConfig::ril_address_and_prefix() {
+std::string DeviceConfig::ril_address_and_prefix() {
     // hardcoded one in goldfish
     return "10.0.2.15/24";
 }
 
-const char* DeviceConfig::ril_gateway() {
+std::string DeviceConfig::ril_gateway() {
     // hardcoded one in goldfish
     return "10.0.2.2";
 }
 
-const char* DeviceConfig::ril_dns() {
+std::string DeviceConfig::ril_dns() {
     // Note: the android_cmdLineOptions->dns_server sometimes is just
     // 127.0.0.1 and it does not work
     // TODO: improve it
