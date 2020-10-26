@@ -11,16 +11,17 @@
 
 #pragma once
 
-#include "android/base/Optional.h"
-#include "android/base/StringView.h"
-#include "android/base/containers/CircularBuffer.h"
-#include "android/base/system/System.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/snapshot/common.h"
-#include "snapshot.pb.h"
+#include <stdint.h>                                  // for uint64_t, int32_t
+#include <string>                                    // for allocator, string
+#include <vector>                                    // for vector
 
-#include <string>
-#include <vector>
+#include "android/base/Optional.h"                   // for Optional
+#include "android/base/StringView.h"                 // for StringView, oper...
+#include "android/base/containers/CircularBuffer.h"  // for CircularBuffer
+#include "android/base/system/System.h"              // for System, System::...
+#include "android/featurecontrol/Features.h"         // for Feature
+#include "android/snapshot/common.h"                 // for FailureReason
+#include "snapshot.pb.h"                             // for SaveStats, Confi...
 
 namespace android {
 namespace snapshot {
@@ -28,7 +29,10 @@ namespace snapshot {
 class Snapshot final {
 public:
     Snapshot(const char* name);
-    explicit Snapshot(const char* name, const char* dataDir);
+    explicit Snapshot(const char* name,
+                      const char* dataDir,
+                      bool verifyQcow = true);
+    Snapshot(const emulator_snapshot::Snapshot& snapshotPb);
 
     static std::vector<Snapshot> getExistingSnapshots();
     static base::Optional<Snapshot> getSnapshotById(std::string id);
@@ -55,6 +59,7 @@ public:
     bool areSavesSlow() const;
 
     uint64_t diskSize() const { return mSize; }
+    uint64_t folderSize() const { return mFolderSize; }
 
     // Returns the snapshot's Protobuf holding its metadata.
     // If Protobuf cannot be read, sets failure reason
@@ -65,6 +70,10 @@ public:
     // the snapshot protobuf with an error code if the check
     // does not work out.
     const bool checkValid(bool writeResult);
+
+    // Checks to see whether the snapshot can be loaded,
+    // ignoring any virtual machine and gpu configuration.
+    const bool checkOfflineValid(bool writeResult = false);
 
     base::Optional<FailureReason> failureReason() const;
 
@@ -81,6 +90,7 @@ public:
     void saveEnabledFeatures();
     bool writeSnapshotToDisk();
     bool isCompatibleWithCurrentFeatures();
+    bool isLoaded();
 
 private:
     void loadProtobufOnce();
@@ -92,7 +102,10 @@ private:
     std::string mName;
     std::string mDataDir;
     emulator_snapshot::Snapshot mSnapshotPb;
+    // We might not load the qcow files when validating an exported snapshot.
+    bool mVerifyQcow = true;
     uint64_t mSize = 0;
+    uint64_t mFolderSize = 0;
     int32_t mInvalidLoads = 0;
     int32_t mSuccessfulLoads = 0;
 

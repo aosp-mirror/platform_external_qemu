@@ -157,6 +157,15 @@ TEST(LogString, EmptyString) {
     EXPECT_STREQ("", ls.string());
 }
 
+TEST(LogString, LongString) {
+    std::string longString = "hello this is a really long string, one that should result in a buffer overflow as it has so many "
+                 "characters that it will not fit in the default buffer. This means that we should allocate some additional "
+                 "memory to make sure the characters fit. This used to cause issues in the past.";
+
+    LogString ls("%s", longString.c_str());
+    EXPECT_EQ(longString, ls.string());
+}
+
 TEST(LogString, SimpleString) {
     LogString ls("Hello");
     EXPECT_STREQ("Hello", ls.string());

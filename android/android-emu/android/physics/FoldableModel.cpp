@@ -427,7 +427,10 @@ void FoldableModel::setPosture(float posture, PhysicalInterpolation mode,
 
     // E.g., if initial config is folded, and snapshot also foled.
     // Need force sending this status to UI, and adjust the host window size
-    if (android_hw_sensors_is_loading_snapshot()) {
+    if (android_hw_sensors_is_loading_snapshot() &&
+        (android_foldable_hinge_configured() ||
+         android_foldable_rollable_configured() ||
+         android_foldable_any_folded_area_configured())) {
         mState.currentPosture = p;
         lock.unlock();
         sendPostureToSystem(p);

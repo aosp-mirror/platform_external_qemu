@@ -570,7 +570,9 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
                     return std::make_pair(pname, value);
                 });
     } else if (m_target != 0) {
-        GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not supported\n", m_target);
+        GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not "
+               "supported\n",
+               __func__, m_target);
         fprintf(stderr, "Warning: texture target %d not supported\n", m_target);
     }
     m_loadedFromStream.store(true);

@@ -38,9 +38,7 @@
 #include "Participant.h"                                        // for json
 #include "android/base/Log.h"                                   // for base
 #include "android/base/Optional.h"                              // for Optional
-#include "android/base/StringView.h"                            // for Strin...
-#include "android/base/memory/SharedMemory.h"                   // for Strin...
-#include "android/base/misc/StringUtils.h"                      // for split
+#include "android/base/ProcessControl.h"                        // for parse...
 #include "android/base/system/System.h"                         // for System
 #include "emulator/net/EmulatorConnection.h"                    // for Emula...
 #include "emulator/webrtc/Switchboard.h"                        // for Switc...
@@ -98,7 +96,8 @@ Switchboard::Switchboard(const std::string& discoveryFile,
       mSignaling(rtc::Thread::Create()),
       mProtocol(this),
       mTransport(&mProtocol, connection),
-      mEmulator(parent) {
+      mEmulator(parent),
+      mTurnConfig(parseEscapedLaunchString(turnConfig)) {
     mNetwork->SetName("Sw-Network", nullptr);
     mNetwork->Start();
     mWorker->SetName("Sw-Worker", nullptr);
@@ -108,19 +107,12 @@ Switchboard::Switchboard(const std::string& discoveryFile,
     mConnectionFactory = ::webrtc::CreatePeerConnectionFactory(
             mNetwork.get() /* network_thread */,
             mWorker.get() /* worker_thread */,
-            mSignaling.get() /* signaling_thread */,
-            &mGoldfishAdm,
+            mSignaling.get() /* signaling_thread */, &mGoldfishAdm,
             ::webrtc::CreateBuiltinAudioEncoderFactory(),
             ::webrtc::CreateBuiltinAudioDecoderFactory(),
             ::webrtc::CreateBuiltinVideoEncoderFactory(),
             ::webrtc::CreateBuiltinVideoDecoderFactory(),
             nullptr /* audio_mixer */, nullptr /* audio_processing */);
-
-    split(turnConfig, " ", [this](StringView str) {
-        if (!str.empty()) {
-            mTurnConfig.push_back(str);
-        }
-    });
 }
 
 void Switchboard::rtcConnectionDropped(std::string participant) {

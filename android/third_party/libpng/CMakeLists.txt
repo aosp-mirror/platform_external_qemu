@@ -3,16 +3,12 @@ cmake_policy(VERSION 3.0.2)
 project(libpng)
 set(PNG_SRC_DIR ${ANDROID_QEMU2_TOP_DIR}/../libpng/)
 
-if (LINUX_AARCH64)
-set (PNG_ARCH_SPECIFIC
-    ${PNG_SRC_DIR}/arm/arm_init.c
-    ${PNG_SRC_DIR}/arm/filter_neon_intrinsics.c
-    )
+if(LINUX_AARCH64)
+  set(PNG_ARCH_SPECIFIC ${PNG_SRC_DIR}/arm/arm_init.c
+                        ${PNG_SRC_DIR}/arm/filter_neon_intrinsics.c)
 else()
-set (PNG_ARCH_SPECIFIC
-    ${PNG_SRC_DIR}/intel/intel_init.c
-    ${PNG_SRC_DIR}/intel/filter_sse2_intrinsics.c
-    )
+  set(PNG_ARCH_SPECIFIC ${PNG_SRC_DIR}/intel/intel_init.c
+                        ${PNG_SRC_DIR}/intel/filter_sse2_intrinsics.c)
 endif()
 
 # TODO(jansene): We can likely turn this into a shared library. Which would save
@@ -27,6 +23,7 @@ android_add_library(
   NOTICE "REPO/LICENSE"
   LICENSE libpng
   SRC # cmake-format: sortable
+      ${PNG_ARCH_SPECIFIC}
       ${PNG_SRC_DIR}/png.c
       ${PNG_SRC_DIR}/pngerror.c
       ${PNG_SRC_DIR}/pngget.c
@@ -41,9 +38,7 @@ android_add_library(
       ${PNG_SRC_DIR}/pngwio.c
       ${PNG_SRC_DIR}/pngwrite.c
       ${PNG_SRC_DIR}/pngwtran.c
-      ${PNG_SRC_DIR}/pngwutil.c
-      ${PNG_ARCH_SPECIFIC}
-      )
+      ${PNG_SRC_DIR}/pngwutil.c)
 target_compile_options(
   png PRIVATE -std=gnu89 -Wall -Wno-unused-parameter
               -Wno-tautological-constant-out-of-range-compare)

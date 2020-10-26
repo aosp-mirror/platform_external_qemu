@@ -13,13 +13,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 import os
 import platform
 import subprocess
 import sys
 from threading import Thread
-
-from absl import logging
 
 from aemu.definitions import get_qemu_root, get_visual_studio
 
@@ -29,27 +28,22 @@ else:
     from Queue import Queue
 
 
-def _reader(pipe, queue):
+def _reader(pipe, logfn):
     try:
         with pipe:
             for line in iter(pipe.readline, b""):
-                queue.put((pipe, line[:-1]))
+                logfn(line[:-1].decode("utf-8").strip())
     finally:
-        queue.put(None)
+        pass
 
 
-def log_std_out(proc):
+def _log_proc(proc):
     """Logs the output of the given process."""
     q = Queue()
-    Thread(target=_reader, args=[proc.stdout, q]).start()
-    Thread(target=_reader, args=[proc.stderr, q]).start()
-    for _ in range(2):
-        for _, line in iter(q.get, None):
-            try:
-                logging.info(line.decode("utf-8"))
-            except IOError:
-                # We sometimes see IOError, errno = 0 on windows.
-                pass
+    for args in [[proc.stdout, logging.info], [proc.stderr, logging.error]]:
+        Thread(target=_reader, args=args).start()
+
+    return q
 
 
 _CACHED_ENV = None
@@ -107,7 +101,7 @@ def run(cmd, cwd=None, extra_env=None):
         env=local_env,
     )
 
-    log_std_out(proc)
+    _log_proc(proc)
     proc.wait()
     if proc.returncode != 0:
         raise Exception("Failed to run %s - %s" % (" ".join(cmd), proc.returncode))

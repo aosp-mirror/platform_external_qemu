@@ -6,11 +6,11 @@ android_add_library(
       FramebufferData.cpp
       GLBackgroundLoader.cpp
       GLDispatch.cpp
-      GLutils.cpp
-      GLEScontext.cpp
-      GLESvalidate.cpp
-      GLESpointer.cpp
       GLESbuffer.cpp
+      GLEScontext.cpp
+      GLESpointer.cpp
+      GLESvalidate.cpp
+      GLutils.cpp
       NamedObject.cpp
       ObjectData.cpp
       ObjectNameSpace.cpp

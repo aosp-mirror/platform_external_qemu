@@ -22,6 +22,7 @@
 #include "android/avd/info.h"                               // for AVDINFO_N...
 #include "android/avd/util.h"                               // for path_getA...
 #include "android/base/files/PathUtils.h"                   // for PathUtils
+#include "android/cmdline-option.h"                 // for android_cmdLineOptions
 #include "android/emulation/control/adb/AdbInterface.h"         // for AdbInterface
 #include "android/featurecontrol/Features.h"                // for GenericSn...
 #include "android/globals.h"                                // for android_a...
@@ -86,6 +87,7 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
 SettingsPage::SettingsPage(QWidget* parent)
     : QWidget(parent), mAdb(nullptr), mUi(new Ui::SettingsPage()) {
     mUi->setupUi(this);
+    disableForEmbeddedEmulator();
     mUi->set_saveLocBox->installEventFilter(this);
     mUi->set_adbPathBox->installEventFilter(this);
 
@@ -718,4 +720,12 @@ void SettingsPage::on_set_disableMouseWheel_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::DISABLE_MOUSE_WHEEL, checked);
     emit disableMouseWheelChanged(checked);
+}
+
+void SettingsPage::disableForEmbeddedEmulator() {
+    if (android_cmdLineOptions->qt_hide_window) {
+        for (auto* w : {mUi->general_tab, mUi->proxy_tab}) {
+            mUi->set_tabs->removeTab(mUi->set_tabs->indexOf(w));
+        }
+    }
 }

@@ -15,190 +15,133 @@
 # limitations under the License.
 
 
-
+import argparse
 import multiprocessing
 import os
 import platform
 import shutil
 import sys
-
-from absl import app, flags, logging
+import logging
 
 from aemu.definitions import (
-    BuildConfig,
-    Crash,
-    Generator,
-    Make,
-    Toolchain,
+    ENUMS,
     fixup_windows_clang,
     get_aosp_root,
     get_cmake,
     get_qemu_root,
     read_simple_properties,
+    find_aosp_root,
+    set_aosp_root,
 )
 from aemu.distribution import create_distribution
 from aemu.process import run
 from aemu.run_tests import run_tests
 
-FLAGS = flags.FLAGS
-flags.DEFINE_string(
-    "sdk_revision",
-    None,
-    "## DEPRECATED ##, it will automatically use the one defined in source.properties",
-)
-flags.DEFINE_string("sdk_build_number", None, "The emulator sdk build number.")
-flags.DEFINE_enum(
-    "config",
-    "release",
-    list(BuildConfig.values()),
-    "Whether we are building a release or debug configuration.",
-)
-flags.DEFINE_enum(
-    "crash",
-    "none",
-    list(Crash.values()),
-    "Which crash server to use or none if you do not want crash uploads."
-    "enabling this will result in symbol processing and uploading during install.",
-)
-flags.DEFINE_string("out", os.path.abspath("objs"), "Use specific output directory.")
-flags.DEFINE_string("dist", None, "Create distribution in directory")
-flags.DEFINE_boolean("qtwebengine", False, "Build with QtWebEngine support")
-flags.DEFINE_boolean("tests", True, "Run all the tests")
-flags.DEFINE_integer(
-    "test_jobs",
-    multiprocessing.cpu_count(),
-    "Specifies  the number of tests to run simultaneously",
-)
-flags.DEFINE_list(
-    "sanitizer",
-    [],
-    "List of sanitizers ([address, thread]) to enable in the built binaries.",
-)
-flags.DEFINE_enum("generator", "ninja", list(Generator.values()), "CMake generator to use.")
-flags.DEFINE_enum(
-    "target",
-    platform.system().lower(),
-    list(Toolchain.values()),
-    "Which platform to target. "
-    "This will attempt to cross compile "
-    "if the target does not match the current platform (%s)"
-    % platform.system().lower(),
-)
-flags.DEFINE_enum(
-    "build",
-    "check",
-    list(Make.values()),
-    "Target that should be build after configuration. "
-    "The config target will only configure the build, "
-    "no symbol processing or testing will take place.",
-)
-flags.DEFINE_boolean(
-    "clean",
-    True,
-    "Clean the destination build directory before configuring. "
-    "Setting this to false will attempt an incremental build. "
-    "Note that this can introduce cmake caching issues.",
-)
-flags.DEFINE_multi_string(
-    "cmake_option",
-    [],
-    "Options that should be passed "
-    "on directly to cmake. These will be passed on directly "
-    "to the underlying cmake project. For example: "
-    "--cmake_option QEMU_UPSTREAM=FALSE",
-)
-flags.DEFINE_boolean("strip", False, "Strip debug symbols.")
 
-flags.DEFINE_boolean(
-    "minbuild", False, "Minimize the build to only support x86_64/aarch64."
-)
-
-flags.DEFINE_boolean("gfxstream", False, "Build gfxstream libs/tests and crosvm")
-flags.DEFINE_boolean("crosvm", False, "Build crosvm")
-flags.DEFINE_boolean("gfxstream_only", False, "Build only gfxstream libs/tests")
+def ensure_requests():
+    """Make sure the requests package is availabe."""
+    try:
+        import requests
+    except:
+        run([sys.executable, "-m", "ensurepip"])
+        run([sys.executable, "-m", "pip", "install", "--user", "requests"])
 
 
-def configure():
+def configure(args):
     """Configures the cmake project."""
 
     # Clear out the existing directory.
-    if FLAGS.clean:
-        if os.path.exists(FLAGS.out):
-            logging.info("Clearing out %s", FLAGS.out)
-            shutil.rmtree(FLAGS.out)
-        if not os.path.exists(FLAGS.out):
-            os.makedirs(FLAGS.out)
+    if args.clean:
+        if os.path.exists(args.out):
+            logging.info("Clearing out %s", args.out)
+            shutil.rmtree(args.out)
+        if not os.path.exists(args.out):
+            os.makedirs(args.out)
 
     # Configure..
-    cmake_cmd = [get_cmake(), "-B%s" % FLAGS.out]
+    cmake_cmd = [get_cmake(), "-B%s" % args.out]
 
     # Setup the right toolchain/compiler configuration.
-    cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
-    cmake_cmd += Crash.from_string(FLAGS.crash).to_cmd()
-    cmake_cmd += BuildConfig.from_string(FLAGS.config).to_cmd()
+    cmake_cmd += [
+        "-DCMAKE_TOOLCHAIN_FILE={}".format(
+            os.path.join(
+                get_qemu_root(),
+                "android",
+                "build",
+                "cmake",
+                ENUMS["Toolchain"][args.target],
+            )
+        )
+    ]
+    cmake_cmd += ENUMS["Crash"][args.crash]
+    cmake_cmd += ENUMS["BuildConfig"][args.config]
 
     # Make darwin and msvc builds have QtWebEngine support for the default
     # build.
-    if FLAGS.target == "darwin" or FLAGS.target == "windows":
-        FLAGS.qtwebengine = True
-    cmake_cmd += ["-DQTWEBENGINE=%s" % FLAGS.qtwebengine]
+    if args.target == "darwin" or args.target == "windows":
+        args.qtwebengine = True
+    cmake_cmd += ["-DQTWEBENGINE=%s" % args.qtwebengine]
 
-    if FLAGS.cmake_option:
-        flags = ["-D%s" % x for x in FLAGS.cmake_option]
-        logging.warn("Dangerously adding the following flags to cmake: %s", flags)
-        cmake_cmd += flags
+    if args.cmake_option:
+        additional_cmake_args = ["-D%s" % x for x in args.cmake_option]
+        logging.warning(
+            "Dangerously adding the following args to cmake: %s", additional_cmake_args
+        )
+        cmake_cmd += additional_cmake_args
 
-    if FLAGS.sdk_revision:
-        sdk_revision = FLAGS.sdk_revision
+    if args.sdk_revision:
+        sdk_revision = args.sdk_revision
     else:
         sdk_revision = read_simple_properties(
             os.path.join(get_aosp_root(), "external", "qemu", "source.properties")
         )["Pkg.Revision"]
     cmake_cmd += ["-DOPTION_SDK_TOOLS_REVISION=%s" % sdk_revision]
 
-    if FLAGS.sdk_build_number:
-        cmake_cmd += ["-DOPTION_SDK_TOOLS_BUILD_NUMBER=%s" % FLAGS.sdk_build_number]
-    if FLAGS.sanitizer:
-        cmake_cmd += ["-DOPTION_ASAN=%s" % (",".join(FLAGS.sanitizer))]
+    if args.sdk_build_number:
+        cmake_cmd += ["-DOPTION_SDK_TOOLS_BUILD_NUMBER=%s" % args.sdk_build_number]
+    if args.sanitizer:
+        cmake_cmd += ["-DOPTION_ASAN=%s" % (",".join(args.sanitizer))]
 
-    if FLAGS.minbuild:
-        cmake_cmd += ["-DOPTION_MINBUILD=%s" % FLAGS.minbuild]
+    if args.minbuild:
+        cmake_cmd += ["-DOPTION_MINBUILD=%s" % args.minbuild]
 
-    if FLAGS.gfxstream:
-        cmake_cmd += ["-DGFXSTREAM=%s" % FLAGS.gfxstream]
+    if args.gfxstream:
+        cmake_cmd += ["-DGFXSTREAM=%s" % args.gfxstream]
 
-    if FLAGS.crosvm:
-        cmake_cmd += ["-DCROSVM=%s" % FLAGS.crosvm]
+    if args.crosvm:
+        cmake_cmd += ["-DCROSVM=%s" % args.crosvm]
 
-    if FLAGS.gfxstream_only:
-        cmake_cmd += ["-DGFXSTREAM_ONLY=%s" % FLAGS.gfxstream_only]
+    if args.gfxstream_only:
+        cmake_cmd += ["-DGFXSTREAM_ONLY=%s" % args.gfxstream_only]
 
-    cmake_cmd += Generator.from_string(FLAGS.generator).to_cmd()
+    cmake_cmd += ENUMS["Generator"][args.generator]
     cmake_cmd += [get_qemu_root()]
 
     # Make sure we fixup clang in windows builds
     if platform.system() == "Windows":
         fixup_windows_clang()
 
-    run(cmake_cmd, FLAGS.out)
+    if args.crash != "none":
+        # Make sure we have the requests library
+        ensure_requests()
+
+    run(cmake_cmd, args.out)
 
 
-def get_build_cmd():
+def get_build_cmd(args):
     """Gets the command that will build all the sources."""
     target = "install"
-    cross_compile = platform.system().lower() != FLAGS.target
+    cross_compile = platform.system().lower() != args.target
 
     # Stripping is meaning less in windows world, or when we are cross compiling.
-    if (FLAGS.crash != "none" or FLAGS.strip != "none") and (
+    if (args.crash != "none" or args.strip != "none") and (
         platform.system().lower() != "windows" and not cross_compile
     ):
         target += "/strip"
-    return [get_cmake(), "--build", FLAGS.out, "--target", target]
+    return [get_cmake(), "--build", args.out, "--target", target]
 
 
-def main(argv=None):
-    del argv  # Unused.
-
+def main(args):
     version = sys.version_info
     logging.info(
         "Running under Python {0[0]}.{0[1]}.{0[2]}, Platform: {1}".format(
@@ -206,38 +149,38 @@ def main(argv=None):
         )
     )
 
-    configure()
-    if FLAGS.build == "config":
-        print("You can now build with: %s " % " ".join(get_build_cmd()))
+    configure(args)
+    if args.build == "config":
+        print("You can now build with: %s " % " ".join(get_build_cmd(args)))
         return
 
     # Build
-    run(get_build_cmd())
+    run(get_build_cmd(args))
 
     # Test.
-    if FLAGS.tests:
-        cross_compile = platform.system().lower() != FLAGS.target
+    if args.tests:
+        cross_compile = platform.system().lower() != args.target
         if not cross_compile:
             run_tests_opts = []
-            if FLAGS.gfxstream or FLAGS.crosvm or FLAGS.gfxstream_only:
+            if args.gfxstream or args.crosvm or args.gfxstream_only:
                 run_tests_opts.append("--skip-emulator-check")
 
-            run_tests(FLAGS.out, FLAGS.test_jobs, FLAGS.crash != "none", run_tests_opts)
+            run_tests(args.out, args.test_jobs, args.crash != "none", run_tests_opts)
         else:
             logging.info("Not running tests for cross compile.")
 
     # Create a distribution if needed.
-    if FLAGS.dist:
+    if args.dist:
         data = {
             "aosp": get_aosp_root(),
-            "target": FLAGS.target,
-            "sdk_build_number": FLAGS.sdk_build_number,
-            "config": FLAGS.config,
+            "target": args.target,
+            "sdk_build_number": args.sdk_build_number,
+            "config": args.config,
         }
 
-        create_distribution(FLAGS.dist, FLAGS.out, data)
+        create_distribution(args.dist, args.out, data)
 
-    if platform.system() != "Windows" and FLAGS.config == "debug":
+    if platform.system() != "Windows" and args.config == "debug":
         overrides = open(
             os.path.join(get_qemu_root(), "android", "asan_overrides")
         ).read()
@@ -253,7 +196,162 @@ def main(argv=None):
 
 
 def launch():
-    app.run(main)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--sdk_revision",
+        dest="sdk_revision",
+        help="## DEPRECATED ##, it will automatically use the one defined in source.properties",
+    )
+    parser.add_argument("--sdk_build_number", help="The emulator sdk build number.")
+    parser.add_argument(
+        "--config",
+        default="release",
+        choices=(ENUMS["BuildConfig"].keys()),
+        help="Whether we are building a release or debug configuration.",
+    )
+    parser.add_argument(
+        "--crash",
+        default="none",
+        choices=(ENUMS["Crash"].keys()),
+        help="Which crash server to use or none if you do not want crash uploads. Enabling this will result in symbol processing and uploading during install.",
+    )
+    parser.add_argument(
+        "--out", default=os.path.abspath("objs"), help="Use specific output directory."
+    )
+    parser.add_argument("--dist", help="Create distribution in directory")
+    parser.add_argument(
+        "--qtwebengine",
+        dest="qtwebengine",
+        default=False,
+        action="store_true",
+        help="Build with QtWebEngine support",
+    )
+    parser.add_argument(
+        "--no-qtwebengine",
+        dest="qtwebengine",
+        action="store_false",
+        help="Build without QtWebEngine support",
+    )
+    parser.add_argument(
+        "--no-tests", dest="tests", action="store_false", help="Do not run the tests"
+    )
+    parser.add_argument(
+        "--tests",
+        dest="tests",
+        default=True,
+        action="store_true",
+        help="Run all the tests",
+    )
+    parser.add_argument(
+        "--test_jobs",
+        default=multiprocessing.cpu_count(),
+        help="Specifies  the number of tests to run simultaneously",
+        type=int,
+    )
+    parser.add_argument(
+        "--sanitizer",
+        action="append",
+        help="List of sanitizers ([address, thread]) to enable in the built binaries.",
+    )
+    parser.add_argument(
+        "--generator",
+        default="ninja",
+        choices=ENUMS["Generator"].keys(),
+        help="CMake generator to use.",
+    )
+    parser.add_argument(
+        "--target",
+        default=platform.system().lower(),
+        choices=ENUMS["Toolchain"].keys(),
+        help="Which platform to target. This will attempt to cross compile if the target does not match the current platform ({})".format(
+            (platform.system().lower())
+        ),
+    )
+    parser.add_argument(
+        "--build",
+        default="check",
+        choices=ENUMS["Make"].keys(),
+        help="Target that should be build after configuration. The config target will only configure the build, no symbol processing or testing will take place.",
+    )
+    parser.add_argument(
+        "--no-clean",
+        dest="clean",
+        default=True,
+        action="store_false",
+        help="Attempt an incremental build. Note that this can introduce cmake caching issues.",
+    )
+    parser.add_argument(
+        "--clean",
+        dest="clean",
+        default=True,
+        action="store_true",
+        help="Clean the destination directory before building.",
+    )
+    parser.add_argument(
+        "--cmake_option",
+        action="append",
+        help="Options that should be passed on directly to cmake. These will be passed on directly to the underlying cmake project. For example: "
+        "--cmake_option QEMU_UPSTREAM=FALSE",
+    )
+    parser.add_argument(
+        "--strip", dest="strip", action="store_true", help="Strip debug symbols."
+    )
+    parser.add_argument(
+        "--no-strip",
+        dest="strip",
+        default=False,
+        action="store_false",
+        help="Do not strip debug symbols.",
+    )
+
+    parser.add_argument(
+        "--minbuild",
+        default=False,
+        action="store_true",
+        help="Minimize the build to only support x86_64/aarch64.",
+    )
+
+    parser.add_argument(
+        "--gfxstream",
+        action="store_true",
+        dest="gfxstream",
+        help="Build gfxstream libs/tests and crosvm",
+    )
+    parser.add_argument(
+        "--crosvm", dest="crosvm", action="store_true", help="Build crosvm"
+    )
+    parser.add_argument(
+        "--gfxstream_only",
+        dest="gfxstream_only",
+        action="store_true",
+        help="Build only gfxstream libs/tests",
+    )
+    parser.add_argument(
+        "--verbose",
+        dest="verbose",
+        default=False,
+        action="store_true",
+        help="Verbose logging",
+    )
+    parser.add_argument(
+        "--aosp",
+        dest="aosp",
+        default=find_aosp_root(),
+        help="AOSP directory ({})".format(find_aosp_root()),
+    )
+
+    args, leftover = parser.parse_known_args()
+
+    # Configure logger.
+    lvl = logging.DEBUG if args.verbose else logging.INFO
+    handler = logging.StreamHandler()
+    logging.root = logging.getLogger("root")
+    logging.root.addHandler(handler)
+    logging.root.setLevel(lvl)
+
+    set_aosp_root(args.aosp)
+
+    main(args)
 
 
 if __name__ == "__main__":

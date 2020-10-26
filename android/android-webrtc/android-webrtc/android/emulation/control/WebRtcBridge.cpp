@@ -261,8 +261,9 @@ static Optional<System::Pid> launchAsDaemon(std::string executable,
         invoke += arg + " ";
     }
 
-    // This either works or not.. We are not waiting around.
-    const System::Duration kHalfSecond = 500;
+    // We might do an initial turn verification, which can technically
+    // take up to 1 second, so allow for that.
+    const System::Duration kHalfSecond = 1500;
     System::ProcessExitCode exitCode;
     LOG(INFO) << "Launching: " << invoke;
     auto pidStr = System::get()->runCommandWithResult(cmdArgs, kHalfSecond,

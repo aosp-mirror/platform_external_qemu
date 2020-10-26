@@ -397,6 +397,8 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
             s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             if (mShouldReallocateTexture) {
+                mMaskTextureWidth = std::max(mMaskTextureWidth, mMaskWidth);
+                mMaskTextureHeight = std::max(mMaskTextureHeight, mMaskHeight);
                 // mMaskPixels is actually not used here, we only use
                 // glTexImage2D here to resize the texture
                 s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
@@ -488,13 +490,9 @@ void TextureDraw::setScreenMask(int width, int height, const unsigned char* rgba
 
     mShouldReallocateTexture =
             (width > mMaskTextureWidth) || (height > mMaskTextureHeight);
-    mMaskTextureWidth = std::max(width, mMaskTextureWidth);
-    mMaskTextureHeight = std::max(height, mMaskTextureHeight);
-    mMaskPixels.resize(mMaskTextureWidth * mMaskTextureHeight * 4);
-    if (mShouldReallocateTexture) {
-        mMaskTextureWidth = width;
-        mMaskTextureHeight = height;
-    }
+    auto nextMaskTextureWidth = std::max(width, mMaskTextureWidth);
+    auto nextMaskTextureHeight = std::max(height, mMaskTextureHeight);
+    mMaskPixels.resize(nextMaskTextureWidth * nextMaskTextureHeight * 4);
     // Save the data for use in the right context
     std::copy(rgbaData, rgbaData + width * height * 4, mMaskPixels.begin());
 

@@ -268,6 +268,10 @@ void SyncThread::doSyncBlockedWaitNoTimeline(SyncThreadCmd* cmd) {
     FenceSync* fenceSync =
         FenceSync::getFromHandle((uint64_t)(uintptr_t)cmd->fenceSync);
 
+    if (!fenceSync) {
+        return;
+    }
+
     EGLint wait_result = 0x0;
 
     DPRINT("wait on sync obj: %p", cmd->fenceSync);

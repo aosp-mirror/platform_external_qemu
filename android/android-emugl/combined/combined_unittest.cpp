@@ -18,6 +18,7 @@
 #include "android/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/base/Tracing.h"
 #include "android/opengles.h"
 #include "android/emulation/testing/TestDmaMap.h"
 
@@ -1177,6 +1178,114 @@ TEST_P(CombinedGoldfishOpenglTest, GetStringTwiceCurrent) {
         EXPECT_NE(nullptr, strstr(versionStringAfter, "ES 3"));
         EXPECT_EQ(nullptr, strstr(extensionStringAfter, "OES_draw_texture"));
     }
+
+    glFinish();
+}
+
+TEST_P(CombinedGoldfishOpenglTest, CombinedGuestHostTracing) {
+    android::base::enableTracing();
+
+    const char* versionString = (const char*)glGetString(GL_VERSION);
+    const char* extensionString = (const char*)glGetString(GL_EXTENSIONS);
+
+    printf("%s: GL version string (non-gles1): %s\n", __func__, versionString);
+    printf("%s: GL extension string (non-gles1): %s\n", __func__, extensionString);
+
+    EXPECT_NE(nullptr, strstr(versionString, "ES 3"));
+    EXPECT_EQ(nullptr, strstr(extensionString, "OES_draw_texture"));
+
+    // Do some random stuff
+    constexpr char vshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    layout (location = 0) in vec2 pos;
+    layout (location = 1) in vec3 color;
+
+    uniform mat4 transform;
+
+    out vec3 color_varying;
+
+    void main() {
+        gl_Position = transform * vec4(pos, 0.0, 1.0);
+        color_varying = (transform * vec4(color, 1.0)).xyz;
+    }
+    )";
+    constexpr char fshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    in vec3 color_varying;
+
+    out vec4 fragColor;
+
+    void main() {
+        fragColor = vec4(color_varying, 1.0);
+    }
+    )";
+
+    GLuint program = compileAndLinkShaderProgram(vshaderSrc, fshaderSrc);
+
+    GLint transformLoc = glGetUniformLocation(program, "transform");
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    struct VertexAttributes {
+        float position[2];
+        float color[3];
+    };
+
+    const VertexAttributes vertexAttrs[] = {
+        { { -0.5f, -0.5f,}, { 0.2, 0.1, 0.9, }, },
+        { { 0.5f, -0.5f,}, { 0.8, 0.3, 0.1,}, },
+        { { 0.0f, 0.5f,}, { 0.1, 0.9, 0.6,}, },
+    };
+
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexAttrs), vertexAttrs,
+                     GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(VertexAttributes), 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(VertexAttributes),
+                              (GLvoid*)offsetof(VertexAttributes, color));
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    glUseProgram(program);
+
+    glClearColor(0.2f, 0.2f, 0.3f, 0.0f);
+    glViewport(0, 0, 1, 1);
+
+    float matrix[16] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    uint32_t drawCount = 0;
+    static constexpr uint32_t kDrawCallLimit = 200;
+
+    while (drawCount < kDrawCallLimit) {
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glDrawArraysNullAEMU(GL_TRIANGLES, 0, 3);
+        ++drawCount;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDeleteBuffers(1, &buffer);
+    glUseProgram(0);
+    glDeleteProgram(program);
+
+    glFinish();
+    android::base::disableTracing();
 }
 
 INSTANTIATE_TEST_SUITE_P(

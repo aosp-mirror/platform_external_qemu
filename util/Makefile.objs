@@ -13,6 +13,7 @@ util-obj-$(CONFIG_POSIX) += memfd.o
 util-obj-$(CONFIG_WIN32) += aio-win32.o
 util-obj-$(CONFIG_WIN32) += event_notifier-win32.o
 util-obj-$(CONFIG_WIN32) += oslib-win32.o
+util-obj-$(CONFIG_WIN32) += oslib-win32poll.o
 util-obj-$(CONFIG_WIN32) += qemu-thread-win32.o
 util-obj-y += mmap-alloc.o
 util-obj-y += abort.o

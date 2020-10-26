@@ -141,8 +141,8 @@ protected:
     }
 
     // Returns pipe pointer.
-    void* openAndConnectOffworld() {
-        void* pipe = mDevice->connect("OffworldPipe");
+    int openAndConnectOffworld() {
+        int pipe = mDevice->connect("OffworldPipe");
 
         pb::ConnectHandshake connect;
         connect.set_version(android::offworld::kProtocolVersion);
@@ -155,7 +155,7 @@ protected:
         return pipe;
     }
 
-    void writeMessage(void* pipe, const google::protobuf::Message& message) {
+    void writeMessage(int pipe, const google::protobuf::Message& message) {
         const int size = message.ByteSize();
         std::vector<uint8_t> data(static_cast<size_t>(size));
         EXPECT_TRUE(message.SerializeToArray(data.data(), size));
@@ -167,7 +167,7 @@ protected:
         EXPECT_THAT(mDevice->write(pipe, data), IsOk());
     }
 
-    void writeRequest(void* pipe, const std::string& request) {
+    void writeRequest(int pipe, const std::string& request) {
         pb::Request requestMessage;
         ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
                 request, &requestMessage));
@@ -175,7 +175,7 @@ protected:
     }
 
     template <typename T>
-    T readMessage(void* pipe) {
+    T readMessage(int pipe) {
         uint32_t responseSize = 0;
         EXPECT_EQ(sizeof(uint32_t),
                   mDevice->read(pipe, &responseSize, sizeof(uint32_t)));
@@ -198,7 +198,7 @@ protected:
     }
 
     template <typename T>
-    T readMessageBlocking(void* pipe) {
+    T readMessageBlocking(int pipe) {
         const base::Looper::Duration deadline = mLooper->nowMs() + kTimeoutMs;
 
         // Since these unittests never expect long-running operations, run in
@@ -225,19 +225,19 @@ protected:
         event.wait();
     }
 
-    void snapshotSave(void* pipe, base::Stream* stream) {
+    void snapshotSave(int pipe, base::Stream* stream) {
         RecursiveScopedVmLock lock;
         mDevice->saveSnapshot(stream, pipe);
     }
 
-    void* snapshotLoad(base::Stream* stream) {
+    int snapshotLoad(base::Stream* stream) {
         RecursiveScopedVmLock lock;
-        void* pipe = mDevice->loadSnapshotSinglePipe(stream);
-        EXPECT_NE(pipe, nullptr);
+        int pipe = mDevice->loadSnapshotSinglePipe(stream);
+        EXPECT_GE(pipe, 0);
         return pipe;
     }
 
-    void createCheckpoint(void* pipe,
+    void createCheckpoint(int pipe,
                           const char* snapshotName,
                           base::Stream* stream) {
         MockAndroidVmOperations mock;
@@ -269,7 +269,7 @@ protected:
         EXPECT_EQ(response.result(), pb::Response::RESULT_NO_ERROR);
     }
 
-    void gotoCheckpoint(void* pipe,
+    void gotoCheckpoint(int pipe,
                         const char* snapshotName,
                         base::Stream* stream) {
         MockAndroidVmOperations mock;
@@ -319,7 +319,7 @@ protected:
 };
 
 TEST_F(OffworldPipeTest, Connect) {
-    void* pipe = mDevice->connect("OffworldPipe");
+    int pipe = mDevice->connect("OffworldPipe");
 
     pb::ConnectHandshake connect;
     connect.set_version(android::offworld::kProtocolVersion);
@@ -335,7 +335,7 @@ TEST_F(OffworldPipeTest, Connect) {
 TEST_F(OffworldPipeTest, ConnectSnapshotBeforeHandshake) {
     base::MemStream snapshotStream;
     {
-        void* pipe = mDevice->connect("OffworldPipe");
+        int pipe = mDevice->connect("OffworldPipe");
         snapshotSave(pipe, &snapshotStream);
         mDevice->close(pipe);
     }
@@ -354,7 +354,7 @@ TEST_F(OffworldPipeTest, ConnectSnapshotBeforeHandshake) {
 }
 
 TEST_F(OffworldPipeTest, ConnectionFailure) {
-    void* pipe = mDevice->connect("OffworldPipe");
+    int pipe = mDevice->connect("OffworldPipe");
 
     TestEvent receivedClose;
     mDevice->setWakeCallback(pipe, [&](int wakes) {
@@ -379,7 +379,7 @@ TEST_F(OffworldPipeTest, ConnectionFailure) {
 }
 
 TEST_F(OffworldPipeTest, Snapshot) {
-    void* pipe = openAndConnectOffworld();
+    int pipe = openAndConnectOffworld();
 
     MemStream stream;
     createCheckpoint(pipe, "TestSnapshot", &stream);
@@ -389,8 +389,8 @@ TEST_F(OffworldPipeTest, Snapshot) {
 }
 
 TEST_F(OffworldPipeTest, SnapshotMultiPipe) {
-    void* commandPipe = openAndConnectOffworld();
-    void* otherPipe = openAndConnectOffworld();
+    int commandPipe = openAndConnectOffworld();
+    int otherPipe = openAndConnectOffworld();
 
     MemStream stream;
     createCheckpoint(commandPipe, "TestSnapshot", &stream);
@@ -406,7 +406,7 @@ TEST_F(OffworldPipeTest, SnapshotMultiPipe) {
 // TODO(jwmcglynn): Add test coverage for fork API.
 
 TEST_F(OffworldPipeTest, AutomationListen) {
-    void* pipe = openAndConnectOffworld();
+    int pipe = openAndConnectOffworld();
 
     writeRequest(pipe, "automation { listen {} }");
 
@@ -437,7 +437,7 @@ TEST_F(OffworldPipeTest, AutomationListen) {
 }
 
 TEST_F(OffworldPipeTest, AutomationListenBlocksMultiple) {
-    void* pipe = openAndConnectOffworld();
+    int pipe = openAndConnectOffworld();
 
     writeRequest(pipe, "automation { listen {} }");
 
@@ -455,7 +455,7 @@ TEST_F(OffworldPipeTest, AutomationListenBlocksMultiple) {
 }
 
 TEST_F(OffworldPipeTest, AutomationListenPipeClose) {
-    void* pipe = openAndConnectOffworld();
+    int pipe = openAndConnectOffworld();
 
     writeRequest(pipe, "automation { listen {} }");
 
@@ -465,7 +465,7 @@ TEST_F(OffworldPipeTest, AutomationListenPipeClose) {
                                   "automation { listen {} }")));
     mDevice->close(pipe);
 
-    void* secondPipe = openAndConnectOffworld();
+    int secondPipe = openAndConnectOffworld();
     writeRequest(secondPipe, "automation { listen {} }");
 
     EXPECT_THAT(
@@ -476,7 +476,7 @@ TEST_F(OffworldPipeTest, AutomationListenPipeClose) {
 }
 
 TEST_F(OffworldPipeTest, AutomationReplay) {
-    void* pipe = openAndConnectOffworld();
+    int pipe = openAndConnectOffworld();
     const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
     const uint64_t kFutureTime = secondsToNs(10.0f);
 
@@ -508,7 +508,7 @@ TEST_F(OffworldPipeTest, AutomationReplay) {
 TEST_F(OffworldPipeTest, AutomationAsyncIdSnapshot) {
     base::MemStream snapshotStream;
     {
-        void* pipe = openAndConnectOffworld();
+        int pipe = openAndConnectOffworld();
 
         writeRequest(pipe,
                      "automation { replay { event: 'delay: 123 "
@@ -536,7 +536,7 @@ TEST_F(OffworldPipeTest, AutomationAsyncIdSnapshot) {
 }
 
 TEST_F(OffworldPipeTest, VideoInjection) {
-    void* pipe = openAndConnectOffworld();
+    int pipe = openAndConnectOffworld();
 
     writeRequest(
         pipe,
