@@ -393,6 +393,8 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
         VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM,
         VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM,
 
+        // R8G8 formats
+        VK_FORMAT_R8G8_UNORM,
     };
 
     std::vector<VkImageType> types = {
@@ -1271,7 +1273,11 @@ bool importExternalMemoryDedicatedImage(
 static VkFormat glFormat2VkFormat(GLint internalformat) {
     switch (internalformat) {
         case GL_LUMINANCE:
+        case GL_R8:
             return VK_FORMAT_R8_UNORM;
+        case GL_RG:
+        case GL_RG8:
+            return VK_FORMAT_R8G8_UNORM;
         case GL_RGB:
         case GL_RGB8:
             return VK_FORMAT_R8G8B8_UNORM;
@@ -1713,6 +1719,10 @@ bool updateColorBufferFromVkImage(uint32_t colorBufferHandle) {
     // Copy to staging buffer
     uint32_t bpp = 4; /* format always rgba8...not */
     switch (infoPtr->format) {
+        case VK_FORMAT_R8_UNORM:
+            bpp = 1;
+            break;
+        case VK_FORMAT_R8G8_UNORM:
         case VK_FORMAT_R5G6B5_UNORM_PACK16:
             bpp = 2;
             break;
