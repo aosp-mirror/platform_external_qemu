@@ -20,16 +20,22 @@
 #include <memory>  // for unique_ptr
 #include <string>  // for string, operator!=
 
+#include "android/base/ProcessControl.h"       // for parse...
 #include "android/base/StringView.h"           // for StringView
 #include "android/base/memory/SharedMemory.h"  // for SharedMemory, SharedMe...
+#include "android/base/system/System.h"        // for System
 #include "emulator/net/EmulatorConnection.h"   // for EmulatorConnection
+#include "emulator/webrtc/Switchboard.h"
+#include "nlohmann/json.hpp"  // for basic...
 
 #ifdef _MSC_VER
-#include "msvc-posix.h"
 #include "msvc-getopt.h"
+#include "msvc-posix.h"
 #else
 #include <getopt.h>
 #endif
+
+using nlohmann::json;
 
 static std::string FLAG_logdir("");
 static std::string FLAG_server("127.0.0.1");
@@ -148,6 +154,40 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // Check to see if we have a working turn configuration.
+    if (!FLAG_turn.empty()) {
+        auto cmd = android::base::parseEscapedLaunchString(FLAG_turn);
+
+        RTC_LOG(INFO) << "TurnCFG: --- Command --- ";
+        for (auto param : cmd) {
+            RTC_LOG(INFO) << "TurnCFG: param:" << param;
+        }
+        RTC_LOG(INFO) << "TurnCFG: --- Running --- ";
+
+        android::base::System::ProcessExitCode exitCode;
+        auto turn = android::base::System::get()->runCommandWithResult(
+                cmd, 1000, &exitCode);
+
+        if (turn) {
+            RTC_LOG(INFO) << "TurnCFG:" << *turn;
+            if (exitCode == 0 && json::accept(*turn)) {
+                json config = json::parse(*turn, nullptr, false);
+                if (config.count("iceServers")) {
+                    RTC_LOG(INFO)
+                            << "TurnCFG: Turn command produces valid json.";
+                } else {
+                    RTC_LOG(LS_ERROR)
+                            << "TurnCFG: JSON is missing iceServers.";
+                }
+            } else {
+                RTC_LOG(INFO) << "TurnCFG: bad exit: " << exitCode
+                              << ", or bad json result: " << *turn;
+            }
+        } else {
+            RTC_LOG(INFO) << "TurnCFG: Produces no result, exit: " << exitCode;
+        }
+    }
+
     // Check if we can access the shared memory region.
     {
         auto sharedMemory = SharedMemory(FLAG_handle, 4);
@@ -162,7 +202,8 @@ int main(int argc, char* argv[]) {
 
     rtc::InitializeSSL();
     bool deamon = FLAG_daemon;
-    emulator::net::EmulatorConnection server(FLAG_port, FLAG_disc, FLAG_handle, FLAG_turn);
+    emulator::net::EmulatorConnection server(FLAG_port, FLAG_disc, FLAG_handle,
+                                             FLAG_turn);
     int status = server.listen(deamon) ? 0 : 1;
     RTC_LOG(INFO) << "Finished, status: " << status;
     rtc::CleanupSSL();

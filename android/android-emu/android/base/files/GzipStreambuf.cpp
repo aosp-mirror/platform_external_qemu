@@ -120,6 +120,76 @@ int GzipInputStreambuf::underflow() {
                    : traits_type::to_int_type(*this->gptr());
 }
 
+GzipInputFileStreambuf::GzipInputFileStreambuf(const char* fileName,
+                                               std::size_t chunk)
+    : mCapacity(chunk) {
+    mFile = gzopen(fileName, "rb");
+    gzbuffer(mFile, mCapacity);
+    mOut = std::unique_ptr<char[]>(new char[mCapacity]);
+}
+
+GzipInputFileStreambuf::~GzipInputFileStreambuf() {
+    gzclose(mFile);
+}
+
+std::streampos GzipInputFileStreambuf::seekoff(std::streamoff off,
+                                               std::ios_base::seekdir way,
+                                               std::ios_base::openmode which) {
+    int whence = 0;
+    switch (way) {
+        case std::ios_base::beg:
+            whence = SEEK_SET;
+            break;
+        case std::ios_base::cur:
+            whence = SEEK_CUR;
+            off -= this->egptr() - this->gptr();
+            break;
+        case std::ios_base::end:
+            whence = SEEK_END;
+            break;
+    }
+    this->setg(mOut.get(), mOut.get(), mOut.get());
+    return gzseek(mFile, off, whence);
+}
+
+std::streampos GzipInputFileStreambuf::seekpos(std::streampos pos,
+                                               std::ios_base::openmode which) {
+    this->setg(mOut.get(), mOut.get(), mOut.get());
+    return gzseek(mFile, pos, SEEK_SET);
+}
+
+int GzipInputFileStreambuf::underflow() {
+    if (mErr != Z_OK) {
+        return traits_type::eof();
+    }
+
+    if (this->gptr() == this->egptr()) {
+        int available;
+
+        // 2 cases.. eof, or we need to read more data in order to compress.
+        do {
+            available = gzread(mFile, mOut.get(), mCapacity);
+        } while (available == 0 && !gzeof(mFile));
+
+        if (available < 0) {
+            mErr = available;
+            DD("gzread error: %d", mErr);
+            return traits_type::eof();
+        }
+
+        if (gzeof(mFile)) {
+            DD("Nothing available for decompression.");
+            return traits_type::eof();
+        }
+
+        DD("available: %d", available);
+        this->setg(mOut.get(), mOut.get(), mOut.get() + available);
+    }
+    return this->gptr() == this->egptr()
+                   ? traits_type::eof()
+                   : traits_type::to_int_type(*this->gptr());
+}
+
 GzipOutputStreambuf::GzipOutputStreambuf(std::streambuf* dst,
                                          int level,
                                          std::size_t bufferCapcity)
@@ -213,6 +283,9 @@ GzipOutputStream::~GzipOutputStream() {
 
 GzipInputStream::GzipInputStream(std::istream& os)
     : std::istream(new GzipInputStreambuf(os.rdbuf())) {}
+
+GzipInputStream::GzipInputStream(const char* fileName)
+    : std::istream(new GzipInputFileStreambuf(fileName)) {}
 
 GzipInputStream::GzipInputStream(std::streambuf* sbuf)
     : std::istream(new GzipInputStreambuf(sbuf)) {}

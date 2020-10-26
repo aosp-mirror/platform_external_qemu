@@ -152,7 +152,7 @@ class IOStream;
 #include "%s.h"
 
 #include "android/base/AlignedBuf.h"
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 #include "android/base/synchronization/AndroidLock.h"
 
 #include <cutils/properties.h>
@@ -210,8 +210,8 @@ using OnFailCompareFunc = std::function<void(const char*)>;
 """
         poolInclude = """
 #include "goldfish_vk_private_defs.h"
-#include "android/base/Pool.h"
-using android::base::Pool;
+#include "android/base/BumpPool.h"
+using android::base::BumpPool;
 """
         handleMapInclude = """
 #include "goldfish_vk_private_defs.h"
@@ -230,29 +230,10 @@ using android::base::Pool;
         transformImplInclude = """
 #include "VkDecoderGlobalState.h"
 """
-        unboxInclude = """
-#include "goldfish_vk_private_defs.h"
-#include "goldfish_vk_extension_structs.h"
-
-namespace android {
-namespace base {
-class Pool;
-} // namespace base
-} // namespace android
-
-using android::base::Pool;
-
-"""
-        unboxImplInclude = """
-#include "android/base/Pool.h"
-#include "VkDecoderGlobalState.h"
-#include "goldfish_vk_deepcopy.h"
-#include "goldfish_vk_handlemap.h"
-"""
         poolIncludeGuest = """
 #include "goldfish_vk_private_defs.h"
-#include "android/base/Pool.h"
-using android::base::Pool;
+#include "android/base/BumpPool.h"
+using android::base::BumpPool;
 // Stuff we are not going to use but if included,
 // will cause compile errors. These are Android Vulkan
 // required extensions, but the approach will be to
@@ -330,7 +311,7 @@ using DlSymFunc = void* (void*, const char*);
 
 namespace android {
 namespace base {
-class Pool;
+class BumpPool;
 } // namespace android
 } // namespace base
 
@@ -341,7 +322,7 @@ class Pool;
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 #include "android/base/system/System.h"
 
 #include "IOStream.h"
@@ -425,9 +406,6 @@ class Pool;
         self.addModule("common", "goldfish_vk_transform",
                        extraHeader=transformInclude,
                        extraImpl=transformImplInclude)
-        self.addModule("common", "goldfish_vk_unbox",
-                       extraHeader=unboxInclude,
-                       extraImpl=unboxImplInclude)
         self.addHostModule("VkDecoder",
                            extraHeader=decoderHeaderIncludes,
                            extraImpl=decoderImplIncludes,
@@ -451,7 +429,6 @@ class Pool;
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap")
         self.addWrapper(cereal.VulkanDispatch, "goldfish_vk_dispatch")
         self.addWrapper(cereal.VulkanTransform, "goldfish_vk_transform", resourceTrackerTypeName="VkDecoderGlobalState")
-        self.addWrapper(cereal.VulkanUnbox, "goldfish_vk_unbox")
         self.addWrapper(cereal.VulkanDecoder, "VkDecoder")
         self.addWrapper(cereal.VulkanDecoderSnapshot, "VkDecoderSnapshot")
 

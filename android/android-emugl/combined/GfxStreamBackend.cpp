@@ -44,7 +44,12 @@
 #define GFXSTREAM_DEBUG_LEVEL 1
 
 #if GFXSTREAM_DEBUG_LEVEL >= 1
-#define GFXS_LOG(fmt,...) printf("%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#define GFXS_LOG(fmt, ...)                                                     \
+    do {                                                                       \
+        fprintf(stdout, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__); \
+        fflush(stdout);                                                        \
+    } while (0)
+
 #else
 #define GFXS_LOG(fmt,...)
 #endif
@@ -186,11 +191,11 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
                     numBuffers);
         },
         // guest_send()
-        [](GoldfishHostPipe* hostPipe,
+        [](GoldfishHostPipe** hostPipe,
            const GoldfishPipeBuffer* buffers,
            int numBuffers) -> int {
             return android_pipe_guest_send(
-                    hostPipe,
+                    reinterpret_cast<void**>(hostPipe),
                     reinterpret_cast<const AndroidPipeBuffer*>(buffers),
                     numBuffers);
         },
@@ -222,32 +227,6 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         [](QEMUFile* file) {
             (void)file;
         },
-};
-
-// android_pipe_hw_funcs but for virtio-gpu
-static const AndroidPipeHwFuncs android_pipe_hw_virtio_funcs = {
-        // resetPipe()
-        [](void* hwPipe, void* hostPipe) {
-            virtio_goldfish_pipe_reset(hwPipe, hostPipe);
-        },
-        // closeFromHost()
-        [](void* hwPipe) {
-            fprintf(stderr, "%s: closeFromHost not supported!\n", __func__);
-        },
-        // signalWake()
-        [](void* hwPipe, unsigned flags) {
-            fprintf(stderr, "%s: signalWake not supported!\n", __func__);
-        },
-        // getPipeId()
-        [](void* hwPipe) {
-            fprintf(stderr, "%s: getPipeId not supported!\n", __func__);
-            return 0;
-        },
-        // lookupPipeById()
-        [](int id) -> void* {
-            fprintf(stderr, "%s: lookupPipeById not supported!\n", __func__);
-            return nullptr;
-        }
 };
 
 static android::base::TestTempDir* sTestContentDir = nullptr;
@@ -285,8 +264,11 @@ enum RendererFlags {
     GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT = 1 << 5, // for disabling vk
     GFXSTREAM_RENDERER_FLAGS_IGNORE_HOST_GL_ERRORS_BIT = 1 << 6, // control IgnoreHostOpenGLErrors flag
     GFXSTREAM_RENDERER_FLAGS_NATIVE_TEXTURE_DECOMPRESSION_BIT = 1 << 7, // Attempt GPU texture decompression
+    GFXSTREAM_RENDERER_FLAGS_ENABLE_BPTC_TEXTURES_BIT = 1 << 8, // enable BPTC texture support if available
+    GFXSTREAM_RENDERER_FLAGS_ENABLE_GLES31_BIT = 1 << 9, // disables the PlayStoreImage flag
 
     GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT = 1 << 20, // for disabling syncfd
+    GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE = 1 << 21,
 };
 
 // Sets backend flags for different kinds of initialization.
@@ -354,16 +336,22 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
 
     bool ignoreHostGlErrorsFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_IGNORE_HOST_GL_ERRORS_BIT;
     bool nativeTextureDecompression = renderer_flags & GFXSTREAM_RENDERER_FLAGS_NATIVE_TEXTURE_DECOMPRESSION_BIT;
+    bool bptcTextureSupport = renderer_flags & GFXSTREAM_RENDERER_FLAGS_ENABLE_BPTC_TEXTURES_BIT;
     bool syncFdDisabledByFlag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT;
     bool surfaceless =
             renderer_flags & GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS_BIT;
+    bool enableGlEs31Flag = renderer_flags & GFXSTREAM_RENDERER_FLAGS_ENABLE_GLES31_BIT;
+    bool guestUsesAngle = renderer_flags & GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE;
 
     GFXS_LOG("Vulkan enabled? %d", enableVk);
     GFXS_LOG("egl2egl enabled? %d", enable_egl2egl);
     GFXS_LOG("ignore host gl errors enabled? %d", ignoreHostGlErrorsFlag);
     GFXS_LOG("syncfd enabled? %d", !syncFdDisabledByFlag);
     GFXS_LOG("use native texture decompression if available? %d", nativeTextureDecompression);
+    GFXS_LOG("enable BPTC support if available? %d", bptcTextureSupport);
     GFXS_LOG("surfaceless? %d", surfaceless);
+    GFXS_LOG("OpenGL ES 3.1 enabled? %d", enableGlEs31Flag);
+    GFXS_LOG("guest using ANGLE? %d", guestUsesAngle);
 
     // Need to manually set the GLES backend paths in gfxstream environment
     // because the library search paths are not automatically set to include
@@ -384,7 +372,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLESDynamicVersion, true);
     android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::PlayStoreImage, true);
+            android::featurecontrol::PlayStoreImage, !enableGlEs31Flag);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLDMA, false);
     android::featurecontrol::setEnabledOverride(
@@ -395,6 +383,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::IgnoreHostOpenGLErrors, ignoreHostGlErrorsFlag);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::NativeTextureDecompression, nativeTextureDecompression);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::BptcTextureSupport, bptcTextureSupport);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLDirectMem, false);
     android::featurecontrol::setEnabledOverride(
@@ -411,6 +401,8 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
             android::featurecontrol::VirtioGpuNext, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VirtioGpuNativeSync, !syncFdDisabledByFlag);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::GuestUsesAngle, guestUsesAngle);
 
     emugl::vkDispatch(false /* don't use test ICD */);
 
@@ -468,7 +460,6 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     android_init_opengles_pipe();
     android_opengles_pipe_set_recv_mode(2 /* virtio-gpu */);
     android_init_refcount_pipe();
-    android_pipe_set_hw_virtio_funcs(&android_pipe_hw_virtio_funcs);
 
     sGetPixelsFunc = android_getReadPixelsFunc();
 

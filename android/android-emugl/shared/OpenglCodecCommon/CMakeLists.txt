@@ -1,7 +1,7 @@
 android_add_library(
   TARGET OpenglCodecCommon LICENSE Apache-2.0
   SRC # cmake-format: sortable
-      glUtils.cpp ChecksumCalculator.cpp ChecksumCalculatorThreadInfo.cpp)
+      ChecksumCalculator.cpp ChecksumCalculatorThreadInfo.cpp glUtils.cpp)
 
 target_compile_options(OpenglCodecCommon PRIVATE -fvisibility=hidden)
 target_link_libraries(OpenglCodecCommon PRIVATE emugl_base)

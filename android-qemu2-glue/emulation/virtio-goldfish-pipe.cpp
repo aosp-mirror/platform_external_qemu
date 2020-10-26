@@ -486,6 +486,9 @@ const uint32_t kVirtioGpuAddressSpacePingWithResponse = 0x1003;
 const uint32_t kVirtioGpuNativeSyncCreateExportFd = 0x9000;
 const uint32_t kVirtioGpuNativeSyncCreateImportFd = 0x9001;
 
+const uint32_t kVirtioGpuNativeSyncVulkanCreateExportFd = 0xa000;
+const uint32_t kVirtioGpuNativeSyncVulkanCreateImportFd = 0xa001;
+
 class PipeVirglRenderer {
 public:
     PipeVirglRenderer() = default;
@@ -788,10 +791,22 @@ public:
             case kVirtioGpuNativeSyncCreateImportFd: {
                 uint32_t sync_handle_lo = dwords[1];
                 uint32_t sync_handle_hi = dwords[2];
-                uint64_t sync_handle =
-                    (((uint64_t)sync_handle_hi) << 32) |
-                    ((uint64_t)sync_handle_lo);
+                uint64_t sync_handle = convert32to64(sync_handle_lo, sync_handle_hi);
+
                 mVirtioGpuOps->wait_for_gpu(sync_handle);
+                break;
+            }
+            case kVirtioGpuNativeSyncVulkanCreateExportFd:
+            case kVirtioGpuNativeSyncVulkanCreateImportFd: {
+                uint32_t device_handle_lo = dwords[1];
+                uint32_t device_handle_hi = dwords[2];
+                uint64_t device_handle = convert32to64(device_handle_lo, device_handle_hi);
+
+                uint32_t fence_handle_lo = dwords[3];
+                uint32_t fence_handle_hi = dwords[4];
+                uint64_t fence_handle = convert32to64(fence_handle_lo, fence_handle_hi);
+
+                mVirtioGpuOps->wait_for_gpu_vulkan(device_handle, fence_handle);
                 break;
             }
             default:
@@ -1133,7 +1148,15 @@ public:
                     ((char*)entry.linear) + box->x + writtenBytes,
                     wantedBytes - writtenBytes,
                 };
-                auto status = ops->guest_send(hostPipe, &buf, 1);
+
+                // guest_send can now reallocate the pipe.
+                void* hostPipeBefore = hostPipe;
+                auto status = ops->guest_send(&hostPipe, &buf, 1);
+                if (hostPipe != hostPipeBefore) {
+                    resetPipe((GoldfishHwPipe*)(uintptr_t)(entry.ctxId), hostPipe);
+                    it = mResources.find(resId);
+                    entry = it->second;
+                }
 
                 if (status > 0) {
                     writtenBytes += status;
@@ -1408,11 +1431,6 @@ private:
         resIt->second.ctxId = 0;
     }
 
-
-    GoldfishHwPipe* createNewHwPipeId() {
-        return reinterpret_cast<GoldfishHwPipe*>(mNextHwPipe++);
-    }
-
     inline const GoldfishPipeServiceOps* ensureAndGetServiceOps() {
         if (mServiceOps) return mServiceOps;
         mServiceOps = goldfish_pipe_get_service_ops();
@@ -1429,7 +1447,6 @@ private:
     struct address_space_device_control_ops* mAddressSpaceDeviceControlOps =
         nullptr;
 
-    uint32_t mNextHwPipe = 1;
     const GoldfishPipeServiceOps* mServiceOps = nullptr;
 
     std::unordered_map<VirglCtxId, PipeCtxEntry> mContexts;

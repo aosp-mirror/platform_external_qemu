@@ -51,42 +51,8 @@ Congratulations! You have all the sources you need. Now run:
 
 If all goes well you should have a freshly build emulator in the `objs` directory.
 
-You can pass the flag `--helpfull` to the rebuild script to get an idea of which options you can pass in. Look at the section under `aemu.cmake`
-```sh
-    android/rebuild.sh --helpfull
+You can pass the flag `--help` to the rebuild script to get an idea of which options you can pass in.
 
-    aemu.cmake:
-        --build: <config|check>: Target that should be build after configuration. The config target will only configure the build, no symbol processing or testing will take place.
-            (default: 'check')
-        --[no]clean: Clean the destination build directory before configuring. Setting this to false will attempt an incremental build. Note that this can introduce cmake caching issues.
-            (default: 'true')
-        --cmake_option: Options that should be passed on directly to cmake. These will be passed on directly to the underlying cmake project. For example: --cmake_option QEMU_UPSTREAM=FALSE;
-            repeat this option to specify a list of values
-            (default: '[]')
-        --config: <debug|release>: Whether we are building a release or debug configuration.
-            (default: 'release')
-        --crash: <prod|staging|none>: Which crash server to use or none if you do not want crash uploads.enabling this will result in symbol processing and uploading during install.
-            (default: 'none')
-        --dist: Create distribution in directory
-        --generator: <visualstudio|xcode|ninja|make>: CMake generator to use.
-            (default: 'ninja')
-        --out: Use specific output directory.
-            (default: '/Users/jansene/src/emu-master-dev/external/qemu/objs')
-        --[no]qtwebengine: Build with QtWebEngine support
-            (default: 'false')
-        --sanitizer: List of sanitizers ([address, thread]) to enable in the built binaries.
-            (default: '')
-            (a comma separated list)
-        --sdk_build_number: The emulator sdk build number.
-        --sdk_revision: ## DEPRECATED ##, it will automatically use the one defined in source.properties
-        --target: <windows|linux|darwin|mingw>: Which platform to target. This will attempt to cross compile if the target does not match the current platform (linux)
-            (default: 'linux')
-        --test_jobs: Specifies  the number of tests to run simultaneously
-            (default: '8')
-            (an integer)
-        --[no]tests: Run all the tests
-            (default: 'true')
-```
 ### Incremental builds
 
 The rebuild script does a complete clean build. You can use ninja to partial builds:

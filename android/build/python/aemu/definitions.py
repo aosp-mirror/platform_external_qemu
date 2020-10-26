@@ -14,20 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
+import logging
 import os
 import platform
 import subprocess
-from enum import Enum
-
-from absl import flags, logging
 
 
-FLAGS = flags.FLAGS
+EXE_POSTFIX = ""
+if platform.system() == "Windows":
+    EXE_POSTFIX = ".exe"
 
-# Beware! This depends on this file NOT being installed!
-flags.DEFINE_string(
-    "aosp_root",
-    os.path.abspath(
+
+AOSP_ROOT = ""
+
+
+def find_aosp_root():
+    path = os.path.abspath(os.getcwd())
+    qemu = os.path.join("external", "qemu")
+    if path.rfind(qemu) != -1:
+        return path[: path.rfind(qemu)]
+
+    return os.path.abspath(
         os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "..",
@@ -37,18 +44,16 @@ flags.DEFINE_string(
             "..",
             "..",
         )
-    ),
-    "The aosp directory",
-)
+    )
 
 
-EXE_POSTFIX = ""
-if platform.system() == "Windows":
-    EXE_POSTFIX = ".exe"
+def set_aosp_root(root):
+    global AOSP_ROOT
+    AOSP_ROOT = root
 
 
 def get_aosp_root():
-    return FLAGS.aosp_root
+    return AOSP_ROOT
 
 
 def get_qemu_root():
@@ -136,7 +141,7 @@ def fixup_windows_clang():
                 logging.info("Setting symlink for %s", clang_cl)
                 subprocess.call(
                     ["mklink", clang_cl, os.path.join(clang_dir, "clang.exe")],
-                    shell=True
+                    shell=True,
                 )
 
 
@@ -167,66 +172,27 @@ def read_simple_properties(fname):
     return res
 
 
-class ArgEnum(Enum):
-    """A class that can parse argument enums"""
-
-    def __str__(self):
-        return self.name
-
-    def to_cmd(self):
-        return self.value
-
-    @classmethod
-    def values(clzz):
-        return [n.name for n in clzz]
-
-    @classmethod
-    def from_string(clzz, s):
-        try:
-            return clzz[s.lower()]
-        except KeyError:
-            raise ValueError()
-
-
-class Crash(ArgEnum):
-    """All supported crash backends."""
-
-    prod = ["-DOPTION_CRASHUPLOAD=PROD"]
-    staging = ["-DOPTION_CRASHUPLOAD=STAGING"]
-    none = ["-DOPTION_CRASHUPLOAD=NONE"]
-
-
-class BuildConfig(ArgEnum):
-    """Supported build configurations."""
-
-    debug = ["-DCMAKE_BUILD_TYPE=Debug"]
-    release = ["-DCMAKE_BUILD_TYPE=Release"]
-
-
-class Make(ArgEnum):
-    config = "configure only"
-    check = "check"
-
-
-class Generator(ArgEnum):
-    """Supported generators."""
-
-    visualstudio = ["-G", "Visual Studio 15 2017 Win64"]
-    xcode = ["-G", "Xcode"]
-    ninja = ["-G", "Ninja"]
-    make = ["-G", "Unix Makefiles"]
-
-
-class Toolchain(ArgEnum):
-    """Supported toolchains."""
-
-    windows = "toolchain-windows_msvc-x86_64.cmake"
-    linux = "toolchain-linux-x86_64.cmake"
-    darwin = "toolchain-darwin-x86_64.cmake"
-    linux_aarch64 = "toolchain-linux-aarch64.cmake"
-
-    def to_cmd(self):
-        return [
-            "-DCMAKE_TOOLCHAIN_FILE=%s"
-            % os.path.join(get_qemu_root(), "android", "build", "cmake", self.value)
-        ]
+ENUMS = {
+    "Crash": {
+        "prod": ["-DOPTION_CRASHUPLOAD=PROD"],
+        "staging": ["-DOPTION_CRASHUPLOAD=STAGING"],
+        "none": ["-DOPTION_CRASHUPLOAD=NONE"],
+    },
+    "BuildConfig": {
+        "debug": ["-DCMAKE_BUILD_TYPE=Debug"],
+        "release": ["-DCMAKE_BUILD_TYPE=Release"],
+    },
+    "Make": {"config": "configure only", "check": "check"},
+    "Generator": {
+        "xcode": ["-G", "Xcode"],
+        "ninja": ["-G", "Ninja"],
+        "make": ["-G", "Unix Makefiles"],
+        "visualstudio": ["-G", "Visual Studio 15 2017 Win64"],
+    },
+    "Toolchain": {
+        "windows": "toolchain-windows_msvc-x86_64.cmake",
+        "linux": "toolchain-linux-x86_64.cmake",
+        "darwin": "toolchain-darwin-x86_64.cmake",
+        "linux_aarch64": "toolchain-linux-aarch64.cmake",
+    },
+}

@@ -114,8 +114,10 @@ public:
 
         // search for an item in |mPipes| that is in the WaitingForHostAdbConnection state,
         // remove it from |mPipes| and return it.
-
         AdbGuestPipe* searchForActivePipe();
+
+        // Check if there is a pipe in WaitingForHostAdbConnection state.
+        bool hasActivePipe() const;
 
         // Resets the current ADB guest pipe connection.
         void resetActiveGuestPipeConnection();
@@ -143,7 +145,8 @@ public:
     virtual unsigned onGuestPoll() const override;
     virtual int onGuestRecv(AndroidPipeBuffer* buffers, int count) override;
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int count) override;
+                            int count,
+                            void** newPipePtr) override;
     virtual void onGuestWantWakeOn(int flags) override;
 
     // Called when a host connection occurs. Transfers ownership of

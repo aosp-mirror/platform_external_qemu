@@ -119,7 +119,8 @@ public:
     }
 
     int onGuestSend(const AndroidPipeBuffer* buffers,
-                    int numBuffers) override {
+                    int numBuffers,
+                    void** newPipePtr) override {
         int transferred = 0;
         for (int i = 0; i < numBuffers; ++i) {
             transferred += buffers[i].size;
@@ -150,7 +151,8 @@ static NetworkPipe::Service* sNetworkPipeService = nullptr;
 void registerNetworkPipeService() {
     if (sNetworkPipeService == nullptr) {
         sNetworkPipeService = new NetworkPipe::Service;
-        android::AndroidPipe::Service::add(sNetworkPipeService);
+        AndroidPipe::Service::add(
+            std::unique_ptr<NetworkPipe::Service>(sNetworkPipeService));
     }
 }
 

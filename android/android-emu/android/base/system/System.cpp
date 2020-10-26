@@ -2908,12 +2908,20 @@ void System::disableCopyOnWriteForPath(StringView path) {
 #ifdef __APPLE__
 void disableAppNap_macImpl(void);
 void cpuUsageCurrentThread_macImpl(uint64_t* user, uint64_t* sys);
+void hideDockIcon_macImpl(void);
 #endif
 
 // static
 void System::disableAppNap() {
 #ifdef __APPLE__
     disableAppNap_macImpl();
+#endif
+}
+
+// static
+void System::hideDockIcon() {
+#ifdef __APPLE__
+    hideDockIcon_macImpl();
 #endif
 }
 

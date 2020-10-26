@@ -15,12 +15,10 @@
 # limitations under the License.
 
 
-
 import os
 import re
 import zipfile
-
-from absl import logging
+import logging
 
 from aemu.definitions import get_qemu_root
 from aemu.licensing import Licensing
@@ -66,10 +64,10 @@ zip_sets = {
 }
 
 
-def recursive_glob(dir, regex):
+def recursive_glob(directory, regex):
     """Recursively glob the rootdir for any file that matches the given regex"""
     reg = re.compile(regex)
-    for root, _, filenames in os.walk(dir):
+    for root, _, filenames in os.walk(directory):
         for filename in filenames:
             fname = os.path.join(root, filename)
             if reg.match(fname):

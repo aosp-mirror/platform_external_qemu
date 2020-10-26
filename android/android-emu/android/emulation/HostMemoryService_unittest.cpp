@@ -69,11 +69,11 @@ protected:
         mLooper.reset();
     }
 
-    void* connectService() {
+    int connectService() {
         return mDevice->connect("HostMemoryPipe");
     }
 
-    void writeCmd(void* pipe, uint32_t cmd) {
+    void writeCmd(int pipe, uint32_t cmd) {
         std::vector<uint8_t> payload(sizeof(uint32_t));
         memcpy(payload.data(), &cmd, sizeof(uint32_t));
 
@@ -83,7 +83,7 @@ protected:
         EXPECT_THAT(mDevice->write(pipe, payload), IsOk());
     }
 
-    void writeCmdWithData(void* pipe, uint32_t cmd, uint64_t addr, uint64_t size) {
+    void writeCmdWithData(int pipe, uint32_t cmd, uint64_t addr, uint64_t size) {
         size_t totalSize = sizeof(uint32_t) + 2 * sizeof(uint64_t);
 
         std::vector<uint8_t> payload(totalSize);
@@ -99,7 +99,7 @@ protected:
         EXPECT_THAT(mDevice->write(pipe, payload), IsOk());
     }
 
-    void block(void* pipe) {
+    void block(int pipe) {
         const base::Looper::Duration deadline = mLooper->nowMs() + kTimeoutMs;
 
         // Since these unittests never expect long-running operations, run in
@@ -110,7 +110,7 @@ protected:
         }
     }
 
-    uint32_t readCmdResponseBlocking(void* pipe) {
+    uint32_t readCmdResponseBlocking(int pipe) {
         block(pipe);
 
         uint32_t responseSize = 0;
@@ -125,7 +125,7 @@ protected:
         return *(uint32_t*)(response.data());
     }
 
-    uint64_t readDataResponseBlocking(void* pipe) {
+    uint64_t readDataResponseBlocking(int pipe) {
         block(pipe);
 
         uint32_t responseSize = 0;
@@ -145,13 +145,13 @@ protected:
 
 // Check that basic connection works.
 TEST_F(HostMemoryServiceTest, Connect) {
-    void* pipe = connectService();
+    int pipe = connectService();
     mDevice->close(pipe);
 }
 
 // Check that sending a null command does nothing.
 TEST_F(HostMemoryServiceTest, NullCommand) {
-    void* pipe = connectService();
+    int pipe = connectService();
     writeCmd(pipe, (uint32_t)HostMemoryServiceCommand::None);
     mDevice->close(pipe);
 }
@@ -159,7 +159,7 @@ TEST_F(HostMemoryServiceTest, NullCommand) {
 // Tests that if the shared region was not allocated yet,
 // it returns false.
 TEST_F(HostMemoryServiceTest, QuerySharedRegionAllocated) {
-    void* pipe = connectService();
+    int pipe = connectService();
     writeCmd(pipe, (uint32_t)HostMemoryServiceCommand::IsSharedRegionAllocated);
     auto res = readCmdResponseBlocking(pipe);
     EXPECT_EQ(0, res);
@@ -168,7 +168,7 @@ TEST_F(HostMemoryServiceTest, QuerySharedRegionAllocated) {
 
 // Allocate the region.
 TEST_F(HostMemoryServiceTest, AllocateSharedRegion) {
-    void* pipe = connectService();
+    int pipe = connectService();
     writeCmdWithData(
         pipe,
         (uint32_t)HostMemoryServiceCommand::AllocSharedRegion,
@@ -182,7 +182,7 @@ TEST_F(HostMemoryServiceTest, AllocateSharedRegion) {
 
 // Test alloc/free of subregions.
 TEST_F(HostMemoryServiceTest, AllocFreeSubRegion) {
-    void* pipe = connectService();
+    int pipe = connectService();
     writeCmdWithData(
         pipe,
         (uint32_t)HostMemoryServiceCommand::AllocSubRegion,

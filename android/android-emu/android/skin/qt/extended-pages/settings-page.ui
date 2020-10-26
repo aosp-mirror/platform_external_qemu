@@ -28,7 +28,7 @@
    <property name="currentIndex">
     <number>0</number>
    </property>
-   <widget class="QWidget" name="tab_1">
+   <widget class="QWidget" name="general_tab">
     <attribute name="title">
      <string>General</string>
     </attribute>
@@ -810,7 +810,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="tab_2">
+   <widget class="QWidget" name="proxy_tab">
     <attribute name="title">
      <string>Proxy</string>
     </attribute>
@@ -1192,7 +1192,7 @@
     <zorder>set_proxyResults</zorder>
     <zorder>set_proxyResultsTitle</zorder>
    </widget>
-   <widget class="QWidget" name="tab_3">
+   <widget class="QWidget" name="advanced_tab">
     <attribute name="title">
      <string>Advanced</string>
     </attribute>

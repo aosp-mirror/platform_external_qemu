@@ -19,7 +19,7 @@ import os
 
 import grpc
 from aemu.discovery.emulator_discovery import EmulatorDiscovery, get_default_emulator
-from aemu.proto.snapshot_service_pb2 import SnapshotPackage
+from aemu.proto.snapshot_service_pb2 import SnapshotPackage, SnapshotFilter
 from google.protobuf import empty_pb2
 from tqdm import tqdm
 
@@ -129,16 +129,16 @@ class SnapshotService(object):
     def info(self, snap_id):
         """Lists all available snapshots."""
         self.logger.debug("Retrieving snapshots")
-        response = self.stub.ListSnapshots(_EMPTY_)
+        response = self.stub.ListSnapshots(SnapshotFilter(statusFilter=SnapshotFilter.All))
         self.logger.debug("Response %s", response)
         return next((f for f in response.snapshots if f.snapshot_id == snap_id), None,)
 
     def lists(self):
         """Lists all available snapshots."""
         self.logger.debug("Retrieving snapshots")
-        response = self.stub.ListSnapshots(_EMPTY_)
+        response = self.stub.ListSnapshots(SnapshotFilter(statusFilter=SnapshotFilter.All))
         self.logger.debug("Response %s", response)
-        return [f.snapshot_id for f in response.snapshots]
+        return [f for f in response.snapshots]
 
     def load(self, snap_id):
         """Loads a snapshot inside the emulator."""

@@ -20,7 +20,7 @@
 #include "common/goldfish_vk_testing.h"
 
 #include "android/base/ArraySize.h"
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 
 #include <gtest/gtest.h>
 #include <string.h>
@@ -536,7 +536,7 @@ TEST(VulkanStream, testMarshalVulkanStructWithVoidPtrToData) {
 
 // Tests that marshal + unmarshal is equivalent to deepcopy.
 TEST(VulkanStream, testDeepcopyEquivalence) {
-    Pool pool;
+    BumpPool pool;
     TestStream testStream;
     VulkanStream stream(&testStream);
 
@@ -594,7 +594,7 @@ TEST(VulkanStream, testDeepcopyEquivalence) {
 // Tests that a struct with an extension struct attached
 // is properly marshaled/unmarshaled.
 TEST(VulkanStream, testStructExtension) {
-    Pool pool;
+    BumpPool pool;
     TestStream testStream;
     VulkanStream stream(&testStream);
 

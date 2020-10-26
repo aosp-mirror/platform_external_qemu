@@ -36,6 +36,7 @@
 #include "android/base/memory/MemoryTracker.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/base/Tracing.h"
 
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
@@ -330,6 +331,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         return true;
     }
 
+    android::base::initializeTracing();
+
     //
     // allocate space for the FrameBuffer object
     //
@@ -414,6 +417,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         (emugl::getRenderer() == SELECTED_RENDERER_HOST ||
          emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
          emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
+
+    fb->m_guestUsesAngle =
+        emugl::emugl_feature_is_enabled(
+            android::featurecontrol::GuestUsesAngle);
 
     //
     // if GLES2 plugin has loaded - try to make GLES2 context and
@@ -1904,6 +1911,10 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     GLenum format,
                                     GLenum type,
                                     void* pixels) {
+    if (width == 0 || height == 0) {
+        return false;
+    }
+
     AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
@@ -2318,6 +2329,10 @@ void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
 }
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
+    if (m_guestUsesAngle) {
+        goldfish_vk::updateColorBufferFromVkImage(p_colorbuffer);
+    }
+
     bool res = postImpl(p_colorbuffer, needLockAndBind);
     if (res) setGuestPostedAFrame();
     return res;
@@ -3015,5 +3030,15 @@ void FrameBuffer::waitForGpu(uint64_t eglsync) {
         return;
     }
 
+    SyncThread::get()->triggerBlockedWaitNoTimeline(fenceSync);
+}
+
+void FrameBuffer::waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle) {
+    (void)deviceHandle;
+
+    // Note: this will always be nullptr.
+    FenceSync* fenceSync = FenceSync::getFromHandle(fenceHandle);
+
+    // Note: this will always signal right away.
     SyncThread::get()->triggerBlockedWaitNoTimeline(fenceSync);
 }

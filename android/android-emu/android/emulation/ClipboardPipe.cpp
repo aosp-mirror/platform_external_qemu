@@ -122,7 +122,8 @@ int ClipboardPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 }
 
 int ClipboardPipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                               int numBuffers) {
+                               int numBuffers,
+                               void** newPipePtr) {
     if (!sEnabled) {
         // Fake out that we've processed the data, and don't do anything.
         int total = 0;
@@ -150,7 +151,7 @@ void ClipboardPipe::setEnabled(bool enabled) {
 }
 
 void registerClipboardPipeService() {
-    android::AndroidPipe::Service::add(new ClipboardPipe::Service());
+    android::AndroidPipe::Service::add(std::make_unique<ClipboardPipe::Service>());
 }
 
 void ClipboardPipe::registerGuestClipboardCallback(

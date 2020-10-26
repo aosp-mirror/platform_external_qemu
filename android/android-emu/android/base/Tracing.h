@@ -21,42 +21,45 @@
 namespace android {
 namespace base {
 
-class ScopedTrace {
-public:
-    ScopedTrace(const char* name) {
-        beginTraceImpl(name);
-    }
+// New tracing API that talks to an underlying tracing library, possibly perfetto.
+//
+// Sets up global state useful for tracing.
+void initializeTracing();
 
-    ~ScopedTrace() {
-        endTraceImpl(name_);
-    }
-private:
-    void beginTraceImpl(const char* name);
-    void endTraceImpl(const char* name);
-    const char* const name_ = nullptr;
-};
+// Enable/disable tracing
+void enableTracing();
+void disableTracing();
 
-bool shouldEnableTracing();
+// Set the time of traces on the host to be at this guest time.
+// Not needed if we assume timestamps can be transferrable (e.g.,
+// when RDTSC with raw passthrough is used)
+void setGuestTime(uint64_t guestTime);
+
+// Record a counter of some kind.
+void traceCounter(const char* tag, int64_t value);
+
 void beginTrace(const char* name);
 void endTrace();
 
-class ScopedThresholdTrace {
+class ScopedTrace {
 public:
-    ScopedThresholdTrace(const char* name, uint64_t thresholdUs = 1000) {
-        beginTraceImpl(name, thresholdUs);
-    }
-
-    ~ScopedThresholdTrace() {
-        endTraceImpl(name_);
-    }
-private:
-    void beginTraceImpl(const char* name, uint64_t thresholdUs);
-    void endTraceImpl(const char* name);
-    const char* const name_ = nullptr;
+    ScopedTrace(const char* name);
+    ~ScopedTrace();
 };
 
-void beginThresholdTrace(const char* name, uint64_t thresholdUs = 1000);
-void endThresholdTrace();
+class ScopedTraceDerived : public ScopedTrace {
+public:
+    void* member = nullptr;
+};
+
+void setGuestTime(uint64_t t);
+
+void enableTracing();
+void disableTracing();
+
+bool shouldEnableTracing();
+
+void traceCounter(const char* name, int64_t value);
 
 } // namespace base
 } // namespace android
@@ -66,8 +69,6 @@ void endThresholdTrace();
 #define AEMU_GENSYM(x) __AEMU_GENSYM1(x,__COUNTER__)
 
 #define AEMU_SCOPED_TRACE(tag) __attribute__ ((unused)) android::base::ScopedTrace AEMU_GENSYM(aemuScopedTrace_)(tag)
-#define AEMU_SCOPED_THRESHOLD_TRACE(tag) __attribute__ ((unused)) android::base::ScopedThresholdTrace AEMU_GENSYM(aemuScopedTrace_)(tag)
-#define AEMU_SCOPED_THRESHOLD_TRACE_TIMED(tag, thresholdUs) __attribute__ ((unused)) android::base::ScopedThresholdTrace AEMU_GENSYM(aemuScopedTrace_)(tag, thresholdUs)
-
 #define AEMU_SCOPED_TRACE_CALL() AEMU_SCOPED_TRACE(__func__)
-#define AEMU_SCOPED_THRESHOLD_TRACE_CALL() AEMU_SCOPED_THRESHOLD_TRACE(__func__)
+#define AEMU_SCOPED_THRESHOLD_TRACE_CALL()
+#define AEMU_SCOPED_THRESHOLD_TRACE(...)

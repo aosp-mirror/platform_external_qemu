@@ -140,7 +140,7 @@ There are 2 advantages running with Windows native tools:
 From an elevated command prompt execute:
 
   ```bat
-  C:> mkdir %USERPROFILE%\bin && cd %USERPROFILE%\bin && wget http://storage.googleapis.com/git-repo-downloads/repo && echo @call python %~dp0repo %* > %USERPROFILE%/bin/repo.cmd
+  C:> mkdir %USERPROFILE%\bin && cd %USERPROFILE%\bin && curl -o repo http://storage.googleapis.com/git-repo-downloads/repo && echo @call python %~dp0repo %* > %USERPROFILE%/bin/repo.cmd
   ```
 
 Make sure to add `%USERPROFILE%\bin` to the `PATH`, otherwise you will not
@@ -172,6 +172,8 @@ Congratulations! You have all the sources you need. Now run:
   ```
 
 You should end up with an emulator in the objs directory.
+
+You can pass the flag `--help` to the rebuild script to get an idea of which options you can pass in.
 
 ### Setup git cookies
 

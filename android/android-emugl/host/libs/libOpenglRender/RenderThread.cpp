@@ -409,13 +409,11 @@ intptr_t RenderThread::main() {
             // any sort of GLES call when we are creating/destroying EGL
             // contexts.
             {
-                AEMU_SCOPED_THRESHOLD_TRACE("lockContextStructureRead");
                 FrameBuffer::getFB()->lockContextStructureRead();
             }
             size_t last;
 
             {
-                AEMU_SCOPED_THRESHOLD_TRACE("glDec.decode");
                 last = tInfo.m_glDec.decode(
                         readBuf.buf(), readBuf.validData(), ioStream, &checksumCalc);
                 if (last > 0) {
@@ -429,7 +427,6 @@ intptr_t RenderThread::main() {
             // decoder
             //
             {
-                AEMU_SCOPED_THRESHOLD_TRACE("gl2Dec.decode");
                 last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
                                              ioStream, &checksumCalc);
 
@@ -445,7 +442,6 @@ intptr_t RenderThread::main() {
             // renderControl decoder
             //
             {
-                AEMU_SCOPED_THRESHOLD_TRACE("rcDec.decode");
                 last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
                                             ioStream, &checksumCalc);
                 if (last > 0) {
@@ -459,7 +455,6 @@ intptr_t RenderThread::main() {
             // Vulkan decoder
             //
             {
-                AEMU_SCOPED_THRESHOLD_TRACE("vkDec.decode");
                 last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
                                             ioStream);
                 if (last > 0) {

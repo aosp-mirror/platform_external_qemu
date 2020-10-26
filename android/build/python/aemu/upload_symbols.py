@@ -19,41 +19,19 @@ import json
 import os
 import sys
 import time
+import logging
+import argparse
 
 if sys.version_info[0] == 2:
-  from urllib import quote
+    from urllib import quote
 else:
-  from urllib.parse import quote
-  import urllib.request, urllib.error
+    from urllib.parse import quote
+    import urllib.request, urllib.error
 
-from absl import app, flags, logging
 
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-
-FLAGS = flags.FLAGS
-flags.DEFINE_string(
-    "environment",
-    "prod",
-    "Which symbol server endpoint to use, can be staging or prod",
-)
-flags.DEFINE_string(
-    "api_key",
-    None,
-    "Which api key to use. By default will load contents of ~/.emulator_symbol_server_key",
-)
-flags.DEFINE_string("symbol_file", None, "The symbol file you wish to process")
-flags.DEFINE_boolean(
-    "force", False, "Upload symbol file, even though it is already available."
-)
-
-flags.register_validator(
-    "environment",
-    lambda value: value.lower() == "prod" or value.lower() == "staging",
-    message="--environment should be either prod or staging (case insensitive).",
-)
-flags.mark_flag_as_required("symbol_file")
 
 
 class SymbolFileServer(object):
@@ -113,8 +91,8 @@ class SymbolFileServer(object):
     def _exec_request_with_retry(self, oper, url, **kwargs):
         """Makes a web request with default timeout, returning the response.
 
-           The request will be tried multiple times, with exponential backoff:
-           sleep 1 * (2 ^ ({number of total retries} - 1))
+        The request will be tried multiple times, with exponential backoff:
+        sleep 1 * (2 ^ ({number of total retries} - 1))
         """
         retries = Retry(
             total=SymbolFileServer.MAX_RETRY,
@@ -136,13 +114,13 @@ class SymbolFileServer(object):
     def _exec_request(self, oper, url, **kwargs):
         """Makes a web request with default timeout, returning the json result.
 
-           The api key will be added to the url request as a parameter.
+        The api key will be added to the url request as a parameter.
 
-           This method will raise a requests.exceptions.HTTPError
-           if the status code is not 4XX, 5XX
+        This method will raise a requests.exceptions.HTTPError
+        if the status code is not 4XX, 5XX
 
-           Note: If you are using verbose logging it is entirely possible that the subsystem will
-           write your api key to the logs!
+        Note: If you are using verbose logging it is entirely possible that the subsystem will
+        write your api key to the logs!
         """
         resp = self._exec_request_with_retry(oper, url, **kwargs)
         if resp.status_code > 399:
@@ -216,13 +194,43 @@ class SymbolFileServer(object):
         return status["result"]
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--environment",
+        default="prod",
+        choices=["prod", "staging"],
+        help="Which symbol server endpoint to use, can be staging or prod",
+    )
+
+    parser.add_argument(
+        "--api_key",
+        default=None,
+        help="Which api key to use. By default will load contents of ~/.emulator_symbol_server_key",
+    )
+
+    parser.add_argument(
+        "--symbol_file",
+        default=None,
+        required=True,
+        help="The symbol file you wish to process",
+    )
+    parser.add_argument(
+        "--force",
+        default=False,
+        action="store_true",
+        help="Upload symbol file, even though it is already available.",
+    )
+    return parser.parse_args()
+
+
 def main(args):
     # The lower level enging will log individual requests!
     logging.debug("-----------------------------------------------------------")
     logging.debug("- WARNING!! You are likely going to leak your api key    --")
     logging.debug("-----------------------------------------------------------")
 
-    api_key = FLAGS.api_key
+    api_key = args.api_key
     available = False
     if not api_key:
         try:
@@ -234,12 +242,12 @@ def main(args):
                 e,
             )
 
-    server = SymbolFileServer(FLAGS.environment, api_key)
-    if FLAGS.force or not server.is_available(FLAGS.symbol_file):
+    server = SymbolFileServer(args.environment, api_key)
+    if args.force or not server.is_available(args.symbol_file):
         start = time.time()
-        status = server.upload(FLAGS.symbol_file)
+        status = server.upload(args.symbol_file)
         # Let's assume that our symbols will now become available
-        available = (status == "OK")
+        available = status == "OK"
         print(
             "{} after {} seconds".format(
                 SymbolFileServer.STATUS_MSG.get(
@@ -249,7 +257,7 @@ def main(args):
             )
         )
     else:
-        print("Symbol {} already available, skipping upload.".format(FLAGS.symbol_file))
+        print("Symbol {} already available, skipping upload.".format(args.symbol_file))
         available = True
 
     # api key -> symbol file should have been made available.
@@ -257,7 +265,7 @@ def main(args):
 
 
 def launch():
-    app.run(main)
+    main(parse_args())
 
 
 if __name__ == "__main__":

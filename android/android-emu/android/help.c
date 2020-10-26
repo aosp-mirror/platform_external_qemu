@@ -1250,6 +1250,7 @@ help_turncfg(stralloc_t*  out)
     PRINTF(
     "  Execute the given command to obtain turn configuration..\n\n"
     "    <cmd> is the command to execute\n\n"
+    "  Parameters in <cmd> can be grouped with a single (') or double (\") quote\n\n"
     "  This command must do the following:\n\n"
     "  - Produce a result on stdout.\n"
     "  - Produce a result within 1000 ms.\n"
@@ -1258,7 +1259,7 @@ help_turncfg(stralloc_t*  out)
     "  - That contain at least an \"iceServers\" array.\n"
     "  - The exit value should be 0 on success\n\n"
     "  For example:\n\n"
-    "  -turncfg \"curl -s -X POST https://networktraversal.googleapis.com/v1alpha/iceconfig?key=MySec\"\n\n"
+    "  -turncfg \"sh -c 'curl -s -X POST https://api.twilio.com/2010-04-01/Accounts/some_account/Tokens.json -u some_account:some_secret | sed \\'s/ice_servers/iceServers/g\\''\"\n\n"
     );
 }
 

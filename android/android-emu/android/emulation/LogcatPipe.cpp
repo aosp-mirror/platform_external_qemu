@@ -46,7 +46,8 @@ int LogcatPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
     return PIPE_ERROR_IO;
 }
 
-int LogcatPipe::onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) {
+int LogcatPipe::onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers,
+                            void** newPipePtr) {
     int result = 0;
     base::AutoLock lock(sLogcatStreamLock);
     while (numBuffers > 0) {
@@ -84,7 +85,7 @@ void registerLogcatPipeService() {
         }
     }
 
-    android::AndroidPipe::Service::add(new LogcatPipe::Service());
+    android::AndroidPipe::Service::add(std::make_unique<LogcatPipe::Service>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -15,6 +15,7 @@
 #include <qcoreevent.h>                             // for QEvent (ptr only)
 #include <qsize.h>                                  // for operator*
 #include <qstring.h>                                // for operator+, operat...
+#include <regex>                                    // for std::regex_replace()
 #include <stddef.h>                                 // for NULL
 #include <QAbstractButton>                          // for QAbstractButton
 #include <QBitmap>                                  // for QBitmap
@@ -76,11 +77,13 @@ TvRemotePage::TvRemotePage(QWidget *parent) :
     }
 
     connect(mUi->tvRemote_settingsButton, &QPushButton::pressed,
-             [this]() {onSettingsButtonPressed();});
+            [this]() {onSettingsButtonPressed();});
     connect(mUi->tvRemote_programGuideButton, &QPushButton::pressed,
-             [this]() {onProgramGuideButtonPressed();});
+            [this]() {onProgramGuideButtonPressed();});
     connect(mUi->tvRemote_assistantButton, &QPushButton::pressed,
-             [this]() {onAssistantButtonPressed();});
+            [this]() {onAssistantButtonPressed();});
+    connect(mUi->tvRemote_watchlistButton, &QPushButton::pressed,
+            [this]() {onWatchlistButtonPressed();});
 
     remaskButtons();
     installEventFilter(this);
@@ -96,10 +99,9 @@ void TvRemotePage::setAdbInterface(android::emulation::AdbInterface* adb_interfa
     mAdbInterface = adb_interface;
 }
 
-void TvRemotePage::toggleButtonEvent(
-    QPushButton* button,
-    const SkinKeyCode key_code,
-    const SkinEventType event_type) {
+void TvRemotePage::toggleButtonEvent(QPushButton* button,
+                                     const SkinKeyCode key_code,
+                                     const SkinEventType event_type) {
     if (mEmulatorWindow) {
         SkinEvent* skin_event = new SkinEvent();
         skin_event->type = event_type;
@@ -121,6 +123,27 @@ void TvRemotePage::toggleButtonEvent(
     }
 }
 
+void TvRemotePage::handleAdbCommand(const std::vector<std::string>& adb_command,
+                                    const std::string& command_tag) {
+    mAdbInterface->enqueueCommand(
+        adb_command,
+        [command_tag](const android::emulation::OptionalAdbCommandResult& result) {
+            if (result && result->output && result->exit_code == 0) {
+                VLOG(tvremote) << "[" << command_tag <<"] ADB command completed.";
+
+                std::string command_output(std::istreambuf_iterator<char>(*result->output), {});
+                // Some adb commands (e.g. sending keycodes) don't provide an output.
+                if (!command_output.empty()) {
+                    VLOG(tvremote) << "[" << command_tag <<"] ADB command output: "
+                                   << command_output;
+                }
+            } else {
+                VLOG(tvremote) << "[" << command_tag <<"] ADB command failed.";
+            }
+        }
+    );
+}
+
 void TvRemotePage::onSettingsButtonPressed() {
     std::vector<std::string> adb_command = {
         "shell",
@@ -128,8 +151,9 @@ void TvRemotePage::onSettingsButtonPressed() {
         "start",
         "com.android.tv.settings/com.android.tv.settings.MainSettings"
     };
+    std::string command_tag = "Open Settings";
 
-    mAdbInterface->enqueueCommand(adb_command);
+    handleAdbCommand(adb_command, command_tag);
 }
 
 void TvRemotePage::onProgramGuideButtonPressed() {
@@ -139,19 +163,42 @@ void TvRemotePage::onProgramGuideButtonPressed() {
         "start",
         "com.google.android.tv/com.android.tv.MainActivity"
     };
+    std::string command_tag = "Open Live Channels";
 
-    mAdbInterface->enqueueCommand(adb_command);
+    handleAdbCommand(adb_command, command_tag);
 }
 
 void TvRemotePage::onAssistantButtonPressed() {
     std::vector<std::string> adb_command = {
         "shell",
+        "am",
+        "start",
+        "-a",
+        "android.intent.action.ASSIST",
+        "--ei",
+        "search_type",
+        "1",
+        "--es",
+        "query"
+    };
+    std::string command_tag = "Trigger Assistant";
+    std::string query(
+        sanitizeUserInput(mUi->tvRemote_assistantTextBox->toPlainText().toStdString()));
+
+    adb_command.push_back(query);
+    handleAdbCommand(adb_command, command_tag);
+}
+
+void TvRemotePage::onWatchlistButtonPressed() {
+    std::vector<std::string> adb_command = {
+        "shell",
         "input",
         "keyevent",
-        "KEYCODE_ASSIST"
+        "KEYCODE_BOOKMARK"
     };
+    std::string command_tag = "Toggle Watchlist";
 
-    mAdbInterface->enqueueCommand(adb_command);
+    handleAdbCommand(adb_command, command_tag);
 }
 
 void TvRemotePage::remaskButtons() {
@@ -173,4 +220,12 @@ bool TvRemotePage::eventFilter(QObject* o, QEvent* event) {
         remaskButtons();
     }
     return QWidget::eventFilter(o, event);
+}
+
+std::string TvRemotePage::sanitizeUserInput(const std::string& raw_input) {
+    std::regex special_characters {R"(\\|")"};
+    std::string sanitized_input =
+        "\"" + std::regex_replace(raw_input, special_characters, R"(\$&)") + "\"";
+
+    return sanitized_input;
 }

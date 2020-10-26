@@ -11,11 +11,12 @@
 
 #include "android/base/ProcessControl.h"
 
-#include <stddef.h>                            // for size_t
-#include <algorithm>                           // for count_if
-#include <fstream>                             // for operator<<, basic_ostream
+#include <stddef.h>  // for size_t
+
+#include <algorithm>   // for count_if
+#include <fstream>     // for operator<<, basic_ostream
+#include <functional>  // for function, __base
 #include <sstream>
-#include <functional>                          // for function, __base
 
 #include "android/base/FunctionView.h"         // for FunctionView
 #include "android/base/Optional.h"             // for Optional, kNullopt
@@ -91,7 +92,7 @@ std::vector<std::string> makeArgvStrings(int argc, const char** argv) {
 
 std::string createEscapedLaunchString(int argc, const char* const* argv) {
     std::string result;
-    auto mParams = makeArgvStrings(argc, (const char**) argv);
+    auto mParams = makeArgvStrings(argc, (const char**)argv);
     for (size_t n = 0; n < mParams.size(); ++n) {
         if (n > 0) {
             result += ' ';
@@ -99,6 +100,61 @@ std::string createEscapedLaunchString(int argc, const char* const* argv) {
         result += escapeCommandLine(mParams[n]);
     }
     return result;
+}
+
+/**
+ * Parses a command line string into individual arguments. The arguments are
+ * separated by whitespace characters. Each argument is optionally enclosed into
+ * double quotes. Double quotes inside quoted arguments and whitespaces inside a
+ * non-quoted ones are escaped by backslashes. Backslashes inside arguments are
+ * doubled. A character preceded by a single backslash is taken literally and
+ * doesn't have any special meaning.
+ */
+std::vector<std::string> parseEscapedLaunchString(std::string launch) {
+    constexpr char kQuote = '\'', kDoubleQuote = '"', kEscape = '\\', kNone = '\000';
+    std::vector<std::string> args;
+    std::string argBuilder;
+    bool insideArgument = false, escaped = false;
+    char quoted = kNone;
+    for (char c : launch) {
+        if (insideArgument) {
+            if (escaped) {
+                argBuilder.push_back(c);
+                escaped = false;
+            } else {
+                if ( (quoted == c) || (quoted == kNone && isspace(c))) {
+                    args.push_back(argBuilder);
+                    argBuilder.clear();
+                    insideArgument = false;
+                    quoted = kNone;
+                } else if (c == kEscape)
+                    escaped = true;
+                else
+                    argBuilder.push_back(c);
+            }
+        } else {
+            if (!isspace(c)) {
+                insideArgument = true;
+                switch (c) {
+                    case kQuote:
+                        quoted = kQuote;
+                        break;
+                    case kDoubleQuote:
+                        quoted = kDoubleQuote;
+                        break;
+                    case kEscape:
+                        escaped = true;
+                        break;
+                    default:
+                        argBuilder.push_back(c);
+                }
+            }
+        }
+    }
+    if (!argBuilder.empty()) {
+        args.push_back(argBuilder);
+    }
+    return args;
 }
 
 ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc,

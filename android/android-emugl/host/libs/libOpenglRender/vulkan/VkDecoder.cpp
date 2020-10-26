@@ -29,7 +29,7 @@
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 #include "android/base/system/System.h"
 
 #include "IOStream.h"
@@ -55,7 +55,14 @@ using android::base::System;
 
 class VkDecoder::Impl {
 public:
-    Impl() : m_logCalls(System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1"), m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) { }
+    Impl() : m_logCalls(System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1"),
+             m_vk(vkDispatch()),
+             m_state(VkDecoderGlobalState::get()),
+             m_boxedHandleUnwrapMapping(m_state),
+             m_boxedHandleCreateMapping(m_state),
+             m_boxedHandleDestroyMapping(m_state),
+             m_boxedHandleUnwrapAndDeleteMapping(m_state),
+             m_boxedHandleUnwrapAndDeletePreserveBoxedMapping(m_state) { }
     VulkanStream* stream() { return &m_vkStream; }
     VulkanMemReadingStream* readStream() { return &m_vkMemReadingStream; }
 
@@ -76,7 +83,7 @@ private:
     BoxedHandleCreateMapping m_boxedHandleCreateMapping;
     BoxedHandleDestroyMapping m_boxedHandleDestroyMapping;
     BoxedHandleUnwrapAndDeleteMapping m_boxedHandleUnwrapAndDeleteMapping;
-    android::base::Pool m_pool { 8, 4096, 64 };
+    android::base::BumpPool m_pool;
     BoxedHandleUnwrapAndDeletePreserveBoxedMapping m_boxedHandleUnwrapAndDeletePreserveBoxedMapping;
 };
 

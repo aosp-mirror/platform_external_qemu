@@ -89,7 +89,8 @@ public:
     }
 
     int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+                            int numBuffers,
+                            void** newPipePtr) override {
         // The guest is supposed to send us a confirm code first. The code is
         // 100 (4 byte integer).
         assert(buffers[0].size >= 4);
@@ -117,7 +118,7 @@ std::atomic<uint64_t> GLProcessPipe::s_headId {0};
 }
 
 void registerGLProcessPipeService() {
-    android::AndroidPipe::Service::add(new GLProcessPipe::Service());
+    AndroidPipe::Service::add(std::make_unique<GLProcessPipe::Service>());
 }
 
 }

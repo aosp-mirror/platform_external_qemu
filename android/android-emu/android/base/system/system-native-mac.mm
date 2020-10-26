@@ -16,6 +16,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOBSD.h>
 #include <IOKit/IOKitLib.h>
+#include <Carbon/Carbon.h>
 
 #include <IOKit/kext/KextManager.h>
 #include <IOKit/storage/IOBlockStorageDevice.h>
@@ -147,6 +148,17 @@ Optional<System::DiskKind> nativeDiskKind(int st_dev) {
     IOObjectRelease(entryIterator);
 
     return {};
+}
+
+// From:
+// https://stackoverflow.com/questions/6796028/start-a-gui-process-in-mac-os-x-without-dock-icon
+void hideDockIcon_macImpl(void) {
+    if (NSApp == nil) {
+        // Initialize the global variable "NSApp"
+        [NSApplication sharedApplication];
+    }
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyProhibited];
+
 }
 
 }  // namespace base

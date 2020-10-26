@@ -44,15 +44,16 @@ struct Globals {
         // Register adb pipe service.
         adbGuestPipeService = new AdbGuestPipe::Service(&hostListener);
         hostListener.setGuestAgent(adbGuestPipeService);
-        AndroidPipe::Service::add(adbGuestPipeService);
+        AndroidPipe::Service::add(std::unique_ptr<AdbGuestPipe::Service>(adbGuestPipeService));
 
         // Register adb-debug pipe service.
         android::base::Stream* debugStream = nullptr;
         if (VERBOSE_CHECK(adb)) {
             debugStream = new android::base::StdioStream(stderr);
         }
-        android::AndroidPipe::Service::add(
-                new android::emulation::AdbDebugPipe::Service(debugStream));
+        AndroidPipe::Service::add(
+            std::make_unique<android::emulation::AdbDebugPipe::Service>(
+                debugStream));
     }
 
     AdbGuestPipe::Service* adbGuestPipeService = nullptr;

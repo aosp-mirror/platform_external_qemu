@@ -51,12 +51,16 @@ static const System::Duration kAdbCommandTimeoutMs = 3000;
 // Interval for mCheckTimer in milliseconds.
 static const int kCheckTimerIntervalMs = 5000;
 
+// Interval for mSupportsActionTimer in milliseconds.
+static const int kSupportsActionTimerIntervalMs = 1000;
+
 CarRotaryPage::CarRotaryPage(QWidget* parent)
         : QWidget(parent), mAdb(nullptr), mUi(new Ui::CarRotaryPage()), mEmulatorWindow(NULL) {
     mUi->setupUi(this);
 
     mAdbExecuteIsActive = false;
     mIsBootCompleted = false;
+    mSupportsActionArg = false;
 
     // Temporarily hide mouse wheel widgets until mouse wheel scroll is implemented.
     // TODO(agathaman): renable widgets when mouse wheel scroll is implemented.
@@ -68,32 +72,38 @@ CarRotaryPage::CarRotaryPage(QWidget* parent)
     // Timer will stop when detected that rotary service is running.
     checkRotaryControllerServiceTimer();
 
+    // Start a timer to determine whether the inject-key supports the -a flag.
+    // Timer will stop when boot completes.
+    startSupportsActionTimer();
+
     const struct {
         QPushButton* button;
         string cmd;
+        bool useActionArg;
         string label;
     } buttons[] {
-            {mUi->carrotary_upButton, "cmd car_service inject-key 280", "Up"},
-            {mUi->carrotary_downButton, "cmd car_service inject-key 281", "Down"},
-            {mUi->carrotary_leftButton, "cmd car_service inject-key 282", "Left"},
-            {mUi->carrotary_rightButton, "cmd car_service inject-key 283", "Right"},
-            {mUi->carrotary_clickButton, "cmd car_service inject-key 23", "Click"},
+            {mUi->carrotary_upButton, "cmd car_service inject-key 280", true, "Up"},
+            {mUi->carrotary_downButton, "cmd car_service inject-key 281", true, "Down"},
+            {mUi->carrotary_leftButton, "cmd car_service inject-key 282", true, "Left"},
+            {mUi->carrotary_rightButton, "cmd car_service inject-key 283", true, "Right"},
+            {mUi->carrotary_clickButton, "cmd car_service inject-key 23", true, "Click"},
             {mUi->carrotary_counterclockwiseButton,
-                    "cmd car_service inject-rotary", "CCW rotation"},
+                    "cmd car_service inject-rotary", false, "CCW rotation"},
             {mUi->carrotary_clockwiseButton,
-                    "cmd car_service inject-rotary -c true", "CW rotation"},
-            {mUi->carrotary_backButton, "input keyevent 4", "Back"},
-            {mUi->carrotary_homeButton, "input keyevent 3", "Home"}};
+                    "cmd car_service inject-rotary -c true", false, "CW rotation"},
+            {mUi->carrotary_backButton, "input keyevent 4", false, "Back"},
+            {mUi->carrotary_homeButton, "input keyevent 3", false, "Home"}};
 
     for (const auto& button_info : buttons) {
         QPushButton* button = button_info.button;
-        const string cmd = button_info.cmd;
-        const string label = button_info.label;
-        connect(button, &QPushButton::pressed, [button, cmd, label, this]() {
-            toggleButtonPressed(button, cmd, label);
+        const string& cmd = button_info.cmd;
+        const bool useActionArg = button_info.useActionArg;
+        const string& label = button_info.label;
+        connect(button, &QPushButton::pressed, [button, cmd, useActionArg, label, this]() {
+            toggleButtonPressed(button, cmd, useActionArg, label);
         });
-        connect(button, &QPushButton::released, [button, cmd, label, this]() {
-            toggleButtonReleased(button, cmd, label);
+        connect(button, &QPushButton::released, [button, cmd, useActionArg, label, this]() {
+            toggleButtonReleased(button, cmd, useActionArg, label);
         });
     }
 
@@ -109,10 +119,16 @@ void CarRotaryPage::setEmulatorWindow(EmulatorQtWindow* eW) {
     mEmulatorWindow = eW;
 }
 
-void CarRotaryPage::toggleButtonPressed(QPushButton* button, const string cmd,
-        const string label) {
-    // Toggle icon to pressed icon theme
+void CarRotaryPage::toggleButtonPressed(
+        QPushButton* button, const string& cmd, const bool useActionArg, const string& label) {
+    D("%s button pressed", label.c_str());
     toggleIconTheme(button, /* pressed= */ true);
+
+    // Inject an ACTION_DOWN event if requested and supported. Otherwise, we'll inject ACTION_DOWN
+    // and ACTION_UP in toggleButtonReleased().
+    if (useActionArg && mSupportsActionArg) {
+        executeCmd(cmd, "-a down");
+    }
 
     // Only handle long press for rotation buttons. Other buttons are handled by released.
     if (button != mUi->carrotary_counterclockwiseButton &&
@@ -139,14 +155,16 @@ void CarRotaryPage::toggleButtonPressed(QPushButton* button, const string cmd,
 }
 
 void CarRotaryPage::toggleButtonReleased(
-        QPushButton* button, const string cmd, const string label) {
+        QPushButton* button, const string& cmd, const bool useActionArg, const string& label) {
     D("%s button released", label.c_str());
     toggleIconTheme(button, /* pressed= */ false);
     if (mLongPressTimer.isActive()) {
         mLongPressTimer.stop();
     }
-    mLastPushButtonCmd = cmd;
-    executeLastPushButtonCmd();
+
+    // Inject an ACTION_UP event if requested and supported. Otherwise, inject ACTION_DOWN followed
+    // by ACTION_UP.
+    executeCmd(cmd, useActionArg && mSupportsActionArg ? "-a up" : "");
 }
 
 void CarRotaryPage::toggleIconTheme(QPushButton* button, const bool pressed) {
@@ -160,12 +178,17 @@ void CarRotaryPage::toggleIconTheme(QPushButton* button, const bool pressed) {
 }
 
 void CarRotaryPage::executeLastPushButtonCmd() {
-    if (!mLastPushButtonCmd.empty()) {
+    executeCmd(mLastPushButtonCmd, "");
+}
+
+void CarRotaryPage::executeCmd(const string& cmd, const string& arg) {
+    if (!cmd.empty()) {
         mAdbExecuteIsActive = true;
         mAdbExecuteTime.restart();
-        D("Executing cmd: %s", mLastPushButtonCmd.c_str());
+        D("Executing cmd: %s arg: %s", cmd.c_str(), arg.c_str());
         mAdb->runAdbCommand(
-                {"shell", mLastPushButtonCmd},
+                arg.empty() ? std::vector<std::string>{"shell", cmd}
+                            : std::vector<std::string>{"shell", cmd, arg},
                 [this](const OptionalAdbCommandResult& result) {
                     mAdbExecuteIsActive = false;
                     D("ADB execute elapsed: %i", mAdbExecuteTime.elapsed());
@@ -234,6 +257,38 @@ void CarRotaryPage::checkRotaryControllerService() {
                 kAdbCommandTimeoutMs,
                 true);
     }
+}
+
+void CarRotaryPage::startSupportsActionTimer() {
+    QObject::connect(&mSupportsActionTimer, &QTimer::timeout, this,
+            &CarRotaryPage::determineWhetherInjectKeySupportsActionArg);
+    mSupportsActionTimer.setSingleShot(false);
+    mSupportsActionTimer.setInterval(kSupportsActionTimerIntervalMs);
+    mSupportsActionTimer.start();
+}
+
+void CarRotaryPage::determineWhetherInjectKeySupportsActionArg() {
+    if (!mAdb) {
+        D("ADB interface unavailable");
+        return;
+    }
+    if (!isBootCompleted()) {
+        return;
+    }
+    mAdb->runAdbCommand(
+            {"shell", "cmd car_service -h | grep \"inject-key\""},
+            [this](const android::emulation::OptionalAdbCommandResult& result) {
+                string line;
+                mSupportsActionArg = false;
+                if (result && result->exit_code == 0 && result->output &&
+                        getline(*(result->output), line)) {
+                    mSupportsActionArg = line.find("-a") != std::string::npos;
+                    D("inject-key %s -a", mSupportsActionArg ? "supports" : "doesn't support");
+                    mSupportsActionTimer.stop();
+                }
+            },
+            kAdbCommandTimeoutMs,
+            true);
 }
 
 bool CarRotaryPage::isBootCompleted() {

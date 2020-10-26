@@ -406,6 +406,7 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
 
     std::vector<VkImageUsageFlags> usageFlags = {
         VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
         VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT,
@@ -417,7 +418,7 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
 
     std::vector<VkEmulation::ImageSupportInfo> res;
 
-    // Currently: 12 formats, 2 tilings, 4 usage flags -> 96 cases
+    // Currently: 12 formats, 2 tilings, 5 usage flags -> 120 cases
     // to check
     for (auto f : formats) {
         for (auto t : types) {

@@ -14,7 +14,7 @@
 
 #include "goldfish_vk_baseprotodefs.pb.h"
 
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 #include "common/goldfish_vk_baseprotoconversion.h"
 #include "common/goldfish_vk_testing.h"
 
@@ -27,7 +27,7 @@
 #include <string.h>
 #include <vulkan.h>
 
-using android::base::Pool;
+using android::base::BumpPool;
 
 namespace goldfish_vk {
 
@@ -235,7 +235,7 @@ static void onFailCompareFunc(const char* errMsg) {
 
 // Tests the protobuf conversion API at a basic level.
 TEST(VulkanProtobuf, ConversionSimple) {
-    Pool pool;
+    BumpPool pool;
     DefaultHandleMapping mapping;
 
     VkExtent2D extent = { 1, 2, };
@@ -258,7 +258,7 @@ TEST(VulkanProtobuf, ConversionSimple) {
 
 // Tests the protobuf conversion API when strings are involved.
 TEST(VulkanProtobuf, ConversionStrings) {
-    Pool pool;
+    BumpPool pool;
     DefaultHandleMapping mapping;
 
     constexpr char testAppName[] = "testAppName";
@@ -291,7 +291,7 @@ TEST(VulkanProtobuf, ConversionStrings) {
 
 // Tests the protobuf conversion API with arrays of strings.
 TEST(VulkanProtobuf, ConversionStringArrays) {
-    Pool pool;
+    BumpPool pool;
     DefaultHandleMapping mapping;
 
     const char* const testExtensionNames[] = {
@@ -333,7 +333,7 @@ TEST(VulkanProtobuf, ConversionStringArrays) {
 
 // Tests the protobuf conversion API for nested structs.
 TEST(VulkanProtobuf, ConversionNestedStruct) {
-    Pool pool;
+    BumpPool pool;
     DefaultHandleMapping mapping;
 
     constexpr char testAppName[] = "testAppName";
@@ -380,7 +380,7 @@ TEST(VulkanProtobuf, ConversionNestedStruct) {
 
 // Tests that protobuf conversion API can work with nested repeated structs.
 TEST(VulkanProtobuf, ConversionNestedRepeatedStruct) {
-    Pool pool;
+    BumpPool pool;
     DefaultHandleMapping mapping;
 
     std::vector<VkDescriptorPoolSize> poolSizes = {
@@ -411,7 +411,7 @@ TEST(VulkanProtobuf, ConversionNestedRepeatedStruct) {
 
 // Tests the protobuf conversion API for structs that have static strings.
 TEST(VulkanProtobuf, ConversionStaticString) {
-    Pool pool;
+    BumpPool pool;
     DefaultHandleMapping mapping;
 
     VkExtensionProperties extProps = {
@@ -431,7 +431,7 @@ TEST(VulkanProtobuf, ConversionStaticString) {
 
 // Tests that protobuf conversion API can work with extension structs.
 TEST(VulkanProtobuf, ConversionExtensionStruct) {
-    Pool pool;
+    BumpPool pool;
     DefaultHandleMapping mapping;
 
     VkMemoryDedicatedAllocateInfo dedicatedAi = {

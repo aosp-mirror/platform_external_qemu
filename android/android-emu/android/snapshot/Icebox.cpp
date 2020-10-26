@@ -29,6 +29,7 @@
 #include "android/base/Log.h"                                // for CHECK
 #include "android/base/async/ThreadLooper.h"                 // for ThreadLo...
 #include "android/base/files/PathUtils.h"                    // for pj
+#include "android/base/files/ScopedFd.h"
 #include "android/base/sockets/SocketUtils.h"                // for socketSe...
 #include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
 #include "android/base/synchronization/Lock.h"               // for Lock
@@ -43,7 +44,7 @@
 #include "openssl/base.h"                                    // for RSA
 #include "openssl/nid.h"                                     // for NID_sha1
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG >= 1
 #define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
@@ -62,7 +63,6 @@ using namespace android::emulation;
 using namespace android::jdwp;
 
 static int s_adb_port = -1;
-static int s_adb_scoket = -1;
 static std::atomic<std::uint32_t> s_id = {6000};
 static std::unique_ptr<android::base::Thread> s_workerThread = {};
 static int s_version = A_VERSION_MIN;
@@ -142,35 +142,29 @@ static void assignChecksum(apacket* packet) {
 
 static int tryConnect() {
     using namespace android::base;
-    if (s_adb_scoket > 0) {
-        return s_adb_scoket;
-    }
-    if (s_adb_port == -1) {
-        fprintf(stderr, "adb port uninitialized\n");
-        return false;
-    }
 
-    int s = socketTcp4LoopbackClient(s_adb_port);
-    if (s < 0) {
-        s = socketTcp6LoopbackClient(s_adb_port);
+    int fd = socketTcp4LoopbackClient(s_adb_port);
+    if (fd < 0) {
+        fd = socketTcp6LoopbackClient(s_adb_port);
     }
-    if (s < 0) {
+    if (fd < 0) {
         fprintf(stderr, "failed to connect to adb port %d\n", s_adb_port);
         return -1;
     }
+    android::base::ScopedFd s(fd);
 
-#define _SEND_PACKET(packet)           \
-    {                                  \
-        assignChecksum(&packet);       \
-        if (!sendPacket(s, &packet)) { \
-            return -1;                 \
-        }                              \
+#define _SEND_PACKET(packet)                 \
+    {                                        \
+        assignChecksum(&packet);             \
+        if (!sendPacket(s.get(), &packet)) { \
+            return -1;                       \
+        }                                    \
     }
-#define _RECV_PACKET(packet)           \
-    {                                  \
-        if (!recvPacket(s, &packet)) { \
-            return -1;                 \
-        }                              \
+#define _RECV_PACKET(packet)                 \
+    {                                        \
+        if (!recvPacket(s.get(), &packet)) { \
+            return -1;                       \
+        }                                    \
     }
 
     uint32_t local_id = s_id.fetch_add(1);
@@ -180,8 +174,8 @@ static int tryConnect() {
     if (s_id == 0) {
         s_id++;
     }
-    socketSetBlocking(s);
-    socketSetNoDelay(s);
+    socketSetBlocking(s.get());
+    socketSetNoDelay(s.get());
     D("Setup socket");
 
     {
@@ -218,7 +212,7 @@ static int tryConnect() {
                                  pack_recv.mesg.data_length,
                                  (char*)pack_send.data.data(), sigLen)) {
                 fprintf(stderr, "Fail to authenticate adb\n");
-                return false;
+                return -1;
             }
             assert(sigLen <= pack_send.data.size());
             pack_send.mesg.data_length = sigLen;
@@ -235,10 +229,9 @@ static int tryConnect() {
         }
         s_version = std::min((unsigned)A_VERSION, pack_recv.mesg.arg0);
     }
-    s_adb_scoket = s;
 #undef _SEND_PACKET
 #undef _RECV_PACKET
-    return s;
+    return s.release();
 }
 
 static bool recvPacketWithId(int s, int hostId, apacket* packet) {
@@ -263,6 +256,7 @@ namespace icebox {
 
 void set_jdwp_port(int adb_port) {
     s_adb_port = adb_port;
+    D("Set jdwp port %d\n", s_adb_port);
 }
 
 bool run_async(std::string cmd_str) {
@@ -272,24 +266,24 @@ bool run_async(std::string cmd_str) {
         }
     }
     s_workerThread.reset(new android::base::FunctorThread([cmd_str] {
-        int s = tryConnect();
-        if (s < 0) {
+        base::ScopedFd s(tryConnect());
+        if (s.get() < 0) {
             return -1;
         }
         uint32_t local_id = s_id.fetch_add(1);
         uint32_t remote_id = 0;
-#define _SEND_PACKET(packet)           \
-    {                                  \
-        assignChecksum(&packet);       \
-        if (!sendPacket(s, &packet)) { \
-            return -1;                 \
-        }                              \
+#define _SEND_PACKET(packet)                 \
+    {                                        \
+        assignChecksum(&packet);             \
+        if (!sendPacket(s.get(), &packet)) { \
+            return -1;                       \
+        }                                    \
     }
-#define _RECV_PACKET(packet)                           \
-    {                                                  \
-        if (!recvPacketWithId(s, local_id, &packet)) { \
-            return -1;                                 \
-        }                                              \
+#define _RECV_PACKET(packet)                                 \
+    {                                                        \
+        if (!recvPacketWithId(s.get(), local_id, &packet)) { \
+            return -1;                                       \
+        }                                                    \
     }
         {
             apacket connect;
@@ -348,32 +342,34 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         s_id++;
     }
     D("Setup socket");
-    int s = tryConnect();
-    if (s < 0) {
+    base::ScopedFd s(tryConnect());
+    if (s.get() < 0) {
         D("Connect failed");
         return false;
     }
     D("Connect succeeded");
 
-#define _SEND_PACKET(packet)           \
-    {                                  \
-        assignChecksum(&packet);       \
-        if (!sendPacket(s, &packet)) { \
-            return false;              \
-        }                              \
+#define _SEND_PACKET(packet)                        \
+    {                                               \
+        assignChecksum(&packet);                    \
+        if (!sendPacket(s.get(), &packet)) {        \
+            D("Send packet failed %d\n", __LINE__); \
+            return false;                           \
+        }                                           \
     }
-#define _RECV_PACKET(packet)                           \
-    {                                                  \
-        if (!recvPacketWithId(s, local_id, &packet)) { \
-            return false;                              \
-        }                                              \
+#define _RECV_PACKET(packet)                                 \
+    {                                                        \
+        if (!recvPacketWithId(s.get(), local_id, &packet)) { \
+            D("Recv packet failed %d\n", __LINE__);          \
+            return false;                                    \
+        }                                                    \
     }
-#define _SEND_PACKET_OK(packet)             \
-    {                                       \
-        _SEND_PACKET(packet);               \
-        if (!recvOkayWithId(s, local_id)) { \
-            return false;                   \
-        }                                   \
+#define _SEND_PACKET_OK(packet)                   \
+    {                                             \
+        _SEND_PACKET(packet);                     \
+        if (!recvOkayWithId(s.get(), local_id)) { \
+            return false;                         \
+        }                                         \
     }
     {
         apacket jdwp_connect;
@@ -615,35 +611,39 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
             if (max_snapshot_number == -1 ||
                 snapshot_num < max_snapshot_number) {
                 // Take snapshot when AssertionError is thrown
-                bool snapshot_done = false;
-                base::ConditionVariable snapshot_signal;
-                base::Lock snapshot_lock;
                 D("send out command for main thread");
                 std::string new_snapshot_name =
                         snapshot_name + std::to_string(snapshot_num);
                 snapshot_num++;
-                android::base::ThreadLooper::runOnMainLooper(
-                        [&snapshot_done, &snapshot_signal, &snapshot_lock,
-                         &new_snapshot_name]() {
-                            D("ready to take snapshot");
-                            getConsoleAgents()->vm->vmStop();
-                            const AndroidSnapshotStatus result =
-                                    androidSnapshot_save(
+                android::base::ThreadLooper::
+                        runOnMainLooperAndWaitForCompletion(
+                                [&new_snapshot_name]() {
+                                    D("ready to take snapshot");
+                                    getConsoleAgents()->vm->vmStop();
+                                    bool snapshotSkipped =
+                                            getConsoleAgents()
+                                                    ->vm
+                                                    ->isSnapshotSaveSkipped();
+                                    if (snapshotSkipped) {
+                                        D("Temporarily re-enabling snapshot");
+                                        getConsoleAgents()
+                                                ->vm->setSkipSnapshotSave(
+                                                        false);
+                                    }
+                                    androidSnapshot_delete(
                                             new_snapshot_name.c_str());
-                            D("Snapshot done, result %d (expect %d)", result,
-                              SNAPSHOT_STATUS_OK);
-                            getConsoleAgents()->vm->vmStart();
-                            snapshot_lock.lock();
-                            snapshot_done = true;
-                            snapshot_signal.broadcastAndUnlock(&snapshot_lock);
-                            D("Snapshot thread done");
-                        });
-                D("Icebox thread waiting for snapshot");
-                snapshot_lock.lock();
-                snapshot_signal.wait(&snapshot_lock, [&snapshot_done]() {
-                    return snapshot_done;
-                });
-                snapshot_lock.unlock();
+                                    const AndroidSnapshotStatus result =
+                                            androidSnapshot_save(
+                                                    new_snapshot_name.c_str());
+                                    D("Snapshot done, result %d (expect %d)",
+                                      result, SNAPSHOT_STATUS_OK);
+                                    if (snapshotSkipped) {
+                                        getConsoleAgents()
+                                                ->vm->setSkipSnapshotSave(true);
+                                    }
+                                    getConsoleAgents()->vm->vmStart();
+                                    D("Snapshot thread done");
+                                });
                 D("Icebox thread resume after snapshot");
             }
             _SEND_PACKET(ok_out);
