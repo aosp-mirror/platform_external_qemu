@@ -13,48 +13,19 @@
 // limitations under the License.
 #include "emulator/webrtc/capture/GrpcAudioSource.h"
 
-#include <grpcpp/grpcpp.h>     // for string
-#include <rtc_base/logging.h>  // for RTC_LOG
-#include <stdio.h>             // for size_t
+#include <grpcpp/grpcpp.h>                // for ClientReaderInterface, Clie...
+#include <stdio.h>                        // for size_t
+#include <algorithm>                      // for min
+#include <memory>                         // for unique_ptr, operator==
+#include <string>                         // for string, basic_string<>::val...
+#include <thread>                         // for thread
 
-#include <algorithm>  // for min
-#include <map>        // for multimap
-#include <memory>     // for unique_ptr
-#include <string>     // for string
-#include <thread>     // for thread::id
-#include <utility>    // for __unwra...
-
-#include "android/base/StringView.h"                          // for StringView
-#include "android/base/files/IniFile.h"                       // for IniFile
-#include "android/emulation/control/secure/BasicTokenAuth.h"  // for BasicTo...
-#include "emulator_controller.pb.h"                           // for AudioPa...
-#include "grpcpp/security/credentials.h"                      // for Insecur...
+#include "emulator_controller.grpc.pb.h"  // for EmulatorController::Stub
+#include "emulator_controller.pb.h"       // for AudioPacket, AudioFormat
 
 namespace emulator {
 namespace webrtc {
 
-// A plugin that inserts the basic auth headers into a gRPC request
-// if needed.
-class BasicTokenAuthenticator : public grpc::MetadataCredentialsPlugin {
-public:
-    BasicTokenAuthenticator(const grpc::string& token)
-        : mToken("Bearer " + token) {}
-    ~BasicTokenAuthenticator() = default;
-
-    grpc::Status GetMetadata(
-            grpc::string_ref service_url,
-            grpc::string_ref method_name,
-            const grpc::AuthContext& channel_auth_context,
-            std::multimap<grpc::string, grpc::string>* metadata) override {
-        metadata->insert(std::make_pair(
-                android::emulation::control::BasicTokenAuth::DEFAULT_HEADER,
-                mToken));
-        return grpc::Status::OK;
-    }
-
-private:
-    grpc::string mToken;
-};
 
 using ::android::emulation::control::AudioFormat;
 using ::android::emulation::control::AudioPacket;
@@ -68,38 +39,15 @@ constexpr int32_t kSamplesPerFrame = kBitRateHz / 100 /*(10ms/1s)*/;
 constexpr size_t kBytesPerFrame =
         kBytesPerSample * kSamplesPerFrame * kChannels;
 
-GrpcAudioSource::GrpcAudioSource(std::string discovery_file) {
-    if (initializeGrpcStub(discovery_file)) {
+GrpcAudioSource::GrpcAudioSource(std::string discovery_file) :
+mClient(discovery_file) {
+    if (mClient.stub()) {
         mPartialFrame.reserve(kBytesPerFrame);
         mAudioThread = std::thread([this]() { StreamAudio(); });
     }
 }
 
-bool GrpcAudioSource::initializeGrpcStub(std::string discovery_file) {
-    android::base::IniFile iniFile(discovery_file);
-    iniFile.read();
-    if (!iniFile.hasKey("grpc.port") || iniFile.hasKey("grpc.server_cert")) {
-        RTC_LOG(LERROR) << "No grpc port, or tls enabled. Audio disabled.";
-        return false;
-    }
-    std::string grpc_address =
-            "localhost:" + iniFile.getString("grpc.port", "8554");
-    mEmulatorStub = android::emulation::control::EmulatorController::NewStub(
-            grpc::CreateChannel(
-                    grpc_address,
-                    ::grpc::experimental::LocalCredentials(LOCAL_TCP)));
 
-    // Install token authenticator if needed.
-    if (iniFile.hasKey("grpc.token")) {
-        auto token = iniFile.getString("grpc.token", "");
-        auto creds = grpc::MetadataCredentialsFromPlugin(
-                std::make_unique<BasicTokenAuthenticator>(token));
-        mContext.set_credentials(creds);
-    }
-
-    RTC_LOG(INFO) << "Initialized audio.";
-    return true;
-}
 
 void GrpcAudioSource::StreamAudio() {
     AudioFormat request;
@@ -107,7 +55,7 @@ void GrpcAudioSource::StreamAudio() {
     request.set_channels(AudioFormat::Stereo);
     request.set_samplingrate(kBitRateHz);
     std::unique_ptr<grpc::ClientReaderInterface<AudioPacket>> stream =
-            mEmulatorStub->streamAudio(&mContext, request);
+            mClient.stub()->streamAudio(&mContext, request);
     if (stream == nullptr) {
         return;
     }

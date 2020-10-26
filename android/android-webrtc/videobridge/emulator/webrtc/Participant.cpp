@@ -29,6 +29,7 @@
 
 #include "emulator/webrtc/Switchboard.h"               // for Switchboard
 #include "emulator/webrtc/capture/GrpcAudioSource.h"   // for GrpcAudioSource
+#include "emulator/webrtc/capture/GrpcVideoSource.h"   // for GrpcAudioSource
 #include "emulator/webrtc/capture/VideoCapturer.h"     // for VideoCapturer
 #include "emulator/webrtc/capture/VideoTrackSource.h"  // for VideoTrackSource
 #include "nlohmann/json.hpp"                           // for basic_json<>::...
@@ -250,11 +251,9 @@ bool Participant::AddVideoTrack(std::string handle) {
     }
 
     // TODO(jansene): Video sources should be shared amongst participants.
-    RTC_LOG(INFO) << "Adding track: [" << handle << "]";
-    auto capturer =
-            mSwitchboard->getVideoCaptureFactory()->getVideoCapturer(handle);
-    auto track = new rtc::RefCountedObject<emulator::webrtc::VideoTrackSource>(
-            capturer);
+    RTC_LOG(INFO) << "Adding video track: [" << handle << "]";;
+    auto track = new rtc::RefCountedObject<emulator::webrtc::GrpcVideoSource>(
+            handle);
     scoped_refptr<::webrtc::VideoTrackInterface> video_track(
             mPeerConnectionFactory->CreateVideoTrack(handle, track));
 
