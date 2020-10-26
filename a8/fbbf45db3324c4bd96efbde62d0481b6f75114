@@ -1,0 +1,7 @@
+Code-Review+2: Erwin Jansen <jansene@google.com>
+Bypass-Presubmit+1: Erwin Jansen <jansene@google.com>
+Submitted-by: Erwin Jansen <jansene@google.com>
+Submitted-at: Mon, 26 Oct 2020 20:30:51 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1475057
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
