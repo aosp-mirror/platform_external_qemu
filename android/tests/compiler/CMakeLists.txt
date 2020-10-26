@@ -7,7 +7,7 @@ prebuilt(GLIB2)
 android_add_test(
   TARGET win_clang_unittests
   SRC # cmake-format: sortable
-      enum_bit_fields.c longjump_test.c compiler_tests.cpp)
+      compiler_tests.cpp enum_bit_fields.c longjump_test.c)
 
 # the longjump errors manifest with -O2
 set_source_files_properties(longjump_test.c PRIVATE COMPILE_FLAGS "-O2")

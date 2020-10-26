@@ -14,7 +14,8 @@
 
 #include <grpcpp/grpcpp.h>
 #include <stdint.h>
-#include <sys/stat.h>                                              // for stat
+#include <sys/stat.h>  // for stat
+
 #include <cstdio>
 #include <fstream>
 #include <functional>
@@ -32,13 +33,13 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/GzipStreambuf.h"
 #include "android/base/files/PathUtils.h"  // for pj
+#include "android/base/files/TarStream.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/control/LineConsumer.h"
 #include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
-#include "android/emulation/control/snapshot/TarStream.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/globals.h"
 #include "android/snapshot/Icebox.h"
@@ -46,6 +47,7 @@
 #include "android/snapshot/Snapshot.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/utils/file_io.h"
+#include "android/utils/ini.h"
 #include "android/utils/path.h"
 #include "snapshot.pb.h"
 #include "snapshot_service.grpc.pb.h"
@@ -113,22 +115,18 @@ public:
                 });
         android_mkdir(tmpdir.data(), 0700);
 
-        // An imported snapshot already has the qcow2 images inside its snapshot
-        // directory, so they are already in a good state.
-        if (!snapshot->isImported()) {
-            // Exports all qcow2 images..
-            SnapshotLineConsumer slc(&result);
-            auto exp = getConsoleAgents()->vm->snapshotExport(
-                    snapshot->name().data(), tmpdir.data(), slc.opaque(),
-                    LineConsumer::Callback);
+        // Exports all qcow2 images..
+        SnapshotLineConsumer slc(&result);
+        auto exp = getConsoleAgents()->vm->snapshotExport(
+                snapshot->name().data(), tmpdir.data(), slc.opaque(),
+                LineConsumer::Callback);
 
-            if (!exp) {
-                writer->Write(*slc.error());
-                return Status::OK;
-            }
-
-            LOG(VERBOSE) << "Exported snapshot in " << sw.restartUs() << " us";
+        if (!exp) {
+            writer->Write(*slc.error());
+            return Status::OK;
         }
+
+        LOG(VERBOSE) << "Exported snapshot in " << sw.restartUs() << " us";
 
         // Stream the tmpdir out as a tar.gz..
         CallbackStreambufWriter csb(
@@ -146,7 +144,8 @@ public:
             stream = std::make_unique<std::ostream>(&csb);
         }
 
-        // Use of  a 64 KB  buffer gives good performance (see performance tests.)
+        // Use of  a 64 KB  buffer gives good performance (see performance
+        // tests.)
         TarWriter tw(tmpdir, *stream, k64KB);
         result.set_success(tw.addDirectory("."));
         if (tw.fail()) {
@@ -171,7 +170,8 @@ public:
             char buf[k64KB];
             PathUtils::split(fname, nullptr, &name);
 
-            // Use of  a 64 KB  buffer gives good performance (see performance tests.)
+            // Use of  a 64 KB  buffer gives good performance (see performance
+            // tests.)
             std::ifstream ifs(fname, std::ios_base::in | std::ios_base::binary);
             ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
 
@@ -286,14 +286,31 @@ public:
     }
 
     Status ListSnapshots(ServerContext* context,
-                         const ::google::protobuf::Empty* request,
+                         const SnapshotFilter* request,
                          SnapshotList* reply) override {
         for (auto snapshot : snapshot::Snapshot::getExistingSnapshots()) {
             auto protobuf = snapshot.getGeneralInfo();
 
-            if (protobuf && snapshot.checkValid(false)) {
+            bool keep =
+                    (request->statusfilter() == SnapshotFilter::CompatibleOnly &&
+                     snapshot.checkValid(false)) ||
+                    request->statusfilter() == SnapshotFilter::All;
+            if (protobuf && keep) {
                 auto details = reply->add_snapshots();
                 details->set_snapshot_id(snapshot.name());
+                details->set_size(snapshot.folderSize());
+                if (snapshot.isLoaded()) {
+                    // Invariant: SnapshotDetails::Loaded -> SnapshotDetails::Compatible
+                    details->set_status(SnapshotDetails::Loaded);
+                } else {
+                    // We only need to check for snapshot validity once.
+                    // Invariant: SnapshotFilter::CompatbileOnly -> snapshot.checkValid(false)
+                    if (request->statusfilter() == SnapshotFilter::CompatibleOnly || snapshot.checkValid(false)) {
+                        details->set_status(SnapshotDetails::Compatible);
+                    } else {
+                        details->set_status(SnapshotDetails::Incompatible);
+                    }
+                }
                 *details->mutable_details() = *protobuf;
             }
         }

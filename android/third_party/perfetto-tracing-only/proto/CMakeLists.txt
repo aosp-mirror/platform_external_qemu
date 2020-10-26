@@ -1,0 +1,1 @@
+android_add_protobuf(perfetto_trace perfetto_trace.proto)

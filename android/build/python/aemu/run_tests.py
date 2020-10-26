@@ -22,8 +22,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-
-from absl import logging
+import logging
 
 from aemu.definitions import EXE_POSTFIX, get_ctest, get_qemu_root
 from aemu.process import run

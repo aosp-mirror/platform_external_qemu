@@ -20,9 +20,11 @@
 
 namespace goldfish_vk {
 
+class VkDecoderGlobalState;
+
 class VulkanHandleMapping {
 public:
-    VulkanHandleMapping() = default;
+    VulkanHandleMapping(VkDecoderGlobalState* state) : m_state (state) { }
     virtual ~VulkanHandleMapping() { }
 
 #define DECLARE_HANDLE_MAP_PURE_VIRTUAL_METHOD(type) \
@@ -31,10 +33,13 @@ public:
     virtual void mapHandles_u64_##type(const uint64_t* handle_u64s, type* handles, size_t count = 1) = 0; \
 
     GOLDFISH_VK_LIST_HANDLE_TYPES(DECLARE_HANDLE_MAP_PURE_VIRTUAL_METHOD)
+protected:
+    VkDecoderGlobalState* m_state;
 };
 
 class DefaultHandleMapping : public VulkanHandleMapping {
 public:
+    DefaultHandleMapping() : VulkanHandleMapping(nullptr) { }
     virtual ~DefaultHandleMapping() { }
 
 #define DECLARE_HANDLE_MAP_OVERRIDE(type) \

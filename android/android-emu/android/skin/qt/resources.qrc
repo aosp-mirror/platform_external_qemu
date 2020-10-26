@@ -195,6 +195,16 @@
         <file alias="trip_origin">images/light/ic_trip_origin_24dp.svg</file>
         <file alias="trip_waypoint">images/light/ic_directions_waypoint_dot_24dp.svg</file>
         <file alias="trip_destination">images/light/ic_directions_destination_24dp.svg</file>
+        <file alias="tv_remote_back">images/light/tv_remote_back.svg</file>
+        <file alias="tv_remote_back_pressed">images/light/tv_remote_back_pressed.svg</file>
+        <file alias="tv_remote_bookmark">images/light/tv_remote_bookmark.svg</file>
+        <file alias="tv_remote_bookmark_pressed">images/light/tv_remote_bookmark_pressed.svg</file>
+        <file alias="tv_remote_home">images/light/tv_remote_home.svg</file>
+        <file alias="tv_remote_home_pressed">images/light/tv_remote_home_pressed.svg</file>
+        <file alias="tv_remote_live_tv">images/light/tv_remote_live_tv.svg</file>
+        <file alias="tv_remote_live_tv_pressed">images/light/tv_remote_live_tv_pressed.svg</file>
+        <file alias="tv_remote_settings">images/light/tv_remote_settings.svg</file>
+        <file alias="tv_remote_settings_pressed">images/light/tv_remote_settings_pressed.svg</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
         <file alias="walk">images/light/ic_directions_walk_222_48dp.svg</file>
 
@@ -352,6 +362,16 @@
         <file alias="trip_origin">images/dark/ic_trip_origin_white_24dp.svg</file>
         <file alias="trip_waypoint">images/dark/ic_directions_waypoint_dot_white_24dp.svg</file>
         <file alias="trip_destination">images/dark/ic_directions_destination_white_24dp.svg</file>
+        <file alias="tv_remote_back">images/dark/tv_remote_back.svg</file>
+        <file alias="tv_remote_back_pressed">images/dark/tv_remote_back_pressed.svg</file>
+        <file alias="tv_remote_bookmark">images/dark/tv_remote_bookmark.svg</file>
+        <file alias="tv_remote_bookmark_pressed">images/dark/tv_remote_bookmark_pressed.svg</file>
+        <file alias="tv_remote_home">images/dark/tv_remote_home.svg</file>
+        <file alias="tv_remote_home_pressed">images/dark/tv_remote_home_pressed.svg</file>
+        <file alias="tv_remote_live_tv">images/dark/tv_remote_live_tv.svg</file>
+        <file alias="tv_remote_live_tv_pressed">images/dark/tv_remote_live_tv_pressed.svg</file>
+        <file alias="tv_remote_settings">images/dark/tv_remote_settings.svg</file>
+        <file alias="tv_remote_settings_pressed">images/dark/tv_remote_settings_pressed.svg</file>
         <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
         <file alias="walk">images/dark/ic_directions_walk_EEE_48dp.svg</file>
         <file alias="posture_closed">images/dark/posture_closed.svg</file>

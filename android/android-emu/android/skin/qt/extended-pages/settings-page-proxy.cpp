@@ -218,7 +218,12 @@ static void sendProxySettingsToAgent(QString password) {
     QString proxyString;
 
     QSettings settings;
+
     bool useStudio = settings.value(Ui::Settings::HTTP_PROXY_USE_STUDIO, true).toBool();
+    // When in embedded mode, always use proxy setting from Studio.
+    if (android_cmdLineOptions->qt_hide_window) {
+        useStudio = true;
+    }
     bool proxyAuth = settings.value(Ui::Settings::HTTP_PROXY_AUTHENTICATION, false).toBool();
     enum Ui::Settings::HTTP_PROXY_TYPE proxyType =
             (enum Ui::Settings::HTTP_PROXY_TYPE)settings.value(
@@ -245,6 +250,7 @@ static void sendProxySettingsToAgent(QString password) {
         // Should never get here. Default to "no proxy."
         proxyString = "";
     }
+
     // Send the proxy selection to the agent
     int proxyResultCode = sHttpProxyAgent->httpProxySet(proxyString.toStdString().c_str());
 

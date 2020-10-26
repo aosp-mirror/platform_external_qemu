@@ -403,7 +403,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 }
 
 void registerQemuMiscPipeServicePipe() {
-    android::AndroidPipe::Service::add(new android::AndroidMessagePipe::Service(
+    AndroidPipe::Service::add(std::make_unique<AndroidMessagePipe::Service>(
             "QemuMiscPipe", qemuMiscPipeDecodeAndExecute));
 }
 }  // namespace android

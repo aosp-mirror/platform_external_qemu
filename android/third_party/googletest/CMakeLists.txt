@@ -79,11 +79,11 @@ target_link_libraries(gmock_main PRIVATE gmock PUBLIC Threads::Threads)
 if(WINDOWS_MSVC_X86_64)
   # Okay, google test is not happy under msvc compile
   foreach(tgt gtest gmock gmock_main gtest_main)
-      # clang-cl cross compile does not like the msvc specific flags.
-      if (MSVC)
-          target_compile_options(${tgt} PRIVATE -EHsc)
-          target_compile_definitions(${tgt} PRIVATE -D_HAS_EXCEPTIONS=1)
-      endif()
+    # clang-cl cross compile does not like the msvc specific flags.
+    if(MSVC)
+      target_compile_options(${tgt} PRIVATE -EHsc)
+      target_compile_definitions(${tgt} PRIVATE -D_HAS_EXCEPTIONS=1)
+    endif()
     target_compile_definitions(
       ${tgt} PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
   endforeach()

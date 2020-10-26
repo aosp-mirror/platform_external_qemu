@@ -19,11 +19,18 @@ import os
 import sys
 import time
 
+import google.protobuf.text_format
 import click
 
 from aemu.proto.snapshot_pb2 import Image
-from aemu.proto.snapshot_service_pb2 import SnapshotPackage
+from aemu.proto.snapshot_service_pb2 import SnapshotPackage, SnapshotDetails
 from snaptool.snapshot import SnapshotService
+
+
+def fmt_proto(msg):
+    """Formats a protobuf message as a single line."""
+    return google.protobuf.text_format.MessageToString(msg, as_one_line=True)
+
 
 def epoch_fmt(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))
@@ -37,9 +44,7 @@ def sizeof_fmt(num):
 
 
 @click.group()
-@click.option(
-    "--grpc", default="", help="Port of the grpc service to use."
-)
+@click.option("--grpc", default="", help="Port of the grpc service to use.")
 @click.pass_context
 def cli(ctx, grpc):
     ctx.obj = SnapshotService(grpc)
@@ -52,7 +57,13 @@ def list(snapshotService):
     snaps = snapshotService.lists()
     if snaps:
         for snap in snaps:
-            print(snap)
+            print(
+                "{}: {} ({})".format(
+                    snap.snapshot_id,
+                    SnapshotDetails.LoadStatus.Name(snap.status),
+                    sizeof_fmt(snap.size),
+                )
+            )
     else:
         print("No snapshots available.")
 
@@ -67,7 +78,7 @@ def info(snapshotService, name, all):
         print("{} does not exist".format(name))
 
     if all:
-        print(snap)
+        print(fmt_proto(snap))
     else:
         print(
             "{} : Created: {}".format(
@@ -126,6 +137,7 @@ def load(snapshotService, name):
 @click.argument("name")
 def save(snapshotService, name):
     snapshotService.save(name)
+
 
 @cli.command()
 @click.pass_obj

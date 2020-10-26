@@ -135,23 +135,18 @@ void setMinLogLevel(LogSeverity level) {
 
 // LogString
 
-LogString::LogString(const char* fmt, ...) : mString(NULL) {
+LogString::LogString(const char* fmt, ...) {
     size_t capacity = 100;
-    char* message = reinterpret_cast<char*>(::malloc(capacity));
     for (;;) {
+        mString.resize(capacity);
         va_list args;
         va_start(args, fmt);
-        int ret = vsnprintf(message, capacity, fmt, args);
+        int ret = vsnprintf(mString.data(), capacity, fmt, args);
         va_end(args);
         if (ret >= 0 && size_t(ret) < capacity)
             break;
         capacity *= 2;
     }
-    mString = message;
-}
-
-LogString::~LogString() {
-    ::free(mString);
 }
 
 // LogStream

@@ -1864,6 +1864,14 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (strstr(cstring, "GL_KHR_texture_compression_astc_ldr") != NULL) {
         s_glSupport.ext_GL_KHR_texture_compression_astc_ldr = true;
     }
+
+    // BPTC extension detection
+    if (emugl_feature_is_enabled(android::featurecontrol::BptcTextureSupport)) {
+        if ((strstr(cstring, "GL_EXT_texture_compression_bptc") != NULL) ||
+            (strstr(cstring, "GL_ARB_texture_compression_bptc") != NULL)) {
+            s_glSupport.hasBptcSupport = true;
+        }
+    }
 }
 
 void GLEScontext::buildStrings(bool isGles1, const char* baseVendor,

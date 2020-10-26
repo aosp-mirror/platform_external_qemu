@@ -13,14 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from distutils.spawn import find_executable
-import os
-import subprocess
-import sys
-
 import setuptools
-
 
 try:
     with open("README.md", "r") as fh:
@@ -30,30 +23,21 @@ except IOError:
 
 setuptools.setup(
     python_requires=">=2",
-    name="aemu",
+    name="emu-build",
     version="1.0",
     test_suite="nose.collector",
     tests_require=["coverage", "mock"],
     author="Erwin Jansen",
     author_email="jansene@google.com",
-    description="Set of tools to build the android emulator on every supported platform",
+    description="The android emulator python build scripts",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
+    packages=["aemu"],
     platforms="POSIX",
     entry_points={
-        "console_scripts": ["aemu-build=aemu.cmake:launch"],
+        "console_scripts": ["emu-build=aemu:aemu"],
     },
-    install_requires=[
-        "pip==19.0.3",
-        "enum34==1.1.6",
-        "requests==2.21.0",
-        "absl-py==0.6.1",
-        "certifi==2019.3.9",
-        "urllib3==1.24.1",
-        "idna==2.8",
-        "chardet==3.0.4",
-    ],
+    install_requires=["requests"],
     license="Apache License, Version 2.0",
     classifiers=[
         "Programming Language :: Python :: 2",
@@ -63,4 +47,5 @@ setuptools.setup(
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Topic :: Utilities",
-    ])
+    ],
+)

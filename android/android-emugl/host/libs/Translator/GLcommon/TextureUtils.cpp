@@ -228,6 +228,17 @@ bool isEtc2Format(GLenum internalformat) {
     return false;
 }
 
+bool isBptcFormat(GLenum internalformat) {
+    switch (internalformat) {
+    case GL_COMPRESSED_RGBA_BPTC_UNORM_EXT:
+    case GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT:
+    case GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT:
+    case GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_EXT:
+        return true;
+    }
+    return false;
+}
+
 bool isPaletteFormat(GLenum internalformat)  {
     switch (internalformat) {
     case GL_PALETTE4_RGB8_OES:
@@ -747,6 +758,13 @@ void forEachAstcFormat(std::function<void(GLint format)> f) {
     ASTC_FORMATS_LIST(CALL_ON_ASTC_FORMAT)
 }
 
+void forEachBptcFormat(std::function<void(GLint format)> f) {
+    f(GL_COMPRESSED_RGBA_BPTC_UNORM_EXT);
+    f(GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT);
+    f(GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT);
+    f(GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_EXT);
+}
+
 bool isEtc2OrAstcFormat(GLenum format) {
     switch (format) {
     case GL_COMPRESSED_RGB8_ETC2:
@@ -764,4 +782,15 @@ bool isEtc2OrAstcFormat(GLenum format) {
         break;
     }
     return isAstcFormat(format);
+}
+
+bool shouldPassthroughCompressedFormat(GLEScontext* ctx, GLenum internalformat) {
+    if (isEtc2Format(internalformat)) {
+        return ctx->getCaps()->hasEtc2Support;
+    } else if (isAstcFormat(internalformat)) {
+        return ctx->getCaps()->hasAstcSupport;
+    } else if (isBptcFormat(internalformat)) {
+        return ctx->getCaps()->hasBptcSupport;
+    }
+    return false;
 }

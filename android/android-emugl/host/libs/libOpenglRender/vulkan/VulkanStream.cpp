@@ -15,7 +15,7 @@
 
 #include "IOStream.h"
 
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 
 #include "emugl/common/feature_control.h"
 
@@ -135,7 +135,7 @@ private:
         return size;
     }
 
-    android::base::Pool mPool { 8, 4096, 64 };
+    android::base::BumpPool mPool;
 
     size_t mWritePos = 0;
     std::vector<uint8_t> mWriteBuffer;

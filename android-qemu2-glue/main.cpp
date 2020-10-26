@@ -80,6 +80,12 @@
 
 #include "config-target.h"
 
+// modem simulator
+extern "C" {
+#include "android_modem_v2.h"
+}
+#include "modem_main.h"
+
 extern "C" {
 #include "android/skin/charmap.h"
 #include "hw/misc/goldfish_pstore.h"
@@ -110,6 +116,7 @@ extern "C" {
 #include <unistd.h>
 #endif
 #include <algorithm>
+#include <string>
 
 #include "android/version.h"
 #define D(...)                   \
@@ -710,6 +717,33 @@ static void enter_qemu_main_loop(int argc, char** argv) {
 #endif // windows
 #endif // !CONFIG_HEADLESS
 
+// create the modem_simulator sub folder on the host
+// the radio configs come from the image/<arch>/data/misc/modem_simulator
+// folder, make a copy of that folder to avd/modem_simulator/ and create
+// the necessary dir strucutres that modem simulator expects
+static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw) {
+    ScopedCPtr<char> avd_dir(path_dirname(hw->disk_dataPartition_path));
+    if (!avd_dir) {
+        return false;
+    }
+
+    std::string modem_config_dir = PathUtils::join(avd_dir.get(), "modem_simulator");
+    std::string iccprofile_path = PathUtils::join(modem_config_dir.c_str(), "iccprofile_for_sim0.xml");
+    if (android_op_wipe_data) {
+        path_delete_file(iccprofile_path.c_str());
+    }
+
+    if (path_exists(iccprofile_path.c_str())) {
+        return true;
+    }
+
+    ScopedCPtr<char> sysimg_dir(path_dirname(hw->disk_ramdisk_path));
+    std::string org_modem_config_dir = PathUtils::join(sysimg_dir.get(), "data", "misc", "modem_simulator");
+
+    path_copy_dir(modem_config_dir.c_str(), org_modem_config_dir.c_str());
+    return path_exists(iccprofile_path.c_str());
+}
+
 static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
     if (!userdata_dir) {
@@ -1039,6 +1073,7 @@ static int startEmulatorWithMinConfig(
     stopRenderer();
     emulator_finiUserInterface();
 
+    cuttlefish::stop_android_modem_simulator();
     process_late_teardown();
     return 0;
 }
@@ -1911,6 +1946,29 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
+    if (feature_is_enabled(kFeature_ModemSimulator)) {
+        if (create_modem_simulator_configs_if_needed(hw)) {
+            init_modem_simulator();
+            // start modem now, so qemu can proceed with virtioport setup
+            int modem_simulator_guest_port =
+                    cuttlefish::start_android_modem_simulator_detached();
+
+            args.add("-device");
+            args.add("virtio-serial");
+            args.add("-chardev");
+            args.addFormat(
+                    "socket,port=%d,host=localhost,nowait,nodelay,ipv6,id="
+                    "modem",
+                    modem_simulator_guest_port);
+            args.add("-device");
+            args.add("virtserialport,chardev=modem,name=modem");
+        } else {
+            dwarning(
+                    "Could not setup modem simulator config files, modem "
+                    "simulator disabled.");
+        }
+    }
+
     // rng
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     args.add("-device");
@@ -2239,6 +2297,7 @@ extern "C" int main(int argc, char** argv) {
     stopRenderer();
     emulator_finiUserInterface();
 
+    cuttlefish::stop_android_modem_simulator();
     process_late_teardown();
     return 0;
 }

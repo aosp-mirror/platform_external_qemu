@@ -22,12 +22,14 @@ package android.emulation.control;
 import "google/protobuf/empty.proto";
 
 service UiController {
-    // this method has no effect if the extended contorls are already shown
+    // this method has no effect if the extended contorls are already shown.
+    // In that case, visibilityChanged will be set to false;
     rpc showExtendedControls(google.protobuf.Empty)
-            returns (google.protobuf.Empty) {}
-    // this method has no effect if the extended controls are hidden
+            returns (ExtendedControlsStatus) {}
+    // this method has no effect if the extended controls are hidden.
+    // In that case, visibilityChanged will be set to false;
     rpc closeExtendedControls(google.protobuf.Empty)
-            returns (google.protobuf.Empty) {}
+            returns (ExtendedControlsStatus) {}
     rpc setUiTheme(ThemingStyle) returns (google.protobuf.Empty) {}
 }
 
@@ -37,4 +39,8 @@ message ThemingStyle {
         DARK = 1;
     }
     Style style = 1;
+}
+
+message ExtendedControlsStatus {
+    bool visibilityChanged = 1;
 }

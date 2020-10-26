@@ -44,19 +44,25 @@ public:
 
     Status showExtendedControls(ServerContext* context,
                                 const Empty* request,
-                                Empty* reply) {
+                                ExtendedControlsStatus* reply) {
         auto agent = mAgents->emu;
-        android::base::ThreadLooper::runOnMainLooper(
-                [agent]() { agent->startExtendedWindow(); });
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [agent, reply]() {
+                    bool ret = agent->startExtendedWindow();
+                    reply->set_visibilitychanged(ret);
+                });
         return Status::OK;
     }
 
     Status closeExtendedControls(ServerContext* context,
                                  const Empty* request,
-                                 Empty* reply) {
+                                 ExtendedControlsStatus* reply) {
         auto agent = mAgents->emu;
-        android::base::ThreadLooper::runOnMainLooper(
-                [agent]() { agent->quitExtendedWindow(); });
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [agent, reply]() {
+                    bool ret = agent->quitExtendedWindow();
+                    reply->set_visibilitychanged(ret);
+                });
         return Status::OK;
     }
 

@@ -15,7 +15,7 @@ decoder_snapshot_decl_preamble = """
 
 namespace android {
 namespace base {
-class Pool;
+class BumpPool;
 class Stream;
 } // namespace base {
 } // namespace android {
@@ -207,7 +207,7 @@ class VulkanDecoderSnapshot(VulkanWrapperGenerator):
         additionalParams = [ \
             makeVulkanTypeSimple(True, "uint8_t", 1, "snapshotTraceBegin"),
             makeVulkanTypeSimple(False, "size_t", 0, "snapshotTraceBytes"),
-            makeVulkanTypeSimple(False, "android::base::Pool", 1, "pool"),]
+            makeVulkanTypeSimple(False, "android::base::BumpPool", 1, "pool"),]
 
         if api.retType.typeName != "void":
             additionalParams.append( \

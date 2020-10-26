@@ -457,7 +457,8 @@ public:
     }
 
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+                            int numBuffers,
+                            void** newPipePtr) override {
         DD("%s", __func__);
 
         if (!mIsWorking) {
@@ -576,7 +577,7 @@ private:
 }  // namespace
 
 void registerPipeService() {
-    android::AndroidPipe::Service::add(new EmuglPipe::Service());
+    android::AndroidPipe::Service::add(std::make_unique<EmuglPipe::Service>());
     registerGLProcessPipeService();
 }
 

@@ -51,10 +51,10 @@ public:
                 mSharedRegionSize);
         }
 
-        static Service* create() {
+        static std::unique_ptr<Service> create() {
             AutoLock lock(sServiceLock);
             sService = new Service();
-            return sService;
+            return std::unique_ptr<Service>(sService);
         }
 
         static Service* get() {
