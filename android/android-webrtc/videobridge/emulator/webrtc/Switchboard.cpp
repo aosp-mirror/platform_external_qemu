@@ -216,9 +216,7 @@ void Switchboard::received(SocketTransport* transport, const json object) {
 
             // Note: Dynamically adding new tracks will likely require stream
             // re-negotiation.
-            for (const std::string& handle : handles) {
-                stream->AddVideoTrack(handle);
-            }
+            stream->AddVideoTrack(mDiscoveryFile);
             stream->AddAudioTrack(mDiscoveryFile);
             stream->CreateOffer();
         }
