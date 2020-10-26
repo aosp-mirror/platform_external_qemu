@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b8166554_5f4e04cb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-26T19:51:07Z",
+      "side": 1,
+      "message": "do we need those?",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 17
+      },
+      "revId": "8602687fb531db105261d4e5d96a2f613e67411d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
