@@ -39,6 +39,30 @@
       },
       "revId": "1c3fed90b43f383f216b920c08ffd5627e7bfcf2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e215b8a3_38d2ba64",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_private_defs.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-10-27T00:29:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "facb2855_6b469a0d",
+      "range": {
+        "startLine": 212,
+        "startChar": 25,
+        "endLine": 212,
+        "endChar": 46
+      },
+      "revId": "1c3fed90b43f383f216b920c08ffd5627e7bfcf2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
