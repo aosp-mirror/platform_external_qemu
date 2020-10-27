@@ -121,6 +121,24 @@
       "parentUuid": "f28721c1_44f2031c",
       "revId": "d82d6949dfb62bd0638a7843b7f497347e387996",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7ad85e89_469383ac",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/sensor-replay-page.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2020-10-27T00:49:27Z",
+      "side": 1,
+      "message": "Interesting... why we have different connectors? Is that a UI requirement? Do these connectors mean different things? In any case, not big deal...",
+      "parentUuid": "e2d6b654_f40b253d",
+      "revId": "d82d6949dfb62bd0638a7843b7f497347e387996",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
