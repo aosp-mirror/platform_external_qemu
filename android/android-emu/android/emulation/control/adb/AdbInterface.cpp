@@ -212,6 +212,7 @@ private:
     AdbCommandPtr mSelf;
 };
 
+using AdbEntry = std::pair<std::string, Optional<int>>;
 class AdbInterfaceImpl final : public AdbInterface {
 public:
     friend AdbInterface::Builder;
@@ -253,7 +254,7 @@ private:
     std::string mAutoAdbPath;
     std::string mCustomAdbPath;
     std::string mSerialString;
-    std::vector<std::pair<std::string, Optional<int>>> mAvailableAdbInstalls;
+    std::vector<AdbEntry> mAvailableAdbInstalls;
     bool mAdbVersionCurrent = false;
 };
 
@@ -464,8 +465,14 @@ void AdbInterfaceImpl::selectAdbPath() {
         }
     }
 
-    // A locator that will scan the filesystem for available ADB installs
-    // Just take the first (likely the one from the SDK, our dir)
+    // Sort available adb installations by protocol version. Unknown versions
+    // are least preferred. Note that we sort using >=, so biggest numbers
+    // first.
+    std::sort(mAvailableAdbInstalls.begin(), mAvailableAdbInstalls.end(),
+              [](const AdbEntry& fst, const AdbEntry& snd) {
+                  return fst.second &&
+                         (!snd.second || fst.second >= snd.second);
+              });
     std::tie(mAutoAdbPath, adbVersion) = mAvailableAdbInstalls.front();
     mAdbVersionCurrent = adbVersion ? *adbVersion >= kMinAdbProtocol : false;
 }
