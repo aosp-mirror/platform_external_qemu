@@ -525,7 +525,8 @@ ui_init(const AConfig* skinConfig,
     ProcessSerialNumber psn = {0, kCurrentProcess};
     TransformProcessType(&psn, kProcessTransformToBackgroundApplication);
 #endif
-    } else {
+    /** Do not load emulator icon for embedded emulator. */
+    } else if (!opts->qt_hide_window) {
         // NOTE: On Windows, the program icon is embedded as a resource inside
         //       the executable. However, this only changes the icon that appears
         //       with the executable in a file browser. To change the icon that

@@ -424,5 +424,8 @@
         <file alias="posture_half-open_0BA">images/all/posture_half-open_0BA.svg</file>
         <file alias="posture_open_0BA">images/all/posture_open_0BA.svg</file>
         <file alias="posture_tent_0BA">images/all/posture_tent_0BA.svg</file>
+        <!-- Used in Embedded Emulator -->
+        <file alias="android_studio_icon">images/all/androidstudio.svg</file>
+        <file alias="android_studio_icon_sm">images/all/androidstudio-small.svg</file>
     </qresource>
 </RCC>
