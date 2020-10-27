@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "android/utils/compiler.h"
 
@@ -73,6 +74,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(car_rotary, "Car rotary controller")                          \
     _VERBOSE_TAG(wifi, "Virtio Wifi")                                          \
     _VERBOSE_TAG(tvremote, "TV remote")                                        \
+    _VERBOSE_TAG(time, "Prefix a timestamp when logging")                      \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
@@ -146,6 +148,7 @@ extern void base_disable_verbose_logs();
  ** Debug messages can be sent by calling these functions:
  **
  ** 'dprint' prints "emulator: ", the message, then appends a '\n'
+ ** 'fdprintf' prints "emulator: ", the message then appends a '\n'
  ** 'dprintn' prints the message as is
  ** 'dprintnv' is 'dprintn' but allows you to use a va_list argument
  ** 'dwarning' prints "emulator: WARNING: ", then appends a '\n'
@@ -154,6 +157,8 @@ extern void base_disable_verbose_logs();
 
 extern void   dprint( const char*  format, ... );
 extern void   dprintn( const char*  format, ... );
+extern void   fdprintf( FILE* fp, const char* format, ... );
+extern void   fdprintfnv( FILE* fp, const char* level, const char* format, va_list  args );
 extern void   dprintnv( const char*  format, va_list  args );
 extern void   dwarning( const char*  format, ... );
 extern void   derror( const char*  format, ... );
