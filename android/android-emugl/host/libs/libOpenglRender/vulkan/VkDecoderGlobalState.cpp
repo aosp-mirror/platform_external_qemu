@@ -298,10 +298,10 @@ public:
         info.boxed = boxed;
 
         if (m_emu->instanceSupportsMoltenVK) {
-            m_useIOSurfaceFunc = reinterpret_cast<PFN_vkUseIOSurfaceMVK>(
-                m_vk->vkGetInstanceProcAddr(*pInstance, "vkUseIOSurfaceMVK"));
-            if (!m_useIOSurfaceFunc) {
-                fprintf(stderr, "Cannot find vkUseIOSurfaceMVK\n");
+            m_setMTLTextureFunc = reinterpret_cast<PFN_vkSetMTLTextureMVK>(
+                m_vk->vkGetInstanceProcAddr(*pInstance, "vkSetMTLTextureMVK"));
+            if (!m_setMTLTextureFunc) {
+                fprintf(stderr, "Cannot find vkSetMTLTextureMVK\n");
                 abort();
             }
         }
@@ -1360,10 +1360,10 @@ public:
         if (mapInfoIt == mMapInfo.end()) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
-        if (mapInfoIt->second.ioSurface) {
-            result = m_useIOSurfaceFunc(image, mapInfoIt->second.ioSurface);
+        if (mapInfoIt->second.mtlTexture) {
+            result = m_setMTLTextureFunc(image, mapInfoIt->second.mtlTexture);
             if (result != VK_SUCCESS) {
-                fprintf(stderr, "vkUseIOSurfaceMVK failed\n");
+                fprintf(stderr, "vkSetMTLTexture failed\n");
                 return VK_ERROR_OUT_OF_HOST_MEMORY;
             }
         }
@@ -2768,7 +2768,7 @@ public:
         mapInfo.size = localAllocInfo.allocationSize;
         mapInfo.device = device;
         if (importCbInfoPtr && m_emu->instanceSupportsMoltenVK) {
-            mapInfo.ioSurface = getColorBufferIOSurface(importCbInfoPtr->colorBuffer);
+            mapInfo.mtlTexture = getColorBufferMTLTexture(importCbInfoPtr->colorBuffer);
         }
 
         bool hostVisible =
@@ -2810,9 +2810,9 @@ public:
         }
 
 #ifdef __APPLE__
-        if (info->ioSurface) {
-            CFRelease(info->ioSurface);
-            info->ioSurface = nullptr;
+        if (info->mtlTexture) {
+            CFRelease(info->mtlTexture);
+            info->mtlTexture = nullptr;
         }
 #endif
 
@@ -5421,7 +5421,7 @@ private:
     bool mVerbosePrints = false;
     bool mUseOldMemoryCleanupPath = false;
     bool mGuestUsesAngle = false;
-    PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
+    PFN_vkSetMTLTextureMVK m_setMTLTextureFunc = nullptr;
 
     Lock mLock;
     ConditionVariable mCvWaitSequenceNumber;
@@ -5446,7 +5446,7 @@ private:
         uint64_t sizeToPage = 0;
         uint64_t hostmemId = 0;
         VkDevice device = VK_NULL_HANDLE;
-        IOSurfaceRef ioSurface = nullptr;
+        MTLTextureRef mtlTexture = nullptr;
     };
 
     struct InstanceInfo {
