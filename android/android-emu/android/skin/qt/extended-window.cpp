@@ -587,6 +587,10 @@ void ExtendedWindow::disableMouseWheel(bool disabled) {
 
 void ExtendedWindow::showEvent(QShowEvent* e) {
     if (mFirstShowEvent && !e->spontaneous()) {
+        if (android_cmdLineOptions->qt_hide_window) {
+            const QIcon icon(":/all/android_studio_icon");
+            setWindowIcon(icon);
+        }
         // This function has things that must be performed
         // after the ctor and after show() is called
         switchToTheme(getSelectedTheme());
