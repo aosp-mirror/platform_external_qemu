@@ -52,6 +52,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "24591518_88beee6b",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Added lock protection to all the functions that are referring to session_.\nAdded comments to session_.",
+      "parentUuid": "0f0cb65e_d38dd3d6",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a13f22ed_9a12e5c8",
@@ -65,6 +83,30 @@
       "writtenOn": "2020-10-20T22:53:25Z",
       "side": 1,
       "message": "This function is only used once, in the lines above. There may not be value in having it as a separate helper function.",
+      "range": {
+        "startLine": 71,
+        "startChar": 28,
+        "endLine": 71,
+        "endChar": 40
+      },
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "050b3a02_6eb345f5",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a13f22ed_9a12e5c8",
       "range": {
         "startLine": 71,
         "startChar": 28,
@@ -92,6 +134,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d2cbccfc_507e8830",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "45020146_1bb04343",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d37c2c75_9131567d",
@@ -109,6 +169,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2e639a45_c5700726",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d37c2c75_9131567d",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0094157d_5b3e29c1",
@@ -122,6 +200,24 @@
       "writtenOn": "2020-10-20T22:28:00Z",
       "side": 1,
       "message": "This means that this thread will be blocked for as long as it takes to get to the next event.\nIf the session file is corrupted or if something went wrong during the recording, this could block this thread for a long time and \"StopReplay()\" wouldn\u0027t work.\n\nIs that correct?\nShouldn\u0027t we unblock periodically to check if a REPLAY_STOP message is available?",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c1aae19_a9f75865",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0094157d_5b3e29c1",
       "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
@@ -161,6 +257,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3374fa05_17c9fda4",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cb709516_763b4178",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5ed79564_8d24c458",
@@ -178,6 +292,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f26983fd_e04287af",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5ed79564_8d24c458",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "652681ff_d7db9245",
@@ -191,6 +323,24 @@
       "writtenOn": "2020-10-20T22:28:00Z",
       "side": 1,
       "message": "This is not clear to me. What are the integers returned by this method mean?\nAre they positions in the list of session records?",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "796c0d03_a7c3d120",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Comments updated, They are event counts for each intervals",
+      "parentUuid": "652681ff_d7db9245",
       "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
@@ -230,6 +380,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cbe3ddc4_1e4deea7",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Change qemu style. \u0027m\u0027 prefix and lowerCamelCase",
+      "parentUuid": "f530b310_37abaf76",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9d32c128_de8796b0",
@@ -243,6 +411,24 @@
       "writtenOn": "2020-10-20T22:28:00Z",
       "side": 1,
       "message": "Nit: why is there a \"t\" before \"Lock\"?",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "27bc3b56_29386a0c",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d32c128_de8796b0",
       "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
@@ -264,6 +450,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c5a271ad_690de308",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback.h",
+        "patchSetId": 36
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b5acb4f5_52f6339f",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "467f9828_f67f77d4",
@@ -277,6 +481,24 @@
       "writtenOn": "2020-10-20T22:28:00Z",
       "side": 1,
       "message": "Nit: If you were doing ++timestampNs above, you wouldn\u0027t need this",
+      "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5b96cd49_7c0dd89f",
+        "filename": "android/android-emu/android/sensor_replay/sensor_session_playback_unittest.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2020-10-27T04:55:25Z",
+      "side": 1,
+      "message": "I still need this. This will be used in line 131 to check the session duration.\nIt should be the same as the_timestamp_of_the_last_sensor_record, not  (the_timestamp_of_the_last_sensor_record +1)",
+      "parentUuid": "467f9828_f67f77d4",
       "revId": "d475b5651fd4255a975a3aab4aa2d17b49a96a20",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
