@@ -97,7 +97,10 @@ ExtendedWindow::ExtendedWindow(
 #else
     // On Windows, a SubWindow does not show a Close button.
     // A Dialog works for Windows and Mac
-    setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
+    if (android_cmdLineOptions->qt_hide_window)
+        setWindowFlags(Qt::Tool | Qt::WindowCloseButtonHint);
+    else
+        setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
 #endif
 
     QSettings settings;
@@ -601,6 +604,14 @@ void ExtendedWindow::disableMouseWheel(bool disabled) {
 
 void ExtendedWindow::showEvent(QShowEvent* e) {
     if (mFirstShowEvent && !e->spontaneous()) {
+        if (android_cmdLineOptions->qt_hide_window) {
+#ifdef __linux__
+            const QIcon icon(":/all/android_studio_icon");
+#else
+            const QIcon icon(":/all/android_studio_icon_small");
+#endif
+            setWindowIcon(icon);
+        }
         // This function has things that must be performed
         // after the ctor and after show() is called
         switchToTheme(getSelectedTheme());
