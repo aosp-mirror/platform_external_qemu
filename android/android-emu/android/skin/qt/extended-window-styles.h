@@ -39,4 +39,5 @@ enum ExtendedWindowPane {
     PANE_IDX_HELP,
     PANE_IDX_CAR,
     PANE_IDX_CAR_ROTARY,
+    PANE_IDX_SENSOR_REPLAY,
 };
