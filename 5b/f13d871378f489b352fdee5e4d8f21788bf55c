@@ -1,0 +1,9 @@
+Lint+1: Lint 🤖 <ayeaye-gerrit@google.com>
+Code-Review+2: Roberto Perez <robertoalexis@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Autosubmit+1: Calvin Huang <calhuang@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Tue, 27 Oct 2020 04:55:52 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1386262
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
