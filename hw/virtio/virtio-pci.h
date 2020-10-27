@@ -37,8 +37,11 @@
 #ifdef CONFIG_VHOST_SCSI
 #include "hw/virtio/vhost-scsi.h"
 #endif
+
 #ifdef CONFIG_VHOST_VSOCK
 #include "hw/virtio/vhost-vsock.h"
+#else
+#include "hw/virtio/virtio-vsock.h"
 #endif
 
 #include "android-qemu2-glue/emulation/virtio-wifi.h"
@@ -58,6 +61,7 @@ typedef struct VirtIOInputHIDPCI VirtIOInputHIDPCI;
 typedef struct VirtIOInputHostPCI VirtIOInputHostPCI;
 typedef struct VirtIOGPUPCI VirtIOGPUPCI;
 typedef struct VHostVSockPCI VHostVSockPCI;
+typedef struct VirtIOVSockPCI VirtIOVSockPCI;
 typedef struct VirtIOCryptoPCI VirtIOCryptoPCI;
 typedef struct VirtIOWifiPCI VirtIOWifiPCI;
 
@@ -408,6 +412,16 @@ struct VirtIOGPUPCI {
 struct VHostVSockPCI {
     VirtIOPCIProxy parent_obj;
     VHostVSock vdev;
+};
+#else
+
+#define TYPE_VIRTIO_VSOCK_PCI "virtio-vsock-pci"
+#define VIRTIO_VSOCK_PCI(obj) \
+        OBJECT_CHECK(VirtIOVSockPCI, (obj), TYPE_VIRTIO_VSOCK_PCI)
+
+struct VirtIOVSockPCI {
+    VirtIOPCIProxy parent_obj;
+    VirtIOVSock vdev;
 };
 #endif
 
