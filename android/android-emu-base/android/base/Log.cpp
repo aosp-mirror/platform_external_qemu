@@ -11,6 +11,7 @@
 
 #include "android/base/Log.h"
 
+
 #include <stdarg.h>                        // for va_end, va_list, va_start
 #include <stdio.h>                         // for fprintf, fflush, vsnprintf
 #include <stdlib.h>                        // for free, malloc
@@ -20,6 +21,7 @@
 #include "android/base/Debug.h"            // for DebugBreak, IsDebuggerAtta...
 #include "android/base/StringView.h"       // for StringView, c_str, CStrWra...
 #include "android/base/files/PathUtils.h"  // for PathUtils
+#include "android/utils/debug.h"
 
 #define ENABLE_THREAD_ID 0
 
@@ -66,7 +68,7 @@ void defaultLogMessage(const LogParams& params,
 
     FILE* output = params.severity >= LOG_WARNING ? stderr : stdout;
     if (params.quiet) {
-        fprintf(output, "emulator: %s: %.*s\n",
+        fdprintf(output, "%s: %.*s",
                 severityLevelToString(params.severity), int(messageLen),
                 message);
     } else {
@@ -75,8 +77,7 @@ void defaultLogMessage(const LogParams& params,
         if (!PathUtils::split(path, nullptr, &filename)) {
             filename = path;
         }
-
-        fprintf(output, "emulator: %s%s: %s:%d: %.*s\n", tidStr,
+        fdprintf(output, "%s%s: %s:%d: %.*s", tidStr,
                 severityLevelToString(params.severity), c_str(filename).get(),
                 params.lineno, int(messageLen), message);
 
