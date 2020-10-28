@@ -144,6 +144,9 @@ message SnapshotPackage {
 
   // Format of the payload. Only required for the first message.
   Format format = 5;
+
+  // Path to the snapshot package tar file.
+  string path = 6;
 }
 
 // A snapshot filter can be used to filter the results produced by ListSnapshots
