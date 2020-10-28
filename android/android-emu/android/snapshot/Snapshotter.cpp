@@ -853,7 +853,11 @@ void Snapshotter::onCrashedSnapshot(const char* name) {
 }
 
 bool Snapshotter::onStartSaving(const char* name) {
+#ifdef AEMU_MIN
+    printf("AEMU_MIN defined\n");
+#endif
 #ifndef AEMU_MIN
+    printf("AEMU_MIN not defined\n");
     CrashReporter::get()->hangDetector().pause(true);
 #endif
     callCallbacks(Operation::Save, Stage::Start);
