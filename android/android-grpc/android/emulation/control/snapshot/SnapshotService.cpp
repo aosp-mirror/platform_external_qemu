@@ -129,24 +129,45 @@ public:
         LOG(VERBOSE) << "Exported snapshot in " << sw.restartUs() << " us";
 
         // Stream the tmpdir out as a tar.gz..
-        CallbackStreambufWriter csb(
-                k256KB, [writer](char* bytes, std::size_t len) {
-                    SnapshotPackage msg;
-                    msg.set_payload(std::string(bytes, len));
-                    msg.set_success(true);
-                    return writer->Write(msg);
-                });
+
+        std::unique_ptr<CallbackStreambufWriter> csb;
+        std::unique_ptr<std::ofstream> dstFile;
+        std::streambuf* streamBufPtr = nullptr;
+        if (request->path() == "") {
+            csb.reset(new CallbackStreambufWriter(
+                    k256KB, [writer](char* bytes, std::size_t len) {
+                        SnapshotPackage msg;
+                        msg.set_payload(std::string(bytes, len));
+                        msg.set_success(true);
+                        return writer->Write(msg);
+                    }));
+            streamBufPtr = csb.get();
+        } else {
+            dstFile.reset(new std::ofstream(request->path().c_str()));
+            if (!dstFile->is_open()) {
+                result.set_success(false);
+                result.set_err("Failed to write to " + request->path());
+                writer->Write(result);
+                return Status::OK;
+            }
+            streamBufPtr = dstFile->rdbuf();
+        }
 
         std::unique_ptr<std::ostream> stream;
+        std::ostream* streamPtr = nullptr;
         if (request->format() == SnapshotPackage::TARGZ) {
-            stream = std::make_unique<GzipOutputStream>(&csb);
+            stream = std::make_unique<GzipOutputStream>(streamBufPtr);
+            streamPtr = stream.get();
+        } else if (request->path() == "") {
+            stream = std::make_unique<std::ostream>(streamBufPtr);
+            streamPtr = stream.get();
         } else {
-            stream = std::make_unique<std::ostream>(&csb);
+            streamPtr = dstFile.get();
         }
 
         // Use of  a 64 KB  buffer gives good performance (see performance
         // tests.)
-        TarWriter tw(tmpdir, *stream, k64KB);
+        TarWriter tw(tmpdir, *streamPtr, k64KB);
         result.set_success(tw.addDirectory("."));
         if (tw.fail()) {
             result.set_err(tw.error_msg());
