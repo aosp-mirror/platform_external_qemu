@@ -33,6 +33,7 @@
 #include "android/base/system/System.h"
 #include "android/base/Tracing.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/synchronization/MessageChannel.h"
 #include "android/utils/path.h"
 #include "android/utils/file_io.h"
 
@@ -43,6 +44,7 @@
 #include <assert.h>
 
 using android::base::AutoLock;
+using android::base::MessageChannel;
 
 namespace emugl {
 
@@ -391,7 +393,39 @@ intptr_t RenderThread::main() {
 
         auto progressStart = currTimeUs(benchmarkEnabled);
         bool progress;
+
+#define MAX_THREADS 1
+            struct ThreadRunLimiter {
+                ThreadRunLimiter() {
+                    availableThreads.send(0);
+                }
+                android::base::MessageChannel<int, MAX_THREADS> availableThreads;
+                void acquire() {
+                    int token;
+                    availableThreads.receive(&token);
+                }
+                void release() {
+                    availableThreads.send(0);
+                }
+            };
+
+            struct ScopedThreadRunLimiter {
+                ScopedThreadRunLimiter(ThreadRunLimiter* t) : m_limiter(t) {
+                    m_limiter->acquire();
+                }
+                ~ScopedThreadRunLimiter() {
+                    m_limiter->release();
+                }
+                private:
+                ThreadRunLimiter* m_limiter;
+            };
+
+            static ThreadRunLimiter* l = new ThreadRunLimiter;
+
+            ScopedThreadRunLimiter scoped(l);
         do {
+
+
             progress = false;
 
             // try to process some of the command buffer using the GLESv1
