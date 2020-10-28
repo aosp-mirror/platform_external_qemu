@@ -18,6 +18,7 @@
 #include "android/base/files/MemStream.h"
 #include "android/base/Optional.h"
 #include "android/emulation/address_space_graphics_types.h"
+#include "android/base/synchronization/MessageChannel.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "emugl/common/mutex.h"
@@ -98,6 +99,8 @@ private:
     android::base::Lock mLock;
     android::base::ConditionVariable mCondVar;
     android::base::Optional<android::base::MemStream> mStream;
+
+    bool mRunInLimitedMode = false;
 };
 
 }  // namespace emugl

@@ -33,6 +33,7 @@
 #include "android/base/system/System.h"
 #include "android/base/Tracing.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/synchronization/MessageChannel.h"
 #include "android/utils/path.h"
 #include "android/utils/file_io.h"
 
@@ -43,6 +44,7 @@
 #include <assert.h>
 
 using android::base::AutoLock;
+using android::base::MessageChannel;
 
 namespace emugl {
 
@@ -71,10 +73,31 @@ static uint64_t currTimeUs(bool enable) {
 // Start with a smaller buffer to not waste memory on a low-used render threads.
 static constexpr int kStreamBufferSize = 128 * 1024;
 
+// Requires this many threads on the system available to run unlimited.
+static constexpr int kMinThreadsToRunUnlimited = 5;
+
+// A thread run limiter that limits render threads to run one slice at a time.
+class ThreadRunLimiter {
+public:
+    ThreadRunLimiter() { }
+    void acquire() {
+        int val;
+        mTokenChannel.receive(&val);
+    }
+    void release() {
+        mTokenChannel.send(0);
+    }
+private:
+    android::base::MessageChannel<int, 1> mTokenChannel;
+};
+
+static ThreadRunLimiter sThreadRunLimiter;
+
 RenderThread::RenderThread(RenderChannelImpl* channel,
                            android::base::Stream* loadStream)
     : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
-      mChannel(channel) {
+      mChannel(channel),
+      mRunInLimitedMode(android::base::System::get()->getCpuCoreCount() < kMinThreadsToRunUnlimited) {
     if (loadStream) {
         const bool success = loadStream->getByte();
         if (success) {
@@ -391,7 +414,13 @@ intptr_t RenderThread::main() {
 
         auto progressStart = currTimeUs(benchmarkEnabled);
         bool progress;
+
+        if (mRunInLimitedMode) {
+            sThreadRunLimiter.acquire();
+        }
+
         do {
+
             progress = false;
 
             // try to process some of the command buffer using the GLESv1
@@ -463,6 +492,10 @@ intptr_t RenderThread::main() {
                 }
             }
         } while (progress);
+
+        if (mRunInLimitedMode) {
+            sThreadRunLimiter.release();
+        }
     }
 
     if (dumpFP) {
