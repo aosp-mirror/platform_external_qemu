@@ -25,8 +25,17 @@ class QWidget;
 
 PerfStatsPage::PerfStatsPage(QWidget* parent)
     : QFrame(parent), mUi(new Ui::PerfStatsPage()) {
+#ifdef __linux__
+    // On Linux, a Dialog does not show a Close button and a
+    // Tool has a Close button that shows a dot rather than
+    // an X. So we use a SubWindow.
+    setWindowFlags(Qt::SubWindow | Qt::WindowCloseButtonHint);
+#else
+    // On Windows, a SubWindow does not show a Close button.
+    // A Tool for Windows and Mac
+    setWindowFlags(Qt::Tool | Qt::WindowCloseButtonHint);
+#endif
     mUi->setupUi(this);
-
     connect(this, SIGNAL(windowVisible()),
             this, SLOT(enableCollection()));
 
