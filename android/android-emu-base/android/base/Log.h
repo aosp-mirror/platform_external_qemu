@@ -166,12 +166,12 @@ void setMinLogLevel(LogSeverity level);
 //   CHECK(some_condition) << "Something really bad happened!";
 //
 #define CHECK(condition) \
-    LOG_IF(FATAL, !(condition)) << "Check failed: " #condition ". "
+    LOG_IF(ERROR, !(condition)) << "Check failed: " #condition ". "
 
 // A variant of CHECK() that also appends the errno message string at
 // the end of the log message before exiting the process.
 #define PCHECK(condition) \
-    PLOG_IF(FATAL, !(condition)) << "Check failed: " #condition ". "
+    PLOG_IF(ERROR, !(condition)) << "Check failed: " #condition ". "
 
 // Define ENABLE_DLOG to 1 here if DLOG() statements should be compiled
 // as normal LOG() ones in the final binary. If 0, the statements will not
