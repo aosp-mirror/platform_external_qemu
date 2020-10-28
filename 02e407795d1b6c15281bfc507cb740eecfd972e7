@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c92fab01_f6dc43c8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-10-28T13:12:47Z",
+      "side": 1,
+      "message": "Marking comment as \u0027done\u0027 in hope that build system will allow merge.",
+      "revId": "02e407795d1b6c15281bfc507cb740eecfd972e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}

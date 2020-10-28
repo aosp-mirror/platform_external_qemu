@@ -33,6 +33,24 @@
       "message": "Could you also update hardware-properties.ini to reflect this optional settings for hw.sensor.hinge_angles_posture_definitions?\nThanks",
       "revId": "96aa5ecea4eeb6420aa68d3ae50cb8d58518519c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "568f6ded_b086f14b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-10-28T13:12:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "61ec6a6f_f3ee0590",
+      "revId": "96aa5ecea4eeb6420aa68d3ae50cb8d58518519c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
