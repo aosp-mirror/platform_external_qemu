@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "481da6b6_443a4f1a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-10-28T16:19:35Z",
+      "side": 1,
+      "message": "Could you update the .proto documentation with the difference in behavior when the path variable is set?",
+      "revId": "50b86008a9742bd08651699a71048ca763f737c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "55fd3867_62ef6c93",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-10-28T16:19:35Z",
+      "side": 1,
+      "message": "Could you update the documentation to reflect what setting path will do?",
+      "revId": "50b86008a9742bd08651699a71048ca763f737c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "453f81bc_f26067fb",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-10-28T16:19:35Z",
+      "side": 1,
+      "message": "Could you add documentation that this is optional and that the emulator \u0026 caller must have access to the destination path?",
+      "revId": "50b86008a9742bd08651699a71048ca763f737c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
