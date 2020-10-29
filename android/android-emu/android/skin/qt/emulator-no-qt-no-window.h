@@ -12,14 +12,10 @@
 
 #pragma once
 
-#include <string.h>                             // for memcpy
 #include <functional>                           // for function
 #include <memory>                               // for shared_ptr
 #include <queue>                                // for queue
-#include <string>                               // for basic_string, string
-#include <vector>                               // for vector
 
-#include "android/base/Compiler.h"              // for DISALLOW_COPY_AND_ASSIGN
 #include "android/base/synchronization/Lock.h"  // for Lock
 #include "android/skin/event.h"                 // for SkinEvent
 #include "android/ui-emu-agent.h"               // for UiEmuAgent
@@ -32,7 +28,6 @@ namespace emulation {
 class AdbInterface;
 }  // namespace emulation
 }  // namespace android
-struct SkinSurface;
 
 // The EmulatorNoQtNoWindow class is used to build a QT-Widget-less
 // event loop when the parameter -no-window is passed to the android
@@ -129,6 +124,7 @@ private:
     android::base::Lock mSkinEventQueueLock;
     std::queue<SkinEvent*> mSkinEventQueue;
     bool mIsFolded = false;
+    void saveMultidisplayToConfig();
 };
 
 #ifdef CONFIG_HEADLESS

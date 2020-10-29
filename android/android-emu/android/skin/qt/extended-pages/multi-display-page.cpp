@@ -39,7 +39,7 @@ class QWidget;
 static constexpr uint64_t kReportWindowDurationUs = 1000 * 1000 * 60;
 static constexpr uint32_t kMaxReportsPerWindow = 5;
 
-int MultiDisplayPage::sMaxItem = 3;
+int MultiDisplayPage::sMaxItem = avdInfo_maxMultiDisplayEntries();
 
 MultiDisplayPage::MultiDisplayPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::MultiDisplayPage()) {

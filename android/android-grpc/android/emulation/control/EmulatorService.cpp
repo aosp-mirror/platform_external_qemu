@@ -80,6 +80,7 @@
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
+#include "android/skin/winsys.h"
 
 namespace google {
 namespace protobuf {
@@ -690,7 +691,7 @@ public:
                     mAgents->vm->vmReset();
                     break;
                 case VmRunState::SHUTDOWN:
-                    mAgents->vm->vmShutdown();
+                    skin_winsys_quit_request();
                     break;
                 case VmRunState::TERMINATE: {
                     LOG(INFO) << "Terminating the emulator.";
