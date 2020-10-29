@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5818c18d_130c2b85",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 991,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-10-29T21:33:05Z",
+      "side": 1,
+      "message": "was it intentional to disable then re-enable for stand alone? why not just disable it for non-standalone?",
+      "range": {
+        "startLine": 991,
+        "startChar": 4,
+        "endLine": 991,
+        "endChar": 14
+      },
+      "revId": "09ee62ae7c33c2604d02f3df6e9631a771bf62dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
