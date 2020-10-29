@@ -23,7 +23,6 @@
 #include <grpcpp/grpcpp.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -74,6 +73,7 @@
 #include "android/recording/Producer.h"
 #include "android/recording/audio/AudioProducer.h"
 #include "android/skin/rect.h"
+#include "android/skin/winsys.h"
 #include "android/telephony/gsm.h"
 #include "android/telephony/modem.h"
 #include "android/telephony/sms.h"
@@ -690,7 +690,7 @@ public:
                     mAgents->vm->vmReset();
                     break;
                 case VmRunState::SHUTDOWN:
-                    mAgents->vm->vmShutdown();
+                    skin_winsys_quit_request();
                     break;
                 case VmRunState::TERMINATE: {
                     LOG(INFO) << "Terminating the emulator.";

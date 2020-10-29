@@ -2015,6 +2015,10 @@ void avdInfo_setCustomCoreHwIniPath(AvdInfo* info, const char* path) {
     info->coreHardwareIniPath = strdup(path);
 }
 
+int avdInfo_maxMultiDisplayEntries() {
+    return 3;
+}
+
 void avdInfo_replaceMultiDisplayInConfigIni(AvdInfo* i, int index,
                                             int x, int y,
                                             int w, int h,
