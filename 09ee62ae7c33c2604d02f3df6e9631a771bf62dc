@@ -39,6 +39,30 @@
       },
       "revId": "09ee62ae7c33c2604d02f3df6e9631a771bf62dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "089b9366_6b5945a1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 991,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-29T23:18:44Z",
+      "side": 1,
+      "message": "Not really, but it helps to make it behave the same way and have fewer if statements in standalone versus not standalone.",
+      "parentUuid": "5818c18d_130c2b85",
+      "range": {
+        "startLine": 991,
+        "startChar": 4,
+        "endLine": 991,
+        "endChar": 14
+      },
+      "revId": "09ee62ae7c33c2604d02f3df6e9631a771bf62dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
