@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "79947f50_e12ab22f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1368821
+      },
+      "writtenOn": "2020-10-29T21:36:54Z",
+      "side": 1,
+      "message": "I assume we want to CP this into the Stable?\n\nAlso since 30.3.0 Canary has already been signed off, would it be ok to publish this fix in the 30.3.01 Canary instead?",
+      "revId": "09ee62ae7c33c2604d02f3df6e9631a771bf62dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5818c18d_130c2b85",
