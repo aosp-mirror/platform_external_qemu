@@ -370,12 +370,19 @@ public:
         SnapshotLineConsumer slc(reply);
         bool snapshot_success = false;
 
+        // Put an extra pause in hang detector.
+        // Snapshotter already calls a hang detector pause. But it is not
+        // enough for imported snapshots, because it performs extra steps
+        // (rebase snasphot) before the snapshotter pause. So it would
+        // require an extra pause here.
+        crashreport::CrashReporter::get()->hangDetector().pause(true);
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
                 [&snapshot_success, &slc, &snapshot]() {
                     snapshot_success = getConsoleAgents()->vm->snapshotLoad(
                             snapshot->name().data(), slc.opaque(),
                             LineConsumer::Callback);
                 });
+        crashreport::CrashReporter::get()->hangDetector().pause(false);
         if (!snapshot_success) {
             slc.error();
             return Status::OK;
