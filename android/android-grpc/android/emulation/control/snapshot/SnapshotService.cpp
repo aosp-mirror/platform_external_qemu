@@ -252,12 +252,21 @@ public:
             id = msg.snapshot_id();
         }
 
+        std::unique_ptr<CallbackStreambufReader> csr;
         std::unique_ptr<std::istream> stream;
-        CallbackStreambufReader csr(cb);
-        if (msg.format() == SnapshotPackage::TARGZ) {
-            stream = std::make_unique<GzipInputStream>(&csr);
+        if (msg.path() == "") {
+            csr.reset(new CallbackStreambufReader(cb));
+            if (msg.format() == SnapshotPackage::TARGZ) {
+                stream = std::make_unique<GzipInputStream>(csr.get());
+            } else {
+                stream = std::make_unique<std::istream>(csr.get());
+            }
         } else {
-            stream = std::make_unique<std::istream>(&csr);
+            if (msg.format() == SnapshotPackage::TARGZ) {
+                stream = std::make_unique<GzipInputStream>(msg.path().c_str());
+            } else {
+                stream = std::make_unique<std::ifstream>(msg.path().c_str());
+            }
         }
 
         TarReader tr(tmpSnap, *stream);
@@ -286,14 +295,15 @@ public:
             reply->set_err("Failed to rename: " + tmpSnap + " --> " +
                            finalDest);
             LOG(INFO) << "Failed to rename: " + tmpSnap + " --> " + finalDest;
+            return Status::OK;
         }
 
         // Okay, now we have to fix up (i.e. import) the snapshot
         auto snapshot = android::snapshot::Snapshot::getSnapshotById(id);
         if (!snapshot) {
-            // Que what?, we just created you..
+            // It might fail if snapshot preload fails.
             reply->set_success(false);
-            reply->set_err("Cannot find created snapshot");
+            reply->set_err("Snapshot incompatible");
             // Best effort to cleanup mess.
             path_delete_dir(finalDest.c_str());
             return Status::OK;
