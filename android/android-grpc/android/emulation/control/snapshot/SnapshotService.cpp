@@ -115,11 +115,13 @@ public:
                 });
         android_mkdir(tmpdir.data(), 0700);
 
+        CrashReporter::get()->hangDetector().pause(true);
         // Exports all qcow2 images..
         SnapshotLineConsumer slc(&result);
         auto exp = getConsoleAgents()->vm->snapshotExport(
                 snapshot->name().data(), tmpdir.data(), slc.opaque(),
                 LineConsumer::Callback);
+        CrashReporter::get()->hangDetector().pause(false);
 
         if (!exp) {
             writer->Write(*slc.error());
