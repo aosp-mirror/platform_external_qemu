@@ -988,6 +988,8 @@ void SnapshotPage::showEvent(QShowEvent* ee) {
 void SnapshotPage::on_takeSnapshotButton_clicked() {
     setOperationInProgress(true);
 
+    setEnabled(false);
+
     if (mIsStandAlone) {
         mMadeSelection = true;
         close();
