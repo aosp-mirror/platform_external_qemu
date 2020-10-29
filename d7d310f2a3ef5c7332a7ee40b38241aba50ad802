@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b82024e8_148f12d6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-10-29T20:11:27Z",
+      "side": 1,
+      "message": "Huan, can you make sure this is still OK for multi display?",
+      "revId": "d7d310f2a3ef5c7332a7ee40b38241aba50ad802",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
