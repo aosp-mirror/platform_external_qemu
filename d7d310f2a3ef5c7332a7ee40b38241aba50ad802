@@ -33,6 +33,24 @@
       "message": "?",
       "revId": "d7d310f2a3ef5c7332a7ee40b38241aba50ad802",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b86f183e_c802d78d",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2019,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-10-29T20:30:08Z",
+      "side": 1,
+      "message": "Moved from MultiDisplayPage::sMaxItem",
+      "parentUuid": "eb9ecbcd_6c7afe00",
+      "revId": "d7d310f2a3ef5c7332a7ee40b38241aba50ad802",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
