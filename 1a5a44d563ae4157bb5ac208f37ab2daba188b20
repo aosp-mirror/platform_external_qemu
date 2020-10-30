@@ -211,6 +211,30 @@
       },
       "revId": "1a5a44d563ae4157bb5ac208f37ab2daba188b20",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "55bc8f63_dc7176b1",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-10-30T21:46:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7378b8bc_7e5db5a4",
+      "range": {
+        "startLine": 167,
+        "startChar": 2,
+        "endLine": 167,
+        "endChar": 8
+      },
+      "revId": "1a5a44d563ae4157bb5ac208f37ab2daba188b20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
