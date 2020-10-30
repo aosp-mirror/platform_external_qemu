@@ -73,6 +73,12 @@ service SnapshotService {
   // Note that pulling .gz stream is slow.
   //
   // You must provide the snapshot_id and (desired) format.
+  //
+  // If SnapshotPackage.path is set, the gRPC service will directly write the
+  // exported snapshot to SnapshotPackage.path without streaming, which is
+  // usually significantly faster. It would require emulator to have direct
+  // access to SnapshotPackage.path, which usually means it can only be used
+  // when pulling from a local emulator.
   rpc PullSnapshot(SnapshotPackage) returns (stream SnapshotPackage) {}
 
   // Push a tar.gz stream contain the snapshot. The tar file should
@@ -85,6 +91,12 @@ service SnapshotService {
   //
   // You must provide the snapshot_id and format in the first message.
   // Will return success and a possible error message when a failure occurs.
+  //
+  // If SnapshotPackage.path is set, the gRPC service will directly unzip the
+  // exported snapshot from SnapshotPackage.path without streaming, which is
+  // usually significantly faster. It would require emulator to have direct
+  // access to SnapshotPackage.path, which usually means it can only be used
+  // when pushing to a local emulator.
   rpc PushSnapshot(stream SnapshotPackage) returns (SnapshotPackage) {}
 
   // Loads the given snapshot inside the emulator and activates it.
@@ -144,6 +156,14 @@ message SnapshotPackage {
 
   // Format of the payload. Only required for the first message.
   Format format = 5;
+
+  // Path to the snapshot package tar file.
+  //
+  // When set, the PullSnapshot/PushSnapshot operation will directly write/read the
+  // exported snapshot in path without streaming, which is usually significantly
+  // faster. It would require emulator to have direct access to path, which usually
+  // means it can only be used with a local emulator.
+  string path = 6;
 }
 
 // A snapshot filter can be used to filter the results produced by ListSnapshots
