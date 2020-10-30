@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2870b5d2_0b1992c3",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-10-30T19:19:39Z",
+      "side": 1,
+      "message": "Could you add some message-level documentation for this message? Especially this message is used for both request/response so we need to document that how to create requests and what to expect in response.",
+      "range": {
+        "startLine": 141,
+        "startChar": 0,
+        "endLine": 141,
+        "endChar": 23
+      },
+      "revId": "1a5a44d563ae4157bb5ac208f37ab2daba188b20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4c9731de_b5b43cd6",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-10-30T19:19:39Z",
+      "side": 1,
+      "message": "What does \"the first request\" mean? If you call SaveSnapshot rpc with TARGZ in the first request and TAR in the second request, the emulator ignores the second request?",
+      "range": {
+        "startLine": 146,
+        "startChar": 55,
+        "endLine": 146,
+        "endChar": 72
+      },
+      "revId": "1a5a44d563ae4157bb5ac208f37ab2daba188b20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "31b5c8c4_6f1b94d7",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-10-30T19:19:39Z",
+      "side": 1,
+      "message": "When set in a request,",
+      "range": {
+        "startLine": 163,
+        "startChar": 5,
+        "endLine": 163,
+        "endChar": 13
+      },
+      "revId": "1a5a44d563ae4157bb5ac208f37ab2daba188b20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f4b57e9e_684a59af",
+        "filename": "android/android-grpc/snapshot_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1300185
+      },
+      "writtenOn": "2020-10-30T19:19:39Z",
+      "side": 1,
+      "message": "Could you add a paragraph for explaining the expected response. It can start with \"When set in a response, ...\"",
+      "range": {
+        "startLine": 167,
+        "startChar": 2,
+        "endLine": 167,
+        "endChar": 8
+      },
+      "revId": "1a5a44d563ae4157bb5ac208f37ab2daba188b20",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
