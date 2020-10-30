@@ -3061,7 +3061,8 @@ bool EmulatorQtWindow::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32
 void EmulatorQtWindow::saveMultidisplayToConfig() {
     int pos_x, pos_y;
     uint32_t width, height, dpi, flag;
-    for (uint32_t i = 1; i < MultiDisplayPage::sMaxItem + 1; i++) {
+    const int maxEntries = avdInfo_maxMultiDisplayEntries();
+    for (uint32_t i = 1; i < maxEntries + 1; i++) {
         if (!getMultiDisplay(i, &pos_x, &pos_y, &width, &height, &dpi, &flag, nullptr)) {
             avdInfo_replaceMultiDisplayInConfigIni(android_avdInfo,
                                                    i,
