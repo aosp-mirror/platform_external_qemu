@@ -98,6 +98,7 @@ public:
         SnapshotPackage result;
         auto snapshot =
                 snapshot::Snapshot::getSnapshotById(request->snapshot_id());
+        result.set_path(request->path());
 
         if (!snapshot) {
             // Nope, the snapshot doesn't exist.
