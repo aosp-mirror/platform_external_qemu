@@ -1441,7 +1441,8 @@ message EmulatorFeatureFlagState {
     BPTC_TEXTURE_SUPPORT = 70;
     GUEST_USES_ANGLE = 71;
     VIRTIO_VSOCK_PIPE = 72;
-    // Next tag: 73
+    S3TC_TEXTURE_SUPPORT = 73;
+    // Next tag: 74
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
