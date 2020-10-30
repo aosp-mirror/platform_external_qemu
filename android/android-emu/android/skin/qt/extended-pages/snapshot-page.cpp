@@ -988,11 +988,13 @@ void SnapshotPage::showEvent(QShowEvent* ee) {
 void SnapshotPage::on_takeSnapshotButton_clicked() {
     setOperationInProgress(true);
 
+
     if (mIsStandAlone) {
         mMadeSelection = true;
         close();
     } else {
 
+        setEnabled(false);
         QString snapshotName("snap_"
                              + QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss"));
 
