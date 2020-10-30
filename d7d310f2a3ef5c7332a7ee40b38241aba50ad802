@@ -51,6 +51,24 @@
       "parentUuid": "eb9ecbcd_6c7afe00",
       "revId": "d7d310f2a3ef5c7332a7ee40b38241aba50ad802",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7a9a3ae4_e498283d",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2019,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-10-30T10:46:59Z",
+      "side": 1,
+      "message": "Yes, this makes sure the window/no-window do not get out of sync.",
+      "parentUuid": "b86f183e_c802d78d",
+      "revId": "d7d310f2a3ef5c7332a7ee40b38241aba50ad802",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
