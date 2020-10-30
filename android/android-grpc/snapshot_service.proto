@@ -143,7 +143,7 @@ message SnapshotPackage {
     TARGZ = 0;
     TAR = 1;
   }
-  // The identifier to the snapshot, only required for the first message.
+  // The identifier to the snapshot, only required for the first request message.
   string snapshot_id = 1;
 
   // A stream of bytes. Encoded as a tar (possibly gzipped) file pendinf on the
@@ -154,10 +154,11 @@ message SnapshotPackage {
   bool success = 3;
   bytes err = 4;
 
-  // Format of the payload. Only required for the first message.
+  // Format of the payload. Only required for the first request message.
   Format format = 5;
 
-  // Path to the snapshot package tar file.
+  // Path to the snapshot package tar file. Only required for the first request
+  // message.
   //
   // When set, the PullSnapshot/PushSnapshot operation will directly write/read the
   // exported snapshot in path without streaming, which is usually significantly
