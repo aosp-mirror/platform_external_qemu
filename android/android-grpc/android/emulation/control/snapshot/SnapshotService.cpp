@@ -37,6 +37,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/emulation/control/LineConsumer.h"
 #include "android/emulation/control/adb/AdbShellStream.h"
 #include "android/emulation/control/snapshot/CallbackStreambuf.h"
@@ -115,11 +116,13 @@ public:
                 });
         android_mkdir(tmpdir.data(), 0700);
 
+        crashreport::CrashReporter::get()->hangDetector().pause(true);
         // Exports all qcow2 images..
         SnapshotLineConsumer slc(&result);
         auto exp = getConsoleAgents()->vm->snapshotExport(
                 snapshot->name().data(), tmpdir.data(), slc.opaque(),
                 LineConsumer::Callback);
+        crashreport::CrashReporter::get()->hangDetector().pause(false);
 
         if (!exp) {
             writer->Write(*slc.error());
@@ -129,24 +132,45 @@ public:
         LOG(VERBOSE) << "Exported snapshot in " << sw.restartUs() << " us";
 
         // Stream the tmpdir out as a tar.gz..
-        CallbackStreambufWriter csb(
-                k256KB, [writer](char* bytes, std::size_t len) {
-                    SnapshotPackage msg;
-                    msg.set_payload(std::string(bytes, len));
-                    msg.set_success(true);
-                    return writer->Write(msg);
-                });
+
+        std::unique_ptr<CallbackStreambufWriter> csb;
+        std::unique_ptr<std::ofstream> dstFile;
+        std::streambuf* streamBufPtr = nullptr;
+        if (request->path() == "") {
+            csb.reset(new CallbackStreambufWriter(
+                    k256KB, [writer](char* bytes, std::size_t len) {
+                        SnapshotPackage msg;
+                        msg.set_payload(std::string(bytes, len));
+                        msg.set_success(true);
+                        return writer->Write(msg);
+                    }));
+            streamBufPtr = csb.get();
+        } else {
+            dstFile.reset(new std::ofstream(request->path().c_str()));
+            if (!dstFile->is_open()) {
+                result.set_success(false);
+                result.set_err("Failed to write to " + request->path());
+                writer->Write(result);
+                return Status::OK;
+            }
+            streamBufPtr = dstFile->rdbuf();
+        }
 
         std::unique_ptr<std::ostream> stream;
+        std::ostream* streamPtr = nullptr;
         if (request->format() == SnapshotPackage::TARGZ) {
-            stream = std::make_unique<GzipOutputStream>(&csb);
+            stream = std::make_unique<GzipOutputStream>(streamBufPtr);
+            streamPtr = stream.get();
+        } else if (request->path() == "") {
+            stream = std::make_unique<std::ostream>(streamBufPtr);
+            streamPtr = stream.get();
         } else {
-            stream = std::make_unique<std::ostream>(&csb);
+            streamPtr = dstFile.get();
         }
 
         // Use of  a 64 KB  buffer gives good performance (see performance
         // tests.)
-        TarWriter tw(tmpdir, *stream, k64KB);
+        TarWriter tw(tmpdir, *streamPtr, k64KB);
         result.set_success(tw.addDirectory("."));
         if (tw.fail()) {
             result.set_err(tw.error_msg());
@@ -228,12 +252,21 @@ public:
             id = msg.snapshot_id();
         }
 
+        std::unique_ptr<CallbackStreambufReader> csr;
         std::unique_ptr<std::istream> stream;
-        CallbackStreambufReader csr(cb);
-        if (msg.format() == SnapshotPackage::TARGZ) {
-            stream = std::make_unique<GzipInputStream>(&csr);
+        if (msg.path() == "") {
+            csr.reset(new CallbackStreambufReader(cb));
+            if (msg.format() == SnapshotPackage::TARGZ) {
+                stream = std::make_unique<GzipInputStream>(csr.get());
+            } else {
+                stream = std::make_unique<std::istream>(csr.get());
+            }
         } else {
-            stream = std::make_unique<std::istream>(&csr);
+            if (msg.format() == SnapshotPackage::TARGZ) {
+                stream = std::make_unique<GzipInputStream>(msg.path().c_str());
+            } else {
+                stream = std::make_unique<std::ifstream>(msg.path().c_str());
+            }
         }
 
         TarReader tr(tmpSnap, *stream);
@@ -262,14 +295,15 @@ public:
             reply->set_err("Failed to rename: " + tmpSnap + " --> " +
                            finalDest);
             LOG(INFO) << "Failed to rename: " + tmpSnap + " --> " + finalDest;
+            return Status::OK;
         }
 
         // Okay, now we have to fix up (i.e. import) the snapshot
         auto snapshot = android::snapshot::Snapshot::getSnapshotById(id);
         if (!snapshot) {
-            // Que what?, we just created you..
+            // It might fail if snapshot preload fails.
             reply->set_success(false);
-            reply->set_err("Cannot find created snapshot");
+            reply->set_err("Snapshot incompatible");
             // Best effort to cleanup mess.
             path_delete_dir(finalDest.c_str());
             return Status::OK;
@@ -336,12 +370,19 @@ public:
         SnapshotLineConsumer slc(reply);
         bool snapshot_success = false;
 
+        // Put an extra pause in hang detector.
+        // Snapshotter already calls a hang detector pause. But it is not
+        // enough for imported snapshots, because it performs extra steps
+        // (rebase snasphot) before the snapshotter pause. So it would
+        // require an extra pause here.
+        crashreport::CrashReporter::get()->hangDetector().pause(true);
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
                 [&snapshot_success, &slc, &snapshot]() {
                     snapshot_success = getConsoleAgents()->vm->snapshotLoad(
                             snapshot->name().data(), slc.opaque(),
                             LineConsumer::Callback);
                 });
+        crashreport::CrashReporter::get()->hangDetector().pause(false);
         if (!snapshot_success) {
             slc.error();
             return Status::OK;
