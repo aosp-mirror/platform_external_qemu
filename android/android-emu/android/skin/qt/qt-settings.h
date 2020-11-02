@@ -55,7 +55,6 @@ constexpr char FRAME_ALWAYS[] = "set/frameAlways4"; // Do not use "set/frameAlwa
                                                     // version is 4
                                                     // (for canary, default with frame ON for Wear
                                                     // devices, default OFF for everything else)
-constexpr char DISABLE_DEVICE_FRAME[] = "set/disableDeviceFrame";
 constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
 constexpr char DISABLE_MOUSE_WHEEL[] = "set/disableMouseWheel";
@@ -153,8 +152,5 @@ constexpr char PER_AVD_CELLULAR_SIGNAL_STRENGTH[] = "perAvd/cell/signal_strength
 constexpr char PER_AVD_CELLULAR_VOICE_STATUS[]    = "perAvd/cell/voice_status";
 constexpr char PER_AVD_CELLULAR_METER_STATUS[]    = "perAvd/cell/meter_status";
 constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
-
-constexpr char PER_AVD_DISABLE_DEVICE_FRAME[] = "perAvd/set/disableDeviceFrame";
-
 }  // namespace Settings
 }  // namespace Ui
