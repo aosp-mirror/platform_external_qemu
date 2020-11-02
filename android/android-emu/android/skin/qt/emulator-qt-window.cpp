@@ -483,29 +483,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true;
     mPreviouslyFramed = mFrameAlways;
 
-    mDisableDeviceFrame = false;
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
-    if (avdPath) {
-        // Setting for where there's an AVD
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
-        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-
-        mDisableDeviceFrame =
-            avdSpecificSettings.value(
-                Ui::Settings::PER_AVD_DISABLE_DEVICE_FRAME, false).toBool();
-    } else {
-        // Use the global setting
-        mDisableDeviceFrame =
-            settings.value(Ui::Settings::DISABLE_DEVICE_FRAME, false).toBool();
-    }
-
-    // Apply feature control disable at the start, then ignore feature
-    // control setting later in case we want to turn it back on.
-    if (android::featurecontrol::isEnabled(
-            android::featurecontrol::NoDeviceFrame)) {
-        mDisableDeviceFrame = true;
-    }
-
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
                                  mUserActionsCounter);
 
@@ -665,8 +642,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             });
 
     setFrameAlways(mFrameAlways);
-
-    if (mDisableDeviceFrame) { setNoSkin(false /* keep rotation buttons */); }
 
     mWheelScrollTimer.setInterval(100);
     mWheelScrollTimer.setSingleShot(true);
@@ -3018,18 +2993,16 @@ bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
     return true;
 }
 
-void EmulatorQtWindow::setNoSkin(bool hideRotationButtons) {
-    runOnUiThread([this, hideRotationButtons]() {
+void EmulatorQtWindow::setNoSkin() {
+    runOnUiThread([this]() {
         char *skinName, *skinDir;
         avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
         if (skinDir != NULL) {
             SkinEvent* event = new SkinEvent();
             event->type = kEventSetNoSkin;
-            queueSkinEvent(event);
+            skin_event_add(event);
         }
-        if (hideRotationButtons) {
-            mToolWindow->hideRotationButton(true);
-        }
+        mToolWindow->hideRotationButton(true);
         setFrameAlways(true);
     });
 }
@@ -3041,7 +3014,7 @@ void EmulatorQtWindow::restoreSkin() {
         if (skinDir != NULL) {
             SkinEvent* event = new SkinEvent();
             event->type = kEventRestoreSkin;
-            queueSkinEvent(event);
+            skin_event_add(event);
         }
         mToolWindow->hideRotationButton(false);
         setFrameAlways(false);
