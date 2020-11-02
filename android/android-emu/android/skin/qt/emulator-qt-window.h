@@ -278,7 +278,7 @@ public:
                             uint32_t dpi,
                             uint32_t flag);
     bool getMonitorRect(uint32_t* width, uint32_t* height);
-    void setNoSkin(bool disableRotation = true);
+    void setNoSkin();
     void restoreSkin();
     bool multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
                                    uint32_t dpi, uint32_t flag);
@@ -540,13 +540,12 @@ private:
     QPoint mWheelScrollPos;
     bool mStartedAdbStopProcess;
 
-    bool         mFrameAlways; // true = no floating emulator
+    bool         mFrameAlways;       // true = no floating emulator
     bool         mPreviouslyFramed = false;
     bool         mHaveBeenFrameless;
     unsigned int mHardRefreshCountDown = 0;
-    SkinRotation mOrientation; // Rotation of the main window
+    SkinRotation mOrientation;       // Rotation of the main window
     bool         mWindowIsMinimized = false;
-    bool         mDisableDeviceFrame = false; // true = no device skin
 
     QScreen* mCurrentScreen = nullptr;
 
