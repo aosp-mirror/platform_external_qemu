@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 #include "android/base/memory/SharedMemory.h"
 
+#include <shlwapi.h>
 #include <cassert>
 #include <string>
 
@@ -22,9 +23,15 @@ namespace base {
 SharedMemory::SharedMemory(StringView name, size_t size) : mSize(size) {
     constexpr StringView kFileUri = "file://";
     if (name.find(kFileUri, 0) == 0) {
+        // Convert URI to path using win32 api.
+        const Win32UnicodeString srcUri(name);
+        WCHAR path[MAX_PATH];
+        DWORD cPath = MAX_PATH;
+        auto HR = PathCreateFromUrlW(srcUri.c_str(), path, &cPath, NULL);
+        assert(HR == S_OK);
+        const Win32UnicodeString destPath(path);
+        mName = PathUtils::recompose(PathUtils::decompose(destPath.toString()));
         mShareType = ShareType::FILE_BACKED;
-        auto path = name.substr(kFileUri.size());
-        mName = PathUtils::recompose(PathUtils::decompose(path));
     } else {
         mShareType = ShareType::SHARED_MEMORY;
         mName = "SHM_" + name.str();
