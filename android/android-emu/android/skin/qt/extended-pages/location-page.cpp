@@ -119,7 +119,11 @@ static void updateThreadLoop() {
 
 LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
-    mUi(new Ui::LocationPage)
+    mUi(new Ui::LocationPage),
+    mPaneInvocationTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::UNKONWN_EMULATOR_UI_EVENT_TYPE,
+              android_studio::EmulatorUiEvent::EXTENDED_WINDOW_OPEN))
+
 #ifdef USE_WEBENGINE
     ,
     mShouldRefreshPageOnReconnect(false),
@@ -167,6 +171,9 @@ LocationPage::LocationPage(QWidget *parent) :
         }
     }
 #endif // USE_WEBENGINE
+
+    // Connect the tab signaling
+    connect(mUi->locationTabs, SIGNAL(currentChanged(int)), this, SLOT(on_tabChanged()));
 
     if (useLocationV2) {
         // Hide the old tab on the Location page
@@ -257,6 +264,20 @@ LocationPage::LocationPage(QWidget *parent) :
                     }
                     return false;
         });
+    }
+}
+
+
+void LocationPage::on_tabChanged() {
+    switch(mUi->locationTabs->currentIndex()) {
+        case 0:
+            mPaneInvocationTracker->increment("LOCATION_SINGLE_POINT");
+            break;
+        case 1:
+            mPaneInvocationTracker->increment("LOCATION_ROUTES");
+            break;
+        default:
+            LOG(WARNING) << "Unknown tab selected.";
     }
 }
 
