@@ -21,8 +21,13 @@
 
 class MultiDisplayItem;
 class QObject;
-class QString;
-class QWidget;
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 
 class MultiDisplayPage : public QWidget {
     Q_OBJECT
@@ -49,6 +54,8 @@ private:
 
     std::unique_ptr<Ui::MultiDisplayPage> mUi;
     std::vector<MultiDisplayItem*> mItem;
+    std::shared_ptr<UiEventTracker> mApplyChangesTracker;
+
     int mSecondaryItemCount = 0;
     double m_monitorAspectRatio = 1.0;
     char* mSkinName;
