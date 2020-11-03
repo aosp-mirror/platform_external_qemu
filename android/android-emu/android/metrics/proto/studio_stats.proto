@@ -2061,6 +2061,7 @@ message EmulatorUiEvent {
   enum EmulatorUiEventContext {
     UNKNOWN_EMULATOR_UI_EVENT_CONTEXT = 0;
     EXTENDED_WINDOW_OPEN = 1;
+    EXTENDED_DISPLAYS_TAB = 2;
   }
 }
 
