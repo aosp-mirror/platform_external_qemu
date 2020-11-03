@@ -24,6 +24,7 @@
 #include "android/skin/qt/qt-ui-commands.h"          // for QtUICommand
 #include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
 #include "android/ui-emu-agent.h"                    // for UiEmuAgent
+#include "android/metrics/UiEventTracker.h"
 
 class EmulatorQtWindow;
 class QCloseEvent;
@@ -34,7 +35,7 @@ class QShowEvent;
 class ToolWindow;
 class VirtualSceneControlWindow;
 template <class CommandType> class ShortcutKeyStore;
-using ClickCount = uint16_t;
+using android::metrics::UiEventTracker;
 
 namespace Ui {
     class ExtendedControls;
@@ -103,7 +104,7 @@ private:
     EmulatorQtWindow* mEmulatorWindow;
     ToolWindow*  mToolWindow;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
-    std::map<ExtendedWindowPane, ClickCount> mPaneInvocationCount;
+    std::shared_ptr<UiEventTracker> mPaneInvocationTracker;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
     std::unique_ptr<Ui::ExtendedControls> mExtendedUi;
     bool mFirstShowEvent = true;
