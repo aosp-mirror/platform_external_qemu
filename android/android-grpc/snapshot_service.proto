@@ -144,10 +144,9 @@ message SnapshotPackage {
     TARGZ = 0;
     TAR = 1;
   }
-  // [request only] The identifier to the snapshot, only required for request
-  // messages. For streaming service, only used in the first stream message of
-  // a gRPC call (would be ignored in consequent stream messages of the same
-  // call).
+  // The identifier to the snapshot, only required for request messages. For
+  // streaming service, only used in the first stream message of a gRPC call
+  // (would be ignored in consequent stream messages of the same call).
   string snapshot_id = 1;
 
   // A stream of bytes. Encoded as a tar (possibly gzipped) file pendinf on the
@@ -163,7 +162,7 @@ message SnapshotPackage {
   // (would be ignored in consequent stream messages of the same call).
   Format format = 5;
 
-  // [request only] Path to the snapshot package tar file. Only used in request
+  // [request only] Path to the snapshot package file. Only used in request
   // messages.
   //
   // When set in a request, the PullSnapshot/PushSnapshot operation will directly
