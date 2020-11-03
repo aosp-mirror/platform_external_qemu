@@ -24,7 +24,6 @@
 #include "android/skin/qt/qt-ui-commands.h"          // for QtUICommand
 #include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
 #include "android/ui-emu-agent.h"                    // for UiEmuAgent
-#include "android/metrics/UiEventTracker.h"
 
 class EmulatorQtWindow;
 class QCloseEvent;
@@ -35,6 +34,13 @@ class QShowEvent;
 class ToolWindow;
 class VirtualSceneControlWindow;
 template <class CommandType> class ShortcutKeyStore;
+
+namespace android {
+namespace metrics {
+ class UiEventTracker;
+}
+}
+
 using android::metrics::UiEventTracker;
 
 namespace Ui {
