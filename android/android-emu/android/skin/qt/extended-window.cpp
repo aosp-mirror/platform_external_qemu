@@ -79,16 +79,16 @@ class QPushButton;
 class QShowEvent;
 class QWidget;
 
-ExtendedWindow::ExtendedWindow(
-    EmulatorQtWindow *eW,
-    ToolWindow  *tW) :
-    QFrame(nullptr),
-    mEmulatorWindow(eW),
-    mToolWindow(tW),
-    mExtendedUi(new Ui::ExtendedControls),
-    mSizeTweaker(this),
-    mSidebarButtons(this)
-{
+ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
+    : QFrame(nullptr),
+      mEmulatorWindow(eW),
+      mToolWindow(tW),
+      mExtendedUi(new Ui::ExtendedControls),
+      mSizeTweaker(this),
+      mSidebarButtons(this),
+      mPaneInvocationTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::UNKONWN_EMULATOR_UI_EVENT_TYPE,
+              android_studio::EmulatorUiEvent::EXTENDED_WINDOW_OPEN)) {
 #ifdef __linux__
     // On Linux, a Dialog does not show a Close button and a
     // Tool has a Close button that shows a dot rather than
@@ -362,24 +362,6 @@ static std::string translate_idx(ExtendedWindowPane value) {
 void ExtendedWindow::sendMetricsOnShutDown() {
     mExtendedUi->location_page->sendMetrics();
     mExtendedUi->multiDisplayPage->sendMetrics();
-    if (mPaneInvocationCount.size() > 0) {
-        for (const auto& invocation : mPaneInvocationCount) {
-            android::metrics::MetricsReporter::get().report(
-                    [=](android_studio::AndroidStudioEvent* event) {
-                        auto* metrics = event->mutable_emulator_ui_event();
-                        metrics->set_element_id(
-                                translate_idx(invocation.first));
-                        metrics->set_context(android_studio::EmulatorUiEvent::
-                                                     EXTENDED_WINDOW_OPEN);
-                        metrics->set_type(
-                                android_studio::EmulatorUiEvent::
-                                        UNKONWN_EMULATOR_UI_EVENT_TYPE);
-                        metrics->set_value(invocation.second);
-                        event->set_kind(android_studio::AndroidStudioEvent::
-                                                EMULATOR_UI_EVENT);
-                    });
-        }
-    }
 }
 
 // static
@@ -531,7 +513,7 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     }
 
     if (mExtendedWindowWasShown && mExtendedUi->stackedWidget->currentIndex() != thisIndex) {
-        mPaneInvocationCount[thisIndex]++;
+        mPaneInvocationTracker->increment(translate_idx(thisIndex));
     }
     QPushButton* thisButton = it->second;
     thisButton->toggle();
