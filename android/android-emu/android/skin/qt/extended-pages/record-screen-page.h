@@ -20,6 +20,14 @@
 
 #include "android/recording/screen-recorder.h"  // for RecordingStatus
 
+
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class QObject;
 class QString;
 class QWidget;
@@ -85,7 +93,8 @@ private:
     std::unique_ptr<Ui::RecordScreenPage> mUi;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     std::unique_ptr<android::videoplayer::VideoInfo> mVideoInfo;
-    RecordUiState mState;
+    std::shared_ptr<UiEventTracker> mRecTracker;
+ RecordUiState mState;
     QTimer mTimer;
     int mSec;  // number of elapsed seconds
 };

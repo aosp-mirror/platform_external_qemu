@@ -11,8 +11,6 @@
 
 #include "android/skin/qt/extended-pages/camera-virtualscene-subpage.h"
 
-#include <qsettings.h>                                      // for QSettings...
-#include <qstring.h>                                        // for operator+
 #include <QByteArray>                                       // for QByteArray
 #include <QCheckBox>                                        // for QCheckBox
 #include <QFileInfo>                                        // for QFileInfo
@@ -26,19 +24,22 @@
 #include "android/emulation/control/virtual_scene_agent.h"  // for QAndroidV...
 #include "android/globals.h"                                // for android_hw
 #include "android/metrics/MetricsReporter.h"                // for MetricsRe...
-#include "studio_stats.pb.h"          // for AndroidSt...
+#include "android/metrics/UiEventTracker.h"                 // for UiEventTr...
 #include "android/skin/qt/poster-image-well.h"              // for PosterIma...
 #include "android/skin/qt/qt-settings.h"                    // for PER_AVD_S...
+#include "studio_stats.pb.h"                                // for EmulatorU...
 
 class QShowEvent;
-class QVariant;
-class QWidget;
 
 const QAndroidVirtualSceneAgent* CameraVirtualSceneSubpage::sVirtualSceneAgent =
         nullptr;
 
 CameraVirtualSceneSubpage::CameraVirtualSceneSubpage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::CameraVirtualSceneSubpage()) {
+    : QWidget(parent), mUi(new Ui::CameraVirtualSceneSubpage()),
+       mCameraTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_CAMERA_TAB))
+    {
     mUi->setupUi(this);
 
     connect(mUi->imageWall, SIGNAL(interaction()), this,
@@ -62,6 +63,7 @@ void CameraVirtualSceneSubpage::showEvent(QShowEvent* event) {
 }
 
 void CameraVirtualSceneSubpage::on_imageWall_pathChanged(QString path) {
+    mCameraTracker->increment("WALL");
     changePoster("wall", path);
 }
 
@@ -70,6 +72,7 @@ void CameraVirtualSceneSubpage::on_imageWall_scaleChanged(float value) {
 }
 
 void CameraVirtualSceneSubpage::on_imageTable_pathChanged(QString path) {
+    mCameraTracker->increment("TABLE");
     changePoster("table", path);
 }
 

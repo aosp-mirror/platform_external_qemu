@@ -11,24 +11,26 @@
 
 #include "android/skin/qt/extended-pages/finger-page.h"
 
-#include <qnamespace.h>                              // for RichText
-#include <qstring.h>                                 // for operator+
 #include <QComboBox>                                 // for QComboBox
 #include <QLabel>                                    // for QLabel
 #include <QVariant>                                  // for QVariant
+#include <Qt>                                        // for RichText
 
 #include "android/avd/info.h"                        // for avdInfo_getApiDe...
 #include "android/emulation/VmLock.h"                // for RecursiveScopedV...
 #include "android/emulation/control/finger_agent.h"  // for QAndroidFingerAgent
 #include "android/globals.h"                         // for android_avdInfo
-
-class QWidget;
+#include "android/metrics/UiEventTracker.h"          // for UiEventTracker
+#include "studio_stats.pb.h"                         // for EmulatorUiEvent
 
 static const QAndroidFingerAgent* sFingerAgent = nullptr;
 
 FingerPage::FingerPage(QWidget *parent) :
     QWidget(parent),
-    mUi(new Ui::FingerPage())
+    mUi(new Ui::FingerPage()),
+    mFingerTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_FINGER_TAB))
 {
     mUi->setupUi(this);
 
@@ -73,6 +75,7 @@ FingerPage::FingerPage(QWidget *parent) :
 
 void FingerPage::on_finger_touchButton_pressed()
 {
+    mFingerTracker->increment("FINGER");
     // Send the ID associated with the selected fingerprint
     int fingerID = mUi->finger_pickBox->currentData().toInt();
 

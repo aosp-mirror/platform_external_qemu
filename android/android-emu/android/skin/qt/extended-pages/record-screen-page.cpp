@@ -29,6 +29,8 @@
 #include <QThread>
 #include <utility>
 
+#include "android/metrics/UiEventTracker.h"            // for UiEventTracker
+
 #include "android/avd/info.h"
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
@@ -74,7 +76,11 @@ static void setRetainSize(QWidget* widget) {
 }
 
 RecordScreenPage::RecordScreenPage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::RecordScreenPage) {
+    : QWidget(parent), mUi(new Ui::RecordScreenPage),
+     mRecTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_RECORD_TAB))
+    {
     mUi->setupUi(this);
 
     // Resize format combobox width to the largest item
@@ -241,7 +247,9 @@ void RecordScreenPage::updateElapsedTime() {
 }
 
 void RecordScreenPage::on_rec_playStopButton_clicked() {
+
     if (mState == RecordUiState::Stopped) {
+        mRecTracker->increment("PLAY");
         auto videoPlayerNotifier =
                 std::unique_ptr<android::videoplayer::QtVideoPlayerNotifier>(
                         new android::videoplayer::QtVideoPlayerNotifier());
@@ -257,6 +265,7 @@ void RecordScreenPage::on_rec_playStopButton_clicked() {
         mVideoPlayer->start();
         setRecordUiState(RecordUiState::Playing);
     } else if (mState == RecordUiState::Playing) {
+        mRecTracker->increment("STOP");
         mVideoPlayer->stop();
         mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
         mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
@@ -267,7 +276,7 @@ void RecordScreenPage::on_rec_playStopButton_clicked() {
 
 void RecordScreenPage::on_rec_recordButton_clicked() {
     RecordUiState newState = RecordUiState::Ready;
-
+    mRecTracker->increment("RECORD");
     if (!sRecordScreenAgent) {
         // agent not ready yet
         return;
@@ -312,6 +321,7 @@ void RecordScreenPage::on_rec_recordAgainButton_clicked() {
 }
 
 void RecordScreenPage::on_rec_saveButton_clicked() {
+    mRecTracker->increment("SAVE");
     QSettings settings;
 
     // Stop the video player if it's running

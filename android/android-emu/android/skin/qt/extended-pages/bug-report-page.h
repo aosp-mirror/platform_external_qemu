@@ -11,23 +11,30 @@
 
 #pragma once
 
-#include <qobjectdefs.h>                             // for Q_OBJECT, slots
-#include <stddef.h>                                  // for size_t
-#include <QString>                                   // for QString
-#include <QWidget>                                   // for QWidget
-#include <memory>                                    // for unique_ptr
-#include <string>                                    // for string
+#include <stddef.h>                                      // for size_t
+#include <QByteArrayData>                                // for Q_OBJECT, slots
+#include <QString>                                       // for QString
+#include <QWidget>                                       // for QWidget
+#include <memory>                                        // for shared_ptr
+#include <string>                                        // for string
 
-#include "android/avd/BugreportInfo.h"               // for BugreportInfo
-#include "android/base/StringView.h"                 // for StringView
+#include "android/avd/BugreportInfo.h"                   // for BugreportInfo
+#include "android/base/StringView.h"                     // for StringView
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbCommandPtr
-#include "android/settings-agent.h"                  // for SettingsTheme
+#include "android/settings-agent.h"                      // for SettingsTheme
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class QEvent;
 class QMessageBox;
 class QObject;
 class QShowEvent;
-class QWidget;
+
 namespace Ui {
 class BugreportPage;
 }  // namespace Ui
@@ -73,6 +80,7 @@ private:
     QMessageBox* mDeviceDetailsDialog;
     bool mFirstShowEvent = true;
     std::unique_ptr<Ui::BugreportPage> mUi;
+    std::shared_ptr<UiEventTracker> mBugTracker;
     SavingStates mSavingStates;
     android::avd::BugreportInfo mReportingFields;
     std::string mReproSteps;
