@@ -19,14 +19,20 @@
 #include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
 #include "android/globals.h"                          // for android_avdInfo
 #include "android/hw-events.h"                        // for EV_KEY, EV_SW
+#include "android/metrics/UiEventTracker.h"           // for UiEventTracker
 #include "android/skin/event.h"                       // for SkinEvent, Skin...
 #include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
 #include "android/skin/qt/extended-pages/common.h"    // for getSelectedTheme
 #include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
+#include "studio_stats.pb.h"                          // for EmulatorUiEvent
+
 
 MicrophonePage::MicrophonePage(QWidget* parent)
     : QWidget(parent),
       mUi(new Ui::MicrophonePage()),
+             mMicTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_MIC_TAB)),
       mEmulatorWindow(nullptr) {
     mUi->setupUi(this);
 

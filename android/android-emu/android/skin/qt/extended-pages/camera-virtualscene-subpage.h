@@ -10,19 +10,25 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include <qobjectdefs.h>                     // for Q_OBJECT, slots
+#include <QByteArrayData>                    // for Q_OBJECT, slots
 #include <QString>                           // for QString
 #include <QWidget>                           // for QWidget
-#include <memory>                            // for unique_ptr
+#include <memory>                            // for shared_ptr, unique_ptr
 
 #include "ui_camera-virtualscene-subpage.h"  // for CameraVirtualSceneSubpage
 
 class QObject;
 class QShowEvent;
-class QString;
-class QWidget;
 struct QAndroidVirtualSceneAgent;
 
+
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class CameraVirtualSceneSubpage : public QWidget {
     Q_OBJECT
 
@@ -55,6 +61,7 @@ private:
     static void loadInitialSettings();
 
     std::unique_ptr<Ui::CameraVirtualSceneSubpage> mUi;
+    std::shared_ptr<UiEventTracker> mCameraTracker;
     bool mHasBeenShown = false;
     bool mHadFirstInteraction = false;
 

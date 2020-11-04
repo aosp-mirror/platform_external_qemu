@@ -81,7 +81,8 @@
 #include "android/globals.h"                         // for android_avdParams
 #include "android/metrics/MetricsReporter.h"         // for MetricsReporter
 #include "android/metrics/MetricsWriter.h"           // for android_studio
-#include "studio_stats.pb.h"   // for EmulatorSnapshot...
+#include "android/metrics/UiEventTracker.h"          // for UiEventTracker
+#include "studio_stats.pb.h"                         // for EmulatorSnapshot...
 #include "android/settings-agent.h"                  // for SettingsTheme
 #include "android/skin/qt/error-dialog.h"            // for showErrorDialog
 #include "android/skin/qt/extended-pages/common.h"   // for setButtonEnabled
@@ -223,7 +224,10 @@ static SnapshotPage* sInstance = nullptr;
 SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     QWidget(parent),
     mIsStandAlone(standAlone),
-    mUi(new Ui::SnapshotPage())
+    mUi(new Ui::SnapshotPage()),
+    mSnapshotTracker(new UiEventTracker(
+            android_studio::EmulatorUiEvent::BUTTON_PRESS,
+            android_studio::EmulatorUiEvent::EXTENDED_SNAPSHOT_TAB))
 {
     mUi->setupUi(this);
 
@@ -554,6 +558,7 @@ void SnapshotPage::changeUiFromSaveOnExitSetting(SaveSnapshotOnExit choice) {
 
 void SnapshotPage::on_enlargeInfoButton_clicked() {
     // Make the info window grow
+    mSnapshotTracker->increment("ENLARGE");
     mUi->preview->lower(); // Let the preview window get covered
     QPropertyAnimation *infoAnimation = new QPropertyAnimation(mUi->selectionInfo, "geometry");
 
@@ -582,15 +587,17 @@ void SnapshotPage::on_reduceInfoButton_clicked() {
 }
 
 void SnapshotPage::on_editSnapshot_clicked() {
+    mSnapshotTracker->increment("EDIT");
     editSnapshot(getSelectedSnapshot());
 }
 
 void SnapshotPage::on_deleteSnapshot_clicked() {
+    mSnapshotTracker->increment("DELETE");
     deleteSnapshot(getSelectedSnapshot());
 }
 
 void SnapshotPage::on_loadSnapshot_clicked() {
-
+    mSnapshotTracker->increment("LOAD");
     const WidgetSnapshotItem* theItem = getSelectedSnapshot();
     if (!theItem) return;
 
@@ -605,6 +612,7 @@ void SnapshotPage::on_loadSnapshot_clicked() {
 }
 
 void SnapshotPage::on_saveQuickBootNowButton_clicked() {
+    mSnapshotTracker->increment("SAVE_BOOT_NOW");
     setEnabled(false);
     setOperationInProgress(true);
     // Invoke the snapshot save function.
@@ -615,6 +623,7 @@ void SnapshotPage::on_saveQuickBootNowButton_clicked() {
 }
 
 void SnapshotPage::on_loadQuickBootNowButton_clicked() {
+    mSnapshotTracker->increment("LOAD_BOOT_NOW");
     setEnabled(false);
     setOperationInProgress(true);
     // Invoke the snapshot load function.
@@ -643,6 +652,7 @@ void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snap
 }
 
 void SnapshotPage::on_defaultSnapshotDisplay_itemSelectionChanged() {
+    mSnapshotTracker->increment("SELECT_DEFAULT");
     QList<QTreeWidgetItem *> selectedItems = mUi->defaultSnapshotDisplay->selectedItems();
     if (selectedItems.size() > 0) {
         // We have the selection, de-select the other list
@@ -651,6 +661,7 @@ void SnapshotPage::on_defaultSnapshotDisplay_itemSelectionChanged() {
     updateAfterSelectionChanged();
 }
 void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
+    mSnapshotTracker->increment("SELECT");
     QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
     if (selectedItems.size() > 0) {
         // We have the selection, de-select the other list
@@ -688,6 +699,7 @@ static void setSaveOnExitChoice(SaveSnapshotOnExit choice) {
 }
 
 void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
+    mSnapshotTracker->increment("SELECT_BOOT");
     SaveSnapshotOnExit preferenceValue;
     switch(static_cast<SaveSnapshotOnExitUiOrder>(uiIndex)) {
         case SaveSnapshotOnExitUiOrder::Never:
@@ -735,6 +747,7 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
 }
 
 void SnapshotPage::on_deleteInvalidSnapshots_currentIndexChanged(int uiIndex) {
+    mSnapshotTracker->increment("DELETE_INVALID");
     DeleteInvalidSnapshots preferenceValue;
     switch(static_cast<DeleteInvalidSnapshotsUiOrder>(uiIndex)) {
         case DeleteInvalidSnapshotsUiOrder::No:
@@ -986,6 +999,7 @@ void SnapshotPage::showEvent(QShowEvent* ee) {
 // In stand-alone mode, it is used to choose the selected
 // snapshot.
 void SnapshotPage::on_takeSnapshotButton_clicked() {
+    mSnapshotTracker->increment("TAKE_SNAPSHOT");
     setOperationInProgress(true);
 
 

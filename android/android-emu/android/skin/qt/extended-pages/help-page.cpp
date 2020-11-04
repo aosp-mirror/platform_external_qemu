@@ -38,6 +38,7 @@
 #include "android/cmdline-option.h"                 // for android_cmdLineOptions
 #include "android/globals.h"                        // for android_avdInfo
 #include "android/metrics/StudioConfig.h"           // for UpdateChannel
+#include "android/metrics/UiEventTracker.h"         // for UiEventTr...
 #include "android/skin/qt/shortcut-key-store.h"     // for ShortcutKeyStore
 #include "android/update-check/UpdateChecker.h"     // for UpdateChecker
 #include "android/update-check/VersionExtractor.h"  // for VersionExtractor
@@ -58,7 +59,10 @@ static const char FEATURE_REQUEST_TEMPLATE[] =
         R"(Feature Request:
 
 Use Case or Problem this feature helps you with:)";
-HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage) {
+HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage),  mHelpTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_HELP_TAB))
+               {
     mUi->setupUi(this);
     disableForEmbeddedEmulator();
     // Get the version of this code
@@ -171,10 +175,12 @@ void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand
 }
 
 void HelpPage::on_help_docs_clicked() {
+    mHelpTracker->increment("DOCS");
     QDesktopServices::openUrl(QUrl::fromEncoded(DOCS_URL));
 }
 
 void HelpPage::on_help_sendFeedback_clicked() {
+    mHelpTracker->increment("FEEDBACK");
     std::string encodedArgs = Uri::FormatEncodeArguments(
             SEND_FEEDBACK_URL,
             mBugreportInfo.dump() + FEATURE_REQUEST_TEMPLATE);
