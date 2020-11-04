@@ -169,6 +169,7 @@ set(android-emu-common
     android/metrics/StudioConfig.cpp
     android/metrics/SyncMetricsReporter.cpp
     android/metrics/TextMetricsWriter.cpp
+    android/metrics/UiEventTracker.cpp
     android/multi-instance.cpp
     android/multitouch-port.c
     android/multitouch-screen.c
@@ -205,9 +206,9 @@ set(android-emu-common
     android/qt/qt_path.cpp
     android/qt/qt_setup.cpp
     android/resource.c
-    android/sensor_replay/sensor_session_playback.cpp
     android/sdk-controller-socket.c
     android/sensor_mock/SensorMockUtils.cpp
+    android/sensor_replay/sensor_session_playback.cpp
     android/session_phase_reporter.cpp
     android/shaper.c
     android/snaphost-android.c
@@ -857,6 +858,7 @@ if(NOT LINUX_AARCH64)
       android/proxy/ProxyUtils_unittest.cpp
       android/qt/qt_path_unittest.cpp
       android/qt/qt_setup_unittest.cpp
+      android/sensor_replay/sensor_session_playback_unittest.cpp
       android/snapshot/RamLoader_unittest.cpp
       android/snapshot/RamSaver_unittest.cpp
       android/snapshot/RamSnapshot_unittest.cpp
@@ -883,8 +885,7 @@ if(NOT LINUX_AARCH64)
       android/virtualscene/TextureUtils_unittest.cpp
       android/wear-agent/PairUpWearPhone_unittest.cpp
       android/wear-agent/testing/WearAgentTestUtils.cpp
-      android/wear-agent/WearAgent_unittest.cpp
-      android/sensor_replay/sensor_session_playback_unittest.cpp)
+      android/wear-agent/WearAgent_unittest.cpp)
 
   if(NOT OPTION_GFXSTREAM_BACKEND)
     list(APPEND android-emu_unittests_common

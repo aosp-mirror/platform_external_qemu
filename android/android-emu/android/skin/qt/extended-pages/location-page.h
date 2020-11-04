@@ -26,6 +26,7 @@
 #include "android/skin/qt/websockets/websocketclientwrapper.h"
 #include "android/skin/qt/websockets/websockettransport.h"
 #include "network-connectivity-manager.h"
+#include "android/metrics/UiEventTracker.h"
 
 #include <QDateTime>
 #include <QListWidgetItem>
@@ -47,6 +48,7 @@ class RouteSenderThread;
 class MapBridge;
 class PointWidgetItem;
 class RouteWidgetItem;
+using android::metrics::UiEventTracker;
 
 class LocationPage : public QWidget
 {
@@ -137,6 +139,7 @@ signals:
 
 private slots:
     void setUpWebEngine();
+    void on_tabChanged();
     void map_saveRoute();
     void onWebPageLoadFinished(bool okay);
 
@@ -213,6 +216,7 @@ private:
         Deletion,
     };
 
+    std::shared_ptr<UiEventTracker> mPaneInvocationTracker;
     void updatePointWidgetItemsColor();
     void updateRouteWidgetItemsColor();
     void validateCoordinates();
