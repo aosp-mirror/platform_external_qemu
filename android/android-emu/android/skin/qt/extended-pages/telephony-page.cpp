@@ -36,6 +36,8 @@
 #include "android/telephony/sms.h"                      // for SmsPDU, is_in...
 #include "ui_telephony-page.h"                          // for TelephonyPage
 #include "android_modem_v2.h"                          // for TelephonyPage
+#include "android/metrics/UiEventTracker.h"
+#include "android/metrics/UiEventTracker.h"
 
 class QString;
 class QWidget;
@@ -66,6 +68,9 @@ static void telephony_callback(void* userData, int numActiveCalls) {
 TelephonyPage::TelephonyPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::TelephonyPage()),
+     mPhoneTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_TELEPHONY_TAB)),
     mCallActivity(TelephonyPage::CallActivity::Inactive)
 {
     mUi->setupUi(this);
@@ -97,6 +102,7 @@ TelephonyPage::~TelephonyPage() {
 
 void TelephonyPage::on_tel_startEndButton_clicked()
 {
+    mPhoneTracker->increment("CALL");
     SettingsTheme theme = getSelectedTheme();
     if (mCallActivity == CallActivity::Inactive) {
         // Start a call
@@ -181,6 +187,7 @@ void TelephonyPage::on_tel_startEndButton_clicked()
 
 void TelephonyPage::on_tel_holdCallButton_clicked()
 {
+    mPhoneTracker->increment("HOLD");
     SettingsTheme theme = getSelectedTheme();
     switch (mCallActivity) {
         case CallActivity::Active:
@@ -311,6 +318,7 @@ QValidator::State TelephonyPage::PhoneNumberValidator::validateAsAlphanumeric(co
 void TelephonyPage::on_sms_sendButton_clicked()
 {
     // Get the "from" number
+    mPhoneTracker->increment("SMS");
     SmsAddressRec sender;
     int retVal = sms_address_from_str(&sender,
                      mUi->tel_numberBox->

@@ -20,6 +20,13 @@
 #include <QWidget>        // for QWidget
 #include <memory>         // for unique_ptr
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class QObject;
 class QString;
 class QWidget;
@@ -66,6 +73,7 @@ private:
     };
 
     std::unique_ptr<Ui::TelephonyPage> mUi;
+    std::shared_ptr<UiEventTracker> mPhoneTracker;
     CallActivity mCallActivity;
     QString mPhoneNumber;
     QEvent::Type mCustomEventType;
