@@ -154,7 +154,7 @@ int AHardwareBuffer_sendHandleToUnixSocket(const AHardwareBuffer* buffer, int so
     char buf[CMSG_SPACE(kFdBufferSize)];
     struct msghdr msg = {
             .msg_control = buf,
-            .msg_controllen = sizeof(buf),
+            .msg_controllen = static_cast<socklen_t>(sizeof(buf)),
             .msg_iov = &iov[0],
             .msg_iovlen = 1,
     };
@@ -187,7 +187,7 @@ int AHardwareBuffer_recvHandleFromUnixSocket(int socketFd, AHardwareBuffer** out
     iov[0].iov_len = kMessageBufferSize;
     struct msghdr msg = {
             .msg_control = fdBuf,
-            .msg_controllen = sizeof(fdBuf),
+            .msg_controllen = static_cast<socklen_t>(sizeof(fdBuf)),
             .msg_iov = &iov[0],
             .msg_iovlen = 1,
     };

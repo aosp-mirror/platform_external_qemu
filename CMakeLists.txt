@@ -263,10 +263,11 @@ elseif(WINDOWS_MSVC_X86_64)
   set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 elseif(DARWIN_X86_64)
   # And the asm type if we are compiling with yasm
+  add_c_flag("-Werror")
+  add_c_flag("-Wno-deprecated-declarations")
   set(ANDROID_NASM_TYPE macho64)
   # Always consider the source to be darwin.
   add_definitions(-D_DARWIN_C_SOURCE=1)
-  add_c_flag("-Wno-everything")
 else()
   message(FATAL_ERROR "Unknown target!")
 endif()
@@ -282,10 +283,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # clang-cl != clang-lin != clang-darwin
   add_c_flag("-Wno-unknown-warning-option")
   add_c_flag("-Wno-unknown-argument")
-endif()
-
-if(DARWIN_X86_64)
-  add_c_flag("-Werror")
 endif()
 
 if(WINDOWS_MSVC_X86_64)
@@ -610,6 +607,7 @@ android_target_compile_options(
   "-Wno-shift-negative-value"
   # There are a series of out of bounds issues in hvf.
   "-Wno-array-bounds"
+  "-Wno-shift-count-overflow"
   "-Wno-format"
   "-Wno-implicit-int-float-conversion"
   "-Wno-reorder-init-list")
