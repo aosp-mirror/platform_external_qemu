@@ -10,11 +10,12 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/cellular-page.h"
 
-#include <qsettings.h>                                 // for QSettings::Ini...
-#include <qstring.h>                                   // for operator+
-#include <QComboBox>                                   // for QComboBox
-#include <QSettings>                                   // for QSettings
-#include <QVariant>                                    // for QVariant
+#include <qsettings.h>  // for QSettings::Ini...
+#include <qstring.h>    // for operator+
+
+#include <QComboBox>  // for QComboBox
+#include <QSettings>  // for QSettings
+#include <QVariant>   // for QVariant
 
 #include "android/avd/util.h"                          // for path_getAvdCon...
 #include "android/emulation/VmLock.h"                  // for RecursiveScope...
@@ -22,8 +23,9 @@
 #include "android/emulator-window.h"                   // for emulator_windo...
 #include "android/globals.h"                           // for android_hw
 #include "android/main-common.h"                       // for emulator_has_n...
-#include "android/skin/qt/qt-settings.h"               // for PER_AVD_SETTIN...
-#include "ui_cellular-page.h"                          // for CellularPage
+#include "android/metrics/UiEventTracker.h"
+#include "android/skin/qt/qt-settings.h"  // for PER_AVD_SETTIN...
+#include "ui_cellular-page.h"             // for CellularPage
 
 class QWidget;
 
@@ -34,17 +36,73 @@ static void saveNetworkType(int type);
 static void saveSignalStrength(int strength);
 static void saveVoiceStatus(int status);
 static void saveMeterStatus(int status);
-static int  getSavedDataStatus();
-static int  getSavedMeterStatus();
-static int  getSavedNetworkType();
-static int  getSavedSignalStrength();
-static int  getSavedVoiceStatus();
+static int getSavedDataStatus();
+static int getSavedMeterStatus();
+static int getSavedNetworkType();
+static int getSavedSignalStrength();
+static int getSavedVoiceStatus();
+
+#define STATE(p) \
+    case (p):    \
+        s = #p;  \
+        break;
 
 
-CellularPage::CellularPage(QWidget *parent) :
-    QWidget(parent),
-    mUi(new Ui::CellularPage())
-{
+static std::string translate_idx(CellularStatus value) {
+    std::string s = "";
+    switch (value) {
+        STATE(Cellular_Stat_Home);
+        STATE(Cellular_Stat_Roaming);
+        STATE(Cellular_Stat_Searching);
+        STATE(Cellular_Stat_Denied);
+        STATE(Cellular_Stat_Unregistered);
+    }
+    return s;
+}
+
+static std::string translate_idx(CellularStandard value) {
+    std::string s = "";
+    switch (value) {
+        STATE(Cellular_Std_GSM);
+        STATE(Cellular_Std_HSCSD);
+        STATE(Cellular_Std_GPRS);
+        STATE(Cellular_Std_EDGE);
+        STATE(Cellular_Std_UMTS);
+        STATE(Cellular_Std_HSDPA);
+        STATE(Cellular_Std_LTE);
+        STATE(Cellular_Std_full);
+        STATE(Cellular_Std_5G);
+    }
+    return s;
+}
+
+static std::string translate_idx(CellularSignal value) {
+    std::string s = "";
+    switch (value) {
+        STATE(Cellular_Signal_None);
+        STATE(Cellular_Signal_Poor);
+        STATE(Cellular_Signal_Moderate);
+        STATE(Cellular_Signal_Good);
+        STATE(Cellular_Signal_Great);
+    }
+    return s;
+}
+
+static std::string translate_idx(CellularMeterStatus value) {
+    std::string s = "";
+    switch (value) {
+        STATE(Cellular_Metered);
+        STATE(Cellular_Temporarily_Not_Metered);
+    }
+    return s;
+}
+
+CellularPage::CellularPage(QWidget* parent)
+    : QWidget(parent),
+      mUi(new Ui::CellularPage()),
+      mDropDownTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::OPTION_SELECTED,
+              android_studio::EmulatorUiEvent::EXTENDED_CELLULAR_TAB)) {
     mUi->setupUi(this);
 
     // Restore previous setting values to the UI widgets
@@ -62,8 +120,8 @@ CellularPage::CellularPage(QWidget *parent) :
     mUi->cell_dataStatusBox->setCurrentIndex(getSavedDataStatus());
 
     // Meter status
-    mUi->cell_meterStatusBox->setCurrentIndex(getSavedMeterStatus()); // always metered
-
+    mUi->cell_meterStatusBox->setCurrentIndex(
+            getSavedMeterStatus());  // always metered
 }
 
 extern "C" int sim_is_present() {
@@ -75,7 +133,8 @@ bool CellularPage::simIsPresent() {
     EmulatorWindow* const ew = emulator_window_get();
     if (ew) {
         // If the command line says no SIM, we say no SIM.
-        if (ew->opts->no_sim) return false;
+        if (ew->opts->no_sim)
+            return false;
     }
     // In the absence of UI controls, the default is 'true'.
     return true;
@@ -83,8 +142,8 @@ bool CellularPage::simIsPresent() {
 
 // static
 void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
-
-    if (!agent) return;
+    if (!agent)
+        return;
 
     android::RecursiveScopedVmLock vmlock;
 
@@ -108,7 +167,8 @@ void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
 
     // Signal strength
     if (sCellularAgent->setSignalStrengthProfile) {
-        sCellularAgent->setSignalStrengthProfile((CellularSignal)getSavedSignalStrength());
+        sCellularAgent->setSignalStrengthProfile(
+                (CellularSignal)getSavedSignalStrength());
     }
 
     // Voice status
@@ -123,62 +183,63 @@ void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
 
     // Meter status
     if (sCellularAgent->setMeterStatus) {
-        sCellularAgent->setMeterStatus((CellularMeterStatus)getSavedMeterStatus());
+        sCellularAgent->setMeterStatus(
+                (CellularMeterStatus)getSavedMeterStatus());
     }
 }
 
-void CellularPage::on_cell_standardBox_currentIndexChanged(int index)
-{
+void CellularPage::on_cell_standardBox_currentIndexChanged(int index) {
     saveNetworkType(index);
 
     android::RecursiveScopedVmLock vmlock;
     if (sCellularAgent && sCellularAgent->setStandard) {
         CellularStandard cStandard = (CellularStandard)index;
         sCellularAgent->setStandard(cStandard);
+        mDropDownTracker->increment(translate_idx(cStandard));
     }
 }
 
-void CellularPage::on_cell_voiceStatusBox_currentIndexChanged(int index)
-{
+void CellularPage::on_cell_voiceStatusBox_currentIndexChanged(int index) {
     saveVoiceStatus(index);
 
     android::RecursiveScopedVmLock vmlock;
     if (sCellularAgent && sCellularAgent->setVoiceStatus) {
         CellularStatus vStatus = (CellularStatus)index;
         sCellularAgent->setVoiceStatus(vStatus);
+        mDropDownTracker->increment(translate_idx(vStatus) + "_VOICE");
     }
 }
 
-void CellularPage::on_cell_meterStatusBox_currentIndexChanged(int index)
-{
+void CellularPage::on_cell_meterStatusBox_currentIndexChanged(int index) {
     saveMeterStatus(index);
 
     android::RecursiveScopedVmLock vmlock;
     if (sCellularAgent && sCellularAgent->setMeterStatus) {
         CellularMeterStatus mStatus = (CellularMeterStatus)index;
         sCellularAgent->setMeterStatus(mStatus);
+        mDropDownTracker->increment(translate_idx(mStatus));
     }
 }
 
-void CellularPage::on_cell_dataStatusBox_currentIndexChanged(int index)
-{
+void CellularPage::on_cell_dataStatusBox_currentIndexChanged(int index) {
     saveDataStatus(index);
 
     android::RecursiveScopedVmLock vmlock;
     if (sCellularAgent && sCellularAgent->setDataStatus) {
         CellularStatus dStatus = (CellularStatus)index;
         sCellularAgent->setDataStatus(dStatus);
+        mDropDownTracker->increment(translate_idx(dStatus) + "_DATA");
     }
 }
 
-void CellularPage::on_cell_signalStatusBox_currentIndexChanged(int index)
-{
+void CellularPage::on_cell_signalStatusBox_currentIndexChanged(int index) {
     saveSignalStrength(index);
 
     android::RecursiveScopedVmLock vmlock;
     if (sCellularAgent && sCellularAgent->setSignalStrengthProfile) {
         CellularSignal signal = (CellularSignal)index;
         sCellularAgent->setSignalStrengthProfile(signal);
+        mDropDownTracker->increment(translate_idx(signal));
     }
 }
 
@@ -189,9 +250,11 @@ void CellularPage::on_cell_signalStatusBox_currentIndexChanged(int index)
 static void saveDataStatus(int status) {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_CELLULAR_DATA_STATUS, status);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_CELLULAR_DATA_STATUS,
+                                     status);
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
@@ -202,9 +265,11 @@ static void saveDataStatus(int status) {
 static void saveNetworkType(int type) {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_CELLULAR_NETWORK_TYPE, type);
+        avdSpecificSettings.setValue(
+                Ui::Settings::PER_AVD_CELLULAR_NETWORK_TYPE, type);
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
@@ -215,9 +280,11 @@ static void saveNetworkType(int type) {
 static void saveSignalStrength(int strength) {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_CELLULAR_SIGNAL_STRENGTH, strength);
+        avdSpecificSettings.setValue(
+                Ui::Settings::PER_AVD_CELLULAR_SIGNAL_STRENGTH, strength);
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
@@ -228,9 +295,11 @@ static void saveSignalStrength(int strength) {
 static void saveVoiceStatus(int status) {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_CELLULAR_VOICE_STATUS, status);
+        avdSpecificSettings.setValue(
+                Ui::Settings::PER_AVD_CELLULAR_VOICE_STATUS, status);
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
@@ -241,9 +310,11 @@ static void saveVoiceStatus(int status) {
 static void saveMeterStatus(int status) {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_CELLULAR_METER_STATUS, status);
+        avdSpecificSettings.setValue(
+                Ui::Settings::PER_AVD_CELLULAR_METER_STATUS, status);
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
@@ -251,72 +322,98 @@ static void saveMeterStatus(int status) {
     }
 }
 
-static int  getSavedMeterStatus() {
+static int getSavedMeterStatus() {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        return avdSpecificSettings.value(Ui::Settings::PER_AVD_CELLULAR_METER_STATUS,
-                                         Cellular_Metered).toInt();
+        return avdSpecificSettings
+                .value(Ui::Settings::PER_AVD_CELLULAR_METER_STATUS,
+                       Cellular_Metered)
+                .toInt();
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
-        return settings.value(Ui::Settings::CELLULAR_METER_STATUS, Cellular_Metered).toInt();
+        return settings
+                .value(Ui::Settings::CELLULAR_METER_STATUS, Cellular_Metered)
+                .toInt();
     }
 }
 
-static int  getSavedDataStatus() {
+static int getSavedDataStatus() {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        return avdSpecificSettings.value(Ui::Settings::PER_AVD_CELLULAR_DATA_STATUS,
-                                         Cellular_Stat_Home).toInt();
+        return avdSpecificSettings
+                .value(Ui::Settings::PER_AVD_CELLULAR_DATA_STATUS,
+                       Cellular_Stat_Home)
+                .toInt();
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
-        return settings.value(Ui::Settings::CELLULAR_DATA_STATUS, Cellular_Stat_Home).toInt();
+        return settings
+                .value(Ui::Settings::CELLULAR_DATA_STATUS, Cellular_Stat_Home)
+                .toInt();
     }
 }
 
-static int  getSavedNetworkType() {
+static int getSavedNetworkType() {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        return avdSpecificSettings.value(Ui::Settings::PER_AVD_CELLULAR_NETWORK_TYPE,
-                                         Cellular_Std_full).toInt();
+        return avdSpecificSettings
+                .value(Ui::Settings::PER_AVD_CELLULAR_NETWORK_TYPE,
+                       Cellular_Std_full)
+                .toInt();
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
-        return settings.value(Ui::Settings::CELLULAR_NETWORK_TYPE, Cellular_Std_full).toInt();
+        return settings
+                .value(Ui::Settings::CELLULAR_NETWORK_TYPE, Cellular_Std_full)
+                .toInt();
     }
 }
 
-static int  getSavedSignalStrength() {
+static int getSavedSignalStrength() {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        return avdSpecificSettings.value(Ui::Settings::PER_AVD_CELLULAR_SIGNAL_STRENGTH,
-                                         Cellular_Signal_Moderate).toInt();
+        return avdSpecificSettings
+                .value(Ui::Settings::PER_AVD_CELLULAR_SIGNAL_STRENGTH,
+                       Cellular_Signal_Moderate)
+                .toInt();
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
-        return settings.value(Ui::Settings::CELLULAR_SIGNAL_STRENGTH, Cellular_Signal_Moderate).toInt();
+        return settings
+                .value(Ui::Settings::CELLULAR_SIGNAL_STRENGTH,
+                       Cellular_Signal_Moderate)
+                .toInt();
     }
 }
 
-static int  getSavedVoiceStatus() {
+static int getSavedVoiceStatus() {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-        return avdSpecificSettings.value(Ui::Settings::PER_AVD_CELLULAR_VOICE_STATUS,
-                                         Cellular_Stat_Home).toInt();
+        return avdSpecificSettings
+                .value(Ui::Settings::PER_AVD_CELLULAR_VOICE_STATUS,
+                       Cellular_Stat_Home)
+                .toInt();
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
-        return settings.value(Ui::Settings::CELLULAR_VOICE_STATUS, Cellular_Stat_Home).toInt();
+        return settings
+                .value(Ui::Settings::CELLULAR_VOICE_STATUS, Cellular_Stat_Home)
+                .toInt();
     }
 }
