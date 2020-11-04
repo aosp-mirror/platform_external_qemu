@@ -45,6 +45,7 @@
 #define NPCM7XX_CLK_BA          (0xf0801000)
 #define NPCM7XX_MC_BA           (0xf0824000)
 #define NPCM7XX_RNG_BA          (0xf000b000)
+#define NPCM7XX_KCS_BA          (0xf0007000)
 
 /* USB Host modules */
 #define NPCM7XX_EHCI_BA         (0xf0806000)
@@ -83,6 +84,7 @@ enum NPCM7xxInterrupt {
     NPCM7XX_UART1_IRQ,
     NPCM7XX_UART2_IRQ,
     NPCM7XX_UART3_IRQ,
+    NPCM7XX_KCS_HIB_IRQ         = 9,
     NPCM7XX_EMC1RX_IRQ          = 15,
     NPCM7XX_EMC1TX_IRQ,
     NPCM7XX_MMC_IRQ             = 26,
@@ -432,6 +434,7 @@ static void npcm7xx_init(Object *obj)
         DEVICE(&s->smbus[i])->id = g_strdup_printf("smbus[%d]", i);
     }
 
+    object_initialize_child(obj, "kcs", &s->kcs, TYPE_NPCM7XX_KCS);
     object_initialize_child(obj, "ehci", &s->ehci, TYPE_NPCM7XX_EHCI);
     object_initialize_child(obj, "ohci", &s->ohci, TYPE_SYSBUS_OHCI);
 
@@ -613,6 +616,12 @@ static void npcm7xx_realize(DeviceState *dev, Error **errp)
                            npcm7xx_irq(s, NPCM7XX_SMBUS0_IRQ + i));
     }
 
+    /* KCS modules*/
+    sysbus_realize(SYS_BUS_DEVICE(&s->kcs), &error_abort);
+    sysbus_mmio_map(SYS_BUS_DEVICE(&s->kcs), 0, NPCM7XX_KCS_BA);
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->kcs), 0,
+                       npcm7xx_irq(s, NPCM7XX_KCS_HIB_IRQ));
+
     /* USB Host */
     object_property_set_bool(OBJECT(&s->ehci), "companion-enable", true,
                              &error_abort);
@@ -742,7 +751,6 @@ static void npcm7xx_realize(DeviceState *dev, Error **errp)
     create_unimplemented_device("npcm7xx.shm",          0xc0001000,   4 * KiB);
     create_unimplemented_device("npcm7xx.vdmx",         0xe0800000,   4 * KiB);
     create_unimplemented_device("npcm7xx.pcierc",       0xe1000000,  64 * KiB);
-    create_unimplemented_device("npcm7xx.kcs",          0xf0007000,   4 * KiB);
     create_unimplemented_device("npcm7xx.gfxi",         0xf000e000,   4 * KiB);
     create_unimplemented_device("npcm7xx.espi",         0xf009f000,   4 * KiB);
     create_unimplemented_device("npcm7xx.peci",         0xf0100000,   4 * KiB);

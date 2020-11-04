@@ -1,0 +1,8 @@
+# See docs/devel/tracing.txt for syntax documentation.
+
+# npcm7xx_kcs.c
+npcm7xx_kcs_read(const char *id, int channel, int reg, uint8_t value) " %s channel: %" PRIi32 ", reg: %" PRIi32 ", value 0x%02" PRIx8
+npcm7xx_kcs_write(const char *id, int channel, int reg, uint8_t value) " %s channel: %" PRIi32 ", reg: %" PRIi32 ", value 0x%02" PRIx8
+npcm7xx_kcs_handle_event(const char *id, uint8_t status) " %s: %" PRIu8
+npcm7xx_kcs_host_read_byte(const char *id, uint8_t value) " %s: value 0x%02" PRIx8
+npcm7xx_kcs_host_write_byte(const char *id, uint8_t value) " %s: value 0x%02" PRIx8
