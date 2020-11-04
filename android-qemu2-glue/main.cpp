@@ -1238,7 +1238,8 @@ extern "C" int main(int argc, char** argv) {
         is_multi_instance = true;
         opts->no_snapshot_save = true;
         args.add("-read-only");
-    } else if (filelock_create_timeout(coreHwIniPath, 2000) == NULL) {
+    } else if (!opts->check_snapshot_loadable &&
+               filelock_create_timeout(coreHwIniPath, 2000) == NULL) {
         /* The AVD is already in use, we still support this as an
          * experimental feature. Use a temporary hardware-qemu.ini
          * file though to avoid overwriting the existing one. */
