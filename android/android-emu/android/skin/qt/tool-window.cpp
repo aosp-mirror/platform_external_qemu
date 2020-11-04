@@ -585,7 +585,9 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
         case QtUICommand::SHOW_PANE_MULTIDISPLAY:
             if (down) {
                 if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
-                    && !android_foldable_any_folded_area_configured()) {
+                    && !android_foldable_any_folded_area_configured()
+                    && !android_foldable_hinge_configured()
+                    && !android_foldable_rollable_configured()) {
                     showOrRaiseExtendedWindow(PANE_IDX_MULTIDISPLAY);
                 }
             }
