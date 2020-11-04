@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include <qobjectdefs.h>            // for Q_OBJECT, signals, slots
 #include <stdint.h>                 // for uint32_t
+#include <QByteArrayData>           // for Q_OBJECT, signals, slots
 #include <QString>                  // for QString
 #include <QWidget>                  // for QWidget
-#include <memory>                   // for unique_ptr
+#include <memory>                   // for shared_ptr, unique_ptr
 #include <string>                   // for string
 #include <vector>                   // for vector
 
@@ -24,7 +24,13 @@
 class MultiDisplayPage;
 class QFocusEvent;
 class QObject;
-class QWidget;
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 
 class MultiDisplayItem : public QWidget {
     Q_OBJECT
@@ -49,6 +55,7 @@ private:
         uint32_t dpi;
     };
     static std::vector<displayType> sDisplayTypes;
+    std::shared_ptr<UiEventTracker> mDropDownTracker;
     int mId;
     int mCurrentIndex;
     MultiDisplayPage* mMultiDisplayPage = nullptr;
