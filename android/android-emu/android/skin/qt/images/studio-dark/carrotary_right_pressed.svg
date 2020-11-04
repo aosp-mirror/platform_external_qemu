@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="154px" height="216px" viewBox="0 0 154 216" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>carrotary_right</title>
+    <g id="carrotary_right" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="emulator_rotary_controller" transform="translate(-189.000000, -83.000000)" fill-rule="nonzero">
+            <path d="M191.132,191.132 L297.198,297.198 C355.777,238.619 355.777,143.645 297.198,85.066 L191.132,191.132 Z" id="Path" stroke="#273238" stroke-width="3" fill="#3d5059"></path>
+            <polygon id="Path" fill="#FFFFFF" points="314.465 180.132 311.871 182.726 320.277 191.132 311.871 199.538 314.465 202.132 325.465 191.132"></polygon>
+        </g>
+    </g>
+</svg>

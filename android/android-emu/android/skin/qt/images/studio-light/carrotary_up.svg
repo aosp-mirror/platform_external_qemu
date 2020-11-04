@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="216px" height="153px" viewBox="0 0 216 153" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>carrotary_up</title>
+    <g id="carrotary_up" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="carrotary_light_" transform="translate(-83.000000, -40.000000)" fill-rule="nonzero">
+            <path d="M191.132,191.132 L297.198,85.066 C238.619,26.4874 143.645,26.4874 85.066,85.066 L191.132,191.132 Z" id="Path" stroke="#F9F9F9" stroke-width="3" fill="#E0E0E0"></path>
+            <polygon id="Path" fill="#FFFFFF" points="181.132 69.7987 183.726 72.3928 192.132 63.987 200.538 72.3928 203.132 69.7987 192.132 58.7987"></polygon>
+        </g>
+    </g>
+</svg>
