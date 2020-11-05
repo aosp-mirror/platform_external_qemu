@@ -30,6 +30,7 @@
 #include <tuple>                                     // for tuple
 #include <utility>                                   // for move
 
+#include "android/cmdline-option.h"                  // for android_cmdLineOptions
 #include "android/skin/qt/ModalOverlay.h"            // for ModalOverlay
 #include "android/skin/qt/OverlayMessageCenter.h"    // for OverlayMessageCe...
 #include "android/skin/qt/VirtualSceneInfoDialog.h"  // for VirtualSceneInfo...
@@ -387,6 +388,14 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     }
 }
 
+void EmulatorContainer::show() {
+    // When emulator is running in embedded mode,
+    // hide all windows except for extended controls window.
+    if (android_cmdLineOptions->qt_hide_window) {
+        return;
+    }
+    QScrollArea::show();
+}
 void EmulatorContainer::showMinimized() {
 // Some Linux window managers (specifically, Compiz, which is the default
 // Ubuntu window manager) will not allow minimizing unless the minimize
@@ -458,6 +467,11 @@ void EmulatorContainer::slot_resizeDone() {
 void EmulatorContainer::slot_showModalOverlay(QString text) {
     slot_hideModalOverlay();
     slot_hideVirtualSceneInfoDialog();
+    // When emulator is running in embedded mode,
+    // hide all windows except for extended controls window.
+    if (android_cmdLineOptions->qt_hide_window) {
+        return;
+    }
     mModalOverlay = new Ui::ModalOverlay(text, this);
     adjustModalOverlayGeometry();
     mModalOverlay->show();
