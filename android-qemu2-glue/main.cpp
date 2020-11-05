@@ -1433,6 +1433,7 @@ extern "C" int main(int argc, char** argv) {
                 !opts->read_only &&
                 !opts->snapshot &&
                 !opts->no_snapshot_save &&
+                !opts->check_snapshot_loadable &&
                 androidSnapshot_getQuickbootChoice();
 
             if (mapAsShared) {
