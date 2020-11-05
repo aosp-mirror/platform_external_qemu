@@ -480,10 +480,7 @@ bool ToolWindow::setUiTheme(SettingsTheme theme, bool persist) {
         return false;
     }
     if (getSelectedTheme() != theme) {
-        if (persist) {
-            QSettings settings;
-            settings.setValue(Ui::Settings::UI_THEME, (int)theme);
-        }
+        setSelectedTheme(theme, persist);
         ensureExtendedWindowExists();
         emit(themeChanged(theme));
     }

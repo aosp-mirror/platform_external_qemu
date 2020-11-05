@@ -381,9 +381,7 @@ void SettingsPage::on_set_themeBox_currentIndexChanged(int index)
         // Out of range--ignore
         return;
     }
-    QSettings settings;
-    settings.setValue(Ui::Settings::UI_THEME, (int)theme);
-
+    setSelectedTheme(theme, true);
     emit(themeChanged(theme));
 }
 
