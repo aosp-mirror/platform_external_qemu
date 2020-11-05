@@ -2292,6 +2292,9 @@ extern "C" int main(int argc, char** argv) {
 #endif
     if (opts->check_snapshot_loadable) {
         android_check_snapshot_loadable(opts->check_snapshot_loadable);
+        stopRenderer();
+        cuttlefish::stop_android_modem_simulator();
+        process_late_teardown();
         return 0;
     }
 
