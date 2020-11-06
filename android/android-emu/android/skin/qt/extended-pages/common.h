@@ -38,6 +38,9 @@ QString getRecordingSaveDirectory();
 // Get the currently active UI theme.
 SettingsTheme getSelectedTheme();
 
+// Set the currently active UI theme.
+void setSelectedTheme(SettingsTheme theme, bool persist);
+
 // Adjusts all push buttons to fit the given theme (i.e. changing icons)
 void adjustAllButtonsForTheme(SettingsTheme theme);
 
