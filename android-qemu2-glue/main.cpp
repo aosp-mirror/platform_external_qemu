@@ -1131,7 +1131,9 @@ extern "C" int main(int argc, char** argv) {
             // kernel path to android_hw->kernel_path (android_hw is currently
             // not used in the Fuchsia path).
             if (opts->fuchsia) {
-                args.add({"-kernel", opts->kernel});
+                if (opts->kernel) {
+                    args.add({"-kernel", opts->kernel});
+                }
                 std::string dataDir = getNthParentDir(executable, 3U);
                 if (dataDir.empty()) {
                     dataDir = "lib/pc-bios";
