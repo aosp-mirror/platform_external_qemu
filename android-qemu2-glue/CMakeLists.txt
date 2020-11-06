@@ -57,6 +57,7 @@ android_add_library(
   TARGET libqemu2-glue LICENSE Apache-2.0 SRC # cmake-format: sortable
                                               ${android-qemu2-glue_src})
 
+android_target_compile_options(libqemu2-glue darwin-x86_64 PRIVATE "-Wno-macro-redefined")
 target_include_directories(
   libqemu2-glue
   PRIVATE .. ../include ../qemu2-auto-generated ../slirp

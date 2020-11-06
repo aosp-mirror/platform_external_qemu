@@ -497,6 +497,7 @@ android_target_compile_options(
 android_target_compile_options(
   android-emu darwin-x86_64
   PRIVATE -Wno-objc-method-access -Wno-missing-selector-name -Wno-receiver-expr
+          -Wno-error
           -Wno-incomplete-implementation -Wno-incompatible-pointer-types
           -Wno-deprecated-declarations)
 

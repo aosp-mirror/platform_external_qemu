@@ -656,7 +656,7 @@ function(android_add_protobuf name protofiles)
   # information, but it will generate it as needed. The  dynamic_cast operator
   # can still be used for casts that do not require runtime type information,
   # i.e. casts to void * or to unambiguous base classes.
-  target_compile_options(${name} PRIVATE -fno-rtti)
+  target_compile_options(${name} PRIVATE -fno-rtti -Wno-deprecated-declarations)
   # This needs to be public, as we don't want the headers to start exposing
   # exceptions.
   target_compile_definitions(${name} PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
