@@ -34,6 +34,7 @@
 #include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
 #include "android/base/synchronization/Lock.h"               // for Lock
 #include "android/base/system/System.h"                      // for System
+#include "android/base/threads/Async.h"
 #include "android/base/threads/FunctorThread.h"              // for FunctorT...
 #include "android/base/threads/Thread.h"                     // for Thread
 #include "android/console.h"                                 // for getConso...
@@ -321,12 +322,11 @@ bool track_async(int pid,
             return false;
         }
     }
-    s_workerThread.reset(new android::base::FunctorThread(
+    return android::base::async(
             [pid, snapshot_name, max_snapshot_number] {
                 bool result = track(pid, snapshot_name, max_snapshot_number);
                 D("track result %d\n", result);
-            }));
-    return s_workerThread->start();
+            });
 }
 bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
     if (s_adb_port == -1) {
