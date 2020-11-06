@@ -47,7 +47,7 @@ void fdprintfnv(FILE* fp, const char* lvl, const char* format, va_list args) {
         time_t now = tv.tv_sec;
         struct tm* time = localtime(&now);
         fprintf(fp, "%02d:%02d:%02d.%05ld ", time->tm_hour, time->tm_min,
-                time->tm_sec, (long) tv.tv_usec);
+                time->tm_sec, tv.tv_usec);
         fprintf(fp, "emulator: ");
     }
     if (lvl) {
