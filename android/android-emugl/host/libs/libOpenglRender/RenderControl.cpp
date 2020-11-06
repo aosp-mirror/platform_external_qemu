@@ -1405,6 +1405,26 @@ static void rcMakeCurrentAsync(uint32_t context, uint32_t drawSurf, uint32_t rea
     fb->bindContext(context, drawSurf, readSurf);
 }
 
+static void rcComposeAsync(uint32_t bufferSize, void* buffer) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+    fb->compose(bufferSize, buffer);
+}
+
+static void rcDestroySyncKHRAsyncy(uint64_t handle) {
+    FenceSync* fenceSync = FenceSync::getFromHandle(handle);
+    if (!fenceSync) return;
+    fenceSync->decRef();
+}
+
+static void rcDestroySyncKHRAsync(uint64_t handle) {
+    FenceSync* fenceSync = FenceSync::getFromHandle(handle);
+    if (!fenceSync) return;
+    fenceSync->decRef();
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1465,4 +1485,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcFlushWindowColorBufferAsyncWithFrameNumber = rcFlushWindowColorBufferAsyncWithFrameNumber;
     dec->rcSetTracingForPuid = rcSetTracingForPuid;
     dec->rcMakeCurrentAsync = rcMakeCurrentAsync;
+    dec->rcComposeAsync = rcComposeAsync;
+    dec->rcDestroySyncKHRAsync = rcDestroySyncKHRAsync;
 }
