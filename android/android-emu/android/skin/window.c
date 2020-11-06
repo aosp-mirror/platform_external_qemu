@@ -1056,6 +1056,7 @@ struct SkinWindow {
     int           x_pos;
     int           y_pos;
     double        scale;
+    double        dpr; // Needed for HiDPI
 
     // For dragging and resizing the window
     int           drag_x_start;
@@ -1356,18 +1357,12 @@ typedef struct {
     int fbw;
     int fbh;
     float rot;
+    float dpr;
     bool deleteExisting;
 } gles_show_data;
 
 static void skin_window_run_opengles_show(void* p) {
     gles_show_data* data = p;
-    double dpr = 1.0;
-#ifdef __APPLE__
-    // If the window is on a retina monitor, the framebuffer size needs to be
-    // adjusted to the actual number of pixels.
-    skin_winsys_get_device_pixel_ratio(&dpr);
-#endif
-
     data->window->win_funcs->opengles_show(skin_winsys_get_window_handle(),
                                            data->wx,
                                            data->wy,
@@ -1375,7 +1370,7 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->wh,
                                            data->fbw,
                                            data->fbh,
-                                           dpr,
+                                           data->dpr,
                                            data->rot,
                                            data->deleteExisting);
     AFREE(data);
@@ -1392,6 +1387,13 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
 
     data->fbw = window->framebuffer.w;
     data->fbh = window->framebuffer.h;
+
+    data->dpr = 1.0;
+    // Only sets the pixel ratio to adjust the framebuffer size if HiDPI scaling
+    // is enabled.
+    if (!android_cmdLineOptions->no_hidpi_scaling) {
+        data->dpr = window->dpr;
+    }
 
 #if 0
     printf("%s pos %d %d, size %d %d, fb %d %d\n", __func__,
@@ -1488,6 +1490,18 @@ static void skin_window_ensure_fully_visible(void* ptr) {
     AFREE(data);
 }
 
+static void
+skin_window_set_device_pixel_ratio( SkinWindow* window )
+{
+    double dpr = 1.0;
+#ifdef __APPLE__
+    // Only macOS devices with Retina display needs to get the device pixel
+    // ratio to zoom the opengles display.
+    skin_winsys_get_device_pixel_ratio(&dpr);
+#endif
+    window->dpr = dpr;
+}
+
 SkinWindow* skin_window_create(SkinLayout* slayout,
                                int x,
                                int y,
@@ -1514,6 +1528,8 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
 
     window->drag_x_start = 0;
     window->drag_y_start = 0;
+
+    skin_window_set_device_pixel_ratio(window);
 
     SkinRect  monitor;
     int       win_w = slayout->size.w;
@@ -1685,6 +1701,7 @@ skin_window_resize( SkinWindow*  window, int resize_container )
     int           window_x = window->x_pos;
     int           window_y = window->y_pos;
     double        scale = window->scale;
+    double        dpr = window->dpr;
 
     // Pre-record the container dimensions
     if (resize_container) {
@@ -1699,6 +1716,17 @@ skin_window_resize( SkinWindow*  window, int resize_container )
     if (scale != 1.0) {
         window_w = (int) ceil(layout_w * scale);
         window_h = (int) ceil(layout_h * scale);
+    }
+
+    // If HiDPI scaling is disabled on the device, window->container and
+    // (window_w, window_h) should be the actual pixel size of container and
+    // the window; the logical pixel size used for Qt should be divided by the
+    // display's pixel ratio.
+    if (android_cmdLineOptions->no_hidpi_scaling) {
+        window->container.w = (int) ceil(window->container.w / dpr);
+        window->container.h = (int) ceil(window->container.h / dpr);
+        window_w = (int) ceil(window_w / dpr);
+        window_h = (int) ceil(window_h / dpr);
     }
 
     // Attempt to resize the window surface. If it doesn't exist, a new one will be
@@ -1734,6 +1762,14 @@ skin_window_resize( SkinWindow*  window, int resize_container )
 
     window->framebuffer.w = drect.size.w;
     window->framebuffer.h = drect.size.h;
+
+    // The OpenGL framebuffer subwindow uses actual pixel size to initialize.
+    // so size of "window->framebuffer" should be the Skin size (logical pixel)
+    // multiplies display's pixel ratio.
+    if (android_cmdLineOptions->no_hidpi_scaling) {
+        window->framebuffer.w = window->framebuffer.w * dpr;
+        window->framebuffer.h = window->framebuffer.h * dpr;
+    }
 
     if (skin_window_recompute_subwindow_rect(window, &drect)) {
         skin_window_show_opengles(window, false);
@@ -2206,8 +2242,15 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         break;
 
     case kEventScreenChanged:
-        // Re-setup the OpenGL ES subwindow with a potentially different
-        // framebuffer size (e.g., 2x for retina screens).
+        // Re-setup the guest window and the OpenGL ES subwindow with a
+        // potentially different window size / framebuffer size.
+        //
+        // For example, if HiDPI is enabled, the guest window size keeps the
+        // same, while OpenGL ES subwindow will be initialized with a
+        // framebuffer of 2x size. Otherwise, if HiDPI is disabled, the
+        // framebuffer still gets the same size, but window size will be halved.
+        skin_window_set_device_pixel_ratio(window);
+        skin_window_resize(window, 1);
         skin_window_show_opengles(window, true);
         break;
 

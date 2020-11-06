@@ -2176,6 +2176,19 @@ void EmulatorQtWindow::doResize(const QSize& size,
     double widthScale = (double)newSize.width() / (double)originalWidth;
     double heightScale = (double)newSize.height() / (double)originalHeight;
 
+    // On HiDPI screen, newSize is in Qt logical pixel, whle originalWidth/
+    // originalHeight are in actual pixel (logical pixel * pixel ratio).
+    // When HiDPI scaling is disabled, we need to multiply the pixel ratio to
+    // widthScale/heightScale to make the scale correct.
+    if (android_cmdLineOptions->no_hidpi_scaling) {
+        double dpr = 1.0;
+#ifdef __APPLE__
+        slot_getDevicePixelRatio(&dpr);
+#endif
+        widthScale *= dpr;
+        heightScale *= dpr;
+    }
+
     simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
 
     maskWindowFrame();
