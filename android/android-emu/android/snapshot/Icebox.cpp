@@ -432,7 +432,8 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         apacket handshake_recv;
         _RECV_PACKET_OK(handshake_recv);
         D("Handshake recv OK");
-        if (memcmp(handshake_recv.data.data(), "JDWP-Handshake", 14) != 0) {
+        if (handshake_recv.data.size() < 14 ||
+            memcmp(handshake_recv.data.data(), "JDWP-Handshake", 14) != 0) {
             return false;
         }
     }
