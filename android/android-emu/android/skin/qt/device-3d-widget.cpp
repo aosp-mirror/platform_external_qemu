@@ -818,10 +818,10 @@ void Device3DWidget::repaintGL() {
             for (int32_t i = mCenterIndex - 1; i >= 0; i--) {
                 mDisplaySegments[i].rotate = mDisplaySegments[i + 1].rotate +
                                              mDisplaySegments[i].hingeAngle;
-                if ((mDisplaySegments[i].hingeAngle >= 0 &&
-                    android_foldable_hinge_configured()) ||
-                    (mDisplaySegments[i].hingeAngle < 0 &&
-                    android_foldable_rollable_configured())) {
+                if (mDisplaySegments[i].hingeAngle >= 0 &&
+                    android_foldable_hinge_configured() ||
+                    mDisplaySegments[i].hingeAngle < 0 &&
+                    android_foldable_rollable_configured()) {
                     glm::vec4 v = mDisplaySegments[i + 1].hingeModelTransfrom *
                                   glm::vec4(0.0,
                                             (mDisplaySegments[i + 1].t -
