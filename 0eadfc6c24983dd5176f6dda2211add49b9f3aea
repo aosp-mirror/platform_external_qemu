@@ -1,0 +1,30 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000005981869",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1464762?revision\u003d8",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "4a738b27_23f102da",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RingStream.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-11-06T11:30:41Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 11
+      },
+      "revId": "0eadfc6c24983dd5176f6dda2211add49b9f3aea",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
