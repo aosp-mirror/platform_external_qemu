@@ -226,7 +226,7 @@ static constexpr android::base::StringView kHostSideTracing = "ANDROID_EMU_host_
 // rcMakeCurrent
 // rcCompose
 // rcDestroySyncKHR
-static constexpr android::base::StringView kAsyncFrameCommands = "ANDROID_EMU_async_frame_cmds";
+static constexpr android::base::StringView kAsyncFrameCommands = "ANDROID_EMU_async_frame_commands";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
