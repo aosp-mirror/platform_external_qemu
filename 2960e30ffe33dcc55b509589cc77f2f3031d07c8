@@ -33,6 +33,24 @@
       "message": "haitao:\n  please add the bug number to the commit message",
       "revId": "2960e30ffe33dcc55b509589cc77f2f3031d07c8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a8c8c2f5_9f4c0b16",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-11-09T19:48:28Z",
+      "side": 1,
+      "message": "also some explanation of those two extra CPU features will be very\nhelpful to future maintainers",
+      "parentUuid": "aae5bb88_16e8a2fa",
+      "revId": "2960e30ffe33dcc55b509589cc77f2f3031d07c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
