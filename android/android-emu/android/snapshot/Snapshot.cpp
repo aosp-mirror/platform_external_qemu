@@ -649,6 +649,10 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
         return false;
     }
 
+    if (fc::isEnabled(fc::AllowSnapshotMigration)) {
+        return true;
+    }
+
     if (mSnapshotPb.images_size() > int(ARRAY_SIZE(kImages))) {
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchAvd);
