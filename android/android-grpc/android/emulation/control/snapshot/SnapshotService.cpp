@@ -21,6 +21,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "android/android.h"
@@ -183,7 +184,28 @@ public:
             result.set_err("Failed to save snapshot meta data");
         }
 
-        // Now add in the metadata.
+        // Compress those files first for faster snapshot compatibility check.
+        const std::unordered_set<std::string> priorityFiles(
+                {"snapshot.pb", "hardware.ini", "config.ini",
+                 "screenshot.png"});
+        for (const auto& name : priorityFiles) {
+            std::string fullpath = pj(snapshot->dataDir(), name);
+            if (!System::get()->pathIsFile(fullpath)) {
+                continue;
+            }
+            // Use of  a 64 KB  buffer gives good performance (see performance
+            // tests.)
+            std::ifstream ifs(fullpath,
+                              std::ios_base::in | std::ios_base::binary);
+            char buf[k64KB];
+            ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
+            struct stat sb;
+            if (android_stat(fullpath.c_str(), &sb) != 0 ||
+                !tw.addFileEntryFromStream(ifs, name, sb)) {
+                result.set_err("Unable to tar " + fullpath);
+                break;
+            }
+        }
         auto entries = System::get()->scanDirEntries(snapshot->dataDir(), true);
         for (const auto& fname : entries) {
             if (!System::get()->pathIsFile(fname)) {
@@ -193,6 +215,9 @@ public:
             android::base::StringView name;
             char buf[k64KB];
             PathUtils::split(fname, nullptr, &name);
+            if (priorityFiles.count(name)) {
+                continue;
+            }
 
             // Use of  a 64 KB  buffer gives good performance (see performance
             // tests.)

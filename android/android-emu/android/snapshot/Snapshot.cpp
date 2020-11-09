@@ -1004,9 +1004,15 @@ extern "C" int android_check_snapshot_loadable(const char* snapshot_name) {
         } while (path_exists(temp_dir.c_str()) || path_is_dir(temp_dir.c_str()));
         path_android_mkdir(temp_dir.c_str(), 0777);
         android::base::TarReader tr(temp_dir, *stream, true);
-        for (auto entry = tr.first(); tr.good(); entry = tr.next(entry)) {
-            if (entry.name == "snapshot.pb" || entry.name == "hardware.ini") {
+        const std::unordered_set<std::string> requiredFiles(
+                {"snapshot.pb", "hardware.ini"});
+        std::unordered_set<std::string> foundFiles;
+        for (auto entry = tr.first();
+             tr.good() && foundFiles.size() < requiredFiles.size();
+             entry = tr.next(entry)) {
+            if (requiredFiles.count(entry.name)) {
                 tr.extract(entry);
+                foundFiles.insert(entry.name);
             }
         }
         Snapshot snapshot("", temp_dir.c_str(), false);
