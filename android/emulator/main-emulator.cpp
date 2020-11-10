@@ -661,7 +661,7 @@ int main(int argc, char** argv)
 
     // print a version string and build id for easier debugging
 #if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
-    D("Android emulator version %s (CL:%s)", EMULATOR_VERSION_STRING
+    dprint("Android emulator version %s (CL:%s)", EMULATOR_VERSION_STRING
       " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
       EMULATOR_CL_SHA1);
 #endif

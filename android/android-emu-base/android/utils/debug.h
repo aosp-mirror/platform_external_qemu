@@ -75,6 +75,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(wifi, "Virtio Wifi")                                          \
     _VERBOSE_TAG(tvremote, "TV remote")                                        \
     _VERBOSE_TAG(time, "Prefix a timestamp when logging")                      \
+    _VERBOSE_TAG(ini, "Log details around ini files.")                         \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
@@ -103,6 +104,9 @@ extern void base_disable_verbose_logs();
 
 #define  VERBOSE_PRINT(tag,...)  \
     do { if (VERBOSE_CHECK(tag)) dprint(__VA_ARGS__); } while (0)
+
+#define  VERBOSE_INFO(tag,...)  \
+    do { if (VERBOSE_CHECK(tag)) dinfo(__VA_ARGS__); } while (0)
 
 // This omits the "emulator: " prefix.
 #define  VERBOSE_DPRINT(tag,format,...)  \
@@ -151,6 +155,7 @@ extern void base_disable_verbose_logs();
  ** 'fdprintf' prints "emulator: ", the message then appends a '\n'
  ** 'dprintn' prints the message as is
  ** 'dprintnv' is 'dprintn' but allows you to use a va_list argument
+ ** 'dinfo' prints "emulator: INFO: ", then appends a '\n'
  ** 'dwarning' prints "emulator: WARNING: ", then appends a '\n'
  ** 'derror' prints "emulator: ERROR: ", then appends a '\n'
  */
@@ -160,6 +165,7 @@ extern void   dprintn( const char*  format, ... );
 extern void   fdprintf( FILE* fp, const char* format, ... );
 extern void   fdprintfnv( FILE* fp, const char* level, const char* format, va_list  args );
 extern void   dprintnv( const char*  format, va_list  args );
+extern void   dinfo( const char*  format, ... );
 extern void   dwarning( const char*  format, ... );
 extern void   derror( const char*  format, ... );
 
