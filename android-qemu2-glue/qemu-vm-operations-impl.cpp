@@ -16,6 +16,7 @@
 #include <errno.h>                                    // for errno
 #include <nlohmann/json.hpp>                          // for basic_json, bas...
 #include <stdint.h>                                   // for uint64_t, int64_t
+#include <sstream>
 
 #include "android/base/Log.h"                         // for LOG, LogMessage
 #include "android/base/Optional.h"                    // for Optional
@@ -239,6 +240,37 @@ static bool rebase_on_top_of(std::string src,
             {qemu_img, "rebase", "-f", "qcow2", "-b", dst_img, src});
 
     return res;
+}
+
+// Delete all snapshots in the image, except for [snapshotToKeep]
+static bool delete_unrelated_snapshot(const char* imageFile,
+                                      const char* snapshotToKeep) {
+    std::string snapshotNames = System::get()->runCommandWithResult(
+            {qemu_img, "snapshot", "-l", imageFile}).value();
+    size_t offset = 0;
+    bool bodyStarted = false;
+    while (offset < snapshotNames.length()) {
+        size_t pst = snapshotNames.find(offset, '\n');
+        if (pst == std::string::npos) {
+            pst = snapshotNames.length();
+        }
+        std::string line = snapshotNames.substr(offset, pst - offset);
+        offset = pst + 1;
+        if (bodyStarted) {
+            int id;
+            std::string snapshotName;
+            std::istringstream stream(line);
+            line >> id >> snapshotName;
+            if (snapshotName != snapshotToKeep) {
+                // Delete the unrelated snapshot.
+                
+            }
+        } else {
+            if (line.substr(0, 3) == "ID ") {
+                bodyStarted = true;
+            }
+        }
+    }
 }
 
 // Swaps out the given blockdriver with a new blockdriver
