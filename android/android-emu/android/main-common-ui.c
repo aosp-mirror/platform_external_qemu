@@ -19,6 +19,7 @@
 
 #include "android/avd/util.h"
 #include "android/boot-properties.h"
+#include "android/cmdline-option.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/feature_control.h"
@@ -57,7 +58,11 @@
 /***  CONFIGURATION
  ***/
 
-static AUserConfig*  userConfig;
+static AUserConfig* userConfig = NULL;
+
+AUserConfig* aemu_get_userConfigPtr() {
+    return userConfig;
+}
 
 static AConfig* s_skinConfig = NULL;
 static char* s_skinPath = NULL;
@@ -413,7 +418,6 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
         return false;
     }
 
-    user_config_init();
     parse_skin_files(opts->skindir, opts->skin, opts, hw,
                      &s_skinConfig, &s_skinPath);
 
