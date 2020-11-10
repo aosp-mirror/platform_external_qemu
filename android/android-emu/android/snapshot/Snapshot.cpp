@@ -732,7 +732,7 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
 }
 
 const bool Snapshot::checkValid(bool writeFailure) {
-    if (!checkOfflineValid(writeFailure)) {
+    if (!preload()) {
         return false;
     }
 
@@ -747,6 +747,83 @@ const bool Snapshot::checkValid(bool writeFailure) {
 
     if (mSnapshotPb.has_config() &&
         !verifyConfig(mSnapshotPb.config(), writeFailure)) {
+        return false;
+    }
+
+    if (mSnapshotPb.images_size() > int(ARRAY_SIZE(kImages))) {
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchAvd);
+        return false;
+    }
+
+    int matchedImages = 0;
+    for (const auto& image : kImages) {
+        ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
+        const auto type = image.type;
+        const auto it = std::find_if(
+                mSnapshotPb.images().begin(), mSnapshotPb.images().end(),
+                [type](const pb::Image& im) {
+                    return im.has_type() && im.type() == type;
+                });
+        if (it != mSnapshotPb.images().end()) {
+            if (!verifyImageInfo(image.type, path.get(), *it)) {
+                // If in build env, nuke the qcow2 as well.
+                if (avdInfo_inAndroidBuild(android_avdInfo)) {
+                    std::string qcow2Path(path.get());
+                    qcow2Path += ".qcow2";
+                    path_delete_file(qcow2Path.c_str());
+                }
+
+                if (writeFailure)
+                    saveFailure(FailureReason::SystemImageChanged);
+                return false;
+            }
+            ++matchedImages;
+        } else {
+            // Should match an empty image info
+            if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
+                // If in build env, nuke the qcow2 as well.
+                if (avdInfo_inAndroidBuild(android_avdInfo)) {
+                    std::string qcow2Path(path.get());
+                    qcow2Path += ".qcow2";
+                    path_delete_file(qcow2Path.c_str());
+                }
+
+                if (writeFailure)
+                    saveFailure(FailureReason::NoSnapshotInImage);
+                return false;
+            }
+        }
+    }
+    if (matchedImages != mSnapshotPb.images_size()) {
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchAvd);
+        return false;
+    }
+
+    IniFile expectedConfig(PathUtils::join(mDataDir, "hardware.ini"));
+    if (!expectedConfig.read(false)) {
+        if (writeFailure)
+            saveFailure(FailureReason::CorruptedData);
+        return false;
+    }
+    IniFile actualConfig(avdInfo_getCoreHwIniPath(android_avdInfo));
+    if (!actualConfig.read(false)) {
+        if (writeFailure)
+            saveFailure(FailureReason::InternalError);
+        return false;
+    }
+    IniFile expectedStripped;
+    androidHwConfig_stripDefaults(
+            reinterpret_cast<CIniFile*>(&expectedConfig),
+            reinterpret_cast<CIniFile*>(&expectedStripped));
+    IniFile actualStripped;
+    androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&actualConfig),
+                                  reinterpret_cast<CIniFile*>(&actualStripped));
+    if (!areHwConfigsEqual(expectedStripped, actualStripped)) {
+        fprintf(stderr, "%s: hw configs not eq\n", __func__);
+        if (writeFailure)
+            saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
 
