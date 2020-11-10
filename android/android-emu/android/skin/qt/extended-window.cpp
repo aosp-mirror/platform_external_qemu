@@ -314,6 +314,11 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
 ExtendedWindow::~ExtendedWindow() {
     mExtendedUi->location_page->requestStopLoadingGeoData();
+    if (android_cmdLineOptions->qt_hide_window && !mFirstShowEvent) {
+        auto userConfig = aemu_get_userConfigPtr();
+        QRect geom = geometry();
+        auserConfig_setExtendedControlsPos(userConfig, geom.x(), geom.y());
+    }
 }
 
 
@@ -571,10 +576,18 @@ void ExtendedWindow::disableMouseWheel(bool disabled) {
 
 void ExtendedWindow::showEvent(QShowEvent* e) {
     if (mFirstShowEvent && !e->spontaneous()) {
+        bool moved = false;
         if (android_cmdLineOptions->qt_hide_window) {
             const QIcon icon(":/all/android_studio_icon");
             setWindowIcon(icon);
+            auto userConfig = aemu_get_userConfigPtr();
+            int x, y;
+            if (auserConfig_getExtendedControlsPos(userConfig, &x, &y)) {
+                move(x, y);
+                moved = true;
+            }
         }
+
         // This function has things that must be performed
         // after the ctor and after show() is called
         switchToTheme(getSelectedTheme());
@@ -591,11 +604,13 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
         }
 
         mFirstShowEvent = false;
-
-        // There is a gap between the main window and the tool bar. Use the same
-        // gap between the tool bar and the extended window.
-        move(mToolWindow->geometry().right() + 3 + ToolWindow::TOOL_GAP_FRAMELESS,
-             mToolWindow->geometry().top());
+        if (!moved) {
+            // There is a gap between the main window and the tool bar. Use the
+            // same gap between the tool bar and the extended window.
+            move(mToolWindow->geometry().right() + 3 +
+                         ToolWindow::TOOL_GAP_FRAMELESS,
+                 mToolWindow->geometry().top());
+        }
     }
     QFrame::showEvent(e);
 }
