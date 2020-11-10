@@ -12,10 +12,11 @@
 
 #pragma once
 
+#include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/base/export.h"
 #include "android/constants.h"
-#include "android/avd/info.h"
-#include "android/avd/hw-config.h"
+#include "android/user-config.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -76,5 +77,7 @@ extern const char* to_set_locale;
  * keycode */
 /* on emulator host. */
 extern int use_keycode_forwarding;
+
+extern AEMU_EXPORT AUserConfig* aemu_get_userConfigPtr();
 
 ANDROID_END_HEADER
