@@ -1,0 +1,30 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000006053034",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1495097?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "f2e06be3_0ae7837c",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-11-10T21:55:20Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 266,
+        "startChar": 0,
+        "endLine": 266,
+        "endChar": 16
+      },
+      "revId": "fa410fcaa01b386d257fcf8e00dad3846483f20b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
