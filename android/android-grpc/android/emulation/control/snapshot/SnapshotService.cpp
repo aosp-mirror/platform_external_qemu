@@ -119,9 +119,14 @@ public:
         crashreport::CrashReporter::get()->hangDetector().pause(true);
         // Exports all qcow2 images..
         SnapshotLineConsumer slc(&result);
-        auto exp = getConsoleAgents()->vm->snapshotExport(
-                snapshot->name().data(), tmpdir.data(), slc.opaque(),
-                LineConsumer::Callback);
+        bool exp;
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [&snapshot, &tmpdir, &slc, &exp] {
+                    exp = getConsoleAgents()->vm->snapshotExport(
+                            snapshot->name().data(), tmpdir.data(),
+                            slc.opaque(), LineConsumer::Callback);
+                });
+
         crashreport::CrashReporter::get()->hangDetector().pause(false);
 
         if (!exp) {
@@ -431,8 +436,11 @@ public:
         reply->set_success(true);
 
         // This is really best effor here. We will not discover errors etc.
-        snapshot::Snapshotter::get().deleteSnapshot(
-                request->snapshot_id().c_str());
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [&request]() {
+                    snapshot::Snapshotter::get().deleteSnapshot(
+                            request->snapshot_id().c_str());
+                });
         return Status::OK;
     }
 
