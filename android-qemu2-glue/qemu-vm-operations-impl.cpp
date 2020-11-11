@@ -241,6 +241,33 @@ static bool rebase_on_top_of(std::string src,
     return res;
 }
 
+static bool extract_snapshot(const char* srcImg,
+    const char* dstImg,
+    const char* snapshot,
+    void* opaque,
+    LineConsumerCallback errConsumer) {
+    printf("extracting %s (%s) -> %s\n", srcImg, snapshot, dstImg);
+    auto qemu_img = System::get()->findBundledExecutable("qemu-img");
+    auto res = System::get()->runCommandWithResult(
+            {qemu_img, "convert", "-O", "qcow2", "-s", snapshot, srcImg, dstImg});
+    if (!res) {
+        std::string err = std::string("Failed to extract snapshot. Source image name ")
+                + srcImg + " destination image name " + dstImg + " snapshot name "
+                + snapshot + ".\n";
+        errConsumer(opaque, err.c_str(), err.size());
+        return false;
+    }
+    res = System::get()->runCommandWithResult(
+            {qemu_img, "snapshot", "-c", snapshot, dstImg});
+    if (!res) {
+        std::string err = std::string("Failed to create snapshot. Image name ")
+            + dstImg + " snapshot name " + snapshot + ".\n";
+        errConsumer(opaque, err.c_str(), err.size());
+        return false;
+    }
+    return true;
+}
+
 // Swaps out the given blockdriver with a new blockdriver
 // backed by the provided qcow2 file.
 // |drive| Device to be swapped out
@@ -899,36 +926,40 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
             errConsumer(opaque, err.c_str(), err.size());
             continue;
         }
-        auto tmp_overlay =
-                pj(android::snapshot::getAvdDir(), "tmp_" + qcow.str());
         auto final_overlay = pj(dest, qcow);
-
-        // Copy and rebase on an empty image...
-        if (path_copy_file(tmp_overlay.c_str(), overlay.c_str()) != 0) {
-            success = false;
-            std::string err = std::string("Failed to copy ") + overlay +
-                              " to " + tmp_overlay + " due to " +
-                              std::to_string(errno);
-
-            errConsumer(opaque, err.c_str(), err.size());
-        }
-        // TODO(jansene): remove unused snapshots from the temporary overlay.
-        // (i.e. those with a different name/id than snapshot) See qemu-img.c
-        // static int img_snapshot(int argc, char **argv) on how to list &
-        // remove.
-        success = rebase_on_top_of(tmp_overlay, "empty.qcow2", opaque,
-                                   errConsumer) &&
-                  success;
-
-        // And move it to the export destination..
         path_delete_file(final_overlay.c_str());
-        if (std::rename(tmp_overlay.c_str(), final_overlay.c_str()) != 0) {
-            std::string err = "Failed to rename " + tmp_overlay + " to " +
-                              final_overlay +
-                              ", errno: " + std::to_string(errno);
-            path_delete_file(tmp_overlay.c_str());
-            errConsumer(opaque, err.c_str(), err.size());
-            success = false;
+        if (qcow.find("userdata-qemu") != std::string::npos) {
+            success &= extract_snapshot(overlay.c_str(), final_overlay.c_str(), snapshot,
+                    opaque, errConsumer);
+        } else {
+            auto tmp_overlay =
+                    pj(android::snapshot::getAvdDir(), "tmp_" + qcow.str());
+
+            // Copy and rebase on an empty image...
+            if (path_copy_file(tmp_overlay.c_str(), overlay.c_str()) != 0) {
+                success = false;
+                std::string err = std::string("Failed to copy ") + overlay +
+                                " to " + tmp_overlay + " due to " +
+                                std::to_string(errno);
+
+                errConsumer(opaque, err.c_str(), err.size());
+            }
+            // TODO(jansene): remove unused snapshots from the temporary overlay.
+            // (i.e. those with a different name/id than snapshot) See qemu-img.c
+            // static int img_snapshot(int argc, char **argv) on how to list &
+            // remove.
+            success &= rebase_on_top_of(tmp_overlay, "empty.qcow2", opaque,
+                                    errConsumer);
+
+            // And move it to the export destination..
+            if (std::rename(tmp_overlay.c_str(), final_overlay.c_str()) != 0) {
+                std::string err = "Failed to rename " + tmp_overlay + " to " +
+                                final_overlay +
+                                ", errno: " + std::to_string(errno);
+                path_delete_file(tmp_overlay.c_str());
+                errConsumer(opaque, err.c_str(), err.size());
+                success = false;
+            }
         }
     }
 
