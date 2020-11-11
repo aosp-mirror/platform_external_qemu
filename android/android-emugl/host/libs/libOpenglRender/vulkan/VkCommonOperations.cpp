@@ -462,10 +462,6 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         "VK_KHR_get_physical_device_properties2",
     };
 
-    std::vector<const char*> moltenVKInstanceExtNames = {
-        "VK_MVK_moltenvk",
-    };
-
     std::vector<const char*> externalMemoryDeviceExtNames = {
         "VK_KHR_dedicated_allocation",
         "VK_KHR_get_memory_requirements2",
@@ -484,8 +480,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     bool externalMemoryCapabilitiesSupported =
         extensionsSupported(exts, externalMemoryInstanceExtNames);
-    bool moltenVKSupported =
-        extensionsSupported(exts, moltenVKInstanceExtNames);
+    bool moltenVKSupported = (vk->vkGetMTLTextureMVK != nullptr) &&
+        (vk->vkSetMTLTextureMVK != nullptr);
 
     VkInstanceCreateInfo instCi = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
@@ -504,10 +500,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         // We don't need both moltenVK and external memory. Disable
         // external memory if moltenVK is supported.
         externalMemoryCapabilitiesSupported = false;
-        instCi.enabledExtensionCount =
-            moltenVKInstanceExtNames.size();
-        instCi.ppEnabledExtensionNames =
-            moltenVKInstanceExtNames.data();
+        instCi.enabledExtensionCount = 0u;
+        instCi.ppEnabledExtensionNames = nullptr;
     }
 
     VkApplicationInfo appInfo = {
@@ -603,16 +597,12 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
     }
 
     if (sVkEmulation->instanceSupportsMoltenVK) {
-        sVkEmulation->setMTLTextureFunc = reinterpret_cast<PFN_vkSetMTLTextureMVK>(
-                vk->vkGetInstanceProcAddr(
-                        sVkEmulation->instance, "vkSetMTLTextureMVK"));
+        sVkEmulation->setMTLTextureFunc = vk->vkSetMTLTextureMVK;
         if (!sVkEmulation->setMTLTextureFunc) {
             LOG(ERROR) << "Cannot find vkSetMTLTextureMVK";
             return sVkEmulation;
         }
-        sVkEmulation->getMTLTextureFunc = reinterpret_cast<PFN_vkGetMTLTextureMVK>(
-                vk->vkGetInstanceProcAddr(
-                        sVkEmulation->instance, "vkGetMTLTextureMVK"));
+        sVkEmulation->getMTLTextureFunc = vk->vkGetMTLTextureMVK;
         if (!sVkEmulation->getMTLTextureFunc) {
             LOG(ERROR) << "Cannot find vkGetMTLTextureMVK";
             return sVkEmulation;
