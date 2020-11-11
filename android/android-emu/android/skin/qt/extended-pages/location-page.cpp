@@ -271,10 +271,10 @@ LocationPage::LocationPage(QWidget *parent) :
 void LocationPage::on_tabChanged() {
     switch(mUi->locationTabs->currentIndex()) {
         case 0:
-            mPaneInvocationTracker->increment("LOCATION_SINGLE_POINT");
+            mPaneInvocationTracker->increment("SINGLE_POINT");
             break;
         case 1:
-            mPaneInvocationTracker->increment("LOCATION_ROUTES");
+            mPaneInvocationTracker->increment("ROUTES");
             break;
         default:
             LOG(WARNING) << "Unknown tab selected.";

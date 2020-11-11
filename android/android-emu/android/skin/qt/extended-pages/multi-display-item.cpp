@@ -99,6 +99,8 @@ MultiDisplayItem::MultiDisplayItem(int id,
     mCurrentIndex = i;
     if (mUi->selectDisplayType->currentIndex() != mCurrentIndex) {
         mUi->selectDisplayType->setCurrentIndex(mCurrentIndex);
+        // This selection is not made by the user, so we have to adjust our count.
+        mDropDownTracker->increment(sDisplayTypes[mCurrentIndex].shortName, -1);
         onDisplayTypeChanged(mCurrentIndex);
     }
 }

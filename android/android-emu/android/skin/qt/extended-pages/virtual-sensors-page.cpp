@@ -246,27 +246,27 @@ void VirtualSensorsPage::showEvent(QShowEvent* event) {
 }
 
 void VirtualSensorsPage::on_btn_postureClosed_clicked() {
-    mSensorTracker->increment("POSTURE_CLOSED");
+    mSensorTracker->increment("POST_CLOSED");
     on_posture_valueChanged(POSTURE_CLOSED);
 }
 
 void VirtualSensorsPage::on_btn_postureFlipped_clicked() {
-    mSensorTracker->increment("POSTURE_FLIPPED");
+    mSensorTracker->increment("POST_FLIPPED");
     on_posture_valueChanged(POSTURE_FLIPPED);
 }
 
 void VirtualSensorsPage::on_btn_postureHalfOpen_clicked() {
-    mSensorTracker->increment("POSTURE_HALF_OPENED");
+    mSensorTracker->increment("POST_HALF_OPENED");
     on_posture_valueChanged(POSTURE_HALF_OPENED);
 }
 
 void VirtualSensorsPage::on_btn_postureOpen_clicked() {
-    mSensorTracker->increment("POSTURE_OPENED");
+    mSensorTracker->increment("POST_OPENED");
     on_posture_valueChanged(POSTURE_OPENED);
 }
 
 void VirtualSensorsPage::on_btn_postureTent_clicked() {
-    mSensorTracker->increment("POSTURE_TENT");
+    mSensorTracker->increment("POST_TENT");
     on_posture_valueChanged(POSTURE_TENT);
 }
 
@@ -281,12 +281,12 @@ void VirtualSensorsPage::on_rotateToLandscape_clicked() {
 }
 
 void VirtualSensorsPage::on_rotateToReversePortrait_clicked() {
-    mSensorTracker->increment("REVERSE_PORTRAIT");
+    mSensorTracker->increment("REV_PORTRAIT");
     setCoarseOrientation(ANDROID_COARSE_REVERSE_PORTRAIT);
 }
 
 void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
-    mSensorTracker->increment("REVERSE_LANDSCAPE");
+    mSensorTracker->increment("REV_LANDSCAPE");
     setCoarseOrientation(ANDROID_COARSE_REVERSE_LANDSCAPE);
 }
 
@@ -386,7 +386,7 @@ void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
 }
 
 void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
-    mSensorTracker->increment("MAGNETIC_FIELD_NORTH");
+    mSensorTracker->increment("MAG_FIELD_NORTH");
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
             mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
@@ -394,7 +394,7 @@ void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
 }
 
 void VirtualSensorsPage::on_magEastWidget_valueChanged(double value) {
-    mSensorTracker->increment("MAGNETIC_FIELD_EAST");
+    mSensorTracker->increment("MAG_FIELD_EAST");
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
             mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
@@ -402,7 +402,7 @@ void VirtualSensorsPage::on_magEastWidget_valueChanged(double value) {
 }
 
 void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
-    mSensorTracker->increment("MAGNETIC_FIELD_VERT");
+    mSensorTracker->increment("MAG_FIELD_VERT");
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
             mUi->magNorthWidget->value(), mUi->magEastWidget->value(),

@@ -58,7 +58,8 @@ static std::string translate_idx(BatteryCharger value) {
         STATE(BATTERY_CHARGER_WIRELESS);
         STATE(BATTERY_CHARGER_NUM_ENTRIES);
     }
-    return s;
+    // Chop off BATTERY_
+    return s.substr(8);
 }
 static std::string translate_idx(BatteryHealth value) {
     std::string s = "";
@@ -71,7 +72,8 @@ static std::string translate_idx(BatteryHealth value) {
         STATE(BATTERY_HEALTH_UNKNOWN);
         STATE(BATTERY_HEALTH_NUM_ENTRIES);
     }
-    return s;
+    // Chop off BATTERY_
+    return s.substr(8);
 }
 
 static std::string translate_idx(BatteryStatus value) {
@@ -84,7 +86,8 @@ static std::string translate_idx(BatteryStatus value) {
         STATE(BATTERY_STATUS_FULL);
         STATE(BATTERY_STATUS_NUM_ENTRIES);
     }
-    return s;
+    // Chop off BATTERY_
+    return s.substr(8);
 }
 
 BatteryPage::BatteryPage(QWidget* parent)
