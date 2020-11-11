@@ -184,6 +184,14 @@ public:
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceMemoryProperties2* pMemoryProperties);
 
+    // Override supported device extension lists
+    VkResult on_vkEnumerateDeviceExtensionProperties(
+        android::base::BumpPool* pool,
+        VkPhysicalDevice physicalDevice,
+        const char* pLayerName,
+        uint32_t* pPropertyCount,
+        VkExtensionProperties* pProperties);
+
     VkResult on_vkCreateDevice(
         android::base::BumpPool* pool,
         VkPhysicalDevice physicalDevice,
