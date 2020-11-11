@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c15f8818_ecc1fe70",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VulkanDispatch.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-11T16:29:07Z",
+      "side": 1,
+      "message": "build error",
+      "revId": "1148bf801d5dc2fd7ed4f303590055f11d6e9151",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
