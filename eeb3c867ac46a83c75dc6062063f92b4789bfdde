@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fef59706_6310f5c4",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 945,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-11-11T17:56:34Z",
+      "side": 1,
+      "message": "This does not short circuit, is that what you intended?",
+      "revId": "eeb3c867ac46a83c75dc6062063f92b4789bfdde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
