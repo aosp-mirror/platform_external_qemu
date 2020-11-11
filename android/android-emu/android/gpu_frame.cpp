@@ -14,8 +14,9 @@
 
 #include "android/gpu_frame.h"
 
-#include <stdio.h>                                // for stderr
-#include <atomic>                                 // for atomic_bool
+#include <stdio.h>  // for stderr
+
+#include <atomic>  // for atomic_bool
 
 #include "android/base/Log.h"                     // for LogMessage, DCHECK
 #include "android/base/async/CallbackRegistry.h"  // for CallbackRegistry
@@ -192,7 +193,10 @@ void gpu_register_shared_memory_callback(FrameAvailableCallback frameAvailable,
     gpu_frame_set_record_mode(true, 0);
     bool expected = false;
     if (sRequestPost.compare_exchange_strong(expected, true)) {
-        android_getVirtioGpuOps()->repost();
+        auto gpuOps = android_getVirtioGpuOps();
+        if (gpuOps) {
+            gpuOps->repost();
+        }
         sRequestPost.store(false);
     }
 }
@@ -202,7 +206,11 @@ void gpu_unregister_shared_memory_callback(void* opaque) {
     gpu_frame_set_record_mode(false, 0);
     bool expected = false;
     if (sRequestPost.compare_exchange_strong(expected, true)) {
-        android_getVirtioGpuOps()->repost();
+        auto gpuOps = android_getVirtioGpuOps();
+        if (gpuOps) {
+            gpuOps->repost();
+        }
+
         sRequestPost.store(false);
     }
 }
