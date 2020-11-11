@@ -237,9 +237,7 @@ void init_vulkan_dispatch_from_system_loader(
             self.apisToGet["global"] + \
             self.apisToGet["global-instance"] + \
             self.apisToGet["instance"] + \
-            self.apisToGet["device"] + \
-            self.apisToGet["global"] + \
-            self.apisToGet["global"]
+            self.apisToGet["device"]
 
         for vulkanApi, typeDecl, feature in apis:
             self.syncFeature(self.cgenImpl, feature)

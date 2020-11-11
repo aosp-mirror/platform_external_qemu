@@ -801,34 +801,6 @@ void init_vulkan_dispatch_from_system_loader(
 #ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)dlSymFunc(lib, "vkGetLinearImageLayoutGOOGLE");
 #endif
-#ifdef VK_VERSION_1_0
-    out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
-    out->vkEnumeratePhysicalDevices = (PFN_vkEnumeratePhysicalDevices)dlSymFunc(lib, "vkEnumeratePhysicalDevices");
-    out->vkGetPhysicalDeviceFeatures = (PFN_vkGetPhysicalDeviceFeatures)dlSymFunc(lib, "vkGetPhysicalDeviceFeatures");
-    out->vkGetPhysicalDeviceFormatProperties = (PFN_vkGetPhysicalDeviceFormatProperties)dlSymFunc(lib, "vkGetPhysicalDeviceFormatProperties");
-    out->vkGetPhysicalDeviceImageFormatProperties = (PFN_vkGetPhysicalDeviceImageFormatProperties)dlSymFunc(lib, "vkGetPhysicalDeviceImageFormatProperties");
-    out->vkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties)dlSymFunc(lib, "vkGetPhysicalDeviceProperties");
-    out->vkGetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties)dlSymFunc(lib, "vkGetPhysicalDeviceQueueFamilyProperties");
-    out->vkGetPhysicalDeviceMemoryProperties = (PFN_vkGetPhysicalDeviceMemoryProperties)dlSymFunc(lib, "vkGetPhysicalDeviceMemoryProperties");
-    out->vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)dlSymFunc(lib, "vkGetInstanceProcAddr");
-    out->vkCreateDevice = (PFN_vkCreateDevice)dlSymFunc(lib, "vkCreateDevice");
-    out->vkDestroyDevice = (PFN_vkDestroyDevice)dlSymFunc(lib, "vkDestroyDevice");
-    out->vkEnumerateDeviceExtensionProperties = (PFN_vkEnumerateDeviceExtensionProperties)dlSymFunc(lib, "vkEnumerateDeviceExtensionProperties");
-    out->vkEnumerateDeviceLayerProperties = (PFN_vkEnumerateDeviceLayerProperties)dlSymFunc(lib, "vkEnumerateDeviceLayerProperties");
-    out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
-    out->vkEnumeratePhysicalDevices = (PFN_vkEnumeratePhysicalDevices)dlSymFunc(lib, "vkEnumeratePhysicalDevices");
-    out->vkGetPhysicalDeviceFeatures = (PFN_vkGetPhysicalDeviceFeatures)dlSymFunc(lib, "vkGetPhysicalDeviceFeatures");
-    out->vkGetPhysicalDeviceFormatProperties = (PFN_vkGetPhysicalDeviceFormatProperties)dlSymFunc(lib, "vkGetPhysicalDeviceFormatProperties");
-    out->vkGetPhysicalDeviceImageFormatProperties = (PFN_vkGetPhysicalDeviceImageFormatProperties)dlSymFunc(lib, "vkGetPhysicalDeviceImageFormatProperties");
-    out->vkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties)dlSymFunc(lib, "vkGetPhysicalDeviceProperties");
-    out->vkGetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties)dlSymFunc(lib, "vkGetPhysicalDeviceQueueFamilyProperties");
-    out->vkGetPhysicalDeviceMemoryProperties = (PFN_vkGetPhysicalDeviceMemoryProperties)dlSymFunc(lib, "vkGetPhysicalDeviceMemoryProperties");
-    out->vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)dlSymFunc(lib, "vkGetInstanceProcAddr");
-    out->vkCreateDevice = (PFN_vkCreateDevice)dlSymFunc(lib, "vkCreateDevice");
-    out->vkDestroyDevice = (PFN_vkDestroyDevice)dlSymFunc(lib, "vkDestroyDevice");
-    out->vkEnumerateDeviceExtensionProperties = (PFN_vkEnumerateDeviceExtensionProperties)dlSymFunc(lib, "vkEnumerateDeviceExtensionProperties");
-    out->vkEnumerateDeviceLayerProperties = (PFN_vkEnumerateDeviceLayerProperties)dlSymFunc(lib, "vkEnumerateDeviceLayerProperties");
-#endif
 }
 
 void init_vulkan_dispatch_from_instance(
