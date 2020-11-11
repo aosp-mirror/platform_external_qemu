@@ -6422,6 +6422,36 @@ server.
             <param><type>VkDeviceSize</type>* <name>pOffset</name></param>
             <param><type>VkDeviceSize</type>* <name>pRowPitchAlignment</name></param>
         </command>
+        <command>
+            <proto><type>void</type> <name>vkGetMTLDeviceMVK</name></proto>
+            <param><type>VkPhysicalDevice</type> <name>physicalDevice</name></param>
+            <param><type>void</type>** <name>pMTLDevice</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS">
+            <proto><type>VkResult</type> <name>vkSetMTLTextureMVK</name></proto>
+            <param><type>VkImage</type> <name>image</name></param>
+            <param><type>void</type>* <name>mtlTexture</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkGetMTLTextureMVK</name></proto>
+            <param><type>VkImage</type> <name>image</name></param>
+            <param><type>void</type>** <name>pMTLTexture</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkGetMTLBufferMVK</name></proto>
+            <param><type>VkBuffer</type> <name>buffer</name></param>
+            <param><type>void</type>** <name>pMTLBuffer</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS">
+            <proto><type>VkResult</type> <name>vkUseIOSurfaceMVK</name></proto>
+            <param><type>VkImage</type> <name>image</name></param>
+            <param><type>void</type>* <name>ioSurface</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkGetIOSurfaceMVK</name></proto>
+            <param><type>VkImage</type> <name>image</name></param>
+            <param><type>void</type>**  <name>pIOSurface</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -8368,12 +8398,6 @@ server.
                 <command name="vkCreateMacOSSurfaceMVK"/>
             </require>
         </extension>
-        <extension name="VK_MVK_moltenvk" number="125" type="instance" author="MVK" contact="Bill Hollings @billhollings" supported="disabled">
-            <require>
-                <enum value="0"                                             name="VK_MVK_MOLTENVK_SPEC_VERSION"/>
-                <enum value="&quot;VK_MVK_moltenvk&quot;"                   name="VK_MVK_MOLTENVK_EXTENSION_NAME"/>
-            </require>
-        </extension>
         <extension name="VK_EXT_external_memory_dma_buf" number="126" type="device" requires="VK_KHR_external_memory_fd" author="EXT" contact="Chad Versace @chadversary" supported="vulkan">
             <require>
                 <enum value="1"                                             name="VK_EXT_EXTERNAL_MEMORY_DMA_BUF_SPEC_VERSION"/>
@@ -9324,6 +9348,18 @@ server.
                 <enum value="227"                                           name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_NUMBER"/>
                 <enum value="&quot;VK_GOOGLE_linear_image_layout&quot;"     name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_EXTENSION_NAME"/>
                 <command name="vkGetLinearImageLayoutGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_MVK_moltenvk" number="228" type="instance" author="MVK" contact="Bill Hollings @billhollings" supported="vulkan">
+            <require>
+                <enum value="28"                                            name="VK_MVK_MOLTENVK_SPEC_VERSION"/>
+                <enum value="&quot;VK_MVK_moltenvk&quot;"                   name="VK_MVK_MOLTENVK_EXTENSION_NAME"/>
+                <command name="vkGetMTLDeviceMVK"/>
+                <command name="vkSetMTLTextureMVK"/>
+                <command name="vkGetMTLTextureMVK"/>
+                <command name="vkGetMTLBufferMVK"/>
+                <command name="vkUseIOSurfaceMVK"/>
+                <command name="vkGetIOSurfaceMVK"/>
             </require>
         </extension>
     </extensions>

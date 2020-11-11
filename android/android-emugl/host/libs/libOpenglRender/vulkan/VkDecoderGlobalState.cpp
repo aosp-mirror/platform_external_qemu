@@ -234,11 +234,6 @@ public:
                     pCreateInfo->enabledExtensionCount,
                     pCreateInfo->ppEnabledExtensionNames);
 
-        // Always include VK_MVK_moltenvk when supported.
-        if (m_emu->instanceSupportsMoltenVK) {
-            finalExts.push_back("VK_MVK_moltenvk");
-        }
-
         // Create higher version instance whenever it is possible.
         uint32_t apiVersion = VK_MAKE_VERSION(1, 0, 0);
         if (pCreateInfo->pApplicationInfo) {
@@ -298,9 +293,7 @@ public:
         info.boxed = boxed;
 
         if (m_emu->instanceSupportsMoltenVK) {
-            m_setMTLTextureFunc = reinterpret_cast<PFN_vkSetMTLTextureMVK>(
-                m_vk->vkGetInstanceProcAddr(*pInstance, "vkSetMTLTextureMVK"));
-            if (!m_setMTLTextureFunc) {
+            if (!m_vk->vkSetMTLTextureMVK) {
                 fprintf(stderr, "Cannot find vkSetMTLTextureMVK\n");
                 abort();
             }
@@ -821,6 +814,58 @@ public:
                     ~(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
             }
         }
+    }
+
+    VkResult on_vkEnumerateDeviceExtensionProperties(
+        android::base::BumpPool* pool,
+        VkPhysicalDevice boxed_physicalDevice,
+        const char* pLayerName,
+        uint32_t* pPropertyCount,
+        VkExtensionProperties* pProperties) {
+
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+
+        if (!m_emu->instanceSupportsMoltenVK) {
+            return vk->vkEnumerateDeviceExtensionProperties(
+                physicalDevice, pLayerName, pPropertyCount, pProperties);
+        }
+
+        // If MoltenVK is supported on host, we need to ensure that we include
+        // VK_MVK_moltenvk extenstion in returned properties.
+        std::vector<VkExtensionProperties> properties;
+        uint32_t propertyCount = 0u;
+        VkResult result = vk->vkEnumerateDeviceExtensionProperties(
+            physicalDevice, pLayerName, &propertyCount, nullptr);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+
+        properties.resize(propertyCount);
+        result = vk->vkEnumerateDeviceExtensionProperties(
+            physicalDevice, pLayerName, &propertyCount, properties.data());
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+
+        if (std::find_if(properties.begin(), properties.end(),
+            [](const VkExtensionProperties& props) {
+                return strcmp(props.extensionName, VK_MVK_MOLTENVK_EXTENSION_NAME) == 0;
+            }) == properties.end()) {
+            VkExtensionProperties mvk_props;
+            strncpy(mvk_props.extensionName, VK_MVK_MOLTENVK_EXTENSION_NAME,
+                    sizeof(mvk_props.extensionName));
+            mvk_props.specVersion = VK_MVK_MOLTENVK_SPEC_VERSION;
+            properties.push_back(mvk_props);
+        }
+
+        if (*pPropertyCount == 0) {
+            *pPropertyCount = properties.size();
+        } else {
+            memcpy(pProperties, properties.data(), *pPropertyCount * sizeof(VkExtensionProperties));
+        }
+
+        return VK_SUCCESS;
     }
 
     VkResult on_vkCreateDevice(
@@ -1361,7 +1406,7 @@ public:
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
         if (mapInfoIt->second.mtlTexture) {
-            result = m_setMTLTextureFunc(image, mapInfoIt->second.mtlTexture);
+            result = m_vk->vkSetMTLTextureMVK(image, mapInfoIt->second.mtlTexture);
             if (result != VK_SUCCESS) {
                 fprintf(stderr, "vkSetMTLTexture failed\n");
                 return VK_ERROR_OUT_OF_HOST_MEMORY;
@@ -5421,7 +5466,6 @@ private:
     bool mVerbosePrints = false;
     bool mUseOldMemoryCleanupPath = false;
     bool mGuestUsesAngle = false;
-    PFN_vkSetMTLTextureMVK m_setMTLTextureFunc = nullptr;
 
     Lock mLock;
     ConditionVariable mCvWaitSequenceNumber;
@@ -5998,6 +6042,16 @@ void VkDecoderGlobalState::on_vkGetPhysicalDeviceMemoryProperties2KHR(
     VkPhysicalDeviceMemoryProperties2* pMemoryProperties) {
     mImpl->on_vkGetPhysicalDeviceMemoryProperties2(
         pool, physicalDevice, pMemoryProperties);
+}
+
+VkResult VkDecoderGlobalState::on_vkEnumerateDeviceExtensionProperties(
+    android::base::BumpPool* pool,
+    VkPhysicalDevice physicalDevice,
+    const char* pLayerName,
+    uint32_t* pPropertyCount,
+    VkExtensionProperties* pProperties) {
+    return mImpl->on_vkEnumerateDeviceExtensionProperties(
+        pool, physicalDevice, pLayerName, pPropertyCount, pProperties);
 }
 
 VkResult VkDecoderGlobalState::on_vkCreateDevice(

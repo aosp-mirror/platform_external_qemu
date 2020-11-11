@@ -3015,6 +3015,46 @@ public:
         VkDeviceSize* pOffset,
         VkDeviceSize* pRowPitchAlignment);
 #endif
+#ifdef VK_MVK_moltenvk
+    void vkGetMTLDeviceMVK(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::BumpPool* pool,
+        VkPhysicalDevice physicalDevice,
+        void** pMTLDevice);
+    void vkSetMTLTextureMVK(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::BumpPool* pool,
+        VkResult input_result,
+        VkImage image,
+        void* mtlTexture);
+    void vkGetMTLTextureMVK(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::BumpPool* pool,
+        VkImage image,
+        void** pMTLTexture);
+    void vkGetMTLBufferMVK(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::BumpPool* pool,
+        VkBuffer buffer,
+        void** pMTLBuffer);
+    void vkUseIOSurfaceMVK(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::BumpPool* pool,
+        VkResult input_result,
+        VkImage image,
+        void* ioSurface);
+    void vkGetIOSurfaceMVK(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::BumpPool* pool,
+        VkImage image,
+        void** pIOSurface);
+#endif
 
 private:
     class Impl;
