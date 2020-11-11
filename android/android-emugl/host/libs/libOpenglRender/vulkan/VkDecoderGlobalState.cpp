@@ -823,6 +823,58 @@ public:
         }
     }
 
+    VkResult on_vkEnumerateDeviceExtensionProperties(
+        android::base::BumpPool* pool,
+        VkPhysicalDevice boxed_physicalDevice,
+        const char* pLayerName,
+        uint32_t* pPropertyCount,
+        VkExtensionProperties* pProperties) {
+
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+
+        if (!m_emu->instanceSupportsMoltenVK) {
+            return vk->vkEnumerateDeviceExtensionProperties(
+                physicalDevice, pLayerName, pPropertyCount, pProperties);
+        }
+
+        // If MoltenVK is supported on host, we need to ensure that we include
+        // VK_MVK_moltenvk extenstion in returned properties.
+        std::vector<VkExtensionProperties> properties;
+        uint32_t propertyCount = 0u;
+        VkResult result = vk->vkEnumerateDeviceExtensionProperties(
+            physicalDevice, pLayerName, &propertyCount, nullptr);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+
+        properties.resize(propertyCount);
+        result = vk->vkEnumerateDeviceExtensionProperties(
+            physicalDevice, pLayerName, &propertyCount, properties.data());
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+
+        if (std::find_if(properties.begin(), properties.end(),
+            [](const VkExtensionProperties& props) {
+                return strcmp(props.extensionName, VK_MVK_MOLTENVK_EXTENSION_NAME) == 0;
+            }) == properties.end()) {
+            VkExtensionProperties mvk_props;
+            strncpy(mvk_props.extensionName, VK_MVK_MOLTENVK_EXTENSION_NAME,
+                    sizeof(mvk_props.extensionName));
+            mvk_props.specVersion = VK_MVK_MOLTENVK_SPEC_VERSION;
+            properties.push_back(mvk_props);
+        }
+
+        if (*pPropertyCount == 0) {
+            *pPropertyCount = properties.size();
+        } else {
+            memcpy(pProperties, properties.data(), *pPropertyCount * sizeof(VkExtensionProperties));
+        }
+
+        return VK_SUCCESS;
+    }
+
     VkResult on_vkCreateDevice(
             android::base::BumpPool* pool,
             VkPhysicalDevice boxed_physicalDevice,
@@ -5998,6 +6050,16 @@ void VkDecoderGlobalState::on_vkGetPhysicalDeviceMemoryProperties2KHR(
     VkPhysicalDeviceMemoryProperties2* pMemoryProperties) {
     mImpl->on_vkGetPhysicalDeviceMemoryProperties2(
         pool, physicalDevice, pMemoryProperties);
+}
+
+VkResult VkDecoderGlobalState::on_vkEnumerateDeviceExtensionProperties(
+    android::base::BumpPool* pool,
+    VkPhysicalDevice physicalDevice,
+    const char* pLayerName,
+    uint32_t* pPropertyCount,
+    VkExtensionProperties* pProperties) {
+    return mImpl->on_vkEnumerateDeviceExtensionProperties(
+        pool, physicalDevice, pLayerName, pPropertyCount, pProperties);
 }
 
 VkResult VkDecoderGlobalState::on_vkCreateDevice(

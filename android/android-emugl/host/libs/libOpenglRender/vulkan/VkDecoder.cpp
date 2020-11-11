@@ -941,7 +941,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "stream %p: call vkEnumerateDeviceExtensionProperties 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pLayerName, (unsigned long long)pPropertyCount, (unsigned long long)pProperties);
                 }
                 VkResult vkEnumerateDeviceExtensionProperties_VkResult_return = (VkResult)0;
-                vkEnumerateDeviceExtensionProperties_VkResult_return = vk->vkEnumerateDeviceExtensionProperties(unboxed_physicalDevice, pLayerName, pPropertyCount, pProperties);
+                vkEnumerateDeviceExtensionProperties_VkResult_return = m_state->on_vkEnumerateDeviceExtensionProperties(&m_pool, physicalDevice, pLayerName, pPropertyCount, pProperties);
                 vkStream->unsetHandleMapping();
                 // WARNING PTR CHECK
                 uint64_t cgen_var_39 = (uint64_t)(uintptr_t)pPropertyCount;
