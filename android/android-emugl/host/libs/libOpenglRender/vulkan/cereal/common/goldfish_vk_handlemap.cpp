@@ -4784,6 +4784,8 @@ void handlemap_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_MVK_moltenvk
+#endif
 void handlemap_extension_struct(
     VulkanHandleMapping* handlemap,
     void* structExtension_out)

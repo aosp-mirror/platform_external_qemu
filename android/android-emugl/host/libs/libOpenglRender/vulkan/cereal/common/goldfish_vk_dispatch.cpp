@@ -298,6 +298,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_MVK_moltenvk
+#endif
 
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -800,6 +802,14 @@ void init_vulkan_dispatch_from_system_loader(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)dlSymFunc(lib, "vkGetLinearImageLayoutGOOGLE");
+#endif
+#ifdef VK_MVK_moltenvk
+    out->vkGetMTLDeviceMVK = (PFN_vkGetMTLDeviceMVK)dlSymFunc(lib, "vkGetMTLDeviceMVK");
+    out->vkSetMTLTextureMVK = (PFN_vkSetMTLTextureMVK)dlSymFunc(lib, "vkSetMTLTextureMVK");
+    out->vkGetMTLTextureMVK = (PFN_vkGetMTLTextureMVK)dlSymFunc(lib, "vkGetMTLTextureMVK");
+    out->vkGetMTLBufferMVK = (PFN_vkGetMTLBufferMVK)dlSymFunc(lib, "vkGetMTLBufferMVK");
+    out->vkUseIOSurfaceMVK = (PFN_vkUseIOSurfaceMVK)dlSymFunc(lib, "vkUseIOSurfaceMVK");
+    out->vkGetIOSurfaceMVK = (PFN_vkGetIOSurfaceMVK)dlSymFunc(lib, "vkGetIOSurfaceMVK");
 #endif
 }
 

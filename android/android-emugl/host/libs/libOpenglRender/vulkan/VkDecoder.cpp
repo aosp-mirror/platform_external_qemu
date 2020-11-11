@@ -17679,6 +17679,198 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 break;
             }
 #endif
+#ifdef VK_MVK_moltenvk
+            case OP_vkGetMTLDeviceMVK:
+            {
+                VkPhysicalDevice physicalDevice;
+                void** pMTLDevice;
+                // Begin manual dispatchable handle unboxing for physicalDevice;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_855;
+                vkReadStream->read((uint64_t*)&cgen_var_855, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_855, (VkPhysicalDevice*)&physicalDevice, 1);
+                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
+                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for physicalDevice;
+                // Begin manual dispatchable handle unboxing for pMTLDevice;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pMTLDevice, sizeof(void*));
+                vkReadStream->read((void**)pMTLDevice, sizeof(void*));
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pMTLDevice;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMTLDeviceMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pMTLDevice);
+                }
+                vk->vkGetMTLDeviceMVK(unboxed_physicalDevice, pMTLDevice);
+                vkStream->unsetHandleMapping();
+                vkStream->write((void**)pMTLDevice, sizeof(void*));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkGetMTLDeviceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMTLDevice);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+            case OP_vkSetMTLTextureMVK:
+            {
+                VkImage image;
+                void* mtlTexture;
+                uint64_t cgen_var_856;
+                vkReadStream->read((uint64_t*)&cgen_var_856, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_856, (VkImage*)&image, 1);
+                // Begin manual dispatchable handle unboxing for mtlTexture;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&mtlTexture, sizeof(uint8_t));
+                vkReadStream->read((void*)mtlTexture, sizeof(uint8_t));
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for mtlTexture;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkSetMTLTextureMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)image, (unsigned long long)mtlTexture);
+                }
+                VkResult vkSetMTLTextureMVK_VkResult_return = (VkResult)0;
+                vkSetMTLTextureMVK_VkResult_return = vk->vkSetMTLTextureMVK(image, mtlTexture);
+                vkStream->unsetHandleMapping();
+                vkStream->write((void*)mtlTexture, sizeof(uint8_t));
+                vkStream->write(&vkSetMTLTextureMVK_VkResult_return, sizeof(VkResult));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkSetMTLTextureMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetMTLTextureMVK_VkResult_return, image, mtlTexture);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+            case OP_vkGetMTLTextureMVK:
+            {
+                VkImage image;
+                void** pMTLTexture;
+                uint64_t cgen_var_857;
+                vkReadStream->read((uint64_t*)&cgen_var_857, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_857, (VkImage*)&image, 1);
+                // Begin manual dispatchable handle unboxing for pMTLTexture;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pMTLTexture, sizeof(void*));
+                vkReadStream->read((void**)pMTLTexture, sizeof(void*));
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pMTLTexture;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMTLTextureMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)image, (unsigned long long)pMTLTexture);
+                }
+                vk->vkGetMTLTextureMVK(image, pMTLTexture);
+                vkStream->unsetHandleMapping();
+                vkStream->write((void**)pMTLTexture, sizeof(void*));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkGetMTLTextureMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, image, pMTLTexture);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+            case OP_vkGetMTLBufferMVK:
+            {
+                VkBuffer buffer;
+                void** pMTLBuffer;
+                uint64_t cgen_var_858;
+                vkReadStream->read((uint64_t*)&cgen_var_858, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_858, (VkBuffer*)&buffer, 1);
+                // Begin manual dispatchable handle unboxing for pMTLBuffer;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pMTLBuffer, sizeof(void*));
+                vkReadStream->read((void**)pMTLBuffer, sizeof(void*));
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pMTLBuffer;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetMTLBufferMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)buffer, (unsigned long long)pMTLBuffer);
+                }
+                vk->vkGetMTLBufferMVK(buffer, pMTLBuffer);
+                vkStream->unsetHandleMapping();
+                vkStream->write((void**)pMTLBuffer, sizeof(void*));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkGetMTLBufferMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, buffer, pMTLBuffer);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+            case OP_vkUseIOSurfaceMVK:
+            {
+                VkImage image;
+                void* ioSurface;
+                uint64_t cgen_var_859;
+                vkReadStream->read((uint64_t*)&cgen_var_859, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_859, (VkImage*)&image, 1);
+                // Begin manual dispatchable handle unboxing for ioSurface;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&ioSurface, sizeof(uint8_t));
+                vkReadStream->read((void*)ioSurface, sizeof(uint8_t));
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for ioSurface;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkUseIOSurfaceMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)image, (unsigned long long)ioSurface);
+                }
+                VkResult vkUseIOSurfaceMVK_VkResult_return = (VkResult)0;
+                vkUseIOSurfaceMVK_VkResult_return = vk->vkUseIOSurfaceMVK(image, ioSurface);
+                vkStream->unsetHandleMapping();
+                vkStream->write((void*)ioSurface, sizeof(uint8_t));
+                vkStream->write(&vkUseIOSurfaceMVK_VkResult_return, sizeof(VkResult));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkUseIOSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkUseIOSurfaceMVK_VkResult_return, image, ioSurface);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+            case OP_vkGetIOSurfaceMVK:
+            {
+                VkImage image;
+                void** pIOSurface;
+                uint64_t cgen_var_860;
+                vkReadStream->read((uint64_t*)&cgen_var_860, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_860, (VkImage*)&image, 1);
+                // Begin manual dispatchable handle unboxing for pIOSurface;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pIOSurface, sizeof(void*));
+                vkReadStream->read((void**)pIOSurface, sizeof(void*));
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for pIOSurface;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetIOSurfaceMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)image, (unsigned long long)pIOSurface);
+                }
+                vk->vkGetIOSurfaceMVK(image, pIOSurface);
+                vkStream->unsetHandleMapping();
+                vkStream->write((void**)pIOSurface, sizeof(void*));
+                vkStream->commitWrite();
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkGetIOSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, image, pIOSurface);
+                }
+                m_pool.freeAll();
+                vkReadStream->clearPool();
+                break;
+            }
+#endif
             default:
             {
                 return ptr - (unsigned char *)buf;
