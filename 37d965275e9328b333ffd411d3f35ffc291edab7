@@ -1,0 +1,30 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000006073020",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1495918?revision\u003d3",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "f5e3f861_ebe96788",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 863,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-11-11T17:07:59Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 863,
+        "startChar": 76,
+        "endLine": 863,
+        "endChar": 77
+      },
+      "revId": "37d965275e9328b333ffd411d3f35ffc291edab7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
