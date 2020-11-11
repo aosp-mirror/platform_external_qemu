@@ -234,11 +234,6 @@ public:
                     pCreateInfo->enabledExtensionCount,
                     pCreateInfo->ppEnabledExtensionNames);
 
-        // Always include VK_MVK_moltenvk when supported.
-        if (m_emu->instanceSupportsMoltenVK) {
-            finalExts.push_back("VK_MVK_moltenvk");
-        }
-
         // Create higher version instance whenever it is possible.
         uint32_t apiVersion = VK_MAKE_VERSION(1, 0, 0);
         if (pCreateInfo->pApplicationInfo) {
@@ -298,9 +293,7 @@ public:
         info.boxed = boxed;
 
         if (m_emu->instanceSupportsMoltenVK) {
-            m_setMTLTextureFunc = reinterpret_cast<PFN_vkSetMTLTextureMVK>(
-                m_vk->vkGetInstanceProcAddr(*pInstance, "vkSetMTLTextureMVK"));
-            if (!m_setMTLTextureFunc) {
+            if (!m_vk->vkSetMTLTextureMVK) {
                 fprintf(stderr, "Cannot find vkSetMTLTextureMVK\n");
                 abort();
             }
@@ -1413,7 +1406,7 @@ public:
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
         if (mapInfoIt->second.mtlTexture) {
-            result = m_setMTLTextureFunc(image, mapInfoIt->second.mtlTexture);
+            result = m_vk->vkSetMTLTextureMVK(image, mapInfoIt->second.mtlTexture);
             if (result != VK_SUCCESS) {
                 fprintf(stderr, "vkSetMTLTexture failed\n");
                 return VK_ERROR_OUT_OF_HOST_MEMORY;
@@ -5473,7 +5466,6 @@ private:
     bool mVerbosePrints = false;
     bool mUseOldMemoryCleanupPath = false;
     bool mGuestUsesAngle = false;
-    PFN_vkSetMTLTextureMVK m_setMTLTextureFunc = nullptr;
 
     Lock mLock;
     ConditionVariable mCvWaitSequenceNumber;
