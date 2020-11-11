@@ -57,7 +57,8 @@ static std::string translate_idx(CellularStatus value) {
         STATE(Cellular_Stat_Denied);
         STATE(Cellular_Stat_Unregistered);
     }
-    return s;
+    // Chop off "Cellular_"
+    return s.substr(9);
 }
 
 static std::string translate_idx(CellularStandard value) {
@@ -73,7 +74,8 @@ static std::string translate_idx(CellularStandard value) {
         STATE(Cellular_Std_full);
         STATE(Cellular_Std_5G);
     }
-    return s;
+    // Chop off "Cellular_"
+    return s.substr(9);
 }
 
 static std::string translate_idx(CellularSignal value) {
@@ -85,7 +87,8 @@ static std::string translate_idx(CellularSignal value) {
         STATE(Cellular_Signal_Good);
         STATE(Cellular_Signal_Great);
     }
-    return s;
+    // Chop off "Cellular_"
+    return s.substr(9);
 }
 
 static std::string translate_idx(CellularMeterStatus value) {

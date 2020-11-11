@@ -11,10 +11,13 @@
 
 #pragma once
 
-#include <memory>             // for enable_shared_from_this
-#include <string>             // for string, operator==, hash
-#include <unordered_map>      // for unordered_map
+#include <memory>  // for enable_shared_from_this
+#include <mutex>
+#include <string>         // for string, operator==, hash
+#include <unordered_map>  // for unordered_map
+#include <vector>
 
+#include "android/base/Compiler.h"  // for DISALLOW_COPY_ASSIGN_...
 #include "studio_stats.pb.h"  // for EmulatorUiEvent_EmulatorUiEventContext
 
 namespace android {
@@ -28,22 +31,41 @@ namespace metrics {
 // myTracker = std::make_shared<UiEventTracker>(eventType, context);
 // myTracker->increment("foo")
 //
-// Make sure that myTracker is alive when the metrics are reported, otherwise nothing will happen.
+// Note that all UiEvents will be batched and submitted in a single event
+// when the metrics system shuts down under emulator_ui_events
 class UiEventTracker : public std::enable_shared_from_this<UiEventTracker> {
 public:
     UiEventTracker(
             ::android_studio::EmulatorUiEvent_EmulatorUiEventType eventType,
-            ::android_studio::EmulatorUiEvent_EmulatorUiEventContext context);
+            ::android_studio::EmulatorUiEvent_EmulatorUiEventContext context,
+            bool dropFirst = true);
 
     void increment(const std::string& element, int amount = 1);
+    std::vector<::android_studio::EmulatorUiEvent> currentEvents();
 
 private:
-    void registerCallback(const std::string& element);
-
     ::android_studio::EmulatorUiEvent_EmulatorUiEventType mEventType;
     ::android_studio::EmulatorUiEvent_EmulatorUiEventContext mContext;
     std::unordered_map<std::string, int> mElementCounter;
+    std::mutex mElementLock;
+    bool mDropFirst;
+    bool mRegistered;
 };
-}  // namespace metrics
 
+// This class is used to batch individual UiEventTrackers.
+class MultipleUiEventsTracker {
+public:
+    DISALLOW_COPY_ASSIGN_AND_MOVE(MultipleUiEventsTracker);
+    MultipleUiEventsTracker() = default;
+    ~MultipleUiEventsTracker() = default;
+
+    static MultipleUiEventsTracker& get();
+    void registerTracker(std::shared_ptr<UiEventTracker> tracker);
+
+private:
+    std::mutex mCallbackLock;
+    std::vector<std::shared_ptr<UiEventTracker>> mOnExit;
+};
+
+}  // namespace metrics
 }  // namespace android

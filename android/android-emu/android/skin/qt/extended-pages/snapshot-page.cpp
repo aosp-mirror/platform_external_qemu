@@ -612,7 +612,7 @@ void SnapshotPage::on_loadSnapshot_clicked() {
 }
 
 void SnapshotPage::on_saveQuickBootNowButton_clicked() {
-    mSnapshotTracker->increment("SAVE_BOOT_NOW");
+    mSnapshotTracker->increment("SAVE_BOOT");
     setEnabled(false);
     setOperationInProgress(true);
     // Invoke the snapshot save function.
@@ -623,7 +623,7 @@ void SnapshotPage::on_saveQuickBootNowButton_clicked() {
 }
 
 void SnapshotPage::on_loadQuickBootNowButton_clicked() {
-    mSnapshotTracker->increment("LOAD_BOOT_NOW");
+    mSnapshotTracker->increment("LOAD_BOOT");
     setEnabled(false);
     setOperationInProgress(true);
     // Invoke the snapshot load function.
