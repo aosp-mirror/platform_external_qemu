@@ -241,6 +241,38 @@ static bool rebase_on_top_of(std::string src,
     return res;
 }
 
+static bool extract_snapshot(const char* srcImg,
+                             const char* dstImg,
+                             const char* snapshot,
+                             void* opaque,
+                             LineConsumerCallback errConsumer) {
+    auto qemu_img = System::get()->findBundledExecutable("qemu-img");
+    // Extract the snapshot into a standalone qcow2 file.
+    auto res = System::get()->runCommandWithResult({qemu_img, "convert", "-O",
+                                                    "qcow2", "-s", snapshot,
+                                                    srcImg, dstImg});
+    if (!res) {
+        std::string err =
+                std::string("Failed to extract snapshot. Source image name ") +
+                srcImg + " destination image name " + dstImg +
+                " snapshot name " + snapshot + ".\n";
+        errConsumer(opaque, err.c_str(), err.size());
+        return false;
+    }
+    // Create an empty snapshot in the standalone qcow2 file.
+    res = System::get()->runCommandWithResult(
+            {qemu_img, "snapshot", "-c", snapshot, dstImg});
+    if (!res) {
+        std::string err =
+                std::string("Failed to create snapshot. Image name ") + dstImg +
+                " snapshot name " + snapshot + ".\n";
+        errConsumer(opaque, err.c_str(), err.size());
+        path_delete_file(dstImg);
+        return false;
+    }
+    return true;
+}
+
 // Swaps out the given blockdriver with a new blockdriver
 // backed by the provided qcow2 file.
 // |drive| Device to be swapped out
@@ -870,11 +902,18 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
     // Exporting works like this:
     // 1. Pause the emulator, we don't want any writes to happen
     // 2. Flush all the drives, so we don't have a messed up qcow2 state
-    // 3. Copy all the qcow2 to a temporary
-    // 4. Rebase on top of an empty image, forcing us to pull all relevant
-    //    data from the read only sections of the base image (likely nop)
-    // 5. Move the standalone qcows out of the way..
-    // 6. Wake up the emulator.
+    //
+    // Then it takes different workflows depending on the image:
+    // Workflow A:
+    // a.1. convert the snapshot to a standalone qcow2 file
+    // a.2. create an empty snapshot in the standalone qcow2 file
+    // Workflow B:
+    // b.1. Copy all the qcow2 to a temporary
+    // b.2. Rebase on top of an empty image, forcing us to pull all relevant
+    //      data from the read only sections of the base image (likely nop)
+    // b.3. Move the standalone qcows out of the way..
+    //
+    // At last, we wake up the emulator.
     //
     // TODO(jansene) Qemu supports live migration, so this should be possible
     // without pausing the emulator.
@@ -897,38 +936,49 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
             success = false;
             std::string err = "Failed to extract basename from " + overlay;
             errConsumer(opaque, err.c_str(), err.size());
-            continue;
+            break;
         }
-        auto tmp_overlay =
-                pj(android::snapshot::getAvdDir(), "tmp_" + qcow.str());
         auto final_overlay = pj(dest, qcow);
-
-        // Copy and rebase on an empty image...
-        if (path_copy_file(tmp_overlay.c_str(), overlay.c_str()) != 0) {
-            success = false;
-            std::string err = std::string("Failed to copy ") + overlay +
-                              " to " + tmp_overlay + " due to " +
-                              std::to_string(errno);
-
-            errConsumer(opaque, err.c_str(), err.size());
-        }
-        // TODO(jansene): remove unused snapshots from the temporary overlay.
-        // (i.e. those with a different name/id than snapshot) See qemu-img.c
-        // static int img_snapshot(int argc, char **argv) on how to list &
-        // remove.
-        success = rebase_on_top_of(tmp_overlay, "empty.qcow2", opaque,
-                                   errConsumer) &&
-                  success;
-
-        // And move it to the export destination..
         path_delete_file(final_overlay.c_str());
-        if (std::rename(tmp_overlay.c_str(), final_overlay.c_str()) != 0) {
-            std::string err = "Failed to rename " + tmp_overlay + " to " +
-                              final_overlay +
-                              ", errno: " + std::to_string(errno);
-            path_delete_file(tmp_overlay.c_str());
-            errConsumer(opaque, err.c_str(), err.size());
-            success = false;
+        // Extract the target snapshot from qcow2.
+        // It doesn't work with cache.img.
+        if (qcow.find("cache") == std::string::npos) {
+            if (!extract_snapshot(overlay.c_str(), final_overlay.c_str(),
+                                  snapshot, opaque, errConsumer)) {
+                success = false;
+                break;
+            }
+        } else {
+            // For cache image, we use fallback path to extract all contents.
+            auto tmp_overlay =
+                    pj(android::snapshot::getAvdDir(), "tmp_" + qcow.str());
+
+            // Copy and rebase on an empty image...
+            if (path_copy_file(tmp_overlay.c_str(), overlay.c_str()) != 0) {
+                success = false;
+                std::string err = std::string("Failed to copy ") + overlay +
+                                  " to " + tmp_overlay + " due to " +
+                                  std::to_string(errno);
+                errConsumer(opaque, err.c_str(), err.size());
+                break;
+            }
+
+            success = rebase_on_top_of(tmp_overlay, "empty.qcow2", opaque,
+                                       errConsumer);
+
+            // And move it to the export destination..
+            if (success && std::rename(tmp_overlay.c_str(), final_overlay.c_str()) != 0) {
+                std::string err = "Failed to rename " + tmp_overlay + " to " +
+                                  final_overlay +
+                                  ", errno: " + std::to_string(errno);
+
+                errConsumer(opaque, err.c_str(), err.size());
+                success = false;
+            }
+            if (!success) {
+                path_delete_file(tmp_overlay.c_str());
+                break;
+            }
         }
     }
 
