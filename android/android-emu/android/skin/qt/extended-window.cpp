@@ -333,6 +333,7 @@ static std::string translate_idx(ExtendedWindowPane value) {
         s = #p;                   \
         break;
     switch (value) {
+        PANE(PANE_IDX_UNKNOWN)
         PANE(PANE_IDX_LOCATION)
         PANE(PANE_IDX_MULTIDISPLAY)
         PANE(PANE_IDX_CELLULAR)
