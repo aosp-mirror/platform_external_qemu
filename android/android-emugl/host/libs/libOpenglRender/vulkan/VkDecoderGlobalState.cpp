@@ -31,6 +31,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
 #include "android/base/containers/EntityManager.h"
+#include "android/base/containers/HybridEntityManager.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/Stream.h"
@@ -1039,6 +1040,7 @@ public:
             }
         }
 
+        fprintf(stderr, "%s: new device. %p %p\n", __func__, *pDevice, (void*)(uintptr_t)(deviceInfo.boxed));
         // Box the device.
         *pDevice = (VkDevice)deviceInfo.boxed;
 
@@ -2624,6 +2626,9 @@ public:
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
 
+        fprintf(stderr, "%s: device vk %p %p\n", __func__,
+                (void*)device,
+                (void*)vk);
         if (!pAllocateInfo) return VK_ERROR_INITIALIZATION_FAILED;
 
         VkMemoryAllocateInfo localAllocInfo = vk_make_orphan_copy(*pAllocateInfo);
@@ -2643,6 +2648,7 @@ public:
                     "%s: Fatal: Export allocs are to be handled "
                     "on the guest side / VkCommonOperations.\n",
                     __func__);
+                fprintf(stderr, "%s:%d unsuccess\n", __func__, __LINE__);
             abort();
         }
 
@@ -2693,12 +2699,14 @@ public:
             // User app gave an invalid VkDevice,
             // but we don't really want to crash here.
             // We should allow invalid apps.
+                fprintf(stderr, "%s:%d unsuccess\n", __func__, __LINE__);
             return VK_ERROR_DEVICE_LOST;
         }
 
         auto physdevInfo = android::base::find(mPhysdevInfo, *physdev);
 
         if (!physdevInfo) {
+                fprintf(stderr, "%s:%d unsuccess\n", __func__, __LINE__);
             // If this fails, we crash, as we assume that the memory properties
             // map should have the info.
             emugl::emugl_crash_reporter(
@@ -2714,6 +2722,7 @@ public:
         if (localAllocInfo.memoryTypeIndex >=
             physdevInfo->memoryProperties.memoryTypeCount) {
             // Continue allowing invalid behavior.
+                fprintf(stderr, "%s:%d unsuccess\n", __func__, __LINE__);
             return VK_ERROR_INCOMPATIBLE_DRIVER;
         }
 
@@ -2750,6 +2759,7 @@ public:
                             "%s: VK_ERROR_OUT_OF_DEVICE_MEMORY: "
                             "colorBuffer 0x%x does not have Vulkan external memory backing\n", __func__,
                             importCbInfoPtr->colorBuffer);
+                fprintf(stderr, "%s:%d unsuccess\n", __func__, __LINE__);
                     return VK_ERROR_OUT_OF_DEVICE_MEMORY;
                 }
 
@@ -2784,6 +2794,7 @@ public:
                             "buffer 0x%x does not have Vulkan external memory "
                             "backing\n",
                             __func__, importBufferInfoPtr->buffer);
+                fprintf(stderr, "%s:%d unsuccess\n", __func__, __LINE__);
                     return VK_ERROR_OUT_OF_DEVICE_MEMORY;
                 }
 
@@ -2803,6 +2814,7 @@ public:
             vk->vkAllocateMemory(device, &localAllocInfo, pAllocator, pMemory);
 
         if (result != VK_SUCCESS) {
+                fprintf(stderr, "%s:%d unsuccess\n", __func__, __LINE__);
             return result;
         }
 
@@ -2821,6 +2833,7 @@ public:
 
         if (!hostVisible) {
             *pMemory = new_boxed_non_dispatchable_VkDeviceMemory(*pMemory);
+                fprintf(stderr, "%s:%d unsuccess\n", __func__, __LINE__);
             return result;
         }
 
@@ -2832,6 +2845,7 @@ public:
             VkResult mapResult = vk->vkMapMemory(device, *pMemory, 0,
                                                  mapInfo.size, 0, &mapInfo.ptr);
             if (mapResult != VK_SUCCESS) {
+                fprintf(stderr, "%s:%d unsuccess\n", __func__, __LINE__);
                 return VK_ERROR_OUT_OF_HOST_MEMORY;
             }
         }
@@ -4071,7 +4085,6 @@ public:
         mGlobalHandleStore.remove((uint64_t)boxed); \
     } \
     type unbox_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
         auto elt = mGlobalHandleStore.getLocked( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) return VK_NULL_HANDLE; \
@@ -4083,7 +4096,6 @@ public:
                 (uint64_t)(uintptr_t)unboxed); \
     } \
     VulkanDispatch* dispatch_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
         auto elt = mGlobalHandleStore.getLocked( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) { fprintf(stderr, "%s: err not found boxed %p\n", __func__, boxed); return nullptr; } \
@@ -4106,7 +4118,6 @@ public:
                 (uint64_t)(uintptr_t)unboxed); \
     } \
     type unbox_non_dispatchable_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
         auto elt = mGlobalHandleStore.getLocked( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); return VK_NULL_HANDLE; } \
@@ -5725,10 +5736,10 @@ private:
     template <class T>
     class BoxedHandleManager {
     public:
-        using Store = android::base::EntityManager<32, 16, 16, T>;
+        using Store = android::base::HybridEntityManager<16000, uint64_t, T>;
 
         Lock lock;
-        Store store;
+        mutable Store store;
         std::unordered_map<uint64_t, uint64_t> reverseMap;
 
         void clear() {
@@ -5737,30 +5748,30 @@ private:
         }
 
         uint64_t add(const T& item, BoxedHandleTypeTag tag) {
-            AutoLock l(lock);
             auto res = (uint64_t)store.add(item, (size_t)tag);
+            AutoLock l(lock);
             reverseMap[(uint64_t)(item.underlying)] = res;
             return res;
         }
 
         uint64_t addFixed(uint64_t handle, const T& item, BoxedHandleTypeTag tag) {
-            AutoLock l(lock);
             auto res = (uint64_t)store.addFixed(handle, item, (size_t)tag);
+            AutoLock l(lock);
             reverseMap[(uint64_t)(item.underlying)] = res;
             return res;
         }
 
         void remove(uint64_t h) {
-            AutoLock l(lock);
             auto item = getLocked(h);
             if (item) {
+                AutoLock l(lock);
                 reverseMap.erase((uint64_t)(item->underlying));
             }
             store.remove(h);
         }
 
         T* getLocked(uint64_t h) {
-            return store.get(h);
+            return (T*)store.get_const(h);
         }
 
         uint64_t getBoxedFromUnboxedLocked(uint64_t unboxed) {
