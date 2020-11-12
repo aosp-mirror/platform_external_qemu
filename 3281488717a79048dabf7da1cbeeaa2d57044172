@@ -26,6 +26,40 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "34ddf033_495c86ca",
+        "filename": "android/android-grpc/android/emulation/control/UiController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-11-12T17:33:54Z",
+      "side": 1,
+      "message": "Leftover?",
+      "revId": "3281488717a79048dabf7da1cbeeaa2d57044172",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5f5fc6bb_385397d9",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-11-12T17:33:54Z",
+      "side": 1,
+      "message": "Could you update the documentation to describe the PaneEntry parameter?",
+      "revId": "3281488717a79048dabf7da1cbeeaa2d57044172",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "345cc351_18b3e13c",
         "filename": "android/android-grpc/ui_controller_service.proto",
         "patchSetId": 1
