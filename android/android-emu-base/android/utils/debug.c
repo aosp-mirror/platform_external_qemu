@@ -48,8 +48,8 @@ void fdprintfnv(FILE* fp, const char* lvl, const char* format, va_list args) {
         struct tm* time = localtime(&now);
         fprintf(fp, "%02d:%02d:%02d.%05ld ", time->tm_hour, time->tm_min,
                 time->tm_sec, tv.tv_usec);
-        fprintf(fp, "emulator: ");
     }
+    fprintf(fp, "emulator: ");
     if (lvl) {
         fprintf(fp, "%s", lvl);
     }
@@ -66,6 +66,12 @@ void dprintn(const char* format, ...) {
 
 void dprintnv(const char* format, va_list args) {
     vfprintf(stdout, format, args);
+}
+void dinfo(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    fdprintfnv(stdout, "INFO: ", format, args);
+    va_end(args);
 }
 
 void dwarning(const char* format, ...) {
