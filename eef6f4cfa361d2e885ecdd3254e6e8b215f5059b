@@ -1,0 +1,30 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000006116680",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1497294?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "adffb0ab_a5d56605",
+        "filename": "android/scripts/aarch64-linux/launcher/postemuinstall.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-11-12T23:21:39Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 18,
+        "startChar": 25,
+        "endLine": 18,
+        "endChar": 26
+      },
+      "revId": "eef6f4cfa361d2e885ecdd3254e6e8b215f5059b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
