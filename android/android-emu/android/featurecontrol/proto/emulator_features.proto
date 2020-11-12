@@ -101,4 +101,6 @@ enum Feature {
     ModemSimulator = 56;
 
     TvRemote = 57;
+
+    VirtioMouse = 58;
 }

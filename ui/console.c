@@ -2396,12 +2396,16 @@ void kbd_mouse_event(int dx, int dy, int dz, int button_state) {
         [INPUT_BUTTON_MIDDLE]     = MOUSE_EVENT_MBUTTON,
         [INPUT_BUTTON_RIGHT]      = MOUSE_EVENT_RBUTTON,
     };
-    static uint32_t prev_state;
+    static struct {
+        int32_t x;
+        int32_t y;
+        uint32_t buttons;
+    } prev_state;
 
-    if (prev_state != button_state) {
-        qemu_input_update_buttons(active_console, bmap, prev_state,
+    if (prev_state.buttons != button_state) {
+        qemu_input_update_buttons(active_console, bmap, prev_state.buttons,
                                   button_state);
-        prev_state = (uint32_t)button_state;
+        prev_state.buttons = (uint32_t)button_state;
     }
 
     const bool is_absolute = qemu_input_is_absolute();
@@ -2420,9 +2424,11 @@ void kbd_mouse_event(int dx, int dy, int dz, int button_state) {
         qemu_input_queue_abs(active_console, INPUT_AXIS_X, dx, 0, w);
         qemu_input_queue_abs(active_console, INPUT_AXIS_Y, y, 0, h);
     } else {
-        qemu_input_queue_rel(active_console, INPUT_AXIS_X, dx);
-        qemu_input_queue_rel(active_console, INPUT_AXIS_Y, y);
+      qemu_input_queue_rel(active_console, INPUT_AXIS_X, dx - prev_state.x);
+      qemu_input_queue_rel(active_console, INPUT_AXIS_Y, y - prev_state.y);
     }
+    prev_state.x = dx;
+    prev_state.y = y;
 
     qemu_input_event_sync();
 }

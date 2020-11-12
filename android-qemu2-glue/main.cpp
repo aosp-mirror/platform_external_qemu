@@ -629,7 +629,10 @@ private:
 
 static void initialize_virtio_input_devs(android::ParameterList& args, AndroidHwConfig* hw) {
     if (fc::isEnabled(fc::VirtioInput)) {
-        if (androidHwConfig_isScreenMultiTouch(hw)) {
+        if (fc::isEnabled(fc::VirtioMouse)) {
+            args.add("-device");
+            args.add("virtio-mouse-pci");
+        } else if (androidHwConfig_isScreenMultiTouch(hw)) {
             for (int id = 1; id <= VIRTIO_INPUT_MAX_NUM; id++) {
                 args.add("-device");
                 args.add(StringFormat("virtio_input_multi_touch_pci_%d", id).c_str());
@@ -1148,6 +1151,7 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::Vulkan, true);
                 fc::setIfNotOverriden(fc::GLDirectMem, true);
                 fc::setIfNotOverriden(fc::VirtioInput, true);
+                fc::setIfNotOverriden(fc::VirtioMouse, false);
                 fc::setEnabledOverride(fc::RefCountPipe, false);
                 fc::setIfNotOverriden(fc::VulkanNullOptionalStrings, true);
                 fc::setIfNotOverriden(fc::VulkanIgnoredHandles, true);
