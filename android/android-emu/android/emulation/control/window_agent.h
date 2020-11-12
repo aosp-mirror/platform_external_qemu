@@ -14,9 +14,9 @@
 
 #include <stdint.h>
 #include "android/settings-agent.h"
+#include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/rect.h"
 #include "android/utils/compiler.h"
-
 ANDROID_BEGIN_HEADER
 
 // Window agent's possible message types
@@ -81,8 +81,9 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*restoreSkin)(void);
     void (*updateUIMultiDisplayPage)(uint32_t);
     bool (*getMonitorRect)(uint32_t*, uint32_t*);
+    // start extended window and switch to the pane specified by the index.
     // return true if extended controls window's visibility has changed.
-    bool (*startExtendedWindow)(void);
+    bool (*startExtendedWindow)(ExtendedWindowPane index);
     bool (*quitExtendedWindow)(void);
     bool (*setUiTheme)(SettingsTheme type);
 } QAndroidEmulatorWindowAgent;

@@ -122,7 +122,7 @@ public:
     }
     void hideRotationButton(bool hide);
     bool setUiTheme(SettingsTheme theme, bool persist);
-    void showExtendedWindow();
+    void showExtendedWindow(ExtendedWindowPane pane);
     void hideExtendedWindow();
 
 signals:

@@ -4032,7 +4032,7 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
 }
 
 static int do_start_extended_window(ControlClient client, char* args) {
-    client->global->emu_agent->startExtendedWindow();
+    client->global->emu_agent->startExtendedWindow(PANE_IDX_LOCATION);
     return 0;
 }
 

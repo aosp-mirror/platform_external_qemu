@@ -24,8 +24,7 @@ import "google/protobuf/empty.proto";
 service UiController {
     // this method has no effect if the extended contorls are already shown.
     // In that case, visibilityChanged will be set to false;
-    rpc showExtendedControls(google.protobuf.Empty)
-            returns (ExtendedControlsStatus) {}
+    rpc showExtendedControls(PaneEntry) returns (ExtendedControlsStatus) {}
     // this method has no effect if the extended controls are hidden.
     // In that case, visibilityChanged will be set to false;
     rpc closeExtendedControls(google.protobuf.Empty)
@@ -43,4 +42,36 @@ message ThemingStyle {
 
 message ExtendedControlsStatus {
     bool visibilityChanged = 1;
+}
+
+message PaneEntry {
+    enum PaneIndex {
+        // if specified as UNKNOWN, extended controls will display the current
+        // pane by default.
+        UNKNOWN = 0;
+        // Referenced from
+        // external/qemu/android/android-emu/android/skin/qt/extended-window-styles.h
+        LOCATION = 1;
+        MULTIDISPLAY = 2;
+        CELLULAR = 3;
+        BATTERY = 4;
+        CAMERA = 5;
+        TELEPHONE = 6;
+        DPAD = 7;
+        TV_REMOTE = 8;
+        ROTARY = 9;
+        MICROPHONE = 10;
+        FINGER = 11;
+        VIRT_SENSORS = 12;
+        SNAPSHOT = 13;
+        BUGREPORT = 14;
+        RECORD = 15;
+        GOOGLE_PLAY = 16;
+        SETTINGS = 17;
+        HELP = 18;
+        CAR = 19;
+        CAR_ROTARY = 20;
+        SENSOR_REPLAY = 21;
+    };
+    PaneIndex index = 1;
 }
