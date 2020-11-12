@@ -18,7 +18,8 @@
 // This gives the order of the tabbed panes on the extended window.
 // This must correspond to the ordering that is set from within
 // QtDesigner and written to extended.ui.
-enum ExtendedWindowPane {
+typedef enum {
+    PANE_IDX_UNKNOWN = -1,
     PANE_IDX_LOCATION = 0,
     PANE_IDX_MULTIDISPLAY,
     PANE_IDX_CELLULAR,
@@ -40,4 +41,4 @@ enum ExtendedWindowPane {
     PANE_IDX_CAR,
     PANE_IDX_CAR_ROTARY,
     PANE_IDX_SENSOR_REPLAY,
-};
+} ExtendedWindowPane;

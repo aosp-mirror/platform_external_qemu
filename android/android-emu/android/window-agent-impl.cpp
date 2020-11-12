@@ -172,25 +172,29 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .startExtendedWindow =
-                []() {
+                [](ExtendedWindowPane pane) {
                     auto* win = EmulatorQtWindow::getInstance();
-                    if (win && !win->toolWindow()->isExtendedWindowVisible()) {
-                        win->runOnUiThread([win]() {
-                            win->toolWindow()->showExtendedWindow();
+                    bool visibilityChanged = false;
+                    if (win) {
+                        visibilityChanged =
+                                !win->toolWindow()->isExtendedWindowVisible();
+                        win->runOnUiThread([win, pane]() {
+                            win->toolWindow()->showExtendedWindow(pane);
                         });
-                        return true;
                     }
-                    return false;
+                    return visibilityChanged;
                 },
         .quitExtendedWindow =
                 []() {
                     auto* win = EmulatorQtWindow::getInstance();
-                    if (win && win->toolWindow()->isExtendedWindowVisible()) {
+                    bool visibilityChanged = false;
+                    if (win) {
+                        visibilityChanged =
+                                win->toolWindow()->isExtendedWindowVisible();
                         win->runOnUiThread(
                             [win]() { win->toolWindow()->hideExtendedWindow(); });
-                        return true;
                     }
-                    return false;
+                    return visibilityChanged;
                 },
         .setUiTheme = [](SettingsTheme type) {
                     skin_winsys_touch_qt_extended_virtual_sensors();
