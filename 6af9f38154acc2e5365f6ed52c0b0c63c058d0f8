@@ -1,0 +1,56 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000006117932",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1439831?revision\u003d4",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "c94b04f3_c97f670d",
+        "filename": "android/android-emu-base/android/base/synchronization/Lock.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-11-12T23:59:08Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 281,
+        "startChar": 28,
+        "endLine": 281,
+        "endChar": 29
+      },
+      "revId": "6af9f38154acc2e5365f6ed52c0b0c63c058d0f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000006117932",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1439831?revision\u003d4",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "eb7d1ede_5592f290",
+        "filename": "android/android-emu-base/android/base/synchronization/Lock.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2020-11-12T23:59:08Z",
+      "side": 1,
+      "message": "Please remove the trailing whitespace.",
+      "range": {
+        "startLine": 286,
+        "startChar": 2,
+        "endLine": 286,
+        "endChar": 3
+      },
+      "revId": "6af9f38154acc2e5365f6ed52c0b0c63c058d0f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
