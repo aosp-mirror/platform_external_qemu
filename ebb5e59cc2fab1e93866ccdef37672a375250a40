@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "02071e0e_cbb15707",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-12T15:07:56Z",
+      "side": 1,
+      "message": "If we want to let 2 or N threads run instead of 1, but true, don\u0027t think we ended up needing that part",
+      "parentUuid": "de5907e3_36bbfe21",
+      "range": {
+        "startLine": 93,
+        "startChar": 3,
+        "endLine": 93,
+        "endChar": 56
+      },
+      "revId": "ebb5e59cc2fab1e93866ccdef37672a375250a40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c19207a6_85768e21",
@@ -47,6 +71,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "aae5d819_d872e37a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-12T15:07:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c19207a6_85768e21",
+      "range": {
+        "startLine": 113,
+        "startChar": 4,
+        "endLine": 113,
+        "endChar": 29
+      },
+      "revId": "ebb5e59cc2fab1e93866ccdef37672a375250a40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "04a072f2_04b5bbf5",
@@ -60,6 +108,30 @@
       "writtenOn": "2020-11-12T00:11:05Z",
       "side": 1,
       "message": "nit: isn\u0027t needed",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 56
+      },
+      "revId": "ebb5e59cc2fab1e93866ccdef37672a375250a40",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7e77fe15_438a76b3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-12T15:07:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04a072f2_04b5bbf5",
       "range": {
         "startLine": 21,
         "startChar": 0,
