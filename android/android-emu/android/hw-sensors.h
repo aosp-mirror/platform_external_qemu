@@ -241,6 +241,7 @@ struct AnglesToPosture {
     struct {
         float left;
         float right;
+        float default_value;
     } angles[ANDROID_FOLDABLE_MAX_HINGES_ROLLS];
     enum FoldablePostures posture;
 };
