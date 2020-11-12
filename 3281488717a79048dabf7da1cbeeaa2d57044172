@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cea7e4fa_8fd5a13c",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1218,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-11-12T17:46:47Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e63de341_c597a05a",
+      "range": {
+        "startLine": 1217,
+        "startChar": 7,
+        "endLine": 1218,
+        "endChar": 71
+      },
+      "revId": "3281488717a79048dabf7da1cbeeaa2d57044172",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "34ddf033_495c86ca",
@@ -37,6 +61,24 @@
       "writtenOn": "2020-11-12T17:33:54Z",
       "side": 1,
       "message": "Leftover?",
+      "revId": "3281488717a79048dabf7da1cbeeaa2d57044172",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a8060901_021bbe85",
+        "filename": "android/android-grpc/android/emulation/control/UiController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-11-12T17:46:47Z",
+      "side": 1,
+      "message": "Good catch. line 103 and 104 should be deleted.",
+      "parentUuid": "34ddf033_495c86ca",
       "revId": "3281488717a79048dabf7da1cbeeaa2d57044172",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
@@ -58,6 +100,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "133caf27_01817f4e",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-11-12T17:46:47Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5f5fc6bb_385397d9",
+      "revId": "3281488717a79048dabf7da1cbeeaa2d57044172",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "345cc351_18b3e13c",
@@ -71,6 +131,30 @@
       "writtenOn": "2020-11-12T17:32:15Z",
       "side": 1,
       "message": "It would be more readable to call this value KEEP_CURRENT.",
+      "range": {
+        "startLine": 51,
+        "startChar": 8,
+        "endLine": 51,
+        "endChar": 15
+      },
+      "revId": "3281488717a79048dabf7da1cbeeaa2d57044172",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2700e1c5_b7564fb6",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-11-12T17:46:47Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "345cc351_18b3e13c",
       "range": {
         "startLine": 51,
         "startChar": 8,
