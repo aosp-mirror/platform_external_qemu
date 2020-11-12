@@ -31,6 +31,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
 #include "android/base/containers/EntityManager.h"
+#include "android/base/containers/HybridEntityManager.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/Stream.h"
@@ -4053,8 +4054,7 @@ public:
             auto res = mGlobalHandleStore.addFixed(handle, item, typeTag);
             return res;
         } else {
-            auto res = mGlobalHandleStore.add(item, typeTag);
-            return res;
+            return mGlobalHandleStore.add(item, typeTag);
         }
     }
 
@@ -4071,8 +4071,7 @@ public:
         mGlobalHandleStore.remove((uint64_t)boxed); \
     } \
     type unbox_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
-        auto elt = mGlobalHandleStore.getLocked( \
+        auto elt = mGlobalHandleStore.get( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) return VK_NULL_HANDLE; \
         return (type)elt->underlying; \
@@ -4083,8 +4082,7 @@ public:
                 (uint64_t)(uintptr_t)unboxed); \
     } \
     VulkanDispatch* dispatch_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
-        auto elt = mGlobalHandleStore.getLocked( \
+        auto elt = mGlobalHandleStore.get( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) { fprintf(stderr, "%s: err not found boxed %p\n", __func__, boxed); return nullptr; } \
         return elt->dispatch; \
@@ -4106,8 +4104,7 @@ public:
                 (uint64_t)(uintptr_t)unboxed); \
     } \
     type unbox_non_dispatchable_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
-        auto elt = mGlobalHandleStore.getLocked( \
+        auto elt = mGlobalHandleStore.get( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); return VK_NULL_HANDLE; } \
         return (type)elt->underlying; \
@@ -5725,10 +5722,19 @@ private:
     template <class T>
     class BoxedHandleManager {
     public:
-        using Store = android::base::EntityManager<32, 16, 16, T>;
+
+        // The hybrid entity manager uses a sequence lock to protect access to
+        // a working set of 16000 handles, allowing us to avoid using a regular
+        // lock for those. Performance is degraded when going over this number,
+        // as it will then fall back to a std::map.
+        //
+        // We use 16000 as the max number of live handles to track; we don't
+        // expect the system to go over 16000 total live handles, outside some
+        // dEQP object management tests.
+        using Store = android::base::HybridEntityManager<16000, uint64_t, T>;
 
         Lock lock;
-        Store store;
+        mutable Store store;
         std::unordered_map<uint64_t, uint64_t> reverseMap;
 
         void clear() {
@@ -5737,30 +5743,30 @@ private:
         }
 
         uint64_t add(const T& item, BoxedHandleTypeTag tag) {
-            AutoLock l(lock);
             auto res = (uint64_t)store.add(item, (size_t)tag);
+            AutoLock l(lock);
             reverseMap[(uint64_t)(item.underlying)] = res;
             return res;
         }
 
         uint64_t addFixed(uint64_t handle, const T& item, BoxedHandleTypeTag tag) {
-            AutoLock l(lock);
             auto res = (uint64_t)store.addFixed(handle, item, (size_t)tag);
+            AutoLock l(lock);
             reverseMap[(uint64_t)(item.underlying)] = res;
             return res;
         }
 
         void remove(uint64_t h) {
-            AutoLock l(lock);
-            auto item = getLocked(h);
+            auto item = get(h);
             if (item) {
+                AutoLock l(lock);
                 reverseMap.erase((uint64_t)(item->underlying));
             }
             store.remove(h);
         }
 
-        T* getLocked(uint64_t h) {
-            return store.get(h);
+        T* get(uint64_t h) {
+            return (T*)store.get_const(h);
         }
 
         uint64_t getBoxedFromUnboxedLocked(uint64_t unboxed) {
