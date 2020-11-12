@@ -39,6 +39,30 @@
       },
       "revId": "1eebefe7c1349d9daba0d64a898b2cc115afc963",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cbca6404_345f39a2",
+        "filename": "ui/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2431,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-11-12T16:53:30Z",
+      "side": 1,
+      "message": "Currently, virtio-mouse doesn\u0027t support absolute positionning. We can probably just add INPUT_EVENT_MASK_ABS to mask here \nhttps://source.corp.google.com/android/external/qemu/hw/input/virtio-input-hid.c;l\u003d334?q\u003dvirtio-input-hi\u0026ss\u003dpiper%2FGoogle%2Fandroid:external%2Fqemu%2F",
+      "parentUuid": "efdca573_aeabca08",
+      "range": {
+        "startLine": 2427,
+        "startChar": 0,
+        "endLine": 2431,
+        "endChar": 21
+      },
+      "revId": "1eebefe7c1349d9daba0d64a898b2cc115afc963",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
