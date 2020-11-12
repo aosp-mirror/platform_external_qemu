@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bcf5a443_e14dac22",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-12T15:18:03Z",
+      "side": 1,
+      "message": "Awesome work Yilong! 😊",
+      "revId": "1eebefe7c1349d9daba0d64a898b2cc115afc963",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "efdca573_aeabca08",
+        "filename": "ui/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2431,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-12T15:18:03Z",
+      "side": 1,
+      "message": "Yup, like David, I\u0027m also wondering about the absolute versus relative which also includes an additional subtraction here.",
+      "range": {
+        "startLine": 2427,
+        "startChar": 0,
+        "endLine": 2431,
+        "endChar": 21
+      },
+      "revId": "1eebefe7c1349d9daba0d64a898b2cc115afc963",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
