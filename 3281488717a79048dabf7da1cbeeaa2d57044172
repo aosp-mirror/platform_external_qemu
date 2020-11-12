@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e63de341_c597a05a",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1218,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-11-12T17:32:15Z",
+      "side": 1,
+      "message": "Combine into a single \u0027if\u0027 statement.",
+      "range": {
+        "startLine": 1217,
+        "startChar": 7,
+        "endLine": 1218,
+        "endChar": 71
+      },
+      "revId": "3281488717a79048dabf7da1cbeeaa2d57044172",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "345cc351_18b3e13c",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-11-12T17:32:15Z",
+      "side": 1,
+      "message": "It would be more readable to call this value KEEP_CURRENT.",
+      "range": {
+        "startLine": 51,
+        "startChar": 8,
+        "endLine": 51,
+        "endChar": 15
+      },
+      "revId": "3281488717a79048dabf7da1cbeeaa2d57044172",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
