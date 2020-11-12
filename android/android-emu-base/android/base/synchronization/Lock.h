@@ -24,6 +24,8 @@
 #include <pthread.h>
 #endif
 
+#include <atomic>
+
 #include <assert.h>
 
 namespace android {
@@ -232,6 +234,143 @@ private:
     bool mReadLocked = true;
     // This class has a non-movable object.
     DISALLOW_COPY_ASSIGN_AND_MOVE(AutoReadLock);
+};
+
+// Seqlock (cross platform)
+// Based on:
+// https://lwn.net/Articles/21812/
+// https://github.com/rigtorp/Seqlock
+//
+// A seqlock is meant to address performance issues with using reader/writer
+// locks to protect data structures where the time spent performing operations
+// while the lock is held is very short or even comparable to the time spent
+// locking/unlocking in the first place. This is very common in situations
+// where we have some globally accessible array of objects and multiple threads
+// performing short little read/write operations on them (i.e., pretty much
+// anything that uses entity component system architecture that needs to be
+// accessed by multiple threads).
+//
+// The basic idea of a seqlock is to store a sequence number (like a version
+// number) that writers increment, but readers only read. When beginning write
+// access, the sequence number is incremented, and after write access ends, the
+// sequence number is incremented again. This way, when a reader is trying to
+// read and it notices a change in the sequence number (or, as an optimization,
+// that the number is odd (because writes should always end up incrementing the
+// sequence number by 2 if they complete)), it can try again until there is no
+// change.
+//
+// The problem, however, is that we need to be very careful about how we set
+// and compare the sequence numbers, because compilers/hardware easily reorder
+// instructions involving what seems to be just simple integer arithmetic.
+// (see https://www.hpl.hp.com/techreports/2012/HPL-2012-68.pdf) Atomic
+// primitives need to be used for all accesses to the sequence number.
+//
+// In particular, the atomic updates to the sequence number and the actual
+// non-atomic data accesses are allowed to be reordered by the compiler, which
+// introduces problems when accessing the data (still allowing reads of an
+// update in progress); we need smp_rmb.
+// https://elixir.bootlin.com/linux/latest/source/tools/arch/arm64/include/asm/barrier.h#L25
+//
+// arm64: memory barrier instruction
+// asm volatile("dmb ishld" ::: "memory")
+// x86: compiler barrier
+// std::atomic_signal_fence(std::memory_order_acq_rel);
+//
+// This smp_rmb needs to be added before and after the read operation.
+//
+// On the write side, we use 
+// arm64: memory barrier instruction
+// asm volatile("dmb ishst" ::: "memory")
+// x86: compiler barrier
+// std::atomic_signal_fence(std::memory_order_acq_rel);
+// 
+// https://github.com/rigtorp/Seqlock has a version that seems to address these issues, while
+// https://elixir.bootlin.com/linux/latest/source/include/linux/seqlock.h shows how to implement in the kernel.
+//
+static inline __attribute__((always_inline)) void SmpWmb() {
+#if defined(__aarch64__)
+        asm volatile("dmb ishst" ::: "memory");
+#elif defined(__x86_64__)
+        std::atomic_thread_fence(std::memory_order_release);
+#else
+#error "Unimplemented SmpWmb for current CPU architecture"
+#endif
+}
+
+static inline __attribute__((always_inline)) void SmpRmb() {
+#if defined(__aarch64__)
+        asm volatile("dmb ishld" ::: "memory");
+#elif defined(__x86_64__)
+        std::atomic_thread_fence(std::memory_order_acquire);
+#else
+#error "Unimplemented SmpRmb for current CPU architecture"
+#endif
+}
+
+class SeqLock {
+public:
+    void beginWrite() {
+        mWriteLock.lock();
+        mSeq.fetch_add(1, std::memory_order_release);
+        SmpWmb();
+    }
+
+    void endWrite() {
+        SmpWmb();
+        mSeq.fetch_add(1, std::memory_order_release);
+        mWriteLock.unlock();
+    }
+
+#ifdef __cplusplus
+#   define SEQLOCK_LIKELY( exp )    (__builtin_expect( !!(exp), true ))
+#   define SEQLOCK_UNLIKELY( exp )  (__builtin_expect( !!(exp), false ))
+#else
+#   define SEQLOCK_LIKELY( exp )    (__builtin_expect( !!(exp), 1 ))
+#   define SEQLOCK_UNLIKELY( exp )  (__builtin_expect( !!(exp), 0 ))
+#endif
+
+    uint32_t beginRead() {
+        uint32_t res;
+
+        // see https://elixir.bootlin.com/linux/latest/source/include/linux/seqlock.h#L128; if odd we definitely know there's a write in progress, and shouldn't proceed any further.
+repeat:
+        res = mSeq.load(std::memory_order_acquire);
+        if (SEQLOCK_UNLIKELY(res & 1)) {
+            goto repeat;
+        }
+
+        SmpRmb();
+        return res;
+    }
+
+    bool shouldRetryRead(uint32_t prevSeq) {
+        SmpRmb();
+        uint32_t res = mSeq.load(std::memory_order_acquire);
+        return (res != prevSeq);
+    }
+
+    // Convenience class for write
+    class ScopedWrite {
+    public:
+        ScopedWrite(SeqLock* lock) : mLock(lock) {
+            mLock->beginWrite();
+        }
+        ~ScopedWrite() {
+            mLock->endWrite();
+        }
+    private:
+        SeqLock* mLock;
+    };
+
+    // Convenience macro for read (no std::function due to its considerable overhead)
+#define AEMU_SEQLOCK_READ_WITH_RETRY(lock, readStuff) { uint32_t aemu_seqlock_curr_seq; do { \
+    aemu_seqlock_curr_seq = (lock)->beginRead(); \
+    readStuff; \
+    } while ((lock)->shouldRetryRead(aemu_seqlock_curr_seq)); }
+
+private:
+    std::atomic<uint32_t> mSeq { 0 }; // The sequence number
+    Lock mWriteLock; // Just use a normal mutex to protect writes
 };
 
 }  // namespace base
