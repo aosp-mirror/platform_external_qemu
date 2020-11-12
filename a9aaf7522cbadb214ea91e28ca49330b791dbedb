@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "40866e11_eded8cfe",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2020-11-12T19:09:57Z",
+      "side": 1,
+      "message": "Hello! This seems to have been approved, but Gerrit is telling me I do not have permission to submit it. Could someone please let me know what else needs to be done from my side? Thank you!",
+      "revId": "a9aaf7522cbadb214ea91e28ca49330b791dbedb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
