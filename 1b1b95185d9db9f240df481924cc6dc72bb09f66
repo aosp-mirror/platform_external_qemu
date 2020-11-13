@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c59e277b_3093c283",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-11-13T20:27:15Z",
+      "side": 1,
+      "message": "Just discovered that QT always fires a default event, causing us to count too much!",
+      "revId": "1b1b95185d9db9f240df481924cc6dc72bb09f66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
