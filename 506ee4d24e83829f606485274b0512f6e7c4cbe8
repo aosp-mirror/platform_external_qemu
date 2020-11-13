@@ -16,6 +16,24 @@
       "message": "I tried this patch on CRD and it was very easy to move mouse around after it has been capture. The kernel log keeps printing: \"ReceiveEvent: Unsupported event type 0!\". Maybe take another look at CRD?",
       "revId": "506ee4d24e83829f606485274b0512f6e7c4cbe8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3d648fc4_a935c609",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-11-13T16:27:27Z",
+      "side": 1,
+      "message": "NVM. I didn\u0027t see there is a new patch for aosp/1496905.",
+      "parentUuid": "191aa587_884b98dc",
+      "revId": "506ee4d24e83829f606485274b0512f6e7c4cbe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
