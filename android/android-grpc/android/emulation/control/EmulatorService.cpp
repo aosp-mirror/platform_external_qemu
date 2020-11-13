@@ -45,6 +45,7 @@
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/ServiceUtils.h"
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/clipboard/Clipboard.h"
 #include "android/emulation/control/display_agent.h"
@@ -61,7 +62,6 @@
 #include "android/emulation/control/utils/AudioUtils.h"
 #include "android/emulation/control/utils/EventWaiter.h"
 #include "android/emulation/control/utils/ScreenshotUtils.h"
-#include "android/emulation/control/utils/ServiceUtils.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/globals.h"
@@ -80,6 +80,12 @@
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
+
+namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+}  // namespace android
 
 namespace google {
 namespace protobuf {
@@ -208,14 +214,16 @@ public:
         auto agent = mAgents->location;
         GpsState request = *requestPtr;
 
-        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion([agent, request]() {
-            struct timeval tVal;
-            memset(&tVal, 0, sizeof(tVal));
-            gettimeofday(&tVal, NULL);
-            agent->gpsSendLoc(request.latitude(), request.longitude(),
-                              request.altitude(), request.speed(),
-                              request.bearing(), request.satellites(), &tVal);
-        });
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [agent, request]() {
+                    struct timeval tVal;
+                    memset(&tVal, 0, sizeof(tVal));
+                    gettimeofday(&tVal, NULL);
+                    agent->gpsSendLoc(request.latitude(), request.longitude(),
+                                      request.altitude(), request.speed(),
+                                      request.bearing(), request.satellites(),
+                                      &tVal);
+                });
 
         return Status::OK;
     }
