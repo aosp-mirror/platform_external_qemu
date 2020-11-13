@@ -63,6 +63,30 @@
       },
       "revId": "1eebefe7c1349d9daba0d64a898b2cc115afc963",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "133b83d3_83be4702",
+        "filename": "ui/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2431,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-11-13T09:24:35Z",
+      "side": 1,
+      "message": "As per discussed earlier, reveman@ mentioned that we could possibly grab the mouse events, and always use EV_REL mouse events which matches the real mouse hardware better.\n\nIn that case we could send relx and rely directly to kbd_mouse_event().\n\nOne problem is that, QEMU\u0027s kbd_mouse_event() determines input type from device HID descriptor, while the input source may send anything (they may send an ABS location or a REL location); my suggestion is that we also pass the event type (ABS or REL) to kbd_mouse_event() so that it will only forward the correct type of event to virtio. I\u0027ve just added a TODO for that and will address it soon.",
+      "parentUuid": "cbca6404_345f39a2",
+      "range": {
+        "startLine": 2427,
+        "startChar": 0,
+        "endLine": 2431,
+        "endChar": 21
+      },
+      "revId": "1eebefe7c1349d9daba0d64a898b2cc115afc963",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
