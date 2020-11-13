@@ -720,6 +720,7 @@ private:
         AddRecordDisplay = 2,
         DelRecordDisplay = 3,
         Exit = 4,
+        FlushPipeline = 5,
     };
     struct Readback {
         ReadbackCmd cmd;

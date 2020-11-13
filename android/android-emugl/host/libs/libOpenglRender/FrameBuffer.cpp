@@ -798,6 +798,9 @@ FrameBuffer::sendReadbackWorkerCmd(const Readback& readback) {
         return WorkerProcessingResult::Continue;
     case ReadbackCmd::Exit:
         return WorkerProcessingResult::Stop;
+    case ReadbackCmd::FlushPipeline:
+        m_readbackWorker->flushPipeline(readback.displayId);
+        return WorkerProcessingResult::Continue;
     }
     return WorkerProcessingResult::Stop;
 }
@@ -2489,9 +2492,9 @@ void FrameBuffer::flushReadPipeline(int displayId) {
         ERR("Cannot find onPost pixels for display %d", displayId);
         return;
     }
-
-    ensureReadbackWorker();
-    m_readbackWorker->flushPipeline(displayId);
+ m_readbackThread.enqueue({ ReadbackCmd::FlushPipeline, displayId,
+                                           0, nullptr, 0 });
+    m_readbackThread.waitQueuedItems();
 }
 
 void FrameBuffer::ensureReadbackWorker() {
