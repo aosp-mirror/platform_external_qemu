@@ -164,19 +164,12 @@ void ReadbackWorker::flushPipeline(uint32_t displayId) {
     auto src = r.mBuffers[r.mPrevReadPixelsIndex];
     auto dst = r.mBuffers.back();
 
-    // This is not called from a renderthread, so let's activate
-    // the context.
-    s_egl.eglMakeCurrent(mFb->getDisplay(), mFlushSurf, mFlushSurf, mFlushContext);
-
     // We now copy the last frame into slot 4, where no other thread
     // ever writes.
     s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, src);
     s_gles2.glBindBuffer(GL_COPY_WRITE_BUFFER, dst);
     s_gles2.glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0,
                                 r.mBufferSize);
-    s_egl.eglMakeCurrent(mFb->getDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
-                         EGL_NO_CONTEXT);
-
     r.mMapCopyIndex = r.mBuffers.size() - 1;
     lock.unlock();
     mFb->doPostCallback(nullptr, r.mDisplayId);

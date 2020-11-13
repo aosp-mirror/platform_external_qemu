@@ -429,7 +429,7 @@ public:
     void doPostCallback(void* pixels, uint32_t displayId);
 
     void getPixels(void* pixels, uint32_t bytes, uint32_t displayId);
-    void flushReadPipeline(int displayId);
+    void flushReadPipeline(uint32_t displayId);
     void ensureReadbackWorker();
 
     bool asyncReadbackSupported();
@@ -720,6 +720,7 @@ private:
         AddRecordDisplay = 2,
         DelRecordDisplay = 3,
         Exit = 4,
+        FlushPipeline = 5,
     };
     struct Readback {
         ReadbackCmd cmd;
