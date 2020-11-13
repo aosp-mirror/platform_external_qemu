@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "abf6d77a_0a47b1bb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1060975
+      },
+      "writtenOn": "2020-11-13T17:56:34Z",
+      "side": 1,
+      "message": "LGTM for car rotary page changes. Thanks!",
+      "revId": "f3f99c38b3e412cbb1f847724a77cd154ebfd162",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
