@@ -73,6 +73,7 @@ set(android-emu-common
     android/emulation/control/GooglePlayServices.cpp
     android/emulation/control/LineConsumer.cpp
     android/emulation/control/NopRtcBridge.cpp
+    android/emulation/control/ServiceUtils.cpp
     android/emulation/CpuAccelerator.cpp
     android/emulation/CrossSessionSocket.cpp
     android/emulation/DmaMap.cpp

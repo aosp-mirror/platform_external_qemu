@@ -220,7 +220,7 @@ AvdFlavor propertyFile_getAvdFlavor(const FileData* data) {
         res = AVD_ANDROID_AUTO;
     }
 
-    return res;
+    return AVD_ANDROID_AUTO;
 }
 
 bool propertyFile_isGoogleApis(const FileData* data) {
