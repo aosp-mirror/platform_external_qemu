@@ -1082,6 +1082,32 @@ void EmulatorQtWindow::leaveEvent(QEvent* event) {
 }
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::VirtioMouse) &&
+        !mMouseGrabbed) {
+        if (mPromptMouseRestoreMessageBox) {
+            QMessageBox msgBox;
+            msgBox.setText(
+                    "You have clicked the mouse inside the Emulator "
+                    "display. This will cause Emulator to capture the "
+                    "host mouse pointer and the keyboard, which will "
+                    "make them unavailable to other host applications."
+                    "\n\n"
+                    "You can press Ctrl+R to uncapture the keyboard and "
+                    "mouse and return to normal operation.");
+            msgBox.exec();
+            mPromptMouseRestoreMessageBox = false;
+        }
+
+        D("%s: mouse grabbed\n", __func__);
+        grabMouse(QCursor(Qt::CursorShape::BlankCursor));
+
+        SkinEvent* skin_event = createSkinEvent(kEventMouseStartTracking);
+        queueSkinEvent(skin_event);
+
+        mMouseGrabbed = true;
+    }
+
     handleMouseEvent(kEventMouseButtonDown, getSkinMouseButton(event),
                      event->pos(), event->globalPos());
 }
@@ -2330,6 +2356,19 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
 }
 
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
+    // TODO(liyl): Make this shortcut configurable instead of hard-coding it
+    // inside the code.
+    if (event->key() == Qt::Key_R &&
+        event->modifiers() == Qt::ControlModifier && type == kEventKeyDown) {
+        D("%s: mouse released\n", __func__);
+        releaseMouse();
+
+        SkinEvent* skin_event = createSkinEvent(kEventMouseStopTracking);
+        queueSkinEvent(skin_event);
+
+        mMouseGrabbed = false;
+    }
+
     if (!mForwardShortcutsToDevice && mInZoomMode) {
         if (event->key() == Qt::Key_Control) {
             if (type == kEventKeyUp) {
