@@ -13,7 +13,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/utils/ServiceUtils.h"
+#include "android/emulation/control/ServiceUtils.h"
 
 #include <istream>
 #include <memory>
@@ -55,7 +55,7 @@ struct BootCompletedSyncState {
     bool results = false;
 };
 
-bool bootCompleted() {
+bool bootCompleted(std::chrono::milliseconds maxWaitTime) {
     auto state = std::make_shared<BootCompletedSyncState>();
 
     AutoLock aLock(state->lock);
@@ -69,7 +69,6 @@ bool bootCompleted() {
     // to us about boot completion, so we will resort to
     // calling adb in those cases..
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    const int k2SecondsUs = 2 * 1000 * 1000;
     if (!guest_boot_completed && apiLevel < 28) {
         adbInterface->enqueueCommand(
                 {"shell", "getprop", "dev.bootcomplete"},
@@ -89,7 +88,7 @@ bool bootCompleted() {
         if (!state->results) {
             state->cv.timedWait(
                 &state->lock,
-                base::System::get()->getUnixTimeUs() + k2SecondsUs);
+                base::System::get()->getUnixTimeUs() + maxWaitTime.count());
         }
     }
     return guest_boot_completed;

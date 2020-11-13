@@ -65,6 +65,5 @@ private:
     QTimer mSupportsActionTimer;
     std::string mLastPushButtonCmd;
     bool mAdbExecuteIsActive;
-    bool mIsBootCompleted;
     bool mSupportsActionArg;
 };
