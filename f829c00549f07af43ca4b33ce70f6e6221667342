@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4d534aab_9388d217",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-11-13T19:22:43Z",
+      "side": 1,
+      "message": "Could you add some rationale about using 16000 to separate handles to EntityManager and a locked map?",
+      "range": {
+        "startLine": 9,
+        "startChar": 27,
+        "endLine": 9,
+        "endChar": 37
+      },
+      "revId": "f829c00549f07af43ca4b33ce70f6e6221667342",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}

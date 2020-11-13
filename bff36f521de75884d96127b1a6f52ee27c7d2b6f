@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3cd0e463_c8c00a1a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2651,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-11-13T19:22:43Z",
+      "side": 1,
+      "message": "Do we need to keep these \"unsuccess\" logs? or only print them if ANDROID_EMU_VERBOSE is set.",
+      "range": {
+        "startLine": 2651,
+        "startChar": 0,
+        "endLine": 2651,
+        "endChar": 73
+      },
+      "revId": "bff36f521de75884d96127b1a6f52ee27c7d2b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "937b32c3_b4eb171d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 5773,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-11-13T19:22:43Z",
+      "side": 1,
+      "message": "should we rename this to get(h), since we do not need lock on this anymore?",
+      "range": {
+        "startLine": 5773,
+        "startChar": 11,
+        "endLine": 5773,
+        "endChar": 20
+      },
+      "revId": "bff36f521de75884d96127b1a6f52ee27c7d2b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
