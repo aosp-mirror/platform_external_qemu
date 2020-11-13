@@ -16,6 +16,24 @@
       "message": "This does not short circuit, is that what you intended?",
       "revId": "eeb3c867ac46a83c75dc6062063f92b4789bfdde",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "74e66760_a3926268",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 945,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-11-13T00:50:36Z",
+      "side": 1,
+      "message": "Done. Now we explicitly break the loop when fails.",
+      "parentUuid": "fef59706_6310f5c4",
+      "revId": "eeb3c867ac46a83c75dc6062063f92b4789bfdde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }

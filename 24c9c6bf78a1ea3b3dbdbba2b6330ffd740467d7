@@ -16,6 +16,24 @@
       "message": "It fails my tests now 😭",
       "revId": "24c9c6bf78a1ea3b3dbdbba2b6330ffd740467d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2143b5aa_766862c0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2020-11-13T00:50:36Z",
+      "side": 1,
+      "message": "Turns out that it is caused by an unrelated bug, filed b/173152987",
+      "parentUuid": "d13c23bd_691e7d87",
+      "revId": "24c9c6bf78a1ea3b3dbdbba2b6330ffd740467d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
