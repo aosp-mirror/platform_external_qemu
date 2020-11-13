@@ -45,6 +45,8 @@ typedef enum {
     kEventSetDisplayRegionAndUpdate,
     kEventSetNoSkin,
     kEventRestoreSkin,
+    kEventMouseStartTracking,
+    kEventMouseStopTracking,
 } SkinEventType;
 
 typedef enum {

@@ -450,6 +450,9 @@ private:
     EmulatorOverlay mOverlay;
     QRect mDeviceGeometry;
 
+    bool mMouseGrabbed = false;
+    bool mPromptMouseRestoreMessageBox = true;
+
     // Window flags to use for frameless and framed appearance
 
     static constexpr Qt::WindowFlags FRAMELESS_WINDOW_FLAGS  = (  Qt::Window

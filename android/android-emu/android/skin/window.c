@@ -19,6 +19,7 @@
 #include "android/crashreport/crash-handler.h"  // for crashhandler_die_format
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulator-window.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/hw-sensors.h"
 #include "android/multitouch-screen.h"          // for multitouch_create_but...
@@ -824,6 +825,16 @@ finger_state_reset( FingerState*  finger )
 }
 
 typedef struct {
+    char tracking;
+    uint32_t button_pressed;
+} MouseState;
+
+static void mouse_state_reset(MouseState* mouse) {
+    mouse->tracking = 0;
+    mouse->button_pressed = 0u;
+}
+
+typedef struct {
     Button*   pressed;
     Button*   hover;
 } ButtonState;
@@ -1040,6 +1051,7 @@ struct SkinWindow {
     SkinPos       pos;
     FingerState   finger;
     FingerState   secondary_finger;
+    MouseState mouse;
     ButtonState   button;
     BallState     ball;
     bool          use_emugl_subwindow;
@@ -1071,6 +1083,13 @@ struct SkinWindow {
     SkinSize      container;
     int           scroll_h; // Needed for OSX
 };
+
+static void add_mouse_event(SkinWindow* window, int32_t rel_x, int32_t rel_y) {
+    uint32_t id = 0;
+    // TODO(liyl): handle multi-display and display rotation.
+    window->win_funcs->mouse_event(rel_x, rel_y, window->mouse.button_pressed,
+                                   id);
+}
 
 static void
 add_finger_event(SkinWindow* window,
@@ -1791,6 +1810,7 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     finger_state_reset( &window->secondary_finger );
     button_state_reset( &window->button );
     ball_state_reset( &window->ball, window );
+    mouse_state_reset(&window->mouse);
 
     skin_window_redraw( window, NULL );
 
@@ -2012,6 +2032,8 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         finger = &window->finger;
     }
 
+    MouseState* mouse = &window->mouse;
+
     if (!window->surface)
         return;
 
@@ -2032,7 +2054,18 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                ev->u.mouse.x, ev->u.mouse.y, window->finger.pos.x,
                window->finger.pos.y, window->finger.inside);
 #endif
-        if (finger->inside) {
+        if (feature_is_enabled(kFeature_VirtioMouse)) {
+            if (mouse->tracking) {
+                // update button state
+                mouse->button_pressed |= 1 << (ev->u.mouse.button);
+
+                int32_t rel_x = ev->u.mouse.xrel;
+                int32_t rel_y = ev->u.mouse.yrel;
+                skin_window_map_to_scale(window, &rel_x, &rel_y);
+
+                add_mouse_event(window, rel_x, rel_y);
+            }
+        } else if (finger->inside) {
             // The click is inside the touch screen
             finger->tracking = 1;
             add_finger_event(window,
@@ -2041,7 +2074,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                              finger->pos.y,
                              button_state);
         } else if (!multitouch_should_skip_sync(button_state) &&
-                   !multitouch_is_second_finger(button_state)    ) {
+                   !multitouch_is_second_finger(button_state)) {
             // This is a single click outside the touch screen
             window->button.pressed = NULL;
             button = window->button.hover;
@@ -2145,9 +2178,19 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             window->button.pressed = NULL;
             window->button.hover   = NULL;
             skin_window_move_mouse( window, finger, mx, my );
-        }
-        else if (finger->tracking)
-        {
+        } else if (feature_is_enabled(kFeature_VirtioMouse)) {
+            skin_window_move_mouse(window, finger, mx, my);
+            if (mouse->tracking) {
+                // update button state
+                mouse->button_pressed &= ~(1 << (ev->u.mouse.button));
+
+                int32_t rel_x = ev->u.mouse.xrel;
+                int32_t rel_y = ev->u.mouse.yrel;
+                skin_window_map_to_scale(window, &rel_x, &rel_y);
+
+                add_mouse_event(window, rel_x, rel_y);
+            }
+        } else if (finger->tracking) {
             skin_window_move_mouse( window, finger, mx, my );
             finger->tracking = 0;
             add_finger_event(window,
@@ -2192,7 +2235,15 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         if ( !window->button.pressed )
         {
             skin_window_move_mouse( window, finger, mx, my );
-            if ( finger->tracking ) {
+            if (feature_is_enabled(kFeature_VirtioMouse)) {
+                if (mouse->tracking) {
+                    int32_t rel_x = ev->u.mouse.xrel;
+                    int32_t rel_y = ev->u.mouse.yrel;
+                    skin_window_map_to_scale(window, &rel_x, &rel_y);
+
+                    add_mouse_event(window, rel_x, rel_y);
+                }
+            } else if (finger->tracking) {
                 add_finger_event(window,
                                  finger,
                                  finger->pos.x,
@@ -2201,6 +2252,15 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             }
         }
         break;
+
+    case kEventMouseStartTracking:
+        window->mouse.tracking = 1;
+        break;
+
+    case kEventMouseStopTracking:
+        window->mouse.tracking = 0;
+        break;
+
     case kEventRotaryInput:
         window->win_funcs->rotary_input_event(ev->u.rotary_input.delta);
         break;

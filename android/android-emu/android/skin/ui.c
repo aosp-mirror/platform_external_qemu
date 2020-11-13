@@ -329,10 +329,17 @@ bool skin_ui_process_events(SkinUI* ui) {
             DE("EVENT: kEventMouseButton x=%d y=%d xrel=%d yrel=%d button=%d\n",
                ev.u.mouse.x, ev.u.mouse.y, ev.u.mouse.xrel, ev.u.mouse.yrel,
                ev.u.mouse.button);
-            if (ev.u.mouse.button == kMouseButtonLeft ||
-                ev.u.mouse.button == kMouseButtonSecondaryTouch) {
-                skin_window_process_event(ui->window, &ev);
-            }
+            skin_window_process_event(ui->window, &ev);
+            break;
+
+        case kEventMouseStartTracking:
+            DE("EVENT: kEventMouseStartTracking\n");
+            skin_window_process_event(ui->window, &ev);
+            break;
+
+        case kEventMouseStopTracking:
+            DE("EVENT: kEventMouseStopTracking\n");
+            skin_window_process_event(ui->window, &ev);
             break;
 
         case kEventScrollBarChanged:
