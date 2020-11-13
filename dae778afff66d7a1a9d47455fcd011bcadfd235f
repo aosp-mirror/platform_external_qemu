@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "72c9b99b_78a78119",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-11-13T20:53:39Z",
+      "side": 1,
+      "message": "Fixed the counting issues, added some tests to validate these cases.",
+      "revId": "dae778afff66d7a1a9d47455fcd011bcadfd235f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
