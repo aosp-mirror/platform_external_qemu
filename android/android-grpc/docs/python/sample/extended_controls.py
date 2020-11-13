@@ -18,6 +18,7 @@ import grpc
 import time
 from google.protobuf import empty_pb2
 from aemu.proto.ui_controller_service_pb2 import ThemingStyle
+from aemu.proto.ui_controller_service_pb2 import PaneEntry
 
 from aemu.discovery.emulator_discovery import get_default_emulator
 
@@ -37,7 +38,8 @@ def main(args):
 	theme = ThemingStyle(style="LIGHT")
 	setUiTheme(theme)
 	print("Show extended window")
-	stub.showExtendedControls(_EMPTY_)
+	pane = PaneEntry(index="CELLULAR")
+	stub.showExtendedControls(pane)
 	# sleep for 3 seconds
 	time.sleep(3)
 	print("Close extended window")

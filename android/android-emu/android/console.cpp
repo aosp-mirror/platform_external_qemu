@@ -4032,7 +4032,9 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
 }
 
 static int do_start_extended_window(ControlClient client, char* args) {
-    client->global->emu_agent->startExtendedWindow();
+    // start extended window with the currently selected pane.
+    // set to location pane by default.
+    client->global->emu_agent->startExtendedWindow(PANE_IDX_UNKNOWN);
     return 0;
 }
 

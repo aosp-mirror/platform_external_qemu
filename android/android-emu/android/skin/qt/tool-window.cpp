@@ -487,9 +487,13 @@ bool ToolWindow::setUiTheme(SettingsTheme theme, bool persist) {
     return true;
 }
 
-void ToolWindow::showExtendedWindow() {
+void ToolWindow::showExtendedWindow(ExtendedWindowPane pane) {
     ensureExtendedWindowExists();
-    on_more_button_clicked();
+    if (pane == PANE_IDX_UNKNOWN) {
+        on_more_button_clicked();
+    } else {
+        showOrRaiseExtendedWindow(pane);
+    }
 }
 
 void ToolWindow::hideExtendedWindow() {
@@ -1207,6 +1211,12 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
             pane == PANE_IDX_FINGER) {
             return;
         }
+    }
+    // Snapshot and multidisplay panes are disabled in embedded emulator.
+    // Set to default location pane.
+    if (android_cmdLineOptions->qt_hide_window &&
+        (pane == PANE_IDX_MULTIDISPLAY || pane == PANE_IDX_SNAPSHOT)) {
+        pane = PANE_IDX_LOCATION;
     }
     // Show the tabbed pane
     mExtendedWindow.get()->showPane(pane);
