@@ -15,6 +15,7 @@
 #include "android/base/IOVector.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 
 namespace android {
