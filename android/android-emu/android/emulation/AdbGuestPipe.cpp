@@ -42,7 +42,7 @@
 #include <sys/socket.h>
 #endif
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #include <stdio.h>
@@ -361,7 +361,7 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
                 }
             }
         }
-    } else {
+    } else if (mState != State::ClosedByHost && mState != State::ClosedByGuest) {
         mReuseFromSnapshot = true;
         mState = State::WaitingForHostAdbConnection;
     }
@@ -434,7 +434,7 @@ AdbGuestPipe::~AdbGuestPipe() {
 }
 
 void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
-    DD("%s: [%p]", __func__, this);
+    D("%s: [%p]", __func__, this);
     mState = State::ClosedByGuest;
     DINIT("%s: [%p] Adb closed by guest",__func__, this);
     if (needsHubTranslation()) {
@@ -494,6 +494,8 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
         }
         if (needsHubTranslation()) {
             if (count == PIPE_ERROR_IO) {
+                D("%s: [%p] closed by host", __func__, this);
+                mFdWatcher->dontWantRead();
                 mState = State::ClosedByHost;
                 stopSocketTraffic();
                 mHostSocket.reset();
@@ -541,16 +543,16 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
         }
         if (needsHubTranslation()) {
             if (count == PIPE_ERROR_IO) {
-                D("onGuestSend PIPE_ERROR_IO");
+                D("%s: [%p] closed by host", __func__, this);
                 mState = State::ClosedByHost;
                 stopSocketTraffic();
                 mHostSocket.reset();
-            }
-            if (count == PIPE_ERROR_AGAIN && !mAdbHub->socketWantWrite()) {
-                mFdWatcher->dontWantWrite();
-            }
-            if (mAdbHub->socketWantWrite()) {
-                mFdWatcher->wantWrite();
+            } else {
+                if (count == PIPE_ERROR_AGAIN && !mAdbHub->socketWantWrite()) {
+                    mFdWatcher->dontWantWrite();
+                } else if (mAdbHub->socketWantWrite()) {
+                    mFdWatcher->wantWrite();
+                }
             }
         }
         return count;
@@ -644,6 +646,7 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
 
 void AdbGuestPipe::resetConnection() {
     D("%s: [%p] reset connection\n", __func__, this);
+    stopSocketTraffic();
     service()->hostCloseSocket(mHostSocket.fd());
     mHostSocket.reset();
     mState = State::ClosedByHost;
@@ -677,11 +680,15 @@ void AdbGuestPipe::onHostSocketEvent(unsigned events) {
     DD("%s: [%p] events=%x (%u)", __func__, this, events, events);
 
     if (needsHubTranslation()) {
+        printf("onHostSocketEvent adbHub event %d\n", events);
         mAdbHub->onHostSocketEvent(mFdWatcher->fd(), events, [this]() {
             mState = State::ClosedByHost;
-            resetConnection();
         });
-        if (mState != State::ClosedByHost) {
+        if (mState == State::ClosedByHost) {
+            //stopSocketTraffic();
+            //mHostSocket.reset();
+            resetConnection();
+        } else {
             if (mAdbHub->socketWantRead()) {
                 mFdWatcher->wantRead();
             } else {
