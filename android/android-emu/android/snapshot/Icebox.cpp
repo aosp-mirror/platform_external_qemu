@@ -44,7 +44,7 @@
 #include "openssl/base.h"                                    // for RSA
 #include "openssl/nid.h"                                     // for NID_sha1
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
