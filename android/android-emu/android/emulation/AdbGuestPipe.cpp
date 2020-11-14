@@ -42,7 +42,7 @@
 #include <sys/socket.h>
 #endif
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #include <stdio.h>
@@ -494,6 +494,8 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
         }
         if (needsHubTranslation()) {
             if (count == PIPE_ERROR_IO) {
+                D("%s: [%p] closed by host", __func__, this);
+                mFdWatcher->dontWantRead();
                 mState = State::ClosedByHost;
                 stopSocketTraffic();
                 mHostSocket.reset();
@@ -541,16 +543,16 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
         }
         if (needsHubTranslation()) {
             if (count == PIPE_ERROR_IO) {
-                D("onGuestSend PIPE_ERROR_IO");
+                D("%s: [%p] closed by host", __func__, this);
                 mState = State::ClosedByHost;
                 stopSocketTraffic();
                 mHostSocket.reset();
-            }
-            if (count == PIPE_ERROR_AGAIN && !mAdbHub->socketWantWrite()) {
-                mFdWatcher->dontWantWrite();
-            }
-            if (mAdbHub->socketWantWrite()) {
-                mFdWatcher->wantWrite();
+            } else {
+                if (count == PIPE_ERROR_AGAIN && !mAdbHub->socketWantWrite()) {
+                    mFdWatcher->dontWantWrite();
+                } else if (mAdbHub->socketWantWrite()) {
+                    mFdWatcher->wantWrite();
+                }
             }
         }
         return count;
@@ -647,7 +649,8 @@ void AdbGuestPipe::resetConnection() {
     service()->hostCloseSocket(mHostSocket.fd());
     mHostSocket.reset();
     mState = State::ClosedByHost;
-    signalWake(PIPE_WAKE_CLOSED);
+    //signalWake(PIPE_WAKE_CLOSED);
+    closeFromHost();
 }
 
 // static
@@ -677,11 +680,15 @@ void AdbGuestPipe::onHostSocketEvent(unsigned events) {
     DD("%s: [%p] events=%x (%u)", __func__, this, events, events);
 
     if (needsHubTranslation()) {
+        printf("onHostSocketEvent adbHub event %d\n", events);
         mAdbHub->onHostSocketEvent(mFdWatcher->fd(), events, [this]() {
             mState = State::ClosedByHost;
-            resetConnection();
+            //resetConnection();
         });
-        if (mState != State::ClosedByHost) {
+        if (mState == State::ClosedByHost) {
+            mFdWatcher->dontWantRead();
+            mFdWatcher->dontWantWrite();
+        } else {
             if (mAdbHub->socketWantRead()) {
                 mFdWatcher->wantRead();
             } else {

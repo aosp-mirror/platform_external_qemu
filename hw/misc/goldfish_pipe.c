@@ -51,7 +51,7 @@
 #endif
 
 /* Set to > 0 for debug output */
-#define PIPE_DEBUG 0
+#define PIPE_DEBUG 1
 
 /* Set to 1 to debug i/o register reads/writes */
 #define PIPE_DEBUG_REGS 0
@@ -494,6 +494,8 @@ void goldfish_pipe_close_from_host(void *pipe_raw) {
         pipe->closed = 1;
         goldfish_pipe_signal_wake(pipe, GOLDFISH_PIPE_WAKE_CLOSED);
     }
+    D("%s: id=%d channel=0x%llx (closed=%d) done", __func__, (int)pipe->id,
+        pipe->channel, pipe->closed);
 }
 
 /* Function to look up hwpipe by pipe id and vice versa. */

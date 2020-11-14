@@ -287,6 +287,8 @@ void stream_get_timer(Stream* stream, LoopTimer* timer);
 // Allow AndroidEmu to access the main loop looper (hereafter referred to
 // as the main looper).
 void android_registerMainLooper(Looper* looper);
+void android_registerMainLoopWait(void (*wake)(int nonblocking));
+void androidMainLoopWait(int nonblocking);
 Looper* android_getMainLooper();
 
 /* */
