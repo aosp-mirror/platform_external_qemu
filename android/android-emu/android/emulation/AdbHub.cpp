@@ -17,7 +17,7 @@
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/JdwpProxy.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #include <stdio.h>
@@ -37,6 +37,7 @@ static const size_t kHeaderSize = sizeof(android::emulation::amessage);
 namespace android {
 namespace emulation {
 void AdbHub::onSave(android::base::Stream* stream) {
+    D("AdbHub::onSave");
     stream->putBe32(mJdwpProxies.size());
     for (const auto& proxy : mJdwpProxies) {
         proxy.second->onSave(stream);
@@ -47,6 +48,7 @@ void AdbHub::onSave(android::base::Stream* stream) {
 }
 
 void AdbHub::onLoad(android::base::Stream* stream) {
+    D("AdbHub::onSave");
     int proxyCount = stream->getBe32();
     for (int i = 0; i < proxyCount; i++) {
         jdwp::JdwpProxy* proxy = new jdwp::JdwpProxy(stream);

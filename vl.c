@@ -4654,6 +4654,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         socket_drainer_start(looper_getForThread());
         android_wear_agent_start(looper_getForThread());
         android_registerMainLooper(looper_getForThread());
+        android_registerMainLoopWait(main_loop_wait);
     }
 
     if (min_config_qemu_mode) {

@@ -43,8 +43,9 @@
 #include "android/snapshot/interface.h"                      // for androidS...
 #include "openssl/base.h"                                    // for RSA
 #include "openssl/nid.h"                                     // for NID_sha1
+#include "android/utils/looper.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
@@ -620,7 +621,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
                         runOnMainLooperAndWaitForCompletion(
                                 [&new_snapshot_name]() {
                                     D("ready to take snapshot");
-                                    getConsoleAgents()->vm->vmStop();
+                                    //getConsoleAgents()->vm->vmStop();
                                     bool snapshotSkipped =
                                             getConsoleAgents()
                                                     ->vm
@@ -631,8 +632,8 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
                                                 ->vm->setSkipSnapshotSave(
                                                         false);
                                     }
-                                    androidSnapshot_delete(
-                                            new_snapshot_name.c_str());
+                                    //androidSnapshot_delete(
+                                    //        new_snapshot_name.c_str());
                                     const AndroidSnapshotStatus result =
                                             androidSnapshot_save(
                                                     new_snapshot_name.c_str());
@@ -642,9 +643,10 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
                                         getConsoleAgents()
                                                 ->vm->setSkipSnapshotSave(true);
                                     }
-                                    getConsoleAgents()->vm->vmStart();
+                                    //getConsoleAgents()->vm->vmStart();
                                     D("Snapshot thread done");
                                 });
+                androidMainLoopWait(false);
                 D("Icebox thread resume after snapshot");
             }
             _SEND_PACKET(ok_out);
