@@ -90,11 +90,14 @@ private:
     SnapshotPackage* mStatus;
 };
 
+#define _PR_LINE printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+
 class SnapshotServiceImpl final : public SnapshotService::Service {
 public:
     Status PullSnapshot(ServerContext* context,
                         const SnapshotPackage* request,
                         ServerWriter<SnapshotPackage>* writer) override {
+        _PR_LINE
         SnapshotPackage result;
         auto snapshot =
                 snapshot::Snapshot::getSnapshotById(request->snapshot_id());
@@ -115,19 +118,22 @@ public:
                     path_delete_dir(tmpdir->c_str());
                 });
         android_mkdir(tmpdir.data(), 0700);
-
+        _PR_LINE
         crashreport::CrashReporter::get()->hangDetector().pause(true);
         // Exports all qcow2 images..
         SnapshotLineConsumer slc(&result);
         bool exp;
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
                 [&snapshot, &tmpdir, &slc, &exp] {
+                    _PR_LINE
                     exp = getConsoleAgents()->vm->snapshotExport(
                             snapshot->name().data(), tmpdir.data(),
                             slc.opaque(), LineConsumer::Callback);
+                    _PR_LINE
                 });
-
+        _PR_LINE
         crashreport::CrashReporter::get()->hangDetector().pause(false);
+        _PR_LINE
 
         if (!exp) {
             writer->Write(*slc.error());
