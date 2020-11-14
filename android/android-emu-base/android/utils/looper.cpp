@@ -204,3 +204,13 @@ void android_registerMainLooper(Looper* looper) {
 Looper* android_getMainLooper() {
     return sMainLooper;
 }
+
+static void (*sMainloopWait)(int nonblocking) = nullptr;
+
+void android_registerMainLoopWait(void (*wake)(int nonblocking)) {
+    sMainloopWait = wake;
+}
+
+void androidMainLoopWait(int nonblocking) {
+    sMainloopWait(nonblocking);
+}

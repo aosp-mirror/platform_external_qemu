@@ -17,7 +17,7 @@
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/JdwpProxy.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #include <stdio.h>
@@ -37,6 +37,7 @@ static const size_t kHeaderSize = sizeof(android::emulation::amessage);
 namespace android {
 namespace emulation {
 void AdbHub::onSave(android::base::Stream* stream) {
+    D("AdbHub::onSave");
     stream->putBe32(mJdwpProxies.size());
     for (const auto& proxy : mJdwpProxies) {
         proxy.second->onSave(stream);
@@ -47,6 +48,7 @@ void AdbHub::onSave(android::base::Stream* stream) {
 }
 
 void AdbHub::onLoad(android::base::Stream* stream) {
+    D("AdbHub::onSave");
     int proxyCount = stream->getBe32();
     for (int i = 0; i < proxyCount; i++) {
         jdwp::JdwpProxy* proxy = new jdwp::JdwpProxy(stream);
@@ -71,6 +73,9 @@ void AdbHub::checkRemoveProxy(
 }
 
 int AdbHub::onGuestSendData(const AndroidPipeBuffer* buffers, int numBuffers) {
+    if (mHostClosed) {
+        return PIPE_ERROR_IO;
+    }
     int currentBuffer = 0;
     size_t currentPst = 0;
     int actualSendBytes = 0;
@@ -205,7 +210,11 @@ int AdbHub::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
     if (actualRecvBytes) {
         return actualRecvBytes;
     } else {
-        return PIPE_ERROR_AGAIN;
+        if (mHostClosed) {
+            return PIPE_ERROR_IO;
+        } else {
+            return PIPE_ERROR_AGAIN;
+        }
     }
 }
 
@@ -215,12 +224,16 @@ void AdbHub::onHostSocketEvent(int fd,
     DD("%s: %s", __FILE__, __func__);
     if ((events & base::Looper::FdWatch::kEventRead) != 0) {
         if (readSocket(fd) == PIPE_ERROR_IO) {
+            D("%s: %s host closed", __FILE__, __func__);
+            mHostClosed = true;
             onSocketClose();
             return;
         }
     }
     if ((events & base::Looper::FdWatch::kEventWrite) != 0) {
         if (writeSocket(fd) == PIPE_ERROR_IO) {
+            D("%s: %s host closed", __FILE__, __func__);
+            mHostClosed = true;
             onSocketClose();
             return;
         }
@@ -419,20 +432,27 @@ unsigned AdbHub::onGuestPoll() const {
     if (mWantRecv) {
         ret |= PIPE_POLL_IN;
     }
+    if (mHostClosed) {
+        ret |= PIPE_POLL_HUP;
+    }
     return ret;
 }
 
 bool AdbHub::socketWantRead() {
-    return true;
+    return !mHostClosed;
 }
 
 bool AdbHub::socketWantWrite() {
-    return !mSendToHostQueue.empty() ||
+    return !mHostClosed && (
+        !mSendToHostQueue.empty() ||
            (mCurrentHostSendPacketPst >= 0 &&
-            mCurrentHostSendPacketPst < packetSize(mCurrentHostSendPacket));
+            mCurrentHostSendPacketPst < packetSize(mCurrentHostSendPacket)));
 }
 
 int AdbHub::pipeWakeFlags() {
+    if (mHostClosed) {
+        return 0;
+    }
     int wakeFlags = PIPE_WAKE_WRITE;
     if (!mRecvFromHostQueue.empty() ||
         (mCurrentGuestRecvPacketPst >= 0 &&

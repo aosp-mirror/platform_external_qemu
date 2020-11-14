@@ -89,6 +89,7 @@ private:
 
     emulation::apacket mCnxnPacket;
     bool mShouldReconnect = false;
+    bool mHostClosed = false;
 };
 }  // namespace emulation
 }  // namespace android
