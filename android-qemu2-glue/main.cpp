@@ -891,7 +891,8 @@ static int startEmulatorWithMinConfig(
     AvdInfo** avdInfoToOverride) {
 
     android_qemu_mode = 0;
-    min_config_qemu_mode = 1;
+    // Min config mode and fuchsia mode are equivalent, at least for now.
+    min_config_qemu_mode = is_fuchsia = 1;
 
     auto opts = optsToOverride;
     auto hw = hwConfigToOverride;
