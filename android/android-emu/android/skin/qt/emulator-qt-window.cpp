@@ -861,7 +861,11 @@ void EmulatorQtWindow::slot_startupTick() {
     if (android_cmdLineOptions->qt_hide_window) {
         return;
     }
-    mStartupDialog->setWindowTitle(tr("Android Emulator"));
+    if (is_fuchsia) {
+        mStartupDialog->setWindowTitle(tr("Fuchsia Emulator"));
+    } else {
+        mStartupDialog->setWindowTitle(tr("Android Emulator"));
+    }
     // Hide close/minimize/maximize buttons
     mStartupDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
                                    Qt::WindowTitleHint);
@@ -2784,8 +2788,8 @@ void EmulatorQtWindow::wheelScrollTimeout() {
 }
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {
-    // Do not check for ADB in min config (Fuchsia) mode.
-    if (min_config_qemu_mode) return;
+    // Do not check for ADB in Fuchsia mode.
+    if (is_fuchsia) return;
 
     QSettings settings;
     if (!(*mAdbInterface)->isAdbVersionCurrent() &&

@@ -89,6 +89,7 @@ int arm_snapshot_save_completed = 0;
 int host_emulator_is_headless = 0;
 int android_qemu_mode = 1;
 int min_config_qemu_mode = 0;
+int is_fuchsia = 0;
 
 bool emulator_has_network_option = false;
 

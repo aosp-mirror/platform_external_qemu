@@ -61,6 +61,9 @@ extern int android_qemu_mode;
 /* are we using android-emu libraries for a minimal configuration? */
 extern int min_config_qemu_mode;
 
+/* is android-emu running Fuchsia? */
+extern int is_fuchsia;
+
 extern int android_snapshot_update_timer;
 
 /* are we using qemu 2? */
