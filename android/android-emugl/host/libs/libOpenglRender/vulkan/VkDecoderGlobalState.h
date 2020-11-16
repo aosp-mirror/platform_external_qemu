@@ -75,6 +75,9 @@ public:
     size_t setCreatedHandlesForSnapshotLoad(const unsigned char* buffer);
     void clearCreatedHandlesForSnapshotLoad();
 
+    void onResourceMap(uint32_t resId, uint64_t hostmemId);
+    void onResourceUnmap(uint32_t resId, uint64_t hostmemId);
+
     VkResult on_vkEnumerateInstanceVersion(
         android::base::BumpPool* pool,
         uint32_t* pApiVersion);
