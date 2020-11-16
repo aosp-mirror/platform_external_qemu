@@ -603,6 +603,9 @@ public:
 
     void setGuestManagedColorBufferLifetime(bool guestManaged);
 
+    void onResourceMap(uint32_t resourceId, uint64_t hostmemId);
+    void onResourceUnmap(uint32_t resourceId, uint64_t hostmemId);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();

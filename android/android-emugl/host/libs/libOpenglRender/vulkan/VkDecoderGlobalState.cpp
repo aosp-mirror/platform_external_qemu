@@ -207,6 +207,83 @@ public:
         mCreatedHandlesForSnapshotLoadIndex = 0;
     }
 
+    void onResourceMap(uint32_t resId, uint64_t hostmemId) {
+        AutoLock lock(mLock);
+        for (auto it : mMapInfo) {
+            if (!it.second.virtioGpuMapped) continue;
+            if (hostmemId != it.second.hostmemId) continue;
+
+            it.second.resourceMapped = true;
+
+            auto deviceIt = mDeviceInfo.find(it.second.device);
+            if (deviceIt == mDeviceInfo.end()) continue;
+
+            deviceIt->second.resourceMapped = true;
+
+            auto physdevIt = mDeviceToPhysicalDevice.find(it.second.device);
+            if (physdevIt == mDeviceToPhysicalDevice.end()) continue;
+
+            auto instanceIt = mPhysicalDeviceToInstance.find(physdevIt->second);
+
+            if (instanceIt == mPhysicalDeviceToInstance.end()) continue;
+
+            auto instanceInfoIt = mInstanceInfo.find(instanceIt->second);
+
+            if (instanceInfoIt == mInstanceInfo.end()) continue;
+
+            instanceInfoIt->second.resourceMapped = true;
+
+            return;
+        }
+    }
+
+    void onResourceUnmap(uint32_t resId, uint64_t hostmemId) {
+        AutoLock lock(mLock);
+        for (auto it : mMapInfo) {
+            if (!it.second.virtioGpuMapped) continue;
+            if (hostmemId != it.second.hostmemId) continue;
+
+            auto& memInfo = it.second;
+            memInfo.resourceMapped = false;
+            if (memInfo.freedFromDriver) {
+                fprintf(stderr, "%s:%d: freed from driver\n", __func__, __LINE__);
+                freeMemoryLocked(
+                        memInfo.deviceDispatch,
+                        memInfo.device,
+                        it.first,
+                        nullptr);
+            }
+
+            VkDevice device = memInfo.device;
+
+            auto deviceIt = mDeviceInfo.find(device);
+            if (deviceIt == mDeviceInfo.end()) continue;
+            auto physdevIt = mDeviceToPhysicalDevice.find(device);
+            if (physdevIt == mDeviceToPhysicalDevice.end()) continue;
+            auto instanceIt = mPhysicalDeviceToInstance.find(physdevIt->second);
+            if (instanceIt == mPhysicalDeviceToInstance.end()) continue;
+            auto instanceInfoIt = mInstanceInfo.find(instanceIt->second);
+            if (instanceInfoIt == mInstanceInfo.end()) continue;
+
+            auto& deviceInfo = deviceIt->second;
+            deviceInfo.resourceMapped = false;
+            if (deviceInfo.freedFromDriver) {
+                fprintf(stderr, "%s:%d: freed from driver\n", __func__, __LINE__);
+                destroyDeviceLocked(
+                    deviceIt->first, nullptr);
+            }
+
+            auto& instanceInfo = instanceInfoIt->second;
+            instanceInfo.resourceMapped = false;
+            if (instanceInfo.freedFromDriver) {
+                fprintf(stderr, "%s:%d: freed from driver\n", __func__, __LINE__);
+                vkDestroyInstanceImplLocked(instanceInfoIt->first, nullptr);
+            }
+
+            return;
+        }
+    }
+
     VkResult on_vkEnumerateInstanceVersion(
             android::base::BumpPool* pool,
             uint32_t* pApiVersion) {
@@ -322,8 +399,18 @@ public:
 
     void vkDestroyInstanceImpl(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
         AutoLock lock(mLock);
+        vkDestroyInstanceImplLocked(instance, pAllocator);
+    }
 
+    void vkDestroyInstanceImplLocked(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
         teardownInstanceLocked(instance);
+
+        auto instInfo = android::base::find(mInstanceInfo, instance);
+        if (!instInfo) return;
+        if (instInfo->resourceMapped) {
+            instInfo->freedFromDriver = true;
+            return;
+        }
 
         m_vk->vkDestroyInstance(instance, pAllocator);
 
@@ -337,7 +424,6 @@ public:
             }
         }
 
-        auto instInfo = android::base::find(mInstanceInfo, instance);
         delete_boxed_VkInstance(instInfo->boxed);
         mInstanceInfo.erase(instance);
     }
@@ -1087,6 +1173,11 @@ public:
         auto it = mDeviceInfo.find(device);
         if (it == mDeviceInfo.end()) return;
 
+        if (it->second.resourceMapped) {
+            it->second.freedFromDriver = true;
+            return;
+        }
+
         auto eraseIt = mQueueInfo.begin();
         for(; eraseIt != mQueueInfo.end();) {
             if (eraseIt->second.device == device) {
@@ -1102,6 +1193,9 @@ public:
         m_vk->vkDestroyDevice(device, pAllocator);
 
         delete_boxed_VkDevice(it->second.boxed);
+
+        mDeviceInfo.erase(device);
+        mDeviceToPhysicalDevice.erase(device);
     }
 
     void on_vkDestroyDevice(
@@ -1114,9 +1208,6 @@ public:
         AutoLock lock(mLock);
 
         destroyDeviceLocked(device, pAllocator);
-
-        mDeviceInfo.erase(device);
-        mDeviceToPhysicalDevice.erase(device);
     }
 
     VkResult on_vkCreateBuffer(
@@ -2812,6 +2903,7 @@ public:
         auto& mapInfo = mMapInfo[*pMemory];
         mapInfo.size = localAllocInfo.allocationSize;
         mapInfo.device = device;
+        mapInfo.deviceDispatch = vk;
         if (importCbInfoPtr && m_emu->instanceSupportsMoltenVK) {
             mapInfo.mtlTexture = getColorBufferMTLTexture(importCbInfoPtr->colorBuffer);
         }
@@ -2854,6 +2946,27 @@ public:
             return;
         }
 
+        if (info->virtioGpuMapped) {
+            if (mLogging) {
+                fprintf(stderr, "%s: unmap hostmem %p id 0x%llx\n", __func__,
+                        info->ptr,
+                        (unsigned long long)info->hostmemId);
+            }
+
+            if (info->resourceMapped) {
+                if (mLogging) {
+                    fprintf(stderr, "%s: skip unmap hostmem %p id 0x%llx\n", __func__,
+                            info->ptr,
+                            (unsigned long long)info->hostmemId);
+                }
+                info->freedFromDriver = true;
+                // Skip this time around until it's freed from virtio-gpu.
+                return;
+            }
+
+            get_emugl_vm_operations().hostmemUnregister(info->hostmemId);
+        }
+
 #ifdef __APPLE__
         if (info->mtlTexture) {
             CFRelease(info->mtlTexture);
@@ -2875,16 +2988,6 @@ public:
             if (mUseOldMemoryCleanupPath) {
                 unmapMemoryAtGpaIfExists(info->guestPhysAddr);
             }
-        }
-
-        if (info->virtioGpuMapped) {
-            if (mLogging) {
-                fprintf(stderr, "%s: unmap hostmem %p id 0x%llx\n", __func__,
-                        info->ptr,
-                        (unsigned long long)info->hostmemId);
-            }
-
-            get_emugl_vm_operations().hostmemUnregister(info->hostmemId);
         }
 
         if (info->needUnmap && info->ptr) {
@@ -5274,8 +5377,6 @@ private:
 
         for (uint32_t i = 0; i < devicesToDestroy.size(); ++i) {
             destroyDeviceLocked(devicesToDestroy[i], nullptr);
-            mDeviceInfo.erase(devicesToDestroy[i]);
-            mDeviceToPhysicalDevice.erase(devicesToDestroy[i]);
         }
     }
 
@@ -5489,7 +5590,10 @@ private:
         void* pageAlignedHva = nullptr;
         uint64_t sizeToPage = 0;
         uint64_t hostmemId = 0;
+        bool resourceMapped = false;
+        bool freedFromDriver = false;
         VkDevice device = VK_NULL_HANDLE;
+        VulkanDispatch* deviceDispatch = nullptr;
         MTLTextureRef mtlTexture = nullptr;
     };
 
@@ -5497,6 +5601,8 @@ private:
         std::vector<std::string> enabledExtensionNames;
         uint32_t apiVersion = VK_MAKE_VERSION(1, 0, 0);
         VkInstance boxed = nullptr;
+        bool resourceMapped = false;
+        bool freedFromDriver = false;
     };
 
     struct PhysicalDeviceInfo {
@@ -5513,6 +5619,8 @@ private:
         bool emulateTextureAstc = false;
         VkPhysicalDevice physicalDevice;
         VkDevice boxed = nullptr;
+        bool resourceMapped = false;
+        bool freedFromDriver = false;
         bool needEmulatedDecompression(const CompressedImageInfo& imageInfo) {
             return imageInfo.isCompressed &&
                    ((imageInfo.isEtc2 && emulateTextureEtc2) ||
@@ -5890,6 +5998,14 @@ size_t VkDecoderGlobalState::setCreatedHandlesForSnapshotLoad(const unsigned cha
 
 void VkDecoderGlobalState::clearCreatedHandlesForSnapshotLoad() {
     mImpl->clearCreatedHandlesForSnapshotLoad();
+}
+
+void VkDecoderGlobalState::onResourceMap(uint32_t resId, uint64_t hostmemId) {
+    mImpl->onResourceMap(resId, hostmemId);
+}
+
+void VkDecoderGlobalState::onResourceUnmap(uint32_t resId, uint64_t hostmemId) {
+    mImpl->onResourceUnmap(resId, hostmemId);
 }
 
 VkResult VkDecoderGlobalState::on_vkEnumerateInstanceVersion(
