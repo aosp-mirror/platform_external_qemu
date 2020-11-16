@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c951d066_e5edf269",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2651,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-16T23:04:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3cd0e463_c8c00a1a",
+      "range": {
+        "startLine": 2651,
+        "startChar": 0,
+        "endLine": 2651,
+        "endChar": 73
+      },
+      "revId": "bff36f521de75884d96127b1a6f52ee27c7d2b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "937b32c3_b4eb171d",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-11-13T19:22:43Z",
       "side": 1,
       "message": "should we rename this to get(h), since we do not need lock on this anymore?",
+      "range": {
+        "startLine": 5773,
+        "startChar": 11,
+        "endLine": 5773,
+        "endChar": 20
+      },
+      "revId": "bff36f521de75884d96127b1a6f52ee27c7d2b6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2baa1d90_a52b5fc2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 5773,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-16T23:04:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "937b32c3_b4eb171d",
       "range": {
         "startLine": 5773,
         "startChar": 11,
