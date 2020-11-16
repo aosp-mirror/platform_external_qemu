@@ -1353,6 +1353,8 @@ public:
 
         if (hvaOut) *hvaOut = (void*)(uintptr_t)alignedHva;
         if (sizeOut) *sizeOut = alignedSize;
+
+        mVirtioGpuOps->on_resource_map(res_handle, entry.hvaId);
         return 0;
     }
 
@@ -1363,6 +1365,7 @@ public:
             return -1;
         }
 
+        mVirtioGpuOps->on_resource_unmap(res_handle, it->second.hvaId);
         // TODO(lfy): Good place to run any registered cleanup callbacks.
         // No-op for now.
         return 0;

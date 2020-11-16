@@ -83,6 +83,8 @@ typedef void* (*get_global_egl_context_t)(void);
 typedef void (*wait_for_gpu_t)(uint64_t eglsync);
 typedef void (*wait_for_gpu_vulkan_t)(uint64_t device, uint64_t fence);
 typedef void (*set_guest_managed_color_buffer_lifetime_t)(bool guest_managed);
+typedef void (*on_resource_map_t)(uint32_t resource_id, uint64_t hostmem_id);
+typedef void (*on_resource_unmap_t)(uint32_t resource_id, uint64_t hostmem_id);
 
 struct AndroidVirtioGpuOps {
     create_color_buffer_with_handle_t create_color_buffer_with_handle;
@@ -106,6 +108,8 @@ struct AndroidVirtioGpuOps {
     wait_for_gpu_t wait_for_gpu;
     wait_for_gpu_vulkan_t wait_for_gpu_vulkan;
     set_guest_managed_color_buffer_lifetime_t set_guest_managed_color_buffer_lifetime;
+    on_resource_map_t on_resource_map;
+    on_resource_unmap_t on_resource_unmap;
 };
 
 #endif // ANDROID_VIRTIO_GPU_OPS

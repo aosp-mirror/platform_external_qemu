@@ -3075,3 +3075,12 @@ void FrameBuffer::waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle) 
 void FrameBuffer::setGuestManagedColorBufferLifetime(bool guestManaged) {
     m_guestManagedColorBufferLifetime = guestManaged;
 }
+
+void FrameBuffer::onResourceMap(uint32_t resourceId, uint64_t hostmemId) {
+    goldfish_vk::VkDecoderGlobalState::get()->onResourceMap(resourceId, hostmemId);
+}
+
+void FrameBuffer::onResourceUnmap(uint32_t resourceId, uint64_t hostmemId) {
+    goldfish_vk::VkDecoderGlobalState::get()->onResourceUnmap(resourceId, hostmemId);
+}
+
