@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <string>
-#include <unordered_map>
+#include <chrono>         // for seconds, milliseconds
+#include <ratio>          // for ratio
+#include <string>         // for string
+#include <unordered_map>  // for unordered_map
 
 namespace android {
 namespace emulation {
@@ -21,9 +23,15 @@ namespace control {
 
 std::unordered_map<std::string, std::string> getQemuConfig();
 
-// Returns if the emulator has booted, either by checking the global var,
-// or calling adb.
-bool bootCompleted();
+// Returns if the emulator has booted at least once.
+//
+// 1. For API >= 28 we rely on a boot services that informs qemu that boot has
+// completed. This call will never block and wait.
+// 2. For API < 28, we schedule an ADB command, and wait at most maxWaitTime for
+// the result. The global boot state will be updated even if maxWaitTime has
+// passed.
+bool bootCompleted(
+        std::chrono::milliseconds maxWaitTime = std::chrono::seconds(2));
 
 }  // namespace control
 }  // namespace emulation
