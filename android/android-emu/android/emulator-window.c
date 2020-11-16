@@ -67,7 +67,8 @@ static void write_window_name(char* buff,
                               size_t buff_len,
                               int base_port,
                               const char* avd_name) {
-    snprintf(buff, buff_len, "Android Emulator - %s:%d", avd_name, base_port);
+    char* product_name = qemulator->opts->fuchsia ? "Fuchsia" : "Android";
+    snprintf(buff, buff_len, "%s Emulator - %s:%d", product_name, avd_name, base_port);
 }
 
 static void
