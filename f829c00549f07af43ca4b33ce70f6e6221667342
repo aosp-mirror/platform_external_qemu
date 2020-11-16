@@ -22,6 +22,23 @@
       },
       "revId": "f829c00549f07af43ca4b33ce70f6e6221667342",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b7d8ce0e_fa4345ee",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-16T16:49:12Z",
+      "side": 1,
+      "message": "Crash in dEQP-VK.api.object_management*",
+      "revId": "f829c00549f07af43ca4b33ce70f6e6221667342",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
