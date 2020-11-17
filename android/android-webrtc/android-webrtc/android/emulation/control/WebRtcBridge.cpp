@@ -4,10 +4,11 @@
 #include <stdio.h>                              // for sscanf
 #include <chrono>                               // for operator+, seconds
 #include <memory>                               // for shared_ptr, shared_pt...
+#include <ostream>                              // for operator<<, ostream
 #include <utility>                              // for move
 #include <vector>                               // for vector
 
-#include "android/base/Log.h"                   // for LOG, LogMessage, LogS...
+#include "android/base/Log.h"                   // for LogStreamVoidify, LOG
 #include "android/base/Optional.h"              // for Optional
 #include "android/base/async/AsyncSocket.h"     // for AsyncSocket
 #include "android/base/sockets/ScopedSocket.h"  // for ScopedSocket
@@ -245,14 +246,12 @@ void WebRtcBridge::stateConnectionChange(SocketTransport* connection,
 
 static Optional<System::Pid> launchAsDaemon(std::string executable,
                                             int port,
-                                            std::string videomodule,
                                             std::string turnConfig) {
     std::vector<std::string> cmdArgs{
             executable,    "--daemon",
             "--logdir",    System::get()->getTempDir(),
             "--discovery", ConfigDirs::getCurrentDiscoveryPath(),
             "--port",      std::to_string(port),
-            "--handle",    videomodule,
             "--turn",      turnConfig};
 
     System::Pid bridgePid;
@@ -281,7 +280,6 @@ static Optional<System::Pid> launchAsDaemon(std::string executable,
 
 static Optional<System::Pid> launchInBackground(std::string executable,
                                                 int port,
-                                                std::string videomodule,
                                                 std::string turnConfig) {
     std::vector<std::string> cmdArgs{executable,
                                      "--logdir",
@@ -290,8 +288,6 @@ static Optional<System::Pid> launchInBackground(std::string executable,
                                      ConfigDirs::getCurrentDiscoveryPath(),
                                      "--port",
                                      std::to_string(port),
-                                     "--handle",
-                                     videomodule,
                                      "--turn",
                                      turnConfig};
     System::Pid bridgePid;
@@ -311,16 +307,32 @@ static Optional<System::Pid> launchInBackground(std::string executable,
     return bridgePid;
 }
 
-bool WebRtcBridge::start() {
-    mState = BridgeState::Pending;
+Optional<System::Pid> WebRtcBridge::launch(int port,
+                                           std::string turnConfig) {
     std::string executable =
             System::get()->findBundledExecutable(kVideoBridgeExe);
 
     // no video bridge?
     if (executable.empty()) {
-        mState = BridgeState::Disconnected;
         return false;
     }
+
+    // Daemonized version is only properly supported on Linux
+#ifdef __linux__
+    Optional<System::Pid> bridgePid =
+            launchAsDaemon(executable, port, turnConfig);
+#else
+    // Windows does not have fork, darwin has security requirements that are
+    // not easily met
+    Optional<System::Pid> bridgePid =
+            launchInBackground(executable, port,  turnConfig);
+#endif
+
+    return bridgePid;
+}
+
+bool WebRtcBridge::start() {
+    mState = BridgeState::Pending;
 
     // TODO(jansen): We should pause the recorder when no connections are
     // active.
@@ -330,16 +342,8 @@ bool WebRtcBridge::start() {
         return false;
     }
 
-// Daemonized version is only properly supported on Linux
-#ifdef __linux__
-    Optional<System::Pid> bridgePid = launchAsDaemon(
-            executable, mVideoBridgePort, mVideoModule, mTurnConfig);
-#else
-    // Windows does not have fork, darwin has security requirements that are
-    // not easily met
-    Optional<System::Pid> bridgePid = launchInBackground(
-            executable, mVideoBridgePort, mVideoModule, mTurnConfig);
-#endif
+    Optional<System::Pid> bridgePid =
+            launch(mVideoBridgePort, mTurnConfig);
 
     if (!bridgePid.hasValue()) {
         LOG(ERROR) << "WebRTC bridge disabled";

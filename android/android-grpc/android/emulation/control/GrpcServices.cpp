@@ -69,6 +69,8 @@ public:
 
     int port() override { return mPort; }
 
+    void wait() override { mServer->Wait(); }
+
 private:
     std::unique_ptr<grpc::Server> mServer;
     std::vector<std::shared_ptr<Service>> mRegisteredServices;

@@ -5,9 +5,7 @@ android_add_executable(
   LICENSE Apache-2.0 INSTALL .
   SRC # cmake-format: sortable
       emulator/main/GoldfishBridge.cpp
-      emulator/net/EmulatorConnection.cpp
       emulator/net/EmulatorGrpcClient.cpp
-      emulator/net/RtcAsyncSocketAdapter.cpp
       emulator/webrtc/capture/AudioSource.cpp
       emulator/webrtc/capture/GrpcAudioSource.cpp
       emulator/webrtc/capture/GrpcVideoSource.cpp
@@ -37,6 +35,7 @@ target_link_libraries(
           android-net
           android-emu
           android-grpc
+          android-webrtc
           nlohmann_json::nlohmann_json
           ssl)
 target_include_directories(goldfish-webrtc-bridge

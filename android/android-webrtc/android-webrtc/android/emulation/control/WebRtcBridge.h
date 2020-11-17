@@ -14,12 +14,14 @@
 
 #pragma once
 
-#include <stdint.h>                                         // for uint16_t
-#include <map>                                              // for map
-#include <memory>                                           // for shared_ptr
-#include <mutex>                                            // for condition...
-#include <string>                                           // for string
+#include <stdint.h>  // for uint16_t
 
+#include <map>     // for map
+#include <memory>  // for shared_ptr
+#include <mutex>   // for condition...
+#include <string>  // for string
+
+#include "android/base/Optional.h"                          // for Optional
 #include "android/base/containers/BufferQueue.h"            // for BufferQueue
 #include "android/base/synchronization/Lock.h"              // for Lock (ptr...
 #include "android/base/system/System.h"                     // for System
@@ -29,7 +31,6 @@
 #include "android/emulation/control/record_screen_agent.h"  // for QAndroidR...
 #include "emulator/net/JsonProtocol.h"                      // for JsonProtocol
 #include "emulator/net/SocketTransport.h"                   // for SocketTra...
-
 namespace emulator {
 namespace net {
 class AsyncSocketAdapter;
@@ -46,6 +47,7 @@ namespace control {
 
 using MessageQueue = base::BufferQueue<std::string>;
 using base::Lock;
+using base::Optional;
 using base::ReadWriteLock;
 using emulator::net::AsyncSocketAdapter;
 using emulator::net::JsonProtocol;
@@ -70,6 +72,7 @@ using emulator::net::State;
 // connection was removed, this will cleanup the message buffer.
 class WebRtcBridge : public RtcBridge, public JsonReceiver {
 public:
+    [[deprecated("The goldfish-webrtc-video bridge is now using gRPC.")]]
     WebRtcBridge(AsyncSocketAdapter* socket,
                  const AndroidConsoleAgents* const consoleAgents,
                  int desiredFps,
@@ -103,6 +106,8 @@ public:
     // the video bridge will run at this framerate as well.
     static const int kMaxFPS = 24;
     static const std::string kVideoBridgeExe;
+    static Optional<System::Pid> launch(int port,
+                                        std::string turnConfig);
 
     // Maximum number of messages we are willing to queue, before we start
     // dropping them.

@@ -17,11 +17,13 @@
 #include <rtc_base/critical_section.h>  // for CritS...
 #include <rtc_base/thread.h>            // for Thread
 
-#include "emulator/net/EmulatorGrcpClient.h"  // for Emula...
-#include "emulator/net/JsonProtocol.h"        // for JsonProtocol (ptr only)
-#include "emulator/net/SocketTransport.h"     // for SocketTransport (ptr only)
+#include <nlohmann/json.hpp>
+
+#include "android/emulation/control/RtcBridge.h"  // for RtcBridge...
+#include "emulator/net/EmulatorGrcpClient.h"      // for Emula...
 #include "emulator/webrtc/capture/GoldfishAudioDeviceModule.h"
 #include "emulator/webrtc/capture/VideoCapturerFactory.h"
+
 namespace emulator {
 
 namespace net {
@@ -33,12 +35,12 @@ namespace webrtc {
 
 class Participant;
 
-using net::AsyncSocketAdapter;
-using net::EmulatorConnection;
-using net::JsonProtocol;
-using net::JsonReceiver;
-using net::SocketTransport;
-using net::State;
+using json = nlohmann::json;
+using android::emulation::control::RtcBridge;
+using MessageQueue = android::base::BufferQueue<std::string>;
+using android::base::Lock;
+using android::base::ReadWriteLock;
+using android::base::System;
 
 // A switchboard manages a set of web rtc participants:
 //
@@ -46,17 +48,37 @@ using net::State;
 // 2. It removes participants when a user disconnects
 // 3. It routes the webrtc json signals to the proper participant.
 // 4. Participants that are no longer streaming need to be finalized.
-class Switchboard : public JsonReceiver {
+class Switchboard : public RtcBridge {
 public:
     Switchboard(EmulatorGrpcClient client,
-                const std::string& handle,
-                const std::string& turnconfig,
-                AsyncSocketAdapter* connection,
-                EmulatorConnection* parent);
+                const std::string& shmPath,
+                const std::string& turnconfig);
     ~Switchboard();
-    void received(SocketTransport* from, const json object) override;
-    void stateConnectionChange(SocketTransport* connection,
-                               State current) override;
+
+    // Connect will initiate the RTC stream if not yet in progress.
+    bool connect(std::string identity) override;
+
+    // Disconnects the RTC stream in progress.
+    void disconnect(std::string identity) override;
+
+    // Accept the incoming jsep message from the given identity
+    bool acceptJsepMessage(std::string identity, std::string msg) override;
+
+    // Blocks and waits until a message becomes available for the given
+    // identity. Returns the next message if one is available. Returns false and
+    // a by message if the identity does not exist.
+    bool nextMessage(std::string identity,
+                     std::string* nextMessage,
+                     System::Duration blockAtMostMs) override;
+
+    // Disconnect and stop the rtc bridge.
+    void terminate() override{};
+
+    // Asynchronously starts the rtc bridge..
+    bool start() override { return true; };
+
+    BridgeState state() override { return BridgeState::Connected; };
+
     void send(std::string to, json msg);
 
     // Called when a participant is unable to continue the rtc stream.
@@ -86,10 +108,13 @@ private:
     std::vector<std::string> mDroppedConnections;  // Connections that need to
                                                    // be garbage collected.
     std::vector<std::string> mClosedConnections;
-    const std::string mHandle = "video0";  // Handle to shared memory region
+    const std::string mShmPath = "/tmp";
     std::vector<std::string>
             mTurnConfig;  // Process to invoke to retrieve turn config.
-    int32_t mFps = 24;    // Desired fps
+
+    // Maximum number of messages we are willing to queue, before we start
+    // dropping them.
+    static const uint16_t kMaxMessageQueueLen = 128;
 
     GoldfishAudioDeviceModule mGoldfishAdm;
     VideoCapturerFactory mCaptureFactory;
@@ -102,11 +127,13 @@ private:
     rtc::scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
             mConnectionFactory;
 
+    // Message queues used to store messages received from the videobridge.
+    std::map<std::string, std::shared_ptr<MessageQueue>> mId;
+    std::map<MessageQueue*, std::shared_ptr<Lock>> mLocks;
+    ReadWriteLock mMapLock;
+
     // Network/communication things.
     EmulatorGrpcClient mClient;
-    JsonProtocol mProtocol;
-    SocketTransport mTransport;
-    net::EmulatorConnection* mEmulator;
     rtc::CriticalSection mCleanupCS;
     rtc::CriticalSection mCleanupClosedCS;
 };
