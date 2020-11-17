@@ -11,28 +11,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <rtc_base/log_sinks.h>    // for FileRotatingLogSink
-#include <rtc_base/logging.h>      // for LogSink, RTC_LOG, INFO
-#include <rtc_base/ssl_adapter.h>  // for CleanupSSL, InitializeSSL
-#include <stdio.h>                 // for printf, fprintf, stderr
-#include <stdlib.h>                // for atoi, exit, EXIT_FAILURE
+#include <rtc_base/log_sinks.h>                // for FileRotatingLogSink
+#include <rtc_base/logging.h>                  // for RTC_LOG, LogSink, INFO
+#include <rtc_base/ssl_adapter.h>              // for CleanupSSL, InitializeSSL
+#include <stdio.h>                             // for printf, fprintf, stderr
+#include <stdlib.h>                            // for atoi, exit, EXIT_FAILURE
+#include <memory>                              // for unique_ptr
+#include <string>                              // for basic_string, string
+#include <vector>                              // for vector
 
-#include <memory>  // for unique_ptr
-#include <string>  // for string, operator!=
-
-#include "android/base/ProcessControl.h"       // for parse...
+#include "android/base/Optional.h"             // for Optional
+#include "android/base/ProcessControl.h"       // for parseEscapedLaunchString
 #include "android/base/StringView.h"           // for StringView
 #include "android/base/memory/SharedMemory.h"  // for SharedMemory, SharedMe...
-#include "android/base/system/System.h"        // for System
+#include "android/base/system/System.h"        // for System, System::Proces...
 #include "emulator/net/EmulatorConnection.h"   // for EmulatorConnection
-#include "emulator/webrtc/Switchboard.h"
-#include "nlohmann/json.hpp"  // for basic...
+#include "emulator/net/EmulatorGrcpClient.h"   // for EmulatorGrpcClient
+#include "nlohmann/json.hpp"                   // for json
 
 #ifdef _MSC_VER
 #include "msvc-getopt.h"
 #include "msvc-posix.h"
 #else
-#include <getopt.h>
+#include <getopt.h>                            // for optarg, required_argument
 #endif
 
 using nlohmann::json;
@@ -176,8 +177,7 @@ int main(int argc, char* argv[]) {
                     RTC_LOG(INFO)
                             << "TurnCFG: Turn command produces valid json.";
                 } else {
-                    RTC_LOG(LS_ERROR)
-                            << "TurnCFG: JSON is missing iceServers.";
+                    RTC_LOG(LS_ERROR) << "TurnCFG: JSON is missing iceServers.";
                 }
             } else {
                 RTC_LOG(INFO) << "TurnCFG: bad exit: " << exitCode
@@ -202,7 +202,14 @@ int main(int argc, char* argv[]) {
 
     rtc::InitializeSSL();
     bool deamon = FLAG_daemon;
-    emulator::net::EmulatorConnection server(FLAG_port, FLAG_disc, FLAG_handle,
+    emulator::webrtc::EmulatorGrpcClient client(FLAG_disc);
+
+    if (!client.hasOpenChannel()) {
+        RTC_LOG(LERROR) << "Unable to open gRPC channel to the emulator.";
+        return -1;
+    }
+
+    emulator::net::EmulatorConnection server(FLAG_port, client, FLAG_handle,
                                              FLAG_turn);
     int status = server.listen(deamon) ? 0 : 1;
     RTC_LOG(INFO) << "Finished, status: " << status;

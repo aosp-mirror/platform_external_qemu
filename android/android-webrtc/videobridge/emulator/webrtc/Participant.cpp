@@ -13,26 +13,26 @@
 // limitations under the License.
 #include "Participant.h"
 
-#include <absl/types/optional.h>                 // for optional
-#include <api/media_stream_interface.h>          // for MediaStreamTra...
-#include <api/rtc_error.h>                       // for RTCError, RTCE...
-#include <api/rtp_sender_interface.h>            // for RtpSenderInter...
-#include <p2p/base/port_allocator.h>             // for PortAllocator
-#include <rtc_base/checks.h>                     // for FatalLogCall
-#include <rtc_base/copy_on_write_buffer.h>       // for CopyOnWriteBuffer
-#include <rtc_base/logging.h>                    // for RTC_LOG
-#include <rtc_base/ref_counted_object.h>         // for RefCountedObject
-#include <rtc_base/rtc_certificate_generator.h>  // for RTCCertificate...
-#include <rtc_base/third_party/base64/base64.h>  // for Base64
+#include <absl/types/optional.h>                      // for optional
+#include <api/media_stream_interface.h>               // for MediaStreamTrac...
+#include <api/rtc_error.h>                            // for RTCError, RTCEr...
+#include <api/rtp_sender_interface.h>                 // for RtpSenderInterface
+#include <grpcpp/grpcpp.h>                            // for ClientContext
+#include <p2p/base/port_allocator.h>                  // for PortAllocator
+#include <rtc_base/checks.h>                          // for FatalLogCall
+#include <rtc_base/copy_on_write_buffer.h>            // for CopyOnWriteBuffer
+#include <rtc_base/logging.h>                         // for RTC_LOG
+#include <rtc_base/ref_counted_object.h>              // for RefCountedObject
+#include <rtc_base/rtc_certificate_generator.h>       // for RTCCertificateG...
+#include <utility>                                    // for pair
 
-#include <utility>  // for pair
-
-#include "emulator/webrtc/Switchboard.h"               // for Switchboard
-#include "emulator/webrtc/capture/GrpcAudioSource.h"   // for GrpcAudioSource
-#include "emulator/webrtc/capture/GrpcVideoSource.h"   // for GrpcAudioSource
-#include "emulator/webrtc/capture/VideoCapturer.h"     // for VideoCapturer
-#include "emulator/webrtc/capture/VideoTrackSource.h"  // for VideoTrackSource
-#include "nlohmann/json.hpp"                           // for basic_json<>::...
+#include "emulator/webrtc/Switchboard.h"              // for Switchboard
+#include "emulator/webrtc/capture/GrpcAudioSource.h"  // for GrpcAudioSource
+#include "emulator/webrtc/capture/GrpcVideoSource.h"  // for GrpcVideoSource
+#include "emulator_controller.grpc.pb.h"              // for EmulatorControl...
+#include "emulator_controller.pb.h"                   // for KeyboardEvent
+#include "google/protobuf/empty.pb.h"                 // for Empty
+#include "nlohmann/json.hpp"                          // for basic_json<>::v...
 
 using json = nlohmann::json;
 using MediaStreamPair =
@@ -58,10 +58,10 @@ protected:
 };
 
 EventForwarder::EventForwarder(
-        Participant* part,
+        EmulatorGrpcClient client,
         scoped_refptr<::webrtc::DataChannelInterface> channel,
         std::string label)
-    : mParticipant(part), mChannel(channel), mLabel(label) {
+    : mClient(client), mChannel(channel), mLabel(label) {
     channel->RegisterObserver(this);
 }
 
@@ -72,14 +72,24 @@ EventForwarder::~EventForwarder() {
 void EventForwarder::OnStateChange() {}
 
 void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
-    std::string encoded;
-    rtc::Base64::EncodeFromArray(buffer.data.cdata(), buffer.data.size(),
-                                 &encoded);
-    json msg;
-    msg["msg"] = encoded;
-    msg["label"] = mLabel;
-
-    mParticipant->SendToBridge(msg);
+    if (!mEmulatorGrpc) {
+        mEmulatorGrpc = mClient.stub();
+    }
+    ::google::protobuf::Empty nullResponse;
+    std::unique_ptr<grpc::ClientContext> context = mClient.newContext();
+    if (mLabel == "keyboard") {
+        android::emulation::control::KeyboardEvent keyEvent;
+        keyEvent.ParseFromArray(buffer.data.data(), buffer.size());
+        mEmulatorGrpc->sendKey(context.get(), keyEvent, &nullResponse);
+    } else if (mLabel == "mouse") {
+        android::emulation::control::MouseEvent mouseEvent;
+        mouseEvent.ParseFromArray(buffer.data.data(), buffer.size());
+        mEmulatorGrpc->sendMouse(context.get(), mouseEvent, &nullResponse);
+    } else if (mLabel == "touch") {
+        android::emulation::control::TouchEvent touchEvent;
+        touchEvent.ParseFromArray(buffer.data.data(), buffer.size());
+        mEmulatorGrpc->sendTouch(context.get(), touchEvent, &nullResponse);
+    }
 }
 
 Participant::~Participant() {
@@ -251,9 +261,10 @@ bool Participant::AddVideoTrack(std::string handle) {
     }
 
     // TODO(jansene): Video sources should be shared amongst participants.
-    RTC_LOG(INFO) << "Adding video track: [" << handle << "]";;
+    RTC_LOG(INFO) << "Adding video track: [" << handle << "]";
+    ;
     auto track = new rtc::RefCountedObject<emulator::webrtc::GrpcVideoSource>(
-            handle);
+            mSwitchboard->emulatorClient());
     scoped_refptr<::webrtc::VideoTrackInterface> video_track(
             mPeerConnectionFactory->CreateVideoTrack(handle, track));
 
@@ -276,8 +287,8 @@ bool Participant::AddAudioTrack(std::string grpc) {
 
     // TODO(jansene): Audio sources should be shared amongst participants.
     RTC_LOG(INFO) << "Adding audio track: [" << grpc << "]";
-    auto track =
-            new rtc::RefCountedObject<emulator::webrtc::GrpcAudioSource>(grpc);
+    auto track = new rtc::RefCountedObject<emulator::webrtc::GrpcAudioSource>(
+            mSwitchboard->emulatorClient());
     scoped_refptr<::webrtc::AudioTrackInterface> audio_track(
             mPeerConnectionFactory->CreateAudioTrack(grpc, track));
 
@@ -324,8 +335,8 @@ bool Participant::RemoveVideoTrack(std::string handle) {
 
 void Participant::AddDataChannel(const std::string& label) {
     auto channel = mPeerConnection->CreateDataChannel(label, nullptr);
-    mEventForwarders[label] =
-            std::make_unique<EventForwarder>(this, channel, label);
+    mEventForwarders[label] = std::make_unique<EventForwarder>(
+            mSwitchboard->emulatorClient(), channel, label);
 }
 
 bool Participant::Initialize() {
