@@ -1096,8 +1096,13 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
                     "display. This will cause Emulator to capture the "
                     "host mouse pointer and the keyboard, which will "
                     "make them unavailable to other host applications."
-                    "\n\n"
-                    "You can press Ctrl+R to uncapture the keyboard and "
+                    "\n\n You can press "
+#ifdef __APPLE__
+                    "Cmd+R"
+#else
+                    "Ctrl+R"
+#endif
+                    " to uncapture the keyboard and "
                     "mouse and return to normal operation.");
             msgBox.exec();
             mPromptMouseRestoreMessageBox = false;
