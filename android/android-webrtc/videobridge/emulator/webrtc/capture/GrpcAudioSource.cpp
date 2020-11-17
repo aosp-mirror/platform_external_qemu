@@ -13,19 +13,19 @@
 // limitations under the License.
 #include "emulator/webrtc/capture/GrpcAudioSource.h"
 
-#include <grpcpp/grpcpp.h>                // for ClientReaderInterface, Clie...
-#include <stdio.h>                        // for size_t
-#include <algorithm>                      // for min
-#include <memory>                         // for unique_ptr, operator==
-#include <string>                         // for string, basic_string<>::val...
-#include <thread>                         // for thread
+#include <grpcpp/grpcpp.h>                    // for ClientReaderInterface
+#include <stdio.h>                            // for size_t
+#include <algorithm>                          // for min
+#include <memory>                             // for unique_ptr, operator==
+#include <string>                             // for string, basic_string<>:...
+#include <thread>                             // for thread
 
-#include "emulator_controller.grpc.pb.h"  // for EmulatorController::Stub
-#include "emulator_controller.pb.h"       // for AudioPacket, AudioFormat
+#include "emulator/net/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
+#include "emulator_controller.grpc.pb.h"      // for EmulatorController::Stub
+#include "emulator_controller.pb.h"           // for AudioPacket, AudioFormat
 
 namespace emulator {
 namespace webrtc {
-
 
 using ::android::emulation::control::AudioFormat;
 using ::android::emulation::control::AudioPacket;
@@ -39,15 +39,11 @@ constexpr int32_t kSamplesPerFrame = kBitRateHz / 100 /*(10ms/1s)*/;
 constexpr size_t kBytesPerFrame =
         kBytesPerSample * kSamplesPerFrame * kChannels;
 
-GrpcAudioSource::GrpcAudioSource(std::string discovery_file) :
-mClient(discovery_file) {
-    if (mClient.stub()) {
-        mPartialFrame.reserve(kBytesPerFrame);
-        mAudioThread = std::thread([this]() { StreamAudio(); });
-    }
+GrpcAudioSource::GrpcAudioSource(EmulatorGrpcClient client)
+    : mEmulatorGrpc(client.stub()), mContext(client.newContext()) {
+    mPartialFrame.reserve(kBytesPerFrame);
+    mAudioThread = std::thread([this]() { StreamAudio(); });
 }
-
-
 
 void GrpcAudioSource::StreamAudio() {
     AudioFormat request;
@@ -55,7 +51,7 @@ void GrpcAudioSource::StreamAudio() {
     request.set_channels(AudioFormat::Stereo);
     request.set_samplingrate(kBitRateHz);
     std::unique_ptr<grpc::ClientReaderInterface<AudioPacket>> stream =
-            mClient.stub()->streamAudio(&mContext, request);
+            mEmulatorGrpc->streamAudio(mContext.get(), request);
     if (stream == nullptr) {
         return;
     }
@@ -92,7 +88,7 @@ void GrpcAudioSource::ConsumeAudioPacket(const AudioPacket& audio_packet) {
 }
 
 GrpcAudioSource::~GrpcAudioSource() {
-    mContext.TryCancel();
+    mContext->TryCancel();
     mCaptureAudio = false;
     mAudioThread.join();
 }

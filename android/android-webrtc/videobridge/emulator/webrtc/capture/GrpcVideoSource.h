@@ -21,8 +21,8 @@
 #include <media/base/video_adapter.h>         // for VideoAdapter
 #include <media/base/video_broadcaster.h>     // for VideoBroadcaster
 #include <atomic>                             // for atomic_bool
+#include <memory>                             // for unique_ptr
 #include <mutex>                              // for mutex
-#include <string>                             // for string
 #include <thread>                             // for thread
 
 #include "emulator/net/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
@@ -52,7 +52,7 @@ using ::android::emulation::control::Image;
 class GrpcVideoSource
     : public ::webrtc::Notifier<::webrtc::VideoTrackSourceInterface> {
 public:
-    explicit GrpcVideoSource(std::string discovery_file);
+    explicit GrpcVideoSource(EmulatorGrpcClient client);
     ~GrpcVideoSource() override;
 
     bool is_screencast() const override { return true; }
@@ -85,9 +85,8 @@ private:
 
     void captureFrames();
 
-    grpc::ClientContext mContext;
     EmulatorGrpcClient mClient;
-
+    std::unique_ptr<::grpc::ClientContext> mContext;
     rtc::scoped_refptr<::webrtc::I420Buffer>
             mI420Buffer;  // Re-usable I420Buffer.
     std::thread mVideoThread;

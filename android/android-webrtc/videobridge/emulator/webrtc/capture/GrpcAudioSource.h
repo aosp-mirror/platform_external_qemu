@@ -15,12 +15,12 @@
 
 #include <grpcpp/grpcpp.h>                        // for ClientContext
 #include <cstdint>                                // for uint8_t
-#include <string>                                 // for string
+#include <memory>                                 // for unique_ptr
 #include <thread>                                 // for thread
 #include <vector>                                 // for vector
 
-#include "emulator/net/EmulatorGrcpClient.h"      // for EmulatorGrpcClient
 #include "emulator/webrtc/capture/AudioSource.h"  // for AudioSource
+#include "emulator_controller.grpc.pb.h"          // for EmulatorController
 
 namespace android {
 namespace emulation {
@@ -32,10 +32,11 @@ class AudioPacket;
 
 namespace emulator {
 namespace webrtc {
+class EmulatorGrpcClient;
 
 class GrpcAudioSource : public AudioSource {
 public:
-    explicit GrpcAudioSource(std::string discovery_file);
+    explicit GrpcAudioSource(EmulatorGrpcClient client);
 
     ~GrpcAudioSource();
 
@@ -48,8 +49,8 @@ private:
             const ::android::emulation::control::AudioPacket& audio_packet);
 
     std::vector<uint8_t> mPartialFrame;
-    EmulatorGrpcClient mClient;
-    grpc::ClientContext mContext;
+    std::unique_ptr<android::emulation::control::EmulatorController::Stub> mEmulatorGrpc;
+    std::unique_ptr<grpc::ClientContext> mContext;
     std::thread mAudioThread;
     bool mCaptureAudio{true};
 };
