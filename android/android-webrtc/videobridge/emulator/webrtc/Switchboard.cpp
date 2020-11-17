@@ -41,7 +41,9 @@
 #include "android/base/ProcessControl.h"                        // for parse...
 #include "android/base/system/System.h"                         // for System
 #include "emulator/net/EmulatorConnection.h"                    // for Emula...
+#include "emulator/net/EmulatorGrcpClient.h"                    // for Emula...
 #include "emulator/webrtc/Switchboard.h"                        // for Switc...
+#include "emulator/webrtc/capture/GoldfishAudioDeviceModule.h"  // for Goldf...
 #include "nlohmann/json.hpp"                                    // for basic...
 
 namespace emulator {
@@ -83,13 +85,12 @@ void Switchboard::stateConnectionChange(SocketTransport* connection,
 
 Switchboard::~Switchboard() {}
 
-Switchboard::Switchboard(const std::string& discoveryFile,
+Switchboard::Switchboard(EmulatorGrpcClient client,
                          const std::string& handle,
                          const std::string& turnConfig,
                          AsyncSocketAdapter* connection,
                          net::EmulatorConnection* parent)
-    : mDiscoveryFile(discoveryFile),
-      mHandle(handle),
+    : mHandle(handle),
       mTaskFactory(::webrtc::CreateDefaultTaskQueueFactory()),
       mNetwork(rtc::Thread::CreateWithSocketServer()),
       mWorker(rtc::Thread::Create()),
@@ -97,7 +98,8 @@ Switchboard::Switchboard(const std::string& discoveryFile,
       mProtocol(this),
       mTransport(&mProtocol, connection),
       mEmulator(parent),
-      mTurnConfig(parseEscapedLaunchString(turnConfig)) {
+      mTurnConfig(parseEscapedLaunchString(turnConfig)),
+      mClient(client) {
     mNetwork->SetName("Sw-Network", nullptr);
     mNetwork->Start();
     mWorker->SetName("Sw-Worker", nullptr);
@@ -216,8 +218,8 @@ void Switchboard::received(SocketTransport* transport, const json object) {
 
             // Note: Dynamically adding new tracks will likely require stream
             // re-negotiation.
-            stream->AddVideoTrack(mDiscoveryFile);
-            stream->AddAudioTrack(mDiscoveryFile);
+            stream->AddVideoTrack("grpcVideo");
+            stream->AddAudioTrack("grpcAudio");
             stream->CreateOffer();
         }
         return;

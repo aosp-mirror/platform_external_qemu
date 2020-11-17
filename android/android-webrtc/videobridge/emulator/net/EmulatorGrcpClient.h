@@ -23,17 +23,23 @@
 namespace emulator {
 namespace webrtc {
 
+// An EmulatorGrpcClient manages the configuration to the emulator grpc endpoint.
+// Through this method you can get a properly configured stub, and context , that
+// will inject proper credentials when needed.
+//
+// The Client is initialized by giving it the proper emulator discovery file.
 class EmulatorGrpcClient {
 public:
     explicit EmulatorGrpcClient(std::string discovery_file) : mDiscoveryFile(discovery_file) {};
-    android::emulation::control::EmulatorController::Stub* stub();
+    std::unique_ptr<android::emulation::control::EmulatorController::Stub> stub();
+    std::unique_ptr<grpc::ClientContext> newContext();
+    bool hasOpenChannel();
 
 private:
-    bool initializeGrpcStub();
+    bool initializeChannel();
 
-    std::unique_ptr<android::emulation::control::EmulatorController::Stub>
-            mEmulatorStub;
-    grpc::ClientContext mContext;
+    std::shared_ptr<::grpc::Channel> mChannel;
+    std::shared_ptr<grpc_impl::CallCredentials> mCredentials;
     std::string mDiscoveryFile;
 };
 

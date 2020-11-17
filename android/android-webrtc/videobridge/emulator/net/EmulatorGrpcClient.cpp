@@ -11,22 +11,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "emulator/net/EmulatorGrcpClient.h"                  // for Emulato...
-
-
-#include <grpcpp/grpcpp.h>     // for string
-#include <rtc_base/logging.h>  // for RTC_LOG
-
-#include <map>      // for multimap
-#include <memory>   // for unique_ptr
-#include <string>   // for basic_s...
-#include <utility>  // for pair
+#include <grpcpp/grpcpp.h>                                    // for ClientC...
+#include <rtc_base/logging.h>                                 // for RTC_LOG
+#include <map>                                                // for multimap
+#include <memory>                                             // for shared_ptr
+#include <string>                                             // for operator+
+#include <utility>                                            // for __unwra...
 
 #include "android/base/StringView.h"                          // for StringView
 #include "android/base/files/IniFile.h"                       // for IniFile
 #include "android/emulation/control/secure/BasicTokenAuth.h"  // for BasicTo...
+#include "emulator/net/EmulatorGrcpClient.h"                  // for Emulato...
 #include "emulator_controller.grpc.pb.h"                      // for Emulato...
 #include "grpc/grpc_security_constants.h"                     // for LOCAL_TCP
+#include "grpc/impl/codegen/connectivity_state.h"             // for (anonym...
+#include "grpcpp/channel_impl.h"                              // for Channel
 #include "grpcpp/security/credentials.h"                      // for LocalCr...
 
 namespace emulator {
@@ -55,16 +54,36 @@ private:
     grpc::string mToken;
 };
 
-android::emulation::control::EmulatorController::Stub*
-EmulatorGrpcClient::stub() {
-    if (!mEmulatorStub) {
-        initializeGrpcStub();
+bool EmulatorGrpcClient::hasOpenChannel() {
+    if (!mChannel) {
+        initializeChannel();
     }
+    if (!mChannel)
+        return false;
 
-    return mEmulatorStub.get();
+    auto state = mChannel->GetState(true);
+    RTC_LOG(INFO) << "Channel state: " << state;
+    return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
 }
 
-bool EmulatorGrpcClient::initializeGrpcStub() {
+std::unique_ptr<android::emulation::control::EmulatorController::Stub>
+EmulatorGrpcClient::stub() {
+    if (!mChannel) {
+        initializeChannel();
+    }
+
+    return android::emulation::control::EmulatorController::NewStub(mChannel);
+}
+
+std::unique_ptr<grpc::ClientContext> EmulatorGrpcClient::newContext() {
+    auto ctx = std::make_unique<grpc::ClientContext>();
+    if (mCredentials) {
+        ctx->set_credentials(mCredentials);
+    }
+    return ctx;
+}
+
+bool EmulatorGrpcClient::initializeChannel() {
     android::base::IniFile iniFile(mDiscoveryFile);
     iniFile.read();
     if (!iniFile.hasKey("grpc.port") || iniFile.hasKey("grpc.server_cert")) {
@@ -73,17 +92,14 @@ bool EmulatorGrpcClient::initializeGrpcStub() {
     }
     std::string grpc_address =
             "localhost:" + iniFile.getString("grpc.port", "8554");
-    mEmulatorStub = android::emulation::control::EmulatorController::NewStub(
-            grpc::CreateChannel(
-                    grpc_address,
-                    ::grpc::experimental::LocalCredentials(LOCAL_TCP)));
+    mChannel = grpc::CreateChannel(
+            grpc_address, ::grpc::experimental::LocalCredentials(LOCAL_TCP));
 
     // Install token authenticator if needed.
     if (iniFile.hasKey("grpc.token")) {
         auto token = iniFile.getString("grpc.token", "");
-        auto creds = grpc::MetadataCredentialsFromPlugin(
+        mCredentials = grpc::MetadataCredentialsFromPlugin(
                 std::make_unique<BasicTokenAuthenticator>(token));
-        mContext.set_credentials(creds);
     }
 
     RTC_LOG(INFO) << "Initialized grpc Stub.";
