@@ -13,18 +13,18 @@
 // limitations under the License.
 #include "emulator/webrtc/capture/GrpcVideoSource.h"
 
-#include <api/video/video_frame.h>         // for VideoFrame::Builder
-#include <api/video/video_frame_buffer.h>  // for VideoFrameBuffer
-#include <api/video/video_rotation.h>      // for kVideoRotation_0
-#include <grpcpp/grpcpp.h>                 // for ClientReaderInterface
-#include <rtc_base/logging.h>              // for RTC_LOG
-#include <rtc_base/time_utils.h>           // for TimeMicros
-#include <stdint.h>                        // for uint8_t
-
-#include <memory>  // for unique_ptr, operator==
-#include <string>  // for string, operator==, stoi
-#include <thread>  // for thread
-#include <tuple>   // for make_tuple, tuple_elem...
+#include <api/video/video_frame.h>             // for VideoFrame::Builder
+#include <api/video/video_frame_buffer.h>      // for VideoFrameBuffer
+#include <api/video/video_rotation.h>          // for kVideoRotation_0
+#include <api/video/video_source_interface.h>  // for VideoSinkWants
+#include <grpcpp/grpcpp.h>                     // for ClientContext, ClientR...
+#include <rtc_base/logging.h>                  // for RTC_LOG
+#include <rtc_base/time_utils.h>               // for TimeMicros
+#include <stdint.h>                            // for uint8_t
+#include <memory>                              // for unique_ptr, operator==
+#include <string>                              // for operator==, stoi, string
+#include <thread>                              // for thread
+#include <tuple>                               // for make_tuple, tuple_elem...
 
 #include "android/base/StringView.h"           // for StringView
 #include "android/base/memory/SharedMemory.h"  // for SharedMemory, StringView
@@ -38,7 +38,6 @@
 #include "libyuv/video_common.h"               // for FOURCC_RGB3, FourCC
 
 namespace rtc {
-struct VideoSinkWants;
 template <typename VideoFrameT>
 class VideoSinkInterface;
 }  // namespace rtc
@@ -52,17 +51,15 @@ using ::android::emulation::control::Image;
 using ::android::emulation::control::ImageFormat;
 using ::android::emulation::control::ImageTransport;
 
-GrpcVideoSource::GrpcVideoSource(std::string discovery_file)
-    : mClient(discovery_file) {}
+GrpcVideoSource::GrpcVideoSource(EmulatorGrpcClient client) : mClient(client) {}
 
-std::tuple<int, int> getScreenDimensions(
-        android::emulation::control::EmulatorController::Stub* stub) {
+std::tuple<int, int> getScreenDimensions(EmulatorGrpcClient client) {
     ::google::protobuf::Empty empty;
 
+    auto context = client.newContext();
     int w = 1080, h = 1920;
     EmulatorStatus emuState;
-    grpc::ClientContext context;
-    auto status = stub->getStatus(&context, empty, &emuState);
+    auto status = client.stub()->getStatus(context.get(), empty, &emuState);
     if (emuState.has_hardwareconfig()) {
         for (int i = 0; i < emuState.hardwareconfig().entry_size(); i++) {
             auto entry = emuState.hardwareconfig().entry(i);
@@ -81,7 +78,7 @@ std::tuple<int, int> getScreenDimensions(
 using android::emulation::control::Rotation;
 
 void GrpcVideoSource::captureFrames() {
-    auto [w, h] = getScreenDimensions(mClient.stub());
+    auto [w, h] = getScreenDimensions(mClient);
     auto memsize = w * h * 3;
     mI420Buffer = ::webrtc::I420Buffer::Create(w, h);
 
@@ -99,10 +96,11 @@ void GrpcVideoSource::captureFrames() {
     transport->set_channel(ImageTransport::MMAP);
     transport->set_handle(handle);
 
+    mContext = mClient.newContext();
     RTC_LOG(INFO) << "Requesting video stream " << w << "x" << h
                   << ", from:" << handle;
     std::unique_ptr<grpc::ClientReaderInterface<Image>> stream =
-            mClient.stub()->streamScreenshot(&mContext, request);
+            mClient.stub()->streamScreenshot(mContext.get(), request);
 
     if (stream == nullptr) {
         RTC_LOG(WARNING) << "Video: unable to obtain stream.." << handle;
@@ -151,9 +149,13 @@ void GrpcVideoSource::captureFrames() {
 }
 
 GrpcVideoSource::~GrpcVideoSource() {
-    mContext.TryCancel();
+    if (mContext) {
+        mContext->TryCancel();
+    }
+    if (mCaptureVideo) {
+        mVideoThread.join();
+    }
     mCaptureVideo = false;
-    mVideoThread.join();
 }
 
 bool GrpcVideoSource::GetStats(Stats* stats) {

@@ -13,32 +13,34 @@
 // limitations under the License.
 #include "emulator/net/EmulatorConnection.h"
 
-#include <rtc_base/async_socket.h>  // for AsyncSocket
-#include <rtc_base/logging.h>       // for RTC_LOG
-#include <rtc_base/thread.h>        // for AutoSocketServerThread
-#include <stdio.h>                  // for fprintf, stderr
-
-#include <utility>  // for move
+#include <errno.h>                               // for errno
+#include <rtc_base/async_socket.h>               // for AsyncSocket
+#include <rtc_base/logging.h>                    // for RTC_LOG
+#include <rtc_base/thread.h>                     // for AutoSocketServerThread
+#include <stdio.h>                               // for fprintf, stderr
+#include <utility>                               // for move
 
 #ifndef _WIN32
-#include <sys/socket.h>  // for AF_INET, SOCK_STREAM
-#include <unistd.h>      // for fork, pid_t
+#include <sys/socket.h>                          // for AF_INET, SOCK_STREAM
+#include <unistd.h>                              // for fork, pid_t
 #endif
 
-#include "emulator/net/RtcAsyncSocketAdapter.h"  // for AsyncSocket, RtcAsyn...
+#include "emulator/net/RtcAsyncSocketAdapter.h"  // for RtcAsyncSocketAdapter
 #include "emulator/webrtc/Switchboard.h"         // for Switchboard
 #include "rtc_base/physical_socket_server.h"     // for PhysicalSocketServer
 #include "rtc_base/socket_address.h"             // for SocketAddress
 
+
 namespace emulator {
 namespace net {
+using webrtc::EmulatorGrpcClient;
 
 EmulatorConnection::EmulatorConnection(int port,
-                                       std::string discovery_file,
+                                       EmulatorGrpcClient client,
                                        std::string handle,
                                        std::string turnConfig)
     : mPort(port),
-      mDiscoveryFile(discovery_file),
+      mClient(client),
       mHandle(handle),
       mTurnConfig(turnConfig) {}
 
@@ -114,7 +116,7 @@ void EmulatorConnection::OnRead(rtc::AsyncSocket* socket) {
     while (AsyncSocket* incoming = socket->Accept(&accept_addr)) {
         RtcAsyncSocketAdapter* adapter = new RtcAsyncSocketAdapter(incoming);
         std::unique_ptr<Switchboard> board(new webrtc::Switchboard(
-                mDiscoveryFile, mHandle, mTurnConfig, adapter, this));
+                mClient, mHandle, mTurnConfig, adapter, this));
         mConnections.push_back(std::move(board));
         RTC_LOG(INFO) << "New switchboard registered for incoming emulator.";
     }

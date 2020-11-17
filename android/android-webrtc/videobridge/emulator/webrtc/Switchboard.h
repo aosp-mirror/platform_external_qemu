@@ -17,11 +17,11 @@
 #include <rtc_base/critical_section.h>  // for CritS...
 #include <rtc_base/thread.h>            // for Thread
 
-#include "emulator/net/JsonProtocol.h"     // for JsonProtocol (ptr only)
-#include "emulator/net/SocketTransport.h"  // for SocketTransport (ptr only)
-#include "emulator/webrtc/capture/VideoCapturerFactory.h"
+#include "emulator/net/EmulatorGrcpClient.h"  // for Emula...
+#include "emulator/net/JsonProtocol.h"        // for JsonProtocol (ptr only)
+#include "emulator/net/SocketTransport.h"     // for SocketTransport (ptr only)
 #include "emulator/webrtc/capture/GoldfishAudioDeviceModule.h"
-
+#include "emulator/webrtc/capture/VideoCapturerFactory.h"
 namespace emulator {
 
 namespace net {
@@ -48,7 +48,7 @@ using net::State;
 // 4. Participants that are no longer streaming need to be finalized.
 class Switchboard : public JsonReceiver {
 public:
-    Switchboard(const std::string& discoveryFile,
+    Switchboard(EmulatorGrpcClient client,
                 const std::string& handle,
                 const std::string& turnconfig,
                 AsyncSocketAdapter* connection,
@@ -72,6 +72,7 @@ public:
     void finalizeConnections();
 
     VideoCapturerFactory* getVideoCaptureFactory() { return &mCaptureFactory; }
+    EmulatorGrpcClient& emulatorClient() { return mClient; }
 
     static std::string BRIDGE_RECEIVER;
 
@@ -86,13 +87,12 @@ private:
                                                    // be garbage collected.
     std::vector<std::string> mClosedConnections;
     const std::string mHandle = "video0";  // Handle to shared memory region
-    const std::string mDiscoveryFile;      // Emulator discovery file.
     std::vector<std::string>
             mTurnConfig;  // Process to invoke to retrieve turn config.
     int32_t mFps = 24;    // Desired fps
 
     GoldfishAudioDeviceModule mGoldfishAdm;
-     VideoCapturerFactory mCaptureFactory;
+    VideoCapturerFactory mCaptureFactory;
     // Worker threads for all the participants.
     std::unique_ptr<rtc::Thread> mWorker;
     std::unique_ptr<rtc::Thread> mSignaling;
@@ -103,6 +103,7 @@ private:
             mConnectionFactory;
 
     // Network/communication things.
+    EmulatorGrpcClient mClient;
     JsonProtocol mProtocol;
     SocketTransport mTransport;
     net::EmulatorConnection* mEmulator;

@@ -13,19 +13,20 @@
 // limitations under the License.
 #pragma once
 
-#include <api/data_channel_interface.h>     // for DataChannelInterface (ptr...
-// #include <api/datachannelinterface.h>     // for DataChannelInterface (ptr o...
-#include <api/jsep.h>                       // for IceCandidateInterface (pt...
-#include <api/peer_connection_interface.h>  // for PeerConnectionInterface
-#include <api/scoped_refptr.h>              // for scoped_refptr
-#include <stdint.h>                         // for uint32_t, uint8_t
-#include <memory>                           // for unique_ptr
-#include <string>                           // for string, basic_string, ope...
-#include <unordered_map>                    // for unordered_map
-#include <unordered_set>                    // for unordered_set
-#include <vector>                           // for vector
+#include <api/data_channel_interface.h>       // for DataChannelInterface (p...
+#include <api/jsep.h>                         // for IceCandidateInterface (...
+#include <api/peer_connection_interface.h>    // for PeerConnectionInterface
+#include <api/scoped_refptr.h>                // for scoped_refptr
+#include <stdint.h>                           // for uint32_t, uint8_t
+#include <memory>                             // for unique_ptr
+#include <string>                             // for string, basic_string
+#include <unordered_map>                      // for unordered_map
+#include <unordered_set>                      // for unordered_set
+#include <vector>                             // for vector
 
-#include "nlohmann/json.hpp"                // for json
+#include "emulator/net/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
+#include "emulator_controller.grpc.pb.h"      // for EmulatorController
+#include "nlohmann/json.hpp"                  // for json
 
 namespace emulator {
 namespace webrtc {
@@ -49,7 +50,6 @@ using webrtc::VideoTrackInterface;
 namespace emulator {
 namespace webrtc {
 
-class Participant;
 class Switchboard;
 
 // A default peer connection observer that does nothing
@@ -81,7 +81,7 @@ public:
 
 class EventForwarder : public ::webrtc::DataChannelObserver {
 public:
-    EventForwarder(Participant* part,
+    EventForwarder(EmulatorGrpcClient client,
                    scoped_refptr<::webrtc::DataChannelInterface> channel,
                    std::string label);
     ~EventForwarder();
@@ -91,8 +91,9 @@ public:
     void OnMessage(const ::webrtc::DataBuffer& buffer) override;
 
 private:
+    EmulatorGrpcClient mClient;
     scoped_refptr<::webrtc::DataChannelInterface> mChannel;
-    Participant* mParticipant;
+    std::unique_ptr<android::emulation::control::EmulatorController::Stub> mEmulatorGrpc;
     std::string mLabel;
 };
 

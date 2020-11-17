@@ -16,7 +16,7 @@
 #include <memory>                                  // for unique_ptr
 #include <string>                                  // for string
 #include <vector>                                  // for vector
-
+#include "emulator/net/EmulatorGrcpClient.h"  // for Emulato...
 #include "rtc_base/physical_socket_server.h"         // for PhysicalSocketServer
 
 namespace rtc {
@@ -32,11 +32,12 @@ namespace net {
 
 using rtc::AsyncSocket;
 using webrtc::Switchboard;
+using webrtc::EmulatorGrpcClient;
 
 // Binds to a port and listens for incoming emulator connections.
 class EmulatorConnection : public sigslot::has_slots<> {
 public:
-    EmulatorConnection(int port, std::string discovery_file, std::string handle, std::string turnconfig);
+    EmulatorConnection(int port, EmulatorGrpcClient client, std::string handle, std::string turnconfig);
     ~EmulatorConnection();
 
     bool listen(bool fork);
@@ -55,7 +56,7 @@ private:
     std::string mHandle;
     std::string mTurnConfig;
     int mPort;
-    std::string mDiscoveryFile;
+    EmulatorGrpcClient mClient;
 };
 }  // namespace net
 }  // namespace emulator
