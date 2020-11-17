@@ -13,18 +13,18 @@
 // limitations under the License.
 #include "emulator/webrtc/capture/GrpcVideoSource.h"
 
-#include <api/video/video_frame.h>             // for VideoFrame::Builder
-#include <api/video/video_frame_buffer.h>      // for VideoFrameBuffer
-#include <api/video/video_rotation.h>          // for kVideoRotation_0
-#include <api/video/video_source_interface.h>  // for VideoSinkWants
-#include <grpcpp/grpcpp.h>                     // for ClientContext, ClientR...
-#include <rtc_base/logging.h>                  // for RTC_LOG
-#include <rtc_base/time_utils.h>               // for TimeMicros
-#include <stdint.h>                            // for uint8_t
-#include <memory>                              // for unique_ptr, operator==
-#include <string>                              // for operator==, stoi, string
-#include <thread>                              // for thread
-#include <tuple>                               // for make_tuple, tuple_elem...
+#include <api/video/video_frame.h>         // for VideoFrame::Builder
+#include <api/video/video_frame_buffer.h>  // for VideoFrameBuffer
+#include <api/video/video_rotation.h>      // for kVideoRotation_0
+#include <grpcpp/grpcpp.h>                 // for ClientReaderInterface
+#include <rtc_base/logging.h>              // for RTC_LOG
+#include <rtc_base/time_utils.h>           // for TimeMicros
+#include <stdint.h>                        // for uint8_t
+
+#include <memory>  // for unique_ptr, operator==
+#include <string>  // for string, operator==, stoi
+#include <thread>  // for thread
+#include <tuple>   // for make_tuple, tuple_elem...
 
 #include "android/base/StringView.h"           // for StringView
 #include "android/base/memory/SharedMemory.h"  // for SharedMemory, StringView
@@ -38,6 +38,7 @@
 #include "libyuv/video_common.h"               // for FOURCC_RGB3, FourCC
 
 namespace rtc {
+struct VideoSinkWants;
 template <typename VideoFrameT>
 class VideoSinkInterface;
 }  // namespace rtc

@@ -31,6 +31,7 @@ namespace webrtc {
 class EmulatorGrpcClient {
 public:
     explicit EmulatorGrpcClient(std::string discovery_file) : mDiscoveryFile(discovery_file) {};
+    EmulatorGrpcClient(std::string address, std::string ca, std::string key, std::string cer);
     std::unique_ptr<android::emulation::control::EmulatorController::Stub> stub();
     std::unique_ptr<grpc::ClientContext> newContext();
     bool hasOpenChannel();
