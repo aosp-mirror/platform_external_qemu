@@ -13,21 +13,31 @@
 // limitations under the License.
 #include "android/emulation/control/RtcService.h"
 
-#include <grpcpp/grpcpp.h>  // for Status, ServerCo...
+#include <grpcpp/grpcpp.h>                           // for Status, ServerCo...
+#include <stdint.h>                                  // for uint16_t
+#include <chrono>                                    // for milliseconds
+#include <memory>                                    // for shared_ptr, uniq...
+#include <ostream>                                   // for operator<<, basi...
+#include <ratio>                                     // for ratio
+#include <string>                                    // for string, operator+
 
-#include <chrono>  // for milliseconds
-#include <memory>  // for unique_ptr
-#include <mutex>   // for mutex, lock_guard
-#include <ratio>   // for ratio
-#include <string>  // for string
-
-#include "android/base/Log.h"                        // for base
+#include "android/base/Log.h"                        // for LogStreamVoidify
+#include "android/base/Optional.h"                   // for Optional
+#include "android/base/Stopwatch.h"                  // for Stopwatch
 #include "android/base/Uuid.h"                       // for Uuid
-#include "android/base/async/ThreadLooper.h"         // for ThreadLooper
+#include "android/base/sockets/ScopedSocket.h"       // for ScopedSocket
+#include "android/base/sockets/SocketUtils.h"        // for socketGetPort
+#include "android/base/system/System.h"              // for System::Pid, System
 #include "android/console.h"                         // for AndroidConsoleAg...
-#include "android/emulation/control/RtcBridge.h"     // for RtcBridge
+#include "android/emulation/control/RtcBridge.h"     // for RtcBridge, System
 #include "android/emulation/control/WebRtcBridge.h"  // for WebRtcBridge
-#include "rtc_service.grpc.pb.h"                     // for Rtc, Rtc::Service
+#include "grpc/grpc_security_constants.h"            // for LOCAL_TCP
+#include "grpc/impl/codegen/connectivity_state.h"    // for GRPC_CHANNEL_IDLE
+#include "grpc/impl/codegen/gpr_types.h"             // for gpr_timespec
+#include "grpc/support/time.h"                       // for gpr_now, gpr_tim...
+#include "grpcpp/channel_impl.h"                     // for Channel
+#include "grpcpp/security/credentials.h"             // for LocalCredentials
+#include "rtc_service.grpc.pb.h"                     // for Rtc, Rtc::Stub
 #include "rtc_service.pb.h"                          // for JsepMsg, RtcId
 
 namespace google {
@@ -39,18 +49,121 @@ class Empty;
 using grpc::ServerContext;
 using grpc::ServerWriter;
 using grpc::Status;
+using grpc::StatusCode;
 using namespace android::base;
 
 namespace android {
 namespace emulation {
 namespace control {
 
+// This forwards the RTC service calls to a separate goldfish-webrtc process.
+class RtcServiceForwarder : public Rtc::Service {
+public:
+    RtcServiceForwarder(std::string turncfg) : mTurnCfg(turncfg) {}
+
+    ~RtcServiceForwarder() {
+        if (mBridgePid) {
+            LOG(INFO) << "Terminating video bridge.";
+            System::get()->killProcess(mBridgePid);
+        }
+    }
+
+    Status requestRtcStream(ServerContext* context,
+                            const ::google::protobuf::Empty* request,
+                            RtcId* reply) override {
+        if (!connected()) {
+            return Status(StatusCode::UNAVAILABLE,
+                          "No remote channel to webrtc available.");
+        }
+        grpc::ClientContext clientContext;
+        auto stub = android::emulation::control::Rtc::NewStub(mChannel);
+        return stub->requestRtcStream(&clientContext, *request, reply);
+    }
+
+    Status sendJsepMessage(ServerContext* context,
+                           const JsepMsg* request,
+                           ::google::protobuf::Empty* reply) override {
+        if (!connected()) {
+            return Status(StatusCode::UNAVAILABLE,
+                          "No remote channel to webrtc available.");
+        }
+        grpc::ClientContext clientContext;
+        auto stub = android::emulation::control::Rtc::NewStub(mChannel);
+        return stub->sendJsepMessage(&clientContext, *request, reply);
+    }
+
+    Status receiveJsepMessages(ServerContext* context,
+                               const RtcId* request,
+                               ServerWriter<JsepMsg>* writer) override {
+        if (!connected()) {
+            return Status(StatusCode::UNAVAILABLE,
+                          "No remote channel to webrtc available.");
+        }
+        grpc::ClientContext clientContext;
+        auto stub = android::emulation::control::Rtc::NewStub(mChannel);
+        auto reader = stub->receiveJsepMessages(&clientContext, *request);
+        if (!reader) {
+            return Status::CANCELLED;
+        }
+        JsepMsg msg;
+
+        while (reader->Read(&msg) && writer->Write(msg)) {
+            // Do nothing..
+        }
+        return Status::OK;
+    }
+
+    Status receiveJsepMessage(ServerContext* context,
+                              const RtcId* request,
+                              JsepMsg* reply) override {
+        if (!connected()) {
+            return Status(StatusCode::UNAVAILABLE,
+                          "No remote channel to webrtc available.");
+        }
+        grpc::ClientContext clientContext;
+        auto stub = android::emulation::control::Rtc::NewStub(mChannel);
+        return stub->receiveJsepMessage(&clientContext, *request, reply);
+    }
+
+private:
+    // Launches the goldfish-webrtc-bridge and sets up the forwarder if needed.
+    bool connected() {
+        if (mChannel) {
+            auto state = mChannel->GetState(true);
+            return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
+        }
+
+        // Launch the forwarding bridge..
+        Stopwatch sw;
+        // Find a free port.
+        {
+            android::base::ScopedSocket s0(socketTcp4LoopbackServer(0));
+            mPort = android::base::socketGetPort(s0.get());
+        }
+        mBridgePid = WebRtcBridge::launch(mPort, mTurnCfg);
+        std::string grpc_address = "localhost:" + std::to_string(mPort);
+        mChannel = grpc::CreateChannel(
+                grpc_address,
+                ::grpc::experimental::LocalCredentials(LOCAL_TCP));
+        auto waitUntil = gpr_time_add(gpr_now(GPR_CLOCK_REALTIME),
+                                      gpr_time_from_seconds(5, GPR_TIMESPAN));
+        bool connect = mChannel->WaitForConnected(waitUntil);
+        auto state = mChannel->GetState(true);
+        LOG(INFO) << (connect ? "Connected" : "Not connected")
+                  << " state: " << state
+                  << ", after: " << Stopwatch::sec(sw.elapsedUs()) << " s";
+        return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
+    }
+
+    std::string mTurnCfg;
+    int mPort = 0;
+    Optional<System::Pid> mBridgePid;
+    std::shared_ptr<::grpc::Channel> mChannel;
+};
+
 class RtcServiceImpl : public Rtc::Service {
 public:
-    RtcServiceImpl(const AndroidConsoleAgents* agents, std::string turncfg)
-        : mAgents(agents),
-          mTurnCfg(turncfg),
-          mLooper(android::base::ThreadLooper::get()) {}
+    RtcServiceImpl(RtcBridge* bridge) : mBridge(bridge) {}
 
     Status requestRtcStream(ServerContext* context,
                             const ::google::protobuf::Empty* request,
@@ -117,28 +230,19 @@ public:
     }
 
 private:
-    RtcBridge* getBridge() {
-        const std::lock_guard<std::mutex> lock(mLock);
-        if (mBridge)
-            return mBridge.get();
+    RtcBridge* getBridge() { return mBridge; }
 
-        mBridge.reset(android::emulation::control::WebRtcBridge::create(
-                mLooper, 0, mAgents, mTurnCfg));
-        auto started = mBridge->start();
-        return mBridge.get();
-    }
-
-    std::string mTurnCfg;
-    const AndroidConsoleAgents* const mAgents;
-    std::mutex mLock;
-    android::base::Looper* mLooper;
-    std::unique_ptr<RtcBridge> mBridge;
+    RtcBridge* mBridge;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;
 };
 
 grpc::Service* getRtcService(const AndroidConsoleAgents* agents,
                              const char* turncfg) {
-    return new RtcServiceImpl(agents, turncfg ? turncfg : "");
+    return new RtcServiceForwarder(turncfg ? turncfg : "");
+}
+
+grpc::Service* getRtcService(RtcBridge* bridge) {
+    return new RtcServiceImpl(bridge);
 }
 }  // namespace control
 }  // namespace emulation

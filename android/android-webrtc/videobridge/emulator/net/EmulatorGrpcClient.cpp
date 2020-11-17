@@ -11,13 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <grpcpp/grpcpp.h>                                    // for ClientC...
-#include <rtc_base/logging.h>                                 // for RTC_LOG
-#include <map>                                                // for multimap
-#include <memory>                                             // for shared_ptr
-#include <string>                                             // for operator+
-#include <utility>                                            // for __unwra...
+#include <grpcpp/grpcpp.h>     // for ClientC...
+#include <rtc_base/logging.h>  // for RTC_LOG
 
+#include <fstream>   // for ifstream
+#include <iterator>  // for istre...
+#include <map>       // for multimap
+#include <memory>    // for shared_ptr
+#include <memory>    // for alloc...
+#include <string>    // for operator+
+#include <string>    // for char_...
+#include <utility>   // for __unwra...
+
+#include "android/base/Stopwatch.h"
 #include "android/base/StringView.h"                          // for StringView
 #include "android/base/files/IniFile.h"                       // for IniFile
 #include "android/emulation/control/secure/BasicTokenAuth.h"  // for BasicTo...
@@ -26,10 +32,12 @@
 #include "grpc/grpc_security_constants.h"                     // for LOCAL_TCP
 #include "grpc/impl/codegen/connectivity_state.h"             // for (anonym...
 #include "grpcpp/channel_impl.h"                              // for Channel
-#include "grpcpp/security/credentials.h"                      // for LocalCr...
+#include "grpcpp/security/credentials.h"
 
 namespace emulator {
 namespace webrtc {
+
+using android::base::Stopwatch;
 
 // A plugin that inserts the basic auth headers into a gRPC request
 // if needed.
@@ -61,8 +69,15 @@ bool EmulatorGrpcClient::hasOpenChannel() {
     if (!mChannel)
         return false;
 
+    Stopwatch sw;
+    auto waitUntil = gpr_time_add(gpr_now(GPR_CLOCK_REALTIME),
+                                  gpr_time_from_seconds(5, GPR_TIMESPAN));
+    bool connect = mChannel->WaitForConnected(waitUntil);
     auto state = mChannel->GetState(true);
-    RTC_LOG(INFO) << "Channel state: " << state;
+    RTC_LOG(INFO) << (connect ? "Connected" : "Not connected")
+                  << " state: " << state
+                  << ", after: " << Stopwatch::sec(sw.elapsedUs()) << " s";
+
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
 }
 
@@ -73,6 +88,29 @@ EmulatorGrpcClient::stub() {
     }
 
     return android::emulation::control::EmulatorController::NewStub(mChannel);
+}
+
+static std::string readFile(std::string fname) {
+    std::ifstream fstream(fname);
+    std::string contents((std::istreambuf_iterator<char>(fstream)),
+                         std::istreambuf_iterator<char>());
+    return contents;
+}
+
+EmulatorGrpcClient::EmulatorGrpcClient(std::string address,
+                                       std::string ca,
+                                       std::string key,
+                                       std::string cer) {
+    std::shared_ptr<grpc::ChannelCredentials> call_creds = ::grpc::InsecureChannelCredentials();
+    if (!ca.empty() && !key.empty() && !cer.empty()) {
+        // Client will use the server cert as the ca authority.
+        grpc::SslCredentialsOptions sslOpts;
+        sslOpts.pem_root_certs = readFile(ca);
+        sslOpts.pem_private_key = readFile(key);
+        sslOpts.pem_cert_chain = readFile(cer);
+        call_creds = grpc::SslCredentials(sslOpts);
+    }
+    mChannel = grpc::CreateChannel(address, call_creds);
 }
 
 std::unique_ptr<grpc::ClientContext> EmulatorGrpcClient::newContext() {

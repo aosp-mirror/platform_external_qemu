@@ -44,6 +44,9 @@ public:
 
     // The port that the gRPC service is available on.
     virtual int port() = 0;
+
+    // Block and wait until the server is completed.
+    virtual void wait() = 0;
 };
 
 // A Factory class that is capable of constructing a proper gRPC service that
