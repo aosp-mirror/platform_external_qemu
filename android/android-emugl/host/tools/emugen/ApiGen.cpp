@@ -453,7 +453,7 @@ static void writeVarEncodingExpression(Var& var, FILE* fp)
         if (var.isDMA()) {
             fprintf(fp, "\t*(uint64_t *)(ptr) = ctx->lockAndWriteDma(%s, __size_%s); ptr += 8;\n", varname, varname);
         } else {
-            fprintf(fp, "\t*(unsigned int *)(ptr) = __size_%s; ptr += 4;\n", varname);
+            fprintf(fp, "\tmemcpy(ptr, &__size_%s, 4); ptr += 4;\n", varname);
 
             Var::PointerDir dir = var.pointerDir();
             if (dir == Var::POINTER_INOUT || dir == Var::POINTER_IN) {
