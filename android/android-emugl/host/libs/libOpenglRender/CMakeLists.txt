@@ -16,6 +16,8 @@ function(add_opengl_dependencies TGT)
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
   android_target_properties(
     ${TGT} darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+  android_target_properties(
+    ${TGT} darwin-aarch64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 endfunction()
 
 android_add_library(
@@ -131,8 +133,7 @@ android_target_link_libraries(
   PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 android_install_shared(OpenglRender)
 
-if(NOT LINUX_AARCH64)
-
+if(NOT BUILDING_FOR_AARCH64)
   android_add_library(
     TARGET OpenglRender_standalone_common
     LICENSE Apache-2.0
