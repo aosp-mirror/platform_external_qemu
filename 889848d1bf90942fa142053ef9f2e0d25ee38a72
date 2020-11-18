@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9d6740a8_83ff29a0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-11-18T17:08:15Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "32feac4d_a04d41d8",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 1
+      },
+      "revId": "889848d1bf90942fa142053ef9f2e0d25ee38a72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c44744f7_b657b689",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-11-13T16:44:43Z",
       "side": 1,
       "message": "remove duplicate",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 43
+      },
+      "revId": "889848d1bf90942fa142053ef9f2e0d25ee38a72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b6741e47_40393f17",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/telephony-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-11-18T17:08:15Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c44744f7_b657b689",
       "range": {
         "startLine": 40,
         "startChar": 0,
