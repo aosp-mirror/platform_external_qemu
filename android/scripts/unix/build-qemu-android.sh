@@ -206,6 +206,14 @@ build_qemu_android () {
         var_append QEMU_TARGET_BUILDS "$QEMU_TARGET-softmmu/qemu-system-$QEMU_TARGET$(builder_host_exe_extension)"
     done
 
+    case $1 in
+        darwin-aarch64)
+            QEMU_TARGETS="aarch64"
+            QEMU_TARGET_LIST="aarch64-softmmu"
+            QEMU_TARGET_BUILDS="aarch64-softmmu/qemu-system-aarch64"
+            ;;
+    esac
+
     dump "$(builder_text) Building qemu-android"
     log "Qemu targets: $QEMU_TARGETS"
 
@@ -298,6 +306,10 @@ build_qemu_android () {
                 ;;
             linux-aarch64)
                 # TODO(bohu): cross build libusb for aarch64
+                LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
+                ;;
+            darwin-aarch64)
+                # TODO(lfy): cross build libusb for aarch64
                 LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
                 ;;
             *)
@@ -418,8 +430,8 @@ EOF
             $CROSS_PREFIX_FLAG \
             --target-list="$QEMU_TARGET_LIST" \
             --prefix=$PREFIX \
-            --extra-cflags="$EXTRA_CFLAGS" \
-            --extra-ldflags="$EXTRA_LDFLAGS" \
+            --extra-cflags="$EXTRA_CFLAGS -I/Users/lfy/emu/prebuilts/android-emulator-build/common/virglrenderer/darwin-aarch64/include/virgl" \
+            --extra-ldflags="$EXTRA_LDFLAGS -L/Users/lfy/emu/prebuilts/android-emulator-build/common/virglrenderer/darwin-aarch64/lib" \
             --python=$PYTHON2 \
             $DEBUG_FLAGS \
             $LIBUSB_FLAGS \
@@ -457,9 +469,10 @@ EOF
             --disable-xen \
             --disable-xen-pci-passthrough \
             --disable-xfsctl \
-            --enable-sdl \
+            --disable-sdl \
             --enable-trace-backends=nop \
             --enable-vnc \
+            --enable-virglrenderer \
             --with-sdlabi=2.0 \
             &&
 
