@@ -4629,23 +4629,23 @@ fi
 ##########################################
 # virgl renderer probe
 
-if test "$virglrenderer" != "no" ; then
-  cat > $TMPC << EOF
-#include <virglrenderer.h>
-int main(void) { virgl_renderer_poll(); return 0; }
-EOF
-  virgl_cflags=$($pkg_config --cflags virglrenderer 2>/dev/null)
-  virgl_libs=$($pkg_config --libs virglrenderer 2>/dev/null)
-  if $pkg_config virglrenderer >/dev/null 2>&1 && \
-     compile_prog "$virgl_cflags" "$virgl_libs" ; then
-    virglrenderer="yes"
-  else
-    if test "$virglrenderer" = "yes" ; then
-      feature_not_found "virglrenderer"
-    fi
-    virglrenderer="no"
-  fi
-fi
+# if test "$virglrenderer" != "no" ; then
+#   cat > $TMPC << EOF
+# #include <virglrenderer.h>
+# int main(void) { virgl_renderer_poll(); return 0; }
+# EOF
+#   virgl_cflags=$($pkg_config --cflags virglrenderer 2>/dev/null)
+#   virgl_libs=$($pkg_config --libs virglrenderer 2>/dev/null)
+#   if $pkg_config virglrenderer >/dev/null 2>&1 && \
+#      compile_prog "$virgl_cflags" "$virgl_libs" ; then
+#     virglrenderer="yes"
+#   else
+#     if test "$virglrenderer" = "yes" ; then
+#       feature_not_found "virglrenderer"
+#     fi
+#     virglrenderer="no"
+#   fi
+# fi
 
 ##########################################
 # capstone
