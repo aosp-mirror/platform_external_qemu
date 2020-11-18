@@ -22,6 +22,7 @@
 #include <grpcpp/grpcpp.h>
 #include <stdio.h>
 #include <string.h>
+
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -69,6 +70,8 @@
 #include "android/globals.h"
 #include "android/gpu_frame.h"
 #include "android/hw-sensors.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/Percentiles.h"
 #include "android/opengles.h"
 #include "android/physics/Physics.h"
 #include "android/recording/Frame.h"
@@ -82,7 +85,7 @@
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
-
+#include "studio_stats.pb.h"
 namespace android {
 namespace base {
 class Looper;
@@ -521,6 +524,9 @@ public:
 
         bool lastFrameWasEmpty = first.format().width() == 0;
         int frame = 0;
+
+        // Track percentiles, and report if we have seen at least 32 frames.
+        metrics::Percentiles perfEstimator(32, {0.5, 0.95});
         while (clientAvailable) {
             Image reply;
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(125);
@@ -533,7 +539,7 @@ public:
             auto arrived = frameEvent.next(kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
                 frame += arrived;
-                // TODO(jansene): Add metrics around dropped frames/timing?
+                Stopwatch sw;
                 getScreenshot(context, request, &reply);
                 reply.set_seq(frame);
 
@@ -546,10 +552,33 @@ public:
                 if (!context->IsCancelled() &&
                     (!lastFrameWasEmpty || !emptyFrame)) {
                     clientAvailable = writer->Write(reply);
+                    perfEstimator.addSample(sw.elapsedUs());
                 }
                 lastFrameWasEmpty = emptyFrame;
             }
             clientAvailable = !context->IsCancelled() && clientAvailable;
+        }
+
+        // Only report metrics if we have a constant size per image, and
+        // if we delivered sufficient amount of frames.
+        if (perfEstimator.isBucketized() &&
+            (request->format() == ImageFormat::RGB888 ||
+             request->format() == ImageFormat::RGBA8888)) {
+            android::metrics::MetricsReporter::get().report(
+                    [=](android_studio::AndroidStudioEvent* event) {
+                        int bpp = request->format() == ImageFormat::RGB888 ? 3
+                                                                           : 4;
+                        auto screenshot = event->mutable_emulator_details()
+                                                  ->mutable_screenshot();
+                        screenshot->set_size(request->width() *
+                                             request->height() * bpp);
+                        screenshot->set_frames(frame);
+                        // We care about median, 95%, and 100%.
+                        // (max enables us to calculate # of dropped frames.)
+                        perfEstimator.fillMetricsEvent(
+                                screenshot->mutable_delivery_delay(),
+                                {0.5, 0.95, 1.0});
+                    });
         }
         return Status::OK;
     }
@@ -574,6 +603,7 @@ public:
         if (!enabled)
             return Status::OK;
 
+        reply->set_timestampus(System::get()->getUnixTimeUs());
         android::emulation::ImageFormat desiredFormat =
                 ScreenshotUtils::translate(request->format());
 

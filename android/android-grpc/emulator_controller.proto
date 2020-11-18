@@ -732,6 +732,12 @@ message Image {
   // necessarily contiguous, and can be used to detect how many frames were
   // dropped. An example sequence could be: [0, 3, 5, 7, 9, 11].
   uint32 seq = 5;
+
+  // [Output Only] Unix timestamp in microseconds when the emulator estimates
+  // the frame was generated. The timestamp is before the actual frame is
+  // copied and transformed. This can be used to calculate variance between
+  // frame production time, and frame depiction time.
+  uint64 timestampUs = 6;
 }
 
 message Rotation {
