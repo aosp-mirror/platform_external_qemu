@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e4973d86_3646e6b7",
+        "filename": "android/android-emu/android/skin/qt/stylesheet.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-11-18T19:28:32Z",
+      "side": 1,
+      "message": "It seems like this change to light theme will affect standalone emulator. Is this expected?",
+      "revId": "02f0ef06da94154ec53f7ab666e74239e73b737a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
