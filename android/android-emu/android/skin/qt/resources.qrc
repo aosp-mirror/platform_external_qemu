@@ -622,7 +622,7 @@
         <file alias="drop_down">images/studio-dark/ic_arrow_drop_down_ABB_48dp.svg</file>
         <file alias="edit">images/studio-dark/ic_mode_edit_ABB_48dp.svg</file>
         <file alias="edit_disabled">images/studio-dark/ic_mode_edit_555_48dp.svg</file>
-        <file alias="file">images/studio-dark/ic_file_white_24dp.svg</file>
+        <file alias="file">images/studio-dark/ic_file_24dp.svg</file>
         <file alias="file_download">images/studio-dark/ic_file_download_ABB_48dp.svg</file>
         <file alias="file_upload">images/studio-dark/ic_file_upload_ABB_48dp.svg</file>
         <file alias="fingerprint">images/studio-dark/ic_fingerprint_ABB_48dp.svg</file>

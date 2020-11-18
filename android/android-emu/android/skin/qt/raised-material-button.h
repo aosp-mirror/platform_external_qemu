@@ -36,9 +36,15 @@ public:
 
     void setTheme(SettingsTheme theme) {
         if (!mOverrideTheme) {
-            mShadowEffect->setColor(theme == SETTINGS_THEME_LIGHT
-                                            ? QColor(200, 200, 200)
-                                            : QColor(25, 25, 25));
+            if (theme == SETTINGS_THEME_LIGHT) {
+                 mShadowEffect->setColor(QColor(200, 200, 200));
+            } else if (theme == SETTINGS_THEME_DARK) {
+                mShadowEffect->setColor(QColor(25, 25, 25));
+            } else if (theme == SETTINGS_THEME_STUDIO_LIGHT) {
+                mShadowEffect->setColor(QColor(0, 0, 0,0));
+            } else if (theme == SETTINGS_THEME_STUDIO_DARK) {
+                mShadowEffect->setColor(QColor(0, 0, 0, 0));
+            }
         }
     }
 
