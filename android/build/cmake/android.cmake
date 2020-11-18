@@ -30,6 +30,7 @@ function(_check_target_tag TAG)
       linux-x86_64
       linux-aarch64
       darwin-x86_64
+      darwin-aarch64
       all
       Clang)
   if(NOT (TAG IN_LIST VALID_TARGETS))
@@ -231,7 +232,7 @@ function(_register_target)
   set(src ${build_SRC})
   if(LINUX AND build_LINUX)
     list(APPEND src ${build_LINUX})
-  elseif(DARWIN_X86_64 AND build_DARWIN)
+  elseif((DARWIN_X86_64 OR DARWIN_AARCH64) AND build_DARWIN)
     list(APPEND src ${build_DARWIN})
   elseif(WINDOWS_MSVC_X86_64 AND (build_MSVC OR build_WINDOWS))
     list(APPEND src ${build_MSVC} ${build_WINDOWS})
@@ -991,7 +992,7 @@ endfunction()
 # . LIBCMD The variable which will contain the complete linker command . LIBNAME
 # The archive that needs to be included completely
 function(android_complete_archive LIBCMD LIBNAME)
-  if(DARWIN_X86_64)
+  if(DARWIN_X86_64 OR DARWIN_AARCH64)
     set(${LIBCMD} "-Wl,-force_load,$<TARGET_FILE:${LIBNAME}>" PARENT_SCOPE)
   elseif(WINDOWS_MSVC_X86_64)
     if(MSVC)
@@ -1138,20 +1139,36 @@ endfunction()
 # ANDROID_AARCH The android architecture name STUBS The set of stub sources to
 # use.
 function(android_add_qemu_upstream_executable ANDROID_AARCH STUBS)
-  android_build_qemu_variant(
-    # INSTALL We do not install this target.
-    EXE qemu-upstream-${ANDROID_AARCH}
-    CPU ${ANDROID_AARCH}
-    SOURCES vl.c ${STUBS}
-    DEFINITIONS -DNEED_CPU_H
-    LIBRARIES android-emu
-              libqemu2-glue
-              libqemu2-glue-vm-operations
-              libqemu2-util
-              SDL2::SDL2
-              android-qemu-deps
-              android-qemu-deps-headful
-              emulator-libusb)
+    if (DARWIN_AARCH64)
+        android_build_qemu_variant(
+            # INSTALL We do not install this target.
+            EXE qemu-upstream-${ANDROID_AARCH}
+            CPU ${ANDROID_AARCH}
+            SOURCES vl.c ${STUBS}
+            DEFINITIONS -DNEED_CPU_H
+            LIBRARIES android-emu
+            libqemu2-glue
+            libqemu2-glue-vm-operations
+            libqemu2-util
+            android-qemu-deps
+            android-qemu-deps-headful
+            emulator-libusb)
+    else()
+        android_build_qemu_variant(
+            # INSTALL We do not install this target.
+            EXE qemu-upstream-${ANDROID_AARCH}
+            CPU ${ANDROID_AARCH}
+            SOURCES vl.c ${STUBS}
+            DEFINITIONS -DNEED_CPU_H
+            LIBRARIES android-emu
+            libqemu2-glue
+            libqemu2-glue-vm-operations
+            libqemu2-util
+            SDL2::SDL2
+            android-qemu-deps
+            android-qemu-deps-headful
+            emulator-libusb)
+    endif()
 endfunction()
 
 # Copies a shared library
