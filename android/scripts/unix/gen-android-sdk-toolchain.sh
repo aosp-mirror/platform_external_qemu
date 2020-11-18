@@ -125,7 +125,7 @@ aosp_dir_parse_option
 if [ "$OPT_HOST" ]; then
     log "Detected OPT_HOST $OPT_HOST"
     case $OPT_HOST in
-        linux-x86_64|linux-aarch64|darwin-x86_64|windows_msvc-x86_64)
+        linux-x86_64|linux-aarch64|darwin-x86_64|darwin-aarch64|windows_msvc-x86_64)
             ;;
         *)
             panic "Invalid --host value: $OPT_HOST"
@@ -133,6 +133,10 @@ if [ "$OPT_HOST" ]; then
     esac
     HOST=$OPT_HOST
     if [ "$OPT_HOST" = "linux-aarch64" ]; then
+        log "Setting BUILD_ARCH to aarch64"
+        BUILD_ARCH="aarch64"
+    fi
+    if [ "$OPT_HOST" = "darwin-aarch64" ]; then
         log "Setting BUILD_ARCH to aarch64"
         BUILD_ARCH="aarch64"
     fi
@@ -345,6 +349,10 @@ gen_wrapper_toolchain () {
           local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
           local PROGRAMS="as ar ranlib strings nm objdump objcopy aarch64-linux-gnu-dlltool"
           ;;
+        darwin-aarch64)
+          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
+          local PROGRAMS="as ar ranlib strings nm objdump objcopy dlltool"
+          ;;
         *)
           local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
           local PROGRAMS="as ar ranlib strings nm objdump objcopy dlltool"
@@ -385,6 +393,9 @@ gen_wrapper_toolchain () {
     if [ ! -f "${DST_DIR}/c++" ]; then
         case "$CURRENT_HOST" in
             linux-aarch64*)
+                ln -sf ${DST_DIR}/g++ ${DST_DIR}/c++
+                ;;
+            darwin-aarch64*)
                 ln -sf ${DST_DIR}/g++ ${DST_DIR}/c++
                 ;;
         esac
@@ -609,49 +620,62 @@ prepare_build_for_linux_aarch64() {
     DST_PREFIX=/usr/bin/aarch64-linux-gnu-
 }
 
-configure_google_storage() {
-    local DEPOT_TOOLS=$(aosp_depot_tools_dir)
-    ${DEPOT_TOOLS}/download_from_google_storage --config
-}
+prepare_build_for_darwin_aarch64() {
+    # Use system clang
+    CLANG_BINDIR=
+    CLANG_DIR=
+    GNU_CONFIG_HOST=
+    CLANG_VERSION=
+    SYSROOT="/"
 
-fetch_dependencies_msvc() {
-    # Takes two parameters:
-    # $1: The path to the mount point for ciopfs,
-    # $2: The path to the data directory for ciopfs
-
-    # if you really want to force pull-down the sdk again, you can specify it in the rebuild script via
-    # --force-refresh-winsdk
-    CLANG_VERSION=$(get_clang_version)
-    # The mount point for ciopfs (case-insensitive)
-    local MOUNT_POINT="$1"
-    # Where the windows sdk is actually stored in ciopfs
-    local DATA_POINT="$2"
-
-    if [ -d "$MOUNT_POINT" ] && [ -d "$DATA_POINT" ]; then
-      # We will cache the windows sdk and reuse it for each build, unless you specify to force pull it down
-      # via --force-fetch-wintoolchain
-      if [ "$OPT_FORCE_FETCH_WINTOOLCHAIN" ]; then
-        # Need to unmount $MOUNT_POINT first or we can't delete it
-        run fusermount -u ${MOUNT_POINT}
-        run rm -rf $MOUNT_POINT
-        run rm -rf $DATA_POINT
-      else
-        return 0
-      fi
+    OSX_VERSION=$(sw_vers -productVersion)
+    OSX_DEPLOYMENT_TARGET=10.16
+    OSX_SDK_SUPPORTED="10.11 10.12 10.13 10.14 10.15 10.16 11.0"
+    OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
+            grep --color=never macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
+            sed -e 's/^/10./g' | tr '\n' ' ')
+    if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
+        panic "Please install XCode on this machine!"
+    fi
+    log "OSX: Installed SDKs: $OSX_SDK_INSTALLED_LIST"
+    for supported_sdk in $(echo "$OSX_SDK_SUPPORTED" | tr ' ' '\n' | sort -r)
+    do
+        POSSIBLE_OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | grep $supported_sdk | head -1)
+        if [ -n "$POSSIBLE_OSX_SDK_VERSION" ]; then
+            OSX_SDK_VERSION=$POSSIBLE_OSX_SDK_VERSION
+        fi
+    done
+    log "OSX: Using SDK version $OSX_SDK_VERSION"
+    if [ -z "$OSX_SDK_VERSION" ]; then
+        panic "No supported OSX SDKs found on the machine (Need any of: [$OSX_SDK_SUPPORTED], have: [$OSX_SDK_INSTALLED_LIST])"
     fi
 
-    # Create the case-insensitive filesystem
-    run mkdir -p {$MOUNT_POINT,$DATA_POINT}
-    local CIOPFS="${AOSP_DIR}/prebuilts/android-emulator-build/common/ciopfs/linux-x86_64/ciopfs"
-    run $CIOPFS -o use_ino $DATA_POINT $MOUNT_POINT
+    XCODE_PATH=$(xcode-select -print-path 2>/dev/null)
+    log "OSX: XCode path: $XCODE_PATH"
 
-    # Download the windows sdk
-    local DEPOT_TOOLS=$(aosp_depot_tools_dir)
-    local MSVC_HASH=$(aosp_msvc_hash)
+    OSX_SDK_ROOT=$XCODE_PATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${OSX_SDK_VERSION}.sdk
+    log "OSX: Looking for $OSX_SDK_ROOT"
+    if [ ! -d "$OSX_SDK_ROOT" ]; then
+        OSX_SDK_ROOT=/Developer/SDKs/MacOSX${OSX_SDK_VERSION}.sdk
+        log "OSX: Looking for $OSX_SDK_ROOT"
+        if [ ! -d "$OSX_SDK_ROOT" ]; then
+            panic "Could not find SDK $OSX_SDK_VERSION at $OSX_SDK_ROOT"
+        fi
+    fi
+    log "OSX: Using SDK at $OSX_SDK_ROOT"
+    EXTRA_ENV_SETUP="export SDKROOT=$OSX_SDK_ROOT"
+    PREBUILT_TOOLCHAIN_DIR=
 
-    log "Looking to get tools version: ${MSVC_HASH}"
-    log "Downloading the SDK (this might take a couple of minutes ...)"
-    run ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH
+    GNU_CONFIG_HOST=
+
+    common_FLAGS="-target arm64-apple-darwin20.0.0"
+    var_append common_FLAGS " -isysroot $OSX_SDK_ROOT"
+    var_append common_FLAGS " -DMACOSX_DEPLOYMENT_TARGET=$OSX_DEPLOYMENT_TARGET"
+    EXTRA_CFLAGS="$common_FLAGS -B/usr/bin"
+    EXTRA_CXXFLAGS="$common_FLAGS -B/usr/bin"
+    var_append EXTRA_CXXFLAGS "-stdlib=libc++"
+    EXTRA_LDFLAGS="$common_FLAGS"
+    DST_PREFIX=
 }
 
 get_clang_version() {
@@ -859,6 +883,9 @@ prepare_build_for_host () {
     case $CURRENT_HOST in
         linux-*)
             prepare_build_for_linux_$BUILD_ARCH
+            ;;
+        darwin-aarch64)
+            prepare_build_for_darwin_aarch64
             ;;
         darwin-*)
             prepare_build_for_darwin
