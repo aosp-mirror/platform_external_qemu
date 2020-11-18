@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5fc48102_99a2b905",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1001414
+      },
+      "writtenOn": "2020-11-18T00:00:41Z",
+      "side": 1,
+      "message": "wrong comment?",
+      "range": {
+        "startLine": 72,
+        "startChar": 20,
+        "endLine": 72,
+        "endChar": 38
+      },
+      "revId": "b1e81ebf4aa04d769d1922d02b21064442ea9026",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
