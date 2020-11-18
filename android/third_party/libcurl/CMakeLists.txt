@@ -154,6 +154,7 @@ target_compile_definitions(
                -DOS=\"${ANDROID_TARGET_TAG}\")
 target_compile_definitions(curl PUBLIC -DCURL_STATICLIB)
 target_compile_options(curl PRIVATE -Wno-macro-redefined)
+android_target_compile_definitions(curl darwin-aarch64 PRIVATE -DHAVE_CONFIG_H)
 android_target_compile_definitions(curl darwin-x86_64 PRIVATE -DHAVE_CONFIG_H)
 android_target_compile_definitions(curl linux-x86_64 PRIVATE -DHAVE_CONFIG_H)
 android_target_compile_definitions(curl linux-aarch64 PRIVATE -DHAVE_CONFIG_H)

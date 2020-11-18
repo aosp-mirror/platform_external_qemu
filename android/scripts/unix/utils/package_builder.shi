@@ -19,7 +19,7 @@ shell_import utils/option_parser.shi
 shell_import utils/package_list_parser.shi
 
 # List of valid host systems.
-_SHU_VALID_HOST_SYSTEMS="linux-x86_64,linux-aarch64,windows-x86_64,darwin-x86_64,windows_msvc-x86_64"
+_SHU_VALID_HOST_SYSTEMS="linux-x86_64,linux-aarch64,windows-x86_64,darwin-x86_64,windows_msvc-x86_64,darwin-aarch64"
 
 # Call this function before 'option_parse' to register options related to
 # building packages. This registers the following options:
@@ -57,7 +57,16 @@ package_builder_register_options () {
         esac
         ;;
       darwin)
-        DEFAULT_HOST_SYSTEMS="darwin-x86_64"
+        case $(get_build_arch) in
+          x86_64)
+            DEFAULT_HOST_SYSTEMS="darwin-x86_64"
+            ;;
+          aarch64)
+            DEFAULT_HOST_SYSTEMS="darwin-aarch64"
+            ;;
+          *)
+            panic "Don't know how to build binaries on darwin with this arch : [$(get_build_arch)]"
+        esac
         ;;
       *)
         panic "Don't know how to build binaries on this system [$(get_build_os)]"
@@ -522,6 +531,10 @@ _shu_builder_prepare_for_host () {
             ;;
         windows_msvc-x86_64)
             _SHU_BUILDER_GNU_CONFIG_HOST=x86_64-pc-windows-msvc
+            ;;
+        darwin-aarch64)
+            # Use host compiler.
+            _SHU_BUILDER_GNU_CONFIG_HOST=
             ;;
         darwin-*)
             # Use host compiler.

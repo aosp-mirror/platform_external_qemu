@@ -16,15 +16,24 @@
 
 #ifdef __APPLE__
 
+#ifdef __arm64__
+#include <Hypervisor/Hypervisor.h>
+#else
 #include <Hypervisor/hv.h>
 #include <Hypervisor/hv_vmx.h>
-
+#endif
+ 
 TEST(HypervisorTest, HypervisorFrameworkVmCreate) {
-    int res = hv_vm_create(HV_VM_DEFAULT);
-
+#ifdef __arm64__
+    int res = hv_vm_create(0);
     EXPECT_EQ(HV_SUCCESS, res);
-
     hv_vm_destroy();
+#else
+    int res = hv_vm_create(HV_VM_DEFAULT);
+    EXPECT_EQ(HV_SUCCESS, res);
+    hv_vm_destroy();
+#endif
 }
+
 
 #endif

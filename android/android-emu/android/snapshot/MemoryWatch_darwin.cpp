@@ -27,7 +27,11 @@
 #include <sys/errno.h>
 #include <sys/mman.h>
 
+#if defined(__arm64__)
+#include <Hypervisor/Hypervisor.h>
+#else
 #include <Hypervisor/hv.h>
+#endif
 
 #include <vector>
 
@@ -113,7 +117,11 @@ public:
             uint64_t gpa, size;
             int count = hva2gpa_call(start, 1, 1, &gpa, &size);
             if (count) {
+#ifdef __x86_64__
                 guest_mem_protect_call(gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+#else
+                guest_mem_protect_call(gpa, length, 0);
+#endif
             }
         }
         return true;

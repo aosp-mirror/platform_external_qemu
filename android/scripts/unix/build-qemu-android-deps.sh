@@ -292,6 +292,12 @@ build_qemu_android_deps () {
         export CONFIG_SITE=$(dirname "$0")/cross-config.arm64
     fi
 
+    local is_darwin_aarch64="0"
+    if [ "$1" == "darwin-aarch64" ]; then
+        log "Building darwin-aarch64, some stuff changes"
+        is_darwin_aarch64="1"
+    fi
+
     if [ -z "$OPT_FORCE" ]; then
         if timestamp_check \
                 "$INSTALL_DIR/$(builder_host)" qemu-android-deps; then
@@ -323,7 +329,11 @@ build_qemu_android_deps () {
     do_dtc_package dtc
 
     # libffi is required by glib.
-    do_autotools_package libffi
+    if [ "1" == "$is_darwin_aarch64" ]; then
+        do_autotools_package libffi --build=aarch64-apple-darwin20.0.0
+    else
+        do_autotools_package libffi
+    fi
 
     # Must define LIBFFI_CFLAGS and LIBFFI_LIBS to ensure
     # that GLib picks it up properly. Note that libffi places
@@ -367,6 +377,18 @@ build_qemu_android_deps () {
         windows-x86_64)
             do_windows_glib_package 64
             ;;
+        darwin-aarch64)
+            do_autotools_package glib \
+                --disable-always-build-tests \
+                --disable-debug \
+                --disable-fam \
+                --disable-installed-tests \
+                --disable-libelf \
+                --disable-man \
+                --disable-selinux \
+                --disable-xattr \
+                --disable-compile-warnings
+            ;;
         *)
             do_autotools_package glib \
                 --disable-always-build-tests \
@@ -405,31 +427,42 @@ build_qemu_android_deps () {
         --disable-libpng
 
     # Handle SDL2
-    local SDL_FLAGS=
+    local build_sdl=1
+
     case $1 in
-        windows*)
-            # DirectX sources assume __FUNCTION__ is a macro, but on GCC it isn't.
-            SDL_FLAGS=--disable-directx
+        darwin-aarch64)
+            build_sdl=0
             ;;
     esac
 
-    do_autotools_package SDL2 $SDL_FLAGS
-    SDL_CONFIG=$PREFIX/bin/sdl2-config
+    if [ "1" == "$build_sdl" ]; then
+        local SDL_FLAGS=
+        case $1 in
+            windows*)
+                # DirectX sources assume __FUNCTION__ is a macro, but on GCC it isn't.
+                SDL_FLAGS=--disable-directx
+                ;;
+        esac
 
-    # default sdl2.pc libs doesn't work with our cross-compiler,
-    # append missing libs
-    case $1 in
-        windows-*)
-            sed -i -e '/^Libs: -L\${libdir} /s/$/ -Wl,--no-undefined -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static-libgcc/' $PREFIX/lib/pkgconfig/sdl2.pc
-            ;;
-        darwin-*)
-            sed -i "" -e '/^Libs: -L\${libdir} /s/$/ -lm -Wl,-framework,OpenGL  -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit/' $PREFIX/lib/pkgconfig/sdl2.pc
-            ;;
-        linux-*)
-            sed -i -e '/^Libs: -L\${libdir} /s/$/ -Wl,--no-undefined -lm -ldl -lrt/' $PREFIX/lib/pkgconfig/sdl2.pc
-            ;;
-    esac
+        do_autotools_package SDL2 $SDL_FLAGS
+        SDL_CONFIG=$PREFIX/bin/sdl2-config
 
+        # default sdl2.pc libs doesn't work with our cross-compiler,
+        # append missing libs
+        case $1 in
+            windows-*)
+                sed -i -e '/^Libs: -L\${libdir} /s/$/ -Wl,--no-undefined -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static-libgcc/' $PREFIX/lib/pkgconfig/sdl2.pc
+                ;;
+            darwin-*)
+                sed -i "" -e '/^Libs: -L\${libdir} /s/$/ -lm -Wl,-framework,OpenGL  -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit/' $PREFIX/lib/pkgconfig/sdl2.pc
+                ;;
+            linux-*)
+                sed -i -e '/^Libs: -L\${libdir} /s/$/ -Wl,--no-undefined -lm -ldl -lrt/' $PREFIX/lib/pkgconfig/sdl2.pc
+                ;;
+        esac
+    else
+        SDL_CONFIG=none
+    fi
 
     PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig
     case $1 in
