@@ -22,6 +22,30 @@
       },
       "revId": "b1e81ebf4aa04d769d1922d02b21064442ea9026",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3ac91bfc_ec96ec32",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-18T03:42:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5fc48102_99a2b905",
+      "range": {
+        "startLine": 72,
+        "startChar": 20,
+        "endLine": 72,
+        "endChar": 38
+      },
+      "revId": "b1e81ebf4aa04d769d1922d02b21064442ea9026",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
