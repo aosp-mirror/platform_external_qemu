@@ -2046,18 +2046,18 @@ bool configAndStartRenderer(
     char* api_arch = avdInfo_getTargetAbi(avd);
     bool isGoogle = avdInfo_isGoogleApis(avd);
 
-    if (avdInfo_sysImgGuestRenderingBlacklisted(avd) &&
-        (isGuestRendererChoice(opts->gpu) ||
-         isGuestRendererChoice(hw->hw_gpu_mode))) {
-        dwarning("Your AVD has been configured with an in-guest renderer, "
-                 "but the system image does not support guest rendering."
-                 "Falling back to 'swiftshader_indirect' mode.");
-        if (opts->gpu) {
-            str_reset(&opts->gpu, DEFAULT_SOFTWARE_GPU_MODE);
-        } else {
-            str_reset(&hw->hw_gpu_mode, DEFAULT_SOFTWARE_GPU_MODE);
-        }
-    }
+    // if (avdInfo_sysImgGuestRenderingBlacklisted(avd) &&
+    //     (isGuestRendererChoice(opts->gpu) ||
+    //      isGuestRendererChoice(hw->hw_gpu_mode))) {
+    //     dwarning("Your AVD has been configured with an in-guest renderer, "
+    //              "but the system image does not support guest rendering."
+    //              "Falling back to 'swiftshader_indirect' mode.");
+    //     if (opts->gpu) {
+    //         str_reset(&opts->gpu, DEFAULT_SOFTWARE_GPU_MODE);
+    //     } else {
+    //         str_reset(&hw->hw_gpu_mode, DEFAULT_SOFTWARE_GPU_MODE);
+    //     }
+    // }
 
     // Map the generic "software" setting to our default software renderer
     if (!strcmp(hw->hw_gpu_mode, "software")) {

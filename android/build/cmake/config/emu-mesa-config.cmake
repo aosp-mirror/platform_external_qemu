@@ -15,7 +15,7 @@ get_filename_component(
 
 set(MESA_FOUND TRUE)
 
-if(DARWIN_X86_64)
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
   # No mesa on mac
   android_license(TARGET "MESA_DEPENDENCIES" LIBNAME None SPDX None LICENSE None
                   LOCAL None)
