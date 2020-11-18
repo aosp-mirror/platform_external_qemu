@@ -10,46 +10,83 @@
 // GNU General Public License for more details.
 #include "android/metrics/UiEventTracker.h"
 
-#include <unordered_map>                      // for unordered_map
+#include <functional>     // for __base
+#include <unordered_map>  // for __hash_map_iterator
+#include <utility>        // for pair
 
-#include "android/base/Log.h"                 // for LogStreamVoidify, LOG
-#include "android/metrics/MetricsReporter.h"  // for MetricsReporter
-#include "studio_stats.pb.h"                  // for EmulatorUiEvent, Androi...
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "android/metrics/MetricsReporter.h"   // for MetricsReporter
+#include "studio_stats.pb.h"                   // for EmulatorUiEvent, Andro...
 
 namespace android {
 namespace metrics {
 
 UiEventTracker::UiEventTracker(
         ::android_studio::EmulatorUiEvent_EmulatorUiEventType eventType,
-        ::android_studio::EmulatorUiEvent_EmulatorUiEventContext context)
-    : mEventType(eventType), mContext(context) {}
+        ::android_studio::EmulatorUiEvent_EmulatorUiEventContext context,
+        bool dropFirst)
+    : mEventType(eventType), mContext(context), mDropFirst(dropFirst), mRegistered(false) {
+    }
 
 void UiEventTracker::increment(const std::string& element, int amount) {
+    const std::lock_guard<std::mutex> lock(mElementLock);
+    if (!mRegistered) {
+        MultipleUiEventsTracker::get().registerTracker(shared_from_this());
+        mRegistered = true;
+    }
     if (mElementCounter.count(element) == 0) {
-        // First time registering.. Report this metric on exit.
-        registerCallback(element);
+        if (mDropFirst) {
+            mElementCounter[element] -= amount;
+        }
     }
     mElementCounter[element] += amount;
 }
 
-void UiEventTracker::registerCallback(const std::string& element) {
-    auto weakSelf = std::weak_ptr<UiEventTracker>(shared_from_this());
-    MetricsReporter::get().reportOnExit(
-            [weakSelf, element](android_studio::AndroidStudioEvent* event) {
-                if (const auto self = weakSelf.lock()) {
-                    auto* metrics = event->mutable_emulator_ui_event();
-                    metrics->set_element_id(element);
-                    metrics->set_context(self->mContext);
-                    metrics->set_type(self->mEventType);
-                    metrics->set_value(self->mElementCounter[element]);
-                    event->set_kind(android_studio::AndroidStudioEvent::
-                                            EMULATOR_UI_EVENT);
-                } else {
-                    LOG(WARNING) << "Root tracker for metric " << element
-                                 << " expired.";
-                }
-            });
+std::vector<::android_studio::EmulatorUiEvent> UiEventTracker::currentEvents() {
+    const std::lock_guard<std::mutex> lock(mElementLock);
+    std::vector<::android_studio::EmulatorUiEvent> events;
+    for (auto it = mElementCounter.begin(); it != mElementCounter.end(); ++it) {
+        // We only report elements that have an actual value.
+        if (it->second > 0) {
+            ::android_studio::EmulatorUiEvent event;
+            event.set_element_id(it->first);
+            event.set_context(mContext);
+            event.set_type(mEventType);
+            event.set_value(it->second);
+            events.push_back(event);
+        }
+    }
+    return events;
 }
 
+static base::LazyInstance<MultipleUiEventsTracker> sTrackerInstance = {};
+
+MultipleUiEventsTracker& MultipleUiEventsTracker::get() {
+    return sTrackerInstance.get();
+}
+
+void MultipleUiEventsTracker::registerTracker(
+        std::shared_ptr<UiEventTracker> tracker) {
+    const std::lock_guard<std::mutex> lock(mCallbackLock);
+
+    // We only need to register a callback once!
+    if (mOnExit.empty()) {
+        MetricsReporter::get().reportOnExit(
+                [=](android_studio::AndroidStudioEvent* event) {
+                    const std::lock_guard<std::mutex> lock(mCallbackLock);
+                    for (auto const& tracker : mOnExit) {
+                        for (auto const& currentEvt :
+                             tracker->currentEvents()) {
+                            auto newEvent = event->add_emulator_ui_events();
+                            *newEvent = currentEvt;
+                        }
+                    }
+
+                    event->set_kind(android_studio::AndroidStudioEvent::
+                                            EMULATOR_UI_EVENTS);
+                });
+    }
+    mOnExit.push_back(tracker);
+}
 }  // namespace metrics
 }  // namespace android

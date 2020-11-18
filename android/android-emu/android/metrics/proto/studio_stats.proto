@@ -307,6 +307,9 @@ message AndroidStudioEvent {
   // Set when kind = WINDOWS_DEFENDER_STATUS
   optional WindowsDefenderStatus windows_defender_status = 84;
 
+  // set when kind = EMULATOR_UI_EVENTS
+  repeated EmulatorUiEvent emulator_ui_events = 114;
+
   enum EventCategory {
     // The event was not grouped into any specific category (default).
     NO_EVENT_CATEGORY = 0;
@@ -768,6 +771,9 @@ message AndroidStudioEvent {
 
     // Status of Windows Defender
     WINDOWS_DEFENDER_STATUS = 182;
+
+    // User clicked something in the Emulator UI.
+    EMULATOR_UI_EVENTS = 216;
   }
 
   // Represents different Performance Monitoring types.
@@ -2063,6 +2069,18 @@ message EmulatorUiEvent {
     UNKNOWN_EMULATOR_UI_EVENT_CONTEXT = 0;
     EXTENDED_WINDOW_OPEN = 1;
     EXTENDED_DISPLAYS_TAB = 2;
+    EXTENDED_CELLULAR_TAB = 3;
+    EXTENDED_BATTERY_TAB = 4;
+    EXTENDED_CAMERA_TAB = 5;
+    EXTENDED_TELEPHONY_TAB = 6;
+    EXTENDED_MIC_TAB = 7;
+    EXTENDED_FINGER_TAB = 8;
+    EXTENDED_SENSORS_TAB = 9;
+    EXTENDED_BUG_TAB = 10;
+    EXTENDED_SNAPSHOT_TAB = 11;
+    EXTENDED_RECORD_TAB = 12;
+    EXTENDED_SETTINGS_TAB = 13;
+    EXTENDED_HELP_TAB = 14;
   }
 }
 

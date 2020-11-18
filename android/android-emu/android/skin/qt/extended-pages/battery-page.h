@@ -19,6 +19,15 @@
 
 #include "ui_battery-page.h"  // for BatteryPage
 
+
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
+
 class QComboBox;
 class QObject;
 class QWidget;
@@ -45,4 +54,5 @@ private:
 
 private:
     std::unique_ptr<Ui::BatteryPage> mUi;
+    std::shared_ptr<UiEventTracker> mDropDownTracker;
 };

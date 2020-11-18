@@ -22,6 +22,14 @@ class QObject;
 class QWidget;
 struct QAndroidCellularAgent;
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
+
 class CellularPage : public QWidget
 {
     Q_OBJECT
@@ -41,7 +49,7 @@ private slots:
 
     // TODO: Implement Network delay setting
     // http://developer.android.com/tools/devices/emulator.html#netdelay
-
 private:
     std::unique_ptr<Ui::CellularPage> mUi;
+    std::shared_ptr<UiEventTracker> mDropDownTracker;
 };

@@ -43,6 +43,7 @@
 #include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
 #include "android/skin/qt/stylesheet.h"               // for stylesheetFontSize
 #include "studio_stats.pb.h"                          // for AndroidStudioEvent
+#include "android/metrics/UiEventTracker.h"          // for UiEventTracker
 
 class QShowEvent;
 class QWidget;
@@ -55,7 +56,10 @@ int kAccelerometerTabIndex = 0;
 const QAndroidSensorsAgent* VirtualSensorsPage::sSensorsAgent = nullptr;
 
 VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::VirtualSensorsPage()) {
+    : QWidget(parent), mUi(new Ui::VirtualSensorsPage()),
+       mSensorTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_SENSORS_TAB)) {
     mQAndroidPhysicalStateAgent.onTargetStateChanged = onTargetStateChanged;
     mQAndroidPhysicalStateAgent.onPhysicalStateChanging =
             onPhysicalStateChanging;
@@ -242,38 +246,47 @@ void VirtualSensorsPage::showEvent(QShowEvent* event) {
 }
 
 void VirtualSensorsPage::on_btn_postureClosed_clicked() {
+    mSensorTracker->increment("POST_CLOSED");
     on_posture_valueChanged(POSTURE_CLOSED);
 }
 
 void VirtualSensorsPage::on_btn_postureFlipped_clicked() {
+    mSensorTracker->increment("POST_FLIPPED");
     on_posture_valueChanged(POSTURE_FLIPPED);
 }
 
 void VirtualSensorsPage::on_btn_postureHalfOpen_clicked() {
+    mSensorTracker->increment("POST_HALF_OPENED");
     on_posture_valueChanged(POSTURE_HALF_OPENED);
 }
 
 void VirtualSensorsPage::on_btn_postureOpen_clicked() {
+    mSensorTracker->increment("POST_OPENED");
     on_posture_valueChanged(POSTURE_OPENED);
 }
 
 void VirtualSensorsPage::on_btn_postureTent_clicked() {
+    mSensorTracker->increment("POST_TENT");
     on_posture_valueChanged(POSTURE_TENT);
 }
 
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
+    mSensorTracker->increment("PORTRAIT");
     setCoarseOrientation(ANDROID_COARSE_PORTRAIT);
 }
 
 void VirtualSensorsPage::on_rotateToLandscape_clicked() {
+    mSensorTracker->increment("LANDSCAPE");
     setCoarseOrientation(ANDROID_COARSE_LANDSCAPE);
 }
 
 void VirtualSensorsPage::on_rotateToReversePortrait_clicked() {
+    mSensorTracker->increment("REV_PORTRAIT");
     setCoarseOrientation(ANDROID_COARSE_REVERSE_PORTRAIT);
 }
 
 void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
+    mSensorTracker->increment("REV_LANDSCAPE");
     setCoarseOrientation(ANDROID_COARSE_REVERSE_LANDSCAPE);
 }
 
@@ -339,34 +352,41 @@ void VirtualSensorsPage::setCoarseOrientation(
 
 void VirtualSensorsPage::on_temperatureSensorValueWidget_valueChanged(
         double value) {
+    mSensorTracker->increment("TEMPERATURE");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_TEMPERATURE,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_proximitySensorValueWidget_valueChanged(
         double value) {
+    mSensorTracker->increment("PROXIMITY");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_PROXIMITY,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_lightSensorValueWidget_valueChanged(double value) {
+    mSensorTracker->increment("LIGHT");
+
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_LIGHT,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_pressureSensorValueWidget_valueChanged(
         double value) {
+            mSensorTracker->increment("PRESSURE");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_PRESSURE,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
         double value) {
+            mSensorTracker->increment("HUMIDITY");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_HUMIDITY,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
+    mSensorTracker->increment("MAG_FIELD_NORTH");
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
             mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
@@ -374,6 +394,7 @@ void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
 }
 
 void VirtualSensorsPage::on_magEastWidget_valueChanged(double value) {
+    mSensorTracker->increment("MAG_FIELD_EAST");
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
             mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
@@ -381,6 +402,7 @@ void VirtualSensorsPage::on_magEastWidget_valueChanged(double value) {
 }
 
 void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
+    mSensorTracker->increment("MAG_FIELD_VERT");
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
             mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
@@ -388,56 +410,68 @@ void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
 }
 
 void VirtualSensorsPage::on_hinge0Slider_valueChanged(double value) {
+    mSensorTracker->increment("HINGE_ANGLE0");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE0,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_hinge1Slider_valueChanged(double value) {
+    mSensorTracker->increment("HINGE_ANGLE1");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE1,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_hinge2Slider_valueChanged(double value) {
+    mSensorTracker->increment("HINGE_ANGLE2");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE2,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_roll0Slider_valueChanged(double value) {
+    mSensorTracker->increment("ROLLABLE0");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE0,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_roll1Slider_valueChanged(double value) {
+    mSensorTracker->increment("ROLLABLE1");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE1,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_roll2Slider_valueChanged(double value) {
+    mSensorTracker->increment("ROLLABLE2");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE2,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_zRotSlider_valueChanged(double) {
+    mSensorTracker->increment("Z_ROT");
     propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_xRotSlider_valueChanged(double) {
+    mSensorTracker->increment("X_ROT");
     propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_yRotSlider_valueChanged(double) {
+    mSensorTracker->increment("Y_ROT");
     propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_positionXSlider_valueChanged(double) {
+    mSensorTracker->increment("X_POS");
     propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
+    mSensorTracker->increment("Y_POS");
     propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
+    mSensorTracker->increment("Z_POS");
     propagateSlidersChange();
 }
 

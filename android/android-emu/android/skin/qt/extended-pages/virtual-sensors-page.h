@@ -29,6 +29,13 @@
 #include "glm/detail/type_vec.hpp"                 // for vec3
 #include "glm/detail/type_vec3.hpp"                // for tvec3
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class QObject;
 class QShowEvent;
 class QWidget;
@@ -154,6 +161,7 @@ private:
     static void onPhysicalStateStabilized(void* context);
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
+    std::shared_ptr<UiEventTracker> mSensorTracker;
     QDoubleValidator mMagFieldValidator;
     QTimer mAccelerationTimer;
     bool mFirstShow = true;

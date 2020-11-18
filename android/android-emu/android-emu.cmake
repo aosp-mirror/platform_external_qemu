@@ -1004,7 +1004,8 @@ if(NOT LINUX_AARCH64)
         android/metrics/tests/Percentiles_unittest.cpp
         android/metrics/tests/PeriodicReporter_unittest.cpp
         android/metrics/tests/PlaystoreMetricsWriter_unittest.cpp
-        android/metrics/tests/SyncMetricsReporter_unittest.cpp)
+        android/metrics/tests/SyncMetricsReporter_unittest.cpp
+        android/metrics/tests/UiEventTracker_unittest.cpp)
 
   target_compile_options(android-emu-metrics_unittests PRIVATE -O0)
   target_link_libraries(android-emu-metrics_unittests PRIVATE gmock_main
