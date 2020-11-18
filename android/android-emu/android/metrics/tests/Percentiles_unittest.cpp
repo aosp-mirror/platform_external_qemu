@@ -132,6 +132,17 @@ TEST(PercentilesTest, normalDistributionTest) {
     EXPECT_NEAR(6.0, p.calcValueForTargetNo(0).valueOr(0), 0.03);
 }
 
+TEST(PercentilesTest, bucketizeReprot) {
+    auto p = Percentiles(kRawDataSize, {0.5});
+    for(int i = 0; i < kRawDataSize; i++) {
+        p.addSample(i);
+        EXPECT_EQ(i + 1, p.samplesCount());
+        EXPECT_FALSE(p.isBucketized());
+    }
+    p.addSample(1);
+    EXPECT_TRUE(p.isBucketized());
+}
+
 TEST(PercentilesTest, normalMultiplePointsTest) {
     auto p = Percentiles(kRawDataSize, {0.4, 0.5, 0.6});
     auto entries = getNormalDistribution(kNumSamples, 6.0);
@@ -204,5 +215,23 @@ TEST(PercentilesTest, exportTest) {
         EXPECT_EQ(0, event.bucket_size());
         EXPECT_EQ(kRawDataSize, event.raw_sample_size());
         EXPECT_TRUE(RangesMatch(entries, event.raw_sample()));
+    }
+
+    // Test that the filter only exports the desired buckets.
+    {
+        auto p = Percentiles(kRawDataSize, {0.5});
+        p.addSamples(getNormalDistribution(kNumSamples));
+
+        android_studio::PercentileEstimator event;
+        // We only want one bucket!
+        p.fillMetricsEvent(&event, {0.5});
+
+        EXPECT_EQ(0, event.raw_sample_size());
+        EXPECT_EQ(1, event.bucket_size());
+        EXPECT_TRUE(event.bucket(0).has_value());
+        EXPECT_EQ(p.calcValueForTargetNo(0), event.bucket(0).value());
+        EXPECT_TRUE(event.bucket(0).has_target_percentile());
+        EXPECT_EQ(p.target(0), event.bucket(0).target_percentile());
+        EXPECT_TRUE(event.bucket(0).has_count());
     }
 }
