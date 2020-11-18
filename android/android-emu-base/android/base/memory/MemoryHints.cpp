@@ -24,13 +24,28 @@
 #include <sys/types.h>
 #endif
 
+#if defined(__APPLE__) && defined(__arm64__)
+// Seeing segfaults with madvise dontneed on macos aarch64
+#define DISABLE_DONTNEED 1
+#else
+#define DISABLE_DONTNEED 0
+#endif
+
 using android::base::ContiguousRangeMapper;
 using android::base::LazyInstance;
 
 namespace android {
 namespace base {
 
+#ifdef __APPLE__
+#ifdef __arm64__
+static constexpr size_t kPageSize = 16384;
+#else
 static constexpr size_t kPageSize = 4096;
+#endif
+#else
+static constexpr size_t kPageSize = 4096;
+#endif
 
 class MemoryTouchBuffer {
 public:
@@ -113,9 +128,15 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
     switch (hint) {
         case MemoryHint::DontNeed:
 #ifdef __APPLE__
+#if DISABLE_DONTNEED
+            // On darwin-arm64, mprotect doesn't seem to work properly.
+            skipAdvise = true;
+            reprotect = false;
+#else
             asAdviseFlag = MADV_FREE;
             // On Mac, an explicit mprotect() needs to happen to kick the page out.
             reprotect = true;
+#endif // __APPLE__
 #else // Linux
             // MADV_FREE would be best, but it is not necessarily
             // supported on all Linux systems.

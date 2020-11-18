@@ -59,7 +59,7 @@ android_add_library(
       jquant2.c
       jutils.c)
 target_include_directories(emulator-libjpeg PUBLIC .)
-if(NOT LINUX_AARCH64)
+if(NOT BUILDING_FOR_AARCH64)
   target_compile_options(emulator-libjpeg PRIVATE -O3 -fstrict-aliasing -msse2
                                                   -Wno-all)
   target_compile_definitions(
