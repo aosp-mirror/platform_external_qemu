@@ -467,6 +467,19 @@ android_target_link_libraries(
          "-weak_framework Hypervisor"
          "-framework OpenGL")
 
+android_target_link_libraries(
+  android-emu darwin-aarch64
+  PUBLIC "-framework AppKit"
+         "-framework AVFoundation" # For camera-capture-mac.m
+         "-framework Accelerate" # Of course, our camera needs it!
+         "-framework CoreMedia" # Also for the camera.
+         "-framework CoreVideo" # Also for the camera.
+         "-framework IOKit"
+         "-framework VideoToolbox" # For HW codec acceleration on mac
+         "-framework VideoDecodeAcceleration" # For HW codec acceleration on mac
+         "-weak_framework Hypervisor"
+         "-framework OpenGL")
+
 target_include_directories(
   android-emu
   PUBLIC
@@ -508,6 +521,9 @@ android_target_compile_options(
 
 android_target_compile_definitions(
   android-emu darwin-x86_64 PRIVATE "-D_DARWIN_C_SOURCE=1" "-Dftello64=ftell"
+  "-Dfseeko64=fseek")
+android_target_compile_definitions(
+  android-emu darwin-aarch64 PRIVATE "-D_DARWIN_C_SOURCE=1" "-Dftello64=ftell"
   "-Dfseeko64=fseek")
 
 target_compile_definitions(
@@ -695,6 +711,21 @@ android_target_link_libraries(
           "-framework VideoToolbox" # For HW codec acceleration on mac
           "-framework VideoDecodeAcceleration" # For HW codec acceleration on
                                                # mac
+          "-framework OpenGL"
+          "-framework IOKit")
+
+android_target_link_libraries(
+  android-emu-shared darwin-aarch64
+  PRIVATE "-framework AppKit"
+          "-framework ApplicationServices" # To control icon
+          "-framework AVFoundation" # For camera-capture-mac.m
+          "-framework Accelerate" # Of course, our camera needs it!
+          "-framework CoreMedia" # Also for the camera.
+          "-framework CoreVideo" # Also for the camera.
+          "-framework VideoToolbox" # For HW codec acceleration on mac
+          "-framework VideoDecodeAcceleration" # For HW codec acceleration on
+                                               # mac
+          "-framework OpenGL"
           "-framework IOKit")
 target_include_directories(
   android-emu-shared
@@ -732,6 +763,9 @@ target_compile_definitions(android-emu-shared PUBLIC ${CURL_DEFINITIONS}
                                                      ${LIBXML2_DEFINITIONS})
 android_target_compile_definitions(
   android-emu-shared darwin-x86_64 PRIVATE "-D_DARWIN_C_SOURCE=1"
+  "-Dftello64=ftell" "-Dfseeko64=fseek")
+android_target_compile_definitions(
+  android-emu-shared darwin-aarch64 PRIVATE "-D_DARWIN_C_SOURCE=1"
   "-Dftello64=ftell" "-Dfseeko64=fseek")
 target_compile_definitions(
   android-emu-shared
@@ -923,6 +957,11 @@ if(NOT LINUX_AARCH64)
     android-emu_unittests darwin-x86_64 PRIVATE "-D_DARWIN_C_SOURCE=1"
     "-Dftello64=ftell" "-Dfseeko64=fseek")
   android_target_compile_options(android-emu_unittests darwin-x86_64
+                                 PRIVATE "-Wno-deprecated-declarations")
+  android_target_compile_definitions(
+    android-emu_unittests darwin-aarch64 PRIVATE "-D_DARWIN_C_SOURCE=1"
+    "-Dftello64=ftell" "-Dfseeko64=fseek")
+  android_target_compile_options(android-emu_unittests darwin-aarch64
                                  PRIVATE "-Wno-deprecated-declarations")
 
   # Dependecies are exported from android-emu.
