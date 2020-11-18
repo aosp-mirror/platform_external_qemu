@@ -39,6 +39,7 @@ const char TABLE_BOTTOM_COLOR_VAR[] = "TABLE_BOTTOM_COLOR";
 const char THEME_PATH_VAR[] = "PATH";
 const char THEME_TEXT_COLOR[] = "TEXT_COLOR";
 const char MAJOR_TAB_COLOR_VAR[] = "MAJOR_TAB_COLOR";
+const char MAJOR_TAB_SELECTED_COLOR_VAR[] = "MAJOR_TAB_SELECTED_COLOR";
 const char TAB_BKG_COLOR_VAR[] = "TAB_BKG_COLOR";
 const char TAB_SELECTED_COLOR_VAR[] = "TAB_SELECTED_COLOR";
 const char TABLE_SELECTED_VAR[] = "TABLE_SELECTED";
@@ -269,7 +270,9 @@ struct StylesheetValues {
         {"DISABLED_BKG_COLOR","rgba(240,240,240,60%)"},  // Main page background (disabled)
         {"BKG_COLOR_OVERLAY", "rgba(236,236,236,175)"},  // Overlay background
         {"BUTTON_BKG_COLOR",                "#F9F9F9"},  // Background of push buttons
+        {"BUTTON_BKG_PRESSED_COLOR",        "#e6e6e6"},  // Background of push buttons
         {"BUTTON_COLOR",                    "#757575"},  // Text in push buttons
+        {"BUTTON_BORDER",                   "0px solid #FFFFFF"}, //Raise button border
         {"DISABLED_BUTTON_COLOR",           "#bbbbbb"},  // Text in disabled push buttons
         {"DISABLED_PULLDOWN_COLOR",         "#c0c0c0"},  // Text in disabled combo box
         {"DISABLED_TOOL_COLOR",             "#baeae4"},  // Grayed-out tool text
@@ -278,11 +281,12 @@ struct StylesheetValues {
         {"INSTRUCTION_COLOR",               "#91a4ad"},  // Large instruction string
         {"LARGE_DIVIDER_COLOR",    "rgba(0,0,0,2.1%)"},  // Start of large divider's gradient
         {MAJOR_TAB_COLOR_VAR,               "#91a4ad"},  // Text of major tabs
-        {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
+        {MAJOR_TAB_SELECTED_COLOR_VAR,      "#91a4ad"},  // Text of selected major tabs 
+       {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
         {"SCROLL_BKG_COLOR",                "#f6f6f6"},  // Background of scroll bar
         {"SCROLL_HANDLE_COLOR",             "#d9d9d9"},  // Handle of scroller
         {"SNAPSHOT_INFO_BKG",               "#f9f9f9"},  // Background of snapshot description text
-        {TAB_BKG_COLOR_VAR,                 "#E6EBF0"},  // Background of major tabs
+        {TAB_BKG_COLOR_VAR,                 "#FFFFFF"},  // Background of major tabs
         {TAB_SELECTED_COLOR_VAR,            "#f5f5f5"},  // Background of the selected major tab
         {HORIZ_DIVIDER_COLOR_VAR,           "#f5f5f5"},  // Horizontal divider in the left Navigation.
         {"TAB_DARKENED_COLOR",              "#e6e6e6"},
@@ -306,6 +310,7 @@ struct StylesheetValues {
         {"DROP_TARGET_BKG_COLOR", "rgba(0,190,64,10%)"},  // Drop target background color.
         {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
         {"VHAL_PROPERTY_BKG",               "#f2f2f2"},  // Vhal property background color.
+        {"TEXT_INPUT_BKG",                  "#FFFFFF"},  // Background for text input
     };
 
     QHash<QString, QString> darkValues = {
@@ -314,7 +319,9 @@ struct StylesheetValues {
         {"DISABLED_BKG_COLOR","rgba(39,50,56,60%)"},
         {"BKG_COLOR_OVERLAY", "rgba(35,46,52,175)"},
         {"BUTTON_BKG_COLOR",             "#37474f"},
+        {"BUTTON_BKG_PRESSED_COLOR",     "#20292e"},  // Background of push buttons
         {"BUTTON_COLOR",                 "#bec1c3"},
+        {"BUTTON_BORDER",                "0px solid #FFFFFF"}, //Raise button border
         {"DISABLED_BUTTON_COLOR",        "#5f6162"},
         {"DISABLED_PULLDOWN_COLOR",      "#808080"},
         {"DISABLED_TOOL_COLOR",          "#1b5c58"},
@@ -323,7 +330,8 @@ struct StylesheetValues {
         {"INSTRUCTION_COLOR",            "#ffffff"},
         {"LARGE_DIVIDER_COLOR",  "rgba(0,0,0,20%)"},
         {MAJOR_TAB_COLOR_VAR,            "#bdc0c3"},
-        {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
+        {MAJOR_TAB_SELECTED_COLOR_VAR,      "#bdc0c3"}, 
+       {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
         {"SCROLL_BKG_COLOR",             "#333b43"},
         {"SCROLL_HANDLE_COLOR",          "#1d272c"},
         {"SNAPSHOT_INFO_BKG",            "#273238"},
@@ -351,7 +359,8 @@ struct StylesheetValues {
         {"DROP_TARGET_BKG_COLOR", "rgba(0,190,64,7%)"},
         {THEME_PATH_VAR,                    "dark"},
         {"VHAL_PROPERTY_BKG",            "#394249"},
-    };
+        {"TEXT_INPUT_BKG",               "#394249"},  // Background for text input
+ };
 
     QHash<QString, QString> studioLightValues = {
         {"BOX_COLOR",                       "#d9d9d9"},  // Boundary around SMS text area
@@ -359,8 +368,10 @@ struct StylesheetValues {
         {"DISABLED_BKG_COLOR","rgba(240,240,240,60%)"},  // Main page background (disabled)
         {"BKG_COLOR_OVERLAY", "rgba(236,236,236,175)"},  // Overlay background
         {"BUTTON_BKG_COLOR",                "#FFFFFF"},  // Background of push buttons
+        {"BUTTON_BKG_PRESSED_COLOR",        "#CFCFCF"},  // Background of push buttons
         {"BUTTON_COLOR",                    "#1D1D1D"},  // Text in push buttons
-        {"DISABLED_BUTTON_COLOR",           "#8C8C8C"},  // Text in disabled push buttons
+        {"BUTTON_BORDER",                   "1px solid #C4C4C4"}, //Raise button border
+       {"DISABLED_BUTTON_COLOR",           "#8C8C8C"},  // Text in disabled push buttons
         {"DISABLED_BUTTON_BKG_COLOR",       "#F2F2F2"},
         {"DISABLED_PULLDOWN_COLOR",         "#8C8C8C"},  // Text in disabled combo box
         {"DISABLED_TOOL_COLOR",             "#8C8C8C"},  // Grayed-out tool text
@@ -369,6 +380,7 @@ struct StylesheetValues {
         {"INSTRUCTION_COLOR",               "#808080"},  // Large instruction string
         {"LARGE_DIVIDER_COLOR",             "#D1D1D1"},  // Start of large divider's gradient
         {MAJOR_TAB_COLOR_VAR,               "#1D1D1D"},  // Text of major tabs
+        {MAJOR_TAB_SELECTED_COLOR_VAR,      "#FFFFFF"},  // Text of selected major tabs 
         {"MAJOR_TITLE_COLOR",               "#FFFFFF"},  // Text of major tab separators
         {"SCROLL_BKG_COLOR",                "rgba(0,0,0,0%)"},  // Background of scroll bar
         {"SCROLL_HANDLE_COLOR",             "#999999"},  // Handle of scroller
@@ -392,11 +404,12 @@ struct StylesheetValues {
         {"LINK_COLOR",                      "#2470B3"},  // Highlighted link
         {"PREVIEW_IMAGE_BKG",               "#F2F2F2"},  // Behind snapshot preview image
         {"RAISED_COLORED_BKG_COLOR",        "#87AFDA"},  // Colored raised button background color.
-        {"RAISED_COLORED_PRESSED_COLOR",    "#E9EEF5"},  // Colored raised button pressed color.
+        {"RAISED_COLORED_PRESSED_COLOR",    "#87AFDA"},  // Colored raised button pressed color.
         {"RAISED_COLORED_COLOR",            "#ffffff"},  // Colored raised button text color.
         {"DROP_TARGET_BKG_COLOR", "rgba(98,181,67,60%)"},  // Drop target background color.
         {THEME_PATH_VAR,                    "studio-light"},  // Icon directory under images/
         {"VHAL_PROPERTY_BKG",               "#f2f2f2"},  // Vhal property background color.
+        {"TEXT_INPUT_BKG",                  "#FFFFFF"},  // Background for text input
     };
 
     QHash<QString, QString> studioDarkValues = {
@@ -405,7 +418,9 @@ struct StylesheetValues {
         {"DISABLED_BKG_COLOR","rgba(39,50,56,60%)"},
         {"BKG_COLOR_OVERLAY", "rgba(35,46,52,175)"},
         {"BUTTON_BKG_COLOR",             "#4C5052"},
+        {"BUTTON_BKG_PRESSED_COLOR",     "#5C6164"},  // Background of push buttons
         {"BUTTON_COLOR",                 "#BBBBBB"},
+        {"BUTTON_BORDER",                "1px solid #5E6060"}, //Raise button border
         {"DISABLED_BUTTON_COLOR",        "#777777"},
         {"DISABLED_BUTTON_BKG_COLOR",    "#3C3F41"},
         {"DISABLED_PULLDOWN_COLOR",      "#777777"},
@@ -415,7 +430,8 @@ struct StylesheetValues {
         {"INSTRUCTION_COLOR",            "#878787"},
         {"LARGE_DIVIDER_COLOR",  "rgba(0,0,0,20%)"},
         {MAJOR_TAB_COLOR_VAR,            "#BBBBBB"},
-        {"MAJOR_TITLE_COLOR",            "#FFFFFF"},
+        {MAJOR_TAB_SELECTED_COLOR_VAR,   "#FFFFFF"},
+       {"MAJOR_TITLE_COLOR",            "#FFFFFF"},
         {"SCROLL_BKG_COLOR",             "#2B2B2B"},
         {"SCROLL_HANDLE_COLOR",          "rgba(133,133,133,50%)"},
         {"SNAPSHOT_INFO_BKG",            "#273238"},
@@ -438,11 +454,12 @@ struct StylesheetValues {
         {"LINK_COLOR",                   "#589DF6"},
         {"PREVIEW_IMAGE_BKG",            "#3C3F41"},
         {"RAISED_COLORED_BKG_COLOR",     "#87AFDA"},
-        {"RAISED_COLORED_PRESSED_COLOR", "#E9EEF5"},
+        {"RAISED_COLORED_PRESSED_COLOR", "#87AFDA"},
         {"RAISED_COLORED_COLOR",         "#ffffff"},
         {"DROP_TARGET_BKG_COLOR", "rgba(98,181,67,60%)"},
         {THEME_PATH_VAR,                 "studio-dark"},
         {"VHAL_PROPERTY_BKG",            "#3C3F41"},
+        {"TEXT_INPUT_BKG",               "#4C5052"},  // Background for text input
     };
 
     StylesheetValues() {
