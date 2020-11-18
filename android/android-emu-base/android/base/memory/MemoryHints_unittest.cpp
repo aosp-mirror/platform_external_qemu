@@ -21,42 +21,50 @@
 namespace android {
 namespace base {
 
+#ifdef __APPLE__
+#ifdef __arm64__
+    static const uintptr_t kPageSize = 16384;
+#else
+    static const uintptr_t kPageSize = 4096;
+#endif
+#else
+    static const uintptr_t kPageSize = 4096;
+#endif
+
 // A basic check that hints succeed for page-aligned memory,
 // and that no crashes happen for other alignments.
 TEST(MemoryHints, Basic) {
-    const int pageSize = 4096;
     const int numIter = 100;
 
     // Do many iterations with reallocation
     // to get around flaky lucky alignments and so forth.
     std::vector<char*> toDealloc;
     for (int i = 0; i < numIter; i++) {
-        char* unalignedPtr = new char[pageSize];
+        char* unalignedPtr = new char[kPageSize];
 
         // Don't delete those ptrs right away either, because
         // chances are they will just reuse the same addresses
         // due to compiler opt / OS.
         toDealloc.push_back(unalignedPtr);
         // Not necessarily page-aligned; don't expect success
-        memoryHint(unalignedPtr, pageSize, MemoryHint::DontNeed);
-        memoryHint(unalignedPtr, pageSize, MemoryHint::Normal);
-        memoryHint(unalignedPtr, pageSize, MemoryHint::Random);
-        memoryHint(unalignedPtr, pageSize, MemoryHint::Sequential);
+        memoryHint(unalignedPtr, kPageSize, MemoryHint::DontNeed);
+        memoryHint(unalignedPtr, kPageSize, MemoryHint::Normal);
+        memoryHint(unalignedPtr, kPageSize, MemoryHint::Random);
+        memoryHint(unalignedPtr, kPageSize, MemoryHint::Sequential);
 
-        char* forAlignedPtr = new char[pageSize * 2];
+        char* forAlignedPtr = new char[kPageSize * 2];
         toDealloc.push_back(forAlignedPtr);
         char* pagePtr =
-            (char*)((uintptr_t)(forAlignedPtr +
-                        (uintptr_t)(pageSize)) &
-                    (~(pageSize - 1)));
+            (char*)(kPageSize + (uintptr_t)forAlignedPtr & ~(kPageSize - 1));
 
-        EXPECT_TRUE(memoryHint(pagePtr, pageSize, MemoryHint::DontNeed));
-        EXPECT_TRUE(memoryHint(pagePtr, pageSize, MemoryHint::Normal));
-        EXPECT_TRUE(memoryHint(pagePtr, pageSize, MemoryHint::Random));
-        EXPECT_TRUE(memoryHint(pagePtr, pageSize, MemoryHint::Sequential));
+        EXPECT_TRUE(memoryHint(pagePtr, kPageSize, MemoryHint::DontNeed));
+        EXPECT_TRUE(memoryHint(pagePtr, kPageSize, MemoryHint::Normal));
+        EXPECT_TRUE(memoryHint(pagePtr, kPageSize, MemoryHint::Random));
+        EXPECT_TRUE(memoryHint(pagePtr, kPageSize, MemoryHint::Sequential));
 
         // Check that zeroOutMemory works.
-        EXPECT_TRUE(zeroOutMemory(pagePtr, pageSize));
+        EXPECT_TRUE(zeroOutMemory(pagePtr, kPageSize));
+        
     }
 
     for (auto ptr : toDealloc) {
@@ -68,10 +76,10 @@ TEST(MemoryHints, Basic) {
 // crash. All bets are off as to the return result, as some hint
 // settings are not supported on some platforms and are no-ops.
 TEST(MemoryHints, Negative) {
-    memoryHint(0, 4096, MemoryHint::DontNeed);
-    memoryHint(0, 4096, MemoryHint::Normal);
-    memoryHint(0, 4096, MemoryHint::Random);
-    memoryHint(0, 4096, MemoryHint::Sequential);
+    memoryHint(0, kPageSize, MemoryHint::DontNeed);
+    memoryHint(0, kPageSize, MemoryHint::Normal);
+    memoryHint(0, kPageSize, MemoryHint::Random);
+    memoryHint(0, kPageSize, MemoryHint::Sequential);
 }
 
 }  // namespace base

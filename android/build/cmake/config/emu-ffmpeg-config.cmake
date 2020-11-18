@@ -30,9 +30,11 @@ set(FFMPEG_LIBRARIES
 )
 if(WINDOWS)
   # We need winsock for avformat, so make that dependency explicit
-  list(APPEND FFMPEG_LIBRARIES ws2_32::ws2_32 secur32::secur32)
+  list(APPEND FFMPEG_LIBRARIES
+      ws2_32::ws2_32
+      secur32::secur32)
 endif()
-if(DARWIN_X86_64)
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
   # Well, macos needs something extra as well
   list(APPEND FFMPEG_LIBRARIES "-framework VideoToolbox")
   list(APPEND FFMPEG_LIBRARIES "-framework VideoDecodeAcceleration")
