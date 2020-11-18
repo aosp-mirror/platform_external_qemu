@@ -63,6 +63,13 @@ public:
 
     // Returns the number of tracked percentiles.
     int targetCount() const;
+
+    // Returns the number of samples collected.
+    int samplesCount() const;
+
+    // Returns true if the raw samples have been bucketized.
+    bool isBucketized() const;
+
     // Returns the value of tracked percentile #|index|, or empty optional if
     // |index| is out of range.
     base::Optional<double> target(int index) const;
@@ -74,8 +81,11 @@ public:
     base::Optional<double> calcValueForTarget(double target);
     base::Optional<double> calcValueForTargetNo(int targetNo);
 
-    // Fills in a metrics event with the current state.
-    void fillMetricsEvent(android_studio::PercentileEstimator* event) const;
+    // Fills in a metrics event with the current state, you can provide an
+    // optional set of targets that should be selected, leave empty to send all
+    // targets.
+    void fillMetricsEvent(android_studio::PercentileEstimator* event,
+                          std::initializer_list<double> targets = {}) const;
 
 private:
     // A single tracked bucket.
