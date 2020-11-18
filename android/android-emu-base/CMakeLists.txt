@@ -6,7 +6,9 @@
 prebuilt(UUID)
 prebuilt(GLIB2) # Acts as windows stdio compatibility layer.
 prebuilt(LIBUNWIND)
-prebuilt(TCMALLOC)
+if (NOT DARWIN_AARCH64)
+    prebuilt(TCMALLOC)
+endif()
 prebuilt(Threads)
 
 # Let's add in the library
@@ -166,6 +168,15 @@ android_target_link_libraries(
 
 android_target_compile_definitions(
   android-emu-base darwin-x86_64 PRIVATE "-D_DARWIN_C_SOURCE=1"
+  "-Dftello64=ftell" "-Dfseeko64=fseek")
+
+android_target_link_libraries(
+  android-emu-base darwin-aarch64
+  PUBLIC "-framework Foundation" "-framework ApplicationServices"
+         "-framework AppKit" "-framework IOKit")
+
+android_target_compile_definitions(
+  android-emu-base darwin-aarch64 PRIVATE "-D_DARWIN_C_SOURCE=1"
   "-Dftello64=ftell" "-Dfseeko64=fseek")
 
 # Compiler flags, note that these should never propagate (i.e. set to public) as

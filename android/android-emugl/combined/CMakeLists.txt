@@ -23,19 +23,18 @@ if(OPTION_GFXSTREAM_BACKEND)
       ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/standalone_common/angle-util
   )
 
-  android_target_properties(gfxstream_backend linux-x86_64
-                            "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN'")
-  android_target_properties(gfxstream_backend darwin-x86_64
-                            "INSTALL_RPATH>=@loader_path")
+  android_target_properties(gfxstream_backend linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN'")
+  android_target_properties(gfxstream_backend darwin-x86_64 "INSTALL_RPATH>=@loader_path")
+  android_target_properties(gfxstream_backend darwin-aarch64 "INSTALL_RPATH>=@loader_path")
 
-  if(NOT LINUX_AARCH64)
-    target_link_libraries(
-      gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared
-                                emugl_base OpenglRender)
-  else()
+  if (BUILDING_FOR_AARCH64)
     target_link_libraries(
       gfxstream_backend PRIVATE GLIB2::GLIB2 android-emu-shared emugl_base
                                 OpenglRender)
+  else()
+    target_link_libraries(
+      gfxstream_backend PRIVATE GLIB2::GLIB2 OSWindow android-emu-shared
+                                emugl_base OpenglRender)
   endif()
 
   if(NOT LINUX_AARCH64)
@@ -83,7 +82,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
 endif()
 
-if(NOT WINDOWS AND NOT LINUX_AARCH64)
+if(NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
 
   set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp
                        Toplevel.cpp)
