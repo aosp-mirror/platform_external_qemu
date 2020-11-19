@@ -20,6 +20,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "3c1e524c_2cef0ddb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2020-11-19T09:03:22Z",
+      "side": 1,
+      "message": "And one more question: currently, when the grpc option is enabled, the emulator will automatically produce frames in the the shared memory. With this change, will the emulator do so only when the gRPC service is called?",
+      "revId": "5459ffd026c7bb267f4682e62516d6bf275a8129",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "bfea6620_58f9f4bd",
         "filename": "android/android-webrtc/videobridge/emulator/webrtc/capture/GrpcVideoSource.cpp",
         "patchSetId": 5
