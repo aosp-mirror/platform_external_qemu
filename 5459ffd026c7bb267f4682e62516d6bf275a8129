@@ -58,6 +58,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e6e532b0_ee84262c",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/capture/GrpcVideoSource.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-11-19T10:47:02Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "bfea6620_58f9f4bd",
+      "range": {
+        "startLine": 65,
+        "startChar": 9,
+        "endLine": 65,
+        "endChar": 15
+      },
+      "revId": "5459ffd026c7bb267f4682e62516d6bf275a8129",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1c6ff983_2c64756e",
@@ -104,6 +128,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9e3e39ad_1425c45b",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/capture/GrpcVideoSource.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-11-19T10:47:02Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "68949611_d5ad857c",
+      "range": {
+        "startLine": 122,
+        "startChar": 24,
+        "endLine": 122,
+        "endChar": 34
+      },
+      "revId": "5459ffd026c7bb267f4682e62516d6bf275a8129",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f26add05_38933be4",
@@ -117,6 +165,30 @@
       "writtenOn": "2020-11-19T02:47:49Z",
       "side": 1,
       "message": "Maybe not in this CL:\n\nSo every time there\u0027s a new frame we will deliver it. It might be useful to add some throttling here to prevent CPU from burning.",
+      "range": {
+        "startLine": 146,
+        "startChar": 0,
+        "endLine": 146,
+        "endChar": 36
+      },
+      "revId": "5459ffd026c7bb267f4682e62516d6bf275a8129",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "494fe4d3_a3533d37",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/capture/GrpcVideoSource.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-11-19T10:47:02Z",
+      "side": 1,
+      "message": "Ack. Will add a call to mBroadcaster.frame_wanted() to skip unwanted frames.",
+      "parentUuid": "f26add05_38933be4",
       "range": {
         "startLine": 146,
         "startChar": 0,
