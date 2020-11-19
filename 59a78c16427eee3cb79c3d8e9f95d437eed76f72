@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "18c4b267_4a426975",
+        "filename": "android/android-emu/android/metrics/proto/studio_stats.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 1899,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-11-19T18:39:06Z",
+      "side": 1,
+      "message": "nit: extra blank line",
+      "revId": "59a78c16427eee3cb79c3d8e9f95d437eed76f72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
