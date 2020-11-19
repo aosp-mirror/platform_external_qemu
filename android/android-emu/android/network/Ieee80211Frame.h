@@ -57,6 +57,7 @@ public:
     uint16_t getQoSControl() const;
     const android::base::IOVector toEthernet();
     static constexpr size_t MAX_FRAME_LEN = 2352;
+    static constexpr size_t IEEE80211_TX_MAX_RATES = 4;
     static bool validEtherType(uint16_t ethertype);
 
 private:
