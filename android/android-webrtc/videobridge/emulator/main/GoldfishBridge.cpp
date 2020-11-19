@@ -11,54 +11,64 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <rtc_base/log_sinks.h>    // for FileRotatingLogSink
-#include <rtc_base/logging.h>      // for LogSink, RTC_LOG, INFO
-#include <rtc_base/ssl_adapter.h>  // for CleanupSSL, InitializeSSL
-#include <stdio.h>                 // for printf, fprintf, stderr
-#include <stdlib.h>                // for atoi, exit, EXIT_FAILURE
+#include <rtc_base/log_sinks.h>                      // for FileRotatingLogSink
+#include <rtc_base/logging.h>                        // for RTC_LOG, LogSink
+#include <rtc_base/ssl_adapter.h>                    // for CleanupSSL, Init...
+#include <stdio.h>                                   // for fprintf, printf
+#include <stdlib.h>                                  // for atoi, exit, EXIT...
+#include <unistd.h>                                  // for fork, pid_t
+#include <memory>                                    // for unique_ptr
+#include <string>                                    // for basic_string
+#include <vector>                                    // for vector
 
-#include <memory>  // for unique_ptr
-#include <string>  // for string, operator!=
+#include "android/base/Optional.h"                   // for Optional
+#include "android/base/ProcessControl.h"             // for parseEscapedLaun...
+#include "android/base/system/System.h"              // for System, System::...
+#include "android/emulation/control/GrpcServices.h"  // for EmulatorControll...
+#include "android/emulation/control/RtcService.h"    // for getRtcService
+#include "emulator/net/EmulatorGrcpClient.h"         // for EmulatorGrpcClient
+#include "emulator/webrtc/Switchboard.h"             // for Switchboard
+#include "nlohmann/json.hpp"                         // for json
 
-#include "android/base/ProcessControl.h"       // for parse...
-#include "android/base/StringView.h"           // for StringView
-#include "android/base/memory/SharedMemory.h"  // for SharedMemory, SharedMe...
-#include "android/base/system/System.h"        // for System
-#include "emulator/net/EmulatorConnection.h"   // for EmulatorConnection
-#include "emulator/webrtc/Switchboard.h"
-#include "nlohmann/json.hpp"  // for basic...
+namespace android {
+namespace base {
+class SharedMemory;
+}  // namespace base
+}  // namespace android
 
 #ifdef _MSC_VER
 #include "msvc-getopt.h"
 #include "msvc-posix.h"
 #else
-#include <getopt.h>
+#include <getopt.h>                                  // for optarg, required...
 #endif
 
 using nlohmann::json;
 
 static std::string FLAG_logdir("");
-static std::string FLAG_server("127.0.0.1");
+static std::string FLAG_server("localhost:8554");
 static std::string FLAG_turn("");
 static bool FLAG_help = false;
 static bool FLAG_verbose = true;
-static std::string FLAG_handle("video0");
-static int FLAG_port = 5557;
+static int FLAG_port = 8555;
 static std::string FLAG_disc("");
 static bool FLAG_daemon = false;
+static std::string FLAG_shm("");
 
 static struct option long_options[] = {{"logdir", required_argument, 0, 'l'},
                                        {"server", required_argument, 0, 's'},
                                        {"turn", required_argument, 0, 't'},
-                                       {"handle", required_argument, 0, 'e'},
                                        {"help", no_argument, 0, 'h'},
                                        {"verbose", no_argument, 0, 'v'},
                                        {"port", required_argument, 0, 'p'},
                                        {"daemon", no_argument, 0, 'd'},
                                        {"discovery", required_argument, 0, 'i'},
+                                       {"shm_path", required_argument, 0, 'm'},
                                        {0, 0, 0, 0}};
 
-using android::base::SharedMemory;
+using android::emulation::control::EmulatorControllerService;
+using emulator::webrtc::EmulatorGrpcClient;
+using emulator::webrtc::Switchboard;
 
 static void printUsage() {
     printf("--logdir (Directory to log files to, or empty when unused)  type: "
@@ -68,12 +78,10 @@ static void printUsage() {
            "--daemon (Run as a deamon, will print PID of deamon upon exit)  "
            "type: bool  default: false\n"
            "--verbose (Enables logging to stdout)  type: bool  default: false\n"
-           "--handle (The memory handle to read frames from)  type: string  "
-           "default: video0\n"
-           "--port (The port to connect to.)  type: int  default: 5557\n"
-           "--disc (The discoveryfile.) type: string, required\n"
-           "--server (The server to connect to.)  type: string  default: "
-           "127.0.0.1\n"
+           "--port (Port to launch gRPC service on)  type: int  default: 8555\n"
+           "--disc (The discoveryfile.) Use discovery file instead of server flag type: string\n"
+           "--server (The emulator grpc server to connect to.)  type: string  default: "
+           "localhost:8554\n"
            "--help (Prints this message)  type: bool  default: false\n");
 }
 
@@ -86,8 +94,8 @@ static void parseArgs(int argc, char** argv) {
             case 'l':
                 FLAG_logdir = optarg;
                 break;
-            case 'e':
-                FLAG_handle = optarg;
+            case 'm':
+                FLAG_shm = optarg;
             case 's':
                 FLAG_server = optarg;
                 break;
@@ -114,7 +122,7 @@ static void parseArgs(int argc, char** argv) {
     }
 }
 
-const int kMaxFileLogSizeInBytes = 64 * 1024 * 1024;
+const int kMaxFileLogSizeInBytes = 128 * 1024;
 
 // A simple logsink that throws everyhting on stderr.
 class StdLogSink : public rtc::LogSink {
@@ -126,6 +134,7 @@ public:
         fprintf(stderr, "Log: %s", message.c_str());
     }
 };
+
 
 int main(int argc, char* argv[]) {
     parseArgs(argc, argv);
@@ -176,8 +185,7 @@ int main(int argc, char* argv[]) {
                     RTC_LOG(INFO)
                             << "TurnCFG: Turn command produces valid json.";
                 } else {
-                    RTC_LOG(LS_ERROR)
-                            << "TurnCFG: JSON is missing iceServers.";
+                    RTC_LOG(LS_ERROR) << "TurnCFG: JSON is missing iceServers.";
                 }
             } else {
                 RTC_LOG(INFO) << "TurnCFG: bad exit: " << exitCode
@@ -188,24 +196,47 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Check if we can access the shared memory region.
-    {
-        auto sharedMemory = SharedMemory(FLAG_handle, 4);
-        int err = sharedMemory.open(SharedMemory::AccessMode::READ_ONLY);
-        if (err != 0) {
-            RTC_LOG(LERROR) << "Unable to open memory mapped handle: ["
-                            << FLAG_handle << "], due to:" << -err;
-            return -1;
-        }
-        RTC_LOG(INFO) << "Able to map first 4 bytes of: " << FLAG_handle;
-    }
 
     rtc::InitializeSSL();
-    bool deamon = FLAG_daemon;
-    emulator::net::EmulatorConnection server(FLAG_port, FLAG_disc, FLAG_handle,
-                                             FLAG_turn);
-    int status = server.listen(deamon) ? 0 : 1;
-    RTC_LOG(INFO) << "Finished, status: " << status;
+    std::unique_ptr<EmulatorGrpcClient> client;
+
+    if (!FLAG_disc.empty()) {
+        client = std::make_unique<EmulatorGrpcClient>(FLAG_disc);
+    } else {
+        client = std::make_unique<EmulatorGrpcClient>(FLAG_server, "", "", "");
+    }
+
+    if (!client->hasOpenChannel()) {
+        RTC_LOG(LERROR) << "Unable to open gRPC channel to the emulator.";
+        return -1;
+    }
+
+    Switchboard sw(*client, FLAG_shm, FLAG_turn);
+    auto bridge = android::emulation::control::getRtcService(&sw);
+
+    // Local only?
+    std::string address = "0.0.0.0";
+    auto builder = EmulatorControllerService::Builder()
+                           .withPortRange(FLAG_port, FLAG_port + 1)
+                           .withVerboseLogging(FLAG_verbose)
+                           .withAddress(address)
+                           .withService(bridge);
+
+    auto service = builder.build();
+
+
+#ifndef _WIN32
+    if (FLAG_daemon) {
+        pid_t pid = ::fork();
+        if (pid != 0) {
+            RTC_LOG(INFO) << "Spawned a child under: " << pid;
+            fprintf(stderr, "%d\n", pid);
+            return 0;
+        }
+    }
+#endif
+
+    service->wait();
     rtc::CleanupSSL();
-    return status;
+    return 0;
 }
