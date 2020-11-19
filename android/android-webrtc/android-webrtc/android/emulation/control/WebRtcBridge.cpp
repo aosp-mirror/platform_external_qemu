@@ -317,17 +317,10 @@ Optional<System::Pid> WebRtcBridge::launch(int port,
         return false;
     }
 
-    // Daemonized version is only properly supported on Linux
-#ifdef __linux__
-    Optional<System::Pid> bridgePid =
-            launchAsDaemon(executable, port, turnConfig);
-#else
-    // Windows does not have fork, darwin has security requirements that are
-    // not easily met
+    // gRPC has no support for fork when launching, so we launch the server
+    // as a background process.
     Optional<System::Pid> bridgePid =
             launchInBackground(executable, port,  turnConfig);
-#endif
-
     return bridgePid;
 }
 

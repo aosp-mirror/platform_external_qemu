@@ -42,6 +42,7 @@ private:
     std::shared_ptr<::grpc::Channel> mChannel;
     std::shared_ptr<grpc_impl::CallCredentials> mCredentials;
     std::string mDiscoveryFile;
+    std::string mAddress;
 };
 
 }  // namespace webrtc

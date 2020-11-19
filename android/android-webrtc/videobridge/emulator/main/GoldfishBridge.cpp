@@ -11,16 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <rtc_base/log_sinks.h>                      // for FileRotatingLogSink
-#include <rtc_base/logging.h>                        // for RTC_LOG, LogSink
-#include <rtc_base/ssl_adapter.h>                    // for CleanupSSL, Init...
-#include <stdio.h>                                   // for fprintf, printf
-#include <stdlib.h>                                  // for atoi, exit, EXIT...
-#include <unistd.h>                                  // for fork, pid_t
-#include <memory>                                    // for unique_ptr
-#include <string>                                    // for basic_string
-#include <vector>                                    // for vector
+#include <rtc_base/log_sinks.h>    // for FileRotatingLogSink
+#include <rtc_base/logging.h>      // for RTC_LOG, LogSink
+#include <rtc_base/ssl_adapter.h>  // for CleanupSSL, Init...
+#include <stdio.h>                 // for fprintf, printf
+#include <stdlib.h>                // for atoi, exit, EXIT...
+#include <unistd.h>                // for fork, pid_t
 
+#include <memory>  // for unique_ptr
+#include <string>  // for basic_string
+#include <vector>  // for vector
+
+#include "android/base/Log.h"
 #include "android/base/Optional.h"                   // for Optional
 #include "android/base/ProcessControl.h"             // for parseEscapedLaun...
 #include "android/base/system/System.h"              // for System, System::...
@@ -40,49 +42,48 @@ class SharedMemory;
 #include "msvc-getopt.h"
 #include "msvc-posix.h"
 #else
-#include <getopt.h>                                  // for optarg, required...
+#include <getopt.h>  // for optarg, required...
 #endif
 
 using nlohmann::json;
 
 static std::string FLAG_logdir("");
-static std::string FLAG_server("localhost:8554");
+static std::string FLAG_emulator("localhost:8554");
 static std::string FLAG_turn("");
 static bool FLAG_help = false;
 static bool FLAG_verbose = true;
 static int FLAG_port = 8555;
 static std::string FLAG_disc("");
-static bool FLAG_daemon = false;
-static std::string FLAG_shm("");
+static std::string FLAG_address("localhost");
 
 static struct option long_options[] = {{"logdir", required_argument, 0, 'l'},
-                                       {"server", required_argument, 0, 's'},
+                                       {"emulator", required_argument, 0, 's'},
                                        {"turn", required_argument, 0, 't'},
                                        {"help", no_argument, 0, 'h'},
                                        {"verbose", no_argument, 0, 'v'},
                                        {"port", required_argument, 0, 'p'},
-                                       {"daemon", no_argument, 0, 'd'},
                                        {"discovery", required_argument, 0, 'i'},
-                                       {"shm_path", required_argument, 0, 'm'},
+                                       {"address", required_argument, 0, 'm'},
                                        {0, 0, 0, 0}};
 
+using android::base::testing::LogOutput;
 using android::emulation::control::EmulatorControllerService;
 using emulator::webrtc::EmulatorGrpcClient;
 using emulator::webrtc::Switchboard;
 
 static void printUsage() {
     printf("--logdir (Directory to log files to, or empty when unused)  type: "
-           "string  default:\n"
+           "string\n"
            "--turn (Process that will be invoked to retrieve TURN json "
-           "configuration.)  type: string  default:\n"
-           "--daemon (Run as a deamon, will print PID of deamon upon exit)  "
-           "type: bool  default: false\n"
+           "configuration.)  type: string\n"
            "--verbose (Enables logging to stdout)  type: bool  default: false\n"
            "--port (Port to launch gRPC service on)  type: int  default: 8555\n"
-           "--disc (The discoveryfile.) Use discovery file instead of server flag type: string\n"
-           "--server (The emulator grpc server to connect to.)  type: string  default: "
-           "localhost:8554\n"
-           "--help (Prints this message)  type: bool  default: false\n");
+           "--address (Address to bind to)  type: string default: localhost\n"
+           "--disc (The discovery file describing the emulator) type: "
+           "string\n"
+           "--emulator (The emulator grpc server to connect to)  type: string "
+           "default: localhost:8554\n"
+           "--help (Prints this message)\n");
 }
 
 static void parseArgs(int argc, char** argv) {
@@ -95,9 +96,10 @@ static void parseArgs(int argc, char** argv) {
                 FLAG_logdir = optarg;
                 break;
             case 'm':
-                FLAG_shm = optarg;
+                FLAG_address = optarg;
+                break;
             case 's':
-                FLAG_server = optarg;
+                FLAG_emulator = optarg;
                 break;
             case 't':
                 FLAG_turn = optarg;
@@ -111,9 +113,6 @@ static void parseArgs(int argc, char** argv) {
             case 'i':
                 FLAG_disc = optarg;
                 break;
-            case 'd':
-                FLAG_daemon = true;
-                break;
             case 'h':
             default:
                 printUsage();
@@ -124,6 +123,39 @@ static void parseArgs(int argc, char** argv) {
 
 const int kMaxFileLogSizeInBytes = 128 * 1024;
 
+// An adapter that transforms the android-emu based logging output to
+// to the WebRTC logging mechanism
+class EmulatorLogAdapter : public LogOutput {
+public:
+    void logMessage(const android::base::LogParams& params,
+                    const char* message,
+                    size_t messageLen) override {
+        rtc::LoggingSeverity severity = rtc::LS_NONE;
+        switch (params.severity) {
+            case android::base::LOG_DEBUG:
+            case android::base::LOG_VERBOSE:
+                severity = rtc::LS_VERBOSE;
+                break;
+            case android::base::LOG_INFO:
+                severity = rtc::LS_INFO;
+                break;
+            case android::base::LOG_WARNING:
+                severity = rtc::LS_WARNING;
+                break;
+            case android::base::LOG_ERROR:
+            case android::base::LOG_FATAL:
+            case android::base::LOG_NUM_SEVERITIES:
+                severity = rtc::LS_ERROR;
+                break;
+        }
+        ::rtc::webrtc_logging_impl::LogCall() &
+                ::rtc::webrtc_logging_impl::LogStreamer<>()
+                        << ::rtc::webrtc_logging_impl::LogMetadata(
+                                   params.file, params.lineno, severity)
+                        << std::string_view(message, messageLen);
+    }
+};
+
 // A simple logsink that throws everyhting on stderr.
 class StdLogSink : public rtc::LogSink {
 public:
@@ -131,15 +163,21 @@ public:
     ~StdLogSink() override {}
 
     void OnLogMessage(const std::string& message) override {
-        fprintf(stderr, "Log: %s", message.c_str());
+        fprintf(stderr, "%s", message.c_str());
     }
 };
 
-
 int main(int argc, char* argv[]) {
+    EmulatorLogAdapter logAdapter;
+    LogOutput::setNewOutput(&logAdapter);
     parseArgs(argc, argv);
 
     std::unique_ptr<rtc::LogSink> log_sink = nullptr;
+
+    // Set android-emu logging level.
+    if (FLAG_verbose) {
+        android_verbose = ~0;
+    }
 
     // Configure our loggers, we will log at most 1
     if (FLAG_logdir != "") {
@@ -150,7 +188,7 @@ int main(int argc, char* argv[]) {
         log_sink.reset(frl);
         rtc::LogMessage::AddLogToStream(log_sink.get(),
                                         rtc::LoggingSeverity::INFO);
-    } else if (FLAG_verbose && !FLAG_daemon) {
+    } else if (FLAG_verbose) {
         log_sink.reset(new StdLogSink());
         rtc::LogMessage::AddLogToStream(log_sink.get(),
                                         rtc::LoggingSeverity::INFO);
@@ -196,14 +234,14 @@ int main(int argc, char* argv[]) {
         }
     }
 
-
     rtc::InitializeSSL();
     std::unique_ptr<EmulatorGrpcClient> client;
 
     if (!FLAG_disc.empty()) {
         client = std::make_unique<EmulatorGrpcClient>(FLAG_disc);
     } else {
-        client = std::make_unique<EmulatorGrpcClient>(FLAG_server, "", "", "");
+        client =
+                std::make_unique<EmulatorGrpcClient>(FLAG_emulator, "", "", "");
     }
 
     if (!client->hasOpenChannel()) {
@@ -211,32 +249,24 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    Switchboard sw(*client, FLAG_shm, FLAG_turn);
+    // Initalize the RTC service.
+    Switchboard sw(*client, "", FLAG_turn);
     auto bridge = android::emulation::control::getRtcService(&sw);
 
-    // Local only?
-    std::string address = "0.0.0.0";
     auto builder = EmulatorControllerService::Builder()
                            .withPortRange(FLAG_port, FLAG_port + 1)
                            .withVerboseLogging(FLAG_verbose)
-                           .withAddress(address)
+                           .withAddress(FLAG_address)
                            .withService(bridge);
 
+    // And host it until we are done.
     auto service = builder.build();
-
-
-#ifndef _WIN32
-    if (FLAG_daemon) {
-        pid_t pid = ::fork();
-        if (pid != 0) {
-            RTC_LOG(INFO) << "Spawned a child under: " << pid;
-            fprintf(stderr, "%d\n", pid);
-            return 0;
-        }
+    if (service) {
+        service->wait();
+    } else {
+        RTC_LOG(LS_ERROR)
+                << "FATAL! Unable to configure gRPC RTC service (port in use?)";
     }
-#endif
-
-    service->wait();
     rtc::CleanupSSL();
     return 0;
 }
