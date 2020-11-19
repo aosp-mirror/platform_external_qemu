@@ -21,7 +21,7 @@
 namespace android {
 namespace base {
 
-size_t IOVector::copyTo(void* destination, size_t offset, size_t size) {
+size_t IOVector::copyTo(void* destination, size_t offset, size_t size) const {
     iovec_lookup lookup = lookup_iovec(offset);
     if (lookup.iov_index == mIOVecs.size()) {
         return 0;
@@ -72,7 +72,7 @@ size_t IOVector::copyFrom(const void* source, size_t offset, size_t size) {
 
 size_t IOVector::appendEntriesTo(IOVector* destination,
                                  size_t offset,
-                                 size_t size) {
+                                 size_t size) const {
     iovec_lookup lookup = lookup_iovec(offset);
     if (lookup.iov_index == mIOVecs.size()) {
         return 0;
