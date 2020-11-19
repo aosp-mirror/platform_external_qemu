@@ -75,7 +75,7 @@ bool EmulatorGrpcClient::hasOpenChannel() {
     bool connect = mChannel->WaitForConnected(waitUntil);
     auto state = mChannel->GetState(true);
     RTC_LOG(INFO) << (connect ? "Connected" : "Not connected")
-                  << " state: " << state
+                  << " to emulator: " << mAddress
                   << ", after: " << Stopwatch::sec(sw.elapsedUs()) << " s";
 
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
@@ -100,7 +100,7 @@ static std::string readFile(std::string fname) {
 EmulatorGrpcClient::EmulatorGrpcClient(std::string address,
                                        std::string ca,
                                        std::string key,
-                                       std::string cer) {
+                                       std::string cer) : mAddress(address) {
     std::shared_ptr<grpc::ChannelCredentials> call_creds = ::grpc::InsecureChannelCredentials();
     if (!ca.empty() && !key.empty() && !cer.empty()) {
         // Client will use the server cert as the ca authority.
@@ -128,10 +128,10 @@ bool EmulatorGrpcClient::initializeChannel() {
         RTC_LOG(LERROR) << "No grpc port, or tls enabled. gRPC disabled.";
         return false;
     }
-    std::string grpc_address =
+    mAddress =
             "localhost:" + iniFile.getString("grpc.port", "8554");
     mChannel = grpc::CreateChannel(
-            grpc_address, ::grpc::experimental::LocalCredentials(LOCAL_TCP));
+            mAddress, ::grpc::experimental::LocalCredentials(LOCAL_TCP));
 
     // Install token authenticator if needed.
     if (iniFile.hasKey("grpc.token")) {
