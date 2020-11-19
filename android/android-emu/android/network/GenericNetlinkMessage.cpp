@@ -14,6 +14,8 @@
 #include "android/base/Log.h"
 
 #include <algorithm>
+#include <cstring>
+
 namespace android {
 namespace network {
 using android::base::IOVector;
