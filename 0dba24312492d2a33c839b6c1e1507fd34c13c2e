@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1a1d32c3_c5d732e2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2493,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-19T15:46:57Z",
+      "side": 0,
+      "message": "Why did we drop ensureReadbackWorker?",
+      "revId": "0dba24312492d2a33c839b6c1e1507fd34c13c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
