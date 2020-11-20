@@ -3560,7 +3560,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 return 1;
             }
             if (!(popt->arch_mask & arch_type)) {
-                error_report("Option not supported for this target");
+                error_report("%d: Option not supported for this target", __LINE__);
                 return 1;
             }
             switch(popt->index) {
@@ -4372,28 +4372,28 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 break;
             case QEMU_OPTION_xen_domid:
                 if (!(xen_available())) {
-                    error_report("Option not supported for this target");
+                    error_report("%d: Option not supported for this target", __LINE__);
                     return 1;
                 }
                 xen_domid = atoi(optarg);
                 break;
             case QEMU_OPTION_xen_create:
                 if (!(xen_available())) {
-                    error_report("Option not supported for this target");
+                    error_report("%d: Option not supported for this target", __LINE__);
                     return 1;
                 }
                 xen_mode = XEN_CREATE;
                 break;
             case QEMU_OPTION_xen_attach:
                 if (!(xen_available())) {
-                    error_report("Option not supported for this target");
+                    error_report("%d: Option not supported for this target", __LINE__);
                     return 1;
                 }
                 xen_mode = XEN_ATTACH;
                 break;
             case QEMU_OPTION_xen_domid_restrict:
                 if (!(xen_available())) {
-                    error_report("Option not supported for this target");
+                    error_report("%d: Option not supported for this target", __LINE__);
                     exit(1);
                 }
                 xen_domid_restrict = true;

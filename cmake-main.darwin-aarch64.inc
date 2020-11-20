@@ -1347,6 +1347,7 @@ set(qemu-system-aarch64_sources ""
    target/arm/gdbstub64.c
    target/arm/crypto_helper.c
    target/arm/arm-powerctl.c
+   target/arm/hvf.c
    trace/control-target.c)
 set(qemu-system-aarch64_generated_sources "" 
 ${ANDROID_AUTOGEN}/trace/generated-helpers.c)

@@ -1808,7 +1808,11 @@ extern "C" int main(int argc, char** argv) {
     const bool accel_ok =
             handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
     if (accel_ok) {
+#ifdef __APPLE__
+        args.add("-enable-hvf");
+#else
         args.add("-enable-kvm");
+#endif
         if (hw->hw_cpu_ncore > 1) {
             args.add("-smp");
             args.addFormat("cores=%d", hw->hw_cpu_ncore);
