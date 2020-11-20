@@ -86,7 +86,7 @@ set(OPTION_MINBUILD
       BOOL
       "True if we should build a minimum set of components to support 64-bit guets only."
 )
-set(OPTION_WIN_LTO FALSE
+set(OPTION_WIN_LTO TRUE
     CACHE BOOL "True if we should enable global link optimizations in windows (slow)")
 set(OPTION_TCMALLOC
     TRUE
