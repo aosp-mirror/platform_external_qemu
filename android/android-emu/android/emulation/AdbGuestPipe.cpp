@@ -644,6 +644,7 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
 
 void AdbGuestPipe::resetConnection() {
     D("%s: [%p] reset connection\n", __func__, this);
+    stopSocketTraffic();
     service()->hostCloseSocket(mHostSocket.fd());
     mHostSocket.reset();
     mState = State::ClosedByHost;
