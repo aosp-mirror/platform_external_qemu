@@ -174,7 +174,7 @@ bool Switchboard::connect(std::string identity) {
         System::ProcessExitCode exitCode;
         Optional<std::string> turn = System::get()->runCommandWithResult(
                 mTurnConfig, kMaxTurnConfigTime, &exitCode);
-        if (exitCode == 0 && turn && json::accept(*turn)) {
+        if (exitCode == 0 && turn && json::jsonaccept(*turn)) {
             json config = json::parse(*turn, nullptr, false);
             if (config.count("iceServers")) {
                 turnConfig = config;
@@ -223,7 +223,7 @@ bool Switchboard::acceptJsepMessage(std::string identity, std::string message) {
         LOG(ERROR) << "Trying to send to unknown identity.";
         return false;
     }
-    if (!json::accept(message)) {
+    if (!json::jsonaccept(message)) {
         return false;
     }
     mConnections[identity]->IncomingMessage(json::parse(message));

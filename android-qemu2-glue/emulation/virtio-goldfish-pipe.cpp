@@ -11,6 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#ifdef _MSC_VER
+extern "C" {
+#include "qemu/osdep.h"
+}
+#endif
 #include "android/base/AlignedBuf.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/memory/LazyInstance.h"

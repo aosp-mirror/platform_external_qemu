@@ -11,7 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#ifdef _MSC_VER
+extern "C" {
+#include "sysemu/os-win32-msvc.h"
+}
+#endif
 #include "android/base/containers/Lookup.h"
 
 #include "android-qemu2-glue/emulation/DmaMap.h"
