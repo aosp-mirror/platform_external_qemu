@@ -40,6 +40,9 @@
 #include <windows.h>
 #include <ws2tcpip.h>
 #include <ehstorioctl.h>
+#include <inttypes.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <sys/stat.h>
 
 #define MAP_FAILED ((void*)(-1))
@@ -97,10 +100,10 @@ typedef int64_t off64_t;
  * savemask parameter will always be zero we can safely define these
  * in terms of setjmp/longjmp on Win32.
  */
-
 #ifndef USE_CLANG_JMP
     // Define the buffer type for holding the state information.
     #define _JMP_BUF_DEFINED
+
     typedef uint64_t jmp_buf[16];
     #define sigjmp_buf jmp_buf
 

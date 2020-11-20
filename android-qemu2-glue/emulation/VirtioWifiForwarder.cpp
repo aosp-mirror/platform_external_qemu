@@ -9,7 +9,11 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-
+#ifdef _MSC_VER
+extern "C" {
+#include "sysemu/os-win32-msvc.h"
+}
+#endif
 #include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
 
 #include "android-qemu2-glue/emulation/HostapdController.h"
