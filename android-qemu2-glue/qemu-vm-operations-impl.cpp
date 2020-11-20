@@ -11,12 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include <assert.h>                                   // for assert
 #include <errno.h>                                    // for errno
-#include <nlohmann/json.hpp>                          // for basic_json, bas...
 #include <stdint.h>                                   // for uint64_t, int64_t
 
+#ifdef _MSC_VER
+extern "C" {
+#include "sysemu/os-win32-msvc.h"
+}
+#endif
+
+#include <nlohmann/json.hpp>                          // for basic_json, bas...
 #include "android/base/Log.h"                         // for LOG, LogMessage
 #include "android/base/Optional.h"                    // for Optional
 #include "android/base/StringFormat.h"                // for StringFormatWit...
@@ -339,7 +344,7 @@ static std::vector<json> qcow2_drives() {
     while (info) {
         if (info->value->has_inserted) {
             char* js = strstr(info->value->inserted->file, json_str);
-            if (js && json::accept(js + sizeof(json_str) - 1)) {
+            if (js && json::jsonaccept(js + sizeof(json_str) - 1)) {
                 json drive = json::parse(js + sizeof(json_str) - 1);
                 if (drive.count("driver") > 0 && drive["driver"] == "qcow2" &&
                     drive.count("file") > 0 &&

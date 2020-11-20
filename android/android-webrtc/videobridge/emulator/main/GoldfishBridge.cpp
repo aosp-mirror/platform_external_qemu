@@ -217,7 +217,7 @@ int main(int argc, char* argv[]) {
 
         if (turn) {
             RTC_LOG(INFO) << "TurnCFG:" << *turn;
-            if (exitCode == 0 && json::accept(*turn)) {
+            if (exitCode == 0 && json::jsonaccept(*turn)) {
                 json config = json::parse(*turn, nullptr, false);
                 if (config.count("iceServers")) {
                     RTC_LOG(INFO)

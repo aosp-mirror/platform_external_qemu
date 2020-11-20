@@ -1,3 +1,8 @@
+#ifdef _MSC_VER
+extern "C" {
+#include "sysemu/os-win32-msvc.h"
+}
+#endif
 #include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
 #include "android-qemu2-glue/utils/stream.h"
 #include "android/base/Log.h"
