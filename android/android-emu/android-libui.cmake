@@ -354,7 +354,7 @@ if(QTWEBENGINE)
                            Qt5::WebSockets)
 endif()
 
-if(NOT LINUX_AARCH64)
+if(NOT BUILDING_FOR_AARCH64)
   target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
 endif()
 
@@ -398,6 +398,8 @@ android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
 android_target_link_libraries(emulator-libui linux-aarch64 PRIVATE -lX11 -lxcb
                                                                    -lXau)
 android_target_link_libraries(emulator-libui darwin-x86_64
+                              PRIVATE "-framework Carbon")
+android_target_link_libraries(emulator-libui darwin-aarch64
                               PRIVATE "-framework Carbon")
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(emulator-libui windows_msvc-x86_64

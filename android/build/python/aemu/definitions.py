@@ -170,5 +170,6 @@ ENUMS = {
         "linux": "toolchain-linux-x86_64.cmake",
         "darwin": "toolchain-darwin-x86_64.cmake",
         "linux_aarch64": "toolchain-linux-aarch64.cmake",
+        "darwin_aarch64": "toolchain-darwin-aarch64.cmake",
     },
 }

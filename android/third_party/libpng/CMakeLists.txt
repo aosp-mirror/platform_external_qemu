@@ -3,7 +3,7 @@ cmake_policy(VERSION 3.0.2)
 project(libpng)
 set(PNG_SRC_DIR ${ANDROID_QEMU2_TOP_DIR}/../libpng/)
 
-if(LINUX_AARCH64)
+if(BUILDING_FOR_AARCH64)
   set(PNG_ARCH_SPECIFIC ${PNG_SRC_DIR}/arm/arm_init.c
                         ${PNG_SRC_DIR}/arm/filter_neon_intrinsics.c)
 else()

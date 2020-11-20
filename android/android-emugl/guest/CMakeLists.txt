@@ -10,7 +10,7 @@ android_add_library(
 target_include_directories(log PRIVATE android/android-emugl/guest
                                        android/android-emu)
 target_link_libraries(log PRIVATE emugl_base)
-if(NOT LINUX_AARCH64)
+if(NOT BUILDING_FOR_AARCH64)
   # The cutils library.
   android_add_library(
     TARGET cutils

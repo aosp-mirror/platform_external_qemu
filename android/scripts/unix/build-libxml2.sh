@@ -73,6 +73,11 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 # used by emulator though
                 MY_FLAGS="--without-lzma"
                 ;;
+          darwin-aarch64)
+                # TODO(bohu) build lzma for aarch64. but I am not sure it is
+                # used by emulator though
+                MY_FLAGS="--without-lzma"
+                ;;
         esac
 
         builder_build_autotools_package libxml2 \
@@ -87,6 +92,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --without-iconv \
                 --without-python \
                 --with-minimum \
+                --with-output \
                 CFLAGS="-g -O2 -fpic" \
 
         # Copy binaries necessary for the build itself as well as static

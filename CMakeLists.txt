@@ -17,6 +17,21 @@ if(NOT DEFINED ANDROID_TARGET_TAG)
   toolchain_configure_tags(${TAG})
 endif()
 
+
+if(ANDROID_HOST_TAG STREQUAL "darwin-aarch64")
+    set(BUILDING_FOR_AARCH64 TRUE)
+elseif(LINUX_AARCH64)
+    set(BUILDING_FOR_AARCH64 TRUE)
+else()
+    set(BUILDING_FOR_AARCH64 FALSE)
+endif()
+
+if (BUILDING_FOR_AARCH64)
+    message(STATUS "Building for aarch64!!!!!!!!!!!!!!!!!!!!!!!!! (top level)")
+else()
+    message(STATUS "NOT Building for aarch64!!!!!!!!!!!!!!!!!!!!!!!!! (top level)")
+endif()
+
 message(
   STATUS
     "Configured host ${ANDROID_HOST_TAG} to target: ${ANDROID_TARGET_TAG}, target os: ${ANDROID_TARGET_OS}/${ANDROID_TARGET_OS_FLAVOR}"
@@ -109,17 +124,20 @@ else()
       CACHE BOOL "True if we should be building host side tracing on top of the official Perfetto SDK. Defaults false for Windows as it doesn't build on Windows.")
 endif()
 
-
 if(GFXSTREAM_ONLY)
   set(CROSVM FALSE)
   set(GFXSTREAM TRUE)
 endif()
 
-if(LINUX_AARCH64)
+if(BUILDING_FOR_AARCH64)
   set(OPTION_MINBUILD TRUE)
   set(QTWEBENGINE FALSE)
   set(QEMU_UPSTREAM FALSE)
   set(WEBRTC FALSE)
+endif()
+
+if (DARWIN_AARCH64)
+    set(OPTION_TCMALLOC FALSE)
 endif()
 
 if(CROSVM OR GFXSTREAM)
@@ -261,7 +279,7 @@ elseif(WINDOWS_MSVC_X86_64)
   # And the asm type if we are compiling with yasm
   set(ANDROID_NASM_TYPE win64)
   set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
-elseif(DARWIN_X86_64)
+elseif(DARWIN_X86_64 OR DARWIN_AARCH64)
   # And the asm type if we are compiling with yasm
   set(ANDROID_NASM_TYPE macho64)
   # Always consider the source to be darwin.
@@ -405,7 +423,7 @@ set(EMULATOR_FEATURE_DEPENDENCIES
     "${ANDROID_QEMU2_TOP_DIR}/android/data/emu-original-feature-flags.protobuf>lib/emu-original-feature-flags.protobuf"
     "${ANDROID_QEMU2_TOP_DIR}/android/data/hostapd.conf>lib/hostapd.conf")
 
-if(LINUX_AARCH64)
+if(BUILDING_FOR_AARCH64)
   set(ANDROID_TARGET_ARCH "aarch64")
 else()
   set(ANDROID_TARGET_ARCH "x86_64")
@@ -474,7 +492,9 @@ prebuilt(SDL2)
 prebuilt(FDT)
 prebuilt(PIXMAN)
 prebuilt(VIRGLRENDERER)
-prebuilt(TCMALLOC)
+if (NOT DARWIN_AARCH64)
+  prebuilt(TCMALLOC)
+endif()
 
 # Make sure the standard set of windows libraries are available as targets
 if(WINDOWS)
@@ -507,7 +527,7 @@ android_add_interface(
 
 # This defines all the include directories needed to compile the libqemu
 # libraries. There should be no need to make additions here.
-if(LINUX_AARCH64)
+if (BUILDING_FOR_AARCH64)
   set(TCG_ARCH_DIR "tcg/aarch64")
 else()
   set(TCG_ARCH_DIR "tcg/i386")
@@ -586,6 +606,9 @@ set(ANDROID_QEMU_i386_DEVICES_darwin-x86_64
     "hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 set(ANDROID_QEMU_arm_DEVICES_darwin-x86_64
     "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+# TODO: unstub the hvf for darwin on arm
+set(ANDROID_QEMU_arm_DEVICES_darwin-aarch64
+    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 target_compile_definitions(android-qemu-deps INTERFACE "-DANDROID_IO")
 android_target_compile_options(
   android-qemu-deps
@@ -616,6 +639,8 @@ android_target_compile_options(
 android_target_compile_definitions(android-qemu-deps darwin-x86_64 INTERFACE
                                    "-D_DARWIN_C_SOURCE=1")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE
+                              "-framework IOKit" "-framework CoreFoundation")
+android_target_link_libraries(android-qemu-deps darwin-aarch64 INTERFACE
                               "-framework IOKit" "-framework CoreFoundation")
 
 # Windows x86 definitions
@@ -693,6 +718,8 @@ android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE
 android_target_link_libraries(android-qemu-deps linux-aarch64 INTERFACE
                               "${TCMALLOC_LIBRARIES} -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE
+                              "-framework CoreAudio")
+android_target_link_libraries(android-qemu-deps darwin-aarch64 INTERFACE
                               "-framework CoreAudio")
 android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE
                               android-emu-base)
@@ -845,16 +872,16 @@ if(NOT OPTION_AEMU_LIBS_ONLY)
                                          android-qemu-deps android-emu)
 
   # Create the qemu targets.
-  if(NOT LINUX_AARCH64)
+  if(NOT BUILDING_FOR_AARCH64)
     android_add_qemu_executable(
       x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
     android_add_qemu_headless_executable(
       x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
-  android_add_qemu_executable(
-    aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-  android_add_qemu_headless_executable(
-    aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+    android_add_qemu_executable(
+      aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
+    android_add_qemu_headless_executable(
+      aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
 
   if(NOT OPTION_MINBUILD)
     android_add_qemu_executable(
