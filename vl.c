@@ -4641,6 +4641,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #if defined(TARGET_AARCH64) || defined(TARGET_ARM) || defined(TARGET_MIPS)
         if (!feature_is_enabled(kFeature_DynamicPartition)) {
             qemu_device_tree_setup_callback(ranchu_device_tree_setup);
+            qemu_device_tree_setup_callback2(ranchu_device_tree_setup);
         }
 #endif
         qemu_set_rng_random_generic_random_func(rng_random_generic_read_random_bytes);
