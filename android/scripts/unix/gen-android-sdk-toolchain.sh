@@ -507,7 +507,7 @@ prepare_build_for_darwin() {
     MIN_XCODE=10
 
     # This is the list of supported SDKs,
-    OSX_SDK_SUPPORTED="${OSX_REQUIRED}"
+    OSX_SDK_SUPPORTED="${OSX_REQUIRED} 10.15 10.16 11.0"
     OSX_XCODE=$(xcodebuild -version | tr '\n' ' ')
     OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
             egrep --color=never -o " macosx\d+.\d+$" | sed -e "s/.*macosx10\.//g" | sort -n | \
