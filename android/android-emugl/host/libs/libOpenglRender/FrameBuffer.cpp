@@ -812,13 +812,14 @@ FrameBuffer::postWorkerFunc(const Post& post) {
             m_postWorker->viewport(post.viewport.width,
                                    post.viewport.height);
             break;
-        case PostCmd::Compose:
-            if (post.d->version <= 1) {
-                m_postWorker->compose(post.d);
+        case PostCmd::Compose: {
+            if (post.composeVersion <= 1) {
+                m_postWorker->compose((ComposeDevice*)post.composeBuffer.data(), post.composeBuffer.size());
             } else {
-                m_postWorker->compose((ComposeDevice_v2*)post.d);
+                m_postWorker->compose((ComposeDevice_v2*)post.composeBuffer.data(), post.composeBuffer.size());
             }
             break;
+        }
         case PostCmd::Clear:
             m_postWorker->clear();
             break;
@@ -842,7 +843,7 @@ FrameBuffer::postWorkerFunc(const Post& post) {
 
 void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
 #ifdef __APPLE__
-    bool postOnlyOnMainThread = m_subWin;
+    bool postOnlyOnMainThread = m_subWin && (emugl::getRenderer() == SELECTED_RENDERER_HOST);
 #else
     bool postOnlyOnMainThread = false;
 #endif
@@ -2676,8 +2677,10 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
     switch (p->version) {
     case 1: {
         Post composeCmd;
+        composeCmd.composeVersion = 1;
+        composeCmd.composeBuffer.resize(bufferSize);
+        memcpy(composeCmd.composeBuffer.data(), buffer, bufferSize);
         composeCmd.cmd = PostCmd::Compose;
-        composeCmd.d = p;
         sendPostWorkerCmd(composeCmd);
         post(p->targetHandle, false);
         return true;
@@ -2692,8 +2695,10 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
             mutex.lock();
        }
        Post composeCmd;
+       composeCmd.composeVersion = 2;
+       composeCmd.composeBuffer.resize(bufferSize);
+       memcpy(composeCmd.composeBuffer.data(), buffer, bufferSize);
        composeCmd.cmd = PostCmd::Compose;
-       composeCmd.d = p;
        sendPostWorkerCmd(composeCmd);
        if (p2->displayId == 0) {
            post(p2->targetHandle, false);

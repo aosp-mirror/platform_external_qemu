@@ -794,13 +794,14 @@ private:
 
     struct Post {
         PostCmd cmd;
+        int composeVersion;
+        std::vector<char> composeBuffer;
         union {
             ColorBuffer* cb;
             struct {
                 int width;
                 int height;
             } viewport;
-            ComposeDevice* d;
             struct {
                 ColorBuffer* cb;
                 int screenwidth;

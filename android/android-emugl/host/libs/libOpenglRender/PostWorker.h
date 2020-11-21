@@ -56,10 +56,10 @@ public:
     void viewport(int width, int height);
 
     // compose: compse the layers into final framebuffer
-    void compose(ComposeDevice* p);
+    void compose(ComposeDevice* p, uint32_t bufferSize);
 
     // compose: compse the layers into final framebuffer, version 2
-    void compose(ComposeDevice_v2* p);
+    void compose(ComposeDevice_v2* p, uint32_t bufferSize);
 
     // clear: blanks out emulator display when refreshing the subwindow
     // if there is no last posted color buffer to show yet.
@@ -97,8 +97,7 @@ private:
         ColorBuffer* postCb;
         int width;
         int height;
-        ComposeDevice* composeDevice;
-        ComposeDevice_v2* composeDevice_v2;
+        std::vector<char> composeBuffer;
     };
 
     RenderThreadInfo* mTLS;
@@ -114,7 +113,6 @@ private:
     bool m_mainThreadPostingOnly = false;
     UiThreadRunner m_runOnUiThread = 0;
     android::base::MessageChannel<PostArgs, 1> m_toUiThread;
-    android::base::MessageChannel<int, 1> m_fromUiThread;
     EGLContext mContext = EGL_NO_CONTEXT;
     EGLSurface mSurface = EGL_NO_SURFACE;
 
