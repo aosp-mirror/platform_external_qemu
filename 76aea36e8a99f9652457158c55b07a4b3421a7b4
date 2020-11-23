@@ -72,6 +72,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "1778a068_77e4cf5a",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-11-23T23:30:25Z",
+      "side": 1,
+      "message": "I actually don\u0027t know if simulateKeyPress() is still being used any code but the interface is indeed there. I don\u0027t have strong opinion on this but if we isolate changes to keycode forwarding logic only, we won\u0027t break Android.",
+      "parentUuid": "c03f1a3a_d98ddea6",
+      "revId": "76aea36e8a99f9652457158c55b07a4b3421a7b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "2d46ab6d_58df5313",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
