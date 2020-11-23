@@ -38,5 +38,7 @@ android_target_link_libraries(EGL_translator_static darwin-x86_64
                               PUBLIC "-framework AppKit")
 android_target_link_libraries(EGL_translator_static linux-x86_64
                               PUBLIC "-lGL -lX11 -ldl -lpthread")
+android_target_link_libraries(EGL_translator_static linux-aarch64
+                              PUBLIC "-lGL -lX11 -ldl -lpthread")
 android_target_link_libraries(EGL_translator_static windows
                               PUBLIC "gdi32::gdi32")
