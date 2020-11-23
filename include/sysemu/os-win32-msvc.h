@@ -102,9 +102,11 @@ typedef int64_t off64_t;
  */
 #ifndef USE_CLANG_JMP
     // Define the buffer type for holding the state information.
+#ifndef _JMP_BUF_DEFINED
     #define _JMP_BUF_DEFINED
-
     typedef uint64_t jmp_buf[16];
+#endif
+
     #define sigjmp_buf jmp_buf
 
     __fastcall int sigsetjmp_impl(jmp_buf buf);
