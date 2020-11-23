@@ -16,6 +16,24 @@
       "message": "The keyboard layout name logic is probably android-specific. Maybe add a check for FEMU?",
       "revId": "d847e5a34a6374c0cd87e48c5ff6b09ea7a8f5fc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "09b265c0_84d051db",
+        "filename": "android/android-emu/android/main-common-ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-11-23T21:48:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "44337dfc_30a91046",
+      "revId": "d847e5a34a6374c0cd87e48c5ff6b09ea7a8f5fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
