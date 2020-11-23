@@ -54,6 +54,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "c03f1a3a_d98ddea6",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-11-23T21:46:26Z",
+      "side": 1,
+      "message": "Currently this is only used when handling kEventKeyUp and kEventKeyDown events. By default in FEMU/AEMU UI we send kEventTextInput events so it is not called. But I also saw that we still have usages like \"simulateKeyPress()\" which queues kEventKeyDown and kEventKeyUp events.\n\nAnd I also think it might be better if we keep the behavior consistent no matter whether keycode forwarding is enabled. What do you think?",
+      "parentUuid": "29dd5082_f142814f",
+      "revId": "76aea36e8a99f9652457158c55b07a4b3421a7b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "2d46ab6d_58df5313",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -65,6 +83,24 @@
       "writtenOn": "2020-11-23T16:10:18Z",
       "side": 1,
       "message": "I don\u0027t forwardKeyEventToEmulator function will be called if use_keycode_forwarding is used. Maybe we should not change this function.",
+      "revId": "76aea36e8a99f9652457158c55b07a4b3421a7b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0c780d4f_2856aa28",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2355,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-11-23T21:46:26Z",
+      "side": 1,
+      "message": "Right, this function won\u0027t be called if use_keycode_forwarding is used; though I would expect the keyboard behavior be consistent no matter if we enable keycode forwarding. Or is there any other considerations for having this key handled on Android?",
+      "parentUuid": "2d46ab6d_58df5313",
       "revId": "76aea36e8a99f9652457158c55b07a4b3421a7b4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
