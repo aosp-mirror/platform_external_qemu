@@ -608,7 +608,7 @@ set(ANDROID_QEMU_arm_DEVICES_darwin-x86_64
     "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 # TODO: unstub the hvf for darwin on arm
 set(ANDROID_QEMU_arm_DEVICES_darwin-aarch64
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+    "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 target_compile_definitions(android-qemu-deps INTERFACE "-DANDROID_IO")
 android_target_compile_options(
   android-qemu-deps
