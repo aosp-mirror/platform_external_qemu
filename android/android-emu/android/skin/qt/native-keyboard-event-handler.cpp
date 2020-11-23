@@ -39,6 +39,9 @@ class MacOSKeyboardEventHandler : public NativeKeyboardEventHandler {
         if (modifiers & NSEventModifierFlagControl) {
             result |= kKeyModLCtrl;
         }
+        if (modifiers & NSEventModifierFlagCommand) {
+            result |= kKeyModLMeta;
+        }
         if (modifiers & NSEventModifierFlagShift) {
             result |= kKeyModLShift;
         }
@@ -133,6 +136,10 @@ public:
             result |= kKeyModRAlt;
         }
 
+        if (modifiers & XCB_MOD_MASK_4) {
+            result |= kKeyModLMeta;
+        }
+
         // For older system image that doesn't accept CAPS_LOCK, we need to
         // simulate the CAPS_LOCK by using shift when the key is alphabetical.
         // BUG: 141318682
@@ -168,6 +175,12 @@ class WindowsKeyboardEventHandler : public NativeKeyboardEventHandler {
         }
         if (HIWORD(GetAsyncKeyState(VK_RMENU)) != 0) {
             result |= kKeyModRAlt;
+        }
+        if (HIWORD(GetAsyncKeyState(VK_LWIN)) != 0) {
+            result |= kKeyModLMeta;
+        }
+        if (HIWORD(GetAsyncKeyState(VK_RWIN)) != 0) {
+            result |= kKeyModRMeta;
         }
         if (LOWORD(GetKeyState(VK_CAPITAL)) != 0) {
             result |= kKeyModCapsLock;

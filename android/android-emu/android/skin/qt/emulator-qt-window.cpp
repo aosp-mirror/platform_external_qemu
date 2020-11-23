@@ -2351,6 +2351,8 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
         keyData.mod |= kKeyModLCtrl;
     if (modifiers & Qt::AltModifier)
         keyData.mod |= kKeyModLAlt;
+    if (modifiers & Qt::MetaModifier)
+        keyData.mod |= kKeyModLMeta;
 
     queueSkinEvent(skin_event);
 }
@@ -2423,6 +2425,8 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
 
     bool qtEvent = mToolWindow->handleQtKeyEvent(
             event, QtKeyEventSource::EmulatorWindow);
+
+    fprintf(stdout, "use_keycode_forwarding = %d, mForwardShortcutsToDevice = %d\n", use_keycode_forwarding, mForwardShortcutsToDevice);
 
     if (use_keycode_forwarding) {
         return;
