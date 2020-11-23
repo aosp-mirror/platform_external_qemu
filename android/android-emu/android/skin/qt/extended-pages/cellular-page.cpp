@@ -56,6 +56,9 @@ static std::string translate_idx(CellularStatus value) {
         STATE(Cellular_Stat_Searching);
         STATE(Cellular_Stat_Denied);
         STATE(Cellular_Stat_Unregistered);
+        default:
+            fprintf(stderr, "%s: Unseen value for cellular status: 0x%x\n", __func__, value);
+            return "Unknown";
     }
     // Chop off "Cellular_"
     return s.substr(9);
@@ -73,6 +76,9 @@ static std::string translate_idx(CellularStandard value) {
         STATE(Cellular_Std_LTE);
         STATE(Cellular_Std_full);
         STATE(Cellular_Std_5G);
+        default:
+            fprintf(stderr, "%s: Unseen value for cellular standasrd: 0x%x\n", __func__, value);
+            return "Unknown";
     }
     // Chop off "Cellular_"
     return s.substr(9);
@@ -86,6 +92,9 @@ static std::string translate_idx(CellularSignal value) {
         STATE(Cellular_Signal_Moderate);
         STATE(Cellular_Signal_Good);
         STATE(Cellular_Signal_Great);
+        default:
+            fprintf(stderr, "%s: Unseen value for cellular signal: 0x%x\n", __func__, value);
+            return "Unknown";
     }
     // Chop off "Cellular_"
     return s.substr(9);
