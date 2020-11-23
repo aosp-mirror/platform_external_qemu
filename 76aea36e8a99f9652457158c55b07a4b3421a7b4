@@ -16,6 +16,23 @@
       "message": "Hi Yilong. The purpose of the CL could potentially be achived by using emulator option \"use_keycode_forwarding\" but you will need to verify one thing. \n\nSince you print out the use_keycode_forwarding value in emulator-qt-window.cpp, you will know if keycode forwarding is turned on.  I suspect the key code forwarding logic is not turned on in FEMU because emulator_parseUiCommandLineOptions is not set up in FEMU. https://source.corp.google.com/android/external/qemu/android/android-emu/android/main-common-ui.c;l\u003d449?q\u003demulator_parseUiCommandLineOptions\u0026ss\u003dpiper%2FGoogle%2Fandroid",
       "revId": "76aea36e8a99f9652457158c55b07a4b3421a7b4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cdabed9c_01159296",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-11-23T16:06:45Z",
+      "side": 1,
+      "message": "keycode fowarding is turned on in the other CL. Please ignore the comment above.",
+      "revId": "76aea36e8a99f9652457158c55b07a4b3421a7b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
