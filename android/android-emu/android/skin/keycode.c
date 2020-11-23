@@ -200,6 +200,12 @@ const char* skin_key_pair_to_string(uint32_t keycode, uint32_t mod) {
     if ((mod & kKeyModRAlt) != 0) {
         p = bufprint(p, end, "RAlt-");
     }
+    if ((mod & kKeyModLMeta) != 0) {
+        p = bufprint(p, end, "Meta-");
+    }
+    if ((mod & kKeyModRMeta) != 0) {
+        p = bufprint(p, end, "RMeta-");
+    }
     if ((mod & kKeyModNumLock) != 0) {
         p = bufprint(p, end, "NumLock");
     }
@@ -242,6 +248,10 @@ bool skin_key_pair_from_string(const char* str,
         { "shift",  kKeyModLShift },
         { "RShift", kKeyModRShift },
         { "rshift", kKeyModRShift },
+        { "Meta",   kKeyModLMeta },
+        { "meta",   kKeyModLMeta },
+        { "RMeta",  kKeyModRMeta },
+        { "rmeta",  kKeyModRMeta },
         { NULL, 0 }
     };
 

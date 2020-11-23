@@ -90,6 +90,10 @@ typedef enum {
     kKeyCodePeriod = LINUX_KEY_DOT,
     kKeyCodeAltLeft = LINUX_KEY_LEFTALT,
     kKeyCodeAltRight = LINUX_KEY_RIGHTALT,
+    kKeyCodeCtrlLeft = LINUX_KEY_LEFTCTRL,
+    kKeyCodeCtrlRight = LINUX_KEY_RIGHTCTRL,
+    kKeyCodeMetaLeft = LINUX_KEY_LEFTMETA,
+    kKeyCodeMetaRight = LINUX_KEY_RIGHTMETA,
     kKeyCodeCapLeft = LINUX_KEY_LEFTSHIFT,
     kKeyCodeCapRight = LINUX_KEY_RIGHTSHIFT,
     kKeyCodeTab = LINUX_KEY_TAB,
@@ -166,6 +170,8 @@ typedef enum {
     kKeyModRShift = (1U << 5),    // right-shift
     kKeyModNumLock = (1U << 6),   // numlock
     kKeyModCapsLock = (1U << 7),  // capslock
+    kKeyModLMeta = (1U << 8),     // left-meta
+    kKeyModRMeta = (1U << 9),     // right-meta
 } SkinKeyMod;
 
 // Convert a pair of (SkinKeyCode,SkinKeyMod) values into a human-readable
