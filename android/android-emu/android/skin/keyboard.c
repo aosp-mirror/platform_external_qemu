@@ -68,18 +68,26 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     if (skin_key_code_is_arrow(code)) {
         code = skin_keycode_rotate(code, -keyboard->rotation);
         D("handling arrow (code=%d mod=%d)", code, mod);
-        int  doCapL, doCapR, doAltL, doAltR;
+        int doCapL, doCapR, doAltL, doAltR, doCtrlL, doCtrlR, doMetaL, doMetaR;
 
         doCapL = mod & kKeyModLShift;
         doCapR = mod & kKeyModRShift;
         doAltL = mod & kKeyModLAlt;
         doAltR = mod & kKeyModRAlt;
+        doCtrlL = mod & kKeyModLCtrl;
+        doCtrlR = mod & kKeyModRCtrl;
+        doMetaL = mod & kKeyModLMeta;
+        doMetaR = mod & kKeyModRMeta;
 
         if (down) {
             if (doAltL) skin_keyboard_add_key_event(keyboard, kKeyCodeAltLeft, 1);
             if (doAltR) skin_keyboard_add_key_event(keyboard, kKeyCodeAltRight, 1);
             if (doCapL) skin_keyboard_add_key_event(keyboard, kKeyCodeCapLeft, 1);
             if (doCapR) skin_keyboard_add_key_event(keyboard, kKeyCodeCapRight, 1);
+            if (doCtrlL) skin_keyboard_add_key_event(keyboard, kKeyCodeCtrlLeft, 1);
+            if (doCtrlR) skin_keyboard_add_key_event(keyboard, kKeyCodeCtrlRight, 1);
+            if (doMetaL) skin_keyboard_add_key_event(keyboard, kKeyCodeMetaLeft, 1);
+            if (doMetaR) skin_keyboard_add_key_event(keyboard, kKeyCodeMetaRight, 1);
         }
         skin_keyboard_add_key_event(keyboard, code, down);
 
@@ -88,6 +96,10 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
             if (doAltL) skin_keyboard_add_key_event(keyboard, kKeyCodeAltLeft, 0);
             if (doCapR) skin_keyboard_add_key_event(keyboard, kKeyCodeCapRight, 0);
             if (doCapL) skin_keyboard_add_key_event(keyboard, kKeyCodeCapLeft, 0);
+            if (doCtrlL) skin_keyboard_add_key_event(keyboard, kKeyCodeCtrlLeft, 0);
+            if (doCtrlR) skin_keyboard_add_key_event(keyboard, kKeyCodeCtrlRight, 0);
+            if (doMetaL) skin_keyboard_add_key_event(keyboard, kKeyCodeMetaLeft, 0);
+            if (doMetaR) skin_keyboard_add_key_event(keyboard, kKeyCodeMetaRight, 0);
         }
         code = 0;
         return code;
@@ -132,6 +144,8 @@ static SkinKeyMod keycode_to_mod(int key) {
         return kKeyModLCtrl;
     case LINUX_KEY_LEFTSHIFT:
         return kKeyModLShift;
+    case LINUX_KEY_LEFTMETA:
+        return kKeyModLMeta;
     }
     return 0;
 }
@@ -240,6 +254,18 @@ static void process_modifier_key(SkinKeyboard* kb, SkinEvent* ev, int down) {
     }
     if (ev->u.text.mod & kKeyModLAlt) {
         skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, down);
+    }
+    if (ev->u.text.mod & kKeyModLCtrl) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, down);
+    }
+    if (ev->u.text.mod & kKeyModRCtrl) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTCTRL, down);
+    }
+    if (ev->u.text.mod & kKeyModLMeta) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTMETA, down);
+    }
+    if (ev->u.text.mod & kKeyModRMeta) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTMETA, down);
     }
 }
 

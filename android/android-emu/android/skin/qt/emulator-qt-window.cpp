@@ -2351,6 +2351,8 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
         keyData.mod |= kKeyModLCtrl;
     if (modifiers & Qt::AltModifier)
         keyData.mod |= kKeyModLAlt;
+    if (modifiers & Qt::MetaModifier)
+        keyData.mod |= kKeyModLMeta;
 
     queueSkinEvent(skin_event);
 }
