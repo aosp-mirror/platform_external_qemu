@@ -103,6 +103,24 @@
       "parentUuid": "2d46ab6d_58df5313",
       "revId": "76aea36e8a99f9652457158c55b07a4b3421a7b4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "86852aa6_d710c02c",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2355,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-11-23T23:26:16Z",
+      "side": 1,
+      "message": "For Android, there is a key layout file that determines that maps Linux key to Android key. Also, there is a key character mapping file that will determine the final symbol based on the modifier and key. https://www.google.com/search?q\u003dandroid+kcm\u0026oq\u003dandroid+kcm\u0026aqs\u003dchrome..69i57j0i22i30i457j0i22i30j69i60j69i64j69i60l3.1759j0j7\u0026sourceid\u003dchrome\u0026ie\u003dUTF-8\n\n\nThis file in frameworks/base will determine the final symbol and ctrl and meta key won\u0027t really affect the output. https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/data/keyboards/qwerty2.kcm\n\nSo even if we send meta and ctrl into android system, I don\u0027t think it will not really affect the behavior of Android. I prefer to not change this code at all for stability since it might affect Android.",
+      "parentUuid": "0c780d4f_2856aa28",
+      "revId": "76aea36e8a99f9652457158c55b07a4b3421a7b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
