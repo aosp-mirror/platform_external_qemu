@@ -350,7 +350,8 @@ static std::vector<json> qcow2_drives() {
                     drive.count("file") > 0 &&
                     drive["file"].count("filename") > 0) {
                     drive["device"] = info->value->device;
-                    drive["backing"] = info->value->inserted->backing_file;
+                    drive["backing"] = info->value->inserted->has_backing_file ?
+                            info->value->inserted->backing_file : "";
                     DD("Found %s", drive.dump().c_str());
                     drives.push_back(drive);
                 }
