@@ -409,6 +409,34 @@ bool emulator_initMinimalSkinConfig(
     return true;
 }
 
+bool emulator_parseInputCommandLineOptions(AndroidOptions* opts) {
+#ifndef CONFIG_HEADLESS
+    if (opts->use_keycode_forwarding ||
+        feature_is_enabled(kFeature_KeycodeForwarding)) {
+        use_keycode_forwarding = 1;
+    }
+
+    // Set keyboard layout for Android only.
+    if (use_keycode_forwarding && !opts->fuchsia) {
+        const char* cur_keyboard_layout = skin_keyboard_host_layout_name();
+        const char* android_keyboard_layout =
+                skin_keyboard_host_to_guest_layout_name(cur_keyboard_layout);
+        if (android_keyboard_layout) {
+            boot_property_add("qemu.keyboard_layout", android_keyboard_layout);
+        } else {
+// Always use keycode forwarding on Linux due to bug in prebuilt Libxkb.
+#if defined(_WIN32) || defined(__APPLE__)
+            D("No matching Android keyboard layout for %s. Fall back to host "
+              "translation.",
+              cur_keyboard_layout);
+            use_keycode_forwarding = 0;
+#endif
+        }
+    }
+#endif
+    return true;
+}
+
 bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
                                         AvdInfo* avd,
                                         AndroidHwConfig* hw) {
@@ -445,31 +473,6 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
                                  sizeof(charmap_name));
         str_reset(&hw->hw_keyboard_charmap, charmap_name);
     }
-
-#ifndef CONFIG_HEADLESS
-    if (opts->use_keycode_forwarding ||
-        feature_is_enabled(kFeature_KeycodeForwarding)) {
-        use_keycode_forwarding = 1;
-    }
-
-    if (use_keycode_forwarding) {
-        const char* cur_keyboard_layout = skin_keyboard_host_layout_name();
-        const char* android_keyboard_layout =
-                skin_keyboard_host_to_guest_layout_name(cur_keyboard_layout);
-        if (android_keyboard_layout) {
-            boot_property_add("qemu.keyboard_layout", android_keyboard_layout);
-        } else {
-// Always use keycode forwarding on Linux due to bug in prebuilt Libxkb.
-#if defined(_WIN32) || defined(__APPLE__)
-            D("No matching Android keyboard layout for %s. Fall back to host "
-              "translation.",
-              cur_keyboard_layout);
-            use_keycode_forwarding = 0;
-#endif
-        }
-    }
-#endif
-
     return true;
 }
 

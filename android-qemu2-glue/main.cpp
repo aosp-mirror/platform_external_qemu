@@ -1161,6 +1161,7 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::VulkanIgnoredHandles, true);
                 fc::setIfNotOverriden(fc::NoDelayCloseColorBuffer, true);
                 fc::setIfNotOverriden(fc::VulkanShaderFloat16Int8, true);
+                fc::setIfNotOverriden(fc::KeycodeForwarding, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;
@@ -1170,6 +1171,11 @@ extern "C" int main(int argc, char** argv) {
                                 __func__, opts->window_size);
                         return -1;
                     }
+                }
+
+                // Handle input args.
+                if (!emulator_parseInputCommandLineOptions(opts)) {
+                    return 1;
                 }
 
                 initialize_virtio_input_devs(args, hw);
@@ -1288,6 +1294,10 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
+    if (!emulator_parseInputCommandLineOptions(opts)) {
+        return 1;
+    }
+    
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
     }

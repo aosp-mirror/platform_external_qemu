@@ -36,6 +36,8 @@ const struct {
         {"RShift-Keypad_5", LINUX_KEY_KP5, kKeyModRShift},
         {"Ctrl-Shift-Alt-Delete", LINUX_KEY_DELETE,
          kKeyModLCtrl | kKeyModLShift | kKeyModLAlt},
+        {"Meta-A", LINUX_KEY_A, kKeyModLMeta},
+        {"RMeta-A", LINUX_KEY_A, kKeyModRMeta},
 };
 
 const size_t kKeyPairDataLen = ARRAYLEN(kKeyPairData);
