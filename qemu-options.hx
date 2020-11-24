@@ -3631,7 +3631,7 @@ is only available if WHPX support is enabled when compiling.
 ETEXI
 
 DEF("enable-hvf", 0, QEMU_OPTION_enable_hvf, \
-    "-enable-hvf     enable Hypervisor.framework virtualization support\n", QEMU_ARCH_I386)
+    "-enable-hvf     enable Hypervisor.framework virtualization support\n", QEMU_ARCH_ALL)
 STEXI
 @item -enable-hvf
 @findex -enable-hvf
