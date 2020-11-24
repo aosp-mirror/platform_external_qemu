@@ -379,6 +379,8 @@ extern bool insufficientMemMessage;
 #elif defined(__linux__) && defined(__sparc__)
 #include <sys/shm.h>
 #  define QEMU_VMALLOC_ALIGN MAX(getpagesize(), SHMLBA)
+#elif defined(__APPLE__) && defined(__arm64__)
+#  define QEMU_VMALLOC_ALIGN 16384
 #else
 #  define QEMU_VMALLOC_ALIGN getpagesize()
 #endif
