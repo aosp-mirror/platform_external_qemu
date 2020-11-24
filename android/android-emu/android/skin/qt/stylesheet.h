@@ -43,6 +43,7 @@ extern const char TABLE_BOTTOM_COLOR_VAR[];
 extern const char THEME_PATH_VAR[];
 extern const char THEME_TEXT_COLOR[];
 extern const char MAJOR_TAB_COLOR_VAR[];
+extern const char MAJOR_TAB_SELECTED_COLOR_VAR[];
 extern const char TAB_BKG_COLOR_VAR[];
 extern const char TAB_SELECTED_COLOR_VAR[];
 extern const char TABLE_SELECTED_VAR[];
