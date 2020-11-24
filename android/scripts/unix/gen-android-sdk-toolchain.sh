@@ -510,8 +510,8 @@ prepare_build_for_darwin() {
     OSX_SDK_SUPPORTED="${OSX_REQUIRED} 10.15 10.16 11.0"
     OSX_XCODE=$(xcodebuild -version | tr '\n' ' ')
     OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
-            egrep --color=never -o " macosx\d+.\d+$" | sed -e "s/.*macosx10\.//g" | sort -n | \
-            sed -e 's/^/10./g' | tr '\n' ' ')
+            egrep --color=never -o " macosx\d+.\d+$" | sed -e "s/.*macosx//g" | sort -n | \
+            tr '\n' ' ')
     if [ -z "$OSX_SDK_INSTALLED_LIST" ]; then
         panic "Please install XCode on this machine!"
     fi
