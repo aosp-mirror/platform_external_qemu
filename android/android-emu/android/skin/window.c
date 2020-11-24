@@ -1092,6 +1092,14 @@ static void add_mouse_event(SkinWindow* window, int32_t rel_x, int32_t rel_y) {
                                    id);
 }
 
+static void add_mouse_wheel_event(SkinWindow* window,
+                                  int32_t x_delta,
+                                  int32_t y_delta) {
+    uint32_t id = 0;
+    // TODO(liyl): handle multi-display and display rotation.
+    window->win_funcs->mouse_wheel_event(x_delta, y_delta, id);
+}
+
 static void
 add_finger_event(SkinWindow* window,
                  FingerState* finger,
@@ -2286,6 +2294,13 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                                  finger->pos.y,
                                  button_state);
             }
+        }
+        break;
+
+    case kEventMouseWheel:
+        if (feature_is_enabled(kFeature_VirtioMouse) && mouse->tracking) {
+            add_mouse_wheel_event(window, ev->u.wheel.x_delta,
+                                  ev->u.wheel.y_delta);
         }
         break;
 

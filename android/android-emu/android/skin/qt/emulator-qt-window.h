@@ -229,6 +229,7 @@ public:
                           const QPoint& pos,
                           const QPoint& gPos,
                           bool skipSync = false);
+    void handleMouseWheelEvent(int delta, Qt::Orientation orientation);
     void panHorizontal(bool left);
     void panVertical(bool up);
     SkinEvent* createSkinEvent(SkinEventType type);

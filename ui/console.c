@@ -2430,6 +2430,14 @@ void kbd_mouse_event(int dx, int dy, int dz, int button_state) {
     qemu_input_event_sync();
 }
 
+void kbd_mouse_wheel_event(int dx, int dy) {
+  assert(active_console && qemu_console_is_graphic(active_console));
+  qemu_input_queue_rel(active_console, INPUT_AXIS_X_WHEEL, dx);
+  qemu_input_queue_rel(active_console, INPUT_AXIS_Y_WHEEL, dy);
+
+  qemu_input_event_sync();
+}
+
 static const TypeInfo qemu_console_info = {
     .name = TYPE_QEMU_CONSOLE,
     .parent = TYPE_OBJECT,

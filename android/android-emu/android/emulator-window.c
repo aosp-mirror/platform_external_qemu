@@ -110,6 +110,12 @@ static void emulator_window_window_mouse_event(unsigned x,
     user_event_agent->sendMouseEvent(x, y, 0, state, displayId);
 }
 
+static void emulator_window_window_mouse_wheel_event(int x_delta,
+                                                     int y_delta,
+                                                     int display_id) {
+    user_event_agent->sendMouseWheelEvent(x_delta, y_delta, display_id);
+}
+
 static void emulator_window_window_rotary_input_event(int delta) {
     user_event_agent->sendRotaryEvent(delta);
 }
@@ -211,6 +217,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     static const SkinWindowFuncs my_window_funcs = {
         .key_event = &emulator_window_window_key_event,
         .mouse_event = &emulator_window_window_mouse_event,
+        .mouse_wheel_event = &emulator_window_window_mouse_wheel_event,
         .rotary_input_event = &emulator_window_window_rotary_input_event,
         .set_device_orientation = &emulator_window_set_device_orientation,
         .opengles_show = &emulator_window_opengles_show_window,

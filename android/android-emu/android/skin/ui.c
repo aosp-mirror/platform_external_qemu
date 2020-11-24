@@ -332,6 +332,12 @@ bool skin_ui_process_events(SkinUI* ui) {
             skin_window_process_event(ui->window, &ev);
             break;
 
+        case kEventMouseWheel:
+            DE("EVENT: kEventMouseWheel x_delta=%d y_delta=%d\n",
+               ev.u.wheel.x_delta, ev.u.wheel.y_delta);
+            skin_window_process_event(ui->window, &ev);
+            break;
+
         case kEventMouseStartTracking:
             DE("EVENT: kEventMouseStartTracking\n");
             skin_window_process_event(ui->window, &ev);

@@ -2334,6 +2334,20 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
     queueSkinEvent(skin_event);
 }
 
+void EmulatorQtWindow::handleMouseWheelEvent(int delta,
+                                             Qt::Orientation orientation) {
+    SkinEvent* skin_event = createSkinEvent(kEventMouseWheel);
+    skin_event->u.wheel.x_delta = 0;
+    skin_event->u.wheel.y_delta = 0;
+    if (orientation == Qt::Horizontal) {
+        skin_event->u.wheel.x_delta = delta;
+    } else {
+        skin_event->u.wheel.y_delta = delta;
+    }
+
+    queueSkinEvent(skin_event);
+}
+
 void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
                                                  QKeyEvent* event) {
     SkinEvent* skin_event = createSkinEvent(type);
@@ -2766,16 +2780,23 @@ bool EmulatorQtWindow::mouseInside() {
 
 void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
     if (mIgnoreWheelEvent) {
-      event->ignore();
+        event->ignore();
+    } else if (android::featurecontrol::isEnabled(
+                       android::featurecontrol::VirtioMouse)) {
+        if (mMouseGrabbed) {
+            handleMouseWheelEvent(event->delta() / 8, event->orientation());
+        }
     } else {
-      if (!mWheelScrollTimer.isActive()) {
-        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, event->pos(), QPoint(0,0));
-        mWheelScrollPos = event->pos();
-      }
+        if (!mWheelScrollTimer.isActive()) {
+            handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
+                             event->pos(), QPoint(0, 0));
+            mWheelScrollPos = event->pos();
+        }
 
-      mWheelScrollTimer.start();
-      mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-      handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos, QPoint(0,0));
+        mWheelScrollTimer.start();
+        mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
+        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos,
+                         QPoint(0, 0));
     }
 }
 

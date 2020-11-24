@@ -119,6 +119,8 @@ QAndroidUserEventAgent sLoggingUserEventAgent = {
         .sendKeyCode = agent_fwd_with_logging(realUserEventAgent, sendKeyCode),
         .sendKeyCodes = agent_fwd_with_logging_as_array(realUserEventAgent, sendKeyCodes),
         .sendMouseEvent = agent_fwd_with_logging(realUserEventAgent, sendMouseEvent),
+        .sendMouseWheelEvent =
+                agent_fwd_with_logging(realUserEventAgent, sendMouseWheelEvent),
         .sendRotaryEvent = agent_fwd(realUserEventAgent, sendRotaryEvent),
         .sendGenericEvent = agent_fwd_with_logging(realUserEventAgent, sendGenericEvent),
         .sendGenericEvents = agent_fwd_with_logging_as_array(realUserEventAgent, sendGenericEvents),
