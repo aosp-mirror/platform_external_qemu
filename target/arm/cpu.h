@@ -56,6 +56,10 @@
 #define EXCP_SEMIHOST       16   /* semihosting call */
 #define EXCP_NOCP           17   /* v7M NOCP UsageFault */
 #define EXCP_INVSTATE       18   /* v7M INVSTATE UsageFault */
+#define EXCP_STKOF          19   /* v8M STKOF UsageFault */
+#define EXCP_LAZYFP         20   /* v7M fault during lazy FP stacking */
+#define EXCP_LSERR          21   /* v8M LSERR SecureFault */
+#define EXCP_UNALIGNED      22   /* v7M UNALIGNED UsageFault */
 /* NB: add new EXCP_ defines to the array in arm_log_exception() too */
 
 #define ARMV7M_EXCP_RESET   1
@@ -143,7 +147,8 @@ typedef struct ARMGenericTimer {
 #define GTIMER_VIRT 1
 #define GTIMER_HYP  2
 #define GTIMER_SEC  3
-#define NUM_GTIMERS 4
+#define GTIMER_HYPVIRT 4
+#define NUM_GTIMERS 5
 
 typedef struct {
     uint64_t raw_tcr;
@@ -192,6 +197,11 @@ typedef struct ARMVectorReg {
 typedef struct ARMPredicateReg {
     uint64_t p[2 * ARM_MAX_VQ / 8] QEMU_ALIGNED(16);
 } ARMPredicateReg;
+
+/* In AArch32 mode, PAC keys do not exist at all.  */
+typedef struct ARMPACKey {
+    uint64_t lo, hi;
+} ARMPACKey;
 #endif
 
 
@@ -577,6 +587,16 @@ typedef struct CPUARMState {
 
         uint32_t cregs[16];
     } iwmmxt;
+
+#ifdef TARGET_AARCH64
+    struct {
+        ARMPACKey apia;
+        ARMPACKey apib;
+        ARMPACKey apda;
+        ARMPACKey apdb;
+        ARMPACKey apga;
+    } keys;
+#endif
 
 #if defined(CONFIG_USER_ONLY)
     /* For usermode syscall translation.  */
@@ -1088,6 +1108,7 @@ static inline unsigned int aarch64_pstate_mode(unsigned int el, bool handler)
  */
 static inline uint32_t pstate_read(CPUARMState *env)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     int ZF;
 
     ZF = (env->ZF == 0);
@@ -1098,6 +1119,7 @@ static inline uint32_t pstate_read(CPUARMState *env)
 
 static inline void pstate_write(CPUARMState *env, uint32_t val)
 {
+    fprintf(stderr, "%s: call. val: 0x%x\n", __func__, val);
     env->ZF = (~val) & PSTATE_Z;
     env->NF = val;
     env->CF = (val >> 29) & 1;
@@ -1123,6 +1145,7 @@ void cpsr_write(CPUARMState *env, uint32_t val, uint32_t mask,
 /* Return the current xPSR value.  */
 static inline uint32_t xpsr_read(CPUARMState *env)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     int ZF;
     ZF = (env->ZF == 0);
     return (env->NF & 0x80000000) | (ZF << 30)
@@ -1135,6 +1158,7 @@ static inline uint32_t xpsr_read(CPUARMState *env)
 /* Set the xPSR.  Note that some bits of mask must be all-set or all-clear.  */
 static inline void xpsr_write(CPUARMState *env, uint32_t val, uint32_t mask)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     if (mask & XPSR_NZCV) {
         env->ZF = (~val) & XPSR_Z;
         env->NF = val;
