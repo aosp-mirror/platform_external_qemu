@@ -262,6 +262,7 @@ void arm_write_secure_board_setup_dummy_smc(ARMCPU *cpu,
 static void default_reset_secondary(ARMCPU *cpu,
                                     const struct arm_boot_info *info)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     AddressSpace *as = arm_boot_address_space(cpu, info);
     CPUState *cs = CPU(cpu);
 
@@ -283,6 +284,8 @@ static inline bool have_dtb(const struct arm_boot_info *info)
 
 static void set_kernel_args(const struct arm_boot_info *info, AddressSpace *as)
 {
+    fprintf(stderr, "%s: call\n", __func__);
+
     int initrd_size = info->initrd_size;
     hwaddr base = info->loader_start;
     hwaddr p;
@@ -340,6 +343,7 @@ static void set_kernel_args(const struct arm_boot_info *info, AddressSpace *as)
 static void set_kernel_args_old(const struct arm_boot_info *info,
                                 AddressSpace *as)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     hwaddr p;
     const char *s;
     int initrd_size = info->initrd_size;
@@ -667,6 +671,7 @@ fail:
 
 static void do_cpu_reset(void *opaque)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     ARMCPU *cpu = opaque;
     CPUState *cs = CPU(cpu);
     CPUARMState *env = &cpu->env;
@@ -716,6 +721,7 @@ static void do_cpu_reset(void *opaque)
              * requested.
              */
             if (arm_feature(env, ARM_FEATURE_EL3)) {
+                fprintf(stderr, "%s: comes out of reset into el3, need fixup into el2 or el1\n", __func__);
                 /* AArch64 is defined to come out of reset into EL3 if enabled.
                  * If we are booting Linux then we need to adjust our EL as
                  * Linux expects us to be in EL2 or EL1.  AArch32 resets into
@@ -726,8 +732,10 @@ static void do_cpu_reset(void *opaque)
                     env->cp15.scr_el3 |= SCR_RW;
                     if (arm_feature(env, ARM_FEATURE_EL2)) {
                         env->cp15.hcr_el2 |= HCR_RW;
+                        fprintf(stderr, "%s: set pstate, el2\n", __func__);
                         env->pstate = PSTATE_MODE_EL2h;
                     } else {
+                        fprintf(stderr, "%s: set pstate, el1\n", __func__);
                         env->pstate = PSTATE_MODE_EL1h;
                     }
                     /* AArch64 kernels never boot in secure mode */
@@ -755,6 +763,8 @@ static void do_cpu_reset(void *opaque)
             if (cs == first_cpu) {
                 AddressSpace *as = arm_boot_address_space(cpu, info);
 
+                fprintf(stderr, "%s: first cpu, set it to 0x%llx\n", __func__,
+                        (unsigned long long)info->loader_start);
                 cpu_set_pc(cs, info->loader_start);
 
                 if (!have_dtb(info)) {
@@ -1197,6 +1207,7 @@ static void arm_load_kernel_notify(Notifier *notifier, void *data)
 
 void arm_load_kernel(ARMCPU *cpu, struct arm_boot_info *info)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     CPUState *cs;
 
     info->load_kernel_notifier.cpu = cpu;

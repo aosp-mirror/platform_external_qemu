@@ -119,6 +119,8 @@ static void cp_reg_check_reset(gpointer key, gpointer value,  gpointer opaque)
 /* CPUClass::reset() */
 static void arm_cpu_reset(CPUState *s)
 {
+    fprintf(stderr, "%s: call\n", __func__);
+
     ARMCPU *cpu = ARM_CPU(s);
     ARMCPUClass *acc = ARM_CPU_GET_CLASS(cpu);
     CPUARMState *env = &cpu->env;
@@ -134,6 +136,8 @@ static void arm_cpu_reset(CPUState *s)
     env->vfp.xregs[ARM_VFP_MVFR0] = cpu->mvfr0;
     env->vfp.xregs[ARM_VFP_MVFR1] = cpu->mvfr1;
     env->vfp.xregs[ARM_VFP_MVFR2] = cpu->mvfr2;
+
+    fprintf(stderr, "%s: pstate in reset: 0x%llx\n", __func__, (unsigned long long)pstate_read(env));
 
     cpu->power_state = cpu->start_powered_off ? PSCI_OFF : PSCI_ON;
     s->halted = cpu->start_powered_off;
@@ -154,10 +158,13 @@ static void arm_cpu_reset(CPUState *s)
 #else
         /* Reset into the highest available EL */
         if (arm_feature(env, ARM_FEATURE_EL3)) {
+            fprintf(stderr, "%s: reset into el3\n", __func__);
             env->pstate = PSTATE_MODE_EL3h;
         } else if (arm_feature(env, ARM_FEATURE_EL2)) {
+            fprintf(stderr, "%s: reset into el2\n", __func__);
             env->pstate = PSTATE_MODE_EL2h;
         } else {
+            fprintf(stderr, "%s: reset into el1\n", __func__);
             env->pstate = PSTATE_MODE_EL1h;
         }
         env->pc = cpu->rvbar;
@@ -184,12 +191,14 @@ static void arm_cpu_reset(CPUState *s)
     env->daif = PSTATE_D | PSTATE_A | PSTATE_I | PSTATE_F;
 
     if (arm_feature(env, ARM_FEATURE_M)) {
+        fprintf(stderr, "%s: has m feature\n", __func__);
         uint32_t initial_msp; /* Loaded from 0x0 */
         uint32_t initial_pc; /* Loaded from 0x4 */
         uint8_t *rom;
         uint32_t vecbase;
 
         if (arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+        fprintf(stderr, "%s: has v7m secure\n", __func__);
             env->v7m.secure = true;
         } else {
             /* This bit resets to 0 if security is supported, but 1 if
@@ -239,6 +248,8 @@ static void arm_cpu_reset(CPUState *s)
         env->regs[13] = initial_msp & 0xFFFFFFFC;
         env->regs[15] = initial_pc & ~1;
         env->thumb = initial_pc & 1;
+
+        fprintf(stderr, "%s: has v7m feature (done). warning, this set some not-x-regs\n", __func__);
     }
 
     /* AArch32 has a hard highvec setting of 0xFFFF0000.  If we are currently
@@ -319,10 +330,13 @@ static void arm_cpu_reset(CPUState *s)
 
     hw_breakpoint_update_all(cpu);
     hw_watchpoint_update_all(cpu);
+    fprintf(stderr, "%s: call (done)\n", __func__);
 }
 
 bool arm_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
 {
+    fprintf(stderr, "%s: call\n", __func__);
+
     CPUClass *cc = CPU_GET_CLASS(cs);
     CPUARMState *env = cs->env_ptr;
     uint32_t cur_el = arm_current_el(env);
@@ -372,6 +386,7 @@ bool arm_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
         }
     }
 
+    fprintf(stderr, "%s: call (done)\n", __func__);
     return ret;
 }
 

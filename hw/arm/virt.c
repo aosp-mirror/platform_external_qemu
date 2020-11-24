@@ -739,6 +739,7 @@ static void create_rtc(const VirtMachineState *vms, qemu_irq *pic)
 static DeviceState *gpio_key_dev;
 static void virt_powerdown_req(Notifier *n, void *opaque)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     /* use gpio Pin 3 for power button event */
     qemu_set_irq(qdev_get_gpio_in(gpio_key_dev, 0), 1);
 }
