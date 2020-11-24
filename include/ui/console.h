@@ -69,6 +69,8 @@ void kbd_put_ledstate(int ledstate);
 
 void kbd_mouse_event(int dx, int dy, int dz, int buttonsState);
 
+void kbd_mouse_wheel_event(int dx, int dy);
+
 struct MouseTransformInfo {
     /* Touchscreen resolution */
     int x;

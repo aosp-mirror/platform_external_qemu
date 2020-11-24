@@ -36,6 +36,8 @@ typedef struct QAndroidUserEventAgent {
                            int dz,
                            int buttonsState,
                            int displayId);
+    // Mouse wheel event.
+    void (*sendMouseWheelEvent)(int dx, int dy, int displayId);
 
     // Rotary encoder events
     // delta is a positive or negative value indicating the change of angle
