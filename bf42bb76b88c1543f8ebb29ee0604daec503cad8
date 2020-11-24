@@ -16,6 +16,24 @@
       "message": "Hi, have you tried https://android-review.googlesource.com/c/platform/external/qemu/+/1508136 ?",
       "revId": "bf42bb76b88c1543f8ebb29ee0604daec503cad8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a4454589_dc706eac",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1804659
+      },
+      "writtenOn": "2020-11-24T02:24:13Z",
+      "side": 1,
+      "message": "\u003e Hi, have you tried https://android-review.googlesource.com/c/platform/external/qemu/+/1508136 ?\n\nSorry, I ignored this commit 386b0b7b9aaff566b4e51fe00552724b4c6e09f6.",
+      "parentUuid": "13cc9032_f4064c98",
+      "revId": "bf42bb76b88c1543f8ebb29ee0604daec503cad8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
