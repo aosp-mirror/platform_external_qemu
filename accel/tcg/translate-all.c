@@ -190,11 +190,21 @@ void tb_lock(void)
     assert_tb_unlocked();
     qemu_mutex_lock(&tb_ctx.tb_lock);
     have_tb_lock++;
+#if defined(__APPLE__) && defined(__aarch64__)
+    if (have_tb_lock == 1) {
+        pthread_jit_write_protect_np(false);
+    }
+#endif
 }
 
 void tb_unlock(void)
 {
     assert_tb_locked();
+#if defined(__APPLE__) && defined(__aarch64__)
+    if (have_tb_lock == 1) {
+        pthread_jit_write_protect_np(true);
+    }
+#endif
     have_tb_lock--;
     qemu_mutex_unlock(&tb_ctx.tb_lock);
 }
@@ -202,6 +212,9 @@ void tb_unlock(void)
 void tb_lock_reset(void)
 {
     if (have_tb_lock) {
+#if defined(__APPLE__) && defined(__aarch64__)
+        pthread_jit_write_protect_np(true);
+#endif
         qemu_mutex_unlock(&tb_ctx.tb_lock);
         have_tb_lock = 0;
     }
@@ -657,6 +670,9 @@ static inline void *alloc_code_gen_buffer(void)
 {
     int prot = PROT_WRITE | PROT_READ | PROT_EXEC;
     int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+#if defined(__APPLE__)
+    flags |= MAP_JIT;
+#endif
     uintptr_t start = 0;
     size_t size = tcg_ctx->code_gen_buffer_size;
     void *buf;
