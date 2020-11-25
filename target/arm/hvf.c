@@ -821,7 +821,7 @@ int hvf_put_registers(CPUState *cpu) {
 
         for (i = 0; i < 31; ++i) {
             HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, regno_to_hv_xreg(i), env->xregs[i]));
-            DPRINTF("%s: xregs[%d]: 0x%llx\n", __func__, i, (unsigned long long)env->regs[i]);
+            DPRINTF("%s: xregs[%d]: 0x%llx\n", __func__, i, (unsigned long long)env->xregs[i]);
         }
     }
 
@@ -1546,7 +1546,7 @@ static inline int hvf_vcpu_dabt_get_as(CPUState* cpu) {
 }
 
 static inline int hvf_vcpu_dabt_get_rd(CPUState* cpu) {
-    return 1 << ((hvf_vcpu_get_hsr(cpu) & ESR_ELx_SRT_MASK) >> ESR_ELx_SRT_SHIFT);
+    return (hvf_vcpu_get_hsr(cpu) & ESR_ELx_SRT_MASK) >> ESR_ELx_SRT_SHIFT;
 }
 
 static inline bool hvf_vcpu_trap_il_is32bit(CPUState* cpu) {
@@ -1622,11 +1622,9 @@ static inline void hvf_skip_instr(CPUState* cpu, bool is_wide_instr) {
     }
 }
 
-static void hvf_decode_hsr(CPUState* cpu, bool* is_write, int* len) {
+static void hvf_decode_hsr(CPUState* cpu, bool* is_write, int* len, bool* sign_extend, unsigned long* rt) {
     uint32_t esr = hvf_vcpu_get_hsr(cpu);
-    unsigned long rt;
     int access_size;
-    bool sign_extend;
     bool is_extabt = ESR_ELx_EA & esr;
     bool is_ss1tw = ESR_ELx_S1PTW & esr;
 
@@ -1649,34 +1647,85 @@ static void hvf_decode_hsr(CPUState* cpu, bool* is_write, int* len) {
     }
 
     *is_write = esr & ESR_ELx_WNR;
-    sign_extend = esr & ESR_ELx_SSE;
-    rt = hvf_vcpu_dabt_get_rd(cpu);
+    *sign_extend = esr & ESR_ELx_SSE;
+    *rt = hvf_vcpu_dabt_get_rd(cpu);
 
     *len = access_size;
 
     // MMIO is emulated and shuld not be re-executed.
     hvf_skip_instr(cpu, hvf_vcpu_trap_il_is32bit(cpu));
-
-    abort();
 }
 
 static void hvf_handle_mmio(CPUState* cpu) {
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    CPUARMState *env = &armcpu->env;
     uint64_t gpa = cpu->hvf_vcpu_exit_info->exception.physical_address;
     uint32_t esr = cpu->hvf_vcpu_exit_info->exception.syndrome;
     unsigned long data;
-    unsigned long rt;
     int ret;
     bool is_write;
     int len;
+    bool sign_extend;
+    unsigned long rt;
     uint8_t data_buf[8];
 
     bool dabt_valid = esr & ESR_ELx_ISV;
 
     DPRINTF("%s: dabt valid? %d\n", __func__, dabt_valid);
 
-    hvf_decode_hsr(cpu, &is_write, &len);
+    if (!dabt_valid) {
+        DPRINTF("%s: dabt was not valid!!!!!!!!!!!!!\n", __func__);
+        abort();
+    }
 
-    abort();
+    hvf_decode_hsr(cpu, &is_write, &len, &sign_extend, &rt);
+
+    DPRINTF("%s: write? %d len %d signextend %d rt %lu\n", __func__,
+           is_write, len, sign_extend, rt);
+
+    if (is_write) {
+        uint64_t guest_reg_val = rt == 31 ? 0 : env->xregs[rt];
+        switch (len) {
+            case 1:
+                data = guest_reg_val & 0xff;
+                break;
+            case 2:
+                data = guest_reg_val & 0xffff;
+                break;
+            case 4:
+                data = guest_reg_val & 0xffffffff;
+                break;
+            default:
+                data = guest_reg_val;
+                break;
+        }
+        DPRINTF("%s: mmio write\n", __func__);
+        address_space_rw(&address_space_memory, gpa, MEMTXATTRS_UNSPECIFIED, &data, len, 1 /* is write */);
+    } else {
+        DPRINTF("%s: mmio read\n", __func__);
+        address_space_rw(&address_space_memory, gpa, MEMTXATTRS_UNSPECIFIED, data_buf, len, 0 /* is read */);
+        uint64_t val;
+        memcpy(&val, data_buf, 8);
+        switch (len) {
+            case 1:
+                val = val & 0xff;
+                break;
+            case 2:
+                data = val & 0xffff;
+                break;
+            case 4:
+                data = val & 0xffffffff;
+                break;
+            default:
+                break;
+        }
+        DPRINTF("%s: mmio read val 0x%llx to rt %lu\n", __func__, (unsigned long long)val, rt);
+        if (rt != 31) {
+            env->xregs[rt] = val;
+        }
+    }
+
+    DPRINTF("%s: done\n", __func__);
 }
 
 static void hvf_handle_guest_abort(CPUState* cpu, uint32_t ec) {
@@ -1754,6 +1803,9 @@ static void hvf_handle_guest_debug(CPUState* cpu, uint32_t ec) {
 }
 
 static void hvf_handle_exception(CPUState* cpu) {
+    // Sync up our register values.
+    hvf_get_registers(cpu);
+
     // We have an exception in EL2.
     uint32_t syndrome = cpu->hvf_vcpu_exit_info->exception.syndrome;
     DPRINTF("%s: syndrome 0x%x\n", __func__,
@@ -1793,7 +1845,6 @@ static void hvf_handle_exception(CPUState* cpu) {
             break;
         case ESR_ELx_EC_IABT_LOW:
         case ESR_ELx_EC_DABT_LOW:
-            DPRINTF("%s: guest abort!\n", __func__);
             hvf_handle_guest_abort(cpu, ec);
             break;
         case ESR_ELx_EC_SOFTSTP_LOW:
@@ -1809,6 +1860,8 @@ static void hvf_handle_exception(CPUState* cpu) {
             hvf_put_registers(cpu);
             abort();
     };
+    hvf_put_registers(cpu);
+    DPRINTF("%s: post put regs (done)\n", __func__);
 }
 
 int hvf_vcpu_exec(CPUState* cpu) {
@@ -1920,6 +1973,7 @@ again:
             case HV_EXIT_REASON_EXCEPTION:
                 DPRINTF("%s: handle exception\n", __func__);
                 hvf_handle_exception(cpu);
+                cpu->hvf_vcpu_dirty = true;
                 break;
             // TODO-convert-to-arm64
             // case EXIT_REASON_HLT: {
