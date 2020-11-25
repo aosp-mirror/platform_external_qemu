@@ -1508,6 +1508,17 @@ static void hvf_handle_interrupt(CPUState * cpu, int mask) {
     }
 }
 
+static inline void hvf_skip_instr(CPUState* cpu) {
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    CPUARMState *env = &armcpu->env;
+
+    if (is_a64(env)) {
+        env->pc += 4;
+    } else {
+        abort();
+    }
+}
+
 static void hvf_read_mem(struct CPUState* cpu, void *data, uint64_t gpa, int bytes) {
     address_space_rw(&address_space_memory, gpa, MEMTXATTRS_UNSPECIFIED, data, bytes, 0);
 }
@@ -1549,79 +1560,6 @@ static inline int hvf_vcpu_dabt_get_rd(CPUState* cpu) {
     return (hvf_vcpu_get_hsr(cpu) & ESR_ELx_SRT_MASK) >> ESR_ELx_SRT_SHIFT;
 }
 
-static inline bool hvf_vcpu_trap_il_is32bit(CPUState* cpu) {
-    return !!(hvf_vcpu_get_hsr(cpu) & ESR_ELx_IL);
-}
-
-/**
- * adjust_itstate - adjust ITSTATE when emulating instructions in IT-block
- * @vcpu:	The VCPU pointer
- *
- * When exceptions occur while instructions are executed in Thumb IF-THEN
- * blocks, the ITSTATE field of the CPSR is not advanced (updated), so we have
- * to do this little bit of work manually. The fields map like this:
- *
- * IT[7:0] -> CPSR[26:25],CPSR[15:10]
- */
-static void hvf_adjust_itstate(CPUState* cpu)
-{
-    ARMCPU *armcpu = ARM_CPU(cpu);
-    CPUARMState *env = &armcpu->env;
-    static const uint32_t k_compat_psr_t_bit = 0x00000020;
-    static const uint32_t k_compat_psr_it_mask = 0x0600fc00;
-
-	unsigned long itbits, cond;
-	uint32_t cpsr = cpsr_read(env);
-	bool is_arm = !(cpsr & k_compat_psr_t_bit);
-
-	// BUG_ON(is_arm && (cpsr & k_compat_psr_it_mask));
-
-	if (!(cpsr & k_compat_psr_it_mask))
-		return;
-
-	cond = (cpsr & 0xe000) >> 13;
-	itbits = (cpsr & 0x1c00) >> (10 - 2);
-	itbits |= (cpsr & (0x3 << 25)) >> 25;
-
-	/* Perform ITAdvance (see page A2-52 in ARM DDI 0406C) */
-	if ((itbits & 0x7) == 0)
-		itbits = cond = 0;
-	else
-		itbits = (itbits << 1) & 0x1f;
-
-	cpsr &= ~k_compat_psr_it_mask;
-	cpsr |= cond << 13;
-	cpsr |= (itbits & 0x1c) << (10 - 2);
-	cpsr |= (itbits & 0x3) << 25;
-    cpsr_write(env, cpsr, 0xffffffff, CPSRWriteRaw);
-}
-
-static inline void hvf_skip_instr32(CPUState* cpu, bool is_wide_instr) {
-    ARMCPU *armcpu = ARM_CPU(cpu);
-    CPUARMState *env = &armcpu->env;
-    bool is_thumb;
-    static const uint32_t k_compat_psr_t_bit = 0x00000020;
-
-	is_thumb = !!(cpsr_read(env) & k_compat_psr_t_bit);
-	if (is_thumb && !is_wide_instr) {
-        env->pc += 2;
-    } else {
-        env->pc += 4;
-    }
-	hvf_adjust_itstate(cpu);
-}
-
-static inline void hvf_skip_instr(CPUState* cpu, bool is_wide_instr) {
-    ARMCPU *armcpu = ARM_CPU(cpu);
-    CPUARMState *env = &armcpu->env;
-
-    if (is_a64(env)) {
-        env->pc += 4;
-    } else {
-        hvf_skip_instr32(cpu, is_wide_instr);
-    }
-}
-
 static void hvf_decode_hsr(CPUState* cpu, bool* is_write, int* len, bool* sign_extend, unsigned long* rt) {
     uint32_t esr = hvf_vcpu_get_hsr(cpu);
     int access_size;
@@ -1653,7 +1591,7 @@ static void hvf_decode_hsr(CPUState* cpu, bool* is_write, int* len, bool* sign_e
     *len = access_size;
 
     // MMIO is emulated and shuld not be re-executed.
-    hvf_skip_instr(cpu, hvf_vcpu_trap_il_is32bit(cpu));
+    hvf_skip_instr(cpu);
 }
 
 static void hvf_handle_mmio(CPUState* cpu) {
