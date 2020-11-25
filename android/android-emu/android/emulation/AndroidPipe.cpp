@@ -35,7 +35,7 @@
 
 #include <assert.h>
 
-#define DEBUG 0
+#define DEBUG 2
 
 #if DEBUG >= 1
 #include <stdio.h>
@@ -411,9 +411,11 @@ struct Globals {
     Service* loadServiceByName(BaseStream* stream) {
         OptionalString serviceName = readOptionalString(stream);
         if (!serviceName) {
+            fprintf(stderr, "%s:%d rkir555 service=connector\n", __func__, __LINE__);
             DD("%s: no name (assuming connector state)", __FUNCTION__);
             return &connectorService;
         }
+        fprintf(stderr, "%s:%d rkir555 service=%s\n", __func__, __LINE__, serviceName->c_str());
         DD("%s: found [%s]", __FUNCTION__, serviceName->c_str());
         return findServiceByName(serviceName->c_str());
     }
@@ -435,14 +437,14 @@ AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
     OptionalString args = readOptionalString(stream);
     AndroidPipe* pipe = nullptr;
     if (service->canLoad()) {
-        DD("%s: loading state for [%s] hwpipe=%p", __FUNCTION__,
+        DD("%s:%d: loading state for [%s] hwpipe=%p", __FUNCTION__, __LINE__,
            service->name().c_str(), hwPipe);
         pipe = service->load(hwPipe, args ? args->c_str() : nullptr, stream);
         if (!pipe) {
             *pForceClose = 1;
         }
     } else {
-        DD("%s: force-closing hwpipe=%p", __FUNCTION__, hwPipe);
+        DD("%s:%d: force-closing hwpipe=%p", __FUNCTION__, __LINE__, hwPipe);
         *pForceClose = 1;
     }
 
@@ -457,7 +459,7 @@ AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
             abort();
         }
         sGlobals->pipeWaker.signalWake(hwPipe, pendingFlags);
-        DD("%s: singalled wake flags %d for pipe hwpipe=%p", __func__,
+        DD("%s:%d: singalled wake flags %d for pipe hwpipe=%p", __func__, __LINE__,
            pendingFlags, hwPipe);
     }
 
@@ -477,7 +479,7 @@ void AndroidPipe::initThreadingForTest(VmLock* vmLock, base::Looper* looper) {
 }
 
 AndroidPipe::~AndroidPipe() {
-    DD("%s: for hwpipe=%p (host %p '%s')", __FUNCTION__, mHwPipe, this,
+    DD("%s:%d: for hwpipe=%p (host %p '%s')", __FUNCTION__, __LINE__, mHwPipe, this,
        mService->name().c_str());
 }
 
@@ -540,10 +542,13 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
     if (mService == &sGlobals->connectorService) {
         // A connector pipe
         stream->putByte(0);
+        fprintf(stderr, "%s:%d rkir555 connector\n", __func__, __LINE__);
     } else {
         // A regular service pipe.
         stream->putByte(1);
         stream->putString(mService->name());
+        fprintf(stderr, "%s:%d rkir555 service='%s' mService->canLoad()=%d\n",
+                __func__, __LINE__, mService->name().c_str(), mService->canLoad());
     }
 
     MemStream pipeStream;
@@ -558,6 +563,8 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
     const int pendingFlags = sGlobals->pipeWaker.getPendingFlags(mHwPipe);
     pipeStream.putBe32(pendingFlags);
 
+    fprintf(stderr, "%s:%d rkir555 pendingFlags=%u\n", __func__, __LINE__, pendingFlags);
+
     pipeStream.save(stream);
 }
 
@@ -571,6 +578,7 @@ AndroidPipe* AndroidPipe::loadFromStream(BaseStream* stream,
     pipeStream.load(stream);
 
     if (!service) {
+        fprintf(stderr, "%s:%d rkir555 nullptr\n", __func__, __LINE__);
         return nullptr;
     }
     return loadPipeFromStreamCommon(&pipeStream, hwPipe, service, pForceClose);

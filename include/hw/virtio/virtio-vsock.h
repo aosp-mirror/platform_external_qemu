@@ -43,6 +43,9 @@ void virtio_vsock_handle_event_to_guest(VirtIODevice *dev, VirtQueue *vq);
 int virtio_vsock_impl_load(QEMUFile *f, void *impl);
 void virtio_vsock_impl_save(QEMUFile *f, const void *impl);
 
+int virtio_vsock_impl_load_workaround(QEMUFile *f);
+void virtio_vsock_impl_save_workaround(QEMUFile *f);
+
 int virtio_vsock_is_enabled();
 
 #define TYPE_VIRTIO_VSOCK "virtio-vsock"

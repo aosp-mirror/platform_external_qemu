@@ -109,7 +109,7 @@ struct VirtIOVSockDev;
 struct VSockStream {
     struct ForSnapshotLoad {};
 
-    VSockStream(ForSnapshotLoad, struct VirtIOVSockDev *d) : vtblPtr(&vtblNoWake), mDev(d) {}
+    VSockStream(ForSnapshotLoad, struct VirtIOVSockDev *d) : vtblPtr(&vtblMain), mDev(d) {}
 
     VSockStream(struct VirtIOVSockDev *d,
                 uint64_t src_cid,
@@ -171,8 +171,6 @@ struct VSockStream {
     bool signalWake();
 
     void save(android::base::Stream *stream) const {
-        android_pipe_guest_save(mPipe, asCStream(stream));
-
         stream->putBe64(mSrcCid);
         stream->putBe64(mDstCid);
         stream->putBe32(mSrcPort);
@@ -183,18 +181,17 @@ struct VSockStream {
         stream->putBe32(mHostFwdCnt);
 
         mHostToGuestBuf.save(stream);
+
+        android_pipe_guest_save(mPipe, asCStream(stream));
     }
 
-    bool load(android::base::Stream *stream) {
-        char force_close = 0;
-        mPipe = android_pipe_guest_load(asCStream(stream), this, &force_close);
+    enum class LoadResult {
+        OK,
+        FAILED,
+        FORCE_CLOSE
+    };
 
-        if (!mPipe || force_close) {
-            return false;
-        } else {
-            vtblPtr = &vtblMain;
-        }
-
+    LoadResult load(android::base::Stream *stream) {
         mSrcCid = stream->getBe64();
         mDstCid = stream->getBe64();
         mSrcPort = stream->getBe32();
@@ -204,17 +201,26 @@ struct VSockStream {
         mHostSentCnt = stream->getBe32();
         mHostFwdCnt = stream->getBe32();
 
-        return mHostToGuestBuf.load(stream);
+        if (!mHostToGuestBuf.load(stream)) {
+            return LoadResult::FAILED;
+        }
+
+        char force_close = 0;
+        mPipe = android_pipe_guest_load(asCStream(stream), this, &force_close);
+
+        if (force_close) {
+            return LoadResult::FORCE_CLOSE;
+        } else if (!mPipe) {
+            return LoadResult::FAILED;
+        } else {
+            return LoadResult::OK;
+        }
     }
 
     static void closeFromHostCallback(void* that);
 
     static void signalWakeCallback(void* that, unsigned flags) {
         static_cast<VSockStream*>(that)->signalWake();
-    }
-
-    static void signalWakeEmptyCallback(void* that, unsigned flags) {
-        // nothing
     }
 
     static int getPipeIdCallback(void* that) {
@@ -235,18 +241,11 @@ struct VSockStream {
     SocketBuffer mHostToGuestBuf;
 
     static const AndroidPipeHwFuncs vtblMain;
-    static const AndroidPipeHwFuncs vtblNoWake;
 };
 
 const AndroidPipeHwFuncs VSockStream::vtblMain = {
     &closeFromHostCallback,
     &signalWakeCallback,
-    &getPipeIdCallback,
-};
-
-const AndroidPipeHwFuncs VSockStream::vtblNoWake = {
-    &closeFromHostCallback,
-    &signalWakeEmptyCallback,
     &getPipeIdCallback,
 };
 
@@ -311,12 +310,18 @@ struct VirtIOVSockDev {
     void save(android::base::Stream *stream) const {
         std::lock_guard<std::mutex> lock(mMtx);
 
+        stream->putBe32(1234567);
+
+        fprintf(stderr, "rkir555 %s:%d mStreams.size()=%zu\n", __func__, __LINE__, mStreams.size());
+
         stream->putBe32(mStreams.size());
         for (const auto &kv : mStreams) {
             kv.second->save(stream);
         }
         saveVector(mVqGuestToHostBuf, stream);
         mVqHostToGuestBuf.save(stream);
+
+        stream->putBe32(7654321);
     }
 
     bool load(android::base::Stream *stream) {
@@ -324,14 +329,32 @@ struct VirtIOVSockDev {
 
         resetDeviceLocked();
 
-        for (uint32_t n = stream->getBe32(); n > 0; --n) {
-            auto vstream = std::make_shared<VSockStream>(VSockStream::ForSnapshotLoad(), this);
-            if (!vstream->load(stream)) {
-                return false;
-            }
+        if (stream->getBe32() != 1234567) {
+            fprintf(stderr, "rkir555 %s:%d bad header\n", __func__, __LINE__);
+            return false;
+        }
 
-            const auto key = makeStreamKey(vstream->mSrcPort, vstream->mDstPort);
-            if (!mStreams.insert({key, std::move(vstream)}).second) {
+        uint32_t n = stream->getBe32();
+        fprintf(stderr, "rkir555 %s:%d mStreams.size()=%u\n", __func__, __LINE__, n);
+
+        for (; n > 0; --n) {
+            auto vstream = std::make_shared<VSockStream>(VSockStream::ForSnapshotLoad(), this);
+            const VSockStream::LoadResult result = vstream->load(stream);
+            switch (result) {
+            case VSockStream::LoadResult::OK: {
+                    const auto key = makeStreamKey(vstream->mSrcPort, vstream->mDstPort);
+                    if (!mStreams.insert({key, std::move(vstream)}).second) {
+                        return false;
+                    }
+                }
+                break;
+
+            case VSockStream::LoadResult::FORCE_CLOSE:
+                // do nothing
+                break;
+
+            default:
+            case VSockStream::LoadResult::FAILED:
                 return false;
             }
         }
@@ -341,6 +364,11 @@ struct VirtIOVSockDev {
         }
 
         if (!mVqHostToGuestBuf.load(stream)) {
+            return false;
+        }
+
+        if (stream->getBe32() != 7654321) {
+            fprintf(stderr, "rkir555 %s:%d bad footer\n", __func__, __LINE__);
             return false;
         }
 
@@ -665,11 +693,15 @@ void virtio_vsock_handle_guest_to_host(VirtIODevice *dev, VirtQueue *vq) {
 void virtio_vsock_handle_event_to_guest(VirtIODevice *dev, VirtQueue *vq) {
 }
 
+void *gImplWorkaround;  // save/load workaround
+
 void virtio_vsock_ctor(VirtIOVSock *s, Error **errp) {
     s->impl = new VirtIOVSockDev(s);
+    gImplWorkaround = s->impl;
 }
 
 void virtio_vsock_dctor(VirtIOVSock *s) {
+    gImplWorkaround = nullptr;
     delete static_cast<VirtIOVSockDev *>(s->impl);
     s->impl = nullptr;
 }
@@ -684,9 +716,23 @@ void virtio_vsock_impl_save(QEMUFile *f, const void *impl) {
     static_cast<const VirtIOVSockDev *>(impl)->save(&qstream);
 }
 
+void virtio_vsock_impl_save_workaround(QEMUFile *f) {
+    if (gImplWorkaround) {
+        virtio_vsock_impl_save(f, gImplWorkaround);
+    }
+}
+
 int virtio_vsock_impl_load(QEMUFile *f, void *impl) {
     android::qemu::QemuFileStream qstream(f);
     return static_cast<VirtIOVSockDev *>(impl)->load(&qstream) ? 0 : 1;
+}
+
+int virtio_vsock_impl_load_workaround(QEMUFile *f) {
+    if (gImplWorkaround) {
+        return virtio_vsock_impl_load(f, gImplWorkaround);
+    } else {
+        return 0;
+    }
 }
 
 int virtio_vsock_is_enabled() {

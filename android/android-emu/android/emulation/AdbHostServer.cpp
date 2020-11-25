@@ -18,6 +18,8 @@
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 
+#include "android/base/Backtrace.h"
+
 #include <string>
 #include <stdlib.h>
 
@@ -30,6 +32,9 @@ using android::base::StringFormat;
 using android::base::System;
 
 static ScopedSocket connectToAdbServer(int adbClientPort) {
+    std::string backtrace = android::base::bt();
+    fprintf(stderr, "rkir555 %s:%d adbClientPort=%d bt=<%s>\n", __func__, __LINE__, adbClientPort, backtrace.c_str());
+
     ScopedSocket socket(android::base::socketTcp4LoopbackClient(adbClientPort));
     if (!socket.valid()) {
         socket.reset(android::base::socketTcp6LoopbackClient(adbClientPort));
@@ -40,6 +45,10 @@ static ScopedSocket connectToAdbServer(int adbClientPort) {
 // Sends a message to the ADB server on the socket file descriptor.
 // The message will be formatted according to the ADB protocol
 static bool sendMessage(int fd, const std::string& message) {
+    std::string backtrace = android::base::bt();
+    fprintf(stderr, "rkir555 %s:%d fd=%d message='%s' bt=<%s>\n",
+            __func__, __LINE__, fd, message.c_str(), backtrace.c_str());
+
     // A client sends a request using the following format:
     //
     // 1. A 4-byte hexadecimal string giving the length of the payload
@@ -72,6 +81,11 @@ static std::string readResponse(int fd, int bytesToRead) {
         bytesRead += ret;
     }
     buffer.resize(bytesRead);
+
+    std::string backtrace = android::base::bt();
+    fprintf(stderr, "rkir555 %s:%d fd=%d buffer='%s' bt=<%s>\n",
+            __func__, __LINE__, fd, buffer.c_str(), backtrace.c_str());
+
     return buffer;
 }
 

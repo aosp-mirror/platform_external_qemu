@@ -18,6 +18,8 @@
 #include "android/emulation/AdbHostServer.h"
 #include "android/emulation/AdbTypes.h"
 
+#include "android/base/Backtrace.h"
+
 #include <memory>
 #include <vector>
 
@@ -36,6 +38,10 @@ using android::base::AsyncSocketServer;
 using android::base::ScopedSocket;
 
 bool AdbHostListener::reset(int adbPort) {
+    std::string backtrace = android::base::bt();
+    fprintf(stderr, "rkir555 %s:%d adbPort=%d bt=<%s>\n",
+            __func__, __LINE__, adbPort, backtrace.c_str());
+
     if (adbPort < 0) {
         mRegularAdbServer.reset();
         mJdwpServer.reset();

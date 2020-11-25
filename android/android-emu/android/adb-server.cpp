@@ -23,6 +23,8 @@
 #include "android/emulation/AndroidPipe.h"
 #include "android/utils/debug.h"
 
+#include "android/base/Backtrace.h"
+
 #include <memory>
 #include <string>
 
@@ -65,6 +67,10 @@ android::base::LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
 }  // namespace
 
 void android_adb_server_notify(int port) {
+    std::string backtrace = android::base::bt();
+    fprintf(stderr, "rkir555 %s:%d port=%d bt=<%s>\n",
+            __func__, __LINE__, port, backtrace.c_str());
+
     auto globals = sGlobals.ptr();
     globals->hostListener.reset(port);
 
@@ -77,6 +83,10 @@ void android_adb_server_notify(int port) {
 }
 
 int android_adb_server_init(int port) {
+    std::string backtrace = android::base::bt();
+    fprintf(stderr, "rkir555 %s:%d port=%d bt=<%s>\n",
+            __func__, __LINE__, port, backtrace.c_str());
+
     auto globals = sGlobals.ptr();
     if (!globals->hostListener.reset(port)) {
         return -1;
@@ -93,6 +103,10 @@ void android_adb_server_undo_init(void) {
 }
 
 void android_adb_service_init(void) {
+    std::string backtrace = android::base::bt();
+    fprintf(stderr, "rkir555 %s:%d bt=<%s>\n",
+            __func__, __LINE__, backtrace.c_str());
+
     // Register adb pipe service.
     sGlobals->registerServices();
 }

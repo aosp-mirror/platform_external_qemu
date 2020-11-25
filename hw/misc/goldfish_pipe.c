@@ -1442,15 +1442,20 @@ enum {
     GOLDFISH_PIPE_SAVE_VERSION = 1,
 };
 
+extern void virtio_vsock_impl_save_workaround(QEMUFile *f);
+
 static void goldfish_pipe_save(QEMUFile* f, void* opaque) {
     GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
     service_ops->guest_pre_save(f);
+    virtio_vsock_impl_save_workaround(f);
     dev->ops->save(f, dev);
     service_ops->guest_post_save(f);
 }
 
 static void goldfish_pipe_save_v1(QEMUFile* file, PipeDevice* dev) {
+    fprintf(stderr, "%s:%d rkir555\n", __func__, __LINE__);
+
     assert(dev->device_version == PIPE_DEVICE_VERSION_v1);
     qemu_put_be32(file, dev->device_version);
 
@@ -1522,11 +1527,18 @@ static void goldfish_pipe_save_v2(QEMUFile* file, PipeDevice* dev) {
     }
     qemu_put_be32(file, pipe_count);
 
+    fprintf(stderr, "%s:%d rkir555 dev=%p dev->pipes_capacity=%d pipe_count=%d\n", __func__, __LINE__, dev, dev->pipes_capacity, pipe_count);
+
     for (i = 0; i < dev->pipes_capacity; ++i) {
         HwPipe* pipe = dev->pipes[i];
         if (!pipe) {
             continue;
         }
+
+        fprintf(stderr, "%s:%d rkir555 pipe->id=%d pipe->closed=%d pipe->wanted=%d pipe->host_pipe=%p\n",
+                __func__, __LINE__,
+                pipe->id, pipe->closed, pipe->wanted, pipe->host_pipe);
+
         qemu_put_be32(file, pipe->id);
         qemu_put_be64(file, pipe->command_buffer_addr);
         qemu_put_be32(file, pipe->rw_params_max_count);
@@ -1549,8 +1561,14 @@ static void goldfish_pipe_save_v2(QEMUFile* file, PipeDevice* dev) {
         wanted_pipes_count++;
     }
     qemu_put_be32(file, wanted_pipes_count);
+    fprintf(stderr, "%s:%d rkir555 dev=%p wanted_pipes_count=%d\n",
+            __func__, __LINE__, dev, wanted_pipes_count);
+
     for (pipe = dev->wanted_pipes_first; pipe; pipe = pipe->wanted_next) {
         qemu_put_be32(file, pipe->id);
+
+        fprintf(stderr, "%s:%d rkir555 dev=%p wanted pipe=%p pipe->id=%d\n",
+                __func__, __LINE__, dev, pipe, pipe->id);
     }
 
     /* Invalidate all guest DMA buffer -> host ptr mappings. */
@@ -1684,6 +1702,7 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
     /* Load the device. */
     dev->device_version = qemu_get_be32(file);
     if (dev->device_version > PIPE_DEVICE_VERSION) {
+        fprintf(stderr, "%s:%d rkir555 fail\n", __func__, __LINE__);
         goto done;
     } else if (dev->device_version == PIPE_DEVICE_VERSION_v1) {
         // redirect to the v1 loader if this is an old pipe.
@@ -1692,6 +1711,7 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
 
     dev->driver_version = qemu_get_be32(file);
     if (dev->driver_version > MAX_SUPPORTED_DRIVER_VERSION) {
+        fprintf(stderr, "%s:%d rkir555 fail\n", __func__, __LINE__);
         goto done;
     }
 
@@ -1703,12 +1723,14 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
                     dev->signalled_pipe_buffer_size,
             /*is_write*/1);
     if (!dev->signalled_pipe_buffer) {
+        fprintf(stderr, "%s:%d rkir555 fail\n", __func__, __LINE__);
         goto done;
     }
     dev->open_command_addr = qemu_get_be64(file);
     dev->open_command = (OpenCommandParams*)map_guest_buffer(
             dev->open_command_addr, sizeof(*dev->open_command), /*is_write*/0);
     if (!dev->open_command) {
+        fprintf(stderr, "%s:%d rkir555 fail\n", __func__, __LINE__);
         goto done;
     }
 
@@ -1718,6 +1740,7 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
     if (dev->pipes_capacity < pipes_capacity) {
         void* pipes = calloc(pipes_capacity, sizeof(*dev->pipes));
         if (!pipes) {
+            fprintf(stderr, "%s:%d rkir555 fail\n", __func__, __LINE__);
             goto done;
         }
         // No need to memcpy() the old array - we've already freed
@@ -1727,8 +1750,12 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
     dev->pipes_capacity = pipes_capacity;
 
     int pipe_count = qemu_get_be32(file);
+    fprintf(stderr, "%s:%d rkir555 dev=%p dev->pipes_capacity=%d pipe_count=%d\n",
+            __func__, __LINE__, dev, dev->pipes_capacity, pipe_count);
+
     force_closed_pipes = malloc(sizeof(*force_closed_pipes) * pipe_count);
     if (!force_closed_pipes) {
+        fprintf(stderr, "%s:%d rkir555 fail\n", __func__, __LINE__);
         goto done;
     }
     int i;
@@ -1741,6 +1768,7 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
                 pipe->command_buffer_addr, COMMAND_BUFFER_SIZE, /*is_write*/1);
         if (!pipe->command_buffer) {
             hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_ERROR);
+            fprintf(stderr, "%s:%d rkir555 fail\n", __func__, __LINE__);
             goto done;
         }
         pipe->rw_params_max_count = qemu_get_be32(file);
@@ -1765,23 +1793,37 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
         } else if (!pipe->host_pipe) {
             unmap_command_buffer(pipe->command_buffer);
             hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT);
+            fprintf(stderr, "%s:%d rkir555 fail\n", __func__, __LINE__);
             goto done;
         }
 
         if (dev->pipes[pipe->id]) {
             unmap_command_buffer(pipe->command_buffer);
             hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_ERROR);
+            fprintf(stderr, "%s:%d rkir555 fail\n", __func__, __LINE__);
             goto done;
         }
         dev->pipes[pipe->id] = pipe;
+
+        fprintf(stderr, "%s:%d rkir555 pipe->id=%d pipe->closed=%d pipe->wanted=%d pipe->host_pipe=%p has_host_pipe=%d force_close=%d\n",
+                __func__, __LINE__,
+                pipe->id, pipe->closed, pipe->wanted, pipe->host_pipe, has_host_pipe, force_close);
     }
 
     /* Reconstruct wanted pipes list. */
     int wanted_pipes_count = qemu_get_be32(file);
+    fprintf(stderr, "%s:%d rkir555 dev=%p wanted_pipes_count=%d\n",
+            __func__, __LINE__, dev, wanted_pipes_count);
+
     for (i = 0; i < wanted_pipes_count; ++i) {
         int id = qemu_get_be32(file);
+
+        fprintf(stderr, "%s:%d rkir555 dev=%p wanted pipe->id=%d\n",
+                __func__, __LINE__, dev, id);
+
         HwPipe* pipe = dev->pipes[id];
         if (!pipe) {
+            fprintf(stderr, "%s:%d rkir555 fail\n", __func__, __LINE__);
             goto done;
         }
         wanted_pipes_add_v2(dev, pipe);
@@ -1808,6 +1850,8 @@ done:
     return res;
 }
 
+extern int virtio_vsock_impl_load_workaround(QEMUFile* f);
+
 static int goldfish_pipe_load(QEMUFile* f, void* opaque, int version_id) {
     GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
@@ -1820,7 +1864,10 @@ static int goldfish_pipe_load(QEMUFile* f, void* opaque, int version_id) {
     dev->ops->close_all(dev, GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT);
 
     service_ops->guest_pre_load(f);
-    int res = goldfish_pipe_load_v2(f, dev);
+    int res = virtio_vsock_impl_load_workaround(f);
+    if (!res) {
+        res = goldfish_pipe_load_v2(f, dev);
+    }
     service_ops->guest_post_load(f);
     return res;
 }
