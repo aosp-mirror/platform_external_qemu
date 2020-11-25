@@ -40,8 +40,8 @@ namespace {
 constexpr uint32_t kHostBufAlloc = 1024 * 1024;
 
 enum class DstPort {
-    Data = 5555,
-    Ping = 5556,
+    Data = 5000,
+    Ping = 5001,
 };
 
 const char* op2str(int op) {
