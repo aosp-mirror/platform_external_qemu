@@ -15,8 +15,9 @@
 
 #include <Hypervisor/Hypervisor.h>
 
-#include "hvf-arm64.h"
+#include "esr.h"
 
+#include "hvf-arm64.h"
 #include "internals.h"
 
 #include "exec/address-spaces.h"
@@ -662,7 +663,7 @@ int hvf_init_vcpu(CPUState * cpu) {
 // VCPU run/////////////////////////////////////////////////////////////////////
 
 int hvf_vcpu_emulation_mode(CPUState* cpu) {
-    fprintf(stderr, "%s: call\n", __func__);
+    DPRINTF("%s: call\n", __func__);
     CPUArchState *env = (CPUArchState *) (cpu->env_ptr);
     // TODO-convert-to-arm64
     // return !(env->cr[0] & CR0_PG_MASK);
@@ -670,23 +671,23 @@ int hvf_vcpu_emulation_mode(CPUState* cpu) {
 }
 
 int hvf_vcpu_destroy(CPUState* cpu) {
-    fprintf(stderr, "%s: call\n", __func__);
+    DPRINTF("%s: call\n", __func__);
     return 0;
 }
 
 void hvf_raise_event(CPUState* cpu) {
-    fprintf(stderr, "%s: call\n", __func__);
+    DPRINTF("%s: call\n", __func__);
     // TODO
 }
 
 // TODO-convert-to-arm64
 void hvf_inject_interrupts(CPUState *cpu) {
-    fprintf(stderr, "%s: call\n", __func__);
+    DPRINTF("%s: call\n", __func__);
 }
 
 // TODO-convert-to-arm64
 int hvf_process_events(CPUState *cpu) {
-    fprintf(stderr, "%s: call\n", __func__);
+    DPRINTF("%s: call\n", __func__);
     return 0;
 }
 static hv_reg_t regno_to_hv_xreg(int i) {
@@ -801,7 +802,7 @@ int hvf_put_registers(CPUState *cpu) {
     int ret;
     unsigned int el;
 
-    fprintf(stderr, "%s: call\n", __func__);
+    DPRINTF("%s: call\n", __func__);
     ARMCPU *armcpu = ARM_CPU(cpu);
     CPUARMState *env = &armcpu->env;
 
@@ -809,7 +810,7 @@ int hvf_put_registers(CPUState *cpu) {
      * AArch64 registers before pushing them out to 64-bit HVF.
      */
     if (!is_a64(env)) {
-        fprintf(stderr, "%s: syncing 32 to 64!\n", __func__);
+        DPRINTF("%s: syncing 32 to 64!\n", __func__);
         aarch64_sync_32_to_64(env);
     }
 
@@ -1015,7 +1016,7 @@ int hvf_put_registers(CPUState *cpu) {
 }
 
 int hvf_get_registers(CPUState *cpu) {
-    fprintf(stderr, "%s: call\n", __func__);
+    DPRINTF("%s: call\n", __func__);
     uint64_t val;
     unsigned int el;
     int i;
@@ -1242,7 +1243,7 @@ void hvf_handle_io(uint16_t port, void* buffer,
 // TODO: synchronize vcpu state
 void __hvf_cpu_synchronize_state(CPUState* cpu_state, run_on_cpu_data data)
 {
-    fprintf(stderr, "%s: call\n", __func__);
+    DPRINTF("%s: call\n", __func__);
     (void)data;
     if (cpu_state->hvf_vcpu_dirty == 0)
         hvf_get_registers(cpu_state);
@@ -1258,7 +1259,7 @@ void hvf_cpu_synchronize_state(CPUState *cpu_state)
 
 void __hvf_cpu_synchronize_post_reset(CPUState* cpu_state, run_on_cpu_data data)
 {
-    fprintf(stderr, "%s: call\n", __func__);
+    DPRINTF("%s: call\n", __func__);
     (void)data;
     hvf_put_registers(cpu_state);
 
@@ -1275,7 +1276,7 @@ void hvf_cpu_synchronize_post_reset(CPUState *cpu_state)
 
 void _hvf_cpu_synchronize_post_init(CPUState* cpu_state, run_on_cpu_data data)
 {
-    fprintf(stderr, "%s: call\n", __func__);
+    DPRINTF("%s: call\n", __func__);
     (void)data;
     hvf_put_registers(cpu_state);
     cpu_state->hvf_vcpu_dirty = false;
@@ -1507,12 +1508,249 @@ static void hvf_handle_interrupt(CPUState * cpu, int mask) {
     }
 }
 
-#define ESR_ELx_EC_SHIFT	(26ULL)
-#define ESR_ELx_EC_MASK		((0x3FULL) << ESR_ELx_EC_SHIFT)
-#define ESR_ELx_EC(esr)		(((esr) & ESR_ELx_EC_MASK) >> ESR_ELx_EC_SHIFT)
-
 static void hvf_read_mem(struct CPUState* cpu, void *data, uint64_t gpa, int bytes) {
     address_space_rw(&address_space_memory, gpa, MEMTXATTRS_UNSPECIFIED, data, bytes, 0);
+}
+
+static void hvf_handle_wfx(CPUState* cpu) {
+    DPRINTF("%s: call (not implemented)\n", __func__);
+    abort();
+}
+
+static void hvf_handle_cp(CPUState* cpu, uint32_t ec) {
+    DPRINTF("%s: call (not implemented)\n", __func__);
+    abort();
+}
+
+static void hvf_handle_hvc(CPUState* cpu, uint32_t ec) {
+    DPRINTF("%s: call (not implemented)\n", __func__);
+    abort();
+}
+
+static void hvf_handle_smc(CPUState* cpu, uint32_t ec) {
+    DPRINTF("%s: call (not implemented)\n", __func__);
+    abort();
+}
+
+static void hvf_handle_sys_reg(CPUState* cpu) {
+    DPRINTF("%s: call (not implemented)\n", __func__);
+    abort();
+}
+
+static inline uint32_t hvf_vcpu_get_hsr(CPUState* cpu) {
+    return cpu->hvf_vcpu_exit_info->exception.syndrome;
+}
+
+static inline int hvf_vcpu_dabt_get_as(CPUState* cpu) {
+    return 1 << ((hvf_vcpu_get_hsr(cpu) & ESR_ELx_SAS) >> ESR_ELx_SAS_SHIFT);
+}
+
+static inline int hvf_vcpu_dabt_get_rd(CPUState* cpu) {
+    return 1 << ((hvf_vcpu_get_hsr(cpu) & ESR_ELx_SRT_MASK) >> ESR_ELx_SRT_SHIFT);
+}
+
+static inline bool hvf_vcpu_trap_il_is32bit(CPUState* cpu) {
+    return !!(hvf_vcpu_get_hsr(cpu) & ESR_ELx_IL);
+}
+
+/**
+ * adjust_itstate - adjust ITSTATE when emulating instructions in IT-block
+ * @vcpu:	The VCPU pointer
+ *
+ * When exceptions occur while instructions are executed in Thumb IF-THEN
+ * blocks, the ITSTATE field of the CPSR is not advanced (updated), so we have
+ * to do this little bit of work manually. The fields map like this:
+ *
+ * IT[7:0] -> CPSR[26:25],CPSR[15:10]
+ */
+static void hvf_adjust_itstate(CPUState* cpu)
+{
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    CPUARMState *env = &armcpu->env;
+    static const uint32_t k_compat_psr_t_bit = 0x00000020;
+    static const uint32_t k_compat_psr_it_mask = 0x0600fc00;
+
+	unsigned long itbits, cond;
+	uint32_t cpsr = cpsr_read(env);
+	bool is_arm = !(cpsr & k_compat_psr_t_bit);
+
+	// BUG_ON(is_arm && (cpsr & k_compat_psr_it_mask));
+
+	if (!(cpsr & k_compat_psr_it_mask))
+		return;
+
+	cond = (cpsr & 0xe000) >> 13;
+	itbits = (cpsr & 0x1c00) >> (10 - 2);
+	itbits |= (cpsr & (0x3 << 25)) >> 25;
+
+	/* Perform ITAdvance (see page A2-52 in ARM DDI 0406C) */
+	if ((itbits & 0x7) == 0)
+		itbits = cond = 0;
+	else
+		itbits = (itbits << 1) & 0x1f;
+
+	cpsr &= ~k_compat_psr_it_mask;
+	cpsr |= cond << 13;
+	cpsr |= (itbits & 0x1c) << (10 - 2);
+	cpsr |= (itbits & 0x3) << 25;
+    cpsr_write(env, cpsr, 0xffffffff, CPSRWriteRaw);
+}
+
+static inline void hvf_skip_instr32(CPUState* cpu, bool is_wide_instr) {
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    CPUARMState *env = &armcpu->env;
+    bool is_thumb;
+    static const uint32_t k_compat_psr_t_bit = 0x00000020;
+
+	is_thumb = !!(cpsr_read(env) & k_compat_psr_t_bit);
+	if (is_thumb && !is_wide_instr) {
+        env->pc += 2;
+    } else {
+        env->pc += 4;
+    }
+	hvf_adjust_itstate(cpu);
+}
+
+static inline void hvf_skip_instr(CPUState* cpu, bool is_wide_instr) {
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    CPUARMState *env = &armcpu->env;
+
+    if (is_a64(env)) {
+        env->pc += 4;
+    } else {
+        hvf_skip_instr32(cpu, is_wide_instr);
+    }
+}
+
+static void hvf_decode_hsr(CPUState* cpu, bool* is_write, int* len) {
+    uint32_t esr = hvf_vcpu_get_hsr(cpu);
+    unsigned long rt;
+    int access_size;
+    bool sign_extend;
+    bool is_extabt = ESR_ELx_EA & esr;
+    bool is_ss1tw = ESR_ELx_S1PTW & esr;
+
+    if (is_extabt) {
+        DPRINTF("%s: cache operation on I/O addr. not implemented\n", __func__);
+        abort();
+    }
+
+    if (is_ss1tw) {
+        DPRINTF("%s: page table access to I/O mem. tell guest to fix its TTBR\n");
+        abort();
+    }
+
+    access_size = hvf_vcpu_dabt_get_as(cpu);
+
+    DPRINTF("%s: access size: %d\n", __func__, access_size);
+
+    if (access_size < 0) {
+        abort();
+    }
+
+    *is_write = esr & ESR_ELx_WNR;
+    sign_extend = esr & ESR_ELx_SSE;
+    rt = hvf_vcpu_dabt_get_rd(cpu);
+
+    *len = access_size;
+
+    // MMIO is emulated and shuld not be re-executed.
+    hvf_skip_instr(cpu, hvf_vcpu_trap_il_is32bit(cpu));
+
+    abort();
+}
+
+static void hvf_handle_mmio(CPUState* cpu) {
+    uint64_t gpa = cpu->hvf_vcpu_exit_info->exception.physical_address;
+    uint32_t esr = cpu->hvf_vcpu_exit_info->exception.syndrome;
+    unsigned long data;
+    unsigned long rt;
+    int ret;
+    bool is_write;
+    int len;
+    uint8_t data_buf[8];
+
+    bool dabt_valid = esr & ESR_ELx_ISV;
+
+    DPRINTF("%s: dabt valid? %d\n", __func__, dabt_valid);
+
+    hvf_decode_hsr(cpu, &is_write, &len);
+
+    abort();
+}
+
+static void hvf_handle_guest_abort(CPUState* cpu, uint32_t ec) {
+    DPRINTF("%s: call (not implemented)\n", __func__);
+    // TODO: 4K page guest on a 16K page host
+    static const uint32_t k_page_shift = 12;
+
+    uint64_t gpa = cpu->hvf_vcpu_exit_info->exception.physical_address;
+    hvf_slot* slot = hvf_find_overlap_slot(gpa, gpa + 1);
+    uint32_t esr = cpu->hvf_vcpu_exit_info->exception.syndrome;
+    uint32_t fault_status = esr & ESR_ELx_FSC_TYPE;
+    bool is_iabt = ESR_ELx_EC_IABT_LOW == ec;
+    bool is_write = (!is_iabt) && (esr & ESR_ELx_WNR);
+    bool is_cm = esr & ESR_ELx_CM;
+
+    DPRINTF("Fault gpa: 0x%llx\n", (unsigned long long)gpa);
+
+    switch (fault_status) {
+        case ESR_ELx_FSC_FAULT:
+            DPRINTF("%s: is ESR_ELx_FSC_FAULT\n", __func__);
+            break;
+        case ESR_ELx_FSC_ACCESS:
+            DPRINTF("%s: is ESR_ELx_FSC_ACCESS\n", __func__);
+            break;
+        case ESR_ELx_FSC_PERM:
+            DPRINTF("%s: is ESR_ELx_FSC_PERM\n", __func__);
+            break;
+        default:
+            DPRINTF("%s: Unknown fault status: 0x%x\n", __func__, fault_status);
+            break;
+    }
+
+    DPRINTF("%s: is write? %d\n", __func__, is_write);
+
+    if (ESR_ELx_FSC_ACCESS == fault_status) {
+        DPRINTF("%s: is access fault (not implemented)\n", __func__);
+        abort();
+    }
+
+    if (slot) {
+        DPRINTF("Overlap slot found for this fault\n");
+    }
+
+    if (!slot) {
+        DPRINTF("No overlap slot found for this fault, is MMIO\n");
+        if (is_iabt) {
+            DPRINTF("Prefetch abort on i/o address (not implemented)\n");
+            abort();
+        }
+
+
+        // Check for cache maint operation
+        if (is_cm) {
+            DPRINTF("Cache maintenance operation (not implemented)\n");
+            abort();
+        }
+
+        DPRINTF("Actual MMIO operation\n");
+        hvf_handle_mmio(cpu);
+        return;
+    }
+
+    if (ESR_ELx_FSC_ACCESS == fault_status) {
+        DPRINTF("Handle FSC_ACCESS fault (not implemented)\n");
+        abort();
+    }
+
+    DPRINTF("user_mem_abort\n");
+    abort();
+}
+
+static void hvf_handle_guest_debug(CPUState* cpu, uint32_t ec) {
+    DPRINTF("%s: call (not implemented)\n", __func__);
+    abort();
 }
 
 static void hvf_handle_exception(CPUState* cpu) {
@@ -1532,13 +1770,44 @@ static void hvf_handle_exception(CPUState* cpu) {
     uint8_t scratch[1024];
 
     switch (ec) {
-        case 0x20:
-            hvf_read_mem(cpu, scratch, pa, 4);
-            DPRINTF("Guest abort, aborting. pa %#llx mem: 0x%x\n", (unsigned long long)pa, *(uint32_t*)scratch);
-            abort();
+        case ESR_ELx_EC_WFx:
+            hvf_handle_wfx(cpu);
+            break;
+        case ESR_ELx_EC_CP15_32:
+        case ESR_ELx_EC_CP15_64:
+        case ESR_ELx_EC_CP14_MR:
+        case ESR_ELx_EC_CP14_LS:
+        case ESR_ELx_EC_CP14_64:
+            hvf_handle_cp(cpu, ec);
+            break;
+        case ESR_ELx_EC_HVC32:
+        case ESR_ELx_EC_HVC64:
+            hvf_handle_hvc(cpu, ec);
+            break;
+        case ESR_ELx_EC_SMC32:
+        case ESR_ELx_EC_SMC64:
+            hvf_handle_smc(cpu, ec);
+            break;
+        case ESR_ELx_EC_SYS64:
+            hvf_handle_sys_reg(cpu);
+            break;
+        case ESR_ELx_EC_IABT_LOW:
+        case ESR_ELx_EC_DABT_LOW:
+            DPRINTF("%s: guest abort!\n", __func__);
+            hvf_handle_guest_abort(cpu, ec);
+            break;
+        case ESR_ELx_EC_SOFTSTP_LOW:
+        case ESR_ELx_EC_WATCHPT_LOW:
+        case ESR_ELx_EC_BREAKPT_LOW:
+        case ESR_ELx_EC_BKPT32:
+        case ESR_ELx_EC_BRK64:
+            hvf_handle_guest_debug(cpu, ec);
             break;
         default:
-            DPRINTF("Some other exception class: 0x%x\n", __func__, ec);
+            DPRINTF("%s: Some other exception class: 0x%x\n", __func__, ec);
+            hvf_get_registers(cpu);
+            hvf_put_registers(cpu);
+            abort();
     };
 }
 
@@ -1546,26 +1815,28 @@ int hvf_vcpu_exec(CPUState* cpu) {
     ARMCPU* armcpu = ARM_CPU(cpu);
     CPUARMState* env = &armcpu->env;
     int ret = 0;
+    uint64_t pc;
     uint64_t val;
+    int i;
 
     // TODO-convert-to-arm64
     // uint64_t rip = 0;
 
     // armcpu->halted = 0;
 
-    // if (hvf_process_events(armcpu)) {
-    //     qemu_mutex_unlock_iothread();
-    //     pthread_yield_np();
-    //     qemu_mutex_lock_iothread();
-    //     return EXCP_HLT;
-    // }
+    if (hvf_process_events(armcpu)) {
+        qemu_mutex_unlock_iothread();
+        pthread_yield_np();
+        qemu_mutex_lock_iothread();
+        return EXCP_HLT;
+    }
 
 again:
 
 
     do {
         if (cpu->hvf_vcpu_dirty) {
-            fprintf(stderr, "%s: should put registers\n", __func__);
+            DPRINTF("%s: should put registers\n", __func__);
             hvf_put_registers(cpu);
             cpu->hvf_vcpu_dirty = false;
         }
@@ -1588,8 +1859,10 @@ again:
         // }
 
 
-        HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_PC, &val));
-        DPRINTF("%s: run vcpu. pc: 0x%llx\n", __func__, (unsigned long long)val);
+        HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_PC, &pc));
+        hvf_read_mem(cpu, &val, pc, 8);
+        DPRINTF("%s: run vcpu. pc: 0x%llx 8 bytes at pc: 0x%llx\n", __func__, (unsigned long long)pc, (unsigned long long)val);
+
         int r  = hv_vcpu_run(cpu->hvf_fd);
 
         if (r) {
