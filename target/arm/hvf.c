@@ -1545,7 +1545,9 @@ static void hvf_handle_cp(CPUState* cpu, uint32_t ec) {
 
 static void hvf_handle_hvc(CPUState* cpu, uint32_t ec) {
     DPRINTF("%s: call (not implemented)\n", __func__);
-    abort();
+    // TODO(pcc): Implement some of the hypervisor calls.
+    // For now return NOT_SUPPORTED.
+    ARM_CPU(cpu)->env.xregs[0] = -1;
 }
 
 static void hvf_handle_smc(CPUState* cpu, uint32_t ec) {
@@ -1554,8 +1556,28 @@ static void hvf_handle_smc(CPUState* cpu, uint32_t ec) {
 }
 
 static void hvf_handle_sys_reg(CPUState* cpu) {
-    DPRINTF("%s: call (not implemented)\n", __func__);
-    abort();
+    DPRINTF("%s: call\n", __func__);
+    uint32_t esr = cpu->hvf_vcpu_exit_info->exception.syndrome;
+    bool is_write = (esr & ESR_ELx_SYS64_ISS_DIR_MASK) == ESR_ELx_SYS64_ISS_DIR_WRITE;
+    unsigned long rt = (esr & ESR_ELx_SYS64_ISS_RT_MASK) >> ESR_ELx_SYS64_ISS_RT_SHIFT;
+    unsigned long sys = esr & ESR_ELx_SYS64_ISS_SYS_MASK;
+
+    DPRINTF("%s: sys reg 0x%lx %d\n", __func__, sys, is_write);
+    switch (sys) {
+        // Apple hardware does not implement OS Lock, handle the system registers as RAZ/WI.
+        case 0x280406:   // osdlr_el1
+        case 0x280400: { // oslar_el1
+            if (!is_write) {
+                hvf_write_rt(cpu, rt, 0);
+            }
+            break;
+        }
+        default:
+            DPRINTF("%s: sys reg unhandled\n", __func__);
+            abort();
+    }
+
+    hvf_skip_instr(cpu);
 }
 
 static inline uint32_t hvf_vcpu_get_hsr(CPUState* cpu) {
@@ -2178,6 +2200,9 @@ again:
             //     }
             //     store_regs(cpu);
             //     break;
+            case HV_EXIT_REASON_VTIMER_ACTIVATED:
+                // TODO(pcc): Send interrupt.
+                break;
             default:
                 fprintf(stderr, "unhandled exit %llx\n", (unsigned long long)cpu->hvf_vcpu_exit_info->reason);
                 abort();
