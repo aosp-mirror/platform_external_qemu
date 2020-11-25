@@ -69,7 +69,7 @@ public:
     void setCaptureMouse(bool capture);
 
     bool eventFilter(QObject* target, QEvent* event) override;
-
+    void show();
     void showEvent(QShowEvent* event) override;
     void hideEvent(QHideEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
