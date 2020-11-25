@@ -139,8 +139,7 @@ void TelephonyPage::on_tel_startEndButton_clicked() {
 
         setButtonEnabled(mUi->tel_holdCallButton, theme, true);
         // Change the icon and text to "END CALL"
-        QIcon theIcon((theme == SETTINGS_THEME_DARK) ? ":/dark/call_end"
-                                                     : ":/light/call_end");
+        QIcon theIcon = getIconForCurrentTheme("call_end");
         mUi->tel_startEndButton->setIcon(theIcon);
         mUi->tel_startEndButton->setText(tr("END CALL"));
     } else {
@@ -154,8 +153,7 @@ void TelephonyPage::on_tel_startEndButton_clicked() {
 
         setButtonEnabled(mUi->tel_holdCallButton, theme, false);
         // Change the icon and text to "CALL DEVICE"
-        QIcon theIcon((theme == SETTINGS_THEME_DARK) ? ":/dark/phone_button"
-                                                     : ":/light/phone_button");
+        QIcon theIcon = getIconForCurrentTheme("phone_button");
         mUi->tel_startEndButton->setIcon(theIcon);
         mUi->tel_startEndButton->setText(tr("CALL DEVICE"));
 

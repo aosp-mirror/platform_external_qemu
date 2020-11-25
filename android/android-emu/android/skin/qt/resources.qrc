@@ -501,8 +501,8 @@
         <file alias="phone_in_talk">images/studio-light/ic_phone_in_talk_666_48dp.svg</file>
         <file alias="phone_in_talk_disabled">images/studio-light/ic_phone_in_talk_888_48dp.svg</file>
         <file alias="phone_landscape">images/studio-light/ic_phone_android_landscape.svg</file>
-        <file alias="phone_paused">images/studio-light/ic_phone_paused_CCC_48dp.svg</file>
-        <file alias="phone_paused_disabled">images/studio-light/ic_phone_paused_666_48dp.svg</file>
+        <file alias="phone_paused">images/studio-light/ic_phone_paused_666_48dp.svg</file>
+        <file alias="phone_paused_disabled">images/studio-light/ic_phone_paused_CCC_48dp.svg</file>
         <file alias="phone_portrait">images/studio-light/ic_phone_android_portrait.svg</file>
         <file alias="phone_reverse_landscape">images/studio-light/ic_phone_android_reverse_landscape.svg</file>
         <file alias="phone_reverse_portrait">images/studio-light/ic_phone_android_reverse_portrait.svg</file>
