@@ -1523,6 +1523,16 @@ static void hvf_read_mem(struct CPUState* cpu, void *data, uint64_t gpa, int byt
     address_space_rw(&address_space_memory, gpa, MEMTXATTRS_UNSPECIFIED, data, bytes, 0);
 }
 
+static uint64_t hvf_read_rt(CPUState* cpu, unsigned long rt) {
+    return rt == 31 ? 0 : ARM_CPU(cpu)->env.xregs[rt];
+}
+
+static void hvf_write_rt(CPUState* cpu, unsigned long rt, uint64_t val) {
+    if (rt != 31) {
+        ARM_CPU(cpu)->env.xregs[rt] = val;
+    }
+}
+
 static void hvf_handle_wfx(CPUState* cpu) {
     DPRINTF("%s: call (not implemented)\n", __func__);
     abort();
@@ -1622,7 +1632,7 @@ static void hvf_handle_mmio(CPUState* cpu) {
            is_write, len, sign_extend, rt);
 
     if (is_write) {
-        uint64_t guest_reg_val = rt == 31 ? 0 : env->xregs[rt];
+        uint64_t guest_reg_val = hvf_read_rt(cpu, rt);
         switch (len) {
             case 1:
                 data = guest_reg_val & 0xff;
@@ -1658,9 +1668,7 @@ static void hvf_handle_mmio(CPUState* cpu) {
                 break;
         }
         DPRINTF("%s: mmio read val 0x%llx to rt %lu\n", __func__, (unsigned long long)val, rt);
-        if (rt != 31) {
-            env->xregs[rt] = val;
-        }
+        hvf_write_rt(cpu, rt, val);
     }
 
     DPRINTF("%s: done\n", __func__);
