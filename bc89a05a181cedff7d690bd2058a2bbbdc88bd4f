@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b80b6514_d0d805b1",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1687,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-25T19:33:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bcaee4ce_2722e546",
+      "revId": "bc89a05a181cedff7d690bd2058a2bbbdc88bd4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "95f52790_afa1fcae",
@@ -31,6 +49,24 @@
       "writtenOn": "2020-11-25T19:03:53Z",
       "side": 1,
       "message": "Here it should be:\n\n        if (rt !\u003d 31) {\n            env-\u003exregs[rt] \u003d val;\n        }\n\n(writes to xzr are no-ops).",
+      "revId": "bc89a05a181cedff7d690bd2058a2bbbdc88bd4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3181fb9a_55d17f80",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1723,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-25T19:33:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "95f52790_afa1fcae",
       "revId": "bc89a05a181cedff7d690bd2058a2bbbdc88bd4f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
