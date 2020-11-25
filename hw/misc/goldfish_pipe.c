@@ -1442,11 +1442,14 @@ enum {
     GOLDFISH_PIPE_SAVE_VERSION = 1,
 };
 
+extern void virtio_vsock_impl_save_workaround(QEMUFile *f);
+
 static void goldfish_pipe_save(QEMUFile* f, void* opaque) {
     GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
     service_ops->guest_pre_save(f);
     dev->ops->save(f, dev);
+    virtio_vsock_impl_save_workaround(f);
     service_ops->guest_post_save(f);
 }
 
@@ -1808,6 +1811,8 @@ done:
     return res;
 }
 
+extern int virtio_vsock_impl_load_workaround(QEMUFile* f);
+
 static int goldfish_pipe_load(QEMUFile* f, void* opaque, int version_id) {
     GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
@@ -1821,6 +1826,9 @@ static int goldfish_pipe_load(QEMUFile* f, void* opaque, int version_id) {
 
     service_ops->guest_pre_load(f);
     int res = goldfish_pipe_load_v2(f, dev);
+    if (!res) {
+        res = virtio_vsock_impl_load_workaround(f);
+    }
     service_ops->guest_post_load(f);
     return res;
 }

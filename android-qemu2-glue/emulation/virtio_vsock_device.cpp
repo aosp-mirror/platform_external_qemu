@@ -665,11 +665,15 @@ void virtio_vsock_handle_guest_to_host(VirtIODevice *dev, VirtQueue *vq) {
 void virtio_vsock_handle_event_to_guest(VirtIODevice *dev, VirtQueue *vq) {
 }
 
+void *gImplWorkaround;  // save/load workaround
+
 void virtio_vsock_ctor(VirtIOVSock *s, Error **errp) {
     s->impl = new VirtIOVSockDev(s);
+    gImplWorkaround = s->impl;
 }
 
 void virtio_vsock_dctor(VirtIOVSock *s) {
+    gImplWorkaround = nullptr;
     delete static_cast<VirtIOVSockDev *>(s->impl);
     s->impl = nullptr;
 }
@@ -684,9 +688,17 @@ void virtio_vsock_impl_save(QEMUFile *f, const void *impl) {
     static_cast<const VirtIOVSockDev *>(impl)->save(&qstream);
 }
 
+void virtio_vsock_impl_save_workaround(QEMUFile *f) {
+    virtio_vsock_impl_save(f, gImplWorkaround);
+}
+
 int virtio_vsock_impl_load(QEMUFile *f, void *impl) {
     android::qemu::QemuFileStream qstream(f);
     return static_cast<VirtIOVSockDev *>(impl)->load(&qstream) ? 0 : 1;
+}
+
+int virtio_vsock_impl_load_workaround(QEMUFile *f) {
+    return virtio_vsock_impl_load(f, gImplWorkaround);
 }
 
 int virtio_vsock_is_enabled() {
