@@ -43,6 +43,9 @@ int hvf_inject_interrupt(CPUArchState * env, int vector);
 int hvf_vcpu_run(struct hvf_vcpu_state *vcpu);
 #endif
 
+void hvf_vcpu_set_irq(CPUState* cpu, int irq, int level);
+void hvf_irq_deactivated(int cpu, int irq);
+
 typedef struct arm64_reg {
     union {
         // The 64 bit Xn register.
