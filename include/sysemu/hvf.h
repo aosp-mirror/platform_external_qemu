@@ -57,4 +57,6 @@ int hvf_unmap_safe(uint64_t gpa, uint64_t size);
 int hvf_protect_safe(uint64_t gpa, uint64_t size, uint64_t flags);
 int hvf_remap_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags);
 
+void hvf_irq_deactivated(int cpu, int irq);
+
 #endif /* _HVF_H */
