@@ -25,6 +25,7 @@
 #include "exec/ioport.h"
 #include "exec/ram_addr.h"
 #include "exec/memory-remap.h"
+#include "hw/arm/virt.h"
 #include "qemu/main-loop.h"
 #include "qemu/abort.h"
 #include "strings.h"
@@ -613,6 +614,9 @@ int hvf_init_vcpu(CPUState * cpu) {
     cpu->hvf_vcpu_dirty = 1;
     assert_hvf_ok(r);
 
+    cpu->hvf_irq_pending = false;
+    cpu->hvf_fiq_pending = false;
+
     // TODO-convert-to-arm64
 	// if (hv_vmx_read_capability(HV_VMX_CAP_PINBASED, &cpu->hvf_caps->vmx_cap_pinbased))
 	// 	qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PINBASED\n", __func__);
@@ -680,9 +684,9 @@ void hvf_raise_event(CPUState* cpu) {
     // TODO
 }
 
-// TODO-convert-to-arm64
 void hvf_inject_interrupts(CPUState *cpu) {
-    DPRINTF("%s: call\n", __func__);
+    hv_vcpu_set_pending_interrupt(cpu->hvf_fd, HV_INTERRUPT_TYPE_IRQ, cpu->hvf_irq_pending);
+    hv_vcpu_set_pending_interrupt(cpu->hvf_fd, HV_INTERRUPT_TYPE_FIQ, cpu->hvf_fiq_pending);
 }
 
 // TODO-convert-to-arm64
@@ -1534,8 +1538,32 @@ static void hvf_write_rt(CPUState* cpu, unsigned long rt, uint64_t val) {
 }
 
 static void hvf_handle_wfx(CPUState* cpu) {
-    DPRINTF("%s: call (not implemented)\n", __func__);
-    abort();
+    uint64_t cval;
+    HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &cval));
+
+    uint64_t cntpct;
+    __asm__ __volatile__("mrs %0, cntpct_el0" : "=r"(cntpct));
+
+    int64_t ticks_to_sleep = cval - cntpct;
+    if (ticks_to_sleep < 0) {
+        return;
+    }
+
+    uint64_t cntfrq;
+    __asm__ __volatile__("mrs %0, cntfrq_el0" : "=r"(cntfrq));
+
+    uint64_t seconds = ticks_to_sleep / cntfrq;
+    uint64_t nanos = (ticks_to_sleep - cntfrq * seconds) * 1000000000 / cntfrq;
+    struct timespec ts = { seconds, nanos };
+
+    atomic_mb_set(&cpu->thread_kicked, false);
+    qemu_mutex_unlock_iothread();
+    // Use pselect to sleep so that other threads can IPI us while we're sleeping.
+    sigset_t ipimask;
+    sigprocmask(SIG_SETMASK, 0, &ipimask);
+    sigdelset(&ipimask, SIG_IPI);
+    pselect(0, 0, 0, 0, &ts, &ipimask);
+    qemu_mutex_lock_iothread();
 }
 
 static void hvf_handle_cp(CPUState* cpu, uint32_t ec) {
@@ -1832,6 +1860,41 @@ static void hvf_handle_exception(CPUState* cpu) {
     DPRINTF("%s: post put regs (done)\n", __func__);
 }
 
+void hvf_vcpu_set_irq(CPUState* cpu, int irq, int level) {
+    bool* pending;
+    switch (irq) {
+    case ARM_CPU_IRQ:
+        pending = &cpu->hvf_irq_pending;
+        break;
+    case ARM_CPU_FIQ:
+        pending = &cpu->hvf_fiq_pending;
+        break;
+    default:
+        g_assert_not_reached();
+    }
+
+    if (!*pending && level && !qemu_cpu_is_self(cpu)) {
+        hv_vcpus_exit(&cpu->hvf_fd, 1);
+        qemu_cpu_kick(cpu);
+    }
+    *pending = level;
+}
+
+void hvf_irq_deactivated(int cpunum, int irq) {
+    CPUState* cpu = current_cpu;
+    if (cpu != qemu_get_cpu(cpunum)) {
+        abort();
+    }
+
+    if (irq != 16 + ARCH_TIMER_VIRT_IRQ) {
+        return;
+    }
+
+    ARMCPU* armcpu = ARM_CPU(cpu);
+    qemu_set_irq(armcpu->gt_timer_outputs[GTIMER_VIRT], 0);
+    hv_vcpu_set_vtimer_mask(cpu->hvf_fd, false);
+}
+
 int hvf_vcpu_exec(CPUState* cpu) {
     ARMCPU* armcpu = ARM_CPU(cpu);
     CPUARMState* env = &armcpu->env;
@@ -1870,7 +1933,6 @@ again:
         hvf_inject_interrupts(cpu);
         // TODO-convert-to-arm64
         // vmx_update_tpr(cpu);
-
 
         qemu_mutex_unlock_iothread();
         // TODO-convert-to-arm64
@@ -1938,6 +2000,8 @@ again:
         HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_PC, &val));
         DPRINTF("%s: Exit at PC 0x%llx\n", __func__, (unsigned long long)val);
         switch (cpu->hvf_vcpu_exit_info->reason) {
+            case HV_EXIT_REASON_CANCELED:
+                break;
             case HV_EXIT_REASON_EXCEPTION:
                 DPRINTF("%s: handle exception\n", __func__);
                 hvf_handle_exception(cpu);
@@ -2201,7 +2265,7 @@ again:
             //     store_regs(cpu);
             //     break;
             case HV_EXIT_REASON_VTIMER_ACTIVATED:
-                // TODO(pcc): Send interrupt.
+                qemu_set_irq(armcpu->gt_timer_outputs[GTIMER_VIRT], 1);
                 break;
             default:
                 fprintf(stderr, "unhandled exit %llx\n", (unsigned long long)cpu->hvf_vcpu_exit_info->reason);

@@ -33,6 +33,7 @@
 #include "hw/arm/arm.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/hw_accel.h"
+#include "hvf-arm64.h"
 #include "kvm_arm.h"
 #include "disas/capstone.h"
 #include "fpu/softfloat.h"
@@ -453,6 +454,13 @@ static void arm_cpu_kvm_set_irq(void *opaque, int irq, int level)
 #endif
 }
 
+static void arm_cpu_hvf_set_irq(void *opaque, int irq, int level)
+{
+#ifdef CONFIG_HVF
+    hvf_vcpu_set_irq(opaque, irq, level);
+#endif
+}
+
 static bool arm_cpu_virtio_is_big_endian(CPUState *cs)
 {
     ARMCPU *cpu = ARM_CPU(cs);
@@ -559,6 +567,8 @@ static void arm_cpu_initfn(Object *obj)
          * the same interface as non-KVM CPUs.
          */
         qdev_init_gpio_in(DEVICE(cpu), arm_cpu_kvm_set_irq, 4);
+    } else if (hvf_enabled()) {
+        qdev_init_gpio_in(DEVICE(cpu), arm_cpu_hvf_set_irq, 4);
     } else {
         qdev_init_gpio_in(DEVICE(cpu), arm_cpu_set_irq, 4);
     }
