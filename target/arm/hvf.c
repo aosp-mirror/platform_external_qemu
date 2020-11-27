@@ -810,14 +810,6 @@ int hvf_put_registers(CPUState *cpu) {
     ARMCPU *armcpu = ARM_CPU(cpu);
     CPUARMState *env = &armcpu->env;
 
-    /* If we are in AArch32 mode then we need to copy the AArch32 regs to the
-     * AArch64 registers before pushing them out to 64-bit HVF.
-     */
-    if (!is_a64(env)) {
-        DPRINTF("%s: syncing 32 to 64!\n", __func__);
-        aarch64_sync_32_to_64(env);
-    }
-
     // Set HVF general registers
     {
         // HV_REG_LR = HV_REG_X30,
@@ -842,14 +834,8 @@ int hvf_put_registers(CPUState *cpu) {
 
     // Set pstate
     {
-        // Note:
-        if (is_a64(env)) {
-            DPRINTF("%s: HV_REG_CPSR 0x%llx (a64)\n", __func__, (unsigned long long)pstate_read(env));
-            HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_REG_CPSR, pstate_read(env)));
-        } else {
-            DPRINTF("%s: HV_REG_CPSR 0x%llx\n", __func__, (unsigned long long)cpsr_read(env));
-            HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_REG_CPSR, cpsr_read(env)));
-        }
+        DPRINTF("%s: HV_REG_CPSR 0x%llx (a64)\n", __func__, (unsigned long long)pstate_read(env));
+        HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_REG_CPSR, pstate_read(env)));
     }
 
     // Set PC
@@ -866,18 +852,6 @@ int hvf_put_registers(CPUState *cpu) {
 
     // Set SPSR
     {
-        /* Saved Program State Registers
-         *
-         * Before we restore from the banked_spsr[] array we need to
-         * ensure that any modifications to env->spsr are correctly
-         * reflected in the banks.
-         */
-        el = arm_current_el(env);
-        if (el > 0 && !is_a64(env)) {
-            i = bank_number(env->uncached_cpsr & CPSR_M);
-            env->banked_spsr[i] = env->spsr;
-        }
-
         DPRINTF("%s: HV_SYS_REG_SPSR_EL1 0x%llx\n", __func__, env->banked_spsr[aarch64_banked_spsr_index(/* el */ 1)]);
         HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_SPSR_EL1, env->banked_spsr[aarch64_banked_spsr_index(/* el */ 1)]));
     }
@@ -1047,13 +1021,13 @@ int hvf_get_registers(CPUState *cpu) {
         HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_CPSR, &val));
         DPRINTF("%s: HV_REG_CPSR 0x%llx\n", __func__,
                 (unsigned long long)val);
-        env->aarch64 = ((val & PSTATE_nRW) == 0);
-
-        if (is_a64(env)) {
-            pstate_write(env, val);
-        } else {
-            cpsr_write(env, val, 0xffffffff, CPSRWriteRaw);
+        if ((val & PSTATE_nRW) != 0) {
+            DPRINTF("%s: unexpectedly in aarch32 mode\n", __func__,
+                    (unsigned long long)val);
+            abort();
         }
+
+        pstate_write(env, val);
     }
 
     /* KVM puts SP_EL0 in regs.sp and SP_EL1 in regs.sp_el1. On the
@@ -1066,15 +1040,6 @@ int hvf_get_registers(CPUState *cpu) {
         HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_PC, &env->pc));
     }
 
-    /* If we are in AArch32 mode then we need to sync the AArch32 regs with the
-     * incoming AArch64 regs received from 64-bit KVM.
-     * We must perform this after all of the registers have been acquired from
-     * the kernel.
-     */
-    if (!is_a64(env)) {
-        aarch64_sync_64_to_32(env);
-    }
-
     // Get ELR_EL
     {
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_ELR_EL1, &env->elr_el[1]));
@@ -1083,19 +1048,6 @@ int hvf_get_registers(CPUState *cpu) {
     // Get SPSR
     {
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_SPSR_EL1, &env->banked_spsr[aarch64_banked_spsr_index(/* el */ 1)]));
-
-        /* Saved Program State Registers
-         *
-         * Before we restore from the banked_spsr[] array we need to
-         * ensure that any modifications to env->spsr are correctly
-         * reflected in the banks.
-         */
-        el = arm_current_el(env);
-        if (el > 0 && !is_a64(env)) {
-            i = bank_number(env->uncached_cpsr & CPSR_M);
-            env->spsr = env->banked_spsr[i];
-        }
-
     }
 
     // SIMD/FP registers
@@ -1516,11 +1468,7 @@ static inline void hvf_skip_instr(CPUState* cpu) {
     ARMCPU *armcpu = ARM_CPU(cpu);
     CPUARMState *env = &armcpu->env;
 
-    if (is_a64(env)) {
-        env->pc += 4;
-    } else {
-        abort();
-    }
+    env->pc += 4;
 }
 
 static void hvf_read_mem(struct CPUState* cpu, void *data, uint64_t gpa, int bytes) {
