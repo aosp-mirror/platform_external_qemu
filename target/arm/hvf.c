@@ -43,7 +43,7 @@ static const char kHVFVcpuSyncFailed[] = "Failed to sync HVF vcpu context";
         } \
     } while(0) \
 
-#define DEBUG_HVF
+/* #define DEBUG_HVF */
 
 #ifdef DEBUG_HVF
 #define DPRINTF(fmt, ...) \
