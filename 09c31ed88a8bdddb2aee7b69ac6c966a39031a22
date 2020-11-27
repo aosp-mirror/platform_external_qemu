@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9a835537_6c77eae1",
+        "filename": "hw/arm/virt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-11-27T22:40:41Z",
+      "side": 1,
+      "message": "I also had this changed to 31, maybe it\u0027s only a theoretical problem for now since we wouldn\u0027t be asking for that much RAM anyway.",
+      "revId": "09c31ed88a8bdddb2aee7b69ac6c966a39031a22",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
