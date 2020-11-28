@@ -43,3 +43,8 @@ int hvf_protect_safe(uint64_t gpa, uint64_t size, uint64_t flags) {
 int hvf_remap_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
     return -1;
 }
+
+void hvf_irq_deactivated(int cpunum, int irqnum) {
+    (void)cpunum;
+    (void)irqnum;
+}
