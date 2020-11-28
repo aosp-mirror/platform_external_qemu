@@ -968,6 +968,24 @@ static void hvf_handle_interrupt(CPUState * cpu, int mask) {
     }
 }
 
+void hvf_irq_deactivated(int cpunum, int irq) {
+    (void)cpunum;
+    (void)irq;
+    // Shouldn't be used in x86
+    // CPUState* cpu = current_cpu;
+    // if (cpu != qemu_get_cpu(cpunum)) {
+    //     abort();
+    // }
+
+    // if (irq != 16 + ARCH_TIMER_VIRT_IRQ) {
+    //     return;
+    // }
+
+    // ARMCPU* armcpu = ARM_CPU(cpu);
+    // qemu_set_irq(armcpu->gt_timer_outputs[GTIMER_VIRT], 0);
+    // hv_vcpu_set_vtimer_mask(cpu->hvf_fd, false);
+}
+
 int hvf_vcpu_exec(CPUState* cpu) {
     X86CPU *x86_cpu = X86_CPU(cpu);
     CPUX86State *env = &x86_cpu->env;
