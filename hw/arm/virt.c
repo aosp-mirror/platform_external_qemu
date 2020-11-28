@@ -116,7 +116,11 @@ static ARMPlatformBusSystemParams platform_bus_params;
  * of a terabyte of RAM will be doing it on a host with more than a
  * terabyte of physical address space.)
  */
+#if defined(__APPLE__) && defined(__arm64__)
+#define RAMLIMIT_GB 31
+#else
 #define RAMLIMIT_GB 255
+#endif
 #define RAMLIMIT_BYTES (RAMLIMIT_GB * 1024ULL * 1024 * 1024)
 
 /* Addresses and sizes of our components.
@@ -161,8 +165,17 @@ static const MemMapEntry a15memmap[] = {
     [VIRT_PCIE_PIO] =           { 0x3eff0000, 0x00010000 },
     [VIRT_PCIE_ECAM] =          { 0x3f000000, 0x01000000 },
     [VIRT_MEM] =                { 0x40000000, RAMLIMIT_BYTES },
+#if defined(__APPLE__) && defined(__arm64__)
+    /* Second PCIe window, 32GB wide at the 32GB boundary */
+    /* This used to be 512GB, but doesn't work on Apple Silicon
+     * as Apple Silicon only has 36 bits of address space. */
+    /* Temp hack until we can dynamically set pcie mmio high
+     * based on arm64 cpu features */
+    [VIRT_PCIE_MMIO_HIGH] =   { 0x0800000000ULL, 0x0800000000ULL },
+#else
     /* Second PCIe window, 512GB wide at the 512GB boundary */
     [VIRT_PCIE_MMIO_HIGH] =   { 0x8000000000ULL, 0x8000000000ULL },
+#endif
 };
 
 static const int a15irqmap[] = {

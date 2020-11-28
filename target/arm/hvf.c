@@ -25,6 +25,7 @@
 #include "exec/ioport.h"
 #include "exec/ram_addr.h"
 #include "exec/memory-remap.h"
+#include "hw/arm/virt.h"
 #include "qemu/main-loop.h"
 #include "qemu/abort.h"
 #include "strings.h"
@@ -42,7 +43,7 @@ static const char kHVFVcpuSyncFailed[] = "Failed to sync HVF vcpu context";
         } \
     } while(0) \
 
-#define DEBUG_HVF
+/* #define DEBUG_HVF */
 
 #ifdef DEBUG_HVF
 #define DPRINTF(fmt, ...) \
@@ -613,6 +614,9 @@ int hvf_init_vcpu(CPUState * cpu) {
     cpu->hvf_vcpu_dirty = 1;
     assert_hvf_ok(r);
 
+    cpu->hvf_irq_pending = false;
+    cpu->hvf_fiq_pending = false;
+
     // TODO-convert-to-arm64
 	// if (hv_vmx_read_capability(HV_VMX_CAP_PINBASED, &cpu->hvf_caps->vmx_cap_pinbased))
 	// 	qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PINBASED\n", __func__);
@@ -680,9 +684,9 @@ void hvf_raise_event(CPUState* cpu) {
     // TODO
 }
 
-// TODO-convert-to-arm64
 void hvf_inject_interrupts(CPUState *cpu) {
-    DPRINTF("%s: call\n", __func__);
+    hv_vcpu_set_pending_interrupt(cpu->hvf_fd, HV_INTERRUPT_TYPE_IRQ, cpu->hvf_irq_pending);
+    hv_vcpu_set_pending_interrupt(cpu->hvf_fd, HV_INTERRUPT_TYPE_FIQ, cpu->hvf_fiq_pending);
 }
 
 // TODO-convert-to-arm64
@@ -806,14 +810,6 @@ int hvf_put_registers(CPUState *cpu) {
     ARMCPU *armcpu = ARM_CPU(cpu);
     CPUARMState *env = &armcpu->env;
 
-    /* If we are in AArch32 mode then we need to copy the AArch32 regs to the
-     * AArch64 registers before pushing them out to 64-bit HVF.
-     */
-    if (!is_a64(env)) {
-        DPRINTF("%s: syncing 32 to 64!\n", __func__);
-        aarch64_sync_32_to_64(env);
-    }
-
     // Set HVF general registers
     {
         // HV_REG_LR = HV_REG_X30,
@@ -838,14 +834,8 @@ int hvf_put_registers(CPUState *cpu) {
 
     // Set pstate
     {
-        // Note:
-        if (is_a64(env)) {
-            DPRINTF("%s: HV_REG_CPSR 0x%llx (a64)\n", __func__, (unsigned long long)pstate_read(env));
-            HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_REG_CPSR, pstate_read(env)));
-        } else {
-            DPRINTF("%s: HV_REG_CPSR 0x%llx\n", __func__, (unsigned long long)cpsr_read(env));
-            HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_REG_CPSR, cpsr_read(env)));
-        }
+        DPRINTF("%s: HV_REG_CPSR 0x%llx (a64)\n", __func__, (unsigned long long)pstate_read(env));
+        HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_REG_CPSR, pstate_read(env)));
     }
 
     // Set PC
@@ -862,18 +852,6 @@ int hvf_put_registers(CPUState *cpu) {
 
     // Set SPSR
     {
-        /* Saved Program State Registers
-         *
-         * Before we restore from the banked_spsr[] array we need to
-         * ensure that any modifications to env->spsr are correctly
-         * reflected in the banks.
-         */
-        el = arm_current_el(env);
-        if (el > 0 && !is_a64(env)) {
-            i = bank_number(env->uncached_cpsr & CPSR_M);
-            env->banked_spsr[i] = env->spsr;
-        }
-
         DPRINTF("%s: HV_SYS_REG_SPSR_EL1 0x%llx\n", __func__, env->banked_spsr[aarch64_banked_spsr_index(/* el */ 1)]);
         HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_SPSR_EL1, env->banked_spsr[aarch64_banked_spsr_index(/* el */ 1)]));
     }
@@ -1043,13 +1021,13 @@ int hvf_get_registers(CPUState *cpu) {
         HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_CPSR, &val));
         DPRINTF("%s: HV_REG_CPSR 0x%llx\n", __func__,
                 (unsigned long long)val);
-        env->aarch64 = ((val & PSTATE_nRW) == 0);
-
-        if (is_a64(env)) {
-            pstate_write(env, val);
-        } else {
-            cpsr_write(env, val, 0xffffffff, CPSRWriteRaw);
+        if ((val & PSTATE_nRW) != 0) {
+            DPRINTF("%s: unexpectedly in aarch32 mode\n", __func__,
+                    (unsigned long long)val);
+            abort();
         }
+
+        pstate_write(env, val);
     }
 
     /* KVM puts SP_EL0 in regs.sp and SP_EL1 in regs.sp_el1. On the
@@ -1062,15 +1040,6 @@ int hvf_get_registers(CPUState *cpu) {
         HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_PC, &env->pc));
     }
 
-    /* If we are in AArch32 mode then we need to sync the AArch32 regs with the
-     * incoming AArch64 regs received from 64-bit KVM.
-     * We must perform this after all of the registers have been acquired from
-     * the kernel.
-     */
-    if (!is_a64(env)) {
-        aarch64_sync_64_to_32(env);
-    }
-
     // Get ELR_EL
     {
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_ELR_EL1, &env->elr_el[1]));
@@ -1079,19 +1048,6 @@ int hvf_get_registers(CPUState *cpu) {
     // Get SPSR
     {
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_SPSR_EL1, &env->banked_spsr[aarch64_banked_spsr_index(/* el */ 1)]));
-
-        /* Saved Program State Registers
-         *
-         * Before we restore from the banked_spsr[] array we need to
-         * ensure that any modifications to env->spsr are correctly
-         * reflected in the banks.
-         */
-        el = arm_current_el(env);
-        if (el > 0 && !is_a64(env)) {
-            i = bank_number(env->uncached_cpsr & CPSR_M);
-            env->spsr = env->banked_spsr[i];
-        }
-
     }
 
     // SIMD/FP registers
@@ -1512,11 +1468,7 @@ static inline void hvf_skip_instr(CPUState* cpu) {
     ARMCPU *armcpu = ARM_CPU(cpu);
     CPUARMState *env = &armcpu->env;
 
-    if (is_a64(env)) {
-        env->pc += 4;
-    } else {
-        abort();
-    }
+    env->pc += 4;
 }
 
 static void hvf_read_mem(struct CPUState* cpu, void *data, uint64_t gpa, int bytes) {
@@ -1534,8 +1486,32 @@ static void hvf_write_rt(CPUState* cpu, unsigned long rt, uint64_t val) {
 }
 
 static void hvf_handle_wfx(CPUState* cpu) {
-    DPRINTF("%s: call (not implemented)\n", __func__);
-    abort();
+    uint64_t cval;
+    HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &cval));
+
+    uint64_t cntpct;
+    __asm__ __volatile__("mrs %0, cntpct_el0" : "=r"(cntpct));
+
+    int64_t ticks_to_sleep = cval - cntpct;
+    if (ticks_to_sleep < 0) {
+        return;
+    }
+
+    uint64_t cntfrq;
+    __asm__ __volatile__("mrs %0, cntfrq_el0" : "=r"(cntfrq));
+
+    uint64_t seconds = ticks_to_sleep / cntfrq;
+    uint64_t nanos = (ticks_to_sleep - cntfrq * seconds) * 1000000000 / cntfrq;
+    struct timespec ts = { seconds, nanos };
+
+    atomic_mb_set(&cpu->thread_kicked, false);
+    qemu_mutex_unlock_iothread();
+    // Use pselect to sleep so that other threads can IPI us while we're sleeping.
+    sigset_t ipimask;
+    sigprocmask(SIG_SETMASK, 0, &ipimask);
+    sigdelset(&ipimask, SIG_IPI);
+    pselect(0, 0, 0, 0, &ts, &ipimask);
+    qemu_mutex_lock_iothread();
 }
 
 static void hvf_handle_cp(CPUState* cpu, uint32_t ec) {
@@ -1832,6 +1808,41 @@ static void hvf_handle_exception(CPUState* cpu) {
     DPRINTF("%s: post put regs (done)\n", __func__);
 }
 
+void hvf_vcpu_set_irq(CPUState* cpu, int irq, int level) {
+    bool* pending;
+    switch (irq) {
+    case ARM_CPU_IRQ:
+        pending = &cpu->hvf_irq_pending;
+        break;
+    case ARM_CPU_FIQ:
+        pending = &cpu->hvf_fiq_pending;
+        break;
+    default:
+        g_assert_not_reached();
+    }
+
+    if (!*pending && level && !qemu_cpu_is_self(cpu)) {
+        hv_vcpus_exit(&cpu->hvf_fd, 1);
+        qemu_cpu_kick(cpu);
+    }
+    *pending = level;
+}
+
+void hvf_irq_deactivated(int cpunum, int irq) {
+    CPUState* cpu = current_cpu;
+    if (cpu != qemu_get_cpu(cpunum)) {
+        abort();
+    }
+
+    if (irq != 16 + ARCH_TIMER_VIRT_IRQ) {
+        return;
+    }
+
+    ARMCPU* armcpu = ARM_CPU(cpu);
+    qemu_set_irq(armcpu->gt_timer_outputs[GTIMER_VIRT], 0);
+    hv_vcpu_set_vtimer_mask(cpu->hvf_fd, false);
+}
+
 int hvf_vcpu_exec(CPUState* cpu) {
     ARMCPU* armcpu = ARM_CPU(cpu);
     CPUARMState* env = &armcpu->env;
@@ -1870,7 +1881,6 @@ again:
         hvf_inject_interrupts(cpu);
         // TODO-convert-to-arm64
         // vmx_update_tpr(cpu);
-
 
         qemu_mutex_unlock_iothread();
         // TODO-convert-to-arm64
@@ -1938,270 +1948,15 @@ again:
         HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_PC, &val));
         DPRINTF("%s: Exit at PC 0x%llx\n", __func__, (unsigned long long)val);
         switch (cpu->hvf_vcpu_exit_info->reason) {
+            case HV_EXIT_REASON_CANCELED:
+                break;
             case HV_EXIT_REASON_EXCEPTION:
                 DPRINTF("%s: handle exception\n", __func__);
                 hvf_handle_exception(cpu);
                 cpu->hvf_vcpu_dirty = true;
                 break;
-            // TODO-convert-to-arm64
-            // case EXIT_REASON_HLT: {
-            //     macvm_set_rip(cpu, rip + ins_len);
-            //     if (!((cpu->interrupt_request & CPU_INTERRUPT_HARD) && (EFLAGS(cpu) & IF_MASK)) && !(cpu->interrupt_request & CPU_INTERRUPT_NMI) && !(idtvec_info & VMCS_IDT_VEC_VALID)) {
-            //         cpu->halted = 1;
-            //         ret = EXCP_HLT;
-            //     }
-            //     ret = EXCP_INTERRUPT;
-            //     break;
-            // }
-            // case EXIT_REASON_MWAIT: {
-            //     ret = EXCP_INTERRUPT;
-            //     break;
-            // }
-                /* Need to check if MMIO or unmmaped fault */
-            // case EXIT_REASON_EPT_FAULT:
-            // {
-                // TODO-convert-to-arm64
-                // hvf_slot *slot;
-                // addr_t gpa = rvmcs(cpu->hvf_fd, VMCS_GUEST_PHYSICAL_ADDRESS);
-
-                // if ((idtvec_info & VMCS_IDT_VEC_VALID) == 0 && (exit_qual & EXIT_QUAL_NMIUDTI) != 0)
-                //     vmx_set_nmi_blocking(cpu);
-
-                // slot = hvf_find_overlap_slot(gpa, gpa + 1);
-                // mmio
-                // if (ept_emulation_fault(exit_qual) && !slot) {
-                // TODO-convert-to-arm64!!!!!!!!!!!
-//                     struct x86_decode decode;
-// 
-//                     load_regs(cpu);
-//                     cpu->hvf_x86->fetch_rip = rip;
-// 
-//                     decode_instruction(cpu, &decode);
-// #if 0
-//                     DPRINTF("%llx: fetched %s, %x %x modrm %x len %d, gpa %lx\n", rip, decode_cmd_to_string(decode.cmd),
-//                            decode.opcode[0], decode.opcode[1], decode.modrm.byte, decode.len, gpa);
-// #endif
-//                     exec_instruction(cpu, &decode);
-//                     store_regs(cpu);
-                    // break;
-                // }
-
-#ifdef DIRTY_VGA_TRACKING // Don't try to build HVF with dirty vga tracking for now.
-#error
-#endif
-           //      if (slot) {
-           //          pthread_rwlock_wrlock(&mem_lock);
-           //          bool found = false;
-           //          void* hva = hvf_gpa2hva(gpa & ~0xfff, &found);
-           //          pthread_rwlock_unlock(&mem_lock);
-           //          if (found) {
-           //              qemu_ram_load(hva, 16384);
-           //          }
-           //      }
-           //      break;
-           //  }
-            // TODO-convert-to-arm64
-//             case EXIT_REASON_INOUT:
-//             {
-//                 uint32_t in = (exit_qual & 8) != 0;
-//                 uint32_t size =  (exit_qual & 7) + 1;
-//                 uint32_t string =  (exit_qual & 16) != 0;
-//                 uint32_t port =  exit_qual >> 16;
-//                 uint32_t rep = (exit_qual & 0x20) != 0;
-// 
-// #if 1
-//                 if (!string && in) {
-//                     uint64_t val = 0;
-//                     load_regs(cpu);
-//                     hvf_handle_io(port, &val, 0, size, 1);
-//                     if (size == 1) AL(cpu) = val;
-//                     else if (size == 2) AX(cpu) = val;
-//                     else if (size == 4) RAX(cpu) = (uint32_t)val;
-//                     else VM_PANIC("size");
-//                     RIP(cpu) += ins_len;
-//                     store_regs(cpu);
-//                     break;
-//                 } else if (!string && !in) {
-//                     RAX(cpu) = rreg(cpu->hvf_fd, HV_X86_RAX);
-//                     hvf_handle_io(port, &RAX(cpu), 1, size, 1);
-//                     macvm_set_rip(cpu, rip + ins_len);
-//                     break;
-//                 }
-// #endif
-//                 struct x86_decode decode;
-// 
-//                 load_regs(cpu);
-//                 cpu->hvf_x86->fetch_rip = rip;
-// 
-//                 decode_instruction(cpu, &decode);
-//                 VM_PANIC_ON(ins_len != decode.len);
-//                 exec_instruction(cpu, &decode);
-//                 store_regs(cpu);
-// 
-//                 break;
-//             }
-            // TODO-convert-to-arm64
-            // case EXIT_REASON_CPUID: {
-            //     uint32_t rax = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RAX);
-            //     uint32_t rbx = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RBX);
-            //     uint32_t rcx = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RCX);
-            //     uint32_t rdx = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RDX);
-
-            //     get_cpuid_func(cpu, rax, rcx, &rax, &rbx, &rcx, &rdx);
-
-            //     wreg(cpu->hvf_fd, HV_X86_RAX, rax);
-            //     wreg(cpu->hvf_fd, HV_X86_RBX, rbx);
-            //     wreg(cpu->hvf_fd, HV_X86_RCX, rcx);
-            //     wreg(cpu->hvf_fd, HV_X86_RDX, rdx);
-
-            //     macvm_set_rip(cpu, rip + ins_len);
-            //     break;
-            // }
-            // TODO-convert-to-arm64
-            // case EXIT_REASON_XSETBV: {
-            //     X86CPU *x86_cpu = X86_CPU(cpu);
-            //     CPUX86State *env = &x86_cpu->env;
-            //     uint32_t eax = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RAX);
-            //     uint32_t ecx = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RCX);
-            //     uint32_t edx = (uint32_t)rreg(cpu->hvf_fd, HV_X86_RDX);
-
-            //     if (ecx) {
-            //         DPRINTF("xsetbv: invalid index %d\n", ecx);
-            //         macvm_set_rip(cpu, rip + ins_len);
-            //         break;
-            //     }
-            //     env->xcr0 = ((uint64_t)edx << 32) | eax;
-            //     wreg(cpu->hvf_fd, HV_X86_XCR0, env->xcr0 | 1);
-            //     macvm_set_rip(cpu, rip + ins_len);
-            //     break;
-            // }
-            // case EXIT_REASON_INTR_WINDOW:
-            //     // TODO-convert-to-arm64
-            //     // vmx_clear_int_window_exiting(cpu);
-            //     ret = EXCP_INTERRUPT;
-            //     break;
-            // case EXIT_REASON_NMI_WINDOW:
-            //     // TODO-convert-to-arm64
-            //     // vmx_clear_nmi_window_exiting(cpu);
-            //     ret = EXCP_INTERRUPT;
-            //     break;
-            // case EXIT_REASON_EXT_INTR:
-            //     /* force exit and allow io handling */
-            //     ret = EXCP_INTERRUPT;
-            //     break;
-            // TODO-convert-to-arm64
-            // case EXIT_REASON_RDMSR:
-            // case EXIT_REASON_WRMSR:
-            // {
-            //     load_regs(cpu);
-            //     if (exit_reason == EXIT_REASON_RDMSR)
-            //         simulate_rdmsr(cpu);
-            //     else
-            //         simulate_wrmsr(cpu);
-            //     RIP(cpu) += rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH);
-            //     store_regs(cpu);
-            //     break;
-            // }
-            // case EXIT_REASON_CR_ACCESS: {
-            //     int cr;
-            //     int reg;
-
-            //     load_regs(cpu);
-            //     cr = exit_qual & 15;
-            //     reg = (exit_qual >> 8) & 15;
-
-            //     DPRINTF("%lx: mov cr %d from %d %llx\n", rip, cr, reg, RRX(cpu, reg));
-            //     switch (cr) {
-            //         case 0x0: {
-            //             macvm_set_cr0(cpu->hvf_fd, RRX(cpu, reg));
-            //             break;
-            //         }
-            //         case 4: {
-            //             macvm_set_cr4(cpu->hvf_fd, RRX(cpu, reg));
-            //             break;
-            //         }
-            //         case 8: {
-            //             X86CPU *x86_cpu = X86_CPU(cpu);
-            //             if (exit_qual & 0x10) {
-            //                 RRX(cpu, reg) = cpu_get_apic_tpr(x86_cpu->apic_state);
-            //             }
-            //             else {
-            //                 int tpr = RRX(cpu, reg);
-            //                 cpu_set_apic_tpr(x86_cpu->apic_state, tpr);
-            //                 ret = EXCP_INTERRUPT;
-            //             }
-            //             break;
-            //         }
-            //         default:
-            //             qemu_abort("%s: Unrecognized CR %d\n", __func__, cr);
-            //     }
-            //     RIP(cpu) += ins_len;
-            //     store_regs(cpu);
-            //     break;
-            // }
-            // case EXIT_REASON_APIC_ACCESS: { // TODO
-            //     struct x86_decode decode;
-
-            //     load_regs(cpu);
-            //     cpu->hvf_x86->fetch_rip = rip;
-
-            //     decode_instruction(cpu, &decode);
-            //     DPRINTF("apic fetched %s, %x %x len %d\n", decode_cmd_to_string(decode.cmd), decode.opcode[0], decode.opcode[1], decode.len);
-            //     exec_instruction(cpu, &decode);
-            //     store_regs(cpu);
-            //     break;
-            // }
-            // case EXIT_REASON_TPR: {
-            //     ret = 1;
-            //     break;
-            // }
-            // case EXIT_REASON_TASK_SWITCH: {
-            //                                   // TODO-convert-to-arm64
-            //     // uint64_t vinfo = rvmcs(cpu->hvf_fd, VMCS_IDT_VECTORING_INFO);
-            //     // DPRINTF("%llx: task switch %lld, vector %lld, gate %lld\n", RIP(cpu), (exit_qual >> 30) & 0x3, vinfo & VECTORING_INFO_VECTOR_MASK, vinfo & VMCS_INTR_T_MASK);
-            //     // x68_segment_selector sel = {.sel = exit_qual & 0xffff};
-            //     // vmx_handle_task_switch(cpu, sel, (exit_qual >> 30) & 0x3, vinfo & VMCS_INTR_VALID, vinfo & VECTORING_INFO_VECTOR_MASK, vinfo & VMCS_INTR_T_MASK);
-            //     break;
-            // }
-            // case EXIT_REASON_TRIPLE_FAULT: {
-            //     // TODO-convert-to-arm64
-            //     // addr_t gpa = rvmcs(cpu->hvf_fd, VMCS_GUEST_PHYSICAL_ADDRESS);
-
-            //     // DPRINTF("triple fault at %llx (%llx, %llx), cr0 %llx, qual %llx, gpa %llx, ins len %d, cpu %p\n",
-            //     //         linear_rip(cpu, rip), RIP(cpu), linear_addr(cpu, rip, REG_SEG_CS),
-            //     //         rvmcs(cpu->hvf_fd, VMCS_GUEST_CR0), exit_qual, gpa, ins_len, cpu);
-            //     // qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
-            //     // usleep(1000 * 100);
-            //     ret = EXCP_INTERRUPT;
-            //     break;
-            // }
-            // TODO-convert-to-arm64
-            // case EXIT_REASON_RDPMC:
-            //     wreg(cpu->hvf_fd, HV_X86_RAX, 0);
-            //     wreg(cpu->hvf_fd, HV_X86_RDX, 0);
-            //     macvm_set_rip(cpu, rip + ins_len);
-            //     break;
-            // case VMX_REASON_VMCALL:
-            //     // TODO: maybe just take this out?
-            //     // if (g_hypervisor_iface) {
-            //     //     load_regs(cpu);
-            //     //     g_hypervisor_iface->hypercall_handler(cpu);
-            //     //     RIP(cpu) += rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH);
-            //     //     store_regs(cpu);
-            //     // }
-            //     break;
-            // case EXIT_REASON_DR_ACCESS:
-            //     fprintf(stderr, "%llx: unhandled dr access %llx\n", rip, exit_reason);
-            //     load_regs(cpu);
-            //     {
-            //         // Just skip the whole thing for now
-            //         uint32_t insnLen = rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH);
-            //         RIP(cpu) += insnLen;
-            //     }
-            //     store_regs(cpu);
-            //     break;
             case HV_EXIT_REASON_VTIMER_ACTIVATED:
-                // TODO(pcc): Send interrupt.
+                qemu_set_irq(armcpu->gt_timer_outputs[GTIMER_VIRT], 1);
                 break;
             default:
                 fprintf(stderr, "unhandled exit %llx\n", (unsigned long long)cpu->hvf_vcpu_exit_info->reason);

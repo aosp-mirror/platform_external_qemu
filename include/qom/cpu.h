@@ -444,6 +444,8 @@ struct CPUState {
     struct hvf_arm64_state* hvf_arm64;
 #ifdef __arm64__
     hv_vcpu_exit_t* hvf_vcpu_exit_info;
+    bool hvf_irq_pending;
+    bool hvf_fiq_pending;
 #endif
     union {
         uint32_t u32;
