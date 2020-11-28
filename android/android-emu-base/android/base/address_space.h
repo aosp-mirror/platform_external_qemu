@@ -59,7 +59,11 @@ struct address_space_allocator {
 };
 
 #define ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET (~(uint64_t)0)
+#if defined(__APPLE__) && defined(__arm64__)
+#define ANDROID_EMU_ADDRESS_SPACE_DEFAULT_PAGE_SIZE 16384
+#else
 #define ANDROID_EMU_ADDRESS_SPACE_DEFAULT_PAGE_SIZE 4096
+#endif
 
 /* The assert function to abort if something goes wrong. */
 static void address_space_assert(bool condition) {
