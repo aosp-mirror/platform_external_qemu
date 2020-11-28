@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "66c40e31_ea7b41a8",
+        "filename": "target/i386/hvf-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 974,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-11-28T01:48:01Z",
+      "side": 1,
+      "message": "Can we just remove the commented out code?",
+      "revId": "84e1a8f4f21e1478a9a4053b556cceed8e3c6b5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
