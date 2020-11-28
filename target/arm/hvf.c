@@ -582,7 +582,6 @@ int hvf_init_vcpu(CPUState * cpu) {
     // init_cpuid(cpu);
 
     cpu->hvf_caps = (struct hvf_vcpu_caps*)g_malloc0(sizeof(struct hvf_vcpu_caps));
-    cpu->hvf_arm64 = (struct hvf_arm64_state*)g_malloc0(sizeof(struct hvf_arm64_state));
     DPRINTF("%s: create a vcpu config and query its values\n", __func__);
 
     uint64_t configval;
