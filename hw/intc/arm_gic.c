@@ -560,11 +560,9 @@ static void gic_deactivate_irq(GICState *s, int cpu, int irq, MemTxAttrs attrs)
 
     GIC_CLEAR_ACTIVE(irq, cm);
 
-#if defined(CONFIG_HVF) && defined(__arm64__)
     if (hvf_enabled()) {
         hvf_irq_deactivated(cpu, irq);
     }
-#endif
 }
 
 void gic_complete_irq(GICState *s, int cpu, int irq, MemTxAttrs attrs)
@@ -615,11 +613,9 @@ void gic_complete_irq(GICState *s, int cpu, int irq, MemTxAttrs attrs)
     /* In GICv2 the guest can choose to split priority-drop and deactivate */
     if (!gic_eoi_split(s, cpu, attrs)) {
         GIC_CLEAR_ACTIVE(irq, cm);
-#if defined(CONFIG_HVF) && defined(__arm64__)
         if (hvf_enabled()) {
             hvf_irq_deactivated(cpu, irq);
         }
-#endif
     }
     gic_update(s);
 }
