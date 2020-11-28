@@ -254,7 +254,6 @@ struct kvm_run;
 struct hvf_vcpu_caps;
 struct hvf_vcpu_state;
 struct hvf_x86_state;
-struct hvf_arm64_state;
 #endif
 
 struct hax_vcpu_state;
@@ -441,7 +440,6 @@ struct CPUState {
     // and x86 emulation state
     struct hvf_vcpu_caps* hvf_caps;
     struct hvf_x86_state* hvf_x86;
-    struct hvf_arm64_state* hvf_arm64;
 #ifdef __arm64__
     hv_vcpu_exit_t* hvf_vcpu_exit_info;
     bool hvf_irq_pending;
