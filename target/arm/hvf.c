@@ -1519,10 +1519,13 @@ static void hvf_handle_cp(CPUState* cpu, uint32_t ec) {
 }
 
 static void hvf_handle_hvc(CPUState* cpu, uint32_t ec) {
-    DPRINTF("%s: call (not implemented)\n", __func__);
-    // TODO(pcc): Implement some of the hypervisor calls.
-    // For now return NOT_SUPPORTED.
-    ARM_CPU(cpu)->env.xregs[0] = -1;
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    if (arm_is_psci_call(armcpu, EXCP_HVC)) {
+        arm_handle_psci_call(armcpu);
+    } else {
+        DPRINTF("unknown HVC! %016llx", env->xregs[0]);
+        armcpu->env.xregs[0] = -1;
+    }
 }
 
 static void hvf_handle_smc(CPUState* cpu, uint32_t ec) {

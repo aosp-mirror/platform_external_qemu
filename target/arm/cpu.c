@@ -601,6 +601,10 @@ static void arm_cpu_initfn(Object *obj)
     if (tcg_enabled()) {
         cpu->psci_version = 2; /* TCG implements PSCI 0.2 */
     }
+
+    if (hvf_enabled()) {
+        cpu->psci_version = 2; /* HVF uses TCG's PSCI */
+    }
 }
 
 static Property arm_cpu_reset_cbar_property =
