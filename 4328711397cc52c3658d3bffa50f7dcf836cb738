@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "103ad1ff_46977ba3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-11-30T21:53:51Z",
+      "side": 1,
+      "message": "Actually it\u0027s better to use mach_absolute time as in https://android-review.googlesource.com/c/platform/external/qemu/+/1514870/1/target/arm/hvf.c since we dont need to do conversions there.",
+      "revId": "4328711397cc52c3658d3bffa50f7dcf836cb738",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
