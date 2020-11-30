@@ -73,6 +73,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     mUi->temperatureSensorValueWidget->setRange(-273.1, 100.0, false);
     mUi->lightSensorValueWidget->setRange(0, 40000.0, false);
     mUi->pressureSensorValueWidget->setRange(0, 1100, false);
+    mUi->heartRateSensorValueWidget->setRange(0, 500, false);
     mUi->humiditySensorValueWidget->setRange(0, 100, false);
     mUi->proximitySensorValueWidget->setRange(0, 10, false);
     mUi->magNorthWidget->setLocale(QLocale::c());
@@ -375,6 +376,13 @@ void VirtualSensorsPage::on_pressureSensorValueWidget_valueChanged(
         double value) {
             mSensorTracker->increment("PRESSURE");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_PRESSURE,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
+void VirtualSensorsPage::on_heartRateSensorValueWidget_valueChanged(
+        double value) {
+            mSensorTracker->increment("HEART_RATE");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HEART_RATE,
                                PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
@@ -749,6 +757,8 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
                 getPhysicalParameterTarget(PHYSICAL_PARAMETER_LIGHT), false);
         mUi->pressureSensorValueWidget->setValue(
                 getPhysicalParameterTarget(PHYSICAL_PARAMETER_PRESSURE), false);
+        mUi->heartRateSensorValueWidget->setValue(
+                getPhysicalParameterTarget(PHYSICAL_PARAMETER_HEART_RATE), false);
         mUi->humiditySensorValueWidget->setValue(
                 getPhysicalParameterTarget(PHYSICAL_PARAMETER_HUMIDITY), false);
         if (!mUi->hinge0Slider->isHidden()) {
@@ -924,6 +934,12 @@ void VirtualSensorsPage::on_helpPressure_clicked() {
     QDesktopServices::openUrl(
             QUrl::fromEncoded("https://developer.android.com/reference/android/"
                               "hardware/Sensor.html#TYPE_PRESSURE"));
+}
+
+void VirtualSensorsPage::on_helpHeartRate_clicked() {
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_HEART_RATE"));
 }
 
 void VirtualSensorsPage::on_helpAmbientTemp_clicked() {

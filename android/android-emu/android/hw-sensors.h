@@ -95,6 +95,7 @@ typedef enum{
     SENSOR_(HINGE_ANGLE0, "hinge-angle0", HingeAngle0, float, "hinge-angle0:%g") \
     SENSOR_(HINGE_ANGLE1, "hinge-angle1", HingeAngle1, float, "hinge-angle1:%g") \
     SENSOR_(HINGE_ANGLE2, "hinge-angle2", HingeAngle2, float, "hinge-angle2:%g") \
+    SENSOR_(HEART_RATE, "heart-rate", HeartRate, float, "heart-rate:%g") \
 
 typedef enum {
 #define  SENSOR_(x,y,z,v,w)  ANDROID_SENSOR_##x,
@@ -138,6 +139,7 @@ typedef enum{
     PHYSICAL_PARAMETER_(ROLLABLE1,"rollable1",Rollable1,float) \
     PHYSICAL_PARAMETER_(ROLLABLE2,"rollable2",Rollable2,float) \
     PHYSICAL_PARAMETER_(POSTURE,"posture",Posture,float) \
+    PHYSICAL_PARAMETER_(HEART_RATE, "heart-rate", HeartRate, float) \
 
 typedef enum {
 #define PHYSICAL_PARAMETER_(x,y,z,w)  PHYSICAL_PARAMETER_##x,
