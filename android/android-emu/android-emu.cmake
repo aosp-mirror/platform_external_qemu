@@ -315,6 +315,7 @@ set(android_emu_dependent_src
     android/physics/AmbientEnvironment.cpp
     android/physics/FoldableModel.cpp
     android/physics/InertialModel.cpp
+    android/physics/BodyModel.cpp
     android/physics/PhysicalModel.cpp
     android/qemu-setup.cpp
     android/sensors-port.c
@@ -887,6 +888,7 @@ if(NOT LINUX_AARCH64)
       android/opengl/GpuFrameBridge_unittest.cpp
       android/opengl/gpuinfo_unittest.cpp
       android/physics/AmbientEnvironment_unittest.cpp
+      android/physics/BodyModel_unittest.cpp
       android/physics/InertialModel_unittest.cpp
       android/physics/PhysicalModel_unittest.cpp
       android/proxy/proxy_common_unittest.cpp

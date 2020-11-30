@@ -59,6 +59,7 @@ private slots:
     void on_lightSensorValueWidget_valueChanged(double value);
     void on_pressureSensorValueWidget_valueChanged(double value);
     void on_humiditySensorValueWidget_valueChanged(double value);
+    void on_heartRateSensorValueWidget_valueChanged(double value);
     void on_accelModeRotate_toggled();
     void on_accelModeMove_toggled();
     void on_accelModeFold_toggled();
@@ -109,6 +110,7 @@ private slots:
     void on_helpMagneticField_clicked();
     void on_helpLight_clicked();
     void on_helpPressure_clicked();
+    void on_helpHeartRate_clicked();
     void on_helpAmbientTemp_clicked();
     void on_helpProximity_clicked();
     void on_helpHumidity_clicked();
