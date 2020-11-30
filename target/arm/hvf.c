@@ -953,7 +953,8 @@ int hvf_put_registers(CPUState *cpu) {
         // HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_SYS_REG_AMAIR_EL1, ???));
 
         HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTKCTL_EL1, env->cp15.c14_cntkctl));
-        // HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, ???));
+        HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CTL_EL0, env->cp15.c14_timer[GTIMER_VIRT].ctl));
+        HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, env->cp15.c14_timer[GTIMER_VIRT].cval));
         HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CONTEXTIDR_EL1, env->cp15.contextidr_el[1]));
         HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CPACR_EL1, env->cp15.cpacr_el1));
         HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CSSELR_EL1, env->cp15.csselr_el[1]));
@@ -1153,7 +1154,8 @@ int hvf_get_registers(CPUState *cpu) {
         // HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_SYS_REG_AMAIR_EL1, ???));
 
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTKCTL_EL1, &env->cp15.c14_cntkctl));
-        // HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, ???));
+        HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CTL_EL0, &(env->cp15.c14_timer[GTIMER_VIRT].ctl)));
+        HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &(env->cp15.c14_timer[GTIMER_VIRT].cval)));
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CONTEXTIDR_EL1, &env->cp15.contextidr_el[1]));
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CPACR_EL1, &env->cp15.cpacr_el1));
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CSSELR_EL1, &env->cp15.csselr_el[1]));
@@ -1484,33 +1486,52 @@ static void hvf_write_rt(CPUState* cpu, unsigned long rt, uint64_t val) {
     }
 }
 
+static inline uint32_t hvf_vcpu_get_esr(CPUState* cpu) {
+    return cpu->hvf_vcpu_exit_info->exception.syndrome;
+}
+
+/**
+ * hvf_handle_wfx - handle a wait-for-interrupts or wait-for-event
+ *		    instruction executed by a guest
+ *
+ * WFE: Yield the CPU and come back to this vcpu when the scheduler
+ * decides to.
+ * WFI: halt execution of world-switches and schedule other host processes
+ * until there is an incoming IRQ or FIQ to the VM.
+ */
 static void hvf_handle_wfx(CPUState* cpu) {
-    uint64_t cval;
-    HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &cval));
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    CPUARMState *env = &armcpu->env;
 
-    uint64_t cntpct;
-    __asm__ __volatile__("mrs %0, cntpct_el0" : "=r"(cntpct));
+    if (hvf_vcpu_get_esr(cpu) & ESR_ELx_WFx_ISS_WFE) {
+        /*
+         * WFE: Yield the CPU and come back to this vcpu when the scheduler
+         * decides to.
+         */
+        pthread_yield_np();
+    } else {
+        /*
+         * WFI: halt execution of world-switches and schedule other host processes
+         * until there is an incoming IRQ or FIQ to the VM.
+         */
 
-    int64_t ticks_to_sleep = cval - cntpct;
-    if (ticks_to_sleep < 0) {
-        return;
+        // KVM defines half a millisecond as a default polling interval
+        #define HVF_HALT_POLL_NS_DEFAULT 500000
+
+        uint64_t seconds = 0;
+        uint64_t nanos = HVF_HALT_POLL_NS_DEFAULT;
+        struct timespec ts = { seconds, nanos };
+
+        atomic_mb_set(&cpu->thread_kicked, false);
+        qemu_mutex_unlock_iothread();
+        // Use pselect to sleep so that other threads can IPI us while we're sleeping.
+        sigset_t ipimask;
+        sigprocmask(SIG_SETMASK, 0, &ipimask);
+        sigdelset(&ipimask, SIG_IPI);
+        // TODO: This takes up some CPU.
+        pselect(0, 0, 0, 0, &ts, &ipimask);
+        qemu_mutex_lock_iothread();
     }
-
-    uint64_t cntfrq;
-    __asm__ __volatile__("mrs %0, cntfrq_el0" : "=r"(cntfrq));
-
-    uint64_t seconds = ticks_to_sleep / cntfrq;
-    uint64_t nanos = (ticks_to_sleep - cntfrq * seconds) * 1000000000 / cntfrq;
-    struct timespec ts = { seconds, nanos };
-
-    atomic_mb_set(&cpu->thread_kicked, false);
-    qemu_mutex_unlock_iothread();
-    // Use pselect to sleep so that other threads can IPI us while we're sleeping.
-    sigset_t ipimask;
-    sigprocmask(SIG_SETMASK, 0, &ipimask);
-    sigdelset(&ipimask, SIG_IPI);
-    pselect(0, 0, 0, 0, &ts, &ipimask);
-    qemu_mutex_lock_iothread();
 }
 
 static void hvf_handle_cp(CPUState* cpu, uint32_t ec) {
@@ -1558,20 +1579,16 @@ static void hvf_handle_sys_reg(CPUState* cpu) {
     hvf_skip_instr(cpu);
 }
 
-static inline uint32_t hvf_vcpu_get_hsr(CPUState* cpu) {
-    return cpu->hvf_vcpu_exit_info->exception.syndrome;
-}
-
 static inline int hvf_vcpu_dabt_get_as(CPUState* cpu) {
-    return 1 << ((hvf_vcpu_get_hsr(cpu) & ESR_ELx_SAS) >> ESR_ELx_SAS_SHIFT);
+    return 1 << ((hvf_vcpu_get_esr(cpu) & ESR_ELx_SAS) >> ESR_ELx_SAS_SHIFT);
 }
 
 static inline int hvf_vcpu_dabt_get_rd(CPUState* cpu) {
-    return (hvf_vcpu_get_hsr(cpu) & ESR_ELx_SRT_MASK) >> ESR_ELx_SRT_SHIFT;
+    return (hvf_vcpu_get_esr(cpu) & ESR_ELx_SRT_MASK) >> ESR_ELx_SRT_SHIFT;
 }
 
-static void hvf_decode_hsr(CPUState* cpu, bool* is_write, int* len, bool* sign_extend, unsigned long* rt) {
-    uint32_t esr = hvf_vcpu_get_hsr(cpu);
+static void hvf_decode_mmio(CPUState* cpu, bool* is_write, int* len, bool* sign_extend, unsigned long* rt) {
+    uint32_t esr = hvf_vcpu_get_esr(cpu);
     int access_size;
     bool is_extabt = ESR_ELx_EA & esr;
     bool is_ss1tw = ESR_ELx_S1PTW & esr;
@@ -1626,7 +1643,7 @@ static void hvf_handle_mmio(CPUState* cpu) {
         abort();
     }
 
-    hvf_decode_hsr(cpu, &is_write, &len, &sign_extend, &rt);
+    hvf_decode_mmio(cpu, &is_write, &len, &sign_extend, &rt);
 
     DPRINTF("%s: write? %d len %d signextend %d rt %lu\n", __func__,
            is_write, len, sign_extend, rt);
@@ -1853,11 +1870,6 @@ int hvf_vcpu_exec(CPUState* cpu) {
     uint64_t val;
     int i;
 
-    // TODO-convert-to-arm64
-    // uint64_t rip = 0;
-
-    // armcpu->halted = 0;
-
     if (hvf_process_events(armcpu)) {
         qemu_mutex_unlock_iothread();
         pthread_yield_np();
@@ -1866,8 +1878,6 @@ int hvf_vcpu_exec(CPUState* cpu) {
     }
 
 again:
-
-
     do {
         if (cpu->hvf_vcpu_dirty) {
             DPRINTF("%s: should put registers\n", __func__);
@@ -1875,26 +1885,9 @@ again:
             cpu->hvf_vcpu_dirty = false;
         }
 
-        // TODO-convert-to-arm64
-        // cpu->hvf_x86->interruptable =
-        //     !(rvmcs(cpu->hvf_fd, VMCS_GUEST_INTERRUPTIBILITY) &
-        //     (VMCS_INTERRUPTIBILITY_STI_BLOCKING | VMCS_INTERRUPTIBILITY_MOVSS_BLOCKING));
-
         hvf_inject_interrupts(cpu);
-        // TODO-convert-to-arm64
-        // vmx_update_tpr(cpu);
 
         qemu_mutex_unlock_iothread();
-        // TODO-convert-to-arm64
-        // while (!cpu_is_bsp(X86_CPU(cpu)) && cpu->halted) {
-        //     qemu_mutex_lock_iothread();
-        //     return EXCP_HLT;
-        // }
-
-
-        HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_PC, &pc));
-        hvf_read_mem(cpu, &val, pc, 8);
-        DPRINTF("%s: run vcpu. pc: 0x%llx 8 bytes at pc: 0x%llx\n", __func__, (unsigned long long)pc, (unsigned long long)val);
 
         int r  = hv_vcpu_run(cpu->hvf_fd);
 
@@ -1902,44 +1895,13 @@ again:
             qemu_abort("%s: run failed with 0x%x\n", __func__, r);
         }
 
-//  * @typedef    hv_vcpu_exit_t
-//  * @abstract   Contains information about an exit from the vcpu to the host.
-//
-//  * @typedef    hv_vcpu_exit_exception_t
-//  * @abstract   Contains details of a vcpu exception.
-//  */
-// typedef struct {
-//     hv_exception_syndrome_t syndrome;
-//     hv_exception_address_t virtual_address;
-//     hv_ipa_t physical_address;
-// } hv_vcpu_exit_exception_t;
-//  
-//  */
-// typedef struct {
-//     hv_exit_reason_t reason;
-//     hv_vcpu_exit_exception_t exception;
-// } hv_vcpu_exit_t;
-
-
         DPRINTF("%s: Exit info: reason: %#x exception: syndrome %#x va pa %#llx %#llx\n", __func__,
                 cpu->hvf_vcpu_exit_info->reason,
                 cpu->hvf_vcpu_exit_info->exception.syndrome,
                 (unsigned long long)cpu->hvf_vcpu_exit_info->exception.virtual_address,
                 (unsigned long long)cpu->hvf_vcpu_exit_info->exception.physical_address);
-        /* handle VMEXIT */
-        // TODO-convert-to-arm64
-        // uint64_t exit_reason = rvmcs(cpu->hvf_fd, VMCS_EXIT_REASON);
-        // uint64_t exit_qual = rvmcs(cpu->hvf_fd, VMCS_EXIT_QUALIFICATION);
-        // uint32_t ins_len = (uint32_t)rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH);
-        // uint64_t idtvec_info = rvmcs(cpu->hvf_fd, VMCS_IDT_VECTORING_INFO);
-        // rip = rreg(cpu->hvf_fd, HV_X86_RIP);
-        // RFLAGS(cpu) = rreg(cpu->hvf_fd, HV_X86_RFLAGS);
-        // env->eflags = RFLAGS(cpu);
-
         qemu_mutex_lock_iothread();
 
-        // TODO-convert-to-arm64
-        // update_apic_tpr(cpu);
         current_cpu = cpu;
 
         ret = 0;
@@ -1947,15 +1909,12 @@ again:
         // TODO-convert-to-arm64
         uint8_t ec = 0x3f & ((cpu->hvf_vcpu_exit_info->exception.syndrome) >> 26);
         uint64_t val;
-        HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_PC, &val));
-        DPRINTF("%s: Exit at PC 0x%llx\n", __func__, (unsigned long long)val);
         switch (cpu->hvf_vcpu_exit_info->reason) {
             case HV_EXIT_REASON_CANCELED:
                 break;
             case HV_EXIT_REASON_EXCEPTION:
                 DPRINTF("%s: handle exception\n", __func__);
                 hvf_handle_exception(cpu);
-                cpu->hvf_vcpu_dirty = true;
                 break;
             case HV_EXIT_REASON_VTIMER_ACTIVATED:
                 qemu_set_irq(armcpu->gt_timer_outputs[GTIMER_VIRT], 1);
