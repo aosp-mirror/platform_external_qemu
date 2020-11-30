@@ -14,6 +14,7 @@
 #include "qemu-common.h"
 
 #include <Hypervisor/Hypervisor.h>
+#include <mach/mach_time.h>
 
 #include "esr.h"
 
@@ -1488,10 +1489,7 @@ static void hvf_handle_wfx(CPUState* cpu) {
     uint64_t cval;
     HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &cval));
 
-    uint64_t cntpct;
-    __asm__ __volatile__("mrs %0, cntpct_el0" : "=r"(cntpct));
-
-    int64_t ticks_to_sleep = cval - cntpct;
+    int64_t ticks_to_sleep = cval - mach_absolute_time();
     if (ticks_to_sleep < 0) {
         return;
     }
