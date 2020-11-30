@@ -1,2 +1,2 @@
-codesign -s "Lingfeng Yang" --entitlements ./entitlements.plist $1
+codesign -s - --entitlements ./entitlements.plist $1
 
