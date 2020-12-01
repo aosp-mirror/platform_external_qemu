@@ -437,7 +437,7 @@ public:
 
 
     int getHostBitness() const override {
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(__aarch64__)
         return 64;
 #elif defined(_WIN32)
         // Retrieves the path of the WOW64 system directory, which doesn't
@@ -1828,7 +1828,7 @@ System* System::get() {
     return result;
 }
 
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(__aarch64__)
 // static
 const char* System::kLibSubDir = "lib64";
 // static

@@ -185,7 +185,7 @@ public:
     static System::FileSize getAlignedFileSize(System::FileSize align, System::FileSize size);
 
     // Return the program bitness as an integer, either 32 or 64.
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(__aarch64__)
     static const int kProgramBitness = 64;
 #else
     static const int kProgramBitness = 32;
