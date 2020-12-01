@@ -773,9 +773,20 @@ void EmulatorQtWindow::showWin32DeprecationWarning() {
 
 void EmulatorQtWindow::showAvdArchWarning() {
     ScopedCPtr<char> arch(avdInfo_getTargetCpuArch(android_avdInfo));
+
+    // On Apple, we could also be running w/ Virtualization.framework
+    // which should also support fast x86 VMs on arm64.
+#if defined(__APPLE__) || defined (__x86_64__)
     if (!strcmp(arch.get(), "x86") || !strcmp(arch.get(), "x86_64")) {
         return;
     }
+#endif
+
+#ifdef __aarch64__
+    if (!strcmp(arch.get(), "arm64")) {
+        return;
+    }
+#endif
 
     // The following statuses indicate that the machine hardware does not
     // support hardware acceleration. These machines should never show a
