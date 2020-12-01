@@ -1,0 +1,12 @@
+Verified+1: Weilun Du <wdu@google.com>
+Code-Review+1: Weilun Du <wdu@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Open-Source-Licensing+1: Weilun Du <wdu@google.com>
+Lint+1: Weilun Du <wdu@google.com>
+Lint+1: Lint 🤖 <ayeaye-gerrit@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Weilun Du <wdu@google.com>
+Submitted-at: Tue, 01 Dec 2020 17:37:17 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1515080
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
