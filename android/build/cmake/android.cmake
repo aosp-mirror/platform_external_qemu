@@ -22,6 +22,12 @@ include(prebuilts)
 # We want to make sure all the cross targets end up in a unique location
 set(ANDROID_CROSS_BUILD_DIRECTORY ${CMAKE_BINARY_DIR}/build/${ANDROID_HOST_TAG})
 
+set(ANDROID_XCODE_SIGN_ADHOC FALSE)
+
+if (APPLE AND BUILDING_FOR_AARCH64)
+    set(ANDROID_XCODE_SIGN_ADHOC TRUE)
+endif()
+
 # Checks to make sure the TAG is valid.
 function(_check_target_tag TAG)
   set(VALID_TARGETS
@@ -275,6 +281,13 @@ function(_register_target)
       TARGET ${build_TARGET} URL ${build_URL} LIBNAME ${build_LIBNAME}
       SPDX ${build_LICENSE} LICENSE ${REMOTE_LICENSE} LOCAL ${LOCAL_LICENSE})
   endif()
+endfunction()
+
+function(android_sign path)
+    if (ANDROID_XCODE_SIGN_ADHOC)
+        install(
+            CODE "message(\"android_sign ${path}\")\nexecute_process(COMMAND codesign -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${path})")
+    endif()
 endfunction()
 
 # ~~~
@@ -1231,6 +1244,7 @@ function(android_install_exe TGT DST)
   android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
+  android_sign(${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
 endfunction()
 
 # Installs the given shared library. The shared library will end up in ../lib64
@@ -1243,6 +1257,8 @@ function(android_install_shared TGT)
   android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
+  # Account for lib prefix when signing
+  android_sign(${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
 endfunction()
 
 # Strips the given prebuilt executable during install..
