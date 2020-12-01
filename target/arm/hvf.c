@@ -819,7 +819,8 @@ int hvf_put_registers(CPUState *cpu) {
         // HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_SYS_REG_AMAIR_EL1, ???));
 
         HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTKCTL_EL1, env->cp15.c14_cntkctl));
-        // HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, ???));
+        HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CTL_EL0, env->cp15.c14_timer[GTIMER_VIRT].ctl));
+        HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, env->cp15.c14_timer[GTIMER_VIRT].cval));
         HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CONTEXTIDR_EL1, env->cp15.contextidr_el[1]));
         HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CPACR_EL1, env->cp15.cpacr_el1));
         HVF_CHECKED_CALL(hv_vcpu_set_sys_reg(cpu->hvf_fd, HV_SYS_REG_CSSELR_EL1, env->cp15.csselr_el[1]));
@@ -1019,7 +1020,8 @@ int hvf_get_registers(CPUState *cpu) {
         // HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_SYS_REG_AMAIR_EL1, ???));
 
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTKCTL_EL1, &env->cp15.c14_cntkctl));
-        // HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, ???));
+        HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CTL_EL0, &(env->cp15.c14_timer[GTIMER_VIRT].ctl)));
+        HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &(env->cp15.c14_timer[GTIMER_VIRT].cval)));
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CONTEXTIDR_EL1, &env->cp15.contextidr_el[1]));
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CPACR_EL1, &env->cp15.cpacr_el1));
         HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CSSELR_EL1, &env->cp15.csselr_el[1]));
