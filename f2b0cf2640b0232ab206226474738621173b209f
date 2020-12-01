@@ -16,6 +16,24 @@
       "message": "Thanks. I had independently figured this out and hacked the code to always pass this argument, this is a much nicer way.",
       "revId": "f2b0cf2640b0232ab206226474738621173b209f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ee788bd6_b0b38c5f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1535516
+      },
+      "writtenOn": "2020-12-01T04:01:27Z",
+      "side": 1,
+      "message": "Thanks for the quick review.\n\nIf I could propose a feature request, it would be nice if the emulator had a command line flag to pass arbitrary kernel command line options, like raw qemu\u0027s -append. Since I\u0027ve never developed for the emulator before I didn\u0027t want to do something too involved.",
+      "parentUuid": "d0004882_0127a422",
+      "revId": "f2b0cf2640b0232ab206226474738621173b209f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
