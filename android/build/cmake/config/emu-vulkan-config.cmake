@@ -94,6 +94,11 @@ elseif(DARWIN_X86_64)
       "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json"
       # shaders
       ${VULKAN_COMMON_DEPENDENCIES})
+elseif(DARWIN_AARCH64)
+  set(VULKAN_DEPENDENCIES
+      # MoltenVK
+      "${PREBUILT_ROOT}/icds/libMoltenVK.dylib>lib64/vulkan/libMoltenVK.dylib"
+      "${PREBUILT_ROOT}/icds/MoltenVK_icd.json>lib64/vulkan/MoltenVK_icd.json")
 elseif(WINDOWS)
   get_filename_component(
     PREBUILT_ROOT
