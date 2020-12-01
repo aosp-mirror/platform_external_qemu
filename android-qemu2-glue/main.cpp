@@ -1053,8 +1053,12 @@ static int startEmulatorWithMinConfig(
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
     // Features to disable or enable depending on rendering backend
     // and gpu make/model/version
+#if defined(__APPLE__) && defined(__aarch64__)
+    shouldDisableAsyncSwap = false;
+#else
     shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
                               System::get()->getProgramBitness() == 32;
+#endif
     shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                              async_query_host_gpu_SyncBlacklisted();
 
@@ -2208,8 +2212,12 @@ extern "C" int main(int argc, char** argv) {
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
+#if defined(__APPLE__) && defined(__aarch64__)
+        shouldDisableAsyncSwap = false;
+#else
         shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
                                   System::get()->getProgramBitness() == 32;
+#endif
         shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                                  async_query_host_gpu_SyncBlacklisted();
 
