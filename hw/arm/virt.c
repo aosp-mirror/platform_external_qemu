@@ -1512,9 +1512,11 @@ static void machvirt_init(MachineState *machine)
     create_simple_device(vms, pic, RANCHU_GOLDFISH_PIPE, "goldfish_pipe",
                          "google,android-pipe\0"
                          "generic,android-pipe", 2, 0, 0);
-    //create_simple_device(vms, pic, RANCHU_GOLDFISH_SYNC, "goldfish_sync",
-     //                    "google,goldfish-sync\0"
-      //                   "generic,goldfish-sync", 2, 0, 0);
+#if defined(__APPLE__) && defined(__aarch64__)
+    create_simple_device(vms, pic, RANCHU_GOLDFISH_SYNC, "goldfish_sync",
+                      "google,goldfish-sync\0"
+                      "generic,goldfish-sync", 2, 0, 0);
+#endif
     /* Create mmio transports, so the user can create virtio backends
      * (which will be automatically plugged in to the transports). If
      * no backend is created the transport will just sit harmlessly idle.
