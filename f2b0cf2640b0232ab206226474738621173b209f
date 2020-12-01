@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d0004882_0127a422",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-01T03:37:21Z",
+      "side": 1,
+      "message": "Thanks. I had independently figured this out and hacked the code to always pass this argument, this is a much nicer way.",
+      "revId": "f2b0cf2640b0232ab206226474738621173b209f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
