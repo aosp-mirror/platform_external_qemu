@@ -52,6 +52,24 @@
       "parentUuid": "ee788bd6_b0b38c5f",
       "revId": "f2b0cf2640b0232ab206226474738621173b209f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fd0ef3d3_3084b07d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1535516
+      },
+      "writtenOn": "2020-12-01T04:30:44Z",
+      "side": 1,
+      "message": "Oh, didn\u0027t know about that, thanks!",
+      "parentUuid": "e588cad3_4cfa8209",
+      "revId": "f2b0cf2640b0232ab206226474738621173b209f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
