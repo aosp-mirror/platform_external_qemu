@@ -260,9 +260,14 @@ int arm_set_cpu_off(uint64_t cpuid)
         return QEMU_ARM_POWERCTL_IS_OFF;
     }
 
-    /* Queue work to run under the target vCPUs context */
-    async_run_on_cpu(target_cpu_state, arm_set_cpu_off_async_work,
-                     RUN_ON_CPU_NULL);
+    if (hvf_enabled()) {
+        target_cpu_state->halted = 1;
+        hvf_exit_vcpu(target_cpu_state);
+    } else {
+        /* Queue work to run under the target vCPUs context */
+        async_run_on_cpu(target_cpu_state, arm_set_cpu_off_async_work,
+                         RUN_ON_CPU_NULL);
+    }
 
     return QEMU_ARM_POWERCTL_RET_SUCCESS;
 }
