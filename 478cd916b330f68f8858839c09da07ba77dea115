@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "93649cda_57556b4f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-01T03:34:27Z",
+      "side": 1,
+      "message": "Could we adhoc sign the prebuilts instead? According to https://github.com/golang/go/issues/42684#issuecomment-729346276 this should work.",
+      "revId": "478cd916b330f68f8858839c09da07ba77dea115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
