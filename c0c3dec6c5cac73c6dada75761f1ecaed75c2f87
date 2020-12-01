@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "41b89048_55114cd4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-12-01T21:55:00Z",
+      "side": 1,
+      "message": "Unrelated: it looks like we don\u0027t save our physical model to the snapshot.",
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d16d47f8_052484b0",
