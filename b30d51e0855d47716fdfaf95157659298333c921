@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5510c4ec_3ccb1f8e",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1539,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-01T03:32:21Z",
+      "side": 1,
+      "message": "Already converted so remove comment?",
+      "revId": "b30d51e0855d47716fdfaf95157659298333c921",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
