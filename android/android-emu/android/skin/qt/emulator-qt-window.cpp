@@ -777,6 +777,12 @@ void EmulatorQtWindow::showAvdArchWarning() {
         return;
     }
 
+#if defined(__aarch64__) && defined(__APPLE__)
+    if (!strcmp(arch.get(), "arm64")) {
+        return;
+    }
+#endif
+
     // The following statuses indicate that the machine hardware does not
     // support hardware acceleration. These machines should never show a
     // popup indicating to switch to x86.
