@@ -26,6 +26,52 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "15a0ca10_0ff4fd36",
+        "filename": "android/android-emu/android/physics/BodyModel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-12-01T21:49:14Z",
+      "side": 1,
+      "message": "Can we have \u0027enum class\u0027 instead?",
+      "range": {
+        "startLine": 26,
+        "startChar": 8,
+        "endLine": 26,
+        "endChar": 12
+      },
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ccd7445e_49b17190",
+        "filename": "android/android-emu/android/physics/BodyModel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-12-01T21:49:14Z",
+      "side": 1,
+      "message": "\u0027typedef\u0027 here is not required for C++.",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 7
+      },
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "6390d115_6f543816",
         "filename": "android/android-emu/android/physics/BodyModel.h",
         "patchSetId": 1
