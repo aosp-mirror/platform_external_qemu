@@ -485,90 +485,9 @@ static MemoryListener hvf_io_listener = {
 // VCPU init////////////////////////////////////////////////////////////////////
 
 int hvf_enabled() { return !hvf_disabled; }
+
 void hvf_disable(int shouldDisable) {
     hvf_disabled = shouldDisable;
-}
-
-void vmx_reset_vcpu(CPUState *cpu) {
-
-    // TODO-convert-to-arm64
-    // wvmcs(cpu->hvf_fd, VMCS_ENTRY_CTLS, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_IA32_EFER, 0);
-    // macvm_set_cr0(cpu->hvf_fd, 0x60000010);
-
-    // wvmcs(cpu->hvf_fd, VMCS_CR4_MASK, CR4_VMXE_MASK);
-    // wvmcs(cpu->hvf_fd, VMCS_CR4_SHADOW, 0x0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_CR4, CR4_VMXE_MASK);
-
-    // // set VMCS guest state fields
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_CS_SELECTOR, 0xf000);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_CS_LIMIT, 0xffff);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_CS_ACCESS_RIGHTS, 0x9b);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_CS_BASE, 0xffff0000);
-
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_DS_SELECTOR, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_DS_LIMIT, 0xffff);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_DS_ACCESS_RIGHTS, 0x93);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_DS_BASE, 0);
-
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_ES_SELECTOR, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_ES_LIMIT, 0xffff);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_ES_ACCESS_RIGHTS, 0x93);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_ES_BASE, 0);
-
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_FS_SELECTOR, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_FS_LIMIT, 0xffff);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_FS_ACCESS_RIGHTS, 0x93);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_FS_BASE, 0);
-
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_GS_SELECTOR, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_GS_LIMIT, 0xffff);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_GS_ACCESS_RIGHTS, 0x93);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_GS_BASE, 0);
-
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_SS_SELECTOR, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_SS_LIMIT, 0xffff);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_SS_ACCESS_RIGHTS, 0x93);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_SS_BASE, 0);
-
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_LDTR_SELECTOR, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_LDTR_LIMIT, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_LDTR_ACCESS_RIGHTS, 0x10000);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_LDTR_BASE, 0);
-
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_TR_SELECTOR, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_TR_LIMIT, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_TR_ACCESS_RIGHTS, 0x83);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_TR_BASE, 0);
-
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_GDTR_LIMIT, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_GDTR_BASE, 0);
-
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_IDTR_LIMIT, 0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_IDTR_BASE, 0);
-
-    // //wvmcs(cpu->hvf_fd, VMCS_GUEST_CR2, 0x0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_CR3, 0x0);
-    // wvmcs(cpu->hvf_fd, VMCS_GUEST_DR7, 0x0);
-
-    // wreg(cpu->hvf_fd, HV_X86_RIP, 0xfff0);
-    // wreg(cpu->hvf_fd, HV_X86_RDX, 0x623);
-    // wreg(cpu->hvf_fd, HV_X86_RFLAGS, 0x2);
-    // wreg(cpu->hvf_fd, HV_X86_RSP, 0x0);
-    // wreg(cpu->hvf_fd, HV_X86_RAX, 0x0);
-    // wreg(cpu->hvf_fd, HV_X86_RBX, 0x0);
-    // wreg(cpu->hvf_fd, HV_X86_RCX, 0x0);
-    // wreg(cpu->hvf_fd, HV_X86_RSI, 0x0);
-    // wreg(cpu->hvf_fd, HV_X86_RDI, 0x0);
-    // wreg(cpu->hvf_fd, HV_X86_RBP, 0x0);
-
-    // for (int i = 0; i < 8; i++)
-    //      wreg(cpu->hvf_fd, HV_X86_R8+i, 0x0);
-
-    // hv_vm_sync_tsc(0);
-    // cpu->halted = 0;
-    // hv_vcpu_invalidate_tlb(cpu->hvf_fd);
-    // hv_vcpu_flush(cpu->hvf_fd);
 }
 
 int hvf_init_vcpu(CPUState * cpu) {
@@ -577,10 +496,6 @@ int hvf_init_vcpu(CPUState * cpu) {
     ARMCPU *armcpu;
 
     int r;
-    // TODO-convert-to-arm64
-    // init_emu(cpu);
-    // init_decoder(cpu);
-    // init_cpuid(cpu);
 
     cpu->hvf_caps = (struct hvf_vcpu_caps*)g_malloc0(sizeof(struct hvf_vcpu_caps));
     DPRINTF("%s: create a vcpu config and query its values\n", __func__);
@@ -608,59 +523,11 @@ int hvf_init_vcpu(CPUState * cpu) {
     DPRINTF("%s: Setting debug register accesses to not exit the guest...\n", __func__);
     HVF_CHECKED_CALL(hv_vcpu_set_trap_debug_reg_accesses(cpu->hvf_fd, false));
 
-    // DPRINTF("%s: Setting pc to 0x8a0\n", __func__);
-    // HVF_CHECKED_CALL(hv_vcpu_set_reg(cpu->hvf_fd, HV_REG_PC, 0x40000000ULL));
-
     cpu->hvf_vcpu_dirty = 1;
     assert_hvf_ok(r);
 
     cpu->hvf_irq_pending = false;
     cpu->hvf_fiq_pending = false;
-
-    // TODO-convert-to-arm64
-	// if (hv_vmx_read_capability(HV_VMX_CAP_PINBASED, &cpu->hvf_caps->vmx_cap_pinbased))
-	// 	qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PINBASED\n", __func__);
-	// if (hv_vmx_read_capability(HV_VMX_CAP_PROCBASED, &cpu->hvf_caps->vmx_cap_procbased))
-	// 	qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PROCBASED\n", __func__);
-	// if (hv_vmx_read_capability(HV_VMX_CAP_PROCBASED2, &cpu->hvf_caps->vmx_cap_procbased2))
-	// 	qemu_abort("%s: error getting vmx capability HV_VMX_CAP_PROCBASED2\n", __func__);
-	// if (hv_vmx_read_capability(HV_VMX_CAP_ENTRY, &cpu->hvf_caps->vmx_cap_entry))
-	// 	qemu_abort("%s: error getting vmx capability HV_VMX_CAP_ENTRY\n", __func__);
-
-	// /* set VMCS control fields */
-    // wvmcs(cpu->hvf_fd, VMCS_PIN_BASED_CTLS, cap2ctrl(cpu->hvf_caps->vmx_cap_pinbased, 0));
-    // wvmcs(cpu->hvf_fd, VMCS_PRI_PROC_BASED_CTLS, cap2ctrl(cpu->hvf_caps->vmx_cap_procbased,
-    //                                                VMCS_PRI_PROC_BASED_CTLS_HLT |
-    //                                                VMCS_PRI_PROC_BASED_CTLS_MWAIT |
-    //                                                VMCS_PRI_PROC_BASED_CTLS_TSC_OFFSET |
-    //                                                VMCS_PRI_PROC_BASED_CTLS_TPR_SHADOW) |
-    //                                                VMCS_PRI_PROC_BASED_CTLS_SEC_CONTROL);
-	// wvmcs(cpu->hvf_fd, VMCS_SEC_PROC_BASED_CTLS,
-    //       cap2ctrl(cpu->hvf_caps->vmx_cap_procbased2,VMCS_PRI_PROC_BASED2_CTLS_APIC_ACCESSES));
-
-	// wvmcs(cpu->hvf_fd, VMCS_ENTRY_CTLS, cap2ctrl(cpu->hvf_caps->vmx_cap_entry, 0));
-	// wvmcs(cpu->hvf_fd, VMCS_EXCEPTION_BITMAP, 0); /* Double fault */
-
-    // wvmcs(cpu->hvf_fd, VMCS_TPR_THRESHOLD, 0);
-
-    // vmx_reset_vcpu(cpu);
-
-    armcpu = ARM_CPU(cpu);
-    // x86cpu->env.kvm_xsave_buf = qemu_memalign(16384, sizeof(struct hvf_xsave_buf));
-
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_STAR, 1);
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_LSTAR, 1);
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_CSTAR, 1);
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_FMASK, 1);
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_FSBASE, 1);
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_GSBASE, 1);
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_KERNELGSBASE, 1);
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_TSC_AUX, 1);
-    // //hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_TSC, 1);
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_SYSENTER_CS, 1);
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_SYSENTER_EIP, 1);
-    // hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_IA32_SYSENTER_ESP, 1);
-
     return 0;
 }
 
@@ -668,9 +535,6 @@ int hvf_init_vcpu(CPUState * cpu) {
 
 int hvf_vcpu_emulation_mode(CPUState* cpu) {
     DPRINTF("%s: call\n", __func__);
-    CPUArchState *env = (CPUArchState *) (cpu->env_ptr);
-    // TODO-convert-to-arm64
-    // return !(env->cr[0] & CR0_PG_MASK);
     return 0;
 }
 
@@ -694,6 +558,7 @@ int hvf_process_events(CPUState *cpu) {
     DPRINTF("%s: call\n", __func__);
     return 0;
 }
+
 static hv_reg_t regno_to_hv_xreg(int i) {
     switch (i) {
         case 0: return HV_REG_X0;
@@ -1225,237 +1090,24 @@ void __hvf_cpu_synchronize_post_reset(CPUState* cpu_state, run_on_cpu_data data)
     cpu_state->hvf_vcpu_dirty = false;
 }
 
-void hvf_cpu_synchronize_post_reset(CPUState *cpu_state)
-{
+void hvf_cpu_synchronize_post_reset(CPUState *cpu_state) {
     run_on_cpu(cpu_state, __hvf_cpu_synchronize_post_reset, RUN_ON_CPU_NULL);
 }
 
-void _hvf_cpu_synchronize_post_init(CPUState* cpu_state, run_on_cpu_data data)
-{
+void _hvf_cpu_synchronize_post_init(CPUState* cpu_state, run_on_cpu_data data) {
     DPRINTF("%s: call\n", __func__);
     (void)data;
     hvf_put_registers(cpu_state);
     cpu_state->hvf_vcpu_dirty = false;
 }
 
-void hvf_cpu_synchronize_post_init(CPUState *cpu_state)
-{
+void hvf_cpu_synchronize_post_init(CPUState *cpu_state) {
     run_on_cpu(cpu_state, _hvf_cpu_synchronize_post_init, RUN_ON_CPU_NULL);
 }
 
-void hvf_cpu_clean_state(CPUState *cpu_state)
-{
+void hvf_cpu_clean_state(CPUState *cpu_state) {
     cpu_state->hvf_vcpu_dirty = 0;
 }
-
-void vmx_clear_int_window_exiting(CPUState *cpu);
-
-// TODO-convert-to-arm64
-static bool ept_emulation_fault(uint64_t ept_qual)
-{
-    return false;
-
-	// int read, write;
-
-	// /* EPT fault on an instruction fetch doesn't make sense here */
-	// if (ept_qual & EPT_VIOLATION_INST_FETCH)
-	// 	return false;
-
-	// /* EPT fault must be a read fault or a write fault */
-	// read = ept_qual & EPT_VIOLATION_DATA_READ ? 1 : 0;
-	// write = ept_qual & EPT_VIOLATION_DATA_WRITE ? 1 : 0;
-	// if ((read | write) == 0)
-	// 	return false;
-
-	// /*
-	//  * The EPT violation must have been caused by accessing a
-	//  * guest-physical address that is a translation of a guest-linear
-	//  * address.
-	//  */
-	// if ((ept_qual & EPT_VIOLATION_GLA_VALID) == 0 ||
-	//     (ept_qual & EPT_VIOLATION_XLAT_VALID) == 0) {
-	// 	return false;
-	// }
-
-	// return true;
-}
-
-// TODO: taskswitch handling
-static void save_state_to_tss32(CPUState *cpu, struct x86_tss_segment32 *tss)
-{
-    /* CR3 and ldt selector are not saved intentionally */
-    // TODO-convert-to-arm64
-    // tss->eip = EIP(cpu);
-    // tss->eflags = EFLAGS(cpu);
-    // tss->eax = EAX(cpu);
-    // tss->ecx = ECX(cpu);
-    // tss->edx = EDX(cpu);
-    // tss->ebx = EBX(cpu);
-    // tss->esp = ESP(cpu);
-    // tss->ebp = EBP(cpu);
-    // tss->esi = ESI(cpu);
-    // tss->edi = EDI(cpu);
-
-    // tss->es = vmx_read_segment_selector(cpu, REG_SEG_ES).sel;
-    // tss->cs = vmx_read_segment_selector(cpu, REG_SEG_CS).sel;
-    // tss->ss = vmx_read_segment_selector(cpu, REG_SEG_SS).sel;
-    // tss->ds = vmx_read_segment_selector(cpu, REG_SEG_DS).sel;
-    // tss->fs = vmx_read_segment_selector(cpu, REG_SEG_FS).sel;
-    // tss->gs = vmx_read_segment_selector(cpu, REG_SEG_GS).sel;
-}
-
-static void load_state_from_tss32(CPUState *cpu, struct x86_tss_segment32 *tss)
-{
-//     wvmcs(cpu->hvf_fd, VMCS_GUEST_CR3, tss->cr3);
-// 
-//     RIP(cpu) = tss->eip;
-//     EFLAGS(cpu) = tss->eflags | 2;
-// 
-//     /* General purpose registers */
-//     RAX(cpu) = tss->eax;
-//     RCX(cpu) = tss->ecx;
-//     RDX(cpu) = tss->edx;
-//     RBX(cpu) = tss->ebx;
-//     RSP(cpu) = tss->esp;
-//     RBP(cpu) = tss->ebp;
-//     RSI(cpu) = tss->esi;
-//     RDI(cpu) = tss->edi;
-// 
-//     vmx_write_segment_selector(cpu, (x68_segment_selector){tss->ldt}, REG_SEG_LDTR);
-//     vmx_write_segment_selector(cpu, (x68_segment_selector){tss->es}, REG_SEG_ES);
-//     vmx_write_segment_selector(cpu, (x68_segment_selector){tss->cs}, REG_SEG_CS);
-//     vmx_write_segment_selector(cpu, (x68_segment_selector){tss->ss}, REG_SEG_SS);
-//     vmx_write_segment_selector(cpu, (x68_segment_selector){tss->ds}, REG_SEG_DS);
-//     vmx_write_segment_selector(cpu, (x68_segment_selector){tss->fs}, REG_SEG_FS);
-//     vmx_write_segment_selector(cpu, (x68_segment_selector){tss->gs}, REG_SEG_GS);
-// 
-// #if 0
-//     load_segment(cpu, REG_SEG_LDTR, tss->ldt);
-//     load_segment(cpu, REG_SEG_ES, tss->es);
-//     load_segment(cpu, REG_SEG_CS, tss->cs);
-//     load_segment(cpu, REG_SEG_SS, tss->ss);
-//     load_segment(cpu, REG_SEG_DS, tss->ds);
-//     load_segment(cpu, REG_SEG_FS, tss->fs);
-//     load_segment(cpu, REG_SEG_GS, tss->gs);
-// #endif
-}
-
-// static int task_switch_32(CPUState *cpu, x68_segment_selector tss_sel, x68_segment_selector old_tss_sel,
-//                           uint64_t old_tss_base, struct x86_segment_descriptor *new_desc)
-// {
-//     struct x86_tss_segment32 tss_seg;
-//     uint32_t new_tss_base = x86_segment_base(new_desc);
-//     uint32_t eip_offset = offsetof(struct x86_tss_segment32, eip);
-//     uint32_t ldt_sel_offset = offsetof(struct x86_tss_segment32, ldt);
-// 
-//     vmx_read_mem(cpu, &tss_seg, old_tss_base, sizeof(tss_seg));
-//     save_state_to_tss32(cpu, &tss_seg);
-// 
-//     vmx_write_mem(cpu, old_tss_base + eip_offset, &tss_seg.eip, ldt_sel_offset - eip_offset);
-//     vmx_read_mem(cpu, &tss_seg, new_tss_base, sizeof(tss_seg));
-// 
-//     if (old_tss_sel.sel != 0xffff) {
-//         tss_seg.prev_tss = old_tss_sel.sel;
-// 
-//         vmx_write_mem(cpu, new_tss_base, &tss_seg.prev_tss, sizeof(tss_seg.prev_tss));
-//     }
-//     load_state_from_tss32(cpu, &tss_seg);
-//     return 0;
-// }
-
-// static void vmx_handle_task_switch(CPUState *cpu, x68_segment_selector tss_sel, int reason, bool gate_valid, uint8_t gate, uint64_t gate_type)
-// {
-//     uint64_t rip = rreg(cpu->hvf_fd, HV_X86_RIP);
-//     if (!gate_valid || (gate_type != VMCS_INTR_T_HWEXCEPTION &&
-//                         gate_type != VMCS_INTR_T_HWINTR &&
-//                         gate_type != VMCS_INTR_T_NMI)) {
-//         int ins_len = rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH);
-//         macvm_set_rip(cpu, rip + ins_len);
-//         return;
-//     }
-// 
-//     load_regs(cpu);
-// 
-//     struct x86_segment_descriptor curr_tss_desc, next_tss_desc;
-//     int ret;
-//     x68_segment_selector old_tss_sel = vmx_read_segment_selector(cpu, REG_SEG_TR);
-//     uint64_t old_tss_base = vmx_read_segment_base(cpu, REG_SEG_TR);
-//     uint32_t desc_limit;
-//     struct x86_call_gate task_gate_desc;
-//     struct vmx_segment vmx_seg;
-// 
-//     x86_read_segment_descriptor(cpu, &next_tss_desc, tss_sel);
-//     x86_read_segment_descriptor(cpu, &curr_tss_desc, old_tss_sel);
-// 
-//     if (reason == TSR_IDT_GATE && gate_valid) {
-//         int dpl;
-// 
-//         ret = x86_read_call_gate(cpu, &task_gate_desc, gate);
-// 
-//         dpl = task_gate_desc.dpl;
-//         x68_segment_selector cs = vmx_read_segment_selector(cpu, REG_SEG_CS);
-//         if (tss_sel.rpl > dpl || cs.rpl > dpl)
-//             DPRINTF("emulate_gp");
-//     }
-// 
-//     desc_limit = x86_segment_limit(&next_tss_desc);
-//     if (!next_tss_desc.p || ((desc_limit < 0x67 && (next_tss_desc.type & 8)) || desc_limit < 0x2b)) {
-//         VM_PANIC("emulate_ts");
-//     }
-// 
-//     if (reason == TSR_IRET || reason == TSR_JMP) {
-//         curr_tss_desc.type &= ~(1 << 1); /* clear busy flag */
-//         x86_write_segment_descriptor(cpu, &curr_tss_desc, old_tss_sel);
-//     }
-// 
-//     if (reason == TSR_IRET)
-//         EFLAGS(cpu) &= ~RFLAGS_NT;
-// 
-//     if (reason != TSR_CALL && reason != TSR_IDT_GATE)
-//         old_tss_sel.sel = 0xffff;
-// 
-//     if (reason != TSR_IRET) {
-//         next_tss_desc.type |= (1 << 1); /* set busy flag */
-//         x86_write_segment_descriptor(cpu, &next_tss_desc, tss_sel);
-//     }
-// 
-//     if (next_tss_desc.type & 8)
-//         ret = task_switch_32(cpu, tss_sel, old_tss_sel, old_tss_base, &next_tss_desc);
-//     else
-//         //ret = task_switch_16(cpu, tss_sel, old_tss_sel, old_tss_base, &next_tss_desc);
-//         VM_PANIC("task_switch_16");
-// 
-//     macvm_set_cr0(cpu->hvf_fd, rvmcs(cpu->hvf_fd, VMCS_GUEST_CR0) | CR0_TS);
-//     x86_segment_descriptor_to_vmx(cpu, tss_sel, &next_tss_desc, &vmx_seg);
-//     vmx_write_segment_descriptor(cpu, &vmx_seg, REG_SEG_TR);
-// 
-//     store_regs(cpu);
-// 
-//     hv_vcpu_invalidate_tlb(cpu->hvf_fd);
-//     hv_vcpu_flush(cpu->hvf_fd);
-// }
-
-/* Find first bit starting from msb */
-static int apic_fls_bit(uint32_t value)
-{
-    return 31 - clz32(value);
-}
-
-/* Find first bit starting from lsb */
-static int apic_ffs_bit(uint32_t value)
-{
-    return ctz32(value);
-}
-
-static inline void apic_reset_bit(uint32_t *tab, int index)
-{
-    int i, mask;
-    i = index >> 5;
-    mask = 1 << (index & 0x1f);
-    tab[i] &= ~mask;
-}
-
-#define VECTORING_INFO_VECTOR_MASK     0xff
 
 static void hvf_handle_interrupt(CPUState * cpu, int mask) {
     cpu->interrupt_request |= mask;
@@ -1467,12 +1119,7 @@ static void hvf_handle_interrupt(CPUState * cpu, int mask) {
 static inline void hvf_skip_instr(CPUState* cpu) {
     ARMCPU *armcpu = ARM_CPU(cpu);
     CPUARMState *env = &armcpu->env;
-
     env->pc += 4;
-}
-
-static void hvf_read_mem(struct CPUState* cpu, void *data, uint64_t gpa, int bytes) {
-    address_space_rw(&address_space_memory, gpa, MEMTXATTRS_UNSPECIFIED, data, bytes, 0);
 }
 
 static uint64_t hvf_read_rt(CPUState* cpu, unsigned long rt) {
@@ -1851,18 +1498,12 @@ int hvf_vcpu_exec(CPUState* cpu) {
     uint64_t val;
     int i;
 
-    // TODO-convert-to-arm64
-    // uint64_t rip = 0;
-
-    // armcpu->halted = 0;
-
     if (hvf_process_events(armcpu)) {
         qemu_mutex_unlock_iothread();
         pthread_yield_np();
         qemu_mutex_lock_iothread();
         return EXCP_HLT;
     }
-
 again:
 
 
@@ -1873,26 +1514,9 @@ again:
             cpu->hvf_vcpu_dirty = false;
         }
 
-        // TODO-convert-to-arm64
-        // cpu->hvf_x86->interruptable =
-        //     !(rvmcs(cpu->hvf_fd, VMCS_GUEST_INTERRUPTIBILITY) &
-        //     (VMCS_INTERRUPTIBILITY_STI_BLOCKING | VMCS_INTERRUPTIBILITY_MOVSS_BLOCKING));
-
         hvf_inject_interrupts(cpu);
-        // TODO-convert-to-arm64
-        // vmx_update_tpr(cpu);
-
         qemu_mutex_unlock_iothread();
-        // TODO-convert-to-arm64
-        // while (!cpu_is_bsp(X86_CPU(cpu)) && cpu->halted) {
-        //     qemu_mutex_lock_iothread();
-        //     return EXCP_HLT;
-        // }
 
-
-        HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_PC, &pc));
-        hvf_read_mem(cpu, &val, pc, 8);
-        DPRINTF("%s: run vcpu. pc: 0x%llx 8 bytes at pc: 0x%llx\n", __func__, (unsigned long long)pc, (unsigned long long)val);
 
         int r  = hv_vcpu_run(cpu->hvf_fd);
 
@@ -1900,53 +1524,18 @@ again:
             qemu_abort("%s: run failed with 0x%x\n", __func__, r);
         }
 
-//  * @typedef    hv_vcpu_exit_t
-//  * @abstract   Contains information about an exit from the vcpu to the host.
-//
-//  * @typedef    hv_vcpu_exit_exception_t
-//  * @abstract   Contains details of a vcpu exception.
-//  */
-// typedef struct {
-//     hv_exception_syndrome_t syndrome;
-//     hv_exception_address_t virtual_address;
-//     hv_ipa_t physical_address;
-// } hv_vcpu_exit_exception_t;
-//  
-//  */
-// typedef struct {
-//     hv_exit_reason_t reason;
-//     hv_vcpu_exit_exception_t exception;
-// } hv_vcpu_exit_t;
-
-
         DPRINTF("%s: Exit info: reason: %#x exception: syndrome %#x va pa %#llx %#llx\n", __func__,
                 cpu->hvf_vcpu_exit_info->reason,
                 cpu->hvf_vcpu_exit_info->exception.syndrome,
                 (unsigned long long)cpu->hvf_vcpu_exit_info->exception.virtual_address,
                 (unsigned long long)cpu->hvf_vcpu_exit_info->exception.physical_address);
-        /* handle VMEXIT */
-        // TODO-convert-to-arm64
-        // uint64_t exit_reason = rvmcs(cpu->hvf_fd, VMCS_EXIT_REASON);
-        // uint64_t exit_qual = rvmcs(cpu->hvf_fd, VMCS_EXIT_QUALIFICATION);
-        // uint32_t ins_len = (uint32_t)rvmcs(cpu->hvf_fd, VMCS_EXIT_INSTRUCTION_LENGTH);
-        // uint64_t idtvec_info = rvmcs(cpu->hvf_fd, VMCS_IDT_VECTORING_INFO);
-        // rip = rreg(cpu->hvf_fd, HV_X86_RIP);
-        // RFLAGS(cpu) = rreg(cpu->hvf_fd, HV_X86_RFLAGS);
-        // env->eflags = RFLAGS(cpu);
 
         qemu_mutex_lock_iothread();
 
-        // TODO-convert-to-arm64
-        // update_apic_tpr(cpu);
         current_cpu = cpu;
 
         ret = 0;
 
-        // TODO-convert-to-arm64
-        uint8_t ec = 0x3f & ((cpu->hvf_vcpu_exit_info->exception.syndrome) >> 26);
-        uint64_t val;
-        HVF_CHECKED_CALL(hv_vcpu_get_reg(cpu->hvf_fd, HV_REG_PC, &val));
-        DPRINTF("%s: Exit at PC 0x%llx\n", __func__, (unsigned long long)val);
         switch (cpu->hvf_vcpu_exit_info->reason) {
             case HV_EXIT_REASON_CANCELED:
                 break;
