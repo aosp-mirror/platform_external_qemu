@@ -202,7 +202,7 @@ void BugreportPage::on_bug_saveButton_clicked() {
     mBugTracker->increment("ON_SAVE");
     QString dirName = QString::fromStdString(mSavingStates.saveLocation);
     dirName = QFileDialog::getExistingDirectory(
-            Q_NULLPTR, tr("Report Saving Location"), dirName);
+            this, tr("Report Saving Location"), dirName);
     if (dirName.isNull())
         return;
     auto savingPath = PathUtils::join(dirName.toStdString(),
