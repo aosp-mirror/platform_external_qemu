@@ -1112,6 +1112,7 @@ void hvf_cpu_clean_state(CPUState *cpu_state) {
 static void hvf_handle_interrupt(CPUState * cpu, int mask) {
     cpu->interrupt_request |= mask;
     if (!qemu_cpu_is_self(cpu)) {
+        hv_vcpus_exit(&cpu->hvf_fd, 1);
         qemu_cpu_kick(cpu);
     }
 }
@@ -1490,13 +1491,16 @@ void hvf_irq_deactivated(int cpunum, int irq) {
     hv_vcpu_set_vtimer_mask(cpu->hvf_fd, false);
 }
 
+void hvf_exit_vcpu(CPUState *cpu) {
+    hv_vcpus_exit(&cpu->hvf_fd, 1);
+}
+
 int hvf_vcpu_exec(CPUState* cpu) {
     ARMCPU* armcpu = ARM_CPU(cpu);
     CPUARMState* env = &armcpu->env;
     int ret = 0;
-    uint64_t pc;
-    uint64_t val;
-    int i;
+
+    cpu->halted = 0;
 
     if (hvf_process_events(armcpu)) {
         qemu_mutex_unlock_iothread();
@@ -1517,6 +1521,11 @@ again:
         hvf_inject_interrupts(cpu);
         qemu_mutex_unlock_iothread();
 
+        if (cpu->halted) {
+            fprintf(stderr, "%s: cpu is halted\n", __func__);
+            qemu_mutex_lock_iothread();
+            return EXCP_HLT;
+        }
 
         int r  = hv_vcpu_run(cpu->hvf_fd);
 
@@ -1538,6 +1547,7 @@ again:
 
         switch (cpu->hvf_vcpu_exit_info->reason) {
             case HV_EXIT_REASON_CANCELED:
+                ret = EXCP_INTERRUPT;
                 break;
             case HV_EXIT_REASON_EXCEPTION:
                 DPRINTF("%s: handle exception\n", __func__);

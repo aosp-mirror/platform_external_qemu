@@ -50,3 +50,5 @@ void hvf_irq_deactivated(int cpunum, int irqnum) {
 }
 
 void hvf_cpu_synchronize_state(CPUState *cpu) {}
+
+void hvf_exit_vcpu(CPUState* cpu) { (void)cpu; }
