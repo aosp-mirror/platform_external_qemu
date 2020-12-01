@@ -109,7 +109,11 @@ bool isComplete(const Operation& op) {
 
 bool isBufferZeroed(const void* ptr, int32_t size);
 
+#if defined(__APPLE__) && defined(__aarch64__)
+constexpr int32_t kDefaultPageSize = 16384;
+#else
 constexpr int32_t kDefaultPageSize = 4096;
+#endif
 
 constexpr int32_t kCancelTimeoutMs = 15000;
 
