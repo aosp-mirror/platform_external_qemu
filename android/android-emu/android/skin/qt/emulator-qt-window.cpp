@@ -2233,6 +2233,12 @@ void EmulatorQtWindow::doResize(const QSize& size,
     simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
 
     maskWindowFrame();
+#ifdef __APPLE__
+    // To fix issues when resizing + linking against macos sdk 11.
+    SkinEvent* changeEvent = new SkinEvent();
+    changeEvent->type = kEventScreenChanged;
+    queueSkinEvent(changeEvent);
+#endif
 }
 
 void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
@@ -2976,6 +2982,13 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     if (android_foldable_is_folded()) {
         resizeAndChangeAspectRatio(true);
     }
+
+#ifdef __APPLE__
+    // To fix issues when resizing + linking against macos sdk 11.
+    SkinEvent* changeEvent = new SkinEvent();
+    changeEvent->type = kEventScreenChanged;
+    queueSkinEvent(changeEvent);
+#endif
 }
 
 void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
