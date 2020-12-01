@@ -16,6 +16,24 @@
       "message": "Could we adhoc sign the prebuilts instead? According to https://github.com/golang/go/issues/42684#issuecomment-729346276 this should work.",
       "revId": "478cd916b330f68f8858839c09da07ba77dea115",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "07ff5651_661a149a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-01T03:36:57Z",
+      "side": 1,
+      "message": "Sure, I can try putting up a prebuilts cl with signed versions of the qt binaries.",
+      "parentUuid": "93649cda_57556b4f",
+      "revId": "478cd916b330f68f8858839c09da07ba77dea115",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
