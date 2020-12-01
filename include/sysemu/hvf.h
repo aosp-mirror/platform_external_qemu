@@ -59,4 +59,6 @@ int hvf_remap_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags);
 
 void hvf_irq_deactivated(int cpu, int irq);
 
+void hvf_exit_vcpu(CPUState *cpu);
+
 #endif /* _HVF_H */
