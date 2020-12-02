@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c6854e4f_f711c5e9",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 776,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-02T01:12:25Z",
+      "side": 1,
+      "message": "Good point; we\u0027re also planning to run the x86 on arm via Virtualization.framework on macos, so left the route open there for __APPLE__.",
+      "parentUuid": "43c0f067_b99d6c49",
+      "revId": "6ad60c2b22051e3aecc5cebb2d75442f49edcca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b71a729f_9573a016",
@@ -31,6 +49,24 @@
       "writtenOn": "2020-12-02T00:07:24Z",
       "side": 1,
       "message": "Maybe we don\u0027t want the __APPLE__ here? I guess on any other arm64 host we would want to do the same thing.",
+      "revId": "6ad60c2b22051e3aecc5cebb2d75442f49edcca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ac86c83_45643528",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 780,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-02T01:12:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b71a729f_9573a016",
       "revId": "6ad60c2b22051e3aecc5cebb2d75442f49edcca9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
