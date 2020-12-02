@@ -645,6 +645,9 @@ typedef struct CPUARMState {
         uint32_t ctrl;
     } sau;
 
+    /* Used with Hypervisor.framework to resume the VM and calculate the proper cntvoff_el2. */
+    uint64_t host_vtimer_ticks;
+
     void *nvic;
     const struct arm_boot_info *boot_info;
     /* Store GICv3CPUState to access from this struct */

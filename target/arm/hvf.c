@@ -493,7 +493,7 @@ void hvf_disable(int shouldDisable) {
 int hvf_init_vcpu(CPUState * cpu) {
     DPRINTF("%s: entry. cpu: %p\n", __func__, cpu);
 
-    ARMCPU *armcpu;
+    ARMCPU *armcpu = ARM_CPU(cpu);
 
     int r;
 
@@ -528,6 +528,7 @@ int hvf_init_vcpu(CPUState * cpu) {
 
     cpu->hvf_irq_pending = false;
     cpu->hvf_fiq_pending = false;
+
     return 0;
 }
 
@@ -674,6 +675,8 @@ int hvf_put_registers(CPUState *cpu) {
     DPRINTF("%s: call\n", __func__);
     ARMCPU *armcpu = ARM_CPU(cpu);
     CPUARMState *env = &armcpu->env;
+
+    HVF_CHECKED_CALL(hv_vcpu_set_vtimer_offset(cpu->hvf_fd, env->cp15.cntvoff_el2));
 
     // Set HVF general registers
     {
@@ -1136,10 +1139,17 @@ static void hvf_write_rt(CPUState* cpu, unsigned long rt, uint64_t val) {
 }
 
 static void hvf_handle_wfx(CPUState* cpu) {
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    CPUARMState *env = &armcpu->env;
+
     uint64_t cval;
+    uint64_t cntvoff = env->cp15.cntvoff_el2;
+
     HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &cval));
 
-    int64_t ticks_to_sleep = cval - mach_absolute_time();
+    // mach_absolute_time() is an absolute host tick number. We have set up the guest
+    // to use the host tick number offset by enc->cp15.cntvoff_el2.
+    int64_t ticks_to_sleep = cval - (mach_absolute_time() - cntvoff);
     if (ticks_to_sleep < 0) {
         return;
     }
@@ -1498,6 +1508,11 @@ void hvf_exit_vcpu(CPUState *cpu) {
     qemu_cpu_kick(cpu);
 }
 
+void hvf_set_cntvoff(CPUState *cpu, uint64_t off) {
+    fprintf(stderr, "%s: set to %llu\n", __func__,
+            (unsigned long long)off);
+}
+
 int hvf_vcpu_exec(CPUState* cpu) {
     ARMCPU* armcpu = ARM_CPU(cpu);
     CPUARMState* env = &armcpu->env;
@@ -1530,6 +1545,11 @@ again:
         qemu_mutex_unlock_iothread();
 
         int r  = hv_vcpu_run(cpu->hvf_fd);
+
+        // Save the current time here after each run.
+        // Note that this isn't exactly accurate, so we need to make
+        // adjustments in machine.c when saving/loading.
+        env->host_vtimer_ticks = mach_absolute_time();
 
         if (r) {
             qemu_abort("%s: run failed with 0x%x\n", __func__, r);
