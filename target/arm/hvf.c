@@ -94,6 +94,36 @@ struct hvf_accel_state {
     int num_slots;
 };
 
+struct hvf_migration_state {
+    uint64_t ticks;
+};
+
+struct hvf_migration_state mig_state;
+
+static int hvf_mig_state_pre_save(void* opaque) {
+    struct hvf_migration_state* m = opaque;
+    m->ticks -= mach_absolute_time();
+    return 0;
+}
+
+static int hvf_mig_state_post_load(void* opaque) {
+    struct hvf_migration_state* m = opaque;
+    m->ticks += mach_absolute_time();
+    return 0;
+}
+
+const VMStateDescription vmstate_hvf_migration = {
+    .name = "hvf-migration",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .pre_save = hvf_mig_state_pre_save,
+    .post_load = hvf_mig_state_post_load,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT64(ticks, struct hvf_migration_state),
+        VMSTATE_END_OF_LIST()
+    },
+};
+
 pthread_rwlock_t mem_lock = PTHREAD_RWLOCK_INITIALIZER;
 struct hvf_accel_state* hvf_state;
 
@@ -675,6 +705,10 @@ int hvf_put_registers(CPUState *cpu) {
     ARMCPU *armcpu = ARM_CPU(cpu);
     CPUARMState *env = &armcpu->env;
 
+    // Sync up CNTVOFF_EL2
+    env->cp15.cntvoff_el2 = mig_state.ticks;
+    HVF_CHECKED_CALL(hv_vcpu_set_vtimer_offset(cpu->hvf_fd, env->cp15.cntvoff_el2));
+
     // Set HVF general registers
     {
         // HV_REG_LR = HV_REG_X30,
@@ -1136,10 +1170,16 @@ static void hvf_write_rt(CPUState* cpu, unsigned long rt, uint64_t val) {
 }
 
 static void hvf_handle_wfx(CPUState* cpu) {
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    CPUARMState *env = &armcpu->env;
+
     uint64_t cval;
     HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &cval));
 
-    int64_t ticks_to_sleep = cval - mach_absolute_time();
+    // mach_absolute_time() is an absolute host tick number. We
+    // have set up the guest to use the host tick number offset
+    // by env->cp15.cntvoff_el2.
+    int64_t ticks_to_sleep = cval - (mach_absolute_time() - env->cp15.cntvoff_el2);
     if (ticks_to_sleep < 0) {
         return;
     }
@@ -1590,6 +1630,8 @@ static int hvf_accel_init(MachineState *ms) {
     DPRINTF("%s: call. hv vm create?\n", __func__);
     int r = hv_vm_create(0);
 
+    mig_state.ticks = 0;
+
     if (!check_hvf_ok(r)) {
         hv_vm_destroy();
         return -EINVAL;
@@ -1611,6 +1653,9 @@ static int hvf_accel_init(MachineState *ms) {
     qemu_set_user_backed_mapping_funcs(
         hvf_user_backed_ram_map,
         hvf_user_backed_ram_unmap);
+
+    vmstate_register(NULL, 0, &vmstate_hvf_migration, &mig_state);
+
     return 0;
 }
 
