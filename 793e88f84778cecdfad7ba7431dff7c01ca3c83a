@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a2fde6c2_2dbf9b84",
+        "filename": "target/arm/cpu.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 658,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-02T20:55:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea351267_6256b502",
+      "revId": "793e88f84778cecdfad7ba7431dff7c01ca3c83a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "49609791_6ed64f72",
@@ -35,6 +53,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a6b93d3c_790ffac4",
+        "filename": "target/arm/machine.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-02T20:55:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "49609791_6ed64f72",
+      "revId": "793e88f84778cecdfad7ba7431dff7c01ca3c83a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5bf6d551_4de1936e",
@@ -48,6 +84,24 @@
       "writtenOn": "2020-12-02T19:26:04Z",
       "side": 1,
       "message": "Lines 632-643 can be simplified to\n\n uint64_t cntvoff_el2_adjusted \u003d current_time - saved_time;\n\nno? (Unsigned integer overflow is well defined.)",
+      "revId": "793e88f84778cecdfad7ba7431dff7c01ca3c83a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "05c26805_f4c19493",
+        "filename": "target/arm/machine.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-02T20:55:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5bf6d551_4de1936e",
       "revId": "793e88f84778cecdfad7ba7431dff7c01ca3c83a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
