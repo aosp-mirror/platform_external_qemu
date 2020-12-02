@@ -16,6 +16,23 @@
       "message": "Thanks Peter!",
       "revId": "6bff32f7bf1b6e7704014ed3205b04b9fb636644",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bdcff94e_9f673d5c",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1635,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T21:37:34Z",
+      "side": 1,
+      "message": "I don\u0027t think we need to initialize this here (or we can just initialize it to 0).",
+      "revId": "6bff32f7bf1b6e7704014ed3205b04b9fb636644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
