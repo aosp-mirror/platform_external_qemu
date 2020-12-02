@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ea351267_6256b502",
+        "filename": "target/arm/cpu.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 658,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T19:26:04Z",
+      "side": 1,
+      "message": "I\u0027m not sure about having this be set up this way. This really seems like a global property of the accelerator, rather than any of the CPUs.\n\nWhat do you think about storing this state in hvf_global, registering it with vmstate_register and having the CPUs read cntvoff_el2 out of a field in hvf_global when they start up?",
+      "revId": "793e88f84778cecdfad7ba7431dff7c01ca3c83a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "49609791_6ed64f72",
+        "filename": "target/arm/machine.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T19:26:04Z",
+      "side": 1,
+      "message": "Would it be better to call mach_absolute_time() directly here instead of on every VM exit? It might mean that we\u0027ll jump a little bit but I think this is somewhat inevitable anyway.",
+      "revId": "793e88f84778cecdfad7ba7431dff7c01ca3c83a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5bf6d551_4de1936e",
+        "filename": "target/arm/machine.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T19:26:04Z",
+      "side": 1,
+      "message": "Lines 632-643 can be simplified to\n\n uint64_t cntvoff_el2_adjusted \u003d current_time - saved_time;\n\nno? (Unsigned integer overflow is well defined.)",
+      "revId": "793e88f84778cecdfad7ba7431dff7c01ca3c83a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
