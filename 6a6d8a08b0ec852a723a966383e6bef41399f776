@@ -35,6 +35,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1bf86cbf_7ee39f86",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1524,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-02T01:11:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4fc997ed_eff77e0f",
+      "revId": "6a6d8a08b0ec852a723a966383e6bef41399f776",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6d211565_88ef76cd",
@@ -48,6 +66,24 @@
       "writtenOn": "2020-12-02T00:03:40Z",
       "side": 1,
       "message": "Can\u0027t it be:\n\nreturn EXCP_INTERRUPT;\n\nand remove the ret variable?",
+      "revId": "6a6d8a08b0ec852a723a966383e6bef41399f776",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "64b93ca9_ee7bc084",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1549,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-02T01:11:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6d211565_88ef76cd",
       "revId": "6a6d8a08b0ec852a723a966383e6bef41399f776",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
