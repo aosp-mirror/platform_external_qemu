@@ -16,6 +16,24 @@
       "message": "Note, we still see weird time jumps when the snapshot is loaded. For example, if I run the stopwatch app and resume it from a snapshot, the time is as if it kept running while the emulator wasn\u0027t there. So this suggests we\u0027re missing some timekeeping state. Wonder if we need to set cntvoff_el2 somehow.",
       "revId": "6e6fb7feddd0b23985ff906955b090aba6df1c8a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "17056d39_cafa7e85",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T05:18:37Z",
+      "side": 1,
+      "message": "Yes, I think we want to set CNTVOFF_EL2 so that CNTVCT_EL0 doesn\u0027t appear to change while the emulator wasn\u0027t running. Probably the most straightforward way would be to save mach_absolute_time() in the snapshot and set CNTVOFF_EL2 to (saved mach_absolute_time() - current mach_absolute_time()) when resuming.",
+      "parentUuid": "6141ff3f_8d833dd9",
+      "revId": "6e6fb7feddd0b23985ff906955b090aba6df1c8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
