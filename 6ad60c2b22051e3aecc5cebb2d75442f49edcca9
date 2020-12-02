@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "43c0f067_b99d6c49",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 776,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T00:07:24Z",
+      "side": 1,
+      "message": "Maybe we want to warn about slowness for x86-on-arm (i.e. add an ifdef here)?",
+      "revId": "6ad60c2b22051e3aecc5cebb2d75442f49edcca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b71a729f_9573a016",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 780,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T00:07:24Z",
+      "side": 1,
+      "message": "Maybe we don\u0027t want the __APPLE__ here? I guess on any other arm64 host we would want to do the same thing.",
+      "revId": "6ad60c2b22051e3aecc5cebb2d75442f49edcca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
