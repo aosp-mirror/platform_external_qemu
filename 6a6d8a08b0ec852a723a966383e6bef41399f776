@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "be7d0998_cccffae6",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1495,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T00:03:40Z",
+      "side": 1,
+      "message": "Shouldn\u0027t it also call qemu_cpu_kick in case we are in the WFx sleep?",
+      "revId": "6a6d8a08b0ec852a723a966383e6bef41399f776",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4fc997ed_eff77e0f",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1524,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T00:03:40Z",
+      "side": 1,
+      "message": "Can we move it before the unlock and avoid needing to re-lock below?",
+      "revId": "6a6d8a08b0ec852a723a966383e6bef41399f776",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6d211565_88ef76cd",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1549,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T00:03:40Z",
+      "side": 1,
+      "message": "Can\u0027t it be:\n\nreturn EXCP_INTERRUPT;\n\nand remove the ret variable?",
+      "revId": "6a6d8a08b0ec852a723a966383e6bef41399f776",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
