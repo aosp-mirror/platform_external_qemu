@@ -243,6 +243,8 @@ goldfish_sync_read(void *opaque,
     // host (the linked list) are processed. At that point, IRQ
     // is lowered.
     case SYNC_REG_BATCH_COMMAND:
+        if (!s->batch_cmd_addr) return 0;
+
         s->current = goldfish_sync_pop_first_cmd(s);
         if (!s->current) {
             DPRINT("Out of pending commands. Lower IRQ.");
@@ -318,6 +320,8 @@ goldfish_sync_write(void *opaque,
     // |goldfish_sync_timeline_inc| commands because that would
     // decrease performance.
     case SYNC_REG_BATCH_COMMAND:
+        if (!s->batch_cmd_addr) break;
+
         DPRINT("write SYNC_REG_BATCH_COMMAND. obtaining batch cmd vals.");
         struct goldfish_sync_batch_cmd incoming = {
             .cmd = 0,
@@ -344,6 +348,8 @@ goldfish_sync_write(void *opaque,
     // that matters is SYNC_GUEST_CMD_TRIGGER_HOST_WAIT, which is used
     // to cause a OpenGL client wait on the host GPU/CPU.
     case SYNC_REG_BATCH_GUESTCOMMAND:
+        if (!s->batch_guestcmd_addr) break;
+
         DPRINT("write SYNC_REG_BATCH_GUESTCOMMAND. obtaining batch cmd vals.");
         struct goldfish_sync_batch_guestcmd guest_incoming = {
             .host_command = 0,
@@ -508,6 +514,8 @@ static void goldfish_sync_realize(DeviceState *dev, Error **errp) {
 
     s_goldfish_sync_dev = s;
 
+    s->batch_cmd_addr = 0;
+    s->batch_guestcmd_addr = 0;
     s->pending = NULL;
     s->current = NULL;
 

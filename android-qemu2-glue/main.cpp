@@ -1053,8 +1053,12 @@ static int startEmulatorWithMinConfig(
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
     // Features to disable or enable depending on rendering backend
     // and gpu make/model/version
+#if defined(__APPLE__) && defined(__aarch64__)
+    shouldDisableAsyncSwap = false;
+#else
     shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
                               System::get()->getProgramBitness() == 32;
+#endif
     shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                              async_query_host_gpu_SyncBlacklisted();
 
@@ -1393,6 +1397,7 @@ extern "C" int main(int argc, char** argv) {
         // Situations where not to use mmap() for RAM
         // 1. Using HDD on Linux or macOS; no file mapping or we will have a bad time.
         // 2. macOS when having a machine with < 8 logical cores
+        // 3. Apple Silicon (we probably messed up some file page size or synchronization somewhere)
         if (avd){
             auto contentPath = avdInfo_getContentPath(avd);
             auto diskKind = System::get()->pathDiskKind(contentPath);
@@ -1409,6 +1414,10 @@ extern "C" int main(int argc, char** argv) {
             if (numCores < 8) {
                 feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false /* enable */);
             }
+#ifdef __aarch64__
+            // TODO: Fix file-backed RAM snapshot support.
+            feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false /* enable */);
+#endif
 #endif
 
             if (opts->crostini) {
@@ -2208,8 +2217,12 @@ extern "C" int main(int argc, char** argv) {
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
+#if defined(__APPLE__) && defined(__aarch64__)
+        shouldDisableAsyncSwap = false;
+#else
         shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
                                   System::get()->getProgramBitness() == 32;
+#endif
         shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                                  async_query_host_gpu_SyncBlacklisted();
 
