@@ -33,6 +33,24 @@
       "message": "I don\u0027t think we need to initialize this here (or we can just initialize it to 0).",
       "revId": "6bff32f7bf1b6e7704014ed3205b04b9fb636644",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d0b14c72_ddc83be4",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1635,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-02T21:40:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bdcff94e_9f673d5c",
+      "revId": "6bff32f7bf1b6e7704014ed3205b04b9fb636644",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
