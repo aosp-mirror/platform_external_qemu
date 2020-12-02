@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cc0111e1_c2c60add",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1495,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-02T01:11:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "be7d0998_cccffae6",
+      "revId": "6a6d8a08b0ec852a723a966383e6bef41399f776",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4fc997ed_eff77e0f",
