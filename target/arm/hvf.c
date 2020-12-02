@@ -490,10 +490,13 @@ void hvf_disable(int shouldDisable) {
     hvf_disabled = shouldDisable;
 }
 
+static uint64_t hvf_init_ticks = 0;
+static uint64_t hvf_ticks = 0;
+
 int hvf_init_vcpu(CPUState * cpu) {
     DPRINTF("%s: entry. cpu: %p\n", __func__, cpu);
 
-    ARMCPU *armcpu;
+    ARMCPU *armcpu = ARM_CPU(cpu);
 
     int r;
 
@@ -528,6 +531,10 @@ int hvf_init_vcpu(CPUState * cpu) {
 
     cpu->hvf_irq_pending = false;
     cpu->hvf_fiq_pending = false;
+
+    armcpu->env.host_vtimer_start_ptr = &hvf_init_ticks;
+    armcpu->env.host_vtimer_ticks_ptr = &hvf_ticks;
+
     return 0;
 }
 
@@ -1136,10 +1143,17 @@ static void hvf_write_rt(CPUState* cpu, unsigned long rt, uint64_t val) {
 }
 
 static void hvf_handle_wfx(CPUState* cpu) {
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    CPUARMState *env = &armcpu->env;
+
     uint64_t cval;
+    uint64_t cntvoff = env->cp15.cntvoff_el2;
+
     HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &cval));
 
-    int64_t ticks_to_sleep = cval - mach_absolute_time();
+    // mach_absolute_time() is an absolute host tick number. We have set up the guest
+    // to use the host tick number offset by enc->cp15.cntvoff_el2.
+    int64_t ticks_to_sleep = cval - (mach_absolute_time() - cntvoff);
     if (ticks_to_sleep < 0) {
         return;
     }
@@ -1498,6 +1512,12 @@ void hvf_exit_vcpu(CPUState *cpu) {
     qemu_cpu_kick(cpu);
 }
 
+void hvf_set_cntvoff(CPUState *cpu, uint64_t off) {
+    ARMCPU* armcpu = ARM_CPU(cpu);
+    CPUARMState* env = &armcpu->env;
+    HVF_CHECKED_CALL(hv_vcpu_set_vtimer_offset(cpu->hvf_fd, env->cp15.cntvoff_el2));
+}
+
 int hvf_vcpu_exec(CPUState* cpu) {
     ARMCPU* armcpu = ARM_CPU(cpu);
     CPUARMState* env = &armcpu->env;
@@ -1530,6 +1550,11 @@ again:
         qemu_mutex_unlock_iothread();
 
         int r  = hv_vcpu_run(cpu->hvf_fd);
+
+        // Save the current time here after each run.
+        // Note that this isn't exactly accurate, so we need to make
+        // adjustments in machine.c when saving/loading.
+        hvf_ticks = mach_absolute_time();
 
         if (r) {
             qemu_abort("%s: run failed with 0x%x\n", __func__, r);
@@ -1589,6 +1614,8 @@ static int hvf_accel_init(MachineState *ms) {
     int x;
     DPRINTF("%s: call. hv vm create?\n", __func__);
     int r = hv_vm_create(0);
+
+    hvf_init_ticks = mach_absolute_time();
 
     if (!check_hvf_ok(r)) {
         hv_vm_destroy();

@@ -645,6 +645,18 @@ typedef struct CPUARMState {
         uint32_t ctrl;
     } sau;
 
+    /* Used with Hypervisor.framework to resume the VM and calculate the proper
+     * cntvoff_el2. Things tend to work a lot better with just one value of
+     * host vtimer tracked for all vCPUs, hence why these are pointers. If we
+     * allow independently calculated values per cpu they need to be very exact
+     * or we run into deadlock situations (due to wrong inter-cpu time offset)
+     * when multiple vCPUS are involved. */
+    uint64_t* host_vtimer_start_ptr;
+    uint64_t* host_vtimer_ticks_ptr;
+
+    /* Value of host_vtimer_ticks_ptr saved to VMState */
+    uint64_t host_vtimer_ticks;
+
     void *nvic;
     const struct arm_boot_info *boot_info;
     /* Store GICv3CPUState to access from this struct */

@@ -61,4 +61,6 @@ void hvf_irq_deactivated(int cpu, int irq);
 
 void hvf_exit_vcpu(CPUState *cpu);
 
+void hvf_set_cntvoff(CPUState* cpu, uint64_t off);
+
 #endif /* _HVF_H */

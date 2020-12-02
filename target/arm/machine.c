@@ -5,9 +5,14 @@
 #include "hw/boards.h"
 #include "qemu/error-report.h"
 #include "sysemu/kvm.h"
+#include "sysemu/hvf.h"
 #include "kvm_arm.h"
 #include "internals.h"
 #include "migration/cpu.h"
+
+#ifdef __APPLE__
+#include <mach/mach_time.h>
+#endif
 
 static bool vfp_needed(void *opaque)
 {
@@ -599,6 +604,17 @@ static int cpu_pre_save(void *opaque)
     memcpy(cpu->cpreg_vmstate_values, cpu->cpreg_values,
            cpu->cpreg_array_len * sizeof(uint64_t));
 
+#ifdef __APPLE__
+    if (hvf_enabled()) {
+        // QEMU doesn't save cpu->env.cp15.cntvoff_el2, it's treated as
+        // an administrative constant relative to the other registers.
+        // So when we save it, incorporate the current cntvoff_el2 value.
+        cpu->env.host_vtimer_ticks =
+            *(cpu->env.host_vtimer_ticks_ptr) -
+            cpu->env.cp15.cntvoff_el2;
+    }
+#endif
+
     return 0;
 }
 
@@ -607,6 +623,29 @@ static int cpu_post_load(void *opaque, int version_id)
     ARMCPU *cpu = opaque;
     int i, v;
 
+    // Change cntvoff_el2 so the guest resumes to the wanted time.
+#ifdef __APPLE__
+    if (hvf_enabled()) {
+        // On migration, the saved state can be ahead of or behind mach_absolute_time().
+        uint64_t current_time = *(cpu->env.host_vtimer_start_ptr);
+        uint64_t saved_time = cpu->env.host_vtimer_ticks;
+        uint64_t cntvoff_el2_adjusted = 0;
+
+        // CNTVCT = CNTP - CNTVOFF
+        if (saved_time <= current_time) {
+            // We need to increment cntvoff_el2 so that the guest resumes with
+            // its timer count leaving off of where it was.
+            cntvoff_el2_adjusted += (current_time - saved_time);
+        } else {
+            // The guest is from a future tick count. Subtract the difference from cntvoff_el2
+            // so that the guest resumes where it was.
+            cntvoff_el2_adjusted -= (saved_time - current_time);
+        }
+
+        cpu->env.cp15.cntvoff_el2 = cntvoff_el2_adjusted;
+        hvf_set_cntvoff(cpu, cpu->env.cp15.cntvoff_el2);
+    }
+#endif
     /* Update the values list from the incoming migration data.
      * Anything in the incoming data which we don't know about is
      * a migration failure; anything we know about but the incoming
@@ -695,6 +734,7 @@ const VMStateDescription vmstate_arm_cpu = {
         VMSTATE_UINT32(env.exception.syndrome, ARMCPU),
         VMSTATE_UINT32(env.exception.fsr, ARMCPU),
         VMSTATE_UINT64(env.exception.vaddress, ARMCPU),
+        VMSTATE_UINT64(env.host_vtimer_ticks, ARMCPU),
         VMSTATE_TIMER_PTR(gt_timer[GTIMER_PHYS], ARMCPU),
         VMSTATE_TIMER_PTR(gt_timer[GTIMER_VIRT], ARMCPU),
         {
