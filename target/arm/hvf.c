@@ -94,6 +94,77 @@ struct hvf_accel_state {
     int num_slots;
 };
 
+struct hvf_migration_state {
+    uint64_t init_ticks;
+    CPUState* registered_cpus[HVF_MAX_VCPU];
+    uint64_t ticks_to_save;
+};
+
+pthread_rwlock_t mig_state_lock = PTHREAD_RWLOCK_INITIALIZER;
+struct hvf_migration_state mig_state;
+
+static int hvf_mig_state_pre_save(void* opaque) {
+    struct hvf_migration_state* m = opaque;
+    int i;
+
+    pthread_rwlock_wrlock(&mig_state_lock);
+    for (i = 0; i < HVF_MAX_VCPU; ++i) {
+        if (m->registered_cpus[i]) {
+            CPUState* cpu = m->registered_cpus[i];
+            ARMCPU *armcpu = ARM_CPU(cpu);
+            CPUARMState *env = &armcpu->env;
+            m->ticks_to_save = mach_absolute_time() - env->cp15.cntvoff_el2;
+            pthread_rwlock_unlock(&mig_state_lock);
+            return 0;
+        }
+    }
+    pthread_rwlock_unlock(&mig_state_lock);
+
+    fprintf(stderr, "%s: No registered vcpus found, abort.\n", __func__);
+    abort();
+}
+
+static void hvf_set_cntvoff(CPUState* cpu, uint64_t off) {
+    ARMCPU* armcpu = ARM_CPU(cpu);
+    CPUARMState* env = &armcpu->env;
+    HVF_CHECKED_CALL(hv_vcpu_set_vtimer_offset(cpu->hvf_fd, env->cp15.cntvoff_el2));
+}
+
+static int hvf_mig_state_post_load(void* opaque) {
+    struct hvf_migration_state* m = opaque;
+    int i;
+    uint64_t current_time = m->init_ticks;
+    uint64_t saved_time = m->ticks_to_save;
+    uint64_t cntvoff_el2_adjusted =
+        current_time - saved_time;
+
+    pthread_rwlock_wrlock(&mig_state_lock);
+    for (i = 0; i < HVF_MAX_VCPU; ++i) {
+        if (m->registered_cpus[i]) {
+            CPUState* cpu = m->registered_cpus[i];
+            ARMCPU *armcpu = ARM_CPU(cpu);
+            CPUARMState *env = &armcpu->env;
+            env->cp15.cntvoff_el2 = cntvoff_el2_adjusted;
+            hvf_set_cntvoff(cpu, env->cp15.cntvoff_el2);
+        }
+    }
+    pthread_rwlock_unlock(&mig_state_lock);
+
+    return 0;
+}
+
+const VMStateDescription vmstate_hvf_migration = {
+    .name = "hvf-migration",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .pre_save = hvf_mig_state_pre_save,
+    .post_load = hvf_mig_state_post_load,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT64(ticks_to_save, struct hvf_migration_state),
+        VMSTATE_END_OF_LIST()
+    },
+};
+
 pthread_rwlock_t mem_lock = PTHREAD_RWLOCK_INITIALIZER;
 struct hvf_accel_state* hvf_state;
 
@@ -494,8 +565,8 @@ int hvf_init_vcpu(CPUState * cpu) {
     DPRINTF("%s: entry. cpu: %p\n", __func__, cpu);
 
     ARMCPU *armcpu;
-
     int r;
+    int i;
 
     cpu->hvf_caps = (struct hvf_vcpu_caps*)g_malloc0(sizeof(struct hvf_vcpu_caps));
     DPRINTF("%s: create a vcpu config and query its values\n", __func__);
@@ -528,6 +599,15 @@ int hvf_init_vcpu(CPUState * cpu) {
 
     cpu->hvf_irq_pending = false;
     cpu->hvf_fiq_pending = false;
+
+    pthread_rwlock_wrlock(&mig_state_lock);
+    for (i = 0; i < HVF_MAX_VCPU; ++i) {
+        if (!mig_state.registered_cpus[i]) {
+            mig_state.registered_cpus[i] = cpu;
+            break;
+        }
+    }
+    pthread_rwlock_unlock(&mig_state_lock);
     return 0;
 }
 
@@ -1136,10 +1216,16 @@ static void hvf_write_rt(CPUState* cpu, unsigned long rt, uint64_t val) {
 }
 
 static void hvf_handle_wfx(CPUState* cpu) {
+    ARMCPU *armcpu = ARM_CPU(cpu);
+    CPUARMState *env = &armcpu->env;
+
     uint64_t cval;
     HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &cval));
 
-    int64_t ticks_to_sleep = cval - mach_absolute_time();
+    // mach_absolute_time() is an absolute host tick number. We
+    // have set up the guest to use the host tick number offset
+    // by env->cp15.cntvoff_el2.
+    int64_t ticks_to_sleep = cval - (mach_absolute_time() - env->cp15.cntvoff_el2);
     if (ticks_to_sleep < 0) {
         return;
     }
@@ -1590,6 +1676,9 @@ static int hvf_accel_init(MachineState *ms) {
     DPRINTF("%s: call. hv vm create?\n", __func__);
     int r = hv_vm_create(0);
 
+    memset(&mig_state, 0, sizeof(mig_state));
+    mig_state.init_ticks = mach_absolute_time();
+
     if (!check_hvf_ok(r)) {
         hv_vm_destroy();
         return -EINVAL;
@@ -1611,6 +1700,9 @@ static int hvf_accel_init(MachineState *ms) {
     qemu_set_user_backed_mapping_funcs(
         hvf_user_backed_ram_map,
         hvf_user_backed_ram_unmap);
+
+    vmstate_register(NULL, 0, &vmstate_hvf_migration, &mig_state);
+
     return 0;
 }
 
