@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "08cbd818_3da51886",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T21:15:15Z",
+      "side": 1,
+      "message": "Hmm, I was thinking of something a bit more straightforward than this. Instead of updating the CPUs here, I was thinking that the CPUs would read mig_state. So instead of the loop can we do:\n\nm-\u003einit_ticks -\u003d mach_absolute_time();",
+      "revId": "580c06f9205c0a140640a170a0d4cb4f05e35712",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8654e612_c1f7c35b",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T21:15:15Z",
+      "side": 1,
+      "message": "And in this function do:\n\nm-\u003einit_ticks +\u003d mach_absolute_time();;",
+      "revId": "580c06f9205c0a140640a170a0d4cb4f05e35712",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f266332a_e36493f0",
+        "filename": "target/arm/hvf.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1067098
+      },
+      "writtenOn": "2020-12-02T21:15:15Z",
+      "side": 1,
+      "message": "I think at this point the state ought to have restored, so here you would do:\n\nenv-\u003ecp15.cntvoff_el2 \u003d mig_state.init_ticks;\nHVF_CHECKED_CALL(hv_vcpu_set_vtimer_offset(cpu-\u003ehvf_fd, env-\u003ecp15.cntvoff_el2));",
+      "revId": "580c06f9205c0a140640a170a0d4cb4f05e35712",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
