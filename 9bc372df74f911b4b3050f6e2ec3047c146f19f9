@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1da246e0_9d7b453c",
+        "filename": "target/arm/machine.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 628,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-02T07:10:01Z",
+      "side": 1,
+      "message": "Possibly the wrong place to query mach absolute time, maybe better to do this in hvf vcpu init",
+      "revId": "9bc372df74f911b4b3050f6e2ec3047c146f19f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
