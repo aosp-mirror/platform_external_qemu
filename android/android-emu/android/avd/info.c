@@ -1269,8 +1269,18 @@ char*  avdInfo_getDefaultCachePath( const AvdInfo*  i )
     return _getFullFilePath(i->contentPath, imageName);
 }
 
+static bool is_armish(const AvdInfo* i);
+
 char*  avdInfo_getSdCardPath( const AvdInfo* i )
 {
+    if (i->apiLevel >=30 && is_armish(i)) {
+        // BUG: 174481551
+        // ignore sdcard for arm when api is >=30, as
+        // it makes setting up the metadata disk id tricky
+        // TODO: figure out better approach
+        dprint("INFO: ignore sdcard for arm at api level >= 30");
+        return NULL;
+    }
     const char* imageName = _imageFileNames[ AVD_IMAGE_SDCARD ];
     char*       path;
 
