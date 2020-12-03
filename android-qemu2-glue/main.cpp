@@ -1630,6 +1630,11 @@ extern "C" int main(int argc, char** argv) {
     path_mkdir_if_needed(pstorePath.c_str(), 0777);
     android_chmod(pstorePath.c_str(), 0777);
 
+    // TODO(jansene): pstore conflicts with memory maps on Apple Silicon
+#if defined(__APPLE__) && defined(__aarch64__)
+    mem_map pstore = {.start = 0,
+                      .size = 0 };
+#else
     mem_map pstore = {.start = GOLDFISH_PSTORE_MEM_BASE,
                       .size = GOLDFISH_PSTORE_MEM_SIZE};
 
@@ -1638,6 +1643,7 @@ extern "C" int main(int argc, char** argv) {
                    ",file=%s",
                    pstore.start, pstore.size, pstoreFile.c_str());
 
+#endif
     bool firstTimeSetup =
             (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path));
 
