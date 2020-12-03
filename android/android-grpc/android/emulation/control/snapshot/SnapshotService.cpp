@@ -151,7 +151,8 @@ public:
                     }));
             streamBufPtr = csb.get();
         } else {
-            dstFile.reset(new std::ofstream(request->path().c_str()));
+            dstFile.reset(new std::ofstream(request->path().c_str(),
+                          std::ios::binary | std::ios::out));
             if (!dstFile->is_open()) {
                 result.set_success(false);
                 result.set_err("Failed to write to " + request->path());
