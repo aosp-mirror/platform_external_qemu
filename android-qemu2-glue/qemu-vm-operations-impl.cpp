@@ -47,6 +47,7 @@ extern "C" {
 #include "migration/qemu-file-types.h"                // for qemu_put_be64
 #include "qapi/qapi-types-run-state.h"                // for RUN_STATE_SAVE_VM
 #include "qemu-common.h"                              // for tcg_enabled
+#include "qemu/config-file.h"
 #include "qemu/typedefs.h"                            // for QEMUFile, Error
 
 #include "block/block.h"                              // for bdrv_get_aio_co...
@@ -261,6 +262,7 @@ static bool extract_snapshot(const char* srcImg,
                 std::string("Failed to extract snapshot. Source image name ") +
                 srcImg + " destination image name " + dstImg +
                 " snapshot name " + snapshot + ".\n";
+        DD("extract error %s\n", err.c_str());
         errConsumer(opaque, err.c_str(), err.size());
         return false;
     }
@@ -271,6 +273,7 @@ static bool extract_snapshot(const char* srcImg,
         std::string err =
                 std::string("Failed to create snapshot. Image name ") + dstImg +
                 " snapshot name " + snapshot + ".\n";
+        DD("extract error %s\n", err.c_str());
         errConsumer(opaque, err.c_str(), err.size());
         path_delete_file(dstImg);
         return false;
@@ -949,9 +952,60 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
         // Extract the target snapshot from qcow2.
         // It doesn't work with cache.img.
         if (qcow.find("cache") == std::string::npos) {
+#ifdef _WIN32
+            // Windows has file access issues when accessing the same file from
+            // multiple processes simultaneously (probably a bad file share option
+            // setup). Thus we need to unplug the drive and replug it later.
+            std::string id = drive["device"].get<std::string>();
+            DD("unplugging %s\n", id.c_str());
+            BlockBackend* blk = blk_by_name(id.c_str());
+
+            BlockDriverState* oldbs = blk_bs(blk);
+            AioContext* aioCtx = bdrv_get_aio_context(oldbs);
+            aio_context_acquire(aioCtx);
+            blk_remove_bs(blk);
+            aio_context_release(aioCtx);
+#endif
             if (!extract_snapshot(overlay.c_str(), final_overlay.c_str(),
                                   snapshot, opaque, errConsumer)) {
                 success = false;
+            }
+#ifdef _WIN32
+            // Plug it back.
+            QemuOpts* opts = qemu_opts_find(qemu_find_opts("drive"), id.c_str());
+            QDict* bs_opts = qdict_new();
+            qemu_opts_to_qdict(opts, bs_opts);
+            QemuOpts* legacy_opts =
+                    qemu_opts_create(&qemu_legacy_drive_opts, nullptr, 0, nullptr);
+            qemu_opts_absorb_qdict(legacy_opts, bs_opts, nullptr);
+            QemuOpts* drive_opts = qemu_opts_find(&qemu_common_drive_opts, id.c_str());
+            if (drive_opts) {
+                qemu_opts_del(drive_opts);
+                drive_opts = nullptr;
+            }
+            drive_opts = qemu_opts_create(&qemu_common_drive_opts, id.c_str(), 1, nullptr);
+            qemu_opts_absorb_qdict(drive_opts, bs_opts, nullptr);
+
+            qdict_set_default_str(bs_opts, BDRV_OPT_CACHE_DIRECT, "off");
+            qdict_set_default_str(bs_opts, BDRV_OPT_CACHE_NO_FLUSH, "off");
+            qdict_set_default_str(bs_opts, BDRV_OPT_READ_ONLY, "off");
+            qdict_del(bs_opts, "id");
+
+            Error* local_err = NULL;
+            BlockDriverState* bs =
+                    bdrv_open(overlay.c_str(), nullptr, bs_opts, 0, &local_err);
+            if (bs) {
+                int res = blk_insert_bs(blk, bs, &local_err);
+                bdrv_unref(bs);
+            }
+            if (local_err) {
+                success = false;
+                LOG(WARNING) << "drive " << overlay << "open failure: ",
+                    error_get_pretty(local_err);
+                error_free(local_err);
+            }
+#endif
+            if (!success) {
                 break;
             }
         } else {
