@@ -117,6 +117,7 @@ extern "C" {
 #endif
 #include <algorithm>
 #include <string>
+#include <thread>
 
 #include "android/version.h"
 #define D(...)                   \
@@ -877,6 +878,57 @@ bool handleCpuAccelerationForMinConfig(int argc, char** argv,
 
     return true;
 }
+
+struct MyThread {
+    bool mShouldStop {false};
+    std::thread mT1;
+    ~MyThread() {
+        mShouldStop = true;
+        if (mT1.joinable()) {
+            mT1.join();
+        }
+    }
+};
+
+static MyThread s_mythread;
+
+static void process_gps_passive_data() {
+    while(true) {
+        if (s_mythread.mShouldStop)
+            break;
+
+        sleep_ms(1000);
+        // Send a GPS location to the device
+    auto sLocationAgent = getConsoleAgents()->location;
+    if (sLocationAgent && sLocationAgent->gpsSendLoc) {
+        // Send these to the device
+        // lat 37.422 lon -122.084 al 5 vel 0 head 0
+        double latitude = 37.422;
+        double longitude = -122.084;
+        double altitude = 0;
+        double velocity = 0;
+        double heading = 0;
+        //LocationPage::getDeviceLocation(&latitude, &longitude, &altitude, &velocity, &heading);
+
+        timeval timeVal = {};
+        gettimeofday(&timeVal, nullptr);
+        
+//        fprintf(stderr, "headless lat %g lon %g al %g vel %g head %g\n",
+//                latitude, longitude, altitude, velocity, heading);
+
+
+        sLocationAgent->gpsSendLoc(latitude, longitude, altitude, velocity, heading, 4, &timeVal);
+    }
+
+    }
+}
+
+static void start_passive_gps_feeder() {
+     std::thread t1(&process_gps_passive_data);
+    s_mythread.mT1 = std::move(t1);
+
+}
+
 
 static int startEmulatorWithMinConfig(
     int argc,
@@ -2010,6 +2062,15 @@ extern "C" int main(int argc, char** argv) {
                     "simulator disabled.");
         }
     }
+
+    // for headless mode, start a thread to feed guest gps hal with
+    // passive gps locations; qt emulator already does that in location-page.cpp
+#ifdef CONFIG_HEADLESS
+    if (getConsoleAgents()->location->gpsGetPassiveUpdate()) {
+        dprint("feeding guest with passive gps data, in headless mode");
+        start_passive_gps_feeder();
+    }
+#endif
 
     // rng
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
