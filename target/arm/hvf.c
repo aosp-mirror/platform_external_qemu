@@ -1563,7 +1563,6 @@ again:
         hvf_inject_interrupts(cpu);
 
         if (cpu->halted) {
-            qemu_mutex_lock_iothread();
             return EXCP_HLT;
         }
 
