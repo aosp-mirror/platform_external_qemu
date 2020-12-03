@@ -157,7 +157,7 @@ public:
                     }));
             streamBufPtr = csb.get();
         } else {
-            dstFile.reset(new std::ofstream(request->path().c_str()));
+            dstFile.reset(new std::ofstream(request->path().c_str(), std::ios::binary | std::ios::out));
             if (!dstFile->is_open()) {
                 result.set_success(false);
                 result.set_err("Failed to write to " + request->path());
@@ -204,6 +204,9 @@ public:
             android::base::StringView name;
             char buf[k64KB];
             PathUtils::split(fname, nullptr, &name);
+            if (std::string::npos != name.find("cache")) {
+                continue;
+            }
 
             // Use of  a 64 KB  buffer gives good performance (see performance
             // tests.)
@@ -453,6 +456,7 @@ public:
     Status TrackProcess(ServerContext* context,
                         const IceboxTarget* request,
                         IceboxTarget* reply) override {
+        _PR_LINE
         int pid = request->pid();
         if (!request->package_name().empty()) {
             AdbShellStream getPid("pidof " + request->package_name());
@@ -462,16 +466,17 @@ public:
                 sscanf(sout.data(), "%d", &pid);
             }
         }
-
+        _PR_LINE
         if (pid == 0) {
             reply->set_err("Pid cannot be found..");
             reply->set_failed(true);
             return Status::OK;
         }
-
+        _PR_LINE
         std::string snapshotName = request->snapshot_id() == ""
                                            ? "icebox-" + std::to_string(pid)
                                            : request->snapshot_id();
+        _PR_LINE
         icebox::track_async(pid, snapshotName, request->max_snapshot_number());
 
         reply->set_pid(pid);

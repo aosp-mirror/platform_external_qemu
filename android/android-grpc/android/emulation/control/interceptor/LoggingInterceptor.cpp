@@ -67,7 +67,7 @@ static uint64_t getTimeDiffUs(InvocationRecord loginfo,
 }
 
 static void printLog(const InvocationRecord& loginfo) {
-    LOG(INFO) << loginfo.mTimestamps[InvocationRecord::kStartTimeIdx]
+    LOG(VERBOSE) << loginfo.mTimestamps[InvocationRecord::kStartTimeIdx]
               << ", rcvTime: " << loginfo.rcvTime
               << ", sndTime: " << loginfo.sndTime << ", "
               << InvocationRecord::kTypes[static_cast<int>(loginfo.type)]

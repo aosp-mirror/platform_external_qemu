@@ -369,6 +369,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
     {                                             \
         _SEND_PACKET(packet);                     \
         if (!recvOkayWithId(s.get(), local_id)) { \
+            D("Send packet did not get Okay reply%d\n", __LINE__); \
             return false;                         \
         }                                         \
     }
@@ -381,6 +382,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         jdwp_connect.data.resize(20);
         jdwp_connect.mesg.data_length =
                 sprintf((char*)jdwp_connect.data.data(), "jdwp:%d", pid) + 1;
+        D("jdwp connecting %d", pid);
         jdwp_connect.data.resize(jdwp_connect.mesg.data_length);
         _SEND_PACKET(jdwp_connect);
     }
@@ -388,6 +390,12 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         apacket connect_ok;
         _RECV_PACKET(connect_ok);
         if (connect_ok.mesg.command != ADB_OKAY) {
+            D("Failed to receive ADB_OKAY for jdwp command");
+            D("received message cmd %d arg0 %d arg1 %d datalength %d",
+                connect_ok.mesg.command,
+                connect_ok.mesg.arg0,
+                connect_ok.mesg.arg1,
+                connect_ok.mesg.data_length);
             return false;
         }
         remote_id = connect_ok.mesg.arg0;
@@ -604,6 +612,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         apacket reply;
         _RECV_PACKET(reply);
         if (reply.mesg.command == ADB_CLSE) {
+            D("Adb closed");
             return true;
         }
         // we wait for the snapshot before replying OK, to avoid any concurrency
@@ -621,7 +630,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
                         runOnMainLooperAndWaitForCompletion(
                                 [&new_snapshot_name]() {
                                     D("ready to take snapshot");
-                                    //getConsoleAgents()->vm->vmStop();
+                                    getConsoleAgents()->vm->vmStop();
                                     bool snapshotSkipped =
                                             getConsoleAgents()
                                                     ->vm
@@ -632,8 +641,8 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
                                                 ->vm->setSkipSnapshotSave(
                                                         false);
                                     }
-                                    //androidSnapshot_delete(
-                                    //        new_snapshot_name.c_str());
+                                    androidSnapshot_delete(
+                                            new_snapshot_name.c_str());
                                     const AndroidSnapshotStatus result =
                                             androidSnapshot_save(
                                                     new_snapshot_name.c_str());
@@ -643,8 +652,8 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
                                         getConsoleAgents()
                                                 ->vm->setSkipSnapshotSave(true);
                                     }
-                                    //getConsoleAgents()->vm->vmStart();
-                                    androidMainLoopWait(false);
+                                    getConsoleAgents()->vm->vmStart();
+                                    //androidMainLoopWait(false);
                                     D("Snapshot thread done");
                                 });
                 D("Icebox thread resume after snapshot");

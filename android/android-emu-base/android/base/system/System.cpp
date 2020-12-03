@@ -31,6 +31,7 @@
 #include "android/utils/tempfile.h"
 
 #ifdef _WIN32
+#include "android/base/system/dbg.h"
 #include "android/base/files/ScopedRegKey.h"
 #include "android/base/files/ScopedFileHandle.h"
 #include "android/base/system/Win32UnicodeString.h"
@@ -106,6 +107,8 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include <sys/utsname.h>
 #include <sys/vfs.h>
 #endif
+
+
 
 // This variable is a pointer to a zero-terminated array of all environment
 // variables in the current process.
@@ -1199,6 +1202,7 @@ public:
         LOG(WARNING) << "Ignoring invalid parameter detected in function: "
                     << function << " file: " << file << ", line: " << line
                     << ", expression: " << expression;
+        dbg::printCallStack();
     }
 #endif
 

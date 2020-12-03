@@ -32,7 +32,7 @@
 #include "android/utils/path.h"            // for path_mkdir_if_needed
 
 /* set to 1 for very verbose debugging */
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG >= 1
 #define DD(fmt, ...) \
@@ -89,15 +89,21 @@ static uint64_t OTOI(octalnr* in, uint8_t len) {
     return std::stoull(oct, nullptr, 8);
 }
 // convert from int to octal (or base-256)
-static void itoo(char* str, uint8_t len, unsigned long long val) {
+static void itoo(char* str, uint8_t len, uint64_t val) {
     // Do we need binary encoding?
     if (!(val >> (3 * (len - 1))))
+    //if (false)
         sprintf(str, "%0*llo", len - 1, val);
     else {
         *str = (char)128;
         while (--len)
             *++str = val >> (3 * len);
     }
+    printf("expected %llu ", val);
+    for (int i = 0; i < len; i++) {
+        printf("%c", str[i]);
+    }
+    printf("\n");
 }
 
 #define ITOO(x, y) itoo(x, sizeof(x), y)
@@ -119,7 +125,7 @@ bool TarWriter::writeTarHeader(std::string name, bool isDir, struct stat sb) {
     if (name.size() > sizeof(header.name) - 1)
         return false;
 
-    memcpy(header.name, name.data(), name.size());
+    memcpy(header.name, name.data(), name.size() + 1);
     ITOO(header.mode, sb.st_mode);
     ITOO(header.mtime, sb.st_mtime);
     ITOO(header.uid, sb.st_uid);
@@ -136,6 +142,7 @@ bool TarWriter::writeTarHeader(std::string name, bool isDir, struct stat sb) {
 
     // And finally we can create the checksum.
     ITOO(header.chksum, tar_cksum(&header));
+    printf("size of header %d\n", (int)sizeof(header));
 
     mDest.write(reinterpret_cast<char*>(&header), sizeof(header));
     if (mDest.bad()) {
@@ -174,24 +181,33 @@ bool TarWriter::addFileEntryFromStream(std::istream& ifs,
                                        std::string name,
                                        struct stat sb) {
     if (!writeTarHeader(name, false, sb)) {
+        printf("header failed\n");
         return false;
     }
 
     char buf[TARBLOCK];
+    int64_t reads = 0;
+    int64_t writes = 0;
     do {
-        ifs.read(&buf[0], TARBLOCK);
-        mDest.write(&buf[0], ifs.gcount());
+        ifs.read(buf, TARBLOCK);
+        mDest.write(buf, ifs.gcount());
         if (mDest.bad()) {
+            printf("write bad\n");
             return error("Failed to write " + name + " to stream");
         }
-    } while (ifs.gcount() > 0);
+        reads += ifs.gcount();
+    } while (ifs);
 
     size_t bytes_to_write = sb.st_size;
+    printf("writing file %s size %lld\n", name.c_str(), bytes_to_write);
+    printf("read counts %lld write counts %lld\n", reads, writes);
     int padding = TARBLOCK - (bytes_to_write % TARBLOCK);
     if (padding != TARBLOCK) {
         char empty[TARBLOCK] = {0};
         mDest.write(empty, padding);
+        printf("try write padding %d\n", padding);
         if (mDest.bad()) {
+            printf("write failed\n");
             return error("Failed to write " + std::to_string(padding) +
                          " padding bytes for entry " + name + " to stream");
         }
