@@ -54,6 +54,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3e0893a3_77ad44a5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2020-12-04T18:09:54Z",
+      "side": 1,
+      "message": "Thanks. Fixed in aosp/1518537",
+      "parentUuid": "6b129cd4_a4733772",
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d16d47f8_052484b0",
