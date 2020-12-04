@@ -27,6 +27,7 @@
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/utils/debug.h"
+#include "android/base/Backtrace.h"
 
 #include <algorithm>
 #include <memory>
@@ -176,7 +177,10 @@ using android::base::StringView;
 AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
     auto pipe = new AdbGuestPipe(mHwPipe, this, mHostAgent, nullptr);
     onPipeOpen(pipe);
-    D("%s: [%p] created, %d pipes", __func__, pipe, (int)mPipes.size());
+
+    std::string backtrace = android::base::bt();
+
+    D("%s:%d: [%p] created, %d pipes, bt=<%s>", __func__, __LINE__, pipe, (int)mPipes.size(), backtrace.c_str());
     return pipe;
 }
 
@@ -195,7 +199,7 @@ AndroidPipe* AdbGuestPipe::Service::load(void* hwPipe,
         D("loaded pending pipe\n");
         mPipes.push_back(pipe);
     }
-    D("%s: [%p] loaded", __func__, pipe);
+    D("%s:%d: [%p] loaded", __func__, __LINE__, pipe);
 
     return pipe;
 }
@@ -216,12 +220,16 @@ void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket,
 }
 
 void AdbGuestPipe::Service::preLoad(android::base::Stream* stream) {
+    DD("%s:%d stream=%p", __func__, __LINE__, stream);
+
     mCurrentActivePipe = nullptr;
     mPipes.clear();
 }
 
 void AdbGuestPipe::Service::postLoad(android::base::Stream* stream) {
     int activeFd = stream ? stream->getBe32() : 0;
+    DD("%s:%d stream=%p activeFd=%d", __func__, __LINE__, stream, activeFd);
+
     if (activeFd == 0) {
         mCurrentActivePipe = nullptr;
     } else {
@@ -237,10 +245,15 @@ void AdbGuestPipe::Service::postLoad(android::base::Stream* stream) {
 }
 
 void AdbGuestPipe::Service::postSave(android::base::Stream* stream) {
-    DD("%s num. of pipes %d", __func__, (int)mPipes.size());
+    DD("%s:%d: num. of pipes %d", __func__, __LINE__, (int)mPipes.size());
+
     if (mCurrentActivePipe && mCurrentActivePipe->mHostSocket.valid()) {
+        DD("%s:%d: socked fd = %u", __func__, __LINE__, mCurrentActivePipe->mHostSocket.fd());
+
         stream->putBe32(mCurrentActivePipe->mHostSocket.fd());
     } else {
+        DD("%s:%d: no socked fd", __func__, __LINE__);
+
         stream->putBe32(0);
     }
     // TODO: handle mCurrentActivePipe and mPipes more appropriately in snapshot
