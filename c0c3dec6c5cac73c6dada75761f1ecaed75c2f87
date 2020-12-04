@@ -38,6 +38,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "6b129cd4_a4733772",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2020-12-04T17:57:35Z",
+      "side": 1,
+      "message": "Ok, now I see. Since this affects snapshots, you want to increment the snapshot version.\n\nhttps://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-emu/android/snapshot/Snapshot.cpp#386",
+      "parentUuid": "9017b4d9_97ff7488",
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "d16d47f8_052484b0",
         "filename": "android/android-emu/android/physics/BodyModel.cpp",
         "patchSetId": 1
