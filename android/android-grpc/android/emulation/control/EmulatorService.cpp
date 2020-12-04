@@ -499,7 +499,12 @@ public:
 
         if (clientAvailable) {
             getScreenshot(context, request, &first);
-            clientAvailable = !context->IsCancelled() && writer->Write(first);
+//            clientAvailable = !context->IsCancelled() && writer->Write(first);
+            clientAvailable = context->IsCancelled();
+            if (!clientAvailable) return Status::OK;
+            writer->Write(first);
+
+                    LOG(INFO) << "Sending first frame " << clientAvailable;
         }
 
         bool lastFrameWasEmpty = first.format().width() == 0;
@@ -529,6 +534,7 @@ public:
                 if (!context->IsCancelled() &&
                     (!lastFrameWasEmpty || !emptyFrame)) {
                     clientAvailable = writer->Write(reply);
+                    LOG(INFO) << "Sending next frame " << clientAvailable;
                 }
                 lastFrameWasEmpty = emptyFrame;
             }
