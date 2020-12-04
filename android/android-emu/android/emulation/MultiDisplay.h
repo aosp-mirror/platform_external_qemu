@@ -16,14 +16,17 @@
 
 #pragma once
 
-#include "android/base/synchronization/Lock.h"
-#include "android/base/files/Stream.h"
-#include "android/emulation/control/record_screen_agent.h"
-#include "android/emulation/control/window_agent.h"
+#include <stdint.h>                                         // for uint32_t
+#include <map>                                              // for map
 
-#include <map>
+#include "android/base/synchronization/Lock.h"              // for Lock, Aut...
+#include "android/emulation/control/record_screen_agent.h"  // for QAndroidR...
+#include "android/emulation/control/window_agent.h"         // for QAndroidE...
 
 namespace android {
+namespace base {
+class Stream;
+}  // namespace base
 
 struct MultiDisplayInfo {
     int32_t pos_x;

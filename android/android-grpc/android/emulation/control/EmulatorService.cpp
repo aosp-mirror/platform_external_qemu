@@ -45,6 +45,7 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
+#include "android/emulation/MultiDisplay.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
@@ -677,7 +678,6 @@ public:
         LOG(VERBOSE) << "Screenshot " << newWidth << "x" << newHeight
                      << ", in: " << sw.elapsedUs() << " us";
 
-
         // Update format information with the retrieved width, height..
         auto format = reply->mutable_format();
         format->set_format(ScreenshotUtils::translate(img.getImageFormat()));
@@ -736,6 +736,54 @@ public:
                 reply->set_state(VmRunState::UNKNOWN);
                 break;
         };
+
+        return Status::OK;
+    }
+
+    Status getDisplayConfigurations(ServerContext* context,
+                                    const ::google::protobuf::Empty* request,
+                                    DisplayConfigurations* reply) override {
+        uint32_t width, height, dpi, flags;
+        bool enabled;
+        for (int i = 0; i < avdInfo_maxMultiDisplayEntries(); i++) {
+            if (mAgents->multi_display->getMultiDisplay(i, nullptr, nullptr,
+                                                        &width, &height, &dpi,
+                                                        &flags, &enabled)) {
+                auto cfg = reply->add_displays();
+                cfg->set_width(width);
+                cfg->set_height(height);
+                cfg->set_dpi(dpi);
+                cfg->set_display(i);
+                cfg->set_flags(flags);
+            }
+        }
+
+        return Status::OK;
+    }
+
+    Status setSecondaryDisplayConfigurations(
+            ServerContext* context,
+            const DisplayConfigurations* request,
+            ::google::protobuf::Empty* reply) override {
+        int displayId = 1;
+        for (const auto& display : request->displays()) {
+            // TODO(jansene): This can result in UI messages if invalid values
+            // are presented.
+            if (mAgents->multi_display->setMultiDisplay(
+                        displayId, -1, -1, display.width(), display.height(),
+                        display.dpi(), display.flags(), true) < 0) {
+                continue;
+            };
+            mAgents->emu->updateUIMultiDisplayPage(displayId);
+            displayId++;
+        }
+
+        for (; displayId < avdInfo_maxMultiDisplayEntries(); displayId++) {
+            if (mAgents->multi_display->setMultiDisplay(displayId, -1, -1, 0, 0,
+                                                        0, 0, false) >= 0) {
+                mAgents->emu->updateUIMultiDisplayPage(displayId);
+            }
+        }
 
         return Status::OK;
     }
