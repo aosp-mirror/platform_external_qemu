@@ -383,7 +383,11 @@ struct {
 };
 
 // Calculate snapshot version based on a base version plus featurecontrol-derived integer.
-static constexpr int kVersionBase = 66;
+<<<<<<< HEAD
+static constexpr int kVersionBase = 65;
+=======
+static constexpr int kVersionBase = 64;
+>>>>>>> 0184442f58 (WIP: fix snapshotting of virtio-vsock.c)
 static_assert(kVersionBase < (1 << 20), "Base version number is too high.");
 
 #define FEATURE_CONTROL_ITEM(item) + 1
