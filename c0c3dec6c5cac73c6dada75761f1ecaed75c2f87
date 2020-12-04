@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9017b4d9_97ff7488",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2020-12-04T09:30:30Z",
+      "side": 1,
+      "message": "I think we do. Isn\u0027t physicalModel_snapshotSave doing that? Also trying a snapshot save/load flow, I can confirm that the sensors values are correctly saved and restored.",
+      "parentUuid": "41b89048_55114cd4",
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d16d47f8_052484b0",
@@ -31,6 +49,30 @@
       "writtenOn": "2020-12-01T20:50:30Z",
       "side": 1,
       "message": "same here\n\n} // namespace \u003cname\u003e",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 1
+      },
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "72c1ab93_beb54f07",
+        "filename": "android/android-emu/android/physics/BodyModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2020-12-04T09:30:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d16d47f8_052484b0",
       "range": {
         "startLine": 36,
         "startChar": 0,
@@ -87,6 +129,54 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "45bc2e3d_2cba12f3",
+        "filename": "android/android-emu/android/physics/BodyModel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2020-12-04T09:30:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ccd7445e_49b17190",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 7
+      },
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e1ad9ae6_bc7e2188",
+        "filename": "android/android-emu/android/physics/BodyModel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2020-12-04T09:30:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "15a0ca10_0ff4fd36",
+      "range": {
+        "startLine": 26,
+        "startChar": 8,
+        "endLine": 26,
+        "endChar": 12
+      },
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6390d115_6f543816",
@@ -110,6 +200,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f87ac1b_f1ec9d30",
+        "filename": "android/android-emu/android/physics/BodyModel.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2020-12-04T09:30:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6390d115_6f543816",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 1
+      },
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4243eb47_642836da",
@@ -123,6 +237,24 @@
       "writtenOn": "2020-12-01T20:50:30Z",
       "side": 1,
       "message": "Do we still need TestTempDir?",
+      "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "07109f4a_785eeb18",
+        "filename": "android/android-emu/android/physics/BodyModel_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2020-12-04T09:30:30Z",
+      "side": 1,
+      "message": "Oops. Removed.",
+      "parentUuid": "4243eb47_642836da",
       "revId": "c0c3dec6c5cac73c6dada75761f1ecaed75c2f87",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
