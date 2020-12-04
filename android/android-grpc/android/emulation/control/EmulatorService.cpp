@@ -516,10 +516,13 @@ public:
         // a completely empty frame if the screen is not active.
         Image first;
         bool clientAvailable = !context->IsCancelled();
-
+        LOG(INFO) << "Client: " << (clientAvailable ? "available" : "gone");
         if (clientAvailable) {
             getScreenshot(context, request, &first);
             clientAvailable = !context->IsCancelled() && writer->Write(first);
+            LOG(INFO) << "Shipped screenshot to client: " << (clientAvailable ? "available" : "gone");
+            if (!clientAvailable)
+                return Status::OK;
         }
 
         bool lastFrameWasEmpty = first.format().width() == 0;
@@ -553,6 +556,10 @@ public:
                     (!lastFrameWasEmpty || !emptyFrame)) {
                     clientAvailable = writer->Write(reply);
                     perfEstimator.addSample(sw.elapsedUs());
+                    LOG(INFO) << "Next frame client: "
+                              << (clientAvailable ? "available" : "gone");
+                } else {
+                    LOG(INFO) << "Client is gone..";
                 }
                 lastFrameWasEmpty = emptyFrame;
             }
@@ -676,7 +683,6 @@ public:
                 newHeight);
         LOG(VERBOSE) << "Screenshot " << newWidth << "x" << newHeight
                      << ", in: " << sw.elapsedUs() << " us";
-
 
         // Update format information with the retrieved width, height..
         auto format = reply->mutable_format();
