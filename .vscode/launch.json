@@ -100,9 +100,6 @@
                     "-verbose",
                     "-feature",
                     "-HVF",
-                    "-no-window",
-                    "-gpu",
-                    "auto-no-window"
                 ],
                 "env": {
                     // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
