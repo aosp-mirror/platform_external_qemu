@@ -28,3 +28,6 @@ if(ANDROIDSTUDIO)
 else()
   message(STATUS "Skipping android-studio")
 endif()
+
+message(STATUS "Including android-ui")
+add_subdirectory(android-ui)

@@ -500,6 +500,8 @@ public:
         if (clientAvailable) {
             getScreenshot(context, request, &first);
             clientAvailable = !context->IsCancelled() && writer->Write(first);
+
+                    LOG(INFO) << "Sending first frame";
         }
 
         bool lastFrameWasEmpty = first.format().width() == 0;
