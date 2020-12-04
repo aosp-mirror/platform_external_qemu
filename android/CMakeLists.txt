@@ -27,3 +27,6 @@ if(ANDROIDSTUDIO)
   message(STATUS "Including android-studio")
   add_subdirectory(android-studio)
 endif()
+
+message(STATUS "Including android-ui")
+add_subdirectory(android-ui)
