@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "android/emulation/control/AgentLogger.h"
 
+#include <iomanip>
 #include <iostream>                             // for operator<<, basic_ost...
 #include <sstream>                              // for stringstream
 #include <string>                               // for basic_string
@@ -31,7 +32,7 @@ using android::emulation::AndroidLoggingConsoleFactory;
 
 // Add support for logging SkinGenericEventCode's
 std::ostream& operator<<(std::ostream& os, const SkinGenericEventCode& code) {
-    os << "[" << code.type << ", " << code.code << ", " << code.value << ", "
+    os << "[" << std::setw(4) << std::hex << code.type << ", " << code.code << ", " << code.value << ", "
        << code.displayId << "]";
     return os;
 }
@@ -64,6 +65,7 @@ template <typename T>
 void log_array(const char* name, T* array, int count) {
      std::stringstream ss;
      ss << "[";
+     ss << std::hex;
      for(int i = 0; i < count; i++) {
          if (i > 0)
             ss << ", ";
