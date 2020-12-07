@@ -505,6 +505,7 @@ prepare_build_for_darwin() {
     OSX_DEPLOYMENT_TARGET=10.11
     OSX_REQUIRED=10.13
     MIN_XCODE=10
+    OSX_DESIRED=12.2
 
     # This is the list of supported SDKs,
     OSX_SDK_SUPPORTED="${OSX_REQUIRED} 10.15 10.16 11.0"
@@ -532,6 +533,13 @@ prepare_build_for_darwin() {
     if test "$VERSION_SORT" != "$MIN_XCODE"; then
         log "You need to have at least XCode 10 installed, not ${OSX_XCODE}"
         please_install_proper_sdk_error
+    fi
+
+    if [ "$OSX_XCODE_VERSION" != "$OSX_DESIRED" ]; then
+        log "-- WARNING =================================== WARNING ===================================================== WARNING --"
+        log "|| Heads up! We are transitioning to XCode 12.2 to make sure all Apple platforms (M1 && X86) use the same toolchain. ||"
+        log "|| See b/173785647 for details.                                                                                      ||"
+        log "-- WARNING =================================== WARNING ===================================================== WARNING --"
     fi
 
     XCODE_PATH=$(xcode-select -print-path 2>/dev/null)
