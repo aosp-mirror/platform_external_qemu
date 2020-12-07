@@ -16,6 +16,23 @@
       "message": "Let me know if this API will meet the requirements. Another option is to follow the add/remove/list paradigm used by the current UI.\n\n",
       "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9c5ea2fb_5d3dad18",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-07T21:37:38Z",
+      "side": 1,
+      "message": "@huans I just noticed that we do not provide a DPI for the main display with this api (display id \u003d 0), is that expected?",
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
