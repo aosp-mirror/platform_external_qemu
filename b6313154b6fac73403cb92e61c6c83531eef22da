@@ -60,6 +60,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "de16adf6_04fcd362",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 768,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-07T23:55:07Z",
+      "side": 1,
+      "message": "We can, it will just make the handling of delete v.s. update different.",
+      "parentUuid": "58f44485_ec1630e7",
+      "range": {
+        "startLine": 768,
+        "startChar": 12,
+        "endLine": 768,
+        "endChar": 25
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "8789b2a5_85b5a1fa",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 2
@@ -106,6 +130,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a322612d_183aac16",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-07T23:55:07Z",
+      "side": 1,
+      "message": "We do not need this restriction, it just makes the code to implement removal slightly different.",
+      "parentUuid": "32e9c5a2_ae6f13e6",
+      "range": {
+        "startLine": 166,
+        "startChar": 43,
+        "endLine": 167,
+        "endChar": 51
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "15af3cbc_0afee8ae",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 2
@@ -117,6 +165,30 @@
       "writtenOn": "2020-12-07T22:26:59Z",
       "side": 1,
       "message": "The method should either succeed and bring the displays in accordance with DisplayConfigurations, or fail and not change display configuration at all.",
+      "range": {
+        "startLine": 170,
+        "startChar": 7,
+        "endLine": 170,
+        "endChar": 42
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "247c2b7b_26cf651c",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-07T23:55:07Z",
+      "side": 1,
+      "message": "I\u0027m not sure if the underlying agents will allow us to guarantee that a transaction can be successfully rolled back.\n\nWhat is the most convenient way for the emulator to communicate failure to studio? We could return the set of all valid logical displays for example.",
+      "parentUuid": "15af3cbc_0afee8ae",
       "range": {
         "startLine": 170,
         "startChar": 7,
@@ -152,6 +224,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "88366177_5cc4a4fc",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-07T23:55:07Z",
+      "side": 1,
+      "message": "I pressed the auto-format button and it made a mess of things.",
+      "parentUuid": "ee79e719_e78d18cd",
+      "range": {
+        "startLine": 227,
+        "startChar": 8,
+        "endLine": 227,
+        "endChar": 31
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "372b9789_5a4eccb5",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 2
@@ -163,6 +259,30 @@
       "writtenOn": "2020-12-07T22:26:59Z",
       "side": 1,
       "message": "Ditto",
+      "range": {
+        "startLine": 273,
+        "startChar": 8,
+        "endLine": 273,
+        "endChar": 31
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0f6da2bb_4a300f0e",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-07T23:55:07Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "372b9789_5a4eccb5",
       "range": {
         "startLine": 273,
         "startChar": 8,
@@ -198,6 +318,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "c45fd4b9_e96e5f62",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 768,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-07T23:55:07Z",
+      "side": 1,
+      "message": "Thanks for catching this. Looks like an auto formatter issue.",
+      "parentUuid": "046f2ffb_b6ae0149",
+      "range": {
+        "startLine": 768,
+        "startChar": 8,
+        "endLine": 768,
+        "endChar": 32
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "6fd5f15d_8f798ff4",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 2
@@ -209,6 +353,30 @@
       "writtenOn": "2020-12-07T22:26:59Z",
       "side": 1,
       "message": "For the benefit of callers the values of flags should be also declared in this proto.",
+      "range": {
+        "startLine": 889,
+        "startChar": 11,
+        "endLine": 889,
+        "endChar": 16
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c111724b_825cc351",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 889,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-07T23:55:07Z",
+      "side": 1,
+      "message": "There\u0027s no real good support for that in Protobuf: https://stackoverflow.com/questions/26810188/protocol-buffers-and-enums-combinations. Furthermore these flags are secretly dependent on which api level is running in the guest.\n\nWe can include the values in the documentation.",
+      "parentUuid": "6fd5f15d_8f798ff4",
       "range": {
         "startLine": 889,
         "startChar": 11,
