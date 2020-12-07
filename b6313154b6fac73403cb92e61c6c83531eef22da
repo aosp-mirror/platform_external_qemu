@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ffbd9f8b_e3c4ce50",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-07T21:36:51Z",
+      "side": 1,
+      "message": "Let me know if this API will meet the requirements. Another option is to follow the add/remove/list paradigm used by the current UI.\n\n",
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
