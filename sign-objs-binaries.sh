@@ -17,13 +17,6 @@
 ./sign-vm-entitlement.sh objs/lib64/qt/plugins/imageformats/libqicns.dylib
 ./sign-vm-entitlement.sh objs/lib64/qt/plugins/imageformats/libqtga.dylib
 ./sign-vm-entitlement.sh objs/lib64/qt/plugins/imageformats/libqmacjp2.dylib
-./sign-vm-entitlement.sh objs/lib64/qt/lib/libQt5DBusAndroidEmu.5.12.1.dylib
-./sign-vm-entitlement.sh objs/lib64/qt/lib/libQt5GuiAndroidEmu.5.12.1.dylib
-./sign-vm-entitlement.sh objs/lib64/qt/lib/libQt5SvgAndroidEmu.5.12.1.dylib
-./sign-vm-entitlement.sh objs/lib64/qt/lib/libQt5PrintSupportAndroidEmu.5.12.1.dylib
-./sign-vm-entitlement.sh objs/lib64/qt/lib/libQt5WidgetsAndroidEmu.5.12.1.dylib
-./sign-vm-entitlement.sh objs/lib64/qt/lib/libQt5NetworkAndroidEmu.5.12.1.dylib
-./sign-vm-entitlement.sh objs/lib64/qt/lib/libQt5CoreAndroidEmu.5.12.1.dylib
 ./sign-vm-entitlement.sh objs/lib64/gles_swiftshader/libEGL.dylib
 ./sign-vm-entitlement.sh objs/lib64/gles_swiftshader/libGLES_CM.dylib
 ./sign-vm-entitlement.sh objs/lib64/gles_swiftshader/libGLESv2.dylib
