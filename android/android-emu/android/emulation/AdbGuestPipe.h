@@ -236,7 +236,7 @@ private:
     std::unique_ptr<android::emulation::AdbMessageSniffer> mReceivedMesg;
     std::unique_ptr<android::emulation::AdbMessageSniffer> mSendingMesg;
     AdbPortType mPortType = AdbPortType::RegularAdb;
-    std::unique_ptr<AdbHub> mAdbHub;
+    std::unique_ptr<AdbHub> mAdbHub = {};
     bool mReuseFromSnapshot = false;
 };
 
