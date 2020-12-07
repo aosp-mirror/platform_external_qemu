@@ -33,6 +33,190 @@
       "message": "@huans I just noticed that we do not provide a DPI for the main display with this api (display id \u003d 0), is that expected?",
       "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "58f44485_ec1630e7",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 768,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-07T22:26:59Z",
+      "side": 1,
+      "message": "Why can\u0027t we use the displayId from the request?",
+      "range": {
+        "startLine": 768,
+        "startChar": 12,
+        "endLine": 768,
+        "endChar": 25
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8789b2a5_85b5a1fa",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-07T22:26:59Z",
+      "side": 1,
+      "message": "Should we say that including the primary display in the method argument is allowed, but that it is an error if the primary display parameters are different from the current ones?",
+      "range": {
+        "startLine": 165,
+        "startChar": 75,
+        "endLine": 166,
+        "endChar": 42
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "32e9c5a2_ae6f13e6",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-07T22:26:59Z",
+      "side": 1,
+      "message": "Why do we need this restriction?",
+      "range": {
+        "startLine": 166,
+        "startChar": 43,
+        "endLine": 167,
+        "endChar": 51
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "15af3cbc_0afee8ae",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-07T22:26:59Z",
+      "side": 1,
+      "message": "The method should either succeed and bring the displays in accordance with DisplayConfigurations, or fail and not change display configuration at all.",
+      "range": {
+        "startLine": 170,
+        "startChar": 7,
+        "endLine": 170,
+        "endChar": 42
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ee79e719_e78d18cd",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-07T22:26:59Z",
+      "side": 1,
+      "message": "Why was the line break removed?",
+      "range": {
+        "startLine": 227,
+        "startChar": 8,
+        "endLine": 227,
+        "endChar": 31
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "372b9789_5a4eccb5",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-07T22:26:59Z",
+      "side": 1,
+      "message": "Ditto",
+      "range": {
+        "startLine": 273,
+        "startChar": 8,
+        "endLine": 273,
+        "endChar": 31
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "046f2ffb_b6ae0149",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 768,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-07T22:26:59Z",
+      "side": 1,
+      "message": "Ditto.",
+      "range": {
+        "startLine": 768,
+        "startChar": 8,
+        "endLine": 768,
+        "endChar": 32
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6fd5f15d_8f798ff4",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 889,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-07T22:26:59Z",
+      "side": 1,
+      "message": "For the benefit of callers the values of flags should be also declared in this proto.",
+      "range": {
+        "startLine": 889,
+        "startChar": 11,
+        "endLine": 889,
+        "endChar": 16
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
