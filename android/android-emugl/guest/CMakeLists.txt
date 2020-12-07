@@ -33,7 +33,7 @@ if(NOT BUILDING_FOR_AARCH64)
   target_link_libraries(cutils PUBLIC android-emu-base)
   target_link_libraries(cutils PRIVATE log emugl_base)
   android_target_compile_options(
-    cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr
+      cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr -Wno-format
                          -Wno-macro-redefined)
   target_compile_definitions(cutils PRIVATE -D__ANDROID_API__=28)
 

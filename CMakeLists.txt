@@ -300,6 +300,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # clang-cl != clang-lin != clang-darwin
   add_c_flag("-Wno-unknown-warning-option")
   add_c_flag("-Wno-unknown-argument")
+
+  # grpc does some magic.
+  add_c_flag("-Wno-non-c-typedef-for-linkage")
 endif()
 
 if(DARWIN_X86_64)
@@ -661,6 +664,7 @@ android_target_compile_options(
   "-Wno-microsoft-include"
   "-Wno-address-of-packed-member"
   "-Wno-address-of"
+  "-Wno-gnu-variable-sized-type-not-at-end"
   "-mms-bitfields"
   "-mcx16"
   "-Wno-implicit-int-float-conversion"
@@ -712,6 +716,7 @@ android_target_compile_options(
   "-Wno-tautological-pointer-compare"
   "-Wno-unused-variable"
   "-Wno-implicit-int-float-conversion"
+  "-Wno-gnu-variable-sized-type-not-at-end"
   "-Wno-reorder-init-list")
 android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE
                               "${TCMALLOC_LIBRARIES} -lutil")
