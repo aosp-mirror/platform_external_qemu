@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "269e3d44_27bd6551",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-07T19:17:27Z",
+      "side": 1,
+      "message": "Do not submit before presubmit is green ;-)",
+      "revId": "c8143608a082be2f3b4c5e6d402a6c438c448eaf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
