@@ -13,12 +13,16 @@
 // limitations under the License.
 #include "android/emulation/control/utils/ScreenshotUtils.h"
 
-#include <assert.h>  // for assert
+#include <assert.h>                                   // for assert
+#include <math.h>                                     // for fabs
+#include <array>                                      // for array
+#include <ostream>                                    // for operator<<, bas...
+#include <utility>                                    // for make_pair, pair
 
-#include <array>    // for array
-#include <utility>  // for pair
-
-#include "android/base/Log.h"  // for LogStream, LOG, LogMessage
+#include "android/base/Log.h"                         // for LogStreamVoidify
+#include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
+#include "android/hw-sensors.h"                       // for ANDROID_SENSOR_...
+#include "android/physics/GlmHelpers.h"               // for vecNearEqual
 
 namespace android {
 namespace emulation {
@@ -105,6 +109,34 @@ Rotation_SkinRotation ScreenshotUtils::coarseRotation(double zaxis) {
     }
 
     return Rotation::PORTRAIT;
+}
+
+Rotation_SkinRotation ScreenshotUtils::deriveRotation(
+        const QAndroidSensorsAgent* sensorAgent) {
+    glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
+    glm::vec3 device_accelerometer;
+    sensorAgent->getSensor(ANDROID_SENSOR_ACCELERATION, &device_accelerometer.x,
+                           &device_accelerometer.y, &device_accelerometer.z);
+
+    glm::vec3 normalized_accelerometer = glm::normalize(device_accelerometer);
+
+    static const std::array<std::pair<glm::vec3, Rotation_SkinRotation>, 4>
+            directions{std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f),
+                                      Rotation::PORTRAIT),
+                       std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f),
+                                      Rotation::LANDSCAPE),
+                       std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f),
+                                      Rotation::REVERSE_PORTRAIT),
+                       std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f),
+                                      Rotation::REVERSE_LANDSCAPE)};
+    auto coarse_orientation = Rotation::PORTRAIT;
+    for (const auto& v : directions) {
+        if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) < 0.1f) {
+            coarse_orientation = v.second;
+            break;
+        }
+    }
+    return coarse_orientation;
 }
 
 std::tuple<int, int> ScreenshotUtils::resizeKeepAspectRatio(
