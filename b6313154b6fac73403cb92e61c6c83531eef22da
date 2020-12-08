@@ -200,6 +200,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "991b30dc_5844e638",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-08T20:18:41Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a513c900_050051e0",
+      "range": {
+        "startLine": 166,
+        "startChar": 43,
+        "endLine": 167,
+        "endChar": 51
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "15af3cbc_0afee8ae",
@@ -261,6 +285,30 @@
       "side": 1,
       "message": "Is it not sufficient to check the request before attempting to act on it? If not, can\u0027t we remember the current display configuration and restore it if the update fails?",
       "parentUuid": "247c2b7b_26cf651c",
+      "range": {
+        "startLine": 170,
+        "startChar": 7,
+        "endLine": 170,
+        "endChar": 42
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c1d2b6a0_65f0b92d",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-08T20:18:41Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "22aa8821_adc4bb34",
       "range": {
         "startLine": 170,
         "startChar": 7,
@@ -473,6 +521,30 @@
       "side": 1,
       "message": "The values of the flags are already documented in https://developer.android.com/reference/android/hardware/display/DisplayManager.\nI don\u0027t see a problem with adding an enum for the flag values and keeping the uint32 type of the flags field.",
       "parentUuid": "c111724b_825cc351",
+      "range": {
+        "startLine": 889,
+        "startChar": 11,
+        "endLine": 889,
+        "endChar": 16
+      },
+      "revId": "b6313154b6fac73403cb92e61c6c83531eef22da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0afbbe54_f2fd1113",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 889,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-08T20:18:41Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a9115906_217b33b6",
       "range": {
         "startLine": 889,
         "startChar": 11,
