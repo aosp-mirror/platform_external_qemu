@@ -13,11 +13,12 @@
 // limitations under the License.
 #pragma once
 
-#include <tuple>  // for tuple
+#include <tuple>                                       // for tuple
 
 #include "android/emulation/control/ScreenCapturer.h"  // for ImageFormat
+#include "android/emulation/control/sensors_agent.h"   // for QAndroidSensor...
 #include "android/skin/rect.h"                         // for SkinRotation
-#include "emulator_controller.pb.h"                    // for ImageFormat_Im...
+#include "emulator_controller.pb.h"                    // for Rotation_SkinR...
 
 namespace android {
 namespace emulation {
@@ -38,9 +39,8 @@ public:
     // representation.
     static SkinRotation translate(Rotation_SkinRotation x);
 
-    // Translates the zaxis rotation ([-180, 180]) to the coarse grained android
-    // rotation.
-    static Rotation_SkinRotation coarseRotation(double zaxis);
+    // Derives the current device rotation from the sensor state
+    static Rotation_SkinRotation deriveRotation(const QAndroidSensorsAgent* sensorAgent);
 
     // Calculates a resize from (w,h) -> (desiredWidth, desiredHeight) while
     // maintaining the aspect ratio. Returns a tuple with the resulting (w,h)

@@ -747,7 +747,11 @@ message Rotation {
     REVERSE_PORTRAIT = 2;  // -180 degrees
     REVERSE_LANDSCAPE = 3; // -90 degrees
   }
-  SkinRotation rotation = 1; // Can be inferred from z-axis as well.
+
+  // The rotation of the device, derived from the sensor state
+  // of the emulator. The derivation reflects how android observes
+  // the rotation state.
+  SkinRotation rotation = 1;
 
   // Specifies the angle of rotation, in degrees [-180, 180]
   double xAxis = 2;
