@@ -211,7 +211,9 @@ int main(int argc, char **argv)
 /////////////////////////////////////////////////////////////
 
 #define  LCD_DENSITY_LDPI      120
+#define  LCD_DENSITY_140       140
 #define  LCD_DENSITY_MDPI      160
+#define  LCD_DENSITY_180       180
 #define  LCD_DENSITY_TVDPI     213
 #define  LCD_DENSITY_HDPI      240
 #define  LCD_DENSITY_280DPI    280
@@ -4516,7 +4518,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 lcd_density = strtol(optarg, (char **) &optarg, 10);
                 switch (lcd_density) {
                     case LCD_DENSITY_LDPI:
+                    case LCD_DENSITY_140:
                     case LCD_DENSITY_MDPI:
+                    case LCD_DENSITY_180:
                     case LCD_DENSITY_TVDPI:
                     case LCD_DENSITY_HDPI:
                     case LCD_DENSITY_280DPI:
@@ -4531,7 +4535,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                         break;
                     default:
                         fprintf(stderr, "qemu: Bad LCD density: %d. Available densities are: "
-                                "120, 160, 213, 240, 280, 320, 360, 400, 420, 440, 480, 560, 640.\n",
+                                "120, 140, 160, 180, 213, 240, 280, 320, 360, 400, 420, 440, 480, 560, 640.\n",
                                 lcd_density);
                         return 1;
                 }
