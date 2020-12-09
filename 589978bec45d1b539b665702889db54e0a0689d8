@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e25ded1f_587f711a",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 785,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-09T23:31:00Z",
+      "side": 1,
+      "message": "multi display -\u003e multi-display",
+      "range": {
+        "startLine": 785,
+        "startChar": 31,
+        "endLine": 785,
+        "endChar": 44
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "46af4b20_5bf144de",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 787,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-09T23:31:00Z",
+      "side": 1,
+      "message": "updatedDisplays is not used until line 816. Move the declaration near line 812.",
+      "range": {
+        "startLine": 787,
+        "startChar": 35,
+        "endLine": 787,
+        "endChar": 50
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ca4f673a_1973d5b8",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 816,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-09T23:31:00Z",
+      "side": 1,
+      "message": "What is the purpose of including the primary display in updatedDisplays?",
+      "range": {
+        "startLine": 816,
+        "startChar": 16,
+        "endLine": 816,
+        "endChar": 58
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d8970efd_9d6ace5b",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-09T23:31:00Z",
+      "side": 1,
+      "message": "Does this call have any side effects if the parameters of the display remain the same?",
+      "range": {
+        "startLine": 822,
+        "startChar": 40,
+        "endLine": 822,
+        "endChar": 55
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3a9a1101_7a58ed22",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 864,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-09T23:31:00Z",
+      "side": 1,
+      "message": "Redundant \"else\"",
+      "range": {
+        "startLine": 864,
+        "startChar": 10,
+        "endLine": 864,
+        "endChar": 16
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dcb77575_e43e0b25",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-09T23:31:00Z",
+      "side": 1,
+      "message": "It looks like we will try to delete the primary display if it is not present in the request.",
+      "range": {
+        "startLine": 867,
+        "startChar": 16,
+        "endLine": 869,
+        "endChar": 17
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "208ea82a_d0ce69f9",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-09T23:31:00Z",
+      "side": 1,
+      "message": "multi display -\u003e multi-display",
+      "range": {
+        "startLine": 164,
+        "startChar": 36,
+        "endLine": 164,
+        "endChar": 49
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7f5d9d23_7412018e",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-09T23:31:00Z",
+      "side": 1,
+      "message": "multi -\u003e multiple\n\nor better\n\nmulti -\u003e configurable secondary",
+      "range": {
+        "startLine": 172,
+        "startChar": 60,
+        "endLine": 172,
+        "endChar": 65
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
