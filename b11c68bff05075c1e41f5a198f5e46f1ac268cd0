@@ -22,6 +22,30 @@
       },
       "revId": "b11c68bff05075c1e41f5a198f5e46f1ac268cd0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9811b136_a0619dcc",
+        "filename": "android/scripts/unix/darwin-aarch64-replace.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-09T01:15:20Z",
+      "side": 1,
+      "message": "Decrease risk of deleting important stuff on user\u0027s machine",
+      "parentUuid": "8d162597_a4b26389",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 32
+      },
+      "revId": "b11c68bff05075c1e41f5a198f5e46f1ac268cd0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
