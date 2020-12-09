@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4a553648_d42d83cf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-09T01:42:11Z",
+      "side": 1,
+      "message": "Verified this replaces, but looks like Studiop is suppressing all emulator messages.",
+      "revId": "e3462aac5f9a98a38ae202410dad04749ceec0b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
