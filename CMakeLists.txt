@@ -201,6 +201,13 @@ set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 prebuilt(Threads)
 
+# Bug: 175067895
+# Copy emulator replacement script to the install dir.
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
+    file(COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/darwin-aarch64-replace.sh
+         DESTINATION ${CMAKE_INSTALL_PREFIX})
+endif()
+
 # Configure OS depdendency licensenses
 if(LINUX_AARCH64)
   message("Cross build aarch64 libstdc++")
