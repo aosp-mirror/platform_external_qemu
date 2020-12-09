@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8d162597_a4b26389",
+        "filename": "android/scripts/unix/darwin-aarch64-replace.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-12-09T01:14:44Z",
+      "side": 1,
+      "message": "any reason not to use \u0027rm -rf\u0027 , Frank ?",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 32
+      },
+      "revId": "b11c68bff05075c1e41f5a198f5e46f1ac268cd0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
