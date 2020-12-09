@@ -74,6 +74,11 @@
 #include <windows.h>
 #endif
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
+
 using android::base::PathUtils;
 using android::base::RunOptions;
 using android::base::ScopedCPtr;
@@ -265,6 +270,26 @@ static void setupCpuAffinity(
 
 static void doLauncherTest(const char* launcherTestArg);
 
+#if defined(__APPLE__)
+// Use "sysctl.proc_translated" to check if running in Rosetta
+// Returns 1 if running in Rosetta
+static int processIsTranslated() {
+    int ret = 0;
+    size_t size = sizeof(ret);
+    // Call the sysctl and if successful return the result
+    if (sysctlbyname("sysctl.proc_translated", &ret, &size, NULL, 0) != -1) {
+        return ret;
+    }
+    // If "sysctl.proc_translated" is not present then must be native
+    if (errno == ENOENT) {
+        return 0;
+    }
+
+    // Fall back to native
+    return 0;
+}
+#endif
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -285,6 +310,21 @@ int main(int argc, char** argv)
     int restartPid = -1;
     bool doDeleteTempDir = false;
     bool checkLoadable = false;
+
+
+#ifdef __APPLE__
+    if (processIsTranslated()) {
+        fprintf(stderr, "%s: process is translated under Rosetta\n", __func__);
+        const auto progDirSystem = android::base::System::get()->getProgramDirectory();
+        fprintf(stderr, "%s: dir: %s\n", __func__, progDirSystem.c_str());
+        const auto cmd = PathUtils::join(progDirSystem, "darwin-aarch64-replace.sh");
+        fprintf(stderr, "%s: cmd to replace: %s\n", __func__, cmd.c_str());
+        fprintf(stderr, "%s: replacing..\n", __func__);
+        system(cmd.c_str());
+        fprintf(stderr, "%s: replacing...done. Please relaunch the emulator.\n", __func__);
+        return -1;
+    }
+#endif
 
     const char* qemu_top_dir = nullptr;
     for (int nn = 1; nn < argc; nn++) {
