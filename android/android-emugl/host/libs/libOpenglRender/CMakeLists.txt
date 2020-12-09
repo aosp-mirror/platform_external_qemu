@@ -151,6 +151,19 @@ android_add_library(
 android_install_shared(StubXlib)
 endif()
 
+if(LINUX_AARCH64)
+
+android_add_library(
+  TARGET pulse
+  SHARED
+  LICENSE Apache-2.0
+  SRC # cmake-format: sortable
+      stub/StubPulse.cpp
+      )
+
+android_install_shared(pulse)
+endif()
+
 
 if(NOT LINUX_AARCH64)
   android_add_library(
