@@ -16,6 +16,24 @@
       "message": "Verified this replaces, but looks like Studiop is suppressing all emulator messages.",
       "revId": "e3462aac5f9a98a38ae202410dad04749ceec0b4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "18e5aac4_4f956f59",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2020-12-09T01:52:02Z",
+      "side": 1,
+      "message": "nit: please put the download part at the top and errors out if that fails\notherwise, the emulator might be in bad shape when download fails.",
+      "parentUuid": "4a553648_d42d83cf",
+      "revId": "e3462aac5f9a98a38ae202410dad04749ceec0b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
