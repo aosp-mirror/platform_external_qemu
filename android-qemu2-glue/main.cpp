@@ -97,6 +97,7 @@ extern "C" {
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
 #include "android-qemu2-glue/emulation/virtio-input-rotary.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
+#include "android/gps/PassiveGpsUpdater.h"
 #include "android/ui-emu-agent.h"
 
 #include <iostream>
@@ -117,6 +118,7 @@ extern "C" {
 #endif
 #include <algorithm>
 #include <string>
+#include <thread>
 
 #include "android/version.h"
 #define D(...)                   \
@@ -133,6 +135,7 @@ static bool is_multi_instance = false;
 
 using namespace android::base;
 using android::base::System;
+using android::emulation::PassiveGpsUpdater;
 namespace fc = android::featurecontrol;
 
 namespace {
@@ -876,6 +879,44 @@ bool handleCpuAccelerationForMinConfig(int argc, char** argv,
     }
 
     return true;
+}
+
+struct HeadLessPassiveGpsData {
+    std::unique_ptr<PassiveGpsUpdater> update;
+    std::string AVDconf;
+    double latitude = {37.422};
+    double longitude{-122.084};
+    double altitude = 0;
+    double velocity{0};
+    double heading{0};
+};
+
+static HeadLessPassiveGpsData s_headlessGpsData;
+
+static void process_gps_passive_data() {
+    // Send a GPS location to the device
+    auto sLocationAgent = getConsoleAgents()->location;
+    if (sLocationAgent && sLocationAgent->gpsSendLoc) {
+        // Send these to the device
+        // lat 37.422 lon -122.084 al 5 vel 0 head 0
+        timeval timeVal = {};
+        gettimeofday(&timeVal, nullptr);
+
+        sLocationAgent->gpsSendLoc(
+                s_headlessGpsData.latitude, s_headlessGpsData.longitude,
+                s_headlessGpsData.altitude, s_headlessGpsData.velocity,
+                s_headlessGpsData.heading, 4, &timeVal);
+    }
+}
+
+static void start_passive_gps_feeder(const std::string& AVDconfPath) {
+    s_headlessGpsData.AVDconf = AVDconfPath;
+    PassiveGpsUpdater::parseLocationConf(
+            s_headlessGpsData.AVDconf, s_headlessGpsData.latitude,
+            s_headlessGpsData.longitude, s_headlessGpsData.altitude,
+            s_headlessGpsData.velocity, s_headlessGpsData.heading);
+    s_headlessGpsData.update.reset(
+            new PassiveGpsUpdater(process_gps_passive_data));
 }
 
 static int startEmulatorWithMinConfig(
@@ -2010,6 +2051,17 @@ extern "C" int main(int argc, char** argv) {
                     "simulator disabled.");
         }
     }
+
+    // for headless mode, start a thread to feed guest gps hal with
+    // passive gps locations; qt emulator already does that in location-page.cpp
+#ifdef CONFIG_HEADLESS
+    if (getConsoleAgents()->location->gpsGetPassiveUpdate()) {
+        dprint("feeding guest with passive gps data, in headless mode");
+        std::string AVDconfPath =
+                PathUtils::join(avdInfo_getContentPath(avd), "AVDconf");
+        start_passive_gps_feeder(AVDconfPath);
+    }
+#endif
 
     // rng
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
