@@ -16,6 +16,24 @@
       "message": "Do you have a bug id?",
       "revId": "e021571ee31cbf67aaee7e4358bf27aa548611e5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "29d9ea18_56d3ce9c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2020-12-10T23:05:00Z",
+      "side": 1,
+      "message": "Done. fxbug.dev/65214 tracks this issue.",
+      "parentUuid": "51542a83_142d853a",
+      "revId": "e021571ee31cbf67aaee7e4358bf27aa548611e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
