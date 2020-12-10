@@ -1,7 +1,5 @@
 project(Android-Emulator)
 cmake_minimum_required(VERSION 3.5)
-message("Android target tag: ${ANDROID_TARGET_TAG}")
-
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(
     WARNING
@@ -27,9 +25,7 @@ else()
 endif()
 
 if (BUILDING_FOR_AARCH64)
-    message(STATUS "Building for aarch64!!!!!!!!!!!!!!!!!!!!!!!!! (top level)")
-else()
-    message(STATUS "NOT Building for aarch64!!!!!!!!!!!!!!!!!!!!!!!!! (top level)")
+    message(STATUS "Building for aarch64!")
 endif()
 
 message(
