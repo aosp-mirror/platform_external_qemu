@@ -871,7 +871,7 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
     }
 
     m_postThread.enqueue(Post(post));
-    if (!postOnlyOnMainThread) {
+    if (!postOnlyOnMainThread || (PostCmd::Screenshot == post.cmd)) {
         m_postThread.waitQueuedItems();
     }
 }
