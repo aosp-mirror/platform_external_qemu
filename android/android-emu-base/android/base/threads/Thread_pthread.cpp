@@ -186,5 +186,17 @@ unsigned long getCurrentThreadId() {
     return *reinterpret_cast<unsigned long*>(&tid);
 }
 
+static unsigned long sUiThreadId = 0;
+
+void setUiThreadId(unsigned long id) {
+    sUiThreadId = id;
+
+}
+
+bool isRunningInUiThread() {
+    if (!sUiThreadId) return false;
+    return sUiThreadId == getCurrentThreadId();
+}
+
 }  // namespace base
 }  // namespace android

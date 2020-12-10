@@ -870,10 +870,31 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
         m_postThread.start();
     }
 
-    m_postThread.enqueue(Post(post));
-    if (!postOnlyOnMainThread) {
-        m_postThread.waitQueuedItems();
+    // If we want to run only in the main thread and we are actually running
+    // in the main thread already, don't use the PostWorker thread. Ideally,
+    // PostWorker should handle this and dispatch directly, but we'll need to
+    // transfer ownership of the thread to PostWorker.
+    // TODO(lfy): do that refactor
+    // For now, this fixes a screenshot issue on macOS.
+    if (postOnlyOnMainThread && (PostCmd::Screenshot == post.cmd) &&
+        emugl::get_emugl_window_operations().isRunningInUiThread()) {
+        post.cb->readPixelsScaled(
+            post.screenshot.screenwidth,
+            post.screenshot.screenheight,
+            post.screenshot.format,
+            post.screenshot.type,
+            post.screenshot.rotation,
+            post.screenshot.pixels);
+    } else {
+        m_postThread.enqueue(Post(post));
+        if (!postOnlyOnMainThread) {
+            m_postThread.waitQueuedItems();
+        } else if (postOnlyOnMainThread && (PostCmd::Screenshot == post.cmd) &&
+            !emugl::get_emugl_window_operations().isRunningInUiThread()) {
+            m_postThread.waitQueuedItems();
+        }
     }
+
 }
 
 void FrameBuffer::setPostCallback(
