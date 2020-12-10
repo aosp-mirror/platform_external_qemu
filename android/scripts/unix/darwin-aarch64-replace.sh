@@ -24,10 +24,10 @@ set -e
 
 # Download the aarch64 emulator
 
-EMULATOR_DOWNLOAD_BASE_NAME="emulator-darwin-aarch64-0.1"
+EMULATOR_DOWNLOAD_BASE_NAME="emulator-darwin-aarch64-0.2"
 rm -rf ${EMULATOR_DOWNLOAD_BASE_NAME}
-echo "curl -L https://github.com/741g/android-emulator-m1-preview/releases/download/0.1/${EMULATOR_DOWNLOAD_BASE_NAME}-engine-only.zip -o ${EMULATOR_DOWNLOAD_BASE_NAME}.zip"
-curl -L https://github.com/741g/android-emulator-m1-preview/releases/download/0.1/${EMULATOR_DOWNLOAD_BASE_NAME}-engine-only.zip -o ${EMULATOR_DOWNLOAD_BASE_NAME}.zip && \
+echo "curl -L https://github.com/google/android-emulator-m1-preview/releases/download/0.2/${EMULATOR_DOWNLOAD_BASE_NAME}-engine-only.zip -o ${EMULATOR_DOWNLOAD_BASE_NAME}.zip"
+curl -L https://github.com/google/android-emulator-m1-preview/releases/download/0.2/${EMULATOR_DOWNLOAD_BASE_NAME}-engine-only.zip -o ${EMULATOR_DOWNLOAD_BASE_NAME}.zip && \
 echo "unzip ${EMULATOR_DOWNLOAD_BASE_NAME}.zip" && \
 unzip ${EMULATOR_DOWNLOAD_BASE_NAME}.zip && \
 
@@ -287,5 +287,6 @@ rm ./emulator
 # Copy the emulator over and delete the download
 echo "cp -r ${EMULATOR_DOWNLOAD_BASE_NAME}/* ." && \
 cp -r ${EMULATOR_DOWNLOAD_BASE_NAME}/* .
+
 rm -rf ${EMULATOR_DOWNLOAD_BASE_NAME}
 rm -rf ${EMULATOR_DOWNLOAD_BASE_NAME}*.zip
