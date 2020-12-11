@@ -126,6 +126,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/multi-display-page.cpp
     android/skin/qt/extended-pages/network-connectivity-manager.cpp
     android/skin/qt/extended-pages/perfstats-page.cpp
+    android/skin/qt/extended-pages/visual-metrics-page.cpp
     android/skin/qt/extended-pages/record-and-playback-page.cpp
     android/skin/qt/extended-pages/record-macro-edit-dialog.cpp
     android/skin/qt/extended-pages/record-macro-page.cpp
@@ -154,6 +155,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/native-keyboard-event-handler.cpp
     android/skin/qt/OverlayMessageCenter.cpp
     android/skin/qt/perf-stats-3d-widget.cpp
+    android/skin/qt/visual-metrics-widget.cpp
     android/skin/qt/poster-image-well.cpp
     android/skin/qt/posture-selection-dialog.cpp
     android/skin/qt/qt-ui-commands.cpp
@@ -212,6 +214,7 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/telephony-page.ui
     android/skin/qt/extended-pages/tv-remote-page.ui
     android/skin/qt/extended-pages/virtual-sensors-page.ui
+    android/skin/qt/extended-pages/visual-metrics-page.ui
     android/skin/qt/extended.ui
     android/skin/qt/poster-image-well.ui
     android/skin/qt/postureselectiondialog.ui
@@ -301,6 +304,7 @@ if(NOT QTWEBENGINE)
   message(STATUS "Webengine disabled.")
   set(emulator-libui_darwin-x86_64_src
       android/skin/qt/mac-native-window.mm
+      android/skin/qt/mac-display-stream.mm
       android/skin/qt/mac-native-event-filter.mm
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows_msvc-x86_64_src
@@ -315,6 +319,7 @@ else()
       android/skin/qt/extended-pages/location-page.ui
       android/skin/qt/mac-native-event-filter.mm
       android/skin/qt/mac-native-window.mm
+      android/skin/qt/mac-display-stream.mm
       android/skin/qt/websockets/websocketclientwrapper.cpp
       android/skin/qt/websockets/websockettransport.cpp)
   set(emulator-libui_windows_msvc-x86_64_src
@@ -398,9 +403,11 @@ android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
 android_target_link_libraries(emulator-libui linux-aarch64 PRIVATE -lX11 -lxcb
                                                                    -lXau)
 android_target_link_libraries(emulator-libui darwin-x86_64
-                              PRIVATE "-framework Carbon")
+                              PRIVATE "-framework Carbon"
+                                      "-framework IOSurface")
 android_target_link_libraries(emulator-libui darwin-aarch64
-                              PRIVATE "-framework Carbon")
+                              PRIVATE "-framework Carbon"
+                                      "-framework IOSurface")
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(emulator-libui windows_msvc-x86_64
                               PUBLIC dirent-win32)

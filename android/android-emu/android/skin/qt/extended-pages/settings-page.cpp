@@ -26,6 +26,7 @@
 #include "android/skin/qt/FramelessDetector.h"              // for Frameless...
 #include "android/skin/qt/extended-pages/common.h"          // for getSelect...
 #include "android/skin/qt/extended-pages/perfstats-page.h"  // for PerfStats...
+#include "android/skin/qt/extended-pages/visual-metrics-page.h"  // for PerfStats...
 #include "android/skin/qt/qt-settings.h"                    // for SaveSnaps...
 #include "android/skin/qt/raised-material-button.h"         // for RaisedMat...
 #include "android/skin/qt/stylesheet.h"                     // for fontStyle...
@@ -682,6 +683,18 @@ void SettingsPage::on_perfstatsButton_pressed() {
     }
     mPerfStatsPage->show();
     setFrameOnTop(mPerfStatsPage.get(), true);
+}
+
+void SettingsPage::on_visualMetricsButton_pressed() {
+    if (!mVisualMetricsPage.get()) {
+        const double densityFactor = devicePixelRatioF();
+        QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
+        styleString += Ui::stylesheetForTheme(getSelectedTheme());
+        mVisualMetricsPage.reset(new VisualMetricsPage(nullptr));
+        mVisualMetricsPage->setStyleSheet(styleString);
+    }
+    mVisualMetricsPage->show();
+    setFrameOnTop(mVisualMetricsPage.get(), true);
 }
 
 void SettingsPage::on_set_clipboardSharing_toggled(bool checked) {
