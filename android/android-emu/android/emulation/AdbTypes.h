@@ -46,6 +46,9 @@ struct AdbGuestAgent {
     // startListening() was called on the AdbHostAgent.
     virtual void onHostConnection(android::base::ScopedSocket&& socket,
                                   AdbPortType portType) = 0;
+
+    // Resets the current ADB guest pipe connection.
+    virtual void resetActiveGuestPipeConnection() = 0;
 };
 
 // AdbHostAgent is an abstract class to the code that actually
