@@ -15,19 +15,32 @@
 */
 
 #include "MultiDisplay.h"
-#include "android/avd/info.h"
-#include "android/base/LayoutResolver.h"
-#include "android/base/files/StreamSerializing.h"
-#include "android/cmdline-option.h"
-#include "android/emulation/MultiDisplayPipe.h"
-#include "android/emulation/control/adb/AdbInterface.h"
-#include "android/emulator-window.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
-#include "android/hw-sensors.h"
-#include "android/skin/winsys.h"
 
-#include <set>
+#include <stddef.h>                                      // for size_t
+#include <algorithm>                                     // for max
+#include <cstdint>                                       // for uint32_t
+#include <ostream>                                       // for operator<<
+#include <set>                                           // for set
+#include <string>                                        // for string, stoi
+#include <unordered_map>                                 // for unordered_map
+#include <utility>                                       // for pair, make_pair
+#include <vector>                                        // for vector
+
+#include "android/base/LayoutResolver.h"                 // for resolveLayout
+#include "android/base/Log.h"                            // for LogStreamVoi...
+#include "android/base/files/Stream.h"                   // for Stream
+#include "android/base/files/StreamSerializing.h"        // for loadCollection
+#include "android/cmdline-option.h"                      // for android_cmdL...
+#include "android/emulation/MultiDisplayPipe.h"          // for MultiDisplay...
+#include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
+#include "android/emulator-window.h"                     // for emulator_win...
+#include "android/featurecontrol/FeatureControl.h"       // for isEnabled
+#include "android/featurecontrol/Features.h"             // for MultiDisplay
+#include "android/globals.h"                             // for android_hw
+#include "android/hw-sensors.h"                          // for android_fold...
+#include "android/recording/screen-recorder.h"           // for RecorderStates
+#include "android/skin/file.h"                           // for SkinLayout
+#include "android/skin/rect.h"                           // for SKIN_ROTATION_0
 
 using android::base::AutoLock;
 
@@ -575,31 +588,31 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h
     if (dpi < 120 || dpi > 640) {
         mWindowAgent->showMessage("dpi should be between 120 and 640",
                                   WINDOW_MESSAGE_ERROR, 1000);
-        fprintf(stderr, "dpi should be between 120 and 640\n");
+        LOG(ERROR) << "dpi should be between 120 and 640";
         return false;
     }
     if (w < 320 * dpi / 160 || h < 320 * dpi / 160) {
         mWindowAgent->showMessage("width and height should be >= 320dp",
                                   WINDOW_MESSAGE_ERROR, 1000);
-        fprintf(stderr, "width and height should be >= 320dp\n");
+        LOG(ERROR) << "width and height should be >= 320dp";
         return false;
     }
     if (!((w <= 4096 && h <= 2160) || (w <= 2160 && h <= 4096))) {
         mWindowAgent->showMessage("resolution should not exceed 4k (4096*2160)",
                                   WINDOW_MESSAGE_ERROR, 1000);
-        fprintf(stderr, "resolution should not exceed 4k (4096*2160)\n");
+        LOG(ERROR) << "resolution should not exceed 4k (4096*2160)";
         return false;
     }
     if (w * 21 < h * 9 || w * 9 > h * 21) {
         mWindowAgent->showMessage("Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)",
                                   WINDOW_MESSAGE_ERROR, 1000);
-        fprintf(stderr, "Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)\n");
+        LOG(ERROR) << "Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)";
         return false;
     }
     if (id > s_maxNumMultiDisplay) {
         mWindowAgent->showMessage("Display index cannot be more than 3",
                                   WINDOW_MESSAGE_ERROR, 1000);
-        fprintf(stderr, "Display index cannot be more than 3\n");
+        LOG(ERROR) << "Display index cannot be more than 3";
         return false;
     }
     return true;

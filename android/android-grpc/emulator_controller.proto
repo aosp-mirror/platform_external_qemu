@@ -160,6 +160,27 @@ service EmulatorController {
 
   // Gets the state of the virtual machine.
   rpc getVmState(google.protobuf.Empty) returns (VmRunState) {}
+
+  // Atomically changes the current multi display configuration.
+  // After this call the given display configurations will be activated. You
+  // can only update secondary displays. Displays with id 0 will be ignored.
+  //
+  // This call can result in the removal or addition of secondary displays, the final
+  // display state can be observed by the returned configuration.
+  //
+  // The following gRPC error codes can be returned:
+  // -  unimplemented (code 14) if the AVD does NOT support multi displays.
+  // -  aborted (code 10) if:
+  //     - The same display id is defined multiple times.
+  //     - The display configurations are outside valid ranges
+  //       (see DisplayConfiguration)
+  //     - Internal emulator failure.
+  rpc setDisplayConfigurations(DisplayConfigurations)
+      returns (DisplayConfigurations) {}
+
+  // Returns all currently valid logical displays.
+  rpc getDisplayConfigurations(google.protobuf.Empty)
+      returns (DisplayConfigurations) {}
 }
 
 // A Run State that describes the state of the Virtual Machine.
@@ -848,4 +869,101 @@ message SmsMessage {
 
   // A utf8 encoded text message that should be delivered.
   string text = 2;
+}
+
+// A DisplayConfiguration describes a primary or secondary
+// display available to the emulator. The screen aspect ratio
+// cannot be longer (or wider) than 21:9 (or 9:21). Screen sizes
+// larger than 4k will be rejected.
+//
+// Common configurations (w x h) are:
+// - 480p  (480x720)   142 dpi
+// - 720p  (720x1280)  213 dpi
+// - 1080p (1080x1920) 320 dpi
+// - 4K  (2160x3840) 320 dpi
+// - 4K  (2160x3840) 640 dpi (upscaled)
+//
+// The behavior of the virtual display depends on the flags that are provided to
+// this method. By default, virtual displays are created to be private,
+// non-presentation and unsecure.
+message DisplayConfiguration {
+
+  // These are the set of known android flags and their respective values.
+  // you can combine the int values to (de)construct the flags field below.
+  enum DisplayFlags {
+    DISPLAYFLAGS_UNSPECIFIED = 0;
+
+    // When this flag is set, the virtual display is public.
+    // A public virtual display behaves just like most any other display
+    // that is connected to the system such as an external or wireless
+    // display. Applications can open windows on the display and the system
+    // may mirror the contents of other displays onto it. see:
+    // https://developer.android.com/reference/android/hardware/display/DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC
+    VIRTUAL_DISPLAY_FLAG_PUBLIC = 1;
+
+    // When this flag is set, the virtual display is registered as a
+    // presentation display in the presentation display category.
+    // Applications may automatically project their content to presentation
+    // displays to provide richer second screen experiences.
+    // https://developer.android.com/reference/android/hardware/display/DisplayManager#VIRTUAL_DISPLAY_FLAG_PRESENTATION
+    VIRTUAL_DISPLAY_FLAG_PRESENTATION = 2;
+
+    // When this flag is set, the virtual display is considered secure as
+    // defined by the Display#FLAG_SECURE display flag. The caller promises
+    // to take reasonable measures, such as over-the-air encryption, to
+    // prevent the contents of the display from being intercepted or
+    // recorded on a persistent medium.
+    // see:
+    // https://developer.android.com/reference/android/hardware/display/DisplayManager#VIRTUAL_DISPLAY_FLAG_SECURE
+    VIRTUAL_DISPLAY_FLAG_SECURE = 4;
+
+    // This flag is used in conjunction with VIRTUAL_DISPLAY_FLAG_PUBLIC.
+    // Ordinarily public virtual displays will automatically mirror the
+    // content of the default display if they have no windows of their own.
+    // When this flag is specified, the virtual display will only ever show
+    // its own content and will be blanked instead if it has no windows. See
+    // https://developer.android.com/reference/android/hardware/display/DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+    VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY = 8;
+
+    // Allows content to be mirrored on private displays when no content is
+    // being shown.
+    // This flag is mutually exclusive with
+    // VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY. If both flags are specified
+    // then the own-content only behavior will be applied.
+    // see:
+    // https://developer.android.com/reference/android/hardware/display/DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR)
+    VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR = 16;
+  }
+
+  // The width of the display, restricted to:
+  // 320 * (dpi / 160) <= width
+  uint32 width = 1;
+
+  // The heigh of the display, restricted to:
+  // * 320 * (dpi / 160) <= height
+  uint32 height = 2;
+
+  // The pixel density (dpi).
+  // See https://developer.android.com/training/multiscreen/screendensities
+  // for details. This value shoud be in the range [120, ..., 640]
+  uint32 dpi = 3;
+
+  // A combination of virtual display flags. These flags can be constructed
+  // by combining the DisplayFlags enum described above.
+  //
+  // The behavior of the virtual display depends on the flags. By default
+  // virtual displays are created to be private, non-presentation and
+  // unsecure.
+  uint32 flags = 4;
+
+  // The id of the display.
+  // The primary (default) display has the display ID of 0.
+  // A secondary display has a display ID not 0.
+  //
+  // The id can be used to get or stream a screenshot.
+  uint32 display = 5;
+}
+
+message DisplayConfigurations {
+  repeated DisplayConfiguration displays = 1;
 }
