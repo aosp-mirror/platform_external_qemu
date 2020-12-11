@@ -617,8 +617,7 @@ public:
         mAgents->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_ROTATION,
                                                &xaxis, &yaxis, &zaxis,
                                                PARAMETER_VALUE_TYPE_CURRENT);
-
-        auto rotation = ScreenshotUtils::coarseRotation(zaxis);
+        auto rotation = ScreenshotUtils::deriveRotation(mAgents->sensors);
 
         // Calculate the desired rotation and width we should use..
         int desiredWidth = request->width();
