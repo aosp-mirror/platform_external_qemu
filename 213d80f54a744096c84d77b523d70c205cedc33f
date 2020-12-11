@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "39ff6ab8_71525f20",
+        "filename": "mac.source.properties",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1368821
+      },
+      "writtenOn": "2020-12-11T21:57:35Z",
+      "side": 1,
+      "message": "all of these should be 30.4.0",
+      "range": {
+        "startLine": 2,
+        "startChar": 13,
+        "endLine": 2,
+        "endChar": 19
+      },
+      "revId": "213d80f54a744096c84d77b523d70c205cedc33f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
