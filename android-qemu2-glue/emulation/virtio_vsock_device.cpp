@@ -476,9 +476,9 @@ private:
         return isVqFull;
     }
 
-    void vqWriteOpHostToGuest(const struct virtio_vsock_hdr *request,
-                              const enum virtio_vsock_op op,
-                              const VSockStream *stream) {
+    void vqWriteReplyOpHostToGuest(const struct virtio_vsock_hdr *request,
+                                   const enum virtio_vsock_op op,
+                                   const VSockStream *stream) {
         const uint32_t flags = (op == VIRTIO_VSOCK_OP_SHUTDOWN) ?
             (VIRTIO_VSOCK_SHUTDOWN_RCV | VIRTIO_VSOCK_SHUTDOWN_SEND) : 0;
 
@@ -510,26 +510,26 @@ private:
             case DstPort::Data: {
                     auto stream = createStreamLocked(request);
                     if (stream) {
-                        vqWriteOpHostToGuest(request, VIRTIO_VSOCK_OP_RESPONSE, &*stream);
+                        vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RESPONSE, &*stream);
                     } else {
                         fprintf(stderr, "%s:%d {src_port=%u dst_port=%u} could not create "
                                 "the stream - already exists\n",
                                 __func__, __LINE__, request->src_port, request->dst_port);
-                        vqWriteOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
+                        vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
                     }
                 }
                 break;
 
             case DstPort::Ping:
                 vqHostToGuestImpl();
-                vqWriteOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
+                vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
                 break;
 
             default:
                 fprintf(stderr, "%s:%d {src_port=%u dst_port=%u} unexpected dst_port\n",
                         __func__, __LINE__, request->src_port, request->dst_port);
 
-                vqWriteOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
+                vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
                 break;
             }
         } else {
@@ -537,7 +537,7 @@ private:
             if (stream) {
                 switch (request->op) {
                 case VIRTIO_VSOCK_OP_SHUTDOWN:
-                    vqWriteOpHostToGuest(request, VIRTIO_VSOCK_OP_SHUTDOWN, &*stream);
+                    vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_SHUTDOWN, &*stream);
                     closeStreamLocked(std::move(stream));
                     break;
 
@@ -548,7 +548,7 @@ private:
                 case VIRTIO_VSOCK_OP_RW:
                     stream->setGuestPos(request->buf_alloc, request->fwd_cnt);
                     stream->writeGuestToHost(request + 1, request->len);
-                    vqWriteOpHostToGuest(request, VIRTIO_VSOCK_OP_CREDIT_UPDATE, &*stream);
+                    vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_CREDIT_UPDATE, &*stream);
                     break;
 
                 case VIRTIO_VSOCK_OP_CREDIT_UPDATE:
@@ -558,7 +558,7 @@ private:
 
                 case VIRTIO_VSOCK_OP_CREDIT_REQUEST:
                     stream->setGuestPos(request->buf_alloc, request->fwd_cnt);
-                    vqWriteOpHostToGuest(request, VIRTIO_VSOCK_OP_CREDIT_UPDATE, &*stream);
+                    vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_CREDIT_UPDATE, &*stream);
                     break;
 
                 default:
@@ -566,7 +566,7 @@ private:
                             __func__, __LINE__,
                             op2str(request->op), request->op);
 
-                    vqWriteOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, &*stream);
+                    vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, &*stream);
                     closeStreamLocked(std::move(stream));
                     break;
                 }
@@ -575,7 +575,7 @@ private:
                         __func__, __LINE__,
                         request->src_port, request->dst_port, op2str(request->op), request->op);
 
-                vqWriteOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
+                vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
             }
         }
     }
