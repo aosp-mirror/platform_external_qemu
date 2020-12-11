@@ -1083,8 +1083,42 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
     }
 }
 void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
-    handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
-                     event->pos(), event->globalPos());
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::VirtioMouse) &&
+        !android_cmdLineOptions->no_mouse_reposition) {
+        // Block all the incoming mouse events if mouse is being moved to
+        // center of the screen.
+        if (!mMouseRepositioning) {
+            handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
+                             event->pos(), event->globalPos());
+        }
+
+        if (mMouseGrabbed) {
+            QRect mouseRect(mContainer.rect().center() -
+                                    QPoint(mContainer.rect().width() * 0.35f,
+                                           mContainer.rect().height() * 0.35f),
+                            mContainer.rect().center() +
+                                    QPoint(mContainer.rect().width() * 0.35f,
+                                           mContainer.rect().height() * 0.35f));
+            // There may be multiple events to be handled when the mouse is
+            // repositioned to the center of the window, thus we block all the
+            // incoming mouseMoveEvents until the mouse position is completely
+            // within the |mouseRect|.
+            if (!mouseRect.contains(event->pos())) {
+                if (!mMouseRepositioning) {
+                    mMouseRepositioning = true;
+                    QCursor::setPos(
+                            mContainer.mapToGlobal(mContainer.rect().center()));
+                    mPrevMousePosition = mContainer.rect().center();
+                }
+            } else {
+                mMouseRepositioning = false;
+            }
+        }
+    } else {
+        handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
+                         event->pos(), event->globalPos());
+    }
 }
 
 void EmulatorQtWindow::leaveEvent(QEvent* event) {
@@ -1102,19 +1136,30 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
         !mMouseGrabbed) {
         if (mPromptMouseRestoreMessageBox) {
             QMessageBox msgBox;
-            msgBox.setText(
+            QString text =
                     "You have clicked the mouse inside the Emulator "
                     "display. This will cause Emulator to capture the "
                     "host mouse pointer and the keyboard, which will "
                     "make them unavailable to other host applications."
-                    "\n\n You can press "
+                    "<br><br>You can press "
 #ifdef __APPLE__
                     "Cmd+R"
 #else
                     "Ctrl+R"
 #endif
                     " to uncapture the keyboard and "
-                    "mouse and return to normal operation.");
+                    "mouse and return to normal operation.";
+
+            if (!android_cmdLineOptions->no_mouse_reposition) {
+                text.append(
+                        "<br><br>On remote desktops, mouse might not work "
+                        "properly. Please enable relative mouse mode on "
+                        "your remote desktop software, or add "
+                        "\"--no-mouse-reposition\" argument to your "
+                        "emulator arguments.");
+            }
+            msgBox.setText(text);
+            msgBox.setTextFormat(Qt::TextFormat::AutoText);
             msgBox.exec();
             mPromptMouseRestoreMessageBox = false;
         }

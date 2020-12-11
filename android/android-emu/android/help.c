@@ -1944,6 +1944,13 @@ static void help_no_hidpi_scaling(stralloc_t* out) {
     PRINTF("  Disable HiDPI scaling of guest display on macOS devices.\n");
 }
 
+static void help_no_mouse_reposition(stralloc_t* out) {
+    PRINTF("  Do not reposition the mouse to emulator window center if mouse\n"
+           "  pointer gets out of the window.\n"
+           "  Enable this if experiencing mouse issues on remote desktops\n"
+           "  like VNC or Chrome remote desktop.\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
