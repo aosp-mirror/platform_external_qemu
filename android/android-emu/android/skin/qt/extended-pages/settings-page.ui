@@ -26,7 +26,7 @@
     <cursorShape>ArrowCursor</cursorShape>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="general_tab">
     <attribute name="title">
@@ -1304,6 +1304,35 @@
      </property>
      <property name="text">
       <string>PERFORMANCE STATS</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="visualMetricsButton">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>410</y>
+       <width>280</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>VISUAL METRICS</string>
      </property>
      <property name="flat">
       <bool>true</bool>
