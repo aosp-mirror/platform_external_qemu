@@ -2119,10 +2119,17 @@ extern "C" int main(int argc, char** argv) {
     }
     args.add(dataDir);
 
-// Audio enable hda by default for x86 and x64 platforms
+    // Audio enable hda by default for x86 and x64 platforms
+    // (Or all targets incl. ARM if api level >= 30)
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
-    args.add2("-soundhw", "hda");
+    bool targetIsX86 = true;
+#else
+    bool targetIsX86 = false;
 #endif
+
+    if (apiLevel >= 30 || targetIsX86) {
+        args.add2("-soundhw", "hda");
+    }
 
     /* append extra qemu parameters if any */
     for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; idx++) {
