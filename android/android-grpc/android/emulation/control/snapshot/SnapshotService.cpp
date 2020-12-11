@@ -271,7 +271,9 @@ public:
             if (msg.format() == SnapshotPackage::TARGZ) {
                 stream = std::make_unique<GzipInputStream>(msg.path().c_str());
             } else {
-                stream = std::make_unique<std::ifstream>(msg.path().c_str());
+                stream = std::make_unique<std::ifstream>(
+                        msg.path().c_str(),
+                        std::ios_base::in | std::ios_base::binary);
             }
         }
 
