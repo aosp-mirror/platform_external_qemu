@@ -10,7 +10,7 @@ android_add_library(
 target_include_directories(log PRIVATE android/android-emugl/guest
                                        android/android-emu)
 target_link_libraries(log PRIVATE emugl_base)
-if(NOT LINUX_AARCH64)
+if(NOT BUILDING_FOR_AARCH64)
   # The cutils library.
   android_add_library(
     TARGET cutils
@@ -33,7 +33,7 @@ if(NOT LINUX_AARCH64)
   target_link_libraries(cutils PUBLIC android-emu-base)
   target_link_libraries(cutils PRIVATE log emugl_base)
   android_target_compile_options(
-    cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr
+      cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr -Wno-format
                          -Wno-macro-redefined)
   target_compile_definitions(cutils PRIVATE -D__ANDROID_API__=28)
 
@@ -104,7 +104,10 @@ if(NOT LINUX_AARCH64)
   target_include_directories(
     vulkanhal_unittests
     PRIVATE ${ANDROID_EMUGL_DIR}/host/include ${ANDROID_EMUGL_DIR}/combined
-            ${ANDROID_EMUGL_DIR}/guest/grallocusage)
+            ${ANDROID_EMUGL_DIR}/guest/grallocusage
+            ${GOLDFISH_EMUGL_DIR}/shared/OpenglCodecCommon
+            ${GOLDFISH_EMUGL_DIR}/system
+            ${GOLDFISH_EMUGL_DIR}/system/renderControl_enc)
   target_link_libraries(vulkanhal_unittests PRIVATE grallocusage aemugraphics
                         PRIVATE android-emu-test-launcher)
   target_compile_definitions(vulkanhal_unittests PRIVATE -D__ANDROID_API__=28)

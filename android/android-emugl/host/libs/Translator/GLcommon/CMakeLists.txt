@@ -24,7 +24,7 @@ android_add_library(
 target_include_directories(
   GLcommon PUBLIC ${ANDROID_EMUGL_DIR}/host/libs/Translator/include
                   ${ANDROID_EMUGL_DIR}/shared ${ANDROID_EMUGL_DIR}/host/include)
-target_link_libraries(GLcommon PUBLIC android-emu-base astc-codec)
+target_link_libraries(GLcommon PUBLIC android-emu astc-codec)
 target_compile_options(GLcommon PRIVATE -fvisibility=hidden)
 target_compile_options(GLcommon PUBLIC -Wno-inconsistent-missing-override)
 target_link_libraries(GLcommon PRIVATE emugl_base)

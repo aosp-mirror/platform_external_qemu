@@ -24,21 +24,43 @@
 #include "FrameBuffer.h"
 
 #include <unordered_map>
+#include <unordered_set>
 
+using android::base::AutoLock;
 using android::base::Stream;
+using android::base::Lock;
 
 static thread_local RenderThreadInfo* s_threadInfoPtr;
 
+struct RenderThreadRegistry {
+    Lock lock;
+    std::unordered_set<RenderThreadInfo*> threadInfos;
+};
+
+static RenderThreadRegistry sRegistry;
+
 RenderThreadInfo::RenderThreadInfo() {
     s_threadInfoPtr = this;
+    AutoLock lock(sRegistry.lock);
+    sRegistry.threadInfos.insert(this);
 }
 
 RenderThreadInfo::~RenderThreadInfo() {
     s_threadInfoPtr = nullptr;
+    AutoLock lock(sRegistry.lock);
+    sRegistry.threadInfos.erase(this);
 }
 
 RenderThreadInfo* RenderThreadInfo::get() {
     return s_threadInfoPtr;
+}
+
+// Loop over all active render thread infos. Takes the global render thread info lock.
+void RenderThreadInfo::forAllRenderThreadInfos(std::function<void(RenderThreadInfo*)> f) {
+    AutoLock lock(sRegistry.lock);
+    for (auto info: sRegistry.threadInfos) {
+        f(info);
+    }
 }
 
 void RenderThreadInfo::onSave(Stream* stream) {

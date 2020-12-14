@@ -575,7 +575,7 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
     if (!mHostSocket.valid()) {
         return;
     }
-    if (needsHubTranslation()) {
+    if (mAdbHub) {
         int hubWakeFlags = mAdbHub->pipeWakeFlags();
         // If guest read/write would block, signal host socket event to
         // clear/fill the internal buffer.
@@ -644,6 +644,7 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
 
 void AdbGuestPipe::resetConnection() {
     D("%s: [%p] reset connection\n", __func__, this);
+    stopSocketTraffic();
     service()->hostCloseSocket(mHostSocket.fd());
     mHostSocket.reset();
     mState = State::ClosedByHost;
@@ -676,7 +677,7 @@ const char* AdbGuestPipe::toString(AdbGuestPipe::State state) {
 void AdbGuestPipe::onHostSocketEvent(unsigned events) {
     DD("%s: [%p] events=%x (%u)", __func__, this, events, events);
 
-    if (needsHubTranslation()) {
+    if (mAdbHub) {
         mAdbHub->onHostSocketEvent(mFdWatcher->fd(), events, [this]() {
             mState = State::ClosedByHost;
             resetConnection();

@@ -101,10 +101,20 @@ static void user_event_mouse(int dx,
                              int displayId) {
     if (VERBOSE_CHECK(keys))
         printf(">> MOUSE [%d %d %d : 0x%04x]\n", dx, dy, dz, buttonsState);
-    if (feature_is_enabled(kFeature_VirtioInput))
+    if (feature_is_enabled(kFeature_VirtioInput) &&
+        !feature_is_enabled(kFeature_VirtioMouse))
         android_virtio_kbd_mouse_event(dx, dy, dz, buttonsState, displayId);
     else
         kbd_mouse_event(dx, dy, dz, buttonsState);
+}
+
+static void user_event_mouse_wheel(int dx, int dy, int displayId) {
+    if (VERBOSE_CHECK(keys)) {
+        printf(">> MOUSE WHEEL [%d %d]\n", dx, dy);
+    }
+    if (feature_is_enabled(kFeature_VirtioMouse)) {
+        kbd_mouse_wheel_event(dx, dy);
+    }
 }
 
 static void user_event_rotary(int delta) {
@@ -126,12 +136,12 @@ static const QAndroidUserEventAgent sQAndroidUserEventAgent = {
         .sendKeyCode = user_event_keycode,
         .sendKeyCodes = user_event_keycodes,
         .sendMouseEvent = user_event_mouse,
+        .sendMouseWheelEvent = user_event_mouse_wheel,
         .sendRotaryEvent = user_event_rotary,
         .sendGenericEvent = user_event_generic,
         .sendGenericEvents = user_event_generic_events,
         .onNewUserEvent = on_new_event,
-        .eventsDropped = goldfish_event_drop_count };
-
+        .eventsDropped = goldfish_event_drop_count};
 
 const QAndroidUserEventAgent* const gQAndroidUserEventAgent =
         &sQAndroidUserEventAgent;

@@ -38,7 +38,7 @@
 *[ColorGroup="SliderLabel"]  { color: %%TEXT_COLOR%% }
 *[ColorGroup="SmsBox"] { border: 1px solid %%BOX_COLOR%% }
 *[ColorGroup="HorizDivider"] {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0  %%LARGE_DIVIDER_COLOR%%, stop: 1 %%TAB_SELECTED_COLOR%%);
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0  %%LARGE_DIVIDER_COLOR%%, stop: 1 %%HORIZ_DIVIDER_COLOR%%);
     border: 0px;
 }
 *[ColorGroup="HorizDivider2"] { color: %%TITLE_COLOR%% }
@@ -126,7 +126,7 @@ QPlainTextEdit:disabled, QPlainTextEdit[readOnly=true] {
     background: transparent
 }
 QPlainTextEdit {
-    background: %%TAB_BKG_COLOR%%;
+    background: %%TEXT_INPUT_BKG%%;
     border: 1px solid %%EDIT_COLOR%%;
 }
 QCheckBox::indicator:checked[ColorGroup="Toggle"] {
@@ -200,6 +200,7 @@ QPushButton:pressed[ColorGroup="MajorTab"] {
 QPushButton:checked[ColorGroup="MajorTab"] {
     border: none;
     background: %%TAB_SELECTED_COLOR%%;
+    color: %%MAJOR_TAB_SELECTED_COLOR%%;
 }
 QPushButton:pressed[ColorGroup="Button"] {
     border: none;
@@ -313,17 +314,18 @@ QTabBar[ColorGroup="NoHiddenTabOnDisabled"]::tab:disabled {
 RaisedMaterialButton {
     border-radius: 2px;
     color: %%BUTTON_COLOR%%;
+    border: %%BUTTON_BORDER%%;
 }
 RaisedMaterialButton:pressed {
-    background: %%TAB_DARKENED_COLOR%%;
+    background: %%BUTTON_BKG_PRESSED_COLOR%%;
 }
 RaisedMaterialButton[ColorGroup="RaisedColoredButton"] {
     padding: 0 16px;
     color: %%RAISED_COLORED_COLOR%%;
-    background: %%RAISED_COLORED_BKG_COLOR%%
+    background: %%RAISED_COLORED_BKG_COLOR%%;
 }
 RaisedMaterialButton[ColorGroup="RaisedColoredButton"]:pressed {
-    background: %%RAISED_COLORED_PRESSED_COLOR%%
+    background: %%RAISED_COLORED_PRESSED_COLOR%%;
 }
 QAbstractSpinBox {
     border-top: 0px;

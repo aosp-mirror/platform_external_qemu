@@ -47,9 +47,7 @@ bool TouchEventSender::sendOnThisThread(const TouchEvent* request) {
 }
 
 // Scales an axis to the proper EVDEV value..
-static int scaleAxis(int value,
-                     int min_in,
-                     int max_in) {
+static int scaleAxis(int value, int min_in, int max_in) {
     constexpr int64_t min_out = EV_ABS_MIN;
     constexpr int64_t max_out = EV_ABS_MAX;
     constexpr int64_t range_out = (int64_t)max_out - min_out;
@@ -62,7 +60,6 @@ static int scaleAxis(int value,
 }
 
 void TouchEventSender::doSend(const TouchEvent request) {
-
     // Obtain display width, height for the given display id.
     auto displayId = request.device();
     uint32_t w = 0;
@@ -82,20 +79,25 @@ void TouchEventSender::doSend(const TouchEvent request) {
                          << " that is out of range.";
             continue;
         }
+
+        if (touch.pressure() == 0 && mUsedSlots.count(slot) == 0) {
+            LOG(WARNING) << "Ignorig closure of unused (closed) slot: " << slot;
+            continue;
+        }
+
+        events.push_back({EV_ABS, LINUX_ABS_MT_SLOT, slot, displayId});
+
         // Only register slot if needed.
         if (mUsedSlots.count(slot) == 0 && touch.pressure() != 0) {
             events.push_back(
                     {EV_ABS, LINUX_ABS_MT_TRACKING_ID, slot, displayId});
             mUsedSlots.insert(slot);
+            LOG(INFO) << "Registering " << slot;
         }
 
         // Scale to proper evdev values.
         int dx = scaleAxis(touch.x(), 0, w);
         int dy = scaleAxis(touch.y(), 0, h);
-
-        events.push_back({EV_ABS, LINUX_ABS_MT_SLOT, slot, displayId});
-        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_X, dx, displayId});
-        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_Y, dy, displayId});
 
         if (touch.touch_major()) {
             events.push_back({EV_ABS, LINUX_ABS_MT_TOUCH_MAJOR,
@@ -107,14 +109,16 @@ void TouchEventSender::doSend(const TouchEvent request) {
                               touch.touch_minor(), displayId});
         }
 
+        events.push_back(
+                {EV_ABS, LINUX_ABS_MT_PRESSURE, touch.pressure(), displayId});
+        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_X, dx, displayId});
+        events.push_back({EV_ABS, LINUX_ABS_MT_POSITION_Y, dy, displayId});
+
         // Clean up slot if pressure is 0 (implies finger has been lifted)
         if (touch.pressure() == 0) {
             events.push_back({EV_ABS, LINUX_ABS_MT_TRACKING_ID, MTS_POINTER_UP,
                               displayId});
             mUsedSlots.erase(slot);
-        } else {
-            events.push_back({EV_ABS, LINUX_ABS_MT_PRESSURE, touch.pressure(),
-                              displayId});
         }
     }
 

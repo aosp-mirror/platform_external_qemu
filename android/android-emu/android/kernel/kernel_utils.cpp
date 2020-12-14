@@ -122,7 +122,7 @@ bool android_getKernelVersionSimple(const char* const kernelBits,
 bool android_getKernelVersionDecompress(const char* const kernelBits,
                                         const size_t kernelBitsSize,
                                         KernelVersion* kernelVersion) {
-    static const uint8_t kGZipMagic[] = {0x1f, 0x8b, 0x08, 0x00};
+    static const uint8_t kGZipMagic[] = {0x1f, 0x8b, 0x08};
 
     const char* compressedKernelBits =
        static_cast<const char*>(memmem(kernelBits, kernelBitsSize,

@@ -130,6 +130,20 @@ TEST_F(AdbInterfaceTest, findAdbOnPath) {
 
 TEST_F(AdbInterfaceTest, staleAdbVersion) {
     auto daemon = new FakeAdbDaemon();
+    auto locator = new StaticAdbLocator({{"v1", 1}, {"v2", 2}, {"v3", 3}});
+    auto adb = AdbInterface::Builder()
+                       .setLooper(mLooper)
+                       .setAdbLocator(locator)
+                       .setAdbDaemon(daemon)
+                       .build();
+
+    // We should have selected an ancient adb version as we have no new ones.
+    EXPECT_FALSE(adb->isAdbVersionCurrent());
+}
+
+
+TEST_F(AdbInterfaceTest, noStaleAdbVersion) {
+    auto daemon = new FakeAdbDaemon();
     auto locator = new StaticAdbLocator({{"v1", 1}, {"v2", 2}, {"v3", 40}});
     auto adb = AdbInterface::Builder()
                        .setLooper(mLooper)
@@ -137,8 +151,8 @@ TEST_F(AdbInterfaceTest, staleAdbVersion) {
                        .setAdbDaemon(daemon)
                        .build();
 
-    // We have selected an ancient adb version
-    EXPECT_FALSE(adb->isAdbVersionCurrent());
+    // We should not have selected an ancient adb version
+    EXPECT_TRUE(adb->isAdbVersionCurrent());
 }
 
 TEST_F(AdbInterfaceTest, recentAdbVersion) {

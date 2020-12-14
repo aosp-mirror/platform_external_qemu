@@ -11,6 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#ifdef _MSC_VER
+extern "C" {
+#include "qemu/osdep.h"
+}
+#endif
 #include "android/base/AlignedBuf.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/memory/LazyInstance.h"
@@ -890,6 +895,9 @@ public:
         uint32_t fwkformat = virgl_format_to_fwk_format(args->format);
         mVirtioGpuOps->create_color_buffer_with_handle(
             args->width, args->height, glformat, fwkformat, args->handle);
+        mVirtioGpuOps->set_guest_managed_color_buffer_lifetime(true /* guest manages lifetime */);
+        mVirtioGpuOps->open_color_buffer(
+            args->handle);
     }
 
     int createResource(
@@ -967,6 +975,8 @@ public:
         entry.hvaSize = 0;
         entry.hvaId = 0;
         entry.hvSlot = 0;
+
+        mResources.erase(it);
     }
 
     int attachIov(int resId, iovec* iov, int num_iovs) {

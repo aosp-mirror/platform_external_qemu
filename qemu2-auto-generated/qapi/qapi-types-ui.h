@@ -311,9 +311,11 @@ typedef enum InputButton {
 extern const QEnumLookup InputButton_lookup;
 
 typedef enum InputAxis {
-    INPUT_AXIS_X = 0,
-    INPUT_AXIS_Y = 1,
-    INPUT_AXIS__MAX = 2,
+  INPUT_AXIS_X = 0,
+  INPUT_AXIS_Y = 1,
+  INPUT_AXIS_X_WHEEL = 2,
+  INPUT_AXIS_Y_WHEEL = 3,
+  INPUT_AXIS__MAX = 4,
 } InputAxis;
 
 #define InputAxis_str(val) \

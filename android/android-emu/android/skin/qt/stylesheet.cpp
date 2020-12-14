@@ -28,6 +28,7 @@
 #include <vector>                              // for vector
 
 #include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "android/cmdline-option.h"            // for android_cmdLineOptions
 #include "android/skin/qt/logging-category.h"  // for emu
 
 class QTextStream;
@@ -38,11 +39,12 @@ const char TABLE_BOTTOM_COLOR_VAR[] = "TABLE_BOTTOM_COLOR";
 const char THEME_PATH_VAR[] = "PATH";
 const char THEME_TEXT_COLOR[] = "TEXT_COLOR";
 const char MAJOR_TAB_COLOR_VAR[] = "MAJOR_TAB_COLOR";
+const char MAJOR_TAB_SELECTED_COLOR_VAR[] = "MAJOR_TAB_SELECTED_COLOR";
 const char TAB_BKG_COLOR_VAR[] = "TAB_BKG_COLOR";
 const char TAB_SELECTED_COLOR_VAR[] = "TAB_SELECTED_COLOR";
 const char TABLE_SELECTED_VAR[] = "TABLE_SELECTED";
 const char MACRO_BKG_COLOR_VAR[] = "MACRO_BKG_COLOR";
-
+const char HORIZ_DIVIDER_COLOR_VAR[] = "HORIZ_DIVIDER_COLOR";
 // As of now low density font stylesheet is exactly the same.
 // static QString loDensityFontStylesheet;
 
@@ -250,19 +252,27 @@ private:
     bool mOk;
 };
 
+// There are four theme supported in total: dark, light, android studio dark
+// and android studio light. The latter two themes are only used when emulator
+// is running in embedded mode to match with Android studio.
+
 struct StylesheetValues {
     QString darkStylesheet;
     QString lightStylesheet;
+    QString studioDarkStylesheet;
+    QString studioLightStylesheet;
     QString hiDensityFontStylesheet;
 
-    // These are the colors used in the two themes
+    // These are the colors used in the themes
     QHash<QString, QString> lightValues = {
         {"BOX_COLOR",                       "#e0e0e0"},  // Boundary around SMS text area
         {"BKG_COLOR",                       "#f0f0f0"},  // Main page background
         {"DISABLED_BKG_COLOR","rgba(240,240,240,60%)"},  // Main page background (disabled)
         {"BKG_COLOR_OVERLAY", "rgba(236,236,236,175)"},  // Overlay background
         {"BUTTON_BKG_COLOR",                "#F9F9F9"},  // Background of push buttons
+        {"BUTTON_BKG_PRESSED_COLOR",        "#e6e6e6"},  // Background of push buttons
         {"BUTTON_COLOR",                    "#757575"},  // Text in push buttons
+        {"BUTTON_BORDER",                   "0px solid #FFFFFF"}, //Raise button border
         {"DISABLED_BUTTON_COLOR",           "#bbbbbb"},  // Text in disabled push buttons
         {"DISABLED_PULLDOWN_COLOR",         "#c0c0c0"},  // Text in disabled combo box
         {"DISABLED_TOOL_COLOR",             "#baeae4"},  // Grayed-out tool text
@@ -271,12 +281,14 @@ struct StylesheetValues {
         {"INSTRUCTION_COLOR",               "#91a4ad"},  // Large instruction string
         {"LARGE_DIVIDER_COLOR",    "rgba(0,0,0,2.1%)"},  // Start of large divider's gradient
         {MAJOR_TAB_COLOR_VAR,               "#91a4ad"},  // Text of major tabs
-        {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
+        {MAJOR_TAB_SELECTED_COLOR_VAR,      "#91a4ad"},  // Text of selected major tabs 
+       {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
         {"SCROLL_BKG_COLOR",                "#f6f6f6"},  // Background of scroll bar
         {"SCROLL_HANDLE_COLOR",             "#d9d9d9"},  // Handle of scroller
         {"SNAPSHOT_INFO_BKG",               "#f9f9f9"},  // Background of snapshot description text
-        {TAB_BKG_COLOR_VAR,                 "#ffffff"},  // Background of major tabs
+        {TAB_BKG_COLOR_VAR,                 "#FFFFFF"},  // Background of major tabs
         {TAB_SELECTED_COLOR_VAR,            "#f5f5f5"},  // Background of the selected major tab
+        {HORIZ_DIVIDER_COLOR_VAR,           "#f5f5f5"},  // Horizontal divider in the left Navigation.
         {"TAB_DARKENED_COLOR",              "#e6e6e6"},
         {"TABLE_BOTTOM_COLOR",              "#e0e0e0"},
         {"TABLE_SELECTED",                  "#72a4fb"},  // Background of selected table row
@@ -298,6 +310,7 @@ struct StylesheetValues {
         {"DROP_TARGET_BKG_COLOR", "rgba(0,190,64,10%)"},  // Drop target background color.
         {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
         {"VHAL_PROPERTY_BKG",               "#f2f2f2"},  // Vhal property background color.
+        {"TEXT_INPUT_BKG",                  "#FFFFFF"},  // Background for text input
     };
 
     QHash<QString, QString> darkValues = {
@@ -306,7 +319,9 @@ struct StylesheetValues {
         {"DISABLED_BKG_COLOR","rgba(39,50,56,60%)"},
         {"BKG_COLOR_OVERLAY", "rgba(35,46,52,175)"},
         {"BUTTON_BKG_COLOR",             "#37474f"},
+        {"BUTTON_BKG_PRESSED_COLOR",     "#20292e"},  // Background of push buttons
         {"BUTTON_COLOR",                 "#bec1c3"},
+        {"BUTTON_BORDER",                "0px solid #FFFFFF"}, //Raise button border
         {"DISABLED_BUTTON_COLOR",        "#5f6162"},
         {"DISABLED_PULLDOWN_COLOR",      "#808080"},
         {"DISABLED_TOOL_COLOR",          "#1b5c58"},
@@ -315,12 +330,14 @@ struct StylesheetValues {
         {"INSTRUCTION_COLOR",            "#ffffff"},
         {"LARGE_DIVIDER_COLOR",  "rgba(0,0,0,20%)"},
         {MAJOR_TAB_COLOR_VAR,            "#bdc0c3"},
-        {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
+        {MAJOR_TAB_SELECTED_COLOR_VAR,      "#bdc0c3"}, 
+       {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
         {"SCROLL_BKG_COLOR",             "#333b43"},
         {"SCROLL_HANDLE_COLOR",          "#1d272c"},
         {"SNAPSHOT_INFO_BKG",            "#273238"},
         {TAB_BKG_COLOR_VAR,              "#394249"},
         {TAB_SELECTED_COLOR_VAR,         "#313c42"},
+        {HORIZ_DIVIDER_COLOR_VAR,        "#313c42"},
         {"TAB_DARKENED_COLOR",           "#20292e"},
         {"TABLE_BOTTOM_COLOR",           "#1d272c"},
         {"TABLE_SELECTED",               "#4286f5"},
@@ -342,6 +359,107 @@ struct StylesheetValues {
         {"DROP_TARGET_BKG_COLOR", "rgba(0,190,64,7%)"},
         {THEME_PATH_VAR,                    "dark"},
         {"VHAL_PROPERTY_BKG",            "#394249"},
+        {"TEXT_INPUT_BKG",               "#394249"},  // Background for text input
+ };
+
+    QHash<QString, QString> studioLightValues = {
+        {"BOX_COLOR",                       "#d9d9d9"},  // Boundary around SMS text area
+        {"BKG_COLOR",                       "#F2F2F2"},  // Main page background
+        {"DISABLED_BKG_COLOR","rgba(240,240,240,60%)"},  // Main page background (disabled)
+        {"BKG_COLOR_OVERLAY", "rgba(236,236,236,175)"},  // Overlay background
+        {"BUTTON_BKG_COLOR",                "#FFFFFF"},  // Background of push buttons
+        {"BUTTON_BKG_PRESSED_COLOR",        "#CFCFCF"},  // Background of push buttons
+        {"BUTTON_COLOR",                    "#1D1D1D"},  // Text in push buttons
+        {"BUTTON_BORDER",                   "1px solid #C4C4C4"}, //Raise button border
+       {"DISABLED_BUTTON_COLOR",           "#8C8C8C"},  // Text in disabled push buttons
+        {"DISABLED_BUTTON_BKG_COLOR",       "#F2F2F2"},
+        {"DISABLED_PULLDOWN_COLOR",         "#8C8C8C"},  // Text in disabled combo box
+        {"DISABLED_TOOL_COLOR",             "#8C8C8C"},  // Grayed-out tool text
+        {"DIVIDER_COLOR",                   "#D1D1D1"},  // Line between items
+        {"EDIT_COLOR",                      "#C4C4C4"},  // Line under editable fields
+        {"INSTRUCTION_COLOR",               "#808080"},  // Large instruction string
+        {"LARGE_DIVIDER_COLOR",             "#D1D1D1"},  // Start of large divider's gradient
+        {MAJOR_TAB_COLOR_VAR,               "#1D1D1D"},  // Text of major tabs
+        {MAJOR_TAB_SELECTED_COLOR_VAR,      "#FFFFFF"},  // Text of selected major tabs 
+        {"MAJOR_TITLE_COLOR",               "#FFFFFF"},  // Text of major tab separators
+        {"SCROLL_BKG_COLOR",                "rgba(0,0,0,0%)"},  // Background of scroll bar
+        {"SCROLL_HANDLE_COLOR",             "#999999"},  // Handle of scroller
+        {"SNAPSHOT_INFO_BKG",               "#FFFFFF"},  // Background of snapshot description text
+        {TAB_BKG_COLOR_VAR,                 "#E6EBF0"},  // Background of major tabs
+        {TAB_SELECTED_COLOR_VAR,            "#2675BF"},  // Background of the selected major tab
+        {HORIZ_DIVIDER_COLOR_VAR,           "#D1D1D1"},  // Horizontal divider in the left Navigation.
+        {"TAB_DARKENED_COLOR",              "#1E67CE"},
+        {"TABLE_BOTTOM_COLOR",              "#D1D1D1"},
+        {"TABLE_SELECTED",                  "#87AFDA"},  // Background of selected table row
+        {"TEXT_COLOR",                      "#1D1D1D"},  // Main page text
+        {"INACTIVE_TEXT_COLOR",             "#8C8C8C"},
+        {"TITLE_COLOR",                     "#1D1D1D"},  // Main page titles
+        {"DISABLED_TITLE_COLOR",            "#8C8C8C"},  // Main page titles (disabled color)
+        {"TOOL_COLOR",                      "#4083C9"},  // Checkboxes, sliders, etc.
+        {"TOOL_ON_COLOR",                   "#CFCfCF"},  // Main toolbar button ON
+        {"TREE_WIDGET_BKG",                 "#ffffff"},  // List of Snapshots
+        {"TREE_WIDGET_BORDER",              "#D1D1D1"},
+        {"LIST_WIDGET_BORDER",              "#D1D1D1"},
+        {MACRO_BKG_COLOR_VAR,       "rgba(224,85,85, 70%)"},
+        {"LINK_COLOR",                      "#2470B3"},  // Highlighted link
+        {"PREVIEW_IMAGE_BKG",               "#F2F2F2"},  // Behind snapshot preview image
+        {"RAISED_COLORED_BKG_COLOR",        "#87AFDA"},  // Colored raised button background color.
+        {"RAISED_COLORED_PRESSED_COLOR",    "#87AFDA"},  // Colored raised button pressed color.
+        {"RAISED_COLORED_COLOR",            "#ffffff"},  // Colored raised button text color.
+        {"DROP_TARGET_BKG_COLOR", "rgba(98,181,67,60%)"},  // Drop target background color.
+        {THEME_PATH_VAR,                    "studio-light"},  // Icon directory under images/
+        {"VHAL_PROPERTY_BKG",               "#f2f2f2"},  // Vhal property background color.
+        {"TEXT_INPUT_BKG",                  "#FFFFFF"},  // Background for text input
+    };
+
+    QHash<QString, QString> studioDarkValues = {
+        {"BOX_COLOR",                    "#4A4A4A"},
+        {"BKG_COLOR",                    "#3C3F41"},
+        {"DISABLED_BKG_COLOR","rgba(39,50,56,60%)"},
+        {"BKG_COLOR_OVERLAY", "rgba(35,46,52,175)"},
+        {"BUTTON_BKG_COLOR",             "#4C5052"},
+        {"BUTTON_BKG_PRESSED_COLOR",     "#5C6164"},  // Background of push buttons
+        {"BUTTON_COLOR",                 "#BBBBBB"},
+        {"BUTTON_BORDER",                "1px solid #5E6060"}, //Raise button border
+        {"DISABLED_BUTTON_COLOR",        "#777777"},
+        {"DISABLED_BUTTON_BKG_COLOR",    "#3C3F41"},
+        {"DISABLED_PULLDOWN_COLOR",      "#777777"},
+        {"DISABLED_TOOL_COLOR",          "#777777"},
+        {"DIVIDER_COLOR",                "#4A4A4A"},
+        {"EDIT_COLOR",                   "#4A4A4A"},
+        {"INSTRUCTION_COLOR",            "#878787"},
+        {"LARGE_DIVIDER_COLOR",  "rgba(0,0,0,20%)"},
+        {MAJOR_TAB_COLOR_VAR,            "#BBBBBB"},
+        {MAJOR_TAB_SELECTED_COLOR_VAR,   "#FFFFFF"},
+       {"MAJOR_TITLE_COLOR",            "#FFFFFF"},
+        {"SCROLL_BKG_COLOR",             "#2B2B2B"},
+        {"SCROLL_HANDLE_COLOR",          "rgba(133,133,133,50%)"},
+        {"SNAPSHOT_INFO_BKG",            "#273238"},
+        {TAB_BKG_COLOR_VAR,              "#3E434C"},
+        {TAB_SELECTED_COLOR_VAR,         "#1E67CE"},
+        {HORIZ_DIVIDER_COLOR_VAR,        "#323232"},
+        {"TAB_DARKENED_COLOR",           "#3C3F41"},
+        {"TABLE_BOTTOM_COLOR",           "#BBBBBB"},
+        {"TABLE_SELECTED",               "#4A4A4A"},
+        {"TEXT_COLOR",                   "#BBBBBB"},
+        {"INACTIVE_TEXT_COLOR",          "#777777"},
+        {"TITLE_COLOR",                  "#BBBBBB"},
+        {"DISABLED_TITLE_COLOR",         "#777777"},
+        {"TOOL_COLOR",                   "#4A88C7"},
+        {"TOOL_ON_COLOR",                "#5C6164"},
+        {"TREE_WIDGET_BKG",              "#45494A"},
+        {"TREE_WIDGET_BORDER",           "#4A4A4A"},
+        {"LIST_WIDGET_BORDER",           "4A4A4A"},
+        {MACRO_BKG_COLOR_VAR, "rgba(234,67,53,55%)"},
+        {"LINK_COLOR",                   "#589DF6"},
+        {"PREVIEW_IMAGE_BKG",            "#3C3F41"},
+        {"RAISED_COLORED_BKG_COLOR",     "#87AFDA"},
+        {"RAISED_COLORED_PRESSED_COLOR", "#87AFDA"},
+        {"RAISED_COLORED_COLOR",         "#ffffff"},
+        {"DROP_TARGET_BKG_COLOR", "rgba(98,181,67,60%)"},
+        {THEME_PATH_VAR,                 "studio-dark"},
+        {"VHAL_PROPERTY_BKG",            "#3C3F41"},
+        {"TEXT_INPUT_BKG",               "#4C5052"},  // Background for text input
     };
 
     StylesheetValues() {
@@ -368,6 +486,16 @@ private:
             return false;
         }
 
+        QTextStream studio_dark_stylesheet_stream(&studioDarkStylesheet);
+        if (!tpl.render(studioDarkValues, &studio_dark_stylesheet_stream)) {
+            return false;
+        }
+
+        QTextStream studio_light_stylesheet_stream(&studioLightStylesheet);
+        if (!tpl.render(studioLightValues, &studio_light_stylesheet_stream)) {
+            return false;
+        }
+
         StylesheetTemplate font_tpl(":/styles/fonts_stylesheet_template.css");
         if (!font_tpl.isOk()) {
             qCWarning(emu, "Failed to load font stylesheet template!");
@@ -387,11 +515,15 @@ static android::base::LazyInstance<StylesheetValues> sStylesheetValues = {};
 
 const QString& stylesheetForTheme(SettingsTheme theme) {
     switch (theme) {
-    case SETTINGS_THEME_DARK:
-        return sStylesheetValues->darkStylesheet;
-    case SETTINGS_THEME_LIGHT:
-    default:
-        return sStylesheetValues->lightStylesheet;
+        case SETTINGS_THEME_STUDIO_DARK:
+            return sStylesheetValues->studioDarkStylesheet;
+        case SETTINGS_THEME_STUDIO_LIGHT:
+            return sStylesheetValues->studioLightStylesheet;
+        case SETTINGS_THEME_DARK:
+            return sStylesheetValues->darkStylesheet;
+        case SETTINGS_THEME_LIGHT:
+        default:
+            return sStylesheetValues->lightStylesheet;
     }
 }
 
@@ -401,8 +533,17 @@ const QString& fontStylesheet(bool hi_density) {
 
 
 const QHash<QString, QString>& stylesheetValues(SettingsTheme theme) {
-    return theme == SETTINGS_THEME_LIGHT
-            ? sStylesheetValues->lightValues : sStylesheetValues->darkValues;
+    switch (theme) {
+        case SETTINGS_THEME_STUDIO_DARK:
+            return sStylesheetValues->studioDarkValues;
+        case SETTINGS_THEME_STUDIO_LIGHT:
+            return sStylesheetValues->studioLightValues;
+        case SETTINGS_THEME_DARK:
+            return sStylesheetValues->darkValues;
+        case SETTINGS_THEME_LIGHT:
+        default:
+            return sStylesheetValues->lightValues;
+    }
 }
 
 const QString& stylesheetFontSize(FontSize size) {

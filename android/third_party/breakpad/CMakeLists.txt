@@ -20,7 +20,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Configure the compiler for breakpad:
-if(DARWIN_X86_64)
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
   add_c_flag("-fexceptions")
   add_c_flag("-frtti")
   add_c_flag("-fmessage-length=0")
@@ -214,6 +214,8 @@ android_target_compile_definitions(breakpad_common linux-aarch64 PUBLIC
                                    -DHAVE_A_OUT_H)
 android_target_compile_definitions(breakpad_common darwin-x86_64 PUBLIC
                                    -DHAVE_MACH_O_NLIST_H)
+android_target_compile_definitions(breakpad_common darwin-aarch64 PUBLIC
+                                   -DHAVE_MACH_O_NLIST_H)
 android_target_compile_definitions(breakpad_common windows PRIVATE
                                    ${ANDROID_BREAKPAD_WINDOWS_DEFS})
 android_target_link_libraries(breakpad_common linux-x86_64 PRIVATE dl)
@@ -275,6 +277,8 @@ if(NOT OPTION_ASAN)
   android_target_compile_definitions(breakpad_common_unittests linux-aarch64
                                      PUBLIC -DHAVE_A_OUT_H)
   android_target_compile_definitions(breakpad_common_unittests darwin-x86_64
+                                     PUBLIC -DHAVE_MACH_O_NLIST_H)
+  android_target_compile_definitions(breakpad_common_unittests darwin-aarch64
                                      PUBLIC -DHAVE_MACH_O_NLIST_H)
 endif()
 #
@@ -339,6 +343,8 @@ android_target_compile_definitions(breakpad_processor linux-x86_64 PUBLIC
 android_target_compile_definitions(breakpad_processor linux-aarch64 PUBLIC
                                    -DHAVE_A_OUT_H)
 android_target_compile_definitions(breakpad_processor darwin-x86_64 PUBLIC
+                                   -DHAVE_MACH_O_NLIST_H)
+android_target_compile_definitions(breakpad_processor darwin-aarch64 PUBLIC
                                    -DHAVE_MACH_O_NLIST_H)
 
 function(add_proc_test name)
@@ -429,6 +435,8 @@ android_target_compile_definitions(breakpad_server linux-aarch64 PUBLIC
                                    -DHAVE_A_OUT_H)
 android_target_compile_definitions(breakpad_server darwin-x86_64 PUBLIC
                                    -DHAVE_MACH_O_NLIST_H)
+android_target_compile_definitions(breakpad_server darwin-aarch64 PUBLIC
+                                   -DHAVE_MACH_O_NLIST_H)
 target_link_libraries(breakpad_server PUBLIC breakpad_common breakpad_processor)
 
 #
@@ -477,6 +485,9 @@ target_include_directories(breakpad_client PUBLIC ${BREAKPAD_SRC})
 android_target_include_directories(
   breakpad_client darwin-x86_64 PRIVATE ${BREAKPAD_SRC}/client/apple/Framework/
   ${BREAKPAD_SRC}/common/mac)
+android_target_include_directories(
+  breakpad_client darwin-aarch64 PRIVATE ${BREAKPAD_SRC}/client/apple/Framework/
+  ${BREAKPAD_SRC}/common/mac)
 android_target_include_directories(breakpad_client linux-x86_64 PUBLIC
                                    ${ANDROID_QEMU2_TOP_DIR}/android)
 android_target_include_directories(breakpad_client linux-aarch64 PUBLIC
@@ -490,13 +501,16 @@ android_target_compile_definitions(breakpad_client linux-aarch64 PUBLIC
 android_target_compile_definitions(
   breakpad_client darwin-x86_64 PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0
   -DHAVE_MACH_O_NLIST_H)
+android_target_compile_definitions(
+  breakpad_client darwin-aarch64 PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0
+  -DHAVE_MACH_O_NLIST_H)
 
 target_link_libraries(breakpad_client PRIVATE breakpad_common
                                               breakpad_processor)
 
 #
 # dump_syms
-if(NOT LINUX_AARCH64)
+if(NOT BUILDING_FOR_AARCH64)
   android_add_executable(
     TARGET dump_syms
     NODISTRIBUTE

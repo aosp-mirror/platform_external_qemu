@@ -65,7 +65,8 @@ TEST(CrossSessionSocket, RecycleWithoutRegister) {
     CrossSessionSocket::clearRecycleSockets();
 }
 
-TEST(CrossSessionSocket, DrainStale) {
+// BUG: 173703455
+TEST(CrossSessionSocket, DISABLED_DrainStale) {
     const char* kContents = "Stale text";
     const int kContentSize = strlen(kContents) + 1;
     // Make buffer slightly larger so that it can catch if there are

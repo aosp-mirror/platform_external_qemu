@@ -33,7 +33,11 @@ typedef MemBlock::FreeSubblocks_t FreeSubblocks_t;
 using base::AutoLock;
 using base::Lock;
 
+#if defined(__APPLE__) && defined(__arm64__)
+constexpr uint32_t kAlignment = 16384;
+#else
 constexpr uint32_t kAlignment = 4096;
+#endif
 
 uint64_t allocateAddressSpaceBlock(const AddressSpaceHwFuncs* hw, uint32_t size) {
     uint64_t offset;

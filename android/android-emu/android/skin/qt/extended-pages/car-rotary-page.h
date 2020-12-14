@@ -11,15 +11,16 @@
 
 #pragma once
 
-#include <qobjectdefs.h>                                    // for Q_OBJECT
-#include <QTime>                                            // for QTime
-#include <QTimer>                                           // for QTimer
-#include <QWidget>                                          // for QWidget
-#include <memory>                                           // for unique_ptr
-#include <string>                                           // for string
+#include <qobjectdefs.h>  // for Q_OBJECT
 
-#include "android/emulation/control/adb/AdbInterface.h"     // for AdbInterface
-#include "ui_car-rotary-page.h"                             // for CarRotaryPage
+#include <QTime>    // for QTime
+#include <QTimer>   // for QTimer
+#include <QWidget>  // for QWidget
+#include <memory>   // for unique_ptr
+#include <string>   // for string
+
+#include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
+#include "ui_car-rotary-page.h"                          // for CarRotaryPage
 
 class EmulatorQtWindow;
 class QEvent;
@@ -27,12 +28,11 @@ class QObject;
 class QPushButton;
 class QWidget;
 
-class CarRotaryPage : public QWidget
-{
+class CarRotaryPage : public QWidget {
     Q_OBJECT
 
 public:
-    explicit CarRotaryPage(QWidget *parent = 0);
+    explicit CarRotaryPage(QWidget* parent = 0);
     void setAdbInterface(android::emulation::AdbInterface* adb);
     void setEmulatorWindow(EmulatorQtWindow* eW);
 
@@ -65,6 +65,5 @@ private:
     QTimer mSupportsActionTimer;
     std::string mLastPushButtonCmd;
     bool mAdbExecuteIsActive;
-    bool mIsBootCompleted;
     bool mSupportsActionArg;
 };

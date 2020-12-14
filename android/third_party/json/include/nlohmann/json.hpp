@@ -6100,7 +6100,7 @@ class basic_json
         return result;
     }
 
-    static bool accept(detail::input_adapter&& i)
+    static bool jsonaccept(detail::input_adapter&& i)
     {
         return parser(i).accept(true);
     }
@@ -6235,7 +6235,7 @@ class basic_json
                  std::is_base_of<
                      std::random_access_iterator_tag,
                      typename std::iterator_traits<IteratorType>::iterator_category>::value, int>::type = 0>
-    static bool accept(IteratorType first, IteratorType last)
+    static bool jsonaccept(IteratorType first, IteratorType last)
     {
         return parser(detail::input_adapter(first, last)).accept(true);
     }

@@ -21,6 +21,22 @@ if(NOT TARGET Threads::Threads)
   endif()
 endif()
 
+if(WINDOWS_X86_64)
+  # Let's statically link the mingw thread library.. (Leaving out -lstdc++ will
+  # make it dynamic)
+  set_property(
+    TARGET Threads::Threads
+    PROPERTY INTERFACE_LINK_LIBRARIES
+             "-Wl,-Bstatic;-lstdc++;-lwinpthread;-Wl,-Bdynamic")
+elseif(WINDOWS_MSVC_X86_64)
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS
+                                                "-pthread")
+else()
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS
+                                                "-pthread")
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES
+                                                "-lpthread")
+endif()
 set(CMAKE_USE_PTHREADS_INIT 1)
 set(Threads_FOUND TRUE)
 set(PACKAGE_EXPORT "Threads_FOUND;CMAKE_USE_PTHREADS_INIT")

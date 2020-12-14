@@ -11,6 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+#ifdef _MSC_VER
+extern "C" {
+#include "qemu/osdep.h"
+}
+#endif
+
 #include "android-qemu2-glue/qemu-setup.h"
 
 #ifdef _MSC_VER
@@ -32,9 +39,9 @@
 #include <unordered_map>
 #include <utility>
 
+#include "android-qemu2-glue/audio-output.h"
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/audio-capturer.h"
-#include "android-qemu2-glue/audio-output.h"
 #include "android-qemu2-glue/base/async/CpuLooper.h"
 #include "android-qemu2-glue/base/async/Looper.h"
 #include "android-qemu2-glue/emulation/DmaMap.h"

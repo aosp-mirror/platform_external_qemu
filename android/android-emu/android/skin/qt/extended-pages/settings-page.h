@@ -11,21 +11,28 @@
 
 #pragma once
 
-#include <qobjectdefs.h>             // for slots, Q_OBJECT, signals
+#include <QByteArrayData>            // for slots, Q_OBJECT, signals
 #include <QString>                   // for QString
 #include <QWidget>                   // for QWidget
-#include <memory>                    // for unique_ptr
+#include <memory>                    // for unique_ptr, shared_ptr
 
 #include "android/settings-agent.h"  // for SettingsTheme
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class PerfStatsPage;
 class QEvent;
 class QObject;
-class QString;
-class QWidget;
+
 namespace Ui {
-class SettingsPage;
-}  // namespace Ui
+  class SettingsPage;
+}
+
 namespace android {
 namespace emulation {
 class AdbInterface;
@@ -33,12 +40,11 @@ class AdbInterface;
 }  // namespace android
 struct QAndroidHttpProxyAgent;
 
-class SettingsPage : public QWidget
-{
+class SettingsPage : public QWidget {
     Q_OBJECT
 
 public:
-    explicit SettingsPage(QWidget *parent = 0);
+    explicit SettingsPage(QWidget* parent = 0);
     ~SettingsPage();
 
     void setAdbInterface(android::emulation::AdbInterface* adb);
@@ -70,7 +76,9 @@ private slots:
     void on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index);
     void on_set_resetNotifications_pressed();
     void on_perfstatsButton_pressed();
-#ifndef SNAPSHOT_CONTROLS  // TODO:jameskaye Remove when Snapshot controls are fully enabled
+    void on_tabChanged();
+#ifndef SNAPSHOT_CONTROLS  // TODO:jameskaye Remove when Snapshot controls are
+                           // fully enabled
     void on_set_saveSnapNowButton_clicked();
     void on_set_loadSnapNowButton_clicked();
     void on_set_saveSnapshotOnExit_currentIndexChanged(int index);
@@ -105,5 +113,6 @@ private:
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
     std::unique_ptr<PerfStatsPage> mPerfStatsPage;
+    std::shared_ptr<UiEventTracker> mSettingsTracker;
     bool mDisableANGLE = false;
 };

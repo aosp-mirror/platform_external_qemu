@@ -52,7 +52,11 @@ void AddressSpaceHostMemoryAllocatorContext::perform(AddressSpaceDevicePingInfo 
 
 void *AddressSpaceHostMemoryAllocatorContext::allocate_impl(const uint64_t phys_addr,
                                                             const uint64_t size) {
+#if defined(__APPLE__) && defined(__arm64__)
+    constexpr uint64_t alignment = 16384;
+#else
     constexpr uint64_t alignment = 4096;
+#endif
     const uint64_t aligned_size = ((size + alignment - 1) / alignment) * alignment;
 
     void *host_ptr = android::aligned_buf_alloc(alignment, aligned_size);

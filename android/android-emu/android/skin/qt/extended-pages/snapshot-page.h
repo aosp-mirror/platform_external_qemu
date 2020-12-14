@@ -23,6 +23,13 @@
 #include "android/skin/qt/qt-settings.h"  // for SaveSnapshotOnExit
 #include "ui_snapshot-page.h"             // for SnapshotPage
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class QCloseEvent;
 class QObject;
 class QShowEvent;
@@ -144,6 +151,7 @@ private:
                        const std::unique_ptr<emulator_snapshot::Snapshot>& protobuf);
 
     std::unique_ptr<Ui::SnapshotPage> mUi;
+    std::shared_ptr<UiEventTracker> mSnapshotTracker;
 
     QGraphicsScene mPreviewScene;     // Used to render the preview screenshot
 };

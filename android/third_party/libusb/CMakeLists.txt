@@ -35,8 +35,13 @@ android_target_link_libraries(emulator-libusb linux-aarch64
 # Darwin
 android_target_include_directories(emulator-libusb darwin-x86_64 PRIVATE
                                    ${src}/Xcode)
+android_target_include_directories(emulator-libusb darwin-aarch64 PRIVATE
+                                   ${src}/Xcode)
 android_target_link_libraries(
   emulator-libusb darwin-x86_64 PRIVATE "-framework IOKit"
+                                        "-framework CoreFoundation")
+android_target_link_libraries(
+  emulator-libusb darwin-aarch64 PRIVATE "-framework IOKit"
                                         "-framework CoreFoundation")
 
 # These are very slow.. 27.97s user 90.95s system 75% cpu 2:37.73 total

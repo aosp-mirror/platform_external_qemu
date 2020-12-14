@@ -10,16 +10,23 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include <qmetatype.h>                          // for Q_DECLARE_METATYPE
-#include <qobjectdefs.h>                        // for slots, Q_OBJECT, signals
-#include <QString>                              // for QString
-#include <QTimer>                               // for QTimer
-#include <QWidget>                              // for QWidget
-#include <memory>                               // for unique_ptr
-#include <string>                               // for string
+#include <qmetatype.h>    // for Q_DECLARE_METATYPE
+#include <qobjectdefs.h>  // for slots, Q_OBJECT, signals
+#include <QString>        // for QString
+#include <QTimer>         // for QTimer
+#include <QWidget>        // for QWidget
+#include <memory>         // for unique_ptr
+#include <string>         // for string
 
 #include "android/recording/screen-recorder.h"  // for RecordingStatus
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class QObject;
 class QString;
 class QWidget;
@@ -78,13 +85,14 @@ public:
     void setRecordUiState(RecordUiState r);
 
 private:
-    static const char kTmpMediaName[]; // tmp name for unsaved media file
+    static const char kTmpMediaName[];  // tmp name for unsaved media file
     static const QAndroidRecordScreenAgent* sRecordScreenAgent;
 
     std::string mTmpFilePath;
     std::unique_ptr<Ui::RecordScreenPage> mUi;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     std::unique_ptr<android::videoplayer::VideoInfo> mVideoInfo;
+    std::shared_ptr<UiEventTracker> mRecTracker;
     RecordUiState mState;
     QTimer mTimer;
     int mSec;  // number of elapsed seconds

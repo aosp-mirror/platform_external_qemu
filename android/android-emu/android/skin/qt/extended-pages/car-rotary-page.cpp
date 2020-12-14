@@ -22,6 +22,7 @@
 
 #include "android/base/system/System.h"                  // for System
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
+#include "android/emulation/control/ServiceUtils.h"      // for bootCompleted
 #include "android/globals.h"                             // for android_hw
 #include "android/settings-agent.h"                      // for SettingsTheme
 #include "android/skin/qt/emulator-qt-window.h"          // for EmulatorQtWindow
@@ -59,7 +60,6 @@ CarRotaryPage::CarRotaryPage(QWidget* parent)
     mUi->setupUi(this);
 
     mAdbExecuteIsActive = false;
-    mIsBootCompleted = false;
     mSupportsActionArg = false;
 
     // Temporarily hide mouse wheel widgets until mouse wheel scroll is implemented.
@@ -292,18 +292,6 @@ void CarRotaryPage::determineWhetherInjectKeySupportsActionArg() {
 }
 
 bool CarRotaryPage::isBootCompleted() {
-    if (!mIsBootCompleted) {
-        mAdb->runAdbCommand(
-                {"shell", "getprop sys.boot_completed"},
-                [this](const android::emulation::OptionalAdbCommandResult& result) {
-                    string line;
-                    if (result && result->exit_code == 0 && result->output &&
-                            getline(*(result->output), line) && line == "1") {
-                        mIsBootCompleted = true;
-                    }
-                },
-                kAdbCommandTimeoutMs,
-                true);
-    }
-    return mIsBootCompleted;
+    // We don't want to block and wait at all for results.
+    return android::emulation::control::bootCompleted(std::chrono::milliseconds(0));
 }

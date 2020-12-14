@@ -75,6 +75,11 @@
 #define GOLDFISH_ADDRESS_SPACE_CONTROL_SIZE         0x00001000
 #define GOLDFISH_ADDRESS_SPACE_AREA_BAR             1
 #define GOLDFISH_ADDRESS_SPACE_AREA_NAME            "goldfish_address_space_area"
+#if defined(__APPLE__) && defined(__arm64__)
+// Apple Silicon only has 36 bits of address space. Be more conservative here.
+#define GOLDFISH_ADDRESS_SPACE_AREA_SIZE            (16ULL << 29ULL)
+#else
 #define GOLDFISH_ADDRESS_SPACE_AREA_SIZE            (16ULL << 30ULL)
+#endif
 
 #endif  /* !ACPI_GOLDFISH_DEFS_H */

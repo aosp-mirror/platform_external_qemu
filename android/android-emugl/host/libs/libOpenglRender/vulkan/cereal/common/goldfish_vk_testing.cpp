@@ -6331,6 +6331,8 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
+#ifdef VK_MVK_moltenvk
+#endif
 void checkEqual_extension_struct(
     const void* structExtension,
     const void* structExtension2,

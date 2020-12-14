@@ -91,11 +91,18 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 export RC=rc /FO x264res.o f || true
                 _SHU_BUILDER_GNU_CONFIG_HOST_FLAG=
                 ;;
-          darwin-*)
+          darwin-x86_64)
                 # Use host compiler.
                 MY_FLAGS=" --enable-pic \
                     --extra-cflags=-fPIC \
                     --disable-asm \
+                "
+                ;;
+          darwin-aarch64)
+                # Use host compiler.
+                MY_FLAGS=" --enable-pic \
+                    --extra-cflags=-fPIC \
+                    --host=aarch64-apple-darwin20.0.0 \
                 "
                 ;;
           *)

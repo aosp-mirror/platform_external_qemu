@@ -188,7 +188,11 @@ const TargetInfo kTarget = {
         "arm64",
         "aarch64",
 #if defined(__aarch64__)
+#ifdef __APPLE__
+        "cortex-a53",
+#else // __APPLE__
         "host",
+#endif // !__APPLE__
 #else
         "cortex-a57",
 #endif
@@ -629,7 +633,10 @@ private:
 
 static void initialize_virtio_input_devs(android::ParameterList& args, AndroidHwConfig* hw) {
     if (fc::isEnabled(fc::VirtioInput)) {
-        if (androidHwConfig_isScreenMultiTouch(hw)) {
+        if (fc::isEnabled(fc::VirtioMouse)) {
+            args.add("-device");
+            args.add("virtio-mouse-pci");
+        } else if (androidHwConfig_isScreenMultiTouch(hw)) {
             for (int id = 1; id <= VIRTIO_INPUT_MAX_NUM; id++) {
                 args.add("-device");
                 args.add(StringFormat("virtio_input_multi_touch_pci_%d", id).c_str());
@@ -891,7 +898,8 @@ static int startEmulatorWithMinConfig(
     AvdInfo** avdInfoToOverride) {
 
     android_qemu_mode = 0;
-    min_config_qemu_mode = 1;
+    // Min config mode and fuchsia mode are equivalent, at least for now.
+    min_config_qemu_mode = is_fuchsia = 1;
 
     auto opts = optsToOverride;
     auto hw = hwConfigToOverride;
@@ -1045,8 +1053,12 @@ static int startEmulatorWithMinConfig(
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
     // Features to disable or enable depending on rendering backend
     // and gpu make/model/version
+#if defined(__APPLE__) && defined(__aarch64__)
+    shouldDisableAsyncSwap = false;
+#else
     shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
                               System::get()->getProgramBitness() == 32;
+#endif
     shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                              async_query_host_gpu_SyncBlacklisted();
 
@@ -1131,7 +1143,9 @@ extern "C" int main(int argc, char** argv) {
             // kernel path to android_hw->kernel_path (android_hw is currently
             // not used in the Fuchsia path).
             if (opts->fuchsia) {
-                args.add({"-kernel", opts->kernel});
+                if (opts->kernel) {
+                    args.add({"-kernel", opts->kernel});
+                }
                 std::string dataDir = getNthParentDir(executable, 3U);
                 if (dataDir.empty()) {
                     dataDir = "lib/pc-bios";
@@ -1148,11 +1162,13 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::Vulkan, true);
                 fc::setIfNotOverriden(fc::GLDirectMem, true);
                 fc::setIfNotOverriden(fc::VirtioInput, true);
+                fc::setIfNotOverriden(fc::VirtioMouse, false);
                 fc::setEnabledOverride(fc::RefCountPipe, false);
                 fc::setIfNotOverriden(fc::VulkanNullOptionalStrings, true);
                 fc::setIfNotOverriden(fc::VulkanIgnoredHandles, true);
                 fc::setIfNotOverriden(fc::NoDelayCloseColorBuffer, true);
                 fc::setIfNotOverriden(fc::VulkanShaderFloat16Int8, true);
+                fc::setIfNotOverriden(fc::KeycodeForwarding, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;
@@ -1162,6 +1178,11 @@ extern "C" int main(int argc, char** argv) {
                                 __func__, opts->window_size);
                         return -1;
                     }
+                }
+
+                // Handle input args.
+                if (!emulator_parseInputCommandLineOptions(opts)) {
+                    return 1;
                 }
 
                 initialize_virtio_input_devs(args, hw);
@@ -1238,7 +1259,8 @@ extern "C" int main(int argc, char** argv) {
         is_multi_instance = true;
         opts->no_snapshot_save = true;
         args.add("-read-only");
-    } else if (filelock_create_timeout(coreHwIniPath, 2000) == NULL) {
+    } else if (!opts->check_snapshot_loadable &&
+               filelock_create_timeout(coreHwIniPath, 2000) == NULL) {
         /* The AVD is already in use, we still support this as an
          * experimental feature. Use a temporary hardware-qemu.ini
          * file though to avoid overwriting the existing one. */
@@ -1279,6 +1301,10 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
+    if (!emulator_parseInputCommandLineOptions(opts)) {
+        return 1;
+    }
+    
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
     }
@@ -1371,6 +1397,7 @@ extern "C" int main(int argc, char** argv) {
         // Situations where not to use mmap() for RAM
         // 1. Using HDD on Linux or macOS; no file mapping or we will have a bad time.
         // 2. macOS when having a machine with < 8 logical cores
+        // 3. Apple Silicon (we probably messed up some file page size or synchronization somewhere)
         if (avd){
             auto contentPath = avdInfo_getContentPath(avd);
             auto diskKind = System::get()->pathDiskKind(contentPath);
@@ -1387,6 +1414,10 @@ extern "C" int main(int argc, char** argv) {
             if (numCores < 8) {
                 feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false /* enable */);
             }
+#ifdef __aarch64__
+            // TODO: Fix file-backed RAM snapshot support.
+            feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false /* enable */);
+#endif
 #endif
 
             if (opts->crostini) {
@@ -1432,6 +1463,7 @@ extern "C" int main(int argc, char** argv) {
                 !opts->read_only &&
                 !opts->snapshot &&
                 !opts->no_snapshot_save &&
+                !opts->check_snapshot_loadable &&
                 androidSnapshot_getQuickbootChoice();
 
             if (mapAsShared) {
@@ -1598,6 +1630,11 @@ extern "C" int main(int argc, char** argv) {
     path_mkdir_if_needed(pstorePath.c_str(), 0777);
     android_chmod(pstorePath.c_str(), 0777);
 
+    // TODO(jansene): pstore conflicts with memory maps on Apple Silicon
+#if defined(__APPLE__) && defined(__aarch64__)
+    mem_map pstore = {.start = 0,
+                      .size = 0 };
+#else
     mem_map pstore = {.start = GOLDFISH_PSTORE_MEM_BASE,
                       .size = GOLDFISH_PSTORE_MEM_SIZE};
 
@@ -1606,6 +1643,7 @@ extern "C" int main(int argc, char** argv) {
                    ",file=%s",
                    pstore.start, pstore.size, pstoreFile.c_str());
 
+#endif
     bool firstTimeSetup =
             (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path));
 
@@ -1798,7 +1836,11 @@ extern "C" int main(int argc, char** argv) {
     const bool accel_ok =
             handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
     if (accel_ok) {
+#ifdef __APPLE__
+        args.add("-enable-hvf");
+#else
         args.add("-enable-kvm");
+#endif
         if (hw->hw_cpu_ncore > 1) {
             args.add("-smp");
             args.addFormat("cores=%d", hw->hw_cpu_ncore);
@@ -1995,6 +2037,13 @@ extern "C" int main(int argc, char** argv) {
         args.add("virtio-wifi-pci,netdev=virtio-wifi");
     }
 #endif
+
+
+    if (feature_is_enabled(kFeature_VirtioVsockPipe)) {
+        args.add("-device");
+        args.add("virtio-vsock-pci,guest-cid=77");
+    }
+
     if (opts->tcpdump) {
         args.add("-object");
         args.addFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
@@ -2174,8 +2223,12 @@ extern "C" int main(int argc, char** argv) {
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
+#if defined(__APPLE__) && defined(__aarch64__)
+        shouldDisableAsyncSwap = false;
+#else
         shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
                                   System::get()->getProgramBitness() == 32;
+#endif
         shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                                  async_query_host_gpu_SyncBlacklisted();
 
@@ -2284,6 +2337,9 @@ extern "C" int main(int argc, char** argv) {
 #endif
     if (opts->check_snapshot_loadable) {
         android_check_snapshot_loadable(opts->check_snapshot_loadable);
+        stopRenderer();
+        cuttlefish::stop_android_modem_simulator();
+        process_late_teardown();
         return 0;
     }
 

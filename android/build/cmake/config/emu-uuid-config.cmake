@@ -14,7 +14,7 @@ get_filename_component(
   "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/e2fsprogs/${ANDROID_TARGET_TAG}"
   ABSOLUTE)
 
-if(DARWIN_X86_64)
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
   # Apple does its own thing, the headers should be on the path, so no need to
   # set them explicitly.
   android_license(TARGET UUID::UUID LIBNAME uuid SPDX None LICENSE None

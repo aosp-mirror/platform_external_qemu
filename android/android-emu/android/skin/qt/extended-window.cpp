@@ -48,7 +48,6 @@
 #include "android/skin/qt/extended-pages/cellular-page.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/dpad-page.h"
-#include "android/skin/qt/extended-pages/tv-remote-page.h"
 #include "android/skin/qt/extended-pages/finger-page.h"
 #include "android/skin/qt/extended-pages/google-play-page.h"
 #include "android/skin/qt/extended-pages/help-page.h"
@@ -59,8 +58,10 @@
 #include "android/skin/qt/extended-pages/record-macro-page.h"
 #include "android/skin/qt/extended-pages/record-screen-page.h"
 #include "android/skin/qt/extended-pages/rotary-input-page.h"
+#include "android/skin/qt/extended-pages/sensor-replay-page.h"
 #include "android/skin/qt/extended-pages/settings-page.h"
 #include "android/skin/qt/extended-pages/telephony-page.h"
+#include "android/skin/qt/extended-pages/tv-remote-page.h"
 #include "android/skin/qt/extended-pages/virtual-sensors-page.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/qt-settings.h"
@@ -78,16 +79,16 @@ class QPushButton;
 class QShowEvent;
 class QWidget;
 
-ExtendedWindow::ExtendedWindow(
-    EmulatorQtWindow *eW,
-    ToolWindow  *tW) :
-    QFrame(nullptr),
-    mEmulatorWindow(eW),
-    mToolWindow(tW),
-    mExtendedUi(new Ui::ExtendedControls),
-    mSizeTweaker(this),
-    mSidebarButtons(this)
-{
+ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
+    : QFrame(nullptr),
+      mEmulatorWindow(eW),
+      mToolWindow(tW),
+      mExtendedUi(new Ui::ExtendedControls),
+      mSizeTweaker(this),
+      mSidebarButtons(this),
+      mPaneInvocationTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::UNKONWN_EMULATOR_UI_EVENT_TYPE,
+              android_studio::EmulatorUiEvent::EXTENDED_WINDOW_OPEN)) {
 #ifdef __linux__
     // On Linux, a Dialog does not show a Close button and a
     // Tool has a Close button that shows a dot rather than
@@ -111,10 +112,19 @@ ExtendedWindow::ExtendedWindow(
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
-    mExtendedUi->bugreportPage->setAdbInterface(
-            mEmulatorWindow->getAdbInterface());
-    mExtendedUi->carRotaryPage->setAdbInterface(
-            mEmulatorWindow->getAdbInterface());
+
+    if (android_qemu_mode) {
+        mExtendedUi->bugreportPage->setAdbInterface(
+                mEmulatorWindow->getAdbInterface());
+    }
+
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO &&
+        android::featurecontrol::isEnabled(
+                android::featurecontrol::CarRotary) &&
+        android_qemu_mode) {
+        mExtendedUi->carRotaryPage->setAdbInterface(
+                mEmulatorWindow->getAdbInterface());
+    }
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)),
@@ -132,9 +142,8 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
         this, SLOT(switchToTheme(SettingsTheme)));
 
-    connect(
-        mToolWindow, SIGNAL(themeChanged(SettingsTheme)),
-        mExtendedUi->settingsPage, SLOT(setUiTheme(SettingsTheme)), Qt::DirectConnection);
+    connect(mToolWindow, SIGNAL(themeChanged(SettingsTheme)), this,
+            SLOT(switchToTheme(SettingsTheme)), Qt::DirectConnection);
 
     connect(mExtendedUi->settingsPage, SIGNAL(disableMouseWheelChanged(bool)),
         this, SLOT(disableMouseWheel(bool)));
@@ -156,6 +165,7 @@ ExtendedWindow::ExtendedWindow(
     mPaneButtonMap = {
         {PANE_IDX_CAR,           mExtendedUi->carDataButton},
         {PANE_IDX_CAR_ROTARY,    mExtendedUi->carRotaryButton},
+        {PANE_IDX_SENSOR_REPLAY, mExtendedUi->sensorReplayButton},
         {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
         {PANE_IDX_CELLULAR,      mExtendedUi->cellularButton},
         {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
@@ -269,6 +279,14 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->dpadButton->setVisible(false);
         mExtendedUi->telephoneButton->setVisible(false);
 
+        if (android::featurecontrol::isEnabled(
+                    android::featurecontrol::CarVhalReplay)) {
+            mSidebarButtons.addButton(mExtendedUi->sensorReplayButton);
+            mExtendedUi->sensorReplayButton->setVisible(true);
+        } else {
+            mExtendedUi->sensorReplayButton->setVisible(false);
+        }
+
         if (android::featurecontrol::isEnabled(android::featurecontrol::CarRotary) &&
             avdInfo_getApiLevel(android_avdInfo) >= 30 /* Android 11 */) {
             mSidebarButtons.addButton(mExtendedUi->carRotaryButton);
@@ -296,6 +314,11 @@ ExtendedWindow::ExtendedWindow(
 
 ExtendedWindow::~ExtendedWindow() {
     mExtendedUi->location_page->requestStopLoadingGeoData();
+    if (android_cmdLineOptions->qt_hide_window && !mFirstShowEvent) {
+        auto userConfig = aemu_get_userConfigPtr();
+        QRect geom = geometry();
+        auserConfig_setExtendedControlsPos(userConfig, geom.x(), geom.y());
+    }
 }
 
 
@@ -310,6 +333,7 @@ static std::string translate_idx(ExtendedWindowPane value) {
         s = #p;                   \
         break;
     switch (value) {
+        PANE(PANE_IDX_UNKNOWN)
         PANE(PANE_IDX_LOCATION)
         PANE(PANE_IDX_MULTIDISPLAY)
         PANE(PANE_IDX_CELLULAR)
@@ -330,6 +354,7 @@ static std::string translate_idx(ExtendedWindowPane value) {
         PANE(PANE_IDX_HELP)
         PANE(PANE_IDX_CAR)
         PANE(PANE_IDX_CAR_ROTARY)
+        PANE(PANE_IDX_SENSOR_REPLAY)
     }
 #undef PANE
     // Remove _IDX from the string.
@@ -340,24 +365,6 @@ static std::string translate_idx(ExtendedWindowPane value) {
 void ExtendedWindow::sendMetricsOnShutDown() {
     mExtendedUi->location_page->sendMetrics();
     mExtendedUi->multiDisplayPage->sendMetrics();
-    if (mPaneInvocationCount.size() > 0) {
-        for (const auto& invocation : mPaneInvocationCount) {
-            android::metrics::MetricsReporter::get().report(
-                    [=](android_studio::AndroidStudioEvent* event) {
-                        auto* metrics = event->mutable_emulator_ui_event();
-                        metrics->set_element_id(
-                                translate_idx(invocation.first));
-                        metrics->set_context(android_studio::EmulatorUiEvent::
-                                                     EXTENDED_WINDOW_OPEN);
-                        metrics->set_type(
-                                android_studio::EmulatorUiEvent::
-                                        UNKONWN_EMULATOR_UI_EVENT_TYPE);
-                        metrics->set_value(invocation.second);
-                        event->set_kind(android_studio::AndroidStudioEvent::
-                                                EMULATOR_UI_EVENT);
-                    });
-        }
-    }
 }
 
 // static
@@ -377,6 +384,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         RecordScreenPage::setRecordScreenAgent(agentPtr->record);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             CarDataPage::setCarDataAgent(agentPtr->car);
+            SensorReplayPage::setAgent(agentPtr->car, agentPtr->location);
         }
     }
 }
@@ -499,6 +507,7 @@ void ExtendedWindow::on_recordButton_clicked()       { adjustTabs(PANE_IDX_RECOR
 void ExtendedWindow::on_googlePlayButton_clicked()   { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
 void ExtendedWindow::on_carDataButton_clicked()      { adjustTabs(PANE_IDX_CAR); }
 void ExtendedWindow::on_carRotaryButton_clicked()    { adjustTabs(PANE_IDX_CAR_ROTARY); }
+void ExtendedWindow::on_sensorReplayButton_clicked() { adjustTabs(PANE_IDX_SENSOR_REPLAY); }
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);
@@ -507,7 +516,7 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     }
 
     if (mExtendedWindowWasShown && mExtendedUi->stackedWidget->currentIndex() != thisIndex) {
-        mPaneInvocationCount[thisIndex]++;
+        mPaneInvocationTracker->increment(translate_idx(thisIndex));
     }
     QPushButton* thisButton = it->second;
     thisButton->toggle();
@@ -568,6 +577,18 @@ void ExtendedWindow::disableMouseWheel(bool disabled) {
 
 void ExtendedWindow::showEvent(QShowEvent* e) {
     if (mFirstShowEvent && !e->spontaneous()) {
+        bool moved = false;
+        if (android_cmdLineOptions->qt_hide_window) {
+            const QIcon icon(":/all/android_studio_icon");
+            setWindowIcon(icon);
+            auto userConfig = aemu_get_userConfigPtr();
+            int x, y;
+            if (auserConfig_getExtendedControlsPos(userConfig, &x, &y)) {
+                move(x, y);
+                moved = true;
+            }
+        }
+
         // This function has things that must be performed
         // after the ctor and after show() is called
         switchToTheme(getSelectedTheme());
@@ -584,11 +605,13 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
         }
 
         mFirstShowEvent = false;
-
-        // There is a gap between the main window and the tool bar. Use the same
-        // gap between the tool bar and the extended window.
-        move(mToolWindow->geometry().right() + 3 + ToolWindow::TOOL_GAP_FRAMELESS,
-             mToolWindow->geometry().top());
+        if (!moved) {
+            // There is a gap between the main window and the tool bar. Use the
+            // same gap between the tool bar and the extended window.
+            move(mToolWindow->geometry().right() + 3 +
+                         ToolWindow::TOOL_GAP_FRAMELESS,
+                 mToolWindow->geometry().top());
+        }
     }
     QFrame::showEvent(e);
 }

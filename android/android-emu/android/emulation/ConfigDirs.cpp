@@ -60,15 +60,24 @@ std::string ConfigDirs::getUserDirectory() {
         return home;
     }
 
-    home = system->envGet("ANDROID_SDK_HOME");
+    // New key: ANDROID_PREFS_ROOT
+    home = system->envGet("ANDROID_PREFS_ROOT");
     if (!home.empty()) {
         // In v1.9 emulator was changed to use $ANDROID_SDK_HOME/.android
         // directory, but Android Studio has always been using $ANDROID_SDK_HOME
         // directly. Put a workaround here to make sure it works both ways,
         // preferring the one from AS.
-        auto homeOldWay = PathUtils::join(home, kAndroidSubDir);
-        return system->pathIsDir(homeOldWay) ? homeOldWay : home;
+        auto homeNewWay = PathUtils::join(home, kAndroidSubDir);
+        return system->pathIsDir(homeNewWay) ? homeNewWay : home;
+    } else {
+        // Old key that is deprecated (ANDROID_SDK_HOME)
+        home = system->envGet("ANDROID_SDK_HOME");
+        if (!home.empty()) {
+            auto homeOldWay = PathUtils::join(home, kAndroidSubDir);
+            return system->pathIsDir(homeOldWay) ? homeOldWay : home;
+        }
     }
+
     home = system->getHomeDirectory();
     if (home.empty()) {
         home = system->getTempDir();
@@ -86,47 +95,43 @@ std::string ConfigDirs::getAvdRootDirectory() {
     // The search order here should match that in AndroidLocation.java
     // in Android Studio. Otherwise, Studio and the Emulator may find
     // different AVDs. Or one may find an AVD when the other doesn't.
-
     std::string avdRoot = system->envGet("ANDROID_AVD_HOME");
     if (!avdRoot.empty() && system->pathIsDir(avdRoot)) {
         return avdRoot;
     }
 
-    // No luck with ANDROID_AVD_HOME, try ANDROID_SDK_HOME
-    avdRoot = system->envGet("ANDROID_SDK_HOME");
+    // No luck with ANDROID_AVD_HOME, try ANDROID_PREFS_ROOT/ANDROID_SDK_HOME
+    avdRoot = getAvdRootDirectoryWithPrefsRoot(system->envGet("ANDROID_PREFS_ROOT"));
     if (!avdRoot.empty()) {
-        // ANDROID_SDK_HOME is defined
-        if (isValidAvdRoot(avdRoot)) {
-            // ANDROID_SDK_HOME is good
-            return PathUtils::join(avdRoot, kAvdSubDir);
-        }
-        avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-        if (isValidAvdRoot(avdRoot)) {
-            // ANDROID_SDK_HOME/.android is good
-            return PathUtils::join(avdRoot, kAvdSubDir);
-        }
-        // ANDROID_SDK_HOME is defined but bad. In this case,
-        // Android Studio tries $TEST_TMPDIR, $USER_HOME, and
-        // $HOME. We'll do the same.
-        avdRoot = system->envGet("TEST_TMPDIR");
+        return avdRoot;
+    } else {
+        avdRoot = getAvdRootDirectoryWithPrefsRoot(system->envGet("ANDROID_SDK_HOME"));
         if (!avdRoot.empty()) {
-            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-            if (isValidAvdRoot(avdRoot)) {
-                return PathUtils::join(avdRoot, kAvdSubDir);
+            return avdRoot;
+        } else {
+            // ANDROID_PREFS_ROOT/ANDROID_SDK_HOME is defined but bad. In this case,
+            // Android Studio tries $TEST_TMPDIR, $USER_HOME, and
+            // $HOME. We'll do the same.
+            avdRoot = system->envGet("TEST_TMPDIR");
+            if (!avdRoot.empty()) {
+                avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+                if (isValidAvdRoot(avdRoot)) {
+                    return PathUtils::join(avdRoot, kAvdSubDir);
+                }
             }
-        }
-        avdRoot = system->envGet("USER_HOME");
-        if (!avdRoot.empty()) {
-            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-            if (isValidAvdRoot(avdRoot)) {
-                return PathUtils::join(avdRoot, kAvdSubDir);
+            avdRoot = system->envGet("USER_HOME");
+            if (!avdRoot.empty()) {
+                avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+                if (isValidAvdRoot(avdRoot)) {
+                    return PathUtils::join(avdRoot, kAvdSubDir);
+                }
             }
-        }
-        avdRoot = system->envGet("HOME");
-        if (!avdRoot.empty()) {
-            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-            if (isValidAvdRoot(avdRoot)) {
-                return PathUtils::join(avdRoot, kAvdSubDir);
+            avdRoot = system->envGet("HOME");
+            if (!avdRoot.empty()) {
+                avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+                if (isValidAvdRoot(avdRoot)) {
+                    return PathUtils::join(avdRoot, kAvdSubDir);
+                }
             }
         }
     }
@@ -223,6 +228,24 @@ bool ConfigDirs::isValidAvdRoot(android::base::StringView avdPath) {
     }
 
     return true;
+}
+
+std::string ConfigDirs::getAvdRootDirectoryWithPrefsRoot(const std::string& path) {
+    if (path.empty()) return {};
+
+    // ANDROID_PREFS_ROOT is defined
+    if (isValidAvdRoot(path)) {
+        // ANDROID_PREFS_ROOT is good
+        return PathUtils::join(path, kAvdSubDir);
+    }
+
+    std::string avdRoot = PathUtils::join(path, kAndroidSubDir);
+    if (isValidAvdRoot(avdRoot)) {
+        // ANDROID_PREFS_ROOT/.android is good
+        return PathUtils::join(avdRoot, kAvdSubDir);
+    }
+
+    return {};
 }
 
 typedef struct discovery_dir {

@@ -166,6 +166,8 @@ typedef enum {
     kKeyModRShift = (1U << 5),    // right-shift
     kKeyModNumLock = (1U << 6),   // numlock
     kKeyModCapsLock = (1U << 7),  // capslock
+    kKeyModLMeta = (1U << 8),     // left-meta
+    kKeyModRMeta = (1U << 9),     // right-meta
 } SkinKeyMod;
 
 // Convert a pair of (SkinKeyCode,SkinKeyMod) values into a human-readable

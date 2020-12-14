@@ -11,16 +11,22 @@
 
 #pragma once
 
-#include <qobjectdefs.h>         // for Q_OBJECT, slots
+#include <QByteArrayData>        // for Q_OBJECT, slots
 #include <QString>               // for QString
 #include <QWidget>               // for QWidget
-#include <memory>                // for unique_ptr
+#include <memory>                // for shared_ptr, unique_ptr
 
 #include "ui_microphone-page.h"  // for MicrophonePage
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class EmulatorQtWindow;
 class QObject;
-class QWidget;
 
 class MicrophonePage : public QWidget
 {
@@ -45,5 +51,6 @@ private:
 
 private:
     std::unique_ptr<Ui::MicrophonePage> mUi;
+    std::shared_ptr<UiEventTracker> mMicTracker;
     EmulatorQtWindow* mEmulatorWindow;
 };

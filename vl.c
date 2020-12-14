@@ -211,7 +211,9 @@ int main(int argc, char **argv)
 /////////////////////////////////////////////////////////////
 
 #define  LCD_DENSITY_LDPI      120
+#define  LCD_DENSITY_140       140
 #define  LCD_DENSITY_MDPI      160
+#define  LCD_DENSITY_180       180
 #define  LCD_DENSITY_TVDPI     213
 #define  LCD_DENSITY_HDPI      240
 #define  LCD_DENSITY_280DPI    280
@@ -3560,7 +3562,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 return 1;
             }
             if (!(popt->arch_mask & arch_type)) {
-                error_report("Option not supported for this target");
+                error_report("%d: Option not supported for this target", __LINE__);
                 return 1;
             }
             switch(popt->index) {
@@ -4372,28 +4374,28 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 break;
             case QEMU_OPTION_xen_domid:
                 if (!(xen_available())) {
-                    error_report("Option not supported for this target");
+                    error_report("%d: Option not supported for this target", __LINE__);
                     return 1;
                 }
                 xen_domid = atoi(optarg);
                 break;
             case QEMU_OPTION_xen_create:
                 if (!(xen_available())) {
-                    error_report("Option not supported for this target");
+                    error_report("%d: Option not supported for this target", __LINE__);
                     return 1;
                 }
                 xen_mode = XEN_CREATE;
                 break;
             case QEMU_OPTION_xen_attach:
                 if (!(xen_available())) {
-                    error_report("Option not supported for this target");
+                    error_report("%d: Option not supported for this target", __LINE__);
                     return 1;
                 }
                 xen_mode = XEN_ATTACH;
                 break;
             case QEMU_OPTION_xen_domid_restrict:
                 if (!(xen_available())) {
-                    error_report("Option not supported for this target");
+                    error_report("%d: Option not supported for this target", __LINE__);
                     exit(1);
                 }
                 xen_domid_restrict = true;
@@ -4516,7 +4518,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 lcd_density = strtol(optarg, (char **) &optarg, 10);
                 switch (lcd_density) {
                     case LCD_DENSITY_LDPI:
+                    case LCD_DENSITY_140:
                     case LCD_DENSITY_MDPI:
+                    case LCD_DENSITY_180:
                     case LCD_DENSITY_TVDPI:
                     case LCD_DENSITY_HDPI:
                     case LCD_DENSITY_280DPI:
@@ -4531,7 +4535,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                         break;
                     default:
                         fprintf(stderr, "qemu: Bad LCD density: %d. Available densities are: "
-                                "120, 160, 213, 240, 280, 320, 360, 400, 420, 440, 480, 560, 640.\n",
+                                "120, 140, 160, 180, 213, 240, 280, 320, 360, 400, 420, 440, 480, 560, 640.\n",
                                 lcd_density);
                         return 1;
                 }
@@ -4641,6 +4645,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #if defined(TARGET_AARCH64) || defined(TARGET_ARM) || defined(TARGET_MIPS)
         if (!feature_is_enabled(kFeature_DynamicPartition)) {
             qemu_device_tree_setup_callback(ranchu_device_tree_setup);
+            qemu_device_tree_setup_callback2(ranchu_device_tree_setup);
         }
 #endif
         qemu_set_rng_random_generic_random_func(rng_random_generic_read_random_bytes);

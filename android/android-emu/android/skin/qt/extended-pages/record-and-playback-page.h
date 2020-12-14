@@ -17,6 +17,13 @@
 
 #include "ui_record-and-playback-page.h"  // for RecordAndPlaybackPage
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class QObject;
 class QTabBar;
 class QWidget;
@@ -41,4 +48,7 @@ signals:
 
 private slots:
     void setRecordingStateSlot(bool state);
+
+private:
+    std::shared_ptr<UiEventTracker> mRecTracker;
 };

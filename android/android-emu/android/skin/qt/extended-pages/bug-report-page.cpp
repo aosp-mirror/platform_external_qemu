@@ -13,19 +13,13 @@
 
 #include <QtConcurrent/qtconcurrentrun.h>              // for run
 #include <QtCore/qglobal.h>                            // for Q_NULLPTR
-#include <qcoreevent.h>                                // for QEvent (ptr only)
-#include <qfuture.h>                                   // for QFutureInterfa...
-#include <qmessagebox.h>                               // for QMessageBox::C...
-#include <qnamespace.h>                                // for ElideRight
-#include <qstring.h>                                   // for operator+, ope...
 #include <time.h>                                      // for localtime, str...
 #include <QCheckBox>                                   // for QCheckBox
 #include <QDesktopServices>                            // for QDesktopServices
-#include <QEvent>                                      // for QEvent
+#include <QEvent>                                      // for QEvent, QEvent...
 #include <QFileDialog>                                 // for QFileDialog
 #include <QFontMetrics>                                // for QFontMetrics
-#include <QFuture>                                     // for QFuture
-#include <QHash>                                       // for QHash
+#include <QFuture>                                     // for QFuture, QFutu...
 #include <QLabel>                                      // for QLabel
 #include <QMessageBox>                                 // for QMessageBox
 #include <QMovie>                                      // for QMovie
@@ -33,6 +27,7 @@
 #include <QPlainTextEdit>                              // for QPlainTextEdit
 #include <QPushButton>                                 // for QPushButton
 #include <QUrl>                                        // for QUrl
+#include <QtCore>                                      // for QHash, ElideRight
 #include <fstream>                                     // for ofstream, ios_...
 #include <functional>                                  // for __base
 #include <iterator>                                    // for istreambuf_ite...
@@ -46,18 +41,17 @@
 #include "android/base/system/System.h"                // for System, System...
 #include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
 #include "android/globals.h"                           // for android_avdInfo
+#include "android/metrics/UiEventTracker.h"            // for UiEventTracker
+#include "android/skin/qt/emulator-qt-window.h"        // for EmulatorQtWindow
 #include "android/skin/qt/error-dialog.h"              // for showErrorDialog
-#include "android/skin/qt/emulator-qt-window.h"        // for runOnUiThread
 #include "android/skin/qt/extended-pages/common.h"     // for getSelectedTheme
 #include "android/skin/qt/raised-material-button.h"    // for RaisedMaterial...
 #include "android/skin/qt/stylesheet.h"                // for stylesheetValues
 #include "android/utils/path.h"                        // for path_copy_file
+#include "studio_stats.pb.h"                           // for EmulatorUiEvent
 #include "ui_bug-report-page.h"                        // for BugreportPage
 
-class QMovie;
-class QObject;
 class QShowEvent;
-class QWidget;
 
 using android::base::PathUtils;
 using android::base::StringAppendFormat;
@@ -85,7 +79,11 @@ Expected Behavior:
 
 Observed Behavior:)";
 BugreportPage::BugreportPage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::BugreportPage) {
+    : QWidget(parent), mUi(new Ui::BugreportPage),
+       mBugTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_BUG_TAB))
+ {
     mUi->setupUi(this);
     mUi->bug_deviceLabel->installEventFilter(this);
     mUi->bug_emulatorVersionLabel->setText(QString::fromStdString(
@@ -201,9 +199,10 @@ void BugreportPage::enableInput(bool enabled) {
 }
 
 void BugreportPage::on_bug_saveButton_clicked() {
+    mBugTracker->increment("ON_SAVE");
     QString dirName = QString::fromStdString(mSavingStates.saveLocation);
     dirName = QFileDialog::getExistingDirectory(
-            Q_NULLPTR, tr("Report Saving Location"), dirName);
+            this, tr("Report Saving Location"), dirName);
     if (dirName.isNull())
         return;
     auto savingPath = PathUtils::join(dirName.toStdString(),
@@ -223,6 +222,7 @@ void BugreportPage::on_bug_saveButton_clicked() {
 }
 
 void BugreportPage::on_bug_sendToGoogle_clicked() {
+    mBugTracker->increment("ON_SEND");
     if (!mSavingStates.bugreportSavedSucceed) {
         on_bug_saveButton_clicked();
     }
@@ -304,6 +304,9 @@ void BugreportPage::loadAdbBugreport() {
     if (mAdbBugreport && mAdbBugreport->inFlight())
         return;
 
+    // No-op if no adb interface
+    if (!mAdb) return;
+
     mSavingStates.adbBugreportSucceed = false;
     enableInput(false);
     mUi->bug_circularSpinner->show();
@@ -375,6 +378,9 @@ void BugreportPage::loadAdbLogcat() {
     if (mAdbLogcat && mAdbLogcat->inFlight()) {
         return;
     }
+
+    if (!mAdb) return;
+
     // After apiLevel 19, buffer "all" become available
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     mAdbLogcat = mAdb->runAdbCommand(

@@ -78,9 +78,13 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             # We cannot strip symbols in x86_64
             MY_FLAGS="--target=x86_64-win64-gcc --enable-debug"
             ;;
-        darwin-*)
+        darwin-x86_64)
             # Use host compiler.
             MY_FLAGS="--target=x86_64-darwin10-gcc"
+            ;;
+        darwin-aarch64)
+            # Use host compiler (Fall back to generic-gnu as this target is not supported)
+            # MY_FLAGS="--target=arm64-apple-darwin20.0.0"
             ;;
         *)
             panic "Host system '$CURRENT_HOST' is not supported by this script!"

@@ -34,7 +34,14 @@ class QShowEvent;
 class ToolWindow;
 class VirtualSceneControlWindow;
 template <class CommandType> class ShortcutKeyStore;
-using ClickCount = uint16_t;
+
+namespace android {
+namespace metrics {
+ class UiEventTracker;
+}
+}
+
+using android::metrics::UiEventTracker;
 
 namespace Ui {
     class ExtendedControls;
@@ -84,6 +91,7 @@ private slots:
     void on_helpButton_clicked();
     void on_carDataButton_clicked();
     void on_carRotaryButton_clicked();
+    void on_sensorReplayButton_clicked();
     void on_locationButton_clicked();
     void on_microphoneButton_clicked();
     void on_recordButton_clicked();
@@ -102,7 +110,7 @@ private:
     EmulatorQtWindow* mEmulatorWindow;
     ToolWindow*  mToolWindow;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
-    std::map<ExtendedWindowPane, ClickCount> mPaneInvocationCount;
+    std::shared_ptr<UiEventTracker> mPaneInvocationTracker;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
     std::unique_ptr<Ui::ExtendedControls> mExtendedUi;
     bool mFirstShowEvent = true;

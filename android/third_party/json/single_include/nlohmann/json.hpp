@@ -7154,7 +7154,7 @@ class parser
     @param[in] strict  whether to expect the last token to be EOF
     @return whether the input is a proper JSON text
     */
-    bool accept(const bool strict = true)
+    bool jsonaccept(const bool strict = true)
     {
         json_sax_acceptor<BasicJsonType> sax_acceptor;
         return sax_parse(&sax_acceptor, strict);
@@ -18865,9 +18865,9 @@ class basic_json
         return result;
     }
 
-    static bool accept(detail::input_adapter&& i)
+    static bool jsonaccept(detail::input_adapter&& i)
     {
-        return parser(i).accept(true);
+        return parser(i).jsonaccept(true);
     }
 
     /*!
@@ -19000,9 +19000,9 @@ class basic_json
                  std::is_base_of<
                      std::random_access_iterator_tag,
                      typename std::iterator_traits<IteratorType>::iterator_category>::value, int>::type = 0>
-    static bool accept(IteratorType first, IteratorType last)
+    static bool jsonaccept(IteratorType first, IteratorType last)
     {
-        return parser(detail::input_adapter(first, last)).accept(true);
+        return parser(detail::input_adapter(first, last)).jsonaccept(true);
     }
 
     template<class IteratorType, class SAX, typename std::enable_if<
