@@ -286,7 +286,6 @@ rm ./emulator
 
 # Copy the emulator over and delete the download
 echo "cp -r ${EMULATOR_DOWNLOAD_BASE_NAME}/* ." && \
-cp -r ${EMULATOR_DOWNLOAD_BASE_NAME}/* .
-
-rm -rf ${EMULATOR_DOWNLOAD_BASE_NAME}
+cp -r ${EMULATOR_DOWNLOAD_BASE_NAME}/* .  && \
+rm -rf ${EMULATOR_DOWNLOAD_BASE_NAME} && \
 rm -rf ${EMULATOR_DOWNLOAD_BASE_NAME}*.zip
