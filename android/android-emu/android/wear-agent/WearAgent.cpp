@@ -11,6 +11,7 @@
 
 #include "android/wear-agent/WearAgent.h"
 
+#include "android/globals.h"
 #include "android/base/Log.h"
 #include "android/base/async/AsyncReader.h"
 #include "android/base/async/AsyncWriter.h"
@@ -472,6 +473,9 @@ WearAgentImpl::~WearAgentImpl() {
 
 //------------------------- WearAgent Class
 WearAgent::WearAgent(Looper* looper, int adbHostPort) : mWearAgentImpl(0) {
+    if (!android_qemu_mode) {
+        return;
+    }
     if (looper && adbHostPort >= 5037) {
         mWearAgentImpl = new WearAgentImpl(looper, adbHostPort);
     }

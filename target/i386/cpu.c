@@ -5061,6 +5061,8 @@ static void x86_cpu_register_types(void)
                                    /* Extra ECX bits */
                                    CPUID_EXT_AES |
                                    CPUID_EXT_PCLMULQDQ |
+                                   CPUID_EXT_XSAVE |
+                                   CPUID_EXT_AVX |
                                    CPUID_EXT_F16C,
                                    /* Extra EDX bits */
                                    CPUID_FXSR

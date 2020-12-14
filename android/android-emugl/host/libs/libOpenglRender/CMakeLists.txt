@@ -16,6 +16,8 @@ function(add_opengl_dependencies TGT)
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
   android_target_properties(
     ${TGT} darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+  android_target_properties(
+    ${TGT} darwin-aarch64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 endfunction()
 
 android_add_library(
@@ -35,6 +37,7 @@ android_target_link_libraries(OSWindow linux-aarch64 PUBLIC "-lX11" "-lrt"
 
 android_target_link_libraries(OSWindow windows PUBLIC "gdi32::gdi32")
 android_target_link_libraries(OSWindow darwin-x86_64 PUBLIC "-framework AppKit")
+android_target_link_libraries(OSWindow darwin-aarch64 PUBLIC "-framework AppKit")
 target_link_libraries(OSWindow PRIVATE emugl_base)
 target_include_directories(OSWindow PUBLIC ${ANDROID_EMUGL_DIR}/host/include
                                            standalone_common/angle-util)
@@ -127,12 +130,14 @@ android_target_link_libraries(OpenglRender linux-x86_64
                               PRIVATE "-WL,--version-script=render_api.entries")
 
 android_target_link_libraries(
-  OpenglRender darwin-x86_64
-  PRIVATE "-WL,-exported_symbols_list,render_api.entries")
+    OpenglRender darwin-x86_64
+    PRIVATE "-WL,-exported_symbols_list,render_api.entries")
+android_target_link_libraries(
+    OpenglRender darwin-aarch64
+    PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 android_install_shared(OpenglRender)
 
 if(NOT LINUX_AARCH64)
-
   android_add_library(
     TARGET OpenglRender_standalone_common
     LICENSE Apache-2.0

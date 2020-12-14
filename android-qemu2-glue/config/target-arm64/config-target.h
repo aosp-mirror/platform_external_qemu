@@ -7,6 +7,10 @@
 #define CONFIG_I386_DIS 1
 #define CONFIG_ARM_DIS 1
 #if HOST_AARCH64
+#ifdef __APPLE__
+#define CONFIG_HVF 1
+#else
 #define CONFIG_KVM 1
+#endif
 #define CONFIG_ARM_A64_DIS 1
 #endif

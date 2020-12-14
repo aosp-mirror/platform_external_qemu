@@ -25,7 +25,6 @@ import logging
 
 from aemu.definitions import (
     ENUMS,
-    fixup_windows_clang,
     get_aosp_root,
     get_cmake,
     get_qemu_root,
@@ -116,10 +115,6 @@ def configure(args):
 
     cmake_cmd += ENUMS["Generator"][args.generator]
     cmake_cmd += [get_qemu_root()]
-
-    # Make sure we fixup clang in windows builds
-    if platform.system() == "Windows":
-        fixup_windows_clang()
 
     if args.crash != "none":
         # Make sure we have the requests library

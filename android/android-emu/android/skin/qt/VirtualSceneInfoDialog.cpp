@@ -26,6 +26,7 @@
 #include <QSvgWidget>                                // for QSvgWidget
 #include <algorithm>                                 // for min
 
+#include "android/cmdline-option.h"  // for android_cmdLineOptions
 #include "android/settings-agent.h"                  // for SETTINGS_THEME_DARK
 #include "android/skin/qt/emulator-container.h"      // for EmulatorContainer
 #include "android/skin/qt/qt-settings.h"             // for SHOW_VIRTUALSCEN...
@@ -67,6 +68,8 @@ VirtualSceneInfoDialog::VirtualSceneInfoDialog(EmulatorContainer* parent)
 }
 
 void VirtualSceneInfoDialog::show() {
+    if (android_cmdLineOptions->qt_hide_window)
+        return;
     setWindowOpacity(0);
     QWidget::show();
     auto showAnimation = new QPropertyAnimation(this, "windowOpacity");
@@ -77,6 +80,8 @@ void VirtualSceneInfoDialog::show() {
 }
 
 void VirtualSceneInfoDialog::hide(CompletionFunc onHidden) {
+    if (android_cmdLineOptions->qt_hide_window)
+        return;
     auto hideAnimation = new QPropertyAnimation(this, "windowOpacity");
     hideAnimation->setStartValue(windowOpacity());
     hideAnimation->setEndValue(0.0);

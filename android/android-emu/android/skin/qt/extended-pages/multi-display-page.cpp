@@ -25,6 +25,7 @@
 #include "android/base/system/System.h"
 #include "android/globals.h"
 #include "android/metrics/MetricsReporter.h"
+#include "android/metrics/UiEventTracker.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/multi-display-arrangement.h"
@@ -39,10 +40,14 @@ class QWidget;
 static constexpr uint64_t kReportWindowDurationUs = 1000 * 1000 * 60;
 static constexpr uint32_t kMaxReportsPerWindow = 5;
 
-int MultiDisplayPage::sMaxItem = 3;
+int MultiDisplayPage::sMaxItem = avdInfo_maxMultiDisplayEntries();
 
 MultiDisplayPage::MultiDisplayPage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::MultiDisplayPage()) {
+    : QWidget(parent),
+      mUi(new Ui::MultiDisplayPage()),
+      mApplyChangesTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_DISPLAYS_TAB)) {
     mUi->setupUi(this);
 
     // set default display title
@@ -216,6 +221,7 @@ void MultiDisplayPage::recomputeLayout() {
 void MultiDisplayPage::on_applyChanges_clicked() {
     mApplyCnt++;
     uint32_t numDisplay = 0;
+    std::string name;
     for (int i = 1; i <= sMaxItem; i++) {
         uint32_t width, height, dpi;
         bool enabled;
@@ -227,6 +233,7 @@ void MultiDisplayPage::on_applyChanges_clicked() {
             numDisplay++;
             uint32_t w, h, d;
             mItem[i]->getValues(&w, &h, &d);
+            name += mItem[i]->getName() + "_";
             if (w == width && h == height && d == dpi && enabled) {
                 continue;
             }
@@ -254,6 +261,7 @@ void MultiDisplayPage::on_applyChanges_clicked() {
     if (numDisplay > mMaxDisplayCnt) {
         mMaxDisplayCnt = numDisplay;
     }
+    mApplyChangesTracker->increment(name);
 }
 
 void MultiDisplayPage::setArrangementHighLightDisplay(int id) {

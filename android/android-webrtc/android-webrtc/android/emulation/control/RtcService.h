@@ -21,9 +21,11 @@ class Service;
 namespace android {
 namespace emulation {
 namespace control {
+class RtcBridge;
 
 grpc::Service* getRtcService(const AndroidConsoleAgents* agents,
                              const char* turncfg);
+grpc::Service* getRtcService(RtcBridge* bridge);
 
 }  // namespace control
 }  // namespace emulation

@@ -601,6 +601,8 @@ public:
     void waitForGpu(uint64_t eglsync);
     void waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle);
 
+    void setGuestManagedColorBufferLifetime(bool guestManaged);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -792,13 +794,14 @@ private:
 
     struct Post {
         PostCmd cmd;
+        int composeVersion;
+        std::vector<char> composeBuffer;
         union {
             ColorBuffer* cb;
             struct {
                 int width;
                 int height;
             } viewport;
-            ComposeDevice* d;
             struct {
                 ColorBuffer* cb;
                 int screenwidth;
@@ -819,6 +822,9 @@ private:
     bool m_fastBlitSupported = false;
     bool m_vulkanInteropSupported = false;
     bool m_guestUsesAngle = false;
+    // Whether the guest manages ColorBuffer lifetime
+    // so we don't need refcounting on the host side.
+    bool m_guestManagedColorBufferLifetime = false;
 
     android::base::MessageChannel<HandleType, 1024>
         mOutstandingColorBufferDestroys;

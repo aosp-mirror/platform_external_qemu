@@ -44,6 +44,7 @@
 
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
+#include "android/cmdline-option.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/hw-sensors.h"
 #include "android/metrics/MetricsReporter.h"
@@ -288,6 +289,12 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
 
     updateHighlightAndFocusStyle();
     update();  // Queues a repaint call.
+}
+
+void VirtualSceneControlWindow::show() {
+    if (!android_cmdLineOptions->qt_hide_window) {
+        QFrame::show();
+    }
 }
 
 void VirtualSceneControlWindow::showEvent(QShowEvent* event) {

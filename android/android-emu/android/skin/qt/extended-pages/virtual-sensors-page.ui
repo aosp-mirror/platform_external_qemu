@@ -1051,6 +1051,32 @@
       <string>Relative humidity (%)</string>
      </property>
     </widget>
+    <widget class="EditableSliderWidget" name="heartRateSensorValueWidget" native="true">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>400</y>
+       <width>280</width>
+       <height>80</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_16">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>380</y>
+       <width>90</width>
+       <height>15</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Heart rate (bpm)</string>
+     </property>
+    </widget>
     <widget class="QPushButton" name="helpMagneticField">
      <property name="geometry">
       <rect>
@@ -1088,6 +1114,38 @@
       <rect>
        <x>390</x>
        <y>140</y>
+       <width>15</width>
+       <height>15</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/help_outline</normaloff>:/light/help_outline</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>15</width>
+       <height>15</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>help_outline</string>
+     </property>
+     <property name="helpButton" stdset="0">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="helpHeartRate">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>380</y>
        <width>15</width>
        <height>15</height>
       </rect>
@@ -1316,6 +1374,7 @@
   <tabstop>helpPressure</tabstop>
   <tabstop>helpMagneticField_2</tabstop>
   <tabstop>helpHumidity</tabstop>
+  <tabstop>helpHeartRate</tabstop>
  </tabstops>
  <resources>
   <include location="../resources.qrc"/>

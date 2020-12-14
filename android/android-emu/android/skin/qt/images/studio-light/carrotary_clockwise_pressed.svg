@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="103px" height="203px" viewBox="0 0 103 203" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>carrotary_clockwise</title>
+    <g id="carrotary_clockwise" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="emulator_rotary_controller" transform="translate(-190.000000, -90.000000)">
+            <path d="M291.132,191.132 C291.132,135.904 246.361,91.1321 191.132,91.1321 L191.132,291.132 C246.361,291.132 291.132,246.361 291.132,191.132 Z" id="Path" stroke="#F9F9F9" stroke-width="3" fill="#BDC1C6" fill-rule="nonzero"></path>
+            <path d="M264.573,207.957 C267.887,198.197 267.285,175.683 261.444,164.069" id="Path" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.1"></path>
+            <polygon id="Path" fill="#FFFFFF" fill-rule="nonzero" points="260.984 221.215 255.863 203.814 273.493 208.08"></polygon>
+        </g>
+    </g>
+</svg>

@@ -393,6 +393,8 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
         VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM,
         VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM,
 
+        // R8G8 formats
+        VK_FORMAT_R8G8_UNORM,
     };
 
     std::vector<VkImageType> types = {
@@ -460,10 +462,6 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         "VK_KHR_get_physical_device_properties2",
     };
 
-    std::vector<const char*> moltenVKInstanceExtNames = {
-        "VK_MVK_moltenvk",
-    };
-
     std::vector<const char*> externalMemoryDeviceExtNames = {
         "VK_KHR_dedicated_allocation",
         "VK_KHR_get_memory_requirements2",
@@ -482,8 +480,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     bool externalMemoryCapabilitiesSupported =
         extensionsSupported(exts, externalMemoryInstanceExtNames);
-    bool moltenVKSupported =
-        extensionsSupported(exts, moltenVKInstanceExtNames);
+    bool moltenVKSupported = (vk->vkGetMTLTextureMVK != nullptr) &&
+        (vk->vkSetMTLTextureMVK != nullptr);
 
     VkInstanceCreateInfo instCi = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
@@ -502,10 +500,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         // We don't need both moltenVK and external memory. Disable
         // external memory if moltenVK is supported.
         externalMemoryCapabilitiesSupported = false;
-        instCi.enabledExtensionCount =
-            moltenVKInstanceExtNames.size();
-        instCi.ppEnabledExtensionNames =
-            moltenVKInstanceExtNames.data();
+        instCi.enabledExtensionCount = 0u;
+        instCi.ppEnabledExtensionNames = nullptr;
     }
 
     VkApplicationInfo appInfo = {
@@ -601,18 +597,14 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
     }
 
     if (sVkEmulation->instanceSupportsMoltenVK) {
-        sVkEmulation->useIOSurfaceFunc = reinterpret_cast<PFN_vkUseIOSurfaceMVK>(
-                vk->vkGetInstanceProcAddr(
-                        sVkEmulation->instance, "vkUseIOSurfaceMVK"));
-        if (!sVkEmulation->useIOSurfaceFunc) {
-            LOG(ERROR) << "Cannot find vkUseIOSurfaceMVK";
+        sVkEmulation->setMTLTextureFunc = vk->vkSetMTLTextureMVK;
+        if (!sVkEmulation->setMTLTextureFunc) {
+            LOG(ERROR) << "Cannot find vkSetMTLTextureMVK";
             return sVkEmulation;
         }
-        sVkEmulation->getIOSurfaceFunc = reinterpret_cast<PFN_vkGetIOSurfaceMVK>(
-                ivk->vkGetInstanceProcAddr(
-                        sVkEmulation->instance, "vkGetIOSurfaceMVK"));
-        if (!sVkEmulation->getIOSurfaceFunc) {
-            LOG(ERROR) << "Cannot find vkGetIOSurfaceMVK";
+        sVkEmulation->getMTLTextureFunc = vk->vkGetMTLTextureMVK;
+        if (!sVkEmulation->getMTLTextureFunc) {
+            LOG(ERROR) << "Cannot find vkGetMTLTextureMVK";
             return sVkEmulation;
         }
         LOG(VERBOSE) << "Instance supports VK_MVK_moltenvk.";
@@ -1271,7 +1263,11 @@ bool importExternalMemoryDedicatedImage(
 static VkFormat glFormat2VkFormat(GLint internalformat) {
     switch (internalformat) {
         case GL_LUMINANCE:
+        case GL_R8:
             return VK_FORMAT_R8_UNORM;
+        case GL_RG:
+        case GL_RG8:
+            return VK_FORMAT_R8G8_UNORM;
         case GL_RGB:
         case GL_RGB8:
             return VK_FORMAT_R8G8B8_UNORM;
@@ -1558,21 +1554,12 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     }
 
     if (sVkEmulation->instanceSupportsMoltenVK) {
-        // Create IOSurface by passing null surface argument.
-        VkResult useIOSurfaceRes = sVkEmulation->useIOSurfaceFunc(res.image, nullptr);
-        if (useIOSurfaceRes != VK_SUCCESS) {
-            fprintf(stderr, "%s: Failed to create IOSurface. %d\n", __func__,
-                    useIOSurfaceRes);
-            return false;
-        }
-        // Retrieve a reference to the IOSurface created above.
-        sVkEmulation->getIOSurfaceFunc(res.image, &res.ioSurface);
-        if (!res.ioSurface) {
-            fprintf(stderr, "%s: Failed to get IOSurface.\n", __func__);
-            return false;
+        sVkEmulation->getMTLTextureFunc(res.image, &res.mtlTexture);
+        if (!res.mtlTexture) {
+            fprintf(stderr, "%s: Failed to get MTLTexture.\n", __func__);
         }
 #ifdef __APPLE__
-        CFRetain(res.ioSurface);
+        CFRetain(res.mtlTexture);
 #endif
     }
 
@@ -1617,8 +1604,8 @@ bool teardownVkColorBuffer(uint32_t colorBufferHandle) {
     freeExternalMemoryLocked(vk, &info.memory);
 
 #ifdef __APPLE__
-    if (info.ioSurface) {
-        CFRelease(info.ioSurface);
+    if (info.mtlTexture) {
+        CFRelease(info.mtlTexture);
     }
 #endif
 
@@ -1713,6 +1700,10 @@ bool updateColorBufferFromVkImage(uint32_t colorBufferHandle) {
     // Copy to staging buffer
     uint32_t bpp = 4; /* format always rgba8...not */
     switch (infoPtr->format) {
+        case VK_FORMAT_R8_UNORM:
+            bpp = 1;
+            break;
+        case VK_FORMAT_R8G8_UNORM:
         case VK_FORMAT_R5G6B5_UNORM_PACK16:
             bpp = 2;
             break;
@@ -2020,7 +2011,7 @@ bool setColorBufferVulkanMode(uint32_t colorBuffer, uint32_t vulkanMode) {
     return true;
 }
 
-IOSurfaceRef getColorBufferIOSurface(uint32_t colorBuffer) {
+MTLTextureRef getColorBufferMTLTexture(uint32_t colorBuffer) {
     if (!sVkEmulation || !sVkEmulation->live) return nullptr;
 
     AutoLock lock(sVkEmulationLock);
@@ -2033,9 +2024,9 @@ IOSurfaceRef getColorBufferIOSurface(uint32_t colorBuffer) {
     }
 
 #ifdef __APPLE__
-    CFRetain(infoPtr->ioSurface);
+    CFRetain(infoPtr->mtlTexture);
 #endif
-    return infoPtr->ioSurface;
+    return infoPtr->mtlTexture;
 }
 
 int32_t mapGpaToBufferHandle(uint32_t bufferHandle,

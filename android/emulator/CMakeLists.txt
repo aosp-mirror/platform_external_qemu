@@ -17,7 +17,7 @@ target_compile_definitions(
           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
 # Make sure we have the qemu dependencies available
-if(LINUX_AARCH64)
+if(BUILDING_FOR_AARCH64)
   add_dependencies(emulator qemu-system-aarch64 qemu-system-aarch64-headless)
 elseif(OPTION_MINBUILD)
   add_dependencies(emulator qemu-system-x86_64 qemu-system-aarch64
@@ -86,6 +86,7 @@ android_target_dependency(emulator all VIRTUAL_SCENE_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_MACROS_DEPENDENCIES)
 android_target_dependency(emulator all VULKAN_DEPENDENCIES)
 android_target_dependency(emulator linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
+android_target_dependency(emulator linux-aarch64 TCMALLOC_OS_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64
                           GLIB2_WINDOWS_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64
@@ -103,7 +104,7 @@ android_install_dependency(all EMULATOR_FEATURE_DEPENDENCIES)
 android_install_dependency(all EMULATOR_KEYMAP_DEPENDENCIES)
 android_install_dependency(all EMULATOR_BIOS_DEPENDENCIES)
 android_install_dependency(all SWIFTSHADER_DEPENDENCIES)
-if(NOT LINUX_AARCH64)
+if (NOT LINUX_AARCH64)
   android_install_dependency(all ANGLE_DEPENDENCIES)
 endif()
 android_install_dependency(all RUNTIME_OS_DEPENDENCIES)
@@ -114,6 +115,7 @@ android_install_dependency(all VIRTUAL_SCENE_DEPENDENCIES)
 android_install_dependency(all EMULATOR_MACROS_DEPENDENCIES)
 android_install_dependency(all VULKAN_DEPENDENCIES)
 android_install_dependency(linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
+android_install_dependency(linux-aarch64 TCMALLOC_OS_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 GLIB2_WINDOWS_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 ANGLE_RENDERER_DEPENDENCIES)
 android_install_dependency(windows_msvc-x86_64 MSVC_DEPENDENCIES)

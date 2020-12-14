@@ -170,7 +170,7 @@ class GitFiles(object):
 
 
 EXPECTED_HOSTS = set(
-    ['linux-x86_64', 'windows-x86', 'windows-x86_64', 'windows_msvc-x86_64', 'darwin-x86_64'])
+    ['linux-x86_64', 'windows-x86', 'windows-x86_64', 'windows_msvc-x86_64', 'darwin-x86_64', 'darwin-aarch64'])
 
 
 def read_link_file(link_file, git_fs):

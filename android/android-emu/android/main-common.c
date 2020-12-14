@@ -89,6 +89,7 @@ int arm_snapshot_save_completed = 0;
 int host_emulator_is_headless = 0;
 int android_qemu_mode = 1;
 int min_config_qemu_mode = 0;
+int is_fuchsia = 0;
 
 bool emulator_has_network_option = false;
 
@@ -1361,7 +1362,12 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
     // available.
     {
         char* abi = avdInfo_getTargetAbi(avd);
+#if defined(__APPLE__) && defined(__arm64__)
+        if (!strncmp(abi, "arm64", 3)) {
+#else
         if (!strncmp(abi, "x86", 3)) {
+#endif
+            fprintf(stderr, "%s: feature check for hvf\n", __func__);
             // select HVF on Mac if available and we are running on x86
             // TODO: Fix x86_64 support in HVF
             const bool hvf_is_ok = feature_is_enabled(kFeature_HVF) &&
@@ -1398,6 +1404,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                 dwarning("%s emulation may not work without hardware acceleration!", abi);
             }
             else {
+#ifndef __arm64__
                 /* CPU acceleration is enabled and working, but if the host CPU
                  * does not support all instruction sets specified in the x86/
                  * x86_64 ABI, emulation may fail on unsupported instructions.
@@ -1438,6 +1445,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                             "\nHardware-accelerated emulation may not work"
                             " properly!\n", abi, buf);
                 }
+#endif
 
                 if (hvf_is_ok) {
                     androidCpuAcceleration_resetCpuAccelerator(ANDROID_CPU_ACCELERATOR_HVF);

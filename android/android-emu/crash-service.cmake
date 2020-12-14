@@ -1,5 +1,5 @@
 # This file defines emulator crash service
-if(NOT LINUX_AARCH64)
+if (NOT BUILDING_FOR_AARCH64)
   prebuilt(QT5)
   set(CRASH_WINDOWS_ICON ../images/emulator_icon.rc)
 

@@ -129,7 +129,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return true;
                 },
         .startExtendedWindow =
-                []() {
+                [](ExtendedWindowPane pane) {
                 // Not implemented
                 return false;
                 },
@@ -142,6 +142,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 // Not implemented
                 return false;
                 },
+        .runOnUiThread =
+                [](UiUpdateFunc f, void* data, bool wait) {
+                    f(data);
+                }
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

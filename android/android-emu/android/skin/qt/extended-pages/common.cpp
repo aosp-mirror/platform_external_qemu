@@ -31,6 +31,7 @@
 #include <QWidget>                                   // for QWidget
 #include <QWidgetList>                               // for QWidgetList
 
+#include "android/cmdline-option.h"                  // for android_cmdLineOptions
 #include "android/skin/qt/qt-settings.h"             // for SAVE_PATH, SCREE...
 #include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
 #include "android/skin/qt/stylesheet.h"              // for stylesheetValues
@@ -38,6 +39,9 @@
 class QFrame;
 class QPushButton;
 class QWidget;
+
+// Only used by embedded emulator because the value is not persisted.
+static SettingsTheme sCurrentTheme = SETTINGS_THEME_STUDIO_LIGHT;
 
 void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
 {
@@ -145,14 +149,27 @@ QString getRecordingSaveDirectory()
 }
 
 SettingsTheme getSelectedTheme() {
-    QSettings settings;
-    SettingsTheme theme =
-            (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
-    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
-        theme = SETTINGS_THEME_LIGHT;
-    }
+    if (android_cmdLineOptions->qt_hide_window) {
+        return sCurrentTheme;
+    } else {
+        QSettings settings;
+        SettingsTheme theme =
+                (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
+        if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
+            theme = SETTINGS_THEME_LIGHT;
+        }
 
-    return theme;
+        return theme;
+    }
+}
+
+void setSelectedTheme(SettingsTheme theme, bool persist) {
+    if (persist) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::UI_THEME, (int)theme);
+    } else {
+        sCurrentTheme = theme;
+    }
 }
 
 void adjustAllButtonsForTheme(SettingsTheme theme)

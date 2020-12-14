@@ -11,22 +11,18 @@
 
 #include "android/skin/qt/extended-pages/settings-page.h"
 
-#include <qcoreevent.h>                                     // for QEvent::F...
-#include <qfiledialog.h>                                    // for QFileDial...
-#include <qmessagebox.h>                                    // for QMessageB...
-#include <qnamespace.h>                                     // for Checked
-#include <qsettings.h>                                      // for QSettings...
-#include <qstring.h>                                        // for operator+
 #include <stdio.h>                                          // for fprintf
 
 #include "android/avd/info.h"                               // for AVDINFO_N...
 #include "android/avd/util.h"                               // for path_getA...
+#include "android/base/Log.h"                               // for LogStream...
 #include "android/base/files/PathUtils.h"                   // for PathUtils
-#include "android/cmdline-option.h"                 // for android_cmdLineOptions
-#include "android/emulation/control/adb/AdbInterface.h"         // for AdbInterface
+#include "android/cmdline-option.h"                         // for AndroidOp...
+#include "android/emulation/control/adb/AdbInterface.h"     // for AdbInterface
 #include "android/featurecontrol/Features.h"                // for GenericSn...
 #include "android/globals.h"                                // for android_a...
 #include "android/metrics/MetricsWriter.h"                  // for android_s...
+#include "android/metrics/UiEventTracker.h"                 // for UiEventTr...
 #include "android/skin/qt/FramelessDetector.h"              // for Frameless...
 #include "android/skin/qt/extended-pages/common.h"          // for getSelect...
 #include "android/skin/qt/extended-pages/perfstats-page.h"  // for PerfStats...
@@ -36,18 +32,14 @@
 #include "android/skin/winsys.h"                            // for WinsysPre...
 #include "ui_settings-page.h"                               // for SettingsPage
 
-class QLineEdit;
-class QObject;
-class QWidget;
-
 #ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
 #include "android/base/async/ThreadLooper.h"                // for ThreadLooper
 #include "android/featurecontrol/FeatureControl.h"          // for isEnabled
 #include "android/metrics/MetricsReporter.h"                // for MetricsRe...
-#include "studio_stats.pb.h"          // for EmulatorS...
 #include "android/skin/qt/error-dialog.h"                   // for showError...
 #include "android/snapshot/common.h"                        // for kDefaultB...
 #include "android/snapshot/interface.h"                     // for androidSn...
+#include "studio_stats.pb.h"                                // for EmulatorS...
 #endif
 
 #include <QCheckBox>                                        // for QCheckBox
@@ -63,8 +55,11 @@ class QWidget;
 #include <QMessageBox>                                      // for QMessageBox
 #include <QPushButton>                                      // for QPushButton
 #include <QSettings>                                        // for QSettings
+#include <QTabWidget>                                       // for QTabWidget
 #include <QVariant>                                         // for QVariant
+#include <QtCore>                                           // for emit, SIGNAL
 #include <functional>                                       // for __base
+#include <initializer_list>                                 // for initializ...
 #include <string>                                           // for string
 
 #ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
@@ -85,7 +80,10 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
 }
 
 SettingsPage::SettingsPage(QWidget* parent)
-    : QWidget(parent), mAdb(nullptr), mUi(new Ui::SettingsPage()) {
+    : QWidget(parent), mAdb(nullptr), mUi(new Ui::SettingsPage()),
+     mSettingsTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_SETTINGS_TAB)) {
     mUi->setupUi(this);
     disableForEmbeddedEmulator();
     mUi->set_saveLocBox->installEventFilter(this);
@@ -319,10 +317,29 @@ SettingsPage::SettingsPage(QWidget* parent)
         settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
     mUi->set_disableMouseWheel->setChecked(disableMouseWheel);
     on_set_disableMouseWheel_toggled(disableMouseWheel);
+
+    // Connect the tab signaling
+    connect(mUi->set_tabs, SIGNAL(currentChanged(int)), this, SLOT(on_tabChanged()));
 }
 
 SettingsPage::~SettingsPage() {
     proxyDtor();
+}
+
+void SettingsPage::on_tabChanged() {
+    switch(mUi->set_tabs->currentIndex()) {
+        case 0:
+            mSettingsTracker->increment("GENERAL");
+            break;
+        case 1:
+            mSettingsTracker->increment("PROXY");
+            break;
+        case 2:
+            mSettingsTracker->increment("ADVANCED");
+            break;
+        default:
+            LOG(VERBOSE) << "Unknown tab selected.";
+    }
 }
 
 void SettingsPage::setAdbInterface(android::emulation::AdbInterface* adb) {
@@ -381,9 +398,7 @@ void SettingsPage::on_set_themeBox_currentIndexChanged(int index)
         // Out of range--ignore
         return;
     }
-    QSettings settings;
-    settings.setValue(Ui::Settings::UI_THEME, (int)theme);
-
+    setSelectedTheme(theme, true);
     emit(themeChanged(theme));
 }
 

@@ -29,6 +29,12 @@
 #include "qemu/queue.h"
 #include "qemu/thread.h"
 
+#ifdef __APPLE__
+#ifdef __arm64__
+#include <Hypervisor/Hypervisor.h>
+#endif
+#endif
+
 typedef int (*WriteCoreDumpFunction)(const void *buf, size_t size,
                                      void *opaque);
 
@@ -434,6 +440,11 @@ struct CPUState {
     // and x86 emulation state
     struct hvf_vcpu_caps* hvf_caps;
     struct hvf_x86_state* hvf_x86;
+#ifdef __arm64__
+    hv_vcpu_exit_t* hvf_vcpu_exit_info;
+    bool hvf_irq_pending;
+    bool hvf_fiq_pending;
+#endif
     union {
         uint32_t u32;
         icount_decr_u16 u16;

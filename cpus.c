@@ -1803,7 +1803,12 @@ static void qemu_cpu_kick_thread(CPUState *cpu)
     }
 #endif /* CONFIG_HAX */
 #ifdef CONFIG_HVF
-    if (hvf_enabled()) { cpu_exit(cpu); }
+    if (hvf_enabled()) {
+        cpu_exit(cpu);
+#if defined(__aarch64__) && defined(CONFIG_HVF)
+        hvf_exit_vcpu(cpu);
+#endif
+    }
 #endif /* CONFIG_HVf */
 #else /* _WIN32 */
 #ifdef CONFIG_GVM

@@ -128,6 +128,8 @@ AEMU_EXPORT extern int  android_gles_fast_pipes;
 
 AEMU_EXPORT void android_cleanupProcGLObjects(uint64_t puid);
 
+AEMU_EXPORT void android_waitForOpenglesProcessCleanup();
+
 #ifdef __cplusplus
 AEMU_EXPORT const emugl::RendererPtr& android_getOpenglesRenderer();
 #endif

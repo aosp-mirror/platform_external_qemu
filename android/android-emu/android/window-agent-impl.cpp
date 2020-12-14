@@ -18,6 +18,7 @@
 #include "android/emulation/MultiDisplay.h"
 #include "android/hw-sensors.h"
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 
 static_assert(WINDOW_MESSAGE_GENERIC == int(Ui::OverlayMessageType::None),
@@ -172,31 +173,36 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                 },
         .startExtendedWindow =
-                []() {
+                [](ExtendedWindowPane pane) {
                     auto* win = EmulatorQtWindow::getInstance();
-                    if (win && !win->toolWindow()->isExtendedWindowVisible()) {
-                        win->runOnUiThread([win]() {
-                            win->toolWindow()->showExtendedWindow();
+                    bool visibilityChanged = false;
+                    if (win) {
+                        visibilityChanged =
+                                !win->toolWindow()->isExtendedWindowVisible();
+                        win->runOnUiThread([win, pane]() {
+                            win->toolWindow()->showExtendedWindow(pane);
                         });
-                        return true;
                     }
-                    return false;
+                    return visibilityChanged;
                 },
         .quitExtendedWindow =
                 []() {
                     auto* win = EmulatorQtWindow::getInstance();
-                    if (win && win->toolWindow()->isExtendedWindowVisible()) {
+                    bool visibilityChanged = false;
+                    if (win) {
+                        visibilityChanged =
+                                win->toolWindow()->isExtendedWindowVisible();
                         win->runOnUiThread(
                             [win]() { win->toolWindow()->hideExtendedWindow(); });
-                        return true;
                     }
-                    return false;
+                    return visibilityChanged;
                 },
         .setUiTheme = [](SettingsTheme type) {
                     skin_winsys_touch_qt_extended_virtual_sensors();
                     if (auto* win = EmulatorQtWindow::getInstance()) {
-                        win->runOnUiThread(
-                                [win, type]() { win->toolWindow()->setUiTheme(type); });
+                        win->runOnUiThread([win, type]() {
+                            win->toolWindow()->setUiTheme(type, false);
+                        });
                         return true;
                     } else {
                         return false;
@@ -204,6 +210,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
 
                 },
 
+        .runOnUiThread =
+                [](UiUpdateFunc f, void* data, bool wait) {
+                    skin_winsys_run_ui_update(f, data, wait);
+                }
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

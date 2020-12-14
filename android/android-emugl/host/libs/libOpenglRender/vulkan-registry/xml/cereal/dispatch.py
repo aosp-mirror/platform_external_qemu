@@ -42,6 +42,19 @@ getProcAddrFuncs = [
     "vkEnumerateDeviceLayerProperties",
 ]
 
+# Some methods can only be found using dlsym() while we cannot get the function
+# address using vkGetInstProcAddr() or vkGetDeviceProcAddr(). These function
+# pointers should only be initialized when setting up the dispatch from system
+# loader.
+getProcAddrOnlyFuncs = [
+    "vkGetMTLDeviceMVK",
+    "vkSetMTLTextureMVK",
+    "vkGetMTLTextureMVK",
+    "vkGetMTLBufferMVK",
+    "vkUseIOSurfaceMVK",
+    "vkGetIOSurfaceMVK",
+]
+
 getInstanceProcAddrNoInstanceFuncs = [
     "vkCreateInstance",
     "vkEnumerateInstanceExtensionProperties",
@@ -84,6 +97,9 @@ getInstanceProcAddrFuncs = [
 def isGetProcAddressAPI(vulkanApi):
     return vulkanApi.name in getProcAddrFuncs
 
+def isGetProcAddressOnlyAPI(vulkanApi):
+    return vulkanApi.name in getProcAddrOnlyFuncs
+
 def isGetInstanceProcAddressNoInstanceAPI(vulkanApi):
     return vulkanApi.name in getInstanceProcAddrNoInstanceFuncs
 
@@ -100,6 +116,9 @@ def isGetDeviceProcAddressAPI(vulkanApi):
     if isGetProcAddressAPI(vulkanApi):
         return False
 
+    if isGetProcAddressOnlyAPI(vulkanApi):
+        return False
+
     if isGetInstanceProcAddressAPI(vulkanApi):
         return False
 
@@ -108,6 +127,8 @@ def isGetDeviceProcAddressAPI(vulkanApi):
 def inferProcAddressFuncType(vulkanApi):
     if isGetProcAddressAPI(vulkanApi):
         return "global"
+    if isGetProcAddressOnlyAPI(vulkanApi):
+        return "global-only"
     if isGetInstanceProcAddressNoInstanceAPI(vulkanApi):
         return "global-instance"
     if isGetInstanceProcAddressAPI(vulkanApi):
@@ -238,8 +259,7 @@ void init_vulkan_dispatch_from_system_loader(
             self.apisToGet["global-instance"] + \
             self.apisToGet["instance"] + \
             self.apisToGet["device"] + \
-            self.apisToGet["global"] + \
-            self.apisToGet["global"]
+            self.apisToGet["global-only"]
 
         for vulkanApi, typeDecl, feature in apis:
             self.syncFeature(self.cgenImpl, feature)
