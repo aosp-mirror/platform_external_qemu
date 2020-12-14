@@ -21,6 +21,14 @@
 #include "android/skin/qt/qt-ui-commands.h"  // for QtUICommand
 #include "ui_help-page.h"                    // for HelpPage
 
+
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class QObject;
 class QString;
 class QWidget;
@@ -45,6 +53,7 @@ private:
     void disableForEmbeddedEmulator();
 
     std::unique_ptr<Ui::HelpPage> mUi;
+    std::shared_ptr<UiEventTracker> mHelpTracker;
     android::avd::BugreportInfo mBugreportInfo;
 };
 

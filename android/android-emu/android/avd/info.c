@@ -1269,8 +1269,18 @@ char*  avdInfo_getDefaultCachePath( const AvdInfo*  i )
     return _getFullFilePath(i->contentPath, imageName);
 }
 
+static bool is_armish(const AvdInfo* i);
+
 char*  avdInfo_getSdCardPath( const AvdInfo* i )
 {
+    if (i->apiLevel >=30 && is_armish(i)) {
+        // BUG: 174481551
+        // ignore sdcard for arm when api is >=30, as
+        // it makes setting up the metadata disk id tricky
+        // TODO: figure out better approach
+        dprint("INFO: ignore sdcard for arm at api level >= 30");
+        return NULL;
+    }
     const char* imageName = _imageFileNames[ AVD_IMAGE_SDCARD ];
     char*       path;
 
@@ -1726,6 +1736,32 @@ avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir )
     *pSkinName = NULL;
     *pSkinDir  = NULL;
 
+    // TODO: Apple Silicon Qt support is spotty; we can't currently use device skins with
+    // our build. So hardcode the skin to the lcd widthxheight.
+#if defined(__APPLE__) && defined(__aarch64__)
+    if (i->configIni != NULL ) {
+        /* We need to create a name.
+         * Make a "magical" name using the screen size from config.ini
+         * (parse_skin_files() in main-common-ui.c parses this name
+         *  to determine the screen size.)
+         */
+        int width = iniFile_getInteger(i->configIni, "hw.lcd.width", 0);
+        int height = iniFile_getInteger(i->configIni, "hw.lcd.height", 0);
+        if (width > 0 && height > 0) {
+            char skinNameBuf[64];
+            snprintf(skinNameBuf, sizeof skinNameBuf, "%dx%d", width, height);
+            skinName = ASTRDUP(skinNameBuf);
+        } else {
+            skinName = ASTRDUP(SKIN_DEFAULT);
+        }
+    } else {
+        skinName = ASTRDUP(SKIN_DEFAULT);
+    }
+
+    *pSkinName = skinName;
+    return;
+#endif
+
     if (!i->contentPath) {
         *pSkinName = ASTRDUP(SKIN_DEFAULT);
         return;
@@ -2013,6 +2049,10 @@ void avdInfo_setCustomContentPath(AvdInfo* info, const char* path) {
 
 void avdInfo_setCustomCoreHwIniPath(AvdInfo* info, const char* path) {
     info->coreHardwareIniPath = strdup(path);
+}
+
+int avdInfo_maxMultiDisplayEntries() {
+    return 3;
 }
 
 void avdInfo_replaceMultiDisplayInConfigIni(AvdInfo* i, int index,

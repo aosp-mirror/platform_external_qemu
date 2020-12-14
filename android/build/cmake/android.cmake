@@ -22,6 +22,12 @@ include(prebuilts)
 # We want to make sure all the cross targets end up in a unique location
 set(ANDROID_CROSS_BUILD_DIRECTORY ${CMAKE_BINARY_DIR}/build/${ANDROID_HOST_TAG})
 
+set(ANDROID_XCODE_SIGN_ADHOC FALSE)
+
+if (APPLE AND BUILDING_FOR_AARCH64)
+    set(ANDROID_XCODE_SIGN_ADHOC TRUE)
+endif()
+
 # Checks to make sure the TAG is valid.
 function(_check_target_tag TAG)
   set(VALID_TARGETS
@@ -30,6 +36,7 @@ function(_check_target_tag TAG)
       linux-x86_64
       linux-aarch64
       darwin-x86_64
+      darwin-aarch64
       all
       Clang)
   if(NOT (TAG IN_LIST VALID_TARGETS))
@@ -231,7 +238,7 @@ function(_register_target)
   set(src ${build_SRC})
   if(LINUX AND build_LINUX)
     list(APPEND src ${build_LINUX})
-  elseif(DARWIN_X86_64 AND build_DARWIN)
+  elseif((DARWIN_X86_64 OR DARWIN_AARCH64) AND build_DARWIN)
     list(APPEND src ${build_DARWIN})
   elseif(WINDOWS_MSVC_X86_64 AND (build_MSVC OR build_WINDOWS))
     list(APPEND src ${build_MSVC} ${build_WINDOWS})
@@ -274,6 +281,13 @@ function(_register_target)
       TARGET ${build_TARGET} URL ${build_URL} LIBNAME ${build_LIBNAME}
       SPDX ${build_LICENSE} LICENSE ${REMOTE_LICENSE} LOCAL ${LOCAL_LICENSE})
   endif()
+endfunction()
+
+function(android_sign path)
+    if (ANDROID_XCODE_SIGN_ADHOC)
+        install(
+            CODE "message(\"android_sign ${path}\")\nexecute_process(COMMAND codesign -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${path})")
+    endif()
 endfunction()
 
 # ~~~
@@ -991,7 +1005,7 @@ endfunction()
 # . LIBCMD The variable which will contain the complete linker command . LIBNAME
 # The archive that needs to be included completely
 function(android_complete_archive LIBCMD LIBNAME)
-  if(DARWIN_X86_64)
+  if(DARWIN_X86_64 OR DARWIN_AARCH64)
     set(${LIBCMD} "-Wl,-force_load,$<TARGET_FILE:${LIBNAME}>" PARENT_SCOPE)
   elseif(WINDOWS_MSVC_X86_64)
     if(MSVC)
@@ -1138,20 +1152,36 @@ endfunction()
 # ANDROID_AARCH The android architecture name STUBS The set of stub sources to
 # use.
 function(android_add_qemu_upstream_executable ANDROID_AARCH STUBS)
-  android_build_qemu_variant(
-    # INSTALL We do not install this target.
-    EXE qemu-upstream-${ANDROID_AARCH}
-    CPU ${ANDROID_AARCH}
-    SOURCES vl.c ${STUBS}
-    DEFINITIONS -DNEED_CPU_H
-    LIBRARIES android-emu
-              libqemu2-glue
-              libqemu2-glue-vm-operations
-              libqemu2-util
-              SDL2::SDL2
-              android-qemu-deps
-              android-qemu-deps-headful
-              emulator-libusb)
+    if (DARWIN_AARCH64)
+        android_build_qemu_variant(
+            # INSTALL We do not install this target.
+            EXE qemu-upstream-${ANDROID_AARCH}
+            CPU ${ANDROID_AARCH}
+            SOURCES vl.c ${STUBS}
+            DEFINITIONS -DNEED_CPU_H
+            LIBRARIES android-emu
+            libqemu2-glue
+            libqemu2-glue-vm-operations
+            libqemu2-util
+            android-qemu-deps
+            android-qemu-deps-headful
+            emulator-libusb)
+    else()
+        android_build_qemu_variant(
+            # INSTALL We do not install this target.
+            EXE qemu-upstream-${ANDROID_AARCH}
+            CPU ${ANDROID_AARCH}
+            SOURCES vl.c ${STUBS}
+            DEFINITIONS -DNEED_CPU_H
+            LIBRARIES android-emu
+            libqemu2-glue
+            libqemu2-glue-vm-operations
+            libqemu2-util
+            SDL2::SDL2
+            android-qemu-deps
+            android-qemu-deps-headful
+            emulator-libusb)
+    endif()
 endfunction()
 
 # Copies a shared library
@@ -1214,6 +1244,7 @@ function(android_install_exe TGT DST)
   android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
+  android_sign(${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
 endfunction()
 
 # Installs the given shared library. The shared library will end up in ../lib64
@@ -1226,6 +1257,8 @@ function(android_install_shared TGT)
   android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
+  # Account for lib prefix when signing
+  android_sign(${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
 endfunction()
 
 # Strips the given prebuilt executable during install..

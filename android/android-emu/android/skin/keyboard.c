@@ -132,6 +132,8 @@ static SkinKeyMod keycode_to_mod(int key) {
         return kKeyModLCtrl;
     case LINUX_KEY_LEFTSHIFT:
         return kKeyModLShift;
+    case LINUX_KEY_LEFTMETA:
+        return kKeyModLMeta;
     }
     return 0;
 }
@@ -240,6 +242,18 @@ static void process_modifier_key(SkinKeyboard* kb, SkinEvent* ev, int down) {
     }
     if (ev->u.text.mod & kKeyModLAlt) {
         skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, down);
+    }
+    if (ev->u.text.mod & kKeyModLCtrl) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, down);
+    }
+    if (ev->u.text.mod & kKeyModRCtrl) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTCTRL, down);
+    }
+    if (ev->u.text.mod & kKeyModLMeta) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTMETA, down);
+    }
+    if (ev->u.text.mod & kKeyModRMeta) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTMETA, down);
     }
 }
 

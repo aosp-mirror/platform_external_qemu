@@ -199,6 +199,7 @@ def parse_args():
     parser.add_argument(
         "--environment",
         default="prod",
+        type=str.lower,
         choices=["prod", "staging"],
         help="Which symbol server endpoint to use, can be staging or prod",
     )

@@ -75,7 +75,11 @@ struct address_space_allocator {
 };
 
 #define ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET (~(uint64_t)0)
+#if defined(__APPLE__) && defined(__arm64__)
+#define ANDROID_EMU_ADDRESS_SPACE_DEFAULT_PAGE_SIZE 16384
+#else
 #define ANDROID_EMU_ADDRESS_SPACE_DEFAULT_PAGE_SIZE 4096
+#endif
 
 /* The assert function to abort if something goes wrong. */
 static void address_space_assert(bool condition) {
@@ -635,7 +639,11 @@ static void address_space_control_write_locked(void *opaque,
         break;
 
     case ADDRESS_SPACE_REGISTER_GUEST_PAGE_SIZE:
+#if defined(__APPLE__) && defined(__arm64__)
+        state->registers.guest_page_size = (val < 16384) ? 16384 : 16384;
+#else
         state->registers.guest_page_size = val;
+#endif
         break;
 
     case ADDRESS_SPACE_REGISTER_BLOCK_SIZE_LOW:
@@ -752,7 +760,11 @@ static void address_space_pci_set_config(PCIDevice *dev)
                  GOLDFISH_ADDRESS_SPACE_CONTROL_SIZE);
 }
 
+#if defined(__APPLE__) && defined(__arm64__)
+#define DEFAULT_GUEST_PAGE_SIZE 16384
+#else
 #define DEFAULT_GUEST_PAGE_SIZE 4096
+#endif
 
 static void address_space_pci_realize(PCIDevice *dev, Error **errp) {
     AS_DPRINT("realize");

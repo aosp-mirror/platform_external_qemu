@@ -484,7 +484,7 @@ AndroidPipe::~AndroidPipe() {
 // static
 void AndroidPipe::Service::add(std::unique_ptr<Service> service) {
     DD("Adding new pipe service '%s' this=%p", service->name().c_str(),
-       service);
+       service.get());
     sGlobals->services.push_back(std::move(service));
 }
 

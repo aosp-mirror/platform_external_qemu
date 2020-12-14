@@ -212,6 +212,7 @@ private:
     AdbCommandPtr mSelf;
 };
 
+using AdbEntry = std::pair<std::string, Optional<int>>;
 class AdbInterfaceImpl final : public AdbInterface {
 public:
     friend AdbInterface::Builder;
@@ -253,7 +254,7 @@ private:
     std::string mAutoAdbPath;
     std::string mCustomAdbPath;
     std::string mSerialString;
-    std::vector<std::pair<std::string, Optional<int>>> mAvailableAdbInstalls;
+    std::vector<AdbEntry> mAvailableAdbInstalls;
     bool mAdbVersionCurrent = false;
 };
 
@@ -393,6 +394,7 @@ std::vector<std::string> AdbLocatorImpl::availableAdb() {
 // Gets the reported adb protocol version from the given executable
 // This is the last digit in the adb version string.
 Optional<int> AdbLocatorImpl::getAdbProtocolVersion(StringView adbPath) {
+    if (!android_qemu_mode) return {};
     const std::vector<std::string> adbVersion = {adbPath, "version"};
     int protocol = 0;
     // Retrieve the adb version.
@@ -463,8 +465,14 @@ void AdbInterfaceImpl::selectAdbPath() {
         }
     }
 
-    // A locator that will scan the filesystem for available ADB installs
-    // Just take the first (likely the one from the SDK, our dir)
+    // Sort available adb installations by protocol version. Unknown versions
+    // are least preferred. Note that we sort using >=, so biggest numbers
+    // first.
+    std::sort(mAvailableAdbInstalls.begin(), mAvailableAdbInstalls.end(),
+              [](const AdbEntry& fst, const AdbEntry& snd) {
+                  return fst.second &&
+                         (!snd.second || fst.second >= snd.second);
+              });
     std::tie(mAutoAdbPath, adbVersion) = mAvailableAdbInstalls.front();
     mAdbVersionCurrent = adbVersion ? *adbVersion >= kMinAdbProtocol : false;
 }
@@ -473,6 +481,7 @@ AdbInterfaceImpl::AdbInterfaceImpl(Looper* looper,
                                    AdbLocator* locator,
                                    AdbDaemon* daemon)
     : mLooper(looper), mLocator(locator), mDaemon(daemon) {
+    if (!android_qemu_mode) return;
     discoverAdbInstalls();
     selectAdbPath();
 }
@@ -482,6 +491,11 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         ResultCallback&& result_callback,
         System::Duration timeout_ms,
         bool want_output) {
+
+    if (!android_qemu_mode) {
+        return {};
+    }
+
     AdbCommandPtr command;
     if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) && AdbConnection::failed() &&
         (args[0] == "shell" || args[0] == "logcat")) {

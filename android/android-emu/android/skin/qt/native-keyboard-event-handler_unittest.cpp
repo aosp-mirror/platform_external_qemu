@@ -68,7 +68,8 @@ const struct {
                          {XCB_MOD_MASK_LOCK, kKeyModCapsLock},
                          {XCB_MOD_MASK_CONTROL, kKeyModLCtrl},
                          {XCB_MOD_MASK_SHIFT | XCB_MOD_MASK_LOCK,
-                          kKeyModLShift | kKeyModCapsLock}};
+                          kKeyModLShift | kKeyModCapsLock},
+                         {XCB_MOD_MASK_4, kKeyModLMeta}};
 
 #elif defined(__APPLE__)
 
@@ -136,7 +137,8 @@ const struct {
         {NSEventModifierFlagCapsLock, kKeyModCapsLock},
         {NSEventModifierFlagControl, kKeyModLCtrl},
         {NSEventModifierFlagShift | NSEventModifierFlagCapsLock,
-         kKeyModLShift | kKeyModCapsLock}};
+         kKeyModLShift | kKeyModCapsLock},
+        {NSEventModifierFlagCommand, kKeyModLMeta}};
 
 #else  // Windows
 

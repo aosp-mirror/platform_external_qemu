@@ -12,10 +12,11 @@
 
 #pragma once
 
+#include "android/avd/hw-config.h"
+#include "android/avd/info.h"
 #include "android/base/export.h"
 #include "android/constants.h"
-#include "android/avd/info.h"
-#include "android/avd/hw-config.h"
+#include "android/user-config.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -60,6 +61,9 @@ extern int android_qemu_mode;
 /* are we using android-emu libraries for a minimal configuration? */
 extern int min_config_qemu_mode;
 
+/* is android-emu running Fuchsia? */
+extern int is_fuchsia;
+
 extern int android_snapshot_update_timer;
 
 /* are we using qemu 2? */
@@ -76,5 +80,7 @@ extern const char* to_set_locale;
  * keycode */
 /* on emulator host. */
 extern int use_keycode_forwarding;
+
+extern AEMU_EXPORT AUserConfig* aemu_get_userConfigPtr();
 
 ANDROID_END_HEADER

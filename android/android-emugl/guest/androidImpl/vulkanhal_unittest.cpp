@@ -34,6 +34,9 @@
 #include "android/opengles.h"
 #include "android/snapshot/interface.h"
 
+#include "OpenglSystemCommon/HostConnection.h"
+#include "OpenglSystemCommon/ProcessPipe.h"
+
 #include <android/hardware_buffer.h>
 #include <cutils/properties.h>
 
@@ -97,6 +100,8 @@ protected:
     }
 
     void SetUp() override {
+        mProcessPipeRestarted = false;
+
         property_set("ro.kernel.qemu.gltransport", GetParam());
         printf("%s: using transport: %s\n", __func__, GetParam());
 
@@ -107,6 +112,16 @@ protected:
     void TearDown() override {
         teardownVulkan();
         teardownGralloc();
+    }
+
+    void restartProcessPipeAndHostConnection() {
+        processPipeRestart();
+        cutHostConnectionUnclean();
+        refreshHostConnection();
+    }
+
+    void cutHostConnectionUnclean() {
+        HostConnection::exitUnclean();
     }
 
     void setupGralloc() {
@@ -727,6 +742,7 @@ protected:
     bool mInstanceHasGetPhysicalDeviceProperties2Support = false;
     bool mInstanceHasExternalMemorySupport = false;
     bool mDeviceHasExternalMemorySupport = false;
+    bool mProcessPipeRestarted = false;
 
     VkInstance mInstance;
     VkPhysicalDevice mPhysicalDevice;
@@ -1603,6 +1619,39 @@ TEST_P(VulkanHalTest, GetImageMemoryRequirements2) {
     func(mDevice, &info2, &reqs2);
 
     vk->vkDestroyImage(mDevice, testImage, nullptr);
+}
+
+TEST_P(VulkanHalTest, ProcessCleanup) {
+    static constexpr uint32_t kNumTrials = 10;
+    static constexpr uint32_t kNumImagesPerTrial = 100;
+
+    for (uint32_t i = 0; i < kNumTrials; ++i) {
+        VkImage images[kNumImagesPerTrial];
+        for (uint32_t j = 0; j < kNumImagesPerTrial; ++j) {
+            VkImageCreateInfo imageCi = {
+                VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, 0, 0,
+                VK_IMAGE_TYPE_2D,
+                VK_FORMAT_R8G8B8A8_UNORM,
+                { 1, 1, 1, },
+                1, 1,
+                VK_SAMPLE_COUNT_1_BIT,
+                VK_IMAGE_TILING_LINEAR,
+                VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+                VK_SHARING_MODE_EXCLUSIVE,
+                0, nullptr,
+                VK_IMAGE_LAYOUT_UNDEFINED,
+            };
+
+            vk->vkCreateImage(mDevice, &imageCi, nullptr, &images[j]);
+        }
+
+        for (uint32_t j = 0; j < kNumImagesPerTrial; ++j) {
+            vk->vkDestroyImage(mDevice, images[j], nullptr);
+        }
+
+        restartProcessPipeAndHostConnection();
+        setupVulkan();
+    }
 }
 
 INSTANTIATE_TEST_SUITE_P(

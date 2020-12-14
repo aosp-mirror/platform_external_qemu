@@ -968,6 +968,12 @@ static void hvf_handle_interrupt(CPUState * cpu, int mask) {
     }
 }
 
+void hvf_irq_deactivated(int cpunum, int irq) {
+    // Shouldn't be used in x86
+    (void)cpunum;
+    (void)irq;
+}
+
 int hvf_vcpu_exec(CPUState* cpu) {
     X86CPU *x86_cpu = X86_CPU(cpu);
     CPUX86State *env = &x86_cpu->env;

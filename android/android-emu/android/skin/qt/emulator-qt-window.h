@@ -229,6 +229,7 @@ public:
                           const QPoint& pos,
                           const QPoint& gPos,
                           bool skipSync = false);
+    void handleMouseWheelEvent(int delta, Qt::Orientation orientation);
     void panHorizontal(bool left);
     void panVertical(bool up);
     SkinEvent* createSkinEvent(SkinEventType type);
@@ -449,6 +450,9 @@ private:
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
     QRect mDeviceGeometry;
+
+    bool mMouseGrabbed = false;
+    bool mPromptMouseRestoreMessageBox = true;
 
     // Window flags to use for frameless and framed appearance
 

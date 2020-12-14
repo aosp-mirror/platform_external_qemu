@@ -46,6 +46,8 @@ static const unsigned short keymap_button[INPUT_BUTTON__MAX] = {
 static const unsigned short axismap_rel[INPUT_AXIS__MAX] = {
     [INPUT_AXIS_X]                   = REL_X,
     [INPUT_AXIS_Y]                   = REL_Y,
+    [INPUT_AXIS_X_WHEEL]             = REL_HWHEEL,
+    [INPUT_AXIS_Y_WHEEL]             = REL_WHEEL,
 };
 
 static const unsigned short axismap_abs[INPUT_AXIS__MAX] = {

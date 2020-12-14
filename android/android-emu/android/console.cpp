@@ -4032,7 +4032,9 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
 }
 
 static int do_start_extended_window(ControlClient client, char* args) {
-    client->global->emu_agent->startExtendedWindow();
+    // start extended window with the currently selected pane.
+    // set to location pane by default.
+    client->global->emu_agent->startExtendedWindow(PANE_IDX_UNKNOWN);
     return 0;
 }
 
@@ -4047,9 +4049,9 @@ static int do_set_ui_theme(ControlClient client, char* args) {
         return -1;
     }
     if (!strcmp(args,"dark")) {
-        client->global->emu_agent->setUiTheme(SETTINGS_THEME_DARK);
+        client->global->emu_agent->setUiTheme(SETTINGS_THEME_STUDIO_DARK);
     } else if (!strcmp(args, "light")) {
-        client->global->emu_agent->setUiTheme(SETTINGS_THEME_LIGHT);
+        client->global->emu_agent->setUiTheme(SETTINGS_THEME_STUDIO_LIGHT);
     } else {
         control_write( client, "KO: Failed to set UI theme to %s, try 'setUiTheme <dark|light>'\r\n", args);
                 return -1;

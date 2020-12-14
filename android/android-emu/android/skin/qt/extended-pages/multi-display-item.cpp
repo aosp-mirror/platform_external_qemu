@@ -11,12 +11,14 @@
 
 #include "multi-display-item.h"
 
-#include <stddef.h>                                 // for NULL
-#include <QComboBox>                                // for QComboBox
-#include <QLabel>                                   // for QLabel
-#include <QPushButton>                              // for QPushButton
-#include <QStyle>                                   // for QStyle
+#include <stddef.h>  // for NULL
 
+#include <QComboBox>    // for QComboBox
+#include <QLabel>       // for QLabel
+#include <QPushButton>  // for QPushButton
+#include <QStyle>       // for QStyle
+
+#include "android/metrics/UiEventTracker.h"
 #include "android/skin/qt/angle-input-widget.h"     // for AngleInputWidget
 #include "android/skin/qt/emulator-qt-window.h"     // for EmulatorQtWindow
 #include "android/skin/qt/extended-pages/common.h"  // for getIconForCurrent...
@@ -25,19 +27,23 @@
 class QFocusEvent;
 class QWidget;
 
-std::vector<MultiDisplayItem::displayType> MultiDisplayItem::sDisplayTypes =
-    {{"480p(720x480)", "480p", 720, 480, 142},
-     {"720p(1280x720)", "720p", 1280, 720, 213},
-     {"1080p(1920x1080)", "1080p", 1920, 1080, 320},
-     {"4K(3840x2160)", "4K", 3840, 2160, 320},
-     {"4K upscaled(3840x2160)", "4K\nupscaled", 3840, 2160, 640},
-     {"custom", "custom", 1080, 720, 213},
-    };
+std::vector<MultiDisplayItem::displayType> MultiDisplayItem::sDisplayTypes = {
+        {"480p(720x480)", "480p", 720, 480, 142},
+        {"720p(1280x720)", "720p", 1280, 720, 213},
+        {"1080p(1920x1080)", "1080p", 1920, 1080, 320},
+        {"4K(3840x2160)", "4K", 3840, 2160, 320},
+        {"4K upscaled(3840x2160)", "4K\nupscaled", 3840, 2160, 640},
+        {"custom", "custom", 1080, 720, 213},
+};
 
 MultiDisplayItem::MultiDisplayItem(int id, QWidget* parent)
-    : QWidget(parent), mMultiDisplayPage(reinterpret_cast<MultiDisplayPage*>(parent)),
-      mUi(new Ui::MultiDisplayItem()), mId(id) {
-
+    : QWidget(parent),
+      mMultiDisplayPage(reinterpret_cast<MultiDisplayPage*>(parent)),
+      mUi(new Ui::MultiDisplayItem()),
+      mId(id),
+      mDropDownTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::OPTION_SELECTED,
+              android_studio::EmulatorUiEvent::EXTENDED_DISPLAYS_TAB)) {
     mUi->setupUi(this);
     this->setStyleSheet(parent->styleSheet());
 
@@ -55,15 +61,18 @@ MultiDisplayItem::MultiDisplayItem(int id, QWidget* parent)
     mCurrentIndex = 1; /* 720p as default */
     mUi->selectDisplayType->setCurrentIndex(mCurrentIndex);
     setValues(mCurrentIndex);
-    connect(mUi->selectDisplayType, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(onDisplayTypeChanged(int)));
+    connect(mUi->selectDisplayType, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(onDisplayTypeChanged(int)));
     connect(this, SIGNAL(changeDisplay(int)), mMultiDisplayPage,
             SLOT(changeSecondaryDisplay(int)));
     connect(this, SIGNAL(deleteDisplay(int)), mMultiDisplayPage,
             SLOT(deleteSecondaryDisplay(int)));
-    connect(mUi->height, SIGNAL(valueChanged(double)), this, SLOT(onCustomParaChanged(double)));
-    connect(mUi->width, SIGNAL(valueChanged(double)), this, SLOT(onCustomParaChanged(double)));
-    connect(mUi->dpi, SIGNAL(valueChanged(double)), this, SLOT(onCustomParaChanged(double)));
+    connect(mUi->height, SIGNAL(valueChanged(double)), this,
+            SLOT(onCustomParaChanged(double)));
+    connect(mUi->width, SIGNAL(valueChanged(double)), this,
+            SLOT(onCustomParaChanged(double)));
+    connect(mUi->dpi, SIGNAL(valueChanged(double)), this,
+            SLOT(onCustomParaChanged(double)));
     std::string s = "Display " + std::to_string(mId);
     mUi->display_title->setText(s.c_str());
     mUi->deleteDisplay->setIcon(getIconForCurrentTheme("close"));
@@ -72,33 +81,37 @@ MultiDisplayItem::MultiDisplayItem(int id, QWidget* parent)
     hideWidthHeightDpiBox(true);
 }
 
-MultiDisplayItem::MultiDisplayItem(int id, uint32_t width, uint32_t height,
-                                   uint32_t dpi, QWidget* parent)
+MultiDisplayItem::MultiDisplayItem(int id,
+                                   uint32_t width,
+                                   uint32_t height,
+                                   uint32_t dpi,
+                                   QWidget* parent)
     : MultiDisplayItem(id, parent) {
     // check with displayType fits the width, height and dpi, then set to it.
     // If not found, set to "custom" type.
     int i = 0;
-    for ( ; i < sDisplayTypes.size() - 1 ; i++) {
-        if (sDisplayTypes[i].width == width && sDisplayTypes[i].height == height &&
-            sDisplayTypes[i].dpi == dpi) {
+    for (; i < sDisplayTypes.size() - 1; i++) {
+        if (sDisplayTypes[i].width == width &&
+            sDisplayTypes[i].height == height && sDisplayTypes[i].dpi == dpi) {
             break;
         }
     }
-    mCurrentIndex =  i;
+    mCurrentIndex = i;
     if (mUi->selectDisplayType->currentIndex() != mCurrentIndex) {
         mUi->selectDisplayType->setCurrentIndex(mCurrentIndex);
+        // This selection is not made by the user, so we have to adjust our count.
+        mDropDownTracker->increment(sDisplayTypes[mCurrentIndex].shortName, -1);
         onDisplayTypeChanged(mCurrentIndex);
     }
 }
 
 void MultiDisplayItem::onDisplayTypeChanged(int index) {
+    mDropDownTracker->increment(sDisplayTypes[index].shortName);
     if (index == sDisplayTypes.size() - 1) {
         uint32_t w, h, dpi;
         bool enabled;
-        EmulatorQtWindow::getInstance()->getMultiDisplay(mId,
-                                                         NULL, NULL,
-                                                         &w, &h, &dpi,
-                                                         NULL, &enabled);
+        EmulatorQtWindow::getInstance()->getMultiDisplay(
+                mId, NULL, NULL, &w, &h, &dpi, NULL, &enabled);
         if (enabled) {
             mUi->height->setValue(h);
             mUi->width->setValue(w);
@@ -118,7 +131,8 @@ void MultiDisplayItem::onDisplayTypeChanged(int index) {
 void MultiDisplayItem::onCustomParaChanged(double /*value*/) {
     uint32_t w, h, d;
     getValues(&w, &h, &d);
-    if (EmulatorQtWindow::getInstance()->multiDisplayParamValidate(mId, w, h, d, 0)) {
+    if (EmulatorQtWindow::getInstance()->multiDisplayParamValidate(mId, w, h, d,
+                                                                   0)) {
         emit changeDisplay(mId);
     }
 }
@@ -136,7 +150,9 @@ void MultiDisplayItem::setValues(int index) {
     mUi->dpi->setValue(sDisplayTypes[index].dpi);
 }
 
-void MultiDisplayItem::getValues(uint32_t* width, uint32_t* height, uint32_t* dpi) {
+void MultiDisplayItem::getValues(uint32_t* width,
+                                 uint32_t* height,
+                                 uint32_t* dpi) {
     if (width) {
         *width = (uint32_t)mUi->width->value();
     }

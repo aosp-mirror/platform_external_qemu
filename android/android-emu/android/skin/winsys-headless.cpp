@@ -11,6 +11,7 @@
 */
 #include <stdio.h>                                     // for fprintf, stderr
 
+#include <atomic>
 #include <functional>                                  // for __base
 #include <memory>                                      // for static_pointer...
 
@@ -20,6 +21,7 @@
 #include "android/skin/rect.h"                         // for SkinRect, SkinPos
 #include "android/skin/winsys.h"                       // for WinsysPreferre...
 #include "android/ui-emu-agent.h"                      // for UiEmuAgent
+
 
 namespace android {
 namespace base {
@@ -85,7 +87,7 @@ static GlobalState* globalState() {
     return &sGlobalState;
 }
 
-static bool sMainLoopShouldExit = false;
+static std::atomic<bool> sMainLoopShouldExit(false);
 
 #ifdef _WIN32
 static HANDLE sWakeEvent;
@@ -278,9 +280,11 @@ extern void skin_winsys_quit_request() {
     D(__FUNCTION__);
 
     // Someone else already requested close.
-    if (sMainLoopShouldExit) return;
-
-    sMainLoopShouldExit = true;
+    bool expectExit = false;
+    if (!sMainLoopShouldExit.compare_exchange_strong(expectExit, true)) {
+        // We did not exchange the value, i.e. sMainLoopShouldExit != false.
+        return;
+    }
     bool needRequestClose = false;
 
     if (android_avdInfo) {

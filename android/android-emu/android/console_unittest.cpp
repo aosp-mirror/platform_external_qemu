@@ -69,13 +69,15 @@ TEST(Console, postauth_help_size_max) {
 
 static void ping_test();
 
-TEST(Console, preauth_ping) {
-    ping_test();
-}
+// Bug: 171479818
+// TEST(Console, preauth_ping) {
+//     ping_test();
+// }
 
-TEST(Console, postauth_ping) {
-    ping_test();
-}
+// Bug: 171479818
+// TEST(Console, postauth_ping) {
+//     ping_test();
+// }
 
 static void ping_test() {
     // Verify the 'ping' response.

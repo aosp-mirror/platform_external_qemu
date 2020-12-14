@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "android/emulation/control/EmulatorService.h"
 
 #ifdef _MSC_VER
@@ -39,13 +38,16 @@
 
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
+#include "android/base/Stopwatch.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/memory/SharedMemory.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/ServiceUtils.h"
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/clipboard/Clipboard.h"
 #include "android/emulation/control/display_agent.h"
@@ -62,24 +64,33 @@
 #include "android/emulation/control/utils/AudioUtils.h"
 #include "android/emulation/control/utils/EventWaiter.h"
 #include "android/emulation/control/utils/ScreenshotUtils.h"
-#include "android/emulation/control/utils/ServiceUtils.h"
+#include "android/emulation/control/utils/SharedMemoryLibrary.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
 #include "android/hw-sensors.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/Percentiles.h"
 #include "android/opengles.h"
 #include "android/physics/Physics.h"
 #include "android/recording/Frame.h"
 #include "android/recording/Producer.h"
 #include "android/recording/audio/AudioProducer.h"
 #include "android/skin/rect.h"
+#include "android/skin/winsys.h"
 #include "android/telephony/gsm.h"
 #include "android/telephony/modem.h"
 #include "android/telephony/sms.h"
 #include "android/version.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
+#include "studio_stats.pb.h"
+namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+}  // namespace android
 
 namespace google {
 namespace protobuf {
@@ -208,14 +219,16 @@ public:
         auto agent = mAgents->location;
         GpsState request = *requestPtr;
 
-        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion([agent, request]() {
-            struct timeval tVal;
-            memset(&tVal, 0, sizeof(tVal));
-            gettimeofday(&tVal, NULL);
-            agent->gpsSendLoc(request.latitude(), request.longitude(),
-                              request.altitude(), request.speed(),
-                              request.bearing(), request.satellites(), &tVal);
-        });
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [agent, request]() {
+                    struct timeval tVal;
+                    memset(&tVal, 0, sizeof(tVal));
+                    gettimeofday(&tVal, NULL);
+                    agent->gpsSendLoc(request.latitude(), request.longitude(),
+                                      request.altitude(), request.speed(),
+                                      request.bearing(), request.satellites(),
+                                      &tVal);
+                });
 
         return Status::OK;
     }
@@ -492,6 +505,13 @@ public:
         EventWaiter frameEvent(&gpu_register_shared_memory_callback,
                                &gpu_unregister_shared_memory_callback);
 
+        SharedMemoryLibrary::LibraryEntry entry;
+        if (request->transport().channel() == ImageTransport::MMAP) {
+            entry = mSharedMemoryLibrary.borrow(
+                    request->transport().handle(),
+                    request->width() * request->height() * 4);
+        }
+
         // Make sure we always write the first frame, this can be
         // a completely empty frame if the screen is not active.
         Image first;
@@ -504,6 +524,9 @@ public:
 
         bool lastFrameWasEmpty = first.format().width() == 0;
         int frame = 0;
+
+        // Track percentiles, and report if we have seen at least 32 frames.
+        metrics::Percentiles perfEstimator(32, {0.5, 0.95});
         while (clientAvailable) {
             Image reply;
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(125);
@@ -516,7 +539,7 @@ public:
             auto arrived = frameEvent.next(kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
                 frame += arrived;
-                // TODO(jansene): Add metrics around dropped frames/timing?
+                Stopwatch sw;
                 getScreenshot(context, request, &reply);
                 reply.set_seq(frame);
 
@@ -529,10 +552,33 @@ public:
                 if (!context->IsCancelled() &&
                     (!lastFrameWasEmpty || !emptyFrame)) {
                     clientAvailable = writer->Write(reply);
+                    perfEstimator.addSample(sw.elapsedUs());
                 }
                 lastFrameWasEmpty = emptyFrame;
             }
             clientAvailable = !context->IsCancelled() && clientAvailable;
+        }
+
+        // Only report metrics if we have a constant size per image, and
+        // if we delivered sufficient amount of frames.
+        if (perfEstimator.isBucketized() &&
+            (request->format() == ImageFormat::RGB888 ||
+             request->format() == ImageFormat::RGBA8888)) {
+            android::metrics::MetricsReporter::get().report(
+                    [=](android_studio::AndroidStudioEvent* event) {
+                        int bpp = request->format() == ImageFormat::RGB888 ? 3
+                                                                           : 4;
+                        auto screenshot = event->mutable_emulator_details()
+                                                  ->mutable_screenshot();
+                        screenshot->set_size(request->width() *
+                                             request->height() * bpp);
+                        screenshot->set_frames(frame);
+                        // We care about median, 95%, and 100%.
+                        // (max enables us to calculate # of dropped frames.)
+                        perfEstimator.fillMetricsEvent(
+                                screenshot->mutable_delivery_delay(),
+                                {0.5, 0.95, 1.0});
+                    });
         }
         return Status::OK;
     }
@@ -557,6 +603,7 @@ public:
         if (!enabled)
             return Status::OK;
 
+        reply->set_timestampus(System::get()->getUnixTimeUs());
         android::emulation::ImageFormat desiredFormat =
                 ScreenshotUtils::translate(request->format());
 
@@ -622,12 +669,14 @@ public:
             return Status::CANCELLED;
         }
 
+        Stopwatch sw;
         android::emulation::Image img = android::emulation::takeScreenshot(
                 desiredFormat, desiredRotation, renderer.get(),
                 mAgents->display->getFrameBuffer, request->display(), newWidth,
                 newHeight);
+        LOG(VERBOSE) << "Screenshot " << newWidth << "x" << newHeight
+                     << ", in: " << sw.elapsedUs() << " us";
 
-        reply->set_image(img.getPixelBuf(), img.getPixelCount());
 
         // Update format information with the retrieved width, height..
         auto format = reply->mutable_format();
@@ -640,6 +689,20 @@ public:
         rotation_reply->set_yaxis(yaxis);
         rotation_reply->set_zaxis(zaxis);
         rotation_reply->set_rotation(rotation);
+
+        if (request->transport().channel() == ImageTransport::MMAP) {
+            // TODO(jansene): have takeScreenshot write directly to the region
+            auto shm = mSharedMemoryLibrary.borrow(
+                    request->transport().handle(), img.getPixelCount());
+            if (shm->isOpen() && shm->isMapped()) {
+                memcpy(shm->get(), img.getPixelBuf(), img.getPixelCount());
+                auto transport = format->mutable_transport();
+                transport->set_handle(request->transport().handle());
+                transport->set_channel(ImageTransport::MMAP);
+            }
+        } else {
+            reply->set_image(img.getPixelBuf(), img.getPixelCount());
+        }
 
         return Status::OK;
     }
@@ -690,7 +753,7 @@ public:
                     mAgents->vm->vmReset();
                     break;
                 case VmRunState::SHUTDOWN:
-                    mAgents->vm->vmShutdown();
+                    skin_winsys_quit_request();
                     break;
                 case VmRunState::TERMINATE: {
                     LOG(INFO) << "Terminating the emulator.";
@@ -773,6 +836,7 @@ private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
     TouchEventSender mTouchEventSender;
+    SharedMemoryLibrary mSharedMemoryLibrary;
 
     Clipboard* mClipboard;
     Looper* mLooper;

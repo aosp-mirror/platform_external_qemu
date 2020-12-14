@@ -119,9 +119,20 @@ public:
         crashreport::CrashReporter::get()->hangDetector().pause(true);
         // Exports all qcow2 images..
         SnapshotLineConsumer slc(&result);
+<<<<<<< HEAD   (921171 Merge "Merge cherrypicks of [1493823, 1493824] into emu-30-r)
         auto exp = getConsoleAgents()->vm->snapshotExport(
                 snapshot->name().data(), tmpdir.data(), slc.opaque(),
                 LineConsumer::Callback);
+=======
+        bool exp;
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [&snapshot, &tmpdir, &slc, &exp] {
+                    exp = getConsoleAgents()->vm->snapshotExport(
+                            snapshot->name().data(), tmpdir.data(),
+                            slc.opaque(), LineConsumer::Callback);
+                });
+
+>>>>>>> BRANCH (613ca0 Merge "Add 140 and 180 as supported LCD densities" into emu-)
         crashreport::CrashReporter::get()->hangDetector().pause(false);
 
         if (!exp) {
@@ -146,7 +157,12 @@ public:
                     }));
             streamBufPtr = csb.get();
         } else {
+<<<<<<< HEAD   (921171 Merge "Merge cherrypicks of [1493823, 1493824] into emu-30-r)
             dstFile.reset(new std::ofstream(request->path().c_str()));
+=======
+            dstFile.reset(new std::ofstream(request->path().c_str(),
+                          std::ios::binary | std::ios::out));
+>>>>>>> BRANCH (613ca0 Merge "Add 140 and 180 as supported LCD densities" into emu-)
             if (!dstFile->is_open()) {
                 result.set_success(false);
                 result.set_err("Failed to write to " + request->path());
@@ -431,8 +447,11 @@ public:
         reply->set_success(true);
 
         // This is really best effor here. We will not discover errors etc.
-        snapshot::Snapshotter::get().deleteSnapshot(
-                request->snapshot_id().c_str());
+        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
+                [&request]() {
+                    snapshot::Snapshotter::get().deleteSnapshot(
+                            request->snapshot_id().c_str());
+                });
         return Status::OK;
     }
 

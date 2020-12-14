@@ -383,7 +383,11 @@ struct {
 };
 
 // Calculate snapshot version based on a base version plus featurecontrol-derived integer.
+<<<<<<< HEAD   (921171 Merge "Merge cherrypicks of [1493823, 1493824] into emu-30-r)
 static constexpr int kVersionBase = 63;
+=======
+static constexpr int kVersionBase = 65;
+>>>>>>> BRANCH (613ca0 Merge "Add 140 and 180 as supported LCD densities" into emu-)
 static_assert(kVersionBase < (1 << 20), "Base version number is too high.");
 
 #define FEATURE_CONTROL_ITEM(item) + 1

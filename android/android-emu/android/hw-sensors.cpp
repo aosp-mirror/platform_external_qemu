@@ -894,6 +894,10 @@ static void _hwSensors_init(HwSensors* h) {
         }
     }
 
+    if (android_hw->hw_sensors_heart_rate) {
+        h->sensors[ANDROID_SENSOR_HEART_RATE].enabled = true;
+    }
+
     /* XXX: TODO: Add other tests when we add the corresponding
      * properties to hardware-properties.ini et al. */
 

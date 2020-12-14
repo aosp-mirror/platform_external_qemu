@@ -69,6 +69,8 @@ void kbd_put_ledstate(int ledstate);
 
 void kbd_mouse_event(int dx, int dy, int dz, int buttonsState);
 
+void kbd_mouse_wheel_event(int dx, int dy);
+
 struct MouseTransformInfo {
     /* Touchscreen resolution */
     int x;
@@ -446,7 +448,7 @@ void surface_gl_setup_viewport(QemuGLShader *gls,
 #endif
 
 /* sdl.c */
-#ifdef CONFIG_SDL
+#if defined(CONFIG_SDL)
 void sdl_display_early_init(DisplayOptions *opts);
 int sdl_display_init(DisplayState *ds, DisplayOptions *opts);
 #else

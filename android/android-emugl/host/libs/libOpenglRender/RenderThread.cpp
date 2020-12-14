@@ -33,6 +33,7 @@
 #include "android/base/system/System.h"
 #include "android/base/Tracing.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/utils/path.h"
 #include "android/utils/file_io.h"
 
@@ -71,10 +72,17 @@ static uint64_t currTimeUs(bool enable) {
 // Start with a smaller buffer to not waste memory on a low-used render threads.
 static constexpr int kStreamBufferSize = 128 * 1024;
 
+// Requires this many threads on the system available to run unlimited.
+static constexpr int kMinThreadsToRunUnlimited = 5;
+
+// A thread run limiter that limits render threads to run one slice at a time.
+static android::base::Lock sThreadRunLimiter;
+
 RenderThread::RenderThread(RenderChannelImpl* channel,
                            android::base::Stream* loadStream)
     : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
-      mChannel(channel) {
+      mChannel(channel),
+      mRunInLimitedMode(android::base::System::get()->getCpuCoreCount() < kMinThreadsToRunUnlimited) {
     if (loadStream) {
         const bool success = loadStream->getByte();
         if (success) {
@@ -391,7 +399,13 @@ intptr_t RenderThread::main() {
 
         auto progressStart = currTimeUs(benchmarkEnabled);
         bool progress;
+
         do {
+
+            if (mRunInLimitedMode) {
+                sThreadRunLimiter.lock();
+            }
+
             progress = false;
 
             // try to process some of the command buffer using the GLESv1
@@ -448,6 +462,10 @@ intptr_t RenderThread::main() {
                     readBuf.consume(last);
                     progress = true;
                 }
+            }
+
+            if (mRunInLimitedMode) {
+                sThreadRunLimiter.unlock();
             }
 
             //

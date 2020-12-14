@@ -31,6 +31,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
 #include "android/base/containers/EntityManager.h"
+#include "android/base/containers/HybridEntityManager.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/Stream.h"
@@ -234,11 +235,6 @@ public:
                     pCreateInfo->enabledExtensionCount,
                     pCreateInfo->ppEnabledExtensionNames);
 
-        // Always include VK_MVK_moltenvk when supported.
-        if (m_emu->instanceSupportsMoltenVK) {
-            finalExts.push_back("VK_MVK_moltenvk");
-        }
-
         // Create higher version instance whenever it is possible.
         uint32_t apiVersion = VK_MAKE_VERSION(1, 0, 0);
         if (pCreateInfo->pApplicationInfo) {
@@ -298,10 +294,8 @@ public:
         info.boxed = boxed;
 
         if (m_emu->instanceSupportsMoltenVK) {
-            m_useIOSurfaceFunc = reinterpret_cast<PFN_vkUseIOSurfaceMVK>(
-                m_vk->vkGetInstanceProcAddr(*pInstance, "vkUseIOSurfaceMVK"));
-            if (!m_useIOSurfaceFunc) {
-                fprintf(stderr, "Cannot find vkUseIOSurfaceMVK\n");
+            if (!m_vk->vkSetMTLTextureMVK) {
+                fprintf(stderr, "Cannot find vkSetMTLTextureMVK\n");
                 abort();
             }
         }
@@ -821,6 +815,58 @@ public:
                     ~(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
             }
         }
+    }
+
+    VkResult on_vkEnumerateDeviceExtensionProperties(
+        android::base::BumpPool* pool,
+        VkPhysicalDevice boxed_physicalDevice,
+        const char* pLayerName,
+        uint32_t* pPropertyCount,
+        VkExtensionProperties* pProperties) {
+
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+
+        if (!m_emu->instanceSupportsMoltenVK) {
+            return vk->vkEnumerateDeviceExtensionProperties(
+                physicalDevice, pLayerName, pPropertyCount, pProperties);
+        }
+
+        // If MoltenVK is supported on host, we need to ensure that we include
+        // VK_MVK_moltenvk extenstion in returned properties.
+        std::vector<VkExtensionProperties> properties;
+        uint32_t propertyCount = 0u;
+        VkResult result = vk->vkEnumerateDeviceExtensionProperties(
+            physicalDevice, pLayerName, &propertyCount, nullptr);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+
+        properties.resize(propertyCount);
+        result = vk->vkEnumerateDeviceExtensionProperties(
+            physicalDevice, pLayerName, &propertyCount, properties.data());
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+
+        if (std::find_if(properties.begin(), properties.end(),
+            [](const VkExtensionProperties& props) {
+                return strcmp(props.extensionName, VK_MVK_MOLTENVK_EXTENSION_NAME) == 0;
+            }) == properties.end()) {
+            VkExtensionProperties mvk_props;
+            strncpy(mvk_props.extensionName, VK_MVK_MOLTENVK_EXTENSION_NAME,
+                    sizeof(mvk_props.extensionName));
+            mvk_props.specVersion = VK_MVK_MOLTENVK_SPEC_VERSION;
+            properties.push_back(mvk_props);
+        }
+
+        if (*pPropertyCount == 0) {
+            *pPropertyCount = properties.size();
+        } else {
+            memcpy(pProperties, properties.data(), *pPropertyCount * sizeof(VkExtensionProperties));
+        }
+
+        return VK_SUCCESS;
     }
 
     VkResult on_vkCreateDevice(
@@ -1360,10 +1406,10 @@ public:
         if (mapInfoIt == mMapInfo.end()) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
-        if (mapInfoIt->second.ioSurface) {
-            result = m_useIOSurfaceFunc(image, mapInfoIt->second.ioSurface);
+        if (mapInfoIt->second.mtlTexture) {
+            result = m_vk->vkSetMTLTextureMVK(image, mapInfoIt->second.mtlTexture);
             if (result != VK_SUCCESS) {
-                fprintf(stderr, "vkUseIOSurfaceMVK failed\n");
+                fprintf(stderr, "vkSetMTLTexture failed\n");
                 return VK_ERROR_OUT_OF_HOST_MEMORY;
             }
         }
@@ -2768,7 +2814,7 @@ public:
         mapInfo.size = localAllocInfo.allocationSize;
         mapInfo.device = device;
         if (importCbInfoPtr && m_emu->instanceSupportsMoltenVK) {
-            mapInfo.ioSurface = getColorBufferIOSurface(importCbInfoPtr->colorBuffer);
+            mapInfo.mtlTexture = getColorBufferMTLTexture(importCbInfoPtr->colorBuffer);
         }
 
         bool hostVisible =
@@ -2810,9 +2856,9 @@ public:
         }
 
 #ifdef __APPLE__
-        if (info->ioSurface) {
-            CFRelease(info->ioSurface);
-            info->ioSurface = nullptr;
+        if (info->mtlTexture) {
+            CFRelease(info->mtlTexture);
+            info->mtlTexture = nullptr;
         }
 #endif
 
@@ -3134,20 +3180,30 @@ public:
         uint64_t hva = (uint64_t)(uintptr_t)(info->ptr);
         uint64_t size = (uint64_t)(uintptr_t)(info->size);
 
+        constexpr size_t kPageBits = 12;
+        constexpr size_t kPageSize = 1u << kPageBits;
+        constexpr size_t kPageOffsetMask = kPageSize - 1;
+
+        uint64_t pageOffset = hva & kPageOffsetMask;
+        uint64_t sizeToPage =
+            ((size + pageOffset + kPageSize - 1) >>
+             kPageBits) << kPageBits;
+
         auto id =
             get_emugl_vm_operations().hostmemRegister(
                     (uint64_t)(uintptr_t)(info->ptr),
                     (uint64_t)(uintptr_t)(info->size));
 
         *pAddress = hva & (0xfff); // Don't expose exact hva to guest
-        *pSize = size;
+        *pSize = sizeToPage;
         *pHostmemId = id;
 
         info->virtioGpuMapped = true;
         info->hostmemId = id;
 
-        fprintf(stderr, "%s: hva, size: %p 0x%llx id 0x%llx\n", __func__,
+        fprintf(stderr, "%s: hva, size, sizeToPage: %p 0x%llx 0x%llx id 0x%llx\n", __func__,
                 info->ptr, (unsigned long long)(info->size),
+                (unsigned long long)(sizeToPage),
                 (unsigned long long)(*pHostmemId));
         return VK_SUCCESS;
     }
@@ -3998,8 +4054,7 @@ public:
             auto res = mGlobalHandleStore.addFixed(handle, item, typeTag);
             return res;
         } else {
-            auto res = mGlobalHandleStore.add(item, typeTag);
-            return res;
+            return mGlobalHandleStore.add(item, typeTag);
         }
     }
 
@@ -4016,8 +4071,7 @@ public:
         mGlobalHandleStore.remove((uint64_t)boxed); \
     } \
     type unbox_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
-        auto elt = mGlobalHandleStore.getLocked( \
+        auto elt = mGlobalHandleStore.get( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) return VK_NULL_HANDLE; \
         return (type)elt->underlying; \
@@ -4028,8 +4082,7 @@ public:
                 (uint64_t)(uintptr_t)unboxed); \
     } \
     VulkanDispatch* dispatch_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
-        auto elt = mGlobalHandleStore.getLocked( \
+        auto elt = mGlobalHandleStore.get( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) { fprintf(stderr, "%s: err not found boxed %p\n", __func__, boxed); return nullptr; } \
         return elt->dispatch; \
@@ -4051,8 +4104,7 @@ public:
                 (uint64_t)(uintptr_t)unboxed); \
     } \
     type unbox_non_dispatchable_##type(type boxed) { \
-        AutoLock lock(mGlobalHandleStore.lock); \
-        auto elt = mGlobalHandleStore.getLocked( \
+        auto elt = mGlobalHandleStore.get( \
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); return VK_NULL_HANDLE; } \
         return (type)elt->underlying; \
@@ -5411,7 +5463,6 @@ private:
     bool mVerbosePrints = false;
     bool mUseOldMemoryCleanupPath = false;
     bool mGuestUsesAngle = false;
-    PFN_vkUseIOSurfaceMVK m_useIOSurfaceFunc = nullptr;
 
     Lock mLock;
     ConditionVariable mCvWaitSequenceNumber;
@@ -5436,7 +5487,7 @@ private:
         uint64_t sizeToPage = 0;
         uint64_t hostmemId = 0;
         VkDevice device = VK_NULL_HANDLE;
-        IOSurfaceRef ioSurface = nullptr;
+        MTLTextureRef mtlTexture = nullptr;
     };
 
     struct InstanceInfo {
@@ -5671,10 +5722,19 @@ private:
     template <class T>
     class BoxedHandleManager {
     public:
-        using Store = android::base::EntityManager<32, 16, 16, T>;
+
+        // The hybrid entity manager uses a sequence lock to protect access to
+        // a working set of 16000 handles, allowing us to avoid using a regular
+        // lock for those. Performance is degraded when going over this number,
+        // as it will then fall back to a std::map.
+        //
+        // We use 16000 as the max number of live handles to track; we don't
+        // expect the system to go over 16000 total live handles, outside some
+        // dEQP object management tests.
+        using Store = android::base::HybridEntityManager<16000, uint64_t, T>;
 
         Lock lock;
-        Store store;
+        mutable Store store;
         std::unordered_map<uint64_t, uint64_t> reverseMap;
 
         void clear() {
@@ -5683,30 +5743,30 @@ private:
         }
 
         uint64_t add(const T& item, BoxedHandleTypeTag tag) {
-            AutoLock l(lock);
             auto res = (uint64_t)store.add(item, (size_t)tag);
+            AutoLock l(lock);
             reverseMap[(uint64_t)(item.underlying)] = res;
             return res;
         }
 
         uint64_t addFixed(uint64_t handle, const T& item, BoxedHandleTypeTag tag) {
-            AutoLock l(lock);
             auto res = (uint64_t)store.addFixed(handle, item, (size_t)tag);
+            AutoLock l(lock);
             reverseMap[(uint64_t)(item.underlying)] = res;
             return res;
         }
 
         void remove(uint64_t h) {
-            AutoLock l(lock);
-            auto item = getLocked(h);
+            auto item = get(h);
             if (item) {
+                AutoLock l(lock);
                 reverseMap.erase((uint64_t)(item->underlying));
             }
             store.remove(h);
         }
 
-        T* getLocked(uint64_t h) {
-            return store.get(h);
+        T* get(uint64_t h) {
+            return (T*)store.get_const(h);
         }
 
         uint64_t getBoxedFromUnboxedLocked(uint64_t unboxed) {
@@ -5988,6 +6048,16 @@ void VkDecoderGlobalState::on_vkGetPhysicalDeviceMemoryProperties2KHR(
     VkPhysicalDeviceMemoryProperties2* pMemoryProperties) {
     mImpl->on_vkGetPhysicalDeviceMemoryProperties2(
         pool, physicalDevice, pMemoryProperties);
+}
+
+VkResult VkDecoderGlobalState::on_vkEnumerateDeviceExtensionProperties(
+    android::base::BumpPool* pool,
+    VkPhysicalDevice physicalDevice,
+    const char* pLayerName,
+    uint32_t* pPropertyCount,
+    VkExtensionProperties* pProperties) {
+    return mImpl->on_vkEnumerateDeviceExtensionProperties(
+        pool, physicalDevice, pLayerName, pPropertyCount, pProperties);
 }
 
 VkResult VkDecoderGlobalState::on_vkCreateDevice(

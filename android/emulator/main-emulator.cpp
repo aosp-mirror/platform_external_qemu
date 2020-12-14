@@ -284,6 +284,7 @@ int main(int argc, char** argv)
     bool isRestart = false;
     int restartPid = -1;
     bool doDeleteTempDir = false;
+    bool checkLoadable = false;
 
     const char* qemu_top_dir = nullptr;
     for (int nn = 1; nn < argc; nn++) {
@@ -542,6 +543,13 @@ int main(int argc, char** argv)
         if (!strcmp(opt, "-delete-temp-dir")) {
             doDeleteTempDir = true;
         }
+
+        if (!strcmp(opt, "-check-snapshot-loadable")) {
+            checkLoadable = true;
+        }
+    }
+    if (checkLoadable) {
+        cleanUpAvdContent = false;
     }
 
 #ifdef __linux__
@@ -661,7 +669,7 @@ int main(int argc, char** argv)
 
     // print a version string and build id for easier debugging
 #if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
-    D("Android emulator version %s (CL:%s)", EMULATOR_VERSION_STRING
+    dprint("Android emulator version %s (CL:%s)", EMULATOR_VERSION_STRING
       " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
       EMULATOR_CL_SHA1);
 #endif

@@ -289,6 +289,13 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.addFormat("qemu.camera_protocol_ver=1");
     }
 
+    if (opts->shell || opts->shell_serial || opts->show_kernel) {
+        // The default value for printk.devkmsg is "ratelimit",
+        // causing only a few logs from the android init
+        // executable to be printed.
+        params.addFormat("printk.devkmsg=on");
+    }
+
     // User entered parameters are space separated. Passing false here to prevent
     // parameters from being surrounded by quotes.
     return params.toCStringCopy(false);

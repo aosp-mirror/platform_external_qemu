@@ -20,7 +20,6 @@ add_subdirectory(android/automation/proto)
 add_subdirectory(android/offworld/proto)
 
 # Grab the other libraries.
-include(android-emu-base)
 include(android-emu)
 if(NOT OPTION_GFXSTREAM_BACKEND)
   include(android-libui)

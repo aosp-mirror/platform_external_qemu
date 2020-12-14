@@ -3419,6 +3419,14 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #ifdef VK_GOOGLE_linear_image_layout
 #define OP_vkGetLinearImageLayoutGOOGLE 20333
 #endif
+#ifdef VK_MVK_moltenvk
+#define OP_vkGetMTLDeviceMVK 20334
+#define OP_vkSetMTLTextureMVK 20335
+#define OP_vkGetMTLTextureMVK 20336
+#define OP_vkGetMTLBufferMVK 20337
+#define OP_vkUseIOSurfaceMVK 20338
+#define OP_vkGetIOSurfaceMVK 20339
+#endif
 const char* api_opcode_to_string(
     const uint32_t opcode);
 

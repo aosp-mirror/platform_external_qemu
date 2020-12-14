@@ -22,6 +22,17 @@ if(NOT QTWEBENGINE AND ANDROID_TARGET_TAG MATCHES "linux-x86_64")
     HOST_PREBUILT_ROOT
     "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}-nowebengine"
     ABSOLUTE)
+elseif(DARWIN_AARCH64)
+  get_filename_component(
+    PREBUILT_ROOT
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_TARGET_TAG}-nowebengine"
+    ABSOLUTE)
+
+  # Use the host compatible moc, rcc and uic
+  get_filename_component(
+    HOST_PREBUILT_ROOT
+    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}-nowebengine"
+    ABSOLUTE)
 else()
   get_filename_component(
     PREBUILT_ROOT
@@ -108,8 +119,13 @@ set(QT5_LINK_PATH "-L${PREBUILT_ROOT}/lib")
 set(QT5_DEFINITIONS "-DQT5_STATICLIB")
 set(QT5_FOUND TRUE)
 
-if(DARWIN_X86_64)
+if(DARWIN_AARCH64)
+  set(QT_LIB_VERSION 5)
+elseif(DARWIN_X86_64)
   set(QT_LIB_VERSION 5.12.1)
+endif()
+
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   set(QT5_SHARED_DEPENDENCIES
       ${PREBUILT_ROOT}/lib/libQt5CoreAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5CoreAndroidEmu.${QT_LIB_VERSION}.dylib;

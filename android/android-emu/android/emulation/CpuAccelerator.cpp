@@ -81,6 +81,9 @@
 
 #if defined(__APPLE__)
 #  define HAVE_HVF 1
+#ifdef __arm64__
+#  define APPLE_SILICON 1
+#endif
 #endif
 
 #else
@@ -845,6 +848,7 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
         return res;
     }
 
+#ifndef APPLE_SILICON
     // Need same virtualization features as required by HAXM.
     if (ProbeHaxCpu(status) != ANDROID_CPU_ACCELERATION_READY) {
         return res;
@@ -857,6 +861,7 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
                 "needed for Hypervisor.Framework");
         return res;
     }
+#endif
 
     // HVF supported
     res = ANDROID_CPU_ACCELERATION_READY;
@@ -989,6 +994,9 @@ CpuAccelerator GetCurrentCpuAccelerator() {
     AndroidCpuAcceleration status_code = ANDROID_CPU_ACCELERATION_ERROR;
 
 #if !HAVE_KVM
+#if APPLE_SILICON
+    // don't check
+#else
     if (!android::hasModernX86VirtualizationFeatures()) {
         // TODO: Support snapshots when UG is not supported.
         fprintf(stderr, "Warning: Quick Boot / Snapshots not supported on this machine. "
@@ -997,6 +1005,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         featurecontrol::setEnabledOverride(
             featurecontrol::FastSnapshotV1, false);
     }
+#endif
 #endif
 
 #if HAVE_KVM
@@ -1038,6 +1047,8 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         }
 #endif
     } else {
+
+#ifndef APPLE_SILICON
         char vendor_id[16];
         android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
 
@@ -1070,12 +1081,17 @@ CpuAccelerator GetCurrentCpuAccelerator() {
                                vendor_id);
             status_code = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
         }
+#endif
 
 #if HAVE_HVF
         if (featurecontrol::isEnabled(featurecontrol::HVF)) {
             std::string statusHvf;
             AndroidCpuAcceleration status_code_HVF = ProbeHVF(&statusHvf);
             if (status_code_HVF == ANDROID_CPU_ACCELERATION_READY) {
+#ifdef APPLE_SILICON
+                g->accel = CPU_ACCELERATOR_HVF;
+                g->supported_accelerators[CPU_ACCELERATOR_KVM] = false;
+#endif
                 g->supported_accelerators[CPU_ACCELERATOR_HVF] = true;
                 // TODO: Switch to HVF as default option if/when appropriate.
                 if (status_code != ANDROID_CPU_ACCELERATION_READY) {

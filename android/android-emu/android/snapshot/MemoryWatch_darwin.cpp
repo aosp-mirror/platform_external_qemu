@@ -27,7 +27,11 @@
 #include <sys/errno.h>
 #include <sys/mman.h>
 
+#if defined(__arm64__)
+#include <Hypervisor/Hypervisor.h>
+#else
 #include <Hypervisor/hv.h>
+#endif
 
 #include <vector>
 

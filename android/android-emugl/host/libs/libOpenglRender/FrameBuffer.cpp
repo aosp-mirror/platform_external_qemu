@@ -812,13 +812,14 @@ FrameBuffer::postWorkerFunc(const Post& post) {
             m_postWorker->viewport(post.viewport.width,
                                    post.viewport.height);
             break;
-        case PostCmd::Compose:
-            if (post.d->version <= 1) {
-                m_postWorker->compose(post.d);
+        case PostCmd::Compose: {
+            if (post.composeVersion <= 1) {
+                m_postWorker->compose((ComposeDevice*)post.composeBuffer.data(), post.composeBuffer.size());
             } else {
-                m_postWorker->compose((ComposeDevice_v2*)post.d);
+                m_postWorker->compose((ComposeDevice_v2*)post.composeBuffer.data(), post.composeBuffer.size());
             }
             break;
+        }
         case PostCmd::Clear:
             m_postWorker->clear();
             break;
@@ -841,19 +842,38 @@ FrameBuffer::postWorkerFunc(const Post& post) {
 }
 
 void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
+#ifdef __APPLE__
+    bool postOnlyOnMainThread = m_subWin && (emugl::getRenderer() == SELECTED_RENDERER_HOST);
+#else
+    bool postOnlyOnMainThread = false;
+#endif
+
     if (!m_postThread.isStarted()) {
+        if (postOnlyOnMainThread) {
+            EGLContext prevContext = s_egl.eglGetCurrentContext();
+            EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
+            EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
+            m_prevContext = prevContext;
+            m_prevReadSurf = prevReadSurf;
+            m_prevDrawSurf = prevDrawSurf;
+        }
         m_postWorker.reset(new PostWorker([this]() {
             if (m_subWin) {
                 return bindSubwin_locked();
             } else {
                 return bindFakeWindow_locked();
             }
-        }));
+        },
+        postOnlyOnMainThread,
+        m_eglContext,
+        m_eglSurface));
         m_postThread.start();
     }
 
     m_postThread.enqueue(Post(post));
-    m_postThread.waitQueuedItems();
+    if (!postOnlyOnMainThread) {
+        m_postThread.waitQueuedItems();
+    }
 }
 
 void FrameBuffer::setPostCallback(
@@ -1361,13 +1381,15 @@ void FrameBuffer::drainWindowSurface() {
         const auto winIt = m_windows.find(winHandle);
         if (winIt != m_windows.end()) {
             if (const HandleType oldColorBufferHandle = winIt->second.second) {
-                if (m_refCountPipeEnabled) {
-                    if (decColorBufferRefCountLocked(oldColorBufferHandle)) {
-                        colorBuffersToCleanup.push_back(oldColorBufferHandle);
-                    }
-                } else {
-                    if (closeColorBufferLocked(oldColorBufferHandle)) {
-                        colorBuffersToCleanup.push_back(oldColorBufferHandle);
+                if (!m_guestManagedColorBufferLifetime) {
+                    if (m_refCountPipeEnabled) {
+                        if (decColorBufferRefCountLocked(oldColorBufferHandle)) {
+                            colorBuffersToCleanup.push_back(oldColorBufferHandle);
+                        }
+                    } else {
+                        if (closeColorBufferLocked(oldColorBufferHandle)) {
+                            colorBuffersToCleanup.push_back(oldColorBufferHandle);
+                        }
                     }
                 }
                 m_windows.erase(winIt);
@@ -1423,13 +1445,15 @@ std::vector<HandleType> FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_sur
     const auto w = m_windows.find(p_surface);
     if (w != m_windows.end()) {
         ScopedBind bind(m_colorBufferHelper);
-        if (m_refCountPipeEnabled) {
-            if (decColorBufferRefCountLocked(w->second.second)) {
-                colorBuffersToCleanUp.push_back(w->second.second);
-            }
-        } else {
-            if (closeColorBufferLocked(w->second.second)) {
-                colorBuffersToCleanUp.push_back(w->second.second);
+        if (!m_guestManagedColorBufferLifetime) {
+            if (m_refCountPipeEnabled) {
+                if (decColorBufferRefCountLocked(w->second.second)) {
+                    colorBuffersToCleanUp.push_back(w->second.second);
+                }
+            } else {
+                if (closeColorBufferLocked(w->second.second)) {
+                    colorBuffersToCleanUp.push_back(w->second.second);
+                }
             }
         }
         m_windows.erase(w);
@@ -1467,7 +1491,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     c->second.refcount++;
     markOpened(&c->second);
 
-    uint64_t puid = tInfo->m_puid;
+    uint64_t puid = tInfo ? tInfo->m_puid : 0;
     if (puid) {
         m_procOwnedColorBuffers[puid].insert(p_colorbuffer);
     }
@@ -1477,15 +1501,16 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
 void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     // When guest feature flag RefCountPipe is on, no reference counting is
     // needed.
-    if (m_refCountPipeEnabled)
+    if (m_refCountPipeEnabled) {
         return;
+    }
 
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     std::vector<HandleType> toCleanup;
 
     AutoLock mutex(m_lock);
-    uint64_t puid = tInfo->m_puid;
+    uint64_t puid = tInfo ? tInfo->m_puid : 0;
     if (puid) {
         auto ite = m_procOwnedColorBuffers.find(puid);
         if (ite != m_procOwnedColorBuffers.end()) {
@@ -1526,8 +1551,9 @@ bool FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
                                          bool forced) {
     // When guest feature flag RefCountPipe is on, no reference counting is
     // needed.
-    if (m_refCountPipeEnabled)
+    if (m_refCountPipeEnabled) {
         return false;
+    }
 
     if (m_noDelayCloseColorBufferEnabled)
         forced = true;
@@ -1611,6 +1637,19 @@ void FrameBuffer::eraseDelayedCloseColorBufferLocked(
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
+    bool renderThreadWithThisPuidExists = false;
+
+    do {
+        renderThreadWithThisPuidExists = false;
+        RenderThreadInfo::forAllRenderThreadInfos(
+            [puid, &renderThreadWithThisPuidExists](RenderThreadInfo* i) {
+            if (i->m_puid == puid) {
+                renderThreadWithThisPuidExists = true;
+            }
+        });
+        System::get()->sleepUs(10000);
+    } while (renderThreadWithThisPuidExists);
+
     AutoLock mutex(m_lock);
     auto colorBuffersToCleanup = cleanupProcGLObjects_locked(puid);
 
@@ -1649,13 +1688,15 @@ std::vector<HandleType> FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, 
             if (procIte != m_procOwnedWindowSurfaces.end()) {
                 for (auto whndl : procIte->second) {
                     auto w = m_windows.find(whndl);
-                    if (m_refCountPipeEnabled) {
-                        if (decColorBufferRefCountLocked(w->second.second)) {
-                            colorBuffersToCleanup.push_back(w->second.second);
-                        }
-                    } else {
-                        if (closeColorBufferLocked(w->second.second, forced)) {
-                            colorBuffersToCleanup.push_back(w->second.second);
+                    if (!m_guestManagedColorBufferLifetime) {
+                        if (m_refCountPipeEnabled) {
+                            if (decColorBufferRefCountLocked(w->second.second)) {
+                                colorBuffersToCleanup.push_back(w->second.second);
+                            }
+                        } else {
+                            if (closeColorBufferLocked(w->second.second, forced)) {
+                                colorBuffersToCleanup.push_back(w->second.second);
+                            }
                         }
                     }
                     m_windows.erase(w);
@@ -1668,14 +1709,16 @@ std::vector<HandleType> FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, 
         // the guest process, to give the correct reference count.
         // (Note that a color buffer can be shared across guest processes.)
         {
-            auto procIte = m_procOwnedColorBuffers.find(puid);
-            if (procIte != m_procOwnedColorBuffers.end()) {
-                for (auto cb : procIte->second) {
-                    if (closeColorBufferLocked(cb, forced)) {
-                        colorBuffersToCleanup.push_back(cb);
+            if (!m_guestManagedColorBufferLifetime) {
+                auto procIte = m_procOwnedColorBuffers.find(puid);
+                if (procIte != m_procOwnedColorBuffers.end()) {
+                    for (auto cb : procIte->second) {
+                        if (closeColorBufferLocked(cb, forced)) {
+                            colorBuffersToCleanup.push_back(cb);
+                        }
                     }
+                    m_procOwnedColorBuffers.erase(procIte);
                 }
-                m_procOwnedColorBuffers.erase(procIte);
             }
         }
 
@@ -1763,13 +1806,19 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     (*w).second.first->setColorBuffer((*c).second.cb);
     markOpened(&c->second);
     if (w->second.second) {
-        if (m_refCountPipeEnabled)
-            decColorBufferRefCountLocked(w->second.second);
-        else
-            closeColorBufferLocked(w->second.second);
+        if (!m_guestManagedColorBufferLifetime) {
+            if (m_refCountPipeEnabled) {
+                decColorBufferRefCountLocked(w->second.second);
+            } else {
+                closeColorBufferLocked(w->second.second);
+            }
+        }
     }
 
-    c->second.refcount++;
+    if (!m_guestManagedColorBufferLifetime) {
+        c->second.refcount++;
+    }
+
     (*w).second.second = p_colorbuffer;
 
     m_windowSurfaceToColorBuffer[p_surface] = p_colorbuffer;
@@ -2628,8 +2677,10 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
     switch (p->version) {
     case 1: {
         Post composeCmd;
+        composeCmd.composeVersion = 1;
+        composeCmd.composeBuffer.resize(bufferSize);
+        memcpy(composeCmd.composeBuffer.data(), buffer, bufferSize);
         composeCmd.cmd = PostCmd::Compose;
-        composeCmd.d = p;
         sendPostWorkerCmd(composeCmd);
         post(p->targetHandle, false);
         return true;
@@ -2644,8 +2695,10 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
             mutex.lock();
        }
        Post composeCmd;
+       composeCmd.composeVersion = 2;
+       composeCmd.composeBuffer.resize(bufferSize);
+       memcpy(composeCmd.composeBuffer.data(), buffer, bufferSize);
        composeCmd.cmd = PostCmd::Compose;
-       composeCmd.d = p;
        sendPostWorkerCmd(composeCmd);
        if (p2->displayId == 0) {
            post(p2->targetHandle, false);
@@ -3041,4 +3094,8 @@ void FrameBuffer::waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle) 
 
     // Note: this will always signal right away.
     SyncThread::get()->triggerBlockedWaitNoTimeline(fenceSync);
+}
+
+void FrameBuffer::setGuestManagedColorBufferLifetime(bool guestManaged) {
+    m_guestManagedColorBufferLifetime = guestManaged;
 }

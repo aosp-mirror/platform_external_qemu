@@ -85,8 +85,8 @@ struct VkEmulation {
             getImageFormatProperties2Func = nullptr;
 
     bool instanceSupportsMoltenVK = false;
-    PFN_vkUseIOSurfaceMVK useIOSurfaceFunc = nullptr;
-    PFN_vkGetIOSurfaceMVK getIOSurfaceFunc = nullptr;
+    PFN_vkSetMTLTextureMVK setMTLTextureFunc = nullptr;
+    PFN_vkGetMTLTextureMVK getMTLTextureFunc = nullptr;
 
     // Queue, command pool, and command buffer
     // for running commands to sync stuff system-wide.
@@ -250,7 +250,7 @@ struct VkEmulation {
 
         VulkanMode vulkanMode = VulkanMode::Default;
 
-        IOSurfaceRef ioSurface = nullptr;
+        MTLTextureRef mtlTexture = nullptr;
     };
 
     struct BufferInfo {
@@ -267,7 +267,7 @@ struct VkEmulation {
 
         bool glExported = false;
         VulkanMode vulkanMode = VulkanMode::Default;
-        IOSurfaceRef ioSurface = nullptr;
+        MTLBufferRef mtlBuffer = nullptr;
     };
 
     // Track what is supported on whatever device was selected.
@@ -359,7 +359,7 @@ VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);
 bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);
 VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBufferHandle);
-IOSurfaceRef getColorBufferIOSurface(uint32_t colorBufferHandle);
+MTLTextureRef getColorBufferMTLTexture(uint32_t colorBufferHandle);
 bool setColorBufferVulkanMode(uint32_t colorBufferHandle, uint32_t vulkanMode);
 int32_t mapGpaToBufferHandle(uint32_t bufferHandle,
                              uint64_t gpa,

@@ -203,6 +203,9 @@ public:
     // killed). Such resources include color buffer handles and EglImage handles.
     virtual void cleanupProcGLObjects(uint64_t puid) = 0;
 
+    // Wait for cleanupProcGLObjects to finish.
+    virtual void waitForProcessCleanup() = 0;
+
     virtual struct AndroidVirtioGpuOps* getVirtioGpuOps(void) = 0;
 
     // Stops all channels and render threads. The renderer cannot be used after

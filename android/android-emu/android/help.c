@@ -1940,6 +1940,10 @@ static void help_check_snapshot_loadable(stralloc_t* out) {
            "  -check-snapshot-loadable <snapshot name|snapshot TAR file>\n");
 }
 
+static void help_no_hidpi_scaling(stralloc_t* out) {
+    PRINTF("  Disable HiDPI scaling of guest display on macOS devices.\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

@@ -94,6 +94,12 @@
 
 #define PLATFORM_BUS_NUM_IRQS 64
 
+#if defined(__APPLE__) && defined(__aarch64__)
+#define APPLE_SILICON 1
+#else
+#define APPLE_SILICON 0
+#endif
+
 static QemuDeviceTreeSetupFunc virt_device_tree_setup_func;
 void qemu_device_tree_setup_callback2(QemuDeviceTreeSetupFunc setup_func)
 {
@@ -116,7 +122,11 @@ static ARMPlatformBusSystemParams platform_bus_params;
  * of a terabyte of RAM will be doing it on a host with more than a
  * terabyte of physical address space.)
  */
+#if APPLE_SILICON
+#define RAMLIMIT_GB 31
+#else
 #define RAMLIMIT_GB 255
+#endif
 #define RAMLIMIT_BYTES (RAMLIMIT_GB * 1024ULL * 1024 * 1024)
 
 /* Addresses and sizes of our components.
@@ -155,14 +165,27 @@ static const MemMapEntry a15memmap[] = {
     [RANCHU_GOLDFISH_BATTERY] = { 0x0a040000, 0x00001000 },
     [RANCHU_GOLDFISH_EVDEV] =   { 0x0a050000, 0x00001000 },
     [RANCHU_GOLDFISH_PIPE] =    { 0x0a060000, 0x00002000 },
+// TODO(bohu): check on rockpi to see if the sync device works there too
+#if APPLE_SILICON
+    [RANCHU_GOLDFISH_SYNC] =    { 0x0a070000, 0x00002000 },
+#endif
     [VIRT_PLATFORM_BUS] =       { 0x0c000000, 0x02000000 },
     [VIRT_SECURE_MEM] =         { 0x0e000000, 0x01000000 },
     [VIRT_PCIE_MMIO] =          { 0x10000000, 0x2eff0000 },
     [VIRT_PCIE_PIO] =           { 0x3eff0000, 0x00010000 },
     [VIRT_PCIE_ECAM] =          { 0x3f000000, 0x01000000 },
     [VIRT_MEM] =                { 0x40000000, RAMLIMIT_BYTES },
+#if APPLE_SILICON
+    /* Second PCIe window, 32GB wide at the 32GB boundary */
+    /* This used to be 512GB, but doesn't work on Apple Silicon
+     * as Apple Silicon only has 36 bits of address space. */
+    /* Temp hack until we can dynamically set pcie mmio high
+     * based on arm64 cpu features */
+    [VIRT_PCIE_MMIO_HIGH] =   { 0x0800000000ULL, 0x0800000000ULL },
+#else
     /* Second PCIe window, 512GB wide at the 512GB boundary */
     [VIRT_PCIE_MMIO_HIGH] =   { 0x8000000000ULL, 0x8000000000ULL },
+#endif
 };
 
 static const int a15irqmap[] = {
@@ -176,6 +199,9 @@ static const int a15irqmap[] = {
     [RANCHU_GOLDFISH_AUDIO] = 18,
     [RANCHU_GOLDFISH_EVDEV] = 19,
     [RANCHU_GOLDFISH_PIPE] = 20,
+#if APPLE_SILICON
+    [RANCHU_GOLDFISH_SYNC] = 21,
+#endif
     [VIRT_MMIO] = 32, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
     [VIRT_GIC_V2M] = 64, /* ...to 48 + NUM_GICV2M_SPIS - 1 */
     [VIRT_PLATFORM_BUS] = 128, /* ...to 112 + PLATFORM_BUS_NUM_IRQS -1 */
@@ -1499,9 +1525,11 @@ static void machvirt_init(MachineState *machine)
     create_simple_device(vms, pic, RANCHU_GOLDFISH_PIPE, "goldfish_pipe",
                          "google,android-pipe\0"
                          "generic,android-pipe", 2, 0, 0);
-    //create_simple_device(vms, pic, RANCHU_GOLDFISH_SYNC, "goldfish_sync",
-     //                    "google,goldfish-sync\0"
-      //                   "generic,goldfish-sync", 2, 0, 0);
+#if APPLE_SILICON
+    create_simple_device(vms, pic, RANCHU_GOLDFISH_SYNC, "goldfish_sync",
+                         "google,goldfish-sync\0"
+                         "generic,goldfish-sync", 2, 0, 0);
+#endif
     /* Create mmio transports, so the user can create virtio backends
      * (which will be automatically plugged in to the transports). If
      * no backend is created the transport will just sit harmlessly idle.

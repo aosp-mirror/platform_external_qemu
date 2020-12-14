@@ -2,5 +2,5 @@ VehicleHalProto.proto needs to be synced with
 hardware/interfaces/automotive/vehicle/2.0/default/impl/proto/VehicleHalProto.proto
 on android master.
 
-
-
+Sensor_session.proto is used for sensor replay, needs to be synced with
+java/com/google/android/apps/automotive/sensing/sensorreplay/proto/sensor_session.proto

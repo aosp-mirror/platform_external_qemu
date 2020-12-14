@@ -138,31 +138,46 @@ service SnapshotService {
   rpc TrackProcess(IceboxTarget) returns (IceboxTarget) {}
 }
 
+// Sets options for SnapshotService. Used for both request and response messages.
 message SnapshotPackage {
   enum Format {
     TARGZ = 0;
     TAR = 1;
   }
-  // The identifier to the snapshot, only required for the first message.
+  // The identifier to the snapshot, only required for request messages. For
+  // streaming service, only used in the first stream message of a gRPC call
+  // (would be ignored in consequent stream messages of the same call).
   string snapshot_id = 1;
 
   // A stream of bytes. Encoded as a tar (possibly gzipped) file pendinf on the
   // value of format.
   bytes payload = 2;
 
-  // [Output only] status fields, usually indicates end of transmission.
+  // [response only] status fields, usually indicates end of transmission.
   bool success = 3;
   bytes err = 4;
 
-  // Format of the payload. Only required for the first message.
+  // [request only] Format of the payload. Only used in request messages. For
+  // streaming service, only used in the first stream message of a gRPC call
+  // (would be ignored in consequent stream messages of the same call).
   Format format = 5;
 
+<<<<<<< HEAD   (921171 Merge "Merge cherrypicks of [1493823, 1493824] into emu-30-r)
   // Path to the snapshot package tar file.
   //
   // When set, the PullSnapshot/PushSnapshot operation will directly write/read the
   // exported snapshot in path without streaming, which is usually significantly
   // faster. It would require emulator to have direct access to path, which usually
   // means it can only be used with a local emulator.
+=======
+  // [request only] Path to the snapshot package file. Only used in request
+  // messages.
+  //
+  // When set in a request, the PullSnapshot/PushSnapshot operation will directly
+  // write/read the exported snapshot in path without streaming, which is usually
+  // significantly faster. It would require emulator to have direct access to
+  // path, which usually means it can only be used with a local emulator.
+>>>>>>> BRANCH (613ca0 Merge "Add 140 and 180 as supported LCD densities" into emu-)
   string path = 6;
 }
 

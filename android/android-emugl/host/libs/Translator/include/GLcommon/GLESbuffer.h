@@ -34,7 +34,7 @@ public:
    GLuint getUsage(){return m_usage;};
    GLvoid* getData(){ return m_data;}
    bool  setBuffer(GLuint size,GLuint usage,const GLvoid* data);
-   bool  setSubBuffer(GLint offset,GLuint size,const GLvoid* data);
+   bool  setSubBuffer(GLuint offset,GLuint size,const GLvoid* data);
    void  getConversions(const RangeList& rIn,RangeList& rOut);
    bool  fullyConverted(){return m_conversionManager.size() == 0;};
    void  setBinded(){m_wasBound = true;};

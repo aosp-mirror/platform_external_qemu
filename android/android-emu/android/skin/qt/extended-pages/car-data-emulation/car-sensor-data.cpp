@@ -66,13 +66,8 @@ CarSensorData::CarSensorData(QWidget* parent)
     : QWidget(parent), mUi(new Ui::CarSensorData) {
     mUi->setupUi(this);
 
-    if (!feature_is_enabled(kFeature_CarVhalReplay)) {
-        mUi->button_loadrecord->setVisible(false);
-        mUi->button_playrecord->setVisible(false);
-        QObject::connect(&mTimer, &QTimer::timeout, this,
-                     &CarSensorData::VhalTimeout);
-        prepareVhalLoader();
-    }
+    mUi->button_loadrecord->setVisible(false);
+    mUi->button_playrecord->setVisible(false);
 
     if (!feature_is_enabled(kFeature_CarAssistButton)) {
         mUi->button_voice_assistant->setVisible(false);
@@ -141,11 +136,12 @@ void CarSensorData::sendIgnitionChangeMsg(const int ignition,
 
 void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
     mUi->car_speedLabel->setText(QString::number(speed));
-    float speedMetersPerSecond = (float)speed * 
-        ((mUi->comboBox_speedUnit->currentIndex() == MILES_PER_HOUR) 
-            ? MILES_PER_HOUR_TO_METERS_PER_SEC
-            : KILOMETERS_PER_HOUR_TO_METERS_PER_SEC);
-    
+    float speedMetersPerSecond =
+            (float)speed *
+            ((mUi->comboBox_speedUnit->currentIndex() == MILES_PER_HOUR)
+                     ? MILES_PER_HOUR_TO_METERS_PER_SEC
+                     : KILOMETERS_PER_HOUR_TO_METERS_PER_SEC);
+
     if (mSendEmulatorMsg != nullptr) {
         EmulatorMessage emulatorMsg = makeSetPropMsg();
         VehiclePropValue* value = emulatorMsg.add_value();

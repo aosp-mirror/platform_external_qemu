@@ -268,6 +268,8 @@ OPT_PARAM(check_snapshot_loadable,
           "<snapshot name|exported snapshot tar file>",
           "Check if a snasphot is loadable.")
 
+OPT_FLAG(no_hidpi_scaling, "Disable HiDPI scaling of guest display on macOS devices.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

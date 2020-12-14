@@ -69,6 +69,8 @@ public:
 
     int port() override { return mPort; }
 
+    void wait() override { mServer->Wait(); }
+
 private:
     std::unique_ptr<grpc::Server> mServer;
     std::vector<std::shared_ptr<Service>> mRegisteredServices;
@@ -283,7 +285,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     if (!service)
         return nullptr;
 
-    LOG(VERBOSE) << "Started GRPC server at " << server_address.c_str()
+    LOG(INFO) << "Started GRPC server at " << server_address.c_str()
                  << ", security: " << mSecurity
                  << (mAuthToken.empty() ? "" : "+token");
     return std::unique_ptr<EmulatorControllerService>(

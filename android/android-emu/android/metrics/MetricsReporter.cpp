@@ -78,6 +78,11 @@ static base::LazyInstance<ReporterHolder> sInstance = {};
 
 }  // namespace
 
+// Used by unit tests.
+void set_unittest_Reporter(MetricsReporter::Ptr newPtr) {
+    sInstance->reset(std::move(newPtr));
+}
+
 void MetricsReporter::start(const std::string& sessionId,
                             base::StringView emulatorVersion,
                             base::StringView emulatorFullVersion,

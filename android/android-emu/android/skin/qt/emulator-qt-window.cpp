@@ -773,9 +773,20 @@ void EmulatorQtWindow::showWin32DeprecationWarning() {
 
 void EmulatorQtWindow::showAvdArchWarning() {
     ScopedCPtr<char> arch(avdInfo_getTargetCpuArch(android_avdInfo));
+
+    // On Apple, we could also be running w/ Virtualization.framework
+    // which should also support fast x86 VMs on arm64.
+#if defined(__APPLE__) || defined (__x86_64__)
     if (!strcmp(arch.get(), "x86") || !strcmp(arch.get(), "x86_64")) {
         return;
     }
+#endif
+
+#ifdef __aarch64__
+    if (!strcmp(arch.get(), "arm64")) {
+        return;
+    }
+#endif
 
     // The following statuses indicate that the machine hardware does not
     // support hardware acceleration. These machines should never show a
@@ -861,7 +872,11 @@ void EmulatorQtWindow::slot_startupTick() {
     if (android_cmdLineOptions->qt_hide_window) {
         return;
     }
-    mStartupDialog->setWindowTitle(tr("Android Emulator"));
+    if (is_fuchsia) {
+        mStartupDialog->setWindowTitle(tr("Fuchsia Emulator"));
+    } else {
+        mStartupDialog->setWindowTitle(tr("Android Emulator"));
+    }
     // Hide close/minimize/maximize buttons
     mStartupDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
                                    Qt::WindowTitleHint);
@@ -1082,6 +1097,37 @@ void EmulatorQtWindow::leaveEvent(QEvent* event) {
 }
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::VirtioMouse) &&
+        !mMouseGrabbed) {
+        if (mPromptMouseRestoreMessageBox) {
+            QMessageBox msgBox;
+            msgBox.setText(
+                    "You have clicked the mouse inside the Emulator "
+                    "display. This will cause Emulator to capture the "
+                    "host mouse pointer and the keyboard, which will "
+                    "make them unavailable to other host applications."
+                    "\n\n You can press "
+#ifdef __APPLE__
+                    "Cmd+R"
+#else
+                    "Ctrl+R"
+#endif
+                    " to uncapture the keyboard and "
+                    "mouse and return to normal operation.");
+            msgBox.exec();
+            mPromptMouseRestoreMessageBox = false;
+        }
+
+        D("%s: mouse grabbed\n", __func__);
+        grabMouse(QCursor(Qt::CursorShape::BlankCursor));
+
+        SkinEvent* skin_event = createSkinEvent(kEventMouseStartTracking);
+        queueSkinEvent(skin_event);
+
+        mMouseGrabbed = true;
+    }
+
     handleMouseEvent(kEventMouseButtonDown, getSkinMouseButton(event),
                      event->pos(), event->globalPos());
 }
@@ -2176,9 +2222,28 @@ void EmulatorQtWindow::doResize(const QSize& size,
     double widthScale = (double)newSize.width() / (double)originalWidth;
     double heightScale = (double)newSize.height() / (double)originalHeight;
 
+    // On HiDPI screen, newSize is in Qt logical pixel, whle originalWidth/
+    // originalHeight are in actual pixel (logical pixel * pixel ratio).
+    // When HiDPI scaling is disabled, we need to multiply the pixel ratio to
+    // widthScale/heightScale to make the scale correct.
+    if (android_cmdLineOptions->no_hidpi_scaling) {
+        double dpr = 1.0;
+#ifdef __APPLE__
+        slot_getDevicePixelRatio(&dpr);
+#endif
+        widthScale *= dpr;
+        heightScale *= dpr;
+    }
+
     simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
 
     maskWindowFrame();
+#ifdef __APPLE__
+    // To fix issues when resizing + linking against macos sdk 11.
+    SkinEvent* changeEvent = new SkinEvent();
+    changeEvent->type = kEventScreenChanged;
+    queueSkinEvent(changeEvent);
+#endif
 }
 
 void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
@@ -2295,6 +2360,20 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
     queueSkinEvent(skin_event);
 }
 
+void EmulatorQtWindow::handleMouseWheelEvent(int delta,
+                                             Qt::Orientation orientation) {
+    SkinEvent* skin_event = createSkinEvent(kEventMouseWheel);
+    skin_event->u.wheel.x_delta = 0;
+    skin_event->u.wheel.y_delta = 0;
+    if (orientation == Qt::Horizontal) {
+        skin_event->u.wheel.x_delta = delta;
+    } else {
+        skin_event->u.wheel.y_delta = delta;
+    }
+
+    queueSkinEvent(skin_event);
+}
+
 void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
                                                  QKeyEvent* event) {
     SkinEvent* skin_event = createSkinEvent(type);
@@ -2317,6 +2396,19 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
 }
 
 void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
+    // TODO(liyl): Make this shortcut configurable instead of hard-coding it
+    // inside the code.
+    if (event->key() == Qt::Key_R &&
+        event->modifiers() == Qt::ControlModifier && type == kEventKeyDown) {
+        D("%s: mouse released\n", __func__);
+        releaseMouse();
+
+        SkinEvent* skin_event = createSkinEvent(kEventMouseStopTracking);
+        queueSkinEvent(skin_event);
+
+        mMouseGrabbed = false;
+    }
+
     if (!mForwardShortcutsToDevice && mInZoomMode) {
         if (event->key() == Qt::Key_Control) {
             if (type == kEventKeyUp) {
@@ -2714,16 +2806,23 @@ bool EmulatorQtWindow::mouseInside() {
 
 void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
     if (mIgnoreWheelEvent) {
-      event->ignore();
+        event->ignore();
+    } else if (android::featurecontrol::isEnabled(
+                       android::featurecontrol::VirtioMouse)) {
+        if (mMouseGrabbed) {
+            handleMouseWheelEvent(event->delta() / 8, event->orientation());
+        }
     } else {
-      if (!mWheelScrollTimer.isActive()) {
-        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, event->pos(), QPoint(0,0));
-        mWheelScrollPos = event->pos();
-      }
+        if (!mWheelScrollTimer.isActive()) {
+            handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
+                             event->pos(), QPoint(0, 0));
+            mWheelScrollPos = event->pos();
+        }
 
-      mWheelScrollTimer.start();
-      mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-      handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos, QPoint(0,0));
+        mWheelScrollTimer.start();
+        mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
+        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos,
+                         QPoint(0, 0));
     }
 }
 
@@ -2732,8 +2831,8 @@ void EmulatorQtWindow::wheelScrollTimeout() {
 }
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {
-    // Do not check for ADB in min config (Fuchsia) mode.
-    if (min_config_qemu_mode) return;
+    // Do not check for ADB in Fuchsia mode.
+    if (is_fuchsia) return;
 
     QSettings settings;
     if (!(*mAdbInterface)->isAdbVersionCurrent() &&
@@ -2888,6 +2987,13 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     if (android_foldable_is_folded()) {
         resizeAndChangeAspectRatio(true);
     }
+
+#ifdef __APPLE__
+    // To fix issues when resizing + linking against macos sdk 11.
+    SkinEvent* changeEvent = new SkinEvent();
+    changeEvent->type = kEventScreenChanged;
+    queueSkinEvent(changeEvent);
+#endif
 }
 
 void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
@@ -3034,7 +3140,8 @@ bool EmulatorQtWindow::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32
 void EmulatorQtWindow::saveMultidisplayToConfig() {
     int pos_x, pos_y;
     uint32_t width, height, dpi, flag;
-    for (uint32_t i = 1; i < MultiDisplayPage::sMaxItem + 1; i++) {
+    const int maxEntries = avdInfo_maxMultiDisplayEntries();
+    for (uint32_t i = 1; i < maxEntries + 1; i++) {
         if (!getMultiDisplay(i, &pos_x, &pos_y, &width, &height, &dpi, &flag, nullptr)) {
             avdInfo_replaceMultiDisplayInConfigIni(android_avdInfo,
                                                    i,

@@ -674,6 +674,14 @@ PFN_vkQueueBindSparseAsyncGOOGLE vkQueueBindSparseAsyncGOOGLE;
 #ifdef VK_GOOGLE_linear_image_layout
 PFN_vkGetLinearImageLayoutGOOGLE vkGetLinearImageLayoutGOOGLE;
 #endif
+#ifdef VK_MVK_moltenvk
+PFN_vkGetMTLDeviceMVK vkGetMTLDeviceMVK;
+PFN_vkSetMTLTextureMVK vkSetMTLTextureMVK;
+PFN_vkGetMTLTextureMVK vkGetMTLTextureMVK;
+PFN_vkGetMTLBufferMVK vkGetMTLBufferMVK;
+PFN_vkUseIOSurfaceMVK vkUseIOSurfaceMVK;
+PFN_vkGetIOSurfaceMVK vkGetIOSurfaceMVK;
+#endif
 };
 
 } // namespace goldfish_vk

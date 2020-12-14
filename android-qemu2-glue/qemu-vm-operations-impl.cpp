@@ -11,12 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include <assert.h>                                   // for assert
 #include <errno.h>                                    // for errno
-#include <nlohmann/json.hpp>                          // for basic_json, bas...
 #include <stdint.h>                                   // for uint64_t, int64_t
 
+#ifdef _MSC_VER
+extern "C" {
+#include "sysemu/os-win32-msvc.h"
+}
+#endif
+
+#include <nlohmann/json.hpp>                          // for basic_json, bas...
 #include "android/base/Log.h"                         // for LOG, LogMessage
 #include "android/base/Optional.h"                    // for Optional
 #include "android/base/StringFormat.h"                // for StringFormatWit...
@@ -42,6 +47,7 @@ extern "C" {
 #include "migration/qemu-file-types.h"                // for qemu_put_be64
 #include "qapi/qapi-types-run-state.h"                // for RUN_STATE_SAVE_VM
 #include "qemu-common.h"                              // for tcg_enabled
+#include "qemu/config-file.h"
 #include "qemu/typedefs.h"                            // for QEMUFile, Error
 
 #include "block/block.h"                              // for bdrv_get_aio_co...
@@ -241,6 +247,40 @@ static bool rebase_on_top_of(std::string src,
     return res;
 }
 
+static bool extract_snapshot(const char* srcImg,
+                             const char* dstImg,
+                             const char* snapshot,
+                             void* opaque,
+                             LineConsumerCallback errConsumer) {
+    auto qemu_img = System::get()->findBundledExecutable("qemu-img");
+    // Extract the snapshot into a standalone qcow2 file.
+    auto res = System::get()->runCommandWithResult({qemu_img, "convert", "-O",
+                                                    "qcow2", "-s", snapshot,
+                                                    srcImg, dstImg});
+    if (!res) {
+        std::string err =
+                std::string("Failed to extract snapshot. Source image name ") +
+                srcImg + " destination image name " + dstImg +
+                " snapshot name " + snapshot + ".\n";
+        DD("extract error %s\n", err.c_str());
+        errConsumer(opaque, err.c_str(), err.size());
+        return false;
+    }
+    // Create an empty snapshot in the standalone qcow2 file.
+    res = System::get()->runCommandWithResult(
+            {qemu_img, "snapshot", "-c", snapshot, dstImg});
+    if (!res) {
+        std::string err =
+                std::string("Failed to create snapshot. Image name ") + dstImg +
+                " snapshot name " + snapshot + ".\n";
+        DD("extract error %s\n", err.c_str());
+        errConsumer(opaque, err.c_str(), err.size());
+        path_delete_file(dstImg);
+        return false;
+    }
+    return true;
+}
+
 // Swaps out the given blockdriver with a new blockdriver
 // backed by the provided qcow2 file.
 // |drive| Device to be swapped out
@@ -307,13 +347,14 @@ static std::vector<json> qcow2_drives() {
     while (info) {
         if (info->value->has_inserted) {
             char* js = strstr(info->value->inserted->file, json_str);
-            if (js && json::accept(js + sizeof(json_str) - 1)) {
+            if (js && json::jsonaccept(js + sizeof(json_str) - 1)) {
                 json drive = json::parse(js + sizeof(json_str) - 1);
                 if (drive.count("driver") > 0 && drive["driver"] == "qcow2" &&
                     drive.count("file") > 0 &&
                     drive["file"].count("filename") > 0) {
                     drive["device"] = info->value->device;
-                    drive["backing"] = info->value->inserted->backing_file;
+                    drive["backing"] = info->value->inserted->has_backing_file ?
+                            info->value->inserted->backing_file : "";
                     DD("Found %s", drive.dump().c_str());
                     drives.push_back(drive);
                 }
@@ -870,11 +911,18 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
     // Exporting works like this:
     // 1. Pause the emulator, we don't want any writes to happen
     // 2. Flush all the drives, so we don't have a messed up qcow2 state
-    // 3. Copy all the qcow2 to a temporary
-    // 4. Rebase on top of an empty image, forcing us to pull all relevant
-    //    data from the read only sections of the base image (likely nop)
-    // 5. Move the standalone qcows out of the way..
-    // 6. Wake up the emulator.
+    //
+    // Then it takes different workflows depending on the image:
+    // Workflow A:
+    // a.1. convert the snapshot to a standalone qcow2 file
+    // a.2. create an empty snapshot in the standalone qcow2 file
+    // Workflow B:
+    // b.1. Copy all the qcow2 to a temporary
+    // b.2. Rebase on top of an empty image, forcing us to pull all relevant
+    //      data from the read only sections of the base image (likely nop)
+    // b.3. Move the standalone qcows out of the way..
+    //
+    // At last, we wake up the emulator.
     //
     // TODO(jansene) Qemu supports live migration, so this should be possible
     // without pausing the emulator.
@@ -897,38 +945,100 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
             success = false;
             std::string err = "Failed to extract basename from " + overlay;
             errConsumer(opaque, err.c_str(), err.size());
-            continue;
+            break;
         }
-        auto tmp_overlay =
-                pj(android::snapshot::getAvdDir(), "tmp_" + qcow.str());
         auto final_overlay = pj(dest, qcow);
-
-        // Copy and rebase on an empty image...
-        if (path_copy_file(tmp_overlay.c_str(), overlay.c_str()) != 0) {
-            success = false;
-            std::string err = std::string("Failed to copy ") + overlay +
-                              " to " + tmp_overlay + " due to " +
-                              std::to_string(errno);
-
-            errConsumer(opaque, err.c_str(), err.size());
-        }
-        // TODO(jansene): remove unused snapshots from the temporary overlay.
-        // (i.e. those with a different name/id than snapshot) See qemu-img.c
-        // static int img_snapshot(int argc, char **argv) on how to list &
-        // remove.
-        success = rebase_on_top_of(tmp_overlay, "empty.qcow2", opaque,
-                                   errConsumer) &&
-                  success;
-
-        // And move it to the export destination..
         path_delete_file(final_overlay.c_str());
-        if (std::rename(tmp_overlay.c_str(), final_overlay.c_str()) != 0) {
-            std::string err = "Failed to rename " + tmp_overlay + " to " +
-                              final_overlay +
-                              ", errno: " + std::to_string(errno);
-            path_delete_file(tmp_overlay.c_str());
-            errConsumer(opaque, err.c_str(), err.size());
-            success = false;
+        // Extract the target snapshot from qcow2.
+        // It doesn't work with cache.img.
+        if (qcow.find("cache") == std::string::npos) {
+#ifdef _WIN32
+            // Windows has file access issues when accessing the same file from
+            // multiple processes simultaneously (probably a bad file share option
+            // setup). Thus we need to unplug the drive and replug it later.
+            std::string id = drive["device"].get<std::string>();
+            DD("unplugging %s\n", id.c_str());
+            BlockBackend* blk = blk_by_name(id.c_str());
+
+            BlockDriverState* oldbs = blk_bs(blk);
+            AioContext* aioCtx = bdrv_get_aio_context(oldbs);
+            aio_context_acquire(aioCtx);
+            blk_remove_bs(blk);
+            aio_context_release(aioCtx);
+#endif
+            if (!extract_snapshot(overlay.c_str(), final_overlay.c_str(),
+                                  snapshot, opaque, errConsumer)) {
+                success = false;
+            }
+#ifdef _WIN32
+            // Plug it back.
+            QemuOpts* opts = qemu_opts_find(qemu_find_opts("drive"), id.c_str());
+            QDict* bs_opts = qdict_new();
+            qemu_opts_to_qdict(opts, bs_opts);
+            QemuOpts* legacy_opts =
+                    qemu_opts_create(&qemu_legacy_drive_opts, nullptr, 0, nullptr);
+            qemu_opts_absorb_qdict(legacy_opts, bs_opts, nullptr);
+            QemuOpts* drive_opts = qemu_opts_find(&qemu_common_drive_opts, id.c_str());
+            if (drive_opts) {
+                qemu_opts_del(drive_opts);
+                drive_opts = nullptr;
+            }
+            drive_opts = qemu_opts_create(&qemu_common_drive_opts, id.c_str(), 1, nullptr);
+            qemu_opts_absorb_qdict(drive_opts, bs_opts, nullptr);
+
+            qdict_set_default_str(bs_opts, BDRV_OPT_CACHE_DIRECT, "off");
+            qdict_set_default_str(bs_opts, BDRV_OPT_CACHE_NO_FLUSH, "off");
+            qdict_set_default_str(bs_opts, BDRV_OPT_READ_ONLY, "off");
+            qdict_del(bs_opts, "id");
+
+            Error* local_err = NULL;
+            BlockDriverState* bs =
+                    bdrv_open(overlay.c_str(), nullptr, bs_opts, 0, &local_err);
+            if (bs) {
+                int res = blk_insert_bs(blk, bs, &local_err);
+                bdrv_unref(bs);
+            }
+            if (local_err) {
+                success = false;
+                LOG(WARNING) << "drive " << overlay << "open failure: ",
+                    error_get_pretty(local_err);
+                error_free(local_err);
+            }
+#endif
+            if (!success) {
+                break;
+            }
+        } else {
+            // For cache image, we use fallback path to extract all contents.
+            auto tmp_overlay =
+                    pj(android::snapshot::getAvdDir(), "tmp_" + qcow.str());
+
+            // Copy and rebase on an empty image...
+            if (path_copy_file(tmp_overlay.c_str(), overlay.c_str()) != 0) {
+                success = false;
+                std::string err = std::string("Failed to copy ") + overlay +
+                                  " to " + tmp_overlay + " due to " +
+                                  std::to_string(errno);
+                errConsumer(opaque, err.c_str(), err.size());
+                break;
+            }
+
+            success = rebase_on_top_of(tmp_overlay, "empty.qcow2", opaque,
+                                       errConsumer);
+
+            // And move it to the export destination..
+            if (success && std::rename(tmp_overlay.c_str(), final_overlay.c_str()) != 0) {
+                std::string err = "Failed to rename " + tmp_overlay + " to " +
+                                  final_overlay +
+                                  ", errno: " + std::to_string(errno);
+
+                errConsumer(opaque, err.c_str(), err.size());
+                success = false;
+            }
+            if (!success) {
+                path_delete_file(tmp_overlay.c_str());
+                break;
+            }
         }
     }
 

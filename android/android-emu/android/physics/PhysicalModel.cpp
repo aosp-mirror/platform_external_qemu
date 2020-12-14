@@ -30,6 +30,7 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
 #include "android/physics/AmbientEnvironment.h"
+#include "android/physics/BodyModel.h"
 #include "android/physics/FoldableModel.h"
 #include "android/physics/GlmHelpers.h"
 #include "android/physics/InertialModel.h"
@@ -290,6 +291,7 @@ private:
     InertialModel mInertialModel;
     AmbientEnvironment mAmbientEnvironment;
     FoldableModel mFoldableModel;
+    BodyModel mBodyModel;
 
     AutomationController* mAutomationController = nullptr;
     const QAndroidPhysicalStateAgent* mAgent = nullptr;
@@ -471,8 +473,11 @@ void PhysicalModelImpl::setCurrentTime(int64_t time_ns) {
         const bool isAmbientModelStable =
                 mAmbientEnvironment.setCurrentTime(time_ns) ==
                 AMBIENT_STATE_STABLE;
+        const bool isBodyModelStable =
+                mBodyModel.setCurrentTime(time_ns) ==
+                BodyState::STABLE;
         stateStabilized = (isInertialModelStable && isAmbientModelStable &&
-                           mIsPhysicalStateChanging);
+                           isBodyModelStable && mIsPhysicalStateChanging);
     }
 
     if (stateStabilized) {
@@ -686,6 +691,16 @@ void PhysicalModelImpl::setTargetInternalRollable2(
     targetStateChanged();
 }
 
+void PhysicalModelImpl::setTargetInternalHeartRate(float bpm,
+                                               PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mBodyModel.setHeartRate(bpm, mode);
+    }
+    targetStateChanged();
+}
+
 vec3 PhysicalModelImpl::getParameterPosition(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -788,6 +803,12 @@ float PhysicalModelImpl::getParameterRollable2(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     return mFoldableModel.getRollable(2, parameterValueType);
+}
+
+float PhysicalModelImpl::getParameterHeartRate(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return mBodyModel.getHeartRate(parameterValueType);
 }
 
 #define GET_FUNCTION_NAME(x) get##x
@@ -916,6 +937,10 @@ float PhysicalModelImpl::getPhysicalHingeAngle1() const {
 
 float PhysicalModelImpl::getPhysicalHingeAngle2() const {
     return mFoldableModel.getHingeAngle(2);
+}
+
+float PhysicalModelImpl::getPhysicalHeartRate() const {
+    return mBodyModel.getHeartRate();
 }
 
 void PhysicalModelImpl::setPhysicalStateAgent(
