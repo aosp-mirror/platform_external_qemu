@@ -22,13 +22,15 @@
 #include <grpcpp/grpcpp.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <ratio>
+#include <set>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -36,6 +38,7 @@
 #include <utility>
 #include <vector>
 
+#include "android/avd/info.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/Stopwatch.h"
@@ -45,7 +48,6 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
-#include "android/emulation/MultiDisplay.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
@@ -59,6 +61,7 @@
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/LogcatParser.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
@@ -89,6 +92,7 @@
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
 #include "studio_stats.pb.h"
+
 namespace android {
 namespace base {
 class Looper;
@@ -781,11 +785,12 @@ public:
         // Check preconditions, do we have multi display and no duplicate ids?
         if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
             return Status(::grpc::StatusCode::UNIMPLEMENTED,
-                          "The multi display feature is not available", "");
+                          "The multi-display feature is not available", "");
         }
-        std::set<int> newDisplays, updatedDisplays;
+
+        std::set<int> updatingDisplayIds;
         for (const auto& display : request->displays()) {
-            if (newDisplays.count(display.display())) {
+            if (updatingDisplayIds.count(display.display())) {
                 return Status(::grpc::StatusCode::ABORTED,
                               "Duplicate display: " +
                                       std::to_string(display.display()) +
@@ -801,18 +806,30 @@ public:
                                       " is an invalid configuration.",
                               "");
             }
-            newDisplays.insert(display.display());
+            updatingDisplayIds.insert(display.display());
         }
 
+        std::set<int> updatedDisplays;
         // Create a snapshot of the current display state.
         DisplayConfigurations previousState;
         getDisplayConfigurations(context, nullptr, &previousState);
+        auto existingDisplays = previousState.displays();
 
         int failureDisplay = 0;
         // Reconfigure to the desired state
         for (const auto& display : request->displays()) {
-            if (display.display() == 0) {
-                updatedDisplays.insert(display.display());
+            // Check if this display is non zero and is different
+            // than any existing one.
+            auto unchanged = std::find_if(
+                    std::begin(existingDisplays), std::end(existingDisplays),
+                    [&display](const DisplayConfiguration& cfg) {
+                        return display.display() == 0 ||
+                               ScreenshotUtils::equals(cfg, display);
+                    });
+
+            if (unchanged != std::end(existingDisplays)) {
+                // We are trying to change display 0, or we are trying to update
+                // a display with the exact same configuration.
                 continue;
             }
 
@@ -836,11 +853,9 @@ public:
             LOG(WARNING) << "Rolling back failed display updates.";
             // Bring back the old state of the displays we added.
             for (const auto& display : previousState.displays()) {
-                updatedDisplays.erase(display.display());
-                if (display.display() == 0) {
+                if (updatedDisplays.erase(display.display()) == 0) {
                     continue;
                 }
-
                 if (mAgents->multi_display->setMultiDisplay(
                             display.display(), -1, -1, display.width(),
                             display.height(), display.dpi(), display.flags(),
@@ -859,13 +874,12 @@ public:
                           "Internal error while trying to modify display: " +
                                   std::to_string(failureDisplay),
                           "");
+        }
 
-        } else {
-            // Delete displays we don't want.
-            for (const auto& display : previousState.displays()) {
-                if (updatedDisplays.count(display.display()) == 0) {
-                    deleteDisplay(display.display());
-                }
+        // Delete displays we don't want.
+        for (const auto& display : previousState.displays()) {
+            if (updatedDisplays.count(display.display()) == 0) {
+                deleteDisplay(display.display());
             }
         }
 

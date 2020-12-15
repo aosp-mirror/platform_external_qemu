@@ -49,6 +49,8 @@ public:
                                                       double height,
                                                       double desiredWidth,
                                                       double desiredHeight);
+
+    static bool equals(const DisplayConfiguration& a, const DisplayConfiguration& b);
 };
 
 }  // namespace control
