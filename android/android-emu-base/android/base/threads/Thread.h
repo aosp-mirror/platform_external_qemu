@@ -133,6 +133,10 @@ private:
 // Helper function to obtain a printable id for the current thread.
 unsigned long getCurrentThreadId();
 
+// Helper function to set/get/ui thread status.
+void setUiThreadId(unsigned long id);
+bool isRunningInUiThread();
+
 // Subclass of Thread covering interruptible threads.
 class InterruptibleThread : public Thread {
     DISALLOW_COPY_ASSIGN_AND_MOVE(InterruptibleThread);

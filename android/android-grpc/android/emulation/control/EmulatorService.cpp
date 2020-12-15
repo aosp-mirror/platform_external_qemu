@@ -45,6 +45,7 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
+#include "android/emulation/MultiDisplay.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
@@ -67,6 +68,8 @@
 #include "android/emulation/control/utils/SharedMemoryLibrary.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/featurecontrol/FeatureControl.h"
+#include "android/featurecontrol/Features.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
 #include "android/hw-sensors.h"
@@ -614,8 +617,7 @@ public:
         mAgents->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_ROTATION,
                                                &xaxis, &yaxis, &zaxis,
                                                PARAMETER_VALUE_TYPE_CURRENT);
-
-        auto rotation = ScreenshotUtils::coarseRotation(zaxis);
+        auto rotation = ScreenshotUtils::deriveRotation(mAgents->sensors);
 
         // Calculate the desired rotation and width we should use..
         int desiredWidth = request->width();
@@ -677,7 +679,6 @@ public:
         LOG(VERBOSE) << "Screenshot " << newWidth << "x" << newHeight
                      << ", in: " << sw.elapsedUs() << " us";
 
-
         // Update format information with the retrieved width, height..
         auto format = reply->mutable_format();
         format->set_format(ScreenshotUtils::translate(img.getImageFormat()));
@@ -738,6 +739,138 @@ public:
         };
 
         return Status::OK;
+    }
+
+    Status getDisplayConfigurations(ServerContext* context,
+                                    const ::google::protobuf::Empty* request,
+                                    DisplayConfigurations* reply) override {
+        if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
+            return Status(::grpc::StatusCode::UNIMPLEMENTED,
+                          "The multi display feature is not available", "");
+        }
+
+        uint32_t width, height, dpi, flags;
+        bool enabled;
+        for (int i = 0; i < avdInfo_maxMultiDisplayEntries(); i++) {
+            if (mAgents->multi_display->getMultiDisplay(i, nullptr, nullptr,
+                                                        &width, &height, &dpi,
+                                                        &flags, &enabled)) {
+                auto cfg = reply->add_displays();
+                cfg->set_width(width);
+                cfg->set_height(height);
+                cfg->set_dpi(dpi);
+                cfg->set_display(i);
+                cfg->set_flags(flags);
+            }
+        }
+
+        return Status::OK;
+    }
+
+    void deleteDisplay(int displayId) {
+        if (displayId != 0 &&
+            mAgents->multi_display->setMultiDisplay(displayId, -1, -1, 0, 0, 0,
+                                                    0, false) >= 0) {
+            mAgents->emu->updateUIMultiDisplayPage(displayId);
+        }
+    }
+
+    Status setDisplayConfigurations(ServerContext* context,
+                                    const DisplayConfigurations* request,
+                                    DisplayConfigurations* reply) override {
+        // Check preconditions, do we have multi display and no duplicate ids?
+        if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
+            return Status(::grpc::StatusCode::UNIMPLEMENTED,
+                          "The multi display feature is not available", "");
+        }
+        std::set<int> newDisplays, updatedDisplays;
+        for (const auto& display : request->displays()) {
+            if (newDisplays.count(display.display())) {
+                return Status(::grpc::StatusCode::ABORTED,
+                              "Duplicate display: " +
+                                      std::to_string(display.display()) +
+                                      " detected.",
+                              "");
+            }
+
+            if (!mAgents->multi_display->multiDisplayParamValidate(
+                        display.display(), display.width(), display.height(),
+                        display.dpi(), display.flags())) {
+                return Status(::grpc::StatusCode::ABORTED,
+                              "Display: " + std::to_string(display.display()) +
+                                      " is an invalid configuration.",
+                              "");
+            }
+            newDisplays.insert(display.display());
+        }
+
+        // Create a snapshot of the current display state.
+        DisplayConfigurations previousState;
+        getDisplayConfigurations(context, nullptr, &previousState);
+
+        int failureDisplay = 0;
+        // Reconfigure to the desired state
+        for (const auto& display : request->displays()) {
+            if (display.display() == 0) {
+                updatedDisplays.insert(display.display());
+                continue;
+            }
+
+            // TODO(jansene): This can result in UI messages if invalid values
+            // are presented.
+            if (mAgents->multi_display->setMultiDisplay(
+                        display.display(), -1, -1, display.width(),
+                        display.height(), display.dpi(), display.flags(),
+                        true) < 0) {
+                // oh, oh, failure.
+                failureDisplay = display.display();
+                break;
+            };
+
+            updatedDisplays.insert(display.display());
+            mAgents->emu->updateUIMultiDisplayPage(display.display());
+        }
+
+        // Rollback if we didn't modify all the screens.
+        if (failureDisplay != 0) {
+            LOG(WARNING) << "Rolling back failed display updates.";
+            // Bring back the old state of the displays we added.
+            for (const auto& display : previousState.displays()) {
+                updatedDisplays.erase(display.display());
+                if (display.display() == 0) {
+                    continue;
+                }
+
+                if (mAgents->multi_display->setMultiDisplay(
+                            display.display(), -1, -1, display.width(),
+                            display.height(), display.dpi(), display.flags(),
+                            true) >= 0) {
+                    mAgents->emu->updateUIMultiDisplayPage(display.display());
+                };
+            }
+
+            // Delete the displays we added..
+            for (int displayId : updatedDisplays) {
+                deleteDisplay(displayId);
+            }
+
+            // TODO(jansene): Extract detailed messages from setMultiDisplay
+            return Status(::grpc::StatusCode::ABORTED,
+                          "Internal error while trying to modify display: " +
+                                  std::to_string(failureDisplay),
+                          "");
+
+        } else {
+            // Delete displays we don't want.
+            for (const auto& display : previousState.displays()) {
+                if (updatedDisplays.count(display.display()) == 0) {
+                    deleteDisplay(display.display());
+                }
+            }
+        }
+
+        // Get the actual status and return it.
+        return getDisplayConfigurations(context, nullptr, reply);
     }
 
     Status setVmState(ServerContext* context,

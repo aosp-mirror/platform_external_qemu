@@ -56,7 +56,6 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
   if(NOT CROSSCOMPILE)
     # We can add this project without any translation..
     if(NOT TARGET ${EXE})
-      message(STATUS "Adding ${EXE} as subproject, not cross compiling.")
       add_subdirectory(${SOURCE} ${EXE}_ext)
     endif()
     set(${OUT_PATH} "$<TARGET_FILE:${EXE}>" PARENT_SCOPE)
@@ -828,8 +827,6 @@ endfunction()
 
 # Adds a protozero library with the given plugin name.
 function(android_add_protobuf_with_plugin name headerfileextension plugin pluginout protolib PROTOPATH protofile genccpath)
-    message(
-      WARNING "protozero protofile: ${protofile}")
   protobuf_generate_cpp_with_plugin(${headerfileextension} ${plugin} ${pluginout} ${PROTOPATH} PROTO_SRCS PROTO_HDRS ${protofile})
   get_filename_component(PROTO_SRCS_ABS ${PROTO_SRCS} ABSOLUTE)
   set(genccpath2 ${CMAKE_CURRENT_BINARY_DIR}/${genccpath})
