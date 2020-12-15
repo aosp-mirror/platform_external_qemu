@@ -189,6 +189,30 @@
       },
       "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fd49aa75_7fd885d5",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-12-15T19:57:46Z",
+      "side": 1,
+      "message": "AFAIK, webcam will not trigger the virtual scene UI controls to show up and therefore it will not take \"WASD\". Thus, it makes sense to differentiate between these two. Or we can simply just add events for virtual scene camera for now.",
+      "parentUuid": "b1fb6eff_884fd6fa",
+      "range": {
+        "startLine": 86,
+        "startChar": 11,
+        "endLine": 87,
+        "endChar": 29
+      },
+      "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
