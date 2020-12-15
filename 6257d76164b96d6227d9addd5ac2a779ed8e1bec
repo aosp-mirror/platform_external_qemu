@@ -74,6 +74,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "ce76e55b_2861ae51",
+        "filename": "android/android-grpc/android/emulation/control/UiController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-12-15T19:55:06Z",
+      "side": 1,
+      "message": "I agree. I will make sure an event will be sent when streamNotification is called and will send any events subsequently if camera status changes. streamClipboard also does this.",
+      "parentUuid": "77b50d56_d30a64b6",
+      "range": {
+        "startLine": 140,
+        "startChar": 8,
+        "endLine": 152,
+        "endChar": 9
+      },
+      "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "55181bd8_da301541",
         "filename": "android/android-grpc/ui_controller_service.proto",
         "patchSetId": 6
