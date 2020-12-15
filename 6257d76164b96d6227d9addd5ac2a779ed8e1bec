@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bc876014_1146dd65",
+        "filename": "android/android-grpc/android/emulation/control/UiController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-15T19:02:05Z",
+      "side": 1,
+      "message": "I\u0027m not sure if I understand this code, but does it send a CAMERA_ACTIVE event if the camera was active when streamNotification was called?",
+      "range": {
+        "startLine": 140,
+        "startChar": 8,
+        "endLine": 152,
+        "endChar": 9
+      },
+      "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "55181bd8_da301541",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-15T19:02:05Z",
+      "side": 1,
+      "message": "Should we distinguish between webcam and virtual scene?",
+      "range": {
+        "startLine": 86,
+        "startChar": 11,
+        "endLine": 87,
+        "endChar": 29
+      },
+      "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
