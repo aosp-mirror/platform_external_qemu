@@ -213,6 +213,30 @@
       },
       "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "73ff8809_376a1da1",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-15T19:59:42Z",
+      "side": 1,
+      "message": "This means that in EE we need to know only about the virtual scene mode.",
+      "parentUuid": "26e1a3ee_25b3e4cf",
+      "range": {
+        "startLine": 86,
+        "startChar": 11,
+        "endLine": 87,
+        "endChar": 29
+      },
+      "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
