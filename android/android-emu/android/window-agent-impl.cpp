@@ -14,6 +14,7 @@
 
 #include "android/emulation/control/window_agent.h"
 
+#include "android/base/threads/Thread.h"
 #include "android/emulator-window.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/hw-sensors.h"
@@ -209,10 +210,13 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
 
                 },
-
         .runOnUiThread =
                 [](UiUpdateFunc f, void* data, bool wait) {
                     skin_winsys_run_ui_update(f, data, wait);
+                },
+        .isRunningInUiThread =
+                []() {
+                    return android::base::isRunningInUiThread();
                 }
 };
 

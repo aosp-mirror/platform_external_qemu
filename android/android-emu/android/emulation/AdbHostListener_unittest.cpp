@@ -124,6 +124,8 @@ struct TestAdbGuestAgent : public AdbGuestAgent {
         mId = static_cast<int>(id);
     }
 
+    void resetActiveGuestPipeConnection() override {}
+
     int id() const { return mId; }
 
     void close() { mSocket.close(); }

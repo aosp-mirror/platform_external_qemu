@@ -132,6 +132,7 @@ set(android-emu-common
     android/gps.c
     android/gps/GpxParser.cpp
     android/gps/KmlParser.cpp
+    android/gps/PassiveGpsUpdater.cpp
     android/gpu_frame.cpp
     android/help.c
     android/HostHwInfo.cpp

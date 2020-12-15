@@ -270,6 +270,10 @@ OPT_PARAM(check_snapshot_loadable,
 
 OPT_FLAG(no_hidpi_scaling, "Disable HiDPI scaling of guest display on macOS devices.")
 
+OPT_FLAG(no_mouse_reposition,
+         "Do not reposition the mouse to emulator window center if mouse "
+         "pointer gets out of the window.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

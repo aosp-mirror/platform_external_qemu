@@ -45,6 +45,7 @@
 #include <vector>
 
 #include "android/base/Log.h"
+#include "android/base/threads/Thread.h"
 #include "android/cmdline-option.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/MultiDisplay.h"
@@ -798,10 +799,16 @@ void skin_winsys_run_ui_update(SkinGenericFunction f, void* data,
     }
     if (wait) {
         QSemaphore semaphore;
-        window->runOnUiThread([f, data]() { f(data); }, &semaphore);
+        window->runOnUiThread([f, data]() {
+            android::base::setUiThreadId(android::base::getCurrentThreadId());
+            f(data);
+        }, &semaphore);
         semaphore.acquire();
     } else {
-        window->runOnUiThread([f, data]() { f(data); }, nullptr);
+        window->runOnUiThread([f, data]() {
+            android::base::setUiThreadId(android::base::getCurrentThreadId());
+            f(data);
+        }, nullptr);
     }
 }
 extern void skin_winsys_error_dialog(const char* message, const char* title) {

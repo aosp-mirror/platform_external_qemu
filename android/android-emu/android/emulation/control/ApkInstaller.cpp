@@ -70,7 +70,8 @@ bool ApkInstaller::parseOutputForFailure(std::istream& stream,
         if (!line.compare(0, 7, "Success")) {
             gotSuccess = true;
         } else if (!line.compare(0, 7, "Failure") ||
-                   !line.compare(0, 6, "Failed")) {
+                   !line.compare(0, 6, "Failed") ||
+                   (line.find(": Failure") != string::npos)) {
             auto openBrace = line.find("[");
             auto closeBrace = line.find("]", openBrace + 1);
             if (openBrace != string::npos && closeBrace != string::npos) {

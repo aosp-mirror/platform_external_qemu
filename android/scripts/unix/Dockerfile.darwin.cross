@@ -11,7 +11,7 @@
 # limitations under the License.
 
 # Note the docker script expects that you have an xcode.xip in the osxcross directory.
-FROM debian:buster-slim AS osxcross-build
+FROM ${base} AS osxcross-build
 
 # Install all the dependencies needed to compile osxcross.
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -59,7 +59,7 @@ ENV UNATTENDED=1
 RUN cd /osxcross && ./build.sh
 
 # Now we create the final debian container that only contains the compiler.
-FROM debian:buster-slim AS osxcross
+FROM ${base} AS osxcross
 COPY --from=osxcross-build /osxcross/target/ /opt/osxcross
 RUN apt-get update && apt-get install -y --no-install-recommends \
         software-properties-common curl gpg gpg-agent

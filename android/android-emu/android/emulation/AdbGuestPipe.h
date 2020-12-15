@@ -103,6 +103,10 @@ public:
         void preLoad(android::base::Stream* stream) override;
         void postLoad(android::base::Stream* stream) override;
         void postSave(android::base::Stream* stream) override;
+
+        // Resets the current ADB guest pipe connection.
+        void resetActiveGuestPipeConnection() override;
+
         // Called when a new adb pipe connection is opened by
         // the guest. Note that this does *not* transfer ownership of |pipe|.
         // Technically, AndroidPipe instances are owned by the virtual device.
@@ -119,8 +123,6 @@ public:
         // Check if there is a pipe in WaitingForHostAdbConnection state.
         bool hasActivePipe() const;
 
-        // Resets the current ADB guest pipe connection.
-        void resetActiveGuestPipeConnection();
 
         // For pipes in the middle of deletion to notify the service
         // that they are gone.

@@ -187,7 +187,6 @@ endfunction()
 
 
 function(toolchain_configure_tags tag)
-    message("toolchain_configure_tags ${tag}")
     set(ANDROID_TARGET_TAG ${tag})
     string(REGEX REPLACE "-.*" "" ANDROID_TARGET_OS ${tag})
     string(REGEX REPLACE "[-_].*" "" ANDROID_TARGET_OS_FLAVOR ${tag})
@@ -196,8 +195,6 @@ function(toolchain_configure_tags tag)
         set(ANDROID_HOST_TAG "darwin-aarch64")
     else()
         _get_host_tag(ANDROID_HOST_TAG)
-        message("host tag ${ANDROID_HOST_TAG}")
-        message("target tag ${ANDROID_TARGET_TAG}")
     endif()
 
     if (NOT ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
