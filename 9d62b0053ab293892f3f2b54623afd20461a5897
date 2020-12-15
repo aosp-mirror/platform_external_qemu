@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4eee63bd_08cc7a0d",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-15T22:05:51Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "814d5164_acfdcb67",
+      "range": {
+        "startLine": 823,
+        "startChar": 17,
+        "endLine": 823,
+        "endChar": 23
+      },
+      "revId": "9d62b0053ab293892f3f2b54623afd20461a5897",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3bc54768_6e1eb09c",
@@ -47,6 +71,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5fe06f0d_6bf42213",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-15T22:05:51Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3bc54768_6e1eb09c",
+      "range": {
+        "startLine": 858,
+        "startChar": 17,
+        "endLine": 858,
+        "endChar": 18
+      },
+      "revId": "9d62b0053ab293892f3f2b54623afd20461a5897",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4b80ab49_88f07929",
@@ -60,6 +108,30 @@
       "writtenOn": "2020-12-15T20:58:36Z",
       "side": 1,
       "message": "Fits into previous line?",
+      "range": {
+        "startLine": 173,
+        "startChar": 8,
+        "endLine": 173,
+        "endChar": 26
+      },
+      "revId": "9d62b0053ab293892f3f2b54623afd20461a5897",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "36fc3424_aa576195",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-15T22:05:51Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4b80ab49_88f07929",
       "range": {
         "startLine": 173,
         "startChar": 8,
