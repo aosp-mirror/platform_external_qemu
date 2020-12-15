@@ -956,44 +956,14 @@ function(get_git_version VER)
   if(NOT "${GIT_RES}" STREQUAL "0")
     message(
       WARNING
-        "Unable to retrieve git version from ${ANDROID_QEMU2_TOP_DIR}, out: ${STD_OUT}, err: ${STD_ERR}"
+        "Unable to retrieve git version from ${ANDROID_QEMU2_TOP_DIR}, out: ${STD_OUT}, err: ${STD_ERR}, not setting version."
     )
-    if(NOT MSVC)
-      execute_process(
-        COMMAND "date" "+%Y-%m-%d" WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
-        RESULT_VARIABLE DATE_RES OUTPUT_VARIABLE STD_OUT ERROR_VARIABLE STD_ERR)
-      if(NOT "${DATE_RES}" STREQUAL "0")
-        message(FATAL_ERROR "Unable to retrieve date!")
-      endif()
-    else()
-      execute_process(
-        COMMAND "date" "/T" WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
-        RESULT_VARIABLE DATE_RES OUTPUT_VARIABLE STD_OUT ERROR_VARIABLE STD_ERR)
-    endif()
+   else()
+    # Clean up and make visibile
+    string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
+    set(${VER} ${STD_OUT} PARENT_SCOPE)
   endif()
 
-  # Clean up and make visibile
-  string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
-  set(${VER} ${STD_OUT} PARENT_SCOPE)
-endfunction()
-
-# VER The variable to set the sha in Sets ${VER} The latest sha as reported by
-# git
-function(get_git_sha VER)
-  execute_process(
-    COMMAND "git" "log" "-n" "1" "--pretty=format:'%H'"
-    WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR} RESULT_VARIABLE GIT_RES
-    OUTPUT_VARIABLE STD_OUT ERROR_VARIABLE STD_ERR)
-  if(NOT "${GIT_RES}" STREQUAL "0")
-    message(
-      FATAL_ERROR
-        "Unable to retrieve git version from ${ANDROID_QEMU2_TOP_DIR} : out: ${STD_OUT}, err: ${STD_ERR}"
-    )
-  endif()
-
-  # Clean up and make visibile
-  string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
-  set(${VER} ${STD_OUT} PARENT_SCOPE)
 endfunction()
 
 # Constructs a linker command that will make sure the whole archive is included,
