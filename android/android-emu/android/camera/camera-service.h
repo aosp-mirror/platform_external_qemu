@@ -24,6 +24,9 @@ ANDROID_BEGIN_HEADER
  */
 
 /* Initializes camera emulation service over qemu pipe. */
-void android_camera_service_init(void);
+extern void android_camera_service_init(void);
 
+typedef void (*camera_callback_t)(void* context, bool connected);
+
+extern void register_camera_status_change_callback(camera_callback_t cb, void* context);
 ANDROID_END_HEADER
