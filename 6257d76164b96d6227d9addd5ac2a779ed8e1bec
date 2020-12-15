@@ -69,6 +69,30 @@
       },
       "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3cb17078_d41346ae",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-12-15T19:40:59Z",
+      "side": 1,
+      "message": "So I wonder if EE will have a different behavior if webcam is use? I think it is doable to differentiate between webcam and virtual scene.",
+      "parentUuid": "55181bd8_da301541",
+      "range": {
+        "startLine": 86,
+        "startChar": 11,
+        "endLine": 87,
+        "endChar": 29
+      },
+      "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
