@@ -52,6 +52,7 @@
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
 #include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/camera/Camera.h"
 #include "android/emulation/control/clipboard/Clipboard.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
@@ -124,6 +125,7 @@ public:
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
           mTouchEventSender(agents),
+          mCamera(Camera::getCamera()),
           mClipboard(Clipboard::getClipboard(agents->clipboard)),
           mLooper(android::base::ThreadLooper::get()) {
         // the logcat pipe will take ownership of the created stream, and writes
@@ -979,12 +981,43 @@ public:
         return Status::OK;
     }
 
+    void setNotificationEvent(Notification* reply) {
+        if (mCamera->isVirtualSceneConnected()) {
+            reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
+        } else {
+            reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
+        }
+    }
+
+    Status streamNotification(ServerContext* context,
+                              const Empty* request,
+                              ServerWriter<Notification>* writer) override {
+        Notification reply;
+        bool clientAvailable = !context->IsCancelled();
+        if (clientAvailable) {
+            setNotificationEvent(&reply);
+            clientAvailable = writer->Write(reply);
+        }
+        while (clientAvailable) {
+            const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
+            auto arrived = mCamera->eventWaiter()->next(kTimeToWaitForFrame);
+            if (arrived > 0 && !context->IsCancelled()) {
+                setNotificationEvent(&reply);
+                clientAvailable = writer->Write(reply);
+            }
+            clientAvailable = !context->IsCancelled() && clientAvailable;
+        }
+        return Status::OK;
+    }
+
+
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
     TouchEventSender mTouchEventSender;
     SharedMemoryLibrary mSharedMemoryLibrary;
 
+    Camera* mCamera;
     Clipboard* mClipboard;
     Looper* mLooper;
     RingStreambuf
