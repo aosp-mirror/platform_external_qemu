@@ -48,6 +48,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "47f81a24_b7208525",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 785,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-15T20:06:39Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "cf32b520_7b502dfa",
+      "range": {
+        "startLine": 785,
+        "startChar": 31,
+        "endLine": 785,
+        "endChar": 44
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "46af4b20_5bf144de",
@@ -85,6 +109,30 @@
       "side": 1,
       "message": "This comment has not been addressed.",
       "parentUuid": "46af4b20_5bf144de",
+      "range": {
+        "startLine": 787,
+        "startChar": 35,
+        "endLine": 787,
+        "endChar": 50
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b1e31e27_0b6faa67",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 787,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-15T20:06:39Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "613cdca5_219ec6fd",
       "range": {
         "startLine": 787,
         "startChar": 35,
@@ -191,6 +239,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "be90f5c0_0d97ee80",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-15T20:06:39Z",
+      "side": 1,
+      "message": "We can simplify this and make sure we do not update any displays that are not changing.",
+      "parentUuid": "386c5ad3_d8832dd7",
+      "range": {
+        "startLine": 822,
+        "startChar": 40,
+        "endLine": 822,
+        "endChar": 55
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "3a9a1101_7a58ed22",
         "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
         "patchSetId": 4
@@ -226,6 +298,30 @@
       "side": 1,
       "message": "This comment has not been addressed.",
       "parentUuid": "3a9a1101_7a58ed22",
+      "range": {
+        "startLine": 864,
+        "startChar": 10,
+        "endLine": 864,
+        "endChar": 16
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e7c7b888_e58e0afe",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 864,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-15T20:06:39Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7db8ee8a_c24d472e",
       "range": {
         "startLine": 864,
         "startChar": 10,
@@ -285,6 +381,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "7908778f_6bab53b1",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-15T20:06:39Z",
+      "side": 1,
+      "message": "This can be simplified.",
+      "parentUuid": "3fd2d218_17257198",
+      "range": {
+        "startLine": 867,
+        "startChar": 16,
+        "endLine": 869,
+        "endChar": 17
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "208ea82a_d0ce69f9",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 4
@@ -320,6 +440,30 @@
       "side": 1,
       "message": "This comment has not been addressed.",
       "parentUuid": "208ea82a_d0ce69f9",
+      "range": {
+        "startLine": 164,
+        "startChar": 36,
+        "endLine": 164,
+        "endChar": 49
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a15ad4dd_d8c1acaa",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-15T20:06:39Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "212125dc_457bdad8",
       "range": {
         "startLine": 164,
         "startChar": 36,
@@ -367,6 +511,30 @@
       "side": 1,
       "message": "This comment has not been addressed.",
       "parentUuid": "7f5d9d23_7412018e",
+      "range": {
+        "startLine": 172,
+        "startChar": 60,
+        "endLine": 172,
+        "endChar": 65
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "efa6955b_44fd7b85",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-15T20:06:39Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1a0cdf58_6f447ecc",
       "range": {
         "startLine": 172,
         "startChar": 60,
