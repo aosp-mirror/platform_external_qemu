@@ -297,19 +297,16 @@ struct ConsumerCallbacks {
 };
 
 using ConsumerCreateCallback =
-    std::function<void* (struct asg_context, ConsumerCallbacks)>;
+    std::function<void* (struct asg_context, base::Stream*, ConsumerCallbacks)>;
 using ConsumerDestroyCallback =
     std::function<void(void*)>;
 using ConsumerSaveCallback =
-    std::function<void(void*, base::Stream*)>;
-using ConsumerLoadCallback =
     std::function<void(void*, base::Stream*)>;
 
 struct ConsumerInterface {
     ConsumerCreateCallback create;
     ConsumerDestroyCallback destroy;
     ConsumerSaveCallback save;
-    ConsumerLoadCallback load;
 };
 
 } // namespace asg

@@ -236,8 +236,9 @@ RenderChannelPtr RendererImpl::createRenderChannel(
 
 void* RendererImpl::addressSpaceGraphicsConsumerCreate(
     struct asg_context context,
+    android::base::Stream* loadStream,
     android::emulation::asg::ConsumerCallbacks callbacks) {
-    auto thread = new RenderThread(context, callbacks);
+    auto thread = new RenderThread(context, loadStream, callbacks);
     thread->start();
     return (void*)thread;
 }
@@ -246,6 +247,11 @@ void RendererImpl::addressSpaceGraphicsConsumerDestroy(void* consumer) {
     RenderThread* thread = (RenderThread*)consumer;
     thread->wait();
     delete thread;
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerSave(void* consumer, android::base::Stream* stream) {
+    RenderThread* thread = (RenderThread*)consumer;
+    thread->save(stream);
 }
 
 void RendererImpl::pauseAllPreSave() {

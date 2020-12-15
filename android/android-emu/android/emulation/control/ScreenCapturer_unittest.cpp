@@ -149,11 +149,13 @@ public:
 
     void* addressSpaceGraphicsConsumerCreate(
         struct asg_context,
+        android::base::Stream* loadStream,
         android::emulation::asg::ConsumerCallbacks) {
         return nullptr;
     }
 
     void addressSpaceGraphicsConsumerDestroy(void*) { }
+    void addressSpaceGraphicsConsumerSave(void* consumer, android::base::Stream* stream) { }
 
     HardwareStrings getHardwareStrings() {
         return {};

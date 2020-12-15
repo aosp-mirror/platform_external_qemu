@@ -564,6 +564,7 @@ protected:
         ConsumerInterface interface = {
             // create
             [this](struct asg_context context,
+               base::Stream* loadStream,
                ConsumerCallbacks callbacks) {
                Consumer* c = new Consumer(context, callbacks);
                mCurrentConsumer = c;
@@ -576,8 +577,6 @@ protected:
                mCurrentConsumer = nullptr;
             },
             // save
-            [](void* consumer, base::Stream* stream) { },
-            // load
             [](void* consumer, base::Stream* stream) { },
         };
         AddressSpaceGraphicsContext::setConsumer(interface);

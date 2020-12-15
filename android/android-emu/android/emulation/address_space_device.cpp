@@ -32,6 +32,7 @@ using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
 using android::base::Stream;
+using android::emulation::asg::AddressSpaceGraphicsContext;
 
 using namespace android::emulation;
 
@@ -175,8 +176,8 @@ public:
         return contextDesc.device_context.get();
     }
 
-    uint64_t hostmemRegister(uint64_t hva, uint64_t size) {
-        return sVmOps->hostmemRegister(hva, size);
+    uint64_t hostmemRegister(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id) {
+        return sVmOps->hostmemRegister(hva, size, register_fixed, fixed_id);
     }
 
     void hostmemUnregister(uint64_t id) {
@@ -185,6 +186,7 @@ public:
 
     void save(Stream* stream) const {
         AddressSpaceSharedSlotsHostMemoryAllocatorContext::globalStateSave(stream);
+        AddressSpaceGraphicsContext::globalStateSave(stream);
 
         stream->putBe32(mHandleIndex);
         stream->putBe32(mContexts.size());
@@ -216,6 +218,13 @@ public:
                 stream,
                 get_address_space_device_control_ops(),
                 get_address_space_device_hw_funcs())) {
+            return false;
+        }
+
+        asg::AddressSpaceGraphicsContext::init(get_address_space_device_control_ops());
+
+        if (!AddressSpaceGraphicsContext::globalStateLoad(
+                stream)) {
             return false;
         }
 
@@ -313,7 +322,7 @@ private:
         switch (device_type) {
         case AddressSpaceDeviceType::Graphics:
             asg::AddressSpaceGraphicsContext::init(get_address_space_device_control_ops());
-            return DeviceContextPtr(new asg::AddressSpaceGraphicsContext());
+            return DeviceContextPtr(new asg::AddressSpaceGraphicsContext(false /* not virtio */, fromSnapshot));
 #ifndef AEMU_MIN
         case AddressSpaceDeviceType::Media:
             AS_DEVICE_DPRINT("allocating media context");
@@ -335,7 +344,7 @@ private:
 
         case AddressSpaceDeviceType::VirtioGpuGraphics:
             asg::AddressSpaceGraphicsContext::init(get_address_space_device_control_ops());
-            return DeviceContextPtr(new asg::AddressSpaceGraphicsContext(true /* is virtio */));
+            return DeviceContextPtr(new asg::AddressSpaceGraphicsContext(true /* is virtio */, fromSnapshot));
 
         default:
             AS_DEVICE_DPRINT("Bad device type");
@@ -440,8 +449,8 @@ static void sAddressSpaceDeviceClear() {
     sAddressSpaceDeviceState->clear();
 }
 
-static uint64_t sAddressSpaceDeviceHostmemRegister(uint64_t hva, uint64_t size) {
-    return sAddressSpaceDeviceState->hostmemRegister(hva, size);
+static uint64_t sAddressSpaceDeviceHostmemRegister(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id) {
+    return sAddressSpaceDeviceState->hostmemRegister(hva, size, register_fixed, fixed_id);
 }
 
 static void sAddressSpaceDeviceHostmemUnregister(uint64_t id) {

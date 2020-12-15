@@ -264,20 +264,20 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     ConsumerInterface interface = {
         // create
         [](struct asg_context context,
+           android::base::Stream* loadStream,
            ConsumerCallbacks callbacks) {
            return sRenderer->addressSpaceGraphicsConsumerCreate(
-               context, callbacks);
+               context, loadStream, callbacks);
         },
         // destroy
         [](void* consumer) {
            return sRenderer->addressSpaceGraphicsConsumerDestroy(
                consumer);
         },
-        // TODO
         // save
-        [](void* consumer, android::base::Stream* stream) { },
-        // load
-        [](void* consumer, android::base::Stream* stream) { },
+        [](void* consumer, android::base::Stream* stream) {
+           return sRenderer->addressSpaceGraphicsConsumerSave(consumer, stream);
+        },
     };
     AddressSpaceGraphicsContext::setConsumer(interface);
 

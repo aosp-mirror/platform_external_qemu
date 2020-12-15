@@ -97,8 +97,8 @@ RenderThread::RenderThread(RenderChannelImpl* channel,
 
 RenderThread::RenderThread(
         struct asg_context context,
-        android::emulation::asg::ConsumerCallbacks callbacks,
-        android::base::Stream* loadStream)
+        android::base::Stream* loadStream,
+        android::emulation::asg::ConsumerCallbacks callbacks)
     : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
       mRingStream(
           new RingStream(context, callbacks, kStreamBufferSize)) {
