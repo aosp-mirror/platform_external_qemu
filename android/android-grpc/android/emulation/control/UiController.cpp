@@ -31,6 +31,7 @@ class Empty;
 using namespace android::base;
 using ::google::protobuf::Empty;
 using grpc::ServerContext;
+using grpc::ServerWriter;
 using grpc::Status;
 
 namespace android {
@@ -128,7 +129,6 @@ public:
         });
         return Status::OK;
     }
-
 private:
     const AndroidConsoleAgents* mAgents;
 };
