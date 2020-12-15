@@ -237,6 +237,30 @@
       },
       "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6f8c863b_c2681f1d",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2020-12-15T20:00:42Z",
+      "side": 1,
+      "message": "Agree.",
+      "parentUuid": "73ff8809_376a1da1",
+      "range": {
+        "startLine": 86,
+        "startChar": 11,
+        "endLine": 87,
+        "endChar": 29
+      },
+      "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
