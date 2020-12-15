@@ -80,6 +80,8 @@ struct CameraServiceDesc {
 /* One and only one camera service. */
 static CameraServiceDesc    _camera_service_desc;
 
+static void* _context = nullptr;
+static camera_callback_t _callback = nullptr;
 /********************************************************************************
  * Helper routines
  *******************************************************************************/
@@ -1027,7 +1029,9 @@ _camera_client_query_connect(CameraClient* cc, QemudClient* qc, const char* para
     }
 
     D("%s: Camera device '%s' is now connected", __FUNCTION__, cc->device_name);
-
+    if(_callback) {
+        _callback(_context, true);
+    }
     _qemu_client_reply_ok(qc, NULL);
 }
 
@@ -1063,6 +1067,9 @@ _camera_client_query_disconnect(CameraClient* cc,
     cc->camera = NULL;
 
     D("Camera device '%s' is now disconnected", cc->device_name);
+    if(_callback) {
+        _callback(_context, false);
+    }
 
     _qemu_client_reply_ok(qc, NULL);
 }
@@ -2085,6 +2092,11 @@ _camera_service_connect(void*          opaque,
     }
 
     return client;
+}
+
+void register_camera_status_change_callback(camera_callback_t cb, void* ctx) {
+    _callback = cb;
+    _context = ctx;
 }
 
 void android_camera_service_init(void) {
