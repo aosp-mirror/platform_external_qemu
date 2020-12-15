@@ -86,7 +86,8 @@ android_add_library(
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       ${UI_CONTROLLER_SERVICE_GRPC_SRC}
-      android/emulation/control/UiController.cpp)
+      android/emulation/control/UiController.cpp
+      android/emulation/control/camera/Camera.cpp)
 
 target_include_directories(
   android-ui-controller PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
