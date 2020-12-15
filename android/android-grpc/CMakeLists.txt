@@ -49,6 +49,7 @@ android_add_library(
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       ${EMULATOR_GRPC_SRC}
+      android/emulation/control/camera/Camera.cpp
       android/emulation/control/clipboard/Clipboard.cpp
       android/emulation/control/EmulatorService.cpp
       android/emulation/control/GrpcServices.cpp
