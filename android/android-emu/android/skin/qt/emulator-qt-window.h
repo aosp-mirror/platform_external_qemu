@@ -452,6 +452,8 @@ private:
     QRect mDeviceGeometry;
 
     bool mMouseGrabbed = false;
+    bool mMouseRepositioning = false;
+    bool mMouseRepositionFinished = false;
     bool mPromptMouseRestoreMessageBox = true;
 
     // Window flags to use for frameless and framed appearance

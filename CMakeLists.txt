@@ -1,7 +1,5 @@
 project(Android-Emulator)
 cmake_minimum_required(VERSION 3.5)
-message("Android target tag: ${ANDROID_TARGET_TAG}")
-
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(
     WARNING
@@ -27,9 +25,7 @@ else()
 endif()
 
 if (BUILDING_FOR_AARCH64)
-    message(STATUS "Building for aarch64!!!!!!!!!!!!!!!!!!!!!!!!! (top level)")
-else()
-    message(STATUS "NOT Building for aarch64!!!!!!!!!!!!!!!!!!!!!!!!! (top level)")
+    message(STATUS "Building for aarch64!")
 endif()
 
 message(
@@ -200,6 +196,13 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 prebuilt(Threads)
+
+# Bug: 175067895
+# Copy emulator replacement script to the install dir.
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
+    file(COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/darwin-aarch64-replace.sh
+         DESTINATION ${CMAKE_INSTALL_PREFIX})
+endif()
 
 # Configure OS depdendency licensenses
 if(LINUX_AARCH64)
