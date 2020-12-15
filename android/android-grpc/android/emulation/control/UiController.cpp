@@ -17,6 +17,7 @@
 #include <grpcpp/grpcpp.h>
 
 #include "android/base/async/ThreadLooper.h"
+#include "android/emulation/control/camera/Camera.h"
 #include "android/settings-agent.h"
 
 #include "ui_controller_service.grpc.pb.h"
@@ -31,6 +32,7 @@ class Empty;
 using namespace android::base;
 using ::google::protobuf::Empty;
 using grpc::ServerContext;
+using grpc::ServerWriter;
 using grpc::Status;
 
 namespace android {
@@ -89,7 +91,7 @@ static ExtendedWindowPane convertToExtendedWindowPane(
 class UiControllerImpl final : public UiController::Service {
 public:
     UiControllerImpl(const AndroidConsoleAgents* agents)
-        : mAgents(agents) {}
+        : mAgents(agents), mCamera(Camera::getCamera()) {}
 
     Status showExtendedControls(ServerContext* context,
                                 const PaneEntry* paneEntry,
@@ -129,7 +131,36 @@ public:
         return Status::OK;
     }
 
+    void setNotificationEvent(Notification* reply) {
+        if (mCamera->isVirtualSceneConnected()) {
+            reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
+        } else {
+            reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
+        }
+    }
+
+    Status streamNotification(ServerContext* context,
+                              const Empty* request,
+                              ServerWriter<Notification>* writer) {
+        Notification reply;
+        bool clientAvailable = !context->IsCancelled();
+        if (clientAvailable) {
+            setNotificationEvent(&reply);
+        }
+        while (clientAvailable) {
+            const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
+            auto arrived = mCamera->eventWaiter()->next(kTimeToWaitForFrame);
+            if (arrived > 0 && !context->IsCancelled()) {
+                setNotificationEvent(&reply);
+                clientAvailable = writer->Write(reply);
+            }
+            clientAvailable = !context->IsCancelled() && clientAvailable;
+        }
+        return Status::OK;
+    }
+
 private:
+    Camera* mCamera;
     const AndroidConsoleAgents* mAgents;
 };
 

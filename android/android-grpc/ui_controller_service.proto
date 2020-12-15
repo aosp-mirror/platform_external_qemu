@@ -31,6 +31,8 @@ service UiController {
     rpc closeExtendedControls(google.protobuf.Empty)
             returns (ExtendedControlsStatus) {}
     rpc setUiTheme(ThemingStyle) returns (google.protobuf.Empty) {}
+    // Currently, only notify client of camera status change.
+    rpc streamNotification(google.protobuf.Empty) returns (stream Notification) {}
 }
 
 message ThemingStyle {
@@ -77,4 +79,13 @@ message PaneEntry {
         SENSOR_REPLAY = 21;
     };
     PaneIndex index = 1;
+}
+
+message Notification {
+     enum EventType {
+           VIRTUAL_SCENE_CAMERA_INACTIVE = 0;
+           VIRTUAL_SCENE_CAMERA_ACTIVE = 1;
+           // Keep adding more for other event types
+     }
+     EventType event = 1;
 }
