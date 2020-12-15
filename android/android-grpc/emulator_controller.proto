@@ -181,6 +181,10 @@ service EmulatorController {
   // Returns all currently valid logical displays.
   rpc getDisplayConfigurations(google.protobuf.Empty)
       returns (DisplayConfigurations) {}
+
+  // Currently, only notify client of virtual scene camera status change.
+  rpc streamNotification(google.protobuf.Empty) returns (stream Notification) {}
+
 }
 
 // A Run State that describes the state of the Virtual Machine.
@@ -970,4 +974,13 @@ message DisplayConfiguration {
 
 message DisplayConfigurations {
   repeated DisplayConfiguration displays = 1;
+}
+
+message Notification {
+     enum EventType {
+           VIRTUAL_SCENE_CAMERA_INACTIVE = 0;
+           VIRTUAL_SCENE_CAMERA_ACTIVE = 1;
+           // Keep adding more for other event types
+     }
+     EventType event = 1;
 }
