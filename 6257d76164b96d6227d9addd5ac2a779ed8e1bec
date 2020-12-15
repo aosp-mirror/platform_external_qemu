@@ -50,6 +50,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "77b50d56_d30a64b6",
+        "filename": "android/android-grpc/android/emulation/control/UiController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-15T19:52:11Z",
+      "side": 1,
+      "message": "Even if streamNotification is issued very early, it would not get a CAMERA_ACTIVE event if the emulator was started from a snapshot with camera already active. To synchronize Studio and emulator state we need a CAMERA_ACTIVE event if the camera was active when streamNotification was called.",
+      "parentUuid": "f26f0a41_71840dae",
+      "range": {
+        "startLine": 140,
+        "startChar": 8,
+        "endLine": 152,
+        "endChar": 9
+      },
+      "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "55181bd8_da301541",
         "filename": "android/android-grpc/ui_controller_service.proto",
         "patchSetId": 6
@@ -85,6 +109,30 @@
       "side": 1,
       "message": "So I wonder if EE will have a different behavior if webcam is use? I think it is doable to differentiate between webcam and virtual scene.",
       "parentUuid": "55181bd8_da301541",
+      "range": {
+        "startLine": 86,
+        "startChar": 11,
+        "endLine": 87,
+        "endChar": 29
+      },
+      "revId": "6257d76164b96d6227d9addd5ac2a779ed8e1bec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b1fb6eff_884fd6fa",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-15T19:52:11Z",
+      "side": 1,
+      "message": "The real question is whether we need to distinguish between the two camera modes in EE. Does standalone emulator UI behaves differently for these two modes?",
+      "parentUuid": "3cb17078_d41346ae",
       "range": {
         "startLine": 86,
         "startChar": 11,
