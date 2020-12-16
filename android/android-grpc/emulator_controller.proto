@@ -161,7 +161,7 @@ service EmulatorController {
   // Gets the state of the virtual machine.
   rpc getVmState(google.protobuf.Empty) returns (VmRunState) {}
 
-  // Atomically changes the current multi display configuration.
+  // Atomically changes the current multi-display configuration.
   // After this call the given display configurations will be activated. You
   // can only update secondary displays. Displays with id 0 will be ignored.
   //
@@ -169,7 +169,7 @@ service EmulatorController {
   // display state can be observed by the returned configuration.
   //
   // The following gRPC error codes can be returned:
-  // -  unimplemented (code 14) if the AVD does NOT support multi displays.
+  // -  unimplemented (code 14) if the AVD does NOT support a configurable secondary display.
   // -  aborted (code 10) if:
   //     - The same display id is defined multiple times.
   //     - The display configurations are outside valid ranges
