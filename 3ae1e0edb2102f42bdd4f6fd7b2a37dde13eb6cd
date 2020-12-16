@@ -52,6 +52,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "76194633_198868c2",
+        "filename": "android/android-grpc/android/emulation/control/camera/Camera.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-12-16T21:39:52Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6dd5c453_ecbbafc3",
+      "revId": "3ae1e0edb2102f42bdd4f6fd7b2a37dde13eb6cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7428a47a_51e590d0",
