@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4436478f_7cda79a3",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 984,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-12-16T21:53:26Z",
+      "side": 1,
+      "message": "It should have clientAvailable \u003d writer-\u003eWrite(reply) actually. Thanks Erwin, I will update the proto file.",
+      "parentUuid": "aed85916_a85398c0",
+      "revId": "3ae1e0edb2102f42bdd4f6fd7b2a37dde13eb6cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "db58934a_5e22de96",
@@ -83,6 +101,24 @@
       "writtenOn": "2020-12-16T18:55:57Z",
       "side": 1,
       "message": "return mVirtualSceneConnected;",
+      "revId": "3ae1e0edb2102f42bdd4f6fd7b2a37dde13eb6cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "34d6089f_1d7d9e98",
+        "filename": "android/android-grpc/android/emulation/control/camera/Camera.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-12-16T21:53:26Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7428a47a_51e590d0",
       "revId": "3ae1e0edb2102f42bdd4f6fd7b2a37dde13eb6cd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
