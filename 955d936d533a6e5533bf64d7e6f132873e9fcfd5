@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e1397c51_4fffbe0e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-12-16T17:35:08Z",
+      "side": 1,
+      "message": "jansene@ Do you think it makes sense to add the streamNotification in EmulatorService?",
+      "revId": "955d936d533a6e5533bf64d7e6f132873e9fcfd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
