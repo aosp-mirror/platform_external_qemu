@@ -88,6 +88,7 @@ public:
         bool canLoad() const override { return true; }
 
         virtual void preLoad(android::base::Stream* stream) override {
+            fprintf(stderr, "%s: call (emugl pipe service)\n", __func__);
 #ifdef SNAPSHOT_PROFILE
             mLoadMeter.restartUs();
 #endif
@@ -110,6 +111,7 @@ public:
         }
 
         void postLoad(android::base::Stream* stream) override {
+            fprintf(stderr, "%s: call (emugl pipe service)\n", __func__);
             if (const auto& renderer = android_getOpenglesRenderer()) {
                 renderer->resumeAll();
             }
@@ -120,6 +122,7 @@ public:
         }
 
         void preSave(android::base::Stream* stream) override {
+            fprintf(stderr, "%s: call (emugl pipe service)\n", __func__);
 #ifdef SNAPSHOT_PROFILE
             mSaveMeter.restartUs();
 #endif
@@ -137,6 +140,7 @@ public:
         }
 
         void postSave(android::base::Stream* stream) override {
+            fprintf(stderr, "%s: call (emugl pipe service)\n", __func__);
             if (const auto& renderer = android_getOpenglesRenderer()) {
                 renderer->resumeAll();
             }

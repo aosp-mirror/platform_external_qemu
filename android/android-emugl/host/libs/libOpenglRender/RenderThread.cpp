@@ -97,8 +97,8 @@ RenderThread::RenderThread(RenderChannelImpl* channel,
 
 RenderThread::RenderThread(
         struct asg_context context,
-        android::emulation::asg::ConsumerCallbacks callbacks,
-        android::base::Stream* loadStream)
+        android::base::Stream* loadStream,
+        android::emulation::asg::ConsumerCallbacks callbacks)
     : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
       mRingStream(
           new RingStream(context, callbacks, kStreamBufferSize)) {
@@ -141,22 +141,36 @@ void RenderThread::resume() {
 }
 
 void RenderThread::save(android::base::Stream* stream) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     bool success;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         AutoLock lock(mLock);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         assert(mState == SnapshotState::StartSaving ||
                mState == SnapshotState::InProgress ||
                mState == SnapshotState::Finished);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         waitForSnapshotCompletion(&lock);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         success = mState == SnapshotState::Finished;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (success) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         assert(mStream);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         stream->putByte(1);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         android::base::saveStream(stream, *mStream);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     } else {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         stream->putByte(0);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     }
 }
 
@@ -198,11 +212,17 @@ void RenderThread::loadImpl(AutoLock* lock, const SnapshotObjects& objects) {
 
 void RenderThread::saveImpl(AutoLock* lock, const SnapshotObjects& objects) {
     snapshotOperation(lock, [this, &objects] {
+            fprintf(stderr, "RenderThread::saveImpl::%s:%d\n", __func__, __LINE__);
         objects.readBuffer->onSave(&*mStream);
+            fprintf(stderr, "RenderThread::saveImpl::%s:%d\n", __func__, __LINE__);
         if (objects.channelStream) objects.channelStream->save(&*mStream);
+            fprintf(stderr, "RenderThread::saveImpl::%s:%d\n", __func__, __LINE__);
         if (objects.ringStream) objects.ringStream->save(&*mStream);
+            fprintf(stderr, "RenderThread::saveImpl::%s:%d\n", __func__, __LINE__);
         objects.checksumCalc->save(&*mStream);
+            fprintf(stderr, "RenderThread::saveImpl::%s:%d\n", __func__, __LINE__);
         objects.threadInfo->onSave(&*mStream);
+            fprintf(stderr, "RenderThread::saveImpl::%s:%d\n", __func__, __LINE__);
     });
 }
 

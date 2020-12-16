@@ -50,6 +50,7 @@ struct Block {
     // size: implicitly ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE
     bool isEmpty = true;
     bool dedicated = false;
+    size_t dedicatedSize = 0;
     bool usesVirtioGpuHostmem = false;
     uint64_t hostmemId = 0;
 };
@@ -78,8 +79,11 @@ public:
     ConsumerInterface getConsumerInterface() {
         if (!mConsumerInterface.create ||
             !mConsumerInterface.destroy ||
+            !mConsumerInterface.preSave ||
+            !mConsumerInterface.globalPreSave ||
             !mConsumerInterface.save ||
-            !mConsumerInterface.load) {
+            !mConsumerInterface.globalPostSave ||
+            !mConsumerInterface.postSave) {
             crashhandler_die("Consumer interface has not been set\n");
         }
         return mConsumerInterface;
@@ -89,7 +93,19 @@ public:
         return mControlOps;
     }
 
-    void clear() { }
+    void clear() {
+        for (auto& block: mRingBlocks) {
+            destroyBlockLocked(block);
+        }
+
+        for (auto& block: mBufferBlocks) {
+            destroyBlockLocked(block);
+        }
+
+        for (auto& block: mCombinedBlocks) {
+            destroyBlockLocked(block);
+        }
+    }
 
     uint64_t perContextBufferSize() const {
         return mPerContextBufferSize;
@@ -256,24 +272,142 @@ public:
         deleteAllocation(alloc, mCombinedBlocks);
     }
 
+    void preSave() {
+        // mConsumerInterface.globalPreSave();
+    }
+
     void save(base::Stream* stream) {
-        // mSubAllocator->save(stream);
+        fprintf(stderr, "ASG Globals: %s call\n", __func__);
+        stream->putBe64(mRingBlocks.size());
+        stream->putBe64(mBufferBlocks.size());
+        stream->putBe64(mCombinedBlocks.size());
+
+        for (const auto& block: mRingBlocks) {
+            saveBlockLocked(stream, block);
+        }
+
+        for (const auto& block: mBufferBlocks) {
+            saveBlockLocked(stream, block);
+        }
+
+        for (const auto& block: mCombinedBlocks) {
+            saveBlockLocked(stream, block);
+        }
+    }
+
+    void postSave() {
+        // mConsumerInterface.globalPostSave();
     }
 
     bool load(base::Stream* stream) {
-        // clear();
-        // mSubAllocator->load(stream);
+        fprintf(stderr, "ASG Globals: %s call\n", __func__);
+        clear();
+
+        uint64_t ringBlockCount = stream->getBe64();
+        uint64_t bufferBlockCount = stream->getBe64();
+        uint64_t combinedBlockCount = stream->getBe64();
+
+        mRingBlocks.resize(ringBlockCount);
+        mBufferBlocks.resize(bufferBlockCount);
+        mCombinedBlocks.resize(combinedBlockCount);
+
+        for (auto& block: mRingBlocks) {
+            loadBlockLocked(stream, block);
+        }
+
+        for (auto& block: mBufferBlocks) {
+            loadBlockLocked(stream, block);
+        }
+
+        for (auto& block: mCombinedBlocks) {
+            loadBlockLocked(stream, block);
+        }
+
         return true;
     }
 
+    // Assumes that blocks have been loaded,
+    // and that alloc has its blockIndex/offsetIntoPhys fields filled already
+    void fillAllocFromLoad(Allocation& alloc, AddressSpaceGraphicsContext::AllocType allocType) {
+        switch (allocType) {
+            case AddressSpaceGraphicsContext::AllocType::AllocTypeRing:
+                fillAllocFromLoad(mRingBlocks[alloc.blockIndex], alloc);
+                break;
+            case AddressSpaceGraphicsContext::AllocType::AllocTypeBuffer:
+                fillAllocFromLoad(mBufferBlocks[alloc.blockIndex], alloc);
+                break;
+            case AddressSpaceGraphicsContext::AllocType::AllocTypeCombined:
+                fillAllocFromLoad(mCombinedBlocks[alloc.blockIndex], alloc);
+                break;
+            default:
+                fprintf(stderr, "%s: fatal: unknown alloc type: 0x%x\n", __func__, (uint32_t)allocType);
+                abort();
+                break;
+        }
+    }
+
 private:
+
+    void saveBlockLocked(
+        base::Stream* stream,
+        const Block& block) {
+
+        if (block.isEmpty) {
+            stream->putBe32(0);
+            return;
+        }
+
+        stream->putBe64(block.offsetIntoPhys);
+        stream->putBe32(block.dedicated);
+        stream->putBe64(block.dedicatedSize);
+        stream->putBe32(block.usesVirtioGpuHostmem);
+        stream->putBe64(block.hostmemId);
+
+        block.subAlloc->save(stream);
+    }
+
+    void loadBlockLocked(
+        base::Stream* stream,
+        Block& block) {
+
+        uint32_t filled = stream->getBe32();
+
+        if (!filled) {
+            block.isEmpty = true;
+            return;
+        }
+
+        block.offsetIntoPhys = stream->getBe64();
+        block.isEmpty = stream->getBe32();
+        block.dedicated = stream->getBe32();
+        block.dedicatedSize = stream->getBe64();
+        block.usesVirtioGpuHostmem = stream->getBe32();
+        block.hostmemId = stream->getBe64();
+
+        fillBlockLocked(
+            block,
+            block.dedicated,
+            block.dedicatedSize,
+            block.usesVirtioGpuHostmem,
+            &block.hostmemId,
+            true /* register fixed */);
+
+        block.subAlloc->load(stream);
+    }
+
+    void fillAllocFromLoad(const Block& block, Allocation& alloc) {
+        alloc.buffer = block.buffer + (alloc.offsetIntoPhys - block.offsetIntoPhys);
+        alloc.dedicated = block.dedicated;
+        alloc.hostmemId = block.hostmemId;
+    }
 
     void fillBlockLocked(
         Block& block,
         bool dedicated = false,
         size_t dedicatedSize = 0,
         bool usesVirtioGpuHostmem = false,
-        uint64_t* hostmemIdOut = nullptr) {
+        uint64_t* hostmemIdOut = nullptr,
+        bool hostmemRegisterFixed = false) {
 
         if (dedicated) {
             if (usesVirtioGpuHostmem) {
@@ -282,9 +416,12 @@ private:
                         ADDRESS_SPACE_GRAPHICS_PAGE_SIZE,
                         dedicatedSize);
 
-                uint64_t hostmemId = mControlOps->hostmem_register(
-                    (uint64_t)(uintptr_t)buf,
-                    dedicatedSize);
+                uint64_t hostmemId =
+                    mControlOps->hostmem_register(
+                        (uint64_t)(uintptr_t)buf,
+                        dedicatedSize,
+                        hostmemRegisterFixed,
+                        hostmemIdOut ? *hostmemIdOut : 0);
 
                 if (hostmemIdOut) *hostmemIdOut = hostmemId;
 
@@ -299,6 +436,7 @@ private:
                 block.usesVirtioGpuHostmem = usesVirtioGpuHostmem;
                 block.hostmemId = hostmemId;
                 block.dedicated = true;
+                block.dedicatedSize = dedicatedSize;
 
             } else {
                 crashhandler_die(
@@ -395,7 +533,7 @@ void AddressSpaceGraphicsContext::setConsumer(
     sGlobals->setConsumer(interface);
 }
 
-AddressSpaceGraphicsContext::AddressSpaceGraphicsContext(bool isVirtio) :
+AddressSpaceGraphicsContext::AddressSpaceGraphicsContext(bool isVirtio, bool fromSnapshot) :
     mConsumerCallbacks((ConsumerCallbacks){
         [this] { return onUnavailableRead(); },
         [](uint64_t physAddr) {
@@ -404,6 +542,11 @@ AddressSpaceGraphicsContext::AddressSpaceGraphicsContext(bool isVirtio) :
     }),
     mConsumerInterface(sGlobals->getConsumerInterface()),
     mIsVirtio(isVirtio) {
+
+    if (fromSnapshot) {
+        // Use load() instead to initialize
+        return;
+    }
 
     if (mIsVirtio) {
         mCombinedAllocation = sGlobals->allocRingAndBufferStorageDedicated();
@@ -468,7 +611,7 @@ void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo* info) {
         info->size = (uint64_t)(mVersion > guestVersion ? guestVersion : mVersion);
         mVersion = (uint32_t)info->size;
         mCurrentConsumer = mConsumerInterface.create(
-            mHostContext, mConsumerCallbacks);
+            mHostContext, nullptr /* no load stream */, mConsumerCallbacks);
 
         if (mIsVirtio) {
             info->metadata = mCombinedAllocation.hostmemId;
@@ -530,8 +673,124 @@ AddressSpaceDeviceType AddressSpaceGraphicsContext::getDeviceType() const {
     return AddressSpaceDeviceType::Graphics;
 }
 
-void AddressSpaceGraphicsContext::save(base::Stream*) const { }
-bool AddressSpaceGraphicsContext::load(base::Stream*) { return true; }
+void AddressSpaceGraphicsContext::preSave() const {
+    if (mCurrentConsumer) {
+        mConsumerInterface.preSave(mCurrentConsumer);
+    }
+}
+
+void AddressSpaceGraphicsContext::save(base::Stream* stream) const {
+    stream->putBe32(mIsVirtio);
+    stream->putBe32(mVersion);
+    stream->putBe32(mExiting);
+    stream->putBe32(mUnavailableReadCount);
+
+    saveAllocation(stream, mRingAllocation);
+    saveAllocation(stream, mBufferAllocation);
+    saveAllocation(stream, mCombinedAllocation);
+
+    saveRingConfig(stream, mSavedConfig);
+
+    if (mCurrentConsumer) {
+        mConsumerInterface.save(mCurrentConsumer, stream);
+    } else {
+        stream->putBe32(0);
+    }
+}
+
+void AddressSpaceGraphicsContext::postSave() const {
+    if (mCurrentConsumer) {
+        mConsumerInterface.postSave(mCurrentConsumer);
+    }
+}
+
+bool AddressSpaceGraphicsContext::load(base::Stream* stream) {
+    mIsVirtio = stream->getBe32();
+    mVersion = stream->getBe32();
+
+    loadAllocation(stream, mRingAllocation, AllocType::AllocTypeRing);
+    loadAllocation(stream, mBufferAllocation, AllocType::AllocTypeBuffer);
+    loadAllocation(stream, mCombinedAllocation, AllocType::AllocTypeCombined);
+
+    mHostContext = asg_context_create(
+        mRingAllocation.buffer,
+        mBufferAllocation.buffer,
+        sGlobals->perContextBufferSize());
+    mHostContext.ring_config->buffer_size =
+        sGlobals->perContextBufferSize();
+    mHostContext.ring_config->flush_interval =
+        android_hw->hw_gltransport_asg_writeStepSize;
+
+    // In load, the live ring config state is in shared host/guest ram.
+    //
+    // mHostContext.ring_config->host_consumed_pos = 0;
+    // mHostContext.ring_config->transfer_mode = 1;
+    // mHostContext.ring_config->transfer_size = 0;
+    // mHostContext.ring_config->in_error = 0;
+
+    loadRingConfig(stream, mSavedConfig);
+
+    uint32_t consumerExists = stream->getBe32();
+
+    if (consumerExists) {
+        mCurrentConsumer = mConsumerInterface.create(
+            mHostContext, stream, mConsumerCallbacks);
+    }
+
+    return true;
+}
+
+void AddressSpaceGraphicsContext::globalStatePreSave() {
+    sGlobals->preSave();
+}
+
+void AddressSpaceGraphicsContext::globalStateSave(base::Stream* stream) {
+    sGlobals->save(stream);
+}
+
+void AddressSpaceGraphicsContext::globalStatePostSave() {
+    sGlobals->postSave();
+}
+
+bool AddressSpaceGraphicsContext::globalStateLoad(base::Stream* stream) {
+    return sGlobals->load(stream);
+}
+
+void AddressSpaceGraphicsContext::saveRingConfig(base::Stream* stream, const struct asg_ring_config& config) const {
+    stream->putBe32(config.buffer_size);
+    stream->putBe32(config.flush_interval);
+    stream->putBe32(config.host_consumed_pos);
+    stream->putBe32(config.guest_write_pos);
+    stream->putBe32(config.transfer_mode);
+    stream->putBe32(config.transfer_size);
+    stream->putBe32(config.in_error);
+}
+
+void AddressSpaceGraphicsContext::saveAllocation(base::Stream* stream, const Allocation& alloc) const {
+    stream->putBe64(alloc.blockIndex);
+    stream->putBe64(alloc.offsetIntoPhys);
+    stream->putBe64(alloc.size);
+    stream->putBe32(alloc.isView);
+}
+
+void AddressSpaceGraphicsContext::loadRingConfig(base::Stream* stream, struct asg_ring_config& config) {
+    config.buffer_size = stream->getBe32();
+    config.flush_interval = stream->getBe32();
+    config.host_consumed_pos = stream->getBe32();
+    config.guest_write_pos = stream->getBe32();
+    config.transfer_mode = stream->getBe32();
+    config.transfer_size = stream->getBe32();
+    config.in_error = stream->getBe32();
+}
+
+void AddressSpaceGraphicsContext::loadAllocation(base::Stream* stream, Allocation& alloc, AddressSpaceGraphicsContext::AllocType type) {
+    alloc.blockIndex = stream->getBe64();
+    alloc.offsetIntoPhys = stream->getBe64();
+    alloc.size = stream->getBe64();
+    alloc.isView = stream->getBe32();
+
+    sGlobals->fillAllocFromLoad(alloc, type);
+}
 
 }  // namespace asg
 }  // namespace emulation

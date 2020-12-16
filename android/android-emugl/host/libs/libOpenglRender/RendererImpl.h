@@ -49,8 +49,12 @@ public:
 
     void* addressSpaceGraphicsConsumerCreate(
         struct asg_context,
+        android::base::Stream* stream,
         android::emulation::asg::ConsumerCallbacks) override final;
     void addressSpaceGraphicsConsumerDestroy(void*) override final;
+    void addressSpaceGraphicsConsumerPreSave(void* consumer) override final;
+    void addressSpaceGraphicsConsumerSave(void* consumer, android::base::Stream* stream) override final;
+    void addressSpaceGraphicsConsumerPostSave(void* consumer) override final;
 
     HardwareStrings getHardwareStrings() final;
     void setPostCallback(OnPostCallback onPost,
