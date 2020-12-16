@@ -53,6 +53,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "09e8d282_ad5bdb0f",
+        "filename": "android/android-grpc/android/emulation/control/UiController.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2020-12-16T22:03:26Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "db58934a_5e22de96",
+      "revId": "3ae1e0edb2102f42bdd4f6fd7b2a37dde13eb6cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6dd5c453_ecbbafc3",
