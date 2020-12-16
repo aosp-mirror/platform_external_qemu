@@ -507,10 +507,10 @@ if(WINDOWS)
   include(emu-windows-libs)
 endif()
 
-# Get the versions from git (Note that both functions are doing pretty much the
-# same)
+# Get the versions from git if possible, by default we point to
+# the latest qemu merge commit  (v2.12.0) if we are unable to fetch it.
+set(ANDROID_QEMU_VERSION "v2.12.0-19097-g85fa07f04ef")
 get_git_version(ANDROID_QEMU_VERSION)
-get_git_sha(ANDROID_QEMU_SHA)
 
 # Generate the qemu-version header.
 configure_file(qemu-version.h.in qemu-version.h @ONLY)
