@@ -16,6 +16,23 @@
       "message": "jansene@ Do you think it makes sense to add the streamNotification in EmulatorService?",
       "revId": "955d936d533a6e5533bf64d7e6f132873e9fcfd5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "843bb969_aee2e5f8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-16T18:00:32Z",
+      "side": 1,
+      "message": "Would it make sense to start thinking about a more general event registration mechanism? It looks like we are starting to add all these event like streams all over the place.",
+      "revId": "955d936d533a6e5533bf64d7e6f132873e9fcfd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
