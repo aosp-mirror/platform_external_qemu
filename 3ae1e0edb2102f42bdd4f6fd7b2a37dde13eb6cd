@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aed85916_a85398c0",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 984,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-16T18:55:57Z",
+      "side": 1,
+      "message": "Are you missing clientAvailable \u003d writer-\u003eWrite(reply)? otherwise this doesn\u0027t do anything.\n\nWe should probably update the documentation in the .proto file to indicate whether we wait for the first change, or that we send state and then wait for the first change.",
+      "revId": "3ae1e0edb2102f42bdd4f6fd7b2a37dde13eb6cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "db58934a_5e22de96",
+        "filename": "android/android-grpc/android/emulation/control/UiController.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-16T18:55:57Z",
+      "side": 1,
+      "message": "Do we need this?",
+      "revId": "3ae1e0edb2102f42bdd4f6fd7b2a37dde13eb6cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6dd5c453_ecbbafc3",
+        "filename": "android/android-grpc/android/emulation/control/camera/Camera.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-16T18:55:57Z",
+      "side": 1,
+      "message": "Use android::base::LazyInstance for singletons.",
+      "revId": "3ae1e0edb2102f42bdd4f6fd7b2a37dde13eb6cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7428a47a_51e590d0",
+        "filename": "android/android-grpc/android/emulation/control/camera/Camera.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-16T18:55:57Z",
+      "side": 1,
+      "message": "return mVirtualSceneConnected;",
+      "revId": "3ae1e0edb2102f42bdd4f6fd7b2a37dde13eb6cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
