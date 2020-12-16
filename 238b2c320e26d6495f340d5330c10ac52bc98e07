@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c8699763_996bd845",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 8
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-16T16:52:04Z",
+      "side": 1,
+      "message": "I\u0027ve just realized that this method belongs to the EmulatorController, not to UiController because it is not related to emulator UI.",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 1
+      },
+      "revId": "238b2c320e26d6495f340d5330c10ac52bc98e07",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
