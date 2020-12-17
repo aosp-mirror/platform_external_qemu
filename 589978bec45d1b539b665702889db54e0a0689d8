@@ -543,6 +543,29 @@
       },
       "revId": "589978bec45d1b539b665702889db54e0a0689d8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "660f592e_ec9e022e",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 948,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2020-12-17T19:39:17Z",
+      "side": 1,
+      "message": "Typo: shoud -\u003e should",
+      "range": {
+        "startLine": 948,
+        "startChar": 29,
+        "endLine": 948,
+        "endChar": 34
+      },
+      "revId": "589978bec45d1b539b665702889db54e0a0689d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
