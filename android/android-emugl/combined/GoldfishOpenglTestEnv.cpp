@@ -369,20 +369,40 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     ConsumerInterface interface = {
             // create
             [openglesRenderer](struct asg_context context,
+                               android::base::Stream* loadStream,
                                ConsumerCallbacks callbacks) {
                 return openglesRenderer->addressSpaceGraphicsConsumerCreate(
-                        context, callbacks);
+                        context, loadStream, callbacks);
             },
             // destroy
             [openglesRenderer](void* consumer) {
                 return openglesRenderer->addressSpaceGraphicsConsumerDestroy(
                         consumer);
             },
-            // TODO
+            // pre save
+            [openglesRenderer](void* consumer) {
+               return openglesRenderer->addressSpaceGraphicsConsumerPreSave(consumer);
+            },
+            // global presave
+            [openglesRenderer]() {
+               return openglesRenderer->pauseAllPreSave();
+            },
             // save
-            [](void* consumer, android::base::Stream* stream) {},
-            // load
-            [](void* consumer, android::base::Stream* stream) {},
+            [openglesRenderer](void* consumer, android::base::Stream* stream) {
+               return openglesRenderer->addressSpaceGraphicsConsumerSave(consumer, stream);
+            },
+            // global postsave
+            [openglesRenderer]() {
+               return openglesRenderer->resumeAll();
+            },
+            // postSave
+            [openglesRenderer](void* consumer) {
+               return openglesRenderer->addressSpaceGraphicsConsumerPostSave(consumer);
+            },
+            // postLoad
+            [openglesRenderer](void* consumer) {
+               return openglesRenderer->addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(consumer);
+            },
     };
     AddressSpaceGraphicsContext::setConsumer(interface);
 }

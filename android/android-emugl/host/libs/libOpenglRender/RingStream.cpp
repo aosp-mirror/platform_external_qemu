@@ -181,9 +181,17 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             if (mShouldExit) {
                 return nullptr;
             }
-            if (-1 == mCallbacks.onUnavailableRead()) {
+            int unavailReadResult = mCallbacks.onUnavailableRead();
+
+            if (-1 == unavailReadResult) {
                 mShouldExit = true;
             }
+
+            // pause pre snapshot
+            if (-2 == unavailReadResult) {
+                mShouldExit = true;
+            }
+
             continue;
         }
     }
@@ -314,22 +322,17 @@ const unsigned char *RingStream::readFully( void *buf, size_t len) {
 }
 
 void RingStream::onSave(android::base::Stream* stream) {
-    // TODO
-    // Write only the data that's left in read buffer, but in the same format
-    // as saveBuffer() does.
-    // stream->putBe32(mReadBufferLeft);
-    // stream->write(mReadBuffer.data() + mReadBuffer.size() - mReadBufferLeft,
-    //               mReadBufferLeft);
-    // android::base::saveBuffer(stream, mWriteBuffer);
+    stream->putBe32(mReadBufferLeft);
+    stream->write(mReadBuffer.data() + mReadBuffer.size() - mReadBufferLeft,
+                  mReadBufferLeft);
+    android::base::saveBuffer(stream, mWriteBuffer);
 }
 
 unsigned char* RingStream::onLoad(android::base::Stream* stream) {
-    // TODO
-    // android::base::loadBuffer(stream, &mReadBuffer);
-    // mReadBufferLeft = mReadBuffer.size();
-    // android::base::loadBuffer(stream, &mWriteBuffer);
-    // return reinterpret_cast<unsigned char*>(mWriteBuffer.data());
-    return nullptr;
+    android::base::loadBuffer(stream, &mReadBuffer);
+    mReadBufferLeft = mReadBuffer.size();
+    android::base::loadBuffer(stream, &mWriteBuffer);
+    return reinterpret_cast<unsigned char*>(mWriteBuffer.data());
 }
 
 }  // namespace emugl

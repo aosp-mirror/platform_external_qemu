@@ -3192,7 +3192,9 @@ public:
         auto id =
             get_emugl_vm_operations().hostmemRegister(
                     (uint64_t)(uintptr_t)(info->ptr),
-                    (uint64_t)(uintptr_t)(info->size));
+                    (uint64_t)(uintptr_t)(info->size),
+                    // No fixed registration
+                    false, 0);
 
         *pAddress = hva & (0xfff); // Don't expose exact hva to guest
         *pSize = sizeToPage;
