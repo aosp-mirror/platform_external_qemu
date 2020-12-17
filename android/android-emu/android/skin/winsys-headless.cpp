@@ -15,6 +15,10 @@
 #include <functional>                                  // for __base
 #include <memory>                                      // for static_pointer...
 
+#ifdef __linux__
+#include <X11/Xlib.h>
+#endif
+
 #include "android/cmdline-option.h"
 #include "android/globals.h"                           // for android_hw
 #include "android/skin/qt/emulator-no-qt-no-window.h"  // for EmulatorNoQtNo...
@@ -401,6 +405,9 @@ extern int skin_winsys_snapshot_control_start() {
 extern void skin_winsys_start(bool no_window) {
     (void)no_window;
     GlobalState* g = globalState();
+#ifdef __linux__
+    XInitThreads();
+#endif
     skin_winsys_setup_library_paths();
 
     g->app = nullptr;

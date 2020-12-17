@@ -503,6 +503,10 @@ android_target_compile_options(
 target_link_libraries(
   emulator-libui-headless PRIVATE android-emu emulator-libyuv FFMPEG::FFMPEG
                                   zlib android-hw-config)
+                                
+android_target_link_libraries(emulator-libui-headless linux-x86_64 PRIVATE -lX11)
+android_target_link_libraries(emulator-libui-headless linux-aarch64 PRIVATE -lX11 -lxcb
+                                                                   -lXau)
 
 if(WINDOWS_MSVC_X86_64)
   # Qt in windows will call main from win-main v.s. calling qt_main. we have to
