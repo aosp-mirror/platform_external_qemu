@@ -297,19 +297,34 @@ struct ConsumerCallbacks {
 };
 
 using ConsumerCreateCallback =
-    std::function<void* (struct asg_context, ConsumerCallbacks)>;
+    std::function<void* (struct asg_context, base::Stream*, ConsumerCallbacks)>;
 using ConsumerDestroyCallback =
     std::function<void(void*)>;
+using ConsumerPreSaveCallback =
+    std::function<void(void*)>;
+using ConsumerGlobalPreSaveCallback =
+    std::function<void()>;
 using ConsumerSaveCallback =
     std::function<void(void*, base::Stream*)>;
-using ConsumerLoadCallback =
-    std::function<void(void*, base::Stream*)>;
+using ConsumerGlobalPostSaveCallback =
+    std::function<void()>;
+using ConsumerPostSaveCallback =
+    std::function<void(void*)>;
+using ConsumerPostLoadCallback = ConsumerPostSaveCallback;
 
 struct ConsumerInterface {
     ConsumerCreateCallback create;
     ConsumerDestroyCallback destroy;
+
+    ConsumerPreSaveCallback preSave;
+    ConsumerGlobalPreSaveCallback globalPreSave;
+
     ConsumerSaveCallback save;
-    ConsumerLoadCallback load;
+
+    ConsumerGlobalPostSaveCallback globalPostSave;
+    ConsumerPostSaveCallback postSave;
+
+    ConsumerPostLoadCallback postLoad;
 };
 
 } // namespace asg

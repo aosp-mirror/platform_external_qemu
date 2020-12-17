@@ -106,7 +106,7 @@ bool WindowSurface::flushColorBuffer() {
     }
 
     if (!mDrawContext.get()) {
-        fprintf(stderr, "Draw context is NULL\n");
+        fprintf(stderr, "%p: Draw context is NULL\n", this);
         return false;
     }
 
