@@ -114,6 +114,27 @@ public:
         mCombinedBlocks.clear();
     }
 
+    void clearForLoad() {
+        for (auto& block: mRingBlocks) {
+            if (block.isEmpty) continue;
+            destroyBlockLockedForLoad(block);
+        }
+
+        for (auto& block: mBufferBlocks) {
+            if (block.isEmpty) continue;
+            destroyBlockLockedForLoad(block);
+        }
+
+        for (auto& block: mCombinedBlocks) {
+            if (block.isEmpty) continue;
+            destroyBlockLockedForLoad(block);
+        }
+
+        mRingBlocks.clear();
+        mBufferBlocks.clear();
+        mCombinedBlocks.clear();
+    }
+
     uint64_t perContextBufferSize() const {
         return mPerContextBufferSize;
     }
@@ -306,7 +327,8 @@ public:
     }
 
     bool load(base::Stream* stream) {
-        clear();
+        clearForLoad();
+        mConsumerInterface.globalPreLoad();
 
         uint64_t ringBlockCount = stream->getBe64();
         uint64_t bufferBlockCount = stream->getBe64();
@@ -365,6 +387,10 @@ private:
         } else {
             stream->putBe32(1);
         }
+
+        fprintf(stderr, "%s: save offset into phys: 0x%llx phys addr start: 0x%llx\n", __func__,
+                (unsigned long long)block.offsetIntoPhys,
+                (unsigned long long)get_address_space_device_hw_funcs()->getPhysAddrStartLocked());
 
         stream->putBe64(block.offsetIntoPhys);
         stream->putBe32(block.dedicated);
@@ -470,6 +496,12 @@ private:
 
                 if (fromLoad) {
                     offsetIntoPhys = block.offsetIntoPhys;
+                    allocRes = get_address_space_device_hw_funcs()->
+                        allocSharedHostRegionFixedLocked(
+                                ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE, offsetIntoPhys);
+                    if (allocRes) {
+                        // Disregard alloc failures for now
+                    }
                 } else {
                     int allocRes = get_address_space_device_hw_funcs()->
                         allocSharedHostRegionLocked(
@@ -485,6 +517,14 @@ private:
                     aligned_buf_alloc(
                         ADDRESS_SPACE_GRAPHICS_PAGE_SIZE,
                         ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
+
+                if (fromLoad) {
+                    fprintf(stderr, "%s: add memory mapping: phys start: 0x%llx offsetIntoPhys 0x%llx gpa [0x%llx 0x%llx)\n", __func__,
+                            (unsigned long long)get_address_space_device_hw_funcs()->getPhysAddrStartLocked(),
+                            (unsigned long long)offsetIntoPhys,
+                            (unsigned long long)(get_address_space_device_hw_funcs()->getPhysAddrStartLocked() + offsetIntoPhys),
+                            (unsigned long long)(get_address_space_device_hw_funcs()->getPhysAddrStartLocked() + offsetIntoPhys + ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE));
+                }
 
                 mControlOps->add_memory_mapping(
                     get_address_space_device_hw_funcs()->getPhysAddrStartLocked() +
@@ -508,6 +548,8 @@ private:
         if (block.usesVirtioGpuHostmem) {
             mControlOps->hostmem_unregister(block.hostmemId);
         } else {
+            fprintf(stderr, "%s: free shared host region at offset into phys: 0x%llx gpa 0x%llx\n", __func__,
+                    (unsigned long long)block.offsetIntoPhys, (unsigned long long)get_address_space_device_hw_funcs()->getPhysAddrStartLocked() + block.offsetIntoPhys);
             mControlOps->remove_memory_mapping(
                 get_address_space_device_hw_funcs()->getPhysAddrStartLocked() +
                     block.offsetIntoPhys,
@@ -516,6 +558,30 @@ private:
 
             get_address_space_device_hw_funcs()->freeSharedHostRegionLocked(
                 block.offsetIntoPhys);
+        }
+
+        delete block.subAlloc;
+
+        aligned_buf_free(block.buffer);
+
+        block.isEmpty = true;
+    }
+
+    void destroyBlockLockedForLoad(Block& block) {
+
+        if (block.usesVirtioGpuHostmem) {
+            mControlOps->hostmem_unregister(block.hostmemId);
+        } else {
+            fprintf(stderr, "%s: free shared host region at offset into phys: 0x%llx gpa 0x%llx\n", __func__,
+                    (unsigned long long)block.offsetIntoPhys, (unsigned long long)get_address_space_device_hw_funcs()->getPhysAddrStartLocked() + block.offsetIntoPhys);
+            mControlOps->remove_memory_mapping(
+                get_address_space_device_hw_funcs()->getPhysAddrStartLocked() +
+                    block.offsetIntoPhys,
+                block.buffer,
+                ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
+
+            // get_address_space_device_hw_funcs()->freeSharedHostRegionLocked(
+                // block.offsetIntoPhys);
         }
 
         delete block.subAlloc;
@@ -701,8 +767,8 @@ AddressSpaceDeviceType AddressSpaceGraphicsContext::getDeviceType() const {
 
 void AddressSpaceGraphicsContext::preSave() const {
     if (mCurrentConsumer) {
-        mConsumerMessages.send(ConsumerCommand::PausePreSnapshot);
         mConsumerInterface.preSave(mCurrentConsumer);
+        mConsumerMessages.send(ConsumerCommand::PausePreSnapshot);
     }
 }
 

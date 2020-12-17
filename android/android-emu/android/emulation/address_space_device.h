@@ -83,6 +83,9 @@ struct AddressSpaceHwFuncs {
      * are relative to. */
     uint64_t (*getPhysAddrStart)(void);
     uint64_t (*getPhysAddrStartLocked)(void);
+
+    /* Version of allocSharedHostRegionLocked but for a fixed offset */
+    int (*allocSharedHostRegionFixedLocked)(uint64_t page_aligned_size, uint64_t offset);
 };
 
 extern const struct AddressSpaceHwFuncs* address_space_set_hw_funcs(

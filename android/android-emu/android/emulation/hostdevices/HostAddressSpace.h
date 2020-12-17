@@ -61,6 +61,7 @@ public:
     static int freeSharedHostRegion(uint64_t offset);
     static int allocSharedHostRegionLocked(uint64_t page_aligned_size, uint64_t* offset);
     static int freeSharedHostRegionLocked(uint64_t offset);
+    static int allocSharedHostRegionFixedLocked(uint64_t page_aligned_size, uint64_t offset);
     static uint64_t getPhysAddrStart();
     static uint64_t getPhysAddrStartLocked();
 

@@ -180,9 +180,14 @@ void RenderThread::snapshotOperation(AutoLock* lock, OpImpl&& implFunc) {
     mState = SnapshotState::Finished;
     mCondVar.broadcast();
 
+    if (mRingStream) return;
+
     // Only return after we're allowed to proceed.
     while (isPausedForSnapshotLocked()) {
-        mCondVar.wait(lock);
+        if (mRingStream) {
+        } else {
+            mCondVar.wait(lock);
+        }
     }
 }
 

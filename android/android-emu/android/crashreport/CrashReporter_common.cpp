@@ -360,6 +360,7 @@ void crashhandler_append_message_format(const char* format, ...) {
 void crashhandler_die(const char* message) {
     if (const auto reporter = CrashReporter::get()) {
         fprintf(stderr, "%s: fatal: %s\n", __func__, message);
+        *(uint32_t*)(1234) = 5;
         reporter->GenerateDumpAndDie(message);
         } else {
         I("Emulator: exiting becase of the internal error '%s'\n", message);

@@ -274,6 +274,18 @@ public:
         return 0;
     }
 
+    int allocSharedHostRegionFixedLocked(uint64_t page_aligned_size, uint64_t offset) {
+        mPhysicalOffsetAllocator.allocFixed(page_aligned_size, offset);
+        auto& block = mSharedRegions[offset];
+        block.size = page_aligned_size;
+        (void)block;
+
+        HASD_LOG("new shared region: [0x%llx 0x%llx]",
+                 (unsigned long long)offset,
+                 (unsigned long long)offset + page_aligned_size);
+        return 0;
+    }
+
     int freeSharedHostRegion(uint64_t offset) {
         AutoLock lock(mLock);
         return freeSharedHostRegionLocked(offset);
@@ -466,6 +478,10 @@ uint64_t HostAddressSpaceDevice::getPhysAddrStart() {
     return HostAddressSpaceDevice::getImpl()->getPhysAddrStart();
 }
 
+int HostAddressSpaceDevice::allocSharedHostRegionFixedLocked(uint64_t page_aligned_size, uint64_t offset) {
+    return HostAddressSpaceDevice::getImpl()->allocSharedHostRegionFixedLocked(page_aligned_size, offset);
+}
+
 static const AddressSpaceHwFuncs sAddressSpaceHwFuncs = {
     &HostAddressSpaceDevice::allocSharedHostRegion,
     &HostAddressSpaceDevice::freeSharedHostRegion,
@@ -473,6 +489,7 @@ static const AddressSpaceHwFuncs sAddressSpaceHwFuncs = {
     &HostAddressSpaceDevice::freeSharedHostRegionLocked,
     &HostAddressSpaceDevice::getPhysAddrStart,
     &HostAddressSpaceDevice::getPhysAddrStart,
+    &HostAddressSpaceDevice::allocSharedHostRegionFixedLocked,
 };
 
 void HostAddressSpaceDevice::initialize() {

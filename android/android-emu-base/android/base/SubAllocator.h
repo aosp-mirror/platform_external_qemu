@@ -45,6 +45,7 @@ public:
 
     // returns null if the allocation cannot be satisfied.
     void* alloc(size_t wantedSize);
+    void* allocFixed(size_t wantedSize, uint64_t offset);
     // returns true if |ptr| came from alloc(), false otherwise
     bool free(void* ptr);
     void freeAll();

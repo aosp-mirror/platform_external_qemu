@@ -689,6 +689,7 @@ static void forEachServiceFromStream(CStream* stream, Func&& func) {
 }
 
 void android_pipe_guest_pre_load(CStream* stream) {
+    fprintf(stderr, "%s: call\n", __func__);
     CHECK_VM_STATE_LOCK();
     // We may not call qemu_set_irq() until the snapshot is loaded.
     android::sGlobals->pipeWaker.abortAllPending();
