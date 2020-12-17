@@ -85,14 +85,6 @@ else()
   # Configure how we strip executables.
   set(CMAKE_STRIP_CMD "${CMAKE_STRIP} -S")
 
-  # Disable cmake archiver warnings.
-  SET(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> qcS <TARGET> <LINK_FLAGS> <OBJECTS>")
-  SET(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
-
-  SET(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcS <TARGET> <LINK_FLAGS> <OBJECTS>")
-  SET(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
-
-
 endif()
 
 # Always consider the source to be darwin.
