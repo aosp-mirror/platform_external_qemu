@@ -51,8 +51,13 @@ public:
     // analog of createRenderChannel, but for the address space graphics device
     virtual void* addressSpaceGraphicsConsumerCreate(
         struct asg_context,
+        android::base::Stream* loadStream,
         android::emulation::asg::ConsumerCallbacks) = 0;
     virtual void addressSpaceGraphicsConsumerDestroy(void*) = 0;
+    virtual void addressSpaceGraphicsConsumerPreSave(void* consumer) = 0;
+    virtual void addressSpaceGraphicsConsumerSave(void* consumer, android::base::Stream* stream) = 0;
+    virtual void addressSpaceGraphicsConsumerPostSave(void* consumer) = 0;
+    virtual void addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(void* consumer) = 0;
 
     // getHardwareStrings - describe the GPU hardware and driver.
     // The underlying GL's vendor/renderer/version strings are returned to the

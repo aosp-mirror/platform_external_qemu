@@ -47,7 +47,7 @@ public:
     static const Id kInvalidHostmemId;
 
     // Returns kInvalidHostmemId if hva or size is 0.
-    AEMU_EXPORT Id add(uint64_t hva, uint64_t size);
+    AEMU_EXPORT Id add(uint64_t hva, uint64_t size, bool register_fixed = false, uint64_t fixed_id = 0);
 
     // No-op if kInvalidHostmemId or a nonexistent entry
     // is referenced.
@@ -73,7 +73,7 @@ private:
 // C interface for use with vm operations
 extern "C" {
 
-AEMU_EXPORT uint64_t android_emulation_hostmem_register(uint64_t hva, uint64_t size);
+AEMU_EXPORT uint64_t android_emulation_hostmem_register(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id);
 AEMU_EXPORT void android_emulation_hostmem_unregister(uint64_t id);
 AEMU_EXPORT HostmemEntry android_emulation_hostmem_get_info(uint64_t id);
 

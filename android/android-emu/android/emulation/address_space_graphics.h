@@ -40,7 +40,7 @@ struct Allocation {
 
 class AddressSpaceGraphicsContext : public AddressSpaceDeviceContext {
 public:
-    AddressSpaceGraphicsContext(bool isVirtio = false);
+    AddressSpaceGraphicsContext(bool isVirtio = false, bool fromSnapshot = false);
     ~AddressSpaceGraphicsContext();
 
     static void setConsumer(ConsumerInterface);
@@ -53,12 +53,36 @@ public:
     void save(base::Stream* stream) const override;
     bool load(base::Stream* stream) override;
 
+    void preSave() const override;
+    void postSave() const override;
+
+    static void globalStatePreSave();
+    static void globalStateSave(base::Stream*);
+    static void globalStatePostSave();
+
+    static bool globalStateLoad(base::Stream*);
+
+    enum AllocType {
+        AllocTypeRing,
+        AllocTypeBuffer,
+        AllocTypeCombined,
+    };
+
 private:
+
+    void saveRingConfig(base::Stream* stream, const struct asg_ring_config& config) const;
+    void saveAllocation(base::Stream* stream, const Allocation& alloc) const;
+
+    void loadRingConfig(base::Stream* stream, struct asg_ring_config& config);
+
+    void loadAllocation(base::Stream* stream, Allocation& alloc, AllocType type);
+
     // For consumer communication
     enum ConsumerCommand {
         Wakeup = 0,
         Sleep = 1,
         Exit = 2,
+        PausePreSnapshot = 3,
     };
 
     // For ConsumerCallbacks
@@ -77,7 +101,7 @@ private:
     void* mCurrentConsumer = 0;
 
     // Communication with consumer
-    base::MessageChannel<ConsumerCommand, 4> mConsumerMessages;
+    mutable base::MessageChannel<ConsumerCommand, 4> mConsumerMessages;
     uint32_t mExiting = 0;
     // For onUnavailableRead
     uint32_t mUnavailableReadCount = 0;
