@@ -236,8 +236,9 @@ RenderChannelPtr RendererImpl::createRenderChannel(
 
 void* RendererImpl::addressSpaceGraphicsConsumerCreate(
     struct asg_context context,
+    android::base::Stream* loadStream,
     android::emulation::asg::ConsumerCallbacks callbacks) {
-    auto thread = new RenderThread(context, callbacks);
+    auto thread = new RenderThread(context, loadStream, callbacks);
     thread->start();
     return (void*)thread;
 }
@@ -246,6 +247,27 @@ void RendererImpl::addressSpaceGraphicsConsumerDestroy(void* consumer) {
     RenderThread* thread = (RenderThread*)consumer;
     thread->wait();
     delete thread;
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerPreSave(void* consumer) {
+    RenderThread* thread = (RenderThread*)consumer;
+    thread->pausePreSnapshot();
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerSave(void* consumer, android::base::Stream* stream) {
+    RenderThread* thread = (RenderThread*)consumer;
+    thread->save(stream);
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerPostSave(void* consumer) {
+    RenderThread* thread = (RenderThread*)consumer;
+    thread->resume();
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(void* consumer) {
+    RenderThread* thread = (RenderThread*)consumer;
+    fprintf(stderr, "%s: register postload rt\n", __func__);
+    mAdditionalPostLoadRenderThreads.push_back(thread);
 }
 
 void RendererImpl::pauseAllPreSave() {
@@ -261,14 +283,23 @@ void RendererImpl::pauseAllPreSave() {
 }
 
 void RendererImpl::resumeAll() {
+    fprintf(stderr, "%s: call\n", __func__);
     {
         android::base::AutoLock lock(mChannelsLock);
+    fprintf(stderr, "%s: got lock\n", __func__);
         if (mStopped) {
+    fprintf(stderr, "%s: stopped, skip\n", __func__);
             return;
         }
         for (const auto& c : mChannels) {
             c->renderThread()->resume();
         }
+
+        for (const auto t: mAdditionalPostLoadRenderThreads) {
+            fprintf(stderr, "%s: resume a render thread\n", __func__);
+            t->resume();
+        }
+        mAdditionalPostLoadRenderThreads.clear();
     }
 
     repaintOpenGLDisplay();
