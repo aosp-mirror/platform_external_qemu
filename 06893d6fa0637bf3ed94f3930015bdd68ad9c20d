@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8138c3bc_8da89012",
+        "filename": "android/android-grpc/android/emulation/control/UiController.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-17T17:00:44Z",
+      "side": 0,
+      "message": "nit: left over.",
+      "revId": "06893d6fa0637bf3ed94f3930015bdd68ad9c20d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
