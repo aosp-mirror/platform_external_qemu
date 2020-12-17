@@ -50,6 +50,10 @@ struct RenderThreadInfo {
     static void forAllRenderThreadInfos(std::function<void(RenderThreadInfo*)>);
 
     // Current EGL context, draw surface and read surface.
+    HandleType currContextHandleFromLoad;
+    HandleType currDrawSurfHandleFromLoad;
+    HandleType currReadSurfHandleFromLoad;
+
     RenderContextPtr currContext;
     WindowSurfacePtr currDrawSurf;
     WindowSurfacePtr currReadSurf;
@@ -75,6 +79,10 @@ struct RenderThreadInfo {
     // They must be called after Framebuffer snapshot
     void onSave(android::base::Stream* stream);
     bool onLoad(android::base::Stream* stream);
+
+    // Sometimes we can load render thread info before
+    // FrameBuffer repopulates the contexts.
+    void postLoadRefreshCurrentContextSurfacePtrs();
 };
 
 #endif
