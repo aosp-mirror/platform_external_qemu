@@ -102,10 +102,19 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
     HandleType ctxHndl = stream->getBe32();
     HandleType drawSurf = stream->getBe32();
     HandleType readSurf = stream->getBe32();
+    fprintf(stderr, "%s: on load render thread hadnles: %u %u %u\n", __func__,
+            ctxHndl, drawSurf, readSurf);
+    currContextHandleFromLoad = ctxHndl;
+    currDrawSurfHandleFromLoad = drawSurf;
+    currReadSurfHandleFromLoad = readSurf;
     fb->lock();
     currContext = fb->getContext_locked(ctxHndl);
     currDrawSurf = fb->getWindowSurface_locked(drawSurf);
     currReadSurf = fb->getWindowSurface_locked(readSurf);
+    fprintf(stderr, "%s: on load render thread resulting ptrs: %p %p %p\n", __func__,
+            currContext.get(),
+            currDrawSurf.get(),
+            currReadSurf.get());
     fb->unlock();
 
     loadCollection(stream, &m_contextSet, [](Stream* stream) {
@@ -121,4 +130,18 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
     stream->getBe64();
 
     return true;
+}
+
+void RenderThreadInfo::postLoadRefreshCurrentContextSurfacePtrs() {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    assert(fb);
+    fb->lock();
+    currContext = fb->getContext_locked(currContextHandleFromLoad);
+    currDrawSurf = fb->getWindowSurface_locked(currDrawSurfHandleFromLoad);
+    currReadSurf = fb->getWindowSurface_locked(currReadSurfHandleFromLoad);
+    fb->unlock();
+    fprintf(stderr, "%s: on load (2nd try) render thread resulting ptrs: %p %p %p\n", __func__,
+            currContext.get(),
+            currDrawSurf.get(),
+            currReadSurf.get());
 }

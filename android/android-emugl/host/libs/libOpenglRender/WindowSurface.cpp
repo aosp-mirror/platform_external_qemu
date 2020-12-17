@@ -77,6 +77,7 @@ void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
 }
 
 void WindowSurface::bind(RenderContextPtr p_ctx, BindType p_bindType) {
+    fprintf(stderr, "%s: %p bind\n", __func__, this);
     if (p_bindType == BIND_READ) {
         mReadContext = p_ctx;
     } else if (p_bindType == BIND_DRAW) {
@@ -106,7 +107,7 @@ bool WindowSurface::flushColorBuffer() {
     }
 
     if (!mDrawContext.get()) {
-        fprintf(stderr, "Draw context is NULL\n");
+        fprintf(stderr, "%p: Draw context is NULL\n", this);
         return false;
     }
 
@@ -208,12 +209,16 @@ static void saveHndlOrNull(obj_t obj, android::base::Stream* stream) {
 }
 
 void WindowSurface::onSave(android::base::Stream* stream) const {
+    fprintf(stderr, "WindowSurface::%s: call--------------------------------------------------------------------------------\n", __func__);
+
     stream->putBe32(getHndl());
     saveHndlOrNull(mAttachedColorBuffer, stream);
     saveHndlOrNull(mReadContext, stream);
+    fprintf(stderr, "%s: draw context: save %p\n", __func__, mDrawContext.get());
     saveHndlOrNull(mDrawContext, stream);
     stream->putBe32(mWidth);
     stream->putBe32(mHeight);
+    fprintf(stderr, "%s: w h %u %u\n", __func__, mWidth, mHeight);
     if (s_egl.eglSaveConfig) {
         s_egl.eglSaveConfig(mDisplay, mConfig, stream);
     }
@@ -221,14 +226,19 @@ void WindowSurface::onSave(android::base::Stream* stream) const {
 
 WindowSurface * WindowSurface::onLoad(android::base::Stream* stream,
             EGLDisplay display) {
+
+    fprintf(stderr, "WindowSurface::%s: call--------------------------------------------------------------------------------\n", __func__);
+
     FrameBuffer* fb = FrameBuffer::getFB();
     HandleType hndl = stream->getBe32();
     HandleType cb = stream->getBe32();
     HandleType readCtx = stream->getBe32();
     HandleType drawCtx = stream->getBe32();
+    fprintf(stderr, "%s: draw ctx handle: %u\n", __func__, drawCtx);
 
     GLuint width = stream->getBe32();
     GLuint height = stream->getBe32();
+    fprintf(stderr, "%s: w h %u %u\n", __func__, width, height);
     EGLConfig config = 0;
     if (s_egl.eglLoadConfig) {
         config = s_egl.eglLoadConfig(display, stream);
@@ -240,5 +250,6 @@ WindowSurface * WindowSurface::onLoad(android::base::Stream* stream,
     assert(!cb || ret->mAttachedColorBuffer);
     ret->mReadContext = fb->getContext_locked(readCtx);
     ret->mDrawContext = fb->getContext_locked(drawCtx);
+    fprintf(stderr, "%s: draw context: %p this %p\n", __func__, ret->mDrawContext.get(), ret);
     return ret;
 }
