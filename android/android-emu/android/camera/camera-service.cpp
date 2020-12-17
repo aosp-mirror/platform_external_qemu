@@ -80,6 +80,14 @@ struct CameraServiceDesc {
 /* One and only one camera service. */
 static CameraServiceDesc    _camera_service_desc;
 
+/* Camera callback descriptor. */
+struct CameraCallbackDesc {
+    void* context = nullptr;
+    camera_callback_t callback = nullptr;
+    CameraSourceType source;
+};
+
+static CameraCallbackDesc _camera_callback_desc;
 /********************************************************************************
  * Helper routines
  *******************************************************************************/
@@ -1027,7 +1035,10 @@ _camera_client_query_connect(CameraClient* cc, QemudClient* qc, const char* para
     }
 
     D("%s: Camera device '%s' is now connected", __FUNCTION__, cc->device_name);
-
+    if(cc->camera_info->camera_source == _camera_callback_desc.source &&
+        _camera_callback_desc.callback) {
+        _camera_callback_desc.callback(_camera_callback_desc.context, true);
+    }
     _qemu_client_reply_ok(qc, NULL);
 }
 
@@ -1063,6 +1074,10 @@ _camera_client_query_disconnect(CameraClient* cc,
     cc->camera = NULL;
 
     D("Camera device '%s' is now disconnected", cc->device_name);
+    if(cc->camera_info->camera_source == _camera_callback_desc.source &&
+        _camera_callback_desc.callback) {
+        _camera_callback_desc.callback(_camera_callback_desc.context, false);
+    }
 
     _qemu_client_reply_ok(qc, NULL);
 }
@@ -2040,6 +2055,9 @@ static int _camera_client_load(Stream* f, QemudClient* client, void* opaque) {
             return -EIO;
         }
     }
+    if (cc->camera_info->camera_source == _camera_callback_desc.source &&
+        _camera_callback_desc.callback)
+        _camera_callback_desc.callback(_camera_callback_desc.context, is_camera_started);
 
     return 0;
 }
@@ -2085,6 +2103,12 @@ _camera_service_connect(void*          opaque,
     }
 
     return client;
+}
+
+void register_camera_status_change_callback(camera_callback_t cb, void* ctx, CameraSourceType src) {
+    _camera_callback_desc.callback = cb;
+    _camera_callback_desc.context = ctx;
+    _camera_callback_desc.source = src;
 }
 
 void android_camera_service_init(void) {

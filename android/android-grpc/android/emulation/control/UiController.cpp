@@ -128,7 +128,6 @@ public:
         });
         return Status::OK;
     }
-
 private:
     const AndroidConsoleAgents* mAgents;
 };
