@@ -181,6 +181,12 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             if (mShouldExit) {
                 return nullptr;
             }
+
+            if (mShouldExitForSnapshot) {
+                mShouldExitForSnapshot = false;
+                return nullptr;
+            }
+
             int unavailReadResult = mCallbacks.onUnavailableRead();
 
             if (-1 == unavailReadResult) {
@@ -189,7 +195,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
 
             // pause pre snapshot
             if (-2 == unavailReadResult) {
-                mShouldExit = true;
+                mShouldExitForSnapshot = true;
             }
 
             continue;

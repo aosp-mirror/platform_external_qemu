@@ -75,6 +75,7 @@ protected:
     size_t mTotalRecv = 0;
     bool mBenchmarkEnabled = false;
     bool mShouldExit = false;
+    bool mShouldExitForSnapshot = false;
 };
 
 }  // namespace emugl

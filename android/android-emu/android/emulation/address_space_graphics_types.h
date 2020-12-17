@@ -311,6 +311,7 @@ using ConsumerGlobalPostSaveCallback =
 using ConsumerPostSaveCallback =
     std::function<void(void*)>;
 using ConsumerPostLoadCallback = ConsumerPostSaveCallback;
+using ConsumerGlobalPreLoadCallback = ConsumerGlobalPostSaveCallback;
 
 struct ConsumerInterface {
     ConsumerCreateCallback create;
@@ -325,6 +326,8 @@ struct ConsumerInterface {
     ConsumerPostSaveCallback postSave;
 
     ConsumerPostLoadCallback postLoad;
+
+    ConsumerGlobalPreLoadCallback globalPreLoad;
 };
 
 } // namespace asg

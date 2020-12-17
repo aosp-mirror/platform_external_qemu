@@ -145,6 +145,34 @@ static int address_space_allocator_find_available_block(
     return index;
 }
 
+static int address_space_allocator_find_available_block_at_offset(
+    struct address_block *block,
+    int n_blocks,
+    uint64_t size_at_least,
+    uint64_t offset)
+{
+    int index = -1;
+    uint64_t size_at_index = 0;
+    int i;
+
+    address_space_assert(n_blocks >= 1);
+
+    for (i = 0; i < n_blocks; ++i, ++block) {
+        uint64_t this_size = block->size;
+        address_space_assert(this_size > 0);
+
+        if (this_size >= size_at_least && block->available &&
+            offset >= block->offset &&
+            offset < block->offset + this_size) {
+            index = i;
+            size_at_index = this_size;
+            return index;
+        }
+    }
+
+    return index;
+}
+
 static int
 address_space_allocator_grow_capacity(int old_capacity) {
     address_space_assert(old_capacity >= 1);
@@ -207,6 +235,85 @@ address_space_allocator_split_block(
     new_block->available = 1;
 
     ++allocator->size;
+
+    return new_block;
+}
+
+/* Inserts one more address block right after i'th (by borrowing i'th size) and
+ * adjusts sizes:
+ * pre:
+ *   size < blocks[i].size
+ *   offset >= blocks[i].offset
+ *   offset < blocks[i].offset + blocks[i].size
+ *
+ * post:
+ *   * might reallocate allocator->blocks if there is no capacity to insert one
+ *   * blocks[i].size = offset - blocks[i].offset;
+ *   * blocks[i+1].size = offset;
+ *   * blocks[i+1].offset = offset;
+ */
+static struct address_block*
+address_space_allocator_split_block_at_offset(
+    struct address_space_allocator *allocator,
+    int i,
+    uint64_t size,
+    uint64_t offset)
+{
+    uint64_t old_block_size;
+    bool need_extra_block;
+    int new_block_index_offset;
+
+    address_space_assert(allocator->capacity >= 1);
+    address_space_assert(allocator->size >= 1);
+    address_space_assert(allocator->size <= allocator->capacity);
+    address_space_assert(i >= 0);
+    address_space_assert(i < allocator->size);
+    address_space_assert(size < allocator->blocks[i].size);
+
+    need_extra_block =
+        (allocator->blocks[i].size - size - (offset - allocator->blocks[i].offset)) != 0;
+    new_block_index_offset = need_extra_block ? 1 : 0;
+
+    if (allocator->size + new_block_index_offset >= allocator->capacity) {
+        int new_capacity = address_space_allocator_grow_capacity(allocator->capacity + new_block_index_offset);
+        allocator->blocks =
+            (struct address_block*)
+            address_space_realloc(
+                allocator->blocks,
+                sizeof(struct address_block) * new_capacity);
+        address_space_assert(allocator->blocks);
+        allocator->capacity = new_capacity;
+    }
+
+    struct address_block *blocks = allocator->blocks;
+
+    /*   size = 5, i = 1
+     *   [ 0 | 1 |  2  |  3  | 4 ]  =>  [ 0 | 1 | new |  new(for slop)  | 2    | 3 | 4]
+     *         i  (i+1) (i+2)                 i  (i+1) (i+2)              (i+3) 
+     */
+    memmove(&blocks[i + 2 + new_block_index_offset], &blocks[i + 1],
+            sizeof(struct address_block) * (allocator->size - i - 1));
+
+    struct address_block *to_borrow_from = &blocks[i];
+    struct address_block *new_block = to_borrow_from + 1;
+    struct address_block *extra_block = to_borrow_from + 2;
+
+    old_block_size = to_borrow_from->size;
+    to_borrow_from->size = offset - to_borrow_from->offset;
+
+    new_block->offset = offset;
+    new_block->size = size;
+    new_block->available = 1;
+
+    ++allocator->size;
+
+    if (need_extra_block) {
+        extra_block->offset = offset + size;
+        extra_block->size = old_block_size - size - to_borrow_from->size;
+        extra_block->available = 1;
+
+        ++allocator->size;
+    }
 
     return new_block;
 }
@@ -291,6 +398,39 @@ static uint64_t address_space_allocator_allocate(
         block->available = 0;
 
         return block->offset;
+    }
+}
+
+/* Takes a size to allocate an address block and returns an offset where this
+ * block is allocated. This block will not be available for other callers unless
+ * it is explicitly deallocated (see address_space_allocator_deallocate below).
+ */
+static int address_space_allocator_allocate_fixed(
+    struct address_space_allocator *allocator,
+    uint64_t size,
+    uint64_t offset)
+{
+    int i = address_space_allocator_find_available_block_at_offset(
+                allocator->blocks,
+                allocator->size,
+                size,
+                offset);
+    if (i < 0) {
+        return -ENOMEM;
+    } else {
+        address_space_assert(i < allocator->size);
+
+        struct address_block *block = &allocator->blocks[i];
+        address_space_assert(block->size >= size);
+
+        if (block->size > size) {
+            block = address_space_allocator_split_block_at_offset(allocator, i, size, offset);
+        }
+
+        address_space_assert(block->size == size);
+        block->available = 0;
+
+        return 0;
     }
 }
 
@@ -1039,6 +1179,22 @@ int goldfish_address_space_alloc_shared_host_region_locked(
     else
     {
         *offset = offset_out;
+        return 0;
+    }
+}
+
+int goldfish_address_space_alloc_shared_host_region_fixed_locked(
+    uint64_t page_aligned_size, uint64_t offset)
+{
+    int res = address_space_allocator_allocate_fixed(
+        &s_current_state->allocator, page_aligned_size, offset);
+
+    if (res)
+    {
+        return -ENOMEM;
+    }
+    else
+    {
         return 0;
     }
 }
