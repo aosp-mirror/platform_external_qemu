@@ -14,3 +14,10 @@ android_target_properties(emulator-check all "${RUNTIME_OS_PROPERTIES}")
 android_target_link_libraries(emulator-check linux-x86_64 PRIVATE -lX11)
 android_target_link_libraries(emulator-check linux-aarch64
                               PRIVATE emulator-libui)
+
+if (DARWIN_AARCH64)
+    android_add_executable(
+        TARGET m1-test INSTALL . LICENSE Apache-2.0
+        SRC
+            m1-tests.c)
+endif()
