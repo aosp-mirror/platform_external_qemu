@@ -307,6 +307,7 @@ public:
 
     bool load(base::Stream* stream) {
         clear();
+        mConsumerInterface.globalPreLoad();
 
         uint64_t ringBlockCount = stream->getBe64();
         uint64_t bufferBlockCount = stream->getBe64();

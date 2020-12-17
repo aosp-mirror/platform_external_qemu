@@ -45,6 +45,7 @@
 #include "android/featurecontrol/Features.h"                 // for GLAsyncSwap
 #include "android/globals.h"                                 // for android_hw
 #include "android/opengl/emugl_config.h"                     // for emuglCon...
+#include "android/opengl/GLProcessPipe.h"
 #include "android/opengles-pipe.h"                           // for android_...
 #include "android/opengles.h"                                // for android_...
 #include "android/refcount-pipe.h"                           // for android_...
@@ -397,11 +398,18 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
             },
             // postSave
             [openglesRenderer](void* consumer) {
-               return openglesRenderer->addressSpaceGraphicsConsumerPostSave(consumer);
+                return openglesRenderer->addressSpaceGraphicsConsumerPostSave(consumer);
             },
             // postLoad
             [openglesRenderer](void* consumer) {
-               return openglesRenderer->addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(consumer);
+                openglesRenderer->addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(consumer);
+            },
+            // global preload
+            [openglesRenderer]() {
+                android::opengl::forEachProcessPipeIdRunAndErase([openglesRenderer](uint64_t id) {
+                    openglesRenderer->cleanupProcGLObjects(id);
+                });
+                openglesRenderer->waitForProcessCleanup();
             },
     };
     AddressSpaceGraphicsContext::setConsumer(interface);
