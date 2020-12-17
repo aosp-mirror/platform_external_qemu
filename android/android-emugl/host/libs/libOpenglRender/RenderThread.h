@@ -47,8 +47,8 @@ public:
     // Create a new RenderThread instance tied to the address space device.
     RenderThread(
         struct asg_context context,
-        android::emulation::asg::ConsumerCallbacks callbacks,
-        android::base::Stream* loadStream = nullptr);
+        android::base::Stream* loadStream,
+        android::emulation::asg::ConsumerCallbacks callbacks);
     virtual ~RenderThread();
 
     // Returns true iff the thread has finished.
