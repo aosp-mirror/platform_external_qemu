@@ -138,6 +138,12 @@ using android::base::System;
 using android::emulation::PassiveGpsUpdater;
 namespace fc = android::featurecontrol;
 
+#ifdef __linux__
+static bool is_linux = true;
+#else
+static bool is_linux = false;
+#endif
+
 namespace {
 
 enum ImageType {
@@ -673,6 +679,11 @@ static void enableSignalTermination() {
         D("Could not set thread sigmask: %d", result);
     }
 #endif
+}
+
+static bool isCrostini() {
+    struct stat buf;
+    return is_linux && stat("/dev/.cros_milestone", &buf) == 0;
 }
 
 }  // namespace
@@ -1461,7 +1472,7 @@ extern "C" int main(int argc, char** argv) {
 #endif
 #endif
 
-            if (opts->crostini) {
+            if (isCrostini()) {
                 feature_set_if_not_overridden(kFeature_QuickbootFileBacked,
                                               false /* enable */);
             }
