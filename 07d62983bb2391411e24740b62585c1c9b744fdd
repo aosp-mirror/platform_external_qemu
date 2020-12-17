@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "117ce96f_eb8ee3b9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2020-12-17T17:22:32Z",
+      "side": 1,
+      "message": "Note, asg snapshots dont work while emulator is running but quickboot works, and non-asg snapshots (+while emulator is running) still work.",
+      "revId": "07d62983bb2391411e24740b62585c1c9b744fdd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
