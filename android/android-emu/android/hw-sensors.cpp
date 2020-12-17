@@ -1269,3 +1269,7 @@ bool android_foldable_rollable_configured() {
 bool android_hw_sensors_is_loading_snapshot() {
     return physicalModel_isLoadingSnapshot(android_physical_model_instance());
 }
+
+bool android_heart_rate_sensor_configured(){
+  return android_hw->hw_sensors_heart_rate;
+}
