@@ -97,8 +97,8 @@ RenderThread::RenderThread(RenderChannelImpl* channel,
 
 RenderThread::RenderThread(
         struct asg_context context,
-        android::emulation::asg::ConsumerCallbacks callbacks,
-        android::base::Stream* loadStream)
+        android::base::Stream* loadStream,
+        android::emulation::asg::ConsumerCallbacks callbacks)
     : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
       mRingStream(
           new RingStream(context, callbacks, kStreamBufferSize)) {
@@ -108,6 +108,7 @@ RenderThread::RenderThread(
             mStream.emplace(0);
             android::base::loadStream(loadStream, &*mStream);
             mState = SnapshotState::StartLoading;
+            fprintf(stderr, "%s: loaded snapshot for ring, set to StartLoading\n", __func__);
         } else {
             mFinished.store(true, std::memory_order_relaxed);
         }
@@ -141,22 +142,36 @@ void RenderThread::resume() {
 }
 
 void RenderThread::save(android::base::Stream* stream) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     bool success;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         AutoLock lock(mLock);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         assert(mState == SnapshotState::StartSaving ||
                mState == SnapshotState::InProgress ||
                mState == SnapshotState::Finished);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         waitForSnapshotCompletion(&lock);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         success = mState == SnapshotState::Finished;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     }
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (success) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         assert(mStream);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         stream->putByte(1);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         android::base::saveStream(stream, *mStream);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     } else {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         stream->putByte(0);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     }
 }
 
@@ -187,7 +202,9 @@ void RenderThread::snapshotOperation(AutoLock* lock, OpImpl&& implFunc) {
 }
 
 void RenderThread::loadImpl(AutoLock* lock, const SnapshotObjects& objects) {
+            fprintf(stderr, "RenderThread::%s call (outer)\n", __func__);
     snapshotOperation(lock, [this, &objects] {
+            fprintf(stderr, "RenderThread::%s call (inner)\n", __func__);
         objects.readBuffer->onLoad(&*mStream);
         if (objects.channelStream) objects.channelStream->load(&*mStream);
         if (objects.ringStream) objects.ringStream->load(&*mStream);
@@ -284,6 +301,7 @@ intptr_t RenderThread::main() {
     // the first GL command.
     if (doSnapshotOperation(snapshotObjects, SnapshotState::StartLoading)) {
         DBG("Loaded RenderThread @%p from snapshot\n", this);
+        fprintf(stderr, "Loaded RenderThread @%p from snapshot. needRestoreFromSnapshot\n", this);
         needRestoreFromSnapshot = true;
     } else {
         // Not loading from a snapshot: continue regular startup, read
@@ -353,6 +371,7 @@ intptr_t RenderThread::main() {
                     break;
                 }
             } else if (needRestoreFromSnapshot) {
+                tInfo.postLoadRefreshCurrentContextSurfacePtrs();
                 // We just loaded from a snapshot, need to initialize / bind
                 // the contexts.
                 needRestoreFromSnapshot = false;
