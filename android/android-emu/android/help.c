@@ -1927,14 +1927,6 @@ help_no_direct_adb(stralloc_t* out)
     );
 }
 
-static void
-help_crostini(stralloc_t* out)
-{
-    PRINTF(
-    "  Turn on optimizations for running in a VM on Chrome OS.\n"
-    );
-}
-
 static void help_check_snapshot_loadable(stralloc_t* out) {
     PRINTF("  Check if a snapshot is loadable.\n"
            "  -check-snapshot-loadable <snapshot name|snapshot TAR file>\n");
