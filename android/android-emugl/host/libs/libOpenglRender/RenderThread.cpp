@@ -122,8 +122,14 @@ void RenderThread::pausePreSnapshot() {
     assert(mState == SnapshotState::Empty);
     mStream.emplace();
     mState = SnapshotState::StartSaving;
-    if (mChannel) mChannel->pausePreSnapshot();
-    mCondVar.broadcastAndUnlock(&lock);
+    if (mRingStream) {
+        mRingStream->pausePreSnapshot();
+        // mCondVar.broadcastAndUnlock(&lock);
+    }
+    if (mChannel) {
+        mChannel->pausePreSnapshot();
+        mCondVar.broadcastAndUnlock(&lock);
+    }
 }
 
 void RenderThread::resume() {
@@ -133,10 +139,12 @@ void RenderThread::resume() {
     if (mState == SnapshotState::Empty) {
         return;
     }
+    if (mRingStream) mRingStream->resume();
     waitForSnapshotCompletion(&lock);
     mStream.clear();
     mState = SnapshotState::Empty;
     if (mChannel) mChannel->resume();
+    if (mRingStream) mRingStream->resume();
     mCondVar.broadcastAndUnlock(&lock);
 }
 

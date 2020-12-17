@@ -307,6 +307,7 @@ public:
 
     bool load(base::Stream* stream) {
         clear();
+        mConsumerInterface.globalPreLoad();
 
         uint64_t ringBlockCount = stream->getBe64();
         uint64_t bufferBlockCount = stream->getBe64();
@@ -470,6 +471,13 @@ private:
 
                 if (fromLoad) {
                     offsetIntoPhys = block.offsetIntoPhys;
+                    allocRes = get_address_space_device_hw_funcs()->
+                        allocSharedHostRegionFixedLocked(
+                                ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE, offsetIntoPhys);
+                    if (allocRes) {
+                        // Disregard alloc failures for now. This is because when it fails,
+                        // we can assume the correct allocation already exists there (tested)
+                    }
                 } else {
                     int allocRes = get_address_space_device_hw_funcs()->
                         allocSharedHostRegionLocked(
@@ -683,6 +691,8 @@ sleep:
                 goto sleep;
             case ConsumerCommand::PausePreSnapshot:
                 return -2;
+            case ConsumerCommand::ResumePostSnapshot:
+                return -3;
             default:
                 crashhandler_die(
                     "AddressSpaceGraphicsContext::onUnavailableRead: "
@@ -701,8 +711,8 @@ AddressSpaceDeviceType AddressSpaceGraphicsContext::getDeviceType() const {
 
 void AddressSpaceGraphicsContext::preSave() const {
     if (mCurrentConsumer) {
-        mConsumerMessages.send(ConsumerCommand::PausePreSnapshot);
         mConsumerInterface.preSave(mCurrentConsumer);
+        mConsumerMessages.send(ConsumerCommand::PausePreSnapshot);
     }
 }
 
@@ -728,6 +738,7 @@ void AddressSpaceGraphicsContext::save(base::Stream* stream) const {
 
 void AddressSpaceGraphicsContext::postSave() const {
     if (mCurrentConsumer) {
+        mConsumerMessages.send(ConsumerCommand::ResumePostSnapshot);
         mConsumerInterface.postSave(mCurrentConsumer);
     }
 }

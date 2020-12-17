@@ -10,6 +10,8 @@
 // GNU General Public License for more details.
 #pragma once
 
+#include <functional>
+
 namespace android {
 namespace opengl {
 
@@ -17,6 +19,8 @@ namespace opengl {
 // used to detect GL process exits.
 void registerGLProcessPipeService();
 
+void forEachProcessPipeId(std::function<void(uint64_t)>);
+void forEachProcessPipeIdRunAndErase(std::function<void(uint64_t)>);
+
 }  // namespace opengl
 }  // namespace android
-
