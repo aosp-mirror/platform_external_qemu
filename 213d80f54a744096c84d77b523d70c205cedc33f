@@ -22,6 +22,30 @@
       },
       "revId": "213d80f54a744096c84d77b523d70c205cedc33f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "08ed2d72_cf522cf8",
+        "filename": "mac.source.properties",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1271745
+      },
+      "writtenOn": "2020-12-21T18:51:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39ff6ab8_71525f20",
+      "range": {
+        "startLine": 2,
+        "startChar": 13,
+        "endLine": 2,
+        "endChar": 19
+      },
+      "revId": "213d80f54a744096c84d77b523d70c205cedc33f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
