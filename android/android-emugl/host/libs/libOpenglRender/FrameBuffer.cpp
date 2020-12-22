@@ -2652,7 +2652,7 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
     if (desiredRotation == SKIN_ROTATION_90 || desiredRotation == SKIN_ROTATION_270) {
         std::swap(*width, *height);
     }
-    pixels.resize(4 * (*width) * (*height));
+    pixels.resize(nChannels * (*width) * (*height));
 
     GLenum format = nChannels == 3 ? GL_RGB : GL_RGBA;
 

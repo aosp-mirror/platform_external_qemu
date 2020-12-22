@@ -140,6 +140,9 @@ bool ScreenshotUtils::equals(const DisplayConfiguration& a,
            a.display() == b.display();
 }
 
+int ScreenshotUtils::getBytesPerPixel(const ImageFormat& fmt) {
+    return fmt.format() == ImageFormat::RGB888 ? 3 : 4;
+}
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

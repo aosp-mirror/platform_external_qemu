@@ -518,7 +518,8 @@ public:
         if (request->transport().channel() == ImageTransport::MMAP) {
             entry = mSharedMemoryLibrary.borrow(
                     request->transport().handle(),
-                    request->width() * request->height() * 4);
+                    request->width() * request->height() *
+                            ScreenshotUtils::getBytesPerPixel(*request));
         }
 
         // Make sure we always write the first frame, this can be
@@ -575,8 +576,7 @@ public:
              request->format() == ImageFormat::RGBA8888)) {
             android::metrics::MetricsReporter::get().report(
                     [=](android_studio::AndroidStudioEvent* event) {
-                        int bpp = request->format() == ImageFormat::RGB888 ? 3
-                                                                           : 4;
+                        int bpp = ScreenshotUtils::getBytesPerPixel(*request);
                         auto screenshot = event->mutable_emulator_details()
                                                   ->mutable_screenshot();
                         screenshot->set_size(request->width() *
