@@ -380,9 +380,27 @@ static void prepareDataFolder(const char* destDirectory,
 }
 
 static bool creatUserDataExt4Img(AndroidHwConfig* hw,
-                                 const char* dataDirectory) {
-    android_createExt4ImageFromDir(hw->disk_dataPartition_path, dataDirectory,
+                                 const char* dataDirectory,
+                                 bool dockerized) {
+
+    const char* dst = hw->disk_dataPartition_path;
+        TempFile* tf = nullptr;
+        if (dockerized) {
+           tf = tempfile_create();
+           dst = tempfile_path(tf);
+        };
+
+
+    android_createExt4ImageFromDir(dst, dataDirectory,
                                    android_hw->disk_dataPartition_size, "data");
+
+    if (dockerized) {
+        auto success = android_raw_to_qcow2(dst, hw->disk_dataPartition_path, true) == 0;
+        tempfile_close(tf);
+        if (!success) {
+            return false;
+        }
+    }
 
     // Check if creating user data img succeed
     System::FileSize diskSize;
@@ -397,7 +415,8 @@ static bool creatUserDataExt4Img(AndroidHwConfig* hw,
 
 static int createUserData(AvdInfo* avd,
                           const char* dataPath,
-                          AndroidHwConfig* hw) {
+                          AndroidHwConfig* hw,
+                          bool dockerOptimized) {
     ScopedCPtr<char> initDir(avdInfo_getDataInitDirPath(avd));
     bool needCopyDataPartition = true;
     if (path_exists(initDir.get())) {
@@ -405,11 +424,13 @@ static int createUserData(AvdInfo* avd,
         prepareDataFolder(dataPath, initDir.get());
         prepareDisplaySettingXml(hw, dataPath);
 
-        needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
+        needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath, dockerOptimized);
         path_delete_dir(dataPath);
     }
 
     if (needCopyDataPartition) {
+        // This only gets executed if we initDir does not exist, or if we failed to
+        // create a UserDataExt4Img.
         if (path_exists(hw->disk_dataPartition_initPath)) {
             D("Creating: %s by copying from %s \n", hw->disk_dataPartition_path,
               hw->disk_dataPartition_initPath);
@@ -425,8 +446,10 @@ static int createUserData(AvdInfo* avd,
                 resizeExt4Partition(android_hw->disk_dataPartition_path,
                                     android_hw->disk_dataPartition_size);
             }
+
         }
     }
+
 
     return 0;
 }
@@ -754,7 +777,7 @@ static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw) {
     return path_exists(iccprofile_path.c_str());
 }
 
-static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
+static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw, bool docker_optimized) {
     ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
     if (!userdata_dir) {
         derror("no userdata_dir");
@@ -772,7 +795,11 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
         ScopedCPtr<char> init_encryptionkey_img_path(
                 path_join(sysimg_dir.get(), "encryptionkey.img"));
         if (path_exists(init_encryptionkey_img_path.get())) {
-            if (path_copy_file(hw->disk_encryptionKeyPartition_path,
+            if (docker_optimized) {
+                return android_raw_to_qcow2(init_encryptionkey_img_path.get(),
+                               hw->disk_encryptionKeyPartition_path, false) == 0;
+            }
+            else if (path_copy_file(hw->disk_encryptionKeyPartition_path,
                                init_encryptionkey_img_path.get()) >= 0) {
                 return true;
             }
@@ -1345,7 +1372,7 @@ extern "C" int main(int argc, char** argv) {
     if (!emulator_parseInputCommandLineOptions(opts)) {
         return 1;
     }
-    
+
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
     }
@@ -1461,7 +1488,7 @@ extern "C" int main(int argc, char** argv) {
 #endif
 #endif
 
-            if (opts->crostini) {
+            if (opts->crostini || opts->docker) {
                 feature_set_if_not_overridden(kFeature_QuickbootFileBacked,
                                               false /* enable */);
             }
@@ -1737,7 +1764,7 @@ extern "C" int main(int argc, char** argv) {
             }
         }
 
-        int ret = createUserData(avd, dataPath.c_str(), hw);
+        int ret = createUserData(avd, dataPath.c_str(), hw, opts->docker);
         if (ret != 0) {
             crashhandler_die("Failed to initialize userdata.img.");
             return ret;
@@ -1770,7 +1797,7 @@ extern "C" int main(int argc, char** argv) {
     // create encryptionkey.img file if needed
     if (fc::isEnabled(fc::EncryptUserData)) {
         if (hw->disk_encryptionKeyPartition_path == NULL) {
-            if (!createInitalEncryptionKeyPartition(hw)) {
+            if (!createInitalEncryptionKeyPartition(hw, opts->docker)) {
                 derror("Encryption is requested but failed to create "
                        "encrypt "
                        "partition.");
@@ -1799,13 +1826,26 @@ extern "C" int main(int argc, char** argv) {
     if (createEmptyCacheFile) {
         D("Creating empty ext4 cache partition: %s",
           hw->disk_cachePartition_path);
-        int ret = android_createEmptyExt4Image(hw->disk_cachePartition_path,
+        const char* dst = hw->disk_cachePartition_path;
+        TempFile* tf = nullptr;
+        if (opts->docker) {
+           tf = tempfile_create();
+           dst = tempfile_path(tf);
+        };
+        int ret = android_createEmptyExt4Image(dst,
                                                hw->disk_cachePartition_size,
                                                "cache");
         if (ret < 0) {
-            derror("Could not create %s: %s", hw->disk_cachePartition_path,
+            if (tf) {
+                tempfile_close(tf);
+            }
+            derror("Could not create %s: %s", dst,
                    strerror(-ret));
             return 1;
+        }
+
+        if (opts->docker) {
+            android_raw_to_qcow2(dst, hw->disk_cachePartition_path, true);
         }
     }
 

@@ -12,22 +12,25 @@
 #include "android/filesystems/ext4_utils.h"
 
 #include "android/base/Log.h"
-#include "android/utils/debug.h"
 #include "android/base/files/ScopedStdioFile.h"
+#include "android/base/system/System.h"
+#include "android/utils/debug.h"
+#include "android/utils/tempfile.h"
 
 #include "make_ext4fs.h"
 
-#include <memory>
 #include <stdint.h>
 #include <string.h>
+#include <memory>
 
-#define DEBUG_EXT4  0
+#define DEBUG_EXT4 0
 
-#define EXT4_LOG     LOG_IF(INFO, DEBUG_EXT4)
-#define EXT4_PLOG    PLOG_IF(INFO, DEBUG_EXT4)
-#define EXT4_ERROR   LOG_IF(ERROR, DEBUG_EXT4)
-#define EXT4_PERROR  PLOG_IF(ERROR, DEBUG_EXT4)
+#define EXT4_LOG LOG_IF(INFO, DEBUG_EXT4)
+#define EXT4_PLOG PLOG_IF(INFO, DEBUG_EXT4)
+#define EXT4_ERROR LOG_IF(ERROR, DEBUG_EXT4)
+#define EXT4_PERROR PLOG_IF(ERROR, DEBUG_EXT4)
 
+using android::base::System;
 
 // We cannot directly include "msvc-posix.h" as it will break
 // the logging macros.
@@ -39,7 +42,7 @@ struct Ext4Magic {
     static const uint8_t kExpected[kSize];
 };
 
-const uint8_t Ext4Magic::kExpected[kSize] = { 0x53, 0xef };
+const uint8_t Ext4Magic::kExpected[kSize] = {0x53, 0xef};
 
 bool android_pathIsExt4PartitionImage(const char* path) {
     if (!path) {
@@ -54,15 +57,15 @@ bool android_pathIsExt4PartitionImage(const char* path) {
     }
 
     if (::fseek(file.get(), Ext4Magic::kOffset, SEEK_SET) != 0) {
-        EXT4_LOG << "Can't seek to byte " << Ext4Magic::kOffset
-                 << " of " << path;
+        EXT4_LOG << "Can't seek to byte " << Ext4Magic::kOffset << " of "
+                 << path;
         return false;
     }
 
     char magic[Ext4Magic::kSize];
     if (::fread(magic, sizeof(magic), 1, file.get()) != 1) {
-        EXT4_PLOG << "Could not read " << sizeof(magic)
-                  << " bytes from " << path;
+        EXT4_PLOG << "Could not read " << sizeof(magic) << " bytes from "
+                  << path;
         return false;
     }
 
@@ -75,20 +78,41 @@ bool android_pathIsExt4PartitionImage(const char* path) {
     return false;
 }
 
-int android_createEmptyExt4Image(const char *filePath,
+int android_createEmptyExt4Image(const char* filePath,
                                  uint64_t size,
-                                 const char *mountpoint) {
+                                 const char* mountpoint) {
     return android_createExt4ImageFromDir(filePath, NULL, size, mountpoint);
 }
 
-int android_createExt4ImageFromDir(const char *dstFilePath,
-                                   const char *srcDirectory,
+int android_createExt4ImageFromDir(const char* dstFilePath,
+                                   const char* srcDirectory,
                                    uint64_t size,
-                                   const char *mountpoint) {
-
-    int ret = ::make_ext4fs_from_dir(dstFilePath, srcDirectory, size,
-                                     mountpoint, NULL, android_verbose ? 1 : -1);
-    if (ret < 0)
+                                   const char* mountpoint) {
+    int ret =
+            ::make_ext4fs_from_dir(dstFilePath, srcDirectory, size, mountpoint,
+                                   NULL, android_verbose ? 1 : -1);
+    if (ret < 0) {
         EXT4_ERROR << "Failed to create ext4 image at: " << dstFilePath;
+    }
     return ret;
+}
+
+int android_raw_to_qcow2(const char* srcFile,
+                         const char* dstFile,
+                         bool deleteSource) {
+    System::ProcessExitCode outExitCode = 0;
+    auto qemu_img = System::get()->findBundledExecutable("qemu-img");
+    auto res = android::base::System::get()->runCommandWithResult(
+            {qemu_img, "convert", "-f", "raw", "-O", "qcow2", srcFile, dstFile},
+            System::kInfinite, &outExitCode);
+    if (outExitCode != 0) {
+        EXT4_ERROR << "Failed to convert " << srcFile
+                   << " to qcow2: " << dstFile;
+        if (res) {
+            EXT4_ERROR << "Result: " << res;
+        }
+    } else if (deleteSource) {
+        System::get()->deleteFile(srcFile);
+    }
+    return outExitCode;
 }

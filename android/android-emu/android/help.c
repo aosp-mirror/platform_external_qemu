@@ -1931,7 +1931,19 @@ static void
 help_crostini(stralloc_t* out)
 {
     PRINTF(
-    "  Turn on optimizations for running in a VM on Chrome OS.\n"
+    "  Turn on optimizations for running in a VM on Chrome OS.\n\n"
+    );
+}
+
+
+static void
+help_docker(stralloc_t* out)
+{
+    PRINTF(
+    "  Turn on optimizations for running inside a docker container.\n\n"
+    "  It will apply the following set of optimizations:\n"
+    "  - Use qcow2 disks for reduced storage requirements.\n"
+    "  - Disable QuickbootFileBacked\n"
     );
 }
 
