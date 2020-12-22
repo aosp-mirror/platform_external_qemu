@@ -35,4 +35,8 @@ int android_createExt4ImageFromDir(const char *dstFilePath,
                                    uint64_t size,
                                    const char *mountpoint);
 
+// Convert a raw image file to a qcow2, qcow2 images are far sparser
+// Returns 0 on success.
+int android_raw_to_qcow2(const char *srcFile, const char *dstFile, bool deleteSource);
+
 ANDROID_END_HEADER

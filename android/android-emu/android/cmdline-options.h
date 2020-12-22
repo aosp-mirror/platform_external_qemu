@@ -262,6 +262,8 @@ OPT_FLAG(legacy_fake_camera, "Use legacy camera HAL for the emulated fake camera
 
 OPT_FLAG(no_direct_adb, "Use external adb executable for internal communication.")
 
+OPT_FLAG(docker, "Turn on optimizations for running in a docker container.")
+
 OPT_PARAM(check_snapshot_loadable,
           "<snapshot name|exported snapshot tar file>",
           "Check if a snasphot is loadable.")

@@ -1927,6 +1927,17 @@ help_no_direct_adb(stralloc_t* out)
     );
 }
 
+static void
+help_docker(stralloc_t* out)
+{
+    PRINTF(
+    "  Turn on optimizations for running inside a docker container.\n\n"
+    "  It will apply the following set of optimizations:\n"
+    "  - Use qcow2 disks for reduced storage requirements.\n"
+    "  - Disable QuickbootFileBacked\n"
+    );
+}
+
 static void help_check_snapshot_loadable(stralloc_t* out) {
     PRINTF("  Check if a snapshot is loadable.\n"
            "  -check-snapshot-loadable <snapshot name|snapshot TAR file>\n");
