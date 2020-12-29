@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e0c06ea0_8b2ab8c6",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 944,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-29T20:04:08Z",
+      "side": 1,
+      "message": "nit: I wonder if constexpr will give us compile time strlen.",
+      "revId": "68d3588ee0983d9ce8d08f3a636a53c74cae5fcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bf8b4f08_a7a4f9b7",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 958,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2020-12-29T20:04:08Z",
+      "side": 1,
+      "message": "typo: importn",
+      "revId": "68d3588ee0983d9ce8d08f3a636a53c74cae5fcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
