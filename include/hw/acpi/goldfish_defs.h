@@ -19,6 +19,13 @@
  * For interrupts, we use lines 16 through 24.
  */
 
+/* TODO(fxbug.dev/66965): Currently we swapped the IRQ line of goldfish_sync
+ * (IRQ 21) and goldfish_events (IRQ 17) devices as the former one has an
+ * IRQ conflict with PCI devices using legacy IRQ handling. This is just a
+ * workaround and may fail at any time. These IRQ lines needs to be swapped back
+ * once the issue is fixed.
+ */
+
 #ifndef ACPI_GOLDFISH_DEFS_H
 #define ACPI_GOLDFISH_DEFS_H
 
@@ -30,7 +37,7 @@
 /* goldfish events */
 #define GOLDFISH_EVENTS_IOMEM_BASE    0xff011000
 #define GOLDFISH_EVENTS_IOMEM_SIZE    0x00001000
-#define GOLDFISH_EVENTS_IRQ           17
+#define GOLDFISH_EVENTS_IRQ           21
 
 /* android pipe */
 #define GOLDFISH_PIPE_IOMEM_BASE      0xff001000
@@ -50,7 +57,7 @@
 /* goldfish sync */
 #define GOLDFISH_SYNC_IOMEM_BASE      0xff014000
 #define GOLDFISH_SYNC_IOMEM_SIZE      0x00002000
-#define GOLDFISH_SYNC_IRQ             21
+#define GOLDFISH_SYNC_IRQ             17
 
 /* goldfish rtc */
 #define GOLDFISH_RTC_IOMEM_BASE       0xff016000
