@@ -90,6 +90,7 @@ static void isa_ipmi_bt_realize(DeviceState *dev, Error **errp)
     ISAIPMIBTDevice *iib = ISA_IPMI_BT(dev);
     IPMIInterface *ii = IPMI_INTERFACE(dev);
     IPMIInterfaceClass *iic = IPMI_INTERFACE_GET_CLASS(ii);
+    IPMICore *ic;
 
     if (!iib->bt.bmc) {
         error_setg(errp, "IPMI device requires a bmc attribute to be set");
@@ -98,7 +99,8 @@ static void isa_ipmi_bt_realize(DeviceState *dev, Error **errp)
 
     iib->uuid = ipmi_next_uuid();
 
-    iib->bt.bmc->intf = ii;
+    ic = IPMI_CORE(iib->bt.bmc);
+    ic->intf = ii;
     iib->bt.opaque = iib;
 
     iic->init(ii, 0, &err);

@@ -92,13 +92,21 @@ static const TypeInfo ipmi_interface_type_info = {
     .class_init = ipmi_interface_class_init,
 };
 
+static TypeInfo ipmi_core_type_info = {
+    .name = TYPE_IPMI_CORE,
+    .parent = TYPE_DEVICE,
+    .instance_size = sizeof(IPMICore),
+    .abstract = true,
+};
+
 static void isa_ipmi_bmc_check(const Object *obj, const char *name,
                                Object *val, Error **errp)
 {
-    IPMIBmc *bmc = IPMI_BMC(val);
+    IPMICore *ic = IPMI_CORE(val);
 
-    if (bmc->intf)
+    if (ic->intf) {
         error_setg(errp, "BMC object is already in use");
+    }
 }
 
 void ipmi_bmc_find_and_link(Object *obj, Object **bmc)
@@ -122,7 +130,7 @@ static void bmc_class_init(ObjectClass *oc, void *data)
 
 static const TypeInfo ipmi_bmc_type_info = {
     .name = TYPE_IPMI_BMC,
-    .parent = TYPE_DEVICE,
+    .parent = TYPE_IPMI_CORE,
     .instance_size = sizeof(IPMIBmc),
     .abstract = true,
     .class_size = sizeof(IPMIBmcClass),
@@ -132,6 +140,7 @@ static const TypeInfo ipmi_bmc_type_info = {
 static void ipmi_register_types(void)
 {
     type_register_static(&ipmi_interface_type_info);
+    type_register_static(&ipmi_core_type_info);
     type_register_static(&ipmi_bmc_type_info);
 }
 

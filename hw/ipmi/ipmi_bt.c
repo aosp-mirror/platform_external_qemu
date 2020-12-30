@@ -430,7 +430,7 @@ void ipmi_bt_class_init(IPMIInterfaceClass *iic)
 {
     iic->init = ipmi_bt_init;
     iic->set_atn = ipmi_bt_set_atn;
-    iic->handle_rsp = ipmi_bt_handle_rsp;
+    iic->handle_msg = ipmi_bt_handle_rsp;
     iic->handle_if_event = ipmi_bt_handle_event;
     iic->set_irq_enable = ipmi_bt_set_irq_enable;
     iic->reset = ipmi_bt_handle_reset;

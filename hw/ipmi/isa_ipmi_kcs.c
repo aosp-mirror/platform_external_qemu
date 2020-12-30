@@ -92,6 +92,7 @@ static void ipmi_isa_realize(DeviceState *dev, Error **errp)
     ISAIPMIKCSDevice *iik = ISA_IPMI_KCS(dev);
     IPMIInterface *ii = IPMI_INTERFACE(dev);
     IPMIInterfaceClass *iic = IPMI_INTERFACE_GET_CLASS(ii);
+    IPMICore *ic;
 
     if (!iik->kcs.bmc) {
         error_setg(errp, "IPMI device requires a bmc attribute to be set");
@@ -100,7 +101,8 @@ static void ipmi_isa_realize(DeviceState *dev, Error **errp)
 
     iik->uuid = ipmi_next_uuid();
 
-    iik->kcs.bmc->intf = ii;
+    ic = IPMI_CORE(iik->kcs.bmc);
+    ic->intf = ii;
     iik->kcs.opaque = iik;
 
     iic->init(ii, 0, &err);
