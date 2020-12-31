@@ -661,6 +661,10 @@ static void initialize_virtio_input_devs(android::ParameterList& args, AndroidHw
             args.add("-device");
             args.add("virtio-keyboard-pci");
         }
+
+        args.add2("-chardev", "file,id=hvc0,path=/usr/local/google/home/rkir/test.txt");
+        args.add2("-device", "virtio-serial-pci,max_ports=1");
+        args.add2("-device", "virtconsole,nr=0,name=hvc0,chardev=hvc0");
     }
 }
 
@@ -1570,10 +1574,10 @@ extern "C" int main(int argc, char** argv) {
     // either to the 'null' chardev, or the -shell-serial one,
     // which by default will be either 'stdout' (Posix) or 'con:'
     // (Windows).
-    const char* serial = (opts->shell || opts->logcat || opts->show_kernel)
-                                 ? opts->shell_serial
-                                 : "null";
-    args.add2("-serial", serial);
+//    const char* serial = (opts->shell || opts->logcat || opts->show_kernel)
+//                                 ? opts->shell_serial
+//                                 : "null";
+//    args.add2("-serial", serial);
 
     args.add2If("-radio", opts->radio);
     args.add2If("-gps", opts->gps);

@@ -127,8 +127,9 @@ void setupVirtualSerialPorts(ParameterList* kernelParams,
         // TODO(digit): Ensure -shell-serial only works on -shell output.
         if (kernelParams) {
             if (optionShowKernel) {
-                kernelParams->addFormat("console=%s0,38400",
-                                        kernelSerialPrefix);
+//                  kernelParams->addFormat("console=%s0,38400",
+//                                          kernelSerialPrefix);
+                  kernelParams->add("console=hvc0");
             }
 
             if (isARMish) {
