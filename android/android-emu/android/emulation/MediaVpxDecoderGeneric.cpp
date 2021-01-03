@@ -29,7 +29,7 @@
 #include <cassert>
 #include <functional>
 
-#define MEDIA_VPX_DEBUG 0
+#define MEDIA_VPX_DEBUG 1
 
 #if MEDIA_VPX_DEBUG
 #define VPX_DPRINT(fmt, ...)                                                \
@@ -112,7 +112,7 @@ MediaVpxDecoderGeneric::~MediaVpxDecoderGeneric() {
 }
 
 void MediaVpxDecoderGeneric::initVpxContext(void* ptr) {
-    VPX_DPRINT("calling init context");
+    VPX_DPRINT("calling init context with version %d", mParser.version());
 
 #ifndef __APPLE__
     if (canUseCudaDecoder() && mParser.version() >= 200) {
@@ -290,6 +290,19 @@ void MediaVpxDecoderGeneric::getImage(void* ptr) {
     } else {
         memcpy(param.p_dst, pFrame->data.data(),
                pFrame->width * pFrame->height * 3 / 2);
+        if(0){
+            // dump to file
+            char mybuf[1024];
+            static int count=1;
+            snprintf(mybuf, sizeof(mybuf), "debug-yuv-%d.yuv", count++);
+            FILE* fp = fopen(mybuf, "w");
+            if (fp) {
+                VPX_DPRINT("dump yuv file to %s", mybuf);
+                fwrite(pFrame->data.data(),  pFrame->width * pFrame->height * 3 / 2, 1, fp);
+                fclose(fp);
+            }
+        }
+        VPX_DPRINT("copy back to guest w %d h %d", pFrame->width, pFrame->height);
     }
     mSnapshotHelper.discardFrontFrame();
     VPX_DPRINT("completed getImage with colorid %d",
