@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "417756d8_17725c42",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2049,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-01-04T19:28:11Z",
+      "side": 1,
+      "message": "name\u003dhvc0 is a kernel parameter, it will be added later with other kernel parameter\nafter -append",
+      "parentUuid": "65ed976a_b9c86170",
+      "range": {
+        "startLine": 2049,
+        "startChar": 66,
+        "endLine": 2049,
+        "endChar": 69
+      },
+      "revId": "3b5da30107d04df835634b31c2c7ad72cad108cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "18ba97c2_b5f55c09",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-01-04T18:32:41Z",
       "side": 1,
       "message": "Will setupVirtualSerialPorts add \"console\u003dttS0,38400\", so we will get \"console\u003d\" twice?\n\nhttps://android-review.googlesource.com/c/platform/external/qemu/+/1537996/1/android/android-emu/android/emulation/SetupParameters.cpp#17",
+      "range": {
+        "startLine": 2352,
+        "startChar": 12,
+        "endLine": 2352,
+        "endChar": 54
+      },
+      "revId": "3b5da30107d04df835634b31c2c7ad72cad108cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e00870eb_ede41c9d",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2352,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-01-04T19:28:11Z",
+      "side": 1,
+      "message": "good point, will double check.",
+      "parentUuid": "18ba97c2_b5f55c09",
       "range": {
         "startLine": 2352,
         "startChar": 12,
