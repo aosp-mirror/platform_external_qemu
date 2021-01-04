@@ -310,7 +310,7 @@ int main(int argc, char** argv)
     int restartPid = -1;
     bool doDeleteTempDir = false;
     bool checkLoadable = false;
-
+    bool use_virtio_console = false;
 
 #ifdef __APPLE__
     if (processIsTranslated()) {
@@ -327,6 +327,16 @@ int main(int argc, char** argv)
     const char* qemu_top_dir = nullptr;
     for (int nn = 1; nn < argc; nn++) {
         const char* opt = argv[nn];
+
+#ifdef __linux__
+#if defined(__aarch64__)
+        if (!strcmp(opt, "-virtio-console")) {
+            use_virtio_console = true;
+            continue;
+        }
+#endif
+#endif
+
         if (!strcmp(opt, "-qemu-top-dir") && nn + 1 < argc) {
             qemu_top_dir = argv[nn + 1];
             // shuffle up the arguments
@@ -410,6 +420,9 @@ int main(int argc, char** argv)
     if (android::HostHwInfo::queryArmCpuInfo().is_big_little) {
         // set up cpu affinity
         setupCpuAffinity(armCpuInfo);
+    }
+    if (use_virtio_console) {
+        System::get()->envSet("ANDROID_EMULATOR_USE_VIRTIO_CONSOLE", "1");
     }
 #endif
 
