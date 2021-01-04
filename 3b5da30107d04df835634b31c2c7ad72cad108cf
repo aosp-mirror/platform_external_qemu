@@ -48,6 +48,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fc6cb87b_b0a92159",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2049,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-01-04T19:35:48Z",
+      "side": 1,
+      "message": "\"name\u003dhvc0\" is the guest side name of this virtconsole, I believe it should be here, see\n\nhttps://android-review.googlesource.com/c/platform/external/qemu/+/1537996/1/android-qemu2-glue/main.cpp#667",
+      "parentUuid": "417756d8_17725c42",
+      "range": {
+        "startLine": 2049,
+        "startChar": 66,
+        "endLine": 2049,
+        "endChar": 69
+      },
+      "revId": "3b5da30107d04df835634b31c2c7ad72cad108cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "18ba97c2_b5f55c09",
