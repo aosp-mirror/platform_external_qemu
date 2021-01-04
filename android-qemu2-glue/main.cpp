@@ -1562,7 +1562,11 @@ extern "C" int main(int argc, char** argv) {
     const char* serial = (opts->shell || opts->logcat || opts->show_kernel)
                                  ? opts->shell_serial
                                  : "null";
-    args.add2("-serial", serial);
+    if (opts->virtio_console) {
+        args.add2("-serial", "none");
+    } else {
+        args.add2("-serial", serial);
+    }
 
     args.add2If("-radio", opts->radio);
     args.add2If("-gps", opts->gps);
@@ -2029,6 +2033,12 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
+    if (opts->virtio_console) {
+        args.add2("-device", "virtio-serial-device");
+        args.add2("-device", "virtconsole,chardev=charvirtconsole0");
+        args.add2("-chardev", "stdio,id=charvirtconsole0");
+    }
+
     if (feature_is_enabled(kFeature_ModemSimulator)) {
         if (create_modem_simulator_configs_if_needed(hw)) {
             init_modem_simulator();
@@ -2326,6 +2336,10 @@ extern "C" int main(int argc, char** argv) {
         all_boot_params.insert(all_boot_params.end(),
                                hwcodec_boot_params.begin(),
                                hwcodec_boot_params.end());
+
+        if (opts->virtio_console) {
+            all_boot_params.push_back("console=hvc0");
+        }
 
         ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
