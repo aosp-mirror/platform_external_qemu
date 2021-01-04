@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "65ed976a_b9c86170",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2049,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-01-04T18:32:41Z",
+      "side": 1,
+      "message": "Should you add \"name\u003dhvc0\" here for the guest side?",
+      "range": {
+        "startLine": 2049,
+        "startChar": 66,
+        "endLine": 2049,
+        "endChar": 69
+      },
+      "revId": "3b5da30107d04df835634b31c2c7ad72cad108cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "18ba97c2_b5f55c09",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2352,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-01-04T18:32:41Z",
+      "side": 1,
+      "message": "Will setupVirtualSerialPorts add \"console\u003dttS0,38400\", so we will get \"console\u003d\" twice?\n\nhttps://android-review.googlesource.com/c/platform/external/qemu/+/1537996/1/android/android-emu/android/emulation/SetupParameters.cpp#17",
+      "range": {
+        "startLine": 2352,
+        "startChar": 12,
+        "endLine": 2352,
+        "endChar": 54
+      },
+      "revId": "3b5da30107d04df835634b31c2c7ad72cad108cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
