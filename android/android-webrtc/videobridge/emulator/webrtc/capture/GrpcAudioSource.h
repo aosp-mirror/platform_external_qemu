@@ -36,7 +36,7 @@ class EmulatorGrpcClient;
 
 class GrpcAudioSource : public AudioSource {
 public:
-    explicit GrpcAudioSource(EmulatorGrpcClient client);
+    explicit GrpcAudioSource(EmulatorGrpcClient* client);
 
     ~GrpcAudioSource();
 
