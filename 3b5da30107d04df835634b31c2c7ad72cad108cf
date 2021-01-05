@@ -74,6 +74,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "0971fe82_b2b35814",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2049,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-01-05T19:58:23Z",
+      "side": 1,
+      "message": "I think we want to add \"name\u003dhvc0\" here. Otherwise it is unclear what \"console\u003dhvc0\" refers to.",
+      "parentUuid": "fc6cb87b_b0a92159",
+      "range": {
+        "startLine": 2049,
+        "startChar": 66,
+        "endLine": 2049,
+        "endChar": 69
+      },
+      "revId": "3b5da30107d04df835634b31c2c7ad72cad108cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "18ba97c2_b5f55c09",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 4
