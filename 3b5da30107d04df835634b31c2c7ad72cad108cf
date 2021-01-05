@@ -98,6 +98,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "639ecade_ff2d2104",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2049,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-01-05T20:04:40Z",
+      "side": 1,
+      "message": "Roman,\n  this specifies the device; and the parameters are read by qemu;\nthe console\u003dhvc0 is kernel parameter, and it is read by kernel. that is why\nI have to specify it elsewhere (not great for easy comprehension , indeed)\n\ndo you mean change the id to something like virtconsolehvc0 ?",
+      "parentUuid": "0971fe82_b2b35814",
+      "range": {
+        "startLine": 2049,
+        "startChar": 66,
+        "endLine": 2049,
+        "endChar": 69
+      },
+      "revId": "3b5da30107d04df835634b31c2c7ad72cad108cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "18ba97c2_b5f55c09",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 4
