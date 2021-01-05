@@ -17,6 +17,7 @@
 #include <unordered_map>
 
 #include "android/base/Compiler.h"
+#include "android/base/system/System.h"
 
 namespace android {
 namespace emulation {
@@ -57,6 +58,9 @@ public:
 
     // Removes the file from the file system.
     void remove() const;
+
+    // True if a advertisement exists for the given pid.
+    static bool exists(base::System::Pid pid);
 
     // Deletes all ini files in <user-specific_tmp_directory>/avd/running  for
     // which no corresponding process exists. returns the number of files

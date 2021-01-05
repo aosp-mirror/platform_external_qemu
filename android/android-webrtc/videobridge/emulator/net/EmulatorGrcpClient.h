@@ -34,7 +34,8 @@ public:
     EmulatorGrpcClient(std::string address, std::string ca, std::string key, std::string cer);
     std::unique_ptr<android::emulation::control::EmulatorController::Stub> stub();
     std::unique_ptr<grpc::ClientContext> newContext();
-    bool hasOpenChannel();
+    bool hasOpenChannel(bool tryConnect = true);
+    std::string address() { return mAddress; }
 
 private:
     bool initializeChannel();

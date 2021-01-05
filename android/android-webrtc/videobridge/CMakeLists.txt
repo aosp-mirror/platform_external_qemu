@@ -4,7 +4,9 @@ android_add_executable(
   TARGET goldfish-webrtc-bridge
   LICENSE Apache-2.0 INSTALL .
   SRC # cmake-format: sortable
+      emulator/avd/FakeAvd.cpp
       emulator/main/GoldfishBridge.cpp
+      emulator/net/EmulatorForwarder.cpp
       emulator/net/EmulatorGrpcClient.cpp
       emulator/webrtc/capture/AudioSource.cpp
       emulator/webrtc/capture/GrpcAudioSource.cpp
