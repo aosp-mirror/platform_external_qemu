@@ -52,7 +52,7 @@ using ::android::emulation::control::Image;
 class GrpcVideoSource
     : public ::webrtc::Notifier<::webrtc::VideoTrackSourceInterface> {
 public:
-    explicit GrpcVideoSource(EmulatorGrpcClient client);
+    explicit GrpcVideoSource(EmulatorGrpcClient* client);
     ~GrpcVideoSource() override;
 
     bool is_screencast() const override { return true; }
@@ -85,7 +85,7 @@ private:
 
     void captureFrames();
 
-    EmulatorGrpcClient mClient;
+    EmulatorGrpcClient* mClient;
     std::unique_ptr<::grpc::ClientContext> mContext;
     rtc::scoped_refptr<::webrtc::I420Buffer>
             mI420Buffer;  // Re-usable I420Buffer.

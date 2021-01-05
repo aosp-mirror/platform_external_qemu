@@ -11,43 +11,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "Switchboard.h"
+#include "emulator/webrtc/Switchboard.h"
 
-#include <api/audio/audio_mixer.h>                              // for Audio...
-#include <api/audio_codecs/builtin_audio_decoder_factory.h>     // for Creat...
-#include <api/audio_codecs/builtin_audio_encoder_factory.h>     // for Creat...
-#include <api/create_peerconnection_factory.h>                  // for Creat...
-#include <api/peer_connection_interface.h>                      // for PeerC...
-#include <api/scoped_refptr.h>                                  // for scope...
-#include <api/task_queue/default_task_queue_factory.h>          // for Creat...
-#include <api/task_queue/task_queue_factory.h>                  // for TaskQ...
-#include <api/video_codecs/builtin_video_decoder_factory.h>     // for Creat...
-#include <api/video_codecs/builtin_video_encoder_factory.h>     // for Creat...
-#include <modules/audio_device/include/audio_device.h>          // for Audio...
-#include <modules/audio_processing/include/audio_processing.h>  // for Audio...
-#include <rtc_base/critical_section.h>                          // for CritS...
-#include <rtc_base/logging.h>                                   // for RTC_LOG
-#include <rtc_base/ref_counted_object.h>                        // for RefCo...
-#include <rtc_base/thread.h>                                    // for Thread
-#include <map>                                                  // for map
-#include <memory>                                               // for share...
-#include <ostream>                                              // for opera...
-#include <string>                                               // for string
-#include <unordered_map>                                        // for unord...
-#include <utility>                                              // for move
-#include <vector>                                               // for vector
+#include <api/scoped_refptr.h>            // for scoped_refptr
+#include <rtc_base/critical_section.h>    // for CritScope
+#include <rtc_base/logging.h>             // for RTC_LOG
+#include <rtc_base/ref_counted_object.h>  // for RefCountedObject
+#include <map>                            // for map, operator==
+#include <memory>                         // for shared_ptr, shared_...
+#include <ostream>                        // for operator<<, ostream
+#include <string>                         // for string, basic_string
+#include <unordered_map>                  // for unordered_map, unor...
+#include <utility>                        // for move
+#include <vector>                         // for vector
 
-#include "Participant.h"                                        // for Parti...
-#include "android/base/Log.h"                                   // for LogSt...
-#include "android/base/Optional.h"                              // for Optional
-#include "android/base/ProcessControl.h"                        // for parse...
-#include "android/base/containers/BufferQueue.h"                // for Buffe...
-#include "android/base/synchronization/Lock.h"                  // for Lock
-#include "android/base/system/System.h"                         // for System
-#include "emulator/net/EmulatorGrcpClient.h"                    // for Emula...
-#include "emulator/webrtc/Switchboard.h"                        // for Switc...
-#include "emulator/webrtc/capture/GoldfishAudioDeviceModule.h"  // for Goldf...
-#include "nlohmann/json.hpp"                                    // for opera...
+#include "android/base/Log.h"                     // for LogStreamVoidify, LOG
+#include "android/base/Optional.h"                // for Optional
+#include "android/base/ProcessControl.h"          // for parseEscapedLaunchS...
+#include "android/base/containers/BufferQueue.h"  // for BufferQueue, Buffer...
+#include "android/base/synchronization/Lock.h"    // for Lock, AutoReadLock
+#include "android/base/system/System.h"           // for System, System::Dur...
+#include "emulator/webrtc/Participant.h"          // for Parti...
+#include "emulator/webrtc/RtcConnection.h"        // for json, RtcConnection
+#include "nlohmann/json.hpp"                      // for operator""_json
 
 using namespace android::base;
 
@@ -58,32 +44,12 @@ std::string Switchboard::BRIDGE_RECEIVER = "WebrtcVideoBridge";
 
 Switchboard::~Switchboard() {}
 
-Switchboard::Switchboard(EmulatorGrpcClient client,
+Switchboard::Switchboard(EmulatorGrpcClient* client,
                          const std::string& shmPath,
                          const std::string& turnConfig)
-    : mShmPath(shmPath),
-      mTaskFactory(::webrtc::CreateDefaultTaskQueueFactory()),
-      mNetwork(rtc::Thread::CreateWithSocketServer()),
-      mWorker(rtc::Thread::Create()),
-      mSignaling(rtc::Thread::Create()),
-      mTurnConfig(parseEscapedLaunchString(turnConfig)),
-      mClient(client) {
-    mNetwork->SetName("Sw-Network", nullptr);
-    mNetwork->Start();
-    mWorker->SetName("Sw-Worker", nullptr);
-    mWorker->Start();
-    mSignaling->SetName("Sw-Signaling", nullptr);
-    mSignaling->Start();
-    mConnectionFactory = ::webrtc::CreatePeerConnectionFactory(
-            mNetwork.get() /* network_thread */,
-            mWorker.get() /* worker_thread */,
-            mSignaling.get() /* signaling_thread */, &mGoldfishAdm,
-            ::webrtc::CreateBuiltinAudioEncoderFactory(),
-            ::webrtc::CreateBuiltinAudioDecoderFactory(),
-            ::webrtc::CreateBuiltinVideoEncoderFactory(),
-            ::webrtc::CreateBuiltinVideoDecoderFactory(),
-            nullptr /* audio_mixer */, nullptr /* audio_processing */);
-}
+    : RtcConnection(client),
+      mShmPath(shmPath),
+      mTurnConfig(parseEscapedLaunchString(turnConfig)) {}
 
 void Switchboard::rtcConnectionDropped(std::string participant) {
     rtc::CritScope cs(&mCleanupCS);
@@ -152,8 +118,8 @@ bool Switchboard::connect(std::string identity) {
     }
 
     rtc::scoped_refptr<Participant> stream(
-            new rtc::RefCountedObject<Participant>(this, identity,
-                                                   mConnectionFactory.get()));
+            new rtc::RefCountedObject<Participant>(
+                    this, identity, mConnectionFactory.get(), mClient));
     if (!stream->Initialize()) {
         return false;
     }

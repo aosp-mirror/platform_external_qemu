@@ -78,6 +78,13 @@ std::string EmulatorAdvertisement::location() const {
     return result;
 }
 
+// True if a advertisement exists for the given pid.
+bool EmulatorAdvertisement::exists(System::Pid pid) {
+    std::string pidfile = android::base::StringFormat(location_format, pid);
+    std::string pidPath = android::base::pj(android::ConfigDirs::getDiscoveryDirectory(), pidfile);
+    return System::get()->pathIsFile(pidPath);
+}
+
 bool EmulatorAdvertisement::write()  const {
     auto pidFile = location();
     if (System::get()->pathExists(pidFile)) {

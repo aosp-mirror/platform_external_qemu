@@ -14,35 +14,31 @@
 #include <rtc_base/log_sinks.h>    // for FileRotatingLogSink
 #include <rtc_base/logging.h>      // for RTC_LOG, LogSink
 #include <rtc_base/ssl_adapter.h>  // for CleanupSSL, Init...
-#include <stdio.h>                 // for fprintf, printf
-#include <stdlib.h>                // for atoi, exit, EXIT...
-#include <unistd.h>                // for fork, pid_t
+#include <stdio.h>                 // for printf, fprintf
+#include <stdlib.h>                // for exit, atoi, EXIT...
+#include <memory>                  // for unique_ptr, make...
+#include <string>                  // for basic_string
+#include <string_view>             // for string_view
+#include <vector>                  // for vector
 
-#include <memory>  // for unique_ptr
-#include <string>  // for basic_string
-#include <vector>  // for vector
-
-#include "android/base/Log.h"
+#include "android/base/Log.h"                        // for LogStreamVoidify
 #include "android/base/Optional.h"                   // for Optional
 #include "android/base/ProcessControl.h"             // for parseEscapedLaun...
 #include "android/base/system/System.h"              // for System, System::...
 #include "android/emulation/control/GrpcServices.h"  // for EmulatorControll...
 #include "android/emulation/control/RtcService.h"    // for getRtcService
+#include "android/utils/debug.h"                     // for android_verbose
+#include "emulator/net/EmulatorForwarder.h"          // for EmulatorForwarder
 #include "emulator/net/EmulatorGrcpClient.h"         // for EmulatorGrpcClient
 #include "emulator/webrtc/Switchboard.h"             // for Switchboard
 #include "nlohmann/json.hpp"                         // for json
-
-namespace android {
-namespace base {
-class SharedMemory;
-}  // namespace base
-}  // namespace android
 
 #ifdef _MSC_VER
 #include "msvc-getopt.h"
 #include "msvc-posix.h"
 #else
-#include <getopt.h>  // for optarg, required...
+#include <getopt.h>      // for optarg, required...
+#include <sys/signal.h>  // for signal, SIGINT
 #endif
 
 using nlohmann::json;
@@ -53,21 +49,30 @@ static std::string FLAG_turn("");
 static bool FLAG_help = false;
 static bool FLAG_verbose = true;
 static int FLAG_port = 8555;
+static bool FLAG_fwd = false;
 static std::string FLAG_disc("");
 static std::string FLAG_address("localhost");
-
-static struct option long_options[] = {{"logdir", required_argument, 0, 'l'},
-                                       {"emulator", required_argument, 0, 's'},
-                                       {"turn", required_argument, 0, 't'},
-                                       {"help", no_argument, 0, 'h'},
-                                       {"verbose", no_argument, 0, 'v'},
-                                       {"port", required_argument, 0, 'p'},
-                                       {"discovery", required_argument, 0, 'i'},
-                                       {"address", required_argument, 0, 'm'},
-                                       {0, 0, 0, 0}};
+static std::string FLAG_tls_key("");
+static std::string FLAG_tls_cer("");
+static std::string FLAG_tls_ca("");
+static struct option long_options[] = {
+        {"logdir", required_argument, 0, 'l'},
+        {"emulator", required_argument, 0, 's'},
+        {"fwd", no_argument, 0, 'f'},
+        {"turn", required_argument, 0, 't'},
+        {"help", no_argument, 0, 'h'},
+        {"verbose", no_argument, 0, 'v'},
+        {"port", required_argument, 0, 'p'},
+        {"discovery", required_argument, 0, 'i'},
+        {"address", required_argument, 0, 'm'},
+        {"grpc-tls-key", required_argument, 0, 'x'},
+        {"grpc-tls-cer", required_argument, 0, 'y'},
+        {"grpc-tls-ca", required_argument, 0, 'z'},
+        {0, 0, 0, 0}};
 
 using android::base::testing::LogOutput;
 using android::emulation::control::EmulatorControllerService;
+using android::emulation::control::EmulatorForwarder;
 using emulator::webrtc::EmulatorGrpcClient;
 using emulator::webrtc::Switchboard;
 
@@ -83,6 +88,13 @@ static void printUsage() {
            "string\n"
            "--emulator (The emulator grpc server to connect to)  type: string "
            "default: localhost:8554\n"
+           "--fwd (Act as a forwarder) type: bool  default: false\n"
+           "--grpc-tls-key (File with the private key used to enable gRPC TLS "
+           "to the remote emulator) type: string.\n"
+           "--grpc-tls-cer (File with the public X509 certificate used to "
+           "enable gRPC TLS to the remote emulator) type: string.\n"
+           "--grpc-tls-ca (File with the Certificate Authorities used to "
+           "validate the emulator certificate.)\n"
            "--help (Prints this message)\n");
 }
 
@@ -92,6 +104,18 @@ static void parseArgs(int argc, char** argv) {
     while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) !=
            -1) {
         switch (opt) {
+            case 'x':
+                FLAG_tls_key = optarg;
+                break;
+            case 'y':
+                FLAG_tls_cer = optarg;
+                break;
+            case 'z':
+                FLAG_tls_ca = optarg;
+                break;
+            case 'f':
+                FLAG_fwd = true;
+                break;
             case 'l':
                 FLAG_logdir = optarg;
                 break;
@@ -167,6 +191,30 @@ public:
     }
 };
 
+std::unique_ptr<EmulatorForwarder> sForwarder;
+std::unique_ptr<EmulatorControllerService> sController;
+
+static void handleCtrlC() {
+    if (sForwarder) {
+        sForwarder->close();
+    }
+    if (sController) {
+        sController->stop();
+    }
+}
+
+#ifdef _WIN32
+static BOOL WINAPI ctrlHandler(DWORD type) {
+    handleCtrlC();
+    exit(1);
+}
+#else
+void ctrlHandler(int signum) {
+    handleCtrlC();
+    exit(signum);
+}
+#endif
+
 int main(int argc, char* argv[]) {
     EmulatorLogAdapter logAdapter;
     LogOutput::setNewOutput(&logAdapter);
@@ -240,8 +288,8 @@ int main(int argc, char* argv[]) {
     if (!FLAG_disc.empty()) {
         client = std::make_unique<EmulatorGrpcClient>(FLAG_disc);
     } else {
-        client =
-                std::make_unique<EmulatorGrpcClient>(FLAG_emulator, "", "", "");
+        client = std::make_unique<EmulatorGrpcClient>(
+                FLAG_emulator, FLAG_tls_ca, FLAG_tls_key, FLAG_tls_cer);
     }
 
     if (!client->hasOpenChannel()) {
@@ -249,23 +297,38 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    // Initalize the RTC service.
-    Switchboard sw(*client, "", FLAG_turn);
-    auto bridge = android::emulation::control::getRtcService(&sw);
+#ifdef _WIN32
+    ::SetConsoleCtrlHandler(ctrlHandler, TRUE);
+#else
+    signal(SIGINT, ctrlHandler);
+#endif
 
-    auto builder = EmulatorControllerService::Builder()
-                           .withPortRange(FLAG_port, FLAG_port + 1)
-                           .withVerboseLogging(FLAG_verbose)
-                           .withAddress(FLAG_address)
-                           .withService(bridge);
-
-    // And host it until we are done.
-    auto service = builder.build();
-    if (service) {
-        service->wait();
+    if (FLAG_fwd) {
+        sForwarder = std::make_unique<EmulatorForwarder>(client.get());
+        if (!sForwarder->createRemoteConnection()) {
+            LOG(ERROR) << "Unable to establish a connection to the remote "
+                          "forwarder.";
+        };
+        sForwarder->wait();
     } else {
-        RTC_LOG(LS_ERROR)
-                << "FATAL! Unable to configure gRPC RTC service (port in use?)";
+        // Initalize the RTC service.
+        Switchboard sw(client.get(), "", FLAG_turn);
+        auto bridge = android::emulation::control::getRtcService(&sw);
+
+        auto builder = EmulatorControllerService::Builder()
+                               .withPortRange(FLAG_port, FLAG_port + 1)
+                               .withVerboseLogging(FLAG_verbose)
+                               .withAddress(FLAG_address)
+                               .withService(bridge);
+
+        // And host it until we are done.
+        sController = builder.build();
+        if (sController) {
+            sController->wait();
+        } else {
+            RTC_LOG(LS_ERROR) << "FATAL! Unable to configure gRPC RTC service "
+                                 "(port in use?)";
+        }
     }
     rtc::CleanupSSL();
     return 0;

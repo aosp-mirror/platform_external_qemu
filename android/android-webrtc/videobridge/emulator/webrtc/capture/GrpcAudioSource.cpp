@@ -39,8 +39,8 @@ constexpr int32_t kSamplesPerFrame = kBitRateHz / 100 /*(10ms/1s)*/;
 constexpr size_t kBytesPerFrame =
         kBytesPerSample * kSamplesPerFrame * kChannels;
 
-GrpcAudioSource::GrpcAudioSource(EmulatorGrpcClient client)
-    : mEmulatorGrpc(client.stub()), mContext(client.newContext()) {
+GrpcAudioSource::GrpcAudioSource(EmulatorGrpcClient* client)
+    : mEmulatorGrpc(client->stub()), mContext(client->newContext()) {
     mPartialFrame.reserve(kBytesPerFrame);
     mAudioThread = std::thread([this]() { StreamAudio(); });
 }

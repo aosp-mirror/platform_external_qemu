@@ -4,15 +4,20 @@ android_add_executable(
   TARGET goldfish-webrtc-bridge
   LICENSE Apache-2.0 INSTALL .
   SRC # cmake-format: sortable
+      emulator/avd/FakeAvd.cpp
       emulator/main/GoldfishBridge.cpp
+      emulator/net/EmulatorForwarder.cpp
       emulator/net/EmulatorGrpcClient.cpp
       emulator/webrtc/capture/AudioSource.cpp
       emulator/webrtc/capture/GrpcAudioSource.cpp
       emulator/webrtc/capture/GrpcVideoSource.cpp
       emulator/webrtc/capture/VideoCapturerFactory.cpp
       emulator/webrtc/capture/VideoShareCapturer.cpp
+      emulator/webrtc/capture/VideoTrackReceiver.cpp
       emulator/webrtc/capture/VideoTrackSource.cpp
       emulator/webrtc/Participant.cpp
+      emulator/webrtc/RtcConnection.cpp
+      emulator/webrtc/StandaloneConnection.cpp
       emulator/webrtc/Switchboard.cpp)
 
 android_target_compile_options(goldfish-webrtc-bridge darwin-x86_64
