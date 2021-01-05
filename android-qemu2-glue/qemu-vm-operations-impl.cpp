@@ -105,6 +105,8 @@ using android::base::System;
 using android::snapshot::Snapshot;
 using json = nlohmann::json;
 
+static const char* kImportSuffix = "_import.qcow2";
+
 static bool qemu_vm_stop() {
     vm_stop(RUN_STATE_PAUSED);
     return true;
@@ -399,7 +401,7 @@ static bool import_snapshot(const char* name,
         auto drive = *it;
 
         DD("Copying %s", qcow2.c_str());
-        auto dest = pj(avd, qcow2) + "_import.qcow2";
+        auto dest = pj(avd, qcow2) + kImportSuffix;
         auto src = pj(datadir, qcow2);
 
         // We do not symlink as we do not want to modify the existing snapshot.
@@ -412,6 +414,7 @@ static bool import_snapshot(const char* name,
         };
 
         auto baseimg = drive["backing"];
+        DD("backing file %s\n", ((std::string)baseimg).c_str());
         rebase_on_top_of(dest, baseimg, opaque, errConsumer);
 
         // Now we are going to replace the block driver associated with it.
@@ -938,6 +941,8 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
 
     // Now we copy over the qcow2 overlays..
     auto drives = qcow2_drives();
+    static const int kSuffixSize = strlen(kImportSuffix);
+
     for (auto drive : drives) {
         auto overlay = drive["file"]["filename"].get<std::string>();
         StringView qcow;
@@ -948,6 +953,16 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
             break;
         }
         auto final_overlay = pj(dest, qcow);
+
+        // Remove the suffix if there is any.
+        // This would happen if you import then export.
+        while (final_overlay.length() > kSuffixSize &&
+               0 == strcmp(kImportSuffix, final_overlay.c_str() +
+                                                  final_overlay.length() -
+                                                  kSuffixSize)) {
+            final_overlay.resize(final_overlay.length() - kSuffixSize);
+        }
+        DD("final overlay name %s\n", final_overlay.c_str());
         path_delete_file(final_overlay.c_str());
         // Extract the target snapshot from qcow2.
         // It doesn't work with cache.img.
