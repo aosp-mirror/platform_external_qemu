@@ -114,7 +114,10 @@ static char* getQemuExecutablePath(const char* programPath,
                                    int wantedBitness,
                                    bool isHeadless);
 
-static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const char* launcherDir);
+static void updateLibrarySearchPath(bool isHeadless,
+                                    int wantedBitness,
+                                    bool useSystemLibs,
+                                    const char* launcherDir);
 
 static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
                                              const char* avdArch,
@@ -907,7 +910,8 @@ int main(int argc, char** argv)
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
      */
-    updateLibrarySearchPath(wantedBitness, useSystemLibs, progDir.data());
+    updateLibrarySearchPath(isHeadless, wantedBitness, useSystemLibs,
+                            progDir.data());
 
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
@@ -1133,7 +1137,22 @@ static char* getQemuExecutablePath(const char* progDir,
     return path_get_absolute(fullPath);
 }
 
-static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const char* launcherDir) {
+static void appendPreloadLib(const char* fullLibPath) {
+    if (!fullLibPath)
+        return;
+
+    std::string real_preload(fullLibPath);
+    const char* current_preload = getenv("LD_PRELOAD");
+    if (current_preload) {
+        real_preload = real_preload + " " + std::string(fullLibPath);
+    }
+    System::get()->envSet("LD_PRELOAD", real_preload.c_str());
+}
+
+static void updateLibrarySearchPath(bool isHeadless,
+                                    int wantedBitness,
+                                    bool useSystemLibs,
+                                    const char* launcherDir) {
     const char* libSubDir = (wantedBitness == 64) ? "lib64" : "lib";
     char fullPath[PATH_MAX];
     char* tail = fullPath;
@@ -1183,6 +1202,29 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const
         D("Adding library search path: '%s'", fullPath);
         add_library_search_dir(fullPath);
     }
+
+#if defined(__aarch64__)
+    if (isHeadless) {
+        // for headless mode on linux, uses stub xlib
+        bufprint(fullPath, fullPath + sizeof(fullPath),
+                 "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir,
+                 "libStubXlib.so");
+        D("Preload stub xlib: %s", fullPath);
+        appendPreloadLib(fullPath);
+    } else {
+        // not headless, append pulse sound if it exists
+        const char* pulse_lib_path = "/usr/lib/aarch64-linux-gnu/libpulse.so.0";
+        if (path_exists(pulse_lib_path)) {
+            D("Preload pulse lib %s", pulse_lib_path);
+            appendPreloadLib(pulse_lib_path);
+        }
+        // do not use glib in qt
+        System::get()->envSet("QT_NO_GLIB", "1");
+    }
+#else   // !__linux__
+    (void)isHeadless;
+#endif  // !__linux__
+
 #else  // !__linux__
     (void)useSystemLibs;
 #endif  // !__linux__
