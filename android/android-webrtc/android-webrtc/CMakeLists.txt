@@ -1,6 +1,5 @@
 protobuf_generate_grpc_cpp(
   SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
-  INCLUDES ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto
   SOURCES rtc_service.proto
   OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
   GENERATED EMULATOR_WEBRTC_GRPC_SRC)
@@ -17,7 +16,7 @@ android_add_library(
       android/emulation/control/RtcService.cpp
       android/emulation/control/WebRtcBridge.cpp)
 target_include_directories(android-webrtc PUBLIC .
-                           PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+                            ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_definitions(android-webrtc PUBLIC -DANDROID_WEBRTC)
 target_link_libraries(android-webrtc PUBLIC android-net android-grpc
                       PRIVATE android-emu)

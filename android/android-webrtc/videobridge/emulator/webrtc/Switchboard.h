@@ -12,30 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+#include <unordered_map>
 
-#include <api/peer_connection_interface.h>
-#include <rtc_base/critical_section.h>  // for CritS...
-#include <rtc_base/thread.h>            // for Thread
-
-#include <nlohmann/json.hpp>
-
-#include "android/emulation/control/RtcBridge.h"  // for RtcBridge...
-#include "emulator/net/EmulatorGrcpClient.h"      // for Emula...
-#include "emulator/webrtc/capture/GoldfishAudioDeviceModule.h"
-#include "emulator/webrtc/capture/VideoCapturerFactory.h"
+#include "android/base/containers/BufferQueue.h"  // for BufferQueue, Buffer...
+#include "android/base/synchronization/Lock.h"    // for Lock, AutoReadLock
+#include "android/base/system/System.h"           // for System, System::Dur...
+#include "android/emulation/control/RtcBridge.h"
+#include "emulator/webrtc/Participant.h"    // for Parti...
+#include "emulator/webrtc/RtcConnection.h"  // for json, RtcConnection
 
 namespace emulator {
-
-namespace net {
-class AsyncSocketAdapter;
-class EmulatorConnection;
-}  // namespace net
-
 namespace webrtc {
 
-class Participant;
-
-using json = nlohmann::json;
 using android::emulation::control::RtcBridge;
 using MessageQueue = android::base::BufferQueue<std::string>;
 using android::base::Lock;
@@ -48,9 +36,9 @@ using android::base::System;
 // 2. It removes participants when a user disconnects
 // 3. It routes the webrtc json signals to the proper participant.
 // 4. Participants that are no longer streaming need to be finalized.
-class Switchboard : public RtcBridge {
+class Switchboard : public RtcBridge, public RtcConnection {
 public:
-    Switchboard(EmulatorGrpcClient client,
+    Switchboard(EmulatorGrpcClient* client,
                 const std::string& shmPath,
                 const std::string& turnconfig);
     ~Switchboard();
@@ -79,22 +67,21 @@ public:
 
     BridgeState state() override { return BridgeState::Connected; };
 
-    void send(std::string to, json msg);
+    void send(std::string to, json msg) override;
 
     // Called when a participant is unable to continue the rtc stream.
     // The participant will no longer be in use and close can be called.
-    void rtcConnectionDropped(std::string participant);
+    void rtcConnectionDropped(std::string participant) override;
 
     // The connection has actually closed, and can be properly garbage
     // collected.
-    void rtcConnectionClosed(std::string participant);
+    void rtcConnectionClosed(std::string participant) override;
 
     // Cleans up connections that have marked themselves as deleted
     // due to a dropped connection.
     void finalizeConnections();
 
     VideoCapturerFactory* getVideoCaptureFactory() { return &mCaptureFactory; }
-    EmulatorGrpcClient& emulatorClient() { return mClient; }
 
     static std::string BRIDGE_RECEIVER;
 
@@ -105,27 +92,17 @@ private:
             mConnections;
     std::unordered_map<std::string, std::string> mIdentityMap;
 
-    std::vector<std::string> mDroppedConnections;  // Connections that need to
-                                                   // be garbage collected.
+    // Connections that need to be garbage collected.
+    std::vector<std::string> mDroppedConnections;
     std::vector<std::string> mClosedConnections;
     const std::string mShmPath = "/tmp";
-    std::vector<std::string>
-            mTurnConfig;  // Process to invoke to retrieve turn config.
+
+    // Process to invoke to retrieve turn config.
+    std::vector<std::string> mTurnConfig;
 
     // Maximum number of messages we are willing to queue, before we start
     // dropping them.
     static const uint16_t kMaxMessageQueueLen = 128;
-
-    GoldfishAudioDeviceModule mGoldfishAdm;
-    VideoCapturerFactory mCaptureFactory;
-    // Worker threads for all the participants.
-    std::unique_ptr<rtc::Thread> mWorker;
-    std::unique_ptr<rtc::Thread> mSignaling;
-    std::unique_ptr<rtc::Thread> mNetwork;
-    std::unique_ptr<::webrtc::TaskQueueFactory> mTaskFactory;
-
-    rtc::scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
-            mConnectionFactory;
 
     // Message queues used to store messages received from the videobridge.
     std::map<std::string, std::shared_ptr<MessageQueue>> mId;
@@ -133,7 +110,6 @@ private:
     ReadWriteLock mMapLock;
 
     // Network/communication things.
-    EmulatorGrpcClient mClient;
     rtc::CriticalSection mCleanupCS;
     rtc::CriticalSection mCleanupClosedCS;
 };
