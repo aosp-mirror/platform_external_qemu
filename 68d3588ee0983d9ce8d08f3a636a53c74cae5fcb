@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a3549492_de775804",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 944,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-01-05T19:38:27Z",
+      "side": 1,
+      "message": "tested and it doesn\u0027t work",
+      "parentUuid": "e0c06ea0_8b2ab8c6",
+      "revId": "68d3588ee0983d9ce8d08f3a636a53c74cae5fcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bf8b4f08_a7a4f9b7",
@@ -31,6 +49,24 @@
       "writtenOn": "2020-12-29T20:04:08Z",
       "side": 1,
       "message": "typo: importn",
+      "revId": "68d3588ee0983d9ce8d08f3a636a53c74cae5fcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "aaf56cdc_6cfa7aea",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 958,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-01-05T19:38:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bf8b4f08_a7a4f9b7",
       "revId": "68d3588ee0983d9ce8d08f3a636a53c74cae5fcb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
