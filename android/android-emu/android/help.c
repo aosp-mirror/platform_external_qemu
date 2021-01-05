@@ -1013,6 +1013,11 @@ help_shell(stralloc_t*  out)
     "  See also '-shell-serial'.\n\n" );
 }
 
+static void help_virtio_console(stralloc_t* out) {
+    PRINTF("  use '-virtio-console' to use virtio console hvc0 instead of "
+           "default serial line\n\n");
+}
+
 static void
 help_shell_serial(stralloc_t*  out)
 {
