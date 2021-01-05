@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bb880042_9f2dfa1d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-01-05T17:07:17Z",
+      "side": 1,
+      "message": "Roman,\n  PTAL, I tested on the rockpi server and with -virtio-console, the uart crash appears\nto go away; and kernel boots up consistently.\n\n",
+      "revId": "3377ecd7cdaa6b76d090b72dff031c8368e3413d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
