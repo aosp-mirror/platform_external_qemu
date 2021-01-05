@@ -79,6 +79,8 @@ set(qemu2-shared_sources ""
    hw/block/cdrom.c
    hw/pci/pci.c
    audio/ossaudio.c
+   audio/paaudio.c
+   audio/audio_pt_int.c
    hw/virtio/virtio-bus.c
    hw/input/virtio-input.c
    block/qcow2-cluster.c
@@ -1760,5 +1762,5 @@ set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/gpio/pl061.c ${ANDROID_Q
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/block/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/cdrom.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/block.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/pflash_cfi01.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/ecc.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/onenand.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/nvme.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/pflash_cfi02.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/nand.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/m25p80.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/virtio-blk.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/hd-geometry.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/vhost-user-blk.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/block")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/watchdog/watchdog.c ${ANDROID_QEMU2_TOP_DIR}/hw/watchdog/wdt_aspeed.c ${ANDROID_QEMU2_TOP_DIR}/hw/watchdog/wdt_i6300esb.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/watchdog")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/scsi/trace.c ${ANDROID_QEMU2_TOP_DIR}/scsi/utils.c ${ANDROID_QEMU2_TOP_DIR}/scsi/pr-manager-helper.c ${ANDROID_QEMU2_TOP_DIR}/scsi/pr-manager.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/scsi")
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/audio/trace.c ${ANDROID_QEMU2_TOP_DIR}/audio/noaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/wavaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/mixeng.c ${ANDROID_QEMU2_TOP_DIR}/audio/wavcapture.c ${ANDROID_QEMU2_TOP_DIR}/audio/ossaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/audio.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/audio")
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/audio/trace.c ${ANDROID_QEMU2_TOP_DIR}/audio/noaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/wavaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/mixeng.c ${ANDROID_QEMU2_TOP_DIR}/audio/wavcapture.c ${ANDROID_QEMU2_TOP_DIR}/audio/ossaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/paaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/audio_pt_int.c ${ANDROID_QEMU2_TOP_DIR}/audio/audio.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/audio")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/sd/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/sd/bcm2835_sdhost.c ${ANDROID_QEMU2_TOP_DIR}/hw/sd/pl181.c ${ANDROID_QEMU2_TOP_DIR}/hw/sd/pxa2xx_mmci.c ${ANDROID_QEMU2_TOP_DIR}/hw/sd/omap_mmc.c ${ANDROID_QEMU2_TOP_DIR}/hw/sd/sd.c ${ANDROID_QEMU2_TOP_DIR}/hw/sd/core.c ${ANDROID_QEMU2_TOP_DIR}/hw/sd/ssi-sd.c ${ANDROID_QEMU2_TOP_DIR}/hw/sd/sdhci.c ${ANDROID_QEMU2_TOP_DIR}/hw/sd/sdmmc-internal.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/sd")
