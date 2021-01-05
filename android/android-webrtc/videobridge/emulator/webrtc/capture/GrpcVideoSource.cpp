@@ -52,15 +52,15 @@ using ::android::emulation::control::Image;
 using ::android::emulation::control::ImageFormat;
 using ::android::emulation::control::ImageTransport;
 
-GrpcVideoSource::GrpcVideoSource(EmulatorGrpcClient client) : mClient(client) {}
+GrpcVideoSource::GrpcVideoSource(EmulatorGrpcClient* client) : mClient(client) {}
 
-std::tuple<int, int> getScreenDimensions(EmulatorGrpcClient client) {
+std::tuple<int, int> getScreenDimensions(EmulatorGrpcClient* client) {
     ::google::protobuf::Empty empty;
 
-    auto context = client.newContext();
+    auto context = client->newContext();
     int w = 1080, h = 1920;
     EmulatorStatus emuState;
-    auto status = client.stub()->getStatus(context.get(), empty, &emuState);
+    auto status = client->stub()->getStatus(context.get(), empty, &emuState);
     if (emuState.has_hardwareconfig()) {
         for (int i = 0; i < emuState.hardwareconfig().entry_size(); i++) {
             auto entry = emuState.hardwareconfig().entry(i);
@@ -97,11 +97,11 @@ void GrpcVideoSource::captureFrames() {
     transport->set_channel(ImageTransport::MMAP);
     transport->set_handle(handle);
 
-    mContext = mClient.newContext();
+    mContext = mClient->newContext();
     RTC_LOG(INFO) << "Requesting video stream " << w << "x" << h
                   << ", from:" << handle;
     std::unique_ptr<grpc::ClientReaderInterface<Image>> stream =
-            mClient.stub()->streamScreenshot(mContext.get(), request);
+            mClient->stub()->streamScreenshot(mContext.get(), request);
 
     if (stream == nullptr) {
         RTC_LOG(WARNING) << "Video: unable to obtain stream.." << handle;
@@ -192,7 +192,7 @@ void GrpcVideoSource::OnSinkWantsChanged(const rtc::VideoSinkWants& wants) {
                      << ", align: " << wants.resolution_alignment;
 
     bool expected = false;
-    if (mClient.stub() &&
+    if (mClient->stub() &&
         mCaptureVideo.compare_exchange_strong(expected, true)) {
         mVideoThread = std::thread([this]() { captureFrames(); });
     }

@@ -19,6 +19,8 @@
 #include <string>  // for string
 
 #include "emulator_controller.grpc.pb.h"  // for EmulatorController
+#include "rtc_service.grpc.pb.h"                     // for Rtc, Rtc::Stub
+
 
 namespace emulator {
 namespace webrtc {
@@ -33,8 +35,10 @@ public:
     explicit EmulatorGrpcClient(std::string discovery_file) : mDiscoveryFile(discovery_file) {};
     EmulatorGrpcClient(std::string address, std::string ca, std::string key, std::string cer);
     std::unique_ptr<android::emulation::control::EmulatorController::Stub> stub();
+    std::unique_ptr<android::emulation::control::Rtc::Stub> rtcStub();
     std::unique_ptr<grpc::ClientContext> newContext();
-    bool hasOpenChannel();
+    bool hasOpenChannel(bool tryConnect = true);
+    std::string address() { return mAddress; }
 
 private:
     bool initializeChannel();
