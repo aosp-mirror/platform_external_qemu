@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f5cf5d82_28d12b5f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-01-05T18:26:25Z",
+      "side": 1,
+      "message": "Noticed the asg shared slots isnt restored properly",
+      "revId": "70e3e250e726d7d2c5d6b41b8ec94284e1dbc324",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
