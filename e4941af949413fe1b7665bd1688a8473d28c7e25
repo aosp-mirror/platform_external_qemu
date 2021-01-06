@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a6309c60_1e27b752",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-01-06T08:43:32Z",
+      "side": 1,
+      "message": "Thank you for looking into this",
+      "revId": "e4941af949413fe1b7665bd1688a8473d28c7e25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e3247af1_33056028",
+        "filename": "android/android-emu/android/telephony/sms.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 927,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-01-06T08:43:32Z",
+      "side": 1,
+      "message": "Please use CHAR_BIT instead of 8 here.",
+      "range": {
+        "startLine": 927,
+        "startChar": 46,
+        "endLine": 927,
+        "endChar": 47
+      },
+      "revId": "e4941af949413fe1b7665bd1688a8473d28c7e25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
