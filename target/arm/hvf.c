@@ -106,6 +106,12 @@ static int hvf_mig_state_pre_save(void* opaque) {
     return 0;
 }
 
+static int hvf_mig_state_post_save(void* opaque) {
+    struct hvf_migration_state* m = opaque;
+    m->ticks += mach_absolute_time();
+    return 0;
+}
+
 static int hvf_mig_state_post_load(void* opaque) {
     struct hvf_migration_state* m = opaque;
     m->ticks += mach_absolute_time();
@@ -117,6 +123,7 @@ const VMStateDescription vmstate_hvf_migration = {
     .version_id = 1,
     .minimum_version_id = 1,
     .pre_save = hvf_mig_state_pre_save,
+    .post_save = hvf_mig_state_post_save,
     .post_load = hvf_mig_state_post_load,
     .fields = (VMStateField[]) {
         VMSTATE_UINT64(ticks, struct hvf_migration_state),
