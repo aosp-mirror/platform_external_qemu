@@ -1348,7 +1348,13 @@ extern "C" int main(int argc, char** argv) {
            "%" PRIu64 " ms\n",
            get_uptime_ms());
 #endif
-
+    // Older version of Android Studio which runs embedded emulator doesn't
+    // support virtual scene camera. Therefore, we disable it by default. For
+    // newer version of Android Studio with virtual scene camera support, run
+    // emulator with "-feature VirtualScene".
+    if (opts->qt_hide_window) {
+        fc::setIfNotOverriden(fc::VirtualScene, false);
+    }
     if (!emulator_parseFeatureCommandLineOptions(opts, avd, hw)) {
         return 1;
     }
