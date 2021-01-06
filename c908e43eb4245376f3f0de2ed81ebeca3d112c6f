@@ -16,6 +16,24 @@
       "message": "some older android images still use the events device, I\u0027d recommend checking for android_qemu_mode \u003d\u003d 0 where GOLDFISH_SYNC_IRQ occurs and dynamically using a different irq line if so.",
       "revId": "c908e43eb4245376f3f0de2ed81ebeca3d112c6f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dbc52288_56076224",
+        "filename": "include/hw/acpi/goldfish_defs.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-01-06T01:21:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "23fe1f5e_b0ef4e2a",
+      "revId": "c908e43eb4245376f3f0de2ed81ebeca3d112c6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
