@@ -69,8 +69,7 @@ static const System::Duration kAdbCommandTimeoutMs = System::kInfinite;
 
 static const char FILE_BUG_URL[] =
         "https://issuetracker.google.com/issues/new"
-        "?component=192727&description=%s&template=843117";
-
+        "?component=192708&description=%s&template=840533";
 // In reference to
 // https://developer.android.com/studio/report-bugs.html#emulator-bugs
 static const char BUG_REPORT_TEMPLATE[] =
