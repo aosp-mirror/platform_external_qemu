@@ -47,6 +47,18 @@ public:
 
     void printStats();
 
+    void pausePreSnapshot() {
+        mInSnapshotOperation = true;
+    }
+
+    void resume() {
+        mInSnapshotOperation = false;
+    }
+
+    bool inSnapshotOperation() const {
+        return mInSnapshotOperation;
+    }
+
 protected:
     virtual void* allocBuffer(size_t minSize) override final;
     virtual int commitBuffer(size_t size) override final;
@@ -75,6 +87,8 @@ protected:
     size_t mTotalRecv = 0;
     bool mBenchmarkEnabled = false;
     bool mShouldExit = false;
+    bool mShouldExitForSnapshot = false;
+    bool mInSnapshotOperation = false;
 };
 
 }  // namespace emugl

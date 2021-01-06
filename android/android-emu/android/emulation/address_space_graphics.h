@@ -83,6 +83,7 @@ private:
         Sleep = 1,
         Exit = 2,
         PausePreSnapshot = 3,
+        ResumePostSnapshot = 4,
     };
 
     // For ConsumerCallbacks

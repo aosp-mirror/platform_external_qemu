@@ -588,6 +588,8 @@ protected:
             [](void* consumer) { },
             // postload
             [](void* consumer) { },
+            // global preload
+            []() { },
         };
         AddressSpaceGraphicsContext::setConsumer(interface);
     }

@@ -259,6 +259,12 @@ static void pc_init1(MachineState *machine,
 
 #if defined(CONFIG_ANDROID)
     if (android_qemu_mode) {
+        g_assert(pci_bus);
+        g_assert(piix3_devfn >= 0);
+        g_assert(pci_create_simple(pci_bus,
+                                   PCI_DEVFN(GOLDFISH_ADDRESS_SPACE_PCI_SLOT,
+                                             GOLDFISH_ADDRESS_SPACE_PCI_FUNCTION),
+                                   GOLDFISH_ADDRESS_SPACE_NAME));
         sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
                              pcms->gsi[GOLDFISH_BATTERY_IRQ]);
         sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,
@@ -275,12 +281,6 @@ static void pc_init1(MachineState *machine,
                              pcms->gsi[GOLDFISH_SYNC_IRQ]);
         sysbus_create_simple("goldfish_rotary", GOLDFISH_ROTARY_IOMEM_BASE,
                              pcms->gsi[GOLDFISH_ROTARY_IRQ]);
-        g_assert(pci_bus);
-        g_assert(piix3_devfn >= 0);
-        g_assert(pci_create_simple(pci_bus,
-                                   PCI_DEVFN(GOLDFISH_ADDRESS_SPACE_PCI_SLOT,
-                                             GOLDFISH_ADDRESS_SPACE_PCI_FUNCTION),
-                                   GOLDFISH_ADDRESS_SPACE_NAME));
     }
 #endif  // CONFIG_ANDROID
 

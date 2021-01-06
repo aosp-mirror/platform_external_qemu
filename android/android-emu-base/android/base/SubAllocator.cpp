@@ -176,6 +176,26 @@ public:
         return (void*)(uintptr_t)(startAddr + offset);
     }
 
+    void* allocFixed(size_t wantedSize, uint64_t offset) {
+
+        if (wantedSize == 0) return nullptr;
+
+        uint64_t wantedSize64 =
+            (uint64_t)wantedSize;
+
+        size_t toPageSize =
+            pageSize *
+            ((wantedSize + pageSize - 1) / pageSize);
+
+        if (address_space_allocator_allocate_fixed(
+                &addr_alloc, toPageSize, offset)) {
+            return nullptr;
+        }
+
+        ++allocCount;
+        return (void*)(uintptr_t)(startAddr + offset);
+    }
+
     bool empty() const {
         return allocCount == 0;
     }
@@ -215,6 +235,10 @@ bool SubAllocator::postLoad(void* postLoadBuffer) {
 
 void* SubAllocator::alloc(size_t wantedSize) {
     return mImpl->alloc(wantedSize);
+}
+
+void* SubAllocator::allocFixed(size_t wantedSize, uint64_t offset) {
+    return mImpl->allocFixed(wantedSize, offset);
 }
 
 bool SubAllocator::free(void* ptr) {
