@@ -1074,11 +1074,6 @@ _camera_client_query_disconnect(CameraClient* cc,
     cc->camera = NULL;
 
     D("Camera device '%s' is now disconnected", cc->device_name);
-    if(cc->camera_info->camera_source == _camera_callback_desc.source &&
-        _camera_callback_desc.callback) {
-        _camera_callback_desc.callback(_camera_callback_desc.context, false);
-    }
-
     _qemu_client_reply_ok(qc, NULL);
 }
 
@@ -1435,6 +1430,11 @@ _camera_client_query_stop(CameraClient* cc, QemudClient* qc, const char* param)
     cc->staging_framebuffer = NULL;
 
     camera_metrics_report_stop_session(cc->frame_count);
+
+    if (cc->camera_info->camera_source == _camera_callback_desc.source &&
+        _camera_callback_desc.callback) {
+        _camera_callback_desc.callback(_camera_callback_desc.context, false);
+    }
 
     D("%s: Camera device '%s' is now stopped.", __FUNCTION__, cc->device_name);
     _qemu_client_reply_ok(qc, NULL);
