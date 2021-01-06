@@ -312,7 +312,7 @@ int main(int argc, char* argv[]) {
         sForwarder->wait();
     } else {
         // Initalize the RTC service.
-        Switchboard sw(*client, "", FLAG_turn);
+        Switchboard sw(client.get(), "", FLAG_turn);
         auto bridge = android::emulation::control::getRtcService(&sw);
 
         auto builder = EmulatorControllerService::Builder()

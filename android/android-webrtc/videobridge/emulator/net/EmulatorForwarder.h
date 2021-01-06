@@ -14,17 +14,17 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
-#include <mutex>
 #include "emulator/avd/FakeAvd.h"
+#include "emulator/webrtc/StandaloneConnection.h"
 
 namespace emulator {
 namespace webrtc {
 class EmulatorGrpcClient;
 }  // namespace webrtc
 }  // namespace emulator
-
 
 namespace android {
 namespace emulation {
@@ -34,6 +34,7 @@ class EmulatorControllerService;
 
 using emulator::webrtc::EmulatorGrpcClient;
 using Properties = std::unordered_map<std::string, std::string>;
+using emulator::webrtc::StandaloneConnection;
 
 // An EmulatorForwarder opens up an EmulatorController service that
 // is forwarded to a remote emulator. It will write out a:
@@ -59,6 +60,9 @@ public:
     // Closes down the connection and cleans up the resources.
     // Note: Do not call this from a gRPC thread, you will deadlock.
     void close();
+
+    StandaloneConnection* webrtcConnection() { return &mWebRtcConnection; }
+
 private:
     void deleteRecursive(const std::string& path);
     bool retrieveRemoteProperties();
@@ -68,11 +72,12 @@ private:
     std::unique_ptr<EmulatorControllerService> mFwdService;
 
     EmulatorGrpcClient* mClient;
+
+    StandaloneConnection mWebRtcConnection;
     FakeAvd mAvd;
     std::mutex mCloseMutex;
     bool mAlive{false};
 };
-
 
 }  // namespace control
 }  // namespace emulation

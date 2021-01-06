@@ -91,6 +91,15 @@ EmulatorGrpcClient::stub() {
     return android::emulation::control::EmulatorController::NewStub(mChannel);
 }
 
+std::unique_ptr<android::emulation::control::Rtc::Stub>
+EmulatorGrpcClient::rtcStub() {
+    if (!mChannel) {
+        initializeChannel();
+    }
+
+    return android::emulation::control::Rtc::NewStub(mChannel);
+}
+
 static std::string readFile(std::string fname) {
     std::ifstream fstream(fname);
     std::string contents((std::istreambuf_iterator<char>(fstream)),

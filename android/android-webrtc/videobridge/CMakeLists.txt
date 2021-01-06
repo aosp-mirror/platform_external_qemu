@@ -13,8 +13,11 @@ android_add_executable(
       emulator/webrtc/capture/GrpcVideoSource.cpp
       emulator/webrtc/capture/VideoCapturerFactory.cpp
       emulator/webrtc/capture/VideoShareCapturer.cpp
+      emulator/webrtc/capture/VideoTrackReceiver.cpp
       emulator/webrtc/capture/VideoTrackSource.cpp
       emulator/webrtc/Participant.cpp
+      emulator/webrtc/RtcConnection.cpp
+      emulator/webrtc/StandaloneConnection.cpp
       emulator/webrtc/Switchboard.cpp)
 
 android_target_compile_options(goldfish-webrtc-bridge darwin-x86_64

@@ -14,23 +14,25 @@
 // limitations under the License.
 #include "emulator/net/EmulatorForwarder.h"
 
-#include <assert.h>                                           // for assert
-#include <grpcpp/grpcpp.h>                                    // for Status
+#include <assert.h>         // for assert
+#include <grpcpp/grpcpp.h>  // for Status
+#include <libyuv.h>
 #include <atomic>                                             // for atomic
 #include <memory>                                             // for unique_ptr
 #include <ratio>                                              // for ratio
 #include <thread>                                             // for thread
 #include <unordered_map>                                      // for unorder...
 #include <utility>                                            // for move
-
 #include "android/base/Log.h"                                 // for LogStre...
 #include "android/emulation/control/EmulatorAdvertisement.h"  // for Emulato...
 #include "android/emulation/control/GrpcServices.h"           // for Emulato...
-#include "android/utils/Random.h"                             // for generat...
-#include "emulator/net/EmulatorGrcpClient.h"                  // for Emulato...
-#include "emulator_controller.grpc.pb.h"                      // for Emulato...
-#include "emulator_controller.pb.h"                           // for AudioPa...
-
+#include "android/emulation/control/utils/ScreenshotUtils.h"
+#include "android/emulation/control/utils/SharedMemoryLibrary.h"
+#include "android/utils/Random.h"  // for generat...
+#include "api/video/i420_buffer.h"
+#include "emulator/net/EmulatorGrcpClient.h"  // for Emulato...
+#include "emulator_controller.grpc.pb.h"      // for Emulato...
+#include "emulator_controller.pb.h"           // for AudioPa...
 #ifdef _WIN32
 #include <windows.h>
 
@@ -39,11 +41,11 @@
 #include <stdio.h>
 #endif
 
-#include <stdlib.h>                                           // for size_t
-#include <chrono>                                             // for operator+
+#include <stdlib.h>  // for size_t
+#include <chrono>    // for operator+
 
 extern "C" {
-#include "android/proxy/proxy_int.h"                          // for proxy_b...
+#include "android/proxy/proxy_int.h"  // for proxy_b...
 
 namespace android {
 namespace base {
@@ -103,6 +105,8 @@ namespace emulation {
 namespace control {
 
 class AEMUControllerForwarderImpl final : public EmulatorController::Service {
+private:
+
     // 1 -> Many
     template <class T>
     Status forwardCall(ServerWriter<T>* origin, ClientReader<T>* destination) {
@@ -155,13 +159,189 @@ public:
 
     fwdMany(streamNotification, Empty, Notification);
 
-    // TODO: These should go over WebRTC..
-    fwdOne(getScreenshot, ImageFormat, Image);
-    fwdMany(streamScreenshot, ImageFormat, Image);
+    Status getScreenshot(ServerContext* context,
+                         const ImageFormat* request,
+                         Image* reply) override {
+        uint32_t width, height;
+        bool enabled;
+
+        auto receiver = mForwarder->webrtcConnection()->videoReceiver();
+        if (receiver == nullptr || receiver->currentFrame() == nullptr) {
+            // No WebRTC connection.. Fall back to gRPC?
+            return Status::OK;
+        }
+        width = receiver->currentFrame()->width();
+        height = receiver->currentFrame()->height();
+        reply->set_timestampus(System::get()->getUnixTimeUs());
+        android::emulation::ImageFormat desiredFormat =
+                ScreenshotUtils::translate(request->format());
+
+        float xaxis = 0, yaxis = 0, zaxis = 0;
+
+        // TODO(jansene): WebRTC does not yet support multi displays..
+
+        int desiredWidth = request->width();
+        int desiredHeight = request->height();
+
+        // TODO(jansene): Get actual rotation from webrtc endpoint?
+        auto rotation = Rotation::PORTRAIT;
+        SkinRotation desiredRotation = ScreenshotUtils::translate(rotation);
+
+        // User wants to use device width/height
+        if (desiredWidth == 0 || desiredHeight == 0) {
+            desiredWidth = width;
+            desiredHeight = height;
+
+            if (rotation == Rotation::LANDSCAPE ||
+                rotation == Rotation::REVERSE_LANDSCAPE) {
+                std::swap(desiredWidth, desiredHeight);
+            }
+        }
+
+        // Calculate width and height, keeping aspect ration in mind.
+        auto [newWidth, newHeight] = ScreenshotUtils::resizeKeepAspectRatio(
+                width, height, desiredWidth, desiredHeight);
+
+        auto frame = ::webrtc::I420Buffer::Create(newWidth, newHeight);
+        frame->CropAndScaleFrom(*receiver->currentFrame()->GetI420());
+
+        // Update format information with the retrieved width, height..
+        auto format = reply->mutable_format();
+        format->set_format(request->format());
+        format->set_height(frame->height());
+        format->set_width(frame->width());
+
+        auto pixelCount = request->width() * request->height() *
+                          ScreenshotUtils::getBytesPerPixel(*request);
+        uint8_t* dest = nullptr;
+        bool shipBytes = false;
+
+        if (request->transport().channel() == ImageTransport::MMAP) {
+            auto shm = mSharedMemoryLibrary.borrow(
+                    request->transport().handle(), pixelCount);
+            if (shm->isOpen() && shm->isMapped()) {
+                dest = (uint8_t*)shm.get();
+                auto transport = format->mutable_transport();
+                transport->set_handle(request->transport().handle());
+                transport->set_channel(ImageTransport::MMAP);
+            }
+        }
+
+        // Make sure we have a dest. memory region.
+        if (dest == nullptr) {
+            dest = (uint8_t*)malloc(pixelCount);
+            shipBytes = true;
+        }
+
+        auto fmt = request->format() == ImageFormat::RGB888
+                           ? libyuv::FOURCC_RAW
+                           : libyuv::FOURCC_ARGB;
+
+        auto result = ConvertFromI420(frame->DataY(), frame->StrideY(),
+                                      frame->DataU(), frame->StrideU(),
+                                      frame->DataV(), frame->StrideV(), dest, 0,
+                                      frame->width(), frame->height(), fmt);
+
+        auto rotation_reply = format->mutable_rotation();
+        rotation_reply->set_xaxis(xaxis);
+        rotation_reply->set_yaxis(yaxis);
+        rotation_reply->set_zaxis(zaxis);
+        rotation_reply->set_rotation(rotation);
+
+        if (shipBytes) {
+            reply->set_image(dest, pixelCount);
+            free(dest);
+        }
+
+        return Status::OK;
+    }
+
+    Status streamScreenshot(ServerContext* context,
+                            const ImageFormat* request,
+                            ServerWriter<Image>* writer) override {
+        SharedMemoryLibrary::LibraryEntry entry;
+        if (request->transport().channel() == ImageTransport::MMAP) {
+            entry = mSharedMemoryLibrary.borrow(
+                    request->transport().handle(),
+                    request->width() * request->height() *
+                            ScreenshotUtils::getBytesPerPixel(*request));
+        }
+
+        // Make sure we always write the first frame, this can be
+        // a completely empty frame if the screen is not active.
+        Image first;
+        bool clientAvailable = !context->IsCancelled();
+
+        if (clientAvailable) {
+            getScreenshot(context, request, &first);
+            clientAvailable = !context->IsCancelled() && writer->Write(first);
+        }
+
+        auto receiver = mForwarder->webrtcConnection()->videoReceiver();
+        if (receiver == nullptr || receiver->currentFrame() == nullptr) {
+            // Oh oh, no webrtc connection (yet?). Fallback to forwarder?
+            return Status::OK;
+        }
+
+        bool lastFrameWasEmpty = first.format().width() == 0;
+        int frame = 0;
+        // Track percentiles, and report if we have seen at least 32 frames.
+        while (clientAvailable) {
+            Image reply;
+            const auto kTimeToWaitForFrame = std::chrono::milliseconds(125);
+
+            // The next call will return the number of frames that are
+            // available. 0 means no frame was made available in the given
+            // time interval. Since this is a synchronous call we want to
+            // wait at most kTimeToWaitForFrame so we can check if the
+            // client is still there. (All clients get disconnected on
+            // emulator shutdown).
+            auto arrived = receiver->next(kTimeToWaitForFrame);
+            if (arrived > 0 && !context->IsCancelled()) {
+                frame += arrived;
+                getScreenshot(context, request, &reply);
+                reply.set_seq(frame);
+
+                // We send the first empty frame, after that we wait for
+                // frames to come, or until the client gives up on us. So
+                // for a screen that comes in and out the client will see
+                // this timeline: (0 is empty frame-> F is frame) [0, ...
+                // <nothing> ..., F1, F2, F3, 0, ...<nothing>... ]
+                bool emptyFrame = reply.format().width() == 0;
+                if (!context->IsCancelled() &&
+                    (!lastFrameWasEmpty || !emptyFrame)) {
+                    clientAvailable = writer->Write(reply);
+                }
+                lastFrameWasEmpty = emptyFrame;
+            }
+            clientAvailable = !context->IsCancelled() && clientAvailable;
+        }
+
+        return Status::OK;
+    }
+
     fwdMany(streamAudio, AudioFormat, AudioPacket);
-    fwdOne(sendKey, KeyboardEvent, Empty);
-    fwdOne(sendMouse, MouseEvent, Empty);
-    fwdOne(sendTouch, TouchEvent, Empty);
+
+    Status sendKey(ServerContext* context,
+                   const KeyboardEvent* keyEvent,
+                   ::google::protobuf::Empty* reply) override {
+        mForwarder->webrtcConnection()->sendKey(keyEvent);
+        return Status::OK;
+    }
+
+    Status sendMouse(ServerContext* context,
+                     const MouseEvent* mouseEvent,
+                     ::google::protobuf::Empty* reply) override {
+        mForwarder->webrtcConnection()->sendMouse(mouseEvent);
+        return Status::OK;
+    }
+
+    Status sendTouch(ServerContext* context,
+                     const TouchEvent* touchEvent,
+                     ::google::protobuf::Empty* reply) override {
+        mForwarder->webrtcConnection()->sendTouch(touchEvent);
+        return Status::OK;
+    }
 
 private:
     Status checkAlive(const Status& state) {
@@ -179,7 +359,9 @@ private:
 
     EmulatorGrpcClient* mClient;
     EmulatorForwarder* mForwarder;
+    SharedMemoryLibrary mSharedMemoryLibrary;
     std::atomic<bool> mAlive{true};
+    std::atomic<int> mCtxId;
 };
 
 static std::unique_ptr<EmulatorAdvertisement> advertiser;
@@ -207,7 +389,7 @@ void EmulatorForwarder::wait() {
 }
 
 EmulatorForwarder::EmulatorForwarder(EmulatorGrpcClient* client)
-    : mClient(client), mAvd(client){};
+    : mClient(client), mWebRtcConnection(client), mAvd(client){};
 
 EmulatorForwarder::~EmulatorForwarder() {
     close();
@@ -219,9 +401,10 @@ void EmulatorForwarder::close() {
         return;
     }
     mAlive = false;
-
     LOG(INFO) << "Stopping service..";
     mFwdService->stop();
+    LOG(INFO) << "Stopping webrtc..";
+    mWebRtcConnection.close();
 }
 
 bool EmulatorForwarder::createRemoteConnection() {
@@ -239,8 +422,8 @@ bool EmulatorForwarder::createRemoteConnection() {
             {"avd.dir", mAvd.dir()},
             {"avd.id", mAvd.id()},
             {"grpc.token", token},
-            // Note the commandline below is merely to convince studio to see
-            // this as an emulator.
+            // Note the commandline below is merely to convince studio to
+            // see this as an emulator.
             {"cmdline",
              R"#("qemu-system-x86_64-headless" "-netdelay" "none" "-netspeed" "full" "-avd" "P" "-qt-hide-window" "-grpc-use-token" "-idle-grpc-timeout" "300")#"}};
 
@@ -263,6 +446,21 @@ bool EmulatorForwarder::createRemoteConnection() {
     mAlive = true;
     auto port = mFwdService->port();
     props["grpc.port"] = std::to_string(port);
+
+
+    // Establish a webrtc connection, and wait for it to be available.
+    // TODO(jansene): Make it lazy, connect to getScreenshot?
+    mWebRtcConnection.connect();
+
+    // Wait at most 2s, for a frame.
+    auto frame = mWebRtcConnection.videoReceiver()->next(std::chrono::seconds(5));
+    if (frame == 0) {
+        LOG(ERROR) << "No frames received after 5 seconds, bailing out!";
+        return false;
+    } else {
+        LOG(INFO) << "First frame arrived, registering discovery mechanism.";
+    }
+
 
     mAdvertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
     mAdvertiser->garbageCollect();

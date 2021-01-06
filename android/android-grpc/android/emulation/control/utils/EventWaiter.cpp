@@ -23,7 +23,9 @@ EventWaiter::EventWaiter(RegisterCallback add, RemoveCallback remove)
 }
 
 EventWaiter::~EventWaiter() {
-    mRemove(this);
+    if (mRemove) {
+        mRemove(this);
+    }
 }
 
 uint64_t EventWaiter::next(std::chrono::milliseconds timeout_ms) {

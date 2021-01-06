@@ -65,6 +65,8 @@
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
             "args": [
+                "--emulator" ,"localhost:9554" ,"--fwd"
+
                 // "--verbose"
               //  "--gtest_repeat=0", "--gtest_break_on_failure"
               // "--benchmark_filter=BM_cnv.*"
@@ -124,7 +126,7 @@
             "type": "lldb",
             "request": "attach",
             // Replace this with the process executable you want to attach to
-            "pid": 19837, // replace pid with your real pid
+            "pid": 10426, // replace pid with your real pid
             // Ignore signal SIGUSR1
             "postRunCommands": [
                 "pro hand -p true -s false SIGUSR1",
