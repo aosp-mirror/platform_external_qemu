@@ -204,6 +204,15 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
          DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
+if(LINUX_AARCH64)
+    file(COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/linux-aarch64-fixgcc.sh
+         DESTINATION ${CMAKE_INSTALL_PREFIX})
+    file(COPY ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-aarch64/lib/glibc-2.29.tgz
+         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib64)
+    file(COPY ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-aarch64/lib/patchelf.tgz
+         DESTINATION ${CMAKE_INSTALL_PREFIX})
+endif()
+
 # Configure OS depdendency licensenses
 if(LINUX_AARCH64)
   message("Cross build aarch64 libstdc++")
