@@ -34,6 +34,24 @@
       "parentUuid": "d5103eee_08642204",
       "revId": "307b2c5996d1bd654333442bb3c3a4f351317f9c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "231d97bc_bb3805a5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-01-07T17:40:08Z",
+      "side": 1,
+      "message": "Hmmm, I haven\u0027t found an easy way to write test for qemud client and service here.",
+      "parentUuid": "9d9b5802_ce0af9d0",
+      "revId": "307b2c5996d1bd654333442bb3c3a4f351317f9c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
