@@ -441,7 +441,8 @@ message Touch {
   // when their associated tools move out of range.
   //
   // The emulator currently supports up to 10 concurrent touch events. The
-  // identifier should be a value from the set [0, 10]
+  // identifier can be any uninque value and will be mapped to the next
+  // available internal identifier.
   int32 identifier = 3;
 
   // Reports the physical pressure applied to the tip of the tool or the
@@ -464,7 +465,22 @@ message Touch {
   // contact. This axis will be ignored if touch_major is reporting an
   // area measurement greater than 0.
   int32 touch_minor = 6;
-}
+
+    enum EventExpiration {
+      // The system will use the default time of 120s to track
+      // the touch event with the given identifier. If no update happens
+      // within this timeframe the identifier is considered expired
+      // and can be made available for re-use. This means that a touch event
+      // with pressure 0 for this identifier will be send to the emulator.
+      EVENT_EXPIRATION_UNSPECIFIED = 0;
+
+      // Never expire the given slot. You must *ALWAYS* close the identifier
+      // by sending a touch event with 0 pressure.
+      NEVER_EXPIRE = 1;
+    }
+
+    EventExpiration expiration = 7;
+  };
 
 // A TouchEvent contains a list of Touch objects that are in contact with
 // the touch surface.
