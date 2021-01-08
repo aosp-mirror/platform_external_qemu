@@ -17,11 +17,11 @@
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/JdwpProxy.h"
 
-#define DEBUG 0
+#define DEBUG 2
 
-#if DEBUG >= 1
+#if DEBUG >= 2
 #include <stdio.h>
-#define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#define D(...) { if (mJdwpProxies.size() > 0) { fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); } }
 #else
 #define D(...) (void)0
 #endif
@@ -109,6 +109,17 @@ int AdbHub::onGuestSendData(const AndroidPipeBuffer* buffers, int numBuffers) {
             bool shouldPush = true;
             std::queue<emulation::apacket> sendDataQueue;
             amessage& mesg = mCurrentGuestSendPacket.mesg;
+#ifdef DEBUG
+            if (mesg.command == ADB_CNXN) {
+                D("guest sent message ADB_CNXN data size %d", mesg.data_length);
+            } else if (mesg.command == ADB_OKAY) {
+                D("guest sent message ADB_OKAY data size %d", mesg.data_length);
+            } else if (mesg.command == ADB_WRTE) {
+                D("guest sent message ADB_WRTE data size %d", mesg.data_length);
+            } else {
+                D("guest sent message 0x%x", mesg.command);
+            }
+#endif
             if (mesg.command == ADB_CNXN) {
                 mCnxnPacket = mCurrentGuestSendPacket;
             } else {
@@ -150,6 +161,7 @@ int AdbHub::onGuestSendData(const AndroidPipeBuffer* buffers, int numBuffers) {
             mCurrentGuestSendPacketPst = 0;
         }
     }
+    D("Guest sent %d", actualSendBytes);
     if (actualSendBytes == 0) {
         return PIPE_ERROR_AGAIN;
     } else {
@@ -201,7 +213,7 @@ int AdbHub::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
             mWantRecv = false;
         }
     }
-    DD("Finish recv buffer");
+    D("Guest recv %d", actualRecvBytes);
     if (actualRecvBytes) {
         return actualRecvBytes;
     } else {
@@ -212,7 +224,6 @@ int AdbHub::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
 void AdbHub::onHostSocketEvent(int fd,
                                unsigned events,
                                std::function<void()> onSocketClose) {
-    DD("%s: %s", __FILE__, __func__);
     if ((events & base::Looper::FdWatch::kEventRead) != 0) {
         if (readSocket(fd) == PIPE_ERROR_IO) {
             onSocketClose();
@@ -265,7 +276,7 @@ int AdbHub::writeSocket(int fd) {
             return PIPE_ERROR_IO;
         }
     }
-    D("AdbHub writeSocket done");
+    D("AdbHub writeSocket send queue %d", (int)mSendToHostQueue.size());
     return 0;
 }
 
@@ -292,17 +303,31 @@ int AdbHub::readSocket(int fd) {
                         mCurrentHostRecvPacket.mesg.data_length);
             }
             if (len < bytesToRecv) {
+                D("AdbHub readSocket waiting for data");
                 return 0;
             }
         } else if (len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+            D("AdbHub readSocket PIPE_ERROR_AGAIN");
             return PIPE_ERROR_AGAIN;
         } else {
+            D("AdbHub readSocket PIPE_ERROR_IO");
             return PIPE_ERROR_IO;
         }
 
         if (mCurrentHostRecvPacketPst == packetSize(mCurrentHostRecvPacket)) {
             DD("Recv new packet");
             apacket& packet = mCurrentHostRecvPacket;
+#ifdef DEBUG
+            if (packet.mesg.command == ADB_CNXN) {
+                D("guest recv enqueue message ADB_CNXN data size %d", packet.mesg.data_length);
+            } else if (packet.mesg.command == ADB_OKAY) {
+                D("guest recv enqueue message ADB_OKAY data size %d", packet.mesg.data_length);
+            } else if (packet.mesg.command == ADB_WRTE) {
+                D("guest recv enqueue message ADB_WRTE data size %d", packet.mesg.data_length);
+            } else {
+                D("guest recv enqueue message 0x%x", packet.mesg.command);
+            }
+#endif
             if (packet.mesg.command == ADB_CNXN && mShouldReconnect) {
                 D("Reusing connection");
                 apacket sendPacket = mCnxnPacket;
@@ -345,6 +370,7 @@ int AdbHub::readSocket(int fd) {
             mCurrentHostRecvPacketPst = 0;
         }
     }
+    D("AdbHub readSocket recv queue %d", (int)mRecvFromHostQueue.size());
     return 0;
 }
 

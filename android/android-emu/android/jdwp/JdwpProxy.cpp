@@ -14,7 +14,7 @@
 #include "android/emulation/apacket_utils.h"
 #include "android/jdwp/Jdwp.h"
 
-#define DEBUG 0
+#define DEBUG 2
 
 #if DEBUG >= 1
 #include <stdio.h>
@@ -26,6 +26,7 @@
 #if DEBUG >= 2
 
 #define DD(...) D(__VA_ARGS__)
+#include <sys/time.h>
 static void debugPrintJdwp(const char* prefix, const uint8_t* data) {
     struct timeval tp;
     gettimeofday(&tp, NULL);
@@ -179,6 +180,7 @@ void JdwpProxy::onGuestRecvData(const android::emulation::amessage* mesg,
         case Proxying:
 #if DEBUG >= 2
             if (mesg->command == ADB_WRTE) {
+                fprintf(stderr, "guest recv %p %d %d len %d ", this, mesg->arg0, mesg->arg1, mesg->data_length);
                 debugPrintJdwp("guest recv ", data);
             }
 #endif  // DEBUG >= 2
@@ -238,58 +240,63 @@ void JdwpProxy::onGuestSendData(const android::emulation::amessage* mesg,
             }
             break;
         case Proxying:
-#if DEBUG >= 2
-            if (mesg->command == ADB_WRTE) {
-                debugPrintJdwp("guest send ", data);
-            }
-#endif  // DEBUG >= 2
             if (mesg->command == ADB_CLSE) {
                 mShouldClose = true;
                 return;
             }
             if (mesg->command == ADB_WRTE) {
-                // Cache the last message
-                mCachedPacket.reset(new emulation::apacket);
-                mCachedPacket->mesg = *mesg;
-                if (mesg->data_length) {
-                    mCachedPacket->data.assign(data, data + mesg->data_length);
-                }
-                if (mShouldSendCachePacket) {
-                    JdwpCommandHeader jdwpCmd;
-                    jdwpCmd.parseFrom(data);
-                    if (jdwpCmd.flags & kJdwpReplyFlag &&
-                        jdwpCmd.command_set < ExtensionBegin) {
-                        mPendingGuestReplyCommandIds.erase(jdwpCmd.id);
-                        // Collect the event ID.
-                        if (jdwpCmd.id == mBreakpointRequestId) {
-                            memcpy(&mBreakpointEventId, data + kJdwpHeaderSize,
-                                   4);
-                        }
-                        DD("recv reply id %d, remaining %d\n", jdwpCmd.id,
-                           (int)mPendingGuestReplyCommandIds.size());
-                        // If it doesn't have pending commands and the event ID
-                        // is set, send out the loaded pause message
-                        if (mPendingGuestReplyCommandIds.empty() &&
-                            mBreakpointEventId) {
-                            *shouldForwardSend = false;
-                            extraSends->push(emulation::apacket());
-                            emulation::apacket& packet0 = extraSends->back();
-                            packet0.mesg = *mesg;
-                            packet0.data.assign(data, data + mesg->data_length);
-                            extraSends->push(*mloadedCachedPacket.get());
-                            emulation::apacket& packet1 = extraSends->back();
-                            packet1.mesg.arg1 = mCurrentHostId;
-                            // The message looks like (Hexadecimal):
-                            // 02 (suspend policy: all) 000000001 (number of
-                            // events) 02 (event kind: break point) xxxxxxxx
-                            // (request id) ... We need to override the request
-                            // id to match those known to JDI
-                            memcpy(packet1.data.data() + kJdwpHeaderSize + 6,
-                                   &mBreakpointEventId, 4);
-                            mShouldSendCachePacket = false;
-                            mDebuggerActivated = false;
-                            mloadedCachedPacket.reset();
-                            D("Pause message injected\n");
+                if (mGuestSendJdwpLength > 0) {
+                    mGuestSendJdwpLength -= mesg->data_length;
+                } else {
+#if DEBUG >= 2
+                    fprintf(stderr, "guest send %p %d %d len %d ", this, mesg->arg0, mesg->arg1, mesg->data_length);
+                    debugPrintJdwp("guest send ", data);
+#endif  // DEBUG >= 2
+                    mGuestSendJdwpLength = 0;
+                    // Cache the last message
+                    mCachedPacket.reset(new emulation::apacket);
+                    mCachedPacket->mesg = *mesg;
+                    if (mesg->data_length) {
+                        mCachedPacket->data.assign(data, data + mesg->data_length);
+                    }
+                    if (mShouldSendCachePacket) {
+                        JdwpCommandHeader jdwpCmd;
+                        jdwpCmd.parseFrom(data);
+                        mGuestSendJdwpLength = jdwpCmd.length - mesg->data_length;
+                        if (jdwpCmd.flags & kJdwpReplyFlag &&
+                            jdwpCmd.command_set < ExtensionBegin) {
+                            mPendingGuestReplyCommandIds.erase(jdwpCmd.id);
+                            // Collect the event ID.
+                            if (jdwpCmd.id == mBreakpointRequestId) {
+                                memcpy(&mBreakpointEventId, data + kJdwpHeaderSize,
+                                    4);
+                            }
+                            DD("recv reply id %d, remaining %d\n", jdwpCmd.id,
+                            (int)mPendingGuestReplyCommandIds.size());
+                            // If it doesn't have pending commands and the event ID
+                            // is set, send out the loaded pause message
+                            if (mPendingGuestReplyCommandIds.empty() &&
+                                mBreakpointEventId) {
+                                *shouldForwardSend = false;
+                                extraSends->push(emulation::apacket());
+                                emulation::apacket& packet0 = extraSends->back();
+                                packet0.mesg = *mesg;
+                                packet0.data.assign(data, data + mesg->data_length);
+                                extraSends->push(*mloadedCachedPacket.get());
+                                emulation::apacket& packet1 = extraSends->back();
+                                packet1.mesg.arg1 = mCurrentHostId;
+                                // The message looks like (Hexadecimal):
+                                // 02 (suspend policy: all) 000000001 (number of
+                                // events) 02 (event kind: break point) xxxxxxxx
+                                // (request id) ... We need to override the request
+                                // id to match those known to JDI
+                                memcpy(packet1.data.data() + kJdwpHeaderSize + 6,
+                                    &mBreakpointEventId, 4);
+                                mShouldSendCachePacket = false;
+                                mDebuggerActivated = false;
+                                mloadedCachedPacket.reset();
+                                D("Pause message injected\n");
+                            }
                         }
                     }
                 }

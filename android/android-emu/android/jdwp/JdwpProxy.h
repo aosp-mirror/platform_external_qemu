@@ -73,6 +73,7 @@ private:
     int mBreakpointRequestId = 0;
     int mBreakpointEventId = 0;
     int64_t mLastSendMs = 0;
+    int mGuestSendJdwpLength = 0;
 };
 }  // namespace jdwp
 }  // namespace android

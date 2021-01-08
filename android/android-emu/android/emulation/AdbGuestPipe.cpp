@@ -52,7 +52,7 @@
 #endif
 
 #if DEBUG >= 2
-#define DD(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#define DD(...) D(__VA_ARGS__)
 #else
 #define DD(...) (void)0
 #endif

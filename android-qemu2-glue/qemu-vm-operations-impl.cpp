@@ -967,7 +967,8 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
         // Extract the target snapshot from qcow2.
         // It doesn't work with cache.img.
         if (qcow.find("cache") == std::string::npos) {
-#ifdef _WIN32
+#if 1
+//#ifdef _WIN32
             // Windows has file access issues when accessing the same file from
             // multiple processes simultaneously (probably a bad file share option
             // setup). Thus we need to unplug the drive and replug it later.
@@ -985,7 +986,8 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
                                   snapshot, opaque, errConsumer)) {
                 success = false;
             }
-#ifdef _WIN32
+#if 1
+//#ifdef _WIN32
             // Plug it back.
             QemuOpts* opts = qemu_opts_find(qemu_find_opts("drive"), id.c_str());
             QDict* bs_opts = qdict_new();

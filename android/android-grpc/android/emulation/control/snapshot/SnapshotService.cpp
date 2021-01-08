@@ -82,6 +82,7 @@ public:
         for (const auto& line : lines()) {
             errMsg += line + "\n";
         }
+        std::cout << "Operation failed due to: " << errMsg << std::endl;
         mStatus->set_err("Operation failed due to: " + errMsg);
         return mStatus;
     }
