@@ -21,6 +21,7 @@ extern "C" {
 }
 #endif
 
+#include <filesystem>
 #include <nlohmann/json.hpp>                          // for basic_json, bas...
 #include "android/base/Log.h"                         // for LOG, LogMessage
 #include "android/base/Optional.h"                    // for Optional
@@ -1042,10 +1043,9 @@ bool qemu_snapshot_export_qcow(const char* snapshot,
                                        errConsumer);
 
             // And move it to the export destination..
-            if (success && std::rename(tmp_overlay.c_str(), final_overlay.c_str()) != 0) {
+            if (success && !android::base::PathUtils::move(tmp_overlay, final_overlay)) {
                 std::string err = "Failed to rename " + tmp_overlay + " to " +
-                                  final_overlay +
-                                  ", errno: " + std::to_string(errno);
+                                final_overlay;
 
                 errConsumer(opaque, err.c_str(), err.size());
                 success = false;
