@@ -3808,9 +3808,9 @@ public:
         auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
         auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
         vk->vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout,
-                firstSet, descriptorSetCount,
-                pDescriptorSets, dynamicOffsetCount,
-                pDynamicOffsets);
+            firstSet, descriptorSetCount,
+            pDescriptorSets, dynamicOffsetCount,
+            pDynamicOffsets);
         if (pipelineBindPoint == VK_PIPELINE_BIND_POINT_COMPUTE) {
             AutoLock lock(mLock);
             auto cmdBufferInfoIt = mCmdBufferInfo.find(commandBuffer);
