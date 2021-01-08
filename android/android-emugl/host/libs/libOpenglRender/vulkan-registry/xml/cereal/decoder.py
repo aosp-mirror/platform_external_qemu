@@ -3,10 +3,11 @@ from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, DISPATCHABLE_HANDLE_TYPES, NON_DISPATCHABLE_HANDLE_TYPES
 
 from .marshaling import VulkanMarshalingCodegen
+from .reservedmarshaling import VulkanReservedMarshalingCodegen
 from .transform import TransformCodegen, genTransformsForVulkanType
 
 from .wrapperdefs import API_PREFIX_MARSHAL
-from .wrapperdefs import API_PREFIX_UNMARSHAL
+from .wrapperdefs import API_PREFIX_UNMARSHAL, API_PREFIX_RESERVEDUNMARSHAL
 from .wrapperdefs import VULKAN_STREAM_TYPE
 
 from copy import copy
@@ -101,31 +102,66 @@ def emit_param_decl_for_reading(param, cgen):
         cgen.stmt(
             cgen.makeRichCTypeDecl(param))
 
-def emit_unmarshal(typeInfo, param, cgen):
-    iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
-        cgen,
-        READ_STREAM,
-        param.paramName,
-        API_PREFIX_UNMARSHAL,
-        direction="read",
-        dynAlloc=True))
+def emit_unmarshal(typeInfo, param, cgen, output = False, destroy = False):
+    if destroy:
+        iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
+            cgen,
+            READ_STREAM,
+            param.paramName,
+            "readStreamPtrPtr",
+            API_PREFIX_RESERVEDUNMARSHAL,
+            "",
+            direction="read",
+            dynAlloc=True))
+        lenAccess =  cgen.generalLengthAccess(param)
+        if None == lenAccess or "1" == lenAccess:
+            cgen.stmt("boxed_%s_preserve = %s" % (param.paramName, param.paramName))
+            cgen.stmt("%s = unbox_%s(%s)" % (param.paramName, param.typeName, param.paramName))
+        else:
+            cgen.beginFor("uint32_t i = 0", "i < %s" % lenAccess, "++i")
+            cgen.stmt("boxed_%s_preserve[i] = %s[i]" % (param.paramName, param.paramName))
+            cgen.stmt("((%s*)(%s))[i] = unbox_%s(%s[i])" % (param.typeName, param.paramName, param.typeName, param.paramName))
+            cgen.endFor()
+    else:
+        iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
+            cgen,
+            READ_STREAM,
+            param.paramName,
+            "readStreamPtrPtr",
+            API_PREFIX_RESERVEDUNMARSHAL,
+            "" if output else "unbox_",
+            direction="read",
+            dynAlloc=True))
 
-def emit_dispatch_unmarshal(typeInfo, param, cgen):
-    cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % param.paramName)
-    cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
-    iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
-        cgen,
-        READ_STREAM,
-        param.paramName,
-        API_PREFIX_UNMARSHAL,
-        direction="read",
-        dynAlloc=True))
-    cgen.stmt("auto unboxed_%s = unbox_%s(%s)" %
-              (param.paramName, param.typeName, param.paramName))
-    cgen.stmt("auto vk = dispatch_%s(%s)" %
-              (param.typeName, param.paramName))
-    cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
-    cgen.stmt("// End manual dispatchable handle unboxing for %s" % param.paramName)
+def emit_dispatch_unmarshal(typeInfo, param, cgen, globalWrapped):
+    if globalWrapped:
+        cgen.stmt("// Begin global wrapped dispatchable handle unboxing for %s" % param.paramName)
+        iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
+            cgen,
+            READ_STREAM,
+            param.paramName,
+            "readStreamPtrPtr",
+            API_PREFIX_RESERVEDUNMARSHAL,
+            "",
+            direction="read",
+            dynAlloc=True))
+    else:
+        cgen.stmt("// Begin non wrapped dispatchable handle unboxing for %s" % param.paramName)
+        # cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
+        iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
+            cgen,
+            READ_STREAM,
+            param.paramName,
+            "readStreamPtrPtr",
+            API_PREFIX_RESERVEDUNMARSHAL,
+            "",
+            direction="read",
+            dynAlloc=True))
+        cgen.stmt("auto unboxed_%s = unbox_%s(%s)" %
+                  (param.paramName, param.typeName, param.paramName))
+        cgen.stmt("auto vk = dispatch_%s(%s)" %
+                  (param.typeName, param.paramName))
+        cgen.stmt("// End manual dispatchable handle unboxing for %s" % param.paramName)
 
 def emit_transform(typeInfo, param, cgen, variant="tohost"):
     res = \
@@ -196,7 +232,7 @@ def emit_call_log(api, cgen):
     cgen.stmt("fprintf(stderr, \"stream %%p: call %s %s\\n\", ioStream, %s)" % (api.name, paramLogFormat, ", ".join(paramLogArgs)))
     cgen.endIf()
 
-def emit_decode_parameters(typeInfo, api, cgen):
+def emit_decode_parameters(typeInfo, api, cgen, globalWrapped=False):
 
     decodingParams = DecodingParameters(api)
 
@@ -207,28 +243,26 @@ def emit_decode_parameters(typeInfo, api, cgen):
 
     i = 0
     for p in paramsToRead:
+        lenAccess =  cgen.generalLengthAccess(p)
+
         if p.dispatchHandle:
-            emit_dispatch_unmarshal(typeInfo, p, cgen)
+            emit_dispatch_unmarshal(typeInfo, p, cgen, globalWrapped)
         else:
+            destroy = p.nonDispatchableHandleDestroy or p.dispatchableHandleDestroy
+
             if p.nonDispatchableHandleDestroy or p.dispatchableHandleDestroy:
+                destroy = True
                 cgen.stmt("// Begin manual non dispatchable handle destroy unboxing for %s" % p.paramName)
-                cgen.stmt("%s* boxed_%s_preserve" % (p.typeName, p.paramName))
-                cgen.stmt("m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_%s_preserve)" % p.paramName)
-                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping)" % READ_STREAM)
+                if None == lenAccess or "1" == lenAccess:
+                    cgen.stmt("%s boxed_%s_preserve" % (p.typeName, p.paramName))
+                else:
+                    cgen.stmt("%s* boxed_%s_preserve; %s->alloc((void**)&boxed_%s_preserve, %s * sizeof(%s))" % (p.typeName, p.paramName, READ_STREAM, p.paramName, lenAccess, p.typeName))
 
             if p.possiblyOutput():
                 cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % p.paramName)
                 cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
 
-            emit_unmarshal(typeInfo, p, cgen)
-
-            if p.nonDispatchableHandleDestroy:
-                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
-                cgen.stmt("// End manual non dispatchable handle destroy unboxing for %s" % p.paramName)
-
-            if p.possiblyOutput():
-                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
-                cgen.stmt("// End manual dispatchable handle unboxing for %s" % p.paramName)
+            emit_unmarshal(typeInfo, p, cgen, output = p.possiblyOutput(), destroy = destroy)
         i += 1
 
     for p in paramsToRead:
@@ -307,12 +341,29 @@ def emit_decode_return_writeback(api, cgen):
 def emit_decode_finish(cgen):
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
+def emit_destroyed_handle_cleanup(api, cgen):
+    decodingParams = DecodingParameters(api)
+    paramsToRead = decodingParams.toRead
+    for p in paramsToRead:
+        if p.dispatchHandle:
+            pass
+        else:
+            lenAccess = cgen.generalLengthAccess(p)
+            destroy = p.nonDispatchableHandleDestroy or p.dispatchableHandleDestroy
+            if destroy:
+                if None == lenAccess or "1" == lenAccess:
+                    cgen.stmt("delete_%s(%s)" % (p.typeName, p.paramName))
+                else:
+                    cgen.beginFor("uint32_t i = 0", "i < %s" % lenAccess, "++i")
+                    cgen.stmt("delete_%s(%s[i])" % (p.typeName, p.paramName))
+                    cgen.endFor()
+
 def emit_pool_free(cgen):
-    cgen.stmt("m_pool.freeAll()")
     cgen.stmt("%s->clearPool()" % READ_STREAM)
 
 def emit_snapshot(typeInfo, api, cgen):
 
+    cgen.stmt("%s->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin)" % READ_STREAM)
     cgen.stmt("size_t snapshotTraceBytes = %s->endTrace()" % READ_STREAM)
 
     additionalParams = [ \
@@ -332,10 +383,7 @@ def emit_snapshot(typeInfo, api, cgen):
 
     for p in decodingParams.toRead:
         if p.nonDispatchableHandleDestroy or (not p.dispatchHandle and p.dispatchableHandleDestroy):
-            if p.pointerIndirectionLevels > 0:
-                paramsForSnapshot.append(p.withModifiedName("boxed_%s_preserve" % p.paramName))
-            else:
-                paramsForSnapshot.append(p.withModifiedName("*boxed_%s_preserve" % p.paramName))
+            paramsForSnapshot.append(p.withModifiedName("boxed_%s_preserve" % p.paramName))
         else:
             paramsForSnapshot.append(p)
 
@@ -356,15 +404,17 @@ def emit_default_decoding(typeInfo, api, cgen):
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
     emit_snapshot(typeInfo, api, cgen)
+    emit_destroyed_handle_cleanup(api, cgen)
     emit_pool_free(cgen)
 
 def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
-    emit_decode_parameters(typeInfo, api, cgen)
+    emit_decode_parameters(typeInfo, api, cgen, globalWrapped=True)
     emit_global_state_wrapped_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=False)
     emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
     emit_snapshot(typeInfo, api, cgen)
+    emit_destroyed_handle_cleanup(api, cgen)
     emit_pool_free(cgen)
 
 ## Custom decoding definitions##################################################
@@ -378,12 +428,12 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     cgen.stmt("auto size = pMemoryRanges[i].size")
     cgen.stmt("auto offset = pMemoryRanges[i].offset")
     cgen.stmt("uint64_t readStream = 0")
-    cgen.stmt("%s->read(&readStream, sizeof(uint64_t))" % READ_STREAM)
+    cgen.stmt("memcpy(&readStream, *readStreamPtrPtr, sizeof(uint64_t)); *readStreamPtrPtr += sizeof(uint64_t)")
     cgen.stmt("auto hostPtr = m_state->getMappedHostPointer(memory)")
     cgen.stmt("if (!hostPtr && readStream > 0) abort()")
     cgen.stmt("if (!hostPtr) continue")
     cgen.stmt("uint8_t* targetRange = hostPtr + offset")
-    cgen.stmt("%s->read(targetRange, readStream)" % READ_STREAM)
+    cgen.stmt("memcpy(targetRange, *readStreamPtrPtr, readStream); *readStreamPtrPtr += readStream")
     cgen.endFor()
     cgen.endIf()
 
@@ -589,6 +639,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("VulkanStream* %s = stream()" % WRITE_STREAM)
         self.cgen.stmt("VulkanMemReadingStream* %s = readStream()" % READ_STREAM)
         self.cgen.stmt("%s->setBuf((uint8_t*)(ptr + 8))" % READ_STREAM)
+        self.cgen.stmt("uint8_t* readStreamPtr = %s->getBuf(); uint8_t** readStreamPtrPtr = &readStreamPtr" % READ_STREAM)
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.stmt("auto vk = m_vk")
@@ -618,6 +669,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
     def onEnd(self,):
         self.cgen.line("default:")
         self.cgen.beginBlock()
+        self.cgen.stmt("m_pool.freeAll()")
         self.cgen.stmt("return ptr - (unsigned char *)buf")
         self.cgen.endBlock()
 
@@ -630,6 +682,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("m_state->clearCreatedHandlesForSnapshotLoad()");
         self.cgen.endIf()
 
+        self.cgen.stmt("m_pool.freeAll()")
         self.cgen.stmt("return ptr - (unsigned char*)buf;")
         self.cgen.endBlock() # function body
         self.module.appendImpl(self.cgen.swapCode())
