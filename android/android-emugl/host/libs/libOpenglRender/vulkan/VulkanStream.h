@@ -44,6 +44,10 @@ public:
     void loadStringInPlace(char** forOutput);
     void loadStringArrayInPlace(char*** forOutput);
 
+    // When we load a string and are using a reserved pointer.
+    void loadStringInPlaceWithStreamPtr(char** forOutput, uint8_t** streamPtr);
+    void loadStringArrayInPlaceWithStreamPtr(char*** forOutput, uint8_t** streamPtr);
+
     virtual ssize_t read(void *buffer, size_t size);
     virtual ssize_t write(const void *buffer, size_t size);
 
@@ -69,6 +73,8 @@ public:
     ~VulkanMemReadingStream();
 
     void setBuf(uint8_t* buf);
+    uint8_t* getBuf();
+    void setReadPos(uintptr_t pos);
 
     ssize_t read(void *buffer, size_t size) override;
     ssize_t write(const void *buffer, size_t size) override;
