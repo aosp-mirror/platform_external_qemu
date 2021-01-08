@@ -16,7 +16,8 @@
 
 constexpr int kMinVideoBitrate = 100 * 1000;        // bps
 constexpr int kMaxVideoBitrate = 25 * 1000 * 1000;  // bps
-constexpr int kMaxTimeLimit = 3 * 60;               // seconds
+constexpr int kDefaultTimeLimit = 3 * 60;           // seconds
+constexpr int kMaxTimeLimit = 30 * 60;              // seconds
 constexpr int kMaxFPS = 60;                         // fps
 
 // Spacing between intra frames
@@ -34,6 +35,5 @@ constexpr int kSrcNumSamples = 512;
 constexpr int kNumAudioChannels = 2;
 
 constexpr int kDefaultVideoBitrate = 4 * 1000 * 1000;  // bps
-constexpr int kDefaultTimeLimit = kMaxTimeLimit;
 
 constexpr char kContainerFormat[] = "webm";
