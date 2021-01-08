@@ -107,6 +107,16 @@ public:
     // bit + packed unsigned representation)
     void putPackedSignedNum(int64_t num);
     int64_t getPackedSignedNum();
+
+    // Static big-endian conversions
+    static void toByte(uint8_t*);
+    static void toBe16(uint8_t*);
+    static void toBe32(uint8_t*);
+    static void toBe64(uint8_t*);
+    static void fromByte(uint8_t*);
+    static void fromBe16(uint8_t*);
+    static void fromBe32(uint8_t*);
+    static void fromBe64(uint8_t*);
 };
 
 }  // namespace base
