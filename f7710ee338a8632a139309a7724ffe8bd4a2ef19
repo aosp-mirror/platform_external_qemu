@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "345d6142_32c1d3b4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-01-08T01:55:04Z",
+      "side": 1,
+      "message": "since we dont support drm, this is probably ok as it is changing from commandline\n",
+      "revId": "f7710ee338a8632a139309a7724ffe8bd4a2ef19",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
