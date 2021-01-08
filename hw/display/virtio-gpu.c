@@ -851,7 +851,7 @@ static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq);
 static void virtio_gpu_handle_ctrl_cb(VirtIODevice *vdev, VirtQueue *vq)
 {
     VirtIOGPU *g = VIRTIO_GPU(vdev);
-    virtio_gpu_handle_ctrl(vdev, vq);
+    qemu_bh_schedule(g->ctrl_bh);
 }
 
 static void virtio_gpu_handle_cursor_cb(VirtIODevice *vdev, VirtQueue *vq)
@@ -909,7 +909,6 @@ static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq)
     }
 #endif
 
-    virtio_queue_set_notification(vq, 0);
     cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
     while (cmd) {
 
@@ -918,14 +917,11 @@ static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq)
         cmd->finished = false;
         cmd->waiting = false;
         QTAILQ_INSERT_TAIL(&g->cmdq, cmd, next);
-            
-        virtio_gpu_process_cmdq(g);
 
         cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
     }
 
-    virtio_queue_set_notification(vq, 1);
-
+    virtio_gpu_process_cmdq(g);
 
 #ifdef CONFIG_VIRGL
     if (g->use_virgl_renderer) {
