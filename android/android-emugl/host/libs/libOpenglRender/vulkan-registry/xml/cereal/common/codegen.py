@@ -641,6 +641,78 @@ class CodeGen(object):
                        streamStorageVarType, ptrCast, accessExpr))
             self.stmt("%s->%s(%s)" % (streamVar, streamMethod, streamStorageVar))
 
+    def memcpyPrimitive(self, typeInfo, streamVar, accessExpr, accessType, direction="write"):
+        accessTypeName = accessType.typeName
+
+        if accessType.pointerIndirectionLevels == 0 and not self.validPrimitive(typeInfo, accessTypeName):
+            print("Tried to stream a non-primitive type: %s" % accessTypeName)
+            os.abort()
+
+        needPtrCast = False
+
+        streamSize = 8
+
+        if accessType.pointerIndirectionLevels > 0:
+            streamSize = 8
+            streamStorageVarType = "uint64_t"
+            needPtrCast = True
+            streamMethod = "putBe64" if direction == "write" else "getBe64"
+        else:
+            streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
+            if streamSize == 1:
+                streamStorageVarType = "uint8_t"
+            elif streamSize == 2:
+                streamStorageVarType = "uint16_t"
+            elif streamSize == 4:
+                streamStorageVarType = "uint32_t"
+            elif streamSize == 8:
+                streamStorageVarType = "uint64_t"
+            streamMethod = self.makePrimitiveStreamMethod(
+                typeInfo, accessTypeName, direction=direction)
+
+        streamStorageVar = self.var()
+
+        accessCast = self.makeRichCTypeDecl(accessType, useParamName=False)
+
+        if direction == "read":
+            accessCast = self.makeRichCTypeDecl(accessType.getForNonConstAccess(), useParamName=False)
+
+        ptrCast = "(uintptr_t)" if needPtrCast else ""
+
+        if direction == "read":
+            if accessType.pointerIndirectionLevels == 0:
+                self.stmt("memcpy((%s*)&%s, %s, %s)" %
+                    (accessCast,
+                     accessExpr,
+                     streamVar,
+                     str(streamSize)))
+            else:
+                self.stmt("memcpy((%s)%s, %s, %s)" %
+                    (accessCast,
+                     accessExpr,
+                     streamVar,
+                     str(streamSize)))
+        else:
+            self.stmt("%s %s = (%s)%s%s" %
+                      (streamStorageVarType, streamStorageVar,
+                       streamStorageVarType, ptrCast, accessExpr))
+            self.stmt("memcpy(%s, &%s, %s)" % (streamVar, streamStorageVar, str(streamSize)))
+
+    def countPrimitive(self, typeInfo, accessType):
+        accessTypeName = accessType.typeName
+
+        if accessType.pointerIndirectionLevels == 0 and not self.validPrimitive(typeInfo, accessTypeName):
+            print("Tried to count a non-primitive type: %s" % accessTypeName)
+            os.abort()
+
+        needPtrCast = False
+
+        if accessType.pointerIndirectionLevels > 0:
+            streamSize = 8
+        else:
+            streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
+
+        return streamSize
 
 # Class to wrap a Vulkan API call.
 #
