@@ -1657,7 +1657,7 @@ TEST_P(VulkanHalTest, ProcessCleanup) {
 
 // Multithreaded benchmarks: Speed of light with simple vkCmd's.
 TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
-    constexpr uint32_t kThreadCount = 4;
+    constexpr uint32_t kThreadCount = 1;
     VkDescriptorPool pool;
     VkDescriptorSetLayout setLayout;
 

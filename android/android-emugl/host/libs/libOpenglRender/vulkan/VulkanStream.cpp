@@ -170,6 +170,7 @@ void VulkanStream::alloc(void** ptrAddr, size_t bytes) {
 
 void VulkanStream::loadStringInPlace(char** forOutput) {
     size_t len = getBe32();
+    fprintf(stderr, "%s: len: %zu\n", __func__, len);
 
     alloc((void**)forOutput, len + 1);
 
@@ -181,6 +182,7 @@ void VulkanStream::loadStringInPlace(char** forOutput) {
 void VulkanStream::loadStringArrayInPlace(char*** forOutput) {
     size_t count = getBe32();
 
+    fprintf(stderr, "%s: count: %zu\n", __func__, count);
     if (!count) {
         *forOutput = nullptr;
         return;
