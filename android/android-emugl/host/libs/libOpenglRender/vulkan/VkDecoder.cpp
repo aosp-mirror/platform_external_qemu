@@ -123,6 +123,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
         uint8_t* snapshotTraceBegin = vkReadStream->beginTrace();
         vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
         auto vk = m_vk;
+        m_pool.freeAll();
         switch (opcode)
         {
 #ifdef VK_VERSION_1_0
@@ -175,7 +176,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateInstance(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateInstance_VkResult_return, pCreateInfo, pAllocator, pInstance);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -217,7 +217,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyInstance(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -300,7 +299,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkEnumeratePhysicalDevices(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDevices_VkResult_return, instance, pPhysicalDeviceCount, pPhysicalDevices);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -346,7 +344,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceFeatures(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -394,7 +391,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -452,7 +448,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties_VkResult_return, physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -498,7 +493,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -586,7 +580,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -632,7 +625,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -666,7 +658,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetInstanceProcAddr(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetInstanceProcAddr_PFN_vkVoidFunction_return, instance, pName);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -700,7 +691,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDeviceProcAddr(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceProcAddr_PFN_vkVoidFunction_return, device, pName);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -764,7 +754,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateDevice(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDevice_VkResult_return, physicalDevice, pCreateInfo, pAllocator, pDevice);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -806,7 +795,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyDevice(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -900,7 +888,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkEnumerateInstanceExtensionProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceExtensionProperties_VkResult_return, pLayerName, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1004,7 +991,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkEnumerateDeviceExtensionProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateDeviceExtensionProperties_VkResult_return, physicalDevice, pLayerName, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1084,7 +1070,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkEnumerateInstanceLayerProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceLayerProperties_VkResult_return, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1174,7 +1159,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkEnumerateDeviceLayerProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateDeviceLayerProperties_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1221,7 +1205,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDeviceQueue(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, queueFamilyIndex, queueIndex, pQueue);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1272,7 +1255,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueSubmit(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueSubmit_VkResult_return, queue, submitCount, pSubmits, fence);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1304,7 +1286,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueWaitIdle(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueWaitIdle_VkResult_return, queue);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1336,7 +1317,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDeviceWaitIdle(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDeviceWaitIdle_VkResult_return, device);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1404,7 +1384,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkAllocateMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateMemory_VkResult_return, device, pAllocateInfo, pAllocator, pMemory);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1456,7 +1435,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkFreeMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_memory_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1517,7 +1495,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkMapMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMapMemory_VkResult_return, device, memory, offset, size, flags, ppData);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1551,7 +1528,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkUnmapMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, memory);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1615,7 +1591,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkFlushMappedMemoryRanges(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFlushMappedMemoryRanges_VkResult_return, device, memoryRangeCount, pMemoryRanges);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1680,7 +1655,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkInvalidateMappedMemoryRanges(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkInvalidateMappedMemoryRanges_VkResult_return, device, memoryRangeCount, pMemoryRanges);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1722,7 +1696,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDeviceMemoryCommitment(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, memory, pCommittedMemoryInBytes);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1764,7 +1737,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkBindBufferMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory_VkResult_return, device, buffer, memory, memoryOffset);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1806,7 +1778,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkBindImageMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory_VkResult_return, device, image, memory, memoryOffset);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1856,7 +1827,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetBufferMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, buffer, pMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1906,7 +1876,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetImageMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -1998,7 +1967,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetImageSparseMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2096,7 +2064,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, type, samples, usage, tiling, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2147,7 +2114,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueBindSparse(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueBindSparse_VkResult_return, queue, bindInfoCount, pBindInfo, fence);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2215,7 +2181,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateFence(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateFence_VkResult_return, device, pCreateInfo, pAllocator, pFence);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2267,7 +2232,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyFence(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_fence_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2310,7 +2274,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkResetFences(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetFences_VkResult_return, device, fenceCount, pFences);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2346,7 +2309,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetFenceStatus(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceStatus_VkResult_return, device, fence);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2393,7 +2355,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkWaitForFences(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkWaitForFences_VkResult_return, device, fenceCount, pFences, waitAll, timeout);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2461,7 +2422,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateSemaphore(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSemaphore_VkResult_return, device, pCreateInfo, pAllocator, pSemaphore);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2513,7 +2473,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroySemaphore(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_semaphore_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2581,7 +2540,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateEvent_VkResult_return, device, pCreateInfo, pAllocator, pEvent);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2633,7 +2591,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_event_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2669,7 +2626,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetEventStatus(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetEventStatus_VkResult_return, device, event);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2705,7 +2661,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkSetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetEvent_VkResult_return, device, event);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2741,7 +2696,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkResetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetEvent_VkResult_return, device, event);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2809,7 +2763,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateQueryPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateQueryPool_VkResult_return, device, pCreateInfo, pAllocator, pQueryPool);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2861,7 +2814,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyQueryPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_queryPool_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2915,7 +2867,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetQueryPoolResults(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetQueryPoolResults_VkResult_return, device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -2983,7 +2934,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBuffer_VkResult_return, device, pCreateInfo, pAllocator, pBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3035,7 +2985,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_buffer_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3103,7 +3052,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateBufferView(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBufferView_VkResult_return, device, pCreateInfo, pAllocator, pView);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3155,7 +3103,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyBufferView(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_bufferView_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3223,7 +3170,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImage_VkResult_return, device, pCreateInfo, pAllocator, pImage);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3275,7 +3221,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_image_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3332,7 +3277,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetImageSubresourceLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pSubresource, pLayout);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3400,7 +3344,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateImageView(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImageView_VkResult_return, device, pCreateInfo, pAllocator, pView);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3452,7 +3395,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyImageView(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_imageView_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3520,7 +3462,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateShaderModule(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateShaderModule_VkResult_return, device, pCreateInfo, pAllocator, pShaderModule);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3572,7 +3513,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyShaderModule(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_shaderModule_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3640,7 +3580,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreatePipelineCache(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreatePipelineCache_VkResult_return, device, pCreateInfo, pAllocator, pPipelineCache);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3692,7 +3631,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyPipelineCache(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_pipelineCache_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3767,7 +3705,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPipelineCacheData(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPipelineCacheData_VkResult_return, device, pipelineCache, pDataSize, pData);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3814,7 +3751,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkMergePipelineCaches(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMergePipelineCaches_VkResult_return, device, dstCache, srcCacheCount, pSrcCaches);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3902,7 +3838,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateGraphicsPipelines(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateGraphicsPipelines_VkResult_return, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -3990,7 +3925,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateComputePipelines(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateComputePipelines_VkResult_return, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4042,7 +3976,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyPipeline(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_pipeline_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4112,7 +4045,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreatePipelineLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreatePipelineLayout_VkResult_return, device, pCreateInfo, pAllocator, pPipelineLayout);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4166,7 +4098,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyPipelineLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_pipelineLayout_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4234,7 +4165,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateSampler(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSampler_VkResult_return, device, pCreateInfo, pAllocator, pSampler);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4286,7 +4216,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroySampler(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_sampler_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4354,7 +4283,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateDescriptorSetLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorSetLayout_VkResult_return, device, pCreateInfo, pAllocator, pSetLayout);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4406,7 +4334,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyDescriptorSetLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_descriptorSetLayout_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4474,7 +4401,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateDescriptorPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorPool_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorPool);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4526,7 +4452,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyDescriptorPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_descriptorPool_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4564,7 +4489,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkResetDescriptorPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetDescriptorPool_VkResult_return, device, descriptorPool, flags);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4628,7 +4552,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkAllocateDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateDescriptorSets_VkResult_return, device, pAllocateInfo, pDescriptorSets);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4686,7 +4609,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkFreeDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFreeDescriptorSets_VkResult_return, device, descriptorPool, descriptorSetCount, boxed_pDescriptorSets_preserve);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4746,7 +4668,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkUpdateDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorWriteCount, pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4814,7 +4735,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateFramebuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateFramebuffer_VkResult_return, device, pCreateInfo, pAllocator, pFramebuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4866,7 +4786,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyFramebuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_framebuffer_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4934,7 +4853,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateRenderPass_VkResult_return, device, pCreateInfo, pAllocator, pRenderPass);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -4986,7 +4904,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_renderPass_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5036,7 +4953,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetRenderAreaGranularity(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, renderPass, pGranularity);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5104,7 +5020,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateCommandPool_VkResult_return, device, pCreateInfo, pAllocator, pCommandPool);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5156,7 +5071,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_commandPool_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5194,7 +5108,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkResetCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetCommandPool_VkResult_return, device, commandPool, flags);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5254,7 +5167,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkAllocateCommandBuffers(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateCommandBuffers_VkResult_return, device, pAllocateInfo, pCommandBuffers);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5308,7 +5220,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkFreeCommandBuffers(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, commandPool, commandBufferCount, boxed_pCommandBuffers_preserve);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5347,7 +5258,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkBeginCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBeginCommandBuffer_VkResult_return, commandBuffer, pBeginInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5379,7 +5289,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkEndCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEndCommandBuffer_VkResult_return, commandBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5413,7 +5322,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkResetCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetCommandBuffer_VkResult_return, commandBuffer, flags);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5449,7 +5357,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdBindPipeline(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineBindPoint, pipeline);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5496,7 +5403,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetViewport(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstViewport, viewportCount, pViewports);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5543,7 +5449,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetScissor(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstScissor, scissorCount, pScissors);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5575,7 +5480,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetLineWidth(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, lineWidth);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5611,7 +5515,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetDepthBias(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5643,7 +5546,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetBlendConstants(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, blendConstants);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5677,7 +5579,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetDepthBounds(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, minDepthBounds, maxDepthBounds);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5711,7 +5612,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetStencilCompareMask(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, faceMask, compareMask);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5745,7 +5645,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetStencilWriteMask(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, faceMask, writeMask);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5779,7 +5678,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetStencilReference(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, faceMask, reference);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5833,7 +5731,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdBindDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineBindPoint, layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5871,7 +5768,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdBindIndexBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, indexType);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5917,7 +5813,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdBindVertexBuffers(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstBinding, bindingCount, pBuffers, pOffsets);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5955,7 +5850,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDraw(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -5995,7 +5889,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDrawIndexed(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6035,7 +5928,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDrawIndirect(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, drawCount, stride);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6075,7 +5967,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDrawIndexedIndirect(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, drawCount, stride);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6111,7 +6002,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDispatch(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, groupCountX, groupCountY, groupCountZ);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6147,7 +6037,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDispatchIndirect(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6200,7 +6089,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdCopyBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcBuffer, dstBuffer, regionCount, pRegions);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6257,7 +6145,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdCopyImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6316,7 +6203,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdBlitImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions, filter);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6371,7 +6257,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdCopyBufferToImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcBuffer, dstImage, dstImageLayout, regionCount, pRegions);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6426,7 +6311,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdCopyImageToBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstBuffer, regionCount, pRegions);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6467,7 +6351,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdUpdateBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, dstBuffer, dstOffset, dataSize, pData);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6507,7 +6390,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdFillBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, dstBuffer, dstOffset, size, data);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6565,7 +6447,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdClearColorImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, image, imageLayout, pColor, rangeCount, pRanges);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6623,7 +6504,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdClearDepthStencilImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, image, imageLayout, pDepthStencil, rangeCount, pRanges);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6683,7 +6563,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdClearAttachments(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, attachmentCount, pAttachments, rectCount, pRects);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6740,7 +6619,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdResolveImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6776,7 +6654,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, event, stageMask);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6812,7 +6689,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdResetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, event, stageMask);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6902,7 +6778,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdWaitEvents(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, eventCount, pEvents, srcStageMask, dstStageMask, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -6983,7 +6858,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdPipelineBarrier(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7021,7 +6895,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdBeginQuery(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, query, flags);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7057,7 +6930,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdEndQuery(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, query);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7095,7 +6967,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdResetQueryPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, firstQuery, queryCount);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7133,7 +7004,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdWriteTimestamp(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineStage, queryPool, query);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7181,7 +7051,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdCopyQueryPoolResults(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, firstQuery, queryCount, dstBuffer, dstOffset, stride, flags);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7224,7 +7093,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdPushConstants(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, layout, stageFlags, offset, size, pValues);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7263,7 +7131,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdBeginRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pRenderPassBegin, contents);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7295,7 +7162,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdNextSubpass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, contents);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7325,7 +7191,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdEndRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7366,7 +7231,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdExecuteCommands(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, commandBufferCount, pCommandBuffers);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7398,7 +7262,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkEnumerateInstanceVersion(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceVersion_VkResult_return, pApiVersion);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7445,7 +7308,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkBindBufferMemory2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory2_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7492,7 +7354,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkBindImageMemory2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory2_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7536,7 +7397,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDeviceGroupPeerMemoryFeatures(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7568,7 +7428,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetDeviceMask(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, deviceMask);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7610,7 +7469,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDispatchBase(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7700,7 +7558,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkEnumeratePhysicalDeviceGroups(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDeviceGroups_VkResult_return, instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7753,7 +7610,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetImageMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7806,7 +7662,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetBufferMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7901,7 +7756,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetImageSparseMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7947,7 +7801,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceFeatures2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -7993,7 +7846,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8041,7 +7893,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8096,7 +7947,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties2_VkResult_return, physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8184,7 +8034,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8230,7 +8079,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8325,7 +8173,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8361,7 +8208,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkTrimCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, commandPool, flags);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8410,7 +8256,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDeviceQueue2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pQueueInfo, pQueue);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8478,7 +8323,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateSamplerYcbcrConversion(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSamplerYcbcrConversion_VkResult_return, device, pCreateInfo, pAllocator, pYcbcrConversion);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8530,7 +8374,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroySamplerYcbcrConversion(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_ycbcrConversion_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8598,7 +8441,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateDescriptorUpdateTemplate(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorUpdateTemplate_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8650,7 +8492,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyDescriptorUpdateTemplate(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_descriptorUpdateTemplate_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8696,7 +8537,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkUpdateDescriptorSetWithTemplate(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorSet, descriptorUpdateTemplate, pData);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8752,7 +8592,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceExternalBufferProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8805,7 +8644,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceExternalFenceProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8858,7 +8696,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceExternalSemaphoreProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8911,7 +8748,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDescriptorSetLayoutSupport(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pCreateInfo, pSupport);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -8965,7 +8801,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroySurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, *boxed_surface_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9011,7 +8846,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceSupportKHR_VkResult_return, physicalDevice, queueFamilyIndex, surface, pSupported);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9063,7 +8897,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilitiesKHR_VkResult_return, physicalDevice, surface, pSurfaceCapabilities);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9157,7 +8990,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceFormatsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceFormatsKHR_VkResult_return, physicalDevice, surface, pSurfaceFormatCount, pSurfaceFormats);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9231,7 +9063,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceSurfacePresentModesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfacePresentModesKHR_VkResult_return, physicalDevice, surface, pPresentModeCount, pPresentModes);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9301,7 +9132,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateSwapchainKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSwapchainKHR_VkResult_return, device, pCreateInfo, pAllocator, pSwapchain);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9353,7 +9183,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroySwapchainKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_swapchain_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9439,7 +9268,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetSwapchainImagesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainImagesKHR_VkResult_return, device, swapchain, pSwapchainImageCount, pSwapchainImages);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9493,7 +9321,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkAcquireNextImageKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireNextImageKHR_VkResult_return, device, swapchain, timeout, semaphore, fence, pImageIndex);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9532,7 +9359,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueuePresentKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueuePresentKHR_VkResult_return, queue, pPresentInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9580,7 +9406,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDeviceGroupPresentCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceGroupPresentCapabilitiesKHR_VkResult_return, device, pDeviceGroupPresentCapabilities);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9635,7 +9460,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDeviceGroupSurfacePresentModesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceGroupSurfacePresentModesKHR_VkResult_return, device, surface, pModes);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9729,7 +9553,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDevicePresentRectanglesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDevicePresentRectanglesKHR_VkResult_return, physicalDevice, surface, pRectCount, pRects);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9776,7 +9599,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkAcquireNextImage2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireNextImage2KHR_VkResult_return, device, pAcquireInfo, pImageIndex);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9868,7 +9690,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPropertiesKHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -9958,7 +9779,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayPlanePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPlanePropertiesKHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10042,7 +9862,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDisplayPlaneSupportedDisplaysKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneSupportedDisplaysKHR_VkResult_return, physicalDevice, planeIndex, pDisplayCount, pDisplays);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10136,7 +9955,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDisplayModePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayModePropertiesKHR_VkResult_return, physicalDevice, display, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10208,7 +10026,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateDisplayModeKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDisplayModeKHR_VkResult_return, physicalDevice, display, pCreateInfo, pAllocator, pMode);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10262,7 +10079,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDisplayPlaneCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneCapabilitiesKHR_VkResult_return, physicalDevice, mode, planeIndex, pCapabilities);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10325,7 +10141,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateDisplayPlaneSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDisplayPlaneSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10406,7 +10221,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateSharedSwapchainsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSharedSwapchainsKHR_VkResult_return, device, swapchainCount, pCreateInfos, pAllocator, pSwapchains);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10471,7 +10285,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateXlibSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateXlibSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10515,7 +10328,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceXlibPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceXlibPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, dpy, visualID);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10580,7 +10392,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateXcbSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateXcbSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10624,7 +10435,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceXcbPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceXcbPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, connection, visual_id);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10689,7 +10499,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateWaylandSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateWaylandSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10731,7 +10540,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceWaylandPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceWaylandPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, display);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10796,7 +10604,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateMirSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateMirSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10838,7 +10645,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceMirPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceMirPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, connection);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10903,7 +10709,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateAndroidSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateAndroidSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -10968,7 +10773,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateWin32SurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateWin32SurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11002,7 +10806,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceWin32PresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceWin32PresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11054,7 +10857,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceFeatures2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11100,7 +10902,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11148,7 +10949,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11203,7 +11003,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return, physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11291,7 +11090,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11337,7 +11135,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11432,7 +11229,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11478,7 +11274,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDeviceGroupPeerMemoryFeaturesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11510,7 +11305,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetDeviceMaskKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, deviceMask);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11552,7 +11346,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDispatchBaseKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11592,7 +11385,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkTrimCommandPoolKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, commandPool, flags);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11684,7 +11476,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkEnumeratePhysicalDeviceGroupsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDeviceGroupsKHR_VkResult_return, instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11742,7 +11533,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceExternalBufferPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11793,7 +11583,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMemoryWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11845,7 +11634,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMemoryWin32HandlePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandlePropertiesKHR_VkResult_return, device, handleType, handle, pMemoryWin32HandleProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11894,7 +11682,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMemoryFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -11946,7 +11733,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMemoryFdPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryFdPropertiesKHR_VkResult_return, device, handleType, fd, pMemoryFdProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12003,7 +11789,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12046,7 +11831,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkImportSemaphoreWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportSemaphoreWin32HandleKHR_VkResult_return, device, pImportSemaphoreWin32HandleInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12093,7 +11877,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetSemaphoreWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSemaphoreWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12134,7 +11917,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkImportSemaphoreFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportSemaphoreFdKHR_VkResult_return, device, pImportSemaphoreFdInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12181,7 +11963,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetSemaphoreFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSemaphoreFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12236,7 +12017,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdPushDescriptorSetKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12284,7 +12064,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdPushDescriptorSetWithTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, descriptorUpdateTemplate, layout, set, pData);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12358,7 +12137,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateDescriptorUpdateTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorUpdateTemplateKHR_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12410,7 +12188,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyDescriptorUpdateTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_descriptorUpdateTemplate_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12456,7 +12233,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkUpdateDescriptorSetWithTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorSet, descriptorUpdateTemplate, pData);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12521,7 +12297,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateRenderPass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateRenderPass2KHR_VkResult_return, device, pCreateInfo, pAllocator, pRenderPass);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12565,7 +12340,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdBeginRenderPass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pRenderPassBegin, pSubpassBeginInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12609,7 +12383,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdNextSubpass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pSubpassBeginInfo, pSubpassEndInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12646,7 +12419,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdEndRenderPass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pSubpassEndInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12684,7 +12456,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetSwapchainStatusKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainStatusKHR_VkResult_return, device, swapchain);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12739,7 +12510,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceExternalFencePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12782,7 +12552,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkImportFenceWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportFenceWin32HandleKHR_VkResult_return, device, pImportFenceWin32HandleInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12829,7 +12598,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetFenceWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12870,7 +12638,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkImportFenceFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportFenceFdKHR_VkResult_return, device, pImportFenceFdInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12917,7 +12684,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetFenceFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -12976,7 +12742,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilities2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilities2KHR_VkResult_return, physicalDevice, pSurfaceInfo, pSurfaceCapabilities);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13073,7 +12838,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceFormats2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceFormats2KHR_VkResult_return, physicalDevice, pSurfaceInfo, pSurfaceFormatCount, pSurfaceFormats);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13167,7 +12931,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayProperties2KHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13257,7 +13020,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayPlaneProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPlaneProperties2KHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13351,7 +13113,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDisplayModeProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayModeProperties2KHR_VkResult_return, physicalDevice, display, pPropertyCount, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13406,7 +13167,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDisplayPlaneCapabilities2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneCapabilities2KHR_VkResult_return, physicalDevice, pDisplayPlaneInfo, pCapabilities);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13467,7 +13227,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetImageMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13520,7 +13279,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetBufferMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13615,7 +13373,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetImageSparseMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13687,7 +13444,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateSamplerYcbcrConversionKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSamplerYcbcrConversionKHR_VkResult_return, device, pCreateInfo, pAllocator, pYcbcrConversion);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13739,7 +13495,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroySamplerYcbcrConversionKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_ycbcrConversion_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13788,7 +13543,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkBindBufferMemory2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory2KHR_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13835,7 +13589,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkBindImageMemory2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory2KHR_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13890,7 +13643,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetDescriptorSetLayoutSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pCreateInfo, pSupport);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13938,7 +13690,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDrawIndirectCountKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -13984,7 +13735,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDrawIndexedIndirectCountKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14034,7 +13784,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetSwapchainGrallocUsageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainGrallocUsageANDROID_VkResult_return, device, format, imageUsage, grallocUsage);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14080,7 +13829,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkAcquireImageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireImageANDROID_VkResult_return, device, image, nativeFenceFd, semaphore, fence);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14140,7 +13888,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueSignalReleaseImageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueSignalReleaseImageANDROID_VkResult_return, queue, waitSemaphoreCount, pWaitSemaphores, image, pNativeFenceFd);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14210,7 +13957,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateDebugReportCallbackEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDebugReportCallbackEXT_VkResult_return, instance, pCreateInfo, pAllocator, pCallback);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14262,7 +14008,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyDebugReportCallbackEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, *boxed_callback_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14306,7 +14051,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDebugReportMessageEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, flags, objectType, object, location, messageCode, pLayerPrefix, pMessage);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14359,7 +14103,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDebugMarkerSetObjectTagEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDebugMarkerSetObjectTagEXT_VkResult_return, device, pTagInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14398,7 +14141,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDebugMarkerSetObjectNameEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDebugMarkerSetObjectNameEXT_VkResult_return, device, pNameInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14435,7 +14177,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDebugMarkerBeginEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pMarkerInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14465,7 +14206,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDebugMarkerEndEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14502,7 +14242,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDebugMarkerInsertEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pMarkerInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14554,7 +14293,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDrawIndirectCountAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14600,7 +14338,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdDrawIndexedIndirectCountAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14689,7 +14426,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetShaderInfoAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetShaderInfoAMD_VkResult_return, device, pipeline, shaderStage, infoType, pInfoSize, pInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14755,7 +14491,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceExternalImageFormatPropertiesNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceExternalImageFormatPropertiesNV_VkResult_return, physicalDevice, format, type, tiling, usage, flags, externalHandleType, pExternalImageFormatProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14805,7 +14540,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMemoryWin32HandleNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandleNV_VkResult_return, device, memory, handleType, pHandle);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14874,7 +14608,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateViSurfaceNN(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateViSurfaceNN_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14917,7 +14650,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdBeginConditionalRenderingEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pConditionalRenderingBegin);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14947,7 +14679,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdEndConditionalRenderingEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -14986,7 +14717,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdProcessCommandsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pProcessCommandsInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15023,7 +14753,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdReserveSpaceForCommandsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pReserveSpaceInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15091,7 +14820,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateIndirectCommandsLayoutNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateIndirectCommandsLayoutNVX_VkResult_return, device, pCreateInfo, pAllocator, pIndirectCommandsLayout);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15143,7 +14871,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyIndirectCommandsLayoutNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_indirectCommandsLayout_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15211,7 +14938,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateObjectTableNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateObjectTableNVX_VkResult_return, device, pCreateInfo, pAllocator, pObjectTable);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15263,7 +14989,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyObjectTableNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_objectTable_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15306,7 +15031,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkRegisterObjectsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterObjectsNVX_VkResult_return, device, objectTable, objectCount, ppObjectTableEntries, pObjectIndices);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15350,7 +15074,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkUnregisterObjectsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkUnregisterObjectsNVX_VkResult_return, device, objectTable, objectCount, pObjectEntryTypes, pObjectIndices);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15412,7 +15135,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures, pLimits);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15461,7 +15183,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetViewportWScalingNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstViewport, viewportCount, pViewportWScalings);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15499,7 +15220,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkReleaseDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkReleaseDisplayEXT_VkResult_return, physicalDevice, display);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15545,7 +15265,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkAcquireXlibDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireXlibDisplayEXT_VkResult_return, physicalDevice, dpy, display);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15599,7 +15318,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetRandROutputDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetRandROutputDisplayEXT_VkResult_return, physicalDevice, dpy, rrOutput, pDisplay);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15653,7 +15371,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilities2EXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilities2EXT_VkResult_return, physicalDevice, surface, pSurfaceCapabilities);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15698,7 +15415,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDisplayPowerControlEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDisplayPowerControlEXT_VkResult_return, device, display, pDisplayPowerInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15761,7 +15477,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkRegisterDeviceEventEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterDeviceEventEXT_VkResult_return, device, pDeviceEventInfo, pAllocator, pFence);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15828,7 +15543,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkRegisterDisplayEventEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterDisplayEventEXT_VkResult_return, device, display, pDisplayEventInfo, pAllocator, pFence);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15874,7 +15588,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetSwapchainCounterEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainCounterEXT_VkResult_return, device, swapchain, counter, pCounterValue);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -15928,7 +15641,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetRefreshCycleDurationGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetRefreshCycleDurationGOOGLE_VkResult_return, device, swapchain, pDisplayTimingProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16022,7 +15734,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPastPresentationTimingGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPastPresentationTimingGOOGLE_VkResult_return, device, swapchain, pPresentationTimingCount, pPresentationTimings);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16081,7 +15792,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetDiscardRectangleEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstDiscardRectangle, discardRectangleCount, pDiscardRectangles);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16141,7 +15851,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkSetHdrMetadataEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, swapchainCount, pSwapchains, pMetadata);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16206,7 +15915,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateIOSSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateIOSSurfaceMVK_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16271,7 +15979,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateMacOSSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateMacOSSurfaceMVK_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16316,7 +16023,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkSetDebugUtilsObjectNameEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetDebugUtilsObjectNameEXT_VkResult_return, device, pNameInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16355,7 +16061,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkSetDebugUtilsObjectTagEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetDebugUtilsObjectTagEXT_VkResult_return, device, pTagInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16392,7 +16097,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueBeginDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, pLabelInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16422,7 +16126,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueEndDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16459,7 +16162,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueInsertDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, pLabelInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16496,7 +16198,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdBeginDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pLabelInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16526,7 +16227,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdEndDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16563,7 +16263,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdInsertDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pLabelInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16631,7 +16330,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateDebugUtilsMessengerEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDebugUtilsMessengerEXT_VkResult_return, instance, pCreateInfo, pAllocator, pMessenger);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16683,7 +16381,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyDebugUtilsMessengerEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, *boxed_messenger_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16724,7 +16421,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkSubmitDebugUtilsMessageEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, messageSeverity, messageTypes, pCallbackData);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16777,7 +16473,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetAndroidHardwareBufferPropertiesANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetAndroidHardwareBufferPropertiesANDROID_VkResult_return, device, buffer, pProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16824,7 +16519,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMemoryAndroidHardwareBufferANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryAndroidHardwareBufferANDROID_VkResult_return, device, pInfo, pBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16873,7 +16567,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetSampleLocationsEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pSampleLocationsInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -16921,7 +16614,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetPhysicalDeviceMultisamplePropertiesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, samples, pMultisampleProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17001,7 +16693,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateValidationCacheEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateValidationCacheEXT_VkResult_return, device, pCreateInfo, pAllocator, pValidationCache);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17053,7 +16744,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkDestroyValidationCacheEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, *boxed_validationCache_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17100,7 +16790,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkMergeValidationCachesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMergeValidationCachesEXT_VkResult_return, device, dstCache, srcCacheCount, pSrcCaches);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17175,7 +16864,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetValidationCacheDataEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetValidationCacheDataEXT_VkResult_return, device, validationCache, pDataSize, pData);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17241,7 +16929,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMemoryHostPointerPropertiesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryHostPointerPropertiesEXT_VkResult_return, device, handleType, pHostPointer, pMemoryHostPointerProperties);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17283,7 +16970,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdWriteBufferMarkerAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineStage, dstBuffer, dstOffset, marker);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17329,7 +17015,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCmdSetCheckpointNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pCheckpointMarker);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17417,7 +17102,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetQueueCheckpointDataNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, pCheckpointDataCount, pCheckpointData);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17474,7 +17158,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkMapMemoryIntoAddressSpaceGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return, device, memory, pAddress);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17514,7 +17197,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkRegisterImageColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterImageColorBufferGOOGLE_VkResult_return, device, image, colorBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17552,7 +17234,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkRegisterBufferColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterBufferColorBufferGOOGLE_VkResult_return, device, buffer, colorBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17672,7 +17353,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkUpdateDescriptorSetWithTemplateSizedGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorSet, descriptorUpdateTemplate, imageInfoCount, bufferInfoCount, bufferViewCount, pImageInfoEntryIndices, pBufferInfoEntryIndices, pBufferViewEntryIndices, pImageInfos, pBufferInfos, pBufferViews);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17711,7 +17391,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkBeginCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pBeginInfo);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17741,7 +17420,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkEndCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17773,7 +17451,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkResetCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, flags);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17807,7 +17484,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCommandBufferHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, needHostSync, sequenceNumber);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17893,7 +17569,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateImageWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImageWithRequirementsGOOGLE_VkResult_return, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -17977,7 +17652,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkCreateBufferWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBufferWithRequirementsGOOGLE_VkResult_return, device, pCreateInfo, pAllocator, pBuffer, pMemoryRequirements);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -18072,7 +17746,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMemoryHostAddressInfoGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryHostAddressInfoGOOGLE_VkResult_return, device, memory, pAddress, pSize, pHostmemId);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -18128,7 +17801,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkFreeMemorySyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFreeMemorySyncGOOGLE_VkResult_return, device, *boxed_memory_preserve, pAllocator);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -18164,7 +17836,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, needHostSync, sequenceNumber);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -18213,7 +17884,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueSubmitAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, submitCount, pSubmits, fence);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -18243,7 +17913,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueWaitIdleAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -18292,7 +17961,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkQueueBindSparseAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, bindInfoCount, pBindInfo, fence);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
@@ -18342,13 +18010,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetLinearImageLayoutGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, format, pOffset, pRowPitchAlignment);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
+                android::base::endTrace();
                 break;
             }
 #endif
 #ifdef VK_MVK_moltenvk
             case OP_vkGetMTLDeviceMVK:
+            android::base::beginTrace("vkGetMTLDeviceMVK decode");
             {
                 VkPhysicalDevice physicalDevice;
                 void** pMTLDevice;
@@ -18380,11 +18049,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMTLDeviceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMTLDevice);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
+                android::base::endTrace();
                 break;
             }
             case OP_vkSetMTLTextureMVK:
+            android::base::beginTrace("vkSetMTLTextureMVK decode");
             {
                 VkImage image;
                 void* mtlTexture;
@@ -18412,11 +18082,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkSetMTLTextureMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetMTLTextureMVK_VkResult_return, image, mtlTexture);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
+                android::base::endTrace();
                 break;
             }
             case OP_vkGetMTLTextureMVK:
+            android::base::beginTrace("vkGetMTLTextureMVK decode");
             {
                 VkImage image;
                 void** pMTLTexture;
@@ -18442,11 +18113,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMTLTextureMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, image, pMTLTexture);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
+                android::base::endTrace();
                 break;
             }
             case OP_vkGetMTLBufferMVK:
+            android::base::beginTrace("vkGetMTLBufferMVK decode");
             {
                 VkBuffer buffer;
                 void** pMTLBuffer;
@@ -18472,11 +18144,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetMTLBufferMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, buffer, pMTLBuffer);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
+                android::base::endTrace();
                 break;
             }
             case OP_vkUseIOSurfaceMVK:
+            android::base::beginTrace("vkUseIOSurfaceMVK decode");
             {
                 VkImage image;
                 void* ioSurface;
@@ -18504,11 +18177,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkUseIOSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkUseIOSurfaceMVK_VkResult_return, image, ioSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
+                android::base::endTrace();
                 break;
             }
             case OP_vkGetIOSurfaceMVK:
+            android::base::beginTrace("vkGetIOSurfaceMVK decode");
             {
                 VkImage image;
                 void** pIOSurface;
@@ -18534,7 +18208,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     m_state->snapshot()->vkGetIOSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, image, pIOSurface);
                 }
-                m_pool.freeAll();
                 vkReadStream->clearPool();
                 android::base::endTrace();
                 break;
