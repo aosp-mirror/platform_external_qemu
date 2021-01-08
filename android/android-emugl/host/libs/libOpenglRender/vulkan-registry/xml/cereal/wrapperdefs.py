@@ -22,6 +22,8 @@ from .common.vulkantypes import makeVulkanTypeSimple
 
 API_PREFIX_MARSHAL = "marshal_"
 API_PREFIX_UNMARSHAL = "unmarshal_"
+API_PREFIX_RESERVEDMARSHAL = "marshal_"
+API_PREFIX_RESERVEDUNMARSHAL = "unmarshal_"
 
 MARSHAL_INPUT_VAR_NAME = "forMarshaling"
 UNMARSHAL_INPUT_VAR_NAME = "forUnmarshaling"
@@ -43,8 +45,17 @@ PARAMETERS_MARSHALING = [
 PARAMETERS_MARSHALING_GUEST = [
     makeVulkanTypeSimple(False, VULKAN_STREAM_TYPE_GUEST, 1, VULKAN_STREAM_VAR_NAME)
 ]
+PARAMETERS_RESERVEDMARSHALING = [
+    makeVulkanTypeSimple(False, "uint8_t", 1, VULKAN_STREAM_VAR_NAME)
+]
+PARAMETERS_RESERVEDMARSHALING_GUEST = [
+    makeVulkanTypeSimple(False, "uint8_t", 1, VULKAN_STREAM_VAR_NAME)
+]
 PARAMETERS_VALIDATE = [
     makeVulkanTypeSimple(False, VALIDATE_RESULT_TYPE, 1, VALIDATE_VAR_NAME)
+]
+PARAMETERS_COUNTING = [
+    makeVulkanTypeSimple(False, "size_t", 1, VULKAN_STREAM_VAR_NAME)
 ]
 
 STRUCT_EXTENSION_PARAM = \

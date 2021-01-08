@@ -3,6 +3,7 @@ from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
 
 from .marshaling import VulkanMarshalingCodegen
+# from .reservedmarshaling import VulkanReservedMarshalingCodegen
 from .handlemap import HandleMapCodegen
 from .deepcopy import DeepcopyCodegen
 from .transform import TransformCodegen, genTransformsForVulkanType

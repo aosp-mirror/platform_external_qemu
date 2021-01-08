@@ -641,6 +641,21 @@ class CodeGen(object):
                        streamStorageVarType, ptrCast, accessExpr))
             self.stmt("%s->%s(%s)" % (streamVar, streamMethod, streamStorageVar))
 
+    def countPrimitive(self, typeInfo, accessType):
+        accessTypeName = accessType.typeName
+
+        if accessType.pointerIndirectionLevels == 0 and not self.validPrimitive(typeInfo, accessTypeName):
+            print("Tried to count a non-primitive type: %s" % accessTypeName)
+            os.abort()
+
+        needPtrCast = False
+
+        if accessType.pointerIndirectionLevels > 0:
+            streamSize = 8
+        else:
+            streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
+
+        return streamSize
 
 # Class to wrap a Vulkan API call.
 #
