@@ -158,7 +158,9 @@ class IOStream;
 #include <cutils/properties.h>
 
 #include "goldfish_vk_marshaling_guest.h"
+#include "goldfish_vk_reserved_marshaling_guest.h"
 #include "goldfish_vk_deepcopy_guest.h"
+#include "goldfish_vk_counting_guest.h"
 #include "goldfish_vk_handlemap_guest.h"
 #include "goldfish_vk_private_defs.h"
 #include "goldfish_vk_transform_guest.h"
@@ -194,6 +196,23 @@ class IOStream;
 #undef VK_KHR_android_surface
 #undef VK_ANDROID_external_memory_android_hardware_buffer
 """ % VULKAN_STREAM_TYPE_GUEST
+
+        reservedmarshalIncludeGuest = """
+#include "goldfish_vk_marshaling_guest.h"
+#include "goldfish_vk_private_defs.h"
+#include "%s.h"
+
+// Stuff we are not going to use but if included,
+// will cause compile errors. These are Android Vulkan
+// required extensions, but the approach will be to
+// implement them completely on the guest side.
+#undef VK_KHR_android_surface
+#undef VK_ANDROID_external_memory_android_hardware_buffer
+""" % VULKAN_STREAM_TYPE_GUEST
+
+        reservedmarshalImplIncludeGuest = """
+#include "Resources.h"
+"""
 
         vulkanStreamIncludeHost = """
 #include "goldfish_vk_private_defs.h"
@@ -287,6 +306,10 @@ using DlSymFunc = void* (void*, const char*);
 #include "goldfish_vk_extension_structs_guest.h"
 #include "goldfish_vk_private_defs.h"
 """
+        countingIncludes = """
+#include "vk_platform_compat.h"
+#include "goldfish_vk_private_defs.h"
+"""
 
         dispatchImplIncludes = """
 #include <stdio.h>
@@ -319,6 +342,7 @@ class BumpPool;
 
         decoderImplIncludes = """
 #include "common/goldfish_vk_marshaling.h"
+#include "common/goldfish_vk_reserved_marshaling.h"
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
@@ -374,8 +398,14 @@ class BumpPool;
         self.addGuestEncoderModule("goldfish_vk_marshaling_guest",
                                    extraHeader=commonCerealIncludesGuest + marshalIncludeGuest,
                                    extraImpl=commonCerealImplIncludesGuest)
+        self.addGuestEncoderModule("goldfish_vk_reserved_marshaling_guest",
+                                   extraHeader=commonCerealIncludesGuest + reservedmarshalIncludeGuest,
+                                   extraImpl=commonCerealImplIncludesGuest + reservedmarshalImplIncludeGuest)
         self.addGuestEncoderModule("goldfish_vk_deepcopy_guest",
                                    extraHeader=commonCerealIncludesGuest + poolIncludeGuest,
+                                   extraImpl=commonCerealImplIncludesGuest)
+        self.addGuestEncoderModule("goldfish_vk_counting_guest",
+                                   extraHeader=countingIncludes,
                                    extraImpl=commonCerealImplIncludesGuest)
         self.addGuestEncoderModule("goldfish_vk_handlemap_guest",
                                    extraHeader=commonCerealIncludesGuest + handleMapIncludeGuest,
@@ -389,6 +419,9 @@ class BumpPool;
         self.addModule("common", "goldfish_vk_extension_structs",
                        extraHeader=extensionStructsInclude)
         self.addModule("common", "goldfish_vk_marshaling",
+                       extraHeader=vulkanStreamIncludeHost,
+                       extraImpl=commonCerealImplIncludes)
+        self.addModule("common", "goldfish_vk_reserved_marshaling",
                        extraHeader=vulkanStreamIncludeHost,
                        extraImpl=commonCerealImplIncludes)
         self.addModule("common", "goldfish_vk_testing",
@@ -418,12 +451,15 @@ class BumpPool;
         self.addWrapper(cereal.VulkanEncoder, "VkEncoder")
         self.addWrapper(cereal.VulkanExtensionStructs, "goldfish_vk_extension_structs_guest")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling_guest", variant = "guest")
+        self.addWrapper(cereal.VulkanReservedMarshaling, "goldfish_vk_reserved_marshaling_guest", variant = "guest")
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy_guest")
+        self.addWrapper(cereal.VulkanCounting, "goldfish_vk_counting_guest")
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap_guest")
         self.addWrapper(cereal.VulkanTransform, "goldfish_vk_transform_guest")
         self.addWrapper(cereal.VulkanFuncTable, "func_table")
         self.addWrapper(cereal.VulkanExtensionStructs, "goldfish_vk_extension_structs")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling")
+        self.addWrapper(cereal.VulkanReservedMarshaling, "goldfish_vk_reserved_marshaling", variant = "host")
         self.addWrapper(cereal.VulkanTesting, "goldfish_vk_testing")
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy")
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap")

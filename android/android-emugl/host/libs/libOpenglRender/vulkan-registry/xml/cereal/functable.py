@@ -133,7 +133,7 @@ class VulkanFuncTable(VulkanWrapperGenerator):
                     [p.paramName for p in api.parameters])
             else:
                 cgen.funcCall(
-                    callLhs, "vkEnc->" + api.name, [p.paramName for p in api.parameters])
+                    callLhs, "vkEnc->" + api.name, [p.paramName for p in api.parameters] + ["true /* do lock */"])
 
             if retTypeName != "void":
                 cgen.stmt("return %s" % retVar)
