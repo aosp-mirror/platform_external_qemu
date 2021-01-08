@@ -3,6 +3,9 @@ from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
 
 from .marshaling import VulkanMarshalingCodegen
+from .reservedmarshaling import VulkanReservedMarshalingCodegen
+from .counting import VulkanCountingCodegen
+# from .reservedmarshaling import VulkanReservedMarshalingCodegen
 from .handlemap import HandleMapCodegen
 from .deepcopy import DeepcopyCodegen
 from .transform import TransformCodegen, genTransformsForVulkanType
@@ -49,7 +52,6 @@ using android::base::BumpPool;
 
 """
 
-COUNTING_STREAM = "countingStream"
 STREAM = "stream"
 RESOURCES = "resources"
 POOL = "pool"
@@ -150,9 +152,9 @@ def emit_count_marshal(typeInfo, param, cgen):
     res = \
         iterateVulkanType(
             typeInfo, param,
-            VulkanMarshalingCodegen( \
-               cgen, COUNTING_STREAM, param.paramName,
-               API_PREFIX_MARSHAL, direction="write"))
+            VulkanCountingCodegen( \
+               cgen, "featureBits", param.paramName, "countPtr",
+               "count_"))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
@@ -249,7 +251,6 @@ def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
     emit_custom_resource_preprocess(typeInfo, api, cgen);
 
     cgen.stmt("auto %s = mImpl->stream()" % STREAM)
-    cgen.stmt("auto %s = mImpl->countingStream()" % COUNTING_STREAM)
     cgen.stmt("auto %s = mImpl->resources()" % RESOURCES)
     cgen.stmt("auto %s = mImpl->pool()" % POOL)
     cgen.stmt("%s->setHandleMapping(%s->unwrapMapping())" % (STREAM, RESOURCES))
@@ -302,7 +303,9 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
     for localParam in apiForTransform.parameters:
         emit_transform(typeInfo, localParam, cgen, variant="tohost")
 
-    cgen.stmt("%s->rewind()" % COUNTING_STREAM)
+    cgen.stmt("uint32_t featureBits = %s->getFeatureBits()" % (STREAM))
+    cgen.stmt("size_t count = 0")
+    cgen.stmt("size_t* countPtr = &count")
     cgen.beginBlock()
 
     # Use counting stream to calculate the packet size.
@@ -313,9 +316,8 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
 
 def emit_parameter_encode_write_packet_info(typeInfo, api, cgen):
 
-    cgen.stmt("uint32_t packetSize_%s = 4 + 4 + (uint32_t)%s->bytesWritten()" % \
-              (api.name, COUNTING_STREAM))
-    cgen.stmt("%s->rewind()" % COUNTING_STREAM)
+    cgen.stmt("uint32_t packetSize_%s = 4 + 4 + count" % (api.name))
+    # cgen.stmt("fprintf(stderr, \"%s: packet size: %%u\\n\", count)" % api.name)
 
     cgen.stmt("uint32_t opcode_%s = OP_%s" % (api.name, api.name))
     cgen.stmt("%s->write(&opcode_%s, sizeof(uint32_t))" % (STREAM, api.name))
@@ -354,7 +356,6 @@ def emit_post(typeInfo, api, cgen):
 
 def emit_pool_free(cgen):
     cgen.stmt("pool->freeAll()")
-    cgen.stmt("%s->clearPool()" % COUNTING_STREAM)
     cgen.stmt("%s->clearPool()" % STREAM)
 
 def emit_return_unmarshal(typeInfo, api, cgen):
@@ -456,8 +457,6 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("%s->write(targetRange, actualSize)" % streamVar)
         cgen.endFor()
         cgen.endIf()
-
-    emit_flush_ranges(COUNTING_STREAM)
 
     emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
     emit_parameter_encode_do_parameter_write(typeInfo, api, cgen)
