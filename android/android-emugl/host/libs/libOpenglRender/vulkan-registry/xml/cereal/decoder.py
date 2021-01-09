@@ -3,10 +3,11 @@ from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, DISPATCHABLE_HANDLE_TYPES, NON_DISPATCHABLE_HANDLE_TYPES
 
 from .marshaling import VulkanMarshalingCodegen
+from .reservedmarshaling import VulkanReservedMarshalingCodegen
 from .transform import TransformCodegen, genTransformsForVulkanType
 
 from .wrapperdefs import API_PREFIX_MARSHAL
-from .wrapperdefs import API_PREFIX_UNMARSHAL
+from .wrapperdefs import API_PREFIX_UNMARSHAL, API_PREFIX_RESERVEDUNMARSHAL
 from .wrapperdefs import VULKAN_STREAM_TYPE
 
 from copy import copy
@@ -102,11 +103,12 @@ def emit_param_decl_for_reading(param, cgen):
             cgen.makeRichCTypeDecl(param))
 
 def emit_unmarshal(typeInfo, param, cgen):
-    iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
+    iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
         cgen,
         READ_STREAM,
         param.paramName,
-        API_PREFIX_UNMARSHAL,
+        "readStreamPtrPtr",
+        API_PREFIX_RESERVEDUNMARSHAL,
         direction="read",
         dynAlloc=True))
 
@@ -312,6 +314,7 @@ def emit_pool_free(cgen):
 
 def emit_snapshot(typeInfo, api, cgen):
 
+    cgen.stmt("%s->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin)" % READ_STREAM)
     cgen.stmt("size_t snapshotTraceBytes = %s->endTrace()" % READ_STREAM)
 
     additionalParams = [ \
@@ -588,6 +591,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("VulkanStream* %s = stream()" % WRITE_STREAM)
         self.cgen.stmt("VulkanMemReadingStream* %s = readStream()" % READ_STREAM)
         self.cgen.stmt("%s->setBuf((uint8_t*)(ptr + 8))" % READ_STREAM)
+        self.cgen.stmt("uint8_t* readStreamPtr = %s->getBuf(); uint8_t** readStreamPtrPtr = &readStreamPtr" % READ_STREAM)
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.stmt("auto vk = m_vk")
