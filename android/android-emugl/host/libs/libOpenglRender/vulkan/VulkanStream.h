@@ -73,6 +73,8 @@ public:
     ~VulkanMemReadingStream();
 
     void setBuf(uint8_t* buf);
+    uint8_t* getBuf();
+    void setReadPos(uintptr_t pos);
 
     ssize_t read(void *buffer, size_t size) override;
     ssize_t write(const void *buffer, size_t size) override;

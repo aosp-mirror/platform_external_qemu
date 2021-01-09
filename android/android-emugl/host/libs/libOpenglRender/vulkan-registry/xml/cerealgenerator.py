@@ -338,6 +338,7 @@ class BumpPool;
 
         decoderImplIncludes = """
 #include "common/goldfish_vk_marshaling.h"
+#include "common/goldfish_vk_reserved_marshaling.h"
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
