@@ -274,6 +274,14 @@ void VulkanMemReadingStream::setBuf(uint8_t* buf) {
     resetTrace();
 }
 
+uint8_t* VulkanMemReadingStream::getBuf() {
+    return mStart;
+}
+
+void VulkanMemReadingStream::setReadPos(uintptr_t pos) {
+    mReadPos = pos;
+}
+
 ssize_t VulkanMemReadingStream::read(void* buffer, size_t size) {
     memcpy(buffer, mStart + mReadPos, size);
     mReadPos += size;
