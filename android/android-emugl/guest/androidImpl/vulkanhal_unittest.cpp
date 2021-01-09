@@ -1697,7 +1697,7 @@ TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
 
     std::vector<FunctorThread*> threads;
 
-    constexpr uint32_t kRecordsPerThread = 1000000;
+    constexpr uint32_t kRecordsPerThread = 20000000;
     constexpr uint32_t kTotalRecords = kThreadCount * kRecordsPerThread;
 
     for (uint32_t i = 0; i < kThreadCount; ++i) {
