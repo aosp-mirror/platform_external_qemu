@@ -210,6 +210,10 @@ class IOStream;
 #undef VK_ANDROID_external_memory_android_hardware_buffer
 """ % VULKAN_STREAM_TYPE_GUEST
 
+        reservedmarshalImplIncludeGuest = """
+#include "Resources.h"
+"""
+
         vulkanStreamIncludeHost = """
 #include "goldfish_vk_private_defs.h"
 
@@ -397,7 +401,7 @@ class BumpPool;
                                    extraImpl=commonCerealImplIncludesGuest)
         self.addGuestEncoderModule("goldfish_vk_reserved_marshaling_guest",
                                    extraHeader=commonCerealIncludesGuest + reservedmarshalIncludeGuest,
-                                   extraImpl=commonCerealImplIncludesGuest)
+                                   extraImpl=commonCerealImplIncludesGuest + reservedmarshalImplIncludeGuest)
         self.addGuestEncoderModule("goldfish_vk_deepcopy_guest",
                                    extraHeader=commonCerealIncludesGuest + poolIncludeGuest,
                                    extraImpl=commonCerealImplIncludesGuest)
