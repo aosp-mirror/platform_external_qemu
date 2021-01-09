@@ -2044,11 +2044,11 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
-    if (opts->virtio_console) {
-        args.add2("-device", "virtio-serial-device");
-        args.add2("-device", "virtconsole,chardev=charvirtconsole0");
-        args.add2("-chardev", "stdio,id=charvirtconsole0");
-    }
+    args.add2("-chardev", "file,id=forhvc0,path=/usr/local/google/home/rkir/kernel-log.txt");
+    args.add2("-chardev", "file,id=forhvc1,path=/usr/local/google/home/rkir/logcat.txt");
+    args.add2("-device", "virtio-serial-pci");
+    args.add2("-device", "virtconsole,chardev=forhvc0");
+    args.add2("-device", "virtconsole,chardev=forhvc1");
 
     if (feature_is_enabled(kFeature_ModemSimulator)) {
         if (create_modem_simulator_configs_if_needed(hw)) {
