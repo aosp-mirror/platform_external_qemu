@@ -701,24 +701,14 @@ class CodeGen(object):
         ptrCast = "(uintptr_t)" if needPtrCast else ""
 
         if direction == "read":
-            if accessType.pointerIndirectionLevels == 0:
-                self.stmt("memcpy((%s*)&%s, %s, %s)" %
-                    (accessCast,
-                     accessExpr,
-                     streamVar,
-                     str(streamSize)))
-                self.stmt("android::base::Stream::%s((uint8_t*)&%s)" % (
-                    streamMethod,
-                    accessExpr))
-            else:
-                self.stmt("memcpy((%s)%s, %s, %s)" %
-                    (accessCast,
-                     accessExpr,
-                     streamVar,
-                     str(streamSize)))
-                self.stmt("android::base::Stream::%s((uint8_t*)%s)" % (
-                    streamMethod,
-                    accessExpr))
+            self.stmt("memcpy((%s*)&%s, %s, %s)" %
+                (accessCast,
+                 accessExpr,
+                 streamVar,
+                 str(streamSize)))
+            self.stmt("android::base::Stream::%s((uint8_t*)&%s)" % (
+                streamMethod,
+                accessExpr))
         else:
             self.stmt("%s %s = (%s)%s%s" %
                       (streamStorageVarType, streamStorageVar,
