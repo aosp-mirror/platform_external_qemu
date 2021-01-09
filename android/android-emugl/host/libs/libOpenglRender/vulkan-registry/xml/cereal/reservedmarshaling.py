@@ -523,7 +523,7 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
             castedAccessExpr = access
 
         if self.direction == "read" and self.dynAlloc:
-            self.cgen.stmt("size_t %s" % sizeVar)
+            self.cgen.stmt("uint32_t %s" % sizeVar)
 
             self.genMemcpyAndIncr(self.ptrVar, "(uint32_t*)", "&" + sizeVar, "sizeof(uint32_t)", toBe = True, actualSize = 4)
 
@@ -823,7 +823,7 @@ class VulkanReservedMarshaling(VulkanWrapperGenerator):
         accessVar = "structAccess"
         sizeVar = "currExtSize"
         cgen.stmt("VkInstanceCreateInfo* %s = (VkInstanceCreateInfo*)(%s)" % (accessVar, extParam.paramName))
-        cgen.stmt("size_t %s = %s(%s->getFeatureBits(), %s)" % (sizeVar, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME, VULKAN_STREAM_VAR_NAME, extParam.paramName))
+        cgen.stmt("uint32_t %s = %s(%s->getFeatureBits(), %s)" % (sizeVar, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME, VULKAN_STREAM_VAR_NAME, extParam.paramName))
 
         cgen.beginIf("!%s && %s" % (sizeVar, extParam.paramName))
 
