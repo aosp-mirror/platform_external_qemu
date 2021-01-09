@@ -1574,7 +1574,7 @@ extern "C" int main(int argc, char** argv) {
                                  ? opts->shell_serial
                                  : "null";
     if (opts->virtio_console) {
-        args.add2("-serial", "none");
+        args.add2("-serial", "null");
     } else {
         args.add2("-serial", serial);
     }
