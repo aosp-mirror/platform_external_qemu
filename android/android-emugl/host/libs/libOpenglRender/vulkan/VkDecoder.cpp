@@ -125,7 +125,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
         uint8_t* snapshotTraceBegin = vkReadStream->beginTrace();
         vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
         auto vk = m_vk;
-        m_pool.freeAll();
         switch (opcode)
         {
 #ifdef VK_VERSION_1_0
@@ -152,9 +151,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_1;
                 memcpy((uint64_t*)&cgen_var_1, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_1, (VkInstance*)pInstance, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pInstance;
+                *((VkInstance*))pInstance = (VkInstance)(VkInstance)((*&cgen_var_1));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkInstanceCreateInfo(m_state, (VkInstanceCreateInfo*)(pCreateInfo));
@@ -191,16 +188,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkInstance instance;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_3;
                 memcpy((uint64_t*)&cgen_var_3, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_3, (VkInstance*)&instance, 1);
-                auto unboxed_instance = unbox_VkInstance(instance);
-                auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for instance;
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_3));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -237,16 +229,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkInstance instance;
                 uint32_t* pPhysicalDeviceCount;
                 VkPhysicalDevice* pPhysicalDevices;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_5;
                 memcpy((uint64_t*)&cgen_var_5, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_5, (VkInstance*)&instance, 1);
-                auto unboxed_instance = unbox_VkInstance(instance);
-                auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for instance;
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_5));
                 // Begin manual dispatchable handle unboxing for pPhysicalDeviceCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -259,8 +246,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPhysicalDeviceCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPhysicalDeviceCount;
                 // Begin manual dispatchable handle unboxing for pPhysicalDevices;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -276,11 +261,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         vkReadStream->alloc((void**)&cgen_var_8, (*(pPhysicalDeviceCount)) * 8);
                         memcpy((uint64_t*)cgen_var_8, *readStreamPtrPtr, (*(pPhysicalDeviceCount)) * 8);
                         *readStreamPtrPtr += (*(pPhysicalDeviceCount)) * 8;
-                        vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(cgen_var_8, (VkPhysicalDevice*)pPhysicalDevices, (*(pPhysicalDeviceCount)));
+                        for (uint32_t k = 0; k < (*(pPhysicalDeviceCount)); ++k)
+                        {
+                            *((((VkPhysicalDevice*))pPhysicalDevices) + k) = (VkPhysicalDevice)(VkPhysicalDevice)(cgen_var_8[k]);
+                        }
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPhysicalDevices;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkEnumeratePhysicalDevices 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pPhysicalDeviceCount, (unsigned long long)pPhysicalDevices);
@@ -326,22 +312,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures* pFeatures;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_12;
                 memcpy((uint64_t*)&cgen_var_12, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_12, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_12));
                 // Begin manual dispatchable handle unboxing for pFeatures;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pFeatures, sizeof(VkPhysicalDeviceFeatures));
                 reservedunmarshal_VkPhysicalDeviceFeatures(vkReadStream, (VkPhysicalDeviceFeatures*)(pFeatures), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFeatures;
                 if (pFeatures)
                 {
                     transform_tohost_VkPhysicalDeviceFeatures(m_state, (VkPhysicalDeviceFeatures*)(pFeatures));
@@ -374,24 +353,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties* pFormatProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_13;
                 memcpy((uint64_t*)&cgen_var_13, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_13, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_13));
                 memcpy((VkFormat*)&format, *readStreamPtrPtr, sizeof(VkFormat));
                 *readStreamPtrPtr += sizeof(VkFormat);
                 // Begin manual dispatchable handle unboxing for pFormatProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pFormatProperties, sizeof(VkFormatProperties));
                 reservedunmarshal_VkFormatProperties(vkReadStream, (VkFormatProperties*)(pFormatProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFormatProperties;
                 if (pFormatProperties)
                 {
                     transform_tohost_VkFormatProperties(m_state, (VkFormatProperties*)(pFormatProperties));
@@ -428,16 +400,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkImageUsageFlags usage;
                 VkImageCreateFlags flags;
                 VkImageFormatProperties* pImageFormatProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_14;
                 memcpy((uint64_t*)&cgen_var_14, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_14, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_14));
                 memcpy((VkFormat*)&format, *readStreamPtrPtr, sizeof(VkFormat));
                 *readStreamPtrPtr += sizeof(VkFormat);
                 memcpy((VkImageType*)&type, *readStreamPtrPtr, sizeof(VkImageType));
@@ -452,8 +419,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pImageFormatProperties, sizeof(VkImageFormatProperties));
                 reservedunmarshal_VkImageFormatProperties(vkReadStream, (VkImageFormatProperties*)(pImageFormatProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pImageFormatProperties;
                 if (pImageFormatProperties)
                 {
                     transform_tohost_VkImageFormatProperties(m_state, (VkImageFormatProperties*)(pImageFormatProperties));
@@ -487,22 +452,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceProperties* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_15;
                 memcpy((uint64_t*)&cgen_var_15, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_15, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_15));
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pProperties, sizeof(VkPhysicalDeviceProperties));
                 reservedunmarshal_VkPhysicalDeviceProperties(vkReadStream, (VkPhysicalDeviceProperties*)(pProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     transform_tohost_VkPhysicalDeviceProperties(m_state, (VkPhysicalDeviceProperties*)(pProperties));
@@ -535,15 +493,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pQueueFamilyPropertyCount;
                 VkQueueFamilyProperties* pQueueFamilyProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_16;
                 memcpy((uint64_t*)&cgen_var_16, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_16, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_16));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for pQueueFamilyPropertyCount;
                 vkReadStream->unsetHandleMapping();
@@ -557,8 +513,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pQueueFamilyPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pQueueFamilyPropertyCount;
                 // Begin manual dispatchable handle unboxing for pQueueFamilyProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -573,8 +527,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkQueueFamilyProperties(vkReadStream, (VkQueueFamilyProperties*)(pQueueFamilyProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pQueueFamilyProperties;
                 if (pQueueFamilyProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
@@ -628,22 +580,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceMemoryProperties* pMemoryProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_21;
                 memcpy((uint64_t*)&cgen_var_21, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_21, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_21));
                 // Begin manual dispatchable handle unboxing for pMemoryProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryProperties, sizeof(VkPhysicalDeviceMemoryProperties));
                 reservedunmarshal_VkPhysicalDeviceMemoryProperties(vkReadStream, (VkPhysicalDeviceMemoryProperties*)(pMemoryProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryProperties;
                 if (pMemoryProperties)
                 {
                     transform_tohost_VkPhysicalDeviceMemoryProperties(m_state, (VkPhysicalDeviceMemoryProperties*)(pMemoryProperties));
@@ -675,15 +620,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkInstance instance;
                 const char* pName;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_22;
                 memcpy((uint64_t*)&cgen_var_22, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_22, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_22));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->loadStringInPlaceWithStreamPtr((char**)&pName, readStreamPtrPtr);
                 if (m_logCalls)
@@ -710,15 +653,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 const char* pName;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_23;
                 memcpy((uint64_t*)&cgen_var_23, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_23, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_23));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->loadStringInPlaceWithStreamPtr((char**)&pName, readStreamPtrPtr);
                 if (m_logCalls)
@@ -747,16 +688,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDeviceCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkDevice* pDevice;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_24;
                 memcpy((uint64_t*)&cgen_var_24, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_24, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_24));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDeviceCreateInfo));
                 reservedunmarshal_VkDeviceCreateInfo(vkReadStream, (VkDeviceCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -774,9 +710,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_26;
                 memcpy((uint64_t*)&cgen_var_26, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_26, (VkDevice*)pDevice, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDevice;
+                *((VkDevice*))pDevice = (VkDevice)(VkDevice)((*&cgen_var_26));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDeviceCreateInfo(m_state, (VkDeviceCreateInfo*)(pCreateInfo));
@@ -813,16 +747,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_28;
                 memcpy((uint64_t*)&cgen_var_28, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_28, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_28));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -886,8 +815,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -902,8 +829,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkExtensionProperties(vkReadStream, (VkExtensionProperties*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -961,16 +886,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const char* pLayerName;
                 uint32_t* pPropertyCount;
                 VkExtensionProperties* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_35;
                 memcpy((uint64_t*)&cgen_var_35, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_35, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_35));
                 if (vkReadStream->getFeatureBits() & VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT)
                 {
                     // WARNING PTR CHECK
@@ -998,8 +918,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -1014,8 +932,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkExtensionProperties(vkReadStream, (VkExtensionProperties*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -1083,8 +999,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -1099,8 +1013,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkLayerProperties(vkReadStream, (VkLayerProperties*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -1157,15 +1069,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pPropertyCount;
                 VkLayerProperties* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_45;
                 memcpy((uint64_t*)&cgen_var_45, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_45, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_45));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
@@ -1179,8 +1089,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -1195,8 +1103,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkLayerProperties(vkReadStream, (VkLayerProperties*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -1254,16 +1160,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t queueFamilyIndex;
                 uint32_t queueIndex;
                 VkQueue* pQueue;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_50;
                 memcpy((uint64_t*)&cgen_var_50, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_50, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_50));
                 memcpy((uint32_t*)&queueFamilyIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&queueIndex, *readStreamPtrPtr, sizeof(uint32_t));
@@ -1274,9 +1175,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_51;
                 memcpy((uint64_t*)&cgen_var_51, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_51, (VkQueue*)pQueue, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pQueue;
+                *((VkQueue*))pQueue = (VkQueue)(VkQueue)((*&cgen_var_51));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetDeviceQueue 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)queueFamilyIndex, (unsigned long long)queueIndex, (unsigned long long)pQueue);
@@ -1305,16 +1204,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t submitCount;
                 const VkSubmitInfo* pSubmits;
                 VkFence fence;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_53;
                 memcpy((uint64_t*)&cgen_var_53, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_53, (VkQueue*)&queue, 1);
-                auto unboxed_queue = unbox_VkQueue(queue);
-                auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for queue;
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_53));
                 memcpy((uint32_t*)&submitCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pSubmits, ((submitCount)) * sizeof(const VkSubmitInfo));
@@ -1325,7 +1219,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_54;
                 memcpy((uint64_t*)&cgen_var_54, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_54, (VkFence*)&fence, 1);
+                *((VkFence*))&fence = (VkFence)unbox_VkFence((*&cgen_var_54));
                 if (pSubmits)
                 {
                     for (uint32_t i = 0; i < (uint32_t)((submitCount)); ++i)
@@ -1356,16 +1250,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             android::base::beginTrace("vkQueueWaitIdle decode");
             {
                 VkQueue queue;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_55;
                 memcpy((uint64_t*)&cgen_var_55, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_55, (VkQueue*)&queue, 1);
-                auto unboxed_queue = unbox_VkQueue(queue);
-                auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for queue;
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_55));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkQueueWaitIdle 0x%llx \n", ioStream, (unsigned long long)queue);
@@ -1389,15 +1278,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             android::base::beginTrace("vkDeviceWaitIdle decode");
             {
                 VkDevice device;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_56;
                 memcpy((uint64_t*)&cgen_var_56, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_56, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_56));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 if (m_logCalls)
                 {
@@ -1425,16 +1312,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkMemoryAllocateInfo* pAllocateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkDeviceMemory* pMemory;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_57;
                 memcpy((uint64_t*)&cgen_var_57, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_57, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_57));
                 vkReadStream->alloc((void**)&pAllocateInfo, sizeof(const VkMemoryAllocateInfo));
                 reservedunmarshal_VkMemoryAllocateInfo(vkReadStream, (VkMemoryAllocateInfo*)(pAllocateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -1452,9 +1334,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_59;
                 memcpy((uint64_t*)&cgen_var_59, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_59, (VkDeviceMemory*)pMemory, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemory;
+                *((VkDeviceMemory*))pMemory = (VkDeviceMemory)(VkDeviceMemory)((*&cgen_var_59));
                 if (pAllocateInfo)
                 {
                     transform_tohost_VkMemoryAllocateInfo(m_state, (VkMemoryAllocateInfo*)(pAllocateInfo));
@@ -1496,26 +1376,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkDeviceMemory memory;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_61;
                 memcpy((uint64_t*)&cgen_var_61, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_61, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_61));
                 // Begin manual non dispatchable handle destroy unboxing for memory;
-                VkDeviceMemory* boxed_memory_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_memory_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_62;
                 memcpy((uint64_t*)&cgen_var_62, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_62, (VkDeviceMemory*)&memory, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for memory;
+                *((VkDeviceMemory*))&memory = (VkDeviceMemory)unbox_VkDeviceMemory((*&cgen_var_62));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -1555,20 +1425,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceSize size;
                 VkMemoryMapFlags flags;
                 void** ppData;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_64;
                 memcpy((uint64_t*)&cgen_var_64, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_64, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_64));
                 uint64_t cgen_var_65;
                 memcpy((uint64_t*)&cgen_var_65, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_65, (VkDeviceMemory*)&memory, 1);
+                *((VkDeviceMemory*))&memory = (VkDeviceMemory)unbox_VkDeviceMemory((*&cgen_var_65));
                 memcpy((VkDeviceSize*)&offset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((VkDeviceSize*)&size, *readStreamPtrPtr, sizeof(VkDeviceSize));
@@ -1587,8 +1452,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((void**)ppData, *readStreamPtrPtr, sizeof(void*));
                     *readStreamPtrPtr += sizeof(void*);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for ppData;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkMapMemory 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)offset, (unsigned long long)size, (unsigned long long)flags, (unsigned long long)ppData);
@@ -1620,20 +1483,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 VkDeviceMemory memory;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_68;
                 memcpy((uint64_t*)&cgen_var_68, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_68, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_68));
                 uint64_t cgen_var_69;
                 memcpy((uint64_t*)&cgen_var_69, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_69, (VkDeviceMemory*)&memory, 1);
+                *((VkDeviceMemory*))&memory = (VkDeviceMemory)unbox_VkDeviceMemory((*&cgen_var_69));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkUnmapMemory 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory);
@@ -1657,15 +1515,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 uint32_t memoryRangeCount;
                 const VkMappedMemoryRange* pMemoryRanges;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_70;
                 memcpy((uint64_t*)&cgen_var_70, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_70, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_70));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&memoryRangeCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -1723,15 +1579,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 uint32_t memoryRangeCount;
                 const VkMappedMemoryRange* pMemoryRanges;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_71;
                 memcpy((uint64_t*)&cgen_var_71, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_71, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_71));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&memoryRangeCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -1790,27 +1644,23 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkDeviceMemory memory;
                 VkDeviceSize* pCommittedMemoryInBytes;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_72;
                 memcpy((uint64_t*)&cgen_var_72, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_72, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_72));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_73;
                 memcpy((uint64_t*)&cgen_var_73, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_73, (VkDeviceMemory*)&memory, 1);
+                *((VkDeviceMemory*))&memory = (VkDeviceMemory)unbox_VkDeviceMemory((*&cgen_var_73));
                 // Begin manual dispatchable handle unboxing for pCommittedMemoryInBytes;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pCommittedMemoryInBytes, sizeof(VkDeviceSize));
                 memcpy((VkDeviceSize*)pCommittedMemoryInBytes, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pCommittedMemoryInBytes;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetDeviceMemoryCommitment 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)pCommittedMemoryInBytes);
@@ -1836,24 +1686,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkBuffer buffer;
                 VkDeviceMemory memory;
                 VkDeviceSize memoryOffset;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_74;
                 memcpy((uint64_t*)&cgen_var_74, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_74, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_74));
                 uint64_t cgen_var_75;
                 memcpy((uint64_t*)&cgen_var_75, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_75, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_75));
                 uint64_t cgen_var_76;
                 memcpy((uint64_t*)&cgen_var_76, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_76, (VkDeviceMemory*)&memory, 1);
+                *((VkDeviceMemory*))&memory = (VkDeviceMemory)unbox_VkDeviceMemory((*&cgen_var_76));
                 memcpy((VkDeviceSize*)&memoryOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 if (m_logCalls)
@@ -1882,24 +1727,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkImage image;
                 VkDeviceMemory memory;
                 VkDeviceSize memoryOffset;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_77;
                 memcpy((uint64_t*)&cgen_var_77, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_77, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_77));
                 uint64_t cgen_var_78;
                 memcpy((uint64_t*)&cgen_var_78, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_78, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_78));
                 uint64_t cgen_var_79;
                 memcpy((uint64_t*)&cgen_var_79, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_79, (VkDeviceMemory*)&memory, 1);
+                *((VkDeviceMemory*))&memory = (VkDeviceMemory)unbox_VkDeviceMemory((*&cgen_var_79));
                 memcpy((VkDeviceSize*)&memoryOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 if (m_logCalls)
@@ -1927,26 +1767,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkBuffer buffer;
                 VkMemoryRequirements* pMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_80;
                 memcpy((uint64_t*)&cgen_var_80, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_80, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_80));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_81;
                 memcpy((uint64_t*)&cgen_var_81, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_81, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_81));
                 // Begin manual dispatchable handle unboxing for pMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements));
                 reservedunmarshal_VkMemoryRequirements(vkReadStream, (VkMemoryRequirements*)(pMemoryRequirements), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryRequirements;
                 if (pMemoryRequirements)
                 {
                     transform_tohost_VkMemoryRequirements(m_state, (VkMemoryRequirements*)(pMemoryRequirements));
@@ -1979,26 +1815,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkImage image;
                 VkMemoryRequirements* pMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_82;
                 memcpy((uint64_t*)&cgen_var_82, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_82, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_82));
                 uint64_t cgen_var_83;
                 memcpy((uint64_t*)&cgen_var_83, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_83, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_83));
                 // Begin manual dispatchable handle unboxing for pMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements));
                 reservedunmarshal_VkMemoryRequirements(vkReadStream, (VkMemoryRequirements*)(pMemoryRequirements), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryRequirements;
                 if (pMemoryRequirements)
                 {
                     transform_tohost_VkMemoryRequirements(m_state, (VkMemoryRequirements*)(pMemoryRequirements));
@@ -2032,20 +1861,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkImage image;
                 uint32_t* pSparseMemoryRequirementCount;
                 VkSparseImageMemoryRequirements* pSparseMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_84;
                 memcpy((uint64_t*)&cgen_var_84, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_84, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_84));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_85;
                 memcpy((uint64_t*)&cgen_var_85, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_85, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_85));
                 // Begin manual dispatchable handle unboxing for pSparseMemoryRequirementCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -2058,8 +1885,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pSparseMemoryRequirementCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSparseMemoryRequirementCount;
                 // Begin manual dispatchable handle unboxing for pSparseMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -2074,8 +1899,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkSparseImageMemoryRequirements(vkReadStream, (VkSparseImageMemoryRequirements*)(pSparseMemoryRequirements + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSparseMemoryRequirements;
                 if (pSparseMemoryRequirements)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
@@ -2135,15 +1958,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkImageTiling tiling;
                 uint32_t* pPropertyCount;
                 VkSparseImageFormatProperties* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_90;
                 memcpy((uint64_t*)&cgen_var_90, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_90, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_90));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 memcpy((VkFormat*)&format, *readStreamPtrPtr, sizeof(VkFormat));
                 *readStreamPtrPtr += sizeof(VkFormat);
@@ -2167,8 +1988,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -2183,8 +2002,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkSparseImageFormatProperties(vkReadStream, (VkSparseImageFormatProperties*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -2240,15 +2057,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t bindInfoCount;
                 const VkBindSparseInfo* pBindInfo;
                 VkFence fence;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_95;
                 memcpy((uint64_t*)&cgen_var_95, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_95, (VkQueue*)&queue, 1);
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_95));
                 auto unboxed_queue = unbox_VkQueue(queue);
                 auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for queue;
                 memcpy((uint32_t*)&bindInfoCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -2260,7 +2075,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_96;
                 memcpy((uint64_t*)&cgen_var_96, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_96, (VkFence*)&fence, 1);
+                *((VkFence*))&fence = (VkFence)unbox_VkFence((*&cgen_var_96));
                 if (pBindInfo)
                 {
                     for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
@@ -2294,15 +2109,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkFenceCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkFence* pFence;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_97;
                 memcpy((uint64_t*)&cgen_var_97, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_97, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_97));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkFenceCreateInfo));
                 reservedunmarshal_VkFenceCreateInfo(vkReadStream, (VkFenceCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -2321,9 +2134,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_99;
                 memcpy((uint64_t*)&cgen_var_99, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_99, (VkFence*)pFence, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFence;
+                *((VkFence*))pFence = (VkFence)(VkFence)((*&cgen_var_99));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkFenceCreateInfo(m_state, (VkFenceCreateInfo*)(pCreateInfo));
@@ -2365,26 +2176,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkFence fence;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_101;
                 memcpy((uint64_t*)&cgen_var_101, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_101, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_101));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for fence;
-                VkFence* boxed_fence_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_fence_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_102;
                 memcpy((uint64_t*)&cgen_var_102, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_102, (VkFence*)&fence, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for fence;
+                *((VkFence*))&fence = (VkFence)unbox_VkFence((*&cgen_var_102));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -2421,15 +2225,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 uint32_t fenceCount;
                 const VkFence* pFences;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_104;
                 memcpy((uint64_t*)&cgen_var_104, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_104, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_104));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&fenceCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -2440,7 +2242,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_105, ((fenceCount)) * 8);
                     memcpy((uint64_t*)cgen_var_105, *readStreamPtrPtr, ((fenceCount)) * 8);
                     *readStreamPtrPtr += ((fenceCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkFence(cgen_var_105, (VkFence*)pFences, ((fenceCount)));
+                    for (uint32_t k = 0; k < ((fenceCount)); ++k)
+                    {
+                        *((((VkFence*))pFences) + k) = (VkFence)unbox_VkFence(cgen_var_105[k]);
+                    }
                 }
                 if (m_logCalls)
                 {
@@ -2466,20 +2271,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 VkFence fence;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_106;
                 memcpy((uint64_t*)&cgen_var_106, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_106, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_106));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_107;
                 memcpy((uint64_t*)&cgen_var_107, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_107, (VkFence*)&fence, 1);
+                *((VkFence*))&fence = (VkFence)unbox_VkFence((*&cgen_var_107));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetFenceStatus 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)fence);
@@ -2507,15 +2310,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkFence* pFences;
                 VkBool32 waitAll;
                 uint64_t timeout;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_108;
                 memcpy((uint64_t*)&cgen_var_108, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_108, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_108));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&fenceCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -2526,7 +2327,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_109, ((fenceCount)) * 8);
                     memcpy((uint64_t*)cgen_var_109, *readStreamPtrPtr, ((fenceCount)) * 8);
                     *readStreamPtrPtr += ((fenceCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkFence(cgen_var_109, (VkFence*)pFences, ((fenceCount)));
+                    for (uint32_t k = 0; k < ((fenceCount)); ++k)
+                    {
+                        *((((VkFence*))pFences) + k) = (VkFence)unbox_VkFence(cgen_var_109[k]);
+                    }
                 }
                 memcpy((VkBool32*)&waitAll, *readStreamPtrPtr, sizeof(VkBool32));
                 *readStreamPtrPtr += sizeof(VkBool32);
@@ -2558,16 +2362,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkSemaphoreCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSemaphore* pSemaphore;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_110;
                 memcpy((uint64_t*)&cgen_var_110, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_110, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_110));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkSemaphoreCreateInfo));
                 reservedunmarshal_VkSemaphoreCreateInfo(vkReadStream, (VkSemaphoreCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -2585,9 +2384,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_112;
                 memcpy((uint64_t*)&cgen_var_112, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSemaphore(&cgen_var_112, (VkSemaphore*)pSemaphore, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSemaphore;
+                *((VkSemaphore*))pSemaphore = (VkSemaphore)(VkSemaphore)((*&cgen_var_112));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkSemaphoreCreateInfo(m_state, (VkSemaphoreCreateInfo*)(pCreateInfo));
@@ -2629,26 +2426,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkSemaphore semaphore;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_114;
                 memcpy((uint64_t*)&cgen_var_114, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_114, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_114));
                 // Begin manual non dispatchable handle destroy unboxing for semaphore;
-                VkSemaphore* boxed_semaphore_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_semaphore_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_115;
                 memcpy((uint64_t*)&cgen_var_115, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSemaphore(&cgen_var_115, (VkSemaphore*)&semaphore, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for semaphore;
+                *((VkSemaphore*))&semaphore = (VkSemaphore)unbox_VkSemaphore((*&cgen_var_115));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -2686,15 +2473,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkEventCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkEvent* pEvent;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_117;
                 memcpy((uint64_t*)&cgen_var_117, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_117, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_117));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkEventCreateInfo));
                 reservedunmarshal_VkEventCreateInfo(vkReadStream, (VkEventCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -2713,9 +2498,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_119;
                 memcpy((uint64_t*)&cgen_var_119, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_119, (VkEvent*)pEvent, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pEvent;
+                *((VkEvent*))pEvent = (VkEvent)(VkEvent)((*&cgen_var_119));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkEventCreateInfo(m_state, (VkEventCreateInfo*)(pCreateInfo));
@@ -2757,26 +2540,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkEvent event;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_121;
                 memcpy((uint64_t*)&cgen_var_121, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_121, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_121));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for event;
-                VkEvent* boxed_event_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_event_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_122;
                 memcpy((uint64_t*)&cgen_var_122, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_122, (VkEvent*)&event, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for event;
+                *((VkEvent*))&event = (VkEvent)unbox_VkEvent((*&cgen_var_122));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -2812,20 +2588,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 VkEvent event;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_124;
                 memcpy((uint64_t*)&cgen_var_124, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_124, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_124));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_125;
                 memcpy((uint64_t*)&cgen_var_125, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_125, (VkEvent*)&event, 1);
+                *((VkEvent*))&event = (VkEvent)unbox_VkEvent((*&cgen_var_125));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetEventStatus 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)event);
@@ -2850,20 +2624,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 VkEvent event;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_126;
                 memcpy((uint64_t*)&cgen_var_126, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_126, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_126));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_127;
                 memcpy((uint64_t*)&cgen_var_127, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_127, (VkEvent*)&event, 1);
+                *((VkEvent*))&event = (VkEvent)unbox_VkEvent((*&cgen_var_127));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkSetEvent 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)event);
@@ -2888,20 +2660,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 VkEvent event;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_128;
                 memcpy((uint64_t*)&cgen_var_128, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_128, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_128));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_129;
                 memcpy((uint64_t*)&cgen_var_129, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_129, (VkEvent*)&event, 1);
+                *((VkEvent*))&event = (VkEvent)unbox_VkEvent((*&cgen_var_129));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkResetEvent 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)event);
@@ -2928,15 +2698,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkQueryPoolCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkQueryPool* pQueryPool;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_130;
                 memcpy((uint64_t*)&cgen_var_130, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_130, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_130));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkQueryPoolCreateInfo));
                 reservedunmarshal_VkQueryPoolCreateInfo(vkReadStream, (VkQueryPoolCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -2955,9 +2723,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_132;
                 memcpy((uint64_t*)&cgen_var_132, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_132, (VkQueryPool*)pQueryPool, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pQueryPool;
+                *((VkQueryPool*))pQueryPool = (VkQueryPool)(VkQueryPool)((*&cgen_var_132));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkQueryPoolCreateInfo(m_state, (VkQueryPoolCreateInfo*)(pCreateInfo));
@@ -2999,26 +2765,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkQueryPool queryPool;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_134;
                 memcpy((uint64_t*)&cgen_var_134, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_134, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_134));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for queryPool;
-                VkQueryPool* boxed_queryPool_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_queryPool_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_135;
                 memcpy((uint64_t*)&cgen_var_135, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_135, (VkQueryPool*)&queryPool, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for queryPool;
+                *((VkQueryPool*))&queryPool = (VkQueryPool)unbox_VkQueryPool((*&cgen_var_135));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -3060,20 +2819,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 void* pData;
                 VkDeviceSize stride;
                 VkQueryResultFlags flags;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_137;
                 memcpy((uint64_t*)&cgen_var_137, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_137, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_137));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_138;
                 memcpy((uint64_t*)&cgen_var_138, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_138, (VkQueryPool*)&queryPool, 1);
+                *((VkQueryPool*))&queryPool = (VkQueryPool)unbox_VkQueryPool((*&cgen_var_138));
                 memcpy((uint32_t*)&firstQuery, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&queryCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -3086,8 +2843,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pData, ((dataSize)) * sizeof(uint8_t));
                 memcpy((void*)pData, *readStreamPtrPtr, ((dataSize)) * sizeof(uint8_t));
                 *readStreamPtrPtr += ((dataSize)) * sizeof(uint8_t);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pData;
                 memcpy((VkDeviceSize*)&stride, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((VkQueryResultFlags*)&flags, *readStreamPtrPtr, sizeof(VkQueryResultFlags));
@@ -3119,16 +2874,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkBufferCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkBuffer* pBuffer;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_140;
                 memcpy((uint64_t*)&cgen_var_140, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_140, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_140));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkBufferCreateInfo));
                 reservedunmarshal_VkBufferCreateInfo(vkReadStream, (VkBufferCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -3146,9 +2896,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_142;
                 memcpy((uint64_t*)&cgen_var_142, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_142, (VkBuffer*)pBuffer, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pBuffer;
+                *((VkBuffer*))pBuffer = (VkBuffer)(VkBuffer)((*&cgen_var_142));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkBufferCreateInfo(m_state, (VkBufferCreateInfo*)(pCreateInfo));
@@ -3190,26 +2938,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkBuffer buffer;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_144;
                 memcpy((uint64_t*)&cgen_var_144, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_144, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_144));
                 // Begin manual non dispatchable handle destroy unboxing for buffer;
-                VkBuffer* boxed_buffer_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_buffer_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_145;
                 memcpy((uint64_t*)&cgen_var_145, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_145, (VkBuffer*)&buffer, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for buffer;
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_145));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -3247,15 +2985,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkBufferViewCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkBufferView* pView;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_147;
                 memcpy((uint64_t*)&cgen_var_147, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_147, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_147));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkBufferViewCreateInfo));
                 reservedunmarshal_VkBufferViewCreateInfo(vkReadStream, (VkBufferViewCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -3274,9 +3010,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_149;
                 memcpy((uint64_t*)&cgen_var_149, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBufferView(&cgen_var_149, (VkBufferView*)pView, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pView;
+                *((VkBufferView*))pView = (VkBufferView)(VkBufferView)((*&cgen_var_149));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkBufferViewCreateInfo(m_state, (VkBufferViewCreateInfo*)(pCreateInfo));
@@ -3318,26 +3052,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkBufferView bufferView;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_151;
                 memcpy((uint64_t*)&cgen_var_151, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_151, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_151));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for bufferView;
-                VkBufferView* boxed_bufferView_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_bufferView_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_152;
                 memcpy((uint64_t*)&cgen_var_152, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBufferView(&cgen_var_152, (VkBufferView*)&bufferView, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for bufferView;
+                *((VkBufferView*))&bufferView = (VkBufferView)unbox_VkBufferView((*&cgen_var_152));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -3375,16 +3102,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkImageCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkImage* pImage;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_154;
                 memcpy((uint64_t*)&cgen_var_154, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_154, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_154));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkImageCreateInfo));
                 reservedunmarshal_VkImageCreateInfo(vkReadStream, (VkImageCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -3402,9 +3124,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_156;
                 memcpy((uint64_t*)&cgen_var_156, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_156, (VkImage*)pImage, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pImage;
+                *((VkImage*))pImage = (VkImage)(VkImage)((*&cgen_var_156));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkImageCreateInfo(m_state, (VkImageCreateInfo*)(pCreateInfo));
@@ -3446,26 +3166,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkImage image;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_158;
                 memcpy((uint64_t*)&cgen_var_158, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_158, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_158));
                 // Begin manual non dispatchable handle destroy unboxing for image;
-                VkImage* boxed_image_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_image_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_159;
                 memcpy((uint64_t*)&cgen_var_159, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_159, (VkImage*)&image, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for image;
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_159));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -3503,28 +3213,24 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkImage image;
                 const VkImageSubresource* pSubresource;
                 VkSubresourceLayout* pLayout;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_161;
                 memcpy((uint64_t*)&cgen_var_161, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_161, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_161));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_162;
                 memcpy((uint64_t*)&cgen_var_162, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_162, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_162));
                 vkReadStream->alloc((void**)&pSubresource, sizeof(const VkImageSubresource));
                 reservedunmarshal_VkImageSubresource(vkReadStream, (VkImageSubresource*)(pSubresource), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pLayout;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pLayout, sizeof(VkSubresourceLayout));
                 reservedunmarshal_VkSubresourceLayout(vkReadStream, (VkSubresourceLayout*)(pLayout), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pLayout;
                 if (pSubresource)
                 {
                     transform_tohost_VkImageSubresource(m_state, (VkImageSubresource*)(pSubresource));
@@ -3562,16 +3268,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkImageViewCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkImageView* pView;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_163;
                 memcpy((uint64_t*)&cgen_var_163, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_163, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_163));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkImageViewCreateInfo));
                 reservedunmarshal_VkImageViewCreateInfo(vkReadStream, (VkImageViewCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -3589,9 +3290,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_165;
                 memcpy((uint64_t*)&cgen_var_165, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImageView(&cgen_var_165, (VkImageView*)pView, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pView;
+                *((VkImageView*))pView = (VkImageView)(VkImageView)((*&cgen_var_165));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkImageViewCreateInfo(m_state, (VkImageViewCreateInfo*)(pCreateInfo));
@@ -3633,26 +3332,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkImageView imageView;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_167;
                 memcpy((uint64_t*)&cgen_var_167, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_167, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_167));
                 // Begin manual non dispatchable handle destroy unboxing for imageView;
-                VkImageView* boxed_imageView_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_imageView_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_168;
                 memcpy((uint64_t*)&cgen_var_168, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImageView(&cgen_var_168, (VkImageView*)&imageView, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for imageView;
+                *((VkImageView*))&imageView = (VkImageView)unbox_VkImageView((*&cgen_var_168));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -3690,15 +3379,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkShaderModuleCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkShaderModule* pShaderModule;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_170;
                 memcpy((uint64_t*)&cgen_var_170, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_170, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_170));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkShaderModuleCreateInfo));
                 reservedunmarshal_VkShaderModuleCreateInfo(vkReadStream, (VkShaderModuleCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -3717,9 +3404,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_172;
                 memcpy((uint64_t*)&cgen_var_172, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkShaderModule(&cgen_var_172, (VkShaderModule*)pShaderModule, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pShaderModule;
+                *((VkShaderModule*))pShaderModule = (VkShaderModule)(VkShaderModule)((*&cgen_var_172));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkShaderModuleCreateInfo(m_state, (VkShaderModuleCreateInfo*)(pCreateInfo));
@@ -3761,26 +3446,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkShaderModule shaderModule;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_174;
                 memcpy((uint64_t*)&cgen_var_174, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_174, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_174));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for shaderModule;
-                VkShaderModule* boxed_shaderModule_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_shaderModule_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_175;
                 memcpy((uint64_t*)&cgen_var_175, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkShaderModule(&cgen_var_175, (VkShaderModule*)&shaderModule, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for shaderModule;
+                *((VkShaderModule*))&shaderModule = (VkShaderModule)unbox_VkShaderModule((*&cgen_var_175));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -3818,15 +3496,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkPipelineCacheCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkPipelineCache* pPipelineCache;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_177;
                 memcpy((uint64_t*)&cgen_var_177, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_177, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_177));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkPipelineCacheCreateInfo));
                 reservedunmarshal_VkPipelineCacheCreateInfo(vkReadStream, (VkPipelineCacheCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -3845,9 +3521,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_179;
                 memcpy((uint64_t*)&cgen_var_179, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineCache(&cgen_var_179, (VkPipelineCache*)pPipelineCache, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPipelineCache;
+                *((VkPipelineCache*))pPipelineCache = (VkPipelineCache)(VkPipelineCache)((*&cgen_var_179));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkPipelineCacheCreateInfo(m_state, (VkPipelineCacheCreateInfo*)(pCreateInfo));
@@ -3889,26 +3563,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkPipelineCache pipelineCache;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_181;
                 memcpy((uint64_t*)&cgen_var_181, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_181, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_181));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for pipelineCache;
-                VkPipelineCache* boxed_pipelineCache_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_pipelineCache_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_182;
                 memcpy((uint64_t*)&cgen_var_182, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineCache(&cgen_var_182, (VkPipelineCache*)&pipelineCache, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for pipelineCache;
+                *((VkPipelineCache*))&pipelineCache = (VkPipelineCache)unbox_VkPipelineCache((*&cgen_var_182));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -3946,20 +3613,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPipelineCache pipelineCache;
                 size_t* pDataSize;
                 void* pData;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_184;
                 memcpy((uint64_t*)&cgen_var_184, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_184, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_184));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_185;
                 memcpy((uint64_t*)&cgen_var_185, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineCache(&cgen_var_185, (VkPipelineCache*)&pipelineCache, 1);
+                *((VkPipelineCache*))&pipelineCache = (VkPipelineCache)unbox_VkPipelineCache((*&cgen_var_185));
                 // Begin manual dispatchable handle unboxing for pDataSize;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -3973,8 +3638,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     android::base::Stream::fromBe64((uint8_t*)&(*pDataSize));
                     *readStreamPtrPtr += 8;
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDataSize;
                 // Begin manual dispatchable handle unboxing for pData;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -3987,8 +3650,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((void*)pData, *readStreamPtrPtr, (*(pDataSize)) * sizeof(uint8_t));
                     *readStreamPtrPtr += (*(pDataSize)) * sizeof(uint8_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pData;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetPipelineCacheData 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipelineCache, (unsigned long long)pDataSize, (unsigned long long)pData);
@@ -4030,20 +3691,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPipelineCache dstCache;
                 uint32_t srcCacheCount;
                 const VkPipelineCache* pSrcCaches;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_192;
                 memcpy((uint64_t*)&cgen_var_192, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_192, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_192));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_193;
                 memcpy((uint64_t*)&cgen_var_193, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineCache(&cgen_var_193, (VkPipelineCache*)&dstCache, 1);
+                *((VkPipelineCache*))&dstCache = (VkPipelineCache)unbox_VkPipelineCache((*&cgen_var_193));
                 memcpy((uint32_t*)&srcCacheCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pSrcCaches, ((srcCacheCount)) * sizeof(const VkPipelineCache));
@@ -4053,7 +3712,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_194, ((srcCacheCount)) * 8);
                     memcpy((uint64_t*)cgen_var_194, *readStreamPtrPtr, ((srcCacheCount)) * 8);
                     *readStreamPtrPtr += ((srcCacheCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkPipelineCache(cgen_var_194, (VkPipelineCache*)pSrcCaches, ((srcCacheCount)));
+                    for (uint32_t k = 0; k < ((srcCacheCount)); ++k)
+                    {
+                        *((((VkPipelineCache*))pSrcCaches) + k) = (VkPipelineCache)unbox_VkPipelineCache(cgen_var_194[k]);
+                    }
                 }
                 if (m_logCalls)
                 {
@@ -4083,20 +3745,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkGraphicsPipelineCreateInfo* pCreateInfos;
                 const VkAllocationCallbacks* pAllocator;
                 VkPipeline* pPipelines;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_195;
                 memcpy((uint64_t*)&cgen_var_195, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_195, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_195));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_196;
                 memcpy((uint64_t*)&cgen_var_196, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineCache(&cgen_var_196, (VkPipelineCache*)&pipelineCache, 1);
+                *((VkPipelineCache*))&pipelineCache = (VkPipelineCache)unbox_VkPipelineCache((*&cgen_var_196));
                 memcpy((uint32_t*)&createInfoCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pCreateInfos, ((createInfoCount)) * sizeof(const VkGraphicsPipelineCreateInfo));
@@ -4122,10 +3782,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_198, ((createInfoCount)) * 8);
                     memcpy((uint64_t*)cgen_var_198, *readStreamPtrPtr, ((createInfoCount)) * 8);
                     *readStreamPtrPtr += ((createInfoCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkPipeline(cgen_var_198, (VkPipeline*)pPipelines, ((createInfoCount)));
+                    for (uint32_t k = 0; k < ((createInfoCount)); ++k)
+                    {
+                        *((((VkPipeline*))pPipelines) + k) = (VkPipeline)(VkPipeline)(cgen_var_198[k]);
+                    }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPipelines;
                 if (pCreateInfos)
                 {
                     for (uint32_t i = 0; i < (uint32_t)((createInfoCount)); ++i)
@@ -4177,20 +3838,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkComputePipelineCreateInfo* pCreateInfos;
                 const VkAllocationCallbacks* pAllocator;
                 VkPipeline* pPipelines;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_200;
                 memcpy((uint64_t*)&cgen_var_200, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_200, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_200));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_201;
                 memcpy((uint64_t*)&cgen_var_201, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineCache(&cgen_var_201, (VkPipelineCache*)&pipelineCache, 1);
+                *((VkPipelineCache*))&pipelineCache = (VkPipelineCache)unbox_VkPipelineCache((*&cgen_var_201));
                 memcpy((uint32_t*)&createInfoCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pCreateInfos, ((createInfoCount)) * sizeof(const VkComputePipelineCreateInfo));
@@ -4216,10 +3875,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_203, ((createInfoCount)) * 8);
                     memcpy((uint64_t*)cgen_var_203, *readStreamPtrPtr, ((createInfoCount)) * 8);
                     *readStreamPtrPtr += ((createInfoCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkPipeline(cgen_var_203, (VkPipeline*)pPipelines, ((createInfoCount)));
+                    for (uint32_t k = 0; k < ((createInfoCount)); ++k)
+                    {
+                        *((((VkPipeline*))pPipelines) + k) = (VkPipeline)(VkPipeline)(cgen_var_203[k]);
+                    }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPipelines;
                 if (pCreateInfos)
                 {
                     for (uint32_t i = 0; i < (uint32_t)((createInfoCount)); ++i)
@@ -4268,26 +3928,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkPipeline pipeline;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_205;
                 memcpy((uint64_t*)&cgen_var_205, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_205, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_205));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for pipeline;
-                VkPipeline* boxed_pipeline_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_pipeline_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_206;
                 memcpy((uint64_t*)&cgen_var_206, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_206, (VkPipeline*)&pipeline, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for pipeline;
+                *((VkPipeline*))&pipeline = (VkPipeline)unbox_VkPipeline((*&cgen_var_206));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -4325,15 +3978,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkPipelineLayoutCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkPipelineLayout* pPipelineLayout;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_208;
                 memcpy((uint64_t*)&cgen_var_208, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_208, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_208));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkPipelineLayoutCreateInfo));
                 reservedunmarshal_VkPipelineLayoutCreateInfo(vkReadStream, (VkPipelineLayoutCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -4352,9 +4003,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_210;
                 memcpy((uint64_t*)&cgen_var_210, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_210, (VkPipelineLayout*)pPipelineLayout, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPipelineLayout;
+                *((VkPipelineLayout*))pPipelineLayout = (VkPipelineLayout)(VkPipelineLayout)((*&cgen_var_210));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkPipelineLayoutCreateInfo(m_state, (VkPipelineLayoutCreateInfo*)(pCreateInfo));
@@ -4398,26 +4047,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkPipelineLayout pipelineLayout;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_212;
                 memcpy((uint64_t*)&cgen_var_212, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_212, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_212));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for pipelineLayout;
-                VkPipelineLayout* boxed_pipelineLayout_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_pipelineLayout_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_213;
                 memcpy((uint64_t*)&cgen_var_213, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_213, (VkPipelineLayout*)&pipelineLayout, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for pipelineLayout;
+                *((VkPipelineLayout*))&pipelineLayout = (VkPipelineLayout)unbox_VkPipelineLayout((*&cgen_var_213));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -4457,16 +4099,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkSamplerCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSampler* pSampler;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_215;
                 memcpy((uint64_t*)&cgen_var_215, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_215, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_215));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkSamplerCreateInfo));
                 reservedunmarshal_VkSamplerCreateInfo(vkReadStream, (VkSamplerCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -4484,9 +4121,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_217;
                 memcpy((uint64_t*)&cgen_var_217, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSampler(&cgen_var_217, (VkSampler*)pSampler, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSampler;
+                *((VkSampler*))pSampler = (VkSampler)(VkSampler)((*&cgen_var_217));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkSamplerCreateInfo(m_state, (VkSamplerCreateInfo*)(pCreateInfo));
@@ -4528,26 +4163,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkSampler sampler;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_219;
                 memcpy((uint64_t*)&cgen_var_219, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_219, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_219));
                 // Begin manual non dispatchable handle destroy unboxing for sampler;
-                VkSampler* boxed_sampler_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_sampler_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_220;
                 memcpy((uint64_t*)&cgen_var_220, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSampler(&cgen_var_220, (VkSampler*)&sampler, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for sampler;
+                *((VkSampler*))&sampler = (VkSampler)unbox_VkSampler((*&cgen_var_220));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -4585,16 +4210,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDescriptorSetLayoutCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkDescriptorSetLayout* pSetLayout;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_222;
                 memcpy((uint64_t*)&cgen_var_222, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_222, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_222));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorSetLayoutCreateInfo));
                 reservedunmarshal_VkDescriptorSetLayoutCreateInfo(vkReadStream, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -4612,9 +4232,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_224;
                 memcpy((uint64_t*)&cgen_var_224, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorSetLayout(&cgen_var_224, (VkDescriptorSetLayout*)pSetLayout, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSetLayout;
+                *((VkDescriptorSetLayout*))pSetLayout = (VkDescriptorSetLayout)(VkDescriptorSetLayout)((*&cgen_var_224));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDescriptorSetLayoutCreateInfo(m_state, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo));
@@ -4656,26 +4274,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkDescriptorSetLayout descriptorSetLayout;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_226;
                 memcpy((uint64_t*)&cgen_var_226, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_226, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_226));
                 // Begin manual non dispatchable handle destroy unboxing for descriptorSetLayout;
-                VkDescriptorSetLayout* boxed_descriptorSetLayout_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_descriptorSetLayout_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_227;
                 memcpy((uint64_t*)&cgen_var_227, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorSetLayout(&cgen_var_227, (VkDescriptorSetLayout*)&descriptorSetLayout, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for descriptorSetLayout;
+                *((VkDescriptorSetLayout*))&descriptorSetLayout = (VkDescriptorSetLayout)unbox_VkDescriptorSetLayout((*&cgen_var_227));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -4713,16 +4321,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDescriptorPoolCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkDescriptorPool* pDescriptorPool;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_229;
                 memcpy((uint64_t*)&cgen_var_229, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_229, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_229));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorPoolCreateInfo));
                 reservedunmarshal_VkDescriptorPoolCreateInfo(vkReadStream, (VkDescriptorPoolCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -4740,9 +4343,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_231;
                 memcpy((uint64_t*)&cgen_var_231, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorPool(&cgen_var_231, (VkDescriptorPool*)pDescriptorPool, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDescriptorPool;
+                *((VkDescriptorPool*))pDescriptorPool = (VkDescriptorPool)(VkDescriptorPool)((*&cgen_var_231));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDescriptorPoolCreateInfo(m_state, (VkDescriptorPoolCreateInfo*)(pCreateInfo));
@@ -4784,26 +4385,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkDescriptorPool descriptorPool;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_233;
                 memcpy((uint64_t*)&cgen_var_233, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_233, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_233));
                 // Begin manual non dispatchable handle destroy unboxing for descriptorPool;
-                VkDescriptorPool* boxed_descriptorPool_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_descriptorPool_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_234;
                 memcpy((uint64_t*)&cgen_var_234, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorPool(&cgen_var_234, (VkDescriptorPool*)&descriptorPool, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for descriptorPool;
+                *((VkDescriptorPool*))&descriptorPool = (VkDescriptorPool)unbox_VkDescriptorPool((*&cgen_var_234));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -4840,20 +4431,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkDescriptorPool descriptorPool;
                 VkDescriptorPoolResetFlags flags;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_236;
                 memcpy((uint64_t*)&cgen_var_236, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_236, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_236));
                 uint64_t cgen_var_237;
                 memcpy((uint64_t*)&cgen_var_237, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorPool(&cgen_var_237, (VkDescriptorPool*)&descriptorPool, 1);
+                *((VkDescriptorPool*))&descriptorPool = (VkDescriptorPool)unbox_VkDescriptorPool((*&cgen_var_237));
                 memcpy((VkDescriptorPoolResetFlags*)&flags, *readStreamPtrPtr, sizeof(VkDescriptorPoolResetFlags));
                 *readStreamPtrPtr += sizeof(VkDescriptorPoolResetFlags);
                 if (m_logCalls)
@@ -4881,16 +4467,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkDescriptorSetAllocateInfo* pAllocateInfo;
                 VkDescriptorSet* pDescriptorSets;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_238;
                 memcpy((uint64_t*)&cgen_var_238, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_238, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_238));
                 vkReadStream->alloc((void**)&pAllocateInfo, sizeof(const VkDescriptorSetAllocateInfo));
                 reservedunmarshal_VkDescriptorSetAllocateInfo(vkReadStream, (VkDescriptorSetAllocateInfo*)(pAllocateInfo), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pDescriptorSets;
@@ -4902,10 +4483,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_239, pAllocateInfo->descriptorSetCount * 8);
                     memcpy((uint64_t*)cgen_var_239, *readStreamPtrPtr, pAllocateInfo->descriptorSetCount * 8);
                     *readStreamPtrPtr += pAllocateInfo->descriptorSetCount * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorSet(cgen_var_239, (VkDescriptorSet*)pDescriptorSets, pAllocateInfo->descriptorSetCount);
+                    for (uint32_t k = 0; k < pAllocateInfo->descriptorSetCount; ++k)
+                    {
+                        *((((VkDescriptorSet*))pDescriptorSets) + k) = (VkDescriptorSet)(VkDescriptorSet)(cgen_var_239[k]);
+                    }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDescriptorSets;
                 if (pAllocateInfo)
                 {
                     transform_tohost_VkDescriptorSetAllocateInfo(m_state, (VkDescriptorSetAllocateInfo*)(pAllocateInfo));
@@ -4948,26 +4530,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDescriptorPool descriptorPool;
                 uint32_t descriptorSetCount;
                 const VkDescriptorSet* pDescriptorSets;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_241;
                 memcpy((uint64_t*)&cgen_var_241, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_241, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_241));
                 uint64_t cgen_var_242;
                 memcpy((uint64_t*)&cgen_var_242, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorPool(&cgen_var_242, (VkDescriptorPool*)&descriptorPool, 1);
+                *((VkDescriptorPool*))&descriptorPool = (VkDescriptorPool)unbox_VkDescriptorPool((*&cgen_var_242));
                 memcpy((uint32_t*)&descriptorSetCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 // Begin manual non dispatchable handle destroy unboxing for pDescriptorSets;
-                VkDescriptorSet* boxed_pDescriptorSets_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_pDescriptorSets_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 // WARNING PTR CHECK
                 memcpy((VkDescriptorSet**)&pDescriptorSets, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pDescriptorSets);
@@ -4981,11 +4555,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         vkReadStream->alloc((void**)&cgen_var_244, ((descriptorSetCount)) * 8);
                         memcpy((uint64_t*)cgen_var_244, *readStreamPtrPtr, ((descriptorSetCount)) * 8);
                         *readStreamPtrPtr += ((descriptorSetCount)) * 8;
-                        vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorSet(cgen_var_244, (VkDescriptorSet*)pDescriptorSets, ((descriptorSetCount)));
+                        for (uint32_t k = 0; k < ((descriptorSetCount)); ++k)
+                        {
+                            *((((VkDescriptorSet*))pDescriptorSets) + k) = (VkDescriptorSet)unbox_VkDescriptorSet(cgen_var_244[k]);
+                        }
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for pDescriptorSets;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkFreeDescriptorSets 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorPool, (unsigned long long)descriptorSetCount, (unsigned long long)pDescriptorSets);
@@ -5013,16 +4588,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkWriteDescriptorSet* pDescriptorWrites;
                 uint32_t descriptorCopyCount;
                 const VkCopyDescriptorSet* pDescriptorCopies;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_245;
                 memcpy((uint64_t*)&cgen_var_245, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_245, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_245));
                 memcpy((uint32_t*)&descriptorWriteCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pDescriptorWrites, ((descriptorWriteCount)) * sizeof(const VkWriteDescriptorSet));
@@ -5075,15 +4645,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkFramebufferCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkFramebuffer* pFramebuffer;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_246;
                 memcpy((uint64_t*)&cgen_var_246, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_246, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_246));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkFramebufferCreateInfo));
                 reservedunmarshal_VkFramebufferCreateInfo(vkReadStream, (VkFramebufferCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -5102,9 +4670,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_248;
                 memcpy((uint64_t*)&cgen_var_248, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFramebuffer(&cgen_var_248, (VkFramebuffer*)pFramebuffer, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFramebuffer;
+                *((VkFramebuffer*))pFramebuffer = (VkFramebuffer)(VkFramebuffer)((*&cgen_var_248));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkFramebufferCreateInfo(m_state, (VkFramebufferCreateInfo*)(pCreateInfo));
@@ -5146,26 +4712,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkFramebuffer framebuffer;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_250;
                 memcpy((uint64_t*)&cgen_var_250, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_250, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_250));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for framebuffer;
-                VkFramebuffer* boxed_framebuffer_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_framebuffer_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_251;
                 memcpy((uint64_t*)&cgen_var_251, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFramebuffer(&cgen_var_251, (VkFramebuffer*)&framebuffer, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for framebuffer;
+                *((VkFramebuffer*))&framebuffer = (VkFramebuffer)unbox_VkFramebuffer((*&cgen_var_251));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -5203,16 +4762,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkRenderPassCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkRenderPass* pRenderPass;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_253;
                 memcpy((uint64_t*)&cgen_var_253, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_253, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_253));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkRenderPassCreateInfo));
                 reservedunmarshal_VkRenderPassCreateInfo(vkReadStream, (VkRenderPassCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -5230,9 +4784,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_255;
                 memcpy((uint64_t*)&cgen_var_255, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkRenderPass(&cgen_var_255, (VkRenderPass*)pRenderPass, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pRenderPass;
+                *((VkRenderPass*))pRenderPass = (VkRenderPass)(VkRenderPass)((*&cgen_var_255));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkRenderPassCreateInfo(m_state, (VkRenderPassCreateInfo*)(pCreateInfo));
@@ -5274,26 +4826,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkRenderPass renderPass;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_257;
                 memcpy((uint64_t*)&cgen_var_257, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_257, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_257));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for renderPass;
-                VkRenderPass* boxed_renderPass_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_renderPass_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_258;
                 memcpy((uint64_t*)&cgen_var_258, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkRenderPass(&cgen_var_258, (VkRenderPass*)&renderPass, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for renderPass;
+                *((VkRenderPass*))&renderPass = (VkRenderPass)unbox_VkRenderPass((*&cgen_var_258));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -5330,26 +4875,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkRenderPass renderPass;
                 VkExtent2D* pGranularity;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_260;
                 memcpy((uint64_t*)&cgen_var_260, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_260, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_260));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_261;
                 memcpy((uint64_t*)&cgen_var_261, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkRenderPass(&cgen_var_261, (VkRenderPass*)&renderPass, 1);
+                *((VkRenderPass*))&renderPass = (VkRenderPass)unbox_VkRenderPass((*&cgen_var_261));
                 // Begin manual dispatchable handle unboxing for pGranularity;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pGranularity, sizeof(VkExtent2D));
                 reservedunmarshal_VkExtent2D(vkReadStream, (VkExtent2D*)(pGranularity), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pGranularity;
                 if (pGranularity)
                 {
                     transform_tohost_VkExtent2D(m_state, (VkExtent2D*)(pGranularity));
@@ -5383,16 +4924,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkCommandPoolCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkCommandPool* pCommandPool;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_262;
                 memcpy((uint64_t*)&cgen_var_262, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_262, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_262));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkCommandPoolCreateInfo));
                 reservedunmarshal_VkCommandPoolCreateInfo(vkReadStream, (VkCommandPoolCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -5410,9 +4946,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_264;
                 memcpy((uint64_t*)&cgen_var_264, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_264, (VkCommandPool*)pCommandPool, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pCommandPool;
+                *((VkCommandPool*))pCommandPool = (VkCommandPool)(VkCommandPool)((*&cgen_var_264));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkCommandPoolCreateInfo(m_state, (VkCommandPoolCreateInfo*)(pCreateInfo));
@@ -5454,26 +4988,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkCommandPool commandPool;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_266;
                 memcpy((uint64_t*)&cgen_var_266, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_266, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_266));
                 // Begin manual non dispatchable handle destroy unboxing for commandPool;
-                VkCommandPool* boxed_commandPool_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_commandPool_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_267;
                 memcpy((uint64_t*)&cgen_var_267, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_267, (VkCommandPool*)&commandPool, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for commandPool;
+                *((VkCommandPool*))&commandPool = (VkCommandPool)unbox_VkCommandPool((*&cgen_var_267));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -5510,20 +5034,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkCommandPool commandPool;
                 VkCommandPoolResetFlags flags;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_269;
                 memcpy((uint64_t*)&cgen_var_269, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_269, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_269));
                 uint64_t cgen_var_270;
                 memcpy((uint64_t*)&cgen_var_270, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_270, (VkCommandPool*)&commandPool, 1);
+                *((VkCommandPool*))&commandPool = (VkCommandPool)unbox_VkCommandPool((*&cgen_var_270));
                 memcpy((VkCommandPoolResetFlags*)&flags, *readStreamPtrPtr, sizeof(VkCommandPoolResetFlags));
                 *readStreamPtrPtr += sizeof(VkCommandPoolResetFlags);
                 if (m_logCalls)
@@ -5551,16 +5070,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkCommandBufferAllocateInfo* pAllocateInfo;
                 VkCommandBuffer* pCommandBuffers;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_271;
                 memcpy((uint64_t*)&cgen_var_271, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_271, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_271));
                 vkReadStream->alloc((void**)&pAllocateInfo, sizeof(const VkCommandBufferAllocateInfo));
                 reservedunmarshal_VkCommandBufferAllocateInfo(vkReadStream, (VkCommandBufferAllocateInfo*)(pAllocateInfo), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pCommandBuffers;
@@ -5572,10 +5086,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_272, pAllocateInfo->commandBufferCount * 8);
                     memcpy((uint64_t*)cgen_var_272, *readStreamPtrPtr, pAllocateInfo->commandBufferCount * 8);
                     *readStreamPtrPtr += pAllocateInfo->commandBufferCount * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(cgen_var_272, (VkCommandBuffer*)pCommandBuffers, pAllocateInfo->commandBufferCount);
+                    for (uint32_t k = 0; k < pAllocateInfo->commandBufferCount; ++k)
+                    {
+                        *((((VkCommandBuffer*))pCommandBuffers) + k) = (VkCommandBuffer)(VkCommandBuffer)(cgen_var_272[k]);
+                    }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pCommandBuffers;
                 if (pAllocateInfo)
                 {
                     transform_tohost_VkCommandBufferAllocateInfo(m_state, (VkCommandBufferAllocateInfo*)(pAllocateInfo));
@@ -5614,26 +5129,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandPool commandPool;
                 uint32_t commandBufferCount;
                 const VkCommandBuffer* pCommandBuffers;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_274;
                 memcpy((uint64_t*)&cgen_var_274, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_274, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_274));
                 uint64_t cgen_var_275;
                 memcpy((uint64_t*)&cgen_var_275, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_275, (VkCommandPool*)&commandPool, 1);
+                *((VkCommandPool*))&commandPool = (VkCommandPool)unbox_VkCommandPool((*&cgen_var_275));
                 memcpy((uint32_t*)&commandBufferCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 // Begin manual non dispatchable handle destroy unboxing for pCommandBuffers;
-                VkCommandBuffer* boxed_pCommandBuffers_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_pCommandBuffers_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 // WARNING PTR CHECK
                 memcpy((VkCommandBuffer**)&pCommandBuffers, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pCommandBuffers);
@@ -5647,7 +5154,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         vkReadStream->alloc((void**)&cgen_var_277, ((commandBufferCount)) * 8);
                         memcpy((uint64_t*)cgen_var_277, *readStreamPtrPtr, ((commandBufferCount)) * 8);
                         *readStreamPtrPtr += ((commandBufferCount)) * 8;
-                        vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(cgen_var_277, (VkCommandBuffer*)pCommandBuffers, ((commandBufferCount)));
+                        for (uint32_t k = 0; k < ((commandBufferCount)); ++k)
+                        {
+                            *((((VkCommandBuffer*))pCommandBuffers) + k) = (VkCommandBuffer)unbox_VkCommandBuffer(cgen_var_277[k]);
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -5672,16 +5182,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkCommandBufferBeginInfo* pBeginInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_278;
                 memcpy((uint64_t*)&cgen_var_278, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_278, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_278));
                 vkReadStream->alloc((void**)&pBeginInfo, sizeof(const VkCommandBufferBeginInfo));
                 reservedunmarshal_VkCommandBufferBeginInfo(vkReadStream, (VkCommandBufferBeginInfo*)(pBeginInfo), readStreamPtrPtr);
                 if (pBeginInfo)
@@ -5711,15 +5216,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             android::base::beginTrace("vkEndCommandBuffer decode");
             {
                 VkCommandBuffer commandBuffer;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_279;
                 memcpy((uint64_t*)&cgen_var_279, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_279, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_279));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 if (m_logCalls)
                 {
@@ -5745,16 +5248,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 VkCommandBufferResetFlags flags;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_280;
                 memcpy((uint64_t*)&cgen_var_280, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_280, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_280));
                 memcpy((VkCommandBufferResetFlags*)&flags, *readStreamPtrPtr, sizeof(VkCommandBufferResetFlags));
                 *readStreamPtrPtr += sizeof(VkCommandBufferResetFlags);
                 if (m_logCalls)
@@ -5782,22 +5280,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipeline pipeline;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_281;
                 memcpy((uint64_t*)&cgen_var_281, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_281, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_281));
                 memcpy((VkPipelineBindPoint*)&pipelineBindPoint, *readStreamPtrPtr, sizeof(VkPipelineBindPoint));
                 *readStreamPtrPtr += sizeof(VkPipelineBindPoint);
                 uint64_t cgen_var_282;
                 memcpy((uint64_t*)&cgen_var_282, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_282, (VkPipeline*)&pipeline, 1);
+                *((VkPipeline*))&pipeline = (VkPipeline)unbox_VkPipeline((*&cgen_var_282));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkCmdBindPipeline 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)commandBuffer, (unsigned long long)pipelineBindPoint, (unsigned long long)pipeline);
@@ -5822,15 +5315,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t firstViewport;
                 uint32_t viewportCount;
                 const VkViewport* pViewports;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_283;
                 memcpy((uint64_t*)&cgen_var_283, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_283, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_283));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&firstViewport, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -5872,15 +5363,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t firstScissor;
                 uint32_t scissorCount;
                 const VkRect2D* pScissors;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_284;
                 memcpy((uint64_t*)&cgen_var_284, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_284, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_284));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&firstScissor, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -5920,15 +5409,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 float lineWidth;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_285;
                 memcpy((uint64_t*)&cgen_var_285, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_285, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_285));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((float*)&lineWidth, *readStreamPtrPtr, sizeof(float));
                 *readStreamPtrPtr += sizeof(float);
@@ -5956,15 +5443,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 float depthBiasConstantFactor;
                 float depthBiasClamp;
                 float depthBiasSlopeFactor;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_286;
                 memcpy((uint64_t*)&cgen_var_286, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_286, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_286));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((float*)&depthBiasConstantFactor, *readStreamPtrPtr, sizeof(float));
                 *readStreamPtrPtr += sizeof(float);
@@ -5994,15 +5479,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 float blendConstants[4];
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_287;
                 memcpy((uint64_t*)&cgen_var_287, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_287, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_287));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((float*)blendConstants, *readStreamPtrPtr, 4 * sizeof(const float));
                 *readStreamPtrPtr += 4 * sizeof(const float);
@@ -6029,15 +5512,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 float minDepthBounds;
                 float maxDepthBounds;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_288;
                 memcpy((uint64_t*)&cgen_var_288, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_288, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_288));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((float*)&minDepthBounds, *readStreamPtrPtr, sizeof(float));
                 *readStreamPtrPtr += sizeof(float);
@@ -6066,15 +5547,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 VkStencilFaceFlags faceMask;
                 uint32_t compareMask;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_289;
                 memcpy((uint64_t*)&cgen_var_289, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_289, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_289));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((VkStencilFaceFlags*)&faceMask, *readStreamPtrPtr, sizeof(VkStencilFaceFlags));
                 *readStreamPtrPtr += sizeof(VkStencilFaceFlags);
@@ -6103,15 +5582,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 VkStencilFaceFlags faceMask;
                 uint32_t writeMask;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_290;
                 memcpy((uint64_t*)&cgen_var_290, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_290, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_290));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((VkStencilFaceFlags*)&faceMask, *readStreamPtrPtr, sizeof(VkStencilFaceFlags));
                 *readStreamPtrPtr += sizeof(VkStencilFaceFlags);
@@ -6140,15 +5617,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 VkStencilFaceFlags faceMask;
                 uint32_t reference;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_291;
                 memcpy((uint64_t*)&cgen_var_291, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_291, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_291));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((VkStencilFaceFlags*)&faceMask, *readStreamPtrPtr, sizeof(VkStencilFaceFlags));
                 *readStreamPtrPtr += sizeof(VkStencilFaceFlags);
@@ -6182,22 +5657,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDescriptorSet* pDescriptorSets;
                 uint32_t dynamicOffsetCount;
                 const uint32_t* pDynamicOffsets;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_292;
                 memcpy((uint64_t*)&cgen_var_292, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_292, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_292));
                 memcpy((VkPipelineBindPoint*)&pipelineBindPoint, *readStreamPtrPtr, sizeof(VkPipelineBindPoint));
                 *readStreamPtrPtr += sizeof(VkPipelineBindPoint);
                 uint64_t cgen_var_293;
                 memcpy((uint64_t*)&cgen_var_293, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_293, (VkPipelineLayout*)&layout, 1);
+                *((VkPipelineLayout*))&layout = (VkPipelineLayout)unbox_VkPipelineLayout((*&cgen_var_293));
                 memcpy((uint32_t*)&firstSet, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&descriptorSetCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -6209,7 +5679,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_294, ((descriptorSetCount)) * 8);
                     memcpy((uint64_t*)cgen_var_294, *readStreamPtrPtr, ((descriptorSetCount)) * 8);
                     *readStreamPtrPtr += ((descriptorSetCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorSet(cgen_var_294, (VkDescriptorSet*)pDescriptorSets, ((descriptorSetCount)));
+                    for (uint32_t k = 0; k < ((descriptorSetCount)); ++k)
+                    {
+                        *((((VkDescriptorSet*))pDescriptorSets) + k) = (VkDescriptorSet)unbox_VkDescriptorSet(cgen_var_294[k]);
+                    }
                 }
                 memcpy((uint32_t*)&dynamicOffsetCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -6240,20 +5713,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkBuffer buffer;
                 VkDeviceSize offset;
                 VkIndexType indexType;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_295;
                 memcpy((uint64_t*)&cgen_var_295, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_295, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_295));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_296;
                 memcpy((uint64_t*)&cgen_var_296, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_296, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_296));
                 memcpy((VkDeviceSize*)&offset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((VkIndexType*)&indexType, *readStreamPtrPtr, sizeof(VkIndexType));
@@ -6283,15 +5754,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t bindingCount;
                 const VkBuffer* pBuffers;
                 const VkDeviceSize* pOffsets;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_297;
                 memcpy((uint64_t*)&cgen_var_297, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_297, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_297));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&firstBinding, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -6304,7 +5773,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_298, ((bindingCount)) * 8);
                     memcpy((uint64_t*)cgen_var_298, *readStreamPtrPtr, ((bindingCount)) * 8);
                     *readStreamPtrPtr += ((bindingCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(cgen_var_298, (VkBuffer*)pBuffers, ((bindingCount)));
+                    for (uint32_t k = 0; k < ((bindingCount)); ++k)
+                    {
+                        *((((VkBuffer*))pBuffers) + k) = (VkBuffer)unbox_VkBuffer(cgen_var_298[k]);
+                    }
                 }
                 vkReadStream->alloc((void**)&pOffsets, ((bindingCount)) * sizeof(const VkDeviceSize));
                 memcpy((VkDeviceSize*)pOffsets, *readStreamPtrPtr, ((bindingCount)) * sizeof(const VkDeviceSize));
@@ -6334,15 +5806,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t instanceCount;
                 uint32_t firstVertex;
                 uint32_t firstInstance;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_299;
                 memcpy((uint64_t*)&cgen_var_299, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_299, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_299));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&vertexCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -6378,15 +5848,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t firstIndex;
                 int32_t vertexOffset;
                 uint32_t firstInstance;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_300;
                 memcpy((uint64_t*)&cgen_var_300, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_300, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_300));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&indexCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -6423,20 +5891,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceSize offset;
                 uint32_t drawCount;
                 uint32_t stride;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_301;
                 memcpy((uint64_t*)&cgen_var_301, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_301, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_301));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_302;
                 memcpy((uint64_t*)&cgen_var_302, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_302, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_302));
                 memcpy((VkDeviceSize*)&offset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((uint32_t*)&drawCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -6468,20 +5934,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceSize offset;
                 uint32_t drawCount;
                 uint32_t stride;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_303;
                 memcpy((uint64_t*)&cgen_var_303, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_303, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_303));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_304;
                 memcpy((uint64_t*)&cgen_var_304, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_304, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_304));
                 memcpy((VkDeviceSize*)&offset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((uint32_t*)&drawCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -6512,15 +5976,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t groupCountX;
                 uint32_t groupCountY;
                 uint32_t groupCountZ;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_305;
                 memcpy((uint64_t*)&cgen_var_305, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_305, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_305));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&groupCountX, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -6551,20 +6013,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 VkBuffer buffer;
                 VkDeviceSize offset;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_306;
                 memcpy((uint64_t*)&cgen_var_306, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_306, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_306));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_307;
                 memcpy((uint64_t*)&cgen_var_307, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_307, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_307));
                 memcpy((VkDeviceSize*)&offset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 if (m_logCalls)
@@ -6592,24 +6052,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkBuffer dstBuffer;
                 uint32_t regionCount;
                 const VkBufferCopy* pRegions;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_308;
                 memcpy((uint64_t*)&cgen_var_308, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_308, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_308));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_309;
                 memcpy((uint64_t*)&cgen_var_309, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_309, (VkBuffer*)&srcBuffer, 1);
+                *((VkBuffer*))&srcBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_309));
                 uint64_t cgen_var_310;
                 memcpy((uint64_t*)&cgen_var_310, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_310, (VkBuffer*)&dstBuffer, 1);
+                *((VkBuffer*))&dstBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_310));
                 memcpy((uint32_t*)&regionCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pRegions, ((regionCount)) * sizeof(const VkBufferCopy));
@@ -6651,26 +6109,21 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkImageLayout dstImageLayout;
                 uint32_t regionCount;
                 const VkImageCopy* pRegions;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_311;
                 memcpy((uint64_t*)&cgen_var_311, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_311, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_311));
                 uint64_t cgen_var_312;
                 memcpy((uint64_t*)&cgen_var_312, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_312, (VkImage*)&srcImage, 1);
+                *((VkImage*))&srcImage = (VkImage)unbox_VkImage((*&cgen_var_312));
                 memcpy((VkImageLayout*)&srcImageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 uint64_t cgen_var_313;
                 memcpy((uint64_t*)&cgen_var_313, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_313, (VkImage*)&dstImage, 1);
+                *((VkImage*))&dstImage = (VkImage)unbox_VkImage((*&cgen_var_313));
                 memcpy((VkImageLayout*)&dstImageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 memcpy((uint32_t*)&regionCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -6715,26 +6168,24 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t regionCount;
                 const VkImageBlit* pRegions;
                 VkFilter filter;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_314;
                 memcpy((uint64_t*)&cgen_var_314, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_314, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_314));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_315;
                 memcpy((uint64_t*)&cgen_var_315, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_315, (VkImage*)&srcImage, 1);
+                *((VkImage*))&srcImage = (VkImage)unbox_VkImage((*&cgen_var_315));
                 memcpy((VkImageLayout*)&srcImageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 uint64_t cgen_var_316;
                 memcpy((uint64_t*)&cgen_var_316, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_316, (VkImage*)&dstImage, 1);
+                *((VkImage*))&dstImage = (VkImage)unbox_VkImage((*&cgen_var_316));
                 memcpy((VkImageLayout*)&dstImageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 memcpy((uint32_t*)&regionCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -6779,24 +6230,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkImageLayout dstImageLayout;
                 uint32_t regionCount;
                 const VkBufferImageCopy* pRegions;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_317;
                 memcpy((uint64_t*)&cgen_var_317, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_317, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_317));
                 uint64_t cgen_var_318;
                 memcpy((uint64_t*)&cgen_var_318, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_318, (VkBuffer*)&srcBuffer, 1);
+                *((VkBuffer*))&srcBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_318));
                 uint64_t cgen_var_319;
                 memcpy((uint64_t*)&cgen_var_319, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_319, (VkImage*)&dstImage, 1);
+                *((VkImage*))&dstImage = (VkImage)unbox_VkImage((*&cgen_var_319));
                 memcpy((VkImageLayout*)&dstImageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 memcpy((uint32_t*)&regionCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -6839,26 +6285,21 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkBuffer dstBuffer;
                 uint32_t regionCount;
                 const VkBufferImageCopy* pRegions;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_320;
                 memcpy((uint64_t*)&cgen_var_320, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_320, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_320));
                 uint64_t cgen_var_321;
                 memcpy((uint64_t*)&cgen_var_321, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_321, (VkImage*)&srcImage, 1);
+                *((VkImage*))&srcImage = (VkImage)unbox_VkImage((*&cgen_var_321));
                 memcpy((VkImageLayout*)&srcImageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 uint64_t cgen_var_322;
                 memcpy((uint64_t*)&cgen_var_322, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_322, (VkBuffer*)&dstBuffer, 1);
+                *((VkBuffer*))&dstBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_322));
                 memcpy((uint32_t*)&regionCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pRegions, ((regionCount)) * sizeof(const VkBufferImageCopy));
@@ -6898,20 +6339,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceSize dstOffset;
                 VkDeviceSize dataSize;
                 const void* pData;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_323;
                 memcpy((uint64_t*)&cgen_var_323, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_323, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_323));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_324;
                 memcpy((uint64_t*)&cgen_var_324, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_324, (VkBuffer*)&dstBuffer, 1);
+                *((VkBuffer*))&dstBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_324));
                 memcpy((VkDeviceSize*)&dstOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((VkDeviceSize*)&dataSize, *readStreamPtrPtr, sizeof(VkDeviceSize));
@@ -6944,20 +6383,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceSize dstOffset;
                 VkDeviceSize size;
                 uint32_t data;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_325;
                 memcpy((uint64_t*)&cgen_var_325, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_325, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_325));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_326;
                 memcpy((uint64_t*)&cgen_var_326, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_326, (VkBuffer*)&dstBuffer, 1);
+                *((VkBuffer*))&dstBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_326));
                 memcpy((VkDeviceSize*)&dstOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((VkDeviceSize*)&size, *readStreamPtrPtr, sizeof(VkDeviceSize));
@@ -6990,20 +6427,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkClearColorValue* pColor;
                 uint32_t rangeCount;
                 const VkImageSubresourceRange* pRanges;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_327;
                 memcpy((uint64_t*)&cgen_var_327, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_327, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_327));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_328;
                 memcpy((uint64_t*)&cgen_var_328, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_328, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_328));
                 memcpy((VkImageLayout*)&imageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 vkReadStream->alloc((void**)&pColor, sizeof(const VkClearColorValue));
@@ -7052,20 +6487,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkClearDepthStencilValue* pDepthStencil;
                 uint32_t rangeCount;
                 const VkImageSubresourceRange* pRanges;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_329;
                 memcpy((uint64_t*)&cgen_var_329, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_329, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_329));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_330;
                 memcpy((uint64_t*)&cgen_var_330, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_330, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_330));
                 memcpy((VkImageLayout*)&imageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 vkReadStream->alloc((void**)&pDepthStencil, sizeof(const VkClearDepthStencilValue));
@@ -7113,15 +6546,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkClearAttachment* pAttachments;
                 uint32_t rectCount;
                 const VkClearRect* pRects;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_331;
                 memcpy((uint64_t*)&cgen_var_331, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_331, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_331));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&attachmentCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -7178,26 +6609,24 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkImageLayout dstImageLayout;
                 uint32_t regionCount;
                 const VkImageResolve* pRegions;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_332;
                 memcpy((uint64_t*)&cgen_var_332, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_332, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_332));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_333;
                 memcpy((uint64_t*)&cgen_var_333, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_333, (VkImage*)&srcImage, 1);
+                *((VkImage*))&srcImage = (VkImage)unbox_VkImage((*&cgen_var_333));
                 memcpy((VkImageLayout*)&srcImageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 uint64_t cgen_var_334;
                 memcpy((uint64_t*)&cgen_var_334, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_334, (VkImage*)&dstImage, 1);
+                *((VkImage*))&dstImage = (VkImage)unbox_VkImage((*&cgen_var_334));
                 memcpy((VkImageLayout*)&dstImageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 memcpy((uint32_t*)&regionCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -7237,20 +6666,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 VkEvent event;
                 VkPipelineStageFlags stageMask;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_335;
                 memcpy((uint64_t*)&cgen_var_335, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_335, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_335));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_336;
                 memcpy((uint64_t*)&cgen_var_336, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_336, (VkEvent*)&event, 1);
+                *((VkEvent*))&event = (VkEvent)unbox_VkEvent((*&cgen_var_336));
                 memcpy((VkPipelineStageFlags*)&stageMask, *readStreamPtrPtr, sizeof(VkPipelineStageFlags));
                 *readStreamPtrPtr += sizeof(VkPipelineStageFlags);
                 if (m_logCalls)
@@ -7276,20 +6703,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 VkEvent event;
                 VkPipelineStageFlags stageMask;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_337;
                 memcpy((uint64_t*)&cgen_var_337, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_337, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_337));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_338;
                 memcpy((uint64_t*)&cgen_var_338, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkEvent(&cgen_var_338, (VkEvent*)&event, 1);
+                *((VkEvent*))&event = (VkEvent)unbox_VkEvent((*&cgen_var_338));
                 memcpy((VkPipelineStageFlags*)&stageMask, *readStreamPtrPtr, sizeof(VkPipelineStageFlags));
                 *readStreamPtrPtr += sizeof(VkPipelineStageFlags);
                 if (m_logCalls)
@@ -7323,15 +6748,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkBufferMemoryBarrier* pBufferMemoryBarriers;
                 uint32_t imageMemoryBarrierCount;
                 const VkImageMemoryBarrier* pImageMemoryBarriers;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_339;
                 memcpy((uint64_t*)&cgen_var_339, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_339, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_339));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&eventCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -7342,7 +6765,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_340, ((eventCount)) * 8);
                     memcpy((uint64_t*)cgen_var_340, *readStreamPtrPtr, ((eventCount)) * 8);
                     *readStreamPtrPtr += ((eventCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkEvent(cgen_var_340, (VkEvent*)pEvents, ((eventCount)));
+                    for (uint32_t k = 0; k < ((eventCount)); ++k)
+                    {
+                        *((((VkEvent*))pEvents) + k) = (VkEvent)unbox_VkEvent(cgen_var_340[k]);
+                    }
                 }
                 memcpy((VkPipelineStageFlags*)&srcStageMask, *readStreamPtrPtr, sizeof(VkPipelineStageFlags));
                 *readStreamPtrPtr += sizeof(VkPipelineStageFlags);
@@ -7420,16 +6846,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkBufferMemoryBarrier* pBufferMemoryBarriers;
                 uint32_t imageMemoryBarrierCount;
                 const VkImageMemoryBarrier* pImageMemoryBarriers;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_341;
                 memcpy((uint64_t*)&cgen_var_341, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_341, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_341));
                 memcpy((VkPipelineStageFlags*)&srcStageMask, *readStreamPtrPtr, sizeof(VkPipelineStageFlags));
                 *readStreamPtrPtr += sizeof(VkPipelineStageFlags);
                 memcpy((VkPipelineStageFlags*)&dstStageMask, *readStreamPtrPtr, sizeof(VkPipelineStageFlags));
@@ -7502,20 +6923,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkQueryPool queryPool;
                 uint32_t query;
                 VkQueryControlFlags flags;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_342;
                 memcpy((uint64_t*)&cgen_var_342, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_342, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_342));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_343;
                 memcpy((uint64_t*)&cgen_var_343, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_343, (VkQueryPool*)&queryPool, 1);
+                *((VkQueryPool*))&queryPool = (VkQueryPool)unbox_VkQueryPool((*&cgen_var_343));
                 memcpy((uint32_t*)&query, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((VkQueryControlFlags*)&flags, *readStreamPtrPtr, sizeof(VkQueryControlFlags));
@@ -7543,20 +6962,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 VkQueryPool queryPool;
                 uint32_t query;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_344;
                 memcpy((uint64_t*)&cgen_var_344, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_344, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_344));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_345;
                 memcpy((uint64_t*)&cgen_var_345, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_345, (VkQueryPool*)&queryPool, 1);
+                *((VkQueryPool*))&queryPool = (VkQueryPool)unbox_VkQueryPool((*&cgen_var_345));
                 memcpy((uint32_t*)&query, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 if (m_logCalls)
@@ -7583,20 +7000,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkQueryPool queryPool;
                 uint32_t firstQuery;
                 uint32_t queryCount;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_346;
                 memcpy((uint64_t*)&cgen_var_346, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_346, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_346));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_347;
                 memcpy((uint64_t*)&cgen_var_347, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_347, (VkQueryPool*)&queryPool, 1);
+                *((VkQueryPool*))&queryPool = (VkQueryPool)unbox_VkQueryPool((*&cgen_var_347));
                 memcpy((uint32_t*)&firstQuery, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&queryCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -7625,22 +7040,20 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPipelineStageFlagBits pipelineStage;
                 VkQueryPool queryPool;
                 uint32_t query;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_348;
                 memcpy((uint64_t*)&cgen_var_348, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_348, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_348));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((VkPipelineStageFlagBits*)&pipelineStage, *readStreamPtrPtr, sizeof(VkPipelineStageFlagBits));
                 *readStreamPtrPtr += sizeof(VkPipelineStageFlagBits);
                 uint64_t cgen_var_349;
                 memcpy((uint64_t*)&cgen_var_349, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_349, (VkQueryPool*)&queryPool, 1);
+                *((VkQueryPool*))&queryPool = (VkQueryPool)unbox_VkQueryPool((*&cgen_var_349));
                 memcpy((uint32_t*)&query, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 if (m_logCalls)
@@ -7671,20 +7084,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceSize dstOffset;
                 VkDeviceSize stride;
                 VkQueryResultFlags flags;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_350;
                 memcpy((uint64_t*)&cgen_var_350, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_350, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_350));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_351;
                 memcpy((uint64_t*)&cgen_var_351, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueryPool(&cgen_var_351, (VkQueryPool*)&queryPool, 1);
+                *((VkQueryPool*))&queryPool = (VkQueryPool)unbox_VkQueryPool((*&cgen_var_351));
                 memcpy((uint32_t*)&firstQuery, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&queryCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -7692,7 +7103,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_352;
                 memcpy((uint64_t*)&cgen_var_352, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_352, (VkBuffer*)&dstBuffer, 1);
+                *((VkBuffer*))&dstBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_352));
                 memcpy((VkDeviceSize*)&dstOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((VkDeviceSize*)&stride, *readStreamPtrPtr, sizeof(VkDeviceSize));
@@ -7725,20 +7136,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t offset;
                 uint32_t size;
                 const void* pValues;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_353;
                 memcpy((uint64_t*)&cgen_var_353, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_353, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_353));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_354;
                 memcpy((uint64_t*)&cgen_var_354, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_354, (VkPipelineLayout*)&layout, 1);
+                *((VkPipelineLayout*))&layout = (VkPipelineLayout)unbox_VkPipelineLayout((*&cgen_var_354));
                 memcpy((VkShaderStageFlags*)&stageFlags, *readStreamPtrPtr, sizeof(VkShaderStageFlags));
                 *readStreamPtrPtr += sizeof(VkShaderStageFlags);
                 memcpy((uint32_t*)&offset, *readStreamPtrPtr, sizeof(uint32_t));
@@ -7771,15 +7180,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 const VkRenderPassBeginInfo* pRenderPassBegin;
                 VkSubpassContents contents;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_355;
                 memcpy((uint64_t*)&cgen_var_355, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_355, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_355));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pRenderPassBegin, sizeof(const VkRenderPassBeginInfo));
                 reservedunmarshal_VkRenderPassBeginInfo(vkReadStream, (VkRenderPassBeginInfo*)(pRenderPassBegin), readStreamPtrPtr);
@@ -7811,15 +7218,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 VkSubpassContents contents;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_356;
                 memcpy((uint64_t*)&cgen_var_356, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_356, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_356));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((VkSubpassContents*)&contents, *readStreamPtrPtr, sizeof(VkSubpassContents));
                 *readStreamPtrPtr += sizeof(VkSubpassContents);
@@ -7844,15 +7249,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             android::base::beginTrace("vkCmdEndRenderPass decode");
             {
                 VkCommandBuffer commandBuffer;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_357;
                 memcpy((uint64_t*)&cgen_var_357, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_357, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_357));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 if (m_logCalls)
                 {
@@ -7877,16 +7280,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 uint32_t commandBufferCount;
                 const VkCommandBuffer* pCommandBuffers;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_358;
                 memcpy((uint64_t*)&cgen_var_358, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_358, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_358));
                 memcpy((uint32_t*)&commandBufferCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
@@ -7896,7 +7294,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_359, ((commandBufferCount)) * 8);
                     memcpy((uint64_t*)cgen_var_359, *readStreamPtrPtr, ((commandBufferCount)) * 8);
                     *readStreamPtrPtr += ((commandBufferCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(cgen_var_359, (VkCommandBuffer*)pCommandBuffers, ((commandBufferCount)));
+                    for (uint32_t k = 0; k < ((commandBufferCount)); ++k)
+                    {
+                        *((((VkCommandBuffer*))pCommandBuffers) + k) = (VkCommandBuffer)unbox_VkCommandBuffer(cgen_var_359[k]);
+                    }
                 }
                 if (m_logCalls)
                 {
@@ -7926,8 +7327,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pApiVersion, sizeof(uint32_t));
                 memcpy((uint32_t*)pApiVersion, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pApiVersion;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkEnumerateInstanceVersion 0x%llx \n", ioStream, (unsigned long long)pApiVersion);
@@ -7954,16 +7353,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindBufferMemoryInfo* pBindInfos;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_360;
                 memcpy((uint64_t*)&cgen_var_360, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_360, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_360));
                 memcpy((uint32_t*)&bindInfoCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pBindInfos, ((bindInfoCount)) * sizeof(const VkBindBufferMemoryInfo));
@@ -8003,15 +7397,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindImageMemoryInfo* pBindInfos;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_361;
                 memcpy((uint64_t*)&cgen_var_361, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_361, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_361));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&bindInfoCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -8054,15 +7446,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t localDeviceIndex;
                 uint32_t remoteDeviceIndex;
                 VkPeerMemoryFeatureFlags* pPeerMemoryFeatures;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_362;
                 memcpy((uint64_t*)&cgen_var_362, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_362, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_362));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&heapIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -8075,8 +7465,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
                 memcpy((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, *readStreamPtrPtr, sizeof(VkPeerMemoryFeatureFlags));
                 *readStreamPtrPtr += sizeof(VkPeerMemoryFeatureFlags);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPeerMemoryFeatures;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetDeviceGroupPeerMemoryFeatures 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)heapIndex, (unsigned long long)localDeviceIndex, (unsigned long long)remoteDeviceIndex, (unsigned long long)pPeerMemoryFeatures);
@@ -8100,15 +7488,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 uint32_t deviceMask;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_363;
                 memcpy((uint64_t*)&cgen_var_363, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_363, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_363));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&deviceMask, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -8139,15 +7525,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t groupCountX;
                 uint32_t groupCountY;
                 uint32_t groupCountZ;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_364;
                 memcpy((uint64_t*)&cgen_var_364, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_364, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_364));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&baseGroupX, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -8184,15 +7568,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkInstance instance;
                 uint32_t* pPhysicalDeviceGroupCount;
                 VkPhysicalDeviceGroupProperties* pPhysicalDeviceGroupProperties;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_365;
                 memcpy((uint64_t*)&cgen_var_365, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_365, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_365));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 // Begin manual dispatchable handle unboxing for pPhysicalDeviceGroupCount;
                 vkReadStream->unsetHandleMapping();
@@ -8206,8 +7588,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPhysicalDeviceGroupCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPhysicalDeviceGroupCount;
                 // Begin manual dispatchable handle unboxing for pPhysicalDeviceGroupProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -8222,8 +7602,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkPhysicalDeviceGroupProperties(vkReadStream, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPhysicalDeviceGroupProperties;
                 if (pPhysicalDeviceGroupProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
@@ -8280,24 +7658,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkImageMemoryRequirementsInfo2* pInfo;
                 VkMemoryRequirements2* pMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_370;
                 memcpy((uint64_t*)&cgen_var_370, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_370, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_370));
                 vkReadStream->alloc((void**)&pInfo, sizeof(const VkImageMemoryRequirementsInfo2));
                 reservedunmarshal_VkImageMemoryRequirementsInfo2(vkReadStream, (VkImageMemoryRequirementsInfo2*)(pInfo), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements2));
                 reservedunmarshal_VkMemoryRequirements2(vkReadStream, (VkMemoryRequirements2*)(pMemoryRequirements), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryRequirements;
                 if (pInfo)
                 {
                     transform_tohost_VkImageMemoryRequirementsInfo2(m_state, (VkImageMemoryRequirementsInfo2*)(pInfo));
@@ -8334,15 +7705,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkBufferMemoryRequirementsInfo2* pInfo;
                 VkMemoryRequirements2* pMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_371;
                 memcpy((uint64_t*)&cgen_var_371, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_371, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_371));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pInfo, sizeof(const VkBufferMemoryRequirementsInfo2));
                 reservedunmarshal_VkBufferMemoryRequirementsInfo2(vkReadStream, (VkBufferMemoryRequirementsInfo2*)(pInfo), readStreamPtrPtr);
@@ -8350,8 +7719,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements2));
                 reservedunmarshal_VkMemoryRequirements2(vkReadStream, (VkMemoryRequirements2*)(pMemoryRequirements), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryRequirements;
                 if (pInfo)
                 {
                     transform_tohost_VkBufferMemoryRequirementsInfo2(m_state, (VkBufferMemoryRequirementsInfo2*)(pInfo));
@@ -8389,15 +7756,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkImageSparseMemoryRequirementsInfo2* pInfo;
                 uint32_t* pSparseMemoryRequirementCount;
                 VkSparseImageMemoryRequirements2* pSparseMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_372;
                 memcpy((uint64_t*)&cgen_var_372, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_372, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_372));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pInfo, sizeof(const VkImageSparseMemoryRequirementsInfo2));
                 reservedunmarshal_VkImageSparseMemoryRequirementsInfo2(vkReadStream, (VkImageSparseMemoryRequirementsInfo2*)(pInfo), readStreamPtrPtr);
@@ -8413,8 +7778,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pSparseMemoryRequirementCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSparseMemoryRequirementCount;
                 // Begin manual dispatchable handle unboxing for pSparseMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -8429,8 +7792,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkSparseImageMemoryRequirements2(vkReadStream, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSparseMemoryRequirements;
                 if (pInfo)
                 {
                     transform_tohost_VkImageSparseMemoryRequirementsInfo2(m_state, (VkImageSparseMemoryRequirementsInfo2*)(pInfo));
@@ -8488,22 +7849,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures2* pFeatures;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_377;
                 memcpy((uint64_t*)&cgen_var_377, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_377, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_377));
                 // Begin manual dispatchable handle unboxing for pFeatures;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pFeatures, sizeof(VkPhysicalDeviceFeatures2));
                 reservedunmarshal_VkPhysicalDeviceFeatures2(vkReadStream, (VkPhysicalDeviceFeatures2*)(pFeatures), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFeatures;
                 if (pFeatures)
                 {
                     transform_tohost_VkPhysicalDeviceFeatures2(m_state, (VkPhysicalDeviceFeatures2*)(pFeatures));
@@ -8535,22 +7889,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceProperties2* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_378;
                 memcpy((uint64_t*)&cgen_var_378, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_378, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_378));
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pProperties, sizeof(VkPhysicalDeviceProperties2));
                 reservedunmarshal_VkPhysicalDeviceProperties2(vkReadStream, (VkPhysicalDeviceProperties2*)(pProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     transform_tohost_VkPhysicalDeviceProperties2(m_state, (VkPhysicalDeviceProperties2*)(pProperties));
@@ -8583,24 +7930,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties2* pFormatProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_379;
                 memcpy((uint64_t*)&cgen_var_379, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_379, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_379));
                 memcpy((VkFormat*)&format, *readStreamPtrPtr, sizeof(VkFormat));
                 *readStreamPtrPtr += sizeof(VkFormat);
                 // Begin manual dispatchable handle unboxing for pFormatProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pFormatProperties, sizeof(VkFormatProperties2));
                 reservedunmarshal_VkFormatProperties2(vkReadStream, (VkFormatProperties2*)(pFormatProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFormatProperties;
                 if (pFormatProperties)
                 {
                     transform_tohost_VkFormatProperties2(m_state, (VkFormatProperties2*)(pFormatProperties));
@@ -8633,24 +7973,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo;
                 VkImageFormatProperties2* pImageFormatProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_380;
                 memcpy((uint64_t*)&cgen_var_380, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_380, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_380));
                 vkReadStream->alloc((void**)&pImageFormatInfo, sizeof(const VkPhysicalDeviceImageFormatInfo2));
                 reservedunmarshal_VkPhysicalDeviceImageFormatInfo2(vkReadStream, (VkPhysicalDeviceImageFormatInfo2*)(pImageFormatInfo), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pImageFormatProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pImageFormatProperties, sizeof(VkImageFormatProperties2));
                 reservedunmarshal_VkImageFormatProperties2(vkReadStream, (VkImageFormatProperties2*)(pImageFormatProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pImageFormatProperties;
                 if (pImageFormatInfo)
                 {
                     transform_tohost_VkPhysicalDeviceImageFormatInfo2(m_state, (VkPhysicalDeviceImageFormatInfo2*)(pImageFormatInfo));
@@ -8689,15 +8022,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pQueueFamilyPropertyCount;
                 VkQueueFamilyProperties2* pQueueFamilyProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_381;
                 memcpy((uint64_t*)&cgen_var_381, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_381, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_381));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for pQueueFamilyPropertyCount;
                 vkReadStream->unsetHandleMapping();
@@ -8711,8 +8042,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pQueueFamilyPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pQueueFamilyPropertyCount;
                 // Begin manual dispatchable handle unboxing for pQueueFamilyProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -8727,8 +8056,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkQueueFamilyProperties2(vkReadStream, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pQueueFamilyProperties;
                 if (pQueueFamilyProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
@@ -8782,22 +8109,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceMemoryProperties2* pMemoryProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_386;
                 memcpy((uint64_t*)&cgen_var_386, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_386, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_386));
                 // Begin manual dispatchable handle unboxing for pMemoryProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryProperties, sizeof(VkPhysicalDeviceMemoryProperties2));
                 reservedunmarshal_VkPhysicalDeviceMemoryProperties2(vkReadStream, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryProperties;
                 if (pMemoryProperties)
                 {
                     transform_tohost_VkPhysicalDeviceMemoryProperties2(m_state, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties));
@@ -8831,15 +8151,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkPhysicalDeviceSparseImageFormatInfo2* pFormatInfo;
                 uint32_t* pPropertyCount;
                 VkSparseImageFormatProperties2* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_387;
                 memcpy((uint64_t*)&cgen_var_387, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_387, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_387));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 vkReadStream->alloc((void**)&pFormatInfo, sizeof(const VkPhysicalDeviceSparseImageFormatInfo2));
                 reservedunmarshal_VkPhysicalDeviceSparseImageFormatInfo2(vkReadStream, (VkPhysicalDeviceSparseImageFormatInfo2*)(pFormatInfo), readStreamPtrPtr);
@@ -8855,8 +8173,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -8871,8 +8187,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkSparseImageFormatProperties2(vkReadStream, (VkSparseImageFormatProperties2*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pFormatInfo)
                 {
                     transform_tohost_VkPhysicalDeviceSparseImageFormatInfo2(m_state, (VkPhysicalDeviceSparseImageFormatInfo2*)(pFormatInfo));
@@ -8931,20 +8245,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkCommandPool commandPool;
                 VkCommandPoolTrimFlags flags;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_392;
                 memcpy((uint64_t*)&cgen_var_392, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_392, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_392));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_393;
                 memcpy((uint64_t*)&cgen_var_393, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_393, (VkCommandPool*)&commandPool, 1);
+                *((VkCommandPool*))&commandPool = (VkCommandPool)unbox_VkCommandPool((*&cgen_var_393));
                 memcpy((VkCommandPoolTrimFlags*)&flags, *readStreamPtrPtr, sizeof(VkCommandPoolTrimFlags));
                 *readStreamPtrPtr += sizeof(VkCommandPoolTrimFlags);
                 if (m_logCalls)
@@ -8970,15 +8282,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkDeviceQueueInfo2* pQueueInfo;
                 VkQueue* pQueue;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_394;
                 memcpy((uint64_t*)&cgen_var_394, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_394, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_394));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pQueueInfo, sizeof(const VkDeviceQueueInfo2));
                 reservedunmarshal_VkDeviceQueueInfo2(vkReadStream, (VkDeviceQueueInfo2*)(pQueueInfo), readStreamPtrPtr);
@@ -8988,9 +8298,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_395;
                 memcpy((uint64_t*)&cgen_var_395, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_395, (VkQueue*)pQueue, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pQueue;
+                *((VkQueue*))pQueue = (VkQueue)(VkQueue)((*&cgen_var_395));
                 if (pQueueInfo)
                 {
                     transform_tohost_VkDeviceQueueInfo2(m_state, (VkDeviceQueueInfo2*)(pQueueInfo));
@@ -9022,15 +8330,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkSamplerYcbcrConversionCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSamplerYcbcrConversion* pYcbcrConversion;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_397;
                 memcpy((uint64_t*)&cgen_var_397, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_397, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_397));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkSamplerYcbcrConversionCreateInfo));
                 reservedunmarshal_VkSamplerYcbcrConversionCreateInfo(vkReadStream, (VkSamplerYcbcrConversionCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -9049,9 +8355,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_399;
                 memcpy((uint64_t*)&cgen_var_399, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSamplerYcbcrConversion(&cgen_var_399, (VkSamplerYcbcrConversion*)pYcbcrConversion, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pYcbcrConversion;
+                *((VkSamplerYcbcrConversion*))pYcbcrConversion = (VkSamplerYcbcrConversion)(VkSamplerYcbcrConversion)((*&cgen_var_399));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkSamplerYcbcrConversionCreateInfo(m_state, (VkSamplerYcbcrConversionCreateInfo*)(pCreateInfo));
@@ -9093,26 +8397,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkSamplerYcbcrConversion ycbcrConversion;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_401;
                 memcpy((uint64_t*)&cgen_var_401, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_401, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_401));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for ycbcrConversion;
-                VkSamplerYcbcrConversion* boxed_ycbcrConversion_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_ycbcrConversion_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_402;
                 memcpy((uint64_t*)&cgen_var_402, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSamplerYcbcrConversion(&cgen_var_402, (VkSamplerYcbcrConversion*)&ycbcrConversion, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for ycbcrConversion;
+                *((VkSamplerYcbcrConversion*))&ycbcrConversion = (VkSamplerYcbcrConversion)unbox_VkSamplerYcbcrConversion((*&cgen_var_402));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -9150,16 +8447,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_404;
                 memcpy((uint64_t*)&cgen_var_404, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_404, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_404));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorUpdateTemplateCreateInfo));
                 reservedunmarshal_VkDescriptorUpdateTemplateCreateInfo(vkReadStream, (VkDescriptorUpdateTemplateCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -9177,9 +8469,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_406;
                 memcpy((uint64_t*)&cgen_var_406, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_406, (VkDescriptorUpdateTemplate*)pDescriptorUpdateTemplate, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDescriptorUpdateTemplate;
+                *((VkDescriptorUpdateTemplate*))pDescriptorUpdateTemplate = (VkDescriptorUpdateTemplate)(VkDescriptorUpdateTemplate)((*&cgen_var_406));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDescriptorUpdateTemplateCreateInfo(m_state, (VkDescriptorUpdateTemplateCreateInfo*)(pCreateInfo));
@@ -9221,26 +8511,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkDescriptorUpdateTemplate descriptorUpdateTemplate;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_408;
                 memcpy((uint64_t*)&cgen_var_408, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_408, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_408));
                 // Begin manual non dispatchable handle destroy unboxing for descriptorUpdateTemplate;
-                VkDescriptorUpdateTemplate* boxed_descriptorUpdateTemplate_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_descriptorUpdateTemplate_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_409;
                 memcpy((uint64_t*)&cgen_var_409, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_409, (VkDescriptorUpdateTemplate*)&descriptorUpdateTemplate, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for descriptorUpdateTemplate;
+                *((VkDescriptorUpdateTemplate*))&descriptorUpdateTemplate = (VkDescriptorUpdateTemplate)unbox_VkDescriptorUpdateTemplate((*&cgen_var_409));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -9278,24 +8558,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDescriptorSet descriptorSet;
                 VkDescriptorUpdateTemplate descriptorUpdateTemplate;
                 const void* pData;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_411;
                 memcpy((uint64_t*)&cgen_var_411, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_411, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_411));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_412;
                 memcpy((uint64_t*)&cgen_var_412, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorSet(&cgen_var_412, (VkDescriptorSet*)&descriptorSet, 1);
+                *((VkDescriptorSet*))&descriptorSet = (VkDescriptorSet)unbox_VkDescriptorSet((*&cgen_var_412));
                 uint64_t cgen_var_413;
                 memcpy((uint64_t*)&cgen_var_413, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_413, (VkDescriptorUpdateTemplate*)&descriptorUpdateTemplate, 1);
+                *((VkDescriptorUpdateTemplate*))&descriptorUpdateTemplate = (VkDescriptorUpdateTemplate)unbox_VkDescriptorUpdateTemplate((*&cgen_var_413));
                 // WARNING PTR CHECK
                 memcpy((void**)&pData, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pData);
@@ -9329,15 +8607,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo;
                 VkExternalBufferProperties* pExternalBufferProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_415;
                 memcpy((uint64_t*)&cgen_var_415, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_415, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_415));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 vkReadStream->alloc((void**)&pExternalBufferInfo, sizeof(const VkPhysicalDeviceExternalBufferInfo));
                 reservedunmarshal_VkPhysicalDeviceExternalBufferInfo(vkReadStream, (VkPhysicalDeviceExternalBufferInfo*)(pExternalBufferInfo), readStreamPtrPtr);
@@ -9345,8 +8621,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pExternalBufferProperties, sizeof(VkExternalBufferProperties));
                 reservedunmarshal_VkExternalBufferProperties(vkReadStream, (VkExternalBufferProperties*)(pExternalBufferProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pExternalBufferProperties;
                 if (pExternalBufferInfo)
                 {
                     m_state->transformImpl_VkPhysicalDeviceExternalBufferInfo_tohost(pExternalBufferInfo, 1);
@@ -9386,15 +8660,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalFenceInfo* pExternalFenceInfo;
                 VkExternalFenceProperties* pExternalFenceProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_416;
                 memcpy((uint64_t*)&cgen_var_416, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_416, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_416));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 vkReadStream->alloc((void**)&pExternalFenceInfo, sizeof(const VkPhysicalDeviceExternalFenceInfo));
                 reservedunmarshal_VkPhysicalDeviceExternalFenceInfo(vkReadStream, (VkPhysicalDeviceExternalFenceInfo*)(pExternalFenceInfo), readStreamPtrPtr);
@@ -9402,8 +8674,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pExternalFenceProperties, sizeof(VkExternalFenceProperties));
                 reservedunmarshal_VkExternalFenceProperties(vkReadStream, (VkExternalFenceProperties*)(pExternalFenceProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pExternalFenceProperties;
                 if (pExternalFenceInfo)
                 {
                     transform_tohost_VkPhysicalDeviceExternalFenceInfo(m_state, (VkPhysicalDeviceExternalFenceInfo*)(pExternalFenceInfo));
@@ -9440,24 +8710,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo;
                 VkExternalSemaphoreProperties* pExternalSemaphoreProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_417;
                 memcpy((uint64_t*)&cgen_var_417, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_417, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_417));
                 vkReadStream->alloc((void**)&pExternalSemaphoreInfo, sizeof(const VkPhysicalDeviceExternalSemaphoreInfo));
                 reservedunmarshal_VkPhysicalDeviceExternalSemaphoreInfo(vkReadStream, (VkPhysicalDeviceExternalSemaphoreInfo*)(pExternalSemaphoreInfo), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pExternalSemaphoreProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pExternalSemaphoreProperties, sizeof(VkExternalSemaphoreProperties));
                 reservedunmarshal_VkExternalSemaphoreProperties(vkReadStream, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pExternalSemaphoreProperties;
                 if (pExternalSemaphoreInfo)
                 {
                     transform_tohost_VkPhysicalDeviceExternalSemaphoreInfo(m_state, (VkPhysicalDeviceExternalSemaphoreInfo*)(pExternalSemaphoreInfo));
@@ -9494,15 +8757,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkDescriptorSetLayoutCreateInfo* pCreateInfo;
                 VkDescriptorSetLayoutSupport* pSupport;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_418;
                 memcpy((uint64_t*)&cgen_var_418, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_418, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_418));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorSetLayoutCreateInfo));
                 reservedunmarshal_VkDescriptorSetLayoutCreateInfo(vkReadStream, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -9510,8 +8771,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pSupport, sizeof(VkDescriptorSetLayoutSupport));
                 reservedunmarshal_VkDescriptorSetLayoutSupport(vkReadStream, (VkDescriptorSetLayoutSupport*)(pSupport), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSupport;
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDescriptorSetLayoutCreateInfo(m_state, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo));
@@ -9550,26 +8809,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkInstance instance;
                 VkSurfaceKHR surface;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_419;
                 memcpy((uint64_t*)&cgen_var_419, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_419, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_419));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 // Begin manual non dispatchable handle destroy unboxing for surface;
-                VkSurfaceKHR* boxed_surface_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_surface_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_420;
                 memcpy((uint64_t*)&cgen_var_420, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_420, (VkSurfaceKHR*)&surface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for surface;
+                *((VkSurfaceKHR*))&surface = (VkSurfaceKHR)unbox_VkSurfaceKHR((*&cgen_var_420));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -9607,29 +8859,25 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t queueFamilyIndex;
                 VkSurfaceKHR surface;
                 VkBool32* pSupported;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_422;
                 memcpy((uint64_t*)&cgen_var_422, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_422, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_422));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 memcpy((uint32_t*)&queueFamilyIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 uint64_t cgen_var_423;
                 memcpy((uint64_t*)&cgen_var_423, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_423, (VkSurfaceKHR*)&surface, 1);
+                *((VkSurfaceKHR*))&surface = (VkSurfaceKHR)unbox_VkSurfaceKHR((*&cgen_var_423));
                 // Begin manual dispatchable handle unboxing for pSupported;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pSupported, sizeof(VkBool32));
                 memcpy((VkBool32*)pSupported, *readStreamPtrPtr, sizeof(VkBool32));
                 *readStreamPtrPtr += sizeof(VkBool32);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSupported;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSurfaceSupportKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)queueFamilyIndex, (unsigned long long)surface, (unsigned long long)pSupported);
@@ -9656,26 +8904,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 VkSurfaceKHR surface;
                 VkSurfaceCapabilitiesKHR* pSurfaceCapabilities;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_424;
                 memcpy((uint64_t*)&cgen_var_424, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_424, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_424));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_425;
                 memcpy((uint64_t*)&cgen_var_425, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_425, (VkSurfaceKHR*)&surface, 1);
+                *((VkSurfaceKHR*))&surface = (VkSurfaceKHR)unbox_VkSurfaceKHR((*&cgen_var_425));
                 // Begin manual dispatchable handle unboxing for pSurfaceCapabilities;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pSurfaceCapabilities, sizeof(VkSurfaceCapabilitiesKHR));
                 reservedunmarshal_VkSurfaceCapabilitiesKHR(vkReadStream, (VkSurfaceCapabilitiesKHR*)(pSurfaceCapabilities), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurfaceCapabilities;
                 if (pSurfaceCapabilities)
                 {
                     transform_tohost_VkSurfaceCapabilitiesKHR(m_state, (VkSurfaceCapabilitiesKHR*)(pSurfaceCapabilities));
@@ -9711,20 +8955,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkSurfaceKHR surface;
                 uint32_t* pSurfaceFormatCount;
                 VkSurfaceFormatKHR* pSurfaceFormats;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_426;
                 memcpy((uint64_t*)&cgen_var_426, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_426, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_426));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_427;
                 memcpy((uint64_t*)&cgen_var_427, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_427, (VkSurfaceKHR*)&surface, 1);
+                *((VkSurfaceKHR*))&surface = (VkSurfaceKHR)unbox_VkSurfaceKHR((*&cgen_var_427));
                 // Begin manual dispatchable handle unboxing for pSurfaceFormatCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -9737,8 +8979,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pSurfaceFormatCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurfaceFormatCount;
                 // Begin manual dispatchable handle unboxing for pSurfaceFormats;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -9753,8 +8993,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkSurfaceFormatKHR(vkReadStream, (VkSurfaceFormatKHR*)(pSurfaceFormats + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurfaceFormats;
                 if (pSurfaceFormats)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
@@ -9812,20 +9050,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkSurfaceKHR surface;
                 uint32_t* pPresentModeCount;
                 VkPresentModeKHR* pPresentModes;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_432;
                 memcpy((uint64_t*)&cgen_var_432, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_432, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_432));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_433;
                 memcpy((uint64_t*)&cgen_var_433, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_433, (VkSurfaceKHR*)&surface, 1);
+                *((VkSurfaceKHR*))&surface = (VkSurfaceKHR)unbox_VkSurfaceKHR((*&cgen_var_433));
                 // Begin manual dispatchable handle unboxing for pPresentModeCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -9838,8 +9074,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPresentModeCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPresentModeCount;
                 // Begin manual dispatchable handle unboxing for pPresentModes;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -9852,8 +9086,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((VkPresentModeKHR*)pPresentModes, *readStreamPtrPtr, (*(pPresentModeCount)) * sizeof(VkPresentModeKHR));
                     *readStreamPtrPtr += (*(pPresentModeCount)) * sizeof(VkPresentModeKHR);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPresentModes;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetPhysicalDeviceSurfacePresentModesKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)surface, (unsigned long long)pPresentModeCount, (unsigned long long)pPresentModes);
@@ -9896,15 +9128,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkSwapchainCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSwapchainKHR* pSwapchain;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_438;
                 memcpy((uint64_t*)&cgen_var_438, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_438, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_438));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkSwapchainCreateInfoKHR));
                 reservedunmarshal_VkSwapchainCreateInfoKHR(vkReadStream, (VkSwapchainCreateInfoKHR*)(pCreateInfo), readStreamPtrPtr);
@@ -9923,9 +9153,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_440;
                 memcpy((uint64_t*)&cgen_var_440, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(&cgen_var_440, (VkSwapchainKHR*)pSwapchain, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSwapchain;
+                *((VkSwapchainKHR*))pSwapchain = (VkSwapchainKHR)(VkSwapchainKHR)((*&cgen_var_440));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkSwapchainCreateInfoKHR(m_state, (VkSwapchainCreateInfoKHR*)(pCreateInfo));
@@ -9967,26 +9195,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkSwapchainKHR swapchain;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_442;
                 memcpy((uint64_t*)&cgen_var_442, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_442, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_442));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for swapchain;
-                VkSwapchainKHR* boxed_swapchain_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_swapchain_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_443;
                 memcpy((uint64_t*)&cgen_var_443, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(&cgen_var_443, (VkSwapchainKHR*)&swapchain, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for swapchain;
+                *((VkSwapchainKHR*))&swapchain = (VkSwapchainKHR)unbox_VkSwapchainKHR((*&cgen_var_443));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -10024,20 +9245,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkSwapchainKHR swapchain;
                 uint32_t* pSwapchainImageCount;
                 VkImage* pSwapchainImages;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_445;
                 memcpy((uint64_t*)&cgen_var_445, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_445, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_445));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_446;
                 memcpy((uint64_t*)&cgen_var_446, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(&cgen_var_446, (VkSwapchainKHR*)&swapchain, 1);
+                *((VkSwapchainKHR*))&swapchain = (VkSwapchainKHR)unbox_VkSwapchainKHR((*&cgen_var_446));
                 // Begin manual dispatchable handle unboxing for pSwapchainImageCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -10050,8 +9269,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pSwapchainImageCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSwapchainImageCount;
                 // Begin manual dispatchable handle unboxing for pSwapchainImages;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -10067,11 +9284,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         vkReadStream->alloc((void**)&cgen_var_449, (*(pSwapchainImageCount)) * 8);
                         memcpy((uint64_t*)cgen_var_449, *readStreamPtrPtr, (*(pSwapchainImageCount)) * 8);
                         *readStreamPtrPtr += (*(pSwapchainImageCount)) * 8;
-                        vkReadStream->handleMapping()->mapHandles_u64_VkImage(cgen_var_449, (VkImage*)pSwapchainImages, (*(pSwapchainImageCount)));
+                        for (uint32_t k = 0; k < (*(pSwapchainImageCount)); ++k)
+                        {
+                            *((((VkImage*))pSwapchainImages) + k) = (VkImage)(VkImage)(cgen_var_449[k]);
+                        }
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSwapchainImages;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetSwapchainImagesKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain, (unsigned long long)pSwapchainImageCount, (unsigned long long)pSwapchainImages);
@@ -10120,37 +9338,33 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkSemaphore semaphore;
                 VkFence fence;
                 uint32_t* pImageIndex;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_453;
                 memcpy((uint64_t*)&cgen_var_453, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_453, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_453));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_454;
                 memcpy((uint64_t*)&cgen_var_454, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(&cgen_var_454, (VkSwapchainKHR*)&swapchain, 1);
+                *((VkSwapchainKHR*))&swapchain = (VkSwapchainKHR)unbox_VkSwapchainKHR((*&cgen_var_454));
                 memcpy((uint64_t*)&timeout, *readStreamPtrPtr, sizeof(uint64_t));
                 *readStreamPtrPtr += sizeof(uint64_t);
                 uint64_t cgen_var_455;
                 memcpy((uint64_t*)&cgen_var_455, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSemaphore(&cgen_var_455, (VkSemaphore*)&semaphore, 1);
+                *((VkSemaphore*))&semaphore = (VkSemaphore)unbox_VkSemaphore((*&cgen_var_455));
                 uint64_t cgen_var_456;
                 memcpy((uint64_t*)&cgen_var_456, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_456, (VkFence*)&fence, 1);
+                *((VkFence*))&fence = (VkFence)unbox_VkFence((*&cgen_var_456));
                 // Begin manual dispatchable handle unboxing for pImageIndex;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pImageIndex, sizeof(uint32_t));
                 memcpy((uint32_t*)pImageIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pImageIndex;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkAcquireNextImageKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain, (unsigned long long)timeout, (unsigned long long)semaphore, (unsigned long long)fence, (unsigned long long)pImageIndex);
@@ -10176,15 +9390,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkQueue queue;
                 const VkPresentInfoKHR* pPresentInfo;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_457;
                 memcpy((uint64_t*)&cgen_var_457, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_457, (VkQueue*)&queue, 1);
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_457));
                 auto unboxed_queue = unbox_VkQueue(queue);
                 auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for queue;
                 vkReadStream->alloc((void**)&pPresentInfo, sizeof(const VkPresentInfoKHR));
                 reservedunmarshal_VkPresentInfoKHR(vkReadStream, (VkPresentInfoKHR*)(pPresentInfo), readStreamPtrPtr);
@@ -10216,22 +9428,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 VkDeviceGroupPresentCapabilitiesKHR* pDeviceGroupPresentCapabilities;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_458;
                 memcpy((uint64_t*)&cgen_var_458, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_458, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_458));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual dispatchable handle unboxing for pDeviceGroupPresentCapabilities;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pDeviceGroupPresentCapabilities, sizeof(VkDeviceGroupPresentCapabilitiesKHR));
                 reservedunmarshal_VkDeviceGroupPresentCapabilitiesKHR(vkReadStream, (VkDeviceGroupPresentCapabilitiesKHR*)(pDeviceGroupPresentCapabilities), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDeviceGroupPresentCapabilities;
                 if (pDeviceGroupPresentCapabilities)
                 {
                     transform_tohost_VkDeviceGroupPresentCapabilitiesKHR(m_state, (VkDeviceGroupPresentCapabilitiesKHR*)(pDeviceGroupPresentCapabilities));
@@ -10266,20 +9474,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkSurfaceKHR surface;
                 VkDeviceGroupPresentModeFlagsKHR* pModes;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_459;
                 memcpy((uint64_t*)&cgen_var_459, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_459, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_459));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_460;
                 memcpy((uint64_t*)&cgen_var_460, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_460, (VkSurfaceKHR*)&surface, 1);
+                *((VkSurfaceKHR*))&surface = (VkSurfaceKHR)unbox_VkSurfaceKHR((*&cgen_var_460));
                 // Begin manual dispatchable handle unboxing for pModes;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -10292,8 +9498,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((VkDeviceGroupPresentModeFlagsKHR*)pModes, *readStreamPtrPtr, sizeof(VkDeviceGroupPresentModeFlagsKHR));
                     *readStreamPtrPtr += sizeof(VkDeviceGroupPresentModeFlagsKHR);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pModes;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetDeviceGroupSurfacePresentModesKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)surface, (unsigned long long)pModes);
@@ -10327,20 +9531,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkSurfaceKHR surface;
                 uint32_t* pRectCount;
                 VkRect2D* pRects;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_463;
                 memcpy((uint64_t*)&cgen_var_463, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_463, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_463));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_464;
                 memcpy((uint64_t*)&cgen_var_464, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_464, (VkSurfaceKHR*)&surface, 1);
+                *((VkSurfaceKHR*))&surface = (VkSurfaceKHR)unbox_VkSurfaceKHR((*&cgen_var_464));
                 // Begin manual dispatchable handle unboxing for pRectCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -10353,8 +9555,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pRectCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pRectCount;
                 // Begin manual dispatchable handle unboxing for pRects;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -10369,8 +9569,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkRect2D(vkReadStream, (VkRect2D*)(pRects + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pRects;
                 if (pRects)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pRectCount)); ++i)
@@ -10427,15 +9625,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkAcquireNextImageInfoKHR* pAcquireInfo;
                 uint32_t* pImageIndex;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_469;
                 memcpy((uint64_t*)&cgen_var_469, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_469, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_469));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pAcquireInfo, sizeof(const VkAcquireNextImageInfoKHR));
                 reservedunmarshal_VkAcquireNextImageInfoKHR(vkReadStream, (VkAcquireNextImageInfoKHR*)(pAcquireInfo), readStreamPtrPtr);
@@ -10444,8 +9640,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pImageIndex, sizeof(uint32_t));
                 memcpy((uint32_t*)pImageIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pImageIndex;
                 if (pAcquireInfo)
                 {
                     transform_tohost_VkAcquireNextImageInfoKHR(m_state, (VkAcquireNextImageInfoKHR*)(pAcquireInfo));
@@ -10478,15 +9672,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pPropertyCount;
                 VkDisplayPropertiesKHR* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_470;
                 memcpy((uint64_t*)&cgen_var_470, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_470, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_470));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
@@ -10500,8 +9692,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -10516,8 +9706,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkDisplayPropertiesKHR(vkReadStream, (VkDisplayPropertiesKHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -10574,15 +9762,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pPropertyCount;
                 VkDisplayPlanePropertiesKHR* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_475;
                 memcpy((uint64_t*)&cgen_var_475, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_475, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_475));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
@@ -10596,8 +9782,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -10612,8 +9796,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkDisplayPlanePropertiesKHR(vkReadStream, (VkDisplayPlanePropertiesKHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -10671,15 +9853,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t planeIndex;
                 uint32_t* pDisplayCount;
                 VkDisplayKHR* pDisplays;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_480;
                 memcpy((uint64_t*)&cgen_var_480, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_480, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_480));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 memcpy((uint32_t*)&planeIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -10695,8 +9875,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pDisplayCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDisplayCount;
                 // Begin manual dispatchable handle unboxing for pDisplays;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -10712,11 +9890,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         vkReadStream->alloc((void**)&cgen_var_483, (*(pDisplayCount)) * 8);
                         memcpy((uint64_t*)cgen_var_483, *readStreamPtrPtr, (*(pDisplayCount)) * 8);
                         *readStreamPtrPtr += (*(pDisplayCount)) * 8;
-                        vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(cgen_var_483, (VkDisplayKHR*)pDisplays, (*(pDisplayCount)));
+                        for (uint32_t k = 0; k < (*(pDisplayCount)); ++k)
+                        {
+                            *((((VkDisplayKHR*))pDisplays) + k) = (VkDisplayKHR)(VkDisplayKHR)(cgen_var_483[k]);
+                        }
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDisplays;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetDisplayPlaneSupportedDisplaysKHR 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)planeIndex, (unsigned long long)pDisplayCount, (unsigned long long)pDisplays);
@@ -10763,20 +9942,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDisplayKHR display;
                 uint32_t* pPropertyCount;
                 VkDisplayModePropertiesKHR* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_487;
                 memcpy((uint64_t*)&cgen_var_487, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_487, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_487));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_488;
                 memcpy((uint64_t*)&cgen_var_488, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_488, (VkDisplayKHR*)&display, 1);
+                *((VkDisplayKHR*))&display = (VkDisplayKHR)unbox_VkDisplayKHR((*&cgen_var_488));
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -10789,8 +9966,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -10805,8 +9980,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkDisplayModePropertiesKHR(vkReadStream, (VkDisplayModePropertiesKHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -10865,20 +10038,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDisplayModeCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkDisplayModeKHR* pMode;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_493;
                 memcpy((uint64_t*)&cgen_var_493, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_493, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_493));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_494;
                 memcpy((uint64_t*)&cgen_var_494, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_494, (VkDisplayKHR*)&display, 1);
+                *((VkDisplayKHR*))&display = (VkDisplayKHR)unbox_VkDisplayKHR((*&cgen_var_494));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDisplayModeCreateInfoKHR));
                 reservedunmarshal_VkDisplayModeCreateInfoKHR(vkReadStream, (VkDisplayModeCreateInfoKHR*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -10896,9 +10067,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_496;
                 memcpy((uint64_t*)&cgen_var_496, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDisplayModeKHR(&cgen_var_496, (VkDisplayModeKHR*)pMode, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMode;
+                *((VkDisplayModeKHR*))pMode = (VkDisplayModeKHR)(VkDisplayModeKHR)((*&cgen_var_496));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDisplayModeCreateInfoKHR(m_state, (VkDisplayModeCreateInfoKHR*)(pCreateInfo));
@@ -10941,28 +10110,24 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDisplayModeKHR mode;
                 uint32_t planeIndex;
                 VkDisplayPlaneCapabilitiesKHR* pCapabilities;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_498;
                 memcpy((uint64_t*)&cgen_var_498, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_498, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_498));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_499;
                 memcpy((uint64_t*)&cgen_var_499, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDisplayModeKHR(&cgen_var_499, (VkDisplayModeKHR*)&mode, 1);
+                *((VkDisplayModeKHR*))&mode = (VkDisplayModeKHR)unbox_VkDisplayModeKHR((*&cgen_var_499));
                 memcpy((uint32_t*)&planeIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 // Begin manual dispatchable handle unboxing for pCapabilities;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pCapabilities, sizeof(VkDisplayPlaneCapabilitiesKHR));
                 reservedunmarshal_VkDisplayPlaneCapabilitiesKHR(vkReadStream, (VkDisplayPlaneCapabilitiesKHR*)(pCapabilities), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pCapabilities;
                 if (pCapabilities)
                 {
                     transform_tohost_VkDisplayPlaneCapabilitiesKHR(m_state, (VkDisplayPlaneCapabilitiesKHR*)(pCapabilities));
@@ -10998,15 +10163,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDisplaySurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSurfaceKHR* pSurface;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_500;
                 memcpy((uint64_t*)&cgen_var_500, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_500, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_500));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDisplaySurfaceCreateInfoKHR));
                 reservedunmarshal_VkDisplaySurfaceCreateInfoKHR(vkReadStream, (VkDisplaySurfaceCreateInfoKHR*)(pCreateInfo), readStreamPtrPtr);
@@ -11025,9 +10188,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_502;
                 memcpy((uint64_t*)&cgen_var_502, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_502, (VkSurfaceKHR*)pSurface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurface;
+                *((VkSurfaceKHR*))pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((*&cgen_var_502));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDisplaySurfaceCreateInfoKHR(m_state, (VkDisplaySurfaceCreateInfoKHR*)(pCreateInfo));
@@ -11068,15 +10229,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkSwapchainCreateInfoKHR* pCreateInfos;
                 const VkAllocationCallbacks* pAllocator;
                 VkSwapchainKHR* pSwapchains;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_504;
                 memcpy((uint64_t*)&cgen_var_504, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_504, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_504));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&swapchainCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -11103,10 +10262,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_506, ((swapchainCount)) * 8);
                     memcpy((uint64_t*)cgen_var_506, *readStreamPtrPtr, ((swapchainCount)) * 8);
                     *readStreamPtrPtr += ((swapchainCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(cgen_var_506, (VkSwapchainKHR*)pSwapchains, ((swapchainCount)));
+                    for (uint32_t k = 0; k < ((swapchainCount)); ++k)
+                    {
+                        *((((VkSwapchainKHR*))pSwapchains) + k) = (VkSwapchainKHR)(VkSwapchainKHR)(cgen_var_506[k]);
+                    }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSwapchains;
                 if (pCreateInfos)
                 {
                     for (uint32_t i = 0; i < (uint32_t)((swapchainCount)); ++i)
@@ -11153,15 +10313,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkXlibSurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSurfaceKHR* pSurface;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_508;
                 memcpy((uint64_t*)&cgen_var_508, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_508, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_508));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkXlibSurfaceCreateInfoKHR));
                 reservedunmarshal_VkXlibSurfaceCreateInfoKHR(vkReadStream, (VkXlibSurfaceCreateInfoKHR*)(pCreateInfo), readStreamPtrPtr);
@@ -11180,9 +10338,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_510;
                 memcpy((uint64_t*)&cgen_var_510, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_510, (VkSurfaceKHR*)pSurface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurface;
+                *((VkSurfaceKHR*))pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((*&cgen_var_510));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkXlibSurfaceCreateInfoKHR(m_state, (VkXlibSurfaceCreateInfoKHR*)(pCreateInfo));
@@ -11220,15 +10376,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t queueFamilyIndex;
                 Display* dpy;
                 VisualID visualID;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_512;
                 memcpy((uint64_t*)&cgen_var_512, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_512, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_512));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 memcpy((uint32_t*)&queueFamilyIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -11237,8 +10391,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&dpy, sizeof(Display));
                 memcpy((Display*)dpy, *readStreamPtrPtr, sizeof(Display));
                 *readStreamPtrPtr += sizeof(Display);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for dpy;
                 memcpy((VisualID*)&visualID, *readStreamPtrPtr, sizeof(VisualID));
                 *readStreamPtrPtr += sizeof(VisualID);
                 if (m_logCalls)
@@ -11270,15 +10422,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkXcbSurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSurfaceKHR* pSurface;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_513;
                 memcpy((uint64_t*)&cgen_var_513, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_513, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_513));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkXcbSurfaceCreateInfoKHR));
                 reservedunmarshal_VkXcbSurfaceCreateInfoKHR(vkReadStream, (VkXcbSurfaceCreateInfoKHR*)(pCreateInfo), readStreamPtrPtr);
@@ -11297,9 +10447,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_515;
                 memcpy((uint64_t*)&cgen_var_515, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_515, (VkSurfaceKHR*)pSurface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurface;
+                *((VkSurfaceKHR*))pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((*&cgen_var_515));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkXcbSurfaceCreateInfoKHR(m_state, (VkXcbSurfaceCreateInfoKHR*)(pCreateInfo));
@@ -11337,15 +10485,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t queueFamilyIndex;
                 xcb_connection_t* connection;
                 xcb_visualid_t visual_id;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_517;
                 memcpy((uint64_t*)&cgen_var_517, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_517, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_517));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 memcpy((uint32_t*)&queueFamilyIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -11354,8 +10500,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&connection, sizeof(xcb_connection_t));
                 memcpy((xcb_connection_t*)connection, *readStreamPtrPtr, sizeof(xcb_connection_t));
                 *readStreamPtrPtr += sizeof(xcb_connection_t);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for connection;
                 memcpy((xcb_visualid_t*)&visual_id, *readStreamPtrPtr, sizeof(xcb_visualid_t));
                 *readStreamPtrPtr += sizeof(xcb_visualid_t);
                 if (m_logCalls)
@@ -11387,15 +10531,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkWaylandSurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSurfaceKHR* pSurface;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_518;
                 memcpy((uint64_t*)&cgen_var_518, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_518, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_518));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkWaylandSurfaceCreateInfoKHR));
                 reservedunmarshal_VkWaylandSurfaceCreateInfoKHR(vkReadStream, (VkWaylandSurfaceCreateInfoKHR*)(pCreateInfo), readStreamPtrPtr);
@@ -11414,9 +10556,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_520;
                 memcpy((uint64_t*)&cgen_var_520, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_520, (VkSurfaceKHR*)pSurface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurface;
+                *((VkSurfaceKHR*))pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((*&cgen_var_520));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkWaylandSurfaceCreateInfoKHR(m_state, (VkWaylandSurfaceCreateInfoKHR*)(pCreateInfo));
@@ -11453,15 +10593,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 uint32_t queueFamilyIndex;
                 wl_display* display;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_522;
                 memcpy((uint64_t*)&cgen_var_522, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_522, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_522));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 memcpy((uint32_t*)&queueFamilyIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -11470,8 +10608,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&display, sizeof(wl_display));
                 memcpy((wl_display*)display, *readStreamPtrPtr, sizeof(wl_display));
                 *readStreamPtrPtr += sizeof(wl_display);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for display;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetPhysicalDeviceWaylandPresentationSupportKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)queueFamilyIndex, (unsigned long long)display);
@@ -11501,15 +10637,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkMirSurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSurfaceKHR* pSurface;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_523;
                 memcpy((uint64_t*)&cgen_var_523, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_523, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_523));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkMirSurfaceCreateInfoKHR));
                 reservedunmarshal_VkMirSurfaceCreateInfoKHR(vkReadStream, (VkMirSurfaceCreateInfoKHR*)(pCreateInfo), readStreamPtrPtr);
@@ -11528,9 +10662,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_525;
                 memcpy((uint64_t*)&cgen_var_525, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_525, (VkSurfaceKHR*)pSurface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurface;
+                *((VkSurfaceKHR*))pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((*&cgen_var_525));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkMirSurfaceCreateInfoKHR(m_state, (VkMirSurfaceCreateInfoKHR*)(pCreateInfo));
@@ -11567,15 +10699,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 uint32_t queueFamilyIndex;
                 MirConnection* connection;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_527;
                 memcpy((uint64_t*)&cgen_var_527, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_527, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_527));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 memcpy((uint32_t*)&queueFamilyIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -11584,8 +10714,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&connection, sizeof(MirConnection));
                 memcpy((MirConnection*)connection, *readStreamPtrPtr, sizeof(MirConnection));
                 *readStreamPtrPtr += sizeof(MirConnection);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for connection;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetPhysicalDeviceMirPresentationSupportKHR 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)queueFamilyIndex, (unsigned long long)connection);
@@ -11615,15 +10743,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkAndroidSurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSurfaceKHR* pSurface;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_528;
                 memcpy((uint64_t*)&cgen_var_528, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_528, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_528));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkAndroidSurfaceCreateInfoKHR));
                 reservedunmarshal_VkAndroidSurfaceCreateInfoKHR(vkReadStream, (VkAndroidSurfaceCreateInfoKHR*)(pCreateInfo), readStreamPtrPtr);
@@ -11642,9 +10768,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_530;
                 memcpy((uint64_t*)&cgen_var_530, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_530, (VkSurfaceKHR*)pSurface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurface;
+                *((VkSurfaceKHR*))pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((*&cgen_var_530));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkAndroidSurfaceCreateInfoKHR(m_state, (VkAndroidSurfaceCreateInfoKHR*)(pCreateInfo));
@@ -11684,15 +10808,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkWin32SurfaceCreateInfoKHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSurfaceKHR* pSurface;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_532;
                 memcpy((uint64_t*)&cgen_var_532, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_532, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_532));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkWin32SurfaceCreateInfoKHR));
                 reservedunmarshal_VkWin32SurfaceCreateInfoKHR(vkReadStream, (VkWin32SurfaceCreateInfoKHR*)(pCreateInfo), readStreamPtrPtr);
@@ -11711,9 +10833,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_534;
                 memcpy((uint64_t*)&cgen_var_534, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_534, (VkSurfaceKHR*)pSurface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurface;
+                *((VkSurfaceKHR*))pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((*&cgen_var_534));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkWin32SurfaceCreateInfoKHR(m_state, (VkWin32SurfaceCreateInfoKHR*)(pCreateInfo));
@@ -11749,15 +10869,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 uint32_t queueFamilyIndex;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_536;
                 memcpy((uint64_t*)&cgen_var_536, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_536, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_536));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 memcpy((uint32_t*)&queueFamilyIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -11791,22 +10909,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures2* pFeatures;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_537;
                 memcpy((uint64_t*)&cgen_var_537, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_537, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_537));
                 // Begin manual dispatchable handle unboxing for pFeatures;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pFeatures, sizeof(VkPhysicalDeviceFeatures2));
                 reservedunmarshal_VkPhysicalDeviceFeatures2(vkReadStream, (VkPhysicalDeviceFeatures2*)(pFeatures), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFeatures;
                 if (pFeatures)
                 {
                     transform_tohost_VkPhysicalDeviceFeatures2(m_state, (VkPhysicalDeviceFeatures2*)(pFeatures));
@@ -11838,22 +10949,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceProperties2* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_538;
                 memcpy((uint64_t*)&cgen_var_538, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_538, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_538));
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pProperties, sizeof(VkPhysicalDeviceProperties2));
                 reservedunmarshal_VkPhysicalDeviceProperties2(vkReadStream, (VkPhysicalDeviceProperties2*)(pProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     transform_tohost_VkPhysicalDeviceProperties2(m_state, (VkPhysicalDeviceProperties2*)(pProperties));
@@ -11886,24 +10990,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties2* pFormatProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_539;
                 memcpy((uint64_t*)&cgen_var_539, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_539, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_539));
                 memcpy((VkFormat*)&format, *readStreamPtrPtr, sizeof(VkFormat));
                 *readStreamPtrPtr += sizeof(VkFormat);
                 // Begin manual dispatchable handle unboxing for pFormatProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pFormatProperties, sizeof(VkFormatProperties2));
                 reservedunmarshal_VkFormatProperties2(vkReadStream, (VkFormatProperties2*)(pFormatProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFormatProperties;
                 if (pFormatProperties)
                 {
                     transform_tohost_VkFormatProperties2(m_state, (VkFormatProperties2*)(pFormatProperties));
@@ -11936,24 +11033,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo;
                 VkImageFormatProperties2* pImageFormatProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_540;
                 memcpy((uint64_t*)&cgen_var_540, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_540, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_540));
                 vkReadStream->alloc((void**)&pImageFormatInfo, sizeof(const VkPhysicalDeviceImageFormatInfo2));
                 reservedunmarshal_VkPhysicalDeviceImageFormatInfo2(vkReadStream, (VkPhysicalDeviceImageFormatInfo2*)(pImageFormatInfo), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pImageFormatProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pImageFormatProperties, sizeof(VkImageFormatProperties2));
                 reservedunmarshal_VkImageFormatProperties2(vkReadStream, (VkImageFormatProperties2*)(pImageFormatProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pImageFormatProperties;
                 if (pImageFormatInfo)
                 {
                     transform_tohost_VkPhysicalDeviceImageFormatInfo2(m_state, (VkPhysicalDeviceImageFormatInfo2*)(pImageFormatInfo));
@@ -11992,15 +11082,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pQueueFamilyPropertyCount;
                 VkQueueFamilyProperties2* pQueueFamilyProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_541;
                 memcpy((uint64_t*)&cgen_var_541, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_541, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_541));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for pQueueFamilyPropertyCount;
                 vkReadStream->unsetHandleMapping();
@@ -12014,8 +11102,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pQueueFamilyPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pQueueFamilyPropertyCount;
                 // Begin manual dispatchable handle unboxing for pQueueFamilyProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -12030,8 +11116,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkQueueFamilyProperties2(vkReadStream, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pQueueFamilyProperties;
                 if (pQueueFamilyProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
@@ -12085,22 +11169,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceMemoryProperties2* pMemoryProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_546;
                 memcpy((uint64_t*)&cgen_var_546, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_546, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_546));
                 // Begin manual dispatchable handle unboxing for pMemoryProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryProperties, sizeof(VkPhysicalDeviceMemoryProperties2));
                 reservedunmarshal_VkPhysicalDeviceMemoryProperties2(vkReadStream, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryProperties;
                 if (pMemoryProperties)
                 {
                     transform_tohost_VkPhysicalDeviceMemoryProperties2(m_state, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties));
@@ -12134,15 +11211,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkPhysicalDeviceSparseImageFormatInfo2* pFormatInfo;
                 uint32_t* pPropertyCount;
                 VkSparseImageFormatProperties2* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_547;
                 memcpy((uint64_t*)&cgen_var_547, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_547, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_547));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 vkReadStream->alloc((void**)&pFormatInfo, sizeof(const VkPhysicalDeviceSparseImageFormatInfo2));
                 reservedunmarshal_VkPhysicalDeviceSparseImageFormatInfo2(vkReadStream, (VkPhysicalDeviceSparseImageFormatInfo2*)(pFormatInfo), readStreamPtrPtr);
@@ -12158,8 +11233,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -12174,8 +11247,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkSparseImageFormatProperties2(vkReadStream, (VkSparseImageFormatProperties2*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pFormatInfo)
                 {
                     transform_tohost_VkPhysicalDeviceSparseImageFormatInfo2(m_state, (VkPhysicalDeviceSparseImageFormatInfo2*)(pFormatInfo));
@@ -12238,15 +11309,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t localDeviceIndex;
                 uint32_t remoteDeviceIndex;
                 VkPeerMemoryFeatureFlags* pPeerMemoryFeatures;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_552;
                 memcpy((uint64_t*)&cgen_var_552, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_552, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_552));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&heapIndex, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -12259,8 +11328,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
                 memcpy((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, *readStreamPtrPtr, sizeof(VkPeerMemoryFeatureFlags));
                 *readStreamPtrPtr += sizeof(VkPeerMemoryFeatureFlags);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPeerMemoryFeatures;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetDeviceGroupPeerMemoryFeaturesKHR 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)heapIndex, (unsigned long long)localDeviceIndex, (unsigned long long)remoteDeviceIndex, (unsigned long long)pPeerMemoryFeatures);
@@ -12284,15 +11351,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 uint32_t deviceMask;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_553;
                 memcpy((uint64_t*)&cgen_var_553, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_553, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_553));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&deviceMask, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -12323,15 +11388,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t groupCountX;
                 uint32_t groupCountY;
                 uint32_t groupCountZ;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_554;
                 memcpy((uint64_t*)&cgen_var_554, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_554, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_554));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&baseGroupX, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -12372,20 +11435,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkCommandPool commandPool;
                 VkCommandPoolTrimFlags flags;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_555;
                 memcpy((uint64_t*)&cgen_var_555, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_555, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_555));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_556;
                 memcpy((uint64_t*)&cgen_var_556, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_556, (VkCommandPool*)&commandPool, 1);
+                *((VkCommandPool*))&commandPool = (VkCommandPool)unbox_VkCommandPool((*&cgen_var_556));
                 memcpy((VkCommandPoolTrimFlags*)&flags, *readStreamPtrPtr, sizeof(VkCommandPoolTrimFlags));
                 *readStreamPtrPtr += sizeof(VkCommandPoolTrimFlags);
                 if (m_logCalls)
@@ -12413,15 +11474,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkInstance instance;
                 uint32_t* pPhysicalDeviceGroupCount;
                 VkPhysicalDeviceGroupProperties* pPhysicalDeviceGroupProperties;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_557;
                 memcpy((uint64_t*)&cgen_var_557, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_557, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_557));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 // Begin manual dispatchable handle unboxing for pPhysicalDeviceGroupCount;
                 vkReadStream->unsetHandleMapping();
@@ -12435,8 +11494,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPhysicalDeviceGroupCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPhysicalDeviceGroupCount;
                 // Begin manual dispatchable handle unboxing for pPhysicalDeviceGroupProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -12451,8 +11508,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkPhysicalDeviceGroupProperties(vkReadStream, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPhysicalDeviceGroupProperties;
                 if (pPhysicalDeviceGroupProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
@@ -12511,15 +11566,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo;
                 VkExternalBufferProperties* pExternalBufferProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_562;
                 memcpy((uint64_t*)&cgen_var_562, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_562, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_562));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 vkReadStream->alloc((void**)&pExternalBufferInfo, sizeof(const VkPhysicalDeviceExternalBufferInfo));
                 reservedunmarshal_VkPhysicalDeviceExternalBufferInfo(vkReadStream, (VkPhysicalDeviceExternalBufferInfo*)(pExternalBufferInfo), readStreamPtrPtr);
@@ -12527,8 +11580,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pExternalBufferProperties, sizeof(VkExternalBufferProperties));
                 reservedunmarshal_VkExternalBufferProperties(vkReadStream, (VkExternalBufferProperties*)(pExternalBufferProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pExternalBufferProperties;
                 if (pExternalBufferInfo)
                 {
                     m_state->transformImpl_VkPhysicalDeviceExternalBufferInfo_tohost(pExternalBufferInfo, 1);
@@ -12572,15 +11623,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkMemoryGetWin32HandleInfoKHR* pGetWin32HandleInfo;
                 HANDLE* pHandle;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_563;
                 memcpy((uint64_t*)&cgen_var_563, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_563, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_563));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pGetWin32HandleInfo, sizeof(const VkMemoryGetWin32HandleInfoKHR));
                 reservedunmarshal_VkMemoryGetWin32HandleInfoKHR(vkReadStream, (VkMemoryGetWin32HandleInfoKHR*)(pGetWin32HandleInfo), readStreamPtrPtr);
@@ -12589,8 +11638,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pHandle, sizeof(HANDLE));
                 memcpy((HANDLE*)pHandle, *readStreamPtrPtr, sizeof(HANDLE));
                 *readStreamPtrPtr += sizeof(HANDLE);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pHandle;
                 if (pGetWin32HandleInfo)
                 {
                     transform_tohost_VkMemoryGetWin32HandleInfoKHR(m_state, (VkMemoryGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
@@ -12622,15 +11669,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkExternalMemoryHandleTypeFlagBits handleType;
                 HANDLE handle;
                 VkMemoryWin32HandlePropertiesKHR* pMemoryWin32HandleProperties;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_564;
                 memcpy((uint64_t*)&cgen_var_564, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_564, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_564));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((VkExternalMemoryHandleTypeFlagBits*)&handleType, *readStreamPtrPtr, sizeof(VkExternalMemoryHandleTypeFlagBits));
                 *readStreamPtrPtr += sizeof(VkExternalMemoryHandleTypeFlagBits);
@@ -12640,8 +11685,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryWin32HandleProperties, sizeof(VkMemoryWin32HandlePropertiesKHR));
                 reservedunmarshal_VkMemoryWin32HandlePropertiesKHR(vkReadStream, (VkMemoryWin32HandlePropertiesKHR*)(pMemoryWin32HandleProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryWin32HandleProperties;
                 if (pMemoryWin32HandleProperties)
                 {
                     transform_tohost_VkMemoryWin32HandlePropertiesKHR(m_state, (VkMemoryWin32HandlePropertiesKHR*)(pMemoryWin32HandleProperties));
@@ -12678,15 +11721,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkMemoryGetFdInfoKHR* pGetFdInfo;
                 int* pFd;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_565;
                 memcpy((uint64_t*)&cgen_var_565, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_565, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_565));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pGetFdInfo, sizeof(const VkMemoryGetFdInfoKHR));
                 reservedunmarshal_VkMemoryGetFdInfoKHR(vkReadStream, (VkMemoryGetFdInfoKHR*)(pGetFdInfo), readStreamPtrPtr);
@@ -12695,8 +11736,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pFd, sizeof(int));
                 memcpy((int*)pFd, *readStreamPtrPtr, sizeof(int));
                 *readStreamPtrPtr += sizeof(int);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFd;
                 if (pGetFdInfo)
                 {
                     transform_tohost_VkMemoryGetFdInfoKHR(m_state, (VkMemoryGetFdInfoKHR*)(pGetFdInfo));
@@ -12728,15 +11767,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkExternalMemoryHandleTypeFlagBits handleType;
                 int fd;
                 VkMemoryFdPropertiesKHR* pMemoryFdProperties;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_566;
                 memcpy((uint64_t*)&cgen_var_566, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_566, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_566));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((VkExternalMemoryHandleTypeFlagBits*)&handleType, *readStreamPtrPtr, sizeof(VkExternalMemoryHandleTypeFlagBits));
                 *readStreamPtrPtr += sizeof(VkExternalMemoryHandleTypeFlagBits);
@@ -12746,8 +11783,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryFdProperties, sizeof(VkMemoryFdPropertiesKHR));
                 reservedunmarshal_VkMemoryFdPropertiesKHR(vkReadStream, (VkMemoryFdPropertiesKHR*)(pMemoryFdProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryFdProperties;
                 if (pMemoryFdProperties)
                 {
                     transform_tohost_VkMemoryFdPropertiesKHR(m_state, (VkMemoryFdPropertiesKHR*)(pMemoryFdProperties));
@@ -12786,24 +11821,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo;
                 VkExternalSemaphoreProperties* pExternalSemaphoreProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_567;
                 memcpy((uint64_t*)&cgen_var_567, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_567, (VkPhysicalDevice*)&physicalDevice, 1);
-                auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
-                auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for physicalDevice;
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_567));
                 vkReadStream->alloc((void**)&pExternalSemaphoreInfo, sizeof(const VkPhysicalDeviceExternalSemaphoreInfo));
                 reservedunmarshal_VkPhysicalDeviceExternalSemaphoreInfo(vkReadStream, (VkPhysicalDeviceExternalSemaphoreInfo*)(pExternalSemaphoreInfo), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pExternalSemaphoreProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pExternalSemaphoreProperties, sizeof(VkExternalSemaphoreProperties));
                 reservedunmarshal_VkExternalSemaphoreProperties(vkReadStream, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pExternalSemaphoreProperties;
                 if (pExternalSemaphoreInfo)
                 {
                     transform_tohost_VkPhysicalDeviceExternalSemaphoreInfo(m_state, (VkPhysicalDeviceExternalSemaphoreInfo*)(pExternalSemaphoreInfo));
@@ -12843,15 +11871,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 const VkImportSemaphoreWin32HandleInfoKHR* pImportSemaphoreWin32HandleInfo;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_568;
                 memcpy((uint64_t*)&cgen_var_568, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_568, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_568));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pImportSemaphoreWin32HandleInfo, sizeof(const VkImportSemaphoreWin32HandleInfoKHR));
                 reservedunmarshal_VkImportSemaphoreWin32HandleInfoKHR(vkReadStream, (VkImportSemaphoreWin32HandleInfoKHR*)(pImportSemaphoreWin32HandleInfo), readStreamPtrPtr);
@@ -12884,15 +11910,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkSemaphoreGetWin32HandleInfoKHR* pGetWin32HandleInfo;
                 HANDLE* pHandle;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_569;
                 memcpy((uint64_t*)&cgen_var_569, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_569, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_569));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pGetWin32HandleInfo, sizeof(const VkSemaphoreGetWin32HandleInfoKHR));
                 reservedunmarshal_VkSemaphoreGetWin32HandleInfoKHR(vkReadStream, (VkSemaphoreGetWin32HandleInfoKHR*)(pGetWin32HandleInfo), readStreamPtrPtr);
@@ -12901,8 +11925,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pHandle, sizeof(HANDLE));
                 memcpy((HANDLE*)pHandle, *readStreamPtrPtr, sizeof(HANDLE));
                 *readStreamPtrPtr += sizeof(HANDLE);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pHandle;
                 if (pGetWin32HandleInfo)
                 {
                     transform_tohost_VkSemaphoreGetWin32HandleInfoKHR(m_state, (VkSemaphoreGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
@@ -12934,16 +11956,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_570;
                 memcpy((uint64_t*)&cgen_var_570, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_570, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_570));
                 vkReadStream->alloc((void**)&pImportSemaphoreFdInfo, sizeof(const VkImportSemaphoreFdInfoKHR));
                 reservedunmarshal_VkImportSemaphoreFdInfoKHR(vkReadStream, (VkImportSemaphoreFdInfoKHR*)(pImportSemaphoreFdInfo), readStreamPtrPtr);
                 if (pImportSemaphoreFdInfo)
@@ -12975,16 +11992,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkSemaphoreGetFdInfoKHR* pGetFdInfo;
                 int* pFd;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_571;
                 memcpy((uint64_t*)&cgen_var_571, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_571, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_571));
                 vkReadStream->alloc((void**)&pGetFdInfo, sizeof(const VkSemaphoreGetFdInfoKHR));
                 reservedunmarshal_VkSemaphoreGetFdInfoKHR(vkReadStream, (VkSemaphoreGetFdInfoKHR*)(pGetFdInfo), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pFd;
@@ -12992,8 +12004,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pFd, sizeof(int));
                 memcpy((int*)pFd, *readStreamPtrPtr, sizeof(int));
                 *readStreamPtrPtr += sizeof(int);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFd;
                 if (pGetFdInfo)
                 {
                     transform_tohost_VkSemaphoreGetFdInfoKHR(m_state, (VkSemaphoreGetFdInfoKHR*)(pGetFdInfo));
@@ -13029,22 +12039,20 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t set;
                 uint32_t descriptorWriteCount;
                 const VkWriteDescriptorSet* pDescriptorWrites;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_572;
                 memcpy((uint64_t*)&cgen_var_572, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_572, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_572));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((VkPipelineBindPoint*)&pipelineBindPoint, *readStreamPtrPtr, sizeof(VkPipelineBindPoint));
                 *readStreamPtrPtr += sizeof(VkPipelineBindPoint);
                 uint64_t cgen_var_573;
                 memcpy((uint64_t*)&cgen_var_573, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_573, (VkPipelineLayout*)&layout, 1);
+                *((VkPipelineLayout*))&layout = (VkPipelineLayout)unbox_VkPipelineLayout((*&cgen_var_573));
                 memcpy((uint32_t*)&set, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&descriptorWriteCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -13086,24 +12094,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPipelineLayout layout;
                 uint32_t set;
                 const void* pData;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_574;
                 memcpy((uint64_t*)&cgen_var_574, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_574, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_574));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_575;
                 memcpy((uint64_t*)&cgen_var_575, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_575, (VkDescriptorUpdateTemplate*)&descriptorUpdateTemplate, 1);
+                *((VkDescriptorUpdateTemplate*))&descriptorUpdateTemplate = (VkDescriptorUpdateTemplate)unbox_VkDescriptorUpdateTemplate((*&cgen_var_575));
                 uint64_t cgen_var_576;
                 memcpy((uint64_t*)&cgen_var_576, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_576, (VkPipelineLayout*)&layout, 1);
+                *((VkPipelineLayout*))&layout = (VkPipelineLayout)unbox_VkPipelineLayout((*&cgen_var_576));
                 memcpy((uint32_t*)&set, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 // WARNING PTR CHECK
@@ -13146,16 +12152,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_578;
                 memcpy((uint64_t*)&cgen_var_578, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_578, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_578));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorUpdateTemplateCreateInfo));
                 reservedunmarshal_VkDescriptorUpdateTemplateCreateInfo(vkReadStream, (VkDescriptorUpdateTemplateCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -13173,9 +12174,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_580;
                 memcpy((uint64_t*)&cgen_var_580, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_580, (VkDescriptorUpdateTemplate*)pDescriptorUpdateTemplate, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDescriptorUpdateTemplate;
+                *((VkDescriptorUpdateTemplate*))pDescriptorUpdateTemplate = (VkDescriptorUpdateTemplate)(VkDescriptorUpdateTemplate)((*&cgen_var_580));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDescriptorUpdateTemplateCreateInfo(m_state, (VkDescriptorUpdateTemplateCreateInfo*)(pCreateInfo));
@@ -13217,26 +12216,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkDescriptorUpdateTemplate descriptorUpdateTemplate;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_582;
                 memcpy((uint64_t*)&cgen_var_582, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_582, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_582));
                 // Begin manual non dispatchable handle destroy unboxing for descriptorUpdateTemplate;
-                VkDescriptorUpdateTemplate* boxed_descriptorUpdateTemplate_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_descriptorUpdateTemplate_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_583;
                 memcpy((uint64_t*)&cgen_var_583, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_583, (VkDescriptorUpdateTemplate*)&descriptorUpdateTemplate, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for descriptorUpdateTemplate;
+                *((VkDescriptorUpdateTemplate*))&descriptorUpdateTemplate = (VkDescriptorUpdateTemplate)unbox_VkDescriptorUpdateTemplate((*&cgen_var_583));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -13274,24 +12263,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDescriptorSet descriptorSet;
                 VkDescriptorUpdateTemplate descriptorUpdateTemplate;
                 const void* pData;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_585;
                 memcpy((uint64_t*)&cgen_var_585, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_585, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_585));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_586;
                 memcpy((uint64_t*)&cgen_var_586, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorSet(&cgen_var_586, (VkDescriptorSet*)&descriptorSet, 1);
+                *((VkDescriptorSet*))&descriptorSet = (VkDescriptorSet)unbox_VkDescriptorSet((*&cgen_var_586));
                 uint64_t cgen_var_587;
                 memcpy((uint64_t*)&cgen_var_587, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_587, (VkDescriptorUpdateTemplate*)&descriptorUpdateTemplate, 1);
+                *((VkDescriptorUpdateTemplate*))&descriptorUpdateTemplate = (VkDescriptorUpdateTemplate)unbox_VkDescriptorUpdateTemplate((*&cgen_var_587));
                 // WARNING PTR CHECK
                 memcpy((void**)&pData, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pData);
@@ -13328,15 +12315,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkRenderPassCreateInfo2KHR* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkRenderPass* pRenderPass;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_589;
                 memcpy((uint64_t*)&cgen_var_589, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_589, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_589));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkRenderPassCreateInfo2KHR));
                 reservedunmarshal_VkRenderPassCreateInfo2KHR(vkReadStream, (VkRenderPassCreateInfo2KHR*)(pCreateInfo), readStreamPtrPtr);
@@ -13355,9 +12340,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_591;
                 memcpy((uint64_t*)&cgen_var_591, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkRenderPass(&cgen_var_591, (VkRenderPass*)pRenderPass, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pRenderPass;
+                *((VkRenderPass*))pRenderPass = (VkRenderPass)(VkRenderPass)((*&cgen_var_591));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkRenderPassCreateInfo2KHR(m_state, (VkRenderPassCreateInfo2KHR*)(pCreateInfo));
@@ -13394,15 +12377,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 const VkRenderPassBeginInfo* pRenderPassBegin;
                 const VkSubpassBeginInfoKHR* pSubpassBeginInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_593;
                 memcpy((uint64_t*)&cgen_var_593, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_593, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_593));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pRenderPassBegin, sizeof(const VkRenderPassBeginInfo));
                 reservedunmarshal_VkRenderPassBeginInfo(vkReadStream, (VkRenderPassBeginInfo*)(pRenderPassBegin), readStreamPtrPtr);
@@ -13439,15 +12420,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 const VkSubpassBeginInfoKHR* pSubpassBeginInfo;
                 const VkSubpassEndInfoKHR* pSubpassEndInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_594;
                 memcpy((uint64_t*)&cgen_var_594, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_594, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_594));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pSubpassBeginInfo, sizeof(const VkSubpassBeginInfoKHR));
                 reservedunmarshal_VkSubpassBeginInfoKHR(vkReadStream, (VkSubpassBeginInfoKHR*)(pSubpassBeginInfo), readStreamPtrPtr);
@@ -13483,15 +12462,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkSubpassEndInfoKHR* pSubpassEndInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_595;
                 memcpy((uint64_t*)&cgen_var_595, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_595, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_595));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pSubpassEndInfo, sizeof(const VkSubpassEndInfoKHR));
                 reservedunmarshal_VkSubpassEndInfoKHR(vkReadStream, (VkSubpassEndInfoKHR*)(pSubpassEndInfo), readStreamPtrPtr);
@@ -13523,20 +12500,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 VkSwapchainKHR swapchain;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_596;
                 memcpy((uint64_t*)&cgen_var_596, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_596, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_596));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_597;
                 memcpy((uint64_t*)&cgen_var_597, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(&cgen_var_597, (VkSwapchainKHR*)&swapchain, 1);
+                *((VkSwapchainKHR*))&swapchain = (VkSwapchainKHR)unbox_VkSwapchainKHR((*&cgen_var_597));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetSwapchainStatusKHR 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain);
@@ -13564,15 +12539,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalFenceInfo* pExternalFenceInfo;
                 VkExternalFenceProperties* pExternalFenceProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_598;
                 memcpy((uint64_t*)&cgen_var_598, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_598, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_598));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 vkReadStream->alloc((void**)&pExternalFenceInfo, sizeof(const VkPhysicalDeviceExternalFenceInfo));
                 reservedunmarshal_VkPhysicalDeviceExternalFenceInfo(vkReadStream, (VkPhysicalDeviceExternalFenceInfo*)(pExternalFenceInfo), readStreamPtrPtr);
@@ -13580,8 +12553,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pExternalFenceProperties, sizeof(VkExternalFenceProperties));
                 reservedunmarshal_VkExternalFenceProperties(vkReadStream, (VkExternalFenceProperties*)(pExternalFenceProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pExternalFenceProperties;
                 if (pExternalFenceInfo)
                 {
                     transform_tohost_VkPhysicalDeviceExternalFenceInfo(m_state, (VkPhysicalDeviceExternalFenceInfo*)(pExternalFenceInfo));
@@ -13621,15 +12592,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 const VkImportFenceWin32HandleInfoKHR* pImportFenceWin32HandleInfo;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_599;
                 memcpy((uint64_t*)&cgen_var_599, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_599, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_599));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pImportFenceWin32HandleInfo, sizeof(const VkImportFenceWin32HandleInfoKHR));
                 reservedunmarshal_VkImportFenceWin32HandleInfoKHR(vkReadStream, (VkImportFenceWin32HandleInfoKHR*)(pImportFenceWin32HandleInfo), readStreamPtrPtr);
@@ -13662,15 +12631,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkFenceGetWin32HandleInfoKHR* pGetWin32HandleInfo;
                 HANDLE* pHandle;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_600;
                 memcpy((uint64_t*)&cgen_var_600, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_600, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_600));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pGetWin32HandleInfo, sizeof(const VkFenceGetWin32HandleInfoKHR));
                 reservedunmarshal_VkFenceGetWin32HandleInfoKHR(vkReadStream, (VkFenceGetWin32HandleInfoKHR*)(pGetWin32HandleInfo), readStreamPtrPtr);
@@ -13679,8 +12646,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pHandle, sizeof(HANDLE));
                 memcpy((HANDLE*)pHandle, *readStreamPtrPtr, sizeof(HANDLE));
                 *readStreamPtrPtr += sizeof(HANDLE);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pHandle;
                 if (pGetWin32HandleInfo)
                 {
                     transform_tohost_VkFenceGetWin32HandleInfoKHR(m_state, (VkFenceGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
@@ -13712,15 +12677,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 const VkImportFenceFdInfoKHR* pImportFenceFdInfo;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_601;
                 memcpy((uint64_t*)&cgen_var_601, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_601, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_601));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pImportFenceFdInfo, sizeof(const VkImportFenceFdInfoKHR));
                 reservedunmarshal_VkImportFenceFdInfoKHR(vkReadStream, (VkImportFenceFdInfoKHR*)(pImportFenceFdInfo), readStreamPtrPtr);
@@ -13753,15 +12716,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkFenceGetFdInfoKHR* pGetFdInfo;
                 int* pFd;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_602;
                 memcpy((uint64_t*)&cgen_var_602, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_602, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_602));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pGetFdInfo, sizeof(const VkFenceGetFdInfoKHR));
                 reservedunmarshal_VkFenceGetFdInfoKHR(vkReadStream, (VkFenceGetFdInfoKHR*)(pGetFdInfo), readStreamPtrPtr);
@@ -13770,8 +12731,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pFd, sizeof(int));
                 memcpy((int*)pFd, *readStreamPtrPtr, sizeof(int));
                 *readStreamPtrPtr += sizeof(int);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFd;
                 if (pGetFdInfo)
                 {
                     transform_tohost_VkFenceGetFdInfoKHR(m_state, (VkFenceGetFdInfoKHR*)(pGetFdInfo));
@@ -13806,15 +12765,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceSurfaceInfo2KHR* pSurfaceInfo;
                 VkSurfaceCapabilities2KHR* pSurfaceCapabilities;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_603;
                 memcpy((uint64_t*)&cgen_var_603, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_603, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_603));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 vkReadStream->alloc((void**)&pSurfaceInfo, sizeof(const VkPhysicalDeviceSurfaceInfo2KHR));
                 reservedunmarshal_VkPhysicalDeviceSurfaceInfo2KHR(vkReadStream, (VkPhysicalDeviceSurfaceInfo2KHR*)(pSurfaceInfo), readStreamPtrPtr);
@@ -13822,8 +12779,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pSurfaceCapabilities, sizeof(VkSurfaceCapabilities2KHR));
                 reservedunmarshal_VkSurfaceCapabilities2KHR(vkReadStream, (VkSurfaceCapabilities2KHR*)(pSurfaceCapabilities), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurfaceCapabilities;
                 if (pSurfaceInfo)
                 {
                     transform_tohost_VkPhysicalDeviceSurfaceInfo2KHR(m_state, (VkPhysicalDeviceSurfaceInfo2KHR*)(pSurfaceInfo));
@@ -13863,15 +12818,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkPhysicalDeviceSurfaceInfo2KHR* pSurfaceInfo;
                 uint32_t* pSurfaceFormatCount;
                 VkSurfaceFormat2KHR* pSurfaceFormats;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_604;
                 memcpy((uint64_t*)&cgen_var_604, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_604, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_604));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 vkReadStream->alloc((void**)&pSurfaceInfo, sizeof(const VkPhysicalDeviceSurfaceInfo2KHR));
                 reservedunmarshal_VkPhysicalDeviceSurfaceInfo2KHR(vkReadStream, (VkPhysicalDeviceSurfaceInfo2KHR*)(pSurfaceInfo), readStreamPtrPtr);
@@ -13887,8 +12840,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pSurfaceFormatCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurfaceFormatCount;
                 // Begin manual dispatchable handle unboxing for pSurfaceFormats;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -13903,8 +12854,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkSurfaceFormat2KHR(vkReadStream, (VkSurfaceFormat2KHR*)(pSurfaceFormats + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurfaceFormats;
                 if (pSurfaceInfo)
                 {
                     transform_tohost_VkPhysicalDeviceSurfaceInfo2KHR(m_state, (VkPhysicalDeviceSurfaceInfo2KHR*)(pSurfaceInfo));
@@ -13969,15 +12918,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pPropertyCount;
                 VkDisplayProperties2KHR* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_609;
                 memcpy((uint64_t*)&cgen_var_609, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_609, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_609));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
@@ -13991,8 +12938,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -14007,8 +12952,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkDisplayProperties2KHR(vkReadStream, (VkDisplayProperties2KHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -14065,15 +13008,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 uint32_t* pPropertyCount;
                 VkDisplayPlaneProperties2KHR* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_614;
                 memcpy((uint64_t*)&cgen_var_614, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_614, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_614));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
@@ -14087,8 +13028,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -14103,8 +13042,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkDisplayPlaneProperties2KHR(vkReadStream, (VkDisplayPlaneProperties2KHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -14162,20 +13099,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDisplayKHR display;
                 uint32_t* pPropertyCount;
                 VkDisplayModeProperties2KHR* pProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_619;
                 memcpy((uint64_t*)&cgen_var_619, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_619, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_619));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_620;
                 memcpy((uint64_t*)&cgen_var_620, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_620, (VkDisplayKHR*)&display, 1);
+                *((VkDisplayKHR*))&display = (VkDisplayKHR)unbox_VkDisplayKHR((*&cgen_var_620));
                 // Begin manual dispatchable handle unboxing for pPropertyCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -14188,8 +13123,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPropertyCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPropertyCount;
                 // Begin manual dispatchable handle unboxing for pProperties;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -14204,8 +13137,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkDisplayModeProperties2KHR(vkReadStream, (VkDisplayModeProperties2KHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -14262,15 +13193,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 const VkDisplayPlaneInfo2KHR* pDisplayPlaneInfo;
                 VkDisplayPlaneCapabilities2KHR* pCapabilities;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_625;
                 memcpy((uint64_t*)&cgen_var_625, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_625, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_625));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 vkReadStream->alloc((void**)&pDisplayPlaneInfo, sizeof(const VkDisplayPlaneInfo2KHR));
                 reservedunmarshal_VkDisplayPlaneInfo2KHR(vkReadStream, (VkDisplayPlaneInfo2KHR*)(pDisplayPlaneInfo), readStreamPtrPtr);
@@ -14278,8 +13207,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pCapabilities, sizeof(VkDisplayPlaneCapabilities2KHR));
                 reservedunmarshal_VkDisplayPlaneCapabilities2KHR(vkReadStream, (VkDisplayPlaneCapabilities2KHR*)(pCapabilities), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pCapabilities;
                 if (pDisplayPlaneInfo)
                 {
                     transform_tohost_VkDisplayPlaneInfo2KHR(m_state, (VkDisplayPlaneInfo2KHR*)(pDisplayPlaneInfo));
@@ -14326,24 +13253,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkImageMemoryRequirementsInfo2* pInfo;
                 VkMemoryRequirements2* pMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_626;
                 memcpy((uint64_t*)&cgen_var_626, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_626, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_626));
                 vkReadStream->alloc((void**)&pInfo, sizeof(const VkImageMemoryRequirementsInfo2));
                 reservedunmarshal_VkImageMemoryRequirementsInfo2(vkReadStream, (VkImageMemoryRequirementsInfo2*)(pInfo), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements2));
                 reservedunmarshal_VkMemoryRequirements2(vkReadStream, (VkMemoryRequirements2*)(pMemoryRequirements), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryRequirements;
                 if (pInfo)
                 {
                     transform_tohost_VkImageMemoryRequirementsInfo2(m_state, (VkImageMemoryRequirementsInfo2*)(pInfo));
@@ -14380,15 +13300,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkBufferMemoryRequirementsInfo2* pInfo;
                 VkMemoryRequirements2* pMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_627;
                 memcpy((uint64_t*)&cgen_var_627, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_627, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_627));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pInfo, sizeof(const VkBufferMemoryRequirementsInfo2));
                 reservedunmarshal_VkBufferMemoryRequirementsInfo2(vkReadStream, (VkBufferMemoryRequirementsInfo2*)(pInfo), readStreamPtrPtr);
@@ -14396,8 +13314,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements2));
                 reservedunmarshal_VkMemoryRequirements2(vkReadStream, (VkMemoryRequirements2*)(pMemoryRequirements), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryRequirements;
                 if (pInfo)
                 {
                     transform_tohost_VkBufferMemoryRequirementsInfo2(m_state, (VkBufferMemoryRequirementsInfo2*)(pInfo));
@@ -14435,15 +13351,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkImageSparseMemoryRequirementsInfo2* pInfo;
                 uint32_t* pSparseMemoryRequirementCount;
                 VkSparseImageMemoryRequirements2* pSparseMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_628;
                 memcpy((uint64_t*)&cgen_var_628, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_628, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_628));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pInfo, sizeof(const VkImageSparseMemoryRequirementsInfo2));
                 reservedunmarshal_VkImageSparseMemoryRequirementsInfo2(vkReadStream, (VkImageSparseMemoryRequirementsInfo2*)(pInfo), readStreamPtrPtr);
@@ -14459,8 +13373,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pSparseMemoryRequirementCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSparseMemoryRequirementCount;
                 // Begin manual dispatchable handle unboxing for pSparseMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -14475,8 +13387,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkSparseImageMemoryRequirements2(vkReadStream, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSparseMemoryRequirements;
                 if (pInfo)
                 {
                     transform_tohost_VkImageSparseMemoryRequirementsInfo2(m_state, (VkImageSparseMemoryRequirementsInfo2*)(pInfo));
@@ -14540,15 +13450,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkSamplerYcbcrConversionCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSamplerYcbcrConversion* pYcbcrConversion;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_633;
                 memcpy((uint64_t*)&cgen_var_633, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_633, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_633));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkSamplerYcbcrConversionCreateInfo));
                 reservedunmarshal_VkSamplerYcbcrConversionCreateInfo(vkReadStream, (VkSamplerYcbcrConversionCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -14567,9 +13475,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_635;
                 memcpy((uint64_t*)&cgen_var_635, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSamplerYcbcrConversion(&cgen_var_635, (VkSamplerYcbcrConversion*)pYcbcrConversion, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pYcbcrConversion;
+                *((VkSamplerYcbcrConversion*))pYcbcrConversion = (VkSamplerYcbcrConversion)(VkSamplerYcbcrConversion)((*&cgen_var_635));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkSamplerYcbcrConversionCreateInfo(m_state, (VkSamplerYcbcrConversionCreateInfo*)(pCreateInfo));
@@ -14611,26 +13517,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkSamplerYcbcrConversion ycbcrConversion;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_637;
                 memcpy((uint64_t*)&cgen_var_637, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_637, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_637));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for ycbcrConversion;
-                VkSamplerYcbcrConversion* boxed_ycbcrConversion_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_ycbcrConversion_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_638;
                 memcpy((uint64_t*)&cgen_var_638, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSamplerYcbcrConversion(&cgen_var_638, (VkSamplerYcbcrConversion*)&ycbcrConversion, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for ycbcrConversion;
+                *((VkSamplerYcbcrConversion*))&ycbcrConversion = (VkSamplerYcbcrConversion)unbox_VkSamplerYcbcrConversion((*&cgen_var_638));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -14669,16 +13568,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindBufferMemoryInfo* pBindInfos;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_640;
                 memcpy((uint64_t*)&cgen_var_640, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_640, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_640));
                 memcpy((uint32_t*)&bindInfoCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pBindInfos, ((bindInfoCount)) * sizeof(const VkBindBufferMemoryInfo));
@@ -14718,15 +13612,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindImageMemoryInfo* pBindInfos;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_641;
                 memcpy((uint64_t*)&cgen_var_641, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_641, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_641));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&bindInfoCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -14769,15 +13661,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkDescriptorSetLayoutCreateInfo* pCreateInfo;
                 VkDescriptorSetLayoutSupport* pSupport;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_642;
                 memcpy((uint64_t*)&cgen_var_642, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_642, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_642));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorSetLayoutCreateInfo));
                 reservedunmarshal_VkDescriptorSetLayoutCreateInfo(vkReadStream, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo), readStreamPtrPtr);
@@ -14785,8 +13675,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pSupport, sizeof(VkDescriptorSetLayoutSupport));
                 reservedunmarshal_VkDescriptorSetLayoutSupport(vkReadStream, (VkDescriptorSetLayoutSupport*)(pSupport), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSupport;
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDescriptorSetLayoutCreateInfo(m_state, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo));
@@ -14829,26 +13717,24 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceSize countBufferOffset;
                 uint32_t maxDrawCount;
                 uint32_t stride;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_643;
                 memcpy((uint64_t*)&cgen_var_643, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_643, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_643));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_644;
                 memcpy((uint64_t*)&cgen_var_644, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_644, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_644));
                 memcpy((VkDeviceSize*)&offset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 uint64_t cgen_var_645;
                 memcpy((uint64_t*)&cgen_var_645, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_645, (VkBuffer*)&countBuffer, 1);
+                *((VkBuffer*))&countBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_645));
                 memcpy((VkDeviceSize*)&countBufferOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((uint32_t*)&maxDrawCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -14882,26 +13768,24 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceSize countBufferOffset;
                 uint32_t maxDrawCount;
                 uint32_t stride;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_646;
                 memcpy((uint64_t*)&cgen_var_646, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_646, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_646));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_647;
                 memcpy((uint64_t*)&cgen_var_647, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_647, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_647));
                 memcpy((VkDeviceSize*)&offset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 uint64_t cgen_var_648;
                 memcpy((uint64_t*)&cgen_var_648, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_648, (VkBuffer*)&countBuffer, 1);
+                *((VkBuffer*))&countBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_648));
                 memcpy((VkDeviceSize*)&countBufferOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((uint32_t*)&maxDrawCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -14938,16 +13822,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkFormat format;
                 VkImageUsageFlags imageUsage;
                 int* grallocUsage;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_649;
                 memcpy((uint64_t*)&cgen_var_649, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_649, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_649));
                 memcpy((VkFormat*)&format, *readStreamPtrPtr, sizeof(VkFormat));
                 *readStreamPtrPtr += sizeof(VkFormat);
                 memcpy((VkImageUsageFlags*)&imageUsage, *readStreamPtrPtr, sizeof(VkImageUsageFlags));
@@ -14957,8 +13836,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&grallocUsage, sizeof(int));
                 memcpy((int*)grallocUsage, *readStreamPtrPtr, sizeof(int));
                 *readStreamPtrPtr += sizeof(int);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for grallocUsage;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetSwapchainGrallocUsageANDROID 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)format, (unsigned long long)imageUsage, (unsigned long long)grallocUsage);
@@ -14987,30 +13864,25 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 int nativeFenceFd;
                 VkSemaphore semaphore;
                 VkFence fence;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_650;
                 memcpy((uint64_t*)&cgen_var_650, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_650, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_650));
                 uint64_t cgen_var_651;
                 memcpy((uint64_t*)&cgen_var_651, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_651, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_651));
                 memcpy((int*)&nativeFenceFd, *readStreamPtrPtr, sizeof(int));
                 *readStreamPtrPtr += sizeof(int);
                 uint64_t cgen_var_652;
                 memcpy((uint64_t*)&cgen_var_652, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSemaphore(&cgen_var_652, (VkSemaphore*)&semaphore, 1);
+                *((VkSemaphore*))&semaphore = (VkSemaphore)unbox_VkSemaphore((*&cgen_var_652));
                 uint64_t cgen_var_653;
                 memcpy((uint64_t*)&cgen_var_653, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_653, (VkFence*)&fence, 1);
+                *((VkFence*))&fence = (VkFence)unbox_VkFence((*&cgen_var_653));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkAcquireImageANDROID 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)image, (unsigned long long)nativeFenceFd, (unsigned long long)semaphore, (unsigned long long)fence);
@@ -15038,16 +13910,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkSemaphore* pWaitSemaphores;
                 VkImage image;
                 int* pNativeFenceFd;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_654;
                 memcpy((uint64_t*)&cgen_var_654, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_654, (VkQueue*)&queue, 1);
-                auto unboxed_queue = unbox_VkQueue(queue);
-                auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for queue;
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_654));
                 memcpy((uint32_t*)&waitSemaphoreCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 // WARNING PTR CHECK
@@ -15063,20 +13930,21 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         vkReadStream->alloc((void**)&cgen_var_656, ((waitSemaphoreCount)) * 8);
                         memcpy((uint64_t*)cgen_var_656, *readStreamPtrPtr, ((waitSemaphoreCount)) * 8);
                         *readStreamPtrPtr += ((waitSemaphoreCount)) * 8;
-                        vkReadStream->handleMapping()->mapHandles_u64_VkSemaphore(cgen_var_656, (VkSemaphore*)pWaitSemaphores, ((waitSemaphoreCount)));
+                        for (uint32_t k = 0; k < ((waitSemaphoreCount)); ++k)
+                        {
+                            *((((VkSemaphore*))pWaitSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore(cgen_var_656[k]);
+                        }
                     }
                 }
                 uint64_t cgen_var_657;
                 memcpy((uint64_t*)&cgen_var_657, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_657, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_657));
                 // Begin manual dispatchable handle unboxing for pNativeFenceFd;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pNativeFenceFd, sizeof(int));
                 memcpy((int*)pNativeFenceFd, *readStreamPtrPtr, sizeof(int));
                 *readStreamPtrPtr += sizeof(int);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pNativeFenceFd;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkQueueSignalReleaseImageANDROID 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)waitSemaphoreCount, (unsigned long long)pWaitSemaphores, (unsigned long long)image, (unsigned long long)pNativeFenceFd);
@@ -15106,15 +13974,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDebugReportCallbackCreateInfoEXT* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkDebugReportCallbackEXT* pCallback;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_658;
                 memcpy((uint64_t*)&cgen_var_658, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_658, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_658));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDebugReportCallbackCreateInfoEXT));
                 reservedunmarshal_VkDebugReportCallbackCreateInfoEXT(vkReadStream, (VkDebugReportCallbackCreateInfoEXT*)(pCreateInfo), readStreamPtrPtr);
@@ -15133,9 +13999,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_660;
                 memcpy((uint64_t*)&cgen_var_660, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDebugReportCallbackEXT(&cgen_var_660, (VkDebugReportCallbackEXT*)pCallback, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pCallback;
+                *((VkDebugReportCallbackEXT*))pCallback = (VkDebugReportCallbackEXT)(VkDebugReportCallbackEXT)((*&cgen_var_660));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDebugReportCallbackCreateInfoEXT(m_state, (VkDebugReportCallbackCreateInfoEXT*)(pCreateInfo));
@@ -15177,26 +14041,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkInstance instance;
                 VkDebugReportCallbackEXT callback;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_662;
                 memcpy((uint64_t*)&cgen_var_662, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_662, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_662));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 // Begin manual non dispatchable handle destroy unboxing for callback;
-                VkDebugReportCallbackEXT* boxed_callback_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_callback_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_663;
                 memcpy((uint64_t*)&cgen_var_663, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDebugReportCallbackEXT(&cgen_var_663, (VkDebugReportCallbackEXT*)&callback, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for callback;
+                *((VkDebugReportCallbackEXT*))&callback = (VkDebugReportCallbackEXT)unbox_VkDebugReportCallbackEXT((*&cgen_var_663));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -15238,15 +14095,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 int32_t messageCode;
                 const char* pLayerPrefix;
                 const char* pMessage;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_665;
                 memcpy((uint64_t*)&cgen_var_665, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_665, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_665));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 memcpy((VkDebugReportFlagsEXT*)&flags, *readStreamPtrPtr, sizeof(VkDebugReportFlagsEXT));
                 *readStreamPtrPtr += sizeof(VkDebugReportFlagsEXT);
@@ -15297,15 +14152,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 const VkDebugMarkerObjectTagInfoEXT* pTagInfo;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_667;
                 memcpy((uint64_t*)&cgen_var_667, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_667, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_667));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pTagInfo, sizeof(const VkDebugMarkerObjectTagInfoEXT));
                 reservedunmarshal_VkDebugMarkerObjectTagInfoEXT(vkReadStream, (VkDebugMarkerObjectTagInfoEXT*)(pTagInfo), readStreamPtrPtr);
@@ -15337,15 +14190,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 const VkDebugMarkerObjectNameInfoEXT* pNameInfo;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_668;
                 memcpy((uint64_t*)&cgen_var_668, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_668, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_668));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pNameInfo, sizeof(const VkDebugMarkerObjectNameInfoEXT));
                 reservedunmarshal_VkDebugMarkerObjectNameInfoEXT(vkReadStream, (VkDebugMarkerObjectNameInfoEXT*)(pNameInfo), readStreamPtrPtr);
@@ -15377,15 +14228,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkDebugMarkerMarkerInfoEXT* pMarkerInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_669;
                 memcpy((uint64_t*)&cgen_var_669, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_669, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_669));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pMarkerInfo, sizeof(const VkDebugMarkerMarkerInfoEXT));
                 reservedunmarshal_VkDebugMarkerMarkerInfoEXT(vkReadStream, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo), readStreamPtrPtr);
@@ -15414,15 +14263,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             android::base::beginTrace("vkCmdDebugMarkerEndEXT decode");
             {
                 VkCommandBuffer commandBuffer;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_670;
                 memcpy((uint64_t*)&cgen_var_670, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_670, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_670));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 if (m_logCalls)
                 {
@@ -15446,15 +14293,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkDebugMarkerMarkerInfoEXT* pMarkerInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_671;
                 memcpy((uint64_t*)&cgen_var_671, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_671, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_671));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pMarkerInfo, sizeof(const VkDebugMarkerMarkerInfoEXT));
                 reservedunmarshal_VkDebugMarkerMarkerInfoEXT(vkReadStream, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo), readStreamPtrPtr);
@@ -15495,26 +14340,24 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceSize countBufferOffset;
                 uint32_t maxDrawCount;
                 uint32_t stride;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_672;
                 memcpy((uint64_t*)&cgen_var_672, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_672, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_672));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_673;
                 memcpy((uint64_t*)&cgen_var_673, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_673, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_673));
                 memcpy((VkDeviceSize*)&offset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 uint64_t cgen_var_674;
                 memcpy((uint64_t*)&cgen_var_674, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_674, (VkBuffer*)&countBuffer, 1);
+                *((VkBuffer*))&countBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_674));
                 memcpy((VkDeviceSize*)&countBufferOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((uint32_t*)&maxDrawCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -15548,26 +14391,24 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceSize countBufferOffset;
                 uint32_t maxDrawCount;
                 uint32_t stride;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_675;
                 memcpy((uint64_t*)&cgen_var_675, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_675, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_675));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_676;
                 memcpy((uint64_t*)&cgen_var_676, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_676, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_676));
                 memcpy((VkDeviceSize*)&offset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 uint64_t cgen_var_677;
                 memcpy((uint64_t*)&cgen_var_677, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_677, (VkBuffer*)&countBuffer, 1);
+                *((VkBuffer*))&countBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_677));
                 memcpy((VkDeviceSize*)&countBufferOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((uint32_t*)&maxDrawCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -15610,20 +14451,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkShaderInfoTypeAMD infoType;
                 size_t* pInfoSize;
                 void* pInfo;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_678;
                 memcpy((uint64_t*)&cgen_var_678, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_678, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_678));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_679;
                 memcpy((uint64_t*)&cgen_var_679, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_679, (VkPipeline*)&pipeline, 1);
+                *((VkPipeline*))&pipeline = (VkPipeline)unbox_VkPipeline((*&cgen_var_679));
                 memcpy((VkShaderStageFlagBits*)&shaderStage, *readStreamPtrPtr, sizeof(VkShaderStageFlagBits));
                 *readStreamPtrPtr += sizeof(VkShaderStageFlagBits);
                 memcpy((VkShaderInfoTypeAMD*)&infoType, *readStreamPtrPtr, sizeof(VkShaderInfoTypeAMD));
@@ -15641,8 +14480,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     android::base::Stream::fromBe64((uint8_t*)&(*pInfoSize));
                     *readStreamPtrPtr += 8;
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pInfoSize;
                 // Begin manual dispatchable handle unboxing for pInfo;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -15655,8 +14492,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((void*)pInfo, *readStreamPtrPtr, (*(pInfoSize)) * sizeof(uint8_t));
                     *readStreamPtrPtr += (*(pInfoSize)) * sizeof(uint8_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pInfo;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetShaderInfoAMD 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pipeline, (unsigned long long)shaderStage, (unsigned long long)infoType, (unsigned long long)pInfoSize, (unsigned long long)pInfo);
@@ -15708,15 +14543,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkImageCreateFlags flags;
                 VkExternalMemoryHandleTypeFlagsNV externalHandleType;
                 VkExternalImageFormatPropertiesNV* pExternalImageFormatProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_686;
                 memcpy((uint64_t*)&cgen_var_686, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_686, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_686));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 memcpy((VkFormat*)&format, *readStreamPtrPtr, sizeof(VkFormat));
                 *readStreamPtrPtr += sizeof(VkFormat);
@@ -15734,8 +14567,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pExternalImageFormatProperties, sizeof(VkExternalImageFormatPropertiesNV));
                 reservedunmarshal_VkExternalImageFormatPropertiesNV(vkReadStream, (VkExternalImageFormatPropertiesNV*)(pExternalImageFormatProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pExternalImageFormatProperties;
                 if (pExternalImageFormatProperties)
                 {
                     transform_tohost_VkExternalImageFormatPropertiesNV(m_state, (VkExternalImageFormatPropertiesNV*)(pExternalImageFormatProperties));
@@ -15775,20 +14606,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceMemory memory;
                 VkExternalMemoryHandleTypeFlagsNV handleType;
                 HANDLE* pHandle;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_687;
                 memcpy((uint64_t*)&cgen_var_687, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_687, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_687));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_688;
                 memcpy((uint64_t*)&cgen_var_688, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_688, (VkDeviceMemory*)&memory, 1);
+                *((VkDeviceMemory*))&memory = (VkDeviceMemory)unbox_VkDeviceMemory((*&cgen_var_688));
                 memcpy((VkExternalMemoryHandleTypeFlagsNV*)&handleType, *readStreamPtrPtr, sizeof(VkExternalMemoryHandleTypeFlagsNV));
                 *readStreamPtrPtr += sizeof(VkExternalMemoryHandleTypeFlagsNV);
                 // Begin manual dispatchable handle unboxing for pHandle;
@@ -15796,8 +14625,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pHandle, sizeof(HANDLE));
                 memcpy((HANDLE*)pHandle, *readStreamPtrPtr, sizeof(HANDLE));
                 *readStreamPtrPtr += sizeof(HANDLE);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pHandle;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetMemoryWin32HandleNV 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)handleType, (unsigned long long)pHandle);
@@ -15831,15 +14658,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkViSurfaceCreateInfoNN* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSurfaceKHR* pSurface;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_689;
                 memcpy((uint64_t*)&cgen_var_689, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_689, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_689));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkViSurfaceCreateInfoNN));
                 reservedunmarshal_VkViSurfaceCreateInfoNN(vkReadStream, (VkViSurfaceCreateInfoNN*)(pCreateInfo), readStreamPtrPtr);
@@ -15858,9 +14683,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_691;
                 memcpy((uint64_t*)&cgen_var_691, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_691, (VkSurfaceKHR*)pSurface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurface;
+                *((VkSurfaceKHR*))pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((*&cgen_var_691));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkViSurfaceCreateInfoNN(m_state, (VkViSurfaceCreateInfoNN*)(pCreateInfo));
@@ -15902,15 +14725,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkConditionalRenderingBeginInfoEXT* pConditionalRenderingBegin;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_693;
                 memcpy((uint64_t*)&cgen_var_693, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_693, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_693));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pConditionalRenderingBegin, sizeof(const VkConditionalRenderingBeginInfoEXT));
                 reservedunmarshal_VkConditionalRenderingBeginInfoEXT(vkReadStream, (VkConditionalRenderingBeginInfoEXT*)(pConditionalRenderingBegin), readStreamPtrPtr);
@@ -15939,15 +14760,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             android::base::beginTrace("vkCmdEndConditionalRenderingEXT decode");
             {
                 VkCommandBuffer commandBuffer;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_694;
                 memcpy((uint64_t*)&cgen_var_694, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_694, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_694));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 if (m_logCalls)
                 {
@@ -15973,15 +14792,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkCmdProcessCommandsInfoNVX* pProcessCommandsInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_695;
                 memcpy((uint64_t*)&cgen_var_695, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_695, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_695));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pProcessCommandsInfo, sizeof(const VkCmdProcessCommandsInfoNVX));
                 reservedunmarshal_VkCmdProcessCommandsInfoNVX(vkReadStream, (VkCmdProcessCommandsInfoNVX*)(pProcessCommandsInfo), readStreamPtrPtr);
@@ -16011,15 +14828,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkCmdReserveSpaceForCommandsInfoNVX* pReserveSpaceInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_696;
                 memcpy((uint64_t*)&cgen_var_696, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_696, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_696));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pReserveSpaceInfo, sizeof(const VkCmdReserveSpaceForCommandsInfoNVX));
                 reservedunmarshal_VkCmdReserveSpaceForCommandsInfoNVX(vkReadStream, (VkCmdReserveSpaceForCommandsInfoNVX*)(pReserveSpaceInfo), readStreamPtrPtr);
@@ -16051,15 +14866,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkIndirectCommandsLayoutCreateInfoNVX* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkIndirectCommandsLayoutNVX* pIndirectCommandsLayout;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_697;
                 memcpy((uint64_t*)&cgen_var_697, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_697, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_697));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkIndirectCommandsLayoutCreateInfoNVX));
                 reservedunmarshal_VkIndirectCommandsLayoutCreateInfoNVX(vkReadStream, (VkIndirectCommandsLayoutCreateInfoNVX*)(pCreateInfo), readStreamPtrPtr);
@@ -16078,9 +14891,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_699;
                 memcpy((uint64_t*)&cgen_var_699, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkIndirectCommandsLayoutNVX(&cgen_var_699, (VkIndirectCommandsLayoutNVX*)pIndirectCommandsLayout, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pIndirectCommandsLayout;
+                *((VkIndirectCommandsLayoutNVX*))pIndirectCommandsLayout = (VkIndirectCommandsLayoutNVX)(VkIndirectCommandsLayoutNVX)((*&cgen_var_699));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkIndirectCommandsLayoutCreateInfoNVX(m_state, (VkIndirectCommandsLayoutCreateInfoNVX*)(pCreateInfo));
@@ -16122,26 +14933,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkIndirectCommandsLayoutNVX indirectCommandsLayout;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_701;
                 memcpy((uint64_t*)&cgen_var_701, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_701, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_701));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for indirectCommandsLayout;
-                VkIndirectCommandsLayoutNVX* boxed_indirectCommandsLayout_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_indirectCommandsLayout_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_702;
                 memcpy((uint64_t*)&cgen_var_702, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkIndirectCommandsLayoutNVX(&cgen_var_702, (VkIndirectCommandsLayoutNVX*)&indirectCommandsLayout, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for indirectCommandsLayout;
+                *((VkIndirectCommandsLayoutNVX*))&indirectCommandsLayout = (VkIndirectCommandsLayoutNVX)unbox_VkIndirectCommandsLayoutNVX((*&cgen_var_702));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -16179,15 +14983,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkObjectTableCreateInfoNVX* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkObjectTableNVX* pObjectTable;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_704;
                 memcpy((uint64_t*)&cgen_var_704, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_704, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_704));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkObjectTableCreateInfoNVX));
                 reservedunmarshal_VkObjectTableCreateInfoNVX(vkReadStream, (VkObjectTableCreateInfoNVX*)(pCreateInfo), readStreamPtrPtr);
@@ -16206,9 +15008,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_706;
                 memcpy((uint64_t*)&cgen_var_706, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkObjectTableNVX(&cgen_var_706, (VkObjectTableNVX*)pObjectTable, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pObjectTable;
+                *((VkObjectTableNVX*))pObjectTable = (VkObjectTableNVX)(VkObjectTableNVX)((*&cgen_var_706));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkObjectTableCreateInfoNVX(m_state, (VkObjectTableCreateInfoNVX*)(pCreateInfo));
@@ -16250,26 +15050,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkObjectTableNVX objectTable;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_708;
                 memcpy((uint64_t*)&cgen_var_708, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_708, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_708));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for objectTable;
-                VkObjectTableNVX* boxed_objectTable_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_objectTable_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_709;
                 memcpy((uint64_t*)&cgen_var_709, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkObjectTableNVX(&cgen_var_709, (VkObjectTableNVX*)&objectTable, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for objectTable;
+                *((VkObjectTableNVX*))&objectTable = (VkObjectTableNVX)unbox_VkObjectTableNVX((*&cgen_var_709));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -16308,20 +15101,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t objectCount;
                 const VkObjectTableEntryNVX* const* ppObjectTableEntries;
                 const uint32_t* pObjectIndices;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_711;
                 memcpy((uint64_t*)&cgen_var_711, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_711, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_711));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_712;
                 memcpy((uint64_t*)&cgen_var_712, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkObjectTableNVX(&cgen_var_712, (VkObjectTableNVX*)&objectTable, 1);
+                *((VkObjectTableNVX*))&objectTable = (VkObjectTableNVX)unbox_VkObjectTableNVX((*&cgen_var_712));
                 memcpy((uint32_t*)&objectCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
@@ -16355,20 +15146,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t objectCount;
                 const VkObjectEntryTypeNVX* pObjectEntryTypes;
                 const uint32_t* pObjectIndices;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_713;
                 memcpy((uint64_t*)&cgen_var_713, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_713, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_713));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_714;
                 memcpy((uint64_t*)&cgen_var_714, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkObjectTableNVX(&cgen_var_714, (VkObjectTableNVX*)&objectTable, 1);
+                *((VkObjectTableNVX*))&objectTable = (VkObjectTableNVX)unbox_VkObjectTableNVX((*&cgen_var_714));
                 memcpy((uint32_t*)&objectCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pObjectEntryTypes, ((objectCount)) * sizeof(const VkObjectEntryTypeNVX));
@@ -16402,28 +15191,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 VkDeviceGeneratedCommandsFeaturesNVX* pFeatures;
                 VkDeviceGeneratedCommandsLimitsNVX* pLimits;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_715;
                 memcpy((uint64_t*)&cgen_var_715, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_715, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_715));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for pFeatures;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pFeatures, sizeof(VkDeviceGeneratedCommandsFeaturesNVX));
                 reservedunmarshal_VkDeviceGeneratedCommandsFeaturesNVX(vkReadStream, (VkDeviceGeneratedCommandsFeaturesNVX*)(pFeatures), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFeatures;
                 // Begin manual dispatchable handle unboxing for pLimits;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pLimits, sizeof(VkDeviceGeneratedCommandsLimitsNVX));
                 reservedunmarshal_VkDeviceGeneratedCommandsLimitsNVX(vkReadStream, (VkDeviceGeneratedCommandsLimitsNVX*)(pLimits), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pLimits;
                 if (pFeatures)
                 {
                     transform_tohost_VkDeviceGeneratedCommandsFeaturesNVX(m_state, (VkDeviceGeneratedCommandsFeaturesNVX*)(pFeatures));
@@ -16468,15 +15251,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t firstViewport;
                 uint32_t viewportCount;
                 const VkViewportWScalingNV* pViewportWScalings;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_716;
                 memcpy((uint64_t*)&cgen_var_716, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_716, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_716));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&firstViewport, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -16518,20 +15299,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 VkDisplayKHR display;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_717;
                 memcpy((uint64_t*)&cgen_var_717, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_717, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_717));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_718;
                 memcpy((uint64_t*)&cgen_var_718, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_718, (VkDisplayKHR*)&display, 1);
+                *((VkDisplayKHR*))&display = (VkDisplayKHR)unbox_VkDisplayKHR((*&cgen_var_718));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkReleaseDisplayEXT 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)display);
@@ -16559,27 +15338,23 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 Display* dpy;
                 VkDisplayKHR display;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_719;
                 memcpy((uint64_t*)&cgen_var_719, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_719, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_719));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for dpy;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&dpy, sizeof(Display));
                 memcpy((Display*)dpy, *readStreamPtrPtr, sizeof(Display));
                 *readStreamPtrPtr += sizeof(Display);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for dpy;
                 uint64_t cgen_var_720;
                 memcpy((uint64_t*)&cgen_var_720, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_720, (VkDisplayKHR*)&display, 1);
+                *((VkDisplayKHR*))&display = (VkDisplayKHR)unbox_VkDisplayKHR((*&cgen_var_720));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkAcquireXlibDisplayEXT 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)dpy, (unsigned long long)display);
@@ -16607,23 +15382,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 Display* dpy;
                 RROutput rrOutput;
                 VkDisplayKHR* pDisplay;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_721;
                 memcpy((uint64_t*)&cgen_var_721, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_721, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_721));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for dpy;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&dpy, sizeof(Display));
                 memcpy((Display*)dpy, *readStreamPtrPtr, sizeof(Display));
                 *readStreamPtrPtr += sizeof(Display);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for dpy;
                 memcpy((RROutput*)&rrOutput, *readStreamPtrPtr, sizeof(RROutput));
                 *readStreamPtrPtr += sizeof(RROutput);
                 // Begin manual dispatchable handle unboxing for pDisplay;
@@ -16632,9 +15403,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_722;
                 memcpy((uint64_t*)&cgen_var_722, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_722, (VkDisplayKHR*)pDisplay, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDisplay;
+                *((VkDisplayKHR*))pDisplay = (VkDisplayKHR)(VkDisplayKHR)((*&cgen_var_722));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetRandROutputDisplayEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)dpy, (unsigned long long)rrOutput, (unsigned long long)pDisplay);
@@ -16666,26 +15435,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 VkSurfaceKHR surface;
                 VkSurfaceCapabilities2EXT* pSurfaceCapabilities;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_724;
                 memcpy((uint64_t*)&cgen_var_724, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_724, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_724));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_725;
                 memcpy((uint64_t*)&cgen_var_725, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_725, (VkSurfaceKHR*)&surface, 1);
+                *((VkSurfaceKHR*))&surface = (VkSurfaceKHR)unbox_VkSurfaceKHR((*&cgen_var_725));
                 // Begin manual dispatchable handle unboxing for pSurfaceCapabilities;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pSurfaceCapabilities, sizeof(VkSurfaceCapabilities2EXT));
                 reservedunmarshal_VkSurfaceCapabilities2EXT(vkReadStream, (VkSurfaceCapabilities2EXT*)(pSurfaceCapabilities), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurfaceCapabilities;
                 if (pSurfaceCapabilities)
                 {
                     transform_tohost_VkSurfaceCapabilities2EXT(m_state, (VkSurfaceCapabilities2EXT*)(pSurfaceCapabilities));
@@ -16722,20 +15487,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkDisplayKHR display;
                 const VkDisplayPowerInfoEXT* pDisplayPowerInfo;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_726;
                 memcpy((uint64_t*)&cgen_var_726, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_726, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_726));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_727;
                 memcpy((uint64_t*)&cgen_var_727, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_727, (VkDisplayKHR*)&display, 1);
+                *((VkDisplayKHR*))&display = (VkDisplayKHR)unbox_VkDisplayKHR((*&cgen_var_727));
                 vkReadStream->alloc((void**)&pDisplayPowerInfo, sizeof(const VkDisplayPowerInfoEXT));
                 reservedunmarshal_VkDisplayPowerInfoEXT(vkReadStream, (VkDisplayPowerInfoEXT*)(pDisplayPowerInfo), readStreamPtrPtr);
                 if (pDisplayPowerInfo)
@@ -16768,15 +15531,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDeviceEventInfoEXT* pDeviceEventInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkFence* pFence;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_728;
                 memcpy((uint64_t*)&cgen_var_728, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_728, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_728));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pDeviceEventInfo, sizeof(const VkDeviceEventInfoEXT));
                 reservedunmarshal_VkDeviceEventInfoEXT(vkReadStream, (VkDeviceEventInfoEXT*)(pDeviceEventInfo), readStreamPtrPtr);
@@ -16795,9 +15556,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_730;
                 memcpy((uint64_t*)&cgen_var_730, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_730, (VkFence*)pFence, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFence;
+                *((VkFence*))pFence = (VkFence)(VkFence)((*&cgen_var_730));
                 if (pDeviceEventInfo)
                 {
                     transform_tohost_VkDeviceEventInfoEXT(m_state, (VkDeviceEventInfoEXT*)(pDeviceEventInfo));
@@ -16836,20 +15595,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDisplayEventInfoEXT* pDisplayEventInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkFence* pFence;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_732;
                 memcpy((uint64_t*)&cgen_var_732, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_732, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_732));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_733;
                 memcpy((uint64_t*)&cgen_var_733, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_733, (VkDisplayKHR*)&display, 1);
+                *((VkDisplayKHR*))&display = (VkDisplayKHR)unbox_VkDisplayKHR((*&cgen_var_733));
                 vkReadStream->alloc((void**)&pDisplayEventInfo, sizeof(const VkDisplayEventInfoEXT));
                 reservedunmarshal_VkDisplayEventInfoEXT(vkReadStream, (VkDisplayEventInfoEXT*)(pDisplayEventInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -16867,9 +15624,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_735;
                 memcpy((uint64_t*)&cgen_var_735, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_735, (VkFence*)pFence, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pFence;
+                *((VkFence*))pFence = (VkFence)(VkFence)((*&cgen_var_735));
                 if (pDisplayEventInfo)
                 {
                     transform_tohost_VkDisplayEventInfoEXT(m_state, (VkDisplayEventInfoEXT*)(pDisplayEventInfo));
@@ -16907,20 +15662,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkSwapchainKHR swapchain;
                 VkSurfaceCounterFlagBitsEXT counter;
                 uint64_t* pCounterValue;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_737;
                 memcpy((uint64_t*)&cgen_var_737, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_737, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_737));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_738;
                 memcpy((uint64_t*)&cgen_var_738, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(&cgen_var_738, (VkSwapchainKHR*)&swapchain, 1);
+                *((VkSwapchainKHR*))&swapchain = (VkSwapchainKHR)unbox_VkSwapchainKHR((*&cgen_var_738));
                 memcpy((VkSurfaceCounterFlagBitsEXT*)&counter, *readStreamPtrPtr, sizeof(VkSurfaceCounterFlagBitsEXT));
                 *readStreamPtrPtr += sizeof(VkSurfaceCounterFlagBitsEXT);
                 // Begin manual dispatchable handle unboxing for pCounterValue;
@@ -16928,8 +15681,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pCounterValue, sizeof(uint64_t));
                 memcpy((uint64_t*)pCounterValue, *readStreamPtrPtr, sizeof(uint64_t));
                 *readStreamPtrPtr += sizeof(uint64_t);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pCounterValue;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetSwapchainCounterEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)swapchain, (unsigned long long)counter, (unsigned long long)pCounterValue);
@@ -16958,26 +15709,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkSwapchainKHR swapchain;
                 VkRefreshCycleDurationGOOGLE* pDisplayTimingProperties;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_739;
                 memcpy((uint64_t*)&cgen_var_739, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_739, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_739));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_740;
                 memcpy((uint64_t*)&cgen_var_740, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(&cgen_var_740, (VkSwapchainKHR*)&swapchain, 1);
+                *((VkSwapchainKHR*))&swapchain = (VkSwapchainKHR)unbox_VkSwapchainKHR((*&cgen_var_740));
                 // Begin manual dispatchable handle unboxing for pDisplayTimingProperties;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pDisplayTimingProperties, sizeof(VkRefreshCycleDurationGOOGLE));
                 reservedunmarshal_VkRefreshCycleDurationGOOGLE(vkReadStream, (VkRefreshCycleDurationGOOGLE*)(pDisplayTimingProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDisplayTimingProperties;
                 if (pDisplayTimingProperties)
                 {
                     transform_tohost_VkRefreshCycleDurationGOOGLE(m_state, (VkRefreshCycleDurationGOOGLE*)(pDisplayTimingProperties));
@@ -17013,20 +15760,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkSwapchainKHR swapchain;
                 uint32_t* pPresentationTimingCount;
                 VkPastPresentationTimingGOOGLE* pPresentationTimings;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_741;
                 memcpy((uint64_t*)&cgen_var_741, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_741, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_741));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_742;
                 memcpy((uint64_t*)&cgen_var_742, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(&cgen_var_742, (VkSwapchainKHR*)&swapchain, 1);
+                *((VkSwapchainKHR*))&swapchain = (VkSwapchainKHR)unbox_VkSwapchainKHR((*&cgen_var_742));
                 // Begin manual dispatchable handle unboxing for pPresentationTimingCount;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -17039,8 +15784,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pPresentationTimingCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPresentationTimingCount;
                 // Begin manual dispatchable handle unboxing for pPresentationTimings;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -17055,8 +15798,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkPastPresentationTimingGOOGLE(vkReadStream, (VkPastPresentationTimingGOOGLE*)(pPresentationTimings + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pPresentationTimings;
                 if (pPresentationTimings)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pPresentationTimingCount)); ++i)
@@ -17126,15 +15867,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t firstDiscardRectangle;
                 uint32_t discardRectangleCount;
                 const VkRect2D* pDiscardRectangles;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_747;
                 memcpy((uint64_t*)&cgen_var_747, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_747, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_747));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((uint32_t*)&firstDiscardRectangle, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -17182,15 +15921,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t swapchainCount;
                 const VkSwapchainKHR* pSwapchains;
                 const VkHdrMetadataEXT* pMetadata;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_748;
                 memcpy((uint64_t*)&cgen_var_748, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_748, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_748));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&swapchainCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -17201,7 +15938,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_749, ((swapchainCount)) * 8);
                     memcpy((uint64_t*)cgen_var_749, *readStreamPtrPtr, ((swapchainCount)) * 8);
                     *readStreamPtrPtr += ((swapchainCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkSwapchainKHR(cgen_var_749, (VkSwapchainKHR*)pSwapchains, ((swapchainCount)));
+                    for (uint32_t k = 0; k < ((swapchainCount)); ++k)
+                    {
+                        *((((VkSwapchainKHR*))pSwapchains) + k) = (VkSwapchainKHR)unbox_VkSwapchainKHR(cgen_var_749[k]);
+                    }
                 }
                 vkReadStream->alloc((void**)&pMetadata, ((swapchainCount)) * sizeof(const VkHdrMetadataEXT));
                 for (uint32_t i = 0; i < (uint32_t)((swapchainCount)); ++i)
@@ -17241,15 +15981,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkIOSSurfaceCreateInfoMVK* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSurfaceKHR* pSurface;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_750;
                 memcpy((uint64_t*)&cgen_var_750, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_750, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_750));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkIOSSurfaceCreateInfoMVK));
                 reservedunmarshal_VkIOSSurfaceCreateInfoMVK(vkReadStream, (VkIOSSurfaceCreateInfoMVK*)(pCreateInfo), readStreamPtrPtr);
@@ -17268,9 +16006,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_752;
                 memcpy((uint64_t*)&cgen_var_752, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_752, (VkSurfaceKHR*)pSurface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurface;
+                *((VkSurfaceKHR*))pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((*&cgen_var_752));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkIOSSurfaceCreateInfoMVK(m_state, (VkIOSSurfaceCreateInfoMVK*)(pCreateInfo));
@@ -17310,15 +16046,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkMacOSSurfaceCreateInfoMVK* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkSurfaceKHR* pSurface;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_754;
                 memcpy((uint64_t*)&cgen_var_754, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_754, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_754));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkMacOSSurfaceCreateInfoMVK));
                 reservedunmarshal_VkMacOSSurfaceCreateInfoMVK(vkReadStream, (VkMacOSSurfaceCreateInfoMVK*)(pCreateInfo), readStreamPtrPtr);
@@ -17337,9 +16071,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_756;
                 memcpy((uint64_t*)&cgen_var_756, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkSurfaceKHR(&cgen_var_756, (VkSurfaceKHR*)pSurface, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSurface;
+                *((VkSurfaceKHR*))pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((*&cgen_var_756));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkMacOSSurfaceCreateInfoMVK(m_state, (VkMacOSSurfaceCreateInfoMVK*)(pCreateInfo));
@@ -17381,15 +16113,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 const VkDebugUtilsObjectNameInfoEXT* pNameInfo;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_758;
                 memcpy((uint64_t*)&cgen_var_758, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_758, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_758));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pNameInfo, sizeof(const VkDebugUtilsObjectNameInfoEXT));
                 reservedunmarshal_VkDebugUtilsObjectNameInfoEXT(vkReadStream, (VkDebugUtilsObjectNameInfoEXT*)(pNameInfo), readStreamPtrPtr);
@@ -17421,15 +16151,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 const VkDebugUtilsObjectTagInfoEXT* pTagInfo;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_759;
                 memcpy((uint64_t*)&cgen_var_759, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_759, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_759));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pTagInfo, sizeof(const VkDebugUtilsObjectTagInfoEXT));
                 reservedunmarshal_VkDebugUtilsObjectTagInfoEXT(vkReadStream, (VkDebugUtilsObjectTagInfoEXT*)(pTagInfo), readStreamPtrPtr);
@@ -17461,15 +16189,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkQueue queue;
                 const VkDebugUtilsLabelEXT* pLabelInfo;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_760;
                 memcpy((uint64_t*)&cgen_var_760, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_760, (VkQueue*)&queue, 1);
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_760));
                 auto unboxed_queue = unbox_VkQueue(queue);
                 auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for queue;
                 vkReadStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
                 reservedunmarshal_VkDebugUtilsLabelEXT(vkReadStream, (VkDebugUtilsLabelEXT*)(pLabelInfo), readStreamPtrPtr);
@@ -17498,15 +16224,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             android::base::beginTrace("vkQueueEndDebugUtilsLabelEXT decode");
             {
                 VkQueue queue;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_761;
                 memcpy((uint64_t*)&cgen_var_761, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_761, (VkQueue*)&queue, 1);
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_761));
                 auto unboxed_queue = unbox_VkQueue(queue);
                 auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for queue;
                 if (m_logCalls)
                 {
@@ -17530,15 +16254,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkQueue queue;
                 const VkDebugUtilsLabelEXT* pLabelInfo;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_762;
                 memcpy((uint64_t*)&cgen_var_762, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_762, (VkQueue*)&queue, 1);
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_762));
                 auto unboxed_queue = unbox_VkQueue(queue);
                 auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for queue;
                 vkReadStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
                 reservedunmarshal_VkDebugUtilsLabelEXT(vkReadStream, (VkDebugUtilsLabelEXT*)(pLabelInfo), readStreamPtrPtr);
@@ -17568,15 +16290,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkDebugUtilsLabelEXT* pLabelInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_763;
                 memcpy((uint64_t*)&cgen_var_763, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_763, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_763));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
                 reservedunmarshal_VkDebugUtilsLabelEXT(vkReadStream, (VkDebugUtilsLabelEXT*)(pLabelInfo), readStreamPtrPtr);
@@ -17605,15 +16325,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             android::base::beginTrace("vkCmdEndDebugUtilsLabelEXT decode");
             {
                 VkCommandBuffer commandBuffer;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_764;
                 memcpy((uint64_t*)&cgen_var_764, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_764, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_764));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 if (m_logCalls)
                 {
@@ -17637,15 +16355,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkDebugUtilsLabelEXT* pLabelInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_765;
                 memcpy((uint64_t*)&cgen_var_765, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_765, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_765));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
                 reservedunmarshal_VkDebugUtilsLabelEXT(vkReadStream, (VkDebugUtilsLabelEXT*)(pLabelInfo), readStreamPtrPtr);
@@ -17677,15 +16393,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkDebugUtilsMessengerEXT* pMessenger;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_766;
                 memcpy((uint64_t*)&cgen_var_766, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_766, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_766));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkDebugUtilsMessengerCreateInfoEXT));
                 reservedunmarshal_VkDebugUtilsMessengerCreateInfoEXT(vkReadStream, (VkDebugUtilsMessengerCreateInfoEXT*)(pCreateInfo), readStreamPtrPtr);
@@ -17704,9 +16418,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_768;
                 memcpy((uint64_t*)&cgen_var_768, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDebugUtilsMessengerEXT(&cgen_var_768, (VkDebugUtilsMessengerEXT*)pMessenger, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMessenger;
+                *((VkDebugUtilsMessengerEXT*))pMessenger = (VkDebugUtilsMessengerEXT)(VkDebugUtilsMessengerEXT)((*&cgen_var_768));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkDebugUtilsMessengerCreateInfoEXT(m_state, (VkDebugUtilsMessengerCreateInfoEXT*)(pCreateInfo));
@@ -17748,26 +16460,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkInstance instance;
                 VkDebugUtilsMessengerEXT messenger;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_770;
                 memcpy((uint64_t*)&cgen_var_770, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_770, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_770));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 // Begin manual non dispatchable handle destroy unboxing for messenger;
-                VkDebugUtilsMessengerEXT* boxed_messenger_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_messenger_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_771;
                 memcpy((uint64_t*)&cgen_var_771, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDebugUtilsMessengerEXT(&cgen_var_771, (VkDebugUtilsMessengerEXT*)&messenger, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for messenger;
+                *((VkDebugUtilsMessengerEXT*))&messenger = (VkDebugUtilsMessengerEXT)unbox_VkDebugUtilsMessengerEXT((*&cgen_var_771));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -17805,15 +16510,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity;
                 VkDebugUtilsMessageTypeFlagsEXT messageTypes;
                 const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData;
-                // Begin manual dispatchable handle unboxing for instance;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for instance;
                 uint64_t cgen_var_773;
                 memcpy((uint64_t*)&cgen_var_773, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_773, (VkInstance*)&instance, 1);
+                *((VkInstance*))&instance = (VkInstance)(VkInstance)((*&cgen_var_773));
                 auto unboxed_instance = unbox_VkInstance(instance);
                 auto vk = dispatch_VkInstance(instance);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for instance;
                 memcpy((VkDebugUtilsMessageSeverityFlagBitsEXT*)&messageSeverity, *readStreamPtrPtr, sizeof(VkDebugUtilsMessageSeverityFlagBitsEXT));
                 *readStreamPtrPtr += sizeof(VkDebugUtilsMessageSeverityFlagBitsEXT);
@@ -17850,15 +16553,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const AHardwareBuffer* buffer;
                 VkAndroidHardwareBufferPropertiesANDROID* pProperties;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_774;
                 memcpy((uint64_t*)&cgen_var_774, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_774, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_774));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&buffer, sizeof(const AHardwareBuffer));
                 memcpy((AHardwareBuffer*)buffer, *readStreamPtrPtr, sizeof(const AHardwareBuffer));
@@ -17867,8 +16568,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pProperties, sizeof(VkAndroidHardwareBufferPropertiesANDROID));
                 reservedunmarshal_VkAndroidHardwareBufferPropertiesANDROID(vkReadStream, (VkAndroidHardwareBufferPropertiesANDROID*)(pProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pProperties;
                 if (pProperties)
                 {
                     transform_tohost_VkAndroidHardwareBufferPropertiesANDROID(m_state, (VkAndroidHardwareBufferPropertiesANDROID*)(pProperties));
@@ -17903,15 +16602,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 const VkMemoryGetAndroidHardwareBufferInfoANDROID* pInfo;
                 AHardwareBuffer** pBuffer;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_775;
                 memcpy((uint64_t*)&cgen_var_775, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_775, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_775));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pInfo, sizeof(const VkMemoryGetAndroidHardwareBufferInfoANDROID));
                 reservedunmarshal_VkMemoryGetAndroidHardwareBufferInfoANDROID(vkReadStream, (VkMemoryGetAndroidHardwareBufferInfoANDROID*)(pInfo), readStreamPtrPtr);
@@ -17920,8 +16617,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pBuffer, sizeof(AHardwareBuffer*));
                 memcpy((AHardwareBuffer**)pBuffer, *readStreamPtrPtr, sizeof(AHardwareBuffer*));
                 *readStreamPtrPtr += sizeof(AHardwareBuffer*);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pBuffer;
                 if (pInfo)
                 {
                     transform_tohost_VkMemoryGetAndroidHardwareBufferInfoANDROID(m_state, (VkMemoryGetAndroidHardwareBufferInfoANDROID*)(pInfo));
@@ -17963,15 +16658,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkSampleLocationsInfoEXT* pSampleLocationsInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_776;
                 memcpy((uint64_t*)&cgen_var_776, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_776, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_776));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 vkReadStream->alloc((void**)&pSampleLocationsInfo, sizeof(const VkSampleLocationsInfoEXT));
                 reservedunmarshal_VkSampleLocationsInfoEXT(vkReadStream, (VkSampleLocationsInfoEXT*)(pSampleLocationsInfo), readStreamPtrPtr);
@@ -18002,15 +16695,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkPhysicalDevice physicalDevice;
                 VkSampleCountFlagBits samples;
                 VkMultisamplePropertiesEXT* pMultisampleProperties;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_777;
                 memcpy((uint64_t*)&cgen_var_777, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_777, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_777));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 memcpy((VkSampleCountFlagBits*)&samples, *readStreamPtrPtr, sizeof(VkSampleCountFlagBits));
                 *readStreamPtrPtr += sizeof(VkSampleCountFlagBits);
@@ -18018,8 +16709,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMultisampleProperties, sizeof(VkMultisamplePropertiesEXT));
                 reservedunmarshal_VkMultisamplePropertiesEXT(vkReadStream, (VkMultisamplePropertiesEXT*)(pMultisampleProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMultisampleProperties;
                 if (pMultisampleProperties)
                 {
                     transform_tohost_VkMultisamplePropertiesEXT(m_state, (VkMultisamplePropertiesEXT*)(pMultisampleProperties));
@@ -18065,15 +16754,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkValidationCacheCreateInfoEXT* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkValidationCacheEXT* pValidationCache;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_778;
                 memcpy((uint64_t*)&cgen_var_778, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_778, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_778));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkValidationCacheCreateInfoEXT));
                 reservedunmarshal_VkValidationCacheCreateInfoEXT(vkReadStream, (VkValidationCacheCreateInfoEXT*)(pCreateInfo), readStreamPtrPtr);
@@ -18092,9 +16779,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_780;
                 memcpy((uint64_t*)&cgen_var_780, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkValidationCacheEXT(&cgen_var_780, (VkValidationCacheEXT*)pValidationCache, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pValidationCache;
+                *((VkValidationCacheEXT*))pValidationCache = (VkValidationCacheEXT)(VkValidationCacheEXT)((*&cgen_var_780));
                 if (pCreateInfo)
                 {
                     transform_tohost_VkValidationCacheCreateInfoEXT(m_state, (VkValidationCacheCreateInfoEXT*)(pCreateInfo));
@@ -18136,26 +16821,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkValidationCacheEXT validationCache;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_782;
                 memcpy((uint64_t*)&cgen_var_782, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_782, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_782));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for validationCache;
-                VkValidationCacheEXT* boxed_validationCache_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_validationCache_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_783;
                 memcpy((uint64_t*)&cgen_var_783, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkValidationCacheEXT(&cgen_var_783, (VkValidationCacheEXT*)&validationCache, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for validationCache;
+                *((VkValidationCacheEXT*))&validationCache = (VkValidationCacheEXT)unbox_VkValidationCacheEXT((*&cgen_var_783));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -18193,20 +16871,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkValidationCacheEXT dstCache;
                 uint32_t srcCacheCount;
                 const VkValidationCacheEXT* pSrcCaches;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_785;
                 memcpy((uint64_t*)&cgen_var_785, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_785, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_785));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_786;
                 memcpy((uint64_t*)&cgen_var_786, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkValidationCacheEXT(&cgen_var_786, (VkValidationCacheEXT*)&dstCache, 1);
+                *((VkValidationCacheEXT*))&dstCache = (VkValidationCacheEXT)unbox_VkValidationCacheEXT((*&cgen_var_786));
                 memcpy((uint32_t*)&srcCacheCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pSrcCaches, ((srcCacheCount)) * sizeof(const VkValidationCacheEXT));
@@ -18216,7 +16892,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&cgen_var_787, ((srcCacheCount)) * 8);
                     memcpy((uint64_t*)cgen_var_787, *readStreamPtrPtr, ((srcCacheCount)) * 8);
                     *readStreamPtrPtr += ((srcCacheCount)) * 8;
-                    vkReadStream->handleMapping()->mapHandles_u64_VkValidationCacheEXT(cgen_var_787, (VkValidationCacheEXT*)pSrcCaches, ((srcCacheCount)));
+                    for (uint32_t k = 0; k < ((srcCacheCount)); ++k)
+                    {
+                        *((((VkValidationCacheEXT*))pSrcCaches) + k) = (VkValidationCacheEXT)unbox_VkValidationCacheEXT(cgen_var_787[k]);
+                    }
                 }
                 if (m_logCalls)
                 {
@@ -18244,20 +16923,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkValidationCacheEXT validationCache;
                 size_t* pDataSize;
                 void* pData;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_788;
                 memcpy((uint64_t*)&cgen_var_788, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_788, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_788));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_789;
                 memcpy((uint64_t*)&cgen_var_789, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkValidationCacheEXT(&cgen_var_789, (VkValidationCacheEXT*)&validationCache, 1);
+                *((VkValidationCacheEXT*))&validationCache = (VkValidationCacheEXT)unbox_VkValidationCacheEXT((*&cgen_var_789));
                 // Begin manual dispatchable handle unboxing for pDataSize;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -18271,8 +16948,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     android::base::Stream::fromBe64((uint8_t*)&(*pDataSize));
                     *readStreamPtrPtr += 8;
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pDataSize;
                 // Begin manual dispatchable handle unboxing for pData;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -18285,8 +16960,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((void*)pData, *readStreamPtrPtr, (*(pDataSize)) * sizeof(uint8_t));
                     *readStreamPtrPtr += (*(pDataSize)) * sizeof(uint8_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pData;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetValidationCacheDataEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)validationCache, (unsigned long long)pDataSize, (unsigned long long)pData);
@@ -18336,15 +17009,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkExternalMemoryHandleTypeFlagBits handleType;
                 const void* pHostPointer;
                 VkMemoryHostPointerPropertiesEXT* pMemoryHostPointerProperties;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_796;
                 memcpy((uint64_t*)&cgen_var_796, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_796, (VkDevice*)&device, 1);
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_796));
                 auto unboxed_device = unbox_VkDevice(device);
                 auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for device;
                 memcpy((VkExternalMemoryHandleTypeFlagBits*)&handleType, *readStreamPtrPtr, sizeof(VkExternalMemoryHandleTypeFlagBits));
                 *readStreamPtrPtr += sizeof(VkExternalMemoryHandleTypeFlagBits);
@@ -18362,8 +17033,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryHostPointerProperties, sizeof(VkMemoryHostPointerPropertiesEXT));
                 reservedunmarshal_VkMemoryHostPointerPropertiesEXT(vkReadStream, (VkMemoryHostPointerPropertiesEXT*)(pMemoryHostPointerProperties), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryHostPointerProperties;
                 if (pMemoryHostPointerProperties)
                 {
                     transform_tohost_VkMemoryHostPointerPropertiesEXT(m_state, (VkMemoryHostPointerPropertiesEXT*)(pMemoryHostPointerProperties));
@@ -18402,22 +17071,20 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkBuffer dstBuffer;
                 VkDeviceSize dstOffset;
                 uint32_t marker;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_798;
                 memcpy((uint64_t*)&cgen_var_798, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_798, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_798));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 memcpy((VkPipelineStageFlagBits*)&pipelineStage, *readStreamPtrPtr, sizeof(VkPipelineStageFlagBits));
                 *readStreamPtrPtr += sizeof(VkPipelineStageFlagBits);
                 uint64_t cgen_var_799;
                 memcpy((uint64_t*)&cgen_var_799, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_799, (VkBuffer*)&dstBuffer, 1);
+                *((VkBuffer*))&dstBuffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_799));
                 memcpy((VkDeviceSize*)&dstOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 memcpy((uint32_t*)&marker, *readStreamPtrPtr, sizeof(uint32_t));
@@ -18452,15 +17119,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const void* pCheckpointMarker;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_800;
                 memcpy((uint64_t*)&cgen_var_800, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_800, (VkCommandBuffer*)&commandBuffer, 1);
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_800));
                 auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
                 auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for commandBuffer;
                 // WARNING PTR CHECK
                 memcpy((void**)&pCheckpointMarker, (*readStreamPtrPtr), 8);
@@ -18495,15 +17160,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkQueue queue;
                 uint32_t* pCheckpointDataCount;
                 VkCheckpointDataNV* pCheckpointData;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_802;
                 memcpy((uint64_t*)&cgen_var_802, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_802, (VkQueue*)&queue, 1);
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_802));
                 auto unboxed_queue = unbox_VkQueue(queue);
                 auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for queue;
                 // Begin manual dispatchable handle unboxing for pCheckpointDataCount;
                 vkReadStream->unsetHandleMapping();
@@ -18517,8 +17180,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint32_t*)pCheckpointDataCount, *readStreamPtrPtr, sizeof(uint32_t));
                     *readStreamPtrPtr += sizeof(uint32_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pCheckpointDataCount;
                 // Begin manual dispatchable handle unboxing for pCheckpointData;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -18533,8 +17194,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         reservedunmarshal_VkCheckpointDataNV(vkReadStream, (VkCheckpointDataNV*)(pCheckpointData + i), readStreamPtrPtr);
                     }
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pCheckpointData;
                 if (pCheckpointData)
                 {
                     for (uint32_t i = 0; i < (uint32_t)(*(pCheckpointDataCount)); ++i)
@@ -18591,20 +17250,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkDeviceMemory memory;
                 uint64_t* pAddress;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_807;
                 memcpy((uint64_t*)&cgen_var_807, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_807, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_807));
                 uint64_t cgen_var_808;
                 memcpy((uint64_t*)&cgen_var_808, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_808, (VkDeviceMemory*)&memory, 1);
+                *((VkDeviceMemory*))&memory = (VkDeviceMemory)unbox_VkDeviceMemory((*&cgen_var_808));
                 // Begin manual dispatchable handle unboxing for pAddress;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -18617,8 +17271,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint64_t*)pAddress, *readStreamPtrPtr, sizeof(uint64_t));
                     *readStreamPtrPtr += sizeof(uint64_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pAddress;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkMapMemoryIntoAddressSpaceGOOGLE 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)pAddress);
@@ -18653,20 +17305,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkImage image;
                 uint32_t colorBuffer;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_811;
                 memcpy((uint64_t*)&cgen_var_811, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_811, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_811));
                 uint64_t cgen_var_812;
                 memcpy((uint64_t*)&cgen_var_812, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_812, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_812));
                 memcpy((uint32_t*)&colorBuffer, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 if (m_logCalls)
@@ -18694,20 +17341,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkBuffer buffer;
                 uint32_t colorBuffer;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_813;
                 memcpy((uint64_t*)&cgen_var_813, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_813, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_813));
                 uint64_t cgen_var_814;
                 memcpy((uint64_t*)&cgen_var_814, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_814, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_814));
                 memcpy((uint32_t*)&colorBuffer, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 if (m_logCalls)
@@ -18746,24 +17388,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkDescriptorImageInfo* pImageInfos;
                 const VkDescriptorBufferInfo* pBufferInfos;
                 const VkBufferView* pBufferViews;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_815;
                 memcpy((uint64_t*)&cgen_var_815, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_815, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_815));
                 uint64_t cgen_var_816;
                 memcpy((uint64_t*)&cgen_var_816, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorSet(&cgen_var_816, (VkDescriptorSet*)&descriptorSet, 1);
+                *((VkDescriptorSet*))&descriptorSet = (VkDescriptorSet)unbox_VkDescriptorSet((*&cgen_var_816));
                 uint64_t cgen_var_817;
                 memcpy((uint64_t*)&cgen_var_817, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDescriptorUpdateTemplate(&cgen_var_817, (VkDescriptorUpdateTemplate*)&descriptorUpdateTemplate, 1);
+                *((VkDescriptorUpdateTemplate*))&descriptorUpdateTemplate = (VkDescriptorUpdateTemplate)unbox_VkDescriptorUpdateTemplate((*&cgen_var_817));
                 memcpy((uint32_t*)&imageInfoCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&bufferInfoCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -18837,7 +17474,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         vkReadStream->alloc((void**)&cgen_var_824, ((bufferViewCount)) * 8);
                         memcpy((uint64_t*)cgen_var_824, *readStreamPtrPtr, ((bufferViewCount)) * 8);
                         *readStreamPtrPtr += ((bufferViewCount)) * 8;
-                        vkReadStream->handleMapping()->mapHandles_u64_VkBufferView(cgen_var_824, (VkBufferView*)pBufferViews, ((bufferViewCount)));
+                        for (uint32_t k = 0; k < ((bufferViewCount)); ++k)
+                        {
+                            *((((VkBufferView*))pBufferViews) + k) = (VkBufferView)unbox_VkBufferView(cgen_var_824[k]);
+                        }
                     }
                 }
                 if (pImageInfos)
@@ -18878,16 +17518,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 const VkCommandBufferBeginInfo* pBeginInfo;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_825;
                 memcpy((uint64_t*)&cgen_var_825, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_825, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_825));
                 vkReadStream->alloc((void**)&pBeginInfo, sizeof(const VkCommandBufferBeginInfo));
                 reservedunmarshal_VkCommandBufferBeginInfo(vkReadStream, (VkCommandBufferBeginInfo*)(pBeginInfo), readStreamPtrPtr);
                 if (pBeginInfo)
@@ -18915,16 +17550,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             android::base::beginTrace("vkEndCommandBufferAsyncGOOGLE decode");
             {
                 VkCommandBuffer commandBuffer;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_826;
                 memcpy((uint64_t*)&cgen_var_826, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_826, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_826));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkEndCommandBufferAsyncGOOGLE 0x%llx \n", ioStream, (unsigned long long)commandBuffer);
@@ -18947,16 +17577,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 VkCommandBufferResetFlags flags;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_827;
                 memcpy((uint64_t*)&cgen_var_827, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_827, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_827));
                 memcpy((VkCommandBufferResetFlags*)&flags, *readStreamPtrPtr, sizeof(VkCommandBufferResetFlags));
                 *readStreamPtrPtr += sizeof(VkCommandBufferResetFlags);
                 if (m_logCalls)
@@ -18982,16 +17607,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBuffer commandBuffer;
                 uint32_t needHostSync;
                 uint32_t sequenceNumber;
-                // Begin manual dispatchable handle unboxing for commandBuffer;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for commandBuffer;
                 uint64_t cgen_var_828;
                 memcpy((uint64_t*)&cgen_var_828, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_828, (VkCommandBuffer*)&commandBuffer, 1);
-                auto unboxed_commandBuffer = unbox_VkCommandBuffer(commandBuffer);
-                auto vk = dispatch_VkCommandBuffer(commandBuffer);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for commandBuffer;
+                *((VkCommandBuffer*))&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((*&cgen_var_828));
                 memcpy((uint32_t*)&needHostSync, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&sequenceNumber, *readStreamPtrPtr, sizeof(uint32_t));
@@ -19023,16 +17643,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkAllocationCallbacks* pAllocator;
                 VkImage* pImage;
                 VkMemoryRequirements* pMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_829;
                 memcpy((uint64_t*)&cgen_var_829, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_829, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_829));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkImageCreateInfo));
                 reservedunmarshal_VkImageCreateInfo(vkReadStream, (VkImageCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -19050,15 +17665,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_831;
                 memcpy((uint64_t*)&cgen_var_831, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_831, (VkImage*)pImage, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pImage;
+                *((VkImage*))pImage = (VkImage)(VkImage)((*&cgen_var_831));
                 // Begin manual dispatchable handle unboxing for pMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements));
                 reservedunmarshal_VkMemoryRequirements(vkReadStream, (VkMemoryRequirements*)(pMemoryRequirements), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryRequirements;
                 if (pCreateInfo)
                 {
                     transform_tohost_VkImageCreateInfo(m_state, (VkImageCreateInfo*)(pCreateInfo));
@@ -19111,16 +17722,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 const VkAllocationCallbacks* pAllocator;
                 VkBuffer* pBuffer;
                 VkMemoryRequirements* pMemoryRequirements;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_833;
                 memcpy((uint64_t*)&cgen_var_833, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_833, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_833));
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkBufferCreateInfo));
                 reservedunmarshal_VkBufferCreateInfo(vkReadStream, (VkBufferCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -19138,15 +17744,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_835;
                 memcpy((uint64_t*)&cgen_var_835, *readStreamPtrPtr, 8);
                 *readStreamPtrPtr += 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_835, (VkBuffer*)pBuffer, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pBuffer;
+                *((VkBuffer*))pBuffer = (VkBuffer)(VkBuffer)((*&cgen_var_835));
                 // Begin manual dispatchable handle unboxing for pMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements));
                 reservedunmarshal_VkMemoryRequirements(vkReadStream, (VkMemoryRequirements*)(pMemoryRequirements), readStreamPtrPtr);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMemoryRequirements;
                 if (pCreateInfo)
                 {
                     transform_tohost_VkBufferCreateInfo(m_state, (VkBufferCreateInfo*)(pCreateInfo));
@@ -19201,20 +17803,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t* pAddress;
                 uint64_t* pSize;
                 uint64_t* pHostmemId;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_837;
                 memcpy((uint64_t*)&cgen_var_837, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_837, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_837));
                 uint64_t cgen_var_838;
                 memcpy((uint64_t*)&cgen_var_838, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_838, (VkDeviceMemory*)&memory, 1);
+                *((VkDeviceMemory*))&memory = (VkDeviceMemory)unbox_VkDeviceMemory((*&cgen_var_838));
                 // Begin manual dispatchable handle unboxing for pAddress;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -19227,8 +17824,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint64_t*)pAddress, *readStreamPtrPtr, sizeof(uint64_t));
                     *readStreamPtrPtr += sizeof(uint64_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pAddress;
                 // Begin manual dispatchable handle unboxing for pSize;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -19241,8 +17836,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint64_t*)pSize, *readStreamPtrPtr, sizeof(uint64_t));
                     *readStreamPtrPtr += sizeof(uint64_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pSize;
                 // Begin manual dispatchable handle unboxing for pHostmemId;
                 vkReadStream->unsetHandleMapping();
                 // WARNING PTR CHECK
@@ -19255,8 +17848,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     memcpy((uint64_t*)pHostmemId, *readStreamPtrPtr, sizeof(uint64_t));
                     *readStreamPtrPtr += sizeof(uint64_t);
                 }
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pHostmemId;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetMemoryHostAddressInfoGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)memory, (unsigned long long)pAddress, (unsigned long long)pSize, (unsigned long long)pHostmemId);
@@ -19305,26 +17896,16 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDevice device;
                 VkDeviceMemory memory;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_845;
                 memcpy((uint64_t*)&cgen_var_845, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_845, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_845));
                 // Begin manual non dispatchable handle destroy unboxing for memory;
-                VkDeviceMemory* boxed_memory_preserve;
-                m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_memory_preserve);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping);
                 uint64_t cgen_var_846;
                 memcpy((uint64_t*)&cgen_var_846, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_846, (VkDeviceMemory*)&memory, 1);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual non dispatchable handle destroy unboxing for memory;
+                *((VkDeviceMemory*))&memory = (VkDeviceMemory)unbox_VkDeviceMemory((*&cgen_var_846));
                 // WARNING PTR CHECK
                 memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
                 android::base::Stream::fromBe64((uint8_t*)&pAllocator);
@@ -19365,16 +17946,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkQueue queue;
                 uint32_t needHostSync;
                 uint32_t sequenceNumber;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_848;
                 memcpy((uint64_t*)&cgen_var_848, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_848, (VkQueue*)&queue, 1);
-                auto unboxed_queue = unbox_VkQueue(queue);
-                auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for queue;
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_848));
                 memcpy((uint32_t*)&needHostSync, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&sequenceNumber, *readStreamPtrPtr, sizeof(uint32_t));
@@ -19403,16 +17979,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t submitCount;
                 const VkSubmitInfo* pSubmits;
                 VkFence fence;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_849;
                 memcpy((uint64_t*)&cgen_var_849, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_849, (VkQueue*)&queue, 1);
-                auto unboxed_queue = unbox_VkQueue(queue);
-                auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for queue;
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_849));
                 memcpy((uint32_t*)&submitCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pSubmits, ((submitCount)) * sizeof(const VkSubmitInfo));
@@ -19423,7 +17994,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_850;
                 memcpy((uint64_t*)&cgen_var_850, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_850, (VkFence*)&fence, 1);
+                *((VkFence*))&fence = (VkFence)unbox_VkFence((*&cgen_var_850));
                 if (pSubmits)
                 {
                     for (uint32_t i = 0; i < (uint32_t)((submitCount)); ++i)
@@ -19452,16 +18023,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             android::base::beginTrace("vkQueueWaitIdleAsyncGOOGLE decode");
             {
                 VkQueue queue;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_851;
                 memcpy((uint64_t*)&cgen_var_851, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_851, (VkQueue*)&queue, 1);
-                auto unboxed_queue = unbox_VkQueue(queue);
-                auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for queue;
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_851));
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkQueueWaitIdleAsyncGOOGLE 0x%llx \n", ioStream, (unsigned long long)queue);
@@ -19486,16 +18052,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t bindInfoCount;
                 const VkBindSparseInfo* pBindInfo;
                 VkFence fence;
-                // Begin manual dispatchable handle unboxing for queue;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_852;
                 memcpy((uint64_t*)&cgen_var_852, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_852, (VkQueue*)&queue, 1);
-                auto unboxed_queue = unbox_VkQueue(queue);
-                auto vk = dispatch_VkQueue(queue);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for queue;
+                *((VkQueue*))&queue = (VkQueue)(VkQueue)((*&cgen_var_852));
                 memcpy((uint32_t*)&bindInfoCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pBindInfo, ((bindInfoCount)) * sizeof(const VkBindSparseInfo));
@@ -19506,7 +18067,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_853;
                 memcpy((uint64_t*)&cgen_var_853, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_853, (VkFence*)&fence, 1);
+                *((VkFence*))&fence = (VkFence)unbox_VkFence((*&cgen_var_853));
                 if (pBindInfo)
                 {
                     for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
@@ -19540,16 +18101,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkFormat format;
                 VkDeviceSize* pOffset;
                 VkDeviceSize* pRowPitchAlignment;
-                // Begin manual dispatchable handle unboxing for device;
-                vkReadStream->unsetHandleMapping();
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_854;
                 memcpy((uint64_t*)&cgen_var_854, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_854, (VkDevice*)&device, 1);
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for device;
+                *((VkDevice*))&device = (VkDevice)(VkDevice)((*&cgen_var_854));
                 memcpy((VkFormat*)&format, *readStreamPtrPtr, sizeof(VkFormat));
                 *readStreamPtrPtr += sizeof(VkFormat);
                 // Begin manual dispatchable handle unboxing for pOffset;
@@ -19557,15 +18113,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pOffset, sizeof(VkDeviceSize));
                 memcpy((VkDeviceSize*)pOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pOffset;
                 // Begin manual dispatchable handle unboxing for pRowPitchAlignment;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pRowPitchAlignment, sizeof(VkDeviceSize));
                 memcpy((VkDeviceSize*)pRowPitchAlignment, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pRowPitchAlignment;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetLinearImageLayoutGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)format, (unsigned long long)pOffset, (unsigned long long)pRowPitchAlignment);
@@ -19592,23 +18144,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkPhysicalDevice physicalDevice;
                 void** pMTLDevice;
-                // Begin manual dispatchable handle unboxing for physicalDevice;
-                vkReadStream->unsetHandleMapping();
+                // Begin non wrapped dispatchable handle unboxing for physicalDevice;
                 uint64_t cgen_var_855;
                 memcpy((uint64_t*)&cgen_var_855, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_855, (VkPhysicalDevice*)&physicalDevice, 1);
+                *((VkPhysicalDevice*))&physicalDevice = (VkPhysicalDevice)(VkPhysicalDevice)((*&cgen_var_855));
                 auto unboxed_physicalDevice = unbox_VkPhysicalDevice(physicalDevice);
                 auto vk = dispatch_VkPhysicalDevice(physicalDevice);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for physicalDevice;
                 // Begin manual dispatchable handle unboxing for pMTLDevice;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMTLDevice, sizeof(void*));
                 memcpy((void**)pMTLDevice, *readStreamPtrPtr, sizeof(void*));
                 *readStreamPtrPtr += sizeof(void*);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMTLDevice;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetMTLDeviceMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)physicalDevice, (unsigned long long)pMTLDevice);
@@ -19635,14 +18183,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_856;
                 memcpy((uint64_t*)&cgen_var_856, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_856, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_856));
                 // Begin manual dispatchable handle unboxing for mtlTexture;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&mtlTexture, sizeof(uint8_t));
                 memcpy((void*)mtlTexture, *readStreamPtrPtr, sizeof(uint8_t));
                 *readStreamPtrPtr += sizeof(uint8_t);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for mtlTexture;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkSetMTLTextureMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)image, (unsigned long long)mtlTexture);
@@ -19671,14 +18217,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_857;
                 memcpy((uint64_t*)&cgen_var_857, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_857, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_857));
                 // Begin manual dispatchable handle unboxing for pMTLTexture;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMTLTexture, sizeof(void*));
                 memcpy((void**)pMTLTexture, *readStreamPtrPtr, sizeof(void*));
                 *readStreamPtrPtr += sizeof(void*);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMTLTexture;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetMTLTextureMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)image, (unsigned long long)pMTLTexture);
@@ -19705,14 +18249,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_858;
                 memcpy((uint64_t*)&cgen_var_858, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_858, (VkBuffer*)&buffer, 1);
+                *((VkBuffer*))&buffer = (VkBuffer)unbox_VkBuffer((*&cgen_var_858));
                 // Begin manual dispatchable handle unboxing for pMTLBuffer;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pMTLBuffer, sizeof(void*));
                 memcpy((void**)pMTLBuffer, *readStreamPtrPtr, sizeof(void*));
                 *readStreamPtrPtr += sizeof(void*);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pMTLBuffer;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetMTLBufferMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)buffer, (unsigned long long)pMTLBuffer);
@@ -19739,14 +18281,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_859;
                 memcpy((uint64_t*)&cgen_var_859, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_859, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_859));
                 // Begin manual dispatchable handle unboxing for ioSurface;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&ioSurface, sizeof(uint8_t));
                 memcpy((void*)ioSurface, *readStreamPtrPtr, sizeof(uint8_t));
                 *readStreamPtrPtr += sizeof(uint8_t);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for ioSurface;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkUseIOSurfaceMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)image, (unsigned long long)ioSurface);
@@ -19775,14 +18315,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_860;
                 memcpy((uint64_t*)&cgen_var_860, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
-                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_860, (VkImage*)&image, 1);
+                *((VkImage*))&image = (VkImage)unbox_VkImage((*&cgen_var_860));
                 // Begin manual dispatchable handle unboxing for pIOSurface;
                 vkReadStream->unsetHandleMapping();
                 vkReadStream->alloc((void**)&pIOSurface, sizeof(void*));
                 memcpy((void**)pIOSurface, *readStreamPtrPtr, sizeof(void*));
                 *readStreamPtrPtr += sizeof(void*);
-                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
-                // End manual dispatchable handle unboxing for pIOSurface;
                 if (m_logCalls)
                 {
                     fprintf(stderr, "stream %p: call vkGetIOSurfaceMVK 0x%llx 0x%llx \n", ioStream, (unsigned long long)image, (unsigned long long)pIOSurface);
@@ -19804,6 +18342,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #endif
             default:
             {
+                m_pool.freeAll();
                 return ptr - (unsigned char *)buf;
             }
         }
@@ -19813,6 +18352,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
     {
         m_state->clearCreatedHandlesForSnapshotLoad();
     }
+    m_pool.freeAll();
     return ptr - (unsigned char*)buf;;
 }
 

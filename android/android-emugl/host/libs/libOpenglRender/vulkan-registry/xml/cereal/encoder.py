@@ -161,19 +161,21 @@ def emit_count_marshal(typeInfo, param, cgen):
 def emit_marshal(typeInfo, param, cgen):
     forOutput = param.isHandleType() and ("out" in param.inout)
     if forOutput:
-        cgen.stmt("%s->unsetHandleMapping() /* emit_marshal, is handle, possibly out */" % STREAM)
+        cgen.stmt("/* is handle, possibly out */")
 
     res = \
         iterateVulkanType(
             typeInfo, param,
             VulkanReservedMarshalingCodegen( \
                cgen, STREAM, param.paramName, "streamPtrPtr",
-               API_PREFIX_RESERVEDMARSHAL, direction="write"))
+               API_PREFIX_RESERVEDMARSHAL,
+               "" if forOutput else "get_host_u64_",
+               direction="write"))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
     if forOutput:
-        cgen.stmt("%s->setHandleMapping(resources->unwrapMapping())" % STREAM)
+        cgen.stmt("/* is handle, possibly out */")
 
 def emit_unmarshal(typeInfo, param, cgen):
     iterateVulkanType(
@@ -253,7 +255,7 @@ def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
     cgen.stmt("auto %s = mImpl->stream()" % STREAM)
     cgen.stmt("auto %s = mImpl->resources()" % RESOURCES)
     cgen.stmt("auto %s = mImpl->pool()" % POOL)
-    cgen.stmt("%s->setHandleMapping(%s->unwrapMapping())" % (STREAM, RESOURCES))
+    # cgen.stmt("%s->setHandleMapping(%s->unwrapMapping())" % (STREAM, RESOURCES))
 
     encodingParams = EncodingParameters(api)
     for (_, localCopyParam) in encodingParams.localCopied:

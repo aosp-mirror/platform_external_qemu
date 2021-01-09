@@ -102,33 +102,46 @@ def emit_param_decl_for_reading(param, cgen):
         cgen.stmt(
             cgen.makeRichCTypeDecl(param))
 
-def emit_unmarshal(typeInfo, param, cgen):
+def emit_unmarshal(typeInfo, param, cgen, output = False):
     iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
         cgen,
         READ_STREAM,
         param.paramName,
         "readStreamPtrPtr",
         API_PREFIX_RESERVEDUNMARSHAL,
+        "" if output else "unbox_",
         direction="read",
         dynAlloc=True))
 
-def emit_dispatch_unmarshal(typeInfo, param, cgen):
-    cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % param.paramName)
-    cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
-    iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
-        cgen,
-        READ_STREAM,
-        param.paramName,
-        "readStreamPtrPtr",
-        API_PREFIX_RESERVEDUNMARSHAL,
-        direction="read",
-        dynAlloc=True))
-    cgen.stmt("auto unboxed_%s = unbox_%s(%s)" %
-              (param.paramName, param.typeName, param.paramName))
-    cgen.stmt("auto vk = dispatch_%s(%s)" %
-              (param.typeName, param.paramName))
-    cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
-    cgen.stmt("// End manual dispatchable handle unboxing for %s" % param.paramName)
+def emit_dispatch_unmarshal(typeInfo, param, cgen, globalWrapped):
+    if globalWrapped:
+        cgen.stmt("// Begin global wrapped dispatchable handle unboxing for %s" % param.paramName)
+        iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
+            cgen,
+            READ_STREAM,
+            param.paramName,
+            "readStreamPtrPtr",
+            API_PREFIX_RESERVEDUNMARSHAL,
+            "",
+            direction="read",
+            dynAlloc=True))
+    else:
+        cgen.stmt("// Begin non wrapped dispatchable handle unboxing for %s" % param.paramName)
+        # cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
+        iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
+            cgen,
+            READ_STREAM,
+            param.paramName,
+            "readStreamPtrPtr",
+            API_PREFIX_RESERVEDUNMARSHAL,
+            "",
+            direction="read",
+            dynAlloc=True))
+        cgen.stmt("auto unboxed_%s = unbox_%s(%s)" %
+                  (param.paramName, param.typeName, param.paramName))
+        cgen.stmt("auto vk = dispatch_%s(%s)" %
+                  (param.typeName, param.paramName))
+        cgen.stmt("// End manual dispatchable handle unboxing for %s" % param.paramName)
 
 def emit_transform(typeInfo, param, cgen, variant="tohost"):
     res = \
@@ -199,7 +212,7 @@ def emit_call_log(api, cgen):
     cgen.stmt("fprintf(stderr, \"stream %%p: call %s %s\\n\", ioStream, %s)" % (api.name, paramLogFormat, ", ".join(paramLogArgs)))
     cgen.endIf()
 
-def emit_decode_parameters(typeInfo, api, cgen):
+def emit_decode_parameters(typeInfo, api, cgen, globalWrapped=False):
 
     decodingParams = DecodingParameters(api)
 
@@ -211,27 +224,27 @@ def emit_decode_parameters(typeInfo, api, cgen):
     i = 0
     for p in paramsToRead:
         if p.dispatchHandle:
-            emit_dispatch_unmarshal(typeInfo, p, cgen)
+            emit_dispatch_unmarshal(typeInfo, p, cgen, globalWrapped)
         else:
             if p.nonDispatchableHandleDestroy or p.dispatchableHandleDestroy:
                 cgen.stmt("// Begin manual non dispatchable handle destroy unboxing for %s" % p.paramName)
-                cgen.stmt("%s* boxed_%s_preserve" % (p.typeName, p.paramName))
-                cgen.stmt("m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_%s_preserve)" % p.paramName)
-                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping)" % READ_STREAM)
+                # cgen.stmt("%s* boxed_%s_preserve" % (p.typeName, p.paramName))
+                # cgen.stmt("m_boxedHandleUnwrapAndDeletePreserveBoxedMapping.setup(&m_pool, (uint64_t**)&boxed_%s_preserve)" % p.paramName)
+                # cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapAndDeletePreserveBoxedMapping)" % READ_STREAM)
 
             if p.possiblyOutput():
                 cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % p.paramName)
                 cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
 
-            emit_unmarshal(typeInfo, p, cgen)
+            emit_unmarshal(typeInfo, p, cgen, output = p.possiblyOutput())
 
-            if p.nonDispatchableHandleDestroy:
-                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
-                cgen.stmt("// End manual non dispatchable handle destroy unboxing for %s" % p.paramName)
+            # if p.nonDispatchableHandleDestroy:
+            #     cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
+            #     cgen.stmt("// End manual non dispatchable handle destroy unboxing for %s" % p.paramName)
 
-            if p.possiblyOutput():
-                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
-                cgen.stmt("// End manual dispatchable handle unboxing for %s" % p.paramName)
+            # if p.possiblyOutput():
+            #     cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
+            #     cgen.stmt("// End manual dispatchable handle unboxing for %s" % p.paramName)
         i += 1
 
     for p in paramsToRead:
@@ -362,7 +375,7 @@ def emit_default_decoding(typeInfo, api, cgen):
     emit_pool_free(cgen)
 
 def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
-    emit_decode_parameters(typeInfo, api, cgen)
+    emit_decode_parameters(typeInfo, api, cgen, globalWrapped=True)
     emit_global_state_wrapped_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=False)
     emit_decode_return_writeback(api, cgen)
@@ -596,7 +609,6 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.stmt("auto vk = m_vk")
-        self.cgen.stmt("m_pool.freeAll()")
 
         self.cgen.line("switch (opcode)")
         self.cgen.beginBlock() # switch stmt
@@ -625,6 +637,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
     def onEnd(self,):
         self.cgen.line("default:")
         self.cgen.beginBlock()
+        self.cgen.stmt("m_pool.freeAll()")
         self.cgen.stmt("return ptr - (unsigned char *)buf")
         self.cgen.endBlock()
 
@@ -637,6 +650,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("m_state->clearCreatedHandlesForSnapshotLoad()");
         self.cgen.endIf()
 
+        self.cgen.stmt("m_pool.freeAll()")
         self.cgen.stmt("return ptr - (unsigned char*)buf;")
         self.cgen.endBlock() # function body
         self.module.appendImpl(self.cgen.swapCode())

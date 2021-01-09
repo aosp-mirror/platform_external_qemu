@@ -36,6 +36,7 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
                  inputVarName,
                  ptrVarName,
                  marshalPrefix,
+                 handlemapPrefix,
                  direction = "write",
                  forApiOutput = False,
                  dynAlloc = False,
@@ -53,6 +54,7 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
         self.inputVarName = inputVarName
         self.ptrVar = ptrVarName
         self.marshalPrefix = marshalPrefix
+        self.handlemapPrefix = handlemapPrefix
 
         self.exprAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = True)
         self.exprValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
@@ -158,31 +160,44 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
             handle64VarType = \
                 makeVulkanTypeSimple(False, "uint64_t", 0, paramName=handle64Var)
 
+        if "" == self.handlemapPrefix:
+            mapFunc = ("(%s)" % vulkanType.typeName)
+        else:
+            mapFunc = self.handlemapPrefix + vulkanType.typeName
+
         if self.direction == "write":
             if self.handleMapOverwrites:
                 self.cgen.stmt(
                     "static_assert(8 == sizeof(%s), \"handle map overwrite requres %s to be 8 bytes long\")" % \
                             (vulkanType.typeName, vulkanType.typeName))
-                self.cgen.stmt(
-                    "%s->handleMapping()->mapHandles_%s((%s*)%s, %s)" %
-                    (self.streamVarName, vulkanType.typeName, vulkanType.typeName,
-                    access, lenAccess))
+                if "1" == lenAccess:
+                    self.cgen.stmt("*%s = (%s)%s(*%s)" % (access, vulkanType.typeName, mapFunc, access))
+                else:
+                    self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
+                    self.cgen.stmt("%s[k] = (%s)%s(%s[k])" % (access, vulkanType.typeName, mapFunc, access))
+                    self.cgen.endFor()
                 self.genStreamCall(vulkanType, access, "8 * %s" % lenAccess)
             else:
-                self.cgen.stmt(
-                    "%s->handleMapping()->mapHandles_%s_u64(%s, %s, %s)" %
-                    (self.streamVarName, vulkanType.typeName,
-                    access,
-                    handle64VarAccess, lenAccess))
+                if "1" == lenAccess:
+                    self.cgen.stmt("*%s = (uint64_t)%s((*%s))" % (handle64VarAccess, mapFunc, access))
+                else:
+                    self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
+                    self.cgen.stmt("%s[k] = (uint64_t)%s((uint64_t)(%s[k]))" % (handle64VarAccess, mapFunc, access))
+                    self.cgen.endFor()
                 self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
         else:
             self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
-            self.cgen.stmt(
-                "%s->handleMapping()->mapHandles_u64_%s(%s, %s%s, %s)" %
-                (self.streamVarName, vulkanType.typeName,
-                handle64VarAccess,
-                self.makeCastExpr(vulkanType.getForNonConstAccess()), access,
-                lenAccess))
+
+            if "1" == lenAccess:
+                self.cgen.stmt("*(%s)%s = (%s)%s((*%s))" % (
+                    self.makeCastExpr(vulkanType.getForNonConstAccess()), access,
+                    vulkanType.typeName,mapFunc, handle64VarAccess))
+            else:
+                self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
+                self.cgen.stmt("*(((%s)%s) + k) = (%s)%s(%s[k])" % (
+                    self.makeCastExpr(vulkanType.getForNonConstAccess()), access,
+                    vulkanType.typeName, mapFunc, handle64VarAccess))
+                self.cgen.endFor()
 
         if lenAccess != "1":
             self.cgen.endIf()
@@ -644,6 +659,7 @@ class VulkanReservedMarshaling(VulkanWrapperGenerator):
                 MARSHAL_INPUT_VAR_NAME,
                 self.ptrVarName,
                 API_PREFIX_RESERVEDMARSHAL,
+                "get_host_u64_",
                 direction = "write")
 
         self.readCodegen = \
@@ -653,6 +669,7 @@ class VulkanReservedMarshaling(VulkanWrapperGenerator):
                 UNMARSHAL_INPUT_VAR_NAME,
                 self.ptrVarName,
                 API_PREFIX_RESERVEDUNMARSHAL,
+                "unbox_",
                 direction = "read",
                 dynAlloc=self.dynAlloc)
 
