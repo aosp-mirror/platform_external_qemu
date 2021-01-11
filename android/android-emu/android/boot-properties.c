@@ -140,6 +140,7 @@ void boot_property_add_logcat_pipe(const char* logcat_filter) {
             "androidboot.logcat=%s androidboot.consolepipe=qemu_pipe,pipe:logcat", logcat_filter);
     boot_property_add("qemu.cmdline", buf);
     boot_property_add("qemu.logcat", "start");
+    boot_property_add("qemu.logcat_filter", logcat_filter);
 }
 
 /* Prints the warning string corresponding to the error code returned by
