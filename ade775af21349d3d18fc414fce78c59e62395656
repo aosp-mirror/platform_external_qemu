@@ -33,6 +33,23 @@
       "message": "I\u0027m upgrading the buildbots with a newer Xcode version. If that works out we will not need this change.",
       "revId": "ade775af21349d3d18fc414fce78c59e62395656",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "28192926_d0099173",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-01-11T20:45:51Z",
+      "side": 1,
+      "message": "We need to upgrade the build bots to Catalina before we can proceed.",
+      "revId": "ade775af21349d3d18fc414fce78c59e62395656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
