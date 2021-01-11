@@ -1570,7 +1570,7 @@ extern "C" int main(int argc, char** argv) {
     // either to the 'null' chardev, or the -shell-serial one,
     // which by default will be either 'stdout' (Posix) or 'con:'
     // (Windows).
-    const char* serial = (opts->shell || opts->logcat || opts->show_kernel)
+    const char* serial = (opts->shell || opts->show_kernel)
                                  ? opts->shell_serial
                                  : "null";
     if (opts->virtio_console) {
