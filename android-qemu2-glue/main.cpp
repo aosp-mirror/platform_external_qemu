@@ -1553,19 +1553,6 @@ extern "C" int main(int argc, char** argv) {
 #endif  // QEMU2_SNAPSHOT_SUPPORT
     }
 
-    if (fc::isEnabled(fc::LogcatPipe)) {
-        boot_property_add_logcat_pipe("v:*");
-    }
-
-    if (opts->logcat) {
-        dwarning("Logcat tag filtering is currently disabled. b/132840817, everything will be placed on stdout");
-        // Output to std out if no file is provided.
-        if (!opts->logcat_output) {
-            auto str = new std::ostream(std::cout.rdbuf());
-            android::emulation::LogcatPipe::registerStream(str);
-        }
-    }
-
     // Always setup a single serial port, that can be connected
     // either to the 'null' chardev, or the -shell-serial one,
     // which by default will be either 'stdout' (Posix) or 'con:'
@@ -2044,11 +2031,43 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
-    if (opts->virtio_console) {
-        args.add2("-device", "virtio-serial-device");
-        args.add2("-device", "virtconsole,chardev=charvirtconsole0");
-        args.add2("-chardev", "stdio,id=charvirtconsole0");
+    args.add("-chardev");
+    args.addFormat("%s,id=forhvc0",
+                   ((opts->virtio_console && opts->show_kernel) ? "stdio" : "null"));
+
+    args.add("-chardev");
+    if (fc::isEnabled(fc::VirtconsoleLogcat)) {
+        if (opts->logcat) {
+            if (opts->logcat_output) {
+                args.addFormat("file,id=forhvc1,path=%s", opts->logcat_output);
+            } else {
+                args.add("stdio,id=forhvc1");
+            }
+        } else {
+            args.add("null,id=forhvc1");
+        }
+
+        boot_property_add_logcat_pipe_virtconsole("*:V");
+    } else {
+        args.add("null,id=forhvc1");
+
+        if (fc::isEnabled(fc::LogcatPipe)) {
+            boot_property_add_logcat_pipe("*:V");
+        }
+
+        if (opts->logcat) {
+            dwarning("Logcat tag filtering is currently disabled. b/132840817, everything will be placed on stdout");
+            // Output to std out if no file is provided.
+            if (!opts->logcat_output) {
+                auto str = new std::ostream(std::cout.rdbuf());
+                android::emulation::LogcatPipe::registerStream(str);
+            }
+        }
     }
+
+    args.add2("-device", "virtio-serial-pci");
+    args.add2("-device", "virtconsole,chardev=forhvc0");
+    args.add2("-device", "virtconsole,chardev=forhvc1");
 
     if (feature_is_enabled(kFeature_ModemSimulator)) {
         if (create_modem_simulator_configs_if_needed(hw)) {
