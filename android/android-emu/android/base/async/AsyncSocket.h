@@ -20,6 +20,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/FunctorThread.h"
 #include "emulator/net/AsyncSocketAdapter.h"
+#include "android/base/sockets/ScopedSocket.h"
 
 namespace android {
 namespace base {
@@ -32,7 +33,8 @@ using emulator::net::AsyncSocketAdapter;
 class AsyncSocket : public AsyncSocketAdapter {
 public:
     AsyncSocket(Looper* looper, int port);
-    ~AsyncSocket() = default;
+    AsyncSocket(Looper* looper, ScopedSocket socket);
+    ~AsyncSocket();
     void close() override;
     uint64_t recv(char* buffer, uint64_t bufferSize) override;
     uint64_t send(const char* buffer, uint64_t bufferSize) override;
@@ -45,12 +47,13 @@ public:
 
     void onWrite();
     void onRead();
+    void wantRead();
 
 private:
     void connectToPort();
     static const int WRITE_BUFFER_SIZE = 1024;
 
-    int mSocket;
+    ScopedSocket mSocket;
     int mPort;
 
     Looper* mLooper;

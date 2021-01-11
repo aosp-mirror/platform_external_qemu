@@ -16,14 +16,15 @@
 #include <api/scoped_refptr.h>            // for scoped_refptr
 #include <assert.h>                       // for assert
 #include <rtc_base/ref_counted_object.h>  // for RefCountedObject
-#include <memory>                         // for unique_ptr, make_unique
+#include <memory>                         // for unique_ptr, make_shared
 #include <ostream>                        // for operator<<, basic_ostream
 #include <string>                         // for string, operator==
 
 #include "android/base/Log.h"                 // for LogStreamVoidify, LOG
+#include "android/base/async/AsyncSocket.h"   // for AsyncSocket
 #include "emulator/net/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
-#include "emulator/webrtc/Participant.h"      // for Participant
-#include "emulator/webrtc/Switchboard.h"      // for RtcId
+#include "emulator/webrtc/Participant.h"      // for Participant, DataChanne...
+#include "emulator_controller.pb.h"           // for KeyboardEvent, MouseEvent
 #include "google/protobuf/empty.pb.h"         // for Empty
 #include "rtc_service.grpc.pb.h"              // for Rtc::Stub
 
@@ -36,8 +37,9 @@ using google::protobuf::Empty;
 using grpc::Status;
 using grpc::StatusCode;
 
-StandaloneConnection::StandaloneConnection(EmulatorGrpcClient* client)
-    : RtcConnection(client){};
+StandaloneConnection::StandaloneConnection(EmulatorGrpcClient* client,
+                                           int adbPort)
+    : RtcConnection(client), mAdbPort(adbPort){};
 
 void StandaloneConnection::rtcConnectionDropped(std::string participant) {
     if (mCtx)
@@ -66,6 +68,8 @@ void StandaloneConnection::close() {
     if (mParticipant)
         mParticipant->Close();
 
+    if (mAdbSocketServer)
+        mAdbSocketServer->stopListening();
     LOG(INFO) << "Connection close.";
 }
 
@@ -74,8 +78,8 @@ void StandaloneConnection::connect() {
 }
 
 void StandaloneConnection::send(std::string to, json msg) {
-    auto ctx = mClient->newContext();
-    auto rtc = mClient->rtcStub();
+    auto ctx = getEmulatorClient()->newContext();
+    auto rtc = getEmulatorClient()->rtcStub();
     JsepMsg reply;
     reply.mutable_id()->set_guid(mGuid.guid());
     reply.set_message(msg.dump());
@@ -86,29 +90,64 @@ void StandaloneConnection::send(std::string to, json msg) {
     }
 }
 
+bool StandaloneConnection::connectAdbSocket(int fd) {
+    LOG(INFO) << "Socket on: " << fd
+              << ", Looper:" << static_cast<void*>(getLooper())
+              << ", this: " << static_cast<void*>(this);
+    if (mParticipant) {
+        auto channel = mParticipant->GetDataChannel(DataChannelLabel::adb);
+        if (channel) {
+            auto asyncSocket = std::make_shared<android::base::AsyncSocket>(
+                    getLooper(), android::base::ScopedSocket(fd));
+            mAdbForwarders.emplace_back(asyncSocket, channel);
+        }
+    }
+    mAdbSocketServer->startListening();
+    return true;
+}
+
+bool StandaloneConnection::createAdbForwarder() {
+    LOG(INFO) << "Registering adb forwarder on " << mAdbPort
+              << ", Looper:" << static_cast<void*>(getLooper())
+              << ", this: " << static_cast<void*>(this);
+    mAdbSocketServer = AsyncSocketServer::createTcpLoopbackServer(
+            mAdbPort, [this](int fd) { return connectAdbSocket(fd); },
+            AsyncSocketServer::LoopbackMode::kIPv4AndIPv6, getLooper());
+
+    if (!mAdbSocketServer) {
+        return false;
+    }
+    mAdbSocketServer->startListening();
+    return true;
+}
+
 void StandaloneConnection::driveJsep() {
     mAlive = true;
-    auto rtc = mClient->rtcStub();
+    auto rtc = getEmulatorClient()->rtcStub();
 
-    Status status =
-            rtc->requestRtcStream(mClient->newContext().get(), Empty(), &mGuid);
+    Status status = rtc->requestRtcStream(
+            getEmulatorClient()->newContext().get(), Empty(), &mGuid);
     if (status.error_code() != StatusCode::OK) {
         LOG(ERROR) << "Error requesting stream start: " << status.error_code()
-                  << ", " << status.error_message();
+                   << ", " << status.error_message();
         return;
     }
 
-    mCtx = mClient->newContext();
+    mCtx = getEmulatorClient()->newContext();
     auto messages = rtc->receiveJsepMessages(mCtx.get(), mGuid);
     if (!messages) {
         LOG(ERROR) << "Error requesting jsep protocol: " << status.error_code()
-                  << ", " << status.error_message();
+                   << ", " << status.error_message();
         return;
     }
 
-    mParticipant = new rtc::RefCountedObject<Participant>(
-            this, mGuid.guid(), mConnectionFactory.get(), mClient);
-    mParticipant->setVideoReceiver(&mVideoReceiver);
+    mParticipant = new rtc::RefCountedObject<Participant>(this, mGuid.guid(), &mVideoReceiver);
+    if (mAdbPort > 0 && !createAdbForwarder()) {
+        LOG(ERROR) << "Failed to create listener on port " << mAdbPort;
+        close();
+        mParticipant = nullptr;
+        return;
+    }
 
     JsepMsg msg;
     while (mAlive && messages->Read(&msg)) {

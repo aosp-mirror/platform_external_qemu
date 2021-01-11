@@ -107,6 +107,7 @@ public:
     static const int kMaxFPS = 24;
     static const std::string kVideoBridgeExe;
     static Optional<System::Pid> launch(int port,
+                                        int adbPort,
                                         std::string turnConfig);
 
     // Maximum number of messages we are willing to queue, before we start

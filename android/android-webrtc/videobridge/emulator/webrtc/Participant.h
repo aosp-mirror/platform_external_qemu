@@ -13,21 +13,43 @@
 // limitations under the License.
 #pragma once
 
-#include <api/peer_connection_interface.h>  // for PeerConnecti...
-#include <memory>                           // for unique_ptr
-#include <string>                           // for string, oper...
+#include <api/data_channel_interface.h>     // for DataChannelInterface (ptr...
+#include <api/jsep.h>                       // for IceCandidateInterface (pt...
+#include <api/peer_connection_interface.h>  // for PeerConnectionInterface
+#include <api/scoped_refptr.h>              // for scoped_refptr
+#include <stdint.h>                         // for uint32_t
+#include <memory>                           // for unique_ptr, shared_ptr
+#include <string>                           // for string
 #include <unordered_map>                    // for unordered_map
-#include <utility>                          // for pair
-#include <vector>                           // for vector
 
-#include "emulator/net/EmulatorGrcpClient.h"             // for EmulatorGrpc...
-#include "emulator/webrtc/RtcConnection.h"               // for json, RtcCon...
-#include "emulator/webrtc/capture/GrpcAudioSource.h"     // for GrpcAudioSource
-#include "emulator/webrtc/capture/GrpcVideoSource.h"     // for GrpcVideoSource
-#include "emulator/webrtc/capture/VideoTrackReceiver.h"  // for VideoTrackRe...
-#include "nlohmann/json.hpp"                             // for basic_json
+#include "emulator/webrtc/RtcConnection.h"  // for json, RtcConnection (ptr ...
+#include "emulator_controller.grpc.pb.h"    // for EmulatorController
+#include "nlohmann/json.hpp"                // for json
+
+namespace android {
+namespace base {
+class AsyncSocket;
+}  // namespace base
+}  // namespace android
+namespace emulator {
+namespace net {
+class SocketForwarder;
+}  // namespace net
+namespace webrtc {
+class EmulatorGrpcClient;
+class VideoCapturer;
+class VideoTrackReceiver;
+}  // namespace webrtc
+}  // namespace emulator
+namespace webrtc {
+class MediaStreamInterface;
+class RTCError;
+class RtpSenderInterface;
+class VideoTrackInterface;
+}  // namespace webrtc
 
 using json = nlohmann::json;
+using emulator::net::SocketForwarder;
 using rtc::scoped_refptr;
 using webrtc::PeerConnectionInterface;
 using webrtc::VideoTrackInterface;
@@ -35,11 +57,9 @@ using webrtc::VideoTrackInterface;
 namespace emulator {
 namespace webrtc {
 
-class RtcConnection;
-
 // Used data channel labels, use lowercase labels otherwise the JS engine will
 // break.
-enum class DataChannelLabel { mouse, keyboard, touch };
+enum class DataChannelLabel { mouse, keyboard, touch, adb };
 
 // A default peer connection observer that does nothing
 class EmptyConnectionObserver : public ::webrtc::PeerConnectionObserver {
@@ -82,14 +102,11 @@ private:
 // 2. Do network discovery (ice etc).
 // 3. Exchanging of offers between remote client.
 //
-// It talks with the switchboard to send/receive messages.
+// It talks with the rtc connection to send/receive messages.
 class Participant : public EmptyConnectionObserver,
                     public ::webrtc::CreateSessionDescriptionObserver {
 public:
-    Participant(RtcConnection* board,
-                std::string id,
-                ::webrtc::PeerConnectionFactoryInterface* peerConnectionFactory,
-                EmulatorGrpcClient* grpcClient);
+    Participant(RtcConnection* board, std::string id, VideoTrackReceiver* videoReceiver);
     ~Participant() override;
 
     // PeerConnectionObserver implementation.
@@ -113,14 +130,19 @@ public:
     bool AddAudioTrack(std::string grpcAddress);
     bool RemoveAudioTrack(std::string grpcAddress);
 
+
     bool Initialize();
-    inline const std::string GetPeerId() const { return mPeerId; };
     void SendToBridge(json msg);
     void SendToDataChannel(DataChannelLabel label, std::string data);
     void CreateOffer();
     void Close();
 
-    void setVideoReceiver(VideoTrackReceiver* vtr) { mVideoReceiver = vtr; };
+    rtc::scoped_refptr<::webrtc::DataChannelInterface> GetDataChannel(
+            DataChannelLabel label);
+    inline const std::string GetPeerId() const { return mPeerId; };
+        // Register Adb Forwarder to the local running emulator.
+    bool RegisterLocalAdbForwarder(
+            std::shared_ptr<android::base::AsyncSocket> adbSocket);
 
 private:
     void SendMessage(json msg);
@@ -131,7 +153,6 @@ private:
     VideoCapturer* OpenVideoCaptureDevice(const std::string& memoryHandle);
 
     scoped_refptr<PeerConnectionInterface> mPeerConnection;
-    ::webrtc::PeerConnectionFactoryInterface* mPeerConnectionFactory;
     std::unordered_map<std::string,
                        scoped_refptr<::webrtc::MediaStreamInterface>>
             mStreams;
@@ -139,24 +160,24 @@ private:
     std::unordered_map<DataChannelLabel, std::unique_ptr<EventForwarder>>
             mEventForwarders;
 
-
-    std::unordered_map<std::string, scoped_refptr<::webrtc::DataChannelInterface> > mDataChannels;
+    std::unordered_map<std::string,
+                       scoped_refptr<::webrtc::DataChannelInterface>>
+            mDataChannels;
     std::unordered_map<std::string, scoped_refptr<::webrtc::RtpSenderInterface>>
             mActiveVideoTracks;
     std::unordered_map<std::string, scoped_refptr<::webrtc::RtpSenderInterface>>
             mActiveAudioTracks;
 
-    RtcConnection* mSwitchboard;
-    EmulatorGrpcClient* mEmulatorClient;
+    std::shared_ptr<android::base::AsyncSocket> mLocalAdbSocket;
+
+    std::unique_ptr<SocketForwarder> mSocketForwarder;
+    RtcConnection* mRtcConnection;
     VideoTrackReceiver* mVideoReceiver;
     std::string mPeerId;
     uint32_t mId{0};
 
 public:
     const static std::string kStunUri;
-    const std::string kAudioLabel = "emulator_audio_stream";
-    const std::string kVideoLabel = "emulator_video_stream";
-    const std::string kStreamLabel = "emulator_view";
 };
 }  // namespace webrtc
 }  // namespace emulator
