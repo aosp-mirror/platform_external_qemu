@@ -14,7 +14,9 @@
 #pragma once
 
 #include <atomic>
+#include <functional>
 
+#include "android/base/Compiler.h"
 #include "android/emulation/control/utils/EventWaiter.h"  // for EventWaiter
 
 namespace android {
@@ -25,20 +27,20 @@ namespace control {
 // will get notified when camera is connected or disconnected.
 class Camera {
 public:
-    Camera();
+    using Callback = std::function<void(bool)>;
+    Camera(Callback cb);
     bool isVirtualSceneConnected() const { return mVirtualSceneConnected; };
 
     // Gets the event waiter that can be used to wait for new
     // camera updates.
     EventWaiter* eventWaiter();
 
-    // Gets the Camera singleton that will register with the given agent.
-    static Camera* getCamera();
-
 private:
+    DISALLOW_COPY_AND_ASSIGN(Camera);
     static void virtualSceneCameraCallback(void* context, bool connected);
     std::atomic<bool> mVirtualSceneConnected;
     EventWaiter mEventWaiter;
+    Callback mCallback;
 };
 
 }  // namespace control
