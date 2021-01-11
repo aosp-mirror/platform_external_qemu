@@ -12,17 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <api/scoped_refptr.h>  // for scoped_refptr
-#include <grpcpp/grpcpp.h>      // for ClientContext
-#include <memory>               // for unique_ptr
-#include <mutex>                // for mutex
-#include <string>               // for string
-#include <thread>               // for thread
+#include <api/scoped_refptr.h>                           // for scoped_refptr
+#include <grpcpp/grpcpp.h>                               // for ClientContext
+#include <memory>                                        // for unique_ptr
+#include <mutex>                                         // for mutex
+#include <string>                                        // for string
+#include <thread>                                        // for thread
 
 #include "emulator/webrtc/RtcConnection.h"               // for RtcConnection
 #include "emulator/webrtc/capture/VideoTrackReceiver.h"  // for VideoTrackRe...
-#include "emulator_controller.pb.h"
-#include "rtc_service.pb.h"  // for RtcId
+#include "rtc_service.pb.h"                              // for RtcId
+
+#include "android/base/async/AsyncSocketServer.h"
+#include "emulator/net/SocketForwarder.h"
+
+namespace android {
+namespace emulation {
+namespace control {
+class KeyboardEvent;
+class MouseEvent;
+class TouchEvent;
+}  // namespace control
+}  // namespace emulation
+}  // namespace android
 
 namespace emulator {
 namespace webrtc {
@@ -33,12 +45,13 @@ using android::emulation::control::KeyboardEvent;
 using android::emulation::control::MouseEvent;
 using android::emulation::control::RtcId;
 using android::emulation::control::TouchEvent;
+using android::base::AsyncSocketServer;
 
 // A StandaloneConnection is a single connection to a remote running emulator
 // over webrtc.
 class StandaloneConnection : public RtcConnection {
 public:
-    StandaloneConnection(EmulatorGrpcClient* client);
+    StandaloneConnection(EmulatorGrpcClient* client, int adbPort);
     ~StandaloneConnection();
 
     // Called when a participant is unable to continue the rtc stream.
@@ -75,14 +88,21 @@ public:
 
 private:
     void driveJsep();
+    bool connectAdbSocket(int fd);
+    bool createAdbForwarder();
+
     rtc::scoped_refptr<Participant> mParticipant;
     std::unique_ptr<std::thread> mJsepThread;
     std::unique_ptr<grpc::ClientContext> mCtx;
 
+
+    std::unique_ptr<AsyncSocketServer> mAdbSocketServer;
+    std::vector<net::SocketForwarder> mAdbForwarders;
     VideoTrackReceiver mVideoReceiver;
     RtcId mGuid;
     std::mutex mCloseMutex;
     bool mAlive{false};
+    int mAdbPort = 0;
 };
 }  // namespace webrtc
 }  // namespace emulator

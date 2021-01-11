@@ -11,23 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "emulator/webrtc/RtcConnection.h"                      // for RtcCo...
+#include "emulator/webrtc/RtcConnection.h"  // for RtcCo...
 
 #include <api/audio/audio_mixer.h>                              // for Audio...
 #include <api/audio_codecs/builtin_audio_decoder_factory.h>     // for Creat...
 #include <api/audio_codecs/builtin_audio_encoder_factory.h>     // for Creat...
 #include <api/create_peerconnection_factory.h>                  // for Creat...
+#include <api/peer_connection_interface.h>                      // for PeerC...
 #include <api/scoped_refptr.h>                                  // for scope...
 #include <api/task_queue/default_task_queue_factory.h>          // for Creat...
+#include <api/task_queue/task_queue_factory.h>                  // for TaskQ...
 #include <api/video_codecs/builtin_video_decoder_factory.h>     // for Creat...
 #include <api/video_codecs/builtin_video_encoder_factory.h>     // for Creat...
 #include <modules/audio_device/include/audio_device.h>          // for Audio...
 #include <modules/audio_processing/include/audio_processing.h>  // for Audio...
+#include <rtc_base/logging.h>                                   // for RTC_LOG
 #include <rtc_base/thread.h>                                    // for Thread
+#include <functional>                                           // for __base
 #include <memory>                                               // for uniqu...
+#include <thread>                                               // for thread
 
+#include "android/base/Log.h"                                   // for base
+#include "android/base/async/Looper.h"                          // for Looper
 #include "emulator/webrtc/capture/GoldfishAudioDeviceModule.h"  // for Goldf...
 
+using namespace android::base;
 
 namespace emulator {
 namespace webrtc {
@@ -37,7 +45,11 @@ RtcConnection::RtcConnection(EmulatorGrpcClient* client)
       mNetwork(rtc::Thread::CreateWithSocketServer()),
       mWorker(rtc::Thread::Create()),
       mSignaling(rtc::Thread::Create()),
-      mClient(client) {
+      mClient(client),
+      mKeepAlive(
+              &mLooper,
+              [this]() { return mLooperActive; },
+              500) {
     mNetwork->SetName("Sw-Network", nullptr);
     mNetwork->Start();
     mWorker->SetName("Sw-Worker", nullptr);
@@ -51,6 +63,21 @@ RtcConnection::RtcConnection(EmulatorGrpcClient* client)
             ::webrtc::CreateBuiltinVideoEncoderFactory(),
             ::webrtc::CreateBuiltinVideoDecoderFactory(),
             nullptr /* audio_mixer */, nullptr /* audio_processing */);
+    ;
+
+    mKeepAlive.start();
+    mLooperThread = std::make_unique<std::thread>([this]() {
+        mLooper.runWithDeadlineMs(Looper::Timeout::kDurationInfinite);
+        RTC_LOG(INFO) << "Completed looper";
+    });
 }
+RtcConnection::~RtcConnection() {
+    mLooperActive = false;
+    mLooper.forceQuit();
+    if (mLooperThread) {
+        mLooperThread->join();
+    }
+}
+
 }  // namespace webrtc
 }  // namespace emulator

@@ -13,30 +13,28 @@
 // limitations under the License.
 #include "emulator/webrtc/Participant.h"  // for Participant
 
-#include <absl/types/optional.h>                 // for optional
-#include <api/data_channel_interface.h>          // for DataBuffer
-#include <api/jsep.h>                            // for IceCandidate...
-#include <api/media_stream_interface.h>          // for MediaStreamT...
-#include <api/peer_connection_interface.h>       // for PeerConnecti...
-#include <api/rtc_error.h>                       // for RTCError
-#include <api/rtp_sender_interface.h>            // for RtpSenderInt...
-#include <api/scoped_refptr.h>                   // for scoped_refptr
-#include <api/video/video_source_interface.h>    // for VideoSinkWants
-#include <grpcpp/grpcpp.h>                       // for ClientContext
-#include <p2p/base/port_allocator.h>             // for PortAllocator
-#include <rtc_base/checks.h>                     // for FatalLogCall
-#include <rtc_base/copy_on_write_buffer.h>       // for CopyOnWriteB...
-#include <rtc_base/logging.h>                    // for RTC_LOG
-#include <rtc_base/ref_counted_object.h>         // for RefCountedOb...
-#include <rtc_base/rtc_certificate_generator.h>  // for RTCCertifica...
-#include <stdint.h>                              // for uint32_t
-#include <memory>                                // for unique_ptr
-#include <string>                                // for string, oper...
-#include <unordered_map>                         // for unordered_map
-#include <utility>                               // for pair
-#include <vector>                                // for vector
+#include <api/data_channel_interface.h>        // for DataChannelI...
+#include <api/jsep.h>                          // for IceCandidate...
+#include <api/media_stream_interface.h>        // for MediaStreamT...
+#include <api/peer_connection_interface.h>     // for PeerConnecti...
+#include <api/rtc_error.h>                     // for RTCError
+#include <api/rtp_sender_interface.h>          // for RtpSenderInt...
+#include <api/scoped_refptr.h>                 // for scoped_refptr
+#include <api/video/video_source_interface.h>  // for VideoSinkWants
+#include <grpcpp/grpcpp.h>                     // for ClientContext
+#include <rtc_base/checks.h>                   // for FatalLogCall
+#include <rtc_base/copy_on_write_buffer.h>     // for CopyOnWriteB...
+#include <rtc_base/logging.h>                  // for Val, RTC_LOG
+#include <rtc_base/ref_counted_object.h>       // for RefCountedOb...
+#include <stdint.h>                            // for uint8_t, uin...
+#include <memory>                              // for unique_ptr
+#include <string>                              // for string, hash
+#include <unordered_map>                       // for unordered_map
+#include <utility>                             // for pair
+#include <vector>                              // for vector
 
 #include "emulator/net/EmulatorGrcpClient.h"             // for EmulatorGrpc...
+#include "emulator/net/SocketForwarder.h"                // for AdbPortForwa...
 #include "emulator/webrtc/RtcConnection.h"               // for json, RtcCon...
 #include "emulator/webrtc/Switchboard.h"                 // for Switchboard
 #include "emulator/webrtc/capture/GrpcAudioSource.h"     // for GrpcAudioSource
@@ -47,6 +45,12 @@
 #include "google/protobuf/empty.pb.h"                    // for Empty
 #include "nlohmann/json.hpp"                             // for basic_json
 
+namespace android {
+namespace base {
+class AsyncSocket;
+}  // namespace base
+}  // namespace android
+
 using json = nlohmann::json;
 using MediaStreamPair =
         std::pair<std::string, scoped_refptr<webrtc::MediaStreamInterface>>;
@@ -56,7 +60,6 @@ namespace webrtc {
 
 const std::string Participant::kStunUri = "stun:stun.l.google.com:19302";
 
-
 static std::string asString(DataChannelLabel value) {
     std::string s = "";
 #define LABEL(p)                \
@@ -64,6 +67,7 @@ static std::string asString(DataChannelLabel value) {
         s = #p;                 \
         break;
     switch (value) {
+        LABEL(adb)
         LABEL(mouse)
         LABEL(keyboard)
         LABEL(touch)
@@ -125,16 +129,25 @@ void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
             mEmulatorGrpc->sendTouch(context.get(), touchEvent, &nullResponse);
             break;
         }
+        default:
+            break;
     }
 }
 
+static std::atomic<uint32_t> sId{0};
+
+Participant::Participant(RtcConnection* board, std::string id, VideoTrackReceiver* vtr)
+    : mRtcConnection(board), mPeerId(id), mVideoReceiver(vtr) {
+    mId = sId++;
+}
+
 Participant::~Participant() {
+    RTC_LOG(INFO) << "Participant " << mId << ", completed.";
     if (mPeerConnection) {
         mPeerConnection->Close();
     }
 }
 
-static int sId = 0;
 
 void Participant::OnAddStream(
         rtc::scoped_refptr<::webrtc::MediaStreamInterface> stream) {
@@ -151,17 +164,7 @@ void Participant::OnAddStream(
     }
 }
 
-Participant::Participant(
-        RtcConnection* board,
-        std::string id,
-        ::webrtc::PeerConnectionFactoryInterface* peerConnectionFactory,
-        EmulatorGrpcClient* client)
-    : mSwitchboard(board),
-      mPeerId(id),
-      mPeerConnectionFactory(peerConnectionFactory),
-      mEmulatorClient(client) {
-    mId = sId++;
-}
+
 
 void Participant::OnIceConnectionChange(
         ::webrtc::PeerConnectionInterface::IceConnectionState new_state) {
@@ -177,7 +180,7 @@ void Participant::OnIceConnectionChange(
             // the world.
             // TODO(jansene): Figure out if this can directly happen on the
             // worker thread.
-            mSwitchboard->rtcConnectionDropped(mPeerId);
+            mRtcConnection->rtcConnectionDropped(mPeerId);
             break;
         case ::webrtc::PeerConnectionInterface::IceConnectionState::
                 kIceConnectionClosed:
@@ -185,7 +188,7 @@ void Participant::OnIceConnectionChange(
             // other thread, as we cannot make ourself invalid on the calling
             // thread that is actually using us.
             RTC_LOG(INFO) << "Closed! Time to erase peer: " << mId;
-            mSwitchboard->rtcConnectionClosed(mPeerId);
+            mRtcConnection->rtcConnectionClosed(mPeerId);
             break;
         default:;  // Nothing ..
     }
@@ -218,11 +221,20 @@ void Participant::OnIceCandidate(
 }
 
 void Participant::SendToBridge(json msg) {
-    mSwitchboard->send(Switchboard::BRIDGE_RECEIVER, msg);
+    mRtcConnection->send(Switchboard::BRIDGE_RECEIVER, msg);
 }
 
 void Participant::SendMessage(json msg) {
-    mSwitchboard->send(mPeerId, msg);
+    mRtcConnection->send(mPeerId, msg);
+}
+
+rtc::scoped_refptr<::webrtc::DataChannelInterface> Participant::GetDataChannel(
+        DataChannelLabel label) {
+    auto fwd = mDataChannels.find(asString(label));
+    if (fwd != mDataChannels.end()) {
+        return fwd->second;
+    }
+    return nullptr;
 }
 
 void Participant::SendToDataChannel(DataChannelLabel label, std::string data) {
@@ -343,9 +355,9 @@ bool Participant::AddVideoTrack(std::string handle) {
     // TODO(jansene): Video sources should be shared amongst participants.
     RTC_LOG(INFO) << "Adding video track: [" << handle << "]";
     auto track = new rtc::RefCountedObject<emulator::webrtc::GrpcVideoSource>(
-            mEmulatorClient);
+            mRtcConnection->getEmulatorClient());
     scoped_refptr<::webrtc::VideoTrackInterface> video_track(
-            mPeerConnectionFactory->CreateVideoTrack(handle, track));
+            mRtcConnection->getPeerConnectionFactory()->CreateVideoTrack(handle, track));
 
     auto result = mPeerConnection->AddTrack(video_track, {handle});
     if (!result.ok()) {
@@ -367,9 +379,9 @@ bool Participant::AddAudioTrack(std::string grpc) {
     // TODO(jansene): Audio sources should be shared amongst participants.
     RTC_LOG(INFO) << "Adding audio track: [" << grpc << "]";
     auto track = new rtc::RefCountedObject<emulator::webrtc::GrpcAudioSource>(
-            mEmulatorClient);
+            mRtcConnection->getEmulatorClient());
     scoped_refptr<::webrtc::AudioTrackInterface> audio_track(
-            mPeerConnectionFactory->CreateAudioTrack(grpc, track));
+            mRtcConnection->getPeerConnectionFactory()->CreateAudioTrack(grpc, track));
 
     auto result = mPeerConnection->AddTrack(audio_track, {grpc});
     if (!result.ok()) {
@@ -413,13 +425,30 @@ bool Participant::RemoveVideoTrack(std::string handle) {
 
 void Participant::OnDataChannel(
         rtc::scoped_refptr<::webrtc::DataChannelInterface> channel) {
+    RTC_LOG(INFO) << "Registering data channel: " << channel->label();
+    if (channel->label() == "adb" && mLocalAdbSocket) {
+        mSocketForwarder =
+                std::make_unique<SocketForwarder>(mLocalAdbSocket, channel);
+    }
     mDataChannels[channel->label()] = channel;
+}
+
+bool Participant::RegisterLocalAdbForwarder(
+        std::shared_ptr<android::base::AsyncSocket> adbSocket) {
+    RTC_LOG(INFO) << "Registering adb forwarding channel.";
+    mLocalAdbSocket = adbSocket;
+    auto channel = mPeerConnection->CreateDataChannel("adb", nullptr);
+    if (!channel) {
+        return false;
+    }
+    mSocketForwarder = std::make_unique<SocketForwarder>(adbSocket, channel);
+    return true;
 }
 
 void Participant::AddDataChannel(const DataChannelLabel label) {
     auto channel = mPeerConnection->CreateDataChannel(asString(label), nullptr);
     mEventForwarders[label] =
-            std::make_unique<EventForwarder>(mEmulatorClient, channel, label);
+            std::make_unique<EventForwarder>(mRtcConnection->getEmulatorClient(), channel, label);
 }
 
 bool Participant::Initialize() {
@@ -480,7 +509,7 @@ parseRTCConfiguration(json rtcConfiguration) {
 bool Participant::CreatePeerConnection(json rtcConfiguration) {
     RTC_DCHECK(mPeerConnection.get() == nullptr);
 
-    mPeerConnection = mPeerConnectionFactory->CreatePeerConnection(
+    mPeerConnection = mRtcConnection->getPeerConnectionFactory()->CreatePeerConnection(
             parseRTCConfiguration(rtcConfiguration),
             ::webrtc::PeerConnectionDependencies(this));
     return mPeerConnection.get() != nullptr;

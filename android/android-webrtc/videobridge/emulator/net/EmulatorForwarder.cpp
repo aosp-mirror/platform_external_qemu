@@ -17,13 +17,14 @@
 #include <assert.h>         // for assert
 #include <grpcpp/grpcpp.h>  // for Status
 #include <libyuv.h>
-#include <atomic>                                             // for atomic
-#include <memory>                                             // for unique_ptr
-#include <ratio>                                              // for ratio
-#include <thread>                                             // for thread
-#include <unordered_map>                                      // for unorder...
-#include <utility>                                            // for move
-#include "android/base/Log.h"                                 // for LogStre...
+#include <atomic>              // for atomic
+#include <memory>              // for unique_ptr
+#include <ratio>               // for ratio
+#include <thread>              // for thread
+#include <unordered_map>       // for unorder...
+#include <utility>             // for move
+#include "android/base/Log.h"  // for LogStre...
+#include "android/base/async/AsyncSocketServer.h"
 #include "android/emulation/control/EmulatorAdvertisement.h"  // for Emulato...
 #include "android/emulation/control/GrpcServices.h"           // for Emulato...
 #include "android/emulation/control/utils/ScreenshotUtils.h"
@@ -106,7 +107,6 @@ namespace control {
 
 class AEMUControllerForwarderImpl final : public EmulatorController::Service {
 private:
-
     // 1 -> Many
     template <class T>
     Status forwardCall(ServerWriter<T>* origin, ClientReader<T>* destination) {
@@ -388,8 +388,8 @@ void EmulatorForwarder::wait() {
     }
 }
 
-EmulatorForwarder::EmulatorForwarder(EmulatorGrpcClient* client)
-    : mClient(client), mWebRtcConnection(client), mAvd(client){};
+EmulatorForwarder::EmulatorForwarder(EmulatorGrpcClient* client, int adbPort)
+    : mClient(client), mWebRtcConnection(client, adbPort), mAvd(client){};
 
 EmulatorForwarder::~EmulatorForwarder() {
     close();
@@ -447,20 +447,19 @@ bool EmulatorForwarder::createRemoteConnection() {
     auto port = mFwdService->port();
     props["grpc.port"] = std::to_string(port);
 
-
     // Establish a webrtc connection, and wait for it to be available.
     // TODO(jansene): Make it lazy, connect to getScreenshot?
     mWebRtcConnection.connect();
 
     // Wait at most 2s, for a frame.
-    auto frame = mWebRtcConnection.videoReceiver()->next(std::chrono::seconds(5));
+    auto frame =
+            mWebRtcConnection.videoReceiver()->next(std::chrono::seconds(5));
     if (frame == 0) {
         LOG(ERROR) << "No frames received after 5 seconds, bailing out!";
         return false;
     } else {
         LOG(INFO) << "First frame arrived, registering discovery mechanism.";
     }
-
 
     mAdvertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
     mAdvertiser->garbageCollect();

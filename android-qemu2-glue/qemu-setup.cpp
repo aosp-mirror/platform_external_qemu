@@ -332,7 +332,7 @@ int qemu_setup_grpc() {
     }
 #ifdef ANDROID_WEBRTC
     builder.withService(android::emulation::control::getRtcService(
-            getConsoleAgents(), android_cmdLineOptions->turncfg));
+            getConsoleAgents(), android_adb_port, android_cmdLineOptions->turncfg));
 #endif
     int port = -1;
     grpcService = builder.build();

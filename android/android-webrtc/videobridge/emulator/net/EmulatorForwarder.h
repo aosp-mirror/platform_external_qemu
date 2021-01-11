@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include "emulator/avd/FakeAvd.h"
 #include "emulator/webrtc/StandaloneConnection.h"
-
+#include "android/base/async/AsyncSocketServer.h"
 namespace emulator {
 namespace webrtc {
 class EmulatorGrpcClient;
@@ -36,6 +36,7 @@ using emulator::webrtc::EmulatorGrpcClient;
 using Properties = std::unordered_map<std::string, std::string>;
 using emulator::webrtc::StandaloneConnection;
 
+using namespace android::base;
 // An EmulatorForwarder opens up an EmulatorController service that
 // is forwarded to a remote emulator. It will write out a:
 //
@@ -48,7 +49,7 @@ using emulator::webrtc::StandaloneConnection;
 // TODO(jansene): Fake avds show up in list-avds, but are not launchable.
 class EmulatorForwarder {
 public:
-    EmulatorForwarder(EmulatorGrpcClient* client);
+    EmulatorForwarder(EmulatorGrpcClient* client, int adbPort);
     ~EmulatorForwarder();
 
     // Establish a remote connection.

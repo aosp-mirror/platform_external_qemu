@@ -18,7 +18,7 @@
 #include <rtc_base/logging.h>             // for RTC_LOG
 #include <rtc_base/ref_counted_object.h>  // for RefCountedObject
 #include <map>                            // for map, operator==
-#include <memory>                         // for shared_ptr, shared_...
+#include <memory>                         // for shared_ptr, make_sh...
 #include <ostream>                        // for operator<<, ostream
 #include <string>                         // for string, basic_string
 #include <unordered_map>                  // for unordered_map, unor...
@@ -28,12 +28,19 @@
 #include "android/base/Log.h"                     // for LogStreamVoidify, LOG
 #include "android/base/Optional.h"                // for Optional
 #include "android/base/ProcessControl.h"          // for parseEscapedLaunchS...
+#include "android/base/async/AsyncSocket.h"       // for AsyncSocket
 #include "android/base/containers/BufferQueue.h"  // for BufferQueue, Buffer...
 #include "android/base/synchronization/Lock.h"    // for Lock, AutoReadLock
 #include "android/base/system/System.h"           // for System, System::Dur...
-#include "emulator/webrtc/Participant.h"          // for Parti...
+#include "emulator/webrtc/Participant.h"          // for Participant
 #include "emulator/webrtc/RtcConnection.h"        // for json, RtcConnection
 #include "nlohmann/json.hpp"                      // for operator""_json
+
+namespace emulator {
+namespace webrtc {
+class EmulatorGrpcClient;
+}  // namespace webrtc
+}  // namespace emulator
 
 using namespace android::base;
 
@@ -46,9 +53,11 @@ Switchboard::~Switchboard() {}
 
 Switchboard::Switchboard(EmulatorGrpcClient* client,
                          const std::string& shmPath,
-                         const std::string& turnConfig)
+                         const std::string& turnConfig,
+                         int adbPort)
     : RtcConnection(client),
       mShmPath(shmPath),
+      mAdbPort(adbPort),
       mTurnConfig(parseEscapedLaunchString(turnConfig)) {}
 
 void Switchboard::rtcConnectionDropped(std::string participant) {
@@ -118,8 +127,7 @@ bool Switchboard::connect(std::string identity) {
     }
 
     rtc::scoped_refptr<Participant> stream(
-            new rtc::RefCountedObject<Participant>(
-                    this, identity, mConnectionFactory.get(), mClient));
+            new rtc::RefCountedObject<Participant>(this, identity, nullptr));
     if (!stream->Initialize()) {
         return false;
     }
@@ -129,6 +137,12 @@ bool Switchboard::connect(std::string identity) {
     // re-negotiation.
     stream->AddVideoTrack("grpcVideo");
     stream->AddAudioTrack("grpcAudio");
+    if (mAdbPort >= 0) {
+        auto adbSocket = std::make_shared<android::base::AsyncSocket>(
+                getLooper(), mAdbPort);
+        adbSocket->connect();
+        stream->RegisterLocalAdbForwarder(adbSocket);
+    }
     stream->CreateOffer();
 
     // Inform the client we are going to start, this is the place

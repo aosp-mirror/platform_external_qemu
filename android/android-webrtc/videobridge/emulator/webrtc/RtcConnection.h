@@ -12,30 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <api/peer_connection_interface.h>      // for PeerC...
-#include <api/scoped_refptr.h>                  // for scope...
-#include <api/task_queue/task_queue_factory.h>  // for TaskQ...
-#include <rtc_base/thread.h>                    // for Thread
-#include <memory>                               // for uniqu...
-#include <nlohmann/json.hpp>                    // for json
-#include <string>                               // for string
+#include <api/peer_connection_interface.h>  // for PeerC...
+#include <api/scoped_refptr.h>              // for scope...
+#include <rtc_base/thread.h>                // for Thread
+#include <memory>                           // for uniqu...
+#include <nlohmann/json.hpp>                // for json
+#include <string>                           // for string
 
+#include "android/base/async/DefaultLooper.h"                   // for Defau...
+#include "android/base/async/RecurrentTask.h"                   // for Recur...
 #include "emulator/webrtc/capture/GoldfishAudioDeviceModule.h"  // for Goldf...
-#include "emulator/webrtc/capture/VideoCapturerFactory.h"       // for Video...
 
 namespace emulator {
-
 namespace webrtc {
-class EmulatorGrpcClient;
 
+class EmulatorGrpcClient;
 using json = nlohmann::json;
+using android::base::Looper;
+using android::base::RecurrentTask;
+
 // An RtcConnection represents a connection of a webrtc endpoint.
 // The RtcConnection is used by a peerconnection to send messages
 // to another peerconnection.
 class RtcConnection {
 public:
     RtcConnection(EmulatorGrpcClient* client);
-    ~RtcConnection() {}
+    ~RtcConnection();
 
     // Called when a participant is unable to continue the rtc stream.
     // The participant will no longer be in use and close can be called.
@@ -48,18 +50,31 @@ public:
     // Send a jsep json message to the participant identified by to.
     virtual void send(std::string to, json msg) = 0;
 
-protected:
-    EmulatorGrpcClient* mClient;
-    GoldfishAudioDeviceModule mGoldfishAdm;
-    VideoCapturerFactory mCaptureFactory;
+    Looper* getLooper() { return &mLooper; }
+    EmulatorGrpcClient* getEmulatorClient() { return mClient; }
+    ::webrtc::PeerConnectionFactoryInterface* getPeerConnectionFactory() {
+        return mConnectionFactory.get();
+    }
 
-    // PeerConnection related things.
+protected:
+private:
+    EmulatorGrpcClient* mClient;
+
+    GoldfishAudioDeviceModule mGoldfishAdm;
+
+    // PeerConnection factory and threads.
+    rtc::scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
+            mConnectionFactory;
+    std::unique_ptr<::webrtc::TaskQueueFactory> mTaskFactory;
     std::unique_ptr<rtc::Thread> mWorker;
     std::unique_ptr<rtc::Thread> mSignaling;
     std::unique_ptr<rtc::Thread> mNetwork;
-    std::unique_ptr<::webrtc::TaskQueueFactory> mTaskFactory;
-    rtc::scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
-            mConnectionFactory;
+
+    // Looper
+    android::base::DefaultLooper mLooper;
+    std::unique_ptr<std::thread> mLooperThread{nullptr};
+    bool mLooperActive{true};
+    RecurrentTask mKeepAlive;
 };
 }  // namespace webrtc
 }  // namespace emulator
