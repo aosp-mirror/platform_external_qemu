@@ -16,6 +16,23 @@
       "message": "Native mac build bots are not running latest XCode yet.",
       "revId": "ade775af21349d3d18fc414fce78c59e62395656",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5d0b972a_a4f9ef66",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-01-11T19:38:56Z",
+      "side": 1,
+      "message": "I\u0027m upgrading the buildbots with a newer Xcode version. If that works out we will not need this change.",
+      "revId": "ade775af21349d3d18fc414fce78c59e62395656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
