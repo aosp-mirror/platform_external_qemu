@@ -52,6 +52,7 @@ static void term_exit(void)
 
 static void qemu_chr_set_echo_stdio(Chardev *chr, bool echo)
 {
+#if 0
     struct termios tty;
 
     stdio_echo_state = echo;
@@ -71,6 +72,7 @@ static void qemu_chr_set_echo_stdio(Chardev *chr, bool echo)
     }
 
     tcsetattr(0, TCSANOW, &tty);
+#endif
 }
 
 static void term_stdio_handler(int sig)
