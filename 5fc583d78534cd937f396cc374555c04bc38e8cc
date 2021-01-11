@@ -22,6 +22,30 @@
       },
       "revId": "5fc583d78534cd937f396cc374555c04bc38e8cc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f034baa6_d051e69b",
+        "filename": "chardev/char-stdio.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-01-11T19:52:46Z",
+      "side": 1,
+      "message": "It is not explained\n\nhttps://android.googlesource.com/platform/external/qemu/+/8d11df9e5aa58497e27e3481cca119809c76afc6",
+      "parentUuid": "c2519ba9_aacb3e5e",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 5
+      },
+      "revId": "5fc583d78534cd937f396cc374555c04bc38e8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
