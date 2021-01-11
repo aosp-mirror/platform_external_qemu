@@ -197,6 +197,28 @@ void BugreportPage::enableInput(bool enabled) {
     setButtonEnabled(mUi->bug_saveButton, theme, enabled);
 }
 
+void BugreportPage::showSpinningWheelAnimation(bool enabled) {
+    if (enabled) {
+        mUi->bug_circularSpinner->show();
+        mUi->bug_collectingLabel->show();
+    } else {
+        mUi->bug_circularSpinner->hide();
+        mUi->bug_collectingLabel->hide();
+    }
+}
+
+void BugreportPage::on_bug_bugReportCheckBox_clicked() {
+    if(mUi->bug_bugReportCheckBox->isChecked()) {
+        if (mAdbBugreport && mAdbBugreport->inFlight()) {
+            showSpinningWheelAnimation(true);
+            enableInput(false);
+        }
+    } else {
+        showSpinningWheelAnimation(false);
+        enableInput(true);
+    }
+}
+
 void BugreportPage::on_bug_saveButton_clicked() {
     mBugTracker->increment("ON_SAVE");
     QString dirName = QString::fromStdString(mSavingStates.saveLocation);
@@ -308,8 +330,6 @@ void BugreportPage::loadAdbBugreport() {
 
     mSavingStates.adbBugreportSucceed = false;
     enableInput(false);
-    mUi->bug_circularSpinner->show();
-    mUi->bug_collectingLabel->show();
     auto filePath = PathUtils::join(System::get()->getTempDir(),
                                     generateUniqueBugreportName());
     // In reference to
@@ -347,8 +367,7 @@ void BugreportPage::loadAdbBugreport() {
 
                 EmulatorQtWindow::getInstance()->runOnUiThread([this, success, filePath] {
                     enableInput(true);
-                    mUi->bug_circularSpinner->hide();
-                    mUi->bug_collectingLabel->hide();
+                    showSpinningWheelAnimation(false);
                     if (System::get()->pathIsFile(
                                 mSavingStates.adbBugreportFilePath)) {
                         System::get()->deleteFile(
