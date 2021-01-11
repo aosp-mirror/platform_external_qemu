@@ -1,3 +1,5 @@
+import copy
+
 from .common.codegen import CodeGen, VulkanWrapperGenerator
 from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
@@ -111,7 +113,7 @@ def make_event_handler_call(
     return cgen.makeCallExpr( \
                "%s->on_%s%s" % (handler_access, api.name, suffix),
                extraParams + \
-               [p.paramName for p in api.parameters])
+                       [p.paramName for p in api.parameters[:-1]])
 
 def emit_custom_pre_validate(typeInfo, api, cgen):
     if api.name in ENCODER_PREVALIDATED_APIS:
@@ -246,8 +248,6 @@ class EncodingParameters(object):
                 self.toWrite.append(localCopyParam)
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
-    cgen.stmt("EncoderAutoLock encoderLock(this)")
-
     cgen.stmt("mImpl->log(\"start %s\")" % api.name)
     emit_custom_pre_validate(typeInfo, api, cgen);
     emit_custom_resource_preprocess(typeInfo, api, cgen);
@@ -382,7 +382,14 @@ def emit_return(typeInfo, api, cgen):
     retVar = api.getRetVarExpr()
     cgen.stmt("return %s" % retVar)
 
+def emit_lock(cgen):
+    cgen.stmt("if (doLock) this->lock()")
+
+def emit_unlock(cgen):
+    cgen.stmt("if (doLock) this->unlock()")
+
 def emit_default_encoding(typeInfo, api, cgen):
+    emit_lock(cgen)
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
     emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
     emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
@@ -391,18 +398,20 @@ def emit_default_encoding(typeInfo, api, cgen):
     emit_return_unmarshal(typeInfo, api, cgen)
     emit_post(typeInfo, api, cgen)
     emit_pool_free(cgen)
+    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 ## Custom encoding definitions##################################################
 
 def emit_only_goldfish_custom(typeInfo, api, cgen):
-
+    emit_lock(cgen)
     cgen.stmt("mImpl->log(\"custom start %s\");" % api.name)
     cgen.vkApiCall( \
         api,
         customPrefix="mImpl->resources()->on_",
         customParameters=custom_encoder_args(api) + \
-            [p.paramName for p in api.parameters])
+                [p.paramName for p in api.parameters[:-1]])
+    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 def emit_only_resource_event(typeInfo, api, cgen):
@@ -428,6 +437,7 @@ def emit_only_resource_event(typeInfo, api, cgen):
 
 def emit_with_custom_unwrap(custom):
     def call(typeInfo, api, cgen):
+        emit_lock(cgen)
         emit_parameter_encode_preamble_write(typeInfo, api, cgen)
         emit_parameter_encode_copy_unwrap_count(
             typeInfo, api, cgen, customUnwrap=custom)
@@ -436,10 +446,12 @@ def emit_with_custom_unwrap(custom):
         emit_parameter_encode_read(typeInfo, api, cgen)
         emit_return_unmarshal(typeInfo, api, cgen)
         emit_pool_free(cgen)
+        emit_unlock(cgen)
         emit_return(typeInfo, api, cgen)
     return call
 
 def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
+    emit_lock(cgen)
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
     emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
 
@@ -470,9 +482,11 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_parameter_encode_read(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
     emit_pool_free(cgen)
+    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
+    emit_lock(cgen)
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
     emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
     emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
@@ -501,6 +515,7 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
 
     emit_invalidate_ranges(STREAM)
     emit_pool_free(cgen)
+    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 def unwrap_VkNativeBufferANDROID():
@@ -543,7 +558,9 @@ class VulkanEncoder(VulkanWrapperGenerator):
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
 
-        api = self.typeInfo.apis[name]
+        api = copy.deepcopy(self.typeInfo.apis[name])
+        api.parameters.append(makeVulkanTypeSimple(False, "uint32_t", 0, "doLock"))
+
         self.cgenHeader.stmt(self.cgenHeader.makeFuncProto(api))
         apiImpl = api.withModifiedName("VkEncoder::" + api.name)
 
