@@ -143,6 +143,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             return nullptr;
         }
 
+        *(mContext.host_state) = ASG_HOST_STATE_CAN_CONSUME;
         ringAvailable =
             ring_buffer_available_read(mContext.to_host, 0);
         ringLargeXferAvailable =
