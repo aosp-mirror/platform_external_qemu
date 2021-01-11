@@ -469,6 +469,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::S3TC_TEXTURE_SUPPORT;
         case android::featurecontrol::VirtioMouse:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_MOUSE;
+        case android::featurecontrol::VirtconsoleLogcat:
+            return android_studio::EmulatorFeatureFlagState::VIRTCONSOLE_LOGCAT;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
