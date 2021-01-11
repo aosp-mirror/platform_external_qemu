@@ -25,20 +25,19 @@ namespace control {
 // will get notified when camera is connected or disconnected.
 class Camera {
 public:
-    Camera();
+    using Callback = std::function<void(bool)>;
+    Camera(Callback cb);
     bool isVirtualSceneConnected() const { return mVirtualSceneConnected; };
 
     // Gets the event waiter that can be used to wait for new
     // camera updates.
     EventWaiter* eventWaiter();
 
-    // Gets the Camera singleton that will register with the given agent.
-    static Camera* getCamera();
-
 private:
     static void virtualSceneCameraCallback(void* context, bool connected);
     std::atomic<bool> mVirtualSceneConnected;
     EventWaiter mEventWaiter;
+    Callback mCallback;
 };
 
 }  // namespace control
