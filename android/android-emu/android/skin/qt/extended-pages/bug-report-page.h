@@ -62,6 +62,7 @@ public:
 private slots:
     void on_bug_saveButton_clicked();
     void on_bug_sendToGoogle_clicked();
+    void on_bug_bugReportCheckBox_clicked();
 
 private:
     void loadAdbBugreport();
@@ -71,6 +72,7 @@ private:
     bool eventFilter(QObject* object, QEvent* event) override;
     bool launchIssueTracker();
     void enableInput(bool enabled);
+    void showSpinningWheelAnimation(bool enabled);
     bool saveBugReportTo(android::base::StringView location);
     bool saveToFile(android::base::StringView filePath,
                     const char* content,
