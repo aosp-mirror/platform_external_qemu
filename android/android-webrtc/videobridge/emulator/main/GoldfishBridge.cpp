@@ -49,6 +49,7 @@ static std::string FLAG_turn("");
 static bool FLAG_help = false;
 static bool FLAG_verbose = true;
 static int FLAG_port = 8555;
+static int FLAG_adb_port = 0;
 static bool FLAG_fwd = false;
 static std::string FLAG_disc("");
 static std::string FLAG_address("localhost");
@@ -65,6 +66,7 @@ static struct option long_options[] = {
         {"port", required_argument, 0, 'p'},
         {"discovery", required_argument, 0, 'i'},
         {"address", required_argument, 0, 'm'},
+        {"adb", required_argument, 0, 'n'},
         {"grpc-tls-key", required_argument, 0, 'x'},
         {"grpc-tls-cer", required_argument, 0, 'y'},
         {"grpc-tls-ca", required_argument, 0, 'z'},
@@ -121,6 +123,9 @@ static void parseArgs(int argc, char** argv) {
                 break;
             case 'm':
                 FLAG_address = optarg;
+                break;
+            case 'n':
+                FLAG_adb_port = atoi(optarg);
                 break;
             case 's':
                 FLAG_emulator = optarg;
@@ -304,7 +309,7 @@ int main(int argc, char* argv[]) {
 #endif
 
     if (FLAG_fwd) {
-        sForwarder = std::make_unique<EmulatorForwarder>(client.get());
+        sForwarder = std::make_unique<EmulatorForwarder>(client.get(), FLAG_adb_port);
         if (!sForwarder->createRemoteConnection()) {
             LOG(ERROR) << "Unable to establish a connection to the remote "
                           "forwarder.";
@@ -312,7 +317,7 @@ int main(int argc, char* argv[]) {
         sForwarder->wait();
     } else {
         // Initalize the RTC service.
-        Switchboard sw(client.get(), "", FLAG_turn);
+        Switchboard sw(client.get(), "", FLAG_turn, FLAG_adb_port);
         auto bridge = android::emulation::control::getRtcService(&sw);
 
         auto builder = EmulatorControllerService::Builder()

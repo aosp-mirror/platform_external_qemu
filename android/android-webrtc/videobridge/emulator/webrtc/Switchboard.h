@@ -12,17 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <unordered_map>
+#include <rtc_base/critical_section.h>            // for CriticalSection
+#include <stdint.h>                               // for uint16_t
+#include <map>                                    // for map
+#include <memory>                                 // for shared_ptr
+#include <string>                                 // for string
+#include <unordered_map>                          // for unordered_map
+#include <vector>                                 // for vector
 
-#include "android/base/containers/BufferQueue.h"  // for BufferQueue, Buffer...
-#include "android/base/synchronization/Lock.h"    // for Lock, AutoReadLock
+#include "android/base/containers/BufferQueue.h"  // for BufferQueue
+#include "android/base/synchronization/Lock.h"    // for Lock (ptr only)
 #include "android/base/system/System.h"           // for System, System::Dur...
-#include "android/emulation/control/RtcBridge.h"
-#include "emulator/webrtc/Participant.h"    // for Parti...
-#include "emulator/webrtc/RtcConnection.h"  // for json, RtcConnection
+#include "android/emulation/control/RtcBridge.h"  // for RtcBridge::BridgeState
+#include "emulator/webrtc/RtcConnection.h"        // for RtcConnection, json
+#include "emulator/webrtc/capture/VideoCapturerFactory.h"
+
+namespace rtc {
+template <class T> class scoped_refptr;
+}  // namespace rtc
 
 namespace emulator {
 namespace webrtc {
+class EmulatorGrpcClient;
+class Participant;
+class VideoCapturerFactory;
 
 using android::emulation::control::RtcBridge;
 using MessageQueue = android::base::BufferQueue<std::string>;
@@ -40,7 +53,8 @@ class Switchboard : public RtcBridge, public RtcConnection {
 public:
     Switchboard(EmulatorGrpcClient* client,
                 const std::string& shmPath,
-                const std::string& turnconfig);
+                const std::string& turnconfig,
+                int adbPort);
     ~Switchboard();
 
     // Connect will initiate the RTC stream if not yet in progress.
@@ -92,10 +106,13 @@ private:
             mConnections;
     std::unordered_map<std::string, std::string> mIdentityMap;
 
+    VideoCapturerFactory mCaptureFactory;
+
     // Connections that need to be garbage collected.
     std::vector<std::string> mDroppedConnections;
     std::vector<std::string> mClosedConnections;
     const std::string mShmPath = "/tmp";
+    int mAdbPort;
 
     // Process to invoke to retrieve turn config.
     std::vector<std::string> mTurnConfig;

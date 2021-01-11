@@ -280,6 +280,7 @@ static Optional<System::Pid> launchAsDaemon(std::string executable,
 
 static Optional<System::Pid> launchInBackground(std::string executable,
                                                 int port,
+                                                int adbPort,
                                                 std::string turnConfig) {
     std::vector<std::string> cmdArgs{executable,
                                      "--logdir",
@@ -288,6 +289,8 @@ static Optional<System::Pid> launchInBackground(std::string executable,
                                      ConfigDirs::getCurrentDiscoveryPath(),
                                      "--port",
                                      std::to_string(port),
+                                     "--adb",
+                                     std::to_string(adbPort),
                                      "--turn",
                                      turnConfig};
     System::Pid bridgePid;
@@ -307,7 +310,7 @@ static Optional<System::Pid> launchInBackground(std::string executable,
     return bridgePid;
 }
 
-Optional<System::Pid> WebRtcBridge::launch(int port,
+Optional<System::Pid> WebRtcBridge::launch(int port, int adbPort,
                                            std::string turnConfig) {
     std::string executable =
             System::get()->findBundledExecutable(kVideoBridgeExe);
@@ -320,7 +323,7 @@ Optional<System::Pid> WebRtcBridge::launch(int port,
     // gRPC has no support for fork when launching, so we launch the server
     // as a background process.
     Optional<System::Pid> bridgePid =
-            launchInBackground(executable, port,  turnConfig);
+            launchInBackground(executable, port, adbPort, turnConfig);
     return bridgePid;
 }
 
@@ -336,7 +339,7 @@ bool WebRtcBridge::start() {
     }
 
     Optional<System::Pid> bridgePid =
-            launch(mVideoBridgePort, mTurnConfig);
+            launch(mVideoBridgePort, 0, mTurnConfig);
 
     if (!bridgePid.hasValue()) {
         LOG(ERROR) << "WebRTC bridge disabled";
