@@ -82,6 +82,9 @@ void WASDInputHandler::disable() {
     updateVelocity();
 }
 
+bool WASDInputHandler::isEnabled() {
+    return mEnabled;
+}
 void WASDInputHandler::keyDown(ControlKey key) {
     if (!mEnabled) {
         return;
@@ -104,7 +107,6 @@ void WASDInputHandler::mouseMove(int offsetX, int offsetY) {
     if (!mEnabled) {
         return;
     }
-
     if (offsetX != 0 || offsetY != 0) {
         mEulerRotationRadians.x -= offsetY * kPixelsToRotationRadians;
         mEulerRotationRadians.y -= offsetX * kPixelsToRotationRadians;
