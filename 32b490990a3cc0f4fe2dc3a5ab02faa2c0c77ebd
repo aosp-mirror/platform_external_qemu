@@ -16,6 +16,24 @@
       "message": "A question about sendMouse vs sendTouch. When does Studio use sentTouch? I have only observed sendMouse events. Maybe I am wrong. ",
       "revId": "32b490990a3cc0f4fe2dc3a5ab02faa2c0c77ebd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1c4b9a84_774544f7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-01-11T20:15:41Z",
+      "side": 1,
+      "message": "Studio doesn\u0027t use sendTouch currently.",
+      "parentUuid": "ee82fecc_20d9e905",
+      "revId": "32b490990a3cc0f4fe2dc3a5ab02faa2c0c77ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
