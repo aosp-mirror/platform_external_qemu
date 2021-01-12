@@ -16,6 +16,24 @@
       "message": "can you open the bug access to me ?",
       "revId": "694267132a1d809109e9ba1bb389c3fe7ac2f968",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9d62590a_d0749e4b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1647469
+      },
+      "writtenOn": "2021-01-12T13:55:10Z",
+      "side": 1,
+      "message": "I\u0027ve opened the bug up to emu-dev. But the bug doesn\u0027t have much. I had just filed it to track this CL.",
+      "parentUuid": "23cde635_44a54ee8",
+      "revId": "694267132a1d809109e9ba1bb389c3fe7ac2f968",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
