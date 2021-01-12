@@ -34,6 +34,7 @@
 #include "android/base/Tracing.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/containers/HybridEntityManager.h"
 #include "android/utils/path.h"
 #include "android/utils/file_io.h"
 
@@ -44,6 +45,7 @@
 #include <assert.h>
 
 using android::base::AutoLock;
+using android::base::Lock;
 
 namespace emugl {
 
@@ -332,6 +334,8 @@ intptr_t RenderThread::main() {
         delete[] fname;
     }
 
+    uint32_t* seqnoPtr = nullptr;
+
     while (1) {
         // Let's make sure we read enough data for at least some processing.
         int packetSize;
@@ -414,11 +418,31 @@ intptr_t RenderThread::main() {
 
         do {
 
+            if (!seqnoPtr && tInfo.m_puid) {
+                seqnoPtr = FrameBuffer::getFB()->getProcessSequenceNumberPtr(tInfo.m_puid);
+                fprintf(stderr, "%s: initialized a process seqno: %p\n", __func__, seqnoPtr);
+            }
+
             if (mRunInLimitedMode) {
                 sThreadRunLimiter.lock();
             }
 
             progress = false;
+
+            size_t last;
+
+            //
+            // try to process some of the command buffer using the
+            // Vulkan decoder
+            //
+            {
+                last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
+                                            ioStream, seqnoPtr);
+                if (last > 0) {
+                    readBuf.consume(last);
+                    progress = true;
+                }
+            }
 
             // try to process some of the command buffer using the GLESv1
             // decoder
@@ -437,7 +461,6 @@ intptr_t RenderThread::main() {
             {
                 FrameBuffer::getFB()->lockContextStructureRead();
             }
-            size_t last;
 
             {
                 last = tInfo.m_glDec.decode(
@@ -473,25 +496,16 @@ intptr_t RenderThread::main() {
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;
+                    fprintf(stderr, "%s: rendercontrol progress\n", __func__);
+
                 }
+
             }
 
             if (mRunInLimitedMode) {
                 sThreadRunLimiter.unlock();
             }
 
-            //
-            // try to process some of the command buffer using the
-            // Vulkan decoder
-            //
-            {
-                last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
-                                            ioStream);
-                if (last > 0) {
-                    readBuf.consume(last);
-                    progress = true;
-                }
-            }
         } while (progress);
     }
 

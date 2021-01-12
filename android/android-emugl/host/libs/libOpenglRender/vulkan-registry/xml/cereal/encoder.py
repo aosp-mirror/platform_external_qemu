@@ -317,12 +317,14 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
     cgen.endBlock()
 
 def emit_parameter_encode_write_packet_info(typeInfo, api, cgen):
-    cgen.stmt("uint32_t packetSize_%s = 4 + 4 + count" % (api.name))
+    cgen.stmt("uint32_t packetSize_%s = 4 + 4 + 4 + count" % (api.name))
     cgen.stmt("uint8_t* streamPtr = %s->reserve(packetSize_%s)" % (STREAM, api.name))
     cgen.stmt("uint8_t** streamPtrPtr = &streamPtr")
     cgen.stmt("uint32_t opcode_%s = OP_%s" % (api.name, api.name))
+    cgen.stmt("uint32_t seqno = mImpl->resources()->nextSeqno()")
     cgen.stmt("memcpy(streamPtr, &opcode_%s, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)" % api.name)
     cgen.stmt("memcpy(streamPtr, &packetSize_%s, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)" % api.name)
+    cgen.stmt("memcpy(streamPtr, &seqno, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)")
 
 def emit_parameter_encode_do_parameter_write(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)

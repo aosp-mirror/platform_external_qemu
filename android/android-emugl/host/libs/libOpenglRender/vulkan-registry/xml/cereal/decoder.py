@@ -21,7 +21,7 @@ public:
     VkDecoder();
     ~VkDecoder();
     void setForSnapshotLoad(bool forSnapshotLoad);
-    size_t decode(void* buf, size_t bufsize, IOStream* stream);
+    size_t decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr);
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
@@ -52,7 +52,7 @@ public:
         m_forSnapshotLoad = forSnapshotLoad;
     }
 
-    size_t decode(void* buf, size_t bufsize, IOStream* stream);
+    size_t decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr);
 
 private:
     bool m_logCalls;
@@ -78,8 +78,8 @@ void VkDecoder::setForSnapshotLoad(bool forSnapshotLoad) {
     mImpl->setForSnapshotLoad(forSnapshotLoad);
 }
 
-size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream) {
-    return mImpl->decode(buf, bufsize, stream);
+size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr) {
+    return mImpl->decode(buf, bufsize, stream, seqnoPtr);
 }
 
 // VkDecoder::Impl::decode to follow
@@ -621,7 +621,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.module.appendImpl(decoder_impl_preamble)
 
         self.module.appendImpl(
-            "size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)\n")
+            "size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32_t* seqnoPtr)\n")
 
         self.cgen.beginBlock() # function body
 
@@ -647,6 +647,14 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("uint8_t* readStreamPtr = %s->getBuf(); uint8_t** readStreamPtrPtr = &readStreamPtr" % READ_STREAM)
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
+        self.cgen.line("""
+                 if (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK) {
+            uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
+            if (seqnoPtr && !m_forSnapshotLoad) {
+             while ((seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));
+            }
+        }
+        """)
         self.cgen.stmt("auto vk = m_vk")
 
         self.cgen.line("switch (opcode)")
@@ -679,6 +687,12 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.endBlock()
 
         self.cgen.endBlock() # switch stmt
+
+        self.cgen.line("""
+        if (seqnoPtr && (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK)) {
+        __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+        }
+        """)
 
         self.cgen.stmt("ptr += packetLen")
         self.cgen.endBlock() # while loop

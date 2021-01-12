@@ -85,6 +85,8 @@ typedef std::unordered_map<uint64_t, EGLImageSet> ProcOwnedEGLImages;
 typedef std::unordered_map<void*, std::function<void()>> CallbackMap;
 typedef std::unordered_map<uint64_t, CallbackMap> ProcOwnedCleanupCallbacks;
 
+typedef std::unordered_map<uint64_t, uint32_t*> ProcOwnedSequenceNumbers;
+
 // A structure used to list the capabilities of the underlying EGL
 // implementation that the FrameBuffer instance depends on.
 // |has_eglimage_texture_2d| is true iff the EGL_KHR_gl_texture_2D_image
@@ -564,6 +566,10 @@ public:
 
     void registerProcessCleanupCallback(void* key, std::function<void()> callback);
     void unregisterProcessCleanupCallback(void* key);
+
+    void registerProcessSequenceNumberForPuid(uint64_t puid);
+    uint32_t* getProcessSequenceNumberPtr(uint64_t puid);
+
     int createDisplay(uint32_t *displayId);
     int destroyDisplay(uint32_t displayId);
     int setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer);
@@ -764,6 +770,7 @@ private:
     ProcOwnedEGLImages m_procOwnedEGLImages;
     ProcOwnedRenderContexts m_procOwnedRenderContext;
     ProcOwnedCleanupCallbacks m_procOwnedCleanupCallbacks;
+    ProcOwnedSequenceNumbers m_procOwnedSequenceNumbers;
 
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;
