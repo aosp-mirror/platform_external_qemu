@@ -117,6 +117,7 @@ public:
     const Data* get_const(IndexType index) const {
         uint64_t index_u64 = (uint64_t)EM::getHandleIndex(index);
         if (index_u64 < maxIndex) {
+            // const Data* res = mEntityManager.get_const_unsafe(index);
             const Data* res;
             AEMU_SEQLOCK_READ_WITH_RETRY(&mEntityManagerLock,
                 res = mEntityManager.get_const(index));
