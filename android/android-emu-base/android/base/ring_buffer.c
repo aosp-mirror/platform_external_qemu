@@ -404,13 +404,7 @@ long ring_buffer_view_read(
     return (long)steps;
 }
 
-void ring_buffer_yield() {
-#ifdef _WIN32
-    _mm_pause();
-#else
-    sched_yield();
-#endif
-}
+void ring_buffer_yield() { }
 
 static void ring_buffer_sleep() {
 #ifdef _WIN32
@@ -592,15 +586,15 @@ uint32_t ring_buffer_read_fully_with_abort(
     uint8_t* dst = (uint8_t*)data;
 
     while (processed < bytes) {
-#ifdef __x86_64
-        _mm_pause();
-#endif
+// #ifdef __x86_64
+//         _mm_pause();
+// #endif
         if (bytes - processed < candidate_step) {
             candidate_step = bytes - processed;
         }
 
         long processed_here = 0;
-        ring_buffer_wait_read(r, v, candidate_step, (uint64_t)(-1));
+        // ring_buffer_wait_read(r, v, candidate_step, (uint64_t)(-1));
 
         if (v) {
             processed_here = ring_buffer_view_read(r, v, dst + processed, candidate_step, 1);
