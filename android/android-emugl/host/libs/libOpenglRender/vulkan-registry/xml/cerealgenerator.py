@@ -348,8 +348,10 @@ class BumpPool;
 
 #include "android/base/BumpPool.h"
 #include "android/base/system/System.h"
+#include "android/base/Tracing.h"
 
 #include "IOStream.h"
+#include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 
 #include "VkDecoderGlobalState.h"
