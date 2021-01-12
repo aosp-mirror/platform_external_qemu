@@ -723,6 +723,14 @@ public:
         VkDeviceSize* pOffset,
         VkDeviceSize* pRowPitchAlignment);
 
+    // VK_GOOGLE_queue_submit_with_commands
+    void on_vkQueueFlushCommandsGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        VkCommandBuffer commandBuffer,
+        VkDeviceSize dataSize,
+        const void* pData);
+
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,

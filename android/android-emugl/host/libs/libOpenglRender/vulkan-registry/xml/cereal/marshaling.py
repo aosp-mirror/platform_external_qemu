@@ -613,6 +613,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         # that is not going to interfere with renderControl
         # opcodes
         self.currentOpcode = 20000
+        self.endOpcode = 30000
 
         self.extensionMarshalPrototype = \
             VulkanAPI(API_PREFIX_MARSHAL + "extension_struct",
@@ -895,3 +896,6 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             self.cgenImpl.makeFuncImpl(
                 opcode2stringPrototype,
                 lambda cgen: emitOpcode2StringImpl(self.apiOpcodes, cgen)))
+
+        self.module.appendHeader(
+            "#define OP_vkLast %d\n" % (self.endOpcode))

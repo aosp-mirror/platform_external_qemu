@@ -259,6 +259,9 @@ typedef void (VKAPI_PTR *PFN_vkQueueBindSparseAsyncGOOGLE)(
 
 typedef VkResult (VKAPI_PTR *PFN_vkGetLinearImageLayoutGOOGLE)(VkDevice device, VkFormat format, VkDeviceSize* pOffset, VkDeviceSize* pRowPitchAlignment);
 
+#define VK_GOOGLE_queue_submit_with_commands 1
+typedef void (VKAPI_PTR *PFN_vkQueueFlushCommandsGOOGLE)(VkQueue queue, VkDeviceSize dataSize, const void* pData);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

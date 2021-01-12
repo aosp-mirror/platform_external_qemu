@@ -435,7 +435,7 @@ intptr_t RenderThread::main() {
             {
                 (void)seqnoPtr;
                 last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
-                                            ioStream /* , seqnoPtr (to be added)*/);
+                                            ioStream, seqnoPtr);
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;
