@@ -16,6 +16,24 @@
       "message": " sprigogin@ FYI, on Studio side, the KeyEvent message will need to use key up or key down instead of text event type. It looks like Studio is only send text event type for now.",
       "revId": "856a393763a721e7b5343982f41e2f51bd9aa614",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "64ae2f30_1b338aba",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-01-12T20:56:47Z",
+      "side": 1,
+      "message": "Studio currently uses KeyEventType.keypress. Isn\u0027t it equivalent to keydown/keyup sequence?",
+      "parentUuid": "a7de3672_38413420",
+      "revId": "856a393763a721e7b5343982f41e2f51bd9aa614",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
