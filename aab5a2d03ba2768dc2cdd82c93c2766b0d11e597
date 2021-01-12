@@ -16,6 +16,23 @@
       "message": "We\u0027ll also need to build additional Qt prebuilts for both Windows and Darwin that don\u0027t have QtWebEngine support, otherwise you may have runtime errors for those symbols. We currently only have nowebengine prebuilts for darwin-aarch64, linux, and linux-aarch64 (https://android.googlesource.com/platform/prebuilts/android-emulator-build/qt/+/refs/heads/emu-master-dev).",
       "revId": "aab5a2d03ba2768dc2cdd82c93c2766b0d11e597",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fb731892_11ea0509",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-01-12T19:45:00Z",
+      "side": 1,
+      "message": "We\u0027ll build the additional darwin-x86_64-nowebengine target.",
+      "revId": "aab5a2d03ba2768dc2cdd82c93c2766b0d11e597",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
