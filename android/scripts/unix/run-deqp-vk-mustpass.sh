@@ -83,6 +83,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     esac
 done
 
-$DEQP_VK_EXEC_NAME
+gdb --args $DEQP_VK_EXEC_NAME
 
 log "Done running dEQP."
