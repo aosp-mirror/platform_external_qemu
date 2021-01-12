@@ -261,8 +261,7 @@ void VkReconstruction::load(android::base::Stream* stream) {
 
     // TODO: This needs to be the puid seqno ptr
     uint32_t seqno;
-    (void)seqno;
-    decoderForLoading.decode(mLoadedTrace.data(), mLoadedTrace.size(), &trivialStream /* todo &seqno */);
+    decoderForLoading.decode(mLoadedTrace.data(), mLoadedTrace.size(), &trivialStream, &seqno);
 
     DEBUG_RECON("finished decoding trace");
 }
