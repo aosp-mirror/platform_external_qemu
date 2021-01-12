@@ -242,8 +242,6 @@ class EncodingParameters(object):
                 self.toWrite.append(localCopyParam)
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
-    cgen.stmt("EncoderAutoLock encoderLock(this)")
-
     cgen.stmt("mImpl->log(\"start %s\")" % api.name)
     emit_custom_pre_validate(typeInfo, api, cgen);
     emit_custom_resource_preprocess(typeInfo, api, cgen);
@@ -313,13 +311,15 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
 
 def emit_parameter_encode_write_packet_info(typeInfo, api, cgen):
 
-    cgen.stmt("uint32_t packetSize_%s = 4 + 4 + (uint32_t)%s->bytesWritten()" % \
+    cgen.stmt("uint32_t packetSize_%s = 4 + 4 + 4 + (uint32_t)%s->bytesWritten()" % \
               (api.name, COUNTING_STREAM))
     cgen.stmt("%s->rewind()" % COUNTING_STREAM)
 
     cgen.stmt("uint32_t opcode_%s = OP_%s" % (api.name, api.name))
     cgen.stmt("%s->write(&opcode_%s, sizeof(uint32_t))" % (STREAM, api.name))
     cgen.stmt("%s->write(&packetSize_%s, sizeof(uint32_t))" % (STREAM, api.name))
+    cgen.stmt("uint32_t seqno = mImpl->resources()->nextSeqno()")
+    cgen.stmt("%s->write(&seqno, sizeof(uint32_t))" % (STREAM))
 
 def emit_parameter_encode_do_parameter_write(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)

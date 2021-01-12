@@ -48,7 +48,7 @@ public:
     VkDecoder();
     ~VkDecoder();
     void setForSnapshotLoad(bool forSnapshotLoad);
-    size_t decode(void* buf, size_t bufsize, IOStream* stream);
+    size_t decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr);
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

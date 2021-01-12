@@ -1657,7 +1657,7 @@ TEST_P(VulkanHalTest, ProcessCleanup) {
 
 // Multithreaded benchmarks: Speed of light with simple vkCmd's.
 TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
-    constexpr uint32_t kThreadCount = 4;
+    constexpr uint32_t kThreadCount = 1;
     VkDescriptorPool pool;
     VkDescriptorSetLayout setLayout;
 
@@ -1730,8 +1730,8 @@ TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
             };
 
             vk->vkQueueSubmit(mQueue, 1, &si, 0);
-            VkPhysicalDeviceMemoryProperties memProps;
-            vk->vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
+            // VkPhysicalDeviceMemoryProperties memProps;
+            // vk->vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
             return 0;
         });
         threads.push_back(thread);
