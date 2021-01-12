@@ -723,6 +723,14 @@ public:
         VkDeviceSize* pOffset,
         VkDeviceSize* pRowPitchAlignment);
 
+    // VK_GOOGLE_queue_submit_with_commands
+    void on_vkQueueFlushCommandsGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        VkCommandBuffer commandBuffer,
+        VkDeviceSize dataSize,
+        const void* pData);
+
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,
@@ -757,6 +765,7 @@ LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_PROTOTYPE)
 #define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_API_DECL(type) \
     type new_boxed_non_dispatchable_##type(type underlying); \
     void delete_##type(type boxed); \
+    void delayed_delete_##type(type boxed); \
     type unbox_##type(type boxed); \
     type unboxed_to_boxed_non_dispatchable_##type(type boxed); \
 
