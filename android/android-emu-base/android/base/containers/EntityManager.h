@@ -56,7 +56,7 @@ public:
     using IteratorFunc = std::function<void(bool live, EntityHandle h, Item& item)>;
     using ConstIteratorFunc = std::function<void(bool live, EntityHandle h, const Item& item)>;
 
-    static size_t getHandleIndex(EntityHandle h) {
+    static __attribute__((always_inline)) size_t getHandleIndex(EntityHandle h) {
         return static_cast<size_t>(h & ((1ULL << indexBits) - 1ULL));
     }
 
@@ -107,12 +107,12 @@ public:
     ~EntityManager() { clear(); }
 
     struct EntityEntry {
+        Item item;
         EntityHandle handle = 0;
         size_t nextFreeIndex = 0;
         // 0 is a special generation for brand new entries
         // that are not used yet
         size_t liveGeneration = 1;
-        Item item;
     };
 
     void clear() {
@@ -322,6 +322,11 @@ public:
         if (entry->liveGeneration != getHandleGeneration(h)) return nullptr;
 
         return &entry->item;
+    }
+
+    const Item* get_const_unsafe(EntityHandle h) const {
+        size_t index = getHandleIndex(h);
+        return (const Item*)(&((mEntries.data() + index)->item));
     }
 
     bool isLive(EntityHandle h) const {
