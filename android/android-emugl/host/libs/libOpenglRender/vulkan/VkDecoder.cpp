@@ -119,8 +119,19 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
         VulkanStream* vkStream = stream();
         VulkanMemReadingStream* vkReadStream = readStream();
         vkReadStream->setBuf((uint8_t*)(ptr + 8));
-        uint8_t* snapshotTraceBegin = vkReadStream->beginTrace();
         vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+        uint8_t* snapshotTraceBegin = vkReadStream->beginTrace();
+        uint32_t seqno; vkReadStream->read(&seqno, sizeof(uint32_t));
+        bool wait =
+            (opcode == OP_vkQueueSubmit) || 
+            (opcode == OP_vkQueueWaitIdle) || 
+            (opcode == OP_vkDeviceWaitIdle) ||
+            (opcode == OP_vkGetFenceStatus) ||
+            (opcode == OP_vkWaitForFences) ||
+            (opcode == OP_vkResetFences);
+        // if (wait) {
+            m_state->waitSeqno(seqno);
+        // }
         auto vk = m_vk;
         switch (opcode)
         {
@@ -1240,6 +1251,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkQueueWaitIdle:
             {
+                fprintf(stderr, "%s: queue wait idle\n", __func__);
                 VkQueue queue;
                 // Begin manual dispatchable handle unboxing for queue;
                 vkReadStream->unsetHandleMapping();
@@ -1270,6 +1282,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDeviceWaitIdle:
             {
+                fprintf(stderr, "%s: device wait idle\n", __func__);
                 VkDevice device;
                 // Begin manual dispatchable handle unboxing for device;
                 vkReadStream->unsetHandleMapping();
@@ -17873,9 +17886,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #endif
             default:
             {
+                fprintf(stderr, "%s: partial exit\n", __func__);
                 return ptr - (unsigned char *)buf;
             }
         }
+        m_state->setSeqno(seqno);
         ptr += packetLen;
     }
     if (m_forSnapshotLoad)

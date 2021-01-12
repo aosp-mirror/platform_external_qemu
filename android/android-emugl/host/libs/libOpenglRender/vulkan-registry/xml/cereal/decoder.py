@@ -589,8 +589,9 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("VulkanStream* %s = stream()" % WRITE_STREAM)
         self.cgen.stmt("VulkanMemReadingStream* %s = readStream()" % READ_STREAM)
         self.cgen.stmt("%s->setBuf((uint8_t*)(ptr + 8))" % READ_STREAM)
-        self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
+        self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
+        self.cgen.stmt("uint32_t seqno; %s->read(&seqno, sizeof(uint32_t))" % READ_STREAM);
         self.cgen.stmt("auto vk = m_vk")
 
         self.cgen.line("switch (opcode)")

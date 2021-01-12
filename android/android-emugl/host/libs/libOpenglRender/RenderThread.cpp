@@ -262,6 +262,7 @@ intptr_t RenderThread::main() {
     //
     tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, nullptr);
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
+    fprintf(stderr, "%s: puid for this thread: 0x%llx\n", __func__, tInfo.m_puid);
     initRenderControlContext(&tInfo.m_rcDec);
 
     if (!mChannel && !mRingStream) {

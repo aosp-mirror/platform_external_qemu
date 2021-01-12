@@ -75,6 +75,9 @@ public:
     size_t setCreatedHandlesForSnapshotLoad(const unsigned char* buffer);
     void clearCreatedHandlesForSnapshotLoad();
 
+    void waitSeqno(uint32_t nextSeqno);
+    void setSeqno(uint32_t nextSeqno);
+
     VkResult on_vkEnumerateInstanceVersion(
         android::base::BumpPool* pool,
         uint32_t* pApiVersion);

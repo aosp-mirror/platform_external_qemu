@@ -208,6 +208,18 @@ public:
         mCreatedHandlesForSnapshotLoadIndex = 0;
     }
 
+    uint32_t m_seqno = 0;
+
+    void waitSeqno(uint32_t seqno) {
+        while ((seqno - __atomic_load_n(&m_seqno, __ATOMIC_SEQ_CST) != 1) &&
+                seqno > __atomic_load_n(&m_seqno, __ATOMIC_SEQ_CST)) {
+        }
+    }
+
+    void setSeqno(uint32_t seqno) {
+        __atomic_fetch_add(&m_seqno, 1, __ATOMIC_SEQ_CST);
+    }
+
     VkResult on_vkEnumerateInstanceVersion(
             android::base::BumpPool* pool,
             uint32_t* pApiVersion) {
@@ -5940,6 +5952,14 @@ size_t VkDecoderGlobalState::setCreatedHandlesForSnapshotLoad(const unsigned cha
 
 void VkDecoderGlobalState::clearCreatedHandlesForSnapshotLoad() {
     mImpl->clearCreatedHandlesForSnapshotLoad();
+}
+
+void VkDecoderGlobalState::waitSeqno(uint32_t seqno) {
+    mImpl->waitSeqno(seqno);
+}
+
+void VkDecoderGlobalState::setSeqno(uint32_t seqno) {
+    mImpl->setSeqno(seqno);
 }
 
 VkResult VkDecoderGlobalState::on_vkEnumerateInstanceVersion(
