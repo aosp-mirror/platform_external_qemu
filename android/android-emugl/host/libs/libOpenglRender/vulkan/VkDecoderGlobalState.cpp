@@ -28,6 +28,7 @@
 #include "VkDecoderSnapshot.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
+#include "VulkanStream.h"
 #include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
 #include "android/base/containers/EntityManager.h"
@@ -38,6 +39,9 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/Tracing.h"
+#include "common/goldfish_vk_marshaling.h"
+#include "common/goldfish_vk_reserved_marshaling.h"
 #include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_dispatch.h"
 #include "emugl/common/address_space_device_control_ops.h"
@@ -127,7 +131,6 @@ static void releaseOrderMaintInfo(OrderMaintenanceInfo* ord) {
     if (ord->decRef()) delete ord;
 }
 
-
 template <class T>
 class BoxedHandleManager {
 public:
@@ -192,9 +195,37 @@ class DispatchableHandleInfo {
         VulkanDispatch* dispatch = nullptr;
         bool ownDispatch = false;
         OrderMaintenanceInfo* ordMaintInfo = nullptr;
+        VulkanMemReadingStream* readStream = nullptr;
 };
 
 static BoxedHandleManager<DispatchableHandleInfo<uint64_t>> sBoxedHandleManager;
+
+struct ReadStreamRegistry {
+     Lock mLock;
+
+     std::vector<VulkanMemReadingStream*> freeStreams;
+
+     ReadStreamRegistry() { freeStreams.reserve(100); };
+
+     VulkanMemReadingStream* pop() {
+         AutoLock lock(mLock);
+         if (freeStreams.empty()) {
+             freeStreams.push_back(new VulkanMemReadingStream(0));
+             return freeStreams[0];
+         } else {
+            VulkanMemReadingStream* res = freeStreams.back();
+            freeStreams.pop_back();
+            return res;
+         }
+     }
+
+     void push(VulkanMemReadingStream* stream) {
+         AutoLock lock(mLock);
+         freeStreams.push_back(stream);
+     }
+};
+
+static ReadStreamRegistry sReadStreamRegistry;
 
 class VkDecoderGlobalState::Impl {
 public:
@@ -3755,6 +3786,14 @@ public:
         releaseOrderMaintInfo(order);
     }
 
+    void on_vkCommandBufferHostSyncGOOGLE(
+            android::base::BumpPool* pool,
+            VkCommandBuffer commandBuffer,
+            uint32_t needHostSync,
+            uint32_t sequenceNumber) {
+        this->hostSyncCommandBuffer("hostSync", commandBuffer, needHostSync, sequenceNumber);
+    }
+
     void hostSyncQueue(
         const char* tag,
         VkQueue boxed_queue,
@@ -3792,6 +3831,15 @@ public:
         order->cv.broadcast();
         releaseOrderMaintInfo(order);
     }
+
+    void on_vkQueueHostSyncGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber) {
+        this->hostSyncQueue("hostSyncQueue", queue, needHostSync, sequenceNumber);
+    }
+
 
     VkResult on_vkCreateImageWithRequirementsGOOGLE(
         android::base::BumpPool* pool,
@@ -3864,6 +3912,14 @@ public:
         mCmdBufferInfo[commandBuffer].preprocessFuncs.clear();
         mCmdBufferInfo[commandBuffer].subCmds.clear();
         return VK_SUCCESS;
+    }
+
+    VkResult on_vkBeginCommandBufferAsyncGOOGLE(
+            android::base::BumpPool* pool,
+            VkCommandBuffer boxed_commandBuffer,
+            const VkCommandBufferBeginInfo* pBeginInfo) {
+        return this->on_vkBeginCommandBuffer(
+            pool, boxed_commandBuffer, pBeginInfo);
     }
 
     void on_vkEndCommandBufferAsyncGOOGLE(
@@ -4073,6 +4129,22 @@ public:
         }
     }
 
+#include "VkSubDecoder.cpp"
+
+    void on_vkQueueFlushCommandsGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        VkCommandBuffer boxed_commandBuffer,
+        VkDeviceSize dataSize,
+        const void* pData) {
+        (void)queue;
+
+        VkCommandBuffer commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
+        VulkanDispatch* vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
+        VulkanMemReadingStream* readStream = readstream_VkCommandBuffer(boxed_commandBuffer);
+        subDecode(readStream, vk, boxed_commandBuffer, commandBuffer, dataSize, pData);
+    }
+
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
@@ -4157,6 +4229,7 @@ public:
         item.dispatch = dispatch ? dispatch : new VulkanDispatch; \
         item.ownDispatch = ownDispatch; \
         item.ordMaintInfo = new OrderMaintenanceInfo; \
+        item.readStream = nullptr; \
         auto res = (type)newGlobalHandle(item, Tag_##type); \
         return res; \
     } \
@@ -4165,6 +4238,9 @@ public:
             (uint64_t)(uintptr_t)boxed); \
         if (!elt) return; \
         releaseOrderMaintInfo(elt->ordMaintInfo); \
+        if (elt->readStream) { \
+            sReadStreamRegistry.push(elt->readStream); \
+        } \
         sBoxedHandleManager.remove((uint64_t)boxed); \
     } \
     type unbox_##type(type boxed) { \
@@ -4180,6 +4256,16 @@ public:
         auto info = elt->ordMaintInfo; \
         if (!info) return 0; \
         acquireOrderMaintInfo(info); return info; \
+    } \
+    VulkanMemReadingStream* readstream_##type(type boxed) { \
+        auto elt = sBoxedHandleManager.get( \
+                (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return 0; \
+        auto stream = elt->readStream; \
+        if (!stream) { \
+            stream = sReadStreamRegistry.pop(); \
+        } \
+        return stream; \
     } \
     type unboxed_to_boxed_##type(type unboxed) { \
         AutoLock lock(sBoxedHandleManager.lock); \
@@ -6861,6 +6947,15 @@ void VkDecoderGlobalState::on_vkGetLinearImageLayoutGOOGLE(
     mImpl->on_vkGetLinearImageLayoutGOOGLE(pool, device, format, pOffset, pRowPitchAlignment);
 }
 
+void VkDecoderGlobalState::on_vkQueueFlushCommandsGOOGLE(
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    VkCommandBuffer commandBuffer,
+    VkDeviceSize dataSize,
+    const void* pData) {
+    mImpl->on_vkQueueFlushCommandsGOOGLE(pool, queue, commandBuffer, dataSize, pData);
+}
+
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(
     VkDeviceMemory* memory, uint32_t memoryCount,
     VkDeviceSize* offset, uint32_t offsetCount,
@@ -6939,17 +7034,30 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
 
 #define DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF(type) \
     type unbox_##type(type boxed) { \
-        return VkDecoderGlobalState::get()->unbox_##type(boxed); \
+        auto elt = sBoxedHandleManager.get( \
+                (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return VK_NULL_HANDLE; \
+        return (type)elt->underlying; \
     } \
     VulkanDispatch* dispatch_##type(type boxed) { \
-        return VkDecoderGlobalState::get()->dispatch_##type(boxed); \
+        auto elt = sBoxedHandleManager.get( \
+                (uint64_t)(uintptr_t)boxed); \
+        if (!elt) { fprintf(stderr, "%s: err not found boxed %p\n", __func__, boxed); return nullptr; } \
+        return elt->dispatch; \
     } \
     void delete_##type(type boxed) { \
         if (!boxed) return; \
-        VkDecoderGlobalState::get()->delete_##type(boxed); \
+        auto elt = sBoxedHandleManager.get( \
+            (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return; \
+        releaseOrderMaintInfo(elt->ordMaintInfo); \
+        if (elt->readStream) delete elt->readStream; \
+        sBoxedHandleManager.remove((uint64_t)boxed); \
     } \
     type unboxed_to_boxed_##type(type unboxed) { \
-        return VkDecoderGlobalState::get()->unboxed_to_boxed_##type(unboxed); \
+        AutoLock lock(sBoxedHandleManager.lock); \
+        return (type)sBoxedHandleManager.getBoxedFromUnboxedLocked( \
+                (uint64_t)(uintptr_t)unboxed); \
     } \
 
 #define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DEF(type) \
@@ -6958,16 +7066,19 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
     } \
     void delete_##type(type boxed) { \
         if (!boxed) return; \
-        VkDecoderGlobalState::get()->delete_##type(boxed); \
+        sBoxedHandleManager.remove((uint64_t)boxed); \
     } \
-    type unbox_##type(type boxed) { \
+    __attribute__((always_inline)) type unbox_##type(type boxed) { \
         if (!boxed) return boxed; \
         auto elt = sBoxedHandleManager.get( \
                 (uint64_t)(uintptr_t)boxed); \
+        if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); return VK_NULL_HANDLE; } \
         return (type)elt->underlying; \
     } \
     type unboxed_to_boxed_non_dispatchable_##type(type unboxed) { \
-        return VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_##type(unboxed); \
+        AutoLock lock(sBoxedHandleManager.lock); \
+        return (type)sBoxedHandleManager.getBoxedFromUnboxedLocked( \
+                (uint64_t)(uintptr_t)unboxed); \
     } \
 
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF)

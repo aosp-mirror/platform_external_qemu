@@ -65,6 +65,7 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkFreeDescriptorSets",
     "vkCreateDescriptorSetLayout",
     "vkUpdateDescriptorSets",
+    "vkCmdExecuteCommands",
 ]
 
 SUCCESS_VAL = {
@@ -109,13 +110,16 @@ class VulkanFuncTable(VulkanWrapperGenerator):
         def genEncoderOrResourceTrackerCall(cgen, api, declareResources=True):
             cgen.stmt("AEMU_SCOPED_TRACE(\"%s\")" % api.name)
 
-            cgen.stmt("auto vkEnc = HostConnection::get()->vkEncoder()")
-
             if is_cmdbuf_dispatch(api):
-                cgen.stmt("ResourceTracker::get()->syncEncodersForCommandBuffer(commandBuffer, vkEnc)")
+                cgen.stmt("auto vkEnc = ResourceTracker::getCommandBufferEncoder(commandBuffer)")
+            else:
+                cgen.stmt("auto vkEnc = ResourceTracker::getThreadLocalEncoder()")
+            
+            # if is_cmdbuf_dispatch(api):
+            #     cgen.stmt("ResourceTracker::get()->syncEncodersForCommandBuffer(commandBuffer, vkEnc)")
 
-            if is_queue_dispatch(api):
-                cgen.stmt("ResourceTracker::get()->syncEncodersForQueue(queue, vkEnc)")
+            # if is_queue_dispatch(api):
+            #     cgen.stmt("ResourceTracker::get()->syncEncodersForQueue(queue, vkEnc)")
 
             callLhs = None
             retTypeName = api.getRetTypeExpr()
