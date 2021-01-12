@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 The Android Open Source Project
+/* Copyright (C) 2015 The Android Open Source Project
  **
  ** This software is licensed under the terms of the GNU General Public
  ** License version 2, as published by the Free Software Foundation, and
@@ -11,9 +11,15 @@
  */
 
 #pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include "android/utils/compiler.h"
+#include "android/utils/system.h"
 
-#ifdef __cplusplus
-extern "C"
-#endif
-int numHeldMouseButtons();
-bool takeScreenshot(unsigned char* pixelData, size_t width, size_t height);
+ANDROID_BEGIN_HEADER
+bool startDisplayStream(int x,
+                        int y,
+                        void (*callback_t)(int frame, uint64_t timeStamp));
+void stopDisplayStream();
+ANDROID_END_HEADER

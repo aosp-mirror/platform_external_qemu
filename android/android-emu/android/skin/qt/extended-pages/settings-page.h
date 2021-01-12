@@ -26,6 +26,7 @@ class UiEventTracker;
 
 using android::metrics::UiEventTracker;
 class PerfStatsPage;
+class UiMetricsPage;
 class QEvent;
 class QObject;
 
@@ -76,6 +77,7 @@ private slots:
     void on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index);
     void on_set_resetNotifications_pressed();
     void on_perfstatsButton_pressed();
+    void on_uiMetricsButton_pressed();
     void on_tabChanged();
 #ifndef SNAPSHOT_CONTROLS  // TODO:jameskaye Remove when Snapshot controls are
                            // fully enabled
@@ -113,6 +115,7 @@ private:
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
     std::unique_ptr<PerfStatsPage> mPerfStatsPage;
+    std::unique_ptr<UiMetricsPage> mUiMetricsPage;
     std::shared_ptr<UiEventTracker> mSettingsTracker;
     bool mDisableANGLE = false;
 };

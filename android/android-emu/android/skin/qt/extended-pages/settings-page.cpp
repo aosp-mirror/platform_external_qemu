@@ -26,6 +26,7 @@
 #include "android/skin/qt/FramelessDetector.h"              // for Frameless...
 #include "android/skin/qt/extended-pages/common.h"          // for getSelect...
 #include "android/skin/qt/extended-pages/perfstats-page.h"  // for PerfStats...
+#include "android/skin/qt/extended-pages/ui-metrics-page.h"  // for PerfStats...
 #include "android/skin/qt/qt-settings.h"                    // for SaveSnaps...
 #include "android/skin/qt/raised-material-button.h"         // for RaisedMat...
 #include "android/skin/qt/stylesheet.h"                     // for fontStyle...
@@ -85,6 +86,11 @@ SettingsPage::SettingsPage(QWidget* parent)
               android_studio::EmulatorUiEvent::BUTTON_PRESS,
               android_studio::EmulatorUiEvent::EXTENDED_SETTINGS_TAB)) {
     mUi->setupUi(this);
+#ifndef __linux__
+    if (android_cmdLineOptions->ui_metrics) {
+        mUi->uiMetricsButton->show();
+    }
+#endif
     disableForEmbeddedEmulator();
     mUi->set_saveLocBox->installEventFilter(this);
     mUi->set_adbPathBox->installEventFilter(this);
@@ -682,6 +688,18 @@ void SettingsPage::on_perfstatsButton_pressed() {
     }
     mPerfStatsPage->show();
     setFrameOnTop(mPerfStatsPage.get(), true);
+}
+
+void SettingsPage::on_uiMetricsButton_pressed() {
+    if (!mUiMetricsPage.get()) {
+        const double densityFactor = devicePixelRatioF();
+        QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
+        styleString += Ui::stylesheetForTheme(getSelectedTheme());
+        mUiMetricsPage.reset(new UiMetricsPage(nullptr));
+        mUiMetricsPage->setStyleSheet(styleString);
+    }
+    mUiMetricsPage->show();
+    setFrameOnTop(mUiMetricsPage.get(), true);
 }
 
 void SettingsPage::on_set_clipboardSharing_toggled(bool checked) {
