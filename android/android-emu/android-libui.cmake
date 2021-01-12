@@ -126,6 +126,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/multi-display-page.cpp
     android/skin/qt/extended-pages/network-connectivity-manager.cpp
     android/skin/qt/extended-pages/perfstats-page.cpp
+    android/skin/qt/extended-pages/ui-metrics-page.cpp
     android/skin/qt/extended-pages/record-and-playback-page.cpp
     android/skin/qt/extended-pages/record-macro-edit-dialog.cpp
     android/skin/qt/extended-pages/record-macro-page.cpp
@@ -154,6 +155,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/native-keyboard-event-handler.cpp
     android/skin/qt/OverlayMessageCenter.cpp
     android/skin/qt/perf-stats-3d-widget.cpp
+    android/skin/qt/ui-metrics-widget.cpp
     android/skin/qt/poster-image-well.cpp
     android/skin/qt/posture-selection-dialog.cpp
     android/skin/qt/qt-ui-commands.cpp
@@ -212,6 +214,7 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/telephony-page.ui
     android/skin/qt/extended-pages/tv-remote-page.ui
     android/skin/qt/extended-pages/virtual-sensors-page.ui
+    android/skin/qt/extended-pages/ui-metrics-page.ui
     android/skin/qt/extended.ui
     android/skin/qt/poster-image-well.ui
     android/skin/qt/postureselectiondialog.ui
@@ -398,9 +401,11 @@ android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
 android_target_link_libraries(emulator-libui linux-aarch64 PRIVATE -lpulse -lX11 -lxcb
                                                                    -lXau)
 android_target_link_libraries(emulator-libui darwin-x86_64
-                              PRIVATE "-framework Carbon")
+                              PRIVATE "-framework Carbon"
+                                      "-framework IOSurface")
 android_target_link_libraries(emulator-libui darwin-aarch64
-                              PRIVATE "-framework Carbon")
+                              PRIVATE "-framework Carbon"
+                                      "-framework IOSurface")
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(emulator-libui windows_msvc-x86_64
                               PUBLIC dirent-win32)

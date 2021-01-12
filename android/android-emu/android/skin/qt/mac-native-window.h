@@ -11,7 +11,12 @@
  */
 
 #pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "android/utils/compiler.h"
+#include "android/utils/system.h"
 
 ANDROID_BEGIN_HEADER
 
@@ -21,5 +26,6 @@ int numHeldMouseButtons();
 void nsWindowAdopt(void *parent, void *child);
 bool isOptionKeyHeld();
 const char* keyboard_host_layout_name_macImpl();
-
+bool startDisplayStream(void (*callback_t)(uint8_t* pixel, uint64_t timeStamp));
+void stopDisplayStream();
 ANDROID_END_HEADER
