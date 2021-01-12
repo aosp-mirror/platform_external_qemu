@@ -3,9 +3,11 @@
 #include <string>                                        // for string
 #include <vector>                                        // for vector
 
+#include "android/base/Optional.h"                       // for Optional
 #include "android/base/containers/BufferQueue.h"         // for BufferQueue
 #include "android/console.h"                             // for AndroidConso...
 #include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
+#include "android/virtualscene/WASDInputHandler.h"
 #include "emulator_controller.pb.h"                      // for KeyboardEvent
 
 
@@ -76,16 +78,21 @@ public:
     ~EmulatorKeyEventSender();
     void send(const KeyboardEvent* request);
     void sendOnThisThread(const KeyboardEvent* request);
+    void enableVirtualScene(bool enabled);
+    android::virtualscene::WASDInputHandler* getWasdInputHandler() {
+        return mInputHandler.ptr();
+    }
 
 private:
     void doSend(const KeyboardEvent* request);
     void sendKeyCode(int32_t code,
                      const KeyboardEvent::KeyCodeType codeType,
                      const KeyboardEvent::KeyEventType eventType);
+    void forwardToVirtualScene(uint32_t evdev, bool down);
+
     uint32_t domCodeToEvDevKeycode(DomCode key);
     DomCode domKeyAsNonPrintableDomCode(DomKey key);
     DomKey browserKeyToDomKey(std::string key);
-
     void workerThread();
 
     // Converts the incoming code type to evdev code that the emulator
@@ -104,6 +111,9 @@ private:
             offsetof(KeycodeMapEntry, mac)};
 
     const AndroidConsoleAgents* const mAgents;
+    android::base::Optional<android::virtualscene::WASDInputHandler>
+            mInputHandler;
+
     base::Looper* mLooper;
 };
 
