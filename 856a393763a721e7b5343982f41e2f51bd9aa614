@@ -52,6 +52,24 @@
       "parentUuid": "64ae2f30_1b338aba",
       "revId": "856a393763a721e7b5343982f41e2f51bd9aa614",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "950f6d48_c46dfd2a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-01-12T21:05:26Z",
+      "side": 1,
+      "message": "I guess we are ready to check in this CL?",
+      "parentUuid": "222ee689_ac5c1b01",
+      "revId": "856a393763a721e7b5343982f41e2f51bd9aa614",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
