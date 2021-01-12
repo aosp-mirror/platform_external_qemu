@@ -34,6 +34,24 @@
       "parentUuid": "a7de3672_38413420",
       "revId": "856a393763a721e7b5343982f41e2f51bd9aa614",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "222ee689_ac5c1b01",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-01-12T21:04:53Z",
+      "side": 1,
+      "message": "It is the same. I was using the wrong term. I experimented with Arctic Fox 2020.3.1 Canary 1 and I found that sendUtfstring was used instead of sendKeyCode in EmulatorKeyEventSender.cpp\nhttps://source.corp.google.com/android/external/qemu/android/android-grpc/android/emulation/control/keyboard/EmulatorKeyEventSender.cpp;l\u003d294?q\u003dKeyEventSender\u0026ss\u003dpiper%2FGoogle%2Fandroid",
+      "parentUuid": "64ae2f30_1b338aba",
+      "revId": "856a393763a721e7b5343982f41e2f51bd9aa614",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
