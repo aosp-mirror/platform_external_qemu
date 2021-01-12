@@ -16,3 +16,4 @@
 extern "C"
 #endif
 int numHeldMouseButtons();
+bool takeScreenshot(unsigned char* pixelData, size_t width, size_t height);
