@@ -133,6 +133,8 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             break;
         }
 
+        *(mContext.host_state) = ASG_HOST_STATE_CAN_CONSUME;
+
         // if (mInSnapshotOperation) {
         //     fprintf(stderr, "%s: %p in snapshot operation, exit\n", __func__, mRenderThreadPtr);
         //     // In a snapshot operation, exit

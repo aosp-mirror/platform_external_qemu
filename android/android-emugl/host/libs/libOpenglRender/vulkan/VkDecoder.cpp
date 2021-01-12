@@ -71,7 +71,7 @@ public:
         m_forSnapshotLoad = forSnapshotLoad;
     }
 
-    size_t decode(void* buf, size_t bufsize, IOStream* stream);
+    size_t decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr);
 
 private:
     bool m_logCalls;
@@ -97,12 +97,12 @@ void VkDecoder::setForSnapshotLoad(bool forSnapshotLoad) {
     mImpl->setForSnapshotLoad(forSnapshotLoad);
 }
 
-size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream) {
-    return mImpl->decode(buf, bufsize, stream);
+size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr) {
+    return mImpl->decode(buf, bufsize, stream, seqnoPtr);
 }
 
 // VkDecoder::Impl::decode to follow
-size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
+size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32_t* seqnoPtr)
 {
     if (len < 8) return 0;;
     unsigned char *ptr = (unsigned char *)buf;
@@ -123,6 +123,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
         uint8_t* readStreamPtr = vkReadStream->getBuf(); uint8_t** readStreamPtrPtr = &readStreamPtr;
         uint8_t* snapshotTraceBegin = vkReadStream->beginTrace();
         vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+        
+                 if (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK) {
+            uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
+            if (seqnoPtr && !m_forSnapshotLoad) {
+             while ((seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));
+            }
+        }
+        
         auto vk = m_vk;
         switch (opcode)
         {
@@ -17809,6 +17817,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 return ptr - (unsigned char *)buf;
             }
         }
+        
+        if (seqnoPtr && (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK)) {
+        __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+        }
+        
         ptr += packetLen;
     }
     if (m_forSnapshotLoad)
