@@ -2259,6 +2259,8 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #endif
 #ifdef VK_MVK_moltenvk
 #endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+#endif
             default:
             {
                 fprintf(stderr, "Fatal, unrecognized opcode %u\n", opcode);
