@@ -682,6 +682,9 @@ PFN_vkGetMTLBufferMVK vkGetMTLBufferMVK;
 PFN_vkUseIOSurfaceMVK vkUseIOSurfaceMVK;
 PFN_vkGetIOSurfaceMVK vkGetIOSurfaceMVK;
 #endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+PFN_vkQueueFlushCommandsGOOGLE vkQueueFlushCommandsGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk

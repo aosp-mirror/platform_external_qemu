@@ -471,6 +471,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::VIRTIO_MOUSE;
         case android::featurecontrol::VirtconsoleLogcat:
             return android_studio::EmulatorFeatureFlagState::VIRTCONSOLE_LOGCAT;
+        case android::featurecontrol::VulkanQueueSubmitWithCommands:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_QUEUE_SUBMIT_WITH_COMMANDS;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
