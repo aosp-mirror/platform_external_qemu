@@ -117,7 +117,7 @@ static void ipmi_bmc_handle_hw_op(IPMICore *ic, unsigned char hw_op,
     }
 }
 
-static void ipmi_bmc_extern_handle_command(IPMIBmc *b,
+static void ipmi_bmc_extern_handle_command(IPMICore *b,
                                        uint8_t *cmd, unsigned int cmd_len,
                                        unsigned int max_cmd_len,
                                        uint8_t msg_id)
@@ -165,8 +165,8 @@ static void ipmi_bmc_extern_class_init(ObjectClass *oc, void *data)
     IPMIBmcClass *bk = IPMI_BMC_CLASS(oc);
     IPMICoreClass *ck = IPMI_CORE_CLASS(oc);
 
-    bk->handle_command = ipmi_bmc_extern_handle_command;
     bk->handle_reset = ipmi_bmc_extern_handle_reset;
+    ck->handle_command = ipmi_bmc_extern_handle_command;
     ck->handle_hw_op = ipmi_bmc_handle_hw_op;
     dc->hotpluggable = false;
     dc->realize = ipmi_bmc_extern_realize;

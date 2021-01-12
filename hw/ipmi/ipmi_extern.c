@@ -119,9 +119,9 @@ static void addchar(IPMIExtern *ibe, unsigned char ch)
 }
 
 void ipmi_extern_handle_command(IPMIExtern *ibe,
-                                       uint8_t *cmd, unsigned int cmd_len,
-                                       unsigned int max_cmd_len,
-                                       uint8_t msg_id)
+                                uint8_t *cmd, unsigned int cmd_len,
+                                unsigned int max_cmd_len,
+                                uint8_t msg_id)
 {
     IPMIInterface *s = ibe->core->intf;
     uint8_t err = 0, csum;

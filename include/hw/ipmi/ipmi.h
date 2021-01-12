@@ -196,6 +196,14 @@ struct IPMICoreClass {
      * Handle a hardware command.
      */
     void (*handle_hw_op)(struct IPMICore *s, uint8_t hw_op, uint8_t operand);
+
+    /*
+     * Handle a command to the bmc.
+     */
+    void (*handle_command)(struct IPMICore *s,
+                           uint8_t *cmd, unsigned int cmd_len,
+                           unsigned int max_cmd_len,
+                           uint8_t msg_id);
 };
 
 /*
@@ -216,14 +224,6 @@ struct IPMIBmcClass {
 
     /* Called when the system resets to report to the bmc. */
     void (*handle_reset)(struct IPMIBmc *s);
-
-    /*
-     * Handle a command to the bmc.
-     */
-    void (*handle_command)(struct IPMIBmc *s,
-                           uint8_t *cmd, unsigned int cmd_len,
-                           unsigned int max_cmd_len,
-                           uint8_t msg_id);
 };
 
 /*

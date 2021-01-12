@@ -108,7 +108,7 @@ static void smbus_ipmi_send_msg(SMBusIPMIDevice *sid)
 {
     uint8_t *msg = sid->inmsg;
     uint32_t len = sid->inlen;
-    IPMIBmcClass *bk = IPMI_BMC_GET_CLASS(sid->bmc);
+    IPMICoreClass *ck = IPMI_CORE_GET_CLASS(sid->bmc);
 
     sid->outlen = 0;
     sid->outpos = 0;
@@ -136,8 +136,8 @@ static void smbus_ipmi_send_msg(SMBusIPMIDevice *sid)
         return;
     }
 
-    bk->handle_command(sid->bmc, sid->inmsg, sid->inlen, sizeof(sid->inmsg),
-                       sid->waiting_rsp);
+    ck->handle_command(IPMI_CORE(sid->bmc), sid->inmsg, sid->inlen,
+                       sizeof(sid->inmsg), sid->waiting_rsp);
 }
 
 static uint8_t ipmi_receive_byte(SMBusDevice *dev)

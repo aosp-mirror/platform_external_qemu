@@ -640,7 +640,7 @@ static void next_timeout(IPMIBmcSim *ibs)
     timer_mod_ns(ibs->timer, next);
 }
 
-static void ipmi_sim_handle_command(IPMIBmc *b,
+static void ipmi_sim_handle_command(IPMICore *b,
                                     uint8_t *cmd, unsigned int cmd_len,
                                     unsigned int max_cmd_len,
                                     uint8_t msg_id)
@@ -2222,12 +2222,12 @@ static Property ipmi_sim_properties[] = {
 static void ipmi_sim_class_init(ObjectClass *oc, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(oc);
-    IPMIBmcClass *bk = IPMI_BMC_CLASS(oc);
+    IPMICoreClass *ck = IPMI_CORE_CLASS(oc);
 
     dc->hotpluggable = false;
     dc->realize = ipmi_sim_realize;
     device_class_set_props(dc, ipmi_sim_properties);
-    bk->handle_command = ipmi_sim_handle_command;
+    ck->handle_command = ipmi_sim_handle_command;
 }
 
 static const TypeInfo ipmi_sim_type = {
