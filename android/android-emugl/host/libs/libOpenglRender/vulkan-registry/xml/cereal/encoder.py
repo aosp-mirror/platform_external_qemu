@@ -343,19 +343,53 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
 
     cgen.endBlock()
 
+def is_cmdbuf_dispatch(api):
+    return "VkCommandBuffer" == api.parameters[0].typeName
+
 def emit_parameter_encode_write_packet_info(typeInfo, api, cgen):
-    cgen.stmt("uint32_t packetSize_%s = 4 + 4 + count" % (api.name))
+    # Seqno and skipping dispatch serialize are for use with VULKAN_STREAM_FEATURE_QUEUE_SUBMIT_WITH_COMMANDS_BIT
+    doSeqno = True
+    doDispatchSerialize = True
+
+    if is_cmdbuf_dispatch(api):
+        doSeqno = False
+        doDispatchSerialize = False
+
+    if doSeqno:
+        cgen.stmt("uint32_t packetSize_%s = 4 + 4 + (queueSubmitWithCommandsEnabled ? 4 : 0) + count" % (api.name))
+    else:
+        cgen.stmt("uint32_t packetSize_%s = 4 + 4 + count" % (api.name))
+
+    if not doDispatchSerialize:
+        cgen.stmt("if (queueSubmitWithCommandsEnabled) packetSize_%s -= 8" % api.name)
+
     cgen.stmt("uint8_t* streamPtr = %s->reserve(packetSize_%s)" % (STREAM, api.name))
     cgen.stmt("uint8_t** streamPtrPtr = &streamPtr")
     cgen.stmt("uint32_t opcode_%s = OP_%s" % (api.name, api.name))
+
+    if doSeqno:
+        cgen.stmt("uint32_t seqno; if (queueSubmitWithCommandsEnabled) seqno = ResourceTracker::nextSeqno()")
+
     cgen.stmt("memcpy(streamPtr, &opcode_%s, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)" % api.name)
     cgen.stmt("memcpy(streamPtr, &packetSize_%s, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)" % api.name)
+
+    if doSeqno:
+        cgen.line("if (queueSubmitWithCommandsEnabled) { memcpy(streamPtr, &seqno, sizeof(uint32_t)); streamPtr += sizeof(uint32_t); }")
 
 def emit_parameter_encode_do_parameter_write(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
 
+    dispatchDone = False
+
     for p in encodingParams.toWrite:
-        emit_marshal(typeInfo, p, cgen)
+        if is_cmdbuf_dispatch(api) and not dispatchDone:
+            cgen.beginIf("!queueSubmitWithCommandsEnabled")
+            emit_marshal(typeInfo, p, cgen)
+            cgen.endIf()
+        else:
+            emit_marshal(typeInfo, p, cgen)
+
+        dispatchDone = True
 
 def emit_parameter_encode_read(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
@@ -379,8 +413,21 @@ def emit_post(typeInfo, api, cgen):
     for p in encodingParams.toDestroy:
         emit_handlemap_destroy(typeInfo, p, cgen)
 
+    doSeqno = True
+    if is_cmdbuf_dispatch(api):
+        doSeqno = False
+
+    retType = api.getRetTypeExpr()
+
     if api.name in ENCODER_EXPLICIT_FLUSHED_APIS:
         cgen.stmt("stream->flush()");
+        return
+
+    if doSeqno:
+        if retType == "void":
+            encodingParams = EncodingParameters(api)
+            if 0 == len(encodingParams.toRead):
+                cgen.stmt("stream->flush()");
 
 def emit_pool_free(cgen):
     cgen.stmt("++encodeCount;")
@@ -545,6 +592,9 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
+def emit_manual_inline(typeInfo, api, cgen):
+    cgen.line("#include \"%s_encode_impl.cpp.inl\"" % api.name)
+
 def unwrap_VkNativeBufferANDROID():
     def mapOp(cgen, orig, local):
         cgen.stmt("sResourceTracker->unwrap_VkNativeBufferANDROID(%s, %s)" %
@@ -565,6 +615,7 @@ custom_encodes = {
     "vkCreateImage" : emit_with_custom_unwrap(unwrap_VkNativeBufferANDROID()),
     "vkCreateImageWithRequirementsGOOGLE" : emit_with_custom_unwrap(unwrap_VkNativeBufferANDROID()),
     "vkAcquireImageANDROID" : emit_with_custom_unwrap(unwrap_vkAcquireImageANDROID_nativeFenceFd()),
+    "vkQueueFlushCommandsGOOGLE" : emit_manual_inline,
 }
 
 class VulkanEncoder(VulkanWrapperGenerator):
