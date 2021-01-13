@@ -6333,6 +6333,8 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_MVK_moltenvk
 #endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+#endif
 void checkEqual_extension_struct(
     const void* structExtension,
     const void* structExtension2,

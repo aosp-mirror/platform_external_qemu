@@ -196,6 +196,8 @@ class VulkanType(object):
 
         self.primitiveEncodingSize = None
 
+        self.deviceMemoryInfoParameterIndices = None
+
         # Annotations
         # Environment annotation for binding current
         # variables to sub-structures
