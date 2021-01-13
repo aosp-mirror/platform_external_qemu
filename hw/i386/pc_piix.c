@@ -258,30 +258,41 @@ static void pc_init1(MachineState *machine,
     pc_register_ferr_irq(pcms->gsi[13]);
 
 #if defined(CONFIG_ANDROID)
-    if (android_qemu_mode) {
-        g_assert(pci_bus);
-        g_assert(piix3_devfn >= 0);
-        g_assert(pci_create_simple(pci_bus,
-                                   PCI_DEVFN(GOLDFISH_ADDRESS_SPACE_PCI_SLOT,
-                                             GOLDFISH_ADDRESS_SPACE_PCI_FUNCTION),
-                                   GOLDFISH_ADDRESS_SPACE_NAME));
-        sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
-                             pcms->gsi[GOLDFISH_BATTERY_IRQ]);
-        sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,
-                             pcms->gsi[GOLDFISH_EVENTS_IRQ]);
-        sysbus_create_simple("goldfish_pipe", GOLDFISH_PIPE_IOMEM_BASE,
-                             pcms->gsi[GOLDFISH_PIPE_IRQ]);
-        sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
-                             pcms->gsi[GOLDFISH_FB_IRQ]);
-        sysbus_create_simple("goldfish_audio", GOLDFISH_AUDIO_IOMEM_BASE,
-                             pcms->gsi[GOLDFISH_AUDIO_IRQ]);
-        sysbus_create_simple("goldfish_rtc", GOLDFISH_RTC_IOMEM_BASE,
-                             pcms->gsi[GOLDFISH_RTC_IRQ]);
-        sysbus_create_simple("goldfish_sync", GOLDFISH_SYNC_IOMEM_BASE,
-                             pcms->gsi[GOLDFISH_SYNC_IRQ]);
-        sysbus_create_simple("goldfish_rotary", GOLDFISH_ROTARY_IOMEM_BASE,
-                             pcms->gsi[GOLDFISH_ROTARY_IRQ]);
+    uint32_t goldfish_sync_irq = GOLDFISH_SYNC_IRQ;
+    uint32_t goldfish_events_irq = GOLDFISH_EVENTS_IRQ;
+
+    /* TODO(fxbug.dev/66965): Currently for Fuchsia emulator, we swap the IRQ
+     * line of goldfish_sync (IRQ 21) and goldfish_events (IRQ 17) devices as
+     * the former one has an IRQ conflict with PCI devices using legacy IRQ
+     * handling.
+     */
+    if (!android_qemu_mode) {
+        goldfish_sync_irq = GOLDFISH_EVENTS_IRQ;
+        goldfish_events_irq = GOLDFISH_SYNC_IRQ;
     }
+
+    g_assert(pci_bus);
+    g_assert(piix3_devfn >= 0);
+    g_assert(pci_create_simple(pci_bus,
+                                PCI_DEVFN(GOLDFISH_ADDRESS_SPACE_PCI_SLOT,
+                                            GOLDFISH_ADDRESS_SPACE_PCI_FUNCTION),
+                                GOLDFISH_ADDRESS_SPACE_NAME));
+    sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
+                            pcms->gsi[GOLDFISH_BATTERY_IRQ]);
+    sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,
+                            pcms->gsi[goldfish_events_irq]);
+    sysbus_create_simple("goldfish_pipe", GOLDFISH_PIPE_IOMEM_BASE,
+                            pcms->gsi[GOLDFISH_PIPE_IRQ]);
+    sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
+                            pcms->gsi[GOLDFISH_FB_IRQ]);
+    sysbus_create_simple("goldfish_audio", GOLDFISH_AUDIO_IOMEM_BASE,
+                            pcms->gsi[GOLDFISH_AUDIO_IRQ]);
+    sysbus_create_simple("goldfish_rtc", GOLDFISH_RTC_IOMEM_BASE,
+                            pcms->gsi[GOLDFISH_RTC_IRQ]);
+    sysbus_create_simple("goldfish_sync", GOLDFISH_SYNC_IOMEM_BASE,
+                            pcms->gsi[goldfish_sync_irq]);
+    sysbus_create_simple("goldfish_rotary", GOLDFISH_ROTARY_IOMEM_BASE,
+                            pcms->gsi[GOLDFISH_ROTARY_IRQ]);
 #endif  // CONFIG_ANDROID
 
     pc_vga_init(isa_bus, pcmc->pci_enabled ? pci_bus : NULL);

@@ -243,10 +243,23 @@ static void pc_q35_init(MachineState *machine)
     pc_register_ferr_irq(pcms->gsi[13]);
 
 #ifdef CONFIG_ANDROID
+    uint32_t goldfish_sync_irq = GOLDFISH_SYNC_IRQ;
+    uint32_t goldfish_events_irq = GOLDFISH_EVENTS_IRQ;
+
+    /* TODO(fxbug.dev/66965): Currently for Fuchsia emulator, we swap the IRQ
+     * line of goldfish_sync (IRQ 21) and goldfish_events (IRQ 17) devices as
+     * the former one has an IRQ conflict with PCI devices using legacy IRQ
+     * handling.
+     */
+    if (!android_qemu_mode) {
+        goldfish_sync_irq = GOLDFISH_EVENTS_IRQ;
+        goldfish_events_irq = GOLDFISH_SYNC_IRQ;
+    }
+
     sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
                          pcms->gsi[GOLDFISH_BATTERY_IRQ]);
     sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_EVENTS_IRQ]);
+                         pcms->gsi[goldfish_events_irq]);
     sysbus_create_simple("goldfish_pipe", GOLDFISH_PIPE_IOMEM_BASE,
                          pcms->gsi[GOLDFISH_PIPE_IRQ]);
     sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
@@ -256,7 +269,7 @@ static void pc_q35_init(MachineState *machine)
     sysbus_create_simple("goldfish_rtc", GOLDFISH_RTC_IOMEM_BASE,
                          pcms->gsi[GOLDFISH_RTC_IRQ]);
     sysbus_create_simple("goldfish_sync", GOLDFISH_SYNC_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_SYNC_IRQ]);
+                         pcms->gsi[goldfish_sync_irq]);
     sysbus_create_simple("goldfish_rotary", GOLDFISH_ROTARY_IOMEM_BASE,
                          pcms->gsi[GOLDFISH_ROTARY_IRQ]);
     g_assert(pci_create_simple(host_bus,
