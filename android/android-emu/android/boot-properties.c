@@ -142,6 +142,10 @@ void boot_property_add_logcat_pipe(const char* logcat_filter) {
     boot_property_add("qemu.logcat", "start");
 }
 
+void boot_property_add_logcat_pipe_virtconsole(const char* logcat_filter) {
+    boot_property_add("qemu.logcat_filter", (logcat_filter ? logcat_filter : "*:S"));
+}
+
 /* Prints the warning string corresponding to the error code returned by
  * boot_propery_add2().
  */

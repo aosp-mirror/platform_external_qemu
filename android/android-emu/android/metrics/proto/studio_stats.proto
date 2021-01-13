@@ -1449,7 +1449,8 @@ message EmulatorFeatureFlagState {
     VIRTIO_VSOCK_PIPE = 72;
     S3TC_TEXTURE_SUPPORT = 73;
     VIRTIO_MOUSE = 74;
-    // Next tag: 75
+    VIRTCONSOLE_LOGCAT = 75;
+    // Next tag: 76
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
