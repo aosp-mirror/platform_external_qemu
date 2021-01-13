@@ -101,6 +101,10 @@ public:
         return mFeatureBits;
     }
 
+    android::base::BumpPool* pool() {
+        return &mPool;
+    }
+
 private:
     size_t oustandingWriteBuffer() const {
         return mWritePos;
@@ -261,6 +265,10 @@ VulkanHandleMapping* VulkanStream::handleMapping() const {
 
 uint32_t VulkanStream::getFeatureBits() const {
     return mImpl->getFeatureBits();
+}
+
+android::base::BumpPool* VulkanStream::pool() {
+    return mImpl->pool();
 }
 
 VulkanMemReadingStream::VulkanMemReadingStream(uint8_t* start)
