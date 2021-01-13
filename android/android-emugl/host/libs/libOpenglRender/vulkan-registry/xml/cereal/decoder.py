@@ -608,6 +608,9 @@ custom_decodes = {
     "vkQueueBindSparseAsyncGOOGLE" : emit_global_state_wrapped_decoding,
 
     "vkGetLinearImageLayoutGOOGLE" : emit_global_state_wrapped_decoding,
+
+    # VK_GOOGLE_queue_submit_with_commands
+    "vkQueueFlushCommandsGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):

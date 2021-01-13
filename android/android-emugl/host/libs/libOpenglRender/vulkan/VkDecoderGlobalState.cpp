@@ -4073,6 +4073,13 @@ public:
         }
     }
 
+    void on_vkQueueFlushCommandsGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        VkDeviceSize dataSize,
+        const void* pData) {
+    }
+
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
@@ -6859,6 +6866,14 @@ void VkDecoderGlobalState::on_vkGetLinearImageLayoutGOOGLE(
     VkDeviceSize* pOffset,
     VkDeviceSize* pRowPitchAlignment) {
     mImpl->on_vkGetLinearImageLayoutGOOGLE(pool, device, format, pOffset, pRowPitchAlignment);
+}
+
+void VkDecoderGlobalState::on_vkQueueFlushCommandsGOOGLE(
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    VkDeviceSize dataSize,
+    const void* pData) {
+    mImpl->on_vkQueueFlushCommandsGOOGLE(pool, queue, dataSize, pData);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(

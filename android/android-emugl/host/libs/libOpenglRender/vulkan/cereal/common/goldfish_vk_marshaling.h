@@ -3427,6 +3427,9 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #define OP_vkUseIOSurfaceMVK 20338
 #define OP_vkGetIOSurfaceMVK 20339
 #endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+#define OP_vkQueueFlushCommandsGOOGLE 20340
+#endif
 const char* api_opcode_to_string(
     const uint32_t opcode);
 

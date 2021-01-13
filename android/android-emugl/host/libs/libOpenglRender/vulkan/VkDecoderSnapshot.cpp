@@ -4577,6 +4577,18 @@ void vkGetIOSurfaceMVK(
     // TODO: Implement
 }
 #endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+void vkQueueFlushCommandsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    VkDeviceSize dataSize,
+    const void* pData)
+{
+    // TODO: Implement
+}
+#endif
 
 private:
     android::base::Lock mLock;
@@ -9031,6 +9043,18 @@ void VkDecoderSnapshot::vkGetIOSurfaceMVK(
     void** pIOSurface)
 {
     mImpl->vkGetIOSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, pool, image, pIOSurface);
+}
+#endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+void VkDecoderSnapshot::vkQueueFlushCommandsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    VkDeviceSize dataSize,
+    const void* pData)
+{
+    mImpl->vkQueueFlushCommandsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, dataSize, pData);
 }
 #endif
 
