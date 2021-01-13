@@ -102,6 +102,9 @@ enum asg_host_state {
 
     // Error: Something weird happened and we need to exit.
     ASG_HOST_STATE_ERROR = 3,
+
+    // Rendering
+    ASG_HOST_STATE_RENDERING = 4,
 };
 
 struct asg_ring_config;
