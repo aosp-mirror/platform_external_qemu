@@ -41,8 +41,14 @@ private:
     static MediaCodecType getMediaCodecType(uint64_t metadata);
     static MediaOperation getMediaOperation(uint64_t metadata);
 
-    static constexpr int kAlignment = 4096;
-    static constexpr int kNumPages = 1 + 4096 * 2; // 32M + 4k
+#if defined(__APPLE__) && defined(__arm64__)
+    static constexpr uint32_t kPageSize = 16384;
+#else
+    static constexpr uint32_t kPageSize = 4096;
+#endif
+
+    static constexpr int kAlignment = kPageSize;
+    static constexpr int kNumPages = 1 + kPageSize * 2; // 32M + 4k
     bool isMemoryAllocated = false;
     std::unique_ptr<MediaVpxDecoder> mVpxDecoder;
     std::unique_ptr<MediaH264Decoder> mH264Decoder;
