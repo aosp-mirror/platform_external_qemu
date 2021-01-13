@@ -155,7 +155,7 @@ def emit_count_marshal(typeInfo, param, cgen):
         iterateVulkanType(
             typeInfo, param,
             VulkanCountingCodegen( \
-               cgen, "featureBits", param.paramName, "countPtr",
+               cgen, "sFeatureBits", param.paramName, "countPtr",
                "count_"))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
@@ -230,6 +230,9 @@ class EncodingParameters(object):
             param.action = None
             param.inout = "in"
 
+            if param.paramName == "doLock":
+                continue
+
             if param.possiblyOutput():
                 param.inout += "out"
                 self.toWrite.append(param)
@@ -248,7 +251,6 @@ class EncodingParameters(object):
                 self.toWrite.append(localCopyParam)
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
-    cgen.stmt("mImpl->log(\"start %s\")" % api.name)
     emit_custom_pre_validate(typeInfo, api, cgen);
     emit_custom_resource_preprocess(typeInfo, api, cgen);
 
@@ -269,10 +271,31 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
             origParam.paramName in customUnwrap and \
             "copyOp" in customUnwrap[origParam.paramName]
 
+        shouldCustomMap = \
+            customUnwrap and \
+            origParam.paramName in customUnwrap and \
+            "mapOp" in customUnwrap[origParam.paramName]
+
         if shouldCustomCopy:
             customUnwrap[origParam.paramName]["copyOp"](cgen, origParam, localCopyParam)
         else:
-            emit_deepcopy(typeInfo, origParam, cgen)
+            # if this is a pointer type and we don't do custom copy nor unwrap,
+            # and the transform doesn't end up doing anything,
+            # don't deepcopy, just cast it.
+           
+            avoidDeepcopy = False
+
+            if origParam.pointerIndirectionLevels > 0:
+                testCgen = CodeGen()
+                genTransformsForVulkanType("sResourceTracker", origParam, lambda p: testCgen.generalAccess(p, parentVarName = None, asPtr = True), lambda p: testCgen.generalLengthAccess(p, parentVarName = None), testCgen)
+                emit_transform(typeInfo, origParam, testCgen, variant="tohost")
+                if "" == testCgen.swapCode():
+                    avoidDeepcopy = True
+            if avoidDeepcopy:
+                cgen.line("// Avoiding deepcopy for %s" % origParam.paramName)
+                cgen.stmt("%s = (%s%s)%s" % (localCopyParam.paramName, localCopyParam.typeName, "*" * origParam.pointerIndirectionLevels, origParam.paramName))
+            else:
+                emit_deepcopy(typeInfo, origParam, cgen)
 
     for (origParam, localCopyParam) in encodingParams.localCopied:
         shouldCustomMap = \
@@ -302,9 +325,10 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
 
     # For all local copied parameters, run the transforms
     for localParam in apiForTransform.parameters:
+        if "doLock" in localParam.paramName:
+            continue
         emit_transform(typeInfo, localParam, cgen, variant="tohost")
 
-    cgen.stmt("uint32_t featureBits = %s->getFeatureBits()" % (STREAM))
     cgen.stmt("size_t count = 0")
     cgen.stmt("size_t* countPtr = &count")
     cgen.beginBlock()
@@ -315,21 +339,55 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
 
     cgen.endBlock()
 
+def is_cmdbuf_dispatch(api):
+    return "VkCommandBuffer" == api.parameters[0].typeName
+
 def emit_parameter_encode_write_packet_info(typeInfo, api, cgen):
-    cgen.stmt("uint32_t packetSize_%s = 4 + 4 + 4 + count" % (api.name))
+    cgen.stmt("bool queueSubmitWithCommandsEnabled = sFeatureBits & VULKAN_STREAM_FEATURE_QUEUE_SUBMIT_WITH_COMMANDS_BIT")
+
+    # Seqno and skipping dispatch serialize are for use with VULKAN_STREAM_FEATURE_QUEUE_SUBMIT_WITH_COMMANDS_BIT
+    doSeqno = True
+    doDispatchSerialize = True
+
+    if is_cmdbuf_dispatch(api):
+        doSeqno = False
+        doDispatchSerialize = False
+
+    if doSeqno:
+        cgen.stmt("uint32_t packetSize_%s = 4 + 4 + (queueSubmitWithCommandsEnabled ? 4 : 0) + count" % (api.name))
+    else:
+        cgen.stmt("uint32_t packetSize_%s = 4 + 4 + count" % (api.name))
+
+    if not doDispatchSerialize:
+        cgen.stmt("if (queueSubmitWithCommandsEnabled) packetSize_%s -= 8" % api.name)
+
     cgen.stmt("uint8_t* streamPtr = %s->reserve(packetSize_%s)" % (STREAM, api.name))
     cgen.stmt("uint8_t** streamPtrPtr = &streamPtr")
     cgen.stmt("uint32_t opcode_%s = OP_%s" % (api.name, api.name))
-    cgen.stmt("uint32_t seqno = ResourceTracker::nextSeqno()")
+
+    if doSeqno:
+        cgen.stmt("uint32_t seqno = ResourceTracker::nextSeqno()")
+
     cgen.stmt("memcpy(streamPtr, &opcode_%s, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)" % api.name)
     cgen.stmt("memcpy(streamPtr, &packetSize_%s, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)" % api.name)
-    cgen.stmt("memcpy(streamPtr, &seqno, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)")
+
+    if doSeqno:
+        cgen.stmt("memcpy(streamPtr, &seqno, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)")
 
 def emit_parameter_encode_do_parameter_write(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
 
+    dispatchDone = False
+
     for p in encodingParams.toWrite:
-        emit_marshal(typeInfo, p, cgen)
+        if is_cmdbuf_dispatch(api) and not dispatchDone:
+            cgen.beginIf("!queueSubmitWithCommandsEnabled")
+            emit_marshal(typeInfo, p, cgen)
+            cgen.endIf()
+        else:
+            emit_marshal(typeInfo, p, cgen)
+
+        dispatchDone = True
 
 def emit_parameter_encode_read(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
@@ -353,8 +411,21 @@ def emit_post(typeInfo, api, cgen):
     for p in encodingParams.toDestroy:
         emit_handlemap_destroy(typeInfo, p, cgen)
 
+    doSeqno = True
+    if is_cmdbuf_dispatch(api):
+        doSeqno = False
+
+    retType = api.getRetTypeExpr()
+
     if api.name in ENCODER_EXPLICIT_FLUSHED_APIS:
         cgen.stmt("stream->flush()");
+        return
+
+    if doSeqno:
+        if retType == "void":
+            encodingParams = EncodingParameters(api)
+            if 0 == len(encodingParams.toRead):
+                cgen.stmt("stream->flush()");
 
 def emit_pool_free(cgen):
     cgen.stmt("++encodeCount;")
@@ -376,7 +447,6 @@ def emit_return_unmarshal(typeInfo, api, cgen):
               (STREAM, retVar, cgen.sizeofExpr(api.retType)))
 
 def emit_return(typeInfo, api, cgen):
-    cgen.stmt("mImpl->log(\"finish %s\");" % api.name);
     if api.getRetTypeExpr() == "void":
         return
 

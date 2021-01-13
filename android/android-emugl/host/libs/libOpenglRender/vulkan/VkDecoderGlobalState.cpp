@@ -28,6 +28,7 @@
 #include "VkDecoderSnapshot.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
+#include "VulkanStream.h"
 #include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
 #include "android/base/containers/EntityManager.h"
@@ -38,6 +39,8 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
+#include "common/goldfish_vk_marshaling.h"
+#include "common/goldfish_vk_reserved_marshaling.h"
 #include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_dispatch.h"
 #include "emugl/common/address_space_device_control_ops.h"
@@ -192,6 +195,7 @@ class DispatchableHandleInfo {
         VulkanDispatch* dispatch = nullptr;
         bool ownDispatch = false;
         OrderMaintenanceInfo* ordMaintInfo = nullptr;
+        VulkanMemReadingStream* readStream = nullptr;
 };
 
 static BoxedHandleManager<DispatchableHandleInfo<uint64_t>> sBoxedHandleManager;
@@ -3364,6 +3368,7 @@ public:
 
         AutoLock lock(mLock);
         for (uint32_t i = 0; i < pAllocateInfo->commandBufferCount; i++) {
+            fprintf(stderr, "%s: got cmdbuf: %p\n", __func__, pCommandBuffers[i]);
             mCmdBufferInfo[pCommandBuffers[i]] = CommandBufferInfo();
             mCmdBufferInfo[pCommandBuffers[i]].device = device;
             mCmdBufferInfo[pCommandBuffers[i]].cmdPool =
@@ -3755,6 +3760,14 @@ public:
         releaseOrderMaintInfo(order);
     }
 
+    void on_vkCommandBufferHostSyncGOOGLE(
+            android::base::BumpPool* pool,
+            VkCommandBuffer commandBuffer,
+            uint32_t needHostSync,
+            uint32_t sequenceNumber) {
+        this->hostSyncCommandBuffer("hostSync", commandBuffer, needHostSync, sequenceNumber);
+    }
+
     void hostSyncQueue(
         const char* tag,
         VkQueue boxed_queue,
@@ -3792,6 +3805,15 @@ public:
         order->cv.broadcast();
         releaseOrderMaintInfo(order);
     }
+
+    void on_vkQueueHostSyncGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber) {
+        this->hostSyncQueue("hostSyncQueue", queue, needHostSync, sequenceNumber);
+    }
+
 
     VkResult on_vkCreateImageWithRequirementsGOOGLE(
         android::base::BumpPool* pool,
@@ -3866,6 +3888,14 @@ public:
         return VK_SUCCESS;
     }
 
+    VkResult on_vkBeginCommandBufferAsyncGOOGLE(
+            android::base::BumpPool* pool,
+            VkCommandBuffer boxed_commandBuffer,
+            const VkCommandBufferBeginInfo* pBeginInfo) {
+        return this->on_vkBeginCommandBuffer(
+            pool, boxed_commandBuffer, pBeginInfo);
+    }
+
     void on_vkEndCommandBufferAsyncGOOGLE(
             android::base::BumpPool* pool,
             VkCommandBuffer boxed_commandBuffer) {
@@ -3912,10 +3942,10 @@ public:
             const uint32_t* pDynamicOffsets) {
         auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
         auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
-        // vk->vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout,
-        //         firstSet, descriptorSetCount,
-        //         pDescriptorSets, dynamicOffsetCount,
-        //         pDynamicOffsets);
+        vk->vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout,
+                firstSet, descriptorSetCount,
+                pDescriptorSets, dynamicOffsetCount,
+                pDynamicOffsets);
         if (pipelineBindPoint == VK_PIPELINE_BIND_POINT_COMPUTE) {
             AutoLock lock(mLock);
             auto cmdBufferInfoIt = mCmdBufferInfo.find(commandBuffer);
@@ -4073,6 +4103,22 @@ public:
         }
     }
 
+#include "VkSubDecoder.cpp"
+
+    void on_vkQueueFlushCommandsGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        VkCommandBuffer boxed_commandBuffer,
+        VkDeviceSize dataSize,
+        const void* pData) {
+        (void)queue;
+
+        VkCommandBuffer commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
+        VulkanDispatch* vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
+        VulkanMemReadingStream* readStream = readstream_VkCommandBuffer(boxed_commandBuffer);
+        subDecode(readStream, vk, boxed_commandBuffer, commandBuffer, dataSize, pData);
+    }
+
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
@@ -4157,6 +4203,7 @@ public:
         item.dispatch = dispatch ? dispatch : new VulkanDispatch; \
         item.ownDispatch = ownDispatch; \
         item.ordMaintInfo = new OrderMaintenanceInfo; \
+        item.readStream = nullptr; \
         auto res = (type)newGlobalHandle(item, Tag_##type); \
         return res; \
     } \
@@ -4165,6 +4212,7 @@ public:
             (uint64_t)(uintptr_t)boxed); \
         if (!elt) return; \
         releaseOrderMaintInfo(elt->ordMaintInfo); \
+        if (elt->readStream) delete elt->readStream; \
         sBoxedHandleManager.remove((uint64_t)boxed); \
     } \
     type unbox_##type(type boxed) { \
@@ -4180,6 +4228,14 @@ public:
         auto info = elt->ordMaintInfo; \
         if (!info) return 0; \
         acquireOrderMaintInfo(info); return info; \
+    } \
+    VulkanMemReadingStream* readstream_##type(type boxed) { \
+        auto elt = sBoxedHandleManager.get( \
+                (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return 0; \
+        auto stream = elt->readStream; \
+        if (!stream) stream = new VulkanMemReadingStream(0); \
+        return stream; \
     } \
     type unboxed_to_boxed_##type(type unboxed) { \
         AutoLock lock(sBoxedHandleManager.lock); \
@@ -6859,6 +6915,15 @@ void VkDecoderGlobalState::on_vkGetLinearImageLayoutGOOGLE(
     VkDeviceSize* pOffset,
     VkDeviceSize* pRowPitchAlignment) {
     mImpl->on_vkGetLinearImageLayoutGOOGLE(pool, device, format, pOffset, pRowPitchAlignment);
+}
+
+void VkDecoderGlobalState::on_vkQueueFlushCommandsGOOGLE(
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    VkCommandBuffer commandBuffer,
+    VkDeviceSize dataSize,
+    const void* pData) {
+    mImpl->on_vkQueueFlushCommandsGOOGLE(pool, queue, commandBuffer, dataSize, pData);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(
