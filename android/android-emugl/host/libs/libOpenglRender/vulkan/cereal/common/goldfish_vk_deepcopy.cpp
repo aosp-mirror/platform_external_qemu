@@ -6430,6 +6430,8 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_MVK_moltenvk
 #endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+#endif
 void deepcopy_extension_struct(
     BumpPool* pool,
     const void* structExtension,

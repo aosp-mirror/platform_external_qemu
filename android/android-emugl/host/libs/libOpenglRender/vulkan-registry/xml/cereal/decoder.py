@@ -102,7 +102,7 @@ def emit_param_decl_for_reading(param, cgen):
         cgen.stmt(
             cgen.makeRichCTypeDecl(param))
 
-def emit_unmarshal(typeInfo, param, cgen, output = False, destroy = False):
+def emit_unmarshal(typeInfo, param, cgen, output = False, destroy = False, noUnbox = False):
     if destroy:
         iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
             cgen,
@@ -123,13 +123,15 @@ def emit_unmarshal(typeInfo, param, cgen, output = False, destroy = False):
             cgen.stmt("((%s*)(%s))[i] = unbox_%s(%s[i])" % (param.typeName, param.paramName, param.typeName, param.paramName))
             cgen.endFor()
     else:
+        if noUnbox:
+            cgen.line("// No unbox for %s" % (param.paramName))
         iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
             cgen,
             READ_STREAM,
             param.paramName,
             "readStreamPtrPtr",
             API_PREFIX_RESERVEDUNMARSHAL,
-            "" if output else "unbox_",
+            "" if (output or noUnbox) else "unbox_",
             direction="read",
             dynAlloc=True))
 
@@ -249,6 +251,7 @@ def emit_decode_parameters(typeInfo, api, cgen, globalWrapped=False):
             emit_dispatch_unmarshal(typeInfo, p, cgen, globalWrapped)
         else:
             destroy = p.nonDispatchableHandleDestroy or p.dispatchableHandleDestroy
+            noUnbox = api.name == "vkQueueFlushCommandsGOOGLE" and p.paramName == "commandBuffer"
 
             if p.nonDispatchableHandleDestroy or p.dispatchableHandleDestroy:
                 destroy = True
@@ -262,7 +265,7 @@ def emit_decode_parameters(typeInfo, api, cgen, globalWrapped=False):
                 cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % p.paramName)
                 cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
 
-            emit_unmarshal(typeInfo, p, cgen, output = p.possiblyOutput(), destroy = destroy)
+            emit_unmarshal(typeInfo, p, cgen, output = p.possiblyOutput(), destroy = destroy, noUnbox = noUnbox)
         i += 1
 
     for p in paramsToRead:
@@ -608,6 +611,9 @@ custom_decodes = {
     "vkQueueBindSparseAsyncGOOGLE" : emit_global_state_wrapped_decoding,
 
     "vkGetLinearImageLayoutGOOGLE" : emit_global_state_wrapped_decoding,
+
+    # VK_GOOGLE_queue_submit_with_commands
+    "vkQueueFlushCommandsGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):
@@ -648,7 +654,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.line("""
-                 if (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK) {
+                 if (opcode >= OP_vkCreateInstance && opcode < OP_vkLast) {
             uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
             if (seqnoPtr && !m_forSnapshotLoad) {
              while ((seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));
@@ -689,7 +695,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.endBlock() # switch stmt
 
         self.cgen.line("""
-        if (seqnoPtr && (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK)) {
+        if (seqnoPtr && (opcode >= OP_vkCreateInstance && opcode < OP_vkLast)) {
         __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
         }
         """)
