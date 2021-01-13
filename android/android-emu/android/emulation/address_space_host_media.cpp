@@ -104,10 +104,16 @@ bool AddressSpaceHostMediaContext::load(base::Stream* stream) {
     return true;
 }
 
+#if defined(__APPLE__) && defined(__arm64__)
+static constexpr uint32_t kPageSize = 16384;
+#else
+static constexpr uint32_t kPageSize = 4096;
+#endif
+
 void AddressSpaceHostMediaContext::allocatePages(uint64_t phys_addr, int num_pages) {
-    mHostBuffer = android::aligned_buf_alloc(kAlignment, num_pages * 4096);
+    mHostBuffer = android::aligned_buf_alloc(kAlignment, num_pages * kPageSize);
     mControlOps->add_memory_mapping(
-        phys_addr, mHostBuffer, num_pages * 4096);
+        phys_addr, mHostBuffer, num_pages * kPageSize);
     AS_DEVICE_DPRINT("Allocating host memory for media context: guest_addr 0x%" PRIx64 ", 0x%" PRIx64,
                      (uint64_t)phys_addr, (uint64_t)mHostBuffer);
 }
@@ -119,7 +125,7 @@ void AddressSpaceHostMediaContext::deallocatePages(uint64_t phys_addr,
     }
 
     mControlOps->remove_memory_mapping(phys_addr, mHostBuffer,
-                                       num_pages * 4096);
+                                       num_pages * kPageSize);
     android::aligned_buf_free(mHostBuffer);
     mHostBuffer = nullptr;
     AS_DEVICE_DPRINT(
