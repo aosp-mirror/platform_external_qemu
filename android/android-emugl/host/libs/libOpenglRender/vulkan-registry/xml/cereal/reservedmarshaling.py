@@ -148,7 +148,7 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
         if lenAccess != "1":
             self.cgen.beginIf(lenAccess)
             # if self.direction == "write":
-            self.cgen.stmt("__attribute__((aligned(1))) uint64_t* %s = (__attribute__((aligned(1))) uint64_t*)(*%s)" % (handle64Var, self.ptrVar))
+            self.cgen.stmt("uint8_t* %s_ptr = (uint8_t*)(*%s)" % (handle64Var, self.ptrVar))
             # else:
             #     self.cgen.stmt("uint64_t* %s" % handle64Var)
             #     self.cgen.stmt(
@@ -189,7 +189,8 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
                     self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
                 else:
                     self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
-                    self.cgen.stmt("%s[k] = %s(%s[k])" % (handle64VarAccess, mapFunc64, access))
+                    self.cgen.stmt("uint64_t tmpval = %s(%s[k])" % (mapFunc64, access))
+                    self.cgen.stmt("memcpy(%s_ptr, &tmpval, sizeof(uint64_t))" % (handle64Var))
                     self.cgen.endFor()
                     self.genPtrIncr("8 * %s" % lenAccess)
         else:
@@ -201,9 +202,10 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
             else:
                 self.genPtrIncr("8 * %s" % lenAccess)
                 self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
-                self.cgen.stmt("*((%s%s) + k) = (%s)%s((%s)%s[k])" % (
+                self.cgen.stmt("uint64_t tmpval; memcpy(&tmpval, %s_ptr + k * 8, sizeof(uint64_t))" % handle64Var)
+                self.cgen.stmt("*((%s%s) + k) = (%s)%s((%s)tmpval)" % (
                     self.makeCastExpr(vulkanType.getForNonConstAccess()), access,
-                    vulkanType.typeName, mapFunc, vulkanType.typeName, handle64VarAccess))
+                    vulkanType.typeName, mapFunc, vulkanType.typeName))
                 self.cgen.endFor()
 
         if lenAccess != "1":

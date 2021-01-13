@@ -124,10 +124,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
         uint8_t* snapshotTraceBegin = vkReadStream->beginTrace();
         vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
         
-                 if (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK) {
+                 if (opcode >= OP_vkCreateInstance && opcode < OP_vkLast) {
             uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
             if (seqnoPtr && !m_forSnapshotLoad) {
-             while ((seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));
+                while ((seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));
             }
         }
         
@@ -186,6 +186,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateInstance(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateInstance_VkResult_return, pCreateInfo, pAllocator, pInstance);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyInstance:
@@ -223,6 +224,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDestroyInstance(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, pAllocator);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkEnumeratePhysicalDevices:
@@ -258,11 +260,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pPhysicalDevices, (*(pPhysicalDeviceCount)) * sizeof(VkPhysicalDevice));
                     if ((*(pPhysicalDeviceCount)))
                     {
-                        __attribute__((aligned(1))) uint64_t* cgen_var_8 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        uint8_t* cgen_var_8_ptr = (uint8_t*)(*readStreamPtrPtr);
                         *readStreamPtrPtr += 8 * (*(pPhysicalDeviceCount));
                         for (uint32_t k = 0; k < (*(pPhysicalDeviceCount)); ++k)
                         {
-                            *(((VkPhysicalDevice*)pPhysicalDevices) + k) = (VkPhysicalDevice)(VkPhysicalDevice)((VkPhysicalDevice)cgen_var_8[k]);
+                            uint64_t tmpval; memcpy(&tmpval, cgen_var_8_ptr + k * 8, sizeof(uint64_t));
+                            *(((VkPhysicalDevice*)pPhysicalDevices) + k) = (VkPhysicalDevice)(VkPhysicalDevice)((VkPhysicalDevice)tmpval);
                         }
                     }
                 }
@@ -303,6 +306,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumeratePhysicalDevices(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDevices_VkResult_return, instance, pPhysicalDeviceCount, pPhysicalDevices);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceFeatures:
@@ -341,6 +345,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFeatures(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceFormatProperties:
@@ -382,6 +387,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties:
@@ -437,6 +443,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties_VkResult_return, physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceProperties:
@@ -475,6 +482,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceQueueFamilyProperties:
@@ -561,6 +569,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceMemoryProperties:
@@ -599,6 +608,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetInstanceProcAddr:
@@ -630,6 +640,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetInstanceProcAddr(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetInstanceProcAddr_PFN_vkVoidFunction_return, instance, pName);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDeviceProcAddr:
@@ -661,6 +672,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceProcAddr(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceProcAddr_PFN_vkVoidFunction_return, device, pName);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateDevice:
@@ -720,6 +732,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDevice(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDevice_VkResult_return, physicalDevice, pCreateInfo, pAllocator, pDevice);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyDevice:
@@ -757,6 +770,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDestroyDevice(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pAllocator);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkEnumerateInstanceExtensionProperties:
@@ -852,6 +866,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumerateInstanceExtensionProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceExtensionProperties_VkResult_return, pLayerName, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkEnumerateDeviceExtensionProperties:
@@ -953,6 +968,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumerateDeviceExtensionProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateDeviceExtensionProperties_VkResult_return, physicalDevice, pLayerName, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkEnumerateInstanceLayerProperties:
@@ -1032,6 +1048,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumerateInstanceLayerProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceLayerProperties_VkResult_return, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkEnumerateDeviceLayerProperties:
@@ -1120,6 +1137,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumerateDeviceLayerProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateDeviceLayerProperties_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDeviceQueue:
@@ -1162,6 +1180,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceQueue(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, queueFamilyIndex, queueIndex, pQueue);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueueSubmit:
@@ -1209,6 +1228,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueSubmit(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueSubmit_VkResult_return, queue, submitCount, pSubmits, fence);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueueWaitIdle:
@@ -1235,6 +1255,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueWaitIdle(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueWaitIdle_VkResult_return, queue);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDeviceWaitIdle:
@@ -1264,6 +1285,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDeviceWaitIdle(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDeviceWaitIdle_VkResult_return, device);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkAllocateMemory:
@@ -1327,6 +1349,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAllocateMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateMemory_VkResult_return, device, pAllocateInfo, pAllocator, pMemory);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkFreeMemory:
@@ -1374,6 +1397,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDeviceMemory(memory);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkMapMemory:
@@ -1434,6 +1458,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkMapMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMapMemory_VkResult_return, device, memory, offset, size, flags, ppData);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkUnmapMemory:
@@ -1462,6 +1487,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUnmapMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, memory);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkFlushMappedMemoryRanges:
@@ -1524,6 +1550,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkFlushMappedMemoryRanges(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFlushMappedMemoryRanges_VkResult_return, device, memoryRangeCount, pMemoryRanges);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkInvalidateMappedMemoryRanges:
@@ -1587,6 +1614,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkInvalidateMappedMemoryRanges(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkInvalidateMappedMemoryRanges_VkResult_return, device, memoryRangeCount, pMemoryRanges);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDeviceMemoryCommitment:
@@ -1626,6 +1654,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceMemoryCommitment(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, memory, pCommittedMemoryInBytes);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkBindBufferMemory:
@@ -1665,6 +1694,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindBufferMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory_VkResult_return, device, buffer, memory, memoryOffset);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkBindImageMemory:
@@ -1704,6 +1734,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindImageMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory_VkResult_return, device, image, memory, memoryOffset);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetBufferMemoryRequirements:
@@ -1750,6 +1781,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetBufferMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, buffer, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetImageMemoryRequirements:
@@ -1793,6 +1825,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetImageSparseMemoryRequirements:
@@ -1884,6 +1917,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageSparseMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceSparseImageFormatProperties:
@@ -1985,6 +2019,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, type, samples, usage, tiling, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueueBindSparse:
@@ -2035,6 +2070,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueBindSparse(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueBindSparse_VkResult_return, queue, bindInfoCount, pBindInfo, fence);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateFence:
@@ -2101,6 +2137,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateFence(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateFence_VkResult_return, device, pCreateInfo, pAllocator, pFence);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyFence:
@@ -2151,6 +2188,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkFence(fence);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkResetFences:
@@ -2171,11 +2209,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pFences, ((fenceCount)) * sizeof(const VkFence));
                 if (((fenceCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_105 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_105_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((fenceCount));
                     for (uint32_t k = 0; k < ((fenceCount)); ++k)
                     {
-                        *(((VkFence*)pFences) + k) = (VkFence)unbox_VkFence((VkFence)cgen_var_105[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_105_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkFence*)pFences) + k) = (VkFence)unbox_VkFence((VkFence)tmpval);
                     }
                 }
                 if (m_logCalls)
@@ -2194,6 +2233,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetFences(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetFences_VkResult_return, device, fenceCount, pFences);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetFenceStatus:
@@ -2228,6 +2268,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetFenceStatus(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceStatus_VkResult_return, device, fence);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkWaitForFences:
@@ -2250,11 +2291,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pFences, ((fenceCount)) * sizeof(const VkFence));
                 if (((fenceCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_109 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_109_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((fenceCount));
                     for (uint32_t k = 0; k < ((fenceCount)); ++k)
                     {
-                        *(((VkFence*)pFences) + k) = (VkFence)unbox_VkFence((VkFence)cgen_var_109[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_109_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkFence*)pFences) + k) = (VkFence)unbox_VkFence((VkFence)tmpval);
                     }
                 }
                 memcpy((VkBool32*)&waitAll, *readStreamPtrPtr, sizeof(VkBool32));
@@ -2265,6 +2307,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     fprintf(stderr, "stream %p: call vkWaitForFences 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)fenceCount, (unsigned long long)pFences, (unsigned long long)waitAll, (unsigned long long)timeout);
                 }
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 VkResult vkWaitForFences_VkResult_return = (VkResult)0;
                 vkWaitForFences_VkResult_return = vk->vkWaitForFences(unboxed_device, fenceCount, pFences, waitAll, timeout);
                 vkStream->unsetHandleMapping();
@@ -2340,6 +2383,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSemaphore(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSemaphore_VkResult_return, device, pCreateInfo, pAllocator, pSemaphore);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroySemaphore:
@@ -2387,6 +2431,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSemaphore(semaphore);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateEvent:
@@ -2453,6 +2498,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateEvent_VkResult_return, device, pCreateInfo, pAllocator, pEvent);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyEvent:
@@ -2503,6 +2549,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkEvent(event);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetEventStatus:
@@ -2537,6 +2584,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetEventStatus(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetEventStatus_VkResult_return, device, event);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkSetEvent:
@@ -2571,6 +2619,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetEvent_VkResult_return, device, event);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkResetEvent:
@@ -2605,6 +2654,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetEvent_VkResult_return, device, event);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateQueryPool:
@@ -2671,6 +2721,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateQueryPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateQueryPool_VkResult_return, device, pCreateInfo, pAllocator, pQueryPool);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyQueryPool:
@@ -2721,6 +2772,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkQueryPool(queryPool);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetQueryPoolResults:
@@ -2778,6 +2830,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetQueryPoolResults(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetQueryPoolResults_VkResult_return, device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateBuffer:
@@ -2841,6 +2894,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBuffer_VkResult_return, device, pCreateInfo, pAllocator, pBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyBuffer:
@@ -2888,6 +2942,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkBuffer(buffer);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateBufferView:
@@ -2954,6 +3009,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateBufferView(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBufferView_VkResult_return, device, pCreateInfo, pAllocator, pView);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyBufferView:
@@ -3004,6 +3060,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkBufferView(bufferView);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateImage:
@@ -3067,6 +3124,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImage_VkResult_return, device, pCreateInfo, pAllocator, pImage);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyImage:
@@ -3114,6 +3172,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkImage(image);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetImageSubresourceLayout:
@@ -3167,6 +3226,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageSubresourceLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pSubresource, pLayout);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateImageView:
@@ -3230,6 +3290,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateImageView(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImageView_VkResult_return, device, pCreateInfo, pAllocator, pView);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyImageView:
@@ -3277,6 +3338,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkImageView(imageView);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateShaderModule:
@@ -3343,6 +3405,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateShaderModule(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateShaderModule_VkResult_return, device, pCreateInfo, pAllocator, pShaderModule);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyShaderModule:
@@ -3393,6 +3456,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkShaderModule(shaderModule);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreatePipelineCache:
@@ -3459,6 +3523,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreatePipelineCache(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreatePipelineCache_VkResult_return, device, pCreateInfo, pAllocator, pPipelineCache);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyPipelineCache:
@@ -3509,6 +3574,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkPipelineCache(pipelineCache);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPipelineCacheData:
@@ -3585,6 +3651,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPipelineCacheData(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPipelineCacheData_VkResult_return, device, pipelineCache, pDataSize, pData);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkMergePipelineCaches:
@@ -3610,11 +3677,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pSrcCaches, ((srcCacheCount)) * sizeof(const VkPipelineCache));
                 if (((srcCacheCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_194 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_194_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((srcCacheCount));
                     for (uint32_t k = 0; k < ((srcCacheCount)); ++k)
                     {
-                        *(((VkPipelineCache*)pSrcCaches) + k) = (VkPipelineCache)unbox_VkPipelineCache((VkPipelineCache)cgen_var_194[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_194_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkPipelineCache*)pSrcCaches) + k) = (VkPipelineCache)unbox_VkPipelineCache((VkPipelineCache)tmpval);
                     }
                 }
                 if (m_logCalls)
@@ -3633,6 +3701,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkMergePipelineCaches(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMergePipelineCaches_VkResult_return, device, dstCache, srcCacheCount, pSrcCaches);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateGraphicsPipelines:
@@ -3676,11 +3745,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
                 if (((createInfoCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_198 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_198_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((createInfoCount));
                     for (uint32_t k = 0; k < ((createInfoCount)); ++k)
                     {
-                        *(((VkPipeline*)pPipelines) + k) = (VkPipeline)(VkPipeline)((VkPipeline)cgen_var_198[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_198_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkPipeline*)pPipelines) + k) = (VkPipeline)(VkPipeline)((VkPipeline)tmpval);
                     }
                 }
                 if (pCreateInfos)
@@ -3722,6 +3792,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateGraphicsPipelines(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateGraphicsPipelines_VkResult_return, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateComputePipelines:
@@ -3765,11 +3836,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
                 if (((createInfoCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_203 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_203_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((createInfoCount));
                     for (uint32_t k = 0; k < ((createInfoCount)); ++k)
                     {
-                        *(((VkPipeline*)pPipelines) + k) = (VkPipeline)(VkPipeline)((VkPipeline)cgen_var_203[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_203_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkPipeline*)pPipelines) + k) = (VkPipeline)(VkPipeline)((VkPipeline)tmpval);
                     }
                 }
                 if (pCreateInfos)
@@ -3811,6 +3883,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateComputePipelines(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateComputePipelines_VkResult_return, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyPipeline:
@@ -3861,6 +3934,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkPipeline(pipeline);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreatePipelineLayout:
@@ -3929,6 +4003,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreatePipelineLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreatePipelineLayout_VkResult_return, device, pCreateInfo, pAllocator, pPipelineLayout);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyPipelineLayout:
@@ -3981,6 +4056,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkPipelineLayout(pipelineLayout);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateSampler:
@@ -4044,6 +4120,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSampler(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSampler_VkResult_return, device, pCreateInfo, pAllocator, pSampler);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroySampler:
@@ -4091,6 +4168,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSampler(sampler);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateDescriptorSetLayout:
@@ -4154,6 +4232,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDescriptorSetLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorSetLayout_VkResult_return, device, pCreateInfo, pAllocator, pSetLayout);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyDescriptorSetLayout:
@@ -4201,6 +4280,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDescriptorSetLayout(descriptorSetLayout);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateDescriptorPool:
@@ -4264,6 +4344,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDescriptorPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorPool_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorPool);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyDescriptorPool:
@@ -4311,6 +4392,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDescriptorPool(descriptorPool);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkResetDescriptorPool:
@@ -4345,6 +4427,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetDescriptorPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetDescriptorPool_VkResult_return, device, descriptorPool, flags);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkAllocateDescriptorSets:
@@ -4364,11 +4447,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pDescriptorSets, pAllocateInfo->descriptorSetCount * sizeof(VkDescriptorSet));
                 if (pAllocateInfo->descriptorSetCount)
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_239 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_239_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * pAllocateInfo->descriptorSetCount;
                     for (uint32_t k = 0; k < pAllocateInfo->descriptorSetCount; ++k)
                     {
-                        *(((VkDescriptorSet*)pDescriptorSets) + k) = (VkDescriptorSet)(VkDescriptorSet)((VkDescriptorSet)cgen_var_239[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_239_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkDescriptorSet*)pDescriptorSets) + k) = (VkDescriptorSet)(VkDescriptorSet)((VkDescriptorSet)tmpval);
                     }
                 }
                 if (pAllocateInfo)
@@ -4403,6 +4487,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAllocateDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateDescriptorSets_VkResult_return, device, pAllocateInfo, pDescriptorSets);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkFreeDescriptorSets:
@@ -4433,11 +4518,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
                     if (((descriptorSetCount)))
                     {
-                        __attribute__((aligned(1))) uint64_t* cgen_var_244 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        uint8_t* cgen_var_244_ptr = (uint8_t*)(*readStreamPtrPtr);
                         *readStreamPtrPtr += 8 * ((descriptorSetCount));
                         for (uint32_t k = 0; k < ((descriptorSetCount)); ++k)
                         {
-                            *(((VkDescriptorSet*)pDescriptorSets) + k) = (VkDescriptorSet)(VkDescriptorSet)((VkDescriptorSet)cgen_var_244[k]);
+                            uint64_t tmpval; memcpy(&tmpval, cgen_var_244_ptr + k * 8, sizeof(uint64_t));
+                            *(((VkDescriptorSet*)pDescriptorSets) + k) = (VkDescriptorSet)(VkDescriptorSet)((VkDescriptorSet)tmpval);
                         }
                     }
                 }
@@ -4466,6 +4552,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     delete_VkDescriptorSet(pDescriptorSets[i]);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkUpdateDescriptorSets:
@@ -4521,6 +4608,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUpdateDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorWriteCount, pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateFramebuffer:
@@ -4587,6 +4675,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateFramebuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateFramebuffer_VkResult_return, device, pCreateInfo, pAllocator, pFramebuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyFramebuffer:
@@ -4637,6 +4726,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkFramebuffer(framebuffer);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateRenderPass:
@@ -4700,6 +4790,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateRenderPass_VkResult_return, device, pCreateInfo, pAllocator, pRenderPass);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyRenderPass:
@@ -4750,6 +4841,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkRenderPass(renderPass);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetRenderAreaGranularity:
@@ -4796,6 +4888,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetRenderAreaGranularity(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, renderPass, pGranularity);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateCommandPool:
@@ -4859,6 +4952,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateCommandPool_VkResult_return, device, pCreateInfo, pAllocator, pCommandPool);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyCommandPool:
@@ -4906,6 +5000,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkCommandPool(commandPool);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkResetCommandPool:
@@ -4940,6 +5035,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetCommandPool_VkResult_return, device, commandPool, flags);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkAllocateCommandBuffers:
@@ -4959,11 +5055,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pCommandBuffers, pAllocateInfo->commandBufferCount * sizeof(VkCommandBuffer));
                 if (pAllocateInfo->commandBufferCount)
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_272 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_272_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * pAllocateInfo->commandBufferCount;
                     for (uint32_t k = 0; k < pAllocateInfo->commandBufferCount; ++k)
                     {
-                        *(((VkCommandBuffer*)pCommandBuffers) + k) = (VkCommandBuffer)(VkCommandBuffer)((VkCommandBuffer)cgen_var_272[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_272_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkCommandBuffer*)pCommandBuffers) + k) = (VkCommandBuffer)(VkCommandBuffer)((VkCommandBuffer)tmpval);
                     }
                 }
                 if (pAllocateInfo)
@@ -4994,6 +5091,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAllocateCommandBuffers(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateCommandBuffers_VkResult_return, device, pAllocateInfo, pCommandBuffers);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkFreeCommandBuffers:
@@ -5024,11 +5122,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
                     if (((commandBufferCount)))
                     {
-                        __attribute__((aligned(1))) uint64_t* cgen_var_277 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        uint8_t* cgen_var_277_ptr = (uint8_t*)(*readStreamPtrPtr);
                         *readStreamPtrPtr += 8 * ((commandBufferCount));
                         for (uint32_t k = 0; k < ((commandBufferCount)); ++k)
                         {
-                            *(((VkCommandBuffer*)pCommandBuffers) + k) = (VkCommandBuffer)(VkCommandBuffer)((VkCommandBuffer)cgen_var_277[k]);
+                            uint64_t tmpval; memcpy(&tmpval, cgen_var_277_ptr + k * 8, sizeof(uint64_t));
+                            *(((VkCommandBuffer*)pCommandBuffers) + k) = (VkCommandBuffer)(VkCommandBuffer)((VkCommandBuffer)tmpval);
                         }
                     }
                 }
@@ -5054,6 +5153,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     delete_VkCommandBuffer(pCommandBuffers[i]);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkBeginCommandBuffer:
@@ -5087,6 +5187,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBeginCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBeginCommandBuffer_VkResult_return, commandBuffer, pBeginInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkEndCommandBuffer:
@@ -5116,6 +5217,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEndCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEndCommandBuffer_VkResult_return, commandBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkResetCommandBuffer:
@@ -5145,6 +5247,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetCommandBuffer_VkResult_return, commandBuffer, flags);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdBindPipeline:
@@ -5176,6 +5279,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBindPipeline(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineBindPoint, pipeline);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetViewport:
@@ -5221,6 +5325,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetViewport(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstViewport, viewportCount, pViewports);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetScissor:
@@ -5266,6 +5371,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetScissor(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstScissor, scissorCount, pScissors);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetLineWidth:
@@ -5295,6 +5401,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetLineWidth(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, lineWidth);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetDepthBias:
@@ -5330,6 +5437,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetDepthBias(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetBlendConstants:
@@ -5359,6 +5467,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetBlendConstants(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, blendConstants);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetDepthBounds:
@@ -5391,6 +5500,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetDepthBounds(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, minDepthBounds, maxDepthBounds);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetStencilCompareMask:
@@ -5423,6 +5533,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetStencilCompareMask(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, faceMask, compareMask);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetStencilWriteMask:
@@ -5455,6 +5566,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetStencilWriteMask(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, faceMask, writeMask);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetStencilReference:
@@ -5487,6 +5599,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetStencilReference(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, faceMask, reference);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdBindDescriptorSets:
@@ -5517,11 +5630,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
                 if (((descriptorSetCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_294 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_294_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((descriptorSetCount));
                     for (uint32_t k = 0; k < ((descriptorSetCount)); ++k)
                     {
-                        *(((VkDescriptorSet*)pDescriptorSets) + k) = (VkDescriptorSet)unbox_VkDescriptorSet((VkDescriptorSet)cgen_var_294[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_294_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkDescriptorSet*)pDescriptorSets) + k) = (VkDescriptorSet)unbox_VkDescriptorSet((VkDescriptorSet)tmpval);
                     }
                 }
                 memcpy((uint32_t*)&dynamicOffsetCount, *readStreamPtrPtr, sizeof(uint32_t));
@@ -5542,6 +5656,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBindDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineBindPoint, layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdBindIndexBuffer:
@@ -5579,6 +5694,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBindIndexBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, indexType);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdBindVertexBuffers:
@@ -5603,11 +5719,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pBuffers, ((bindingCount)) * sizeof(const VkBuffer));
                 if (((bindingCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_298 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_298_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((bindingCount));
                     for (uint32_t k = 0; k < ((bindingCount)); ++k)
                     {
-                        *(((VkBuffer*)pBuffers) + k) = (VkBuffer)unbox_VkBuffer((VkBuffer)cgen_var_298[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_298_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkBuffer*)pBuffers) + k) = (VkBuffer)unbox_VkBuffer((VkBuffer)tmpval);
                     }
                 }
                 vkReadStream->alloc((void**)&pOffsets, ((bindingCount)) * sizeof(const VkDeviceSize));
@@ -5626,6 +5743,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBindVertexBuffers(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstBinding, bindingCount, pBuffers, pOffsets);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDraw:
@@ -5664,6 +5782,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDraw(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDrawIndexed:
@@ -5705,6 +5824,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndexed(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDrawIndirect:
@@ -5745,6 +5865,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndirect(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, drawCount, stride);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDrawIndexedIndirect:
@@ -5785,6 +5906,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndexedIndirect(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, drawCount, stride);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDispatch:
@@ -5820,6 +5942,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDispatch(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, groupCountX, groupCountY, groupCountZ);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDispatchIndirect:
@@ -5854,6 +5977,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDispatchIndirect(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdCopyBuffer:
@@ -5906,6 +6030,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdCopyBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcBuffer, dstBuffer, regionCount, pRegions);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdCopyImage:
@@ -5961,6 +6086,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdCopyImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdBlitImage:
@@ -6022,6 +6148,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBlitImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions, filter);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdCopyBufferToImage:
@@ -6074,6 +6201,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdCopyBufferToImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcBuffer, dstImage, dstImageLayout, regionCount, pRegions);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdCopyImageToBuffer:
@@ -6126,6 +6254,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdCopyImageToBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstBuffer, regionCount, pRegions);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdUpdateBuffer:
@@ -6167,6 +6296,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdUpdateBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, dstBuffer, dstOffset, dataSize, pData);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdFillBuffer:
@@ -6207,6 +6337,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdFillBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, dstBuffer, dstOffset, size, data);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdClearColorImage:
@@ -6264,6 +6395,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdClearColorImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, image, imageLayout, pColor, rangeCount, pRanges);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdClearDepthStencilImage:
@@ -6321,6 +6453,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdClearDepthStencilImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, image, imageLayout, pDepthStencil, rangeCount, pRanges);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdClearAttachments:
@@ -6379,6 +6512,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdClearAttachments(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, attachmentCount, pAttachments, rectCount, pRects);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdResolveImage:
@@ -6437,6 +6571,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdResolveImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetEvent:
@@ -6471,6 +6606,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, event, stageMask);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdResetEvent:
@@ -6505,6 +6641,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdResetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, event, stageMask);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdWaitEvents:
@@ -6533,11 +6670,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pEvents, ((eventCount)) * sizeof(const VkEvent));
                 if (((eventCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_340 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_340_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((eventCount));
                     for (uint32_t k = 0; k < ((eventCount)); ++k)
                     {
-                        *(((VkEvent*)pEvents) + k) = (VkEvent)unbox_VkEvent((VkEvent)cgen_var_340[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_340_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkEvent*)pEvents) + k) = (VkEvent)unbox_VkEvent((VkEvent)tmpval);
                     }
                 }
                 memcpy((VkPipelineStageFlags*)&srcStageMask, *readStreamPtrPtr, sizeof(VkPipelineStageFlags));
@@ -6599,6 +6737,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdWaitEvents(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, eventCount, pEvents, srcStageMask, dstStageMask, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdPipelineBarrier:
@@ -6679,6 +6818,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdPipelineBarrier(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdBeginQuery:
@@ -6716,6 +6856,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBeginQuery(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, query, flags);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdEndQuery:
@@ -6750,6 +6891,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdEndQuery(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, query);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdResetQueryPool:
@@ -6787,6 +6929,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdResetQueryPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, firstQuery, queryCount);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdWriteTimestamp:
@@ -6824,6 +6967,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdWriteTimestamp(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineStage, queryPool, query);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdCopyQueryPoolResults:
@@ -6875,6 +7019,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdCopyQueryPoolResults(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, firstQuery, queryCount, dstBuffer, dstOffset, stride, flags);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdPushConstants:
@@ -6919,6 +7064,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdPushConstants(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, layout, stageFlags, offset, size, pValues);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdBeginRenderPass:
@@ -6955,6 +7101,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBeginRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pRenderPassBegin, contents);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdNextSubpass:
@@ -6984,6 +7131,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdNextSubpass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, contents);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdEndRenderPass:
@@ -7010,6 +7158,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdEndRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdExecuteCommands:
@@ -7027,11 +7176,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
                 if (((commandBufferCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_359 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_359_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((commandBufferCount));
                     for (uint32_t k = 0; k < ((commandBufferCount)); ++k)
                     {
-                        *(((VkCommandBuffer*)pCommandBuffers) + k) = (VkCommandBuffer)unbox_VkCommandBuffer((VkCommandBuffer)cgen_var_359[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_359_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkCommandBuffer*)pCommandBuffers) + k) = (VkCommandBuffer)unbox_VkCommandBuffer((VkCommandBuffer)tmpval);
                     }
                 }
                 if (m_logCalls)
@@ -7047,6 +7197,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdExecuteCommands(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, commandBufferCount, pCommandBuffers);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -7076,6 +7227,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumerateInstanceVersion(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceVersion_VkResult_return, pApiVersion);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkBindBufferMemory2:
@@ -7118,6 +7270,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindBufferMemory2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory2_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkBindImageMemory2:
@@ -7163,6 +7316,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindImageMemory2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory2_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDeviceGroupPeerMemoryFeatures:
@@ -7206,6 +7360,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceGroupPeerMemoryFeatures(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetDeviceMask:
@@ -7235,6 +7390,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetDeviceMask(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, deviceMask);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDispatchBase:
@@ -7279,6 +7435,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDispatchBase(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkEnumeratePhysicalDeviceGroups:
@@ -7367,6 +7524,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumeratePhysicalDeviceGroups(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDeviceGroups_VkResult_return, instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetImageMemoryRequirements2:
@@ -7412,6 +7570,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetBufferMemoryRequirements2:
@@ -7460,6 +7619,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetBufferMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetImageSparseMemoryRequirements2:
@@ -7553,6 +7713,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageSparseMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceFeatures2:
@@ -7591,6 +7752,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFeatures2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceProperties2:
@@ -7629,6 +7791,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceFormatProperties2:
@@ -7670,6 +7833,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties2:
@@ -7717,6 +7881,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties2_VkResult_return, physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceQueueFamilyProperties2:
@@ -7803,6 +7968,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceMemoryProperties2:
@@ -7841,6 +8007,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceSparseImageFormatProperties2:
@@ -7934,6 +8101,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkTrimCommandPool:
@@ -7968,6 +8136,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkTrimCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, commandPool, flags);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDeviceQueue2:
@@ -8013,6 +8182,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceQueue2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pQueueInfo, pQueue);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateSamplerYcbcrConversion:
@@ -8079,6 +8249,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSamplerYcbcrConversion(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSamplerYcbcrConversion_VkResult_return, device, pCreateInfo, pAllocator, pYcbcrConversion);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroySamplerYcbcrConversion:
@@ -8129,6 +8300,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSamplerYcbcrConversion(ycbcrConversion);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateDescriptorUpdateTemplate:
@@ -8192,6 +8364,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDescriptorUpdateTemplate(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorUpdateTemplate_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyDescriptorUpdateTemplate:
@@ -8239,6 +8412,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDescriptorUpdateTemplate(descriptorUpdateTemplate);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkUpdateDescriptorSetWithTemplate:
@@ -8286,6 +8460,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUpdateDescriptorSetWithTemplate(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorSet, descriptorUpdateTemplate, pData);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceExternalBufferProperties:
@@ -8337,6 +8512,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalBufferProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceExternalFenceProperties:
@@ -8385,6 +8561,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalFenceProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceExternalSemaphoreProperties:
@@ -8430,6 +8607,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalSemaphoreProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDescriptorSetLayoutSupport:
@@ -8478,6 +8656,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDescriptorSetLayoutSupport(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pCreateInfo, pSupport);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -8530,6 +8709,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSurfaceKHR(surface);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceSurfaceSupportKHR:
@@ -8574,6 +8754,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceSupportKHR_VkResult_return, physicalDevice, queueFamilyIndex, surface, pSupported);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceSurfaceCapabilitiesKHR:
@@ -8622,6 +8803,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilitiesKHR_VkResult_return, physicalDevice, surface, pSurfaceCapabilities);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceSurfaceFormatsKHR:
@@ -8715,6 +8897,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceFormatsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceFormatsKHR_VkResult_return, physicalDevice, surface, pSurfaceFormatCount, pSurfaceFormats);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceSurfacePresentModesKHR:
@@ -8789,6 +8972,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfacePresentModesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfacePresentModesKHR_VkResult_return, physicalDevice, surface, pPresentModeCount, pPresentModes);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -8857,6 +9041,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSwapchainKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSwapchainKHR_VkResult_return, device, pCreateInfo, pAllocator, pSwapchain);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroySwapchainKHR:
@@ -8907,6 +9092,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSwapchainKHR(swapchain);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetSwapchainImagesKHR:
@@ -8950,11 +9136,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pSwapchainImages, (*(pSwapchainImageCount)) * sizeof(VkImage));
                     if ((*(pSwapchainImageCount)))
                     {
-                        __attribute__((aligned(1))) uint64_t* cgen_var_449 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        uint8_t* cgen_var_449_ptr = (uint8_t*)(*readStreamPtrPtr);
                         *readStreamPtrPtr += 8 * (*(pSwapchainImageCount));
                         for (uint32_t k = 0; k < (*(pSwapchainImageCount)); ++k)
                         {
-                            *(((VkImage*)pSwapchainImages) + k) = (VkImage)(VkImage)((VkImage)cgen_var_449[k]);
+                            uint64_t tmpval; memcpy(&tmpval, cgen_var_449_ptr + k * 8, sizeof(uint64_t));
+                            *(((VkImage*)pSwapchainImages) + k) = (VkImage)(VkImage)((VkImage)tmpval);
                         }
                     }
                 }
@@ -8994,6 +9181,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSwapchainImagesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainImagesKHR_VkResult_return, device, swapchain, pSwapchainImageCount, pSwapchainImages);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkAcquireNextImageKHR:
@@ -9048,6 +9236,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAcquireNextImageKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireNextImageKHR_VkResult_return, device, swapchain, timeout, semaphore, fence, pImageIndex);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueuePresentKHR:
@@ -9084,6 +9273,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueuePresentKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueuePresentKHR_VkResult_return, queue, pPresentInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDeviceGroupPresentCapabilitiesKHR:
@@ -9127,6 +9317,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceGroupPresentCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceGroupPresentCapabilitiesKHR_VkResult_return, device, pDeviceGroupPresentCapabilities);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDeviceGroupSurfacePresentModesKHR:
@@ -9181,6 +9372,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceGroupSurfacePresentModesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceGroupSurfacePresentModesKHR_VkResult_return, device, surface, pModes);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDevicePresentRectanglesKHR:
@@ -9274,6 +9466,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDevicePresentRectanglesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDevicePresentRectanglesKHR_VkResult_return, physicalDevice, surface, pRectCount, pRects);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkAcquireNextImage2KHR:
@@ -9317,6 +9510,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAcquireNextImage2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireNextImage2KHR_VkResult_return, device, pAcquireInfo, pImageIndex);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -9407,6 +9601,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPropertiesKHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceDisplayPlanePropertiesKHR:
@@ -9495,6 +9690,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayPlanePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPlanePropertiesKHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDisplayPlaneSupportedDisplaysKHR:
@@ -9536,11 +9732,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pDisplays, (*(pDisplayCount)) * sizeof(VkDisplayKHR));
                     if ((*(pDisplayCount)))
                     {
-                        __attribute__((aligned(1))) uint64_t* cgen_var_483 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        uint8_t* cgen_var_483_ptr = (uint8_t*)(*readStreamPtrPtr);
                         *readStreamPtrPtr += 8 * (*(pDisplayCount));
                         for (uint32_t k = 0; k < (*(pDisplayCount)); ++k)
                         {
-                            *(((VkDisplayKHR*)pDisplays) + k) = (VkDisplayKHR)(VkDisplayKHR)((VkDisplayKHR)cgen_var_483[k]);
+                            uint64_t tmpval; memcpy(&tmpval, cgen_var_483_ptr + k * 8, sizeof(uint64_t));
+                            *(((VkDisplayKHR*)pDisplays) + k) = (VkDisplayKHR)(VkDisplayKHR)((VkDisplayKHR)tmpval);
                         }
                     }
                 }
@@ -9580,6 +9777,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDisplayPlaneSupportedDisplaysKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneSupportedDisplaysKHR_VkResult_return, physicalDevice, planeIndex, pDisplayCount, pDisplays);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDisplayModePropertiesKHR:
@@ -9673,6 +9871,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDisplayModePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayModePropertiesKHR_VkResult_return, physicalDevice, display, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateDisplayModeKHR:
@@ -9744,6 +9943,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDisplayModeKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDisplayModeKHR_VkResult_return, physicalDevice, display, pCreateInfo, pAllocator, pMode);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDisplayPlaneCapabilitiesKHR:
@@ -9795,6 +9995,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDisplayPlaneCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneCapabilitiesKHR_VkResult_return, physicalDevice, mode, planeIndex, pCapabilities);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateDisplayPlaneSurfaceKHR:
@@ -9856,6 +10057,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDisplayPlaneSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDisplayPlaneSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -9896,11 +10098,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pSwapchains, ((swapchainCount)) * sizeof(VkSwapchainKHR));
                 if (((swapchainCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_506 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_506_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((swapchainCount));
                     for (uint32_t k = 0; k < ((swapchainCount)); ++k)
                     {
-                        *(((VkSwapchainKHR*)pSwapchains) + k) = (VkSwapchainKHR)(VkSwapchainKHR)((VkSwapchainKHR)cgen_var_506[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_506_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkSwapchainKHR*)pSwapchains) + k) = (VkSwapchainKHR)(VkSwapchainKHR)((VkSwapchainKHR)tmpval);
                     }
                 }
                 if (pCreateInfos)
@@ -9937,6 +10140,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSharedSwapchainsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSharedSwapchainsKHR_VkResult_return, device, swapchainCount, pCreateInfos, pAllocator, pSwapchains);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -10000,6 +10204,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateXlibSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateXlibSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceXlibPresentationSupportKHR:
@@ -10042,6 +10247,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceXlibPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceXlibPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, dpy, visualID);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -10105,6 +10311,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateXcbSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateXcbSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceXcbPresentationSupportKHR:
@@ -10147,6 +10354,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceXcbPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceXcbPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, connection, visual_id);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -10210,6 +10418,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateWaylandSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateWaylandSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceWaylandPresentationSupportKHR:
@@ -10249,6 +10458,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceWaylandPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceWaylandPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, display);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -10312,6 +10522,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateMirSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateMirSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceMirPresentationSupportKHR:
@@ -10351,6 +10562,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceMirPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceMirPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, connection);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -10414,6 +10626,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateAndroidSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateAndroidSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -10477,6 +10690,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateWin32SurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateWin32SurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceWin32PresentationSupportKHR:
@@ -10509,6 +10723,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceWin32PresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceWin32PresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -10553,6 +10768,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFeatures2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceProperties2KHR:
@@ -10591,6 +10807,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceFormatProperties2KHR:
@@ -10632,6 +10849,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties2KHR:
@@ -10679,6 +10897,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return, physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceQueueFamilyProperties2KHR:
@@ -10765,6 +10984,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceMemoryProperties2KHR:
@@ -10803,6 +11023,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceSparseImageFormatProperties2KHR:
@@ -10896,6 +11117,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -10941,6 +11163,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceGroupPeerMemoryFeaturesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdSetDeviceMaskKHR:
@@ -10970,6 +11193,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetDeviceMaskKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, deviceMask);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDispatchBaseKHR:
@@ -11014,6 +11238,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDispatchBaseKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11052,6 +11277,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkTrimCommandPoolKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, commandPool, flags);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11142,6 +11368,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumeratePhysicalDeviceGroupsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDeviceGroupsKHR_VkResult_return, instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11195,6 +11422,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalBufferPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11242,6 +11470,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetMemoryWin32HandlePropertiesKHR:
@@ -11291,6 +11520,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryWin32HandlePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandlePropertiesKHR_VkResult_return, device, handleType, handle, pMemoryWin32HandleProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11336,6 +11566,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetMemoryFdPropertiesKHR:
@@ -11385,6 +11616,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryFdPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryFdPropertiesKHR_VkResult_return, device, handleType, fd, pMemoryFdProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11434,6 +11666,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11474,6 +11707,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkImportSemaphoreWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportSemaphoreWin32HandleKHR_VkResult_return, device, pImportSemaphoreWin32HandleInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetSemaphoreWin32HandleKHR:
@@ -11517,6 +11751,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSemaphoreWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSemaphoreWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11552,6 +11787,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkImportSemaphoreFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportSemaphoreFdKHR_VkResult_return, device, pImportSemaphoreFdInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetSemaphoreFdKHR:
@@ -11592,6 +11828,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSemaphoreFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSemaphoreFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11647,6 +11884,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdPushDescriptorSetKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdPushDescriptorSetWithTemplateKHR:
@@ -11697,6 +11935,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdPushDescriptorSetWithTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, descriptorUpdateTemplate, layout, set, pData);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11766,6 +12005,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDescriptorUpdateTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorUpdateTemplateKHR_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyDescriptorUpdateTemplateKHR:
@@ -11813,6 +12053,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDescriptorUpdateTemplate(descriptorUpdateTemplate);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkUpdateDescriptorSetWithTemplateKHR:
@@ -11860,6 +12101,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUpdateDescriptorSetWithTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorSet, descriptorUpdateTemplate, pData);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -11923,6 +12165,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateRenderPass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateRenderPass2KHR_VkResult_return, device, pCreateInfo, pAllocator, pRenderPass);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdBeginRenderPass2KHR:
@@ -11963,6 +12206,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBeginRenderPass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pRenderPassBegin, pSubpassBeginInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdNextSubpass2KHR:
@@ -12003,6 +12247,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdNextSubpass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pSubpassBeginInfo, pSubpassEndInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdEndRenderPass2KHR:
@@ -12036,6 +12281,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdEndRenderPass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pSubpassEndInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -12072,6 +12318,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSwapchainStatusKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainStatusKHR_VkResult_return, device, swapchain);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -12122,6 +12369,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalFencePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -12162,6 +12410,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkImportFenceWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportFenceWin32HandleKHR_VkResult_return, device, pImportFenceWin32HandleInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetFenceWin32HandleKHR:
@@ -12205,6 +12454,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetFenceWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -12243,6 +12493,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkImportFenceFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportFenceFdKHR_VkResult_return, device, pImportFenceFdInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetFenceFdKHR:
@@ -12286,6 +12537,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetFenceFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -12340,6 +12592,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilities2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilities2KHR_VkResult_return, physicalDevice, pSurfaceInfo, pSurfaceCapabilities);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceSurfaceFormats2KHR:
@@ -12435,6 +12688,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceFormats2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceFormats2KHR_VkResult_return, physicalDevice, pSurfaceInfo, pSurfaceFormatCount, pSurfaceFormats);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -12527,6 +12781,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayProperties2KHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceDisplayPlaneProperties2KHR:
@@ -12615,6 +12870,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayPlaneProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPlaneProperties2KHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDisplayModeProperties2KHR:
@@ -12708,6 +12964,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDisplayModeProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayModeProperties2KHR_VkResult_return, physicalDevice, display, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetDisplayPlaneCapabilities2KHR:
@@ -12758,6 +13015,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDisplayPlaneCapabilities2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneCapabilities2KHR_VkResult_return, physicalDevice, pDisplayPlaneInfo, pCapabilities);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -12811,6 +13069,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetBufferMemoryRequirements2KHR:
@@ -12859,6 +13118,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetBufferMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetImageSparseMemoryRequirements2KHR:
@@ -12952,6 +13212,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageSparseMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -13022,6 +13283,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSamplerYcbcrConversionKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSamplerYcbcrConversionKHR_VkResult_return, device, pCreateInfo, pAllocator, pYcbcrConversion);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroySamplerYcbcrConversionKHR:
@@ -13072,6 +13334,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSamplerYcbcrConversion(ycbcrConversion);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -13116,6 +13379,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindBufferMemory2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory2KHR_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkBindImageMemory2KHR:
@@ -13161,6 +13425,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindImageMemory2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory2KHR_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -13211,6 +13476,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDescriptorSetLayoutSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pCreateInfo, pSupport);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -13261,6 +13527,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndirectCountKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDrawIndexedIndirectCountKHR:
@@ -13309,6 +13576,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndexedIndirectCountKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -13354,6 +13622,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSwapchainGrallocUsageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainGrallocUsageANDROID_VkResult_return, device, format, imageUsage, grallocUsage);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkAcquireImageANDROID:
@@ -13398,6 +13667,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAcquireImageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireImageANDROID_VkResult_return, device, image, nativeFenceFd, semaphore, fence);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueueSignalReleaseImageANDROID:
@@ -13423,11 +13693,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pWaitSemaphores, ((waitSemaphoreCount)) * sizeof(const VkSemaphore));
                     if (((waitSemaphoreCount)))
                     {
-                        __attribute__((aligned(1))) uint64_t* cgen_var_656 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        uint8_t* cgen_var_656_ptr = (uint8_t*)(*readStreamPtrPtr);
                         *readStreamPtrPtr += 8 * ((waitSemaphoreCount));
                         for (uint32_t k = 0; k < ((waitSemaphoreCount)); ++k)
                         {
-                            *(((VkSemaphore*)pWaitSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)cgen_var_656[k]);
+                            uint64_t tmpval; memcpy(&tmpval, cgen_var_656_ptr + k * 8, sizeof(uint64_t));
+                            *(((VkSemaphore*)pWaitSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
                         }
                     }
                 }
@@ -13457,6 +13728,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueSignalReleaseImageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueSignalReleaseImageANDROID_VkResult_return, queue, waitSemaphoreCount, pWaitSemaphores, image, pNativeFenceFd);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -13525,6 +13797,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDebugReportCallbackEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDebugReportCallbackEXT_VkResult_return, instance, pCreateInfo, pAllocator, pCallback);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyDebugReportCallbackEXT:
@@ -13575,6 +13848,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDebugReportCallbackEXT(callback);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDebugReportMessageEXT:
@@ -13621,6 +13895,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDebugReportMessageEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, flags, objectType, object, location, messageCode, pLayerPrefix, pMessage);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -13671,6 +13946,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDebugMarkerSetObjectTagEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDebugMarkerSetObjectTagEXT_VkResult_return, device, pTagInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDebugMarkerSetObjectNameEXT:
@@ -13707,6 +13983,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDebugMarkerSetObjectNameEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDebugMarkerSetObjectNameEXT_VkResult_return, device, pNameInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDebugMarkerBeginEXT:
@@ -13740,6 +14017,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDebugMarkerBeginEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pMarkerInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDebugMarkerEndEXT:
@@ -13766,6 +14044,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDebugMarkerEndEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDebugMarkerInsertEXT:
@@ -13799,6 +14078,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDebugMarkerInsertEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pMarkerInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -13853,6 +14133,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndirectCountAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdDrawIndexedIndirectCountAMD:
@@ -13901,6 +14182,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndexedIndirectCountAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -13993,6 +14275,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetShaderInfoAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetShaderInfoAMD_VkResult_return, device, pipeline, shaderStage, infoType, pInfoSize, pInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -14060,6 +14343,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalImageFormatPropertiesNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceExternalImageFormatPropertiesNV_VkResult_return, physicalDevice, format, type, tiling, usage, flags, externalHandleType, pExternalImageFormatProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -14108,6 +14392,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryWin32HandleNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandleNV_VkResult_return, device, memory, handleType, pHandle);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -14175,6 +14460,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateViSurfaceNN(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateViSurfaceNN_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -14214,6 +14500,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBeginConditionalRenderingEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pConditionalRenderingBegin);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdEndConditionalRenderingEXT:
@@ -14240,6 +14527,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdEndConditionalRenderingEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -14275,6 +14563,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdProcessCommandsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pProcessCommandsInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdReserveSpaceForCommandsNVX:
@@ -14308,6 +14597,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdReserveSpaceForCommandsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pReserveSpaceInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateIndirectCommandsLayoutNVX:
@@ -14374,6 +14664,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateIndirectCommandsLayoutNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateIndirectCommandsLayoutNVX_VkResult_return, device, pCreateInfo, pAllocator, pIndirectCommandsLayout);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyIndirectCommandsLayoutNVX:
@@ -14424,6 +14715,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkIndirectCommandsLayoutNVX(indirectCommandsLayout);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateObjectTableNVX:
@@ -14490,6 +14782,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateObjectTableNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateObjectTableNVX_VkResult_return, device, pCreateInfo, pAllocator, pObjectTable);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyObjectTableNVX:
@@ -14540,6 +14833,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkObjectTableNVX(objectTable);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkRegisterObjectsNVX:
@@ -14583,6 +14877,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkRegisterObjectsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterObjectsNVX_VkResult_return, device, objectTable, objectCount, ppObjectTableEntries, pObjectIndices);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkUnregisterObjectsNVX:
@@ -14628,6 +14923,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUnregisterObjectsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkUnregisterObjectsNVX_VkResult_return, device, objectTable, objectCount, pObjectEntryTypes, pObjectIndices);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX:
@@ -14683,6 +14979,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures, pLimits);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -14730,6 +15027,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetViewportWScalingNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstViewport, viewportCount, pViewportWScalings);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -14766,6 +15064,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkReleaseDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkReleaseDisplayEXT_VkResult_return, physicalDevice, display);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -14809,6 +15108,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAcquireXlibDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireXlibDisplayEXT_VkResult_return, physicalDevice, dpy, display);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetRandROutputDisplayEXT:
@@ -14859,6 +15159,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetRandROutputDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetRandROutputDisplayEXT_VkResult_return, physicalDevice, dpy, rrOutput, pDisplay);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -14909,6 +15210,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilities2EXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilities2EXT_VkResult_return, physicalDevice, surface, pSurfaceCapabilities);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -14952,6 +15254,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDisplayPowerControlEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDisplayPowerControlEXT_VkResult_return, device, display, pDisplayPowerInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkRegisterDeviceEventEXT:
@@ -15013,6 +15316,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkRegisterDeviceEventEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterDeviceEventEXT_VkResult_return, device, pDeviceEventInfo, pAllocator, pFence);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkRegisterDisplayEventEXT:
@@ -15079,6 +15383,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkRegisterDisplayEventEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterDisplayEventEXT_VkResult_return, device, display, pDisplayEventInfo, pAllocator, pFence);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetSwapchainCounterEXT:
@@ -15123,6 +15428,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSwapchainCounterEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainCounterEXT_VkResult_return, device, swapchain, counter, pCounterValue);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -15173,6 +15479,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetRefreshCycleDurationGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetRefreshCycleDurationGOOGLE_VkResult_return, device, swapchain, pDisplayTimingProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPastPresentationTimingGOOGLE:
@@ -15266,6 +15573,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPastPresentationTimingGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPastPresentationTimingGOOGLE_VkResult_return, device, swapchain, pPresentationTimingCount, pPresentationTimings);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -15323,6 +15631,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetDiscardRectangleEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstDiscardRectangle, discardRectangleCount, pDiscardRectangles);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -15350,11 +15659,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pSwapchains, ((swapchainCount)) * sizeof(const VkSwapchainKHR));
                 if (((swapchainCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_749 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_749_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((swapchainCount));
                     for (uint32_t k = 0; k < ((swapchainCount)); ++k)
                     {
-                        *(((VkSwapchainKHR*)pSwapchains) + k) = (VkSwapchainKHR)unbox_VkSwapchainKHR((VkSwapchainKHR)cgen_var_749[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_749_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkSwapchainKHR*)pSwapchains) + k) = (VkSwapchainKHR)unbox_VkSwapchainKHR((VkSwapchainKHR)tmpval);
                     }
                 }
                 vkReadStream->alloc((void**)&pMetadata, ((swapchainCount)) * sizeof(const VkHdrMetadataEXT));
@@ -15382,6 +15692,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSetHdrMetadataEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, swapchainCount, pSwapchains, pMetadata);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -15445,6 +15756,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateIOSSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateIOSSurfaceMVK_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -15508,6 +15820,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateMacOSSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateMacOSSurfaceMVK_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -15550,6 +15863,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSetDebugUtilsObjectNameEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetDebugUtilsObjectNameEXT_VkResult_return, device, pNameInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkSetDebugUtilsObjectTagEXT:
@@ -15586,6 +15900,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSetDebugUtilsObjectTagEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetDebugUtilsObjectTagEXT_VkResult_return, device, pTagInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueueBeginDebugUtilsLabelEXT:
@@ -15619,6 +15934,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueBeginDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, pLabelInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueueEndDebugUtilsLabelEXT:
@@ -15645,6 +15961,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueEndDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueueInsertDebugUtilsLabelEXT:
@@ -15678,6 +15995,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueInsertDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, pLabelInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdBeginDebugUtilsLabelEXT:
@@ -15711,6 +16029,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBeginDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pLabelInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdEndDebugUtilsLabelEXT:
@@ -15737,6 +16056,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdEndDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCmdInsertDebugUtilsLabelEXT:
@@ -15770,6 +16090,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdInsertDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pLabelInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateDebugUtilsMessengerEXT:
@@ -15836,6 +16157,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDebugUtilsMessengerEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDebugUtilsMessengerEXT_VkResult_return, instance, pCreateInfo, pAllocator, pMessenger);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyDebugUtilsMessengerEXT:
@@ -15886,6 +16208,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDebugUtilsMessengerEXT(messenger);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkSubmitDebugUtilsMessageEXT:
@@ -15925,6 +16248,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSubmitDebugUtilsMessageEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, messageSeverity, messageTypes, pCallbackData);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -15974,6 +16298,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetAndroidHardwareBufferPropertiesANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetAndroidHardwareBufferPropertiesANDROID_VkResult_return, device, buffer, pProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetMemoryAndroidHardwareBufferANDROID:
@@ -16017,6 +16342,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryAndroidHardwareBufferANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryAndroidHardwareBufferANDROID_VkResult_return, device, pInfo, pBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -16062,6 +16388,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetSampleLocationsEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pSampleLocationsInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetPhysicalDeviceMultisamplePropertiesEXT:
@@ -16106,6 +16433,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceMultisamplePropertiesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, samples, pMultisampleProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -16184,6 +16512,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateValidationCacheEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateValidationCacheEXT_VkResult_return, device, pCreateInfo, pAllocator, pValidationCache);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkDestroyValidationCacheEXT:
@@ -16234,6 +16563,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkValidationCacheEXT(validationCache);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkMergeValidationCachesEXT:
@@ -16259,11 +16589,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pSrcCaches, ((srcCacheCount)) * sizeof(const VkValidationCacheEXT));
                 if (((srcCacheCount)))
                 {
-                    __attribute__((aligned(1))) uint64_t* cgen_var_787 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    uint8_t* cgen_var_787_ptr = (uint8_t*)(*readStreamPtrPtr);
                     *readStreamPtrPtr += 8 * ((srcCacheCount));
                     for (uint32_t k = 0; k < ((srcCacheCount)); ++k)
                     {
-                        *(((VkValidationCacheEXT*)pSrcCaches) + k) = (VkValidationCacheEXT)unbox_VkValidationCacheEXT((VkValidationCacheEXT)cgen_var_787[k]);
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_787_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkValidationCacheEXT*)pSrcCaches) + k) = (VkValidationCacheEXT)unbox_VkValidationCacheEXT((VkValidationCacheEXT)tmpval);
                     }
                 }
                 if (m_logCalls)
@@ -16282,6 +16613,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkMergeValidationCachesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMergeValidationCachesEXT_VkResult_return, device, dstCache, srcCacheCount, pSrcCaches);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetValidationCacheDataEXT:
@@ -16358,6 +16690,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetValidationCacheDataEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetValidationCacheDataEXT_VkResult_return, device, validationCache, pDataSize, pData);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -16423,6 +16756,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryHostPointerPropertiesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryHostPointerPropertiesEXT_VkResult_return, device, handleType, pHostPointer, pMemoryHostPointerProperties);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -16465,6 +16799,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdWriteBufferMarkerAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineStage, dstBuffer, dstOffset, marker);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -16510,6 +16845,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetCheckpointNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pCheckpointMarker);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetQueueCheckpointDataNV:
@@ -16596,6 +16932,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetQueueCheckpointDataNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, pCheckpointDataCount, pCheckpointData);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -16649,6 +16986,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkMapMemoryIntoAddressSpaceGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return, device, memory, pAddress);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -16685,6 +17023,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkRegisterImageColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterImageColorBufferGOOGLE_VkResult_return, device, image, colorBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkRegisterBufferColorBufferGOOGLE:
@@ -16719,6 +17058,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkRegisterBufferColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterBufferColorBufferGOOGLE_VkResult_return, device, buffer, colorBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -16819,11 +17159,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pBufferViews, ((bufferViewCount)) * sizeof(const VkBufferView));
                     if (((bufferViewCount)))
                     {
-                        __attribute__((aligned(1))) uint64_t* cgen_var_824 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        uint8_t* cgen_var_824_ptr = (uint8_t*)(*readStreamPtrPtr);
                         *readStreamPtrPtr += 8 * ((bufferViewCount));
                         for (uint32_t k = 0; k < ((bufferViewCount)); ++k)
                         {
-                            *(((VkBufferView*)pBufferViews) + k) = (VkBufferView)unbox_VkBufferView((VkBufferView)cgen_var_824[k]);
+                            uint64_t tmpval; memcpy(&tmpval, cgen_var_824_ptr + k * 8, sizeof(uint64_t));
+                            *(((VkBufferView*)pBufferViews) + k) = (VkBufferView)unbox_VkBufferView((VkBufferView)tmpval);
                         }
                     }
                 }
@@ -16854,6 +17195,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUpdateDescriptorSetWithTemplateSizedGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorSet, descriptorUpdateTemplate, imageInfoCount, bufferInfoCount, bufferViewCount, pImageInfoEntryIndices, pBufferInfoEntryIndices, pBufferViewEntryIndices, pImageInfos, pBufferInfos, pBufferViews);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -16886,6 +17228,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBeginCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pBeginInfo);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkEndCommandBufferAsyncGOOGLE:
@@ -16909,6 +17252,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEndCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkResetCommandBufferAsyncGOOGLE:
@@ -16935,6 +17279,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, flags);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCommandBufferHostSyncGOOGLE:
@@ -16964,6 +17309,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCommandBufferHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, needHostSync, sequenceNumber);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -17043,6 +17389,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateImageWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImageWithRequirementsGOOGLE_VkResult_return, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkCreateBufferWithRequirementsGOOGLE:
@@ -17120,6 +17467,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateBufferWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBufferWithRequirementsGOOGLE_VkResult_return, device, pCreateInfo, pAllocator, pBuffer, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -17213,6 +17561,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryHostAddressInfoGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryHostAddressInfoGOOGLE_VkResult_return, device, memory, pAddress, pSize, pHostmemId);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -17265,6 +17614,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDeviceMemory(memory);
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -17296,6 +17646,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, needHostSync, sequenceNumber);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueueSubmitAsyncGOOGLE:
@@ -17340,6 +17691,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueSubmitAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, submitCount, pSubmits, fence);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueueWaitIdleAsyncGOOGLE:
@@ -17363,6 +17715,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueWaitIdleAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkQueueBindSparseAsyncGOOGLE:
@@ -17407,6 +17760,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueBindSparseAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, bindInfoCount, pBindInfo, fence);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -17450,6 +17804,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetLinearImageLayoutGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, format, pOffset, pRowPitchAlignment);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
 #endif
@@ -17486,6 +17841,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMTLDeviceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMTLDevice);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkSetMTLTextureMVK:
@@ -17518,6 +17874,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSetMTLTextureMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetMTLTextureMVK_VkResult_return, image, mtlTexture);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetMTLTextureMVK:
@@ -17548,6 +17905,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMTLTextureMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, image, pMTLTexture);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetMTLBufferMVK:
@@ -17578,6 +17936,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMTLBufferMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, buffer, pMTLBuffer);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkUseIOSurfaceMVK:
@@ -17610,6 +17969,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUseIOSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkUseIOSurfaceMVK_VkResult_return, image, ioSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 break;
             }
             case OP_vkGetIOSurfaceMVK:
@@ -17640,6 +18000,46 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetIOSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, image, pIOSurface);
                 }
                 vkReadStream->clearPool();
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                break;
+            }
+#endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+            case OP_vkQueueFlushCommandsGOOGLE:
+            {
+                VkQueue queue;
+                VkCommandBuffer commandBuffer;
+                VkDeviceSize dataSize;
+                const void* pData;
+                // Begin global wrapped dispatchable handle unboxing for queue;
+                uint64_t cgen_var_861;
+                memcpy((uint64_t*)&cgen_var_861, *readStreamPtrPtr, 1 * 8);
+                *readStreamPtrPtr += 1 * 8;
+                *(VkQueue*)&queue = (VkQueue)(VkQueue)((VkQueue)(*&cgen_var_861));
+                // No unbox for commandBuffer
+                uint64_t cgen_var_862;
+                memcpy((uint64_t*)&cgen_var_862, *readStreamPtrPtr, 1 * 8);
+                *readStreamPtrPtr += 1 * 8;
+                *(VkCommandBuffer*)&commandBuffer = (VkCommandBuffer)(VkCommandBuffer)((VkCommandBuffer)(*&cgen_var_862));
+                memcpy((VkDeviceSize*)&dataSize, *readStreamPtrPtr, sizeof(VkDeviceSize));
+                *readStreamPtrPtr += sizeof(VkDeviceSize);
+                vkReadStream->alloc((void**)&pData, ((dataSize)) * sizeof(const uint8_t));
+                memcpy((void*)pData, *readStreamPtrPtr, ((dataSize)) * sizeof(const uint8_t));
+                *readStreamPtrPtr += ((dataSize)) * sizeof(const uint8_t);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueFlushCommandsGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)commandBuffer, (unsigned long long)dataSize, (unsigned long long)pData);
+                }
+                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                m_state->on_vkQueueFlushCommandsGOOGLE(&m_pool, queue, commandBuffer, dataSize, pData);
+                vkStream->unsetHandleMapping();
+                vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkQueueFlushCommandsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, commandBuffer, dataSize, pData);
+                }
+                vkReadStream->clearPool();
                 break;
             }
 #endif
@@ -17649,11 +18049,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 return ptr - (unsigned char *)buf;
             }
         }
-        
-        if (seqnoPtr && (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK)) {
-        __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
-        }
-        
         ptr += packetLen;
     }
     if (m_forSnapshotLoad)

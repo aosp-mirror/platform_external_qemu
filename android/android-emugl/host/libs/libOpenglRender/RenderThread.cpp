@@ -496,7 +496,6 @@ intptr_t RenderThread::main() {
                 if (last > 0) {
                     readBuf.consume(last);
                     progress = true;
-                    fprintf(stderr, "%s: rendercontrol progress\n", __func__);
 
                 }
 
