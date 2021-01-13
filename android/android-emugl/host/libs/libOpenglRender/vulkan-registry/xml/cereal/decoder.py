@@ -338,8 +338,13 @@ def emit_decode_return_writeback(api, cgen):
         cgen.stmt("%s->write(&%s, %s)" %
             (WRITE_STREAM, retVar, cgen.sizeofExpr(api.retType)))
 
-def emit_decode_finish(cgen):
-    cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
+def emit_decode_finish(api, cgen):
+    decodingParams = DecodingParameters(api)
+    retTypeName = api.getRetTypeExpr()
+    paramsToWrite = decodingParams.toWrite
+
+    if retTypeName != "void" or len(paramsToWrite) != 0:
+        cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
 def emit_destroyed_handle_cleanup(api, cgen):
     decodingParams = DecodingParameters(api)
@@ -402,7 +407,7 @@ def emit_default_decoding(typeInfo, api, cgen):
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
-    emit_decode_finish(cgen)
+    emit_decode_finish(api, cgen)
     emit_snapshot(typeInfo, api, cgen)
     emit_destroyed_handle_cleanup(api, cgen)
     emit_pool_free(cgen)
@@ -412,7 +417,7 @@ def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_global_state_wrapped_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen, autobox=False)
     emit_decode_return_writeback(api, cgen)
-    emit_decode_finish(cgen)
+    emit_decode_finish(api, cgen)
     emit_snapshot(typeInfo, api, cgen)
     emit_destroyed_handle_cleanup(api, cgen)
     emit_pool_free(cgen)
@@ -440,7 +445,7 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
-    emit_decode_finish(cgen)
+    emit_decode_finish(api, cgen)
     emit_snapshot(typeInfo, api, cgen);
     emit_pool_free(cgen)
 
@@ -467,7 +472,7 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     cgen.endFor()
     cgen.endIf()
 
-    emit_decode_finish(cgen)
+    emit_decode_finish(api, cgen)
     emit_snapshot(typeInfo, api, cgen);
     emit_pool_free(cgen)
 
