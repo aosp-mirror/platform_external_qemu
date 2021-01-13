@@ -24,6 +24,12 @@
 
 class IOStream;
 
+namespace android {
+namespace base {
+class BumpPool;
+} // namespace android
+} // namespace base
+
 namespace goldfish_vk {
 
 class VulkanStream : public android::base::Stream {
@@ -62,6 +68,8 @@ public:
 
     uint32_t getFeatureBits() const;
 
+    android::base::BumpPool* pool();
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
@@ -81,7 +89,7 @@ public:
 
     uint8_t* beginTrace();
     size_t endTrace();
-
+    
 private:
     void resetTrace();
 
