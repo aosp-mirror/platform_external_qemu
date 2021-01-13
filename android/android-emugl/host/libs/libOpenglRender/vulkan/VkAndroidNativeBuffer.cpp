@@ -679,14 +679,7 @@ VkResult syncImageToColorBuffer(
         0, nullptr,
     };
 
-    vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, queueState.fence);
-
-    static constexpr uint64_t ANB_MAX_WAIT_NS =
-        5ULL * 1000ULL * 1000ULL * 1000ULL;
-
-    vk->vkWaitForFences(
-        anbInfo->device, 1, &queueState.fence, VK_TRUE, ANB_MAX_WAIT_NS);
-    vk->vkResetFences(anbInfo->device, 1, &queueState.fence);
+    vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, VK_NULL_HANDLE);
 
     fb->unlock();
 
