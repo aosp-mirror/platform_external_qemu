@@ -113,6 +113,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
 
     const uint32_t maxSpins = 30;
     uint32_t spins = 0;
+    *(mContext.host_state) = ASG_HOST_STATE_CAN_CONSUME;
 
     while (count < wanted) {
 
@@ -218,6 +219,8 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
     ++mXmits;
     mTotalRecv += count;
     D("read %d bytes", (int)count);
+
+    *(mContext.host_state) = ASG_HOST_STATE_RENDERING;
     return (const unsigned char*)buf;
 }
 
