@@ -11,7 +11,7 @@
 
 # TODO: Remove this once we have -no-window working with absolutely no Qt
 # dependencies
-if(NOT QTWEBENGINE AND ANDROID_TARGET_TAG MATCHES "linux-x86_64")
+if(NOT QTWEBENGINE AND ((ANDROID_TARGET_TAG MATCHES "linux-x86_64") OR (ANDROID_TARGET_TAG MATCHES "darwin-x86_64"))
   get_filename_component(
     PREBUILT_ROOT
     "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_TARGET_TAG}-nowebengine"
@@ -164,6 +164,7 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
     add_qt_shared_lib(WebSockets "-lQt5WebSocketsAndroidEmu" "Qt5::Qml")
     add_qt_shared_lib(WebEngineWidgets "-lQt5WebEngineWidgetsAndroidEmu"
                       "Qt5::Qml")
+    message("have qt webengine")
 
     list(
       APPEND
@@ -193,6 +194,8 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
       ${PREBUILT_ROOT}/lib/libQt5WebEngineWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebEngineWidgetsAndroidEmu.${QT_LIB_VERSION}.dylib;
       ${PREBUILT_ROOT}/lib/libQt5WebSocketsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebSocketsAndroidEmu.${QT_LIB_VERSION}.dylib
     )
+  else()
+    message("no qt webengine")
   endif()
 
   # Note: this will only set the property for install targets, not during build.
