@@ -105,10 +105,8 @@ bool testExpectMessageFromSocket(int socketFd,
 }
 
 bool testRunMockAdbServer(int adbServerSocket,
-                          int consoleServerSocket,
                           const char* wearDevice,
-                          const char* phoneDevice,
-                          bool usbPhone) {
+                          const char* phoneDevice) {
     char buf[1024] = {'\0'};
     const char kProperty[] = "shell:getprop ro.product.name";
 
@@ -125,7 +123,7 @@ bool testRunMockAdbServer(int adbServerSocket,
         if (!testExpectMessageFromSocket(s.get(), buf) ||
             !testSendToSocket(s.get(), "OKAY") ||
             !testExpectMessageFromSocket(s.get(), kProperty) ||
-            !testSendToSocket(s.get(), "OKAYclockwork")) {
+            !testSendToSocket(s.get(), "OKAYgwear")) {
             return false;
         }
     }
@@ -165,7 +163,7 @@ bool testRunMockAdbServer(int adbServerSocket,
     }
 
     // communication between phone-console and agent
-    if (usbPhone) {
+    {
         ScopedSocket s(socketAcceptAny(adbServerSocket));
         if (!s.valid()) {
             DPRINT("ZZZ");
@@ -179,18 +177,6 @@ bool testRunMockAdbServer(int adbServerSocket,
         if (!testExpectMessageFromSocket(s.get(), buf) ||
             !testSendToSocket(s.get(), "OKAY")) {
             DPRINT("YYY");
-            return false;
-        }
-    } else {
-        ScopedSocket s(socketAcceptAny(consoleServerSocket));
-        if (!s.valid()) {
-            DPRINT("ERROR: cannot accept console port\n");
-            return false;
-        }
-        if (!testSendToSocket(s.get(), "Android Console\nOK\n") ||
-            !testExpectMessageFromSocket(s.get(),
-                "redir add tcp:5601:5601\nquit\n", 0)) {
-            DPRINT("XXX");
             return false;
         }
     }

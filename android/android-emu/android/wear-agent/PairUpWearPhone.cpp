@@ -49,9 +49,6 @@ public:
     void writeAdbServerSocket();
     void readAdbServerSocket();
 
-    void writeEmulatorConsoleSocket();
-    void readEmulatorConsoleSocket();
-
     bool isDone() const;
     void cleanUp();
 
@@ -78,16 +75,10 @@ private:
          TO_GET_WEARABLE_APP_SEND_CMD,
          TO_GET_WEARABLE_APP_READ_REPLY,
 
-         // perform ip forwarding on real device
+         // perform ip forwarding on a phone
          // "host-serial:phone-serial-number:forward:tcp:5601;5601"
          TO_FORWARD_IP_SEND_CMD,
          TO_FORWARD_IP_WAIT_OKAY,
-
-         // perform ip redirection on emulator
-         // the above command does not work on emulator, so we have to connect to the emulator
-         // console and issue command "redir add"
-         TO_READ_GREETINGS_FROM_CONSOLE,
-         TO_SEND_REDIR_CMD_TO_CONSOLE,
 
          PAIRUP_SUCCESS,
 
@@ -107,10 +98,6 @@ private:
     // member related to adb host
     int mAdbHostPort;
     FdWatch mAdbWatch;
-
-    // member related to emulator console
-    int mConsolePort;
-    FdWatch mConsoleWatch;
 
     // device categories
     std::string mDeviceInProbing;
@@ -138,7 +125,6 @@ private:
 
     void closeConnection(FdWatch* watch);
     void openAdbConnection();
-    void openConsoleConnection();
 
     // read and write mode handling methods
     void switchToRead(FdWatch* watch) {
@@ -155,8 +141,6 @@ private:
     bool checkForWearDevice();
     bool checkForCompatiblePhone();
     void startConnectWearAndPhone();
-
-    bool startReadConsole();
 
     // adb asynchronous read/write methods: all return true on success
     // false if need to try again or on error. When error happens,
@@ -185,22 +169,7 @@ static void _on_adb_server_socket_fd(void* opaque, int fd, unsigned events) {
     }
 }
 
-// callback that talks to emulator console
-static void _on_emulator_console_socket_fd(void* opaque, int fd, unsigned events) {
-    PairUpWearPhoneImpl * pairup = static_cast<PairUpWearPhoneImpl*>(opaque);
-    if (!pairup) return;
-
-    if (events & Looper::FdWatch::kEventRead) {
-        pairup->readEmulatorConsoleSocket();
-    } else if (events & Looper::FdWatch::kEventWrite) {
-        pairup->writeEmulatorConsoleSocket();
-    }
-    if (pairup->isDone()) {
-        pairup->cleanUp();
-    }
-}
-
-//-------------- callbacks for IO with adb server and emulator console
+//-------------- callbacks for IO with adb server
 void PairUpWearPhoneImpl::readAdbServerSocket() {
 
     switch(mState) {
@@ -288,44 +257,10 @@ void PairUpWearPhoneImpl::writeAdbServerSocket() {
 
 }
 
-void PairUpWearPhoneImpl::readEmulatorConsoleSocket() {
-    const ssize_t size = socketRecv(mConsoleWatch->fd(),
-                                    mReadBuffer,
-                                    READ_BUFFER_SIZE);
-    if (size > 0) {
-        mReply.append(mReadBuffer, size);
-        DPRINT("read console message: %s\n", mReply.c_str());
-        if (strContains(mReply, "OK")) {
-            DPRINT("received mesg from console:\n%s\n", mReply.c_str());
-            snprintf(mWriteBuffer, WRITE_BUFFER_SIZE, "redir add tcp:5601:5601\nquit\n");
-            DPRINT("sending query to console:\n%s", mWriteBuffer);
-            mAsyncWriter.reset(mWriteBuffer,
-                               ::strlen(mWriteBuffer),
-                               mConsoleWatch.get());
-            switchToWrite(&mConsoleWatch);
-            mState = TO_SEND_REDIR_CMD_TO_CONSOLE;
-        }
-    } else {
-        DPRINT("error happened when reading console\n");
-        startProbeNextDevice();
-    }
-}
-
-void PairUpWearPhoneImpl::writeEmulatorConsoleSocket() {
-    const AsyncStatus status = mAsyncWriter.run();
-
-    if (status == kAsyncCompleted) {
-        mState = PAIRUP_SUCCESS;
-    } else if (status == kAsyncError) {
-        DPRINT("Error: cannot write to console\n");
-        startProbeNextDevice();
-    }
-}
-
 // -------------------------------   Other helper methods
 bool PairUpWearPhoneImpl::checkForWearDevice() {
     const bool isWearDevice =
-            strContains(mReply, "clockwork") &&
+            strContains(mReply, "gwear") &&
             !strncmp(mDeviceInProbing.c_str(), "emulator-", 9);
 
     if (isWearDevice) {
@@ -351,19 +286,6 @@ bool PairUpWearPhoneImpl::checkForCompatiblePhone() {
     }
 
     return isCompatiblePhone;
-}
-
-bool PairUpWearPhoneImpl::startReadConsole() {
-    openConsoleConnection();
-
-    if (mConsoleWatch->fd() < 0) {
-        startProbeNextDevice();
-        return false;
-    } else {
-        DPRINT("ready to read console greetings\n");
-        switchToRead(&mConsoleWatch);
-        return true;
-    }
 }
 
 bool PairUpWearPhoneImpl::startWriteCommandToAdb(int queryType,
@@ -471,8 +393,6 @@ PairUpWearPhoneImpl::PairUpWearPhoneImpl(
     : mLooper(looper),
       mAdbHostPort(adbHostPort),
       mAdbWatch(),
-      mConsolePort(-1),
-      mConsoleWatch(),
       mUnprobedDevices(),
       mWearDevices(),
       mPhoneDevices(),
@@ -496,7 +416,6 @@ PairUpWearPhoneImpl::~PairUpWearPhoneImpl() {
 
 void PairUpWearPhoneImpl::startProbeNextDevice() {
     closeConnection(&mAdbWatch);
-    closeConnection(&mConsoleWatch);
 
     if (mUnprobedDevices.empty()) {
         mState = PAIRUP_ERROR;
@@ -515,7 +434,6 @@ void PairUpWearPhoneImpl::startProbeNextDevice() {
 
 void PairUpWearPhoneImpl::cleanUp() {
     closeConnection(&mAdbWatch);
-    closeConnection(&mConsoleWatch);
 
     mUnprobedDevices.resize(0U);
     mPhoneDevices.resize(0U);
@@ -561,7 +479,6 @@ void PairUpWearPhoneImpl::updateDevices(
 
 void PairUpWearPhoneImpl::startConnectWearAndPhone() {
     closeConnection(&mAdbWatch);
-    closeConnection(&mConsoleWatch);
 
     if (mPhoneDevices.empty() || mWearDevices.empty()) {
         startProbeNextDevice();
@@ -570,19 +487,8 @@ void PairUpWearPhoneImpl::startConnectWearAndPhone() {
 
     std::string phone = mPhoneDevices[0];
     mPhoneDevices.erase(mPhoneDevices.begin());
-    const char emu[] = "emulator-";
-    const int sz = sizeof(emu) - 1;
-    if (strncmp(emu, phone.c_str(), sz) != 0) {
-        // real phone
-        if (startWriteCommandToAdb(FORWARDIP, phone.c_str())) {
-            mState = TO_FORWARD_IP_SEND_CMD;
-        }
-    } else {
-        // emulator
-        mConsolePort = atoi(phone.c_str() + sz);
-        if (startReadConsole()) {
-            mState = TO_READ_GREETINGS_FROM_CONSOLE;
-        }
+    if (startWriteCommandToAdb(FORWARDIP, phone.c_str())) {
+      mState = TO_FORWARD_IP_SEND_CMD;
     }
 }
 
@@ -593,15 +499,6 @@ void PairUpWearPhoneImpl::openAdbConnection() {
     if (!openConnection(mAdbHostPort,
                         &mAdbWatch,
                         _on_adb_server_socket_fd)) {
-        mState = PAIRUP_ERROR;
-    }
-}
-
-void PairUpWearPhoneImpl::openConsoleConnection() {
-    mReply.clear();
-    if (!openConnection(mConsolePort,
-                        &mConsoleWatch,
-                        _on_emulator_console_socket_fd)) {
         mState = PAIRUP_ERROR;
     }
 }
