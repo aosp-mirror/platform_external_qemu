@@ -1697,8 +1697,9 @@ TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
 
     std::vector<FunctorThread*> threads;
 
-    constexpr uint32_t kRecordsPerThread = 20000000;
-    constexpr uint32_t kTotalRecords = kThreadCount * kRecordsPerThread;
+    constexpr uint32_t kRecordsPerThread = 200000;
+    constexpr uint32_t kRepeatSubmits = 1;
+    constexpr uint32_t kTotalRecords = kThreadCount * kRecordsPerThread * kRepeatSubmits;
 
     for (uint32_t i = 0; i < kThreadCount; ++i) {
         FunctorThread* thread = new FunctorThread([this, cbs, sets, pipelineLayout, i]() {
@@ -1707,29 +1708,31 @@ TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
                 VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, 0,
             };
 
-            vk->vkBeginCommandBuffer(cbs[i], &beginInfo);
-            VkRect2D scissor = {
-            { 0, 0, },
-            { 256, 256, },
-            };
+            for (uint32_t k = 0; k < kRepeatSubmits; ++k) {
+                vk->vkBeginCommandBuffer(cbs[i], &beginInfo);
+                VkRect2D scissor = {
+                { 0, 0, },
+                { 256, 256, },
+                };
 
-            for (uint32_t j = 0; j < kRecordsPerThread; ++j) {
-                vk->vkCmdBindDescriptorSets(
-                    cbs[i],
-                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    pipelineLayout, 0, 1, &sets[i], 0, nullptr);
+                for (uint32_t j = 0; j < kRecordsPerThread; ++j) {
+                    vk->vkCmdBindDescriptorSets(
+                        cbs[i],
+                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        pipelineLayout, 0, 1, &sets[i], 0, nullptr);
+                }
+
+                vk->vkEndCommandBuffer(cbs[i]);
+                VkSubmitInfo si = {
+                    VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+                    0, 0,
+                    0,
+                    1, &cbs[i],
+                    0, 0,
+                };
+
+                vk->vkQueueSubmit(mQueue, 1, &si, 0);
             }
-
-            vk->vkEndCommandBuffer(cbs[i]);
-            VkSubmitInfo si = {
-                VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
-                0, 0,
-                0,
-                1, &cbs[i],
-                0, 0,
-            };
-
-            vk->vkQueueSubmit(mQueue, 1, &si, 0);
             // VkPhysicalDeviceMemoryProperties memProps;
             // vk->vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
             return 0;
