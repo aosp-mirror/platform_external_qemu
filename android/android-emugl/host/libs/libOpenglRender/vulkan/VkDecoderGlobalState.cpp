@@ -101,6 +101,33 @@ enum BoxedHandleTypeTag {
     GOLDFISH_VK_LIST_HANDLE_TYPES_BY_STAGE(DEFINE_BOXED_HANDLE_TYPE_TAG)
 };
 
+struct OrderMaintenanceInfo {
+     uint32_t sequenceNumber = 0;
+     Lock lock;
+     ConditionVariable cv;
+
+     uint32_t refcount = 1;
+
+     void incRef() {
+         __atomic_add_fetch(&refcount, 1, __ATOMIC_SEQ_CST);
+     }
+
+     bool decRef() {
+         return 0 == __atomic_sub_fetch(&refcount, 1, __ATOMIC_SEQ_CST);
+     }
+};
+
+static void acquireOrderMaintInfo(OrderMaintenanceInfo* ord) {
+    if (!ord) return;
+    ord->incRef();
+}
+
+static void releaseOrderMaintInfo(OrderMaintenanceInfo* ord) {
+    if (!ord) return;
+    if (ord->decRef()) delete ord;
+}
+
+
 template <class T>
 class BoxedHandleManager {
 public:
@@ -164,6 +191,7 @@ class DispatchableHandleInfo {
         T underlying;
         VulkanDispatch* dispatch = nullptr;
         bool ownDispatch = false;
+        OrderMaintenanceInfo* ordMaintInfo = nullptr;
 };
 
 static BoxedHandleManager<DispatchableHandleInfo<uint64_t>> sBoxedHandleManager;
@@ -3696,34 +3724,35 @@ public:
         uint32_t sequenceNumber) {
 
         auto nextDeadline = []() {
-            return System::get()->getUnixTimeUs() + 10000; // 10 ms
+            return System::get()->getUnixTimeUs() + 1; // 1 ms
         };
 
         auto timeoutDeadline = System::get()->getUnixTimeUs() + 5000000; // 5 s
 
         auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
 
-        AutoLock lock(mLock);
-        auto& info = mCmdBufferInfo[commandBuffer];
+        OrderMaintenanceInfo* order = ordmaint_VkCommandBuffer(boxed_commandBuffer);
+        if (!order) return;
 
-        bool doWait = false;
+        AutoLock lock(order->lock);
 
         if (needHostSync) {
-            while ((sequenceNumber - info.sequenceNumber) != 1) {
+            while ((sequenceNumber - __atomic_load_n(&order->sequenceNumber, __ATOMIC_ACQUIRE) != 1) &&
+                    sequenceNumber > __atomic_load_n(&order->sequenceNumber, __ATOMIC_ACQUIRE)) {
                 auto waitUntilUs = nextDeadline();
-                mCvWaitSequenceNumber.timedWait(
-                    &mLock, waitUntilUs);
-                doWait = true;
+                order->cv.timedWait(
+                    &order->lock, waitUntilUs);
 
                 if (timeoutDeadline < System::get()->getUnixTimeUs()) {
-                    fprintf(stderr, "%s: warning: command buffer sync timed out! curr %u info %u\n", __func__, sequenceNumber, info.sequenceNumber);
+                    fprintf(stderr, "%s: warning: sync timed out! curr %u info %u\n", __func__, sequenceNumber, order->sequenceNumber);
                     break;
                 }
             }
         }
 
-        info.sequenceNumber = sequenceNumber;
-        mCvWaitSequenceNumber.signal();
+        __atomic_fetch_add(&order->sequenceNumber, 1, __ATOMIC_RELEASE);
+        order->cv.broadcast();
+        releaseOrderMaintInfo(order);
     }
 
     void hostSyncQueue(
@@ -3733,34 +3762,35 @@ public:
         uint32_t sequenceNumber) {
 
         auto nextDeadline = []() {
-            return System::get()->getUnixTimeUs() + 10000; // 10 ms
+            return System::get()->getUnixTimeUs() + 1; // 1 ms
         };
 
         auto timeoutDeadline = System::get()->getUnixTimeUs() + 5000000; // 5 s
 
-        auto queue = unbox_VkQueue(boxed_queue);
+        auto commandBuffer = unbox_VkQueue(boxed_queue);
 
-        AutoLock lock(mLock);
-        auto& info = mQueueInfo[queue];
+        OrderMaintenanceInfo* order = ordmaint_VkQueue(boxed_queue);
+        if (!order) return;
 
-        bool doWait = false;
+        AutoLock lock(order->lock);
 
         if (needHostSync) {
-            while ((sequenceNumber - info.sequenceNumber) != 1) {
+            while ((sequenceNumber - __atomic_load_n(&order->sequenceNumber, __ATOMIC_ACQUIRE) != 1) &&
+                    sequenceNumber > __atomic_load_n(&order->sequenceNumber, __ATOMIC_ACQUIRE)) {
                 auto waitUntilUs = nextDeadline();
-                mCvWaitSequenceNumber.timedWait(
-                    &mLock, waitUntilUs);
-                doWait = true;
+                order->cv.timedWait(
+                    &order->lock, waitUntilUs);
 
                 if (timeoutDeadline < System::get()->getUnixTimeUs()) {
-                    fprintf(stderr, "%s: warning: command buffer sync timed out! curr %u info %u\n", __func__, sequenceNumber, info.sequenceNumber);
+                    fprintf(stderr, "%s: warning: sync timed out! curr %u info %u\n", __func__, sequenceNumber, order->sequenceNumber);
                     break;
                 }
             }
         }
 
-        info.sequenceNumber = sequenceNumber;
-        mCvWaitSequenceNumber.signal();
+        __atomic_fetch_add(&order->sequenceNumber, 1, __ATOMIC_RELEASE);
+        order->cv.broadcast();
+        releaseOrderMaintInfo(order);
     }
 
     VkResult on_vkCreateImageWithRequirementsGOOGLE(
@@ -4106,6 +4136,7 @@ public:
         DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(VkExternalImageFormatProperties)
         DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(VkExternalBufferProperties)
 
+
     uint64_t newGlobalHandle(const DispatchableHandleInfo<uint64_t>& item, BoxedHandleTypeTag typeTag) {
         if (!mCreatedHandlesForSnapshotLoad.empty() &&
                 (mCreatedHandlesForSnapshotLoad.size() - mCreatedHandlesForSnapshotLoadIndex > 0)) {
@@ -4125,10 +4156,15 @@ public:
         item.underlying = (uint64_t)underlying; \
         item.dispatch = dispatch ? dispatch : new VulkanDispatch; \
         item.ownDispatch = ownDispatch; \
+        item.ordMaintInfo = new OrderMaintenanceInfo; \
         auto res = (type)newGlobalHandle(item, Tag_##type); \
         return res; \
     } \
     void delete_##type(type boxed) { \
+        auto elt = sBoxedHandleManager.get( \
+            (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return; \
+        releaseOrderMaintInfo(elt->ordMaintInfo); \
         sBoxedHandleManager.remove((uint64_t)boxed); \
     } \
     type unbox_##type(type boxed) { \
@@ -4136,6 +4172,14 @@ public:
                 (uint64_t)(uintptr_t)boxed); \
         if (!elt) return VK_NULL_HANDLE; \
         return (type)elt->underlying; \
+    } \
+    OrderMaintenanceInfo* ordmaint_##type(type boxed) { \
+        auto elt = sBoxedHandleManager.get( \
+                (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return 0; \
+        auto info = elt->ordMaintInfo; \
+        if (!info) return 0; \
+        acquireOrderMaintInfo(info); return info; \
     } \
     type unboxed_to_boxed_##type(type unboxed) { \
         AutoLock lock(sBoxedHandleManager.lock); \
