@@ -124,7 +124,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
         uint8_t* snapshotTraceBegin = vkReadStream->beginTrace();
         vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
         
-                 if (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK) {
+                 if (opcode >= OP_vkCreateInstance && opcode < OP_vkLast) {
             uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
             if (seqnoPtr && !m_forSnapshotLoad) {
              while ((seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));
@@ -17643,6 +17643,43 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 break;
             }
 #endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+            case OP_vkQueueFlushCommandsGOOGLE:
+            {
+                VkQueue queue;
+                VkCommandBuffer commandBuffer;
+                VkDeviceSize dataSize;
+                const void* pData;
+                // Begin global wrapped dispatchable handle unboxing for queue;
+                uint64_t cgen_var_861;
+                memcpy((uint64_t*)&cgen_var_861, *readStreamPtrPtr, 1 * 8);
+                *readStreamPtrPtr += 1 * 8;
+                *(VkQueue*)&queue = (VkQueue)(VkQueue)((VkQueue)(*&cgen_var_861));
+                uint64_t cgen_var_862;
+                memcpy((uint64_t*)&cgen_var_862, *readStreamPtrPtr, 1 * 8);
+                *readStreamPtrPtr += 1 * 8;
+                *(VkCommandBuffer*)&commandBuffer = (VkCommandBuffer)unbox_VkCommandBuffer((VkCommandBuffer)(*&cgen_var_862));
+                memcpy((VkDeviceSize*)&dataSize, *readStreamPtrPtr, sizeof(VkDeviceSize));
+                *readStreamPtrPtr += sizeof(VkDeviceSize);
+                vkReadStream->alloc((void**)&pData, ((dataSize)) * sizeof(const uint8_t));
+                memcpy((void*)pData, *readStreamPtrPtr, ((dataSize)) * sizeof(const uint8_t));
+                *readStreamPtrPtr += ((dataSize)) * sizeof(const uint8_t);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueFlushCommandsGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)commandBuffer, (unsigned long long)dataSize, (unsigned long long)pData);
+                }
+                m_state->on_vkQueueFlushCommandsGOOGLE(&m_pool, queue, commandBuffer, dataSize, pData);
+                vkStream->unsetHandleMapping();
+                vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkQueueFlushCommandsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, commandBuffer, dataSize, pData);
+                }
+                vkReadStream->clearPool();
+                break;
+            }
+#endif
             default:
             {
                 m_pool.freeAll();
@@ -17650,7 +17687,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
             }
         }
         
-        if (seqnoPtr && (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK)) {
+        if (seqnoPtr && (opcode >= OP_vkCreateInstance && opcode < OP_vkLast)) {
         __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
         }
         

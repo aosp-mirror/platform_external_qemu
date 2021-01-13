@@ -47,6 +47,7 @@ public:
             mFallbackPtrs.insert(fallbackPtr);
             return fallbackPtr;
         }
+        // fprintf(stderr, "%s: use storage\n", __func__);
         size_t avail = mStorage.size() - mAllocPos;
         void* allocPtr = (void*)(mStorage.data() + mAllocPos);
         mAllocPos += wantedSizeRoundedUp;
@@ -56,7 +57,7 @@ public:
     void freeAll() {
         mAllocPos = 0;
         if (mNeedRealloc) {
-            mStorage.resize((mTotalWantedThisGeneration * 2) / sizeof(uint64_t));
+            mStorage.resize((mTotalWantedThisGeneration * 2));
             mNeedRealloc = false;
             for (auto ptr : mFallbackPtrs) {
                 free(ptr);

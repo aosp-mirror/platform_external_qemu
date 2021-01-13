@@ -608,6 +608,9 @@ custom_decodes = {
     "vkQueueBindSparseAsyncGOOGLE" : emit_global_state_wrapped_decoding,
 
     "vkGetLinearImageLayoutGOOGLE" : emit_global_state_wrapped_decoding,
+
+    # VK_GOOGLE_queue_submit_with_commands
+    "vkQueueFlushCommandsGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):
@@ -648,7 +651,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.line("""
-                 if (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK) {
+                 if (opcode >= OP_vkCreateInstance && opcode < OP_vkLast) {
             uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
             if (seqnoPtr && !m_forSnapshotLoad) {
              while ((seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));
@@ -689,7 +692,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.endBlock() # switch stmt
 
         self.cgen.line("""
-        if (seqnoPtr && (opcode >= OP_vkCreateInstance && opcode <= OP_vkGetIOSurfaceMVK)) {
+        if (seqnoPtr && (opcode >= OP_vkCreateInstance && opcode < OP_vkLast)) {
         __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
         }
         """)
