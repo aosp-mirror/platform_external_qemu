@@ -14,10 +14,8 @@
 #include "android/emulation/control/keyboard/dom_key.h"  // for DomKey, DomCode
 #include "android/emulation/control/libui_agent.h"       // for LibuiKeyCode...
 #include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
-#include "android/skin/linux_keycodes.h"
-#include "android/utils/utf8_utils.h"  // for android_utf8...
-#include "android/virtualscene/WASDInputHandler.h"
-#include "emulator_controller.pb.h"  // for KeyboardEvent
+#include "android/utils/utf8_utils.h"                    // for android_utf8...
+#include "emulator_controller.pb.h"                      // for KeyboardEvent
 
 /* set to 1 for very verbose debugging */
 #define DEBUG 0
@@ -37,7 +35,6 @@ namespace emulation {
 namespace control {
 namespace keyboard {
 
-using android::virtualscene::WASDInputHandler;
 // From
 // https://cs.chromium.org/chromium/src/ui/events/keycodes/dom_us_layout_data.h
 const struct NonPrintableCodeEntry {
@@ -206,27 +203,6 @@ const struct NonPrintableCodeEntry {
         // {DomCode::CAMERA, DomKey::CAMERA},          // Camera
 };
 
-static android::base::Optional<android::virtualscene::ControlKey> toControlKey(
-        uint32_t evdevKeyCode) {
-    using android::virtualscene::ControlKey;
-    switch (evdevKeyCode) {
-        case LINUX_KEY_W:
-            return ControlKey::W;
-        case LINUX_KEY_A:
-            return ControlKey::A;
-        case LINUX_KEY_S:
-            return ControlKey::S;
-        case LINUX_KEY_D:
-            return ControlKey::D;
-        case LINUX_KEY_Q:
-            return ControlKey::Q;
-        case LINUX_KEY_E:
-            return ControlKey::E;
-        default:
-            return {};
-    }
-}
-
 const size_t kDomKeyMapEntries = ARRAY_SIZE(dom_key_map);
 const size_t kKeycodeMapEntries = ARRAY_SIZE(usb_keycode_map);
 const size_t kNonPrintableCodeEntries = ARRAY_SIZE(kNonPrintableCodeMap);
@@ -235,29 +211,9 @@ EmulatorKeyEventSender::EmulatorKeyEventSender(
         const AndroidConsoleAgents* const consoleAgents)
     : mAgents(consoleAgents) {
     mLooper = android::base::ThreadLooper::get();
-    if (mAgents->sensors) {
-        mInputHandler = WASDInputHandler(mAgents->sensors);
-    }
 }
 
 EmulatorKeyEventSender::~EmulatorKeyEventSender() {}
-
-void EmulatorKeyEventSender::forwardToVirtualScene(uint32_t evdev, bool down) {
-    // Only send WASDQE.
-    const auto controlKey = toControlKey(evdev & 0x3ff);
-    if (!controlKey)
-        return;
-
-    if (mInputHandler) {
-        if (down) {
-            DD("Down evdev 0x%x to virtual scene camera ", evdev);
-            mInputHandler->keyDown(controlKey.value());
-        } else {
-            DD("Up evdev 0x%x to virtual scene camera ", evdev);
-            mInputHandler->keyUp(controlKey.value());
-        }
-    }
-}
 
 void EmulatorKeyEventSender::sendKeyCode(
         int32_t code,
@@ -268,15 +224,12 @@ void EmulatorKeyEventSender::sendKeyCode(
         eventType == KeyboardEvent::keypress) {
         DD("Down %d -> evdev 0x%x", code, evdev | 0x400);
         mAgents->user_event->sendKeyCode(evdev | 0x400);
-        forwardToVirtualScene(evdev, true);
     }
     if (eventType == KeyboardEvent::keyup ||
         eventType == KeyboardEvent::keypress) {
         DD("Up %d -> evdev 0x%x", code, evdev);
         mAgents->user_event->sendKeyCode(evdev);
-        forwardToVirtualScene(evdev, false);
     }
-
 }  // namespace keyboard
 
 void EmulatorKeyEventSender::send(const KeyboardEvent* request) {
@@ -287,16 +240,6 @@ void EmulatorKeyEventSender::send(const KeyboardEvent* request) {
 void EmulatorKeyEventSender::sendOnThisThread(const KeyboardEvent* request) {
     auto event = KeyboardEvent(*request);
     doSend(&event);
-}
-
-void EmulatorKeyEventSender::enableVirtualScene(bool enabled) {
-    if (!mInputHandler || mInputHandler->isEnabled() == enabled)
-        return;
-    if (enabled) {
-        mInputHandler->enable();
-    } else {
-        mInputHandler->disable();
-    }
 }
 
 void EmulatorKeyEventSender::doSend(const KeyboardEvent* request) {
@@ -381,7 +324,6 @@ void EmulatorKeyEventSender::sendUtf8String(const std::string& utf8) {
             for (auto evdev : evdevs) {
                 mAgents->user_event->sendKeyCode(evdev);
             }
-
             start = end;
         }
     }

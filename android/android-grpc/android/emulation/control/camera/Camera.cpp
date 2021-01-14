@@ -21,11 +21,15 @@ namespace android {
 namespace emulation {
 namespace control {
 
+static android::base::LazyInstance<Camera> sCamera = LAZY_INSTANCE_INIT;
+
+Camera* Camera::getCamera() {
+    return sCamera.ptr();
+}
 // mVirtualSceneConnected will be updated in three scenarios:
 // 1, snapshot load 2, virtual scene camera connected 3, virtual scene camera
 // disconnected.
-Camera::Camera(Callback cb)
-    : mVirtualSceneConnected(false), mCallback(std::move(cb)) {
+Camera::Camera() : mVirtualSceneConnected(false) {
     register_camera_status_change_callback(&Camera::virtualSceneCameraCallback,
                                            this, kVirtualScene);
 }
@@ -33,7 +37,6 @@ Camera::Camera(Callback cb)
 void Camera::virtualSceneCameraCallback(void* context, bool connected) {
     auto self = static_cast<Camera*>(context);
     self->mVirtualSceneConnected = connected;
-    self->mCallback(connected);
     self->mEventWaiter.newEvent();
 }
 
