@@ -31,6 +31,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/base/Tracing.h"
 #include "android/opengles.h"
 #include "android/snapshot/interface.h"
 
@@ -1573,7 +1574,6 @@ TEST_P(VulkanHalTest, ImmutableSamplersSuppressVkWriteDescriptorSetSampler) {
     vk->vkDestroySampler(mDevice, sampler, nullptr);
 }
 
-
 // Tests vkGetImageMemoryRequirements2
 TEST_P(VulkanHalTest, GetImageMemoryRequirements2) {
     VkImageCreateInfo testImageCi = {
@@ -1621,6 +1621,7 @@ TEST_P(VulkanHalTest, GetImageMemoryRequirements2) {
     vk->vkDestroyImage(mDevice, testImage, nullptr);
 }
 
+// Tests unclean process exit along with much vk commands still in the stream.
 TEST_P(VulkanHalTest, ProcessCleanup) {
     static constexpr uint32_t kNumTrials = 10;
     static constexpr uint32_t kNumImagesPerTrial = 100;
@@ -1652,6 +1653,172 @@ TEST_P(VulkanHalTest, ProcessCleanup) {
         restartProcessPipeAndHostConnection();
         setupVulkan();
     }
+}
+
+// Multithreaded benchmarks: Speed of light with simple vkCmd's.
+TEST_P(VulkanHalTest, MultithreadedSimpleCommand) {
+    constexpr uint32_t kThreadCount = 4;
+    VkDescriptorPool pool;
+    VkDescriptorSetLayout setLayout;
+
+    std::vector<VkDescriptorSet> sets(kThreadCount);
+
+    // Setup descriptor sets
+    EXPECT_EQ(VK_SUCCESS, allocateTestDescriptorSets(
+        kThreadCount, kThreadCount,
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+        &pool, &setLayout, sets.data()));
+
+    VkPipelineLayout pipelineLayout;
+
+    VkPipelineLayoutCreateInfo pipelineLayoutCi = {
+        VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO, 0, 0,
+        1, &setLayout,
+        0, nullptr,
+    };
+    vk->vkCreatePipelineLayout(mDevice, &pipelineLayoutCi, nullptr, &pipelineLayout);
+
+    // Setup command buffers
+    VkCommandPoolCreateInfo poolCi = {
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0, 0, mGraphicsQueueFamily,
+    };
+
+    VkCommandPool commandPool;
+    vk->vkCreateCommandPool(mDevice, &poolCi, nullptr, &commandPool);
+
+    VkCommandBuffer cbs[kThreadCount];
+    VkCommandBufferAllocateInfo cbAi = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
+        commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, kThreadCount,
+    };
+
+    vk->vkAllocateCommandBuffers(mDevice, &cbAi, cbs);
+
+    std::vector<FunctorThread*> threads;
+
+    constexpr uint32_t kRecordsPerThread = 1000000;
+    constexpr uint32_t kTotalRecords = kThreadCount * kRecordsPerThread;
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        FunctorThread* thread = new FunctorThread([this, cbs, sets, pipelineLayout, i]() {
+            VkCommandBufferBeginInfo beginInfo = {
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, 0,
+                VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, 0,
+            };
+
+            vk->vkBeginCommandBuffer(cbs[i], &beginInfo);
+            VkRect2D scissor = {
+            { 0, 0, },
+            { 256, 256, },
+            };
+
+            for (uint32_t j = 0; j < kRecordsPerThread; ++j) {
+                vk->vkCmdBindDescriptorSets(
+                    cbs[i],
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    pipelineLayout, 0, 1, &sets[i], 0, nullptr);
+            }
+
+            vk->vkEndCommandBuffer(cbs[i]);
+            VkSubmitInfo si = {
+                VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+                0, 0,
+                0,
+                1, &cbs[i],
+                0, 0,
+            };
+
+            vk->vkQueueSubmit(mQueue, 1, &si, 0);
+            VkPhysicalDeviceMemoryProperties memProps;
+            vk->vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
+            return 0;
+        });
+        threads.push_back(thread);
+    }
+
+    auto cpuTimeStart = System::cpuTime();
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        threads[i]->start();
+    }
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        threads[i]->wait();
+        delete threads[i];
+    }
+
+    vk->vkQueueWaitIdle(mQueue);
+    vk->vkDeviceWaitIdle(mDevice);
+
+    auto cpuTime = System::cpuTime() - cpuTimeStart;
+
+    uint64_t duration_us = cpuTime.wall_time_us;
+    uint64_t duration_cpu_us = cpuTime.usageUs();
+
+    float ms = duration_us / 1000.0f;
+    float sec = duration_us / 1000000.0f;
+
+    float submitHz = (float)kTotalRecords / sec;
+
+    printf("Record %u times in %f ms. Rate: %f Hz per thread: %f Hz\n", kTotalRecords, ms, submitHz, (float)submitHz / (float)kThreadCount);
+
+    vk->vkFreeCommandBuffers(mDevice, commandPool, 1, cbs);
+    vk->vkDestroyCommandPool(mDevice, commandPool, nullptr);
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkFreeDescriptorSets(
+        mDevice, pool, kThreadCount, sets.data()));
+
+    vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
+}
+
+// Multithreaded benchmarks: Round trip speed of light.
+TEST_P(VulkanHalTest, MultithreadedRoundTrip) {
+    android::base::enableTracing();
+
+    constexpr uint32_t kThreadCount = 6;
+
+    std::vector<FunctorThread*> threads;
+    constexpr uint32_t kRecordsPerThread = 50;
+    constexpr uint32_t kTotalRecords = kThreadCount * kRecordsPerThread;
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        FunctorThread* thread = new FunctorThread([this]() {
+            for (uint32_t j = 0; j < kRecordsPerThread; ++j) {
+                VkPhysicalDeviceMemoryProperties memProps;
+                vk->vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
+            }
+            return 0;
+        });
+        threads.push_back(thread);
+    }
+
+    auto cpuTimeStart = System::cpuTime();
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        threads[i]->start();
+    }
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        threads[i]->wait();
+        delete threads[i];
+    }
+
+    vk->vkDeviceWaitIdle(mDevice);
+
+    auto cpuTime = System::cpuTime() - cpuTimeStart;
+
+    uint64_t duration_us = cpuTime.wall_time_us;
+    uint64_t duration_cpu_us = cpuTime.usageUs();
+
+    float ms = duration_us / 1000.0f;
+    float sec = duration_us / 1000000.0f;
+
+    float submitHz = (float)kTotalRecords / sec;
+
+    printf("Round trip %u times in %f ms. Rate: %f Hz per thread: %f Hz\n", kTotalRecords, ms, submitHz, (float)submitHz / (float)kThreadCount);
+    android::base::disableTracing();
+    usleep(1000000);
 }
 
 INSTANTIATE_TEST_SUITE_P(
