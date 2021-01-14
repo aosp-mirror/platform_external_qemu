@@ -258,10 +258,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pPhysicalDevices, (*(pPhysicalDeviceCount)) * sizeof(VkPhysicalDevice));
                     if ((*(pPhysicalDeviceCount)))
                     {
-                        uint64_t* cgen_var_8;
-                        vkReadStream->alloc((void**)&cgen_var_8, (*(pPhysicalDeviceCount)) * 8);
-                        memcpy((uint64_t*)cgen_var_8, *readStreamPtrPtr, (*(pPhysicalDeviceCount)) * 8);
-                        *readStreamPtrPtr += (*(pPhysicalDeviceCount)) * 8;
+                        __attribute__((aligned(1))) uint64_t* cgen_var_8 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        *readStreamPtrPtr += 8 * (*(pPhysicalDeviceCount));
                         for (uint32_t k = 0; k < (*(pPhysicalDeviceCount)); ++k)
                         {
                             *(((VkPhysicalDevice*)pPhysicalDevices) + k) = (VkPhysicalDevice)(VkPhysicalDevice)((VkPhysicalDevice)cgen_var_8[k]);
@@ -2173,10 +2171,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pFences, ((fenceCount)) * sizeof(const VkFence));
                 if (((fenceCount)))
                 {
-                    uint64_t* cgen_var_105;
-                    vkReadStream->alloc((void**)&cgen_var_105, ((fenceCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_105, *readStreamPtrPtr, ((fenceCount)) * 8);
-                    *readStreamPtrPtr += ((fenceCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_105 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((fenceCount));
                     for (uint32_t k = 0; k < ((fenceCount)); ++k)
                     {
                         *(((VkFence*)pFences) + k) = (VkFence)unbox_VkFence((VkFence)cgen_var_105[k]);
@@ -2254,10 +2250,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pFences, ((fenceCount)) * sizeof(const VkFence));
                 if (((fenceCount)))
                 {
-                    uint64_t* cgen_var_109;
-                    vkReadStream->alloc((void**)&cgen_var_109, ((fenceCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_109, *readStreamPtrPtr, ((fenceCount)) * 8);
-                    *readStreamPtrPtr += ((fenceCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_109 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((fenceCount));
                     for (uint32_t k = 0; k < ((fenceCount)); ++k)
                     {
                         *(((VkFence*)pFences) + k) = (VkFence)unbox_VkFence((VkFence)cgen_var_109[k]);
@@ -3616,10 +3610,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pSrcCaches, ((srcCacheCount)) * sizeof(const VkPipelineCache));
                 if (((srcCacheCount)))
                 {
-                    uint64_t* cgen_var_194;
-                    vkReadStream->alloc((void**)&cgen_var_194, ((srcCacheCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_194, *readStreamPtrPtr, ((srcCacheCount)) * 8);
-                    *readStreamPtrPtr += ((srcCacheCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_194 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((srcCacheCount));
                     for (uint32_t k = 0; k < ((srcCacheCount)); ++k)
                     {
                         *(((VkPipelineCache*)pSrcCaches) + k) = (VkPipelineCache)unbox_VkPipelineCache((VkPipelineCache)cgen_var_194[k]);
@@ -3684,10 +3676,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
                 if (((createInfoCount)))
                 {
-                    uint64_t* cgen_var_198;
-                    vkReadStream->alloc((void**)&cgen_var_198, ((createInfoCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_198, *readStreamPtrPtr, ((createInfoCount)) * 8);
-                    *readStreamPtrPtr += ((createInfoCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_198 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((createInfoCount));
                     for (uint32_t k = 0; k < ((createInfoCount)); ++k)
                     {
                         *(((VkPipeline*)pPipelines) + k) = (VkPipeline)(VkPipeline)((VkPipeline)cgen_var_198[k]);
@@ -3775,10 +3765,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
                 if (((createInfoCount)))
                 {
-                    uint64_t* cgen_var_203;
-                    vkReadStream->alloc((void**)&cgen_var_203, ((createInfoCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_203, *readStreamPtrPtr, ((createInfoCount)) * 8);
-                    *readStreamPtrPtr += ((createInfoCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_203 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((createInfoCount));
                     for (uint32_t k = 0; k < ((createInfoCount)); ++k)
                     {
                         *(((VkPipeline*)pPipelines) + k) = (VkPipeline)(VkPipeline)((VkPipeline)cgen_var_203[k]);
@@ -4376,10 +4364,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pDescriptorSets, pAllocateInfo->descriptorSetCount * sizeof(VkDescriptorSet));
                 if (pAllocateInfo->descriptorSetCount)
                 {
-                    uint64_t* cgen_var_239;
-                    vkReadStream->alloc((void**)&cgen_var_239, pAllocateInfo->descriptorSetCount * 8);
-                    memcpy((uint64_t*)cgen_var_239, *readStreamPtrPtr, pAllocateInfo->descriptorSetCount * 8);
-                    *readStreamPtrPtr += pAllocateInfo->descriptorSetCount * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_239 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * pAllocateInfo->descriptorSetCount;
                     for (uint32_t k = 0; k < pAllocateInfo->descriptorSetCount; ++k)
                     {
                         *(((VkDescriptorSet*)pDescriptorSets) + k) = (VkDescriptorSet)(VkDescriptorSet)((VkDescriptorSet)cgen_var_239[k]);
@@ -4447,10 +4433,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
                     if (((descriptorSetCount)))
                     {
-                        uint64_t* cgen_var_244;
-                        vkReadStream->alloc((void**)&cgen_var_244, ((descriptorSetCount)) * 8);
-                        memcpy((uint64_t*)cgen_var_244, *readStreamPtrPtr, ((descriptorSetCount)) * 8);
-                        *readStreamPtrPtr += ((descriptorSetCount)) * 8;
+                        __attribute__((aligned(1))) uint64_t* cgen_var_244 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        *readStreamPtrPtr += 8 * ((descriptorSetCount));
                         for (uint32_t k = 0; k < ((descriptorSetCount)); ++k)
                         {
                             *(((VkDescriptorSet*)pDescriptorSets) + k) = (VkDescriptorSet)(VkDescriptorSet)((VkDescriptorSet)cgen_var_244[k]);
@@ -4975,10 +4959,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pCommandBuffers, pAllocateInfo->commandBufferCount * sizeof(VkCommandBuffer));
                 if (pAllocateInfo->commandBufferCount)
                 {
-                    uint64_t* cgen_var_272;
-                    vkReadStream->alloc((void**)&cgen_var_272, pAllocateInfo->commandBufferCount * 8);
-                    memcpy((uint64_t*)cgen_var_272, *readStreamPtrPtr, pAllocateInfo->commandBufferCount * 8);
-                    *readStreamPtrPtr += pAllocateInfo->commandBufferCount * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_272 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * pAllocateInfo->commandBufferCount;
                     for (uint32_t k = 0; k < pAllocateInfo->commandBufferCount; ++k)
                     {
                         *(((VkCommandBuffer*)pCommandBuffers) + k) = (VkCommandBuffer)(VkCommandBuffer)((VkCommandBuffer)cgen_var_272[k]);
@@ -5042,10 +5024,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
                     if (((commandBufferCount)))
                     {
-                        uint64_t* cgen_var_277;
-                        vkReadStream->alloc((void**)&cgen_var_277, ((commandBufferCount)) * 8);
-                        memcpy((uint64_t*)cgen_var_277, *readStreamPtrPtr, ((commandBufferCount)) * 8);
-                        *readStreamPtrPtr += ((commandBufferCount)) * 8;
+                        __attribute__((aligned(1))) uint64_t* cgen_var_277 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        *readStreamPtrPtr += 8 * ((commandBufferCount));
                         for (uint32_t k = 0; k < ((commandBufferCount)); ++k)
                         {
                             *(((VkCommandBuffer*)pCommandBuffers) + k) = (VkCommandBuffer)(VkCommandBuffer)((VkCommandBuffer)cgen_var_277[k]);
@@ -5537,10 +5517,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
                 if (((descriptorSetCount)))
                 {
-                    uint64_t* cgen_var_294;
-                    vkReadStream->alloc((void**)&cgen_var_294, ((descriptorSetCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_294, *readStreamPtrPtr, ((descriptorSetCount)) * 8);
-                    *readStreamPtrPtr += ((descriptorSetCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_294 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((descriptorSetCount));
                     for (uint32_t k = 0; k < ((descriptorSetCount)); ++k)
                     {
                         *(((VkDescriptorSet*)pDescriptorSets) + k) = (VkDescriptorSet)unbox_VkDescriptorSet((VkDescriptorSet)cgen_var_294[k]);
@@ -5625,10 +5603,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pBuffers, ((bindingCount)) * sizeof(const VkBuffer));
                 if (((bindingCount)))
                 {
-                    uint64_t* cgen_var_298;
-                    vkReadStream->alloc((void**)&cgen_var_298, ((bindingCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_298, *readStreamPtrPtr, ((bindingCount)) * 8);
-                    *readStreamPtrPtr += ((bindingCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_298 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((bindingCount));
                     for (uint32_t k = 0; k < ((bindingCount)); ++k)
                     {
                         *(((VkBuffer*)pBuffers) + k) = (VkBuffer)unbox_VkBuffer((VkBuffer)cgen_var_298[k]);
@@ -6557,10 +6533,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pEvents, ((eventCount)) * sizeof(const VkEvent));
                 if (((eventCount)))
                 {
-                    uint64_t* cgen_var_340;
-                    vkReadStream->alloc((void**)&cgen_var_340, ((eventCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_340, *readStreamPtrPtr, ((eventCount)) * 8);
-                    *readStreamPtrPtr += ((eventCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_340 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((eventCount));
                     for (uint32_t k = 0; k < ((eventCount)); ++k)
                     {
                         *(((VkEvent*)pEvents) + k) = (VkEvent)unbox_VkEvent((VkEvent)cgen_var_340[k]);
@@ -7053,10 +7027,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
                 if (((commandBufferCount)))
                 {
-                    uint64_t* cgen_var_359;
-                    vkReadStream->alloc((void**)&cgen_var_359, ((commandBufferCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_359, *readStreamPtrPtr, ((commandBufferCount)) * 8);
-                    *readStreamPtrPtr += ((commandBufferCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_359 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((commandBufferCount));
                     for (uint32_t k = 0; k < ((commandBufferCount)); ++k)
                     {
                         *(((VkCommandBuffer*)pCommandBuffers) + k) = (VkCommandBuffer)unbox_VkCommandBuffer((VkCommandBuffer)cgen_var_359[k]);
@@ -8978,10 +8950,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pSwapchainImages, (*(pSwapchainImageCount)) * sizeof(VkImage));
                     if ((*(pSwapchainImageCount)))
                     {
-                        uint64_t* cgen_var_449;
-                        vkReadStream->alloc((void**)&cgen_var_449, (*(pSwapchainImageCount)) * 8);
-                        memcpy((uint64_t*)cgen_var_449, *readStreamPtrPtr, (*(pSwapchainImageCount)) * 8);
-                        *readStreamPtrPtr += (*(pSwapchainImageCount)) * 8;
+                        __attribute__((aligned(1))) uint64_t* cgen_var_449 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        *readStreamPtrPtr += 8 * (*(pSwapchainImageCount));
                         for (uint32_t k = 0; k < (*(pSwapchainImageCount)); ++k)
                         {
                             *(((VkImage*)pSwapchainImages) + k) = (VkImage)(VkImage)((VkImage)cgen_var_449[k]);
@@ -9566,10 +9536,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pDisplays, (*(pDisplayCount)) * sizeof(VkDisplayKHR));
                     if ((*(pDisplayCount)))
                     {
-                        uint64_t* cgen_var_483;
-                        vkReadStream->alloc((void**)&cgen_var_483, (*(pDisplayCount)) * 8);
-                        memcpy((uint64_t*)cgen_var_483, *readStreamPtrPtr, (*(pDisplayCount)) * 8);
-                        *readStreamPtrPtr += (*(pDisplayCount)) * 8;
+                        __attribute__((aligned(1))) uint64_t* cgen_var_483 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        *readStreamPtrPtr += 8 * (*(pDisplayCount));
                         for (uint32_t k = 0; k < (*(pDisplayCount)); ++k)
                         {
                             *(((VkDisplayKHR*)pDisplays) + k) = (VkDisplayKHR)(VkDisplayKHR)((VkDisplayKHR)cgen_var_483[k]);
@@ -9928,10 +9896,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pSwapchains, ((swapchainCount)) * sizeof(VkSwapchainKHR));
                 if (((swapchainCount)))
                 {
-                    uint64_t* cgen_var_506;
-                    vkReadStream->alloc((void**)&cgen_var_506, ((swapchainCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_506, *readStreamPtrPtr, ((swapchainCount)) * 8);
-                    *readStreamPtrPtr += ((swapchainCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_506 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((swapchainCount));
                     for (uint32_t k = 0; k < ((swapchainCount)); ++k)
                     {
                         *(((VkSwapchainKHR*)pSwapchains) + k) = (VkSwapchainKHR)(VkSwapchainKHR)((VkSwapchainKHR)cgen_var_506[k]);
@@ -13457,10 +13423,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pWaitSemaphores, ((waitSemaphoreCount)) * sizeof(const VkSemaphore));
                     if (((waitSemaphoreCount)))
                     {
-                        uint64_t* cgen_var_656;
-                        vkReadStream->alloc((void**)&cgen_var_656, ((waitSemaphoreCount)) * 8);
-                        memcpy((uint64_t*)cgen_var_656, *readStreamPtrPtr, ((waitSemaphoreCount)) * 8);
-                        *readStreamPtrPtr += ((waitSemaphoreCount)) * 8;
+                        __attribute__((aligned(1))) uint64_t* cgen_var_656 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        *readStreamPtrPtr += 8 * ((waitSemaphoreCount));
                         for (uint32_t k = 0; k < ((waitSemaphoreCount)); ++k)
                         {
                             *(((VkSemaphore*)pWaitSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)cgen_var_656[k]);
@@ -15386,10 +15350,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pSwapchains, ((swapchainCount)) * sizeof(const VkSwapchainKHR));
                 if (((swapchainCount)))
                 {
-                    uint64_t* cgen_var_749;
-                    vkReadStream->alloc((void**)&cgen_var_749, ((swapchainCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_749, *readStreamPtrPtr, ((swapchainCount)) * 8);
-                    *readStreamPtrPtr += ((swapchainCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_749 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((swapchainCount));
                     for (uint32_t k = 0; k < ((swapchainCount)); ++k)
                     {
                         *(((VkSwapchainKHR*)pSwapchains) + k) = (VkSwapchainKHR)unbox_VkSwapchainKHR((VkSwapchainKHR)cgen_var_749[k]);
@@ -16297,10 +16259,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkReadStream->alloc((void**)&pSrcCaches, ((srcCacheCount)) * sizeof(const VkValidationCacheEXT));
                 if (((srcCacheCount)))
                 {
-                    uint64_t* cgen_var_787;
-                    vkReadStream->alloc((void**)&cgen_var_787, ((srcCacheCount)) * 8);
-                    memcpy((uint64_t*)cgen_var_787, *readStreamPtrPtr, ((srcCacheCount)) * 8);
-                    *readStreamPtrPtr += ((srcCacheCount)) * 8;
+                    __attribute__((aligned(1))) uint64_t* cgen_var_787 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((srcCacheCount));
                     for (uint32_t k = 0; k < ((srcCacheCount)); ++k)
                     {
                         *(((VkValidationCacheEXT*)pSrcCaches) + k) = (VkValidationCacheEXT)unbox_VkValidationCacheEXT((VkValidationCacheEXT)cgen_var_787[k]);
@@ -16859,10 +16819,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     vkReadStream->alloc((void**)&pBufferViews, ((bufferViewCount)) * sizeof(const VkBufferView));
                     if (((bufferViewCount)))
                     {
-                        uint64_t* cgen_var_824;
-                        vkReadStream->alloc((void**)&cgen_var_824, ((bufferViewCount)) * 8);
-                        memcpy((uint64_t*)cgen_var_824, *readStreamPtrPtr, ((bufferViewCount)) * 8);
-                        *readStreamPtrPtr += ((bufferViewCount)) * 8;
+                        __attribute__((aligned(1))) uint64_t* cgen_var_824 = (__attribute__((aligned(1))) uint64_t*)(*readStreamPtrPtr);
+                        *readStreamPtrPtr += 8 * ((bufferViewCount));
                         for (uint32_t k = 0; k < ((bufferViewCount)); ++k)
                         {
                             *(((VkBufferView*)pBufferViews) + k) = (VkBufferView)unbox_VkBufferView((VkBufferView)cgen_var_824[k]);

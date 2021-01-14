@@ -55,7 +55,7 @@ using android::base::BumpPool;
 """
 
 STREAM = "stream"
-RESOURCES = "resources"
+RESOURCES = "sResourceTracker"
 POOL = "pool"
 
 ENCODER_PREVALIDATED_APIS = [
@@ -136,7 +136,7 @@ def emit_custom_resource_preprocess(typeInfo, api, cgen):
     if api.name in ENCODER_CUSTOM_RESOURCE_PREPROCESS:
         cgen.stmt( \
             make_event_handler_call( \
-                "mImpl->resources()", api,
+                "sResourceTracker", api,
                 ENCODER_THIS_PARAM,
                 SUCCESS_RET_TYPES[api.getRetTypeExpr()],
                 cgen, suffix="_pre"))
@@ -144,7 +144,7 @@ def emit_custom_resource_preprocess(typeInfo, api, cgen):
 def emit_custom_resource_postprocess(typeInfo, api, cgen):
     if api.name in ENCODER_CUSTOM_RESOURCE_POSTPROCESS:
         cgen.stmt(make_event_handler_call( \
-            "mImpl->resources()",
+            "sResourceTracker",
             api,
             ENCODER_THIS_PARAM,
             api.getRetVarExpr(),
@@ -196,13 +196,13 @@ def emit_deepcopy(typeInfo, param, cgen):
 def emit_transform(typeInfo, param, cgen, variant="tohost"):
     res = \
         iterateVulkanType(typeInfo, param, TransformCodegen( \
-            cgen, param.paramName, "mImpl->resources()", "transform_%s_" % variant, variant))
+            cgen, param.paramName, "sResourceTracker", "transform_%s_" % variant, variant))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
 def emit_handlemap_create(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
-        cgen, None, "resources->createMapping()", "handlemap_",
+        cgen, None, "sResourceTracker", "handlemap_",
         lambda vtype: typeInfo.isHandleType(vtype.typeName)
     ))
 
@@ -214,7 +214,7 @@ def custom_encoder_args(api):
 
 def emit_handlemap_destroy(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
-        cgen, None, "resources->destroyMapping()", "handlemap_",
+        cgen, None, "sResourceTracker->destroyMapping()", "handlemap_",
         lambda vtype: typeInfo.isHandleType(vtype.typeName)
     ))
 
@@ -253,7 +253,6 @@ def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
     emit_custom_resource_preprocess(typeInfo, api, cgen);
 
     cgen.stmt("auto %s = mImpl->stream()" % STREAM)
-    cgen.stmt("auto %s = mImpl->resources()" % RESOURCES)
     cgen.stmt("auto %s = mImpl->pool()" % POOL)
     # cgen.stmt("%s->setHandleMapping(%s->unwrapMapping())" % (STREAM, RESOURCES))
 
@@ -295,7 +294,7 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
     # Apply transforms if applicable.
     # Apply transform to API itself:
     genTransformsForVulkanType(
-        "mImpl->resources()",
+        "sResourceTracker",
         apiForTransform,
         lambda p: cgen.generalAccess(p, parentVarName = None, asPtr = True),
         lambda p: cgen.generalLengthAccess(p, parentVarName = None),
@@ -321,7 +320,7 @@ def emit_parameter_encode_write_packet_info(typeInfo, api, cgen):
     cgen.stmt("uint8_t* streamPtr = %s->reserve(packetSize_%s)" % (STREAM, api.name))
     cgen.stmt("uint8_t** streamPtrPtr = &streamPtr")
     cgen.stmt("uint32_t opcode_%s = OP_%s" % (api.name, api.name))
-    cgen.stmt("uint32_t seqno = mImpl->resources()->nextSeqno()")
+    cgen.stmt("uint32_t seqno = ResourceTracker::nextSeqno()")
     cgen.stmt("memcpy(streamPtr, &opcode_%s, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)" % api.name)
     cgen.stmt("memcpy(streamPtr, &packetSize_%s, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)" % api.name)
     cgen.stmt("memcpy(streamPtr, &seqno, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)")
@@ -384,14 +383,7 @@ def emit_return(typeInfo, api, cgen):
     retVar = api.getRetVarExpr()
     cgen.stmt("return %s" % retVar)
 
-def emit_lock(cgen):
-    cgen.stmt("if (doLock) this->lock()")
-
-def emit_unlock(cgen):
-    cgen.stmt("if (doLock) this->unlock()")
-
 def emit_default_encoding(typeInfo, api, cgen):
-    emit_lock(cgen)
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
     emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
     emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
@@ -400,20 +392,17 @@ def emit_default_encoding(typeInfo, api, cgen):
     emit_return_unmarshal(typeInfo, api, cgen)
     emit_post(typeInfo, api, cgen)
     emit_pool_free(cgen)
-    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 ## Custom encoding definitions##################################################
 
 def emit_only_goldfish_custom(typeInfo, api, cgen):
-    emit_lock(cgen)
     cgen.stmt("mImpl->log(\"custom start %s\");" % api.name)
     cgen.vkApiCall( \
         api,
-        customPrefix="mImpl->resources()->on_",
+        customPrefix="sResourceTracker->on_",
         customParameters=custom_encoder_args(api) + \
                 [p.paramName for p in api.parameters[:-1]])
-    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 def emit_only_resource_event(typeInfo, api, cgen):
@@ -429,7 +418,7 @@ def emit_only_resource_event(typeInfo, api, cgen):
     cgen.stmt(
         (("%s = " % retExpr) if retExpr else "") +
         make_event_handler_call(
-            "mImpl->resources()",
+            "sResourceTracker",
             api,
             ENCODER_THIS_PARAM,
             input_result, cgen))
@@ -439,7 +428,6 @@ def emit_only_resource_event(typeInfo, api, cgen):
 
 def emit_with_custom_unwrap(custom):
     def call(typeInfo, api, cgen):
-        emit_lock(cgen)
         emit_parameter_encode_preamble_write(typeInfo, api, cgen)
         emit_parameter_encode_copy_unwrap_count(
             typeInfo, api, cgen, customUnwrap=custom)
@@ -448,17 +436,15 @@ def emit_with_custom_unwrap(custom):
         emit_parameter_encode_read(typeInfo, api, cgen)
         emit_return_unmarshal(typeInfo, api, cgen)
         emit_pool_free(cgen)
-        emit_unlock(cgen)
         emit_return(typeInfo, api, cgen)
     return call
 
 def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
-    emit_lock(cgen)
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
     emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
 
     def emit_flush_ranges(streamVar):
-        cgen.beginIf("!resources->usingDirectMapping()")
+        cgen.beginIf("!sResourceTracker->usingDirectMapping()")
         cgen.beginFor("uint32_t i = 0", "i < memoryRangeCount", "++i")
         cgen.stmt("auto range = pMemoryRanges[i]")
         cgen.stmt("auto memory = pMemoryRanges[i].memory")
@@ -466,8 +452,8 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("auto offset = pMemoryRanges[i].offset")
         cgen.stmt("uint64_t streamSize = 0")
         cgen.stmt("if (!memory) { %s->write(&streamSize, sizeof(uint64_t)); continue; }" % streamVar)
-        cgen.stmt("auto hostPtr = resources->getMappedPointer(memory)")
-        cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? resources->getMappedSize(memory) : size")
+        cgen.stmt("auto hostPtr = sResourceTracker->getMappedPointer(memory)")
+        cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? sResourceTracker->getMappedSize(memory) : size")
         cgen.stmt("if (!hostPtr) { %s->write(&streamSize, sizeof(uint64_t)); continue; }" % streamVar)
         cgen.stmt("streamSize = actualSize")
         cgen.stmt("%s->write(&streamSize, sizeof(uint64_t))" % streamVar)
@@ -484,11 +470,9 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_parameter_encode_read(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
     emit_pool_free(cgen)
-    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
-    emit_lock(cgen)
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
     emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
     emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
@@ -497,7 +481,7 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_return_unmarshal(typeInfo, api, cgen)
 
     def emit_invalidate_ranges(streamVar):
-        cgen.beginIf("!resources->usingDirectMapping()")
+        cgen.beginIf("!sResourceTracker->usingDirectMapping()")
         cgen.beginFor("uint32_t i = 0", "i < memoryRangeCount", "++i")
         cgen.stmt("auto range = pMemoryRanges[i]")
         cgen.stmt("auto memory = pMemoryRanges[i].memory")
@@ -505,8 +489,8 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("auto offset = pMemoryRanges[i].offset")
         cgen.stmt("uint64_t streamSize = 0")
         cgen.stmt("if (!memory) { %s->read(&streamSize, sizeof(uint64_t)); continue; }" % streamVar)
-        cgen.stmt("auto hostPtr = resources->getMappedPointer(memory)")
-        cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? resources->getMappedSize(memory) : size")
+        cgen.stmt("auto hostPtr = sResourceTracker->getMappedPointer(memory)")
+        cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? sResourceTracker->getMappedSize(memory) : size")
         cgen.stmt("if (!hostPtr) { %s->read(&streamSize, sizeof(uint64_t)); continue; }" % streamVar)
         cgen.stmt("streamSize = actualSize")
         cgen.stmt("%s->read(&streamSize, sizeof(uint64_t))" % streamVar)
@@ -517,18 +501,17 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
 
     emit_invalidate_ranges(STREAM)
     emit_pool_free(cgen)
-    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 def unwrap_VkNativeBufferANDROID():
     def mapOp(cgen, orig, local):
-        cgen.stmt("mImpl->resources()->unwrap_VkNativeBufferANDROID(%s, %s)" %
+        cgen.stmt("sResourceTracker->unwrap_VkNativeBufferANDROID(%s, %s)" %
                   (orig.paramName, local.paramName))
     return { "pCreateInfo" : { "mapOp" : mapOp } }
 
 def unwrap_vkAcquireImageANDROID_nativeFenceFd():
     def mapOp(cgen, orig, local):
-        cgen.stmt("mImpl->resources()->unwrap_vkAcquireImageANDROID_nativeFenceFd(%s, &%s)" %
+        cgen.stmt("sResourceTracker->unwrap_vkAcquireImageANDROID_nativeFenceFd(%s, &%s)" %
                   (orig.paramName, local.paramName))
     return { "nativeFenceFd" : { "mapOp" : mapOp } }
 
