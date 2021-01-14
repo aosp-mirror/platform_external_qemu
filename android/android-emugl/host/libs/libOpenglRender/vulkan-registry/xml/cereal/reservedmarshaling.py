@@ -147,10 +147,13 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
         handle64Var = self.cgen.var()
         if lenAccess != "1":
             self.cgen.beginIf(lenAccess)
-            self.cgen.stmt("uint64_t* %s" % handle64Var)
-            self.cgen.stmt(
-                "%s->alloc((void**)&%s, %s * 8)" % \
-                (self.streamVarName, handle64Var, lenAccess))
+            # if self.direction == "write":
+            self.cgen.stmt("__attribute__((aligned(1))) uint64_t* %s = (__attribute__((aligned(1))) uint64_t*)(*%s)" % (handle64Var, self.ptrVar))
+            # else:
+            #     self.cgen.stmt("uint64_t* %s" % handle64Var)
+            #     self.cgen.stmt(
+            #         "%s->alloc((void**)&%s, %s * 8)" % \
+            #         (self.streamVarName, handle64Var, lenAccess))
             handle64VarAccess = handle64Var
             handle64VarType = \
                 makeVulkanTypeSimple(False, "uint64_t", 1, paramName=handle64Var)
@@ -174,27 +177,29 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
                             (vulkanType.typeName, vulkanType.typeName))
                 if "1" == lenAccess:
                     self.cgen.stmt("*%s = (%s)%s(*%s)" % (access, vulkanType.typeName, mapFunc, access))
+                    self.genStreamCall(vulkanType, access, "8 * %s" % lenAccess)
                 else:
                     self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
                     self.cgen.stmt("%s[k] = (%s)%s(%s[k])" % (access, vulkanType.typeName, mapFunc, access))
                     self.cgen.endFor()
-                self.genStreamCall(vulkanType, access, "8 * %s" % lenAccess)
+                    self.genPtrIncr("8 * %s" % lenAccess)
             else:
                 if "1" == lenAccess:
                     self.cgen.stmt("*%s = %s((*%s))" % (handle64VarAccess, mapFunc64, access))
+                    self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
                 else:
                     self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
                     self.cgen.stmt("%s[k] = %s(%s[k])" % (handle64VarAccess, mapFunc64, access))
                     self.cgen.endFor()
-                self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
+                    self.genPtrIncr("8 * %s" % lenAccess)
         else:
-            self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
-
             if "1" == lenAccess:
+                self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
                 self.cgen.stmt("*%s%s = (%s)%s((%s)(*%s))" % (
                     self.makeCastExpr(vulkanType.getForNonConstAccess()), access,
                     vulkanType.typeName,mapFunc, vulkanType.typeName, handle64VarAccess))
             else:
+                self.genPtrIncr("8 * %s" % lenAccess)
                 self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
                 self.cgen.stmt("*((%s%s) + k) = (%s)%s((%s)%s[k])" % (
                     self.makeCastExpr(vulkanType.getForNonConstAccess()), access,
