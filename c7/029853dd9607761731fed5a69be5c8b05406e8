@@ -1,0 +1,12 @@
+Verified+1: Joshua Duong <joshuaduong@google.com>
+Code-Review+1: Joshua Duong <joshuaduong@google.com>
+Code-Review+2: Erwin Jansen <jansene@google.com>
+Autosubmit+1: Joshua Duong <joshuaduong@google.com>
+Bypass-Presubmit+1: Joshua Duong <joshuaduong@google.com>
+Presubmit-Verified+2: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <ayeaye-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Thu, 14 Jan 2021 22:16:44 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1550368
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
