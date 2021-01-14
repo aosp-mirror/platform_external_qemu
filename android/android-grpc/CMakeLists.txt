@@ -39,7 +39,7 @@ endif()
 protobuf_generate_grpc_cpp(
   SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
   INCLUDES ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto
-  SOURCES emulator_controller.proto snapshot_service.proto
+  SOURCES adb_service.proto emulator_controller.proto snapshot_service.proto
   OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
   GENERATED EMULATOR_GRPC_SRC)
 
@@ -49,6 +49,7 @@ android_add_library(
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
       ${EMULATOR_GRPC_SRC}
+      android/emulation/control/adb/AdbService.cpp
       android/emulation/control/camera/Camera.cpp
       android/emulation/control/clipboard/Clipboard.cpp
       android/emulation/control/EmulatorService.cpp
