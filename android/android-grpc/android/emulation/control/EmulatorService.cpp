@@ -90,6 +90,7 @@
 #include "android/telephony/modem.h"
 #include "android/telephony/sms.h"
 #include "android/version.h"
+#include "android/virtualscene/WASDInputHandler.h"
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
 #include "studio_stats.pb.h"
@@ -125,7 +126,9 @@ public:
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
           mTouchEventSender(agents),
-          mCamera(Camera::getCamera()),
+          mCamera([this](bool connected) {
+              mKeyEventSender.enableVirtualScene(connected);
+          }),
           mClipboard(Clipboard::getClipboard(agents->clipboard)),
           mLooper(android::base::ThreadLooper::get()) {
         // the logcat pipe will take ownership of the created stream, and writes
@@ -399,10 +402,18 @@ public:
                      ::google::protobuf::Empty* reply) override {
         MouseEvent request = *requestPtr;
         auto agent = mAgents->user_event;
-
-        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
+        android::base::ThreadLooper::runOnMainLooper([agent, request, this]() {
             agent->sendMouseEvent(request.x(), request.y(), 0,
                                   request.buttons(), 0);
+            auto* inputHandler = mKeyEventSender.getWasdInputHandler();
+            if (inputHandler && inputHandler->isEnabled()) {
+                if (mPreviousMousePos) {
+                    inputHandler->mouseMove(
+                            request.x() - mPreviousMousePos->first,
+                            request.y() - mPreviousMousePos->second);
+                }
+            }
+            mPreviousMousePos = std::pair<int, int>({request.x(), request.y()});
         });
 
         return Status::OK;
@@ -982,7 +993,7 @@ public:
     }
 
     void setNotificationEvent(Notification* reply) {
-        if (mCamera->isVirtualSceneConnected()) {
+        if (mCamera.isVirtualSceneConnected()) {
             reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
         } else {
             reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
@@ -1000,7 +1011,7 @@ public:
         }
         while (clientAvailable) {
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
-            auto arrived = mCamera->eventWaiter()->next(kTimeToWaitForFrame);
+            auto arrived = mCamera.eventWaiter()->next(kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
                 setNotificationEvent(&reply);
                 clientAvailable = writer->Write(reply);
@@ -1017,12 +1028,12 @@ private:
     TouchEventSender mTouchEventSender;
     SharedMemoryLibrary mSharedMemoryLibrary;
 
-    Camera* mCamera;
+    Camera mCamera;
     Clipboard* mClipboard;
     Looper* mLooper;
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
-
+    android::base::Optional<std::pair<int, int>> mPreviousMousePos;
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;
     const uint16_t kNoWait = 0;

@@ -35,7 +35,7 @@ public:
 
     void enable();
     void disable();
-
+    bool isEnabled();
     void keyDown(ControlKey key);
     void keyUp(ControlKey key);
 
