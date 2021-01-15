@@ -3942,10 +3942,10 @@ public:
             const uint32_t* pDynamicOffsets) {
         auto commandBuffer = unbox_VkCommandBuffer(boxed_commandBuffer);
         auto vk = dispatch_VkCommandBuffer(boxed_commandBuffer);
-        vk->vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout,
-                firstSet, descriptorSetCount,
-                pDescriptorSets, dynamicOffsetCount,
-                pDynamicOffsets);
+        // vk->vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout,
+        //         firstSet, descriptorSetCount,
+        //         pDescriptorSets, dynamicOffsetCount,
+        //         pDynamicOffsets);
         if (pipelineBindPoint == VK_PIPELINE_BIND_POINT_COMPUTE) {
             AutoLock lock(mLock);
             auto cmdBufferInfoIt = mCmdBufferInfo.find(commandBuffer);
@@ -7004,17 +7004,30 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
 
 #define DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF(type) \
     type unbox_##type(type boxed) { \
-        return VkDecoderGlobalState::get()->unbox_##type(boxed); \
+        auto elt = sBoxedHandleManager.get( \
+                (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return VK_NULL_HANDLE; \
+        return (type)elt->underlying; \
     } \
     VulkanDispatch* dispatch_##type(type boxed) { \
-        return VkDecoderGlobalState::get()->dispatch_##type(boxed); \
+        auto elt = sBoxedHandleManager.get( \
+                (uint64_t)(uintptr_t)boxed); \
+        if (!elt) { fprintf(stderr, "%s: err not found boxed %p\n", __func__, boxed); return nullptr; } \
+        return elt->dispatch; \
     } \
     void delete_##type(type boxed) { \
         if (!boxed) return; \
-        VkDecoderGlobalState::get()->delete_##type(boxed); \
+        auto elt = sBoxedHandleManager.get( \
+            (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return; \
+        releaseOrderMaintInfo(elt->ordMaintInfo); \
+        if (elt->readStream) delete elt->readStream; \
+        sBoxedHandleManager.remove((uint64_t)boxed); \
     } \
     type unboxed_to_boxed_##type(type unboxed) { \
-        return VkDecoderGlobalState::get()->unboxed_to_boxed_##type(unboxed); \
+        AutoLock lock(sBoxedHandleManager.lock); \
+        return (type)sBoxedHandleManager.getBoxedFromUnboxedLocked( \
+                (uint64_t)(uintptr_t)unboxed); \
     } \
 
 #define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DEF(type) \
@@ -7023,16 +7036,19 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
     } \
     void delete_##type(type boxed) { \
         if (!boxed) return; \
-        VkDecoderGlobalState::get()->delete_##type(boxed); \
+        sBoxedHandleManager.remove((uint64_t)boxed); \
     } \
-    type unbox_##type(type boxed) { \
+    __attribute__((always_inline)) type unbox_##type(type boxed) { \
         if (!boxed) return boxed; \
         auto elt = sBoxedHandleManager.get( \
                 (uint64_t)(uintptr_t)boxed); \
+        if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); return VK_NULL_HANDLE; } \
         return (type)elt->underlying; \
     } \
     type unboxed_to_boxed_non_dispatchable_##type(type unboxed) { \
-        return VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_##type(unboxed); \
+        AutoLock lock(sBoxedHandleManager.lock); \
+        return (type)sBoxedHandleManager.getBoxedFromUnboxedLocked( \
+                (uint64_t)(uintptr_t)unboxed); \
     } \
 
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF)

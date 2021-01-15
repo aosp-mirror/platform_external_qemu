@@ -27,6 +27,8 @@ driver_workarounds_global_lock_apis = [ \
     "vkDestroyPipelineLayout",
 ]
 
+MAX_STACK_ITEMS="16"
+
 def emit_param_decl_for_reading(param, cgen):
     if param.staticArrExpr:
         cgen.stmt(
@@ -34,6 +36,15 @@ def emit_param_decl_for_reading(param, cgen):
     else:
         cgen.stmt(
             cgen.makeRichCTypeDecl(param))
+
+    if param.pointerIndirectionLevels > 0:
+        lenAccess = cgen.generalLengthAccess(param)
+        if not lenAccess:
+            lenAccess = "1"
+        arrSize = "1" if "1" == lenAccess else "MAX_STACK_ITEMS"
+
+        typeHere = "uint8_t*" if "void" == param.typeName else param.typeName
+        cgen.stmt("%s%s stack_%s[%s]" % (typeHere, "*" * (param.pointerIndirectionLevels - 1), param.paramName, arrSize))
 
 def emit_unmarshal(typeInfo, param, cgen, output = False, destroy = False, noUnbox = False):
     if destroy:
@@ -58,6 +69,12 @@ def emit_unmarshal(typeInfo, param, cgen, output = False, destroy = False, noUnb
     else:
         if noUnbox:
             cgen.line("// No unbox for %s" % (param.paramName))
+
+        lenAccess = cgen.generalLengthAccess(param)
+        if not lenAccess:
+            lenAccess = "1"
+        arrSize = "1" if "1" == lenAccess else "MAX_STACK_ITEMS"
+
         iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
             cgen,
             READ_STREAM,
@@ -66,7 +83,9 @@ def emit_unmarshal(typeInfo, param, cgen, output = False, destroy = False, noUnb
             API_PREFIX_RESERVEDUNMARSHAL,
             "" if (output or noUnbox) else "unbox_",
             direction="read",
-            dynAlloc=True))
+            dynAlloc=True,
+            stackVar="stack_%s" % param.paramName,
+            stackArrSize=arrSize))
 
 def emit_dispatch_unmarshal(typeInfo, param, cgen, globalWrapped):
     if globalWrapped:
@@ -255,7 +274,7 @@ class VulkanSubDecoder(VulkanWrapperGenerator):
         self.cgen = CodeGen()
 
     def onBegin(self,):
-        self.module.appendImpl(decoder_impl_preamble)
+        self.module.appendImpl("#define MAX_STACK_ITEMS %s\n" % MAX_STACK_ITEMS)
 
         self.module.appendImpl(
             "void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* boxed_dispatchHandle, void* dispatchHandle, VkDeviceSize dataSize, const void* pData)\n")

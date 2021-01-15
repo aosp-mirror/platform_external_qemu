@@ -1875,8 +1875,8 @@ TEST_P(VulkanHalTest, SecondaryCommandBuffers) {
 
     std::vector<FunctorThread*> threads;
 
-    constexpr uint32_t kRecordsPerThread = 2000000;
-    constexpr uint32_t kRepeatSubmits = 1;
+    constexpr uint32_t kRecordsPerThread = 20000;
+    constexpr uint32_t kRepeatSubmits = 1000;
     constexpr uint32_t kTotalRecords = kThreadCount * kRecordsPerThread * kRepeatSubmits;
 
     for (uint32_t i = 0; i < kThreadCount; ++i) {

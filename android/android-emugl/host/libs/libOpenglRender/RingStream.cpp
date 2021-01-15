@@ -324,6 +324,8 @@ void RingStream::type3Read(
     uint32_t maxCanRead = ptrEnd - *current;
     uint32_t ringAvail = available;
     uint32_t actuallyRead = std::min(ringAvail, std::min(xferTotal, maxCanRead));
+    __atomic_fetch_sub(&mContext.ring_config->transfer_size, actuallyRead, __ATOMIC_RELEASE);
+    // uint32_t actuallyRead = std::min(xferTotal, maxCanRead);
     ring_buffer_read_fully_with_abort(
             mContext.to_host_large_xfer.ring,
             &mContext.to_host_large_xfer.view,
@@ -344,7 +346,6 @@ void RingStream::type3Read(
 
     *current += actuallyRead;
     *count += actuallyRead;
-    __atomic_fetch_sub(&mContext.ring_config->transfer_size, actuallyRead, __ATOMIC_RELEASE);
 }
 
 void* RingStream::getDmaForReading(uint64_t guest_paddr) {
