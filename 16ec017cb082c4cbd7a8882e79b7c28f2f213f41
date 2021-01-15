@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0b5538c2_4ae2a9d9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-01-15T16:49:32Z",
+      "side": 1,
+      "message": "Thanks Erwin. I will also verify if go/aog/1550383 still has the same issue.",
+      "revId": "16ec017cb082c4cbd7a8882e79b7c28f2f213f41",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
