@@ -1,0 +1,7 @@
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Bypass-Presubmit+1: Lingfeng Yang <lfy@google.com>
+Submitted-by: Lingfeng Yang <lfy@google.com>
+Submitted-at: Fri, 15 Jan 2021 03:13:20 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1551862
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
