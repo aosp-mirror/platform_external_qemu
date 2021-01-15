@@ -1858,7 +1858,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 return ptr - (unsigned char *)buf;
             }
         }
-        ++count; if (count % 10 == 0) { pool->freeAll(); };
+        ++count; if (count % 1000 == 0) { pool->freeAll(); };
         ptr += packetLen;
     }
     pool->freeAll();

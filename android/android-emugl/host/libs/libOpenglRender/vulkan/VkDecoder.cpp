@@ -131,7 +131,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 while ((seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1)) {
                 ++tries;
                 if (tries > 5000000 && tries % 1000000 == 0) {
-                // fprintf(stderr, "%s: Op %u stalled seqno %u curr %u\n", __func__, opcode, seqno, *seqnoPtr);
+                fprintf(stderr, "%s: Op %u stalled seqno %u curr %u\n", __func__, opcode, seqno, *seqnoPtr);
                 }
                 }
             }
