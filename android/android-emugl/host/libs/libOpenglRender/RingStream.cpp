@@ -328,7 +328,6 @@ void RingStream::type3Read(
     // Decrement transfer_size before letting the guest proceed in ring_buffer funcs or we will race
     // to the next time the guest sets transfer_size
     __atomic_fetch_sub(&mContext.ring_config->transfer_size, actuallyRead, __ATOMIC_RELEASE);
-
     ring_buffer_read_fully_with_abort(
             mContext.to_host_large_xfer.ring,
             &mContext.to_host_large_xfer.view,
