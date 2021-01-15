@@ -317,20 +317,11 @@ public:
     }
 
     bool addMemoryMapping(uint64_t gpa, void *ptr, uint64_t size) {
-        fprintf(stderr, "%s: gparange [0x%llx 0x%llx) ptr %p size %llu\n", __func__,
-                (unsigned long long)gpa,
-                (unsigned long long)gpa + size,
-                ptr,
-                (unsigned long long)size);
         AutoLock lock(mMemoryMappingsLock);
         return addMemoryMappingLocked(gpa, ptr, size);
     }
 
     bool removeMemoryMapping(uint64_t gpa, uint64_t size) {
-        fprintf(stderr, "%s: gparange [0x%llx 0x%llx) size %llu\n", __func__,
-                (unsigned long long)gpa,
-                (unsigned long long)gpa + size,
-                (unsigned long long)size);
         AutoLock lock(mMemoryMappingsLock);
         return removeMemoryMappingLocked(gpa, size);
     }
