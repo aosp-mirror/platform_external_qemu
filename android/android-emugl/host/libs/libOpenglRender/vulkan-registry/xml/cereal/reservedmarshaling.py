@@ -42,7 +42,9 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
                  dynAlloc = False,
                  mapHandles = True,
                  handleMapOverwrites = False,
-                 doFiltering = True):
+                 doFiltering = True,
+                 stackVar=None,
+                 stackArrSize=None):
         self.cgen = cgen
         self.direction = direction
         self.processSimple = "write" if self.direction == "write" else "read"
@@ -66,6 +68,9 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
         self.mapHandles = mapHandles
         self.handleMapOverwrites = handleMapOverwrites
         self.doFiltering = doFiltering
+
+        self.stackVar = stackVar
+        self.stackArrSize = stackArrSize
 
     def getTypeForStreaming(self, vulkanType):
         res = copy(vulkanType)
@@ -221,11 +226,32 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
                 bytesExpr = "%s * %s" % (lenAccess, sizeof)
             else:
                 bytesExpr = sizeof
+                lenAccess = "1"
 
-            self.cgen.stmt( \
-                "%s->alloc((void**)&%s, %s)" %
-                    (self.streamVarName,
-                     access, bytesExpr))
+            if self.stackVar:
+                if self.stackArrSize != lenAccess:
+                    self.cgen.beginIf("%s <= %s" % (lenAccess, self.stackArrSize))
+
+                self.cgen.stmt( \
+                        "%s = %s%s" % (access, self.makeCastExpr(vulkanType.getForNonConstAccess()), self.stackVar))
+
+                if self.stackArrSize != lenAccess:
+                    self.cgen.endIf()
+                    self.cgen.beginElse()
+
+                if self.stackArrSize != lenAccess:
+                    self.cgen.stmt( \
+                            "%s->alloc((void**)&%s, %s)" %
+                            (self.streamVarName,
+                                access, bytesExpr))
+
+                if self.stackArrSize != lenAccess:
+                    self.cgen.endIf()
+            else:
+                self.cgen.stmt( \
+                        "%s->alloc((void**)&%s, %s)" %
+                        (self.streamVarName,
+                            access, bytesExpr))
 
     def getOptionalStringFeatureExpr(self, vulkanType):
         if vulkanType.optionalStr is not None:

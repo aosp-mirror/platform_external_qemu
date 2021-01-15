@@ -13,14 +13,19 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/BumpPool.h"
 #include "android/base/files/Stream.h"
 #include "android/base/files/StreamSerializing.h"
 
 #include "VulkanHandleMapping.h"
-
 #include "common/goldfish_vk_private_defs.h"
 
 #include <memory>
+#include <vector>
+
+#include <inttypes.h>
+
+#define E(fmt,...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
 
 class IOStream;
 
@@ -71,8 +76,15 @@ public:
     android::base::BumpPool* pool();
 
 private:
-    class Impl;
-    std::unique_ptr<Impl> mImpl;
+    size_t remainingWriteBufferSize() const;
+    ssize_t bufferedWrite(const void *buffer, size_t size);
+    android::base::BumpPool mPool;
+    size_t mWritePos = 0;
+    std::vector<uint8_t> mWriteBuffer;
+    IOStream* mStream = nullptr;
+    DefaultHandleMapping mDefaultHandleMapping;
+    VulkanHandleMapping* mCurrentHandleMapping;
+    uint32_t mFeatureBits = 0;
 };
 
 class VulkanMemReadingStream : public VulkanStream {
