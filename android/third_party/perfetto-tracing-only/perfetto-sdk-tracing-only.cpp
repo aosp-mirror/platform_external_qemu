@@ -275,6 +275,7 @@ static std::vector<char> sProcessTrace(const std::vector<char>& trace) {
 }
 
 PERFETTO_TRACING_ONLY_EXPORT void disableTracing() {
+    fprintf("")
     if (sTracingSession) {
         sTraceConfig.tracingDisabled = true;
         sTracingSession->StopBlocking();
