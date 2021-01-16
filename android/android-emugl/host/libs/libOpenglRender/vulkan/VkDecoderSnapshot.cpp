@@ -1351,7 +1351,7 @@ void vkAllocateCommandBuffers(
     android::base::AutoLock lock(mLock);
     // pCommandBuffers create
     mReconstruction.addHandles((const uint64_t*)pCommandBuffers, pAllocateInfo->commandBufferCount);
-    mReconstruction.addHandleDependency((const uint64_t*)pCommandBuffers, pAllocateInfo->commandBufferCount, (uint64_t)(uintptr_t)VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_VkCommandPool(pAllocateInfo->commandPool));
+    mReconstruction.addHandleDependency((const uint64_t*)pCommandBuffers, pAllocateInfo->commandBufferCount, (uint64_t)(uintptr_t)unboxed_to_boxed_non_dispatchable_VkCommandPool(pAllocateInfo->commandPool));
     if (!pCommandBuffers) return;
     auto apiHandle = mReconstruction.createApiInfo();
     auto apiInfo = mReconstruction.getApiInfo(apiHandle);
@@ -4297,7 +4297,7 @@ void vkMapMemoryIntoAddressSpaceGOOGLE(
     mReconstruction.setApiTrace(apiInfo, OP_vkMapMemoryIntoAddressSpaceGOOGLE, snapshotTraceBegin, snapshotTraceBytes);
     for (uint32_t i = 0; i < 1; ++i)
     {
-        VkDeviceMemory boxed = VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_VkDeviceMemory((&memory)[i]);
+        VkDeviceMemory boxed = unboxed_to_boxed_non_dispatchable_VkDeviceMemory((&memory)[i]);
         mReconstruction.forEachHandleAddModifyApi((const uint64_t*)(&boxed), 1, apiHandle);
     }
 }

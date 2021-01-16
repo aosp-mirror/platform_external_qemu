@@ -39,6 +39,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/Tracing.h"
 #include "common/goldfish_vk_marshaling.h"
 #include "common/goldfish_vk_reserved_marshaling.h"
 #include "common/goldfish_vk_deepcopy.h"

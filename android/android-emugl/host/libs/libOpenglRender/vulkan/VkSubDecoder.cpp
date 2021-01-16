@@ -42,6 +42,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_VERSION_1_0
             case OP_vkBeginCommandBuffer:
             {
+                android::base::beginTrace("vkBeginCommandBuffer subdecode");
                 const VkCommandBufferBeginInfo* pBeginInfo;
                 VkCommandBufferBeginInfo stack_pBeginInfo[1];
                 pBeginInfo = (VkCommandBufferBeginInfo*)stack_pBeginInfo;
@@ -52,25 +53,31 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 }
                 VkResult vkBeginCommandBuffer_VkResult_return = (VkResult)0;
                 vkBeginCommandBuffer_VkResult_return = this->on_vkBeginCommandBuffer(pool, (VkCommandBuffer)(boxed_dispatchHandle), pBeginInfo);
+                android::base::endTrace();
                 break;
             }
             case OP_vkEndCommandBuffer:
             {
+                android::base::beginTrace("vkEndCommandBuffer subdecode");
                 VkResult vkEndCommandBuffer_VkResult_return = (VkResult)0;
                 vkEndCommandBuffer_VkResult_return = vk->vkEndCommandBuffer((VkCommandBuffer)dispatchHandle);
+                android::base::endTrace();
                 break;
             }
             case OP_vkResetCommandBuffer:
             {
+                android::base::beginTrace("vkResetCommandBuffer subdecode");
                 VkCommandBufferResetFlags flags;
                 memcpy((VkCommandBufferResetFlags*)&flags, *readStreamPtrPtr, sizeof(VkCommandBufferResetFlags));
                 *readStreamPtrPtr += sizeof(VkCommandBufferResetFlags);
                 VkResult vkResetCommandBuffer_VkResult_return = (VkResult)0;
                 vkResetCommandBuffer_VkResult_return = this->on_vkResetCommandBuffer(pool, (VkCommandBuffer)(boxed_dispatchHandle), flags);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdBindPipeline:
             {
+                android::base::beginTrace("vkCmdBindPipeline subdecode");
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipeline pipeline;
                 memcpy((VkPipelineBindPoint*)&pipelineBindPoint, *readStreamPtrPtr, sizeof(VkPipelineBindPoint));
@@ -80,10 +87,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 *readStreamPtrPtr += 1 * 8;
                 *(VkPipeline*)&pipeline = (VkPipeline)unbox_VkPipeline((VkPipeline)(*&cgen_var_0));
                 this->on_vkCmdBindPipeline(pool, (VkCommandBuffer)(boxed_dispatchHandle), pipelineBindPoint, pipeline);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdSetViewport:
             {
+                android::base::beginTrace("vkCmdSetViewport subdecode");
                 uint32_t firstViewport;
                 uint32_t viewportCount;
                 const VkViewport* pViewports;
@@ -112,10 +121,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdSetViewport((VkCommandBuffer)dispatchHandle, firstViewport, viewportCount, pViewports);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdSetScissor:
             {
+                android::base::beginTrace("vkCmdSetScissor subdecode");
                 uint32_t firstScissor;
                 uint32_t scissorCount;
                 const VkRect2D* pScissors;
@@ -144,18 +155,22 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdSetScissor((VkCommandBuffer)dispatchHandle, firstScissor, scissorCount, pScissors);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdSetLineWidth:
             {
+                android::base::beginTrace("vkCmdSetLineWidth subdecode");
                 float lineWidth;
                 memcpy((float*)&lineWidth, *readStreamPtrPtr, sizeof(float));
                 *readStreamPtrPtr += sizeof(float);
                 vk->vkCmdSetLineWidth((VkCommandBuffer)dispatchHandle, lineWidth);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdSetDepthBias:
             {
+                android::base::beginTrace("vkCmdSetDepthBias subdecode");
                 float depthBiasConstantFactor;
                 float depthBiasClamp;
                 float depthBiasSlopeFactor;
@@ -166,18 +181,22 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((float*)&depthBiasSlopeFactor, *readStreamPtrPtr, sizeof(float));
                 *readStreamPtrPtr += sizeof(float);
                 vk->vkCmdSetDepthBias((VkCommandBuffer)dispatchHandle, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdSetBlendConstants:
             {
+                android::base::beginTrace("vkCmdSetBlendConstants subdecode");
                 float blendConstants[4];
                 memcpy((float*)blendConstants, *readStreamPtrPtr, 4 * sizeof(const float));
                 *readStreamPtrPtr += 4 * sizeof(const float);
                 vk->vkCmdSetBlendConstants((VkCommandBuffer)dispatchHandle, blendConstants);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdSetDepthBounds:
             {
+                android::base::beginTrace("vkCmdSetDepthBounds subdecode");
                 float minDepthBounds;
                 float maxDepthBounds;
                 memcpy((float*)&minDepthBounds, *readStreamPtrPtr, sizeof(float));
@@ -185,10 +204,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((float*)&maxDepthBounds, *readStreamPtrPtr, sizeof(float));
                 *readStreamPtrPtr += sizeof(float);
                 vk->vkCmdSetDepthBounds((VkCommandBuffer)dispatchHandle, minDepthBounds, maxDepthBounds);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdSetStencilCompareMask:
             {
+                android::base::beginTrace("vkCmdSetStencilCompareMask subdecode");
                 VkStencilFaceFlags faceMask;
                 uint32_t compareMask;
                 memcpy((VkStencilFaceFlags*)&faceMask, *readStreamPtrPtr, sizeof(VkStencilFaceFlags));
@@ -196,10 +217,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&compareMask, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdSetStencilCompareMask((VkCommandBuffer)dispatchHandle, faceMask, compareMask);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdSetStencilWriteMask:
             {
+                android::base::beginTrace("vkCmdSetStencilWriteMask subdecode");
                 VkStencilFaceFlags faceMask;
                 uint32_t writeMask;
                 memcpy((VkStencilFaceFlags*)&faceMask, *readStreamPtrPtr, sizeof(VkStencilFaceFlags));
@@ -207,10 +230,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&writeMask, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdSetStencilWriteMask((VkCommandBuffer)dispatchHandle, faceMask, writeMask);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdSetStencilReference:
             {
+                android::base::beginTrace("vkCmdSetStencilReference subdecode");
                 VkStencilFaceFlags faceMask;
                 uint32_t reference;
                 memcpy((VkStencilFaceFlags*)&faceMask, *readStreamPtrPtr, sizeof(VkStencilFaceFlags));
@@ -218,10 +243,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&reference, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdSetStencilReference((VkCommandBuffer)dispatchHandle, faceMask, reference);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdBindDescriptorSets:
             {
+                android::base::beginTrace("vkCmdBindDescriptorSets subdecode");
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipelineLayout layout;
                 uint32_t firstSet;
@@ -272,10 +299,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)pDynamicOffsets, *readStreamPtrPtr, ((dynamicOffsetCount)) * sizeof(const uint32_t));
                 *readStreamPtrPtr += ((dynamicOffsetCount)) * sizeof(const uint32_t);
                 this->on_vkCmdBindDescriptorSets(pool, (VkCommandBuffer)(boxed_dispatchHandle), pipelineBindPoint, layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdBindIndexBuffer:
             {
+                android::base::beginTrace("vkCmdBindIndexBuffer subdecode");
                 VkBuffer buffer;
                 VkDeviceSize offset;
                 VkIndexType indexType;
@@ -288,10 +317,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((VkIndexType*)&indexType, *readStreamPtrPtr, sizeof(VkIndexType));
                 *readStreamPtrPtr += sizeof(VkIndexType);
                 vk->vkCmdBindIndexBuffer((VkCommandBuffer)dispatchHandle, buffer, offset, indexType);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdBindVertexBuffers:
             {
+                android::base::beginTrace("vkCmdBindVertexBuffers subdecode");
                 uint32_t firstBinding;
                 uint32_t bindingCount;
                 const VkBuffer* pBuffers;
@@ -331,10 +362,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((VkDeviceSize*)pOffsets, *readStreamPtrPtr, ((bindingCount)) * sizeof(const VkDeviceSize));
                 *readStreamPtrPtr += ((bindingCount)) * sizeof(const VkDeviceSize);
                 vk->vkCmdBindVertexBuffers((VkCommandBuffer)dispatchHandle, firstBinding, bindingCount, pBuffers, pOffsets);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDraw:
             {
+                android::base::beginTrace("vkCmdDraw subdecode");
                 uint32_t vertexCount;
                 uint32_t instanceCount;
                 uint32_t firstVertex;
@@ -348,10 +381,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&firstInstance, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDraw((VkCommandBuffer)dispatchHandle, vertexCount, instanceCount, firstVertex, firstInstance);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDrawIndexed:
             {
+                android::base::beginTrace("vkCmdDrawIndexed subdecode");
                 uint32_t indexCount;
                 uint32_t instanceCount;
                 uint32_t firstIndex;
@@ -368,10 +403,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&firstInstance, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDrawIndexed((VkCommandBuffer)dispatchHandle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDrawIndirect:
             {
+                android::base::beginTrace("vkCmdDrawIndirect subdecode");
                 VkBuffer buffer;
                 VkDeviceSize offset;
                 uint32_t drawCount;
@@ -387,10 +424,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&stride, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDrawIndirect((VkCommandBuffer)dispatchHandle, buffer, offset, drawCount, stride);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDrawIndexedIndirect:
             {
+                android::base::beginTrace("vkCmdDrawIndexedIndirect subdecode");
                 VkBuffer buffer;
                 VkDeviceSize offset;
                 uint32_t drawCount;
@@ -406,10 +445,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&stride, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDrawIndexedIndirect((VkCommandBuffer)dispatchHandle, buffer, offset, drawCount, stride);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDispatch:
             {
+                android::base::beginTrace("vkCmdDispatch subdecode");
                 uint32_t groupCountX;
                 uint32_t groupCountY;
                 uint32_t groupCountZ;
@@ -420,10 +461,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&groupCountZ, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDispatch((VkCommandBuffer)dispatchHandle, groupCountX, groupCountY, groupCountZ);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDispatchIndirect:
             {
+                android::base::beginTrace("vkCmdDispatchIndirect subdecode");
                 VkBuffer buffer;
                 VkDeviceSize offset;
                 uint64_t cgen_var_7;
@@ -433,10 +476,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((VkDeviceSize*)&offset, *readStreamPtrPtr, sizeof(VkDeviceSize));
                 *readStreamPtrPtr += sizeof(VkDeviceSize);
                 vk->vkCmdDispatchIndirect((VkCommandBuffer)dispatchHandle, buffer, offset);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdCopyBuffer:
             {
+                android::base::beginTrace("vkCmdCopyBuffer subdecode");
                 VkBuffer srcBuffer;
                 VkBuffer dstBuffer;
                 uint32_t regionCount;
@@ -472,10 +517,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdCopyBuffer((VkCommandBuffer)dispatchHandle, srcBuffer, dstBuffer, regionCount, pRegions);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdCopyImage:
             {
+                android::base::beginTrace("vkCmdCopyImage subdecode");
                 VkImage srcImage;
                 VkImageLayout srcImageLayout;
                 VkImage dstImage;
@@ -517,10 +564,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 this->on_vkCmdCopyImage(pool, (VkCommandBuffer)(boxed_dispatchHandle), srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdBlitImage:
             {
+                android::base::beginTrace("vkCmdBlitImage subdecode");
                 VkImage srcImage;
                 VkImageLayout srcImageLayout;
                 VkImage dstImage;
@@ -565,10 +614,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdBlitImage((VkCommandBuffer)dispatchHandle, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions, filter);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdCopyBufferToImage:
             {
+                android::base::beginTrace("vkCmdCopyBufferToImage subdecode");
                 VkBuffer srcBuffer;
                 VkImage dstImage;
                 VkImageLayout dstImageLayout;
@@ -607,10 +658,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 this->on_vkCmdCopyBufferToImage(pool, (VkCommandBuffer)(boxed_dispatchHandle), srcBuffer, dstImage, dstImageLayout, regionCount, pRegions);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdCopyImageToBuffer:
             {
+                android::base::beginTrace("vkCmdCopyImageToBuffer subdecode");
                 VkImage srcImage;
                 VkImageLayout srcImageLayout;
                 VkBuffer dstBuffer;
@@ -649,10 +702,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 this->on_vkCmdCopyImageToBuffer(pool, (VkCommandBuffer)(boxed_dispatchHandle), srcImage, srcImageLayout, dstBuffer, regionCount, pRegions);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdUpdateBuffer:
             {
+                android::base::beginTrace("vkCmdUpdateBuffer subdecode");
                 VkBuffer dstBuffer;
                 VkDeviceSize dstOffset;
                 VkDeviceSize dataSize;
@@ -677,10 +732,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((void*)pData, *readStreamPtrPtr, ((dataSize)) * sizeof(const uint8_t));
                 *readStreamPtrPtr += ((dataSize)) * sizeof(const uint8_t);
                 vk->vkCmdUpdateBuffer((VkCommandBuffer)dispatchHandle, dstBuffer, dstOffset, dataSize, pData);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdFillBuffer:
             {
+                android::base::beginTrace("vkCmdFillBuffer subdecode");
                 VkBuffer dstBuffer;
                 VkDeviceSize dstOffset;
                 VkDeviceSize size;
@@ -696,10 +753,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&data, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdFillBuffer((VkCommandBuffer)dispatchHandle, dstBuffer, dstOffset, size, data);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdClearColorImage:
             {
+                android::base::beginTrace("vkCmdClearColorImage subdecode");
                 VkImage image;
                 VkImageLayout imageLayout;
                 const VkClearColorValue* pColor;
@@ -741,10 +800,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdClearColorImage((VkCommandBuffer)dispatchHandle, image, imageLayout, pColor, rangeCount, pRanges);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdClearDepthStencilImage:
             {
+                android::base::beginTrace("vkCmdClearDepthStencilImage subdecode");
                 VkImage image;
                 VkImageLayout imageLayout;
                 const VkClearDepthStencilValue* pDepthStencil;
@@ -786,10 +847,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdClearDepthStencilImage((VkCommandBuffer)dispatchHandle, image, imageLayout, pDepthStencil, rangeCount, pRanges);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdClearAttachments:
             {
+                android::base::beginTrace("vkCmdClearAttachments subdecode");
                 uint32_t attachmentCount;
                 const VkClearAttachment* pAttachments;
                 VkClearAttachment stack_pAttachments[MAX_STACK_ITEMS];
@@ -839,10 +902,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdClearAttachments((VkCommandBuffer)dispatchHandle, attachmentCount, pAttachments, rectCount, pRects);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdResolveImage:
             {
+                android::base::beginTrace("vkCmdResolveImage subdecode");
                 VkImage srcImage;
                 VkImageLayout srcImageLayout;
                 VkImage dstImage;
@@ -884,10 +949,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdResolveImage((VkCommandBuffer)dispatchHandle, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdSetEvent:
             {
+                android::base::beginTrace("vkCmdSetEvent subdecode");
                 VkEvent event;
                 VkPipelineStageFlags stageMask;
                 uint64_t cgen_var_24;
@@ -897,10 +964,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((VkPipelineStageFlags*)&stageMask, *readStreamPtrPtr, sizeof(VkPipelineStageFlags));
                 *readStreamPtrPtr += sizeof(VkPipelineStageFlags);
                 vk->vkCmdSetEvent((VkCommandBuffer)dispatchHandle, event, stageMask);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdResetEvent:
             {
+                android::base::beginTrace("vkCmdResetEvent subdecode");
                 VkEvent event;
                 VkPipelineStageFlags stageMask;
                 uint64_t cgen_var_25;
@@ -910,10 +979,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((VkPipelineStageFlags*)&stageMask, *readStreamPtrPtr, sizeof(VkPipelineStageFlags));
                 *readStreamPtrPtr += sizeof(VkPipelineStageFlags);
                 vk->vkCmdResetEvent((VkCommandBuffer)dispatchHandle, event, stageMask);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdWaitEvents:
             {
+                android::base::beginTrace("vkCmdWaitEvents subdecode");
                 uint32_t eventCount;
                 const VkEvent* pEvents;
                 VkEvent stack_pEvents[MAX_STACK_ITEMS];
@@ -1016,10 +1087,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdWaitEvents((VkCommandBuffer)dispatchHandle, eventCount, pEvents, srcStageMask, dstStageMask, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdPipelineBarrier:
             {
+                android::base::beginTrace("vkCmdPipelineBarrier subdecode");
                 VkPipelineStageFlags srcStageMask;
                 VkPipelineStageFlags dstStageMask;
                 VkDependencyFlags dependencyFlags;
@@ -1102,10 +1175,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 this->on_vkCmdPipelineBarrier(pool, (VkCommandBuffer)(boxed_dispatchHandle), srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdBeginQuery:
             {
+                android::base::beginTrace("vkCmdBeginQuery subdecode");
                 VkQueryPool queryPool;
                 uint32_t query;
                 VkQueryControlFlags flags;
@@ -1118,10 +1193,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((VkQueryControlFlags*)&flags, *readStreamPtrPtr, sizeof(VkQueryControlFlags));
                 *readStreamPtrPtr += sizeof(VkQueryControlFlags);
                 vk->vkCmdBeginQuery((VkCommandBuffer)dispatchHandle, queryPool, query, flags);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdEndQuery:
             {
+                android::base::beginTrace("vkCmdEndQuery subdecode");
                 VkQueryPool queryPool;
                 uint32_t query;
                 uint64_t cgen_var_28;
@@ -1131,10 +1208,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&query, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdEndQuery((VkCommandBuffer)dispatchHandle, queryPool, query);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdResetQueryPool:
             {
+                android::base::beginTrace("vkCmdResetQueryPool subdecode");
                 VkQueryPool queryPool;
                 uint32_t firstQuery;
                 uint32_t queryCount;
@@ -1147,10 +1226,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&queryCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdResetQueryPool((VkCommandBuffer)dispatchHandle, queryPool, firstQuery, queryCount);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdWriteTimestamp:
             {
+                android::base::beginTrace("vkCmdWriteTimestamp subdecode");
                 VkPipelineStageFlagBits pipelineStage;
                 VkQueryPool queryPool;
                 uint32_t query;
@@ -1163,10 +1244,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&query, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdWriteTimestamp((VkCommandBuffer)dispatchHandle, pipelineStage, queryPool, query);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdCopyQueryPoolResults:
             {
+                android::base::beginTrace("vkCmdCopyQueryPoolResults subdecode");
                 VkQueryPool queryPool;
                 uint32_t firstQuery;
                 uint32_t queryCount;
@@ -1193,10 +1276,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((VkQueryResultFlags*)&flags, *readStreamPtrPtr, sizeof(VkQueryResultFlags));
                 *readStreamPtrPtr += sizeof(VkQueryResultFlags);
                 vk->vkCmdCopyQueryPoolResults((VkCommandBuffer)dispatchHandle, queryPool, firstQuery, queryCount, dstBuffer, dstOffset, stride, flags);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdPushConstants:
             {
+                android::base::beginTrace("vkCmdPushConstants subdecode");
                 VkPipelineLayout layout;
                 VkShaderStageFlags stageFlags;
                 uint32_t offset;
@@ -1224,10 +1309,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((void*)pValues, *readStreamPtrPtr, ((size)) * sizeof(const uint8_t));
                 *readStreamPtrPtr += ((size)) * sizeof(const uint8_t);
                 vk->vkCmdPushConstants((VkCommandBuffer)dispatchHandle, layout, stageFlags, offset, size, pValues);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdBeginRenderPass:
             {
+                android::base::beginTrace("vkCmdBeginRenderPass subdecode");
                 const VkRenderPassBeginInfo* pRenderPassBegin;
                 VkRenderPassBeginInfo stack_pRenderPassBegin[1];
                 VkSubpassContents contents;
@@ -1240,23 +1327,29 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkRenderPassBeginInfo(globalstate, (VkRenderPassBeginInfo*)(pRenderPassBegin));
                 }
                 vk->vkCmdBeginRenderPass((VkCommandBuffer)dispatchHandle, pRenderPassBegin, contents);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdNextSubpass:
             {
+                android::base::beginTrace("vkCmdNextSubpass subdecode");
                 VkSubpassContents contents;
                 memcpy((VkSubpassContents*)&contents, *readStreamPtrPtr, sizeof(VkSubpassContents));
                 *readStreamPtrPtr += sizeof(VkSubpassContents);
                 vk->vkCmdNextSubpass((VkCommandBuffer)dispatchHandle, contents);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdEndRenderPass:
             {
+                android::base::beginTrace("vkCmdEndRenderPass subdecode");
                 vk->vkCmdEndRenderPass((VkCommandBuffer)dispatchHandle);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdExecuteCommands:
             {
+                android::base::beginTrace("vkCmdExecuteCommands subdecode");
                 uint32_t commandBufferCount;
                 const VkCommandBuffer* pCommandBuffers;
                 VkCommandBuffer stack_pCommandBuffers[MAX_STACK_ITEMS];
@@ -1281,20 +1374,24 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 this->on_vkCmdExecuteCommands(pool, (VkCommandBuffer)(boxed_dispatchHandle), commandBufferCount, pCommandBuffers);
+                android::base::endTrace();
                 break;
             }
 #endif
 #ifdef VK_VERSION_1_1
             case OP_vkCmdSetDeviceMask:
             {
+                android::base::beginTrace("vkCmdSetDeviceMask subdecode");
                 uint32_t deviceMask;
                 memcpy((uint32_t*)&deviceMask, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdSetDeviceMask((VkCommandBuffer)dispatchHandle, deviceMask);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDispatchBase:
             {
+                android::base::beginTrace("vkCmdDispatchBase subdecode");
                 uint32_t baseGroupX;
                 uint32_t baseGroupY;
                 uint32_t baseGroupZ;
@@ -1314,6 +1411,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&groupCountZ, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDispatchBase((VkCommandBuffer)dispatchHandle, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -1346,14 +1444,17 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_KHR_device_group
             case OP_vkCmdSetDeviceMaskKHR:
             {
+                android::base::beginTrace("vkCmdSetDeviceMaskKHR subdecode");
                 uint32_t deviceMask;
                 memcpy((uint32_t*)&deviceMask, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdSetDeviceMaskKHR((VkCommandBuffer)dispatchHandle, deviceMask);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDispatchBaseKHR:
             {
+                android::base::beginTrace("vkCmdDispatchBaseKHR subdecode");
                 uint32_t baseGroupX;
                 uint32_t baseGroupY;
                 uint32_t baseGroupZ;
@@ -1373,6 +1474,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&groupCountZ, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDispatchBaseKHR((VkCommandBuffer)dispatchHandle, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -1403,6 +1505,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_KHR_push_descriptor
             case OP_vkCmdPushDescriptorSetKHR:
             {
+                android::base::beginTrace("vkCmdPushDescriptorSetKHR subdecode");
                 VkPipelineBindPoint pipelineBindPoint;
                 VkPipelineLayout layout;
                 uint32_t set;
@@ -1439,10 +1542,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdPushDescriptorSetKHR((VkCommandBuffer)dispatchHandle, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdPushDescriptorSetWithTemplateKHR:
             {
+                android::base::beginTrace("vkCmdPushDescriptorSetWithTemplateKHR subdecode");
                 VkDescriptorUpdateTemplate descriptorUpdateTemplate;
                 VkPipelineLayout layout;
                 uint32_t set;
@@ -1469,6 +1574,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     *readStreamPtrPtr += sizeof(const uint8_t);
                 }
                 vk->vkCmdPushDescriptorSetWithTemplateKHR((VkCommandBuffer)dispatchHandle, descriptorUpdateTemplate, layout, set, pData);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -1481,6 +1587,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_KHR_create_renderpass2
             case OP_vkCmdBeginRenderPass2KHR:
             {
+                android::base::beginTrace("vkCmdBeginRenderPass2KHR subdecode");
                 const VkRenderPassBeginInfo* pRenderPassBegin;
                 VkRenderPassBeginInfo stack_pRenderPassBegin[1];
                 const VkSubpassBeginInfoKHR* pSubpassBeginInfo;
@@ -1498,10 +1605,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkSubpassBeginInfoKHR(globalstate, (VkSubpassBeginInfoKHR*)(pSubpassBeginInfo));
                 }
                 vk->vkCmdBeginRenderPass2KHR((VkCommandBuffer)dispatchHandle, pRenderPassBegin, pSubpassBeginInfo);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdNextSubpass2KHR:
             {
+                android::base::beginTrace("vkCmdNextSubpass2KHR subdecode");
                 const VkSubpassBeginInfoKHR* pSubpassBeginInfo;
                 VkSubpassBeginInfoKHR stack_pSubpassBeginInfo[1];
                 const VkSubpassEndInfoKHR* pSubpassEndInfo;
@@ -1519,10 +1628,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkSubpassEndInfoKHR(globalstate, (VkSubpassEndInfoKHR*)(pSubpassEndInfo));
                 }
                 vk->vkCmdNextSubpass2KHR((VkCommandBuffer)dispatchHandle, pSubpassBeginInfo, pSubpassEndInfo);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdEndRenderPass2KHR:
             {
+                android::base::beginTrace("vkCmdEndRenderPass2KHR subdecode");
                 const VkSubpassEndInfoKHR* pSubpassEndInfo;
                 VkSubpassEndInfoKHR stack_pSubpassEndInfo[1];
                 pSubpassEndInfo = (VkSubpassEndInfoKHR*)stack_pSubpassEndInfo;
@@ -1532,6 +1643,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkSubpassEndInfoKHR(globalstate, (VkSubpassEndInfoKHR*)(pSubpassEndInfo));
                 }
                 vk->vkCmdEndRenderPass2KHR((VkCommandBuffer)dispatchHandle, pSubpassEndInfo);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -1572,6 +1684,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_KHR_draw_indirect_count
             case OP_vkCmdDrawIndirectCountKHR:
             {
+                android::base::beginTrace("vkCmdDrawIndirectCountKHR subdecode");
                 VkBuffer buffer;
                 VkDeviceSize offset;
                 VkBuffer countBuffer;
@@ -1595,10 +1708,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&stride, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDrawIndirectCountKHR((VkCommandBuffer)dispatchHandle, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDrawIndexedIndirectCountKHR:
             {
+                android::base::beginTrace("vkCmdDrawIndexedIndirectCountKHR subdecode");
                 VkBuffer buffer;
                 VkDeviceSize offset;
                 VkBuffer countBuffer;
@@ -1622,6 +1737,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&stride, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDrawIndexedIndirectCountKHR((VkCommandBuffer)dispatchHandle, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -1648,6 +1764,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_EXT_debug_marker
             case OP_vkCmdDebugMarkerBeginEXT:
             {
+                android::base::beginTrace("vkCmdDebugMarkerBeginEXT subdecode");
                 const VkDebugMarkerMarkerInfoEXT* pMarkerInfo;
                 VkDebugMarkerMarkerInfoEXT stack_pMarkerInfo[1];
                 pMarkerInfo = (VkDebugMarkerMarkerInfoEXT*)stack_pMarkerInfo;
@@ -1657,15 +1774,19 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkDebugMarkerMarkerInfoEXT(globalstate, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo));
                 }
                 vk->vkCmdDebugMarkerBeginEXT((VkCommandBuffer)dispatchHandle, pMarkerInfo);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDebugMarkerEndEXT:
             {
+                android::base::beginTrace("vkCmdDebugMarkerEndEXT subdecode");
                 vk->vkCmdDebugMarkerEndEXT((VkCommandBuffer)dispatchHandle);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDebugMarkerInsertEXT:
             {
+                android::base::beginTrace("vkCmdDebugMarkerInsertEXT subdecode");
                 const VkDebugMarkerMarkerInfoEXT* pMarkerInfo;
                 VkDebugMarkerMarkerInfoEXT stack_pMarkerInfo[1];
                 pMarkerInfo = (VkDebugMarkerMarkerInfoEXT*)stack_pMarkerInfo;
@@ -1675,6 +1796,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkDebugMarkerMarkerInfoEXT(globalstate, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo));
                 }
                 vk->vkCmdDebugMarkerInsertEXT((VkCommandBuffer)dispatchHandle, pMarkerInfo);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -1685,6 +1807,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_AMD_draw_indirect_count
             case OP_vkCmdDrawIndirectCountAMD:
             {
+                android::base::beginTrace("vkCmdDrawIndirectCountAMD subdecode");
                 VkBuffer buffer;
                 VkDeviceSize offset;
                 VkBuffer countBuffer;
@@ -1708,10 +1831,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&stride, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDrawIndirectCountAMD((VkCommandBuffer)dispatchHandle, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdDrawIndexedIndirectCountAMD:
             {
+                android::base::beginTrace("vkCmdDrawIndexedIndirectCountAMD subdecode");
                 VkBuffer buffer;
                 VkDeviceSize offset;
                 VkBuffer countBuffer;
@@ -1735,6 +1860,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&stride, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdDrawIndexedIndirectCountAMD((VkCommandBuffer)dispatchHandle, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -1771,6 +1897,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_EXT_conditional_rendering
             case OP_vkCmdBeginConditionalRenderingEXT:
             {
+                android::base::beginTrace("vkCmdBeginConditionalRenderingEXT subdecode");
                 const VkConditionalRenderingBeginInfoEXT* pConditionalRenderingBegin;
                 VkConditionalRenderingBeginInfoEXT stack_pConditionalRenderingBegin[1];
                 pConditionalRenderingBegin = (VkConditionalRenderingBeginInfoEXT*)stack_pConditionalRenderingBegin;
@@ -1780,17 +1907,21 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkConditionalRenderingBeginInfoEXT(globalstate, (VkConditionalRenderingBeginInfoEXT*)(pConditionalRenderingBegin));
                 }
                 vk->vkCmdBeginConditionalRenderingEXT((VkCommandBuffer)dispatchHandle, pConditionalRenderingBegin);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdEndConditionalRenderingEXT:
             {
+                android::base::beginTrace("vkCmdEndConditionalRenderingEXT subdecode");
                 vk->vkCmdEndConditionalRenderingEXT((VkCommandBuffer)dispatchHandle);
+                android::base::endTrace();
                 break;
             }
 #endif
 #ifdef VK_NVX_device_generated_commands
             case OP_vkCmdProcessCommandsNVX:
             {
+                android::base::beginTrace("vkCmdProcessCommandsNVX subdecode");
                 const VkCmdProcessCommandsInfoNVX* pProcessCommandsInfo;
                 VkCmdProcessCommandsInfoNVX stack_pProcessCommandsInfo[1];
                 pProcessCommandsInfo = (VkCmdProcessCommandsInfoNVX*)stack_pProcessCommandsInfo;
@@ -1800,10 +1931,12 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkCmdProcessCommandsInfoNVX(globalstate, (VkCmdProcessCommandsInfoNVX*)(pProcessCommandsInfo));
                 }
                 vk->vkCmdProcessCommandsNVX((VkCommandBuffer)dispatchHandle, pProcessCommandsInfo);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdReserveSpaceForCommandsNVX:
             {
+                android::base::beginTrace("vkCmdReserveSpaceForCommandsNVX subdecode");
                 const VkCmdReserveSpaceForCommandsInfoNVX* pReserveSpaceInfo;
                 VkCmdReserveSpaceForCommandsInfoNVX stack_pReserveSpaceInfo[1];
                 pReserveSpaceInfo = (VkCmdReserveSpaceForCommandsInfoNVX*)stack_pReserveSpaceInfo;
@@ -1813,12 +1946,14 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkCmdReserveSpaceForCommandsInfoNVX(globalstate, (VkCmdReserveSpaceForCommandsInfoNVX*)(pReserveSpaceInfo));
                 }
                 vk->vkCmdReserveSpaceForCommandsNVX((VkCommandBuffer)dispatchHandle, pReserveSpaceInfo);
+                android::base::endTrace();
                 break;
             }
 #endif
 #ifdef VK_NV_clip_space_w_scaling
             case OP_vkCmdSetViewportWScalingNV:
             {
+                android::base::beginTrace("vkCmdSetViewportWScalingNV subdecode");
                 uint32_t firstViewport;
                 uint32_t viewportCount;
                 const VkViewportWScalingNV* pViewportWScalings;
@@ -1847,6 +1982,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdSetViewportWScalingNV((VkCommandBuffer)dispatchHandle, firstViewport, viewportCount, pViewportWScalings);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -1873,6 +2009,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_EXT_discard_rectangles
             case OP_vkCmdSetDiscardRectangleEXT:
             {
+                android::base::beginTrace("vkCmdSetDiscardRectangleEXT subdecode");
                 uint32_t firstDiscardRectangle;
                 uint32_t discardRectangleCount;
                 const VkRect2D* pDiscardRectangles;
@@ -1901,6 +2038,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     }
                 }
                 vk->vkCmdSetDiscardRectangleEXT((VkCommandBuffer)dispatchHandle, firstDiscardRectangle, discardRectangleCount, pDiscardRectangles);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -1921,6 +2059,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_EXT_debug_utils
             case OP_vkCmdBeginDebugUtilsLabelEXT:
             {
+                android::base::beginTrace("vkCmdBeginDebugUtilsLabelEXT subdecode");
                 const VkDebugUtilsLabelEXT* pLabelInfo;
                 VkDebugUtilsLabelEXT stack_pLabelInfo[1];
                 pLabelInfo = (VkDebugUtilsLabelEXT*)stack_pLabelInfo;
@@ -1930,15 +2069,19 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkDebugUtilsLabelEXT(globalstate, (VkDebugUtilsLabelEXT*)(pLabelInfo));
                 }
                 vk->vkCmdBeginDebugUtilsLabelEXT((VkCommandBuffer)dispatchHandle, pLabelInfo);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdEndDebugUtilsLabelEXT:
             {
+                android::base::beginTrace("vkCmdEndDebugUtilsLabelEXT subdecode");
                 vk->vkCmdEndDebugUtilsLabelEXT((VkCommandBuffer)dispatchHandle);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCmdInsertDebugUtilsLabelEXT:
             {
+                android::base::beginTrace("vkCmdInsertDebugUtilsLabelEXT subdecode");
                 const VkDebugUtilsLabelEXT* pLabelInfo;
                 VkDebugUtilsLabelEXT stack_pLabelInfo[1];
                 pLabelInfo = (VkDebugUtilsLabelEXT*)stack_pLabelInfo;
@@ -1948,6 +2091,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkDebugUtilsLabelEXT(globalstate, (VkDebugUtilsLabelEXT*)(pLabelInfo));
                 }
                 vk->vkCmdInsertDebugUtilsLabelEXT((VkCommandBuffer)dispatchHandle, pLabelInfo);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -1966,6 +2110,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_EXT_sample_locations
             case OP_vkCmdSetSampleLocationsEXT:
             {
+                android::base::beginTrace("vkCmdSetSampleLocationsEXT subdecode");
                 const VkSampleLocationsInfoEXT* pSampleLocationsInfo;
                 VkSampleLocationsInfoEXT stack_pSampleLocationsInfo[1];
                 pSampleLocationsInfo = (VkSampleLocationsInfoEXT*)stack_pSampleLocationsInfo;
@@ -1975,6 +2120,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkSampleLocationsInfoEXT(globalstate, (VkSampleLocationsInfoEXT*)(pSampleLocationsInfo));
                 }
                 vk->vkCmdSetSampleLocationsEXT((VkCommandBuffer)dispatchHandle, pSampleLocationsInfo);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -2001,6 +2147,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_AMD_buffer_marker
             case OP_vkCmdWriteBufferMarkerAMD:
             {
+                android::base::beginTrace("vkCmdWriteBufferMarkerAMD subdecode");
                 VkPipelineStageFlagBits pipelineStage;
                 VkBuffer dstBuffer;
                 VkDeviceSize dstOffset;
@@ -2016,6 +2163,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&marker, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vk->vkCmdWriteBufferMarkerAMD((VkCommandBuffer)dispatchHandle, pipelineStage, dstBuffer, dstOffset, marker);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -2028,6 +2176,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_NV_device_diagnostic_checkpoints
             case OP_vkCmdSetCheckpointNV:
             {
+                android::base::beginTrace("vkCmdSetCheckpointNV subdecode");
                 const void* pCheckpointMarker;
                 uint8_t* stack_pCheckpointMarker[1];
                 // WARNING PTR CHECK
@@ -2041,6 +2190,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     *readStreamPtrPtr += sizeof(const uint8_t);
                 }
                 vk->vkCmdSetCheckpointNV((VkCommandBuffer)dispatchHandle, pCheckpointMarker);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -2053,6 +2203,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
 #ifdef VK_GOOGLE_async_command_buffers
             case OP_vkBeginCommandBufferAsyncGOOGLE:
             {
+                android::base::beginTrace("vkBeginCommandBufferAsyncGOOGLE subdecode");
                 const VkCommandBufferBeginInfo* pBeginInfo;
                 VkCommandBufferBeginInfo stack_pBeginInfo[1];
                 pBeginInfo = (VkCommandBufferBeginInfo*)stack_pBeginInfo;
@@ -2062,23 +2213,29 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                     transform_tohost_VkCommandBufferBeginInfo(globalstate, (VkCommandBufferBeginInfo*)(pBeginInfo));
                 }
                 this->on_vkBeginCommandBufferAsyncGOOGLE(pool, (VkCommandBuffer)(boxed_dispatchHandle), pBeginInfo);
+                android::base::endTrace();
                 break;
             }
             case OP_vkEndCommandBufferAsyncGOOGLE:
             {
+                android::base::beginTrace("vkEndCommandBufferAsyncGOOGLE subdecode");
                 this->on_vkEndCommandBufferAsyncGOOGLE(pool, (VkCommandBuffer)(boxed_dispatchHandle));
+                android::base::endTrace();
                 break;
             }
             case OP_vkResetCommandBufferAsyncGOOGLE:
             {
+                android::base::beginTrace("vkResetCommandBufferAsyncGOOGLE subdecode");
                 VkCommandBufferResetFlags flags;
                 memcpy((VkCommandBufferResetFlags*)&flags, *readStreamPtrPtr, sizeof(VkCommandBufferResetFlags));
                 *readStreamPtrPtr += sizeof(VkCommandBufferResetFlags);
                 this->on_vkResetCommandBufferAsyncGOOGLE(pool, (VkCommandBuffer)(boxed_dispatchHandle), flags);
+                android::base::endTrace();
                 break;
             }
             case OP_vkCommandBufferHostSyncGOOGLE:
             {
+                android::base::beginTrace("vkCommandBufferHostSyncGOOGLE subdecode");
                 uint32_t needHostSync;
                 uint32_t sequenceNumber;
                 memcpy((uint32_t*)&needHostSync, *readStreamPtrPtr, sizeof(uint32_t));
@@ -2086,6 +2243,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 memcpy((uint32_t*)&sequenceNumber, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 this->on_vkCommandBufferHostSyncGOOGLE(pool, (VkCommandBuffer)(boxed_dispatchHandle), needHostSync, sequenceNumber);
+                android::base::endTrace();
                 break;
             }
 #endif
@@ -2110,7 +2268,7 @@ void subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* box
                 return ptr - (unsigned char *)buf;
             }
         }
-        ++count; if (count % 10 == 0) { pool->freeAll(); };
+        ++count; if (count % 1000 == 0) { pool->freeAll(); };
         ptr += packetLen;
     }
     pool->freeAll();
