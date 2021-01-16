@@ -9,20 +9,25 @@
 
 #include "android/skin/qt/extended-pages/multi-display-page.h"
 
-#include <qnamespace.h>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QSize>
 #include <QVBoxLayout>
+#include <QtCore>
 #include <cstdint>
 #include <functional>
+#include <ostream>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 
+#include "android/console.h"
 #include "android/avd/info.h"
 #include "android/base/LayoutResolver.h"
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
+#include "android/cmdline-option.h"
 #include "android/globals.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/UiEventTracker.h"
@@ -32,9 +37,6 @@
 #include "android/skin/qt/extended-pages/multi-display-item.h"
 #include "android/skin/qt/raised-material-button.h"
 #include "studio_stats.pb.h"
-
-class QString;
-class QWidget;
 
 // Allow at most 5 reports every 60 seconds.
 static constexpr uint64_t kReportWindowDurationUs = 1000 * 1000 * 60;
@@ -60,6 +62,13 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
                                      std::to_string(android_hw->hw_lcd_height) +
                                      ')';
     mUi->defaultDisplayText->setText(defaultDisplayDisp.c_str());
+
+    // Do not show layout panel when studio is active.
+    if (android_cmdLineOptions->qt_hide_window)  {
+        mUi->horizontalLayout_2->removeItem(mUi->verticalLayout_3);
+        mUi->multiDisplayArrangement->hide();
+        mUi->arrangement->hide();
+    }
 
     // set secondary display title
     setSecondaryDisplaysTitle(mSecondaryItemCount);
@@ -262,6 +271,7 @@ void MultiDisplayPage::on_applyChanges_clicked() {
         mMaxDisplayCnt = numDisplay;
     }
     mApplyChangesTracker->increment(name);
+    getConsoleAgents()->multi_display->notifyDisplayChanges();
 }
 
 void MultiDisplayPage::setArrangementHighLightDisplay(int id) {

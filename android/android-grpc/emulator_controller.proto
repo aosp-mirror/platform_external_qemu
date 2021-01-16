@@ -185,8 +185,14 @@ service EmulatorController {
   rpc getDisplayConfigurations(google.protobuf.Empty)
       returns (DisplayConfigurations) {}
 
-  // Currently, only notify client of virtual scene camera status change.
-  // Note that this method will send the state and wait for the first change.
+  // Notifies client of the following changes:
+  //
+  // - Virtual scene camera status change.
+  // - Display configuration changes from extended ui. This will only be fired
+  //   if the user makes modifications the extended displays through the extended
+  //   control tab.
+  //
+  // Note that this method will send the initial virtual scene state immediately.
   rpc streamNotification(google.protobuf.Empty) returns (stream Notification) {}
 
 }
@@ -1001,10 +1007,16 @@ message DisplayConfigurations {
 }
 
 message Notification {
-     enum EventType {
-           VIRTUAL_SCENE_CAMERA_INACTIVE = 0;
-           VIRTUAL_SCENE_CAMERA_ACTIVE = 1;
-           // Keep adding more for other event types
-     }
-     EventType event = 1;
+  enum EventType {
+    VIRTUAL_SCENE_CAMERA_INACTIVE = 0;
+    VIRTUAL_SCENE_CAMERA_ACTIVE = 1;
+
+    // Fired when an update to a display event has been fired through
+    // the extended ui. This does not fire events when the display
+    // is changed through the console or gRPC endpoint.
+    DISPLAY_CONFIGURATIONS_CHANGED_UI = 2;
+    // Keep adding more for other event types
+  }
+
+  EventType event = 1;
 }

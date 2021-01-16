@@ -323,6 +323,7 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
 
     mMultiDisplay.emplace(*displayId, MultiDisplayInfo());
     LOG(VERBOSE) << "create display " << *displayId;
+    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayAdded, *displayId});
     return 0;
 }
 
@@ -363,6 +364,7 @@ int MultiDisplay::destroyDisplay(uint32_t displayId) {
         }
     }
     LOG(VERBOSE) << "delete display " << displayId;
+    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayRemoved, displayId});
     return 0;
 }
 
@@ -414,6 +416,8 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
     LOG(VERBOSE) << "setDisplayPose " << displayId << " x " << x
                  << " y " << y << " w " << w << " h " << h
                  << " dpi " << dpi;
+
+    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayChanged, displayId});
     return 0;
 }
 
@@ -506,6 +510,11 @@ int MultiDisplay::getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayI
 void MultiDisplay::getCombinedDisplaySize(uint32_t* w, uint32_t* h) {
     AutoLock lock(mLock);
     getCombinedDisplaySizeLocked(w, h);
+}
+
+bool MultiDisplay::notifyDisplayChanges() {
+    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayTransactionCompleted, 0});
+    return true;
 }
 
 void MultiDisplay::getCombinedDisplaySizeLocked(uint32_t* w, uint32_t* h) {
