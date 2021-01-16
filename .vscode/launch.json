@@ -4,59 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": "(Windows) Unit Test Launch",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${command:cmake.launchTargetPath}",
-            "args": [
-                "--gtest_break_on_failure"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [
-                {
-                    // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-                    "name": "ASAN_OPTIONS",
-                    "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-                 },
 
-                {
-                    "name": "PATH",
-                    "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
-                }
-            ],
-            "externalConsole": true
-        },
-        {
-            "name": "(Windows) Emulator Launch",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/qemu/windows-x86_64/qemu-system-x86_64",
-            "args": [
-                "@P_64",
-                "-verbose",
-                "-show-kernel"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}\\build",
-            "environment": [
-                {
-                    "name": "ANDROID_SDK_ROOT",
-                    "value": "C:\\Users\\EmuTest2\\AppData\\Local\\Android\\Sdk"
-                },
-                // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-                {
-                    "name": "ASAN_OPTIONS",
-                    "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-                },
-                {
-                    "name": "PATH",
-                    "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
-                }
-            ],
-            "externalConsole": false
-        },
         {
             "name": "(lldb) Debug Cmake Target",
             "type": "lldb",
@@ -102,9 +50,10 @@
                     "-verbose",
                     "-feature",
                     "-HVF",
-                    "-qt-hide-window",
+                    // "-qt-hide-window",
                     "-gpu",
-                    "auto-no-window"
+                 //   "off"
+                    // "auto-no-window"
                 ],
                 "env": {
                     // Make sure we suppress the standard asan warnings, otherwise we will crash fast.

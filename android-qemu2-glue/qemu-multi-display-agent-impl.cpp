@@ -16,6 +16,13 @@
 using android::MultiDisplay;
 
 static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
+        .notifyDisplayChanges = []() {
+            auto instance = MultiDisplay::getInstance();
+            if (instance) {
+                return instance->notifyDisplayChanges();
+            }
+            return false;
+        },
         .setMultiDisplay = [](uint32_t id,
                               int32_t x,
                               int32_t y,

@@ -100,10 +100,12 @@ def _img_consumer(canvas, root, args):
 
     for img in stream_screenshots(args):
         img_bytes = img.image
+        continue
         if mm:
             mm.seek(0)
             img_bytes = mm.read()
 
+        if img.format.width == 0: continue
         # Python has poor UI support, this takes up soo much time
         # that the type of call does not really make a difference.
         if emu:
