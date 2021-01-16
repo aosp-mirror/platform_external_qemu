@@ -107,6 +107,17 @@ TEST_F(EventWaiterTest, no_callback_no_crash) {
     SUCCEED();
 }
 
+TEST_F(EventWaiterTest, available_no_block) {
+    // Test that you can do the following to not track all events:
+    // int curr = 0;
+    // curr += wt.next(curr, timeout);
+    EventWaiter wt;
+    wt.newEvent();
+    EXPECT_EQ(1, wt.next(0, std::chrono::milliseconds(5)));
+    wt.newEvent();
+    EXPECT_EQ(1, wt.next(1, std::chrono::milliseconds(5)));
+}
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

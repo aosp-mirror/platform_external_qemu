@@ -21,6 +21,7 @@
 #include "android/base/threads/WorkerThread.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/snapshot/common.h"
+#include "android/base/EventNotificationSupport.h"
 
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
@@ -61,6 +62,16 @@ struct ColorBufferRef {
 
 struct BufferRef {
     BufferPtr buffer;
+};
+
+ enum class FrameBufferChange {
+    FrameReady = 0,
+};
+
+struct FrameBufferChangeEvent {
+    FrameBufferChange change;
+    uint32_t displayId;
+    uint64_t frameNumber;
 };
 
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
@@ -109,7 +120,7 @@ struct FrameBufferCaps {
 // There is only one global instance, that can be retrieved with getFB(),
 // and which must be previously setup by calling initialize().
 //
-class FrameBuffer {
+class FrameBuffer :  public android::base::EventNotificationSupport<FrameBuffer, FrameBufferChangeEvent> {
 public:
     // Initialize the global instance.
     // |width| and |height| are the dimensions of the emulator GPU display
@@ -631,7 +642,10 @@ private:
             HandleType cb, android::base::System::Duration ts);
 
     bool postImpl(HandleType p_colorbuffer, bool needLockAndBind = true, bool repaint = false);
-    void setGuestPostedAFrame() { m_guestPostedAFrame = true; }
+    void setGuestPostedAFrame() {
+        m_guestPostedAFrame = true;
+        fireEvent({ FrameBufferChange::FrameReady, 0, mFrameNumber++ });
+    }
     HandleType createColorBufferLocked(int p_width,
                                        int p_height,
                                        GLenum p_internalFormat,
@@ -669,6 +683,7 @@ private:
     long long m_statsStartTime = 0;
 
     android::base::Thread* m_perfThread;
+    std::atomic<uint64_t> mFrameNumber;
     emugl::Mutex m_lock;
     emugl::ReadWriteMutex m_contextStructureLock;
     FbConfigList* m_configs = nullptr;
