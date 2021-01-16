@@ -14,8 +14,9 @@
 // limitations under the License.
 #include "android/emulation/control/camera/Camera.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/camera/camera-service.h"
+#include "android/base/memory/LazyInstance.h"             // for LazyInstance
+#include "android/camera/camera-common.h"                 // for kVirtualScene
+#include "android/camera/camera-service.h"                // for register_ca...
 
 namespace android {
 namespace emulation {
@@ -38,6 +39,7 @@ void Camera::virtualSceneCameraCallback(void* context, bool connected) {
     auto self = static_cast<Camera*>(context);
     self->mVirtualSceneConnected = connected;
     self->mEventWaiter.newEvent();
+    self->fireEvent(connected);
 }
 
 EventWaiter* Camera::eventWaiter() {
