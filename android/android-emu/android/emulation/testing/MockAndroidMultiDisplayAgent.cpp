@@ -21,6 +21,9 @@
 
 std::map<uint32_t, android::MultiDisplayInfo> mMultiDisplay;
 static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
+        .notifyDisplayChanges = []() {
+            return true;
+        },
         .setMultiDisplay = [](uint32_t id,
                               int32_t x,
                               int32_t y,

@@ -29,6 +29,8 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <mutex>
+#include <new>
 #include <ratio>
 #include <set>
 #include <string>
@@ -39,6 +41,7 @@
 #include <vector>
 
 #include "android/avd/info.h"
+#include "android/base/EventNotificationSupport.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/Stopwatch.h"
@@ -48,6 +51,7 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
+#include "android/emulation/MultiDisplay.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
@@ -972,41 +976,94 @@ public:
         return Status::OK;
     }
 
-    void setNotificationEvent(Notification* reply) {
+    Notification getCameraNotificationEvent() {
+        Notification reply;
         if (mCamera->isVirtualSceneConnected()) {
-            reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
+            reply.set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
         } else {
-            reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
+            reply.set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
         }
+        return reply;
     }
 
     Status streamNotification(ServerContext* context,
                               const Empty* request,
                               ServerWriter<Notification>* writer) override {
-        Notification reply;
         bool clientAvailable = !context->IsCancelled();
         if (clientAvailable) {
-            setNotificationEvent(&reply);
-            clientAvailable = writer->Write(reply);
+            clientAvailable = writer->Write(getCameraNotificationEvent());
         }
+
+        // The event waiter will be unlocked when a change event is received.
+        EventWaiter notifier;
+        int eventCount = 0;
+        enum class EventTypes { CameraEvent, DisplayEvent };
+
+        // This is the set of notifications that need to be delivered.
+        std::vector<Notification> activeNotifications;
+        std::mutex notificationLock;
+
+        // Register temporary listeners for multi display & camera changes.
+        RaiiEventListener<Camera, bool> cameraListener(
+                mCamera, [&](auto camera, auto state) {
+                    std::lock_guard<std::mutex> lock(notificationLock);
+                    activeNotifications.push_back(getCameraNotificationEvent());
+                    notifier.newEvent();
+                });
+
+        RaiiEventListener<android::MultiDisplay, android::DisplayChangeEvent>
+                displayListener(
+                        MultiDisplay::getInstance(),
+                        [&](auto multiDisplay, auto state) {
+                            if (state.change ==
+                                DisplayChange::DisplayTransactionCompleted) {
+                                Notification display;
+                                display.set_event(
+                                        Notification::
+                                                DISPLAY_CONFIGURATIONS_CHANGED_UI);
+
+                                std::lock_guard<std::mutex> lock(
+                                        notificationLock);
+                                activeNotifications.push_back(display);
+                                notifier.newEvent();
+                            }
+                        });
+
+        // And deliver the events as they come in.
         while (clientAvailable) {
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
-            auto arrived = mCamera->eventWaiter()->next(kTimeToWaitForFrame);
+            // This will not block if events came in while we were processing
+            // them below.
+            auto arrived = notifier.next(eventCount, kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
-                setNotificationEvent(&reply);
-                clientAvailable = writer->Write(reply);
+                eventCount += arrived;
+                // We now have a non empty set of events we have to deliver.
+                std::vector<Notification> current;
+                {
+                    // Make sure we deliver events only once.
+                    std::lock_guard<std::mutex> lock(notificationLock);
+                    std::swap(current, activeNotifications);
+                }
+
+                // Deliver each individual event.
+                for (const auto& event : current) {
+                    clientAvailable = writer->Write(event);
+                    if (!clientAvailable) {
+                        break;
+                    }
+                }
             }
             clientAvailable = !context->IsCancelled() && clientAvailable;
         }
         return Status::OK;
     }
 
-
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
     TouchEventSender mTouchEventSender;
     SharedMemoryLibrary mSharedMemoryLibrary;
+    EventWaiter mNotificationWaiter;
 
     Camera* mCamera;
     Clipboard* mClipboard;
