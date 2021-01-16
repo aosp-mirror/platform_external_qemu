@@ -182,8 +182,12 @@ service EmulatorController {
   rpc getDisplayConfigurations(google.protobuf.Empty)
       returns (DisplayConfigurations) {}
 
-  // Currently, only notify client of virtual scene camera status change.
-  // Note that this method will send the state and wait for the first change.
+  // Notify client of the following changes:
+  //
+  // - Virtual scene camera status change.
+  // - Changes to the active display configurations.
+  //
+  // Note that this method will send the initial virtual scene state immediately.
   rpc streamNotification(google.protobuf.Empty) returns (stream Notification) {}
 
 }
@@ -993,11 +997,42 @@ message DisplayConfigurations {
   repeated DisplayConfiguration displays = 1;
 }
 
+// An Event that provides information about display configuration changes.
+message DisplayChangeEvent {
+  enum DisplayChangeEventType {
+    // the properties of a logical Display, such as size and density, have changed.
+    DISPLAY_CHANGED = 0;
+    // a logical display has been added to the system.
+    DISPLAY_ADDED = 1;
+    // a logical display has been removed from the system.
+    DISPLAY_REMOVED = 2;
+  }
+
+  // The type of the event.
+  DisplayChangeEventType eventType = 1;
+
+  // The id of the display that was added, changed or removed.
+  // Additional details can be obtained by making a call to
+  // getDisplayConfigurations.
+  uint32 display = 2;
+}
+
 message Notification {
-     enum EventType {
-           VIRTUAL_SCENE_CAMERA_INACTIVE = 0;
-           VIRTUAL_SCENE_CAMERA_ACTIVE = 1;
-           // Keep adding more for other event types
-     }
-     EventType event = 1;
+  enum EventType {
+    VIRTUAL_SCENE_CAMERA_INACTIVE = 0;
+    VIRTUAL_SCENE_CAMERA_ACTIVE = 1;
+    // The display event property will be available and
+    // contains detailed information about the display change.
+    DISPLAY_EVENT = 2;
+    // Keep adding more for other event types
+  }
+
+  EventType event = 1;
+
+  // Set whenever:
+  //
+  // - The properties of a logical Display, such as size and density, have changed.
+  // - A logical display has been added to the system
+  // - A logical display has been removed from the system.
+  DisplayChangeEvent displayEvent = 2;
 }
