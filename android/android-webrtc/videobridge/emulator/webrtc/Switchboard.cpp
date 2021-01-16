@@ -187,6 +187,7 @@ bool Switchboard::connect(std::string identity) {
     // The format is json: {"start" : RTCPeerConnection config}
     // (i.e. result from
     // https://networktraversal.googleapis.com/v1alpha/iceconfig?key=....)
+    android::base::System::get()->sleepMs(2000);
     json start;
     start["start"] = turnConfig;
     send(identity, start);

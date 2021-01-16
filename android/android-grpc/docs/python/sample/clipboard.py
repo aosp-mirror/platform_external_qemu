@@ -14,7 +14,7 @@
 
 import argparse
 
-from google.protobuf import empty_pb2
+from google.protobuf import notifyDisplayChanges
 
 from aemu.proto.emulator_controller_pb2 import ClipData
 from aemu.discovery.emulator_discovery import get_default_emulator
