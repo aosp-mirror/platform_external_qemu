@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8fc9a07c_07c157f9",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 1017,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-01-16T03:30:44Z",
+      "side": 1,
+      "message": "Displays are usually not added one by one. The UI has the \"Apply\" button that changes the whole display configuration. Clicking on the \"Apply\" button should not generate multiple notifications.",
+      "range": {
+        "startLine": 1017,
+        "startChar": 9,
+        "endLine": 1017,
+        "endChar": 16
+      },
+      "revId": "dade0bf850fe65831d2c008200e08f666f80601a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "24404b8b_ce45226e",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 1037,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-01-16T03:30:44Z",
+      "side": 1,
+      "message": "We should either include the whole display configuration or not include anything at all and assume that Studio will query the new display configuration explicitly.",
+      "range": {
+        "startLine": 1037,
+        "startChar": 2,
+        "endLine": 1037,
+        "endChar": 33
+      },
+      "revId": "dade0bf850fe65831d2c008200e08f666f80601a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
