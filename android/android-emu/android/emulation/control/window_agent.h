@@ -28,6 +28,9 @@ typedef enum {
     WINDOW_MESSAGE_OK,
 } WindowMessageType;
 
+
+typedef struct {} MultiDisplayPageChangeEvent;
+
 static const int kWindowMessageTimeoutInfinite = -1;
 
 typedef struct EmulatorWindow EmulatorWindow;
