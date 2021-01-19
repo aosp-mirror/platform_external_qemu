@@ -16,6 +16,23 @@
       "message": "dEQP-VK: no regressions",
       "revId": "990e3aea0724c605e47cc67237282d193ca41950",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f7f0a3cf_bcb6843f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 15
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2021-01-19T19:25:41Z",
+      "side": 1,
+      "message": "With this change, the native swapchain may encounter a null pointer exception when unboxing guest Vulkan resources, e.g. when calling unbox_VkImage in VkDecoder.cpp. This doesn\u0027t happen until the system runs for a while. It turns out that the handler (e.g. VkImage) received from the guest does not exist in the HybridEntityManager. This bug happens purely randomly. Note that when the bug happens, the handler index is very large(\u003e 16000), so it is supposed to be stored in the HybridEntityManager::mMap.",
+      "revId": "990e3aea0724c605e47cc67237282d193ca41950",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
