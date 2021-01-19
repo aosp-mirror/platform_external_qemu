@@ -1948,6 +1948,14 @@ static void help_no_mouse_reposition(stralloc_t* out) {
            "  like VNC or Chrome remote desktop.\n");
 }
 
+static void help_ui_metrics(stralloc_t* out) {
+    PRINTF("  Show ui performance metrics subpage in Settings page. This "
+           "subpage\n"
+           "  is used to track how responsive is frame rendering in UI by "
+           "observing\n"
+           "  from host OS\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

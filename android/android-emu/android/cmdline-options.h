@@ -272,6 +272,7 @@ OPT_FLAG(no_hidpi_scaling, "Disable HiDPI scaling of guest display on macOS devi
 OPT_FLAG(no_mouse_reposition,
          "Do not reposition the mouse to emulator window center if mouse "
          "pointer gets out of the window.")
+OPT_FLAG(ui_metrics, "Enable the ui performance metrics page in Settings page.")
 
 #undef CFG_FLAG
 #undef CFG_PARAM
