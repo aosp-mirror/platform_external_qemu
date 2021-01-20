@@ -36,6 +36,8 @@
 #include "qemu/osdep.h"
 #ifndef CONFIG_WIN32
 #include <poll.h>
+#else
+#include "qemu/thread.h"
 #endif
 #include <libusb.h>
 
@@ -229,6 +231,20 @@ static void usb_host_add_fd(int fd, short events, void *user_data)
 static void usb_host_del_fd(int fd, void *user_data)
 {
     qemu_set_fd_handler(fd, NULL, NULL, NULL);
+}
+
+#else /* !CONFIG_WIN32 */
+
+static QemuThread event_thread_id;
+static bool event_thread_run = true;
+static uint32_t open_devs = 0;
+
+void *event_thread_func(void *ctx)
+{
+    while (event_thread_run)
+        libusb_handle_events(ctx);
+ 
+    return NULL;
 }
 
 #endif /* !CONFIG_WIN32 */
@@ -875,6 +891,15 @@ static int usb_host_open(USBHostDevice *s, libusb_device *dev)
     if (rc != 0) {
         goto fail;
     }
+    
+#ifdef CONFIG_WIN32
+    if (open_devs == 0) {
+        printf("starting libusb event thread\n");
+        qemu_thread_create(&event_thread_id, "libusb events", event_thread_func,
+                       ctx, QEMU_THREAD_JOINABLE);
+    }
+    open_devs ++;
+#endif
 
     s->dev     = dev;
     s->bus_num = bus_num;
@@ -888,7 +913,10 @@ static int usb_host_open(USBHostDevice *s, libusb_device *dev)
     usb_ep_init(udev);
     usb_host_ep_update(s);
 
-    udev->speed     = speed_map[libusb_get_device_speed(dev)];
+printf("usb speed: %d\n", (int)libusb_get_device_speed(dev));
+printf("usb speed: %s, force to use %s, USB_SPEED_HIGH=%d\n", speed_name[libusb_get_device_speed(dev)], speed_name[LIBUSB_SPEED_HIGH], LIBUSB_SPEED_HIGH);
+
+    udev->speed     = speed_map[LIBUSB_SPEED_HIGH/*libusb_get_device_speed(dev)*/];
     usb_host_speed_compat(s);
 
     if (s->ddesc.iProduct) {
@@ -1767,7 +1795,7 @@ void hmp_info_usbhost(Monitor *mon, const QDict *qdict)
                        libusb_get_bus_number(devs[i]),
                        libusb_get_device_address(devs[i]),
                        port,
-                       speed_name[libusb_get_device_speed(devs[i])]);
+                       speed_name[LIBUSB_SPEED_HIGH/*libusb_get_device_speed(devs[i])*/]);
         monitor_printf(mon, "    Class %02x:", ddesc.bDeviceClass);
         monitor_printf(mon, " USB device %04x:%04x",
                        ddesc.idVendor, ddesc.idProduct);
