@@ -11,34 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <rtc_base/log_sinks.h>    // for FileRotatingLogSink
-#include <rtc_base/logging.h>      // for RTC_LOG, LogSink
-#include <rtc_base/ssl_adapter.h>  // for CleanupSSL, Init...
-#include <stdio.h>                 // for printf, fprintf
-#include <stdlib.h>                // for exit, atoi, EXIT...
-#include <memory>                  // for unique_ptr, make...
-#include <string>                  // for basic_string
-#include <string_view>             // for string_view
-#include <vector>                  // for vector
+#include <rtc_base/log_sinks.h>                      // for FileRotatingLogSink
+#include <rtc_base/logging.h>                        // for LogSink, LogStre...
+#include <rtc_base/ssl_adapter.h>                    // for CleanupSSL, Init...
+#include <stdio.h>                                   // for printf, fprintf
+#include <stdlib.h>                                  // for atoi, exit, EXIT...
+#include <memory>                                    // for unique_ptr, make...
+#include <string>                                    // for string, char_traits
+#include <string_view>                               // for string_view
 
-#include "android/base/Log.h"                        // for LogStreamVoidify
-#include "android/base/Optional.h"                   // for Optional
-#include "android/base/ProcessControl.h"             // for parseEscapedLaun...
-#include "android/base/system/System.h"              // for System, System::...
+#include "android/base/Log.h"                        // for LogParams, LogOu...
 #include "android/emulation/control/GrpcServices.h"  // for EmulatorControll...
 #include "android/emulation/control/RtcService.h"    // for getRtcService
 #include "android/utils/debug.h"                     // for android_verbose
 #include "emulator/net/EmulatorForwarder.h"          // for EmulatorForwarder
 #include "emulator/net/EmulatorGrcpClient.h"         // for EmulatorGrpcClient
 #include "emulator/webrtc/Switchboard.h"             // for Switchboard
+#include "android/emulation/control/TurnConfig.h"              // for TurnConfig
 #include "nlohmann/json.hpp"                         // for json
 
 #ifdef _MSC_VER
 #include "msvc-getopt.h"
 #include "msvc-posix.h"
 #else
-#include <getopt.h>      // for optarg, required...
-#include <sys/signal.h>  // for signal, SIGINT
+#include <getopt.h>                                  // for optarg, required...
+#include <sys/signal.h>                              // for signal, SIGINT
 #endif
 
 using nlohmann::json;
@@ -77,6 +74,7 @@ using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::EmulatorForwarder;
 using emulator::webrtc::EmulatorGrpcClient;
 using emulator::webrtc::Switchboard;
+using android::emulation::control::TurnConfig;
 
 static void printUsage() {
     printf("--logdir (Directory to log files to, or empty when unused)  type: "
@@ -254,37 +252,10 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    // Check to see if we have a working turn configuration.
-    if (!FLAG_turn.empty()) {
-        auto cmd = android::base::parseEscapedLaunchString(FLAG_turn);
-
-        RTC_LOG(INFO) << "TurnCFG: --- Command --- ";
-        for (auto param : cmd) {
-            RTC_LOG(INFO) << "TurnCFG: param:" << param;
-        }
-        RTC_LOG(INFO) << "TurnCFG: --- Running --- ";
-
-        android::base::System::ProcessExitCode exitCode;
-        auto turn = android::base::System::get()->runCommandWithResult(
-                cmd, 1000, &exitCode);
-
-        if (turn) {
-            RTC_LOG(INFO) << "TurnCFG:" << *turn;
-            if (exitCode == 0 && json::jsonaccept(*turn)) {
-                json config = json::parse(*turn, nullptr, false);
-                if (config.count("iceServers")) {
-                    RTC_LOG(INFO)
-                            << "TurnCFG: Turn command produces valid json.";
-                } else {
-                    RTC_LOG(LS_ERROR) << "TurnCFG: JSON is missing iceServers.";
-                }
-            } else {
-                RTC_LOG(INFO) << "TurnCFG: bad exit: " << exitCode
-                              << ", or bad json result: " << *turn;
-            }
-        } else {
-            RTC_LOG(INFO) << "TurnCFG: Produces no result, exit: " << exitCode;
-        }
+    TurnConfig turnCfg(FLAG_turn);
+    if (!turnCfg.validCommand()) {
+        printf("Error: %s does not produce a valid turn configuration.");
+        return -1;
     }
 
     rtc::InitializeSSL();
@@ -309,7 +280,8 @@ int main(int argc, char* argv[]) {
 #endif
 
     if (FLAG_fwd) {
-        sForwarder = std::make_unique<EmulatorForwarder>(client.get(), FLAG_adb_port);
+        sForwarder = std::make_unique<EmulatorForwarder>(client.get(),
+                                                         FLAG_adb_port);
         if (!sForwarder->createRemoteConnection()) {
             LOG(ERROR) << "Unable to establish a connection to the remote "
                           "forwarder.";
@@ -317,7 +289,8 @@ int main(int argc, char* argv[]) {
         sForwarder->wait();
     } else {
         // Initalize the RTC service.
-        Switchboard sw(client.get(), "", FLAG_turn, FLAG_adb_port);
+
+        Switchboard sw(client.get(), "", turnCfg, FLAG_adb_port);
         auto bridge = android::emulation::control::getRtcService(&sw);
 
         auto builder = EmulatorControllerService::Builder()

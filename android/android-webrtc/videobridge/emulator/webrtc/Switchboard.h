@@ -12,36 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <rtc_base/critical_section.h>            // for CriticalSection
-#include <stdint.h>                               // for uint16_t
-#include <map>                                    // for map
-#include <memory>                                 // for shared_ptr
-#include <string>                                 // for string
-#include <unordered_map>                          // for unordered_map
-#include <vector>                                 // for vector
+#include <api/scoped_refptr.h>                             // for scoped_refptr
+#include <rtc_base/critical_section.h>                     // for CriticalSe...
+#include <stdint.h>                                        // for uint16_t
+#include <map>                                             // for map
+#include <memory>                                          // for shared_ptr
+#include <string>                                          // for string
+#include <unordered_map>                                   // for unordered_map
+#include <vector>                                          // for vector
 
-#include "android/base/containers/BufferQueue.h"  // for BufferQueue
-#include "android/base/synchronization/Lock.h"    // for Lock (ptr only)
-#include "android/base/system/System.h"           // for System, System::Dur...
-#include "android/emulation/control/RtcBridge.h"  // for RtcBridge::BridgeState
-#include "emulator/webrtc/RtcConnection.h"        // for RtcConnection, json
-#include "emulator/webrtc/capture/VideoCapturerFactory.h"
-
-namespace rtc {
-template <class T> class scoped_refptr;
-}  // namespace rtc
+#include "android/base/containers/BufferQueue.h"           // for BufferQueue
+#include "android/base/synchronization/Lock.h"             // for Lock (ptr ...
+#include "android/base/system/System.h"                    // for System
+#include "android/emulation/control/RtcBridge.h"           // for RtcBridge:...
+#include "emulator/webrtc/RtcConnection.h"                 // for RtcConnection
+#include "android/emulation/control/TurnConfig.h"                    // for TurnConfig
+#include "emulator/webrtc/capture/VideoCapturerFactory.h"  // for VideoCaptu...
 
 namespace emulator {
 namespace webrtc {
 class EmulatorGrpcClient;
 class Participant;
-class VideoCapturerFactory;
 
 using android::emulation::control::RtcBridge;
 using MessageQueue = android::base::BufferQueue<std::string>;
 using android::base::Lock;
 using android::base::ReadWriteLock;
 using android::base::System;
+using android::emulation::control::TurnConfig;
 
 // A switchboard manages a set of web rtc participants:
 //
@@ -53,7 +51,7 @@ class Switchboard : public RtcBridge, public RtcConnection {
 public:
     Switchboard(EmulatorGrpcClient* client,
                 const std::string& shmPath,
-                const std::string& turnconfig,
+                TurnConfig turnconfig,
                 int adbPort);
     ~Switchboard();
 
@@ -100,8 +98,6 @@ public:
     static std::string BRIDGE_RECEIVER;
 
 private:
-    // We want the turn config delivered in under a second.
-    const int kMaxTurnConfigTime = 1000;
     std::unordered_map<std::string, rtc::scoped_refptr<Participant>>
             mConnections;
     std::unordered_map<std::string, std::string> mIdentityMap;
@@ -114,8 +110,8 @@ private:
     const std::string mShmPath = "/tmp";
     int mAdbPort;
 
-    // Process to invoke to retrieve turn config.
-    std::vector<std::string> mTurnConfig;
+    // Turn configuration object.
+    TurnConfig mTurnConfig;
 
     // Maximum number of messages we are willing to queue, before we start
     // dropping them.
