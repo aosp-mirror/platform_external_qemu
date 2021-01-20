@@ -352,9 +352,9 @@ SharedFD SharedFD::SocketLocalClient(const std::string& name,
 }
 
 SharedFD SharedFD::SocketLocalServer(int port) {
-    int fd = android::base::socketTcp6LoopbackServer(port);
+    int fd = android::base::socketTcp4LoopbackServer(port);
     if (fd == -1) {
-        fd = android::base::socketTcp4LoopbackServer(port);
+        fd = android::base::socketTcp6LoopbackServer(port);
     }
     if (fd == -1) {
         return SharedFD();
