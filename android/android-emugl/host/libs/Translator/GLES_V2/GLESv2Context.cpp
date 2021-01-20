@@ -528,9 +528,12 @@ void GLESv2Context::drawWithEmulations(
         }
     }
 
+    bool needEnablingPostDraw[kMaxVertexAttributes];
+    memset(needEnablingPostDraw, 0, sizeof(needEnablingPostDraw));
+
     if (needClientVBOSetup) {
         GLESConversionArrays tmpArrs;
-        setupArraysPointers(tmpArrs, 0, count, type, indices, false);
+        setupArraysPointers(tmpArrs, 0, count, type, indices, false, needEnablingPostDraw);
         if (needAtt0PreDrawValidation()) {
             if (indices) {
                 validateAtt0PreDraw(findMaxIndex(count, type, indices));
@@ -603,9 +606,15 @@ void GLESv2Context::drawWithEmulations(
             s_glDispatch.glDisable(GL_POINT_SPRITE);
         }
     }
+
+    for (int i = 0; i < kMaxVertexAttributes; ++i) {
+        if (needEnablingPostDraw[i]) {
+            s_glDispatch.glEnableVertexAttribArray(i);
+        }
+    }
 }
 
-void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
+void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct, bool* needEnablingPostDraw) {
     //going over all clients arrays Pointers
     for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
         GLESpointer* p = m_currVaoState.attribInfo().data() + i;
@@ -622,16 +631,30 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
             p->getStride(),
             p->getNormalized(),
             -1,
-            p->isIntPointer());
+            p->isIntPointer(),
+            needEnablingPostDraw);
     }
 }
 
 //setting client side arr
 void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                                          GLenum arrayType, GLenum dataType,
-                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt){
+                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, bool* needEnablingPostDraw){
     // is not really a client side arr.
-    if (arr == NULL) return;
+    if (arr == NULL) {
+        GLint isEnabled;
+        s_glDispatch.glGetVertexAttribiv((int)arrayType, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &isEnabled);
+        GLuint boundBuf;
+        s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&boundBuf);
+
+        if (isEnabled && !boundBuf) {
+            s_glDispatch.glDisableVertexAttribArray(arrayType);
+            if (needEnablingPostDraw)
+                needEnablingPostDraw[arrayType] = true;
+        }
+
+        return;
+    }
 
     GLuint prevArrayBuffer;
     s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prevArrayBuffer);
