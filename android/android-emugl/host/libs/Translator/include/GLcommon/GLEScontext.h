@@ -250,7 +250,7 @@ public:
     bool vertexAttributesBufferBacked();
     const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize = false, bool isInt = false);
     virtual const GLESpointer* getPointer(GLenum arrType);
-    virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
+    virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct, bool* needEnablingPostDraw) = 0;
 
     static void prepareCoreProfileEmulatedTexture(TextureData* texData, bool is3d, GLenum target,
                                                   GLenum format, GLenum type,

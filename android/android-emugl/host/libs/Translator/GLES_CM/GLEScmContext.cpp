@@ -452,7 +452,8 @@ void GLEScmContext::setupArrayPointerHelper(GLESConversionArrays& cArrs,GLint fi
         }
 }
 
-void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
+void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct, bool* needEnablingPostDraw) {
+    (void)needEnablingPostDraw;
     ArraysMap::iterator it;
     m_pointsIndex = -1;
 
@@ -1838,7 +1839,7 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
     } else {
         GLESConversionArrays tmpArrs;
 
-        setupArraysPointers(tmpArrs,first,count,0,NULL,true);
+        setupArraysPointers(tmpArrs,first,count,0,NULL,true,nullptr);
 
         if (mode == GL_POINTS && isArrEnabled(GL_POINT_SIZE_ARRAY_OES)){
             drawPointsArrs(tmpArrs,first,count);
@@ -1894,7 +1895,7 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
     } else {
         GLESConversionArrays tmpArrs;
 
-        setupArraysPointers(tmpArrs,0,count,type,indices,false);
+        setupArraysPointers(tmpArrs,0,count,type,indices,false,nullptr);
         if(mode == GL_POINTS && isArrEnabled(GL_POINT_SIZE_ARRAY_OES)){
             drawPointsElems(tmpArrs,count,type,indices);
         }
