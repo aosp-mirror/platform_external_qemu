@@ -5477,12 +5477,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 combined = g_strdup_printf("%s mac80211_hwsim.radios=0",
                                            current_machine->kernel_cmdline);
 
-                snprintf(wifi_mac_prefix_str, sizeof(wifi_mac_prefix_str),
-                         "%d", android_serial_number_port);
-
-                // Userspace will use wifi_mac_prefix to generate MAC addresses
-                // for wifi radios.
-                boot_property_add("net.wifi_mac_prefix", wifi_mac_prefix_str);
+                boot_property_add_wifi_mac_prefix(android_serial_number_port);
             } else {
                 // Now that we know the serial number we can set it as the MAC prefix
                 // for wifi. This keeps the MAC addresses unique across several

@@ -48,6 +48,9 @@ int  boot_property_add2( const char*  name, int  namelen,
 void boot_property_add_logcat_pipe(const char* logcat_filter);
 void boot_property_add_logcat_pipe_virtconsole(const char* logcat_filter);
 
+void boot_property_add_shared_net_ip(int a4);
+void boot_property_add_wifi_mac_prefix(int mac_prefix);
+
 /* init the boot property QEMUD service. This must be performed before
  * the VM is started. This is also performed automatically if you call
  * boot_property_add().

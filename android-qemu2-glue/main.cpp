@@ -1387,8 +1387,7 @@ extern "C" int main(int argc, char** argv) {
                     "255\n");
             return 1;
         }
-        args.add("-boot-property");
-        args.addFormat("net.shared_net_ip=10.1.2.%ld", shared_net_id);
+        boot_property_add_shared_net_ip(shared_net_id);
     }
 
     // Add bluetooth parameters if applicable.

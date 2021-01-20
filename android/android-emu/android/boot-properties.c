@@ -146,6 +146,18 @@ void boot_property_add_logcat_pipe_virtconsole(const char* logcat_filter) {
     boot_property_add("qemu.logcat_filter", (logcat_filter ? logcat_filter : "*:S"));
 }
 
+void boot_property_add_shared_net_ip(int a4) {
+    char value[16];
+    snprintf(value, sizeof(value), "10.1.2.%d", a4);
+    boot_property_add("net.shared_net_ip", value);
+}
+
+void boot_property_add_wifi_mac_prefix(int mac_prefix) {
+    char value[8];
+    snprintf(value, sizeof(value), "%d", mac_prefix);
+    boot_property_add("net.wifi_mac_prefix", value);
+}
+
 /* Prints the warning string corresponding to the error code returned by
  * boot_propery_add2().
  */
