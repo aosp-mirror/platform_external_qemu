@@ -528,9 +528,12 @@ void GLESv2Context::drawWithEmulations(
         }
     }
 
+    bool needEnablingPostDraw[kMaxVertexAttributes];
+    memset(needEnablingPostDraw, 0, sizeof(needEnablingPostDraw));
+
     if (needClientVBOSetup) {
         GLESConversionArrays tmpArrs;
-        setupArraysPointers(tmpArrs, 0, count, type, indices, false);
+        setupArraysPointers(tmpArrs, 0, count, type, indices, false, needEnablingPostDraw);
         if (needAtt0PreDrawValidation()) {
             if (indices) {
                 validateAtt0PreDraw(findMaxIndex(count, type, indices));
@@ -542,6 +545,7 @@ void GLESv2Context::drawWithEmulations(
 
     GLuint prevIBO;
     if (needClientIBOSetup) {
+        fprintf(stderr, "%s: need ibo setup\n", __func__);
         int bpv = 2;
         switch (type) {
             case GL_UNSIGNED_BYTE:
@@ -558,8 +562,12 @@ void GLESv2Context::drawWithEmulations(
         size_t dataSize = bpv * count;
 
         s_glDispatch.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint*)&prevIBO);
+        fprintf(stderr, "%s: prev ibo: %u\n", __func__, prevIBO);
+        
         s_glDispatch.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_emulatedClientIBO);
         s_glDispatch.glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices, GL_STREAM_DRAW);
+    } else {
+        fprintf(stderr, "%s: no client ibo setup\n", __func__);
     }
 
     const GLvoid* indicesOrOffset =
@@ -567,7 +575,9 @@ void GLESv2Context::drawWithEmulations(
 
     switch (cmd) {
         case DrawCallCmd::Elements:
+            fprintf(stderr, "%s: Elements: mode 0x%x count %u type 0x%x ind 0x%llx\n", __func__, mode, count, type, (unsigned long long)(uintptr_t)indicesOrOffset);
             s_glDispatch.glDrawElements(mode, count, type, indicesOrOffset);
+            fprintf(stderr, "%s: Elements (done)\n", __func__);
             break;
         case DrawCallCmd::ElementsInstanced:
             s_glDispatch.glDrawElementsInstanced(mode, count, type,
@@ -579,7 +589,9 @@ void GLESv2Context::drawWithEmulations(
                                              indicesOrOffset);
             break;
         case DrawCallCmd::Arrays:
+            fprintf(stderr, "%s: Arrays mode 0x%x first %u count 0x%u\n", __func__, mode, first, count);
             s_glDispatch.glDrawArrays(mode, first, count);
+            fprintf(stderr, "%s: Arrays (done)\n", __func__);
             break;
         case DrawCallCmd::ArraysInstanced:
             s_glDispatch.glDrawArraysInstanced(mode, first, count, primcount);
@@ -590,7 +602,15 @@ void GLESv2Context::drawWithEmulations(
     }
 
     if (needClientIBOSetup) {
+        fprintf(stderr, "%s: try bind prev ibo: %u\n", __func__, prevIBO);
+        int isBuf = s_glDispatch.glIsBuffer(prevIBO);
+        if (isBuf) {
+            fprintf(stderr, "%s: is buffer\n", __func__);
+        } else {
+            fprintf(stderr, "%s: is not buffer\n", __func__);
+        }
         s_glDispatch.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prevIBO);
+        fprintf(stderr, "%s: try bind prev ibo: %u(done)\n", __func__, prevIBO);
     }
 
     if (needClientVBOSetup) {
@@ -603,16 +623,28 @@ void GLESv2Context::drawWithEmulations(
             s_glDispatch.glDisable(GL_POINT_SPRITE);
         }
     }
+
+    for (int i = 0; i < kMaxVertexAttributes; ++i) {
+        if (needEnablingPostDraw[i]) {
+            s_glDispatch.glEnableVertexAttribArray(i);
+        }
+    }
 }
 
-void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
+void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct, bool* needEnablingPostDraw) {
+    fprintf(stderr, "%s: count: %d type 0x%x\n", __func__, count, type);
     //going over all clients arrays Pointers
     for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
         GLESpointer* p = m_currVaoState.attribInfo().data() + i;
         if (!p->isEnable() || p->getAttribType() == GLESpointer::VALUE) {
+            fprintf(stderr, "%s: attrbi %d not enabled or is value, continue %d\n", __func__, i, p->getAttribType() == GLESpointer::VALUE);
             continue;
         }
 
+        fprintf(stderr, "%s: proceed attrib %d data size %d type 0x%x size %d stride %d\n", __func__, i, p->getDataSize(),
+            p->getType(),
+            p->getSize(),
+            p->getStride());
         setupArrWithDataSize(
             p->getDataSize(),
             p->getArrayData(),
@@ -622,26 +654,48 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
             p->getStride(),
             p->getNormalized(),
             -1,
-            p->isIntPointer());
+            p->isIntPointer(),
+            needEnablingPostDraw);
+        fprintf(stderr, "%s: proceed attrib %d data size %d (after)\n", __func__, i, p->getDataSize());
     }
 }
 
 //setting client side arr
 void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                                          GLenum arrayType, GLenum dataType,
-                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt){
+                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, needEnablingPostDraw){
     // is not really a client side arr.
-    if (arr == NULL) return;
+    if (arr == NULL) {
+        fprintf(stderr, "%s: not client side arr, return\n", __func__);
+        GLint isEnabled;
+        s_glDispatch.glGetVertexAttribiv((int)arrayType, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &isEnabled);
+        fprintf(stderr, "%s: enabled? %d\n", __func__, isEnabled);
+        GLuint boundBuf;
+        s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&boundBuf);
+        fprintf(stderr, "%s: bound buffer? %u\n", __func__, boundBuf);
+
+            fprintf(stderr, "%s: warning: enabled? %d with buffer %u bound\n", __func__, isEnabled, boundBuf);
+
+            if (isEnabled && !boundBuf) {
+                fprintf(stderr, "%s: guest is messed up, disabling attrib %u\n", __func__, arrayType);
+                s_glDispatch.glDisableVertexAttribArray(arrayType);
+                needEnablingPostDraw[arrayType] = true;
+            }
+
+        return;
+    }
 
     GLuint prevArrayBuffer;
     s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prevArrayBuffer);
 
     if (arrayType < m_emulatedClientVBOs.size()) {
+    fprintf(stderr, "%s: bind emul vbo: %u\n", __func__, m_emulatedClientVBOs[arrayType]);
         s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, m_emulatedClientVBOs[arrayType]);
     } else {
         fprintf(stderr, "%s: invalid attribute index: %d\n", __func__, (int)arrayType);
     }
 
+    fprintf(stderr, "%s: bufferdata %d\n", __func__, datasize);
     s_glDispatch.glBufferData(GL_ARRAY_BUFFER, datasize, arr, GL_STREAM_DRAW);
 
     if (isInt) {
@@ -650,6 +704,7 @@ void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
         s_glDispatch.glVertexAttribPointer(arrayType, size, dataType, normalized, stride, 0);
     }
 
+    fprintf(stderr, "%s: bind prev: %u\n", __func__, prevArrayBuffer);
     s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, prevArrayBuffer);
 }
 
