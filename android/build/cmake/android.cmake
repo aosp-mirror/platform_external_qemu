@@ -769,7 +769,7 @@ function(protobuf_generate_with_plugin)
 
     set(_generated_srcs)
     foreach(_ext ${protobuf_generate_with_plugin_GENERATE_EXTENSIONS})
-      list(APPEND _generated_srcs "${protobuf_generate_with_plugin_PROTOC_OUT_DIR}/${_rel_dir}/${_basename}${_ext}")
+      list(APPEND _generated_srcs "${protobuf_generate_with_plugin_PROTOC_OUT_DIR}/${_basename}${_ext}")
     endforeach()
     list(APPEND _generated_srcs_all ${_generated_srcs})
 
