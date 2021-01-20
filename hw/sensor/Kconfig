@@ -43,3 +43,7 @@ config ISL_PMBUS_VR
 config MAX31785
     bool
     depends on PMBUS
+
+config AMDSBTSI
+    bool
+    depends on I2C

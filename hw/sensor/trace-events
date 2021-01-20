@@ -1,0 +1,5 @@
+# See docs/devel/tracing.rst for syntax documentation.
+
+# tmp_sbtsi.c
+tmp_sbtsi_write_data(uint8_t addr, uint8_t value) "SBTSI write addr:0x%02x data: 0x%02x"
+tmp_sbtsi_read_data(uint8_t addr, uint8_t value) "SBTSI read addr:0x%02x data: 0x%02x"
