@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dde9c856_89f7f6fd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2021-01-20T20:27:58Z",
+      "side": 1,
+      "message": "I am cleaning up winusb driver code, once check in, emu should support the specific USB device. You guys can change pid/vid to support other usb devices.",
+      "revId": "b7bdc2a30f134d850e44d50e4fa847421a24942a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
