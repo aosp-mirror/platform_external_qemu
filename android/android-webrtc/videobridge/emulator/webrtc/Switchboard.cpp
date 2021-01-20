@@ -13,28 +13,27 @@
 // limitations under the License.
 #include "emulator/webrtc/Switchboard.h"
 
-#include <api/scoped_refptr.h>            // for scoped_refptr
-#include <rtc_base/critical_section.h>    // for CritScope
-#include <rtc_base/logging.h>             // for RTC_LOG
-#include <rtc_base/ref_counted_object.h>  // for RefCountedObject
-#include <map>                            // for map, operator==
-#include <memory>                         // for shared_ptr, make_sh...
-#include <ostream>                        // for operator<<, ostream
-#include <string>                         // for string, basic_string
-#include <unordered_map>                  // for unordered_map, unor...
-#include <utility>                        // for move
-#include <vector>                         // for vector
+#include <api/scoped_refptr.h>                    // for scoped_refptr
+#include <rtc_base/critical_section.h>            // for CritScope
+#include <rtc_base/logging.h>                     // for Val, RTC_LOG
+#include <rtc_base/ref_counted_object.h>          // for RefCountedObject
+#include <map>                                    // for map, operator==
+#include <memory>                                 // for shared_ptr, make_sh...
+#include <ostream>                                // for operator<<, ostream
+#include <string>                                 // for string, hash, opera...
+#include <type_traits>                            // for remove_extent_t
+#include <unordered_map>                          // for unordered_map, unor...
+#include <utility>                                // for move
+#include <vector>                                 // for vector
 
 #include "android/base/Log.h"                     // for LogStreamVoidify, LOG
-#include "android/base/Optional.h"                // for Optional
-#include "android/base/ProcessControl.h"          // for parseEscapedLaunchS...
 #include "android/base/async/AsyncSocket.h"       // for AsyncSocket
-#include "android/base/containers/BufferQueue.h"  // for BufferQueue, Buffer...
+#include "android/base/containers/BufferQueue.h"  // for BufferQueueResult
 #include "android/base/synchronization/Lock.h"    // for Lock, AutoReadLock
 #include "android/base/system/System.h"           // for System, System::Dur...
 #include "emulator/webrtc/Participant.h"          // for Participant
 #include "emulator/webrtc/RtcConnection.h"        // for json, RtcConnection
-#include "nlohmann/json.hpp"                      // for operator""_json
+#include "nlohmann/json.hpp"                      // for basic_json<>::value...
 
 namespace emulator {
 namespace webrtc {
@@ -53,12 +52,12 @@ Switchboard::~Switchboard() {}
 
 Switchboard::Switchboard(EmulatorGrpcClient* client,
                          const std::string& shmPath,
-                         const std::string& turnConfig,
+                         TurnConfig turnConfig,
                          int adbPort)
     : RtcConnection(client),
       mShmPath(shmPath),
       mAdbPort(adbPort),
-      mTurnConfig(parseEscapedLaunchString(turnConfig)) {}
+      mTurnConfig(turnConfig) {}
 
 void Switchboard::rtcConnectionDropped(std::string participant) {
     rtc::CritScope cs(&mCleanupCS);
@@ -149,20 +148,7 @@ bool Switchboard::connect(std::string identity) {
     // where we should send the turn config to the client.
     // Turn is really only needed when your server is
     // locked down pretty well. (Google gce environment for example)
-    json turnConfig = "{}"_json;
-    if (mTurnConfig.size() > 0) {
-        System::ProcessExitCode exitCode;
-        Optional<std::string> turn = System::get()->runCommandWithResult(
-                mTurnConfig, kMaxTurnConfigTime, &exitCode);
-        if (exitCode == 0 && turn && json::jsonaccept(*turn)) {
-            json config = json::parse(*turn, nullptr, false);
-            if (config.count("iceServers")) {
-                turnConfig = config;
-            } else {
-                RTC_LOG(LS_ERROR) << "Unusable turn config: " << turn;
-            }
-        }
-    }
+    json turnConfig = mTurnConfig.getConfig();
 
     // The format is json: {"start" : RTCPeerConnection config}
     // (i.e. result from
