@@ -36,6 +36,8 @@
 #include "qemu/osdep.h"
 #ifndef CONFIG_WIN32
 #include <poll.h>
+#else
+#include "qemu/thread.h"
 #endif
 #include <libusb.h>
 
@@ -237,6 +239,19 @@ static void usb_host_del_fd(int fd, void *user_data)
     qemu_set_fd_handler(fd, NULL, NULL, NULL);
 }
 
+#else /* !CONFIG_WIN32 */
+
+static QemuThread event_thread_id;
+static bool event_thread_run = true;
+
+void *event_thread_func(void *ctx)
+{
+    while (event_thread_run)
+        libusb_handle_events(ctx);
+
+    return NULL;
+}
+
 #endif /* !CONFIG_WIN32 */
 
 static int usb_host_init(void)
@@ -256,6 +271,8 @@ static int usb_host_init(void)
     libusb_set_debug(ctx, loglevel);
 #ifdef CONFIG_WIN32
     /* FIXME: add support for Windows. */
+    qemu_thread_create(&event_thread_id, "libusb events", event_thread_func,
+                       ctx, QEMU_THREAD_JOINABLE);
 #else
     libusb_set_pollfd_notifiers(ctx, usb_host_add_fd,
                                 usb_host_del_fd,
