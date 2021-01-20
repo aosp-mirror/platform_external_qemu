@@ -6,9 +6,9 @@ android_add_executable(
   SRC # cmake-format: sortable
       emulator/avd/FakeAvd.cpp
       emulator/main/GoldfishBridge.cpp
-      emulator/net/SocketForwarder.cpp
       emulator/net/EmulatorForwarder.cpp
       emulator/net/EmulatorGrpcClient.cpp
+      emulator/net/SocketForwarder.cpp
       emulator/webrtc/capture/AudioSource.cpp
       emulator/webrtc/capture/GrpcAudioSource.cpp
       emulator/webrtc/capture/GrpcVideoSource.cpp
