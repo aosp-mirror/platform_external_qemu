@@ -2080,7 +2080,7 @@ extern "C" int main(int argc, char** argv) {
             args.add("virtio-serial");
             args.add("-chardev");
             args.addFormat(
-                    "socket,port=%d,host=localhost,nowait,nodelay,ipv6,id="
+                    "socket,port=%d,host=::1,nowait,nodelay,ipv6,id="
                     "modem",
                     modem_simulator_guest_port);
             args.add("-device");
