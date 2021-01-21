@@ -2130,16 +2130,16 @@ void android_camera_service_init(void) {
         if (strcmp(android_hw->hw_camera_back, "emulated") &&
                 strcmp(android_hw->hw_camera_front, "emulated")) {
             /* Fake camera is not used for camera emulation. */
-            boot_property_add("qemu.sf.fake_camera", "none");
+            boot_property_add_qemu_sf_fake_camera("none");
         } else {
             if(!strcmp(android_hw->hw_camera_back, "emulated") &&
                     !strcmp(android_hw->hw_camera_front, "emulated")) {
                 /* Fake camera is used for both, front and back camera emulation. */
-                boot_property_add("qemu.sf.fake_camera", "both");
+                boot_property_add_qemu_sf_fake_camera("both");
             } else if (!strcmp(android_hw->hw_camera_back, "emulated")) {
-                boot_property_add("qemu.sf.fake_camera", "back");
+                boot_property_add_qemu_sf_fake_camera("back");
             } else {
-                boot_property_add("qemu.sf.fake_camera", "front");
+                boot_property_add_qemu_sf_fake_camera("front");
             }
         }
 

@@ -42,14 +42,18 @@ int  boot_property_add( const char*  name, const char*  value );
 int  boot_property_add2( const char*  name, int  namelen,
                          const char*  value, int  valuelen );
 
-/* add qemu.cmdline=androidboot.logcat=%s androidboot.consolepipe=qemu_pipe,pipe:logcat
-   and qemu.logcat=start
-*/
+/* vendor specific options */
 void boot_property_add_logcat_pipe(const char* logcat_filter);
 void boot_property_add_logcat_pipe_virtconsole(const char* logcat_filter);
-
 void boot_property_add_shared_net_ip(int a4);
 void boot_property_add_wifi_mac_prefix(int mac_prefix);
+void boot_property_add_qemu_adb_secure(int value);
+void boot_property_add_qemu_timezone(const char* value);
+/* Initializes presence of hardware nav button */
+void boot_property_add_qemu_hw_mainkeys(int value);
+void boot_property_add_qemu_keyboard_layout(const char* value);
+void boot_property_add_qemu_sf_fake_camera(const char* value);
+void boot_property_add_qemu_sf_lcd_density(int mapped_density);
 
 /* init the boot property QEMUD service. This must be performed before
  * the VM is started. This is also performed automatically if you call
