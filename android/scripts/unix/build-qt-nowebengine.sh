@@ -297,8 +297,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 var_append EXTRA_CONFIGURE_FLAGS \
                     -no-framework \
                     -sdk macosx
-                var_append CFLAGS -mmacosx-version-min=10.11
-                var_append LDFLAGS -mmacosx-version-min=10.11
+                var_append CFLAGS -mmacosx-version-min=10.13
+                var_append LDFLAGS -mmacosx-version-min=10.13
                 var_append LDFLAGS -lc++
                 ;;
         esac
