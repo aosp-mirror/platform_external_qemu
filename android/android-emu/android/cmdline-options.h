@@ -200,6 +200,8 @@ OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
 
 #ifndef __linux__
   OPT_FLAG( force_32bit, "always use 32-bit emulator" )
+  OPT_FLAG(ui_metrics,
+           "Enable the ui performance metrics page in Settings page.")
 #endif  // __linux__
 
 OPT_PARAM(selinux, "<disabled|permissive>", "Set SELinux to either disabled or permissive mode")
