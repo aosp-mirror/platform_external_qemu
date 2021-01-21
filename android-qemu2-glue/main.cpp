@@ -2030,43 +2030,54 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
-    args.add("-chardev");
-    args.addFormat("%s,id=forhvc0",
-                   ((opts->virtio_console && opts->show_kernel) ? "stdio" : "null"));
+    const bool createVirtconsoles =
+        opts->virtio_console ||
+        fc::isEnabled(fc::VirtconsoleLogcat);
 
-    args.add("-chardev");
-    if (fc::isEnabled(fc::VirtconsoleLogcat)) {
-        if (opts->logcat) {
-            if (opts->logcat_output) {
-                args.addFormat("file,id=forhvc1,path=%s", opts->logcat_output);
+    if (createVirtconsoles) {
+        args.add("-chardev");
+        args.addFormat("%s,id=forhvc0", (opts->show_kernel ? "stdio" : "null"));
+
+        args.add("-chardev");
+        if (fc::isEnabled(fc::VirtconsoleLogcat)) {
+            if (opts->logcat) {
+                if (opts->logcat_output) {
+                    args.addFormat("file,id=forhvc1,path=%s", opts->logcat_output);
+                } else {
+                    args.add("stdio,id=forhvc1");
+                }
             } else {
-                args.add("stdio,id=forhvc1");
+                args.add("null,id=forhvc1");
             }
+
+            boot_property_add_logcat_pipe_virtconsole("*:V");
         } else {
             args.add("null,id=forhvc1");
         }
 
-        boot_property_add_logcat_pipe_virtconsole("*:V");
+        args.add2("-device", "virtio-serial-pci");
+
+        // the order of virtconsoles must be preserved
+        args.add2("-device", "virtconsole,chardev=forhvc0");
+        args.add2("-device", "virtconsole,chardev=forhvc1");
     } else {
-        args.add("null,id=forhvc1");
+        // no virtconsoles here
 
-        if (fc::isEnabled(fc::LogcatPipe)) {
-            boot_property_add_logcat_pipe("*:V");
-        }
+        if (!fc::isEnabled(fc::VirtconsoleLogcat)) {
+            if (fc::isEnabled(fc::LogcatPipe)) {
+                boot_property_add_logcat_pipe("*:V");
+            }
 
-        if (opts->logcat) {
-            dwarning("Logcat tag filtering is currently disabled. b/132840817, everything will be placed on stdout");
-            // Output to std out if no file is provided.
-            if (!opts->logcat_output) {
-                auto str = new std::ostream(std::cout.rdbuf());
-                android::emulation::LogcatPipe::registerStream(str);
+            if (opts->logcat) {
+                dwarning("Logcat tag filtering is currently disabled. b/132840817, everything will be placed on stdout");
+                // Output to std out if no file is provided.
+                if (!opts->logcat_output) {
+                    auto str = new std::ostream(std::cout.rdbuf());
+                    android::emulation::LogcatPipe::registerStream(str);
+                }
             }
         }
     }
-
-    args.add2("-device", "virtio-serial-pci");
-    args.add2("-device", "virtconsole,chardev=forhvc0");
-    args.add2("-device", "virtconsole,chardev=forhvc1");
 
     if (feature_is_enabled(kFeature_ModemSimulator)) {
         if (create_modem_simulator_configs_if_needed(hw)) {
