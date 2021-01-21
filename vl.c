@@ -4748,7 +4748,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
         /* Enable ADB authenticaiton, or not. */
         if (feature_is_enabled(kFeature_PlayStoreImage)) {
-            boot_property_add("qemu.adb.secure", "1");
+            boot_property_add_qemu_adb_secure(1);
         }
 
         /* Set the VM's max heap size, passed as a boot property */
@@ -4763,8 +4763,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             boot_property_add("ro.config.low_ram", "true");
         }
 
-        /* Initialize presence of hardware nav button */
-        boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
+        boot_property_add_qemu_hw_mainkeys(android_hw->hw_mainKeys);
 
         if (android_hw->hw_gsmModem) {
             if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
@@ -4790,9 +4789,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         }
 
         if (lcd_density) {
-            char temp[8];
-            snprintf(temp, sizeof(temp), "%d", lcd_density);
-            boot_property_add("qemu.sf.lcd_density", temp);
+            boot_property_add_qemu_sf_lcd_density(lcd_density);
         }
     }
 
