@@ -52,7 +52,8 @@ using ::android::emulation::control::Image;
 using ::android::emulation::control::ImageFormat;
 using ::android::emulation::control::ImageTransport;
 
-GrpcVideoSource::GrpcVideoSource(EmulatorGrpcClient* client) : mClient(client) {}
+GrpcVideoSource::GrpcVideoSource(EmulatorGrpcClient* client)
+    : mClient(client) {}
 
 std::tuple<int, int> getScreenDimensions(EmulatorGrpcClient* client) {
     ::google::protobuf::Empty empty;
@@ -97,11 +98,12 @@ void GrpcVideoSource::captureFrames() {
     transport->set_channel(ImageTransport::MMAP);
     transport->set_handle(handle);
 
-    mContext = mClient->newContext();
+    std::shared_ptr<grpc::ClientContext> context = mClient->newContext();
+    mContext = context;
     RTC_LOG(INFO) << "Requesting video stream " << w << "x" << h
                   << ", from:" << handle;
     std::unique_ptr<grpc::ClientReaderInterface<Image>> stream =
-            mClient->stub()->streamScreenshot(mContext.get(), request);
+            mClient->stub()->streamScreenshot(context.get(), request);
 
     if (stream == nullptr) {
         RTC_LOG(WARNING) << "Video: unable to obtain stream.." << handle;
@@ -111,6 +113,9 @@ void GrpcVideoSource::captureFrames() {
 
     bool warned = false;
     Image img;
+
+    // TODO(jansene): Make async, so we can guarantee a minimum fps that is
+    // independent of the emulator.
     while (stream->Read(&img)) {
         if (img.format().rotation().rotation() != Rotation::PORTRAIT &&
             !warned) {
@@ -149,14 +154,20 @@ void GrpcVideoSource::captureFrames() {
     tempfile_close(tmp);
 }
 
-GrpcVideoSource::~GrpcVideoSource() {
-    if (mContext) {
-        mContext->TryCancel();
-    }
-    if (mCaptureVideo) {
-        mVideoThread.join();
+void GrpcVideoSource::cancel() {
+    if (auto context = mContext.lock()) {
+        context->TryCancel();
     }
     mCaptureVideo = false;
+}
+
+void GrpcVideoSource::run() {
+    mCaptureVideo = true;
+    captureFrames();
+}
+
+GrpcVideoSource::~GrpcVideoSource() {
+    cancel();
 }
 
 bool GrpcVideoSource::GetStats(Stats* stats) {
@@ -190,12 +201,6 @@ void GrpcVideoSource::OnSinkWantsChanged(const rtc::VideoSinkWants& wants) {
                      << ", max: " << wants.max_pixel_count
                      << ", fps: " << wants.max_framerate_fps
                      << ", align: " << wants.resolution_alignment;
-
-    bool expected = false;
-    if (mClient->stub() &&
-        mCaptureVideo.compare_exchange_strong(expected, true)) {
-        mVideoThread = std::thread([this]() { captureFrames(); });
-    }
     mVideoAdapter.OnSinkWants(wants);
 }
 
