@@ -52,7 +52,6 @@ static void term_exit(void)
 
 static void qemu_chr_set_echo_stdio(Chardev *chr, bool echo)
 {
-#if 0
     struct termios tty;
 
     stdio_echo_state = echo;
@@ -72,7 +71,6 @@ static void qemu_chr_set_echo_stdio(Chardev *chr, bool echo)
     }
 
     tcsetattr(0, TCSANOW, &tty);
-#endif
 }
 
 static void term_stdio_handler(int sig)
@@ -114,7 +112,7 @@ static void qemu_chr_open_stdio(Chardev *chr,
     if (opts->has_signal) {
         stdio_allow_signal = opts->signal;
     }
-    qemu_chr_set_echo_stdio(chr, false);
+    qemu_chr_set_echo_stdio(chr, opts->echo);
 }
 #endif
 
@@ -128,6 +126,7 @@ static void qemu_chr_parse_stdio(QemuOpts *opts, ChardevBackend *backend,
     qemu_chr_parse_common(opts, qapi_ChardevStdio_base(stdio));
     stdio->has_signal = true;
     stdio->signal = qemu_opt_get_bool(opts, "signal", true);
+    stdio->echo = qemu_opt_get_bool(opts, "echo", false);
 }
 
 static void char_stdio_class_init(ObjectClass *oc, void *data)
