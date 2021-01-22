@@ -12,6 +12,7 @@ android_add_executable(
       emulator/webrtc/capture/AudioSource.cpp
       emulator/webrtc/capture/GrpcAudioSource.cpp
       emulator/webrtc/capture/GrpcVideoSource.cpp
+      emulator/webrtc/capture/MediaSourceLibrary.cpp
       emulator/webrtc/capture/VideoCapturerFactory.cpp
       emulator/webrtc/capture/VideoShareCapturer.cpp
       emulator/webrtc/capture/VideoTrackReceiver.cpp

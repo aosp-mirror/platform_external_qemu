@@ -103,19 +103,19 @@ private:
 // 3. Exchanging of offers between remote client.
 //
 // It talks with the rtc connection to send/receive messages.
-class Participant : public EmptyConnectionObserver,
-                    public ::webrtc::CreateSessionDescriptionObserver {
+class Participant : public EmptyConnectionObserver {
 public:
-    Participant(RtcConnection* board, std::string id, VideoTrackReceiver* videoReceiver);
+    Participant(RtcConnection* board,
+                std::string id,
+                VideoTrackReceiver* videoReceiver);
     ~Participant() override;
 
     // PeerConnectionObserver implementation.
     void OnIceCandidate(
             const ::webrtc::IceCandidateInterface* candidate) override;
+    void OnConnectionChange(
+            ::webrtc::PeerConnectionInterface::PeerConnectionState new_state) override;
 
-    // CreateSessionDescriptionObserver implementation.
-    void OnSuccess(::webrtc::SessionDescriptionInterface* desc) override;
-    void OnFailure(::webrtc::RTCError error) override;
     void OnIceConnectionChange(
             ::webrtc::PeerConnectionInterface::IceConnectionState new_state)
             override;
@@ -124,39 +124,35 @@ public:
             rtc::scoped_refptr<::webrtc::MediaStreamInterface> stream) override;
     void OnDataChannel(rtc::scoped_refptr<::webrtc::DataChannelInterface>
                                channel) override;
+    void ReceivedSessionDescription(
+            ::webrtc::SessionDescriptionInterface* desc);
     void IncomingMessage(json msg);
-    bool AddVideoTrack(std::string handle);
-    bool RemoveVideoTrack(std::string handle);
-    bool AddAudioTrack(std::string grpcAddress);
-    bool RemoveAudioTrack(std::string grpcAddress);
-
+    bool AddVideoTrack(int displayId);
+    bool AddAudioTrack();
 
     bool Initialize();
-    void SendToBridge(json msg);
     void SendToDataChannel(DataChannelLabel label, std::string data);
     void CreateOffer();
     void Close();
+    void WaitForClose();
 
     rtc::scoped_refptr<::webrtc::DataChannelInterface> GetDataChannel(
             DataChannelLabel label);
     inline const std::string GetPeerId() const { return mPeerId; };
-        // Register Adb Forwarder to the local running emulator.
+    // Register Adb Forwarder to the local running emulator.
     bool RegisterLocalAdbForwarder(
             std::shared_ptr<android::base::AsyncSocket> adbSocket);
 
 private:
+    void DoClose();
     void SendMessage(json msg);
-    void HandleOffer(const json& msg) const;
-    void HandleCandidate(const json& msg) const;
-    bool CreatePeerConnection(json description);
+    void HandleOffer(const json& msg);
+    void HandleCandidate(const json& msg);
+    bool CreatePeerConnection(const json& description);
     void AddDataChannel(const DataChannelLabel channel);
     VideoCapturer* OpenVideoCaptureDevice(const std::string& memoryHandle);
 
     scoped_refptr<PeerConnectionInterface> mPeerConnection;
-    std::unordered_map<std::string,
-                       scoped_refptr<::webrtc::MediaStreamInterface>>
-            mStreams;
-
     std::unordered_map<DataChannelLabel, std::unique_ptr<EventForwarder>>
             mEventForwarders;
 
@@ -164,20 +160,25 @@ private:
                        scoped_refptr<::webrtc::DataChannelInterface>>
             mDataChannels;
     std::unordered_map<std::string, scoped_refptr<::webrtc::RtpSenderInterface>>
-            mActiveVideoTracks;
-    std::unordered_map<std::string, scoped_refptr<::webrtc::RtpSenderInterface>>
-            mActiveAudioTracks;
+            mActiveTracks;
 
+    GrpcRefAudioSource mAudioSource;
+    std::vector<GrpcRefVideoSource> mVideoSources;
     std::shared_ptr<android::base::AsyncSocket> mLocalAdbSocket;
 
     std::unique_ptr<SocketForwarder> mSocketForwarder;
     RtcConnection* mRtcConnection;
     VideoTrackReceiver* mVideoReceiver;
     std::string mPeerId;
-    uint32_t mId{0};
+    std::atomic<bool> mClosed{false};
+
+    std::mutex mClosedMutex;
+    std::condition_variable mCvClosed;
 
 public:
     const static std::string kStunUri;
+    const static std::string kAudioTrack;
+    const static std::string kVideoTrack;
 };
 }  // namespace webrtc
 }  // namespace emulator

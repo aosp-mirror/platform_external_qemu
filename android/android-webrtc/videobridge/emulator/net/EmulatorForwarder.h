@@ -42,6 +42,7 @@ using namespace android::base;
 //
 // - Android studio compatible discovery file
 // - A temporary "fake" avd based on the remote emulator
+// - Host a gRPC endpoint that gets forwarded.
 //
 // This will result in android studio recognizing this process as
 // an embedded emulator.
@@ -68,6 +69,7 @@ private:
     void deleteRecursive(const std::string& path);
     bool retrieveRemoteProperties();
     bool createFakeAvd();
+    void stopService();
 
     std::unique_ptr<EmulatorAdvertisement> mAdvertiser;
     std::unique_ptr<EmulatorControllerService> mFwdService;

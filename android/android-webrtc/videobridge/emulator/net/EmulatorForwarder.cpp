@@ -391,9 +391,7 @@ void EmulatorForwarder::wait() {
 EmulatorForwarder::EmulatorForwarder(EmulatorGrpcClient* client, int adbPort)
     : mClient(client), mWebRtcConnection(client, adbPort), mAvd(client){};
 
-EmulatorForwarder::~EmulatorForwarder() {
-    close();
-}
+EmulatorForwarder::~EmulatorForwarder() {}
 
 void EmulatorForwarder::close() {
     const std::lock_guard<std::mutex> lock(mCloseMutex);
@@ -401,16 +399,34 @@ void EmulatorForwarder::close() {
         return;
     }
     mAlive = false;
-    LOG(INFO) << "Stopping service..";
-    mFwdService->stop();
     LOG(INFO) << "Stopping webrtc..";
     mWebRtcConnection.close();
+}
+
+void EmulatorForwarder::stopService() {
+    LOG(INFO) << "Stopping service..";
+    mFwdService->stop();
 }
 
 bool EmulatorForwarder::createRemoteConnection() {
     mAvd.garbageCollect();
     if (!mAvd.create()) {
         return false;
+    }
+
+    // Establish a webrtc connection, and wait for it to be available.
+    // TODO(jansene): Make it lazy, connect to getScreenshot?
+    mWebRtcConnection.connect();
+    mWebRtcConnection.registerConnectionClosedListener([&] { stopService(); });
+
+    // Wait at most a few seconds, for a frame.
+    auto frame =
+            mWebRtcConnection.videoReceiver()->next(std::chrono::seconds(25));
+    if (frame == 0) {
+        LOG(ERROR) << "No frames received after 5 seconds, bailing out!";
+        return false;
+    } else {
+        LOG(INFO) << "First frame arrived, registering discovery mechanism.";
     }
 
     const int of64Bytes = 64;
@@ -446,20 +462,6 @@ bool EmulatorForwarder::createRemoteConnection() {
     mAlive = true;
     auto port = mFwdService->port();
     props["grpc.port"] = std::to_string(port);
-
-    // Establish a webrtc connection, and wait for it to be available.
-    // TODO(jansene): Make it lazy, connect to getScreenshot?
-    mWebRtcConnection.connect();
-
-    // Wait at most 2s, for a frame.
-    auto frame =
-            mWebRtcConnection.videoReceiver()->next(std::chrono::seconds(5));
-    if (frame == 0) {
-        LOG(ERROR) << "No frames received after 5 seconds, bailing out!";
-        return false;
-    } else {
-        LOG(INFO) << "First frame arrived, registering discovery mechanism.";
-    }
 
     mAdvertiser = std::make_unique<EmulatorAdvertisement>(std::move(props));
     mAdvertiser->garbageCollect();

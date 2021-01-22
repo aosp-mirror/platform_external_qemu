@@ -27,11 +27,12 @@
 #include <rtc_base/logging.h>                  // for Val, RTC_LOG
 #include <rtc_base/ref_counted_object.h>       // for RefCountedOb...
 #include <stdint.h>                            // for uint8_t, uin...
-#include <memory>                              // for unique_ptr
-#include <string>                              // for string, hash
-#include <unordered_map>                       // for unordered_map
-#include <utility>                             // for pair
-#include <vector>                              // for vector
+#include <functional>
+#include <memory>         // for unique_ptr
+#include <string>         // for string, hash
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for pair
+#include <vector>         // for vector
 
 #include "emulator/net/EmulatorGrcpClient.h"             // for EmulatorGrpc...
 #include "emulator/net/SocketForwarder.h"                // for AdbPortForwa...
@@ -59,6 +60,8 @@ namespace emulator {
 namespace webrtc {
 
 const std::string Participant::kStunUri = "stun:stun.l.google.com:19302";
+const std::string Participant::kAudioTrack = "grpcAudioTrack";
+const std::string Participant::kVideoTrack = "grpcDisplay-";
 
 static std::string asString(DataChannelLabel value) {
     std::string s = "";
@@ -76,6 +79,64 @@ static std::string asString(DataChannelLabel value) {
     return s;
 }
 
+static std::string asString(
+        ::webrtc::PeerConnectionInterface::IceConnectionState value) {
+    std::string s = "";
+#define LABEL(p)                                                     \
+    case (::webrtc::PeerConnectionInterface::IceConnectionState::p): \
+        s = #p;                                                      \
+        break;
+    switch (value) {
+        LABEL(kIceConnectionNew)
+        LABEL(kIceConnectionChecking)
+        LABEL(kIceConnectionConnected)
+        LABEL(kIceConnectionCompleted)
+        LABEL(kIceConnectionFailed)
+        LABEL(kIceConnectionDisconnected)
+        LABEL(kIceConnectionClosed)
+        LABEL(kIceConnectionMax)
+    }
+#undef LABEL
+    return s;
+}
+
+static std::string asString(
+        ::webrtc::PeerConnectionInterface::PeerConnectionState value) {
+    std::string s = "";
+#define LABEL(p)                                                      \
+    case (::webrtc::PeerConnectionInterface::PeerConnectionState::p): \
+        s = #p;                                                       \
+        break;
+    switch (value) {
+        LABEL(kNew)
+        LABEL(kConnecting)
+        LABEL(kConnected)
+        LABEL(kDisconnected)
+        LABEL(kFailed)
+        LABEL(kClosed)
+    }
+#undef LABEL
+    return s;
+}
+
+void logRtcError(::webrtc::RTCError error) {
+    if (!error.ok())
+        RTC_LOG(LS_ERROR) << error.message();
+}
+
+class SetRemoteDescriptionCallback
+    : public rtc::RefCountedObject<
+              ::webrtc::SetRemoteDescriptionObserverInterface> {
+public:
+    SetRemoteDescriptionCallback() {}
+    void OnSetRemoteDescriptionComplete(::webrtc::RTCError error) override {
+        logRtcError(error);
+    }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(SetRemoteDescriptionCallback);
+};
+
 class DummySetSessionDescriptionObserver
     : public ::webrtc::SetSessionDescriptionObserver {
 public:
@@ -87,7 +148,33 @@ public:
 
 protected:
     DummySetSessionDescriptionObserver() {}
-    ~DummySetSessionDescriptionObserver() {}
+    DISALLOW_COPY_AND_ASSIGN(DummySetSessionDescriptionObserver);
+};
+
+class DefaultSessionDescriptionObserver
+    : public ::webrtc::CreateSessionDescriptionObserver {
+public:
+    using ResultCallback =
+            std::function<void(::webrtc::SessionDescriptionInterface*)>;
+
+    void OnSuccess(::webrtc::SessionDescriptionInterface* desc) override {
+        mCallback(desc);
+    }
+    void OnFailure(::webrtc::RTCError error) override { logRtcError(error); }
+
+    static DefaultSessionDescriptionObserver* Create(
+            const ResultCallback& callback) {
+        return new rtc::RefCountedObject<DefaultSessionDescriptionObserver>(
+                callback);
+    }
+
+protected:
+    explicit DefaultSessionDescriptionObserver(const ResultCallback& callback)
+        : mCallback(callback) {}
+
+private:
+    ResultCallback mCallback;
+    DISALLOW_COPY_AND_ASSIGN(DefaultSessionDescriptionObserver);
 };
 
 EventForwarder::EventForwarder(
@@ -134,20 +221,19 @@ void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
     }
 }
 
-static std::atomic<uint32_t> sId{0};
-
-Participant::Participant(RtcConnection* board, std::string id, VideoTrackReceiver* vtr)
-    : mRtcConnection(board), mPeerId(id), mVideoReceiver(vtr) {
-    mId = sId++;
-}
+Participant::Participant(RtcConnection* board,
+                         std::string id,
+                         VideoTrackReceiver* vtr)
+    : mRtcConnection(board), mPeerId(id), mVideoReceiver(vtr) {}
 
 Participant::~Participant() {
-    RTC_LOG(INFO) << "Participant " << mId << ", completed.";
-    if (mPeerConnection) {
-        mPeerConnection->Close();
+    RTC_LOG(INFO) << "Participant " << mPeerId << ", completed.";
+    if (mLocalAdbSocket) {
+        // There's a corner case where we never established a local adb
+        // connection and we could be spinning in a connect loop.
+        mLocalAdbSocket->close();
     }
 }
-
 
 void Participant::OnAddStream(
         rtc::scoped_refptr<::webrtc::MediaStreamInterface> stream) {
@@ -164,49 +250,66 @@ void Participant::OnAddStream(
     }
 }
 
-
+using ::webrtc::PeerConnectionInterface;
 
 void Participant::OnIceConnectionChange(
-        ::webrtc::PeerConnectionInterface::IceConnectionState new_state) {
-    RTC_LOG(INFO) << "Participant: " << mId
-                  << ", OnIceConnectionChange: " << new_state;
+        PeerConnectionInterface::IceConnectionState new_state) {
+    RTC_LOG(INFO) << "OnIceConnectionChange: Participant: " << mPeerId << ": "
+                  << asString(new_state);
+}
+
+void Participant::OnConnectionChange(
+        PeerConnectionInterface::PeerConnectionState new_state) {
+    RTC_LOG(INFO) << "OnConnectionChange: Participant: " << mPeerId << ": "
+                  << asString(new_state);
+    bool closed = false;
     switch (new_state) {
-        case ::webrtc::PeerConnectionInterface::kIceConnectionFailed:
-        case ::webrtc::PeerConnectionInterface::kIceConnectionDisconnected:
-            mEventForwarders.clear();
-            mStreams.clear();
-            RTC_LOG(INFO) << "Disconnected! Time to clean up, peer: " << mId;
-            // We cannot call close from the signaling thread, lest we lock up
-            // the world.
-            // TODO(jansene): Figure out if this can directly happen on the
-            // worker thread.
-            mRtcConnection->rtcConnectionDropped(mPeerId);
+        case PeerConnectionInterface::PeerConnectionState::kFailed:
+        case PeerConnectionInterface::PeerConnectionState::kClosed:
+
+            // We will only notify closing 1 time.
+            if (mClosed.compare_exchange_strong(closed, true)) {
+                mRtcConnection->rtcConnectionClosed(mPeerId);
+            }
             break;
-        case ::webrtc::PeerConnectionInterface::IceConnectionState::
-                kIceConnectionClosed:
-            // Boo! we are closed, peer connection will be garbage collected on
-            // other thread, as we cannot make ourself invalid on the calling
-            // thread that is actually using us.
-            RTC_LOG(INFO) << "Closed! Time to erase peer: " << mId;
-            mRtcConnection->rtcConnectionClosed(mPeerId);
+        default: /* nop */
             break;
-        default:;  // Nothing ..
     }
 }
 
-void Participant::Close() {
+void Participant::DoClose() {
+    RTC_LOG(INFO) << "Closing peer connection.";
+    std::unique_lock<std::mutex> lock(mClosedMutex);
     if (mPeerConnection) {
-        RTC_LOG(INFO) << "Closing peer connection.";
         mPeerConnection->Close();
     }
+
+    mPeerConnection = nullptr;
+    mAudioSource = nullptr;
+    mVideoSources.clear();
+    mEventForwarders.clear();
+    mDataChannels.clear();
+    mActiveTracks.clear();
+
+    mCvClosed.notify_all();
+}
+
+void Participant::Close() {
+    // Closing has to happen on the signaling thread.
+    if (mRtcConnection->signalingThread()->IsCurrent()) {
+        DoClose();
+    } else {
+        mRtcConnection->signalingThread()->Invoke<void>(RTC_FROM_HERE, [&] { DoClose(); });
+    }
+}
+void Participant::WaitForClose() {
+    std::unique_lock<std::mutex> lock(mClosedMutex);
+    mCvClosed.wait(lock, [&] { return mPeerConnection == nullptr; });
 }
 
 void Participant::OnIceCandidate(
         const ::webrtc::IceCandidateInterface* candidate) {
     // We discovered a candidate, now we just send it over.
-    RTC_LOG(INFO) << "participant" << mId
-                  << ", candidate: " << candidate->sdp_mline_index();
-
     std::string sdp;
     if (!candidate->ToString(&sdp)) {
         RTC_LOG(LS_ERROR) << "Failed to serialize candidate";
@@ -220,11 +323,8 @@ void Participant::OnIceCandidate(
     SendMessage(msg);
 }
 
-void Participant::SendToBridge(json msg) {
-    mRtcConnection->send(Switchboard::BRIDGE_RECEIVER, msg);
-}
-
 void Participant::SendMessage(json msg) {
+    RTC_LOG(INFO) << "Send: " << mPeerId << ", :" << msg;
     mRtcConnection->send(mPeerId, msg);
 }
 
@@ -250,7 +350,7 @@ void Participant::SendToDataChannel(DataChannelLabel label, std::string data) {
 }
 
 void Participant::IncomingMessage(json msg) {
-    RTC_LOG(INFO) << "IncomingMessage: " << msg.dump(4);
+    RTC_LOG(INFO) << "IncomingMessage: " << msg.dump();
     if (msg.count("candidate")) {
         if (msg["candidate"].count("candidate")) {
             // Old JS clients wrap this message.
@@ -273,7 +373,7 @@ void Participant::IncomingMessage(json msg) {
     }
 }
 
-void Participant::HandleCandidate(const json& msg) const {
+void Participant::HandleCandidate(const json& msg) {
     if (!msg.count("sdpMid") || !msg.count("sdpMLineIndex") ||
         !msg.count("candidate")) {
         RTC_LOG(WARNING) << "Missing required properties!";
@@ -286,19 +386,15 @@ void Participant::HandleCandidate(const json& msg) const {
 
     std::unique_ptr<::webrtc::IceCandidateInterface> candidate(
             CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
-    if (!candidate.get()) {
+    if (!candidate) {
         RTC_LOG(WARNING) << "Can't parse received candidate message. "
                          << "SdpParseError was: " << error.description;
         return;
     }
-    if (!mPeerConnection->AddIceCandidate(candidate.get())) {
-        RTC_LOG(WARNING) << "Failed to apply the received candidate";
-        return;
-    }
-    RTC_LOG(INFO) << " Received candidate :" << msg;
+    mPeerConnection->AddIceCandidate(std::move(candidate), &logRtcError);
 }
 
-void Participant::HandleOffer(const json& msg) const {
+void Participant::HandleOffer(const json& msg) {
     std::string type = msg["type"];
     if (type == "offer-loopback") {
         RTC_LOG(LS_ERROR) << "We are not doing loopbacks";
@@ -311,25 +407,26 @@ void Participant::HandleOffer(const json& msg) const {
 
     std::string sdp = msg["sdp"];
     ::webrtc::SdpParseError error;
-    ::webrtc::SessionDescriptionInterface* session_description(
+    std::unique_ptr<::webrtc::SessionDescriptionInterface> session_description(
             CreateSessionDescription(type, sdp, &error));
     if (!session_description) {
         RTC_LOG(WARNING) << "Can't parse received session description message. "
                          << "SdpParseError was: " << error.description;
         return;
     }
-    mPeerConnection->SetRemoteDescription(
-            DummySetSessionDescriptionObserver::Create(), session_description);
-    if (session_description->type() ==
-        ::webrtc::SessionDescriptionInterface::kOffer) {
+    auto sort = session_description->type();
+    mPeerConnection->SetRemoteDescription(std::move(session_description),
+                                          new SetRemoteDescriptionCallback());
+    if (sort == ::webrtc::SessionDescriptionInterface::kOffer) {
         mPeerConnection->CreateAnswer(
-                (::webrtc::CreateSessionDescriptionObserver*)this,
-                ::webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
+                DefaultSessionDescriptionObserver::Create(
+                        [&](auto desc) { ReceivedSessionDescription(desc); }),
+                {});
     }
-    return;
 }
 
-void Participant::OnSuccess(::webrtc::SessionDescriptionInterface* desc) {
+void Participant::ReceivedSessionDescription(
+        ::webrtc::SessionDescriptionInterface* desc) {
     mPeerConnection->SetLocalDescription(
             DummySetSessionDescriptionObserver::Create(), desc);
 
@@ -342,22 +439,18 @@ void Participant::OnSuccess(::webrtc::SessionDescriptionInterface* desc) {
     SendMessage(jmessage);
 }
 
-void Participant::OnFailure(::webrtc::RTCError error) {
-    RTC_LOG(LERROR) << ToString(error.type()) << ": " << error.message();
-}
-
-bool Participant::AddVideoTrack(std::string handle) {
-    if (mActiveVideoTracks.count(handle) != 0) {
+bool Participant::AddVideoTrack(int displayId) {
+    std::string handle = kVideoTrack + std::to_string(displayId);
+    if (mActiveTracks.count(handle) != 0) {
         RTC_LOG(LS_ERROR) << "Track " << handle
                           << " already active, not adding again.";
     }
-
-    // TODO(jansene): Video sources should be shared amongst participants.
     RTC_LOG(INFO) << "Adding video track: [" << handle << "]";
-    auto track = new rtc::RefCountedObject<emulator::webrtc::GrpcVideoSource>(
-            mRtcConnection->getEmulatorClient());
+    auto track =
+            mRtcConnection->getMediaSourceLibrary()->getVideoSource(displayId);
     scoped_refptr<::webrtc::VideoTrackInterface> video_track(
-            mRtcConnection->getPeerConnectionFactory()->CreateVideoTrack(handle, track));
+            mRtcConnection->getPeerConnectionFactory()->CreateVideoTrack(
+                    handle, track));
 
     auto result = mPeerConnection->AddTrack(video_track, {handle});
     if (!result.ok()) {
@@ -365,62 +458,38 @@ bool Participant::AddVideoTrack(std::string handle) {
                           << result.error().message();
         return false;
     }
-
-    mActiveVideoTracks[handle] = result.value();
+    mVideoSources.push_back(track);
+    mActiveTracks[handle] = result.value();
     return true;
 }
 
-bool Participant::AddAudioTrack(std::string grpc) {
-    if (mActiveAudioTracks.count(grpc) != 0) {
-        RTC_LOG(LS_ERROR) << "Track " << grpc
+bool Participant::AddAudioTrack() {
+    if (mActiveTracks.count(kAudioTrack) != 0) {
+        RTC_LOG(LS_ERROR) << "Track " << kAudioTrack
                           << " already active, not adding again.";
     }
-
-    // TODO(jansene): Audio sources should be shared amongst participants.
-    RTC_LOG(INFO) << "Adding audio track: [" << grpc << "]";
-    auto track = new rtc::RefCountedObject<emulator::webrtc::GrpcAudioSource>(
-            mRtcConnection->getEmulatorClient());
+    RTC_LOG(INFO) << "Adding audio track: [" << kAudioTrack << "]";
+    auto track = mRtcConnection->getMediaSourceLibrary()->getAudioSource();
     scoped_refptr<::webrtc::AudioTrackInterface> audio_track(
-            mRtcConnection->getPeerConnectionFactory()->CreateAudioTrack(grpc, track));
+            mRtcConnection->getPeerConnectionFactory()->CreateAudioTrack(
+                    kAudioTrack, track));
 
-    auto result = mPeerConnection->AddTrack(audio_track, {grpc});
+    auto result = mPeerConnection->AddTrack(audio_track, {kAudioTrack});
     if (!result.ok()) {
         RTC_LOG(LS_ERROR) << "Failed to add audio track: "
                           << result.error().message();
         return false;
     }
-
-    mActiveAudioTracks[grpc] = result.value();
+    mActiveTracks[kAudioTrack] = result.value();
+    mAudioSource = track;
     return true;
 }
 
 void Participant::CreateOffer() {
     mPeerConnection->CreateOffer(
-            this, ::webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
-}
-
-bool Participant::RemoveAudioTrack(std::string grpc) {
-    if (mActiveAudioTracks.count(grpc) == 0) {
-        RTC_LOG(LS_ERROR) << "Track " << grpc
-                          << " not active, no need to remove.";
-        return false;
-    }
-
-    auto track = mActiveAudioTracks[grpc];
-    mPeerConnection->RemoveTrack(track);
-    return true;
-}
-
-bool Participant::RemoveVideoTrack(std::string handle) {
-    if (mActiveVideoTracks.count(handle) == 0) {
-        RTC_LOG(LS_ERROR) << "Track " << handle
-                          << " not active, no need to remove.";
-        return false;
-    }
-
-    auto track = mActiveVideoTracks[handle];
-    mPeerConnection->RemoveTrack(track);
-    return true;
+            DefaultSessionDescriptionObserver::Create(
+                    [&](auto desc) { ReceivedSessionDescription(desc); }),
+            {});
 }
 
 void Participant::OnDataChannel(
@@ -447,8 +516,8 @@ bool Participant::RegisterLocalAdbForwarder(
 
 void Participant::AddDataChannel(const DataChannelLabel label) {
     auto channel = mPeerConnection->CreateDataChannel(asString(label), nullptr);
-    mEventForwarders[label] =
-            std::make_unique<EventForwarder>(mRtcConnection->getEmulatorClient(), channel, label);
+    mEventForwarders[label] = std::make_unique<EventForwarder>(
+            mRtcConnection->getEmulatorClient(), channel, label);
 }
 
 bool Participant::Initialize() {
@@ -506,12 +575,12 @@ parseRTCConfiguration(json rtcConfiguration) {
     return configuration;
 }
 
-bool Participant::CreatePeerConnection(json rtcConfiguration) {
+bool Participant::CreatePeerConnection(const json& rtcConfiguration) {
     RTC_DCHECK(mPeerConnection.get() == nullptr);
-
-    mPeerConnection = mRtcConnection->getPeerConnectionFactory()->CreatePeerConnection(
-            parseRTCConfiguration(rtcConfiguration),
-            ::webrtc::PeerConnectionDependencies(this));
+    mPeerConnection =
+            mRtcConnection->getPeerConnectionFactory()->CreatePeerConnection(
+                    parseRTCConfiguration(rtcConfiguration),
+                    ::webrtc::PeerConnectionDependencies(this));
     return mPeerConnection.get() != nullptr;
 }
 

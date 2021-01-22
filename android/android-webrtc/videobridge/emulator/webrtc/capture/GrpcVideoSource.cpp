@@ -52,7 +52,8 @@ using ::android::emulation::control::Image;
 using ::android::emulation::control::ImageFormat;
 using ::android::emulation::control::ImageTransport;
 
-GrpcVideoSource::GrpcVideoSource(EmulatorGrpcClient* client) : mClient(client) {}
+GrpcVideoSource::GrpcVideoSource(EmulatorGrpcClient* client)
+    : mClient(client) {}
 
 std::tuple<int, int> getScreenDimensions(EmulatorGrpcClient* client) {
     ::google::protobuf::Empty empty;
@@ -78,6 +79,13 @@ std::tuple<int, int> getScreenDimensions(EmulatorGrpcClient* client) {
 
 using android::emulation::control::Rotation;
 
+static gpr_timespec grpc_timeout_to_deadline(std::chrono::microseconds us) {
+    return gpr_time_add(gpr_now(GPR_CLOCK_MONOTONIC),
+                        gpr_time_from_micros(us.count(), GPR_TIMESPAN));
+}
+
+
+
 void GrpcVideoSource::captureFrames() {
     auto [w, h] = getScreenDimensions(mClient);
     auto memsize = w * h * 3;
@@ -97,66 +105,112 @@ void GrpcVideoSource::captureFrames() {
     transport->set_channel(ImageTransport::MMAP);
     transport->set_handle(handle);
 
-    mContext = mClient->newContext();
+    std::shared_ptr<grpc::ClientContext> context = mClient->newContext();
+    mContext = context;
     RTC_LOG(INFO) << "Requesting video stream " << w << "x" << h
                   << ", from:" << handle;
-    std::unique_ptr<grpc::ClientReaderInterface<Image>> stream =
-            mClient->stub()->streamScreenshot(mContext.get(), request);
 
-    if (stream == nullptr) {
-        RTC_LOG(WARNING) << "Video: unable to obtain stream.." << handle;
-        tempfile_close(tmp);
-        return;
-    }
 
-    bool warned = false;
+    // Video frames..
+    ::webrtc::VideoFrame currentFrame =
+            ::webrtc::VideoFrame::Builder()
+                    .set_video_frame_buffer(mI420Buffer)
+                    .set_timestamp_rtp(0)
+                    .set_timestamp_us(rtc::TimeMicros())
+                    .set_rotation(::webrtc::kVideoRotation_0)
+                    .build();
     Image img;
-    while (stream->Read(&img)) {
-        if (img.format().rotation().rotation() != Rotation::PORTRAIT &&
-            !warned) {
-            RTC_LOG(WARNING) << "Rotation not yet properly supported.";
-            warned = true;
-        };
 
-        uint8_t* data = (uint8_t*)img.image().data();
-        size_t cData = img.image().size();
+    ::grpc::CompletionQueue cq;
+    ::grpc::Status status;
+    bool warned = false;
+    void *got_tag, *my_tag = this;
+    auto rpc = mClient->stub()->PrepareAsyncstreamScreenshot(context.get(),
+                                                             request, &cq);
 
-        if (img.format().has_transport() &&
-            img.format().transport().channel() == ImageTransport::MMAP) {
-            data = (uint8_t*)shm.get();
-            cData = shm.size();
+    // Start the async rpc.
+    rpc->StartCall((void*) 1);
+    rpc->Read(&img, my_tag);
+    bool ok = false, completed = false;
+    do {
+
+        // Wait at most 500ms for the next frame, so we can deliver at least 2 fps to the decoder
+        // if needed. The decoder will drop double frames as we don't modify timestamps.
+        // new connections however will get an immediate frame.
+        auto state =
+                cq.AsyncNext(&got_tag, &ok,
+                             grpc_timeout_to_deadline(std::chrono::milliseconds(500)));
+        // RTC_LOG(INFO) << "Got state: " << state << " tag " << (uint64_t) got_tag << " == " << (uint64_t) my_tag;
+        switch (state) {
+            case ::grpc::CompletionQueue::NextStatus::GOT_EVENT:
+                if (ok && got_tag == my_tag) {
+                    if (img.format().rotation().rotation() !=
+                                Rotation::PORTRAIT &&
+                        !warned) {
+                        RTC_LOG(WARNING)
+                                << "Rotation not yet properly supported.";
+                        warned = true;
+                    };
+
+                    uint8_t* data = (uint8_t*)img.image().data();
+                    size_t cData = img.image().size();
+
+                    if (img.format().has_transport() &&
+                        img.format().transport().channel() ==
+                                ImageTransport::MMAP) {
+                        data = (uint8_t*)shm.get();
+                        cData = shm.size();
+                    }
+
+                    auto converted = libyuv::ConvertToI420(
+                            data, cData, mI420Buffer.get()->MutableDataY(),
+                            mI420Buffer.get()->StrideY(),
+                            mI420Buffer.get()->MutableDataU(),
+                            mI420Buffer.get()->StrideU(),
+                            mI420Buffer.get()->MutableDataV(),
+                            mI420Buffer.get()->StrideV(),
+                            /*crop_x=*/0,
+                            /*crop_y=*/0, w, h, w, h, libyuv::kRotate0,
+                            libyuv::FourCC::FOURCC_RGB3);
+                    currentFrame =
+                            ::webrtc::VideoFrame::Builder()
+                                    .set_video_frame_buffer(mI420Buffer)
+                                    .set_timestamp_rtp(0)
+                                    .set_timestamp_us(rtc::TimeMicros())
+                                    .set_rotation(::webrtc::kVideoRotation_0)
+                                    .build();
+                    rpc->Read(&img, my_tag);
+                }
+            case ::grpc::CompletionQueue::NextStatus::TIMEOUT:
+                // Attached decoders will immediately drop duplicate frames if android did not
+                // give us a new video frame.
+                mBroadcaster.OnFrame(currentFrame);
+                break;
+            case ::grpc::CompletionQueue::NextStatus::SHUTDOWN:
+                completed = true;
+                break;
         }
-
-        auto converted = libyuv::ConvertToI420(
-                data, cData, mI420Buffer.get()->MutableDataY(),
-                mI420Buffer.get()->StrideY(), mI420Buffer.get()->MutableDataU(),
-                mI420Buffer.get()->StrideU(), mI420Buffer.get()->MutableDataV(),
-                mI420Buffer.get()->StrideV(),
-                /*crop_x=*/0,
-                /*crop_y=*/0, w, h, w, h, libyuv::kRotate0,
-                libyuv::FourCC::FOURCC_RGB3);
-        auto frame = ::webrtc::VideoFrame::Builder()
-                             .set_video_frame_buffer(mI420Buffer)
-                             .set_timestamp_rtp(0)
-                             .set_timestamp_us(rtc::TimeMicros())
-                             .set_rotation(::webrtc::kVideoRotation_0)
-                             .build();
-
-        mBroadcaster.OnFrame(frame);
-    }
+    } while (mCaptureVideo && !completed && ok);
 
     RTC_LOG(INFO) << "Completed video stream.";
     tempfile_close(tmp);
 }
 
-GrpcVideoSource::~GrpcVideoSource() {
-    if (mContext) {
-        mContext->TryCancel();
-    }
-    if (mCaptureVideo) {
-        mVideoThread.join();
+void GrpcVideoSource::cancel() {
+    LOG(INFO) << "Cancelling stream";
+    if (auto context = mContext.lock()) {
+        context->TryCancel();
     }
     mCaptureVideo = false;
+}
+
+void GrpcVideoSource::run() {
+    mCaptureVideo = true;
+    captureFrames();
+}
+
+GrpcVideoSource::~GrpcVideoSource() {
+    cancel();
 }
 
 bool GrpcVideoSource::GetStats(Stats* stats) {
@@ -190,12 +244,6 @@ void GrpcVideoSource::OnSinkWantsChanged(const rtc::VideoSinkWants& wants) {
                      << ", max: " << wants.max_pixel_count
                      << ", fps: " << wants.max_framerate_fps
                      << ", align: " << wants.resolution_alignment;
-
-    bool expected = false;
-    if (mClient->stub() &&
-        mCaptureVideo.compare_exchange_strong(expected, true)) {
-        mVideoThread = std::thread([this]() { captureFrames(); });
-    }
     mVideoAdapter.OnSinkWants(wants);
 }
 

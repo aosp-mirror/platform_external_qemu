@@ -41,40 +41,35 @@ StandaloneConnection::StandaloneConnection(EmulatorGrpcClient* client,
                                            int adbPort)
     : RtcConnection(client), mAdbPort(adbPort){};
 
-void StandaloneConnection::rtcConnectionDropped(std::string participant) {
-    if (mCtx)
-        mCtx->TryCancel();
-}
-
 StandaloneConnection::~StandaloneConnection() {
     close();
-    if (mJsepThread)
+    if (mJsepThread) {
         mJsepThread->join();
+    }
 }
 
-void StandaloneConnection::rtcConnectionClosed(std::string participant) {
-    if (mCtx)
-        mCtx->TryCancel();
+void StandaloneConnection::registerConnectionClosedListener(
+        ClosedCallback callback) {
+    mClosedCallback = callback;
 }
 
 void StandaloneConnection::close() {
-    const std::lock_guard<std::mutex> lock(mCloseMutex);
-    if (!mAlive) {
-        return;
-    }
-
     mAlive = false;
-    mGuid.set_guid("");
-    if (mParticipant)
-        mParticipant->Close();
-
-    if (mAdbSocketServer)
-        mAdbSocketServer->stopListening();
-    LOG(INFO) << "Connection close.";
+    if (auto context = mCtx.lock()) {
+        LOG(INFO) << "Cancelling context.";
+        context->TryCancel();
+    }
 }
 
 void StandaloneConnection::connect() {
-    mJsepThread = std::make_unique<std::thread>([=]() { driveJsep(); });
+    mJsepThread = std::make_unique<std::thread>([this] {
+        driveJsep();
+
+        // We are done..
+        if (mClosedCallback) {
+            mClosedCallback();
+        }
+    });
 }
 
 void StandaloneConnection::send(std::string to, json msg) {
@@ -86,45 +81,64 @@ void StandaloneConnection::send(std::string to, json msg) {
     Empty response;
     Status status = rtc->sendJsepMessage(ctx.get(), reply, &response);
     if (status.error_code() != StatusCode::OK) {
-        mParticipant->Close();
+        // Request close..
+        if (auto participant = mParticipant.lock()) {
+            participant->Close();
+        }
     }
 }
 
 bool StandaloneConnection::connectAdbSocket(int fd) {
-    LOG(INFO) << "Socket on: " << fd
-              << ", Looper:" << static_cast<void*>(getLooper())
-              << ", this: " << static_cast<void*>(this);
-    if (mParticipant) {
-        auto channel = mParticipant->GetDataChannel(DataChannelLabel::adb);
+    if (auto participant = mParticipant.lock()) {
+        auto channel = participant->GetDataChannel(DataChannelLabel::adb);
         if (channel) {
+            LOG(INFO) << "Forwarding socket on fd: " << fd;
             auto asyncSocket = std::make_shared<android::base::AsyncSocket>(
                     getLooper(), android::base::ScopedSocket(fd));
             mAdbForwarders.emplace_back(asyncSocket, channel);
         }
     }
-    mAdbSocketServer->startListening();
+    if (auto socketServer = mAdbSocketServer.lock()) {
+        socketServer->startListening();
+    }
+
     return true;
 }
 
-bool StandaloneConnection::createAdbForwarder() {
+std::shared_ptr<AsyncSocketServer> StandaloneConnection::createAdbForwarder() {
     LOG(INFO) << "Registering adb forwarder on " << mAdbPort
               << ", Looper:" << static_cast<void*>(getLooper())
               << ", this: " << static_cast<void*>(this);
-    mAdbSocketServer = AsyncSocketServer::createTcpLoopbackServer(
+    auto server = AsyncSocketServer::createTcpLoopbackServer(
             mAdbPort, [this](int fd) { return connectAdbSocket(fd); },
             AsyncSocketServer::LoopbackMode::kIPv4AndIPv6, getLooper());
 
-    if (!mAdbSocketServer) {
-        return false;
+    if (server) {
+        server->startListening();
     }
-    mAdbSocketServer->startListening();
-    return true;
+    return server;
+}
+
+void StandaloneConnection::rtcConnectionClosed(const std::string participant) {
+    LOG(INFO) << "RtcConnection closed, time to clean up.";
+    signalingThread()->PostDelayedTask(
+            RTC_FROM_HERE,
+            [this] {
+                if (auto participant = mParticipant.lock()) {
+                    participant->Close();
+                }
+            },
+            1);
 }
 
 void StandaloneConnection::driveJsep() {
+    // This drives the jsep protocol, and owns the only active partipant.
     mAlive = true;
-    auto rtc = getEmulatorClient()->rtcStub();
+    std::shared_ptr<grpc::ClientContext> context;
+    std::shared_ptr<Participant> participant;
+    std::shared_ptr<AsyncSocketServer> socketServer;
 
+    auto rtc = getEmulatorClient()->rtcStub();
     Status status = rtc->requestRtcStream(
             getEmulatorClient()->newContext().get(), Empty(), &mGuid);
     if (status.error_code() != StatusCode::OK) {
@@ -133,20 +147,27 @@ void StandaloneConnection::driveJsep() {
         return;
     }
 
-    mCtx = getEmulatorClient()->newContext();
-    auto messages = rtc->receiveJsepMessages(mCtx.get(), mGuid);
+    context = getEmulatorClient()->newContext();
+    mCtx = context;
+
+    auto messages = rtc->receiveJsepMessages(context.get(), mGuid);
     if (!messages) {
         LOG(ERROR) << "Error requesting jsep protocol: " << status.error_code()
                    << ", " << status.error_message();
         return;
     }
 
-    mParticipant = new rtc::RefCountedObject<Participant>(this, mGuid.guid(), &mVideoReceiver);
-    if (mAdbPort > 0 && !createAdbForwarder()) {
-        LOG(ERROR) << "Failed to create listener on port " << mAdbPort;
-        close();
-        mParticipant = nullptr;
-        return;
+    participant =
+            std::make_shared<Participant>(this, mGuid.guid(), &mVideoReceiver);
+    mParticipant = participant;
+
+    if (mAdbPort > 0) {
+        socketServer = createAdbForwarder();
+        if (!socketServer) {
+            LOG(ERROR) << "Failed to create listener on port " << mAdbPort;
+            return;
+        }
+        mAdbSocketServer = socketServer;
     }
 
     JsepMsg msg;
@@ -154,30 +175,32 @@ void StandaloneConnection::driveJsep() {
         assert(mGuid.guid() == msg.id().guid());
         if (json::jsonaccept(msg.message())) {
             auto jsonMessage = json::parse(msg.message());
-            mParticipant->IncomingMessage(jsonMessage);
+            participant->IncomingMessage(jsonMessage);
         }
     }
-    LOG(INFO) << "Finished stream.";
-    mParticipant = nullptr;
+
+    LOG(INFO) << "Finished stream, waiting for participant to disappear.";
+    participant->WaitForClose();
+    mAdbForwarders.clear();
 }
 
 void StandaloneConnection::sendKey(const KeyboardEvent* keyEvent) {
-    if (mParticipant) {
-        mParticipant->SendToDataChannel(DataChannelLabel::keyboard,
-                                        keyEvent->SerializeAsString());
+    if (auto participant = mParticipant.lock()) {
+        participant->SendToDataChannel(DataChannelLabel::keyboard,
+                                       keyEvent->SerializeAsString());
     }
 }
 
 void StandaloneConnection::sendMouse(const MouseEvent* mouseEvent) {
-    if (mParticipant) {
-        mParticipant->SendToDataChannel(DataChannelLabel::mouse,
-                                        mouseEvent->SerializeAsString());
+    if (auto participant = mParticipant.lock()) {
+        participant->SendToDataChannel(DataChannelLabel::mouse,
+                                       mouseEvent->SerializeAsString());
     }
 }
 void StandaloneConnection::sendTouch(const TouchEvent* touchEvent) {
-    if (mParticipant) {
-        mParticipant->SendToDataChannel(DataChannelLabel::touch,
-                                        touchEvent->SerializeAsString());
+    if (auto participant = mParticipant.lock()) {
+        participant->SendToDataChannel(DataChannelLabel::touch,
+                                       touchEvent->SerializeAsString());
     }
 }
 
