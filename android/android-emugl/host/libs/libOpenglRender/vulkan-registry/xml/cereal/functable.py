@@ -121,15 +121,11 @@ class VulkanFuncTable(VulkanWrapperGenerator):
 
             if is_cmdbuf_dispatch(api):
                 cgen.stmt("auto vkEnc = ResourceTracker::getCommandBufferEncoder(commandBuffer)")
+            elif is_queue_dispatch(api):
+                cgen.stmt("auto vkEnc = ResourceTracker::getQueueEncoder(queue)")
             else:
                 cgen.stmt("auto vkEnc = ResourceTracker::getThreadLocalEncoder()")
             
-            # if is_cmdbuf_dispatch(api):
-            #     cgen.stmt("ResourceTracker::get()->syncEncodersForCommandBuffer(commandBuffer, vkEnc)")
-
-            # if is_queue_dispatch(api):
-            #     cgen.stmt("ResourceTracker::get()->syncEncodersForQueue(queue, vkEnc)")
-
             callLhs = None
             retTypeName = api.getRetTypeExpr()
             if retTypeName != "void":

@@ -400,7 +400,7 @@ def emit_pool_free(cgen):
     cgen.stmt("%s->clearPool()" % READ_STREAM)
 
 def emit_seqno_incr(api, cgen):
-    cgen.stmt("__atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST)")
+    cgen.stmt("if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST)")
 
 def emit_snapshot(typeInfo, api, cgen):
 
@@ -683,6 +683,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.beginBlock() # function body
 
         self.cgen.stmt("if (len < 8) return 0;")
+        self.cgen.stmt("bool queueSubmitWithCommandsEnabled = emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanQueueSubmitWithCommands)")
         self.cgen.stmt("unsigned char *ptr = (unsigned char *)buf")
         self.cgen.stmt("const unsigned char* const end = (const unsigned char*)buf + len")
 
@@ -705,7 +706,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.line("""
-                 if (opcode >= OP_vkCreateInstance && opcode < OP_vkLast) {
+                 if (queueSubmitWithCommandsEnabled && opcode >= OP_vkCreateInstance && opcode < OP_vkLast) {
             uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
             if (seqnoPtr && !m_forSnapshotLoad) {
             uint32_t tries = 0;

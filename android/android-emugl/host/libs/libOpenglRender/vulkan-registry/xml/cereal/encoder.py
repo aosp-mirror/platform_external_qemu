@@ -343,8 +343,6 @@ def is_cmdbuf_dispatch(api):
     return "VkCommandBuffer" == api.parameters[0].typeName
 
 def emit_parameter_encode_write_packet_info(typeInfo, api, cgen):
-    cgen.stmt("bool queueSubmitWithCommandsEnabled = sFeatureBits & VULKAN_STREAM_FEATURE_QUEUE_SUBMIT_WITH_COMMANDS_BIT")
-
     # Seqno and skipping dispatch serialize are for use with VULKAN_STREAM_FEATURE_QUEUE_SUBMIT_WITH_COMMANDS_BIT
     doSeqno = True
     doDispatchSerialize = True
@@ -366,13 +364,13 @@ def emit_parameter_encode_write_packet_info(typeInfo, api, cgen):
     cgen.stmt("uint32_t opcode_%s = OP_%s" % (api.name, api.name))
 
     if doSeqno:
-        cgen.stmt("uint32_t seqno = ResourceTracker::nextSeqno()")
+        cgen.stmt("uint32_t seqno; if (queueSubmitWithCommandsEnabled) seqno = ResourceTracker::nextSeqno()")
 
     cgen.stmt("memcpy(streamPtr, &opcode_%s, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)" % api.name)
     cgen.stmt("memcpy(streamPtr, &packetSize_%s, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)" % api.name)
 
     if doSeqno:
-        cgen.stmt("memcpy(streamPtr, &seqno, sizeof(uint32_t)); streamPtr += sizeof(uint32_t)")
+        cgen.line("if (queueSubmitWithCommandsEnabled) { memcpy(streamPtr, &seqno, sizeof(uint32_t)); streamPtr += sizeof(uint32_t); }")
 
 def emit_parameter_encode_do_parameter_write(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
@@ -453,7 +451,15 @@ def emit_return(typeInfo, api, cgen):
     retVar = api.getRetVarExpr()
     cgen.stmt("return %s" % retVar)
 
+def emit_lock(cgen):
+    cgen.stmt("bool queueSubmitWithCommandsEnabled = sFeatureBits & VULKAN_STREAM_FEATURE_QUEUE_SUBMIT_WITH_COMMANDS_BIT")
+    cgen.stmt("if (!queueSubmitWithCommandsEnabled && doLock) this->lock()")
+
+def emit_unlock(cgen):
+    cgen.stmt("if (!queueSubmitWithCommandsEnabled && doLock) this->unlock()")
+
 def emit_default_encoding(typeInfo, api, cgen):
+    emit_lock(cgen)
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
     emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
     emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
@@ -462,17 +468,19 @@ def emit_default_encoding(typeInfo, api, cgen):
     emit_return_unmarshal(typeInfo, api, cgen)
     emit_post(typeInfo, api, cgen)
     emit_pool_free(cgen)
+    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 ## Custom encoding definitions##################################################
 
 def emit_only_goldfish_custom(typeInfo, api, cgen):
-    cgen.stmt("mImpl->log(\"custom start %s\");" % api.name)
+    emit_lock(cgen)
     cgen.vkApiCall( \
         api,
         customPrefix="sResourceTracker->on_",
         customParameters=custom_encoder_args(api) + \
                 [p.paramName for p in api.parameters[:-1]])
+    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 def emit_only_resource_event(typeInfo, api, cgen):
@@ -498,6 +506,7 @@ def emit_only_resource_event(typeInfo, api, cgen):
 
 def emit_with_custom_unwrap(custom):
     def call(typeInfo, api, cgen):
+        emit_lock(cgen)
         emit_parameter_encode_preamble_write(typeInfo, api, cgen)
         emit_parameter_encode_copy_unwrap_count(
             typeInfo, api, cgen, customUnwrap=custom)
@@ -507,9 +516,11 @@ def emit_with_custom_unwrap(custom):
         emit_return_unmarshal(typeInfo, api, cgen)
         emit_pool_free(cgen)
         emit_return(typeInfo, api, cgen)
+        emit_unlock(cgen)
     return call
 
 def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
+    emit_lock(cgen)
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
     emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
 
@@ -540,9 +551,11 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_parameter_encode_read(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
     emit_pool_free(cgen)
+    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
+    emit_lock(cgen)
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
     emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
     emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
@@ -571,6 +584,7 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
 
     emit_invalidate_ranges(STREAM)
     emit_pool_free(cgen)
+    emit_unlock(cgen)
     emit_return(typeInfo, api, cgen)
 
 def emit_manual_inline(typeInfo, api, cgen):

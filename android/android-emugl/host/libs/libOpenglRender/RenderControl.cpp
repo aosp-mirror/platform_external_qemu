@@ -342,7 +342,8 @@ static bool shouldEnableAsyncQueueSubmit() {
 }
 
 static bool shouldEnableQueueSubmitWithCommands() {
-    return shouldEnableVulkan();
+    return shouldEnableVulkan() &&
+        emugl_feature_is_enabled(android::featurecontrol::VulkanQueueSubmitWithCommands);
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {

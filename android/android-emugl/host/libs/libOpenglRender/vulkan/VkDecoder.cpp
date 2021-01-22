@@ -35,6 +35,7 @@
 #include "android/base/Tracing.h"
 
 #include "IOStream.h"
+#include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 
 #include "VkDecoderGlobalState.h"
@@ -106,6 +107,7 @@ size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* 
 size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32_t* seqnoPtr)
 {
     if (len < 8) return 0;;
+    bool queueSubmitWithCommandsEnabled = emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanQueueSubmitWithCommands);
     unsigned char *ptr = (unsigned char *)buf;
     const unsigned char* const end = (const unsigned char*)buf + len;
     if (m_forSnapshotLoad)
@@ -125,7 +127,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
         uint8_t* snapshotTraceBegin = vkReadStream->beginTrace();
         vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
         
-                 if (opcode >= OP_vkCreateInstance && opcode < OP_vkLast) {
+                 if (queueSubmitWithCommandsEnabled && opcode >= OP_vkCreateInstance && opcode < OP_vkLast) {
             uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
             if (seqnoPtr && !m_forSnapshotLoad) {
             uint32_t tries = 0;
@@ -194,7 +196,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateInstance(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateInstance_VkResult_return, pCreateInfo, pAllocator, pInstance);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -234,7 +236,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDestroyInstance(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, pAllocator);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -318,7 +320,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumeratePhysicalDevices(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDevices_VkResult_return, instance, pPhysicalDeviceCount, pPhysicalDevices);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -359,7 +361,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFeatures(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -403,7 +405,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -461,7 +463,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties_VkResult_return, physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -502,7 +504,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -591,7 +593,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -632,7 +634,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -666,7 +668,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetInstanceProcAddr(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetInstanceProcAddr_PFN_vkVoidFunction_return, instance, pName);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -700,7 +702,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceProcAddr(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceProcAddr_PFN_vkVoidFunction_return, device, pName);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -762,7 +764,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDevice(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDevice_VkResult_return, physicalDevice, pCreateInfo, pAllocator, pDevice);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -802,7 +804,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDestroyDevice(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pAllocator);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -900,7 +902,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumerateInstanceExtensionProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceExtensionProperties_VkResult_return, pLayerName, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1004,7 +1006,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumerateDeviceExtensionProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateDeviceExtensionProperties_VkResult_return, physicalDevice, pLayerName, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1086,7 +1088,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumerateInstanceLayerProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceLayerProperties_VkResult_return, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1177,7 +1179,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumerateDeviceLayerProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateDeviceLayerProperties_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1222,7 +1224,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceQueue(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, queueFamilyIndex, queueIndex, pQueue);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1272,7 +1274,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueSubmit(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueSubmit_VkResult_return, queue, submitCount, pSubmits, fence);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1289,7 +1291,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     fprintf(stderr, "stream %p: call vkQueueWaitIdle 0x%llx \n", ioStream, (unsigned long long)queue);
                 }
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 VkResult vkQueueWaitIdle_VkResult_return = (VkResult)0;
                 vkQueueWaitIdle_VkResult_return = m_state->on_vkQueueWaitIdle(&m_pool, queue);
                 vkStream->unsetHandleMapping();
@@ -1321,7 +1323,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     fprintf(stderr, "stream %p: call vkDeviceWaitIdle 0x%llx \n", ioStream, (unsigned long long)device);
                 }
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 VkResult vkDeviceWaitIdle_VkResult_return = (VkResult)0;
                 vkDeviceWaitIdle_VkResult_return = vk->vkDeviceWaitIdle(unboxed_device);
                 vkStream->unsetHandleMapping();
@@ -1399,7 +1401,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAllocateMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateMemory_VkResult_return, device, pAllocateInfo, pAllocator, pMemory);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1449,7 +1451,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDeviceMemory(boxed_memory_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1512,7 +1514,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkMapMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMapMemory_VkResult_return, device, memory, offset, size, flags, ppData);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1543,7 +1545,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUnmapMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, memory);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1608,7 +1610,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkFlushMappedMemoryRanges(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFlushMappedMemoryRanges_VkResult_return, device, memoryRangeCount, pMemoryRanges);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1674,7 +1676,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkInvalidateMappedMemoryRanges(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkInvalidateMappedMemoryRanges_VkResult_return, device, memoryRangeCount, pMemoryRanges);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1716,7 +1718,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceMemoryCommitment(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, memory, pCommittedMemoryInBytes);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1758,7 +1760,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindBufferMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory_VkResult_return, device, buffer, memory, memoryOffset);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1800,7 +1802,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindImageMemory(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory_VkResult_return, device, image, memory, memoryOffset);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1849,7 +1851,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetBufferMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, buffer, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1895,7 +1897,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -1989,7 +1991,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageSparseMemoryRequirements(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2093,7 +2095,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, type, samples, usage, tiling, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2146,7 +2148,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueBindSparse(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueBindSparse_VkResult_return, queue, bindInfoCount, pBindInfo, fence);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2215,7 +2217,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateFence(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateFence_VkResult_return, device, pCreateInfo, pAllocator, pFence);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2268,7 +2270,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkFence(boxed_fence_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2315,7 +2317,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetFences(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetFences_VkResult_return, device, fenceCount, pFences);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2352,7 +2354,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetFenceStatus(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceStatus_VkResult_return, device, fence);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2393,7 +2395,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     fprintf(stderr, "stream %p: call vkWaitForFences 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)fenceCount, (unsigned long long)pFences, (unsigned long long)waitAll, (unsigned long long)timeout);
                 }
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 VkResult vkWaitForFences_VkResult_return = (VkResult)0;
                 vkWaitForFences_VkResult_return = vk->vkWaitForFences(unboxed_device, fenceCount, pFences, waitAll, timeout);
                 vkStream->unsetHandleMapping();
@@ -2471,7 +2473,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSemaphore(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSemaphore_VkResult_return, device, pCreateInfo, pAllocator, pSemaphore);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2521,7 +2523,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSemaphore(boxed_semaphore_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2590,7 +2592,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateEvent_VkResult_return, device, pCreateInfo, pAllocator, pEvent);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2643,7 +2645,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkEvent(boxed_event_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2680,7 +2682,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetEventStatus(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetEventStatus_VkResult_return, device, event);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2717,7 +2719,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetEvent_VkResult_return, device, event);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2754,7 +2756,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetEvent_VkResult_return, device, event);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2823,7 +2825,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateQueryPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateQueryPool_VkResult_return, device, pCreateInfo, pAllocator, pQueryPool);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2876,7 +2878,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkQueryPool(boxed_queryPool_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -2936,7 +2938,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetQueryPoolResults(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetQueryPoolResults_VkResult_return, device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3002,7 +3004,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBuffer_VkResult_return, device, pCreateInfo, pAllocator, pBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3052,7 +3054,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkBuffer(boxed_buffer_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3121,7 +3123,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateBufferView(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBufferView_VkResult_return, device, pCreateInfo, pAllocator, pView);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3174,7 +3176,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkBufferView(boxed_bufferView_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3240,7 +3242,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImage_VkResult_return, device, pCreateInfo, pAllocator, pImage);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3290,7 +3292,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkImage(boxed_image_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3346,7 +3348,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageSubresourceLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, image, pSubresource, pLayout);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3412,7 +3414,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateImageView(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImageView_VkResult_return, device, pCreateInfo, pAllocator, pView);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3462,7 +3464,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkImageView(boxed_imageView_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3531,7 +3533,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateShaderModule(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateShaderModule_VkResult_return, device, pCreateInfo, pAllocator, pShaderModule);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3584,7 +3586,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkShaderModule(boxed_shaderModule_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3653,7 +3655,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreatePipelineCache(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreatePipelineCache_VkResult_return, device, pCreateInfo, pAllocator, pPipelineCache);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3706,7 +3708,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkPipelineCache(boxed_pipelineCache_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3785,7 +3787,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPipelineCacheData(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPipelineCacheData_VkResult_return, device, pipelineCache, pDataSize, pData);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3837,7 +3839,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkMergePipelineCaches(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMergePipelineCaches_VkResult_return, device, dstCache, srcCacheCount, pSrcCaches);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -3930,7 +3932,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateGraphicsPipelines(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateGraphicsPipelines_VkResult_return, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4023,7 +4025,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateComputePipelines(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateComputePipelines_VkResult_return, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4076,7 +4078,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkPipeline(boxed_pipeline_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4147,7 +4149,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreatePipelineLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreatePipelineLayout_VkResult_return, device, pCreateInfo, pAllocator, pPipelineLayout);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4205,7 +4207,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delayed_delete_VkPipelineLayout(boxed_pipelineLayout_preserve, unboxed_device, delayed_remove_callback);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4271,7 +4273,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSampler(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSampler_VkResult_return, device, pCreateInfo, pAllocator, pSampler);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4321,7 +4323,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSampler(boxed_sampler_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4387,7 +4389,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDescriptorSetLayout(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorSetLayout_VkResult_return, device, pCreateInfo, pAllocator, pSetLayout);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4437,7 +4439,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDescriptorSetLayout(boxed_descriptorSetLayout_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4503,7 +4505,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDescriptorPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorPool_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorPool);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4553,7 +4555,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDescriptorPool(boxed_descriptorPool_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4590,7 +4592,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetDescriptorPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetDescriptorPool_VkResult_return, device, descriptorPool, flags);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4652,7 +4654,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAllocateDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateDescriptorSets_VkResult_return, device, pAllocateInfo, pDescriptorSets);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4719,7 +4721,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     delete_VkDescriptorSet(boxed_pDescriptorSets_preserve[i]);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4777,7 +4779,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUpdateDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorWriteCount, pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4846,7 +4848,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateFramebuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateFramebuffer_VkResult_return, device, pCreateInfo, pAllocator, pFramebuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4899,7 +4901,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkFramebuffer(boxed_framebuffer_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -4965,7 +4967,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateRenderPass_VkResult_return, device, pCreateInfo, pAllocator, pRenderPass);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5018,7 +5020,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkRenderPass(boxed_renderPass_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5067,7 +5069,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetRenderAreaGranularity(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, renderPass, pGranularity);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5133,7 +5135,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateCommandPool_VkResult_return, device, pCreateInfo, pAllocator, pCommandPool);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5183,7 +5185,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkCommandPool(boxed_commandPool_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5220,7 +5222,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetCommandPool_VkResult_return, device, commandPool, flags);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5278,7 +5280,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAllocateCommandBuffers(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAllocateCommandBuffers_VkResult_return, device, pAllocateInfo, pCommandBuffers);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5342,7 +5344,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     delete_VkCommandBuffer(boxed_pCommandBuffers_preserve[i]);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5378,7 +5380,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBeginCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBeginCommandBuffer_VkResult_return, commandBuffer, pBeginInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5410,7 +5412,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEndCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEndCommandBuffer_VkResult_return, commandBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5442,7 +5444,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetCommandBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkResetCommandBuffer_VkResult_return, commandBuffer, flags);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5476,7 +5478,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBindPipeline(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineBindPoint, pipeline);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5524,7 +5526,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetViewport(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstViewport, viewportCount, pViewports);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5572,7 +5574,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetScissor(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstScissor, scissorCount, pScissors);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5604,7 +5606,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetLineWidth(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, lineWidth);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5642,7 +5644,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetDepthBias(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5674,7 +5676,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetBlendConstants(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, blendConstants);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5709,7 +5711,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetDepthBounds(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, minDepthBounds, maxDepthBounds);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5744,7 +5746,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetStencilCompareMask(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, faceMask, compareMask);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5779,7 +5781,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetStencilWriteMask(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, faceMask, writeMask);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5814,7 +5816,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetStencilReference(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, faceMask, reference);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5873,7 +5875,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBindDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineBindPoint, layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5913,7 +5915,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBindIndexBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, indexType);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -5964,7 +5966,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBindVertexBuffers(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstBinding, bindingCount, pBuffers, pOffsets);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6005,7 +6007,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDraw(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6049,7 +6051,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndexed(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6092,7 +6094,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndirect(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, drawCount, stride);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6135,7 +6137,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndexedIndirect(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, drawCount, stride);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6173,7 +6175,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDispatch(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, groupCountX, groupCountY, groupCountZ);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6210,7 +6212,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDispatchIndirect(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6265,7 +6267,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdCopyBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcBuffer, dstBuffer, regionCount, pRegions);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6323,7 +6325,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdCopyImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6387,7 +6389,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBlitImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions, filter);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6442,7 +6444,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdCopyBufferToImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcBuffer, dstImage, dstImageLayout, regionCount, pRegions);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6497,7 +6499,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdCopyImageToBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstBuffer, regionCount, pRegions);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6541,7 +6543,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdUpdateBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, dstBuffer, dstOffset, dataSize, pData);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6584,7 +6586,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdFillBuffer(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, dstBuffer, dstOffset, size, data);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6644,7 +6646,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdClearColorImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, image, imageLayout, pColor, rangeCount, pRanges);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6704,7 +6706,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdClearDepthStencilImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, image, imageLayout, pDepthStencil, rangeCount, pRanges);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6765,7 +6767,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdClearAttachments(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, attachmentCount, pAttachments, rectCount, pRects);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6826,7 +6828,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdResolveImage(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6863,7 +6865,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, event, stageMask);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6900,7 +6902,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdResetEvent(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, event, stageMask);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -6998,7 +7000,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdWaitEvents(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, eventCount, pEvents, srcStageMask, dstStageMask, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7081,7 +7083,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdPipelineBarrier(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7121,7 +7123,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBeginQuery(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, query, flags);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7158,7 +7160,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdEndQuery(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, query);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7198,7 +7200,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdResetQueryPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, firstQuery, queryCount);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7238,7 +7240,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdWriteTimestamp(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineStage, queryPool, query);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7292,7 +7294,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdCopyQueryPoolResults(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, queryPool, firstQuery, queryCount, dstBuffer, dstOffset, stride, flags);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7339,7 +7341,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdPushConstants(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, layout, stageFlags, offset, size, pValues);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7378,7 +7380,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBeginRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pRenderPassBegin, contents);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7410,7 +7412,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdNextSubpass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, contents);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7439,7 +7441,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdEndRenderPass(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7480,7 +7482,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdExecuteCommands(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, commandBufferCount, pCommandBuffers);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7512,7 +7514,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumerateInstanceVersion(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumerateInstanceVersion_VkResult_return, pApiVersion);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7557,7 +7559,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindBufferMemory2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory2_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7605,7 +7607,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindImageMemory2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory2_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7651,7 +7653,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceGroupPeerMemoryFeatures(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7683,7 +7685,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetDeviceMask(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, deviceMask);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7730,7 +7732,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDispatchBase(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7821,7 +7823,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumeratePhysicalDeviceGroups(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDeviceGroups_VkResult_return, instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7869,7 +7871,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -7920,7 +7922,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetBufferMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8016,7 +8018,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageSparseMemoryRequirements2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8057,7 +8059,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFeatures2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8098,7 +8100,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8142,7 +8144,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8192,7 +8194,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties2_VkResult_return, physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8281,7 +8283,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8322,7 +8324,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8418,7 +8420,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8455,7 +8457,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkTrimCommandPool(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, commandPool, flags);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8503,7 +8505,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceQueue2(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pQueueInfo, pQueue);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8572,7 +8574,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSamplerYcbcrConversion(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSamplerYcbcrConversion_VkResult_return, device, pCreateInfo, pAllocator, pYcbcrConversion);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8625,7 +8627,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSamplerYcbcrConversion(boxed_ycbcrConversion_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8691,7 +8693,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDescriptorUpdateTemplate(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorUpdateTemplate_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8741,7 +8743,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDescriptorUpdateTemplate(boxed_descriptorUpdateTemplate_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8791,7 +8793,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUpdateDescriptorSetWithTemplate(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorSet, descriptorUpdateTemplate, pData);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8845,7 +8847,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalBufferProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8896,7 +8898,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalFenceProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8944,7 +8946,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalSemaphoreProperties(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -8995,7 +8997,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDescriptorSetLayoutSupport(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pCreateInfo, pSupport);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9050,7 +9052,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSurfaceKHR(boxed_surface_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9097,7 +9099,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceSupportKHR_VkResult_return, physicalDevice, queueFamilyIndex, surface, pSupported);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9148,7 +9150,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilitiesKHR_VkResult_return, physicalDevice, surface, pSurfaceCapabilities);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9244,7 +9246,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceFormatsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceFormatsKHR_VkResult_return, physicalDevice, surface, pSurfaceFormatCount, pSurfaceFormats);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9321,7 +9323,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfacePresentModesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfacePresentModesKHR_VkResult_return, physicalDevice, surface, pPresentModeCount, pPresentModes);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9392,7 +9394,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSwapchainKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSwapchainKHR_VkResult_return, device, pCreateInfo, pAllocator, pSwapchain);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9445,7 +9447,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSwapchainKHR(boxed_swapchain_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9536,7 +9538,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSwapchainImagesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainImagesKHR_VkResult_return, device, swapchain, pSwapchainImageCount, pSwapchainImages);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9593,7 +9595,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAcquireNextImageKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireNextImageKHR_VkResult_return, device, swapchain, timeout, semaphore, fence, pImageIndex);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9632,7 +9634,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueuePresentKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueuePresentKHR_VkResult_return, queue, pPresentInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9678,7 +9680,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceGroupPresentCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceGroupPresentCapabilitiesKHR_VkResult_return, device, pDeviceGroupPresentCapabilities);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9735,7 +9737,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceGroupSurfacePresentModesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDeviceGroupSurfacePresentModesKHR_VkResult_return, device, surface, pModes);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9831,7 +9833,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDevicePresentRectanglesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDevicePresentRectanglesKHR_VkResult_return, physicalDevice, surface, pRectCount, pRects);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9877,7 +9879,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAcquireNextImage2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireNextImage2KHR_VkResult_return, device, pAcquireInfo, pImageIndex);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -9970,7 +9972,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPropertiesKHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10061,7 +10063,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayPlanePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPlanePropertiesKHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10150,7 +10152,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDisplayPlaneSupportedDisplaysKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneSupportedDisplaysKHR_VkResult_return, physicalDevice, planeIndex, pDisplayCount, pDisplays);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10246,7 +10248,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDisplayModePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayModePropertiesKHR_VkResult_return, physicalDevice, display, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10320,7 +10322,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDisplayModeKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDisplayModeKHR_VkResult_return, physicalDevice, display, pCreateInfo, pAllocator, pMode);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10374,7 +10376,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDisplayPlaneCapabilitiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneCapabilitiesKHR_VkResult_return, physicalDevice, mode, planeIndex, pCapabilities);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10438,7 +10440,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDisplayPlaneSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDisplayPlaneSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10523,7 +10525,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSharedSwapchainsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSharedSwapchainsKHR_VkResult_return, device, swapchainCount, pCreateInfos, pAllocator, pSwapchains);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10589,7 +10591,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateXlibSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateXlibSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10634,7 +10636,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceXlibPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceXlibPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, dpy, visualID);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10700,7 +10702,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateXcbSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateXcbSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10745,7 +10747,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceXcbPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceXcbPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, connection, visual_id);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10811,7 +10813,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateWaylandSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateWaylandSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10853,7 +10855,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceWaylandPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceWaylandPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, display);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10919,7 +10921,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateMirSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateMirSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -10961,7 +10963,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceMirPresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceMirPresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex, connection);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11027,7 +11029,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateAndroidSurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateAndroidSurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11093,7 +11095,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateWin32SurfaceKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateWin32SurfaceKHR_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11128,7 +11130,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceWin32PresentationSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceWin32PresentationSupportKHR_VkBool32_return, physicalDevice, queueFamilyIndex);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11175,7 +11177,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFeatures2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11216,7 +11218,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11260,7 +11262,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, format, pFormatProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11310,7 +11312,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceImageFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return, physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11399,7 +11401,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceQueueFamilyProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11440,7 +11442,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceMemoryProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMemoryProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11536,7 +11538,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSparseImageFormatProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11584,7 +11586,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDeviceGroupPeerMemoryFeaturesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11616,7 +11618,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetDeviceMaskKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, deviceMask);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11663,7 +11665,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDispatchBaseKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11704,7 +11706,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkTrimCommandPoolKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, commandPool, flags);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11797,7 +11799,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEnumeratePhysicalDeviceGroupsKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkEnumeratePhysicalDeviceGroupsKHR_VkResult_return, instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11853,7 +11855,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalBufferPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11903,7 +11905,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -11955,7 +11957,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryWin32HandlePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandlePropertiesKHR_VkResult_return, device, handleType, handle, pMemoryWin32HandleProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12003,7 +12005,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12055,7 +12057,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryFdPropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryFdPropertiesKHR_VkResult_return, device, handleType, fd, pMemoryFdProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12107,7 +12109,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12150,7 +12152,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkImportSemaphoreWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportSemaphoreWin32HandleKHR_VkResult_return, device, pImportSemaphoreWin32HandleInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12196,7 +12198,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSemaphoreWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSemaphoreWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12234,7 +12236,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkImportSemaphoreFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportSemaphoreFdKHR_VkResult_return, device, pImportSemaphoreFdInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12277,7 +12279,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSemaphoreFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSemaphoreFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12335,7 +12337,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdPushDescriptorSetKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12388,7 +12390,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdPushDescriptorSetWithTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, descriptorUpdateTemplate, layout, set, pData);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12460,7 +12462,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDescriptorUpdateTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDescriptorUpdateTemplateKHR_VkResult_return, device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12510,7 +12512,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDescriptorUpdateTemplate(boxed_descriptorUpdateTemplate_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12560,7 +12562,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUpdateDescriptorSetWithTemplateKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorSet, descriptorUpdateTemplate, pData);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12626,7 +12628,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateRenderPass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateRenderPass2KHR_VkResult_return, device, pCreateInfo, pAllocator, pRenderPass);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12669,7 +12671,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBeginRenderPass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pRenderPassBegin, pSubpassBeginInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12712,7 +12714,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdNextSubpass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pSubpassBeginInfo, pSubpassEndInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12748,7 +12750,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdEndRenderPass2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pSubpassEndInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12787,7 +12789,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSwapchainStatusKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainStatusKHR_VkResult_return, device, swapchain);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12840,7 +12842,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalFencePropertiesKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12883,7 +12885,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkImportFenceWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportFenceWin32HandleKHR_VkResult_return, device, pImportFenceWin32HandleInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12929,7 +12931,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetFenceWin32HandleKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceWin32HandleKHR_VkResult_return, device, pGetWin32HandleInfo, pHandle);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -12970,7 +12972,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkImportFenceFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkImportFenceFdKHR_VkResult_return, device, pImportFenceFdInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13016,7 +13018,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetFenceFdKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetFenceFdKHR_VkResult_return, device, pGetFdInfo, pFd);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13073,7 +13075,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilities2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilities2KHR_VkResult_return, physicalDevice, pSurfaceInfo, pSurfaceCapabilities);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13171,7 +13173,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceFormats2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceFormats2KHR_VkResult_return, physicalDevice, pSurfaceInfo, pSurfaceFormatCount, pSurfaceFormats);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13266,7 +13268,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayProperties2KHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13357,7 +13359,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceDisplayPlaneProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceDisplayPlaneProperties2KHR_VkResult_return, physicalDevice, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13453,7 +13455,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDisplayModeProperties2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayModeProperties2KHR_VkResult_return, physicalDevice, display, pPropertyCount, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13506,7 +13508,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDisplayPlaneCapabilities2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetDisplayPlaneCapabilities2KHR_VkResult_return, physicalDevice, pDisplayPlaneInfo, pCapabilities);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13562,7 +13564,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13613,7 +13615,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetBufferMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13709,7 +13711,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetImageSparseMemoryRequirements2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13782,7 +13784,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateSamplerYcbcrConversionKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateSamplerYcbcrConversionKHR_VkResult_return, device, pCreateInfo, pAllocator, pYcbcrConversion);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13835,7 +13837,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkSamplerYcbcrConversion(boxed_ycbcrConversion_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13882,7 +13884,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindBufferMemory2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindBufferMemory2KHR_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13930,7 +13932,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBindImageMemory2KHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkBindImageMemory2KHR_VkResult_return, device, bindInfoCount, pBindInfos);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -13983,7 +13985,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetDescriptorSetLayoutSupportKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pCreateInfo, pSupport);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14036,7 +14038,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndirectCountKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14087,7 +14089,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndexedIndirectCountKHR(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14135,7 +14137,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSwapchainGrallocUsageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainGrallocUsageANDROID_VkResult_return, device, format, imageUsage, grallocUsage);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14182,7 +14184,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAcquireImageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireImageANDROID_VkResult_return, device, image, nativeFenceFd, semaphore, fence);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14245,7 +14247,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueSignalReleaseImageANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkQueueSignalReleaseImageANDROID_VkResult_return, queue, waitSemaphoreCount, pWaitSemaphores, image, pNativeFenceFd);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14316,7 +14318,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDebugReportCallbackEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDebugReportCallbackEXT_VkResult_return, instance, pCreateInfo, pAllocator, pCallback);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14369,7 +14371,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDebugReportCallbackEXT(boxed_callback_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14418,7 +14420,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDebugReportMessageEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, flags, objectType, object, location, messageCode, pLayerPrefix, pMessage);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14471,7 +14473,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDebugMarkerSetObjectTagEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDebugMarkerSetObjectTagEXT_VkResult_return, device, pTagInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14510,7 +14512,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDebugMarkerSetObjectNameEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDebugMarkerSetObjectNameEXT_VkResult_return, device, pNameInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14546,7 +14548,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDebugMarkerBeginEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pMarkerInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14575,7 +14577,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDebugMarkerEndEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14611,7 +14613,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDebugMarkerInsertEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pMarkerInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14668,7 +14670,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndirectCountAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14719,7 +14721,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdDrawIndexedIndirectCountAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14814,7 +14816,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetShaderInfoAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetShaderInfoAMD_VkResult_return, device, pipeline, shaderStage, infoType, pInfoSize, pInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14884,7 +14886,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceExternalImageFormatPropertiesNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceExternalImageFormatPropertiesNV_VkResult_return, physicalDevice, format, type, tiling, usage, flags, externalHandleType, pExternalImageFormatProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -14935,7 +14937,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryWin32HandleNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryWin32HandleNV_VkResult_return, device, memory, handleType, pHandle);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15005,7 +15007,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateViSurfaceNN(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateViSurfaceNN_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15047,7 +15049,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBeginConditionalRenderingEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pConditionalRenderingBegin);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15076,7 +15078,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdEndConditionalRenderingEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15114,7 +15116,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdProcessCommandsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pProcessCommandsInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15150,7 +15152,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdReserveSpaceForCommandsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pReserveSpaceInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15219,7 +15221,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateIndirectCommandsLayoutNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateIndirectCommandsLayoutNVX_VkResult_return, device, pCreateInfo, pAllocator, pIndirectCommandsLayout);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15272,7 +15274,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkIndirectCommandsLayoutNVX(boxed_indirectCommandsLayout_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15341,7 +15343,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateObjectTableNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateObjectTableNVX_VkResult_return, device, pCreateInfo, pAllocator, pObjectTable);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15394,7 +15396,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkObjectTableNVX(boxed_objectTable_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15440,7 +15442,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkRegisterObjectsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterObjectsNVX_VkResult_return, device, objectTable, objectCount, ppObjectTableEntries, pObjectIndices);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15488,7 +15490,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUnregisterObjectsNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkUnregisterObjectsNVX_VkResult_return, device, objectTable, objectCount, pObjectEntryTypes, pObjectIndices);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15546,7 +15548,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pFeatures, pLimits);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15596,7 +15598,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetViewportWScalingNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstViewport, viewportCount, pViewportWScalings);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15635,7 +15637,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkReleaseDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkReleaseDisplayEXT_VkResult_return, physicalDevice, display);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15681,7 +15683,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkAcquireXlibDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkAcquireXlibDisplayEXT_VkResult_return, physicalDevice, dpy, display);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15734,7 +15736,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetRandROutputDisplayEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetRandROutputDisplayEXT_VkResult_return, physicalDevice, dpy, rrOutput, pDisplay);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15787,7 +15789,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceSurfaceCapabilities2EXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPhysicalDeviceSurfaceCapabilities2EXT_VkResult_return, physicalDevice, surface, pSurfaceCapabilities);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15833,7 +15835,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkDisplayPowerControlEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkDisplayPowerControlEXT_VkResult_return, device, display, pDisplayPowerInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15897,7 +15899,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkRegisterDeviceEventEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterDeviceEventEXT_VkResult_return, device, pDeviceEventInfo, pAllocator, pFence);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -15966,7 +15968,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkRegisterDisplayEventEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterDisplayEventEXT_VkResult_return, device, display, pDisplayEventInfo, pAllocator, pFence);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16013,7 +16015,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetSwapchainCounterEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetSwapchainCounterEXT_VkResult_return, device, swapchain, counter, pCounterValue);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16066,7 +16068,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetRefreshCycleDurationGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetRefreshCycleDurationGOOGLE_VkResult_return, device, swapchain, pDisplayTimingProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16162,7 +16164,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPastPresentationTimingGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetPastPresentationTimingGOOGLE_VkResult_return, device, swapchain, pPresentationTimingCount, pPresentationTimings);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16222,7 +16224,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetDiscardRectangleEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, firstDiscardRectangle, discardRectangleCount, pDiscardRectangles);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16285,7 +16287,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSetHdrMetadataEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, swapchainCount, pSwapchains, pMetadata);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16351,7 +16353,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateIOSSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateIOSSurfaceMVK_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16417,7 +16419,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateMacOSSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateMacOSSurfaceMVK_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16462,7 +16464,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSetDebugUtilsObjectNameEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetDebugUtilsObjectNameEXT_VkResult_return, device, pNameInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16501,7 +16503,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSetDebugUtilsObjectTagEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetDebugUtilsObjectTagEXT_VkResult_return, device, pTagInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16537,7 +16539,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueBeginDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, pLabelInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16566,7 +16568,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueEndDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16602,7 +16604,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueInsertDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, pLabelInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16638,7 +16640,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdBeginDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pLabelInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16667,7 +16669,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdEndDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16703,7 +16705,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdInsertDebugUtilsLabelEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pLabelInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16772,7 +16774,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateDebugUtilsMessengerEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateDebugUtilsMessengerEXT_VkResult_return, instance, pCreateInfo, pAllocator, pMessenger);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16825,7 +16827,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDebugUtilsMessengerEXT(boxed_messenger_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16867,7 +16869,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSubmitDebugUtilsMessageEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, instance, messageSeverity, messageTypes, pCallbackData);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16919,7 +16921,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetAndroidHardwareBufferPropertiesANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetAndroidHardwareBufferPropertiesANDROID_VkResult_return, device, buffer, pProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -16965,7 +16967,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryAndroidHardwareBufferANDROID(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryAndroidHardwareBufferANDROID_VkResult_return, device, pInfo, pBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17013,7 +17015,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetSampleLocationsEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pSampleLocationsInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17060,7 +17062,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetPhysicalDeviceMultisamplePropertiesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, samples, pMultisampleProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17141,7 +17143,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateValidationCacheEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateValidationCacheEXT_VkResult_return, device, pCreateInfo, pAllocator, pValidationCache);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17194,7 +17196,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkValidationCacheEXT(boxed_validationCache_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17246,7 +17248,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkMergeValidationCachesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMergeValidationCachesEXT_VkResult_return, device, dstCache, srcCacheCount, pSrcCaches);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17325,7 +17327,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetValidationCacheDataEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetValidationCacheDataEXT_VkResult_return, device, validationCache, pDataSize, pData);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17393,7 +17395,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryHostPointerPropertiesEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryHostPointerPropertiesEXT_VkResult_return, device, handleType, pHostPointer, pMemoryHostPointerProperties);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17438,7 +17440,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdWriteBufferMarkerAMD(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pipelineStage, dstBuffer, dstOffset, marker);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17486,7 +17488,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCmdSetCheckpointNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pCheckpointMarker);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17575,7 +17577,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetQueueCheckpointDataNV(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, pCheckpointDataCount, pCheckpointData);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17631,7 +17633,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkMapMemoryIntoAddressSpaceGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return, device, memory, pAddress);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17670,7 +17672,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkRegisterImageColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterImageColorBufferGOOGLE_VkResult_return, device, image, colorBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17707,7 +17709,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkRegisterBufferColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkRegisterBufferColorBufferGOOGLE_VkResult_return, device, buffer, colorBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17846,7 +17848,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUpdateDescriptorSetWithTemplateSizedGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, descriptorSet, descriptorUpdateTemplate, imageInfoCount, bufferInfoCount, bufferViewCount, pImageInfoEntryIndices, pBufferInfoEntryIndices, pBufferViewEntryIndices, pImageInfos, pBufferInfos, pBufferViews);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17881,7 +17883,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkBeginCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, pBeginInfo);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17907,7 +17909,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkEndCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17936,7 +17938,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkResetCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, flags);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -17968,7 +17970,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCommandBufferHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, commandBuffer, needHostSync, sequenceNumber);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18050,7 +18052,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateImageWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateImageWithRequirementsGOOGLE_VkResult_return, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18130,7 +18132,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkCreateBufferWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateBufferWithRequirementsGOOGLE_VkResult_return, device, pCreateInfo, pAllocator, pBuffer, pMemoryRequirements);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18226,7 +18228,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMemoryHostAddressInfoGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkGetMemoryHostAddressInfoGOOGLE_VkResult_return, device, memory, pAddress, pSize, pHostmemId);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18281,7 +18283,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 delete_VkDeviceMemory(boxed_memory_preserve);
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18315,7 +18317,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, needHostSync, sequenceNumber);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18362,7 +18364,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueSubmitAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, submitCount, pSubmits, fence);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18388,7 +18390,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueWaitIdleAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18435,7 +18437,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkQueueBindSparseAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, bindInfoCount, pBindInfo, fence);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18481,7 +18483,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetLinearImageLayoutGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, format, pOffset, pRowPitchAlignment);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18520,7 +18522,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMTLDeviceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, physicalDevice, pMTLDevice);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18555,7 +18557,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkSetMTLTextureMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkSetMTLTextureMVK_VkResult_return, image, mtlTexture);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18588,7 +18590,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMTLTextureMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, image, pMTLTexture);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18621,7 +18623,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetMTLBufferMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, buffer, pMTLBuffer);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18656,7 +18658,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkUseIOSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkUseIOSurfaceMVK_VkResult_return, image, ioSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18689,7 +18691,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     m_state->snapshot()->vkGetIOSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, &m_pool, image, pIOSurface);
                 }
                 vkReadStream->clearPool();
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
                 break;
             }
@@ -18721,7 +18723,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     fprintf(stderr, "stream %p: call vkQueueFlushCommandsGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)commandBuffer, (unsigned long long)dataSize, (unsigned long long)pData);
                 }
-                __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 m_state->on_vkQueueFlushCommandsGOOGLE(&m_pool, queue, commandBuffer, dataSize, pData);
                 vkStream->unsetHandleMapping();
                 vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
