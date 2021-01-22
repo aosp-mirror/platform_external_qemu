@@ -2036,23 +2036,25 @@ extern "C" int main(int argc, char** argv) {
 
     if (createVirtconsoles) {
         args.add("-chardev");
-        args.addFormat("%s,id=forhvc0", (opts->show_kernel ? "stdio" : "null"));
+        args.addFormat("%s,id=forhvc0,echo=on",
+                       (opts->show_kernel ? "stdio" : "null"));
 
         args.add("-chardev");
         if (fc::isEnabled(fc::VirtconsoleLogcat)) {
             if (opts->logcat) {
                 if (opts->logcat_output) {
-                    args.addFormat("file,id=forhvc1,path=%s", opts->logcat_output);
+                    args.addFormat("file,id=forhvc1,path=%s,echo=on",
+                                   opts->logcat_output);
                 } else {
-                    args.add("stdio,id=forhvc1");
+                    args.add("stdio,id=forhvc1,echo=on");
                 }
             } else {
-                args.add("null,id=forhvc1");
+                args.add("null,id=forhvc1,echo=on");
             }
 
             boot_property_add_logcat_pipe_virtconsole("*:V");
         } else {
-            args.add("null,id=forhvc1");
+            args.add("null,id=forhvc1,echo=on");
         }
 
         args.add2("-device", "virtio-serial-pci");
@@ -2091,7 +2093,7 @@ extern "C" int main(int argc, char** argv) {
             args.add("-chardev");
             args.addFormat(
                     "socket,port=%d,host=::1,nowait,nodelay,ipv6,id="
-                    "modem",
+                    "modem,echo=on",
                     modem_simulator_guest_port);
             args.add("-device");
             args.add("virtserialport,chardev=modem,name=modem");
