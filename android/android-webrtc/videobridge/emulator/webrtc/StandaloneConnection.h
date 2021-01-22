@@ -47,6 +47,7 @@ using android::emulation::control::RtcId;
 using android::emulation::control::TouchEvent;
 using android::base::AsyncSocketServer;
 
+using ClosedCallback = std::function<void()>;
 // A StandaloneConnection is a single connection to a remote running emulator
 // over webrtc.
 class StandaloneConnection : public RtcConnection {
@@ -54,13 +55,9 @@ public:
     StandaloneConnection(EmulatorGrpcClient* client, int adbPort);
     ~StandaloneConnection();
 
-    // Called when a participant is unable to continue the rtc stream.
-    // The participant will no longer be in use and close can be called.
-    void rtcConnectionDropped(std::string participant) override;
-
     // The connection has actually closed, and can be properly garbage
     // collected.
-    void rtcConnectionClosed(std::string participant) override;
+    void rtcConnectionClosed(const std::string participant) override;
 
     // Used by participant to forward jsep messages.
     void send(std::string to, json msg) override;
@@ -68,11 +65,8 @@ public:
     // Connect and start the jsep protocol
     void connect();
 
-    // Disconnect the ongoing webrtc connection.
-    void close();
-
     // True if a participant is active.
-    bool isActive() { return mParticipant != nullptr; }
+    bool isActive() { return !mParticipant.expired(); }
 
     // The receiver of the actual video frames.
     VideoTrackReceiver* videoReceiver() { return &mVideoReceiver; };
@@ -86,23 +80,31 @@ public:
     // Sends a touch event over the "touch" data channel
     void sendTouch(const TouchEvent* touchEvent);
 
+    void registerConnectionClosedListener(ClosedCallback callback);
+
+    // Disconnect the ongoing webrtc connection.
+    void close();
+
 private:
     void driveJsep();
     bool connectAdbSocket(int fd);
-    bool createAdbForwarder();
+    std::shared_ptr<AsyncSocketServer> createAdbForwarder();
 
-    rtc::scoped_refptr<Participant> mParticipant;
+    // Owned by the jsep thread.
+    std::weak_ptr<Participant> mParticipant;
+    std::weak_ptr<grpc::ClientContext> mCtx;
+    std::weak_ptr<AsyncSocketServer> mAdbSocketServer;
+
     std::unique_ptr<std::thread> mJsepThread;
-    std::unique_ptr<grpc::ClientContext> mCtx;
 
-
-    std::unique_ptr<AsyncSocketServer> mAdbSocketServer;
     std::vector<net::SocketForwarder> mAdbForwarders;
     VideoTrackReceiver mVideoReceiver;
     RtcId mGuid;
-    std::mutex mCloseMutex;
     bool mAlive{false};
     int mAdbPort = 0;
+    ClosedCallback mClosedCallback;
+
+    DISALLOW_COPY_AND_ASSIGN(StandaloneConnection);
 };
 }  // namespace webrtc
 }  // namespace emulator

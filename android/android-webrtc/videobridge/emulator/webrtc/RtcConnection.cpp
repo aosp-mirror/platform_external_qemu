@@ -63,20 +63,32 @@ RtcConnection::RtcConnection(EmulatorGrpcClient* client)
             ::webrtc::CreateBuiltinVideoEncoderFactory(),
             ::webrtc::CreateBuiltinVideoDecoderFactory(),
             nullptr /* audio_mixer */, nullptr /* audio_processing */);
-    ;
 
+    mLibrary =
+            std::make_unique<MediaSourceLibrary>(mClient, mConnectionFactory.get());
     mKeepAlive.start();
     mLooperThread = std::make_unique<std::thread>([this]() {
         mLooper.runWithDeadlineMs(Looper::Timeout::kDurationInfinite);
-        RTC_LOG(INFO) << "Completed looper";
     });
 }
+
 RtcConnection::~RtcConnection() {
+    // Stop our looper.
     mLooperActive = false;
     mLooper.forceQuit();
-    if (mLooperThread) {
-        mLooperThread->join();
-    }
+    mLooperThread->join();
+
+    // First we need to clean up the connection factory.
+    mConnectionFactory = nullptr;
+
+    // And then shut down the WebRTC threads.
+    mSignaling->Stop();
+    mWorker->Stop();
+    mNetwork->Stop();
+}
+
+void RtcConnection::scheduleTask(std::function<void()> callback) {
+      mSignaling->PostTask(RTC_FROM_HERE, callback);
 }
 
 }  // namespace webrtc

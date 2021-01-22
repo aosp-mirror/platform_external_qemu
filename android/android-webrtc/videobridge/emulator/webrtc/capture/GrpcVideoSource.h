@@ -24,8 +24,9 @@
 #include <memory>                             // for unique_ptr
 #include <mutex>                              // for mutex
 #include <thread>                             // for thread
-
+#include <rtc_base/ref_counted_object.h>    // for RefCountedObject
 #include "emulator/net/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
+#include "emulator/webrtc/capture/MediaSource.h"
 
 namespace rtc {
 struct VideoSinkWants;
@@ -62,6 +63,10 @@ public:
     }
     bool remote() const override { return false; }
 
+protected:
+    void cancel();
+    void run();
+
 private:
     // Implements rtc::VideoSourceInterface.
     void AddOrUpdateSink(rtc::VideoSinkInterface<::webrtc::VideoFrame>* sink,
@@ -86,12 +91,10 @@ private:
     void captureFrames();
 
     EmulatorGrpcClient* mClient;
-    std::unique_ptr<::grpc::ClientContext> mContext;
+    std::weak_ptr<::grpc::ClientContext> mContext;
     rtc::scoped_refptr<::webrtc::I420Buffer>
             mI420Buffer;  // Re-usable I420Buffer.
-    std::thread mVideoThread;
     std::atomic_bool mCaptureVideo{false};
-
     cricket::VideoAdapter mVideoAdapter;
 
     std::mutex mStatsMutex;
@@ -99,5 +102,8 @@ private:
 
     rtc::VideoBroadcaster mBroadcaster;
 };
+
+using GrpcVideoMediaSource = MediaSource<GrpcVideoSource>;
+using GrpcRefVideoSource = rtc::scoped_refptr<GrpcVideoMediaSource>;
 }  // namespace webrtc
 }  // namespace emulator
