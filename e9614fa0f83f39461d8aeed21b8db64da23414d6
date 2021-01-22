@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "03513e53_ea7e19dd",
+        "filename": "chardev/char-stdio.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-01-22T04:31:58Z",
+      "side": 1,
+      "message": "I see it used to be \"false\", now it is \"opts-\u003eecho\" which is \"true\" by default. Is this intentional?",
+      "range": {
+        "startLine": 115,
+        "startChar": 33,
+        "endLine": 115,
+        "endChar": 43
+      },
+      "revId": "e9614fa0f83f39461d8aeed21b8db64da23414d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
