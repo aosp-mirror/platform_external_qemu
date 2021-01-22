@@ -18,9 +18,10 @@
 #include <memory>                                 // for unique_ptr
 #include <thread>                                 // for thread
 #include <vector>                                 // for vector
-
+#include <rtc_base/ref_counted_object.h>           // for RefCountedObject
 #include "emulator/webrtc/capture/AudioSource.h"  // for AudioSource
 #include "emulator_controller.grpc.pb.h"          // for EmulatorController
+#include "emulator/webrtc/capture/MediaSource.h"
 
 namespace android {
 namespace emulation {
@@ -40,6 +41,10 @@ public:
 
     ~GrpcAudioSource();
 
+protected:
+    void cancel();
+    void run();
+
 private:
     // Listens for available audio packets from the Android Emulator.
     void StreamAudio();
@@ -49,11 +54,13 @@ private:
             const ::android::emulation::control::AudioPacket& audio_packet);
 
     std::vector<uint8_t> mPartialFrame;
-    std::unique_ptr<android::emulation::control::EmulatorController::Stub> mEmulatorGrpc;
-    std::unique_ptr<grpc::ClientContext> mContext;
-    std::thread mAudioThread;
+    EmulatorGrpcClient* mClient;
+    std::weak_ptr<grpc::ClientContext> mContext;
     bool mCaptureAudio{true};
 };
+
+using GrpcAudioMediaSource = MediaSource<GrpcAudioSource>;
+using GrpcRefAudioSource = rtc::scoped_refptr<GrpcAudioMediaSource>;
 
 }  // namespace webrtc
 }  // namespace emulator

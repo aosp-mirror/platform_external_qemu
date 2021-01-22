@@ -11,31 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <rtc_base/log_sinks.h>                      // for FileRotatingLogSink
-#include <rtc_base/logging.h>                        // for LogSink, LogStre...
-#include <rtc_base/ssl_adapter.h>                    // for CleanupSSL, Init...
-#include <stdio.h>                                   // for printf, fprintf
-#include <stdlib.h>                                  // for atoi, exit, EXIT...
-#include <memory>                                    // for unique_ptr, make...
-#include <string>                                    // for string, char_traits
-#include <string_view>                               // for string_view
+#include <rtc_base/log_sinks.h>    // for FileRotatingLogSink
+#include <rtc_base/logging.h>      // for LogSink, LogStre...
+#include <rtc_base/ssl_adapter.h>  // for CleanupSSL, Init...
+#include <stdio.h>                 // for printf, fprintf
+#include <stdlib.h>                // for atoi, exit, EXIT...
+#include <memory>                  // for unique_ptr, make...
+#include <string>                  // for string, char_traits
+#include <string_view>             // for string_view
 
 #include "android/base/Log.h"                        // for LogParams, LogOu...
 #include "android/emulation/control/GrpcServices.h"  // for EmulatorControll...
 #include "android/emulation/control/RtcService.h"    // for getRtcService
+#include "android/emulation/control/TurnConfig.h"    // for TurnConfig
 #include "android/utils/debug.h"                     // for android_verbose
 #include "emulator/net/EmulatorForwarder.h"          // for EmulatorForwarder
 #include "emulator/net/EmulatorGrcpClient.h"         // for EmulatorGrpcClient
 #include "emulator/webrtc/Switchboard.h"             // for Switchboard
-#include "android/emulation/control/TurnConfig.h"              // for TurnConfig
 #include "nlohmann/json.hpp"                         // for json
 
 #ifdef _MSC_VER
 #include "msvc-getopt.h"
 #include "msvc-posix.h"
 #else
-#include <getopt.h>                                  // for optarg, required...
-#include <sys/signal.h>                              // for signal, SIGINT
+#include <getopt.h>      // for optarg, required...
+#include <sys/signal.h>  // for signal, SIGINT
 #endif
 
 using nlohmann::json;
@@ -45,7 +45,7 @@ static std::string FLAG_emulator("localhost:8554");
 static std::string FLAG_turn("");
 static bool FLAG_help = false;
 static bool FLAG_verbose = true;
-static int FLAG_port = 8555;
+static int FLAG_port = 9554;
 static int FLAG_adb_port = 0;
 static bool FLAG_fwd = false;
 static std::string FLAG_disc("");
@@ -72,9 +72,9 @@ static struct option long_options[] = {
 using android::base::testing::LogOutput;
 using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::EmulatorForwarder;
+using android::emulation::control::TurnConfig;
 using emulator::webrtc::EmulatorGrpcClient;
 using emulator::webrtc::Switchboard;
-using android::emulation::control::TurnConfig;
 
 static void printUsage() {
     printf("--logdir (Directory to log files to, or empty when unused)  type: "
@@ -82,7 +82,7 @@ static void printUsage() {
            "--turn (Process that will be invoked to retrieve TURN json "
            "configuration.)  type: string\n"
            "--verbose (Enables logging to stdout)  type: bool  default: false\n"
-           "--port (Port to launch gRPC service on)  type: int  default: 8555\n"
+           "--port (Port to launch gRPC service on)  type: int  default: 9554\n"
            "--address (Address to bind to)  type: string default: localhost\n"
            "--disc (The discovery file describing the emulator) type: "
            "string\n"
@@ -148,7 +148,7 @@ static void parseArgs(int argc, char** argv) {
     }
 }
 
-const int kMaxFileLogSizeInBytes = 128 * 1024;
+const int kMaxFileLogSizeInBytes = 128 * 1024 * 1024;
 
 // An adapter that transforms the android-emu based logging output to
 // to the WebRTC logging mechanism
@@ -194,15 +194,16 @@ public:
     }
 };
 
-std::unique_ptr<EmulatorForwarder> sForwarder;
-std::unique_ptr<EmulatorControllerService> sController;
+// Weak ptr that can be used to terminate the bridge with ctrl-c
+std::weak_ptr<EmulatorForwarder> sForwarder;
+std::weak_ptr<EmulatorControllerService> sController;
 
 static void handleCtrlC() {
-    if (sForwarder) {
-        sForwarder->close();
+    if (auto forwarder = sForwarder.lock()) {
+        forwarder->close();
     }
-    if (sController) {
-        sController->stop();
+    if (auto controller = sController.lock()) {
+        controller->stop();
     }
 }
 
@@ -254,7 +255,7 @@ int main(int argc, char* argv[]) {
 
     TurnConfig turnCfg(FLAG_turn);
     if (!turnCfg.validCommand()) {
-        printf("Error: %s does not produce a valid turn configuration.");
+        printf("Error: %s does not produce a valid turn configuration.", FLAG_turn.c_str());
         return -1;
     }
 
@@ -280,13 +281,15 @@ int main(int argc, char* argv[]) {
 #endif
 
     if (FLAG_fwd) {
-        sForwarder = std::make_unique<EmulatorForwarder>(client.get(),
-                                                         FLAG_adb_port);
-        if (!sForwarder->createRemoteConnection()) {
+        auto forwarder = std::make_shared<EmulatorForwarder>(client.get(),
+                                                             FLAG_adb_port);
+        sForwarder = forwarder;
+        if (!forwarder->createRemoteConnection()) {
             LOG(ERROR) << "Unable to establish a connection to the remote "
                           "forwarder.";
-        };
-        sForwarder->wait();
+            forwarder->close();
+        }
+        forwarder->wait();
     } else {
         // Initalize the RTC service.
 
@@ -300,9 +303,10 @@ int main(int argc, char* argv[]) {
                                .withService(bridge);
 
         // And host it until we are done.
-        sController = builder.build();
-        if (sController) {
-            sController->wait();
+        std::shared_ptr<EmulatorControllerService> controller = builder.build();
+        sController = controller;
+        if (controller) {
+            controller->wait();
         } else {
             RTC_LOG(LS_ERROR) << "FATAL! Unable to configure gRPC RTC service "
                                  "(port in use?)";

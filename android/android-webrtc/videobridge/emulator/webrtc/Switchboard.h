@@ -83,32 +83,20 @@ public:
 
     // Called when a participant is unable to continue the rtc stream.
     // The participant will no longer be in use and close can be called.
-    void rtcConnectionDropped(std::string participant) override;
-
-    // The connection has actually closed, and can be properly garbage
-    // collected.
-    void rtcConnectionClosed(std::string participant) override;
-
-    // Cleans up connections that have marked themselves as deleted
-    // due to a dropped connection.
-    void finalizeConnections();
+    void rtcConnectionClosed(const std::string participant) override;
 
     VideoCapturerFactory* getVideoCaptureFactory() { return &mCaptureFactory; }
 
     static std::string BRIDGE_RECEIVER;
 
 private:
-    std::unordered_map<std::string, rtc::scoped_refptr<Participant>>
+    std::unordered_map<std::string, std::shared_ptr<Participant>>
             mConnections;
-    std::unordered_map<std::string, std::string> mIdentityMap;
 
     VideoCapturerFactory mCaptureFactory;
 
-    // Connections that need to be garbage collected.
-    std::vector<std::string> mDroppedConnections;
-    std::vector<std::string> mClosedConnections;
     const std::string mShmPath = "/tmp";
-    int mAdbPort;
+    int mAdbPort{0};
 
     // Turn configuration object.
     TurnConfig mTurnConfig;
@@ -123,8 +111,7 @@ private:
     ReadWriteLock mMapLock;
 
     // Network/communication things.
-    rtc::CriticalSection mCleanupCS;
-    rtc::CriticalSection mCleanupClosedCS;
+    std::mutex mCleanupMutex;
 };
 }  // namespace webrtc
 }  // namespace emulator
