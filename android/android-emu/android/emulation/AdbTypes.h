@@ -49,6 +49,10 @@ struct AdbGuestAgent {
 
     // Resets the current ADB guest pipe connection.
     virtual void resetActiveGuestPipeConnection() = 0;
+
+    // The virtio-vsock transport in the guest does not notify the host that
+    // adbd is running.
+    virtual void startPollingGuestAdbd() {}
 };
 
 // AdbHostAgent is an abstract class to the code that actually

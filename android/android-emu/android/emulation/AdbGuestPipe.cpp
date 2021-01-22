@@ -176,7 +176,7 @@ using android::base::StringView;
 AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
     auto pipe = new AdbGuestPipe(mHwPipe, this, mHostAgent, nullptr);
     onPipeOpen(pipe);
-    D("%s: [%p] created, %d pipes", __func__, pipe, (int)mPipes.size());
+    D("%s:%d [%p] created, %d pipes", __func__, __LINE__, pipe, (int)mPipes.size());
     return pipe;
 }
 
@@ -195,7 +195,7 @@ AndroidPipe* AdbGuestPipe::Service::load(void* hwPipe,
         D("loaded pending pipe\n");
         mPipes.push_back(pipe);
     }
-    D("%s: [%p] loaded", __func__, pipe);
+    D("%s:%d [%p] loaded", __func__, __LINE__, pipe);
 
     return pipe;
 }
@@ -206,7 +206,11 @@ void AdbGuestPipe::Service::removeAdbGuestPipe(AdbGuestPipe* pipe) {
 
 void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket,
                                              AdbPortType portType) {
-    D("%s", __func__);
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p socket=%d\n",
+            "AdbGuestPipe::Service", __func__, __LINE__, this, socket.get());
+
+    D("%s:%d", __func__, __LINE__);
+
     AdbGuestPipe* activePipe = searchForActivePipe();
     CHECK(activePipe != nullptr);
     if (!hasActivePipe()) {
@@ -237,7 +241,7 @@ void AdbGuestPipe::Service::postLoad(android::base::Stream* stream) {
 }
 
 void AdbGuestPipe::Service::postSave(android::base::Stream* stream) {
-    DD("%s num. of pipes %d", __func__, (int)mPipes.size());
+    DD("%s:%d num. of pipes %d", __func__, __LINE__, (int)mPipes.size());
     if (mCurrentActivePipe && mCurrentActivePipe->mHostSocket.valid()) {
         stream->putBe32(mCurrentActivePipe->mHostSocket.fd());
     } else {
@@ -303,7 +307,7 @@ void AdbGuestPipe::Service::unregisterActivePipe(AdbGuestPipe* pipe) {
 }
 
 void AdbGuestPipe::Service::hostCloseSocket(int fd) {
-    DD("%s: [%p]", __func__, this);
+    DD("%s:%d [%p]", __func__, __LINE__, this);
     assert(!mRecycledSockets.count(fd) || !mRecycledSockets[fd].valid());
     mRecycledSockets.erase(fd);
 }
@@ -333,7 +337,7 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
     if (socket) {
         const bool needLoadBuffer = stream->getByte();
         assert(shouldUseRecvBuffer() == needLoadBuffer);
-        DD("%s: [%p] load socket %d", __func__, this, socket);
+        DD("%s:%d [%p] load socket %d", __func__, __LINE__, this, socket);
         // We do not register sockets that are in earlier states
         if (shouldUseRecvBuffer()) {
             mHostSocket = CrossSessionSocket::reclaimSocket(socket);
@@ -352,7 +356,7 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
                 assert(mFdWatcher);
                 mHostSocket.drainSocket(
                         CrossSessionSocket::DrainBehavior::Clear);
-                DD("%s: [%p] poll %d", __func__, this,
+                DD("%s:%d [%p] poll %d", __func__, __LINE__, this,
                 mFdWatcher->poll());
                 mFdWatcher->wantRead();
                 mFdWatcher->wantWrite();
@@ -366,7 +370,7 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
         mState = State::WaitingForHostAdbConnection;
     }
     int proxyCount = stream->getBe32();
-    D("Loading %d jdwp proxies", proxyCount);
+    D("%s:%d Loading %d jdwp proxies", __func__, __LINE__, proxyCount);
     if (!socket && proxyCount <= 0) {
         // Regular adb pipe, immediately close it after load
         mReuseFromSnapshot = false;
@@ -394,7 +398,7 @@ void AdbGuestPipe::onSave(android::base::Stream* stream) {
     if (saveHostSocket) {
         stream->putBe32(mHostSocket.fd());
         bool needSaveBuffer = shouldUseRecvBuffer();
-        DD("%s: [%p] save socket %d needSaveBuffer %d\n", __func__, this,
+        DD("%s:%d [%p] save socket %d needSaveBuffer %d\n", __func__, __LINE__, this,
            mHostSocket.fd(), needSaveBuffer);
         stream->putByte(needSaveBuffer);
         if (needSaveBuffer) {
@@ -408,7 +412,7 @@ void AdbGuestPipe::onSave(android::base::Stream* stream) {
         if (mHostSocket.hasStaleData()) {
             signalWake(PIPE_WAKE_READ);
         }
-        DD("%s: [%p] poll %d", __func__, this, mFdWatcher->poll());
+        DD("%s:%d [%p] poll %d", __func__, __LINE__, this, mFdWatcher->poll());
     } else {
         stream->putBe32(0);
     }
@@ -427,16 +431,16 @@ AdbGuestPipe::~AdbGuestPipe() {
         stopSocketTraffic();
     }
     CrossSessionSocket::recycleSocket(std::move(mHostSocket));
-    DD("%s: [%p] destroyed", __func__, this);
+    DD("%s:%d [%p] destroyed", __func__, __LINE__, this);
     CHECK(mState == State::ClosedByGuest ||
           mState == State::ClosedByHost);
     service()->unregisterActivePipe(this);
 }
 
 void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
-    DD("%s: [%p]", __func__, this);
+    DD("%s:%d [%p]", __func__, __LINE__, this);
     mState = State::ClosedByGuest;
-    DINIT("%s: [%p] Adb closed by guest",__func__, this);
+    DINIT("%s:%d [%p] Adb closed by guest", __func__, __LINE__, this);
     if (needsHubTranslation()) {
         stopSocketTraffic();
     }
@@ -445,7 +449,7 @@ void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
 }
 
 unsigned AdbGuestPipe::onGuestPoll() const {
-    D("%s: [%p]", __func__, this);
+    D("%s:%d [%p]", __func__, __LINE__, this);
     unsigned result = 0;
     switch (mState) {
         case State::WaitingForGuestAcceptCommand:
@@ -482,7 +486,7 @@ unsigned AdbGuestPipe::onGuestPoll() const {
 }
 
 int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
-    D("%s: [%p] numBuffers=%d state=%s", __func__, this, numBuffers,
+    D("%s:%d [%p] numBuffers=%d state=%s", __func__, __LINE__, this, numBuffers,
       toString(mState));
     if (mState == State::ProxyingData) {
         // Common case, proxy-ing the data from the host to the guest.
@@ -529,7 +533,7 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
                               int numBuffers,
                               void** newPipePtr) {
-    D("%s: [%p] numBuffers=%d state=%s", __func__, this, numBuffers,
+    D("%s:%d [%p] numBuffers=%d state=%s", __func__, __LINE__, this, numBuffers,
       toString(mState));
     if (mState == State::ProxyingData) {
         // Common-case, proxy-ing the data from the guest to the host.
@@ -571,7 +575,7 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
 }
 
 void AdbGuestPipe::onGuestWantWakeOn(int flags) {
-    DD("%s: [%p] flags=%x (%d)", __func__, this, (unsigned)flags, flags);
+    DD("%s:%d [%p] flags=%x (%d)", __func__, __LINE__, this, (unsigned)flags, flags);
     if (!mHostSocket.valid()) {
         return;
     }
@@ -605,7 +609,7 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
 
 void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
                                     AdbPortType portType) {
-    DD("%s: [%p] host connection", __func__, this);
+    DD("%s:%d [%p] host connection", __func__, __LINE__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);
 
     android::base::socketSetNonBlocking(socket.get());
@@ -626,7 +630,7 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
 
     mHostSocket = CrossSessionSocket(std::move(socket));
     mPortType = portType;
-    DD("set up pipe type %d\n", portType);
+    DD("%s:%d set up pipe type %d\n", __func__, __LINE__, portType);
 
     if (mReuseFromSnapshot) {
         mState = State::ProxyingData;
@@ -634,16 +638,16 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
             mFdWatcher->wantRead();
         }
         signalWake(PIPE_WAKE_READ | PIPE_WAKE_WRITE);
-        D("Reuse pipe %p from snapshot", this);
+        D("%s:%d Reuse pipe %p from snapshot", __func__, __LINE__, this);
     } else {
-        DD("%s: [%p] sending reply", __func__, this);
+        DD("%s:%d [%p] sending reply", __func__, __LINE__, this);
         setReply("ok", State::SendingAcceptReplyOk);
         signalWake(PIPE_WAKE_READ);
     }
 }
 
 void AdbGuestPipe::resetConnection() {
-    D("%s: [%p] reset connection\n", __func__, this);
+    D("%s:%d [%p] reset connection\n", __func__, __LINE__, this);
     stopSocketTraffic();
     service()->hostCloseSocket(mHostSocket.fd());
     mHostSocket.reset();
@@ -675,7 +679,10 @@ const char* AdbGuestPipe::toString(AdbGuestPipe::State state) {
 
 // Called whenever an i/o event occurs on the host socket.
 void AdbGuestPipe::onHostSocketEvent(unsigned events) {
-    DD("%s: [%p] events=%x (%u)", __func__, this, events, events);
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p events=%08X\n",
+            "AdbGuestPipe", __func__, __LINE__, this, events);
+
+    DD("%s:%d [%p] events=%x (%u)", __func__, __LINE__, this, events, events);
 
     if (mAdbHub) {
         mAdbHub->onHostSocketEvent(mFdWatcher->fd(), events, [this]() {
@@ -715,20 +722,24 @@ void AdbGuestPipe::onHostSocketEvent(unsigned events) {
 }
 
 int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
-    DD("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
+    DD("%s:%d [%p] numBuffers=%d", __func__, __LINE__, this, numBuffers);
     CHECK(mState == State::ProxyingData);
     int result = 0;
     while (numBuffers > 0) {
         uint8_t* data = buffers[0].data;
         size_t dataSize = buffers[0].size;
-        DD("%s: [%p] dataSize=%d", __func__, this, (int)dataSize);
+        DD("%s:%d [%p] dataSize=%d", __func__, __LINE__, this, (int)dataSize);
         while (dataSize > 0) {
             ssize_t len;
             {
                 // Possible that the host socket has been reset.
                 if (mHostSocket.hasStaleData()) {
                     len = mHostSocket.readStaleData(data, dataSize);
-                    DD("%s: [%p] loaded %d data from buffer", __func__, this,
+
+                    fprintf(stderr, "rkir555 %s:%s:%d dataSize=%zu data='%.*s'\n",
+                            "AdbGuestPipe", __func__, __LINE__, len, int(len), data);
+
+                    DD("%s:%d [%p] loaded %d data from buffer", __func__, __LINE__, this,
                        (int)len);
                 } else if (mHostSocket.valid()) {
                     len = android::base::socketRecv(
@@ -752,7 +763,7 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
             if (len < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
                 if (result == 0) {
                     mFdWatcher->dontWantRead();
-                    DD("%s: [%p] done try again", __func__, this);
+                    DD("%s:%d [%p] done try again", __func__, __LINE__, this);
                     return PIPE_ERROR_AGAIN;
                 }
             } else {
@@ -761,19 +772,19 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
                 if (result == 0) {
                     mHostSocket.reset();
                     mState = State::ClosedByHost;
-                    DINIT("%s: [%p] Adb closed by host",__func__, this);
+                    DINIT("%s:%d [%p] Adb closed by host",__func__, __LINE__, this);
                     return PIPE_ERROR_IO;
                 }
             }
             // Some data was received so report it, the guest will have
             // to try again to get an error.
-            DD("%s: [%p] done %d", __func__, this, result);
+            DD("%s:%d [%p] done %d", __func__, __LINE__, this, result);
             return result;
         }
         buffers++;
         numBuffers--;
     }
-    DD("%s: [%p] done %d", __func__, this, result);
+    DD("%s:%d [%p] done %d", __func__, __LINE__, this, result);
     return result;
 }
 
@@ -787,7 +798,7 @@ static int parseMsgSize(const char* msg) {
 
 int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                                   int numBuffers) {
-    DD("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
+    DD("%s:%d [%p] numBuffers=%d", __func__, __LINE__, this, numBuffers);
     CHECK(mState == State::ProxyingData);
     int result = 0;
 #ifdef _DEBUG
@@ -801,6 +812,9 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
             {
                 // Possible that the host socket has been reset.
                 if (mHostSocket.valid()) {
+                    fprintf(stderr, "rkir555 %s:%s:%d dataSize=%zu data='%.*s'\n",
+                            "AdbGuestPipe", __func__, __LINE__, dataSize, int(dataSize), data);
+
                     len = android::base::socketSend(
                             mHostSocket.fd(), data, dataSize);
 #ifdef _DEBUG
@@ -839,7 +853,7 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                 if (result == 0) {
                     mHostSocket.reset();
                     mState = State::ClosedByHost;
-                    DINIT("%s: [%p] Adb closed by host",__func__, this);
+                    DINIT("%s:%d [%p] Adb closed by host", __func__, __LINE__, this);
                     return PIPE_ERROR_IO;
                 }
             }
@@ -859,7 +873,7 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
 int AdbGuestPipe::onGuestRecvReply(AndroidPipeBuffer* buffers, int numBuffers) {
     // Sending reply to the guest.
     CHECK(mState == State::SendingAcceptReplyOk);
-    DD("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
+    DD("%s:%d [%p] numBuffers=%d", __func__, __LINE__, this, numBuffers);
     int result = 0;
     while (numBuffers > 0) {
         uint8_t* data = buffers[0].data;
@@ -886,7 +900,8 @@ int AdbGuestPipe::onGuestRecvReply(AndroidPipeBuffer* buffers, int numBuffers) {
 
 int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                                      int numBuffers) {
-    DD("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
+    DD("%s:%d [%p] numBuffers=%d", __func__, __LINE__, this, numBuffers);
+
     CHECK(mState == State::WaitingForGuestAcceptCommand ||
           mState == State::WaitingForGuestStartCommand);
     // Waiting for a command from the guest. Just match the bytes
@@ -901,7 +916,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
             if (memcmp(data, mBuffer + mBufferPos, avail) != 0) {
                 // Mismatched, this is not what the pipe is expecting.
                 // Closing the connection now is easier than sending 'ko'.
-                DD("%s: [%p] mismatched command", __func__, this);
+                DD("%s:%d [%p] mismatched command", __func__, __LINE__, this);
                 stopSocketTraffic();
                 mHostSocket.reset();
                 return PIPE_ERROR_IO;
@@ -912,21 +927,25 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
             mBufferPos += avail;
             if (mBufferPos == mBufferSize) {
                 // Expected command was received.
-                DD("%s: [%p] command '%.*s' validated", __func__, this,
+                DD("%s:%d [%p] command '%.*s' validated", __func__, __LINE__, this,
                    (int)mBufferSize, mBuffer);
                 if (mState == State::WaitingForGuestAcceptCommand) {
+                    DD("%s:%d [%p] State::WaitingForGuestAcceptCommand", __func__, __LINE__, this);
                     waitForHostConnection();
                 } else if (mState == State::WaitingForGuestStartCommand) {
+                    DD("%s:%d [%p] State::WaitingForGuestStartCommand", __func__, __LINE__, this);
                     // Proxying data can start right now.
                     mState = State::ProxyingData;
                     // when -verbose, print a message indicating adb is connected
-                    DINIT("%s: [%p] Adb connected, start proxing data",__func__, this);
+                    DINIT("%s:%d [%p] Adb connected, start proxing data", __func__, __LINE__, this);
                     if (needsHubTranslation()) {
                         mAdbHub.reset(new AdbHub());
                         if (mAdbHub->socketWantRead()) {
                             mFdWatcher->wantRead();
                         }
                     }
+                } else {
+                    DD("%s:%d [%p] else: mState=%d", __func__, __LINE__, this, mState);
                 }
                 return result;
             }
@@ -934,7 +953,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
         numBuffers--;
         buffers++;
     }
-    DD("%s: [%p] returning %d with buffer pos/size %d/%d", __func__, this,
+    DD("%s:%d [%p] returning %d with buffer pos/size %d/%d", __func__, __LINE__, this,
        result, (int)mBufferPos, (int)mBufferSize);
     return result;
 }
@@ -968,7 +987,7 @@ void AdbGuestPipe::setExpectedGuestCommand(StringView command, State newState) {
 void AdbGuestPipe::waitForHostConnection() {
     // No host connection yet. The guest is still waiting for the 'ok'
     // reply.
-    DD("%s: [%p] waiting for host connection", __func__, this);
+    DD("%s:%d [%p] waiting for host connection", __func__, __LINE__, this);
     mState = State::WaitingForHostAdbConnection;
     // Tell the agent to start listening again.
     // Also notify the server that an emulator instance is waiting
