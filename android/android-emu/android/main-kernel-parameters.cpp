@@ -296,6 +296,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.addFormat("printk.devkmsg=on");
     }
 
+    params.addFormat("qemu.compose_without_post=1");
+
     // User entered parameters are space separated. Passing false here to prevent
     // parameters from being surrounded by quotes.
     return params.toCStringCopy(false);
