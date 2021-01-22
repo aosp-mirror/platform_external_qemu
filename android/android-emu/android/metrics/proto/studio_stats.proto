@@ -1459,7 +1459,8 @@ message EmulatorFeatureFlagState {
     VIRTCONSOLE_LOGCAT = 75;
     VULKAN_QUEUE_SUBMIT_WITH_COMMANDS = 76;
     VULKAN_BATCHED_DESCRIPTOR_SET_UPDATE = 77;
-    // Next tag: 78
+    MINIGBM = 78;
+    // Next tag: 79
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

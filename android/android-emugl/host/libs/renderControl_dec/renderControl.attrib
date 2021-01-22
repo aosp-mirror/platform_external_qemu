@@ -101,3 +101,13 @@ rcComposeAsync
 
 rcDestroySyncKHRAsync
     flag flushOnEncode
+
+rcComposeWithoutPost
+    dir buffer in
+    len buffer bufferSize
+    flag flushOnEncode
+
+rcComposeAsyncWithoutPost
+    dir buffer in
+    len buffer bufferSize
+    flag flushOnEncode
