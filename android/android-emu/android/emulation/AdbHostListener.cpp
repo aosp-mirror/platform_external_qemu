@@ -17,6 +17,7 @@
 #include "android/base/sockets/SocketUtils.h"
 #include "android/emulation/AdbHostServer.h"
 #include "android/emulation/AdbTypes.h"
+#include "android/base/Backtrace.h"
 
 #include <memory>
 #include <vector>
@@ -36,6 +37,11 @@ using android::base::AsyncSocketServer;
 using android::base::ScopedSocket;
 
 bool AdbHostListener::reset(int adbPort) {
+    const std::string backtrace = ""; //android::base::bt();
+
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p adbPort=%d bt=<%s>\n",
+            "AdbHostListener", __func__, __LINE__, this, adbPort, backtrace.c_str());
+
     if (adbPort < 0) {
         mRegularAdbServer.reset();
         mJdwpServer.reset();
@@ -75,26 +81,45 @@ bool AdbHostListener::reset(int adbPort) {
 }
 
 void AdbHostListener::startListening() {
+    const std::string backtrace = ""; //android::base::bt();
+
     if (mRegularAdbServer) {
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p bt=<%s>\n",
+                "AdbHostListener", __func__, __LINE__, this, backtrace.c_str());
+
         mRegularAdbServer->startListening();
     }
     if (mJdwpServer) {
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p bt=<%s>\n",
+                "AdbHostListener", __func__, __LINE__, this, backtrace.c_str());
+
         mJdwpServer->startListening();
     }
 }
 
 void AdbHostListener::stopListening() {
+    const std::string backtrace = ""; //android::base::bt();
+
     if (mRegularAdbServer) {
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p bt=<%s>\n",
+                "AdbHostListener", __func__, __LINE__, this, backtrace.c_str());
+
         mRegularAdbServer->stopListening();
     }
     if (mJdwpServer) {
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p bt=<%s>\n",
+                "AdbHostListener", __func__, __LINE__, this, backtrace.c_str());
+
         mJdwpServer->stopListening();
     }
 }
 
 void AdbHostListener::notifyServer() {
     if (mRegularAdbServer && mAdbClientPort > 0) {
+        fprintf(stderr, "rkir555 AdbHostListener:%s:%d mAdbClientPort=%d\n", __func__, __LINE__, mAdbClientPort);
         AdbHostServer::notify(mRegularAdbServer->port(), mAdbClientPort);
+    } else {
+        fprintf(stderr, "rkir555 AdbHostListener:%s:%d nothing\n", __func__, __LINE__);
     }
 }
 

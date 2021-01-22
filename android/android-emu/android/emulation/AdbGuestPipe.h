@@ -87,7 +87,10 @@ public:
     class Service : public AndroidPipe::Service, public AdbGuestAgent {
     public:
         Service(AdbHostAgent* hostAgent)
-            : AndroidPipe::Service("qemud:adb"), mHostAgent(hostAgent) {}
+            : AndroidPipe::Service("qemud:adb"), mHostAgent(hostAgent) {
+            fprintf(stderr, "rkir555 %s:%s:%d this=%p hostAgent=%p\n",
+                    "AdbGuestPipe::Service", __func__, __LINE__, this, hostAgent);
+        }
 
         // Create a new AdbGuestPipe instance.
         virtual AndroidPipe* create(void* mHwPipe, const char* args) override;

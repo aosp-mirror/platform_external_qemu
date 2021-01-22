@@ -608,6 +608,7 @@ private:
     std::unordered_map<uint64_t, std::shared_ptr<VSockStream>> mStreams;
     std::vector<uint8_t> mVqGuestToHostBuf;
     SocketBuffer mVqHostToGuestBuf;
+    uint32_t mSrcPortI = 1024;
 
     mutable std::mutex mMtx;
 };
