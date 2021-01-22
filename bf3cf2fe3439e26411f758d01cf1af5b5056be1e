@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4c48504a_7eddb590",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1079866
+      },
+      "writtenOn": "2021-01-22T18:06:53Z",
+      "side": 1,
+      "message": "Please revert this until the google3 change has landed",
+      "revId": "bf3cf2fe3439e26411f758d01cf1af5b5056be1e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
