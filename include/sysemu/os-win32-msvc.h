@@ -100,7 +100,7 @@ typedef int64_t off64_t;
  * savemask parameter will always be zero we can safely define these
  * in terms of setjmp/longjmp on Win32.
  */
-#ifndef USE_CLANG_JMP
+#if !defined(USE_CLANG_JMP) && !defined(_JMP_BUF_DEFINED)
     // Define the buffer type for holding the state information.
     #define _JMP_BUF_DEFINED
 
