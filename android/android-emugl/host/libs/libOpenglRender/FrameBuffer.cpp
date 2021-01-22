@@ -2711,7 +2711,7 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
         memcpy(composeCmd.composeBuffer.data(), buffer, bufferSize);
         composeCmd.cmd = PostCmd::Compose;
         sendPostWorkerCmd(composeCmd);
-        post(p->targetHandle, false);
+//        post(p->targetHandle, false);
         return true;
     }
 
@@ -2729,9 +2729,9 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
        memcpy(composeCmd.composeBuffer.data(), buffer, bufferSize);
        composeCmd.cmd = PostCmd::Compose;
        sendPostWorkerCmd(composeCmd);
-       if (p2->displayId == 0) {
-           post(p2->targetHandle, false);
-       }
+//       if (p2->displayId == 0) {
+  //         post(p2->targetHandle, false);
+    //   }
        return true;
     }
 
