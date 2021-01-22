@@ -57,8 +57,8 @@ const char* op2str(int op) {
     }
 }
 
-uint64_t makeStreamKey(uint32_t srcPort, uint32_t dstPort) {
-    return (uint64_t(srcPort) << 32) | dstPort;
+uint64_t makeStreamKey(uint32_t guestPort, uint32_t hostPort) {
+    return (uint64_t(guestPort) << 32) | hostPort;
 }
 
 ::Stream* asCStream(android::base::Stream *stream) {
@@ -112,19 +112,19 @@ struct VSockStream {
     VSockStream(ForSnapshotLoad, struct VirtIOVSockDev *d) : vtblPtr(&vtblNoWake), mDev(d) {}
 
     VSockStream(struct VirtIOVSockDev *d,
-                uint64_t src_cid,
-                uint64_t dst_cid,
-                uint32_t src_port,
-                uint32_t dst_port,
+                uint64_t guest_cid,
+                uint64_t host_cid,
+                uint32_t guest_port,
+                uint32_t host_port,
                 uint32_t guest_buf_alloc,
                 uint32_t guest_fwd_cnt)
         : vtblPtr(&vtblMain)
         , mDev(d)
         , mPipe(android_pipe_guest_open_with_flags(this, ANDROID_PIPE_VIRTIO_VSOCK_BIT))
-        , mSrcCid(src_cid)
-        , mDstCid(dst_cid)
-        , mSrcPort(src_port)
-        , mDstPort(dst_port)
+        , mGuestCid(guest_cid)
+        , mHostCid(host_cid)
+        , mGuestPort(guest_port)
+        , mHostPort(host_port)
         , mGuestBufAlloc(guest_buf_alloc)
         , mGuestFwdCnt(guest_fwd_cnt) {}
 
@@ -173,10 +173,10 @@ struct VSockStream {
     void save(android::base::Stream *stream) const {
         android_pipe_guest_save(mPipe, asCStream(stream));
 
-        stream->putBe64(mSrcCid);
-        stream->putBe64(mDstCid);
-        stream->putBe32(mSrcPort);
-        stream->putBe32(mDstPort);
+        stream->putBe64(mGuestCid);
+        stream->putBe64(mHostCid);
+        stream->putBe32(mGuestPort);
+        stream->putBe32(mHostPort);
         stream->putBe32(mGuestBufAlloc);
         stream->putBe32(mGuestFwdCnt);
         stream->putBe32(mHostSentCnt);
@@ -195,10 +195,10 @@ struct VSockStream {
             vtblPtr = &vtblMain;
         }
 
-        mSrcCid = stream->getBe64();
-        mDstCid = stream->getBe64();
-        mSrcPort = stream->getBe32();
-        mDstPort = stream->getBe32();
+        mGuestCid = stream->getBe64();
+        mHostCid = stream->getBe64();
+        mGuestPort = stream->getBe32();
+        mHostPort = stream->getBe32();
         mGuestBufAlloc = stream->getBe32();
         mGuestFwdCnt = stream->getBe32();
         mHostSentCnt = stream->getBe32();
@@ -224,10 +224,10 @@ struct VSockStream {
     const AndroidPipeHwFuncs * vtblPtr;
     struct VirtIOVSockDev *const mDev;
     void *mPipe = nullptr;
-    uint64_t mSrcCid = 0;
-    uint64_t mDstCid = 0;
-    uint32_t mSrcPort = 0;
-    uint32_t mDstPort = 0;
+    uint64_t mGuestCid = 0;
+    uint64_t mHostCid = 0;
+    uint32_t mGuestPort = 0;
+    uint32_t mHostPort = 0;
     uint32_t mGuestBufAlloc = 0;  // guest's buffer size
     uint32_t mGuestFwdCnt = 0;    // how much the guest received
     uint32_t mHostSentCnt = 0;    // how much the host sent
@@ -254,7 +254,7 @@ struct VirtIOVSockDev {
     VirtIOVSockDev(VirtIOVSock *s) : mS(s) {}
 
     void closeStreamFromHost(VSockStream *streamWeak) {
-        closeStreamLocked(streamWeak->mSrcPort, streamWeak->mDstPort);
+        closeStreamLocked(streamWeak->mGuestPort, streamWeak->mHostPort);
     }
 
     bool sendRWHostToGuest(VSockStream *stream) {
@@ -265,10 +265,10 @@ struct VirtIOVSockDev {
             }
 
             const struct virtio_vsock_hdr hdr = {
-                .src_cid = stream->mDstCid,
-                .dst_cid = stream->mSrcCid,
-                .src_port = stream->mDstPort,
-                .dst_port = stream->mSrcPort,
+                .src_cid = stream->mHostCid,
+                .dst_cid = stream->mGuestCid,
+                .src_port = stream->mHostPort,
+                .dst_port = stream->mGuestPort,
                 .len = static_cast<uint32_t>(b.second),
                 .type = VIRTIO_VSOCK_TYPE_STREAM,
                 .op = static_cast<uint16_t>(VIRTIO_VSOCK_OP_RW),
@@ -330,7 +330,7 @@ struct VirtIOVSockDev {
                 return false;
             }
 
-            const auto key = makeStreamKey(vstream->mSrcPort, vstream->mDstPort);
+            const auto key = makeStreamKey(vstream->mGuestPort, vstream->mHostPort);
             if (!mStreams.insert({key, std::move(vstream)}).second) {
                 return false;
             }
@@ -412,7 +412,7 @@ private:
     }
 
     void closeStreamLocked(std::shared_ptr<VSockStream> stream) {
-        closeStreamLocked(stream->mSrcPort, stream->mDstPort);
+        closeStreamLocked(stream->mGuestPort, stream->mHostPort);
     }
 
     size_t vqWriteHostToGuestImpl(const uint8_t *buf8, size_t size) {
