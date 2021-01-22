@@ -57,6 +57,7 @@ std::string ConfigDirs::getUserDirectory() {
     System* system = System::get();
     std::string home = system->envGet("ANDROID_EMULATOR_HOME");
     if (!home.empty()) {
+        fprintf(stderr, "using ANDROID_EMULATOR_HOME\n");
         return home;
     }
 
@@ -68,11 +69,13 @@ std::string ConfigDirs::getUserDirectory() {
         // directly. Put a workaround here to make sure it works both ways,
         // preferring the one from AS.
         auto homeNewWay = PathUtils::join(home, kAndroidSubDir);
+        fprintf(stderr, "using ANDROID_PREFS_ROOT\n");
         return system->pathIsDir(homeNewWay) ? homeNewWay : home;
     } else {
         // Old key that is deprecated (ANDROID_SDK_HOME)
         home = system->envGet("ANDROID_SDK_HOME");
         if (!home.empty()) {
+            fprintf(stderr, "using ANDROID_SDK_HOME\n");
             auto homeOldWay = PathUtils::join(home, kAndroidSubDir);
             return system->pathIsDir(homeOldWay) ? homeOldWay : home;
         }
@@ -85,6 +88,7 @@ std::string ConfigDirs::getUserDirectory() {
             home = "/tmp";
         }
     }
+    fprintf(stderr, "using home\n");
     return PathUtils::join(home, kAndroidSubDir);
 }
 

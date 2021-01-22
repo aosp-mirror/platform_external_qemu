@@ -80,7 +80,8 @@ std::string EmulatorAdvertisement::location() const {
 
 bool EmulatorAdvertisement::write()  const {
     auto pidFile = location();
-    if (System::get()->pathExists(pidFile)) {
+    if (true) {
+    //if (System::get()->pathExists(pidFile)) {
         LOG(WARNING) << "Overwriting existing discovery file: " << pidFile;
     }
     auto shareFile = std::ofstream(PathUtils::asUnicodePath(pidFile).c_str());
