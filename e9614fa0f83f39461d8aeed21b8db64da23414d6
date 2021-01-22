@@ -22,6 +22,30 @@
       },
       "revId": "e9614fa0f83f39461d8aeed21b8db64da23414d6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b581cfc9_9dce5ec5",
+        "filename": "chardev/char-stdio.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-01-22T04:34:39Z",
+      "side": 1,
+      "message": "I set it to true by default since I saw that you enabled it in aosp/1546495. It should be fine if we use \"false\" by default and add the option in android-qemu2-glue -- actually this would make my life easier. Will upload a new patchset soon.",
+      "parentUuid": "03513e53_ea7e19dd",
+      "range": {
+        "startLine": 115,
+        "startChar": 33,
+        "endLine": 115,
+        "endChar": 43
+      },
+      "revId": "e9614fa0f83f39461d8aeed21b8db64da23414d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
