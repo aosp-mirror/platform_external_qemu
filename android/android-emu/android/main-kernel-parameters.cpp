@@ -284,8 +284,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     if (opts->legacy_fake_camera) {
         params.addFormat("qemu.legacy_fake_camera=1");
     }
-
-    if (apiLevel > 29) {
+    if (isQemu2 && apiLevel > 29 &&
+        !android::featurecontrol::isEnabled(android::featurecontrol::Minigbm)) {
         params.addFormat("qemu.camera_protocol_ver=1");
     }
 

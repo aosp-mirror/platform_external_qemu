@@ -97,7 +97,7 @@ enum Feature {
     VirtioWifi = 54;
 
     CarRotary = 55;
-    
+
     ModemSimulator = 56;
 
     TvRemote = 57;
@@ -105,4 +105,6 @@ enum Feature {
     VirtioMouse = 58;
 
     VirtconsoleLogcat = 59;
+
+    Minigbm = 60;
 }
