@@ -594,7 +594,13 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
     if (android_cmdLineOptions->metrics_collection) {
         event->mutable_emulator_details()
                                 ->mutable_used_features()
-                                ->set_container_launch(true);
+                                ->set_launch_type(android_studio::EmulatorFeatures::CONTAINER);
+    }
+
+    if (android_cmdLineOptions->fuchsia) {
+        event->mutable_emulator_details()
+                                ->mutable_used_features()
+                                ->set_launch_type(android_studio::EmulatorFeatures::FUCHSIA);
     }
 
 }
