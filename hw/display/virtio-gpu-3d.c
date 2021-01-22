@@ -37,6 +37,8 @@ static void virgl_cmd_create_resource_2d(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(c2d);
     trace_virtio_gpu_cmd_res_create_2d(c2d.resource_id, c2d.format,
                                        c2d.width, c2d.height);
+    printf("%s resource_id %d w %d h %d\n", __FUNCTION__,
+           c2d.resource_id, c2d.width, c2d.height);
 
     args.handle = c2d.resource_id;
     args.target = 2;
@@ -138,13 +140,20 @@ static void virgl_cmd_resource_flush(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(rf);
     trace_virtio_gpu_cmd_res_flush(rf.resource_id,
                                    rf.r.width, rf.r.height, rf.r.x, rf.r.y);
-
+    printf("%s: resource %d w %d h %d x %d y %d\n", __FUNCTION__, rf.resource_id,
+                                   rf.r.width, rf.r.height, rf.r.x, rf.r.y);
     for (i = 0; i < g->conf.max_outputs; i++) {
         if (g->scanout[i].resource_id != rf.resource_id) {
             continue;
         }
         virtio_gpu_rect_update(g, i, rf.r.x, rf.r.y, rf.r.width, rf.r.height);
     }
+//    stream_renderer_flush_resource_and_readback(rf.resource_id, rf.r.x, rf.r.y,
+  //                                              rf.r.width, rf.r.height,
+    //                                            NULL, 0);
+#ifdef CONFIG_ANDROID
+    virtio_renderer_flush(rf.resource_id);
+#endif
 }
 
 static void virgl_cmd_set_scanout(VirtIOGPU *g,
@@ -157,6 +166,8 @@ static void virgl_cmd_set_scanout(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(ss);
     trace_virtio_gpu_cmd_set_scanout(ss.scanout_id, ss.resource_id,
                                      ss.r.width, ss.r.height, ss.r.x, ss.r.y);
+    printf("%s: scanout_id %d resource_id %d, w %d h %d x %d y%d\n", __FUNCTION__,
+           ss.scanout_id, ss.resource_id, ss.r.width, ss.r.height, ss.r.x, ss.r.y);
 
     if (ss.scanout_id >= g->conf.max_outputs) {
         qemu_log_mask(LOG_GUEST_ERROR, "%s: illegal scanout id specified %d",
@@ -234,6 +245,7 @@ static void virgl_cmd_transfer_to_host_2d(VirtIOGPU *g,
 
     VIRTIO_GPU_FILL_CMD(t2d);
     trace_virtio_gpu_cmd_res_xfer_toh_2d(t2d.resource_id);
+    printf("%s: resource_id %d\n", __FUNCTION__, t2d.resource_id);
 
     box.x = t2d.r.x;
     box.y = t2d.r.y;
@@ -547,6 +559,8 @@ static void virgl_cmd_resource_unmap(VirtIOGPU *g,
     g->virgl->virgl_renderer_resource_unmap(u.resource_id);
 }
 
+
+
 void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
                                       struct virtio_gpu_ctrl_command *cmd)
 {
@@ -556,7 +570,7 @@ void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
     if (cmd->waiting) {
         return;
     }
-
+    //printf("%s: cmd 0x%x\n", __FUNCTION__, cmd->cmd_hdr.type);
     g->virgl->virgl_renderer_force_ctx_0();
     switch (cmd->cmd_hdr.type) {
     case VIRTIO_GPU_CMD_CTX_CREATE:

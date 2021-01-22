@@ -810,6 +810,7 @@ static void virtio_gpu_simple_process_cmd(VirtIOGPU *g,
 {
     VIRTIO_GPU_FILL_CMD(cmd->cmd_hdr);
     virtio_gpu_ctrl_hdr_bswap(&cmd->cmd_hdr);
+    printf("%s: cmd %d\n", __FUNCTION__, cmd->cmd_hdr.type);
 
     switch (cmd->cmd_hdr.type) {
     case VIRTIO_GPU_CMD_GET_DISPLAY_INFO:

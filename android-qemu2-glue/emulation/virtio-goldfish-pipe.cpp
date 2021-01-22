@@ -1643,4 +1643,8 @@ void virtio_goldfish_pipe_reset(void *pipe, void *host_pipe) {
     sRenderer->resetPipe((GoldfishHwPipe*)pipe, (GoldfishHostPipe*)host_pipe);
 }
 
+void virtio_renderer_flush(uint32_t res_handle) {
+    sRenderer->flushResourceAndReadback(res_handle, 0, 0, 0, 0, NULL, 0);
+}
+
 } // extern "C"
