@@ -37,7 +37,6 @@ static void virgl_cmd_create_resource_2d(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(c2d);
     trace_virtio_gpu_cmd_res_create_2d(c2d.resource_id, c2d.format,
                                        c2d.width, c2d.height);
-
     args.handle = c2d.resource_id;
     args.target = 2;
     args.format = c2d.format;
@@ -138,13 +137,17 @@ static void virgl_cmd_resource_flush(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(rf);
     trace_virtio_gpu_cmd_res_flush(rf.resource_id,
                                    rf.r.width, rf.r.height, rf.r.x, rf.r.y);
-
     for (i = 0; i < g->conf.max_outputs; i++) {
         if (g->scanout[i].resource_id != rf.resource_id) {
             continue;
         }
         virtio_gpu_rect_update(g, i, rf.r.x, rf.r.y, rf.r.width, rf.r.height);
     }
+#ifdef CONFIG_ANDROID
+    stream_renderer_flush_resource_and_readback(rf.resource_id, rf.r.x, rf.r.y,
+                                                rf.r.width, rf.r.height,
+                                                NULL, 0);
+#endif
 }
 
 static void virgl_cmd_set_scanout(VirtIOGPU *g,
@@ -157,7 +160,6 @@ static void virgl_cmd_set_scanout(VirtIOGPU *g,
     VIRTIO_GPU_FILL_CMD(ss);
     trace_virtio_gpu_cmd_set_scanout(ss.scanout_id, ss.resource_id,
                                      ss.r.width, ss.r.height, ss.r.x, ss.r.y);
-
     if (ss.scanout_id >= g->conf.max_outputs) {
         qemu_log_mask(LOG_GUEST_ERROR, "%s: illegal scanout id specified %d",
                       __func__, ss.scanout_id);
@@ -556,7 +558,6 @@ void virtio_gpu_virgl_process_cmd(VirtIOGPU *g,
     if (cmd->waiting) {
         return;
     }
-
     g->virgl->virgl_renderer_force_ctx_0();
     switch (cmd->cmd_hdr.type) {
     case VIRTIO_GPU_CMD_CTX_CREATE:
@@ -655,9 +656,9 @@ void virgl_write_fence(void *opaque, uint32_t fence)
 
     QTAILQ_FOREACH_SAFE(cmd, &g->fenceq, next, tmp) {
         /*
-	 * the guest can end up emitting fences out of order
-	 * so we should check all fenced cmds not just the first one.
-	 */
+         * the guest can end up emitting fences out of order
+         * so we should check all fenced cmds not just the first one.
+         */
         if (cmd->cmd_hdr.fence_id > fence) {
             continue;
         }
