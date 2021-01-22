@@ -13,18 +13,18 @@
 // limitations under the License.
 #include "emulator/webrtc/Switchboard.h"
 
-#include <api/scoped_refptr.h>                    // for scoped_refptr
-#include <rtc_base/critical_section.h>            // for CritScope
-#include <rtc_base/logging.h>                     // for Val, RTC_LOG
-#include <rtc_base/ref_counted_object.h>          // for RefCountedObject
-#include <map>                                    // for map, operator==
-#include <memory>                                 // for shared_ptr, make_sh...
-#include <ostream>                                // for operator<<, ostream
-#include <string>                                 // for string, hash, opera...
-#include <type_traits>                            // for remove_extent_t
-#include <unordered_map>                          // for unordered_map, unor...
-#include <utility>                                // for move
-#include <vector>                                 // for vector
+#include <api/scoped_refptr.h>            // for scoped_refptr
+#include <rtc_base/critical_section.h>    // for CritScope
+#include <rtc_base/logging.h>             // for Val, RTC_LOG
+#include <rtc_base/ref_counted_object.h>  // for RefCountedObject
+#include <map>                            // for map, operator==
+#include <memory>                         // for shared_ptr, make_sh...
+#include <ostream>                        // for operator<<, ostream
+#include <string>                         // for string, hash, opera...
+#include <type_traits>                    // for remove_extent_t
+#include <unordered_map>                  // for unordered_map, unor...
+#include <utility>                        // for move
+#include <vector>                         // for vector
 
 #include "android/base/Log.h"                     // for LogStreamVoidify, LOG
 #include "android/base/async/AsyncSocket.h"       // for AsyncSocket
@@ -59,39 +59,29 @@ Switchboard::Switchboard(EmulatorGrpcClient* client,
       mAdbPort(adbPort),
       mTurnConfig(turnConfig) {}
 
-void Switchboard::rtcConnectionDropped(std::string participant) {
-    rtc::CritScope cs(&mCleanupCS);
-    mDroppedConnections.push_back(participant);
-}
+void Switchboard::rtcConnectionClosed(const std::string participant) {
+    const std::lock_guard<std::mutex> lock(mCleanupMutex);
 
-void Switchboard::rtcConnectionClosed(std::string participant) {
-    rtc::CritScope cs(&mCleanupClosedCS);
-    mClosedConnections.push_back(participant);
-}
-
-void Switchboard::finalizeConnections() {
-    {
-        rtc::CritScope cs(&mCleanupCS);
-        for (auto participant : mDroppedConnections) {
-            AutoWriteLock lock(mMapLock);
-            if (mId.find(participant) != mId.end()) {
-                auto queue = mId[participant];
-                mLocks.erase(queue.get());
-                mId.erase(participant);
-            }
-            mConnections[participant]->Close();
-        }
-        mDroppedConnections.clear();
+    if (mId.find(participant) != mId.end()) {
+        RTC_LOG(INFO) << "Finalizing " << participant;
+        auto queue = mId[participant];
+        mLocks.erase(queue.get());
+        mId.erase(participant);
     }
 
-    {
-        rtc::CritScope cs(&mCleanupClosedCS);
-        for (auto participant : mClosedConnections) {
-            mIdentityMap.erase(participant);
-            mConnections.erase(participant);
-        }
-        mClosedConnections.clear();
-    }
+    signalingThread()->PostDelayedTask(
+            RTC_FROM_HERE,
+            [this, participant] {
+                const std::lock_guard<std::mutex> lock(mCleanupMutex);
+                LOG(INFO) << "disconnect: " << participant
+                          << ", available: " << mConnections.count(participant);
+                auto it = mConnections.find(participant);
+                if (it != mConnections.end()) {
+                    it->second->Close();
+                    mConnections.erase(participant);
+                }
+            },
+            1);
 }
 
 void Switchboard::send(std::string to, json message) {
@@ -125,24 +115,11 @@ bool Switchboard::connect(std::string identity) {
         mMapLock.unlockRead();
     }
 
-    rtc::scoped_refptr<Participant> stream(
-            new rtc::RefCountedObject<Participant>(this, identity, nullptr));
-    if (!stream->Initialize()) {
+    auto participant = std::make_shared<Participant>(this, identity, nullptr);
+    if (!participant->Initialize()) {
         return false;
     }
-    mConnections[identity] = stream;
-
-    // Note: Dynamically adding new tracks will likely require stream
-    // re-negotiation.
-    stream->AddVideoTrack("grpcVideo");
-    stream->AddAudioTrack("grpcAudio");
-    if (mAdbPort >= 0) {
-        auto adbSocket = std::make_shared<android::base::AsyncSocket>(
-                getLooper(), mAdbPort);
-        adbSocket->connect();
-        stream->RegisterLocalAdbForwarder(adbSocket);
-    }
-    stream->CreateOffer();
+    mConnections[identity] = participant;
 
     // Inform the client we are going to start, this is the place
     // where we should send the turn config to the client.
@@ -153,9 +130,19 @@ bool Switchboard::connect(std::string identity) {
     // The format is json: {"start" : RTCPeerConnection config}
     // (i.e. result from
     // https://networktraversal.googleapis.com/v1alpha/iceconfig?key=....)
-    json start;
-    start["start"] = turnConfig;
-    send(identity, start);
+    send(identity, json{{"start", turnConfig}});
+
+    // Note: Dynamically adding new tracks will likely require participant
+    // re-negotiation.
+    participant->AddVideoTrack(0);
+    participant->AddAudioTrack();
+    if (mAdbPort >= 0) {
+        auto adbSocket = std::make_shared<android::base::AsyncSocket>(
+                getLooper(), mAdbPort);
+        adbSocket->connect();
+        participant->RegisterLocalAdbForwarder(adbSocket);
+    }
+    participant->CreateOffer();
 
     return true;
 }
@@ -179,8 +166,9 @@ void Switchboard::disconnect(std::string identity) {
     auto queue = mId[identity];
     mId.erase(identity);
     mLocks.erase(queue.get());
-    mIdentityMap.erase(identity);
-    mConnections.erase(identity);
+
+    const std::lock_guard<std::mutex> lock(mCleanupMutex);
+    mConnections[identity]->Close();
 }
 
 bool Switchboard::acceptJsepMessage(std::string identity, std::string message) {

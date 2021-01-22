@@ -22,6 +22,7 @@
 #include "android/base/async/DefaultLooper.h"                   // for Defau...
 #include "android/base/async/RecurrentTask.h"                   // for Recur...
 #include "emulator/webrtc/capture/GoldfishAudioDeviceModule.h"  // for Goldf...
+#include "emulator/webrtc/capture/MediaSourceLibrary.h"
 
 namespace emulator {
 namespace webrtc {
@@ -32,44 +33,51 @@ using android::base::Looper;
 using android::base::RecurrentTask;
 
 // An RtcConnection represents a connection of a webrtc endpoint.
-// The RtcConnection is used by a peerconnection to send messages
-// to another peerconnection.
+// The RtcConnection is used by a peerconnection to send jsep messages
+// to another peerconnection.å
 class RtcConnection {
 public:
     RtcConnection(EmulatorGrpcClient* client);
     ~RtcConnection();
 
     // Called when a participant is unable to continue the rtc stream.
-    // The participant will no longer be in use and close can be called.
-    virtual void rtcConnectionDropped(std::string participant) = 0;
-
-    // The connection has actually closed, and can be properly garbage
-    // collected.
-    virtual void rtcConnectionClosed(std::string participant) = 0;
+    // The participant will no longer be in use. Usually you want to
+    // close the participant on the signaling thread after which
+    // it can be safely removed.
+    virtual void rtcConnectionClosed(const std::string participant) = 0;
 
     // Send a jsep json message to the participant identified by to.
     virtual void send(std::string to, json msg) = 0;
 
+    // Gets an android based looper that can be used for async operations.
     Looper* getLooper() { return &mLooper; }
+
+    // gRPC connection to the emulator.
     EmulatorGrpcClient* getEmulatorClient() { return mClient; }
+
+    // The WebRTC peerconnection factory.
     ::webrtc::PeerConnectionFactoryInterface* getPeerConnectionFactory() {
         return mConnectionFactory.get();
     }
 
-protected:
+    // The library used to obtain audio/video sources from the emulator.
+    MediaSourceLibrary* getMediaSourceLibrary() { return mLibrary.get(); }
+
+    // The webrtc signalling thread. Use this if you are operating on peerconnections.
+    rtc::Thread* signalingThread() { return mSignaling.get(); }
+
 private:
     EmulatorGrpcClient* mClient;
-
     GoldfishAudioDeviceModule mGoldfishAdm;
+    std::unique_ptr<MediaSourceLibrary> mLibrary;
 
     // PeerConnection factory and threads.
-    rtc::scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
-            mConnectionFactory;
     std::unique_ptr<::webrtc::TaskQueueFactory> mTaskFactory;
     std::unique_ptr<rtc::Thread> mWorker;
     std::unique_ptr<rtc::Thread> mSignaling;
     std::unique_ptr<rtc::Thread> mNetwork;
-
+    rtc::scoped_refptr<::webrtc::PeerConnectionFactoryInterface>
+            mConnectionFactory;
     // Looper
     android::base::DefaultLooper mLooper;
     std::unique_ptr<std::thread> mLooperThread{nullptr};

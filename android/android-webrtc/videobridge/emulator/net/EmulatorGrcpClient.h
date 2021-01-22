@@ -29,7 +29,8 @@ namespace webrtc {
 // Through this method you can get a properly configured stub, and context , that
 // will inject proper credentials when needed.
 //
-// The Client is initialized by giving it the proper emulator discovery file.
+// The Client is initialized by giving it the proper emulator discovery file, or by
+// providing it a set of SSL credentials if you wish to use tls.
 class EmulatorGrpcClient {
 public:
     explicit EmulatorGrpcClient(std::string discovery_file) : mDiscoveryFile(discovery_file) {};
