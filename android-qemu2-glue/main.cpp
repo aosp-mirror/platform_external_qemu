@@ -2036,15 +2036,17 @@ extern "C" int main(int argc, char** argv) {
 
     if (createVirtconsoles) {
         args.add("-chardev");
-        args.addFormat("%s,id=forhvc0", (opts->show_kernel ? "stdio" : "null"));
+        args.addFormat("%s,id=forhvc0",
+                       (opts->show_kernel ? "stdio,echo=on" : "null"));
 
         args.add("-chardev");
         if (fc::isEnabled(fc::VirtconsoleLogcat)) {
             if (opts->logcat) {
                 if (opts->logcat_output) {
-                    args.addFormat("file,id=forhvc1,path=%s", opts->logcat_output);
+                    args.addFormat("file,id=forhvc1,path=%s",
+                                   opts->logcat_output);
                 } else {
-                    args.add("stdio,id=forhvc1");
+                    args.add("stdio,id=forhvc1,echo=on");
                 }
             } else {
                 args.add("null,id=forhvc1");
