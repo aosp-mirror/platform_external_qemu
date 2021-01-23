@@ -41,14 +41,14 @@ public:
             sizeof(uint64_t) * ((wantedSize + sizeof(uint64_t) - 1) / (sizeof(uint64_t)));
 
         mTotalWantedThisGeneration += wantedSizeRoundedUp;
-        if (mAllocPos + wantedSizeRoundedUp > mStorage.size()) {
+        if (mAllocPos + wantedSizeRoundedUp > mStorage.size() * sizeof(uint64_t)) {
             mNeedRealloc = true;
             void* fallbackPtr = malloc(wantedSizeRoundedUp);
             mFallbackPtrs.insert(fallbackPtr);
             return fallbackPtr;
         }
-        size_t avail = mStorage.size() - mAllocPos;
-        void* allocPtr = (void*)(mStorage.data() + mAllocPos);
+        size_t avail = mStorage.size() * sizeof(uint64_t) - mAllocPos;
+        void* allocPtr = (void*)(((unsigned char*)mStorage.data()) + mAllocPos);
         mAllocPos += wantedSizeRoundedUp;
         return allocPtr;
     }
