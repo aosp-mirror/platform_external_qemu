@@ -23,7 +23,7 @@ import sys
 # Class capturing a .cpp file and a .h file (a "C++ module")
 class Module(object):
 
-    def __init__(self, directory, basename, customAbsDir = None, suppress = False):
+    def __init__(self, directory, basename, customAbsDir = None, suppress = False, implOnly = False):
         self.directory = directory
         self.basename = basename
 
@@ -39,6 +39,8 @@ class Module(object):
         self.customAbsDir = customAbsDir
 
         self.suppress = suppress
+
+        self.implOnly = implOnly
 
     def getMakefileSrcEntry(self):
         if self.customAbsDir:
@@ -68,20 +70,27 @@ class Module(object):
 
         filename = os.path.join(absDir, self.basename)
 
-        fpHeader = open(filename + ".h", "w", encoding="utf-8")
+        fpHeader = None
+
+        if not self.implOnly:
+            fpHeader = open(filename + ".h", "w", encoding="utf-8")
+
         fpImpl = open(filename + ".cpp", "w", encoding="utf-8")
 
         self.headerFileHandle = fpHeader
         self.implFileHandle = fpImpl
 
-        self.headerFileHandle.write(self.headerPreamble)
+        if not self.implOnly:
+            self.headerFileHandle.write(self.headerPreamble)
+
         self.implFileHandle.write(self.implPreamble)
 
     def appendHeader(self, toAppend):
         if self.suppress:
             return
 
-        self.headerFileHandle.write(toAppend)
+        if not self.implOnly:
+            self.headerFileHandle.write(toAppend)
 
     def appendImpl(self, toAppend):
         if self.suppress:
@@ -93,10 +102,14 @@ class Module(object):
         if self.suppress:
             return
 
-        self.headerFileHandle.write(self.headerPostamble)
+        if not self.implOnly:
+            self.headerFileHandle.write(self.headerPostamble)
+
         self.implFileHandle.write(self.implPostamble)
 
-        self.headerFileHandle.close()
+        if not self.implOnly:
+            self.headerFileHandle.close()
+
         self.implFileHandle.close()
 
 # Class capturing a .proto protobuf definition file
