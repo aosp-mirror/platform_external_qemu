@@ -113,6 +113,9 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
 
     const uint32_t maxSpins = 30;
     uint32_t spins = 0;
+    bool inLargeXfer = true;
+
+    *(mContext.host_state) = ASG_HOST_STATE_CAN_CONSUME;
 
     while (count < wanted) {
 
@@ -132,6 +135,8 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
         if (count > 0) {  // There is some data to return.
             break;
         }
+
+        *(mContext.host_state) = ASG_HOST_STATE_CAN_CONSUME;
 
         // if (mInSnapshotOperation) {
         //     fprintf(stderr, "%s: %p in snapshot operation, exit\n", __func__, mRenderThreadPtr);
@@ -154,6 +159,7 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
         auto ptrEnd = dst + wanted;
 
         if (ringAvailable) {
+            inLargeXfer = false;
             uint32_t transferMode =
                 mContext.ring_config->transfer_mode;
             switch (transferMode) {
@@ -176,7 +182,19 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
         } else if (ringLargeXferAvailable) {
             type3Read(ringLargeXferAvailable,
                       &count, &current, ptrEnd);
+            inLargeXfer = true;
+            if (0 == __atomic_load_n(&mContext.ring_config->transfer_size, __ATOMIC_ACQUIRE)) {
+                inLargeXfer = false;
+            }
         } else {
+            if (inLargeXfer && 0 != __atomic_load_n(&mContext.ring_config->transfer_size, __ATOMIC_ACQUIRE)) {
+                continue;
+            }
+
+            if (inLargeXfer && 0 == __atomic_load_n(&mContext.ring_config->transfer_size, __ATOMIC_ACQUIRE)) {
+                inLargeXfer = false;
+            }
+
             if (++spins < maxSpins) {
                 ring_buffer_yield();
                 continue;
@@ -216,6 +234,8 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
     ++mXmits;
     mTotalRecv += count;
     D("read %d bytes", (int)count);
+
+    *(mContext.host_state) = ASG_HOST_STATE_RENDERING;
     return (const unsigned char*)buf;
 }
 
@@ -300,18 +320,20 @@ void RingStream::type3Read(
     uint32_t available,
     size_t* count, char** current, const char* ptrEnd) {
 
-    // TODO: using the total transfer size is vulnerable to
-    // the guest client getting aborted and then the host gets stuck
-    // uint32_t xferTotal = mContext.ring_config->transfer_size;
-    uint32_t xferTotal = available;
+    uint32_t xferTotal = __atomic_load_n(&mContext.ring_config->transfer_size, __ATOMIC_ACQUIRE);
     uint32_t maxCanRead = ptrEnd - *current;
-    uint32_t actuallyRead = std::min(xferTotal, maxCanRead);
+    uint32_t ringAvail = available;
+    uint32_t actuallyRead = std::min(ringAvail, std::min(xferTotal, maxCanRead));
+
+    // Decrement transfer_size before letting the guest proceed in ring_buffer funcs or we will race
+    // to the next time the guest sets transfer_size
+    __atomic_fetch_sub(&mContext.ring_config->transfer_size, actuallyRead, __ATOMIC_RELEASE);
 
     ring_buffer_read_fully_with_abort(
-        mContext.to_host_large_xfer.ring,
-        &mContext.to_host_large_xfer.view,
-        *current, actuallyRead,
-        1, &mContext.ring_config->in_error);
+            mContext.to_host_large_xfer.ring,
+            &mContext.to_host_large_xfer.view,
+            *current, actuallyRead,
+            1, &mContext.ring_config->in_error);
 
     *current += actuallyRead;
     *count += actuallyRead;
