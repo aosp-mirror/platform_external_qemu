@@ -1263,7 +1263,7 @@ public:
         auto device = unbox_VkDevice(boxed_device);
 
         sBoxedHandleManager.processDelayedRemoves(device);
-        
+
         AutoLock lock(mLock);
 
         destroyDeviceLocked(device, pAllocator);
@@ -1878,7 +1878,9 @@ public:
         if (res == VK_SUCCESS) {
             AutoLock lock(mLock);
             auto& info = mDescriptorSetLayoutInfo[*pSetLayout];
+            info.device = device;
             *pSetLayout = new_boxed_non_dispatchable_VkDescriptorSetLayout(*pSetLayout);
+            info.boxed = *pSetLayout;
 
             info.createInfo = *pCreateInfo;
             for (uint32_t i = 0; i < pCreateInfo->bindingCount; ++i) {
@@ -1920,7 +1922,9 @@ public:
         if (res == VK_SUCCESS) {
             AutoLock lock(mLock);
             auto& info = mDescriptorPoolInfo[*pDescriptorPool];
+            info.device = device;
             *pDescriptorPool = new_boxed_non_dispatchable_VkDescriptorPool(*pDescriptorPool);
+            info.boxed = *pDescriptorPool;
             info.createInfo = *pCreateInfo;
             info.maxSets = pCreateInfo->maxSets;
             info.usedSets = 0;
@@ -3441,8 +3445,10 @@ public:
         }
         AutoLock lock(mLock);
         mCmdPoolInfo[*pCommandPool] = CommandPoolInfo();
+        mCmdPoolInfo[*pCommandPool].device = device;
 
         *pCommandPool = new_boxed_non_dispatchable_VkCommandPool(*pCommandPool);
+        mCmdPoolInfo[*pCommandPool].boxed = *pCommandPool;
 
         return result;
     }
@@ -3478,11 +3484,6 @@ public:
             vk->vkResetCommandPool(device, commandPool, flags);
         if (result != VK_SUCCESS) {
             return result;
-        }
-        AutoLock lock(mLock);
-        const auto ite = mCmdPoolInfo.find(commandPool);
-        if (ite != mCmdPoolInfo.end()) {
-            removeCommandBufferInfo(ite->second.cmdBuffers);
         }
         return result;
     }
@@ -3526,7 +3527,6 @@ public:
             }
         }
 
-        
         for (uint32_t i = 0; i < submitCount; i++) {
             const VkSubmitInfo& submit = pSubmits[i];
             for (uint32_t c = 0; c < submit.commandBufferCount; c++) {
@@ -3815,6 +3815,14 @@ public:
         releaseOrderMaintInfo(order);
     }
 
+    void on_vkCommandBufferHostSyncGOOGLE(
+            android::base::BumpPool* pool,
+            VkCommandBuffer commandBuffer,
+            uint32_t needHostSync,
+            uint32_t sequenceNumber) {
+        this->hostSyncCommandBuffer("hostSync", commandBuffer, needHostSync, sequenceNumber);
+    }
+
     void hostSyncQueue(
         const char* tag,
         VkQueue boxed_queue,
@@ -3852,6 +3860,15 @@ public:
         order->cv.broadcast();
         releaseOrderMaintInfo(order);
     }
+
+    void on_vkQueueHostSyncGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        uint32_t needHostSync,
+        uint32_t sequenceNumber) {
+        this->hostSyncQueue("hostSyncQueue", queue, needHostSync, sequenceNumber);
+    }
+
 
     VkResult on_vkCreateImageWithRequirementsGOOGLE(
         android::base::BumpPool* pool,
@@ -3924,6 +3941,14 @@ public:
         mCmdBufferInfo[commandBuffer].preprocessFuncs.clear();
         mCmdBufferInfo[commandBuffer].subCmds.clear();
         return VK_SUCCESS;
+    }
+
+    VkResult on_vkBeginCommandBufferAsyncGOOGLE(
+            android::base::BumpPool* pool,
+            VkCommandBuffer boxed_commandBuffer,
+            const VkCommandBufferBeginInfo* pBeginInfo) {
+        return this->on_vkBeginCommandBuffer(
+            pool, boxed_commandBuffer, pBeginInfo);
     }
 
     void on_vkEndCommandBufferAsyncGOOGLE(
@@ -5420,20 +5445,99 @@ private:
             // https://bugs.chromium.org/p/chromium/issues/detail?id=1074600
             // it's important to idle the device before destroying it!
             devicesToDestroyDispatches[i]->vkDeviceWaitIdle(devicesToDestroy[i]);
-            std::vector<VkDeviceMemory> toDestroy;
-
-            auto it = mMapInfo.begin();
-            while (it != mMapInfo.end()) {
-                if (it->second.device == devicesToDestroy[i]) {
-                    toDestroy.push_back(it->first);
+            {
+                std::vector<VkDeviceMemory> toDestroy;
+                auto it = mMapInfo.begin();
+                while (it != mMapInfo.end()) {
+                    if (it->second.device == devicesToDestroy[i]) {
+                        toDestroy.push_back(it->first);
+                    }
+                    ++it;
                 }
-                ++it;
+
+                for (auto mem: toDestroy) {
+                    freeMemoryLocked(devicesToDestroyDispatches[i],
+                            devicesToDestroy[i],
+                            mem, nullptr);
+                }
             }
 
-            for (auto mem: toDestroy) {
-                freeMemoryLocked(devicesToDestroyDispatches[i],
-                        devicesToDestroy[i],
-                        mem, nullptr);
+            // Free all command buffers and command pools
+            {
+                std::vector<VkCommandBuffer> toDestroy;
+                std::vector<VkCommandPool> toDestroyPools;
+                auto it = mCmdBufferInfo.begin();
+                while (it != mCmdBufferInfo.end()) {
+                    if (it->second.device == devicesToDestroy[i]) {
+                        toDestroy.push_back(it->first);
+                        toDestroyPools.push_back(it->second.cmdPool);
+                    }
+                    ++it;
+                }
+
+                for (int j = 0; j < toDestroy.size(); ++j) {
+                    devicesToDestroyDispatches[i]->vkFreeCommandBuffers(devicesToDestroy[i], toDestroyPools[j], 1, &toDestroy[j]);
+                    VkCommandBuffer boxed = unboxed_to_boxed_VkCommandBuffer(toDestroy[j]);
+                    delete_VkCommandBuffer(boxed);
+                    mCmdBufferInfo.erase(toDestroy[j]);
+                }
+            }
+
+            {
+                std::vector<VkCommandPool> toDestroy;
+                std::vector<VkCommandPool> toDestroyBoxed;
+                auto it = mCmdPoolInfo.begin();
+                while (it != mCmdPoolInfo.end()) {
+                    if (it->second.device == devicesToDestroy[i]) {
+                        toDestroy.push_back(it->first);
+                        toDestroyBoxed.push_back(it->second.boxed);
+                    }
+                    ++it;
+                }
+
+                for (int j = 0; j < toDestroy.size(); ++j) {
+                    devicesToDestroyDispatches[i]->vkDestroyCommandPool(devicesToDestroy[i], toDestroy[j], 0);
+                    delete_VkCommandPool(toDestroyBoxed[j]);
+                    mCmdPoolInfo.erase(toDestroy[j]);
+                }
+            }
+
+            {
+                std::vector<VkDescriptorPool> toDestroy;
+                std::vector<VkDescriptorPool> toDestroyBoxed;
+                auto it = mDescriptorPoolInfo.begin();
+                while (it != mDescriptorPoolInfo.end()) {
+                    if (it->second.device == devicesToDestroy[i]) {
+                        toDestroy.push_back(it->first);
+                        toDestroyBoxed.push_back(it->second.boxed);
+                    }
+                    ++it;
+                }
+
+                for (int j = 0; j < toDestroy.size(); ++j) {
+                    devicesToDestroyDispatches[i]->vkDestroyDescriptorPool(devicesToDestroy[i], toDestroy[j], 0);
+                    delete_VkDescriptorPool(toDestroyBoxed[j]);
+                    mDescriptorPoolInfo.erase(toDestroy[j]);
+                }
+            }
+
+            {
+                std::vector<VkDescriptorSetLayout> toDestroy;
+                std::vector<VkDescriptorSetLayout> toDestroyBoxed;
+                auto it = mDescriptorSetLayoutInfo.begin();
+                while (it != mDescriptorSetLayoutInfo.end()) {
+                    if (it->second.device == devicesToDestroy[i]) {
+                        toDestroy.push_back(it->first);
+                        toDestroyBoxed.push_back(it->second.boxed);
+                    }
+                    ++it;
+                }
+
+                for (int j = 0; j < toDestroy.size(); ++j) {
+                    devicesToDestroyDispatches[i]->vkDestroyDescriptorSetLayout(devicesToDestroy[i], toDestroy[j], 0);
+                    delete_VkDescriptorSetLayout(toDestroyBoxed[j]);
+                    mDescriptorSetLayoutInfo.erase(toDestroy[j]);
+                }
             }
         }
 
@@ -5459,6 +5563,8 @@ private:
     };
 
     struct CommandPoolInfo {
+        VkDevice device = 0;
+        VkCommandPool boxed = 0;
         std::unordered_set<VkCommandBuffer> cmdBuffers = {};
     };
 
@@ -5770,11 +5876,15 @@ private:
     };
 
     struct DescriptorSetLayoutInfo  {
+        VkDevice device = 0;
+        VkDescriptorSetLayout boxed = 0;
         VkDescriptorSetLayoutCreateInfo createInfo;
         std::vector<VkDescriptorSetLayoutBinding> bindings;
     };
 
     struct DescriptorPoolInfo {
+        VkDevice device = 0;
+        VkDescriptorPool boxed = 0;
         struct PoolState {
             VkDescriptorType type;
             uint32_t descriptorCount;
