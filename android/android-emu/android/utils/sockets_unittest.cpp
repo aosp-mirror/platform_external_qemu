@@ -13,8 +13,12 @@
 
 #include <gtest/gtest.h>
 
-
+// BUG: 178218218
+#ifdef __APPLE__
+TEST(SockAddress, DISABLED_ResolveAndToString) {
+#else
 TEST(SockAddress, ResolveAndToString) {
+#endif
     SockAddress s[1];
     char tmp[256];
 
