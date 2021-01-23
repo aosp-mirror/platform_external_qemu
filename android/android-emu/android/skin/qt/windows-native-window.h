@@ -16,3 +16,4 @@
 extern "C"
 #endif
 int numHeldMouseButtons();
+unsigned int getPixelValue(int x, int y);
