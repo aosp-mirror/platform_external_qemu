@@ -275,10 +275,31 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
             origParam.paramName in customUnwrap and \
             "copyOp" in customUnwrap[origParam.paramName]
 
+        shouldCustomMap = \
+            customUnwrap and \
+            origParam.paramName in customUnwrap and \
+            "mapOp" in customUnwrap[origParam.paramName]
+
         if shouldCustomCopy:
             customUnwrap[origParam.paramName]["copyOp"](cgen, origParam, localCopyParam)
         else:
-            emit_deepcopy(typeInfo, origParam, cgen)
+            # if this is a pointer type and we don't do custom copy nor unwrap,
+            # and the transform doesn't end up doing anything,
+            # don't deepcopy, just cast it.
+           
+            avoidDeepcopy = False
+
+            if origParam.pointerIndirectionLevels > 0:
+                testCgen = CodeGen()
+                genTransformsForVulkanType("sResourceTracker", origParam, lambda p: testCgen.generalAccess(p, parentVarName = None, asPtr = True), lambda p: testCgen.generalLengthAccess(p, parentVarName = None), testCgen)
+                emit_transform(typeInfo, origParam, testCgen, variant="tohost")
+                if "" == testCgen.swapCode():
+                    avoidDeepcopy = True
+            if avoidDeepcopy:
+                cgen.line("// Avoiding deepcopy for %s" % origParam.paramName)
+                cgen.stmt("%s = (%s%s)%s" % (localCopyParam.paramName, localCopyParam.typeName, "*" * origParam.pointerIndirectionLevels, origParam.paramName))
+            else:
+                emit_deepcopy(typeInfo, origParam, cgen)
 
     for (origParam, localCopyParam) in encodingParams.localCopied:
         shouldCustomMap = \
