@@ -1457,6 +1457,7 @@ message EmulatorFeatureFlagState {
     S3TC_TEXTURE_SUPPORT = 73;
     VIRTIO_MOUSE = 74;
     VIRTCONSOLE_LOGCAT = 75;
+    VULKAN_QUEUE_SUBMIT_WITH_COMMANDS = 76;
     // Next tag: 76
   }
   // Which features were enabled by default or through the server-side config.
