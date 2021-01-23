@@ -27,3 +27,12 @@ int numHeldMouseButtons() {
     }
     return numHeld;
 }
+
+unsigned int getPixelValue(int x, int y) {
+    HDC hdc = GetDC(HWND_DESKTOP);
+    if (!hdc) {
+        return CLR_INVALID;
+    }
+    COLORREF color = GetPixel(hdc, x, y);
+    return color;
+}
