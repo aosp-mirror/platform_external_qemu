@@ -332,6 +332,8 @@ intptr_t RenderThread::main() {
         delete[] fname;
     }
 
+    uint32_t* seqnoPtr = nullptr;
+
     while (1) {
         // Let's make sure we read enough data for at least some processing.
         int packetSize;
@@ -413,6 +415,10 @@ intptr_t RenderThread::main() {
         bool progress;
 
         do {
+
+            if (!seqnoPtr && tInfo.m_puid) {
+                seqnoPtr = FrameBuffer::getFB()->getProcessSequenceNumberPtr(tInfo.m_puid);
+            }
 
             if (mRunInLimitedMode) {
                 sThreadRunLimiter.lock();
