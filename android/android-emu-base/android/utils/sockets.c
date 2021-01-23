@@ -676,14 +676,23 @@ sock_address_from_bsd( SockAddress*  a, const void*  from, size_t  fromlen )
 
 
 int
-sock_address_init_resolve( SockAddress*  a, const char*  hostname, uint16_t  port, int  preferIn6 )
+sock_address_init_resolve( SockAddress*  a, const char*  hostname, uint16_t  port, int  forceIn4, int  forceIn6 )
 {
+    if (forceIn4 && forceIn6) {
+        return set_errno(EINVAL);
+    }
     struct addrinfo   hints[1];
     struct addrinfo*  res;
     int                ret;
 
     memset(hints, 0, sizeof(hints));
-    hints->ai_family   = preferIn6 ? AF_INET6 : AF_UNSPEC;
+    if (forceIn4) {
+        hints->ai_family = AF_INET;
+    } else if (forceIn6) {
+        hints->ai_family = AF_INET6;
+    } else {
+        hints->ai_family = AF_UNSPEC;
+    }
 
     ret = getaddrinfo(hostname, NULL, hints, &res);
     if (ret != 0) {
@@ -725,12 +734,12 @@ sock_address_init_resolve( SockAddress*  a, const char*  hostname, uint16_t  por
         for (r = res; r != NULL; r = r->ai_next) {
             if (r->ai_family == AF_INET && res_ipv4 == NULL) {
                 res_ipv4 = r;
-                if (!preferIn6)
+                if (forceIn4)
                     break;
             }
             else if (r->ai_family == AF_INET6 && res_ipv6 == NULL) {
                 res_ipv6 = r;
-                if (preferIn6)
+                if (forceIn6)
                     break;
             }
         }
@@ -738,7 +747,7 @@ sock_address_init_resolve( SockAddress*  a, const char*  hostname, uint16_t  por
         /* Select the best address in 'r', which will be NULL
          * if there is no corresponding address.
          */
-        if (preferIn6) {
+        if (forceIn6) {
             r = res_ipv6;
             if (r == NULL)
                 r = res_ipv4;
@@ -1434,7 +1443,7 @@ socket_network_client( const char*  host, int  port, SocketType  type )
 {
     SockAddress  addr;
 
-    if (sock_address_init_resolve( &addr, host, port, 0) < 0)
+    if (sock_address_init_resolve( &addr, host, port, 0, 0) < 0)
         return -1;
 
     return socket_in_client( &addr, type );

@@ -443,7 +443,7 @@ proxy_resolve_server( SockAddress*   addr,
     memcpy(name, servername, servernamelen);
     name[servernamelen] = 0;
 
-    if (sock_address_init_resolve( addr, name, serverport, 0 ) < 0) {
+    if (sock_address_init_resolve( addr, name, serverport, 0, 0 ) < 0) {
         PROXY_LOG("%s: can't resolve proxy server name '%s'",
                   __FUNCTION__, name);
         goto Exit;

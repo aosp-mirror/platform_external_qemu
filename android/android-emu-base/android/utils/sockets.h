@@ -254,7 +254,8 @@ char* bufprint_sock_address( char*  p, char*  end, const SockAddress*  a );
 int   sock_address_init_resolve( SockAddress*  a,
                                  const char*   hostname,
                                  uint16_t      port,
-                                 int           preferIn6 );
+                                 int           forceIn4,
+                                 int           forceIn6 );
 
 int  sock_address_get_numeric_info( SockAddress*  a,
                                     char*         host,
