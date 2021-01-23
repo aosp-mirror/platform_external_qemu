@@ -16,3 +16,4 @@ from .unbox import *
 from .baseprotodefs import *
 from .baseprotoconversion import *
 from .decodersnapshot import *
+from .subdecode import *

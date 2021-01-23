@@ -447,6 +447,11 @@ class BumpPool;
                            extraHeader=decoderSnapshotHeaderIncludes,
                            extraImpl=decoderSnapshotImplIncludes,
                            useNamespace=False)
+        self.addHostModule("VkSubDecoder",
+                           extraHeader="",
+                           extraImpl="",
+                           useNamespace=False,
+                           implOnly=True)
 
         self.addWrapper(cereal.VulkanEncoder, "VkEncoder")
         self.addWrapper(cereal.VulkanExtensionStructs, "goldfish_vk_extension_structs_guest")
@@ -467,6 +472,7 @@ class BumpPool;
         self.addWrapper(cereal.VulkanTransform, "goldfish_vk_transform", resourceTrackerTypeName="VkDecoderGlobalState")
         self.addWrapper(cereal.VulkanDecoder, "VkDecoder")
         self.addWrapper(cereal.VulkanDecoderSnapshot, "VkDecoderSnapshot")
+        self.addWrapper(cereal.VulkanSubDecoder, "VkSubDecoder")
 
         self.guestAndroidMkCppFiles = ""
         self.hostCMakeCppFiles = ""
