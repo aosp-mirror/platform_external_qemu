@@ -145,6 +145,11 @@ public:
     Lock lock;
     mutable Store store;
     std::unordered_map<uint64_t, uint64_t> reverseMap;
+    struct DelayedRemove {
+        uint64_t handle;
+        std::function<void()> callback;
+    };
+    std::unordered_map<VkDevice, std::vector<DelayedRemove>> delayedRemoves;
 
     void clear() {
         reverseMap.clear();
@@ -173,6 +178,26 @@ public:
         }
         store.remove(h);
     }
+
+    void removeDelayed(uint64_t h, VkDevice device, std::function<void()> callback) {
+        AutoLock l(lock);
+        delayedRemoves[device].push_back({ h, callback });
+    }
+
+    void processDelayedRemoves(VkDevice device) {
+        AutoLock l(lock);
+        auto it = delayedRemoves.find(device);
+        if (it == delayedRemoves.end()) return;
+        auto& delayedRemovesList = it->second;
+        for (const auto& r : delayedRemovesList) {
+            auto h = r.handle;
+            auto func = r.callback;
+            func();
+            store.remove(h);
+        }
+        delayedRemovesList.clear();
+        delayedRemoves.erase(it);
+     }
 
     T* get(uint64_t h) {
         return (T*)store.get_const(h);
@@ -425,6 +450,28 @@ public:
     }
 
     void vkDestroyInstanceImpl(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
+
+        // Do delayed removes out of the lock, but get the list of devices to destroy inside the lock.
+        {
+            AutoLock lock(mLock);
+            std::vector<VkDevice> devicesToDestroy;
+
+            for (auto it : mDeviceToPhysicalDevice) {
+                auto otherInstance = android::base::find(mPhysicalDeviceToInstance, it.second);
+                if (!otherInstance) continue;
+                if (instance == *otherInstance) {
+                    devicesToDestroy.push_back(it.first);
+                }
+            }
+            lock.unlock();
+
+            // Process delayed removes out of lock
+            for (auto device: devicesToDestroy) {
+                sBoxedHandleManager.processDelayedRemoves(device);
+            }
+        }
+
+
         AutoLock lock(mLock);
 
         teardownInstanceLocked(instance);
@@ -1215,6 +1262,8 @@ public:
 
         auto device = unbox_VkDevice(boxed_device);
 
+        sBoxedHandleManager.processDelayedRemoves(device);
+        
         AutoLock lock(mLock);
 
         destroyDeviceLocked(device, pAllocator);
@@ -3467,6 +3516,17 @@ public:
 
         AutoLock lock(mLock);
 
+        {
+            auto queueInfo = android::base::find(mQueueInfo, queue);
+            if (queueInfo) {
+                VkDevice device = queueInfo->device;
+                lock.unlock();
+                sBoxedHandleManager.processDelayedRemoves(queueInfo->device);
+                lock.lock();
+            }
+        }
+
+        
         for (uint32_t i = 0; i < submitCount; i++) {
             const VkSubmitInfo& submit = pSubmits[i];
             for (uint32_t c = 0; c < submit.commandBufferCount; c++) {
@@ -4199,6 +4259,9 @@ public:
         item.underlying = (uint64_t)underlying; \
         auto res = (type)newGlobalHandle(item, Tag_##type); \
         return res; \
+    } \
+    void delayed_delete_##type(type boxed, VkDevice device, std::function<void()> callback) { \
+        sBoxedHandleManager.removeDelayed((uint64_t)boxed, device, callback); \
     } \
     void delete_##type(type boxed) { \
         sBoxedHandleManager.remove((uint64_t)boxed); \
@@ -6939,17 +7002,29 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
 
 #define DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF(type) \
     type unbox_##type(type boxed) { \
-        return VkDecoderGlobalState::get()->unbox_##type(boxed); \
+        auto elt = sBoxedHandleManager.get( \
+                (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return VK_NULL_HANDLE; \
+        return (type)elt->underlying; \
     } \
     VulkanDispatch* dispatch_##type(type boxed) { \
-        return VkDecoderGlobalState::get()->dispatch_##type(boxed); \
+        auto elt = sBoxedHandleManager.get( \
+                (uint64_t)(uintptr_t)boxed); \
+        if (!elt) { fprintf(stderr, "%s: err not found boxed %p\n", __func__, boxed); return nullptr; } \
+        return elt->dispatch; \
     } \
     void delete_##type(type boxed) { \
         if (!boxed) return; \
-        VkDecoderGlobalState::get()->delete_##type(boxed); \
+        auto elt = sBoxedHandleManager.get( \
+            (uint64_t)(uintptr_t)boxed); \
+        if (!elt) return; \
+        releaseOrderMaintInfo(elt->ordMaintInfo); \
+        sBoxedHandleManager.remove((uint64_t)boxed); \
     } \
     type unboxed_to_boxed_##type(type unboxed) { \
-        return VkDecoderGlobalState::get()->unboxed_to_boxed_##type(unboxed); \
+        AutoLock lock(sBoxedHandleManager.lock); \
+        return (type)sBoxedHandleManager.getBoxedFromUnboxedLocked( \
+                (uint64_t)(uintptr_t)unboxed); \
     } \
 
 #define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DEF(type) \
@@ -6958,16 +7033,22 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
     } \
     void delete_##type(type boxed) { \
         if (!boxed) return; \
-        VkDecoderGlobalState::get()->delete_##type(boxed); \
+        sBoxedHandleManager.remove((uint64_t)boxed); \
     } \
-    type unbox_##type(type boxed) { \
+    void delayed_delete_##type(type boxed, VkDevice device, std::function<void()> callback) { \
+        sBoxedHandleManager.removeDelayed((uint64_t)boxed, device, callback); \
+    } \
+    __attribute__((always_inline)) type unbox_##type(type boxed) { \
         if (!boxed) return boxed; \
         auto elt = sBoxedHandleManager.get( \
                 (uint64_t)(uintptr_t)boxed); \
+        if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); return VK_NULL_HANDLE; } \
         return (type)elt->underlying; \
     } \
     type unboxed_to_boxed_non_dispatchable_##type(type unboxed) { \
-        return VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_##type(unboxed); \
+        AutoLock lock(sBoxedHandleManager.lock); \
+        return (type)sBoxedHandleManager.getBoxedFromUnboxedLocked( \
+                (uint64_t)(uintptr_t)unboxed); \
     } \
 
 GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DEF)
