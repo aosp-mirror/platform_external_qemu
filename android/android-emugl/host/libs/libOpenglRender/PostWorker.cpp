@@ -70,7 +70,6 @@ void PostWorker::postImpl(ColorBuffer* cb) {
     if (!m_mainThreadPostingOnly && !m_initialized) {
         m_initialized = mBindSubwin();
     }
-    printf("post cb %d\n", cb->getHndl());
     float dpr = mFb->getDpr();
     int windowWidth = mFb->windowWidth();
     int windowHeight = mFb->windowHeight();
@@ -163,7 +162,6 @@ void PostWorker::postImpl(ColorBuffer* cb) {
     }
 
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
-    printf("post done\n");
 }
 
 // Called whenever the subwindow needs a refresh (FrameBuffer::setupSubWindow).
@@ -200,7 +198,6 @@ void PostWorker::composeImpl(ComposeDevice* p) {
     if (!m_mainThreadPostingOnly && !m_initialized) {
         m_initialized = mBindSubwin();
     }
-    printf("compose start\n");
     ComposeLayer* l = (ComposeLayer*)p->layer;
     GLint vport[4] = { 0, };
     s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
@@ -244,7 +241,6 @@ void PostWorker::composeImpl(ComposeDevice* p) {
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
     mFb->getTextureDraw()->cleanupForDrawLayer();
-    printf("compose done\n");
 }
 
 void PostWorker::composev2Impl(ComposeDevice_v2* p) {
@@ -252,7 +248,6 @@ void PostWorker::composev2Impl(ComposeDevice_v2* p) {
     if (!m_mainThreadPostingOnly && !m_initialized) {
         m_initialized = mBindSubwin();
     }
-    printf("compose v2 start\n");
     ComposeLayer* l = (ComposeLayer*)p->layer;
     GLint vport[4] = { 0, };
     s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
@@ -295,7 +290,6 @@ void PostWorker::composev2Impl(ComposeDevice_v2* p) {
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
     mFb->getTextureDraw()->cleanupForDrawLayer();
-    printf("compose v2 done\n");
 }
 
 void PostWorker::bind() {

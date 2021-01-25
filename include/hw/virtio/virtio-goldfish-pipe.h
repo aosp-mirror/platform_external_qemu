@@ -18,8 +18,6 @@ void virgl_write_fence(void *opaque, uint32_t fence);
 
 void virtio_goldfish_pipe_reset(void* hwpipe, void* hostpipe);
 
-void virtio_renderer_flush(uint32_t res_handle);
-
 #define VIRTIO_GOLDFISH_EXPORT_API
 #ifdef VIRTIO_GOLDFISH_EXPORT_API
 
