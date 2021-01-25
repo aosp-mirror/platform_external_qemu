@@ -1,0 +1,8 @@
+Lint+1: Lint 🤖 <ayeaye-gerrit@google.com>
+Presubmit-Verified+2: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Yilong Li <liyl@google.com>
+Submitted-by: Lingfeng Yang <lfy@google.com>
+Submitted-at: Mon, 25 Jan 2021 15:35:32 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1558897
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
