@@ -1213,7 +1213,15 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
     if (!fb) {
         return -1;
     }
-    return fb->compose(bufferSize, buffer);
+    return fb->compose(bufferSize, buffer, true);
+}
+
+static int rcComposeWithoutPost(uint32_t bufferSize, void* buffer) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+    return fb->compose(bufferSize, buffer, false);
 }
 
 static int rcCreateDisplay(uint32_t* displayId) {
@@ -1429,9 +1437,16 @@ static void rcComposeAsync(uint32_t bufferSize, void* buffer) {
     if (!fb) {
         return;
     }
-    fb->compose(bufferSize, buffer);
+    fb->compose(bufferSize, buffer, true);
 }
 
+static void rcComposeAsyncWithoutPost(uint32_t bufferSize, void* buffer) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+    fb->compose(bufferSize, buffer, false);
+}
 static void rcDestroySyncKHRAsyncy(uint64_t handle) {
     FenceSync* fenceSync = FenceSync::getFromHandle(handle);
     if (!fenceSync) return;
