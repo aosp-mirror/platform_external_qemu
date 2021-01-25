@@ -74,3 +74,10 @@ EQUALITY_ON_FAIL_VAR = "onFail"
 EQUALITY_ON_FAIL_VAR_TYPE = makeVulkanTypeSimple(False, "OnFailCompareFunc", 0,
                                                  EQUALITY_ON_FAIL_VAR)
 EQUALITY_RET_TYPE = makeVulkanTypeSimple(False, "void", 0)
+
+RELAXED_APIS = [
+    "vkWaitForFences",
+    "vkQueueWaitIdle",
+    "vkDeviceWaitIdle",
+    "vkQueueFlushCommandsGOOGLE",
+]
