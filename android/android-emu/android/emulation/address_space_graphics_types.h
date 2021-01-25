@@ -288,7 +288,7 @@ namespace asg {
 // read in to_host. Will make the consumer sleep
 // until another Ping(NotifyAvailable).
 using OnUnavailableReadCallback =
-    std::function<int()>;
+    std::function<int(uint32_t*, uint8_t*)>;
 
 // Unpacks a type 2 transfer into host pointer and size.
 using GetPtrCallback =
@@ -373,6 +373,10 @@ enum asg_command {
 
     // Retrieve the config.
     ASG_GET_CONFIG = 4,
+
+    // Ping with data.
+    // can read data via toHost
+    ASG_NOTIFY_AVAILABLE_WITH_DATA = 5,
 };
 
 } // extern "C"
