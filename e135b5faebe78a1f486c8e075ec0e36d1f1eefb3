@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c41fe428_c2a3f25e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-01-25T23:02:09Z",
+      "side": 1,
+      "message": "nit: std::move()",
+      "range": {
+        "startLine": 184,
+        "startChar": 46,
+        "endLine": 184,
+        "endChar": 54
+      },
+      "revId": "e135b5faebe78a1f486c8e075ec0e36d1f1eefb3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "72790236_7bb22399",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 4264,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-01-25T23:02:09Z",
+      "side": 1,
+      "message": "std::move(callback); copying std::function objects could be expensive",
+      "range": {
+        "startLine": 4264,
+        "startChar": 67,
+        "endLine": 4264,
+        "endChar": 75
+      },
+      "revId": "e135b5faebe78a1f486c8e075ec0e36d1f1eefb3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
