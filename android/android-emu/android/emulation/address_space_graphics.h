@@ -16,6 +16,9 @@
 #include "android/emulation/AddressSpaceService.h"
 
 #include "android/base/ring_buffer.h"
+#include "android/base/containers/BufferQueue.h"
+#include "android/base/containers/SmallVector.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/emulation/address_space_device.h"
@@ -48,6 +51,7 @@ public:
     static void clear();
 
     void perform(AddressSpaceDevicePingInfo *info) override;
+    void performWithData(AddressSpaceDevicePingWithDataInfo *info) override;
     AddressSpaceDeviceType getDeviceType() const override;
 
     void save(base::Stream* stream) const override;
@@ -69,6 +73,7 @@ public:
     };
 
 private:
+    void wakeupWithData(uint32_t data_size, const uint8_t* data);
 
     void saveRingConfig(base::Stream* stream, const struct asg_ring_config& config) const;
     void saveAllocation(base::Stream* stream, const Allocation& alloc) const;
@@ -78,16 +83,25 @@ private:
     void loadAllocation(base::Stream* stream, Allocation& alloc, AllocType type);
 
     // For consumer communication
-    enum ConsumerCommand {
+    enum ConsumerCommandType {
         Wakeup = 0,
         Sleep = 1,
         Exit = 2,
         PausePreSnapshot = 3,
         ResumePostSnapshot = 4,
+        WakeupWithData = 5,
     };
 
+    bool sendConsumerMessage(ConsumerCommandType type, uint32_t dataSize = 0, const uint8_t* dataPtr = 0, bool blocking = true) const;
+    bool receiveConsumerMessage(ConsumerCommandType* type, uint32_t* dataSizeOut = 0, uint8_t* dataPtrOut = 0, bool blocking = true);
+
+    // struct ConsumerCommand {
+    //     ConsumerCommandType type;
+    //     android::base::SmallFixedVector<uint8_t, 4096> data;
+    // };
+
     // For ConsumerCallbacks
-    int onUnavailableRead();
+    int onUnavailableRead(uint32_t* dataSizeOut, uint8_t* dataOut, bool blocking);
 
     // Data layout
     uint32_t mVersion = 1;
@@ -102,7 +116,13 @@ private:
     void* mCurrentConsumer = 0;
 
     // Communication with consumer
-    mutable base::MessageChannel<ConsumerCommand, 4> mConsumerMessages;
+    // mutable base::MessageChannel<ConsumerCommand, 1024> mConsumerMessagesOld;
+
+    using FlushBuffer = base::SmallFixedVector<uint8_t, 4096>;
+    mutable base::Lock mLock;
+    mutable base::BufferQueue<FlushBuffer> mConsumerMessages;
+    FlushBuffer mRecvBuf;
+
     uint32_t mExiting = 0;
     // For onUnavailableRead
     uint32_t mUnavailableReadCount = 0;

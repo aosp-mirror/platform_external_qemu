@@ -487,6 +487,9 @@ const uint32_t kVirtioGpuAddressSpacePing = 0x1002;
 // out: same as input then | out: error
 const uint32_t kVirtioGpuAddressSpacePingWithResponse = 0x1003;
 
+// kVirtioGpuAddressSpacePingWithData | offset_lo | offset_hi | size_lo | size_hi | metadata_lo | metadata_hi | version | wait_fd | wait_flags | direction | data_size | [data]
+const uint32_t kVirtioGpuAddressSpacePingWithData = 0x1004;
+
 // Commands for native sync fd
 const uint32_t kVirtioGpuNativeSyncCreateExportFd = 0x9000;
 const uint32_t kVirtioGpuNativeSyncCreateImportFd = 0x9001;
@@ -514,6 +517,9 @@ public:
         if (!mAddressSpaceDeviceControlOps) {
             VGP_FATAL("Could not get address space device control ops!");
         }
+
+        mPingWithDataInfoBuffer = malloc(sizeof(android::emulation::AddressSpaceDevicePingWithDataInfo) + 4096);
+        mPingWithDataInfo = new(mPingWithDataInfoBuffer) android::emulation::AddressSpaceDevicePingWithDataInfo;
         VGPLOG("done");
         return 0;
     }
@@ -761,6 +767,43 @@ public:
                     response,
                     sizeof(response) / sizeof(uint32_t),
                     resp_resid);
+                break;
+            }
+            case kVirtioGpuAddressSpacePingWithData: {
+                uint32_t phys_addr_lo = dwords[1];
+                uint32_t phys_addr_hi = dwords[2];
+
+                uint32_t size_lo = dwords[3];
+                uint32_t size_hi = dwords[4];
+
+                uint32_t metadata_lo = dwords[5];
+                uint32_t metadata_hi = dwords[6];
+
+                uint32_t wait_phys_addr_lo = dwords[7];
+                uint32_t wait_phys_addr_hi = dwords[8];
+
+                uint32_t wait_flags = dwords[9];
+                uint32_t direction = dwords[10];
+
+                uint32_t data_size_lo = dwords[11];
+                uint32_t data_size_hi = dwords[12];
+
+                uint8_t* data_begin = (uint8_t*)(dwords + 13);
+
+                mPingWithDataInfo->phys_addr = convert32to64(phys_addr_lo, phys_addr_hi);
+                mPingWithDataInfo->size = convert32to64(size_lo, size_hi);
+                mPingWithDataInfo->metadata = convert32to64(metadata_lo, metadata_hi);
+                mPingWithDataInfo->wait_phys_addr = convert32to64(wait_phys_addr_lo, wait_phys_addr_hi);
+                mPingWithDataInfo->wait_flags = wait_flags;
+                mPingWithDataInfo->direction = direction;
+                mPingWithDataInfo->data_size = convert32to64(data_size_lo, data_size_hi);
+
+                memcpy(mPingWithDataInfo->data, data_begin, mPingWithDataInfo->data_size);
+
+                AutoLock lock(mLock);
+                mAddressSpaceDeviceControlOps->ping_with_data_at_hva(
+                    getAddressSpaceHandleLocked(ctxId),
+                    mPingWithDataInfo);
                 break;
             }
             default:
@@ -1468,6 +1511,9 @@ private:
     // Other fences that aren't related to the fence covering a pipe buffer
     // submission.
     std::deque<int> mFenceDeque;
+
+    void* mPingWithDataInfoBuffer = nullptr;
+    android::emulation::AddressSpaceDevicePingWithDataInfo* mPingWithDataInfo;
 };
 
 static LazyInstance<PipeVirglRenderer> sRenderer = LAZY_INSTANCE_INIT;
