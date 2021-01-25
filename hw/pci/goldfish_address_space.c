@@ -538,6 +538,7 @@ enum address_space_register_id {
     ADDRESS_SPACE_REGISTER_HANDLE = 40,
     ADDRESS_SPACE_REGISTER_PHYS_START_LOW = 44,
     ADDRESS_SPACE_REGISTER_PHYS_START_HIGH = 48,
+    ADDRESS_SPACE_REGISTER_PING_WITH_DATA = 52,
 };
 
 enum address_space_command_id {
@@ -750,6 +751,9 @@ static uint64_t address_space_control_read_locked(struct address_space_state* st
     case ADDRESS_SPACE_REGISTER_PHYS_START_HIGH:
         AS_DPRINT("read high bits of phys start: 0x%x", state->registers.phys_start_high);
         return state->registers.phys_start_high;
+    case ADDRESS_SPACE_REGISTER_PING_WITH_DATA:
+        fprintf(stderr, "%s: warning: kernel tried to read PING_WITH_DATA register!\n", __func__);
+        return state->registers.ping;
     }
 
     /* Should not happen */
@@ -826,6 +830,10 @@ static void address_space_control_write_locked(void *opaque,
     case ADDRESS_SPACE_REGISTER_PHYS_START_HIGH:
         AS_DPRINT("write phys start high 0x%x", (uint32_t)val);
         state->registers.phys_start_high = (uint32_t)val;
+        break;
+    case ADDRESS_SPACE_REGISTER_PING_WITH_DATA:
+        AS_DPRINT("ping for handle: %u", (uint32_t)val);
+        qemu_get_address_space_device_control_ops()->ping_with_data(val);
         break;
 
     }

@@ -41,7 +41,8 @@ RingStream::RingStream(
     size_t bufsize) :
     IOStream(bufsize),
     mContext(context),
-    mCallbacks(callbacks) { }
+    mCallbacks(callbacks) { mWakeupWithDataBuffer.resize(4096); }
+
 RingStream::~RingStream() = default;
 
 int RingStream::getNeededFreeTailSize() const {
@@ -131,7 +132,18 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
 
         mReadBuffer.clear();
 
-        // no read buffer left...
+        if (mWakeupWithDataRemaining) {
+            size_t avail = std::min<size_t>(wanted - count, mWakeupWithDataRemaining);
+            memcpy(dst + count,
+                   mWakeupWithDataBuffer.data() + mWakeupWithDataConsumed,
+                   avail);
+            count += avail;
+            mWakeupWithDataConsumed += avail;
+            mWakeupWithDataRemaining -= avail;
+            continue;
+        }
+
+        // no read buffer nor wakeup-with-data left...
         if (count > 0) {  // There is some data to return.
             break;
         }
@@ -210,7 +222,11 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
                 return nullptr;
             }
 
-            int unavailReadResult = mCallbacks.onUnavailableRead();
+            uint32_t wakeupWithDataSize;
+            uint8_t* wakeupWithDataPtr = mWakeupWithDataBuffer.data();
+            mWakeupWithDataRemaining = wakeupWithDataSize;
+            mWakeupWithDataConsumed = 0;
+            int unavailReadResult = mCallbacks.onUnavailableRead(&wakeupWithDataPtr, wakeupWithDataPtr);
 
             if (-1 == unavailReadResult) {
                 mShouldExit = true;
@@ -224,6 +240,12 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             // resume post snapshot
             if (-3 == unavailReadResult) {
                 mShouldExitForSnapshot = false;
+            }
+
+            // Wakeup with data
+            if (-4 == unavailReadResult) {
+                consumeWakeupWithData(wakeupWithDataSize, wakeupWithDataPtr, &current, ptrEnd);
+                spins = 0;
             }
 
             continue;
@@ -335,6 +357,11 @@ void RingStream::type3Read(
             *current, actuallyRead,
             1, &mContext.ring_config->in_error);
 
+    *current += actuallyRead;
+    *count += actuallyRead;
+}
+
+void RingStream::consumeWakeupWithData(uint32_t size, const uint8_t* data, char** current, const char* ptrEnd) {
     *current += actuallyRead;
     *count += actuallyRead;
 }
