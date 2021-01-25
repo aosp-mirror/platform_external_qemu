@@ -50,10 +50,22 @@ struct AddressSpaceDevicePingInfo {
     uint32_t direction;
 };
 
+struct AddressSpaceDevicePingWithDataInfo {
+    uint64_t phys_addr;
+    uint64_t size;
+    uint64_t metadata;
+    uint64_t wait_phys_addr;
+    uint32_t wait_flags;
+    uint32_t direction;
+    uint64_t data_size;
+    uint8_t data[0];
+};
+
 class AddressSpaceDeviceContext {
 public:
     virtual ~AddressSpaceDeviceContext() {}
     virtual void perform(AddressSpaceDevicePingInfo *info) = 0;
+    virtual void performWithData(AddressSpaceDevicePingWithDataInfo *info) { perform(reinterpret_cast<AddressSpaceDevicePingInfo*>(info)); }
     virtual AddressSpaceDeviceType getDeviceType() const = 0;
     virtual void save(base::Stream* stream) const = 0;
     virtual bool load(base::Stream* stream) = 0;

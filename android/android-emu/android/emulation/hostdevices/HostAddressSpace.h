@@ -49,6 +49,7 @@ public:
     uint64_t offsetToPhysAddr(uint64_t offset) const;
 
     void ping(uint32_t handle, emulation::AddressSpaceDevicePingInfo* pingInfo);
+    void pingWithData(uint32_t handle, emulation::AddressSpaceDevicePingWithDataInfo* pingInfo);
 
     int claimShared(uint32_t handle, uint64_t off, uint64_t size);
     int unclaimShared(uint32_t handle, uint64_t off);
