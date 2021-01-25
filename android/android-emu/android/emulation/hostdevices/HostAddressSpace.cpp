@@ -35,6 +35,7 @@ using android::base::LazyInstance;
 using android::base::Lock;
 using android::base::SubAllocator;
 using android::emulation::AddressSpaceDevicePingInfo;
+using android::emulation::AddressSpaceDevicePingWithDataInfo;
 
 namespace android {
 
@@ -62,7 +63,8 @@ public:
         AutoLock lock(mLock);
         auto& entry = mEntries[handle];
 
-        entry.pingInfo = new AddressSpaceDevicePingInfo;
+        void* buffer = malloc(sizeof(AddressSpaceDevicePingWithDataInfo) + 4096);
+        entry.pingInfo = new(buffer) AddressSpaceDevicePingWithDataInfo;
 
         lock.unlock();
 
@@ -197,6 +199,24 @@ public:
 
         lock.lock();
         memcpy(pingInfo, entry.pingInfo, sizeof(AddressSpaceDevicePingInfo));
+    }
+
+    void pingWithData(uint32_t handle, PingWithDataInput* input) {
+        AutoLock lock(mLock);
+        auto& entry = mEntries[handle];
+        uint8_t* inputData = (uint8_t*)(uintptr_t)input->data_ptr;
+
+        memcpy(entry.pingInfo, input, sizeof(AddressSpaceDevicePingWithDataInfo));
+        memcpy(
+            ((uint8_t*)entry.pingInfo) + offsetof(AddressSpaceDevicePingWithDataInfo, data),
+            inputData,
+            entry.pingInfo->data_size);
+
+        lock.unlock();
+
+        mControlOps->ping_with_data(handle);
+
+        lock.lock();
     }
 
     int claimShared(uint32_t handle, uint64_t off, uint64_t size) {
@@ -376,7 +396,7 @@ private:
     android::base::SubAllocator mPhysicalOffsetAllocator;
 
     struct Entry {
-        AddressSpaceDevicePingInfo* pingInfo = nullptr;
+        AddressSpaceDevicePingWithDataInfo* pingInfo = nullptr;
         MemoryMap blocks;
     };
 
@@ -435,6 +455,10 @@ uint64_t HostAddressSpaceDevice::offsetToPhysAddr(uint64_t offset) const {
 
 void HostAddressSpaceDevice::ping(uint32_t handle, AddressSpaceDevicePingInfo* pingInfo) {
     mImpl->ping(handle, pingInfo);
+}
+
+void HostAddressSpaceDevice::pingWithData(uint32_t handle, PingWithDataInput* pingInfo) {
+    mImpl->pingWithData(handle, pingInfo);
 }
 
 int HostAddressSpaceDevice::claimShared(uint32_t handle, uint64_t off, uint64_t size) {

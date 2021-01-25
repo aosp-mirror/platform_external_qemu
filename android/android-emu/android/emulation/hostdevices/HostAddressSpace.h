@@ -50,6 +50,19 @@ public:
 
     void ping(uint32_t handle, emulation::AddressSpaceDevicePingInfo* pingInfo);
 
+    struct PingWithDataInput {
+        uint64_t offset;
+        uint64_t size;
+        uint64_t metadata;
+        uint32_t version;
+        uint32_t wait_fd;
+        uint32_t wait_flags;
+        uint32_t direction;
+        uint64_t data_size;
+        uint64_t data_ptr;
+    };
+    void pingWithData(uint32_t handle, PingWithDataInput* pingInput);
+
     int claimShared(uint32_t handle, uint64_t off, uint64_t size);
     int unclaimShared(uint32_t handle, uint64_t off);
 

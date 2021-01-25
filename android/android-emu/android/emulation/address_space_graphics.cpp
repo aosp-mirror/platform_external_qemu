@@ -567,13 +567,16 @@ void AddressSpaceGraphicsContext::setConsumer(
 
 AddressSpaceGraphicsContext::AddressSpaceGraphicsContext(bool isVirtio, bool fromSnapshot) :
     mConsumerCallbacks((ConsumerCallbacks){
-        [this] { return onUnavailableRead(); },
+        [this](uint32_t* dataSizeOut, uint8_t* dataPtr, bool blocking) {
+            return onUnavailableRead(dataSizeOut, dataPtr, blocking);
+        },
         [](uint64_t physAddr) {
             return (char*)sGlobals->controlOps()->get_host_ptr(physAddr);
         },
     }),
     mConsumerInterface(sGlobals->getConsumerInterface()),
-    mIsVirtio(isVirtio) {
+    mIsVirtio(isVirtio),
+    mConsumerMessages(1024, mLock) {
 
     if (fromSnapshot) {
         // Use load() instead to initialize
@@ -619,7 +622,7 @@ AddressSpaceGraphicsContext::~AddressSpaceGraphicsContext() {
     if (mCurrentConsumer) {
         mExiting = 1;
         *(mHostContext.host_state) = ASG_HOST_STATE_EXIT;
-        mConsumerMessages.send(ConsumerCommand::Exit);
+        sendConsumerMessage(ConsumerCommandType::Exit);
         mConsumerInterface.destroy(mCurrentConsumer);
     }
 
@@ -651,53 +654,81 @@ void AddressSpaceGraphicsContext::perform(AddressSpaceDevicePingInfo* info) {
         break;
     }
     case ASG_NOTIFY_AVAILABLE:
-        mConsumerMessages.trySend(ConsumerCommand::Wakeup);
+        sendConsumerMessage(ConsumerCommandType::Wakeup, 0, 0, false /* non blocking */);
         info->metadata = 0;
         break;
     case ASG_GET_CONFIG:
         *mHostContext.ring_config = mSavedConfig;
         info->metadata = 0;
         break;
+    case ASG_NOTIFY_AVAILABLE_WITH_DATA:
+        fprintf(stderr, "%s: Fatal, cannot use normal perform for ASG_NOTIFY_AVAILABLE_WITH_DATA\n", __func__);
+        abort();
+        break;
     }
 }
 
-int AddressSpaceGraphicsContext::onUnavailableRead() {
-    static const uint32_t kMaxUnavailableReads = 8;
+void AddressSpaceGraphicsContext::performWithData(AddressSpaceDevicePingWithDataInfo* info) {
+    switch (static_cast<asg_command>(info->metadata)) {
+    case ASG_NOTIFY_AVAILABLE_WITH_DATA:
+        wakeupWithData(info->data_size, info->data);
+        break;
+    default:
+        fprintf(stderr, "%s: unsupported command: 0x%x\n", __func__, (uint32_t)info->metadata);
+        abort();
+    }
+}
 
+int AddressSpaceGraphicsContext::onUnavailableRead(uint32_t* dataOutSize, uint8_t* dataOut, bool blocking) {
+    static const uint32_t kMaxUnavailableReads = 0;
+    ConsumerCommandType type;
+    bool receiveRes;
+
+unavailTop:
     ++mUnavailableReadCount;
-    ring_buffer_yield();
-
-    ConsumerCommand cmd;
 
     if (mExiting) {
         mUnavailableReadCount = kMaxUnavailableReads;
     }
 
     if (mUnavailableReadCount >= kMaxUnavailableReads) {
-        mUnavailableReadCount = 0;
 
 sleep:
         *(mHostContext.host_state) = ASG_HOST_STATE_NEED_NOTIFY;
-        mConsumerMessages.receive(&cmd);
+        if (blocking) {
+            receiveRes = receiveConsumerMessage(&type, dataOutSize, dataOut, true);
+        } else {
+            receiveRes = receiveConsumerMessage(&type, dataOutSize, dataOut, false);
+        }
 
-        switch (cmd) {
-            case ConsumerCommand::Wakeup:
+        if (!receiveRes) {
+            if (blocking)
+                goto unavailTop;
+
+            return 0;
+        }
+
+        switch (type) {
+            case ConsumerCommandType::Wakeup:
                 *(mHostContext.host_state) = ASG_HOST_STATE_CAN_CONSUME;
                 break;
-            case ConsumerCommand::Exit:
+            case ConsumerCommandType::Exit:
                 *(mHostContext.host_state) = ASG_HOST_STATE_EXIT;
                 return -1;
-            case ConsumerCommand::Sleep:
+            case ConsumerCommandType::Sleep:
                 goto sleep;
-            case ConsumerCommand::PausePreSnapshot:
+            case ConsumerCommandType::PausePreSnapshot:
                 return -2;
-            case ConsumerCommand::ResumePostSnapshot:
+            case ConsumerCommandType::ResumePostSnapshot:
                 return -3;
+            case ConsumerCommandType::WakeupWithData:
+                *(mHostContext.host_state) = ASG_HOST_STATE_CAN_CONSUME;
+                return -4;
             default:
                 crashhandler_die(
                     "AddressSpaceGraphicsContext::onUnavailableRead: "
                     "Unknown command: 0x%x\n",
-                    (uint32_t)cmd);
+                    (uint32_t)type);
         }
 
         return 1;
@@ -712,8 +743,12 @@ AddressSpaceDeviceType AddressSpaceGraphicsContext::getDeviceType() const {
 void AddressSpaceGraphicsContext::preSave() const {
     if (mCurrentConsumer) {
         mConsumerInterface.preSave(mCurrentConsumer);
-        mConsumerMessages.send(ConsumerCommand::PausePreSnapshot);
+        sendConsumerMessage(ConsumerCommandType::PausePreSnapshot, 0, 0);
     }
+}
+
+void AddressSpaceGraphicsContext::wakeupWithData(uint32_t data_size, const uint8_t* data) {
+    sendConsumerMessage(ConsumerCommandType::WakeupWithData, data_size, data);
 }
 
 void AddressSpaceGraphicsContext::save(base::Stream* stream) const {
@@ -738,7 +773,7 @@ void AddressSpaceGraphicsContext::save(base::Stream* stream) const {
 
 void AddressSpaceGraphicsContext::postSave() const {
     if (mCurrentConsumer) {
-        mConsumerMessages.send(ConsumerCommand::ResumePostSnapshot);
+        sendConsumerMessage(ConsumerCommandType::ResumePostSnapshot);
         mConsumerInterface.postSave(mCurrentConsumer);
     }
 }
@@ -833,6 +868,60 @@ void AddressSpaceGraphicsContext::loadAllocation(base::Stream* stream, Allocatio
 
     sGlobals->fillAllocFromLoad(alloc, type);
 }
+
+bool AddressSpaceGraphicsContext::sendConsumerMessage(AddressSpaceGraphicsContext::ConsumerCommandType type, uint32_t dataSize, const uint8_t* dataPtr, bool blocking) const {
+    FlushBuffer buffer;
+    buffer.resize_noinit(dataSize + 4);
+    memcpy(buffer.data(), &type, sizeof(uint32_t));
+
+    if (dataPtr) {
+        memcpy(buffer.data() + 4, dataPtr, dataSize);
+    }
+
+    base::BufferQueueResult res;
+
+    if (blocking) {
+        {
+            AutoLock lock(mLock);
+            res = mConsumerMessages.pushLocked(std::move(buffer));
+        }
+        while (res != base::BufferQueueResult::Ok) {
+            AutoLock lock(mLock);
+            res = mConsumerMessages.pushLocked(std::move(buffer));
+        }
+    } else {
+        AutoLock lock(mLock);
+        res = mConsumerMessages.tryPushLocked(std::move(buffer));
+    }
+
+    return res == base::BufferQueueResult::Ok;
+}
+
+bool AddressSpaceGraphicsContext::receiveConsumerMessage(AddressSpaceGraphicsContext::ConsumerCommandType* type, uint32_t* dataSizeOut, uint8_t* dataPtrOut, bool blocking) {
+
+    base::BufferQueueResult res;
+    if (blocking) {
+        AutoLock lock(mLock);
+        res = mConsumerMessages.popLocked(&mRecvBuf);
+    } else {
+        AutoLock lock(mLock);
+        res = mConsumerMessages.tryPopLocked(&mRecvBuf);
+    }
+
+    if (res != base::BufferQueueResult::Ok) {
+        return false;
+    }
+
+    memcpy(type, mRecvBuf.data(), sizeof(uint32_t));
+
+    if (dataSizeOut) *dataSizeOut = mRecvBuf.size() - 4;
+    if (dataPtrOut) {
+        memcpy(dataPtrOut, mRecvBuf.data() + 4, mRecvBuf.size() - 4);
+    }
+
+    return true;
+}
+
 
 }  // namespace asg
 }  // namespace emulation

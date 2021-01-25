@@ -370,6 +370,7 @@ public:
             mContext(context),
             mCallbacks(callbacks),
             mThread([this] { threadFunc(); }) {
+            mWakeupWithDataBuffer.resize(4096);
             mThread.start();
         }
 
@@ -450,7 +451,9 @@ public:
             } else if (largeAvail) {
                 res = type3Read(largeAvail);
             } else {
-                res = mCallbacks.onUnavailableRead();
+                uint32_t wakeupDataSize;
+                res = mCallbacks.onUnavailableRead(&wakeupDataSize, mWakeupWithDataBuffer.data(), true /* blocking */);
+                EXPECT_EQ(0, wakeupDataSize);
             }
 
             handleRoundTrip();
@@ -543,6 +546,7 @@ public:
         FunctorThread mThread;
         std::vector<char> mReadBuffer;
         std::vector<char> mWriteBuffer;
+        std::vector<uint8_t> mWakeupWithDataBuffer;
         size_t mReadPos = 0;
         uint32_t mToHostBytes = 0;
         uint32_t mFromHostBytes = 0;
