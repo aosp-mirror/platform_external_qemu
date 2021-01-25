@@ -13,18 +13,27 @@
 
 #include <gtest/gtest.h>
 
-// BUG: 178218218
-#ifdef __APPLE__
-TEST(SockAddress, DISABLED_ResolveAndToString) {
-#else
-TEST(SockAddress, ResolveAndToString) {
-#endif
+
+TEST(SockAddress, ResolveIp4AndToString) {
     SockAddress s[1];
     char tmp[256];
 
     EXPECT_EQ(0 ,sock_address_init_resolve(s, "216.58.194.164", 53, 0));
-    EXPECT_STREQ("216.58.194.164:53", sock_address_to_string(s, tmp, sizeof(tmp)));
 
+    // An ip4 "hostname" can resolve to an ip6 socket address, depending on OS and
+    // network configuration (see b/178218218). However if this resolved to
+    // an ip4 address we expect this to be an ip4 string.
+    if (s->family == SOCKET_INET) {
+        EXPECT_STREQ("216.58.194.164:53", sock_address_to_string(s, tmp, sizeof(tmp)));
+    }
+}
+
+TEST(SockAddress, ResolveIp6AndToString) {
+    SockAddress s[1];
+    char tmp[256];
+
+    // An ip6 address *ALWAYS* resolves to an ip6 socket address and hence an ip6 string.
     EXPECT_EQ(0 ,sock_address_init_resolve(s, "2001:4860:f802::9b", 53, 0));
+    EXPECT_EQ(SOCKET_IN6, s->family);
     EXPECT_STREQ("[2001:4860:f802::9b]:53", sock_address_to_string(s, tmp, sizeof(tmp)));
 }
