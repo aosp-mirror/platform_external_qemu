@@ -1552,16 +1552,12 @@ extern "C" int main(int argc, char** argv) {
 #endif  // QEMU2_SNAPSHOT_SUPPORT
     }
 
-    const bool createVirtconsoles =
-        opts->virtio_console ||
-        fc::isEnabled(fc::VirtconsoleLogcat);
-
     // Always setup a single serial port, that can be connected
     // either to the 'null' chardev, or the -shell-serial one,
     // which by default will be either 'stdout' (Posix) or 'con:'
     // (Windows).
     const char* const serial =
-        (!createVirtconsoles && (opts->shell || opts->show_kernel)) ?
+        (!opts->virtio_console && (opts->shell || opts->show_kernel)) ?
         opts->shell_serial : "null";
 
     args.add2("-serial", serial);
@@ -2031,10 +2027,15 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
+    const bool createVirtconsoles =
+        opts->virtio_console ||
+        fc::isEnabled(fc::VirtconsoleLogcat);
+
     if (createVirtconsoles) {
         args.add("-chardev");
         args.addFormat("%s,id=forhvc0",
-                       (opts->show_kernel ? "stdio,echo=on" : "null"));
+            ((opts->virtio_console && opts->show_kernel)
+                ? "stdio,echo=on" : "null"));
 
         args.add("-chardev");
         if (fc::isEnabled(fc::VirtconsoleLogcat)) {
