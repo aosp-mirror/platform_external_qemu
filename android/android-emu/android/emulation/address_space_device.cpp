@@ -141,6 +141,63 @@ public:
         }
     }
 
+    void pingWithData(uint32_t handle) {
+        AutoLock lock(mContextsLock);
+        auto& contextDesc = mContexts[handle];
+        AddressSpaceDevicePingWithDataInfo* pingInfo =
+            reinterpret_cast<AddressSpaceDevicePingWithDataInfo*>(contextDesc.pingInfo);
+
+        const uint64_t phys_addr = pingInfo->phys_addr;
+        const uint64_t size = pingInfo->size;
+        const uint64_t metadata = pingInfo->metadata;
+
+        AS_DEVICE_DPRINT(
+                "handle %u data 0x%llx -> %p size %llu meta 0x%llx\n", handle,
+                (unsigned long long)phys_addr,
+                sVmOps->physicalMemoryGetAddr(phys_addr),
+                (unsigned long long)size, (unsigned long long)metadata);
+
+        AddressSpaceDeviceContext *device_context = contextDesc.device_context.get();
+        if (device_context) {
+            fprintf(stderr, "%s: perform with data\n", __func__);
+            device_context->performWithData(pingInfo);
+        } else {
+            // The first ioctl establishes the device type
+            const AddressSpaceDeviceType device_type =
+                static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
+
+            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr, false);
+            pingInfo->metadata = contextDesc.device_context ? 0 : -1;
+        }
+    }
+
+    void pingAtHvaWithData(uint32_t handle, AddressSpaceDevicePingWithDataInfo* pingInfo) {
+        AutoLock lock(mContextsLock);
+        auto& contextDesc = mContexts[handle];
+
+        const uint64_t phys_addr = pingInfo->phys_addr;
+        const uint64_t size = pingInfo->size;
+        const uint64_t metadata = pingInfo->metadata;
+
+        AS_DEVICE_DPRINT(
+                "handle %u data 0x%llx -> %p size %llu meta 0x%llx\n", handle,
+                (unsigned long long)phys_addr,
+                sVmOps->physicalMemoryGetAddr(phys_addr),
+                (unsigned long long)size, (unsigned long long)metadata);
+
+        AddressSpaceDeviceContext *device_context = contextDesc.device_context.get();
+        if (device_context) {
+            device_context->performWithData(pingInfo);
+        } else {
+            // The first ioctl establishes the device type
+            const AddressSpaceDeviceType device_type =
+                static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
+
+            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr, false);
+            pingInfo->metadata = contextDesc.device_context ? 0 : -1;
+        }
+    }
+
     void registerDeallocationCallback(uint64_t gpa, void* context, address_space_device_deallocation_callback_t func) {
         AutoLock lock(mContextsLock);
         auto& currentCallbacks = mDeallocationCallbacks[gpa];
@@ -499,6 +556,15 @@ static const struct AddressSpaceHwFuncs* sAddressSpaceDeviceControlGetHwFuncs() 
     return get_address_space_device_hw_funcs();
 }
 
+static void sAddressSpaceDevicePingWithData(uint32_t handle) {
+    fprintf(stderr, "%s: call\n", __func__);
+    sAddressSpaceDeviceState->pingWithData(handle);
+    fprintf(stderr, "%s: done\n", __func__);
+}
+
+static void sAddressSpaceDevicePingWithDataAtHva(uint32_t handle, void* hva) {
+    sAddressSpaceDeviceState->pingAtHvaWithData(handle, (AddressSpaceDevicePingWithDataInfo*)hva);
+}
 
 } // namespace
 
@@ -520,6 +586,8 @@ static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
     &sAddressSpaceDeviceRegisterDeallocationCallback,  // register_deallocation_callback
     &sAddressSpaceDeviceRunDeallocationCallbacks,      // run_deallocation_callbacks
     &sAddressSpaceDeviceControlGetHwFuncs,             // control_get_hw_funcs
+    &sAddressSpaceDevicePingWithData,                  // ping_with_data
+    &sAddressSpaceDevicePingWithDataAtHva,             // ping_with_data_at_hva
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {

@@ -41,7 +41,8 @@ RingStream::RingStream(
     size_t bufsize) :
     IOStream(bufsize),
     mContext(context),
-    mCallbacks(callbacks) { }
+    mCallbacks(callbacks) { mWakeupWithDataBuffer.resize(4096); mWakeupWithDataRemaining = 0; mWakeupWithDataConsumed = 0; }
+
 RingStream::~RingStream() = default;
 
 int RingStream::getNeededFreeTailSize() const {
@@ -131,7 +132,24 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
 
         mReadBuffer.clear();
 
-        // no read buffer left...
+        if (mWakeupWithDataRemaining) {
+            size_t avail = std::min<size_t>(wanted - count, mWakeupWithDataRemaining);
+            memcpy(dst + count,
+                   mWakeupWithDataBuffer.data() + mWakeupWithDataConsumed,
+                   avail);
+            count += avail;
+
+            uint32_t previewBytes = 4;
+                if (avail < previewBytes) previewBytes = avail;
+                for (uint32_t i = 0; i < previewBytes; ++i) {
+                    fprintf(stderr, "%s: RECVREAD %p 0x%hhx\n", __func__, this, *(((uint8_t*)mWakeupWithDataBuffer.data()) + mWakeupWithDataConsumed + i));
+                }
+            mWakeupWithDataConsumed += avail;
+            mWakeupWithDataRemaining -= avail;
+            continue;
+        }
+
+        // no read buffer nor wakeup-with-data left...
         if (count > 0) {  // There is some data to return.
             break;
         }
@@ -210,7 +228,9 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
                 return nullptr;
             }
 
-            int unavailReadResult = mCallbacks.onUnavailableRead();
+            uint32_t wakeupWithDataSize;
+            uint8_t* wakeupWithDataPtr = mWakeupWithDataBuffer.data();
+            int unavailReadResult = mCallbacks.onUnavailableRead(&wakeupWithDataSize, wakeupWithDataPtr);
 
             if (-1 == unavailReadResult) {
                 mShouldExit = true;
@@ -224,6 +244,29 @@ const unsigned char* RingStream::readRaw(void* buf, size_t* inout_len) {
             // resume post snapshot
             if (-3 == unavailReadResult) {
                 mShouldExitForSnapshot = false;
+            }
+
+            // Wakeup with data
+            if (-4 == unavailReadResult) {
+                fprintf(stderr, "%s: wakeup with data\n", __func__);
+            fprintf(stderr, "%s: wakeup with %d\n", __func__, wakeupWithDataSize);
+            mWakeupWithDataRemaining = wakeupWithDataSize;
+            mWakeupWithDataConsumed = 0;
+                consumeWakeupWithData(wakeupWithDataSize, wakeupWithDataPtr, &count, &current, ptrEnd);
+                uint32_t previewBytes = 4;
+                if (wakeupWithDataSize < previewBytes) previewBytes = wakeupWithDataSize;
+                for (uint32_t i = 0; i < previewBytes; ++i) {
+                    fprintf(stderr, "%s: RECV %p 0x%hhx\n", __func__, this, *(((uint8_t*)mWakeupWithDataBuffer.data()) + i));
+                }
+                ++mContext.ring_config->host_consumed_pos;
+                static int smallFlushees = 0;
+                ++smallFlushees;
+                fprintf(stderr, "%s: wakeup with data %u\n", __func__, mContext.ring_config->host_consumed_pos);
+                if (smallFlushees >= 48) {
+                fprintf(stderr, "%s: bail\n", __func__);
+                abort();
+                }
+                spins = 0;
             }
 
             continue;
@@ -335,6 +378,19 @@ void RingStream::type3Read(
             *current, actuallyRead,
             1, &mContext.ring_config->in_error);
 
+    *current += actuallyRead;
+    *count += actuallyRead;
+}
+
+void RingStream::consumeWakeupWithData(uint32_t size, const uint8_t* data, size_t* count, char** current, const char* ptrEnd) {
+
+    uint32_t maxCanRead = ptrEnd - *current;
+    uint32_t actuallyRead = std::min(size, maxCanRead);
+
+    memcpy(*current, data, actuallyRead);
+
+    mWakeupWithDataConsumed += actuallyRead;
+    mWakeupWithDataRemaining -= actuallyRead;
     *current += actuallyRead;
     *count += actuallyRead;
 }

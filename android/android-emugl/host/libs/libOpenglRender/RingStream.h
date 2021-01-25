@@ -72,12 +72,16 @@ protected:
     void type1Read(uint32_t available, char* begin, size_t* count, char** current, const char* ptrEnd);
     void type2Read(uint32_t available, size_t* count, char** current, const char* ptrEnd);
     void type3Read(uint32_t available, size_t* count, char** current, const char* ptrEnd);
+    void consumeWakeupWithData(uint32_t size, const uint8_t* data, size_t* count, char** current, const char* ptrEnd);
 
     struct asg_context mContext;
     android::emulation::asg::ConsumerCallbacks mCallbacks;
 
     std::vector<asg_type1_xfer> mType1Xfers;
     std::vector<asg_type2_xfer> mType2Xfers;
+    std::vector<uint8_t> mWakeupWithDataBuffer;
+    uint32_t mWakeupWithDataConsumed;
+    uint32_t mWakeupWithDataRemaining;
 
     RenderChannel::Buffer mReadBuffer;
     RenderChannel::Buffer mWriteBuffer;

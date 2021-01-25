@@ -48,6 +48,7 @@ public:
     static void clear();
 
     void perform(AddressSpaceDevicePingInfo *info) override;
+    void performWithData(AddressSpaceDevicePingWithDataInfo *info) override;
     AddressSpaceDeviceType getDeviceType() const override;
 
     void save(base::Stream* stream) const override;
@@ -69,6 +70,7 @@ public:
     };
 
 private:
+    void wakeupWithData(uint32_t data_size, const uint8_t* data);
 
     void saveRingConfig(base::Stream* stream, const struct asg_ring_config& config) const;
     void saveAllocation(base::Stream* stream, const Allocation& alloc) const;
@@ -78,16 +80,22 @@ private:
     void loadAllocation(base::Stream* stream, Allocation& alloc, AllocType type);
 
     // For consumer communication
-    enum ConsumerCommand {
+    enum ConsumerCommandType {
         Wakeup = 0,
         Sleep = 1,
         Exit = 2,
         PausePreSnapshot = 3,
         ResumePostSnapshot = 4,
+        WakeupWithData = 5,
+    };
+
+    struct ConsumerCommand {
+        ConsumerCommandType type;
+        std::vector<uint8_t> data;
     };
 
     // For ConsumerCallbacks
-    int onUnavailableRead();
+    int onUnavailableRead(uint32_t* dataSizeOut, uint8_t* dataOut);
 
     // Data layout
     uint32_t mVersion = 1;
