@@ -16,6 +16,24 @@
       "message": "We need a test for this to prevent future regression",
       "revId": "7356423bbe5c52ee5f7b1d99bcad17402abe12cd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c2c8c4c0_e4aafa07",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-01-26T18:23:54Z",
+      "side": 1,
+      "message": "Good point, let me add an e2e test in the adt-infra branch.",
+      "parentUuid": "55e1805e_10ad20c0",
+      "revId": "7356423bbe5c52ee5f7b1d99bcad17402abe12cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
