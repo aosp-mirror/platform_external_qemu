@@ -11,6 +11,7 @@
 
 #include "android/base/files/PathUtils.h"
 
+#include <filesystem>
 #include <string.h>                      // for size_t, strncmp
 #include <iterator>                      // for reverse_iterator, operator!=
 #include <numeric>                       // for accumulate
@@ -417,6 +418,19 @@ Optional<std::string> PathUtils::pathWithEnvSubstituted(
     }
 
     return PathUtils::recompose(dest);
+}
+
+bool PathUtils::move(StringView from, StringView to) {
+    if (std::rename(from.data(), to.data())) {
+        // Rename can fail if files are on different disks
+        if (std::filesystem::copy_file(from.data(), to.data())) {
+            std::filesystem::remove(from.data());
+            return true;
+        } else {
+            return false;
+        }
+    }
+    return true;
 }
 
 }  // namespace base
