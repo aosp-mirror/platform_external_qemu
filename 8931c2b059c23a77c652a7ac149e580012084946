@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b81654f9_326adb99",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-01-26T22:42:28Z",
+      "side": 1,
+      "message": "Hi Erwin and Akash,\n\ncan we revert this revert now? (require Mac OS SDK 10.13 or later)",
+      "revId": "8931c2b059c23a77c652a7ac149e580012084946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
