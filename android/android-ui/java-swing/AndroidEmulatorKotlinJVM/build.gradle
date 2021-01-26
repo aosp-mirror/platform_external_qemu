@@ -1,0 +1,78 @@
+plugins {
+    id 'application'
+    id 'java'
+    id 'com.google.protobuf' version '0.8.14'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id "org.jetbrains.kotlin.kapt" version "1.4.21"
+    id "com.github.johnrengelman.shadow" version "6.1.0"
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+    // https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
+    implementation 'com.google.protobuf:protobuf-java:3.14.0'
+    // https://mvnrepository.com/artifact/io.grpc/grpc-all
+    implementation 'io.grpc:grpc-all:1.35.0'
+    implementation 'io.grpc:grpc-protobuf:1.35.0'
+    implementation 'io.grpc:grpc-stub:1.35.0'
+    implementation 'io.grpc:grpc-core:1.35.0'
+    implementation 'com.intellij:forms_rt:7.0.3'
+}
+
+sourceSets {
+    main.kotlin.srcDirs += 'build/generated/source/proto/main/grpc'
+    main.kotlin.srcDirs += 'build/generated/source/proto/main/java'
+    main.java.srcDirs += 'build/generated/source/proto/main/grpc'
+    main.java.srcDirs += 'build/generated/source/proto/main/java'
+}
+
+protobuf {
+    // Configure the protoc executable
+    protoc {
+        // Download from repositories
+        artifact = 'com.google.protobuf:protoc:3.14.0'
+        // Locate the codegen plugins
+    }
+
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.35.0'
+        }
+    }
+
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+startScripts.enabled = false
+
+task androidEmulatorClient(type: CreateStartScripts) {
+    mainClassName = 'com.android.emulator.ui.EmulatorContainer'
+    applicationName = 'android-emulator-client'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+test {
+    useJUnitPlatform()
+}
+
+applicationDistribution.into('bin') {
+    from(androidEmulatorClient)
+    fileMode = 0755
+}

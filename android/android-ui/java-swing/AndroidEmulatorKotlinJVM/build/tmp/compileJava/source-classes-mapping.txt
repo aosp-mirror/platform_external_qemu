@@ -1,0 +1,223 @@
+com/android/emulator/control/MouseEventOrBuilder.java
+ com.android.emulator.control.MouseEventOrBuilder
+com/android/emulator/control/PhysicalModelValue.java
+ com.android.emulator.control.PhysicalModelValue
+ com.android.emulator.control.PhysicalModelValue$1
+ com.android.emulator.control.PhysicalModelValue$Builder
+ com.android.emulator.control.PhysicalModelValue$PhysicalType
+ com.android.emulator.control.PhysicalModelValue$PhysicalType$1
+ com.android.emulator.control.PhysicalModelValue$State
+ com.android.emulator.control.PhysicalModelValue$State$1
+com/android/emulator/control/SmsMessage.java
+ com.android.emulator.control.SmsMessage
+ com.android.emulator.control.SmsMessage$1
+ com.android.emulator.control.SmsMessage$Builder
+com/android/emulator/control/Touch.java
+ com.android.emulator.control.Touch
+ com.android.emulator.control.Touch$1
+ com.android.emulator.control.Touch$Builder
+com/android/emulator/control/VmConfigurationOrBuilder.java
+ com.android.emulator.control.VmConfigurationOrBuilder
+com/android/emulator/control/EntryList.java
+ com.android.emulator.control.EntryList
+ com.android.emulator.control.EntryList$1
+ com.android.emulator.control.EntryList$Builder
+com/android/emulator/control/SmsMessageOrBuilder.java
+ com.android.emulator.control.SmsMessageOrBuilder
+com/android/emulator/control/ParameterValueOrBuilder.java
+ com.android.emulator.control.ParameterValueOrBuilder
+com/android/emulator/control/EntryOrBuilder.java
+ com.android.emulator.control.EntryOrBuilder
+com/android/emulator/control/ImageTransport.java
+ com.android.emulator.control.ImageTransport
+ com.android.emulator.control.ImageTransport$1
+ com.android.emulator.control.ImageTransport$Builder
+ com.android.emulator.control.ImageTransport$TransportChannel
+ com.android.emulator.control.ImageTransport$TransportChannel$1
+com/android/emulator/control/ImageOrBuilder.java
+ com.android.emulator.control.ImageOrBuilder
+com/android/emulator/control/ClipDataOrBuilder.java
+ com.android.emulator.control.ClipDataOrBuilder
+com/android/emulator/control/EmulatorStatus.java
+ com.android.emulator.control.EmulatorStatus
+ com.android.emulator.control.EmulatorStatus$1
+ com.android.emulator.control.EmulatorStatus$Builder
+com/android/emulator/control/PhysicalModelValueOrBuilder.java
+ com.android.emulator.control.PhysicalModelValueOrBuilder
+com/android/emulator/control/EmulatorControllerOuterClass.java
+ com.android.emulator.control.EmulatorControllerOuterClass
+com/android/emulator/control/KeyboardEventOrBuilder.java
+ com.android.emulator.control.KeyboardEventOrBuilder
+com/android/emulator/control/Entry.java
+ com.android.emulator.control.Entry
+ com.android.emulator.control.Entry$1
+ com.android.emulator.control.Entry$Builder
+com/android/emulator/control/ParameterValue.java
+ com.android.emulator.control.ParameterValue
+ com.android.emulator.control.ParameterValue$1
+ com.android.emulator.control.ParameterValue$Builder
+com/android/emulator/control/RotationOrBuilder.java
+ com.android.emulator.control.RotationOrBuilder
+com/android/emulator/control/GpsStateOrBuilder.java
+ com.android.emulator.control.GpsStateOrBuilder
+com/android/emulator/control/TouchOrBuilder.java
+ com.android.emulator.control.TouchOrBuilder
+com/android/emulator/control/Fingerprint.java
+ com.android.emulator.control.Fingerprint
+ com.android.emulator.control.Fingerprint$1
+ com.android.emulator.control.Fingerprint$Builder
+com/android/emulator/control/BatteryStateOrBuilder.java
+ com.android.emulator.control.BatteryStateOrBuilder
+com/android/emulator/control/AudioPacketOrBuilder.java
+ com.android.emulator.control.AudioPacketOrBuilder
+com/android/emulator/control/KeyboardEvent.java
+ com.android.emulator.control.KeyboardEvent
+ com.android.emulator.control.KeyboardEvent$1
+ com.android.emulator.control.KeyboardEvent$Builder
+ com.android.emulator.control.KeyboardEvent$KeyCodeType
+ com.android.emulator.control.KeyboardEvent$KeyCodeType$1
+ com.android.emulator.control.KeyboardEvent$KeyEventType
+ com.android.emulator.control.KeyboardEvent$KeyEventType$1
+com/android/emulator/control/ImageFormat.java
+ com.android.emulator.control.ImageFormat
+ com.android.emulator.control.ImageFormat$1
+ com.android.emulator.control.ImageFormat$Builder
+ com.android.emulator.control.ImageFormat$ImgFormat
+ com.android.emulator.control.ImageFormat$ImgFormat$1
+com/android/emulator/control/SensorValueOrBuilder.java
+ com.android.emulator.control.SensorValueOrBuilder
+com/android/emulator/control/FingerprintOrBuilder.java
+ com.android.emulator.control.FingerprintOrBuilder
+com/android/emulator/control/AudioFormat.java
+ com.android.emulator.control.AudioFormat
+ com.android.emulator.control.AudioFormat$1
+ com.android.emulator.control.AudioFormat$Builder
+ com.android.emulator.control.AudioFormat$Channels
+ com.android.emulator.control.AudioFormat$Channels$1
+ com.android.emulator.control.AudioFormat$SampleFormat
+ com.android.emulator.control.AudioFormat$SampleFormat$1
+com/android/emulator/control/GpsState.java
+ com.android.emulator.control.GpsState
+ com.android.emulator.control.GpsState$1
+ com.android.emulator.control.GpsState$Builder
+com/android/emulator/control/EmulatorControllerGrpc.java
+ com.android.emulator.control.EmulatorControllerGrpc
+ com.android.emulator.control.EmulatorControllerGrpc$1
+ com.android.emulator.control.EmulatorControllerGrpc$2
+ com.android.emulator.control.EmulatorControllerGrpc$3
+ com.android.emulator.control.EmulatorControllerGrpc$EmulatorControllerBaseDescriptorSupplier
+ com.android.emulator.control.EmulatorControllerGrpc$EmulatorControllerBlockingStub
+ com.android.emulator.control.EmulatorControllerGrpc$EmulatorControllerFileDescriptorSupplier
+ com.android.emulator.control.EmulatorControllerGrpc$EmulatorControllerFutureStub
+ com.android.emulator.control.EmulatorControllerGrpc$EmulatorControllerImplBase
+ com.android.emulator.control.EmulatorControllerGrpc$EmulatorControllerMethodDescriptorSupplier
+ com.android.emulator.control.EmulatorControllerGrpc$EmulatorControllerStub
+ com.android.emulator.control.EmulatorControllerGrpc$MethodHandlers
+com/android/emulator/control/Image.java
+ com.android.emulator.control.Image
+ com.android.emulator.control.Image$1
+ com.android.emulator.control.Image$Builder
+com/android/emulator/control/LogcatEntryOrBuilder.java
+ com.android.emulator.control.LogcatEntryOrBuilder
+com/android/emulator/control/LogMessageOrBuilder.java
+ com.android.emulator.control.LogMessageOrBuilder
+com/android/emulator/control/VmRunStateOrBuilder.java
+ com.android.emulator.control.VmRunStateOrBuilder
+com/android/emulator/control/EntryListOrBuilder.java
+ com.android.emulator.control.EntryListOrBuilder
+com/android/emulator/control/PhoneResponse.java
+ com.android.emulator.control.PhoneResponse
+ com.android.emulator.control.PhoneResponse$1
+ com.android.emulator.control.PhoneResponse$Builder
+ com.android.emulator.control.PhoneResponse$Response
+ com.android.emulator.control.PhoneResponse$Response$1
+com/android/emulator/control/VmConfiguration.java
+ com.android.emulator.control.VmConfiguration
+ com.android.emulator.control.VmConfiguration$1
+ com.android.emulator.control.VmConfiguration$Builder
+ com.android.emulator.control.VmConfiguration$VmHypervisorType
+ com.android.emulator.control.VmConfiguration$VmHypervisorType$1
+com/android/emulator/control/ImageFormatOrBuilder.java
+ com.android.emulator.control.ImageFormatOrBuilder
+com/android/emulator/control/TouchEventOrBuilder.java
+ com.android.emulator.control.TouchEventOrBuilder
+com/android/emulator/control/EmulatorStatusOrBuilder.java
+ com.android.emulator.control.EmulatorStatusOrBuilder
+com/android/emulator/ui/EmulatorContainer.java
+ com.android.emulator.ui.EmulatorContainer
+ com.android.emulator.ui.EmulatorContainer$1
+ com.android.emulator.ui.EmulatorContainer$2
+ com.android.emulator.ui.EmulatorContainer$ImagePanel
+ com.android.emulator.ui.EmulatorContainer$ScreenshotReceiver
+com/android/emulator/control/MouseEvent.java
+ com.android.emulator.control.MouseEvent
+ com.android.emulator.control.MouseEvent$1
+ com.android.emulator.control.MouseEvent$Builder
+com/android/emulator/control/TouchEvent.java
+ com.android.emulator.control.TouchEvent
+ com.android.emulator.control.TouchEvent$1
+ com.android.emulator.control.TouchEvent$Builder
+com/android/emulator/control/ImageTransportOrBuilder.java
+ com.android.emulator.control.ImageTransportOrBuilder
+com/android/emulator/control/PhoneResponseOrBuilder.java
+ com.android.emulator.control.PhoneResponseOrBuilder
+com/android/emulator/control/LogcatEntry.java
+ com.android.emulator.control.LogcatEntry
+ com.android.emulator.control.LogcatEntry$1
+ com.android.emulator.control.LogcatEntry$Builder
+ com.android.emulator.control.LogcatEntry$LogLevel
+ com.android.emulator.control.LogcatEntry$LogLevel$1
+com/android/emulator/control/ClipData.java
+ com.android.emulator.control.ClipData
+ com.android.emulator.control.ClipData$1
+ com.android.emulator.control.ClipData$Builder
+com/android/emulator/control/AudioPacket.java
+ com.android.emulator.control.AudioPacket
+ com.android.emulator.control.AudioPacket$1
+ com.android.emulator.control.AudioPacket$Builder
+com/android/emulator/control/PhoneCallOrBuilder.java
+ com.android.emulator.control.PhoneCallOrBuilder
+com/android/emulator/control/VmRunState.java
+ com.android.emulator.control.VmRunState
+ com.android.emulator.control.VmRunState$1
+ com.android.emulator.control.VmRunState$Builder
+ com.android.emulator.control.VmRunState$RunState
+ com.android.emulator.control.VmRunState$RunState$1
+com/android/emulator/control/LogMessage.java
+ com.android.emulator.control.LogMessage
+ com.android.emulator.control.LogMessage$1
+ com.android.emulator.control.LogMessage$Builder
+ com.android.emulator.control.LogMessage$LogType
+ com.android.emulator.control.LogMessage$LogType$1
+com/android/emulator/control/Rotation.java
+ com.android.emulator.control.Rotation
+ com.android.emulator.control.Rotation$1
+ com.android.emulator.control.Rotation$Builder
+ com.android.emulator.control.Rotation$SkinRotation
+ com.android.emulator.control.Rotation$SkinRotation$1
+com/android/emulator/control/BatteryState.java
+ com.android.emulator.control.BatteryState
+ com.android.emulator.control.BatteryState$1
+ com.android.emulator.control.BatteryState$BatteryCharger
+ com.android.emulator.control.BatteryState$BatteryCharger$1
+ com.android.emulator.control.BatteryState$BatteryHealth
+ com.android.emulator.control.BatteryState$BatteryHealth$1
+ com.android.emulator.control.BatteryState$BatteryStatus
+ com.android.emulator.control.BatteryState$BatteryStatus$1
+ com.android.emulator.control.BatteryState$Builder
+com/android/emulator/control/SensorValue.java
+ com.android.emulator.control.SensorValue
+ com.android.emulator.control.SensorValue$1
+ com.android.emulator.control.SensorValue$Builder
+ com.android.emulator.control.SensorValue$SensorType
+ com.android.emulator.control.SensorValue$SensorType$1
+ com.android.emulator.control.SensorValue$State
+ com.android.emulator.control.SensorValue$State$1
+com/android/emulator/control/AudioFormatOrBuilder.java
+ com.android.emulator.control.AudioFormatOrBuilder
+com/android/emulator/control/PhoneCall.java
+ com.android.emulator.control.PhoneCall
+ com.android.emulator.control.PhoneCall$1
+ com.android.emulator.control.PhoneCall$Builder
+ com.android.emulator.control.PhoneCall$Operation
+ com.android.emulator.control.PhoneCall$Operation$1
