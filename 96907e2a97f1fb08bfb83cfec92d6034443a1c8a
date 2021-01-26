@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a3241889_70fcf0a3",
+        "filename": "android/android-emu/android/skin/qt/mac-native-window.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-01-26T16:48:53Z",
+      "side": 1,
+      "message": "nit: add blank line",
+      "revId": "96907e2a97f1fb08bfb83cfec92d6034443a1c8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
