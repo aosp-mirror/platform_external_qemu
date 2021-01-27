@@ -298,17 +298,17 @@ def emit_dispatch_call(api, cgen):
     if api.name in driver_workarounds_global_lock_apis:
         if delay:
             cgen.stmt("auto state = VkDecoderGlobalState::get()")
-            cgen.stmt("state->lock()")
+            cgen.stmt("// state already locked")
         else:
             cgen.stmt("m_state->lock()")
 
     cgen.vkApiCall(api, customPrefix="vk->", customParameters=customParams)
 
     if api.name in driver_workarounds_global_lock_apis:
-        if delay:
-            cgen.stmt("state->unlock()")
-        else:
+        if not delay:
             cgen.stmt("m_state->unlock()")
+        # for delayed remove, state is already locked, so we do not need to
+        # unlock
 
     if delay:
         cgen.line("};")
