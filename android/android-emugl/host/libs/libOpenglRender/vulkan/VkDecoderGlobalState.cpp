@@ -188,20 +188,21 @@ public:
         delayedRemoves[device].push_back({ h, callback });
     }
 
-    void processDelayedRemoves(VkDevice device) {
+    void processDelayedRemovesGlobalStateLocked(VkDevice device) {
         AutoLock l(lock);
         auto it = delayedRemoves.find(device);
         if (it == delayedRemoves.end()) return;
         auto& delayedRemovesList = it->second;
         for (const auto& r : delayedRemovesList) {
             auto h = r.handle;
-            auto func = r.callback;
-            func();
+            // VkDecoderGlobalState is already locked when callback is called.
+            auto funcGlobalStateLocked = r.callback;
+            funcGlobalStateLocked();
             store.remove(h);
         }
         delayedRemovesList.clear();
         delayedRemoves.erase(it);
-     }
+    }
 
     T* get(uint64_t h) {
         return (T*)store.get_const(h);
@@ -494,11 +495,10 @@ public:
                     devicesToDestroy.push_back(it.first);
                 }
             }
-            lock.unlock();
 
-            // Process delayed removes out of lock
             for (auto device: devicesToDestroy) {
-                sBoxedHandleManager.processDelayedRemoves(device);
+                sBoxedHandleManager.processDelayedRemovesGlobalStateLocked(
+                        device);
             }
         }
 
@@ -1293,10 +1293,9 @@ public:
 
         auto device = unbox_VkDevice(boxed_device);
 
-        sBoxedHandleManager.processDelayedRemoves(device);
-
         AutoLock lock(mLock);
 
+        sBoxedHandleManager.processDelayedRemovesGlobalStateLocked(device);
         destroyDeviceLocked(device, pAllocator);
 
         mDeviceInfo.erase(device);
@@ -3552,9 +3551,8 @@ public:
             auto queueInfo = android::base::find(mQueueInfo, queue);
             if (queueInfo) {
                 VkDevice device = queueInfo->device;
-                lock.unlock();
-                sBoxedHandleManager.processDelayedRemoves(queueInfo->device);
-                lock.lock();
+                sBoxedHandleManager.processDelayedRemovesGlobalStateLocked(
+                        queueInfo->device);
             }
         }
 

@@ -4188,9 +4188,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 }
                 std::function<void()> delayed_remove_callback = [vk, unboxed_device, pipelineLayout, pAllocator]() {
                 auto state = VkDecoderGlobalState::get();
-                state->lock();
+                // state already locked;
                 vk->vkDestroyPipelineLayout(unboxed_device, pipelineLayout, pAllocator);
-                state->unlock();
                 };
                 vkStream->unsetHandleMapping();
                 vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
