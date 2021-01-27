@@ -298,7 +298,7 @@ public:
             return Status::OK;
         }
 
-        if (std::rename(tmpSnap.c_str(), finalDest.c_str()) != 0) {
+        if (!android::base::PathUtils::move(tmpSnap.c_str(), finalDest.c_str())) {
             reply->set_success(false);
             reply->set_err("Failed to rename: " + tmpSnap + " --> " +
                            finalDest);

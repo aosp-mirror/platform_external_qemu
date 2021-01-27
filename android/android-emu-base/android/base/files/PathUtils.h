@@ -288,6 +288,9 @@ public:
     // not set or empty.
     static Optional<std::string> pathWithEnvSubstituted(std::vector<StringView> decomposedPath);
 
+    // Move a file. It works even when from and to are on different disks.
+    static bool move(StringView from, StringView to);
+
 #ifdef _WIN32
     static Win32UnicodeString asUnicodePath(StringView path) { return Win32UnicodeString(path); }
 #else
