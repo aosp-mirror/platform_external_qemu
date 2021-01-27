@@ -659,15 +659,6 @@ public:
             std::swap(newWidth, newHeight);
         }
 
-        // Screenshot backend uses the _skin layout_'s orientation,
-        // which is clockwise instead of counterclockwise.
-        // This makes the 90/270 cases flipped.
-        if (desiredRotation == SKIN_ROTATION_270) {
-            desiredRotation = SKIN_ROTATION_90;
-        } else if (desiredRotation == SKIN_ROTATION_90) {
-            desiredRotation = SKIN_ROTATION_270;
-        }
-
         // Screenshots can come from either the gl renderer, or the guest.
         const auto& renderer = android_getOpenglesRenderer();
 
