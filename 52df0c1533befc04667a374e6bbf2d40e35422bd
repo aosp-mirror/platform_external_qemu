@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "14ec281f_f68a7116",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-01-27T19:27:04Z",
+      "side": 1,
+      "message": "nit: brackets after if",
+      "range": {
+        "startLine": 366,
+        "startChar": 8,
+        "endLine": 366,
+        "endChar": 41
+      },
+      "revId": "52df0c1533befc04667a374e6bbf2d40e35422bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d521bc9b_0862dd0d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-01-27T19:27:04Z",
+      "side": 1,
+      "message": "nit: typo",
+      "range": {
+        "startLine": 422,
+        "startChar": 36,
+        "endLine": 422,
+        "endChar": 40
+      },
+      "revId": "52df0c1533befc04667a374e6bbf2d40e35422bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
