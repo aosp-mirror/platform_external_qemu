@@ -624,12 +624,14 @@ GL_APICALL void GL_APIENTRY glVertexBindingDivisor(GLuint bindingindex, GLuint d
 
 GL_APICALL void GL_APIENTRY glDrawArraysIndirect(GLenum mode, const void * indirect) {
     GET_CTX_V2();
+    return;
     SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glDrawArraysIndirect);
     ctx->dispatcher().glDrawArraysIndirect(mode, indirect);
 }
 
 GL_APICALL void GL_APIENTRY glDrawElementsIndirect(GLenum mode, GLenum type, const void * indirect) {
     GET_CTX_V2();
+    return;
     SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glDrawElementsIndirect);
     ctx->dispatcher().glDrawElementsIndirect(mode, type, indirect);
 }

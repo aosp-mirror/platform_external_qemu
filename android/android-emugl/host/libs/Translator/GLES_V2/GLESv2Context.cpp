@@ -500,6 +500,7 @@ void GLESv2Context::drawWithEmulations(
     GLsizei primcount,
     GLuint start,
     GLuint end) {
+    return;
 
     if (getMajorVersion() < 3) {
         drawValidate();
