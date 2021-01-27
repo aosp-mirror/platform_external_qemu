@@ -11,6 +11,15 @@
 
 #include "android/base/files/PathUtils.h"
 
+#if defined(__linux__) || defined(_WIN32) ||       \
+        (defined(MAC_OS_X_VERSION_MIN_REQUIRED) && \
+         MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+#define _SUPPORT_FILESYSTEM
+#endif
+
+#ifdef _SUPPORT_FILESYSTEM
+#include <filesystem>
+#endif                                   //_SUPPORT_FILESYSTEM
 #include <string.h>                      // for size_t, strncmp
 #include <iterator>                      // for reverse_iterator, operator!=
 #include <numeric>                       // for accumulate
@@ -417,6 +426,24 @@ Optional<std::string> PathUtils::pathWithEnvSubstituted(
     }
 
     return PathUtils::recompose(dest);
+}
+
+bool PathUtils::move(StringView from, StringView to) {
+    // std::rename returns 0 on success.
+    if (std::rename(from.data(), to.data())) {
+#ifdef _SUPPORT_FILESYSTEM
+        // Rename can fail if files are on different disks
+        if (std::filesystem::copy_file(from.data(), to.data())) {
+            std::filesystem::remove(from.data());
+            return true;
+        } else {
+            return false;
+        }
+#else   // _SUPPORT_FILESYSTEM
+        return false;
+#endif  // _SUPPORT_FILESYSTEM
+    }
+    return true;
 }
 
 }  // namespace base
