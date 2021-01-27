@@ -16,6 +16,24 @@
       "message": "Hi Erwin and Akash,\n\ncan we revert this revert now? (require Mac OS SDK 10.13 or later)",
       "revId": "8931c2b059c23a77c652a7ac149e580012084946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "96efbec8_290fb522",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1329845
+      },
+      "writtenOn": "2021-01-27T06:52:40Z",
+      "side": 1,
+      "message": "yes, all the bots are updated with latest sdk.",
+      "parentUuid": "b81654f9_326adb99",
+      "revId": "8931c2b059c23a77c652a7ac149e580012084946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
