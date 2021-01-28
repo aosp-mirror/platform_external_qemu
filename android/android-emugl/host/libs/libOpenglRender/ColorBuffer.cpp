@@ -24,6 +24,8 @@
 #include "TextureDraw.h"
 #include "TextureResize.h"
 #include "YUVConverter.h"
+#include "vulkan/VulkanDispatch.h"
+#include "vulkan/VkCommonOperations.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -1004,15 +1006,18 @@ void ColorBuffer::postLayer(ComposeLayer* l, int frameWidth, int frameHeight) {
 
 bool ColorBuffer::importMemory(
 #ifdef _WIN32
-        void* handle,
+    void* handle,
 #else
-        int handle,
+    int handle,
 #endif
-        uint64_t size,
-        bool dedicated,
-        bool linearTiling,
-        bool vulkanOnly) {
+    uint64_t size, bool dedicated, bool linearTiling, bool vulkanOnly,
+    std::shared_ptr<DisplayVk::DisplayBufferInfo> displayBufferVk) {
     RecursiveScopedHelperContext context(m_helper);
+    if (!displayBufferVk) {
+        fprintf(stderr, "%s: null display buffer as input\n", __func__);
+        abort();
+    }
+    m_displayBufferVk = std::move(displayBufferVk);
     s_gles2.glCreateMemoryObjectsEXT(1, &m_memoryObject);
     if (dedicated) {
         static const GLint DEDICATED_FLAG = GL_TRUE;

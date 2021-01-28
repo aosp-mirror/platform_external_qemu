@@ -25,6 +25,7 @@
 #include "android/snapshot/LazySnapshotObj.h"
 #include "emugl/common/smart_ptr.h"
 #include "FrameworkFormats.h"
+#include "DisplayVk.h"
 #include "Hwc2.h"
 #include "RenderContext.h"
 
@@ -266,16 +267,20 @@ public:
     void postLayer(ComposeLayer* l, int frameWidth, int frameHeight);
     GLuint getTexture();
 
+    const std::shared_ptr<DisplayVk::DisplayBufferInfo>& getDisplayBufferVk()
+        const {
+            if (!m_displayBufferVk) fprintf(stderr, "%s: asking color buffer %u without vk display buffer for display buffer\n", __func__, getHndl());
+        return m_displayBufferVk;
+    };
+
     bool importMemory(
 #ifdef _WIN32
         void* handle,
 #else
         int handle,
 #endif
-        uint64_t size,
-        bool dedicated,
-        bool linearTiling,
-        bool vulkanOnly);
+        uint64_t size, bool dedicated, bool linearTiling, bool vulkanOnly,
+        std::shared_ptr<DisplayVk::DisplayBufferInfo> displayBufferVk);
     void setInUse(bool inUse);
     bool isInUse() const { return m_inUse; }
 
@@ -335,6 +340,9 @@ private:
     GLuint m_buf = 0;
     uint32_t m_displayId = 0;
     bool m_BRSwizzle = false;
+    // Won't share with others so that m_displayBufferVk lives shorter than this
+    // ColorBuffer.
+    std::shared_ptr<DisplayVk::DisplayBufferInfo> m_displayBufferVk;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;
