@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2011-2015 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2011-2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #ifndef _LIBRENDER_FRAMEBUFFER_H
 #define _LIBRENDER_FRAMEBUFFER_H
 
@@ -24,13 +24,16 @@
 #include "android/base/EventNotificationSupport.h"
 
 #include "ColorBuffer.h"
+#include "DisplayVk.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
 #include "Hwc2.h"
+#include "PostCommands.h"
 #include "PostWorker.h"
 #include "ReadbackWorker.h"
 #include "RenderContext.h"
+#include "Renderer.h"
 #include "TextureDraw.h"
 #include "WindowSurface.h"
 
@@ -63,8 +66,6 @@ struct ColorBufferRef {
 struct BufferRef {
     BufferPtr buffer;
 };
-
-
 
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
 typedef std::unordered_set<HandleType> WindowSurfaceSet;
@@ -125,7 +126,7 @@ public:
     // setPostCallback() instead to retrieve the content.
     // Returns true on success, false otherwise.
     static bool initialize(int width, int height, bool useSubWindow,
-            bool egl2egl);
+                           bool egl2egl);
 
     // Setup a sub-window to display the content of the emulated GPU
     // on-top of an existing UI window. |p_window| is the platform-specific
@@ -306,8 +307,8 @@ public:
     // |p_surface| is the target WindowSurface's handle value.
     // |p_colorbuffer| is the ColorBuffer handle value.
     // Returns true on success, false otherwise.
-    bool  setWindowSurfaceColorBuffer(
-            HandleType p_surface, HandleType p_colorbuffer);
+    bool setWindowSurfaceColorBuffer(HandleType p_surface,
+                                     HandleType p_colorbuffer);
 
     // Copy the content of a WindowSurface's Pbuffer to its attached
     // ColorBuffer. See the documentation for WindowSurface::flushColorBuffer()
@@ -345,7 +346,7 @@ public:
     // with the pixel data.
     void  readColorBuffer(HandleType p_colorbuffer,
                            int x, int y, int width, int height,
-                           GLenum format, GLenum type, void *pixels);
+                           GLenum format, GLenum type, void* pixels);
 
     // Read the content of a given YUV420_888 ColorBuffer into client memory.
     // |p_colorbuffer| is the ColorBuffer's handle value. Similar
@@ -357,7 +358,7 @@ public:
     // |pixles_size| is the size of buffer
     void  readColorBufferYUV(HandleType p_colorbuffer,
                              int x, int y, int width, int height,
-                             void *pixels, uint32_t pixels_size);
+                             void* pixels, uint32_t pixels_size);
 
     // create a Y texture and a UV texture with width and height, the created
     // texture ids are stored in textures respectively
@@ -367,9 +368,7 @@ public:
                            int height,
                            uint32_t* output);
     void destroyYUVTextures(uint32_t type, uint32_t count, uint32_t* textures);
-    void updateYUVTextures(uint32_t type,
-                           uint32_t* textures,
-                           void* privData,
+    void updateYUVTextures(uint32_t type, uint32_t* textures, void* privData,
                            void* func);
     void swapTexturesAndUpdateColorBuffer(uint32_t colorbufferhandle,
                                           int x,
@@ -404,7 +403,7 @@ public:
     // The number of bytes is passed as a check.
     bool replaceColorBufferContents(
         HandleType p_colorbuffer,
-        const void *pixels,
+        const void* pixels,
         size_t numBytes);
     // Reads back the raw color buffer to |pixels|
     // if |pixels| is not null.
@@ -417,7 +416,7 @@ public:
     bool readColorBufferContents(
         HandleType p_colorbuffer,
         size_t* numBytes,
-        void *pixels);
+        void* pixels);
 
     bool getColorBufferInfo(HandleType p_colorbuffer,
                             int* width,
@@ -510,6 +509,9 @@ public:
     void createTrivialContext(HandleType shared,
                               HandleType* contextOut,
                               HandleType* surfOut);
+    void getTrivialContextForCurrentRenderThread(HandleType shared,
+                                                 HandleType* contextOut,
+                                                 HandleType* surfOut);
     // createAndBindTrivialSharedContext(), but with a m_pbufContext
     // as shared, and not adding itself to the context map at all.
     void createAndBindTrivialSharedContext(EGLContext* contextOut,
@@ -555,6 +557,10 @@ public:
         bool linearTiling,
         bool vulkanOnly,
         uint32_t colorBufferHandle);
+
+    void ensureDisplayBufferForColorBuffer(
+        uint32_t colorBufferHandle, VkImage image, VkFormat format);
+
     void setColorBufferInUse(uint32_t colorBufferHandle, bool inUse);
 
     // Used during tests to disable fast blit.
@@ -597,7 +603,8 @@ public:
     ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
     ColorBufferPtr findColorBuffer(HandleType p_colorbuffer);
 
-    void registerProcessCleanupCallback(void* key, std::function<void()> callback);
+    void registerProcessCleanupCallback(void* key,
+                                        std::function<void()> callback);
     void unregisterProcessCleanupCallback(void* key);
 
     void registerProcessSequenceNumberForPuid(uint64_t puid);
@@ -642,6 +649,8 @@ public:
     void waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle);
 
     void setGuestManagedColorBufferLifetime(bool guestManaged);
+
+    VkImageLayout getVkImageLayoutForPresent() const;
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
@@ -827,39 +836,6 @@ private:
     // buffer is already tied to a file descriptor in the guest kernel.
     bool m_noDelayCloseColorBufferEnabled = false;
 
-    // Posting
-    enum class PostCmd {
-        Post = 0,
-        Viewport = 1,
-        Compose = 2,
-        Clear = 3,
-        Screenshot = 4,
-        Exit = 5,
-    };
-
-    struct Post {
-        PostCmd cmd;
-        int composeVersion;
-        std::vector<char> composeBuffer;
-        union {
-            ColorBuffer* cb;
-            struct {
-                int width;
-                int height;
-            } viewport;
-            struct {
-                ColorBuffer* cb;
-                int screenwidth;
-                int screenheight;
-                GLenum format;
-                GLenum type;
-                SkinRotation rotation;
-                void* pixels;
-                SkinRect rect;
-            } screenshot;
-        };
-    };
-
     std::unique_ptr<PostWorker> m_postWorker = {};
     android::base::WorkerThread<Post> m_postThread;
     android::base::WorkerProcessingResult postWorkerFunc(const Post& post);
@@ -874,5 +850,11 @@ private:
 
     android::base::MessageChannel<HandleType, 1024>
         mOutstandingColorBufferDestroys;
+
+    // The implementation for Vulkan native swapchain. Only initialized when
+    // useVulkan is set when calling FrameBuffer::initialize().
+    std::unique_ptr<DisplayVk> m_displayVk;
+    VkInstance m_vkInstance = VK_NULL_HANDLE;
+    VkSurfaceKHR m_vkSurface = VK_NULL_HANDLE;
 };
 #endif
