@@ -487,6 +487,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::ANDROIDBOOT_PROPS;
         case android::featurecontrol::DeviceSkinOverlay:
             return android_studio::EmulatorFeatureFlagState::DEVICESKINOVERLAY;
+        case android::featurecontrol::VulkanNativeSwapchain:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_NATIVE_SWAPCHAIN;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
