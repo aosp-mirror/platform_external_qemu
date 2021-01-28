@@ -28,6 +28,7 @@ extern "C" {
 #include "android/network/WifiForwardPeer.h"
 #include "android/network/WifiForwardPipe.h"
 #include "android/network/WifiForwardServer.h"
+#include "android/network/mac80211_hwsim.h"
 
 using android::base::IOVector;
 using android::base::ScopedSocket;
@@ -37,11 +38,14 @@ using android::base::socketSend;
 using android::base::StringFormat;
 using android::base::ThreadLooper;
 using android::network::Ieee80211Frame;
+using android::network::FrameInfo;
 using android::network::MacAddress;
+using android::network::GenericNetlinkMessage;
 using android::network::WifiForwardClient;
 using android::network::WifiForwardMode;
 using android::network::WifiForwardPeer;
 using android::network::WifiForwardServer;
+using android::network::hwsim_tx_rate;
 
 namespace fc = android::featurecontrol;
 
@@ -79,6 +83,8 @@ struct ieee8023_hdr {
     uint8_t src[ETH_ALEN];  /* source ether addr    */
     uint16_t ethertype;     /* packet type ID field */
 } __attribute__((__packed__));
+
+static FrameInfo sInfo;
 
 const char* const VirtioWifiForwarder::kNicModel = "virtio-wifi-device";
 const char* const VirtioWifiForwarder::kNicName = "virtio-wifi-device";
@@ -147,42 +153,62 @@ bool VirtioWifiForwarder::init() {
     return true;
 }
 
-int VirtioWifiForwarder::forwardFrame(IOVector sg, bool toRemoteVM) {
-    size_t size = sg.summedLength();
 
-    if (size < IEEE80211_HDRLEN) {
+void VirtioWifiForwarder::ackLocalFrame(const Ieee80211Frame* frame) {
+    GenericNetlinkMessage txInfo(GenericNetlinkMessage::NL_AUTO_PORT, 
+                                GenericNetlinkMessage::NL_AUTO_SEQ, 
+                                GenericNetlinkMessage::NLMSG_MIN_TYPE, 0, 0, HWSIM_CMD_TX_INFO_FRAME, 0);
+    const FrameInfo& info = frame->info();
+    txInfo.putAttribute(HWSIM_ATTR_ADDR_TRANSMITTER, info.mTransmitter.mAddr, ETH_ALEN);
+    txInfo.putAttribute(HWSIM_ATTR_FLAGS, &info.mFlags, sizeof(uint32_t));
+    txInfo.putAttribute(HWSIM_ATTR_COOKIE, &info.mCookie, sizeof(uintptr_t));
+    uint32_t signal = -50;
+    txInfo.putAttribute(HWSIM_ATTR_SIGNAL, &signal, sizeof(signal));
+    txInfo.putAttribute(HWSIM_ATTR_TX_INFO, info.mTxRates.data(),
+            Ieee80211Frame::TX_MAX_RATES * sizeof(hwsim_tx_rate));
+
+    mOnFrameAvailableCallback(txInfo.data(), txInfo.dataLen());
+
+}
+
+int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
+    if (iov.summedLength() < IEEE80211_HDRLEN) {
         return 0;
     }
-    Ieee80211Frame frame(size);
-    sg.copyTo(frame.data(), 0, size);
-    const MacAddress addr1 = frame.addr1();
-    if (toRemoteVM) {
-        sendToRemoteVM(frame);
+
+    std::unique_ptr<Ieee80211Frame> frame = parseFrame(iov);
+    if (frame == nullptr) {
+        LOG(VERBOSE) << "Not a HWSIM_CMD_FRAME netlink message";
         return 0;
     }
+    const MacAddress addr1 = frame->addr1();
+    const MacAddress addr2 = frame->addr2();
+    const MacAddress addr3 = frame->addr3();
+    // Ack every frame from guest
+    ackLocalFrame(frame.get());
 
-    int res = 0;
     // Data frames
-    if (frame.isData()) {
+    if (frame->isData()) {
+        //fprintf(stderr, "Mac addr1: " PRIMAC " addr2: " PRIMAC " addr3: " PRIMAC "\n", 
+        //    MACARG(addr1), MACARG(addr2), MACARG(addr3));
+
         if (addr1 != mBssID) {
-            sendToRemoteVM(frame);
-        } else if (frame.isToDS() && !frame.isFromDS()) {
-            res = sendToNIC(frame);
+            sendToRemoteVM(std::move(frame));
+        } else if (frame->isToDS() && !frame->isFromDS()) {
+            sendToNIC(std::move(frame));
         }
-    } else {  // Management frames.
-        // If the frame is broadcast or multicast, forward it to both hostapd
-        // and remote VM
+    } else { // Management frames.
         if (addr1.isBroadcast() || addr1.isMulticast() || addr1 == mBssID) {
             // TODO (wdu@) Experiement with shared memory approach
-            if (socketSend(mVirtIOSock.get(), frame.data(), size) < 0) {
+            if (socketSend(mVirtIOSock.get(), frame->data(), frame->size()) < 0) {
                 LOG(VERBOSE) << "Failed to send frame to hostapd.";
             }
         }
-        if (addr1.isBroadcast() || addr1.isMulticast() || addr1 != mBssID) {
-            sendToRemoteVM(frame);
+        if (addr1.isMulticast() || addr1 != mBssID) {
+            sendToRemoteVM(std::move(frame));
         }
     }
-    return res;
+    return 0;
 }
 
 void VirtioWifiForwarder::stop() {
@@ -216,6 +242,22 @@ void VirtioWifiForwarder::onFrameSentCallback(NetClientState* nc,
     }
 }
 
+ssize_t VirtioWifiForwarder::sendToGuest(VirtioWifiForwarder* forwarder, std::unique_ptr<Ieee80211Frame> frame) {
+    GenericNetlinkMessage msg(GenericNetlinkMessage::NL_AUTO_PORT, 
+                                GenericNetlinkMessage::NL_AUTO_SEQ, 
+                                GenericNetlinkMessage::NLMSG_MIN_TYPE, 0, 0, HWSIM_CMD_FRAME, 0);
+    const auto& info = frame->info();
+    msg.putAttribute(HWSIM_ATTR_ADDR_RECEIVER, info.mTransmitter.mAddr, ETH_ALEN);
+    //fprintf(stderr, "mTransmitter: " PRIMAC "\n", MACARG(info.mTransmitter));
+    msg.putAttribute(HWSIM_ATTR_FRAME, frame->data(), frame->size());
+    uint32_t rateIdx = 1;
+    msg.putAttribute(HWSIM_ATTR_RX_RATE, &rateIdx, sizeof(uint32_t));
+    uint32_t signal = -50;
+    msg.putAttribute(HWSIM_ATTR_SIGNAL,&signal, sizeof(signal));
+    msg.putAttribute(HWSIM_ATTR_FREQ, &info.mChannel, sizeof(uint32_t));
+    return forwarder->mOnFrameAvailableCallback(msg.data(), msg.dataLen());
+}
+
 // QEMU NIC client will receive one ethernet packet at a time.
 ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
                                                  const uint8_t* buf,
@@ -229,8 +271,9 @@ ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
     }
     std::unique_ptr<Ieee80211Frame> frame =
             Ieee80211Frame::buildFromEthernet(buf, size, forwarder->mBssID);
-    return forwarder->mOnFrameAvailableCallback(frame->data(), frame->size(),
-                                                false);
+    auto& info = frame->info();
+    info = sInfo;
+    return sendToGuest(forwarder, std::move(frame));
 }
 
 void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
@@ -240,12 +283,12 @@ void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
     }
     auto forwarder = static_cast<VirtioWifiForwarder*>(opaque);
 
-    uint8_t buf[Ieee80211Frame::MAX_FRAME_LEN];
+    static uint8_t buf[Ieee80211Frame::MAX_FRAME_LEN];
     ssize_t size = socketRecv(fd, buf, sizeof(buf));
     if (size < 0) {
         return;
     }
-    forwarder->mOnFrameAvailableCallback(buf, size, false);
+    sendToGuest(forwarder, std::make_unique<Ieee80211Frame>(buf, size, sInfo));
 }
 
 size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
@@ -279,12 +322,14 @@ size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
             const uint8_t* payload = data + offset + header->dataOffset;
             size_t payloadSize = header->fullLength - header->dataOffset;
             if (payloadSize > 0) {
-                if (mOnFrameAvailableCallback(payload, payloadSize, true) ==
-                    payloadSize) {
+                // The total amount of data is bigger than payload size due to
+                // generic netlink message.
+                /*if (sendToGuest(this, payload, payloadSize) >= payloadSize) {
                     offset += header->fullLength;
                 } else {
                     break;
-                }
+                }*/
+                offset += header->fullLength;
             } else {  // In case there is an empty frame.
                 offset += header->dataOffset;
             }
@@ -304,7 +349,7 @@ size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
     }
 }
 
-void VirtioWifiForwarder::sendToRemoteVM(Ieee80211Frame& frame) {
+void VirtioWifiForwarder::sendToRemoteVM(std::unique_ptr<android::network::Ieee80211Frame> frame) {
     if (mRemotePeer == nullptr) {
         return;
     }
@@ -313,21 +358,21 @@ void VirtioWifiForwarder::sendToRemoteVM(Ieee80211Frame& frame) {
     fhdr.version = kWifiForwardVersion;
     fhdr.type = (uint8_t)FrameHeaderType::DATA;
     fhdr.dataOffset = sizeof(struct FrameHeader);
-    fhdr.fullLength = frame.size() + sizeof(struct FrameHeader);
+    fhdr.fullLength = frame->size() + sizeof(struct FrameHeader);
     mRemotePeer->queue((uint8_t*)&fhdr, fhdr.dataOffset);
-    mRemotePeer->queue(frame.data(), frame.size());
+    mRemotePeer->queue(frame->data(), frame->size());
 }
 
 // Before the packet is sent to QEMU NIC, it needs to be converted
 // from IEEE80211 frame to Ethernet frame.
-int VirtioWifiForwarder::sendToNIC(Ieee80211Frame& frame) {
+int VirtioWifiForwarder::sendToNIC(std::unique_ptr<android::network::Ieee80211Frame> frame) {
     if (mNic == nullptr) {
         return 0;
     }
-    if (frame.isDataNull()) {
+    if (frame->isDataNull()) {
         return 0;
     }
-    auto outSg = frame.toEthernet();
+    auto outSg = frame->toEthernet();
     if (outSg.size() == 0) {
         return 0;
     }
@@ -342,6 +387,45 @@ int VirtioWifiForwarder::sendToNIC(Ieee80211Frame& frame) {
                                 outSg.size());
     }
     return res ? 0 : -EBUSY;
+}
+
+std::unique_ptr<Ieee80211Frame> VirtioWifiForwarder::parseFrame(const IOVector& in) {
+    const GenericNetlinkMessage msg(in);
+    if (msg.genericNetlinkHeader()->cmd != HWSIM_CMD_FRAME) {
+        return nullptr;
+    }
+    MacAddress transmitter;
+    if (!msg.getAttribute(HWSIM_ATTR_ADDR_TRANSMITTER, transmitter.mAddr, ETH_ALEN)) {
+        return nullptr;
+    }
+    struct iovec iov = msg.getAttribute(HWSIM_ATTR_FRAME);
+    if (iov.iov_len < IEEE80211_HDRLEN) {
+        return nullptr;
+    }
+    uint32_t flags;
+    if (!msg.getAttribute(HWSIM_ATTR_FLAGS, &flags, sizeof(uint32_t))) {
+        return nullptr;
+    }
+    uint32_t channel;
+    if (!msg.getAttribute(HWSIM_ATTR_FREQ, &channel, sizeof(uint32_t))) {
+        return nullptr;
+    }
+    hwsim_tx_rate rates[Ieee80211Frame::TX_MAX_RATES];
+    if (!msg.getAttribute(HWSIM_ATTR_TX_INFO, rates, 
+            sizeof(struct hwsim_tx_rate) * Ieee80211Frame::TX_MAX_RATES)) {
+        return nullptr;
+    }
+    hwsim_tx_rate_flag rate_flags[Ieee80211Frame::TX_MAX_RATES];
+    if (!msg.getAttribute(HWSIM_ATTR_TX_INFO_FLAGS, rate_flags,
+            sizeof(struct hwsim_tx_rate_flag) * Ieee80211Frame::TX_MAX_RATES)) {
+        return nullptr;
+    }
+    uint64_t cookie;
+    if (!msg.getAttribute(HWSIM_ATTR_COOKIE, &cookie, sizeof(uint64_t))) {
+        return nullptr;
+    }
+    sInfo = FrameInfo(transmitter, cookie, flags, channel, rates, Ieee80211Frame::TX_MAX_RATES);
+    return std::make_unique<Ieee80211Frame>(static_cast<const uint8_t*>(iov.iov_base), iov.iov_len, sInfo);
 }
 
 }  // namespace qemu2
