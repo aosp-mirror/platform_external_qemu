@@ -285,10 +285,6 @@ void teardownAndroidNativeBufferImage(
 
     anbInfo->acquireQueueState.teardown(vk, device);
 
-    if (anbInfo->externallyBacked) {
-        teardownVkColorBuffer(anbInfo->colorBufferHandle);
-    }
-
     *anbInfo = {};
 }
 
@@ -407,6 +403,7 @@ void AndroidNativeBufferInfo::QueueState::setup(
 void AndroidNativeBufferInfo::QueueState::teardown(
     VulkanDispatch* vk, VkDevice device) {
 
+    if (queue) vk->vkQueueWaitIdle(queue);
     if (cb) vk->vkFreeCommandBuffers(device, pool, 1, &cb);
     if (pool) vk->vkDestroyCommandPool(device, pool, nullptr);
     if (fence) vk->vkDestroyFence(device, fence, nullptr);
@@ -466,10 +463,10 @@ VkResult setAndroidNativeImageSemaphoreSignaled(
             VkImageMemoryBarrier backToPresentSrc = {
                 VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
                 VK_ACCESS_HOST_READ_BIT, 0,
-                VK_IMAGE_LAYOUT_GENERAL,
+                fb->getVkImageLayoutForPresent(),
                 VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                VK_QUEUE_FAMILY_IGNORED,
-                VK_QUEUE_FAMILY_IGNORED,
+                VK_QUEUE_FAMILY_EXTERNAL,
+                anbInfo->lastUsedQueueFamilyIndex,
                 anbInfo->image,
                 {
                     VK_IMAGE_ASPECT_COLOR_BIT,
@@ -559,9 +556,9 @@ VkResult syncImageToColorBuffer(
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
             VK_ACCESS_HOST_READ_BIT, 0,
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            VK_IMAGE_LAYOUT_GENERAL,
-            VK_QUEUE_FAMILY_IGNORED,
-            VK_QUEUE_FAMILY_IGNORED,
+            fb->getVkImageLayoutForPresent(),
+            queueFamilyIndex,
+            VK_QUEUE_FAMILY_EXTERNAL,
             anbInfo->image,
             {
                 VK_IMAGE_ASPECT_COLOR_BIT,
