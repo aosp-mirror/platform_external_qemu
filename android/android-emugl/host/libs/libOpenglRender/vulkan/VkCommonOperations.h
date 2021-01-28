@@ -316,7 +316,7 @@ struct VkEmulation {
     ExternalMemoryInfo virtualHostVisibleHeap;
 };
 
-VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk);
+VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk, bool useNativeSwapchain);
 void setGlInteropSupported(bool supported);
 void setUseDeferredCommands(VkEmulation* emu, bool useDeferred);
 void setUseCreateResourcesWithRequirements(VkEmulation* emu, bool useCreateResourcesWithRequirements);
