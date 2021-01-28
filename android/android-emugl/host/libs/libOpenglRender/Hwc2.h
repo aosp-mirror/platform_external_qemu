@@ -24,6 +24,7 @@
 
 // Should be identical to graphics-base-v1.0.h
 typedef enum {
+    HAL_TRANSFORM_NONE = 0,
     HAL_TRANSFORM_FLIP_H = 1,   // (1 << 0)
     HAL_TRANSFORM_FLIP_V = 2,   // (1 << 1)
     HAL_TRANSFORM_ROT_90 = 4,   // (1 << 2)
@@ -52,6 +53,8 @@ typedef struct hwc_rect {
 } hwc_rect_t;
 
 typedef enum {
+    /* No transform */
+    HWC_TRANSFORM_NONE = HAL_TRANSFORM_NONE,
     /* flip source image horizontally */
     HWC_TRANSFORM_FLIP_H = HAL_TRANSFORM_FLIP_H,
     /* flip source image vertically */

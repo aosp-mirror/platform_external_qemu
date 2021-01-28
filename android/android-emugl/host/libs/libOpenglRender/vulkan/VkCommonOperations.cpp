@@ -34,9 +34,11 @@
 #include <iomanip>
 #include <ostream>
 #include <sstream>
+#include <unordered_set>
 
-#include <stdio.h>
-#include <string.h>
+#include "FrameBuffer.h"
+#include "VulkanDispatch.h"
+#include "common/goldfish_vk_dispatch.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -443,7 +445,7 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
     return res;
 }
 
-VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
+VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk, bool useNativeSwapchain) {
     AutoLock lock(sVkEmulationLock);
 
     if (sVkEmulation) return sVkEmulation;
@@ -456,6 +458,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     sVkEmulation->gvk = vk;
     auto gvk = vk;
+
+    std::vector<const char*> finalInstanceExtensions;
 
     std::vector<const char*> externalMemoryInstanceExtNames = {
         "VK_KHR_external_memory_capabilities",
@@ -489,20 +493,27 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         0, nullptr,
     };
 
-    if (externalMemoryCapabilitiesSupported) {
-        instCi.enabledExtensionCount =
-            externalMemoryInstanceExtNames.size();
-        instCi.ppEnabledExtensionNames =
-            externalMemoryInstanceExtNames.data();
-    }
-
     if (moltenVKSupported) {
         // We don't need both moltenVK and external memory. Disable
         // external memory if moltenVK is supported.
         externalMemoryCapabilitiesSupported = false;
-        instCi.enabledExtensionCount = 0u;
-        instCi.ppEnabledExtensionNames = nullptr;
+    } else if (externalMemoryCapabilitiesSupported) {
+        for (auto ext: externalMemoryInstanceExtNames) {
+            finalInstanceExtensions.push_back(ext);
+        }
     }
+
+    if (useNativeSwapchain) {
+        for (auto ext : SwapChainStateVk::getRequiredInstanceExtensions()) {
+            finalInstanceExtensions.push_back(ext);
+        }
+    }
+
+    instCi.enabledExtensionCount =
+        finalInstanceExtensions.size();
+    instCi.ppEnabledExtensionNames =
+        finalInstanceExtensions.size() > 0 ?
+        finalInstanceExtensions.data() : nullptr;
 
     VkApplicationInfo appInfo = {
         VK_STRUCTURE_TYPE_APPLICATION_INFO, 0,
@@ -774,19 +785,47 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
     uint32_t selectedDeviceExtensionCount = 0;
     const char* const* selectedDeviceExtensionNames = nullptr;
 
+    std::vector<const char*> finalDeviceExtensions;
+
     if (sVkEmulation->deviceInfo.supportsExternalMemory) {
-        selectedDeviceExtensionCount = externalMemoryDeviceExtNames.size();
-        selectedDeviceExtensionNames = externalMemoryDeviceExtNames.data();
+        for (auto ext: externalMemoryDeviceExtNames) {
+            finalDeviceExtensions.push_back(ext);
+        }
+    }
+
+    VkPhysicalDeviceFeatures2 features2 = {};
+    VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {};
+    bool useFeatures2 = false;
+
+    if (useNativeSwapchain) {
+        for (auto ext : CompositorVk::getRequiredDeviceExtensions()) {
+            finalDeviceExtensions.push_back(ext);
+        }
+
+        for (auto ext : SwapChainStateVk::getRequiredDeviceExtensions()) {
+            finalDeviceExtensions.push_back(ext);
+        }
+        descIndexingFeatures.sType =
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
+        descIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
+        features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        features2.pNext = &descIndexingFeatures;
+        useFeatures2 = true;
+
+        if (!CompositorVk::enablePhysicalDeviceFeatures(features2)) {
+            fprintf(stderr, "%s: Fail to enable physical device features for CompositorVk.\n", __func__);
+            useFeatures2 = false;
+        }
     }
 
     VkDeviceCreateInfo dCi = {
-        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, 0, 0,
+        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, useFeatures2 ? &features2 : nullptr, 0,
         // TODO: add compute queue as well if appropriate
         1, &dqCi,
         0, nullptr, // no layers
-        selectedDeviceExtensionCount,
-        selectedDeviceExtensionNames, // no layers
-        nullptr, // no features
+        (uint32_t)finalDeviceExtensions.size(),
+        finalDeviceExtensions.size() ? finalDeviceExtensions.data() : nullptr,
+        nullptr, // no features1
     };
 
     ivk->vkCreateDevice(sVkEmulation->physdev, &dCi, nullptr,
@@ -1306,6 +1345,7 @@ bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle) {
 
     if (!fb->getColorBufferInfo(colorBufferHandle, &width, &height,
                                 &internalformat)) {
+        fprintf(stderr, "%s: cb not found\n", __func__);
         return false;
     }
 
@@ -1317,6 +1357,7 @@ bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle) {
         }
     }
 
+    fprintf(stderr, "%s: fmt 0x%x vk 0x%x not supported\n", __func__, internalformat, vkFormat);
     return false;
 }
 
@@ -1566,17 +1607,16 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     }
 
     if (sVkEmulation->deviceInfo.supportsExternalMemory &&
-        sVkEmulation->deviceInfo.glInteropSupported &&
-        glCompatible &&
+        sVkEmulation->deviceInfo.glInteropSupported && glCompatible &&
         FrameBuffer::getFB()->importMemoryToColorBuffer(
-            dupExternalMemory(res.memory.exportedHandle),
-            res.memory.size,
-            false /* dedicated */,
-            res.tiling == VK_IMAGE_TILING_LINEAR,
-            vulkanOnly,
-            colorBufferHandle)) {
+            dupExternalMemory(res.memory.exportedHandle), res.memory.size,
+            false /* dedicated */, res.tiling == VK_IMAGE_TILING_LINEAR,
+            vulkanOnly, colorBufferHandle)) {
         res.glExported = true;
     }
+
+    FrameBuffer::getFB()->ensureDisplayBufferForColorBuffer(
+        colorBufferHandle, res.image, res.format);
 
     if (exported) *exported = res.glExported;
     if (allocSize) *allocSize = res.memory.size;

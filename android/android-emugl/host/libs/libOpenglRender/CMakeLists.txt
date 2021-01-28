@@ -59,7 +59,7 @@ android_add_library(
 target_link_libraries(
   OpenglRender_vulkan PUBLIC emugl_common OpenglRender_vulkan_cereal
   PRIVATE emugl_base GLcommon)
-android_target_compile_definitions(OpenglRender_vulkan windows PRIVATE
+android_target_compile_definitions(OpenglRender_vulkan windows PUBLIC
                                    -DVK_USE_PLATFORM_WIN32_KHR)
 target_compile_options(
   OpenglRender_vulkan PRIVATE -fvisibility=hidden -Wno-unused-value
@@ -81,6 +81,8 @@ android_add_library(
   SRC # cmake-format: sortable
       ChannelStream.cpp
       ColorBuffer.cpp
+      CompositorVk.cpp
+      DisplayVk.cpp
       FbConfig.cpp
       FenceSync.cpp
       FrameBuffer.cpp
@@ -98,6 +100,7 @@ android_add_library(
       RenderThreadInfo.cpp
       RenderWindow.cpp
       RingStream.cpp
+      SwapChainStateVk.cpp
       SyncThread.cpp
       TextureDraw.cpp
       TextureResize.cpp
@@ -118,7 +121,7 @@ target_link_libraries(
          OpenGLESDispatch
          GLSnapshot)
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
-android_target_compile_definitions(OpenglRender windows PRIVATE
+android_target_compile_definitions(OpenglRender windows PUBLIC
                                    -DVK_USE_PLATFORM_WIN32_KHR)
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
 target_compile_options(OpenglRender PUBLIC -Wno-return-type-c-linkage)
@@ -162,6 +165,8 @@ if(NOT LINUX_AARCH64)
         ../Translator/GLES_V2/ANGLEShaderParser.cpp
         ChannelStream.cpp
         ColorBuffer.cpp
+        CompositorVk.cpp
+        DisplayVk.cpp
         FbConfig.cpp
         FenceSync.cpp
         FrameBuffer.cpp
@@ -182,6 +187,7 @@ if(NOT LINUX_AARCH64)
         standalone_common/SampleApplication.cpp
         standalone_common/SearchPathsSetup.cpp
         standalone_common/ShaderUtils.cpp
+        SwapChainStateVk.cpp
         SyncThread.cpp
         TextureDraw.cpp
         TextureResize.cpp
@@ -206,7 +212,7 @@ if(NOT LINUX_AARCH64)
   target_compile_options(OpenglRender_standalone_common
                          PRIVATE -fvisibility=hidden)
   android_target_compile_definitions(OpenglRender_standalone_common windows
-                                     PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
+    PUBLIC -DVK_USE_PLATFORM_WIN32_KHR)
   target_include_directories(
     OpenglRender_standalone_common
     PUBLIC ${ANDROID_EMUGL_DIR}/host/include/OpenglRender standalone_common
@@ -246,7 +252,7 @@ if(NOT LINUX_AARCH64)
   target_link_libraries(
     OpenglRender_unittests PRIVATE OpenglRender_standalone_common
                                    android-emu-test-launcher android-emu)
-  android_target_compile_definitions(OpenglRender_unittests windows PRIVATE
+  android_target_compile_definitions(OpenglRender_unittests windows PUBLIC
                                      -DVK_USE_PLATFORM_WIN32_KHR)
   add_opengl_dependencies(OpenglRender_unittests)
 
@@ -268,7 +274,7 @@ if(NOT LINUX_AARCH64)
               ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
               ${ANDROID_EMUGL_DIR}/host/include/vulkan)
     android_target_compile_definitions(OpenglRender_vulkan_unittests windows
-                                       PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
+      PUBLIC -DVK_USE_PLATFORM_WIN32_KHR)
   endif()
 
   android_add_executable(
