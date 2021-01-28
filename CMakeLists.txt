@@ -735,9 +735,9 @@ android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE
 android_target_link_libraries(android-qemu-deps linux-aarch64 INTERFACE
                               "${TCMALLOC_LIBRARIES} -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE
-                              "-framework CoreAudio")
+    "-framework CoreAudio" "-framework AudioToolbox")
 android_target_link_libraries(android-qemu-deps darwin-aarch64 INTERFACE
-                              "-framework CoreAudio")
+    "-framework CoreAudio" "-framework AudioToolbox")
 android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE
                               android-emu-base)
 
