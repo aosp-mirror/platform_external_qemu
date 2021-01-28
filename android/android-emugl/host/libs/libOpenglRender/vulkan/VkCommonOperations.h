@@ -314,9 +314,11 @@ struct VkEmulation {
     // external backing?
     // TODO: try switching to this
     ExternalMemoryInfo virtualHostVisibleHeap;
+
+    bool useNativeSwapchain = false;
 };
 
-VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk);
+VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk, bool useNativeSwapchain);
 void setGlInteropSupported(bool supported);
 void setUseDeferredCommands(VkEmulation* emu, bool useDeferred);
 void setUseCreateResourcesWithRequirements(VkEmulation* emu, bool useCreateResourcesWithRequirements);
