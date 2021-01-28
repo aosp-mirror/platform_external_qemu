@@ -24,6 +24,7 @@
  */
 
 #include "qemu/osdep.h"
+#include <AudioToolbox/AudioToolbox.h>
 #include <CoreAudio/CoreAudio.h>
 #include <pthread.h>            /* pthread_X */
 
@@ -62,10 +63,23 @@ typedef struct coreaudioVoiceBase {
     AudioStreamBasicDescription streamBasicDescription;
     AudioDeviceIOProcID ioprocid;
     Boolean isInput;
+    float hwSampleRate;
+    float wantedSampleRate;
     int live;
     int decr;
     int pos;
     bool shuttingDown;
+    bool conversionNeeded;
+    AudioStreamBasicDescription conversionBasicDescription;
+    AudioConverterRef converter;
+    uint32_t converterOutputBufferSize;
+    uint32_t converterNumPackets;
+    void* converterOutputBuffer;
+    uint32_t converterInputPacketsRequired;
+    void* converterInputBuffer;
+    uint32_t converterInputPacketsCopiedForNextConversion;
+    uint32_t converterInputPacketCount;
+    uint32_t converterInputPacketConsumedPos;
 } coreaudioVoiceBase;
 
 typedef struct coreaudioVoiceOut {
@@ -83,6 +97,140 @@ static bool gIsAtExit = false;
 
 static void coreaudio_atexit(void) {
     gIsAtExit = true;
+}
+
+static const char* audio_format_to_string(audfmt_e fmt) {
+    switch (fmt) {
+        case AUD_FMT_U8:
+            return "AUD_FMT_U8";
+        case AUD_FMT_S8:
+            return "AUD_FMT_S8";
+        case AUD_FMT_U16:
+            return "AUD_FMT_U16";
+        case AUD_FMT_S16:
+            return "AUD_FMT_S16";
+        case AUD_FMT_U32:
+            return "AUD_FMT_U32";
+        case AUD_FMT_S32:
+            return "AUD_FMT_S32";
+        default:
+            fprintf(stderr, "%s: warning: unknown AUD format 0x%x\n", __func__, (uint32_t)fmt);
+            return "Unknown AUD format";
+    }
+}
+
+#define COREAUDIO_FLAG_STRING_FORMAT_PIECE(flag,flagbit) (((flag) & (flagbit)) ? (#flagbit " | ") : "")
+
+static const char* coreaudio_show_linear_pcm_flags(AudioFormatFlags flags) {
+    static char linear_pcm_flags_buffer[4096];
+    snprintf(linear_pcm_flags_buffer, sizeof(linear_pcm_flags_buffer),
+            "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAudioFormatFlagIsFloat),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAudioFormatFlagIsBigEndian),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAudioFormatFlagIsSignedInteger),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAudioFormatFlagIsPacked),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAudioFormatFlagIsAlignedHigh),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAudioFormatFlagIsNonInterleaved),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAudioFormatFlagIsNonMixable),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kLinearPCMFormatFlagsSampleFractionShift),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kLinearPCMFormatFlagsSampleFractionMask),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAudioFormatFlagsAreAllClear),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kLinearPCMFormatFlagIsFloat),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kLinearPCMFormatFlagIsBigEndian),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kLinearPCMFormatFlagIsSignedInteger),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kLinearPCMFormatFlagIsPacked),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kLinearPCMFormatFlagIsAlignedHigh),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kLinearPCMFormatFlagIsNonInterleaved),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kLinearPCMFormatFlagIsNonMixable),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kLinearPCMFormatFlagsAreAllClear),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAppleLosslessFormatFlag_16BitSourceData),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAppleLosslessFormatFlag_20BitSourceData),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAppleLosslessFormatFlag_24BitSourceData),
+            COREAUDIO_FLAG_STRING_FORMAT_PIECE(flags, kAppleLosslessFormatFlag_32BitSourceData));
+
+    return linear_pcm_flags_buffer;
+}
+
+static const char* coreaudio_get_format_name_from_id(AudioFormatID formatId) {
+    switch (formatId) {
+        case kAudioFormatLinearPCM:
+            return "kAudioFormatLinearPCM";
+        case kAudioFormatAC3:
+            return "kAudioFormatACe";
+        case kAudioFormat60958AC3:
+            return "kAudioFormat60958AC3";
+        case kAudioFormatAppleIMA4:
+            return "kAudioFormatAppleIMA4";
+        case kAudioFormatMPEG4CELP:
+            return "kAudioFormatMPEG4CELP";
+        case kAudioFormatMPEG4HVXC:
+            return "kAudioFormatMPEG4HVXC";
+        case kAudioFormatMPEG4TwinVQ:
+            return "kAudioFormatMPEG4TwinVQ";
+        case kAudioFormatMACE3:
+            return "kAudioFormatMACE3";
+        case kAudioFormatMACE6:
+            return "kAudioFormatMACE6";
+        case kAudioFormatULaw:
+            return "kAudioFormatULaw";
+        case kAudioFormatALaw:
+            return "kAudioFormatALaw";
+        case kAudioFormatQDesign:
+            return "kAudioFormatQDesign";
+        case kAudioFormatQDesign2:
+            return "kAudioFormatQDesign2";
+        case kAudioFormatQUALCOMM:
+            return "kAudioFormatQUALCOMM";
+        case kAudioFormatMPEGLayer1:
+            return "kAudioFormatMPEGLayer1";
+        case kAudioFormatMPEGLayer2:
+            return "kAudioFormatMPEGLayer2";
+        case kAudioFormatMPEGLayer3:
+            return "kAudioFormatMPEGLayer3";
+        case kAudioFormatTimeCode:
+            return "kAudioFormatTimeCode";
+        case kAudioFormatMIDIStream:
+            return "kAudioFormatMIDIStream";
+        case kAudioFormatParameterValueStream:
+            return "kAudioFormatParameterValueStream";
+        case kAudioFormatAppleLossless:
+            return "kAudioFormatAppleLossless";
+        case kAudioFormatMPEG4AAC_HE:
+            return "kAudioFormatMPEG4AAC_HE";
+        case kAudioFormatMPEG4AAC_LD:
+            return "kAudioFormatMPEG4AAC_LD";
+        case kAudioFormatMPEG4AAC_ELD_SBR:
+            return "kAudioFormatMPEG4AAC_ELD_SBR";
+        case kAudioFormatMPEG4AAC_HE_V2:
+            return "kAudioFormatMPEG4AAC_HE_V2";
+        case kAudioFormatMPEG4AAC_Spatial:
+            return "kAudioFormatMPEG4AAC_Spatial";
+        case kAudioFormatAMR:
+            return "kAudioFormatAMR";
+        case kAudioFormatAudible:
+            return "kAudioFormatAMR";
+        case kAudioFormatDVIIntelIMA:
+            return "kAudioFormatDVIIntelIMA";
+        case kAudioFormatMicrosoftGSM:
+            return "kAudioFormatMicrosoftGSM";
+        case kAudioFormatAES3:
+            return "kAudioFormatAES3";
+        case kAudioFormatAMR_WB:
+            return "kAudioFormatAMR_WB";
+        case kAudioFormatEnhancedAC3:
+            return "kAudioFormatEnhancedAC3";
+        case kAudioFormatMPEG4AAC_ELD_V2:
+            return "kAudioFormatMPEG4AAC_ELD_V2";
+        case kAudioFormatFLAC:
+            return "kAudioFormatFLAC";
+        case kAudioFormatMPEGD_USAC:
+            return "kAudioFormatMPEGD_USAC";
+        case kAudioFormatOpus:
+            return "kAudioFormatOpus";
+        default:
+            fprintf(stderr, "%s: warning: unknown audio format id 0x%x\n", __func__, formatId);
+            return "Unknown audio format";
+    }
 }
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
@@ -672,6 +820,10 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
         return -1;
     }
 
+    fprintf(stderr, "%s: %p input? %d frame size range: %u %u\n", __func__, core, isInput,
+           (uint32_t)frameRange.mMinimum,
+           (uint32_t)frameRange.mMaximum);
+
     if (frameRange.mMinimum > conf->buffer_frames) {
         core->audioDevicePropertyBufferFrameSize = (UInt32) frameRange.mMinimum;
         dolog ("warning: Upsizing Buffer Frames to %f\n", frameRange.mMinimum);
@@ -684,6 +836,8 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
         core->audioDevicePropertyBufferFrameSize = conf->buffer_frames;
     }
 
+    fprintf(stderr, "%s: %p input? %d wanted framesize of %d\n", __func__, core, isInput,
+            core->audioDevicePropertyBufferFrameSize);
     /* set Buffer Frame Size */
     status = coreaudio_set_framesize(core->deviceID,
                                      &core->audioDevicePropertyBufferFrameSize,
@@ -717,17 +871,110 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
         return -1;
     }
 
-    /* set Samplerate */
-    core->streamBasicDescription.mSampleRate = (Float64) as->freq;
-    status = coreaudio_set_streamformat(core->deviceID,
-                                        &core->streamBasicDescription,
-                                        isInput);
-    if (status != kAudioHardwareNoError) {
-        coreaudio_logerr2 (status, typ, "Could not set samplerate %d\n",
-                           as->freq);
-        core->deviceID = kAudioDeviceUnknown;
-        return -1;
+
+    core->hwSampleRate = (float)core->streamBasicDescription.mSampleRate;
+    core->wantedSampleRate = (float)as->freq;
+
+    if (core->hwSampleRate != core->wantedSampleRate) {
+        fprintf(stderr, "%s: %p input? %d Need to resample audio. Creating conversion object...\n", __func__, core, isInput);
+        core->conversionNeeded = true;
+        core->conversionBasicDescription = core->streamBasicDescription;
+        // core->conversionBasicDescription.mSampleRate = as->freq;
+        core->conversionBasicDescription.mSampleRate = as->freq;
+        OSStatus err = AudioConverterNew(&core->streamBasicDescription, &core->conversionBasicDescription, &core->converter);
+        if (err != kAudioHardwareNoError) {
+            fprintf(stderr, "%s: %p input? %d Error when trying to create audio conversion object: 0x%x\n", __func__,
+                     core, isInput, (uint32_t)err);
+            abort();
+        } else {
+            fprintf(stderr, "%s: %p input? %d Successfully created audio conversion object\n", __func__, core, isInput);
+        }
+
+        int bytesPerPacket = core->conversionBasicDescription.mBytesPerPacket;
+        int bytesPerPacketPrev = bytesPerPacket;
+        int size = sizeof(bytesPerPacket);
+        fprintf(stderr, "%s: %p input? %d out size per packetn our conversion desc: %d\n", __func__, core, isInput, bytesPerPacket);
+        AudioConverterGetProperty(core->converter, kAudioConverterPropertyMaximumOutputPacketSize, &size, &bytesPerPacket);
+        fprintf(stderr, "%s: %p input? %d out size per packet from converter: %d\n", __func__, core, isInput, bytesPerPacket);
+        if (bytesPerPacket != bytesPerPacketPrev) {
+            fprintf(stderr, "%s: %p input? %d wtf, bytes per packet don't match\n", __func__, core, isInput);
+        }
+
+        int minInputBufferSize;
+        AudioConverterGetProperty(core->converter, kAudioConverterPropertyMinimumInputBufferSize, &size, &minInputBufferSize);
+        int minOutputBufferSize;
+        AudioConverterGetProperty(core->converter, kAudioConverterPropertyMinimumOutputBufferSize, &size, &minOutputBufferSize);
+
+        fprintf(stderr, "%s: %p input? %d require buffer size ranges: input min %d output min %d\n", __func__,
+                core, isInput,
+                minInputBufferSize,
+                minOutputBufferSize);
+
+        int currentBufferFrameSizeBytes = core->audioDevicePropertyBufferFrameSize * core->streamBasicDescription.mBytesPerFrame;
+        core->converterOutputBufferSize = currentBufferFrameSizeBytes > minOutputBufferSize ? currentBufferFrameSizeBytes : minOutputBufferSize;
+        fprintf(stderr, "%s: %p input? %d using a converter output buffer size of %d. frame size %d frames at %d bytes per frame\n", __func__, core, isInput,
+                core->converterOutputBufferSize,
+                core->audioDevicePropertyBufferFrameSize,
+                core->streamBasicDescription.mBytesPerFrame);
+        core->converterNumPackets = core->converterOutputBufferSize / core->conversionBasicDescription.mBytesPerPacket;
+        fprintf(stderr, "%s: %p input? %d thus the number of packets in the conversion buffer is %d (buffer size %d, bytes per packet %d (channels per frame: %d)\n", __func__, core, isInput,
+                core->converterNumPackets,
+                core->converterOutputBufferSize,
+                core->conversionBasicDescription.mBytesPerPacket,
+                core->conversionBasicDescription.mChannelsPerFrame);
+        // If the 
+        core->converterOutputBuffer = malloc(core->converterOutputBufferSize);
+        if (!core->converterOutputBuffer) {
+            fprintf(stderr, "%s: %p input? %d Fatal: failed to alloc converter output buffer\n", __func__, core, isInput);
+            abort();
+        }
+
+        int calcRequiredInputBufferSize = core->converterOutputBufferSize;
+        AudioConverterGetProperty(core->converter, kAudioConverterPropertyCalculateInputBufferSize, &size, &calcRequiredInputBufferSize);
+        fprintf(stderr, "%s: %p input? %d For converter output buffer size of %d, we need %d input (%d packets)\n", __func__, core, isInput, core->converterOutputBufferSize, calcRequiredInputBufferSize, calcRequiredInputBufferSize / core->streamBasicDescription.mBytesPerPacket);
+        core->converterInputPacketsRequired =
+            calcRequiredInputBufferSize / core->streamBasicDescription.mBytesPerPacket;
+
+        core->converterInputBuffer = malloc(calcRequiredInputBufferSize * 2); // slack to copy over another complete set of frameCount
+        core->converterInputPacketsCopiedForNextConversion = 0;
+        core->converterInputPacketCount = 0;
+        core->converterInputPacketConsumedPos = 0;
     }
+
+    fprintf(stderr, "%s: %p input? %d sw format properties:\n", __func__, core, isInput);
+    fprintf(stderr, "%s: %p input? %d sample rate: %f\n", __func__, core, isInput, (float)as->freq);
+    fprintf(stderr, "%s: %p input? %d num channels: %d\n", __func__, core, isInput, as->nchannels);
+    fprintf(stderr, "%s: %p input? %d format: 0x%x %s\n", __func__, core, isInput, (uint32_t)as->fmt, audio_format_to_string(as->fmt));
+    fprintf(stderr, "%s: %p input? %d endianness: 0x%x\n", __func__, core, isInput, as->endianness);
+
+    fprintf(stderr, "%s: %p input? %d sample rate: hw: %f wanted: %f hwframesize: %d\n", __func__, core,
+            isInput,
+            core->hwSampleRate,
+            core->wantedSampleRate,
+            core->audioDevicePropertyBufferFrameSize);
+
+    fprintf(stderr, "%s: %p input? %d other hw format properties:\n", __func__, core, isInput);
+    fprintf(stderr, "%s: %p input? %d bits per channel: %d\n", __func__, core, isInput, core->streamBasicDescription.mBitsPerChannel);
+    fprintf(stderr, "%s: %p input? %d bytes per frame: %d\n", __func__, core, isInput, core->streamBasicDescription.mBytesPerFrame);
+    fprintf(stderr, "%s: %p input? %d bytes per packet: %d\n", __func__, core, isInput, core->streamBasicDescription.mBytesPerPacket);
+    fprintf(stderr, "%s: %p input? %d channels per frame: %d\n", __func__, core, isInput, core->streamBasicDescription.mChannelsPerFrame);
+    fprintf(stderr, "%s: %p input? %d format flags: 0x%x linear pcm flags: %s\n", __func__, core, isInput, core->streamBasicDescription.mFormatFlags, coreaudio_show_linear_pcm_flags(core->streamBasicDescription.mFormatFlags));
+    fprintf(stderr, "%s: %p input? %d format id: 0x%x %s\n", __func__, core, isInput, core->streamBasicDescription.mFormatID, coreaudio_get_format_name_from_id(core->streamBasicDescription.mFormatID) );
+    fprintf(stderr, "%s: %p input? %d frames per packet: %d\n", __func__, core, isInput, core->streamBasicDescription.mFramesPerPacket);
+    fprintf(stderr, "%s: %p input? %d reserved: %d\n", __func__, core, isInput);
+    fprintf(stderr, "%s: %p input? %d sample rate: %f\n", __func__, core, isInput, core->streamBasicDescription.mSampleRate);
+
+    /* set Samplerate */
+    // core->streamBasicDescription.mSampleRate = (Float64) as->freq;
+    // status = coreaudio_set_streamformat(core->deviceID,
+    //                                     &core->streamBasicDescription,
+    //                                     isInput);
+    // if (status != kAudioHardwareNoError) {
+    //     coreaudio_logerr2 (status, typ, "Could not set samplerate %d\n",
+    //                        as->freq);
+    //     core->deviceID = kAudioDeviceUnknown;
+    //     return -1;
+    // }
 
     /* set Callback */
     core->ioprocid = NULL;
@@ -929,6 +1176,7 @@ static int coreaudio_init_out(HWVoiceOut *hw, struct audsettings *as,
     coreaudioVoiceBase *core = &((coreaudioVoiceOut *) hw)->core;
     CoreaudioConf *conf = drv_opaque;
 
+    as->fmt = AUD_FMT_S32;
     audio_pcm_init_info (&hw->info, as);
 
     if (coreaudio_init_base(core, as, drv_opaque,
@@ -969,6 +1217,51 @@ static int coreaudio_run_in (HWVoiceIn *hw)
     return decr;
 }
 
+static OSStatus converterInputDataProc(
+    AudioConverterRef converter,
+    UInt32* numPacketsConsumeInOut,
+    AudioBufferList* bufferList,
+    AudioStreamPacketDescription* outPacketDescription,
+    void* userData)
+{
+    OSStatus err;
+    coreaudioVoiceBase* core = (coreaudioVoiceBase*)userData;
+    uint32_t consumeWanted = *numPacketsConsumeInOut;
+    uint32_t consumeActual = core->converterInputPacketCount;
+
+    fprintf(stderr, "%s: consume wanted: %u\n", __func__, consumeWanted);
+    fprintf(stderr, "%s: consumed packet pos: %u\n", __func__, core->converterInputPacketConsumedPos);
+    fprintf(stderr, "%s: input packet count: %u\n", __func__, core->converterInputPacketCount);
+    *numPacketsConsumeInOut = consumeWanted > consumeActual ? consumeActual : consumeWanted;
+    fprintf(stderr, "%s: consuming %d\n", __func__, *numPacketsConsumeInOut);
+
+    // if (consumeWanted > core->converterNumPackets) {
+    //     consumeActual = core->converterNumPackets;
+    //     *numPacketsConsumeInOut = consumeActual;
+    // }
+
+    // fprintf(stderr, "%s: consume: actual %u, num packets %u\n", __func__,
+    //         consumeActual, core->converterNumPackets);
+    // fprintf(stderr, "%s: consume: input packet count %d\n", __func__,
+    //        core->converterInputPacketCount);
+
+    // if (consumeActual != core->converterNumPackets) {
+    //     fprintf(stderr, "%s: fatal, mismatched consume. actual %u, num packets %u\n", __func__,
+    //             consumeActual, core->converterNumPackets);
+    //     abort();
+    // }
+
+
+    // Read the actual packet data
+    bufferList->mNumberBuffers = 1;
+    bufferList->mBuffers[0].mData = core->converterInputBuffer + core->converterInputPacketConsumedPos * core->streamBasicDescription.mBytesPerPacket;
+    bufferList->mBuffers[0].mDataByteSize = *numPacketsConsumeInOut * core->streamBasicDescription.mBytesPerPacket;
+    bufferList->mBuffers[0].mNumberChannels = core->streamBasicDescription.mChannelsPerFrame;
+    core->converterInputPacketConsumedPos += *numPacketsConsumeInOut;
+
+    return kAudioHardwareNoError;
+}
+
 /* callback to feed audioinput buffer */
 static OSStatus audioInputDeviceIOProc(
     AudioDeviceID inDevice,
@@ -979,6 +1272,7 @@ static OSStatus audioInputDeviceIOProc(
     const AudioTimeStamp* inOutputTime,
     void* hwptr)
 {
+    OSStatus err;
     UInt32 frame, frameCount;
     float *in = inInputData->mBuffers[0].mData;
     HWVoiceIn *hw = hwptr;
@@ -1015,6 +1309,99 @@ static OSStatus audioInputDeviceIOProc(
     wpos = core->pos;
     dst  = hw->conv_buf + wpos;
 
+    // With conversion:
+    // First ensure there is over the required packet count copied to core->converterInputBuffer
+    if (core->conversionNeeded) {
+        if (core->converterInputPacketsCopiedForNextConversion <
+            core->converterInputPacketsRequired) {
+            void* dst = ((uint8_t*)core->converterInputBuffer) + core->converterInputPacketsCopiedForNextConversion;
+            memcpy(dst, in, sizeof(float) * frameCount);
+            core->converterInputPacketsCopiedForNextConversion += frameCount;
+        }
+
+        if (core->converterInputPacketsCopiedForNextConversion <
+                core->converterInputPacketsRequired) {
+            /* not enough, set signal and return */
+            inInputTime = 0;
+            coreaudio_unlock (core, "audioInputDeviceIOProc(empty)");
+            return 0;
+        }
+    }
+
+    if (core->conversionNeeded) {
+        // Now we have enough
+        core->converterInputPacketConsumedPos = 0;
+        core->converterInputPacketCount = core->converterInputPacketsRequired;
+        fprintf(stderr, "%s: doing input conversion for %d packets (should equal required)\n", __func__,
+                core->converterInputPacketCount);
+
+        UInt32 convertedPacketCount = core->converterInputPacketCount;
+        UInt32 copiedPacketsConsumed = core->converterInputPacketCount;
+        AudioBufferList fillBufferList;
+        fillBufferList.mNumberBuffers = 1;
+        fillBufferList.mBuffers[0].mNumberChannels = core->streamBasicDescription.mChannelsPerFrame;
+        fillBufferList.mBuffers[0].mDataByteSize = core->converterOutputBufferSize;
+        fillBufferList.mBuffers[0].mData = core->converterOutputBuffer;
+        err = AudioConverterFillComplexBuffer(core->converter, converterInputDataProc, core, &convertedPacketCount, &fillBufferList, 0 /* null output packet descriptions */);
+
+        if (err != kAudioHardwareNoError) {
+            fprintf(stderr, "%s: error from conversion: 0x%x\n", __func__, err);
+        }
+        fprintf(stderr, "%s: after: convertedPacketCount %u\n", __func__, convertedPacketCount);
+
+        frameCount = convertedPacketCount;
+        in = (float*)core->converterOutputBuffer;
+        fprintf(stderr, "%s: set input to converter output buffer %p\n", __func__,
+                core->converterOutputBuffer);
+
+        // Move the slack over
+        memmove(
+            core->converterInputBuffer,
+            ((uint8_t*)core->converterInputBuffer) + copiedPacketsConsumed * core->streamBasicDescription.mBytesPerPacket,
+            (core->converterInputPacketsCopiedForNextConversion - copiedPacketsConsumed) * core->streamBasicDescription.mBytesPerPacket);
+
+        fprintf(stderr, "%s: slack: copied %d packets but converted %d: remainder of %d packets\n", __func__,
+                core->converterInputPacketsCopiedForNextConversion,
+                copiedPacketsConsumed,
+                (core->converterInputPacketsCopiedForNextConversion - copiedPacketsConsumed));
+        core->converterInputPacketsCopiedForNextConversion -= copiedPacketsConsumed;
+    }
+
+    // if (core->conversionNeeded) {
+    //     uint32_t framesToConvert = frameCount;
+    //     
+    //     while (framesToConvert) {
+    //         UInt32 convertedPacketCount = framesToConvert;
+    //         uint32_t framesConverted = frameCount - framesToConvert;
+
+    //         core->converterInputBuffer =
+    //             ((uint8_t*)inInputData->mBuffers[0].mData) + framesToConvert * core->streamBasicDescription.mBytesPerPacket;
+    //         core->converterInputPacketCount =
+    //             framesToConvert * (core->streamBasicDescription.mBytesPerFrame / core->streamBasicDescription.mBytesPerPacket);
+
+    //         fprintf(stderr, "%s: doing input conversion. input buffer %p, packet count %d (frame count %d)\n", __func__,
+    //                 core->converterInputBuffer,
+    //                 core->converterInputPacketCount,
+    //                 framesToConvert);
+
+    //         AudioBufferList fillBufferList;
+    //         fillBufferList.mNumberBuffers = 1;
+    //         fillBufferList.mBuffers[0].mNumberChannels = core->streamBasicDescription.mChannelsPerFrame;
+    //         fillBufferList.mBuffers[0].mDataByteSize = core->converterOutputBufferSize - framesConverted * core->streamBasicDescription.mBytesPerFrame;
+    //         fillBufferList.mBuffers[0].mData = ((uint8_t*)core->converterOutputBuffer) + framesConverted * core->streamBasicDescription.mBytesPerPacket;
+    //         err = AudioConverterFillComplexBuffer(core->converter, converterInputDataProc, core, &convertedPacketCount, &fillBufferList, 0 /* null output packet descriptions */);
+    //         fprintf(stderr, "%s: after: convertedPacketCount %u\n", __func__, convertedPacketCount);
+
+    //         framesToConvert -= convertedPacketCount;
+    //     }
+
+    //     // frameCount = convertedPacketCount;
+    //     in = (float*)core->converterOutputBuffer;
+    //     fprintf(stderr, "%s: set input to converter output buffer %p\n", __func__,
+    //             core->converterOutputBuffer);
+
+    // }
+
     /* fill buffer */
     for (frame = 0; frame < frameCount; frame++) {
 #ifdef FLOAT_MIXENG
@@ -1050,6 +1437,7 @@ static int coreaudio_init_in(HWVoiceIn *hw, struct audsettings *as,
     coreaudioVoiceBase *core = &((coreaudioVoiceIn *) hw)->core;
     CoreaudioConf *conf = drv_opaque;
 
+    as->fmt = AUD_FMT_S32;
     audio_pcm_init_info (&hw->info, as);
 
     if (coreaudio_init_base(core, as, drv_opaque,
@@ -1074,7 +1462,7 @@ static int coreaudio_ctl_in (HWVoiceIn *hw, int cmd, ...)
 }
 
 static CoreaudioConf glob_conf = {
-    .buffer_frames = 512,
+    .buffer_frames = 2048,
     .nbuffers = 4,
 };
 
