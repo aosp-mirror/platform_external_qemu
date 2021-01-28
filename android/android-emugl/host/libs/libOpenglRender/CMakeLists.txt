@@ -81,6 +81,7 @@ android_add_library(
   SRC # cmake-format: sortable
       ChannelStream.cpp
       ColorBuffer.cpp
+      CompositorVk.cpp
       FbConfig.cpp
       FenceSync.cpp
       FrameBuffer.cpp

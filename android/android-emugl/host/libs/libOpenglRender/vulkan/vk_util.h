@@ -248,4 +248,14 @@ template <class T> void vk_append_struct(vk_struct_chain_iterator* i, T* vk_stru
     *i = vk_make_chain_iterator(vk_struct);
 }
 
+#define VK_CHECK(x)                                                      \
+    do {                                                                 \
+        VkResult err = x;                                                \
+        if (err != VK_SUCCESS) {                                         \
+            ::fprintf(stderr, "%s(%u) %s: %s failed, error code = %d\n", \
+                      __FILE__, __LINE__, __FUNCTION__, #x, err);        \
+            ::abort();                                                   \
+        }                                                                \
+    } while (0)
+
 #endif /* VK_UTIL_H */
