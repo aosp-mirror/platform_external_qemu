@@ -227,9 +227,9 @@ ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
     if (!forwarder->mCanReceive(nc)) {
         return -1;
     }
-    Ieee80211Frame frame(std::vector<uint8_t>(buf, buf + size),
-                         forwarder->mBssID);
-    return forwarder->mOnFrameAvailableCallback(frame.data(), frame.size(),
+    std::unique_ptr<Ieee80211Frame> frame =
+            Ieee80211Frame::buildFromEthernet(buf, size, forwarder->mBssID);
+    return forwarder->mOnFrameAvailableCallback(frame->data(), frame->size(),
                                                 false);
 }
 
