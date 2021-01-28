@@ -107,7 +107,7 @@ void VulkanStream::loadStringInPlaceWithStreamPtr(char** forOutput, uint8_t** st
         memcpy(*forOutput, *streamPtr, len);
         *streamPtr += len;
     }
-    (*forOutput)[len + 1] = 0;
+    (*forOutput)[len] = 0;
 }
 
 void VulkanStream::loadStringArrayInPlaceWithStreamPtr(char*** forOutput, uint8_t** streamPtr) {
