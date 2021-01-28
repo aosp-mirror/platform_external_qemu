@@ -62,6 +62,8 @@ typedef struct coreaudioVoiceBase {
     AudioStreamBasicDescription streamBasicDescription;
     AudioDeviceIOProcID ioprocid;
     Boolean isInput;
+    float hwSampleRate;
+    float wantedSampleRate;
     int live;
     int decr;
     int pos;
@@ -83,6 +85,88 @@ static bool gIsAtExit = false;
 
 static void coreaudio_atexit(void) {
     gIsAtExit = true;
+}
+
+static const char* coreaudio_get_format_name_from_id(AudioFormatID formatId) {
+    switch (formatId) {
+        case kAudioFormatLinearPCM:
+            return "kAudioFormatLinearPCM";
+        case kAudioFormatAC3:
+            return "kAudioFormatACe";
+        case kAudioFormat60958AC3:
+            return "kAudioFormat60958AC3";
+        case kAudioFormatAppleIMA4:
+            return "kAudioFormatAppleIMA4";
+        case kAudioFormatMPEG4CELP:
+            return "kAudioFormatMPEG4CELP";
+        case kAudioFormatMPEG4HVXC:
+            return "kAudioFormatMPEG4HVXC";
+        case kAudioFormatMPEG4TwinVQ:
+            return "kAudioFormatMPEG4TwinVQ";
+        case kAudioFormatMACE3:
+            return "kAudioFormatMACE3";
+        case kAudioFormatMACE6:
+            return "kAudioFormatMACE6";
+        case kAudioFormatULaw:
+            return "kAudioFormatULaw";
+        case kAudioFormatALaw:
+            return "kAudioFormatALaw";
+        case kAudioFormatQDesign:
+            return "kAudioFormatQDesign";
+        case kAudioFormatQDesign2:
+            return "kAudioFormatQDesign2";
+        case kAudioFormatQUALCOMM:
+            return "kAudioFormatQUALCOMM";
+        case kAudioFormatMPEGLayer1:
+            return "kAudioFormatMPEGLayer1";
+        case kAudioFormatMPEGLayer2:
+            return "kAudioFormatMPEGLayer2";
+        case kAudioFormatMPEGLayer3:
+            return "kAudioFormatMPEGLayer3";
+        case kAudioFormatTimeCode:
+            return "kAudioFormatTimeCode";
+        case kAudioFormatMIDIStream:
+            return "kAudioFormatMIDIStream";
+        case kAudioFormatParameterValueStream:
+            return "kAudioFormatParameterValueStream";
+        case kAudioFormatAppleLossless:
+            return "kAudioFormatAppleLossless";
+        case kAudioFormatMPEG4AAC_HE:
+            return "kAudioFormatMPEG4AAC_HE";
+        case kAudioFormatMPEG4AAC_LD:
+            return "kAudioFormatMPEG4AAC_LD";
+        case kAudioFormatMPEG4AAC_ELD_SBR:
+            return "kAudioFormatMPEG4AAC_ELD_SBR";
+        case kAudioFormatMPEG4AAC_HE_V2:
+            return "kAudioFormatMPEG4AAC_HE_V2";
+        case kAudioFormatMPEG4AAC_Spatial:
+            return "kAudioFormatMPEG4AAC_Spatial";
+        case kAudioFormatAMR:
+            return "kAudioFormatAMR";
+        case kAudioFormatAudible:
+            return "kAudioFormatAMR";
+        case kAudioFormatDVIIntelIMA:
+            return "kAudioFormatDVIIntelIMA";
+        case kAudioFormatMicrosoftGSM:
+            return "kAudioFormatMicrosoftGSM";
+        case kAudioFormatAES3:
+            return "kAudioFormatAES3";
+        case kAudioFormatAMR_WB:
+            return "kAudioFormatAMR_WB";
+        case kAudioFormatEnhancedAC3:
+            return "kAudioFormatEnhancedAC3";
+        case kAudioFormatMPEG4AAC_ELD_V2:
+            return "kAudioFormatMPEG4AAC_ELD_V2";
+        case kAudioFormatFLAC:
+            return "kAudioFormatFLAC";
+        case kAudioFormatMPEGD_USAC:
+            return "kAudioFormatMPEGD_USAC";
+        case kAudioFormatOpus:
+            return "kAudioFormatOpus";
+        default:
+            fprintf(stderr, "%s: warning: unknown audio format id 0x%x\n", __func__, formatId);
+            return "Unknown audio format";
+    }
 }
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
@@ -672,6 +756,10 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
         return -1;
     }
 
+    fprintf(stderr, "%s: %p input? %d frame size range: %d %d\n", __func__,
+           frameRange.mMinimum,
+           frameRange.mMaximum);
+
     if (frameRange.mMinimum > conf->buffer_frames) {
         core->audioDevicePropertyBufferFrameSize = (UInt32) frameRange.mMinimum;
         dolog ("warning: Upsizing Buffer Frames to %f\n", frameRange.mMinimum);
@@ -684,6 +772,8 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
         core->audioDevicePropertyBufferFrameSize = conf->buffer_frames;
     }
 
+    fprintf(stderr, "%s: %p input? %d wanted framesize of %d\n", __func__, core, isInput,
+            core->audioDevicePropertyBufferFrameSize);
     /* set Buffer Frame Size */
     status = coreaudio_set_framesize(core->deviceID,
                                      &core->audioDevicePropertyBufferFrameSize,
@@ -717,17 +807,38 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
         return -1;
     }
 
+
+    core->hwSampleRate = (float)core->streamBasicDescription.mSampleRate;
+    core->wantedSampleRate = (float)as->freq;
+
+    fprintf(stderr, "%s: %p input? %d sample rate: hw: %f wanted: %f hwframesize: %d\n", __func__, core,
+            isInput,
+            core->hwSampleRate,
+            core->wantedSampleRate,
+            core->audioDevicePropertyBufferFrameSize);
+
+    fprintf(stderr, "%s: %p input? %d other format properties:\n", __func__, core, isInput);
+    fprintf(stderr, "%s: %p input? %d bits per channel: %d\n", __func__, core, isInput, core->streamBasicDescription.mBitsPerChannel);
+    fprintf(stderr, "%s: %p input? %d bytes per frame: %d\n", __func__, core, isInput, core->streamBasicDescription.mBytesPerFrame);
+    fprintf(stderr, "%s: %p input? %d bytes per packet: %d\n", __func__, core, isInput, core->streamBasicDescription.mBytesPerPacket);
+    fprintf(stderr, "%s: %p input? %d channels per frame: %d\n", __func__, core, isInput, core->streamBasicDescription.mChannelsPerFrame);
+    fprintf(stderr, "%s: %p input? %d format flags: 0x%x\n", __func__, core, isInput, core->streamBasicDescription.mFormatFlags);
+    fprintf(stderr, "%s: %p input? %d format id: 0x%x %s\n", __func__, core, isInput, core->streamBasicDescription.mFormatID, coreaudio_get_format_name_from_id(core->streamBasicDescription.mFormatID) );
+    fprintf(stderr, "%s: %p input? %d frames per packet: %d\n", __func__, core, isInput);
+    fprintf(stderr, "%s: %p input? %d reserved: %d\n", __func__, core, isInput);
+    fprintf(stderr, "%s: %p input? %d sample rate: %f\n", __func__, core, isInput);
+
     /* set Samplerate */
-    core->streamBasicDescription.mSampleRate = (Float64) as->freq;
-    status = coreaudio_set_streamformat(core->deviceID,
-                                        &core->streamBasicDescription,
-                                        isInput);
-    if (status != kAudioHardwareNoError) {
-        coreaudio_logerr2 (status, typ, "Could not set samplerate %d\n",
-                           as->freq);
-        core->deviceID = kAudioDeviceUnknown;
-        return -1;
-    }
+    // core->streamBasicDescription.mSampleRate = (Float64) as->freq;
+    // status = coreaudio_set_streamformat(core->deviceID,
+    //                                     &core->streamBasicDescription,
+    //                                     isInput);
+    // if (status != kAudioHardwareNoError) {
+    //     coreaudio_logerr2 (status, typ, "Could not set samplerate %d\n",
+    //                        as->freq);
+    //     core->deviceID = kAudioDeviceUnknown;
+    //     return -1;
+    // }
 
     /* set Callback */
     core->ioprocid = NULL;
