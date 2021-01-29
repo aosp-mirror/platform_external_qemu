@@ -41,6 +41,7 @@ set(android-emu-common
     android/emulation/AdbHostServer.cpp
     android/emulation/AdbHub.cpp
     android/emulation/AdbMessageSniffer.cpp
+    android/emulation/AdbVsockPipe.cpp
     android/emulation/address_space_device.cpp
     android/emulation/address_space_graphics.cpp
     android/emulation/address_space_host_media.cpp
