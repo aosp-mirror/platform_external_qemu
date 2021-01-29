@@ -352,8 +352,7 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
                 assert(mFdWatcher);
                 mHostSocket.drainSocket(
                         CrossSessionSocket::DrainBehavior::Clear);
-                DD("%s: [%p] poll %d", __func__, this,
-                mFdWatcher->poll());
+                DD("%s: [%p] poll %d", __func__, this, mFdWatcher->poll());
                 mFdWatcher->wantRead();
                 mFdWatcher->wantWrite();
                 if (mHostSocket.hasStaleData()) {
