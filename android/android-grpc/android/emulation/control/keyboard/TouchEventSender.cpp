@@ -105,9 +105,9 @@ void TouchEventSender::doSend(const TouchEvent request) {
                               displayId});
 
             // Next remove the mappings from existence.
+            mIdMap.erase(it->first);
             it = mIdLastUsedEpoch.erase(it);
             mUsedSlots.erase(removeSlot);
-            mIdMap.erase(it->first);
         } else {
             ++it;
         }
