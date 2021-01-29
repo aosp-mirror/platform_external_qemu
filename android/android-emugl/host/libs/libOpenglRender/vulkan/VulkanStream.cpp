@@ -60,6 +60,11 @@ void VulkanStream::alloc(void** ptrAddr, size_t bytes) {
     }
     
     *ptrAddr = mPool.alloc(bytes);
+
+    if (!*ptrAddr) {
+        fprintf(stderr, "%s: FATAL: alloc failed. Wanted size: %zu\n", __func__, bytes);
+        abort();
+    }
 }
 
 void VulkanStream::loadStringInPlace(char** forOutput) {
@@ -103,6 +108,7 @@ void VulkanStream::loadStringInPlaceWithStreamPtr(char** forOutput, uint8_t** st
     }
 
     alloc((void**)forOutput, len + 1);
+
     if (len > 0) {
         memcpy(*forOutput, *streamPtr, len);
         *streamPtr += len;
