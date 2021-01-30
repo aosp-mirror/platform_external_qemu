@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "09907374_28eff2b5",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/RtcConnection.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-01-30T01:49:00Z",
+      "side": 1,
+      "message": "nit:delete",
+      "range": {
+        "startLine": 66,
+        "startChar": 4,
+        "endLine": 66,
+        "endChar": 5
+      },
+      "revId": "10b5186b47f8cb658bdd34fc121d660dd2bc48f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
