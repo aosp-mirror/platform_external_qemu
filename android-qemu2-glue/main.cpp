@@ -2103,6 +2103,8 @@ extern "C" int main(int argc, char** argv) {
         }
     }
 
+    getConsoleAgents()->location->gpsSetPassiveUpdate(!opts->no_passive_gps);
+
     // for headless mode, start a thread to feed guest gps hal with
     // passive gps locations; qt emulator already does that in location-page.cpp
 #ifdef CONFIG_HEADLESS
@@ -2193,8 +2195,6 @@ extern "C" int main(int argc, char** argv) {
     if (battery && battery->setHasBattery) {
         battery->setHasBattery(android_hw->hw_battery);
     }
-
-    getConsoleAgents()->location->gpsSetPassiveUpdate(!opts->no_passive_gps);
 
     android_init_multi_display(getConsoleAgents()->emu, getConsoleAgents()->record);
 
