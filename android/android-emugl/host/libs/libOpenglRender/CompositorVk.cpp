@@ -15,6 +15,11 @@
 
 #include "vulkan/vk_util.h"
 
+namespace CompositorVkShader {
+#include "vulkan/CompositorFragmentShader.h"
+#include "vulkan/CompositorVertexShader.h"
+}  // namespace CompositorVkShader
+
 std::unique_ptr<CompositorVk> CompositorVk::create(
     const goldfish_vk::VulkanDispatch &vk, VkDevice vkDevice) {
     return std::unique_ptr<CompositorVk>(new CompositorVk(vk, vkDevice));
