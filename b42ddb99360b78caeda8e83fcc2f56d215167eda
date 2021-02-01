@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "016486ef_3782af9d",
+        "filename": "android/third_party/modem-simulator/modem_main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-02-01T19:55:19Z",
+      "side": 1,
+      "message": "Maybe std::format will work here better?",
+      "range": {
+        "startLine": 77,
+        "startChar": 7,
+        "endLine": 77,
+        "endChar": 9
+      },
+      "revId": "b42ddb99360b78caeda8e83fcc2f56d215167eda",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
