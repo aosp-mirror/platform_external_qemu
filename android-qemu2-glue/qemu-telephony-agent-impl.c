@@ -119,7 +119,8 @@ static AModem telephony_getModem() {
 
 static void telephony_set_notif_callback(ModemCallback callbackFunc, void* userData) {
     if (android_modem) {
-      amodem_set_notification_callback(android_modem, callbackFunc, userData);
+        amodem_set_notification_callback_vx(android_modem, callbackFunc,
+                                            userData);
     }
 }
 
