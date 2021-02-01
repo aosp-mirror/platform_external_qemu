@@ -61,3 +61,9 @@ void amodem_set_data_registration_vx(AModem modem, ARegistrationState state) {
 void amodem_set_voice_registration_vx(AModem modem, ARegistrationState state) {
     s_modem->set_voice_registration(modem, state);
 }
+
+void amodem_set_notification_callback_vx(AModem modem,
+                                         ModemCallback callbackFunc,
+                                         void* userData) {
+    s_modem->set_notification_callback_vx(modem, callbackFunc, userData);
+}
