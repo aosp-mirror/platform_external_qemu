@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
 #include <optional>
 
@@ -40,7 +41,10 @@ class CompositorVkTest : public ::testing::Test {
    protected:
     struct RenderTarget {
        public:
-        static constexpr uint32_t k_bpp = 4;  // always R8G8B8A8
+        static constexpr VkFormat k_vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
+        static constexpr uint32_t k_bpp = 4;
+        static constexpr VkImageLayout k_vkImageLayout =
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         const goldfish_vk::VulkanDispatch &m_vk;
         VkDevice m_vkDevice;
@@ -51,6 +55,7 @@ class CompositorVkTest : public ::testing::Test {
 
         VkImage m_vkImage;
         VkDeviceMemory m_imageVkDeviceMemory;
+        VkImageView m_vkImageView;
 
         VkBuffer m_vkBuffer;
         VkDeviceMemory m_bufferVkDeviceMemory;
@@ -125,6 +130,9 @@ class CompositorVkTest : public ::testing::Test {
             if (m_vkBuffer != VK_NULL_HANDLE) {
                 m_vk.vkDestroyBuffer(m_vkDevice, m_vkBuffer, nullptr);
             }
+            if (m_vkImageView != VK_NULL_HANDLE) {
+                m_vk.vkDestroyImageView(m_vkDevice, m_vkImageView, nullptr);
+            }
             if (m_imageVkDeviceMemory != VK_NULL_HANDLE) {
                 m_vk.vkFreeMemory(m_vkDevice, m_imageVkDeviceMemory, nullptr);
             }
@@ -138,6 +146,7 @@ class CompositorVkTest : public ::testing::Test {
             : m_vk(vk),
               m_vkImage(VK_NULL_HANDLE),
               m_imageVkDeviceMemory(VK_NULL_HANDLE),
+              m_vkImageView(VK_NULL_HANDLE),
               m_vkBuffer(VK_NULL_HANDLE),
               m_bufferVkDeviceMemory(VK_NULL_HANDLE),
               m_memory(nullptr),
@@ -153,7 +162,7 @@ class CompositorVkTest : public ::testing::Test {
             imageCi.extent.depth = 1;
             imageCi.mipLevels = 1;
             imageCi.arrayLayers = 1;
-            imageCi.format = VK_FORMAT_R8G8B8A8_SRGB;
+            imageCi.format = k_vkFormat;
             imageCi.tiling = VK_IMAGE_TILING_OPTIMAL;
             imageCi.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             imageCi.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT |
@@ -210,15 +219,35 @@ class CompositorVkTest : public ::testing::Test {
                 m_vk.vkBeginCommandBuffer(cmdBuff, &beginInfo) == VK_SUCCESS;
             if (res) {
                 recordImageLayoutTransformCommands(
-                    cmdBuff, VK_IMAGE_LAYOUT_UNDEFINED,
-                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+                    cmdBuff, VK_IMAGE_LAYOUT_UNDEFINED, k_vkImageLayout);
                 res = m_vk.vkEndCommandBuffer(cmdBuff) == VK_SUCCESS;
             }
             if (res) {
                 res = submitCommandBufferAndWait(cmdBuff);
             }
             m_vk.vkFreeCommandBuffers(m_vkDevice, m_vkCommandPool, 1, &cmdBuff);
-            return res;
+            if (!res) {
+                return false;
+            }
+            VkImageViewCreateInfo imageViewCi = {};
+            imageViewCi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            imageViewCi.image = m_vkImage;
+            imageViewCi.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            imageViewCi.format = k_vkFormat;
+            imageViewCi.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCi.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCi.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCi.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+            imageViewCi.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            imageViewCi.subresourceRange.baseMipLevel = 0;
+            imageViewCi.subresourceRange.levelCount = 1;
+            imageViewCi.subresourceRange.baseArrayLayer = 0;
+            imageViewCi.subresourceRange.layerCount = 1;
+            if (m_vk.vkCreateImageView(m_vkDevice, &imageViewCi, nullptr,
+                                       &m_vkImageView) != VK_SUCCESS) {
+                return false;
+            }
+            return true;
         }
 
         void recordImageLayoutTransformCommands(VkCommandBuffer cmdBuff,
@@ -330,7 +359,7 @@ class CompositorVkTest : public ::testing::Test {
                 return false;
             }
             recordImageLayoutTransformCommands(
-                m_readCommandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                m_readCommandBuffer, k_vkImageLayout,
                 VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
             VkBufferImageCopy region = {};
             region.bufferOffset = 0;
@@ -347,7 +376,7 @@ class CompositorVkTest : public ::testing::Test {
                                         m_vkBuffer, 1, &region);
             recordImageLayoutTransformCommands(
                 m_readCommandBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+                k_vkImageLayout);
             if (m_vk.vkEndCommandBuffer(m_readCommandBuffer) != VK_SUCCESS) {
                 return false;
             }
@@ -357,14 +386,14 @@ class CompositorVkTest : public ::testing::Test {
                 return false;
             }
             recordImageLayoutTransformCommands(
-                m_writeCommandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                m_writeCommandBuffer, k_vkImageLayout,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
             m_vk.vkCmdCopyBufferToImage(
                 m_writeCommandBuffer, m_vkBuffer, m_vkImage,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
             recordImageLayoutTransformCommands(
                 m_writeCommandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+                k_vkImageLayout);
             if (m_vk.vkEndCommandBuffer(m_writeCommandBuffer) != VK_SUCCESS) {
                 return false;
             }
@@ -372,9 +401,7 @@ class CompositorVkTest : public ::testing::Test {
         }
     };
 
-    static void SetUpTestCase() {
-        k_vk = emugl::vkDispatch(false);
-    }
+    static void SetUpTestCase() { k_vk = emugl::vkDispatch(false); }
 
     static constexpr uint32_t k_numOfRenderTargets = 10;
     static constexpr uint32_t k_renderTargetWidth = 255;
@@ -413,6 +440,16 @@ class CompositorVkTest : public ::testing::Test {
             ASSERT_NE(renderTarget, nullptr);
             m_renderTargets.emplace_back(std::move(renderTarget));
         }
+
+        m_renderTargetImageViews.resize(m_renderTargets.size());
+        ASSERT_EQ(
+            std::transform(
+                m_renderTargets.begin(), m_renderTargets.end(),
+                m_renderTargetImageViews.begin(),
+                [](const std::unique_ptr<const RenderTarget> &renderTarget) {
+                    return renderTarget->m_vkImageView;
+                }),
+            m_renderTargetImageViews.end());
     }
 
     void TearDown() override {
@@ -428,12 +465,21 @@ class CompositorVkTest : public ::testing::Test {
         m_vkInstance = VK_NULL_HANDLE;
     }
 
+    std::unique_ptr<CompositorVk> createCompositor() {
+        return CompositorVk::create(*k_vk, m_vkDevice, RenderTarget::k_vkFormat,
+                                    RenderTarget::k_vkImageLayout,
+                                    RenderTarget::k_vkImageLayout,
+                                    k_renderTargetWidth, k_renderTargetHeight,
+                                    m_renderTargetImageViews, m_vkCommandPool);
+    }
+
     static const goldfish_vk::VulkanDispatch *k_vk;
     VkInstance m_vkInstance = VK_NULL_HANDLE;
     VkPhysicalDevice m_vkPhysicalDevice = VK_NULL_HANDLE;
     uint32_t m_compositorQueueFamilyIndex = 0;
     VkDevice m_vkDevice = VK_NULL_HANDLE;
     std::vector<std::unique_ptr<const RenderTarget>> m_renderTargets;
+    std::vector<VkImageView> m_renderTargetImageViews;
     VkCommandPool m_vkCommandPool = VK_NULL_HANDLE;
     VkQueue m_compositorVkQueue = VK_NULL_HANDLE;
     bool m_earlySkipped = false;
@@ -543,7 +589,7 @@ class CompositorVkTest : public ::testing::Test {
 const goldfish_vk::VulkanDispatch *CompositorVkTest::k_vk = nullptr;
 
 TEST_F(CompositorVkTest, Init) {
-    ASSERT_NE(CompositorVk::create(*k_vk, m_vkDevice), nullptr);
+    ASSERT_NE(createCompositor(), nullptr);
 }
 
 TEST_F(CompositorVkTest, ValidatePhysicalDeviceFeatures) {
@@ -580,20 +626,60 @@ TEST_F(CompositorVkTest, EnablePhysicalDeviceFeatures) {
               VK_TRUE);
 }
 
-TEST_F(CompositorVkTest, TestRenderTarget) {
+TEST_F(CompositorVkTest, EmptyCompositionShouldDrawABlackFrame) {
     std::vector<uint32_t> pixels(k_renderTargetNumOfPixels);
     for (uint32_t i = 0; i < k_renderTargetNumOfPixels; i++) {
         uint8_t v = static_cast<uint8_t>((i / 4) & 0xff);
-        uint8_t *pixel = reinterpret_cast<uint8_t*>(&pixels[i]);
+        uint8_t *pixel = reinterpret_cast<uint8_t *>(&pixels[i]);
         pixel[0] = v;
         pixel[1] = v;
         pixel[2] = v;
         pixel[3] = 0xff;
     }
-    ASSERT_TRUE(m_renderTargets[0]->write(pixels));
-    auto maybeImageBytes = m_renderTargets[0]->read();
-    ASSERT_TRUE(maybeImageBytes.has_value());
-    for (uint32_t i = 0; i < k_renderTargetNumOfPixels; i++) {
-        ASSERT_EQ(pixels[i], maybeImageBytes.value()[i]);
+    for (uint32_t i = 0; i < k_numOfRenderTargets; i++) {
+        ASSERT_TRUE(m_renderTargets[i]->write(pixels));
+        auto maybeImageBytes = m_renderTargets[i]->read();
+        ASSERT_TRUE(maybeImageBytes.has_value());
+        for (uint32_t i = 0; i < k_renderTargetNumOfPixels; i++) {
+            ASSERT_EQ(pixels[i], maybeImageBytes.value()[i]);
+        }
+    }
+
+    auto compositor = createCompositor();
+    ASSERT_NE(compositor, nullptr);
+
+    // render to render targets with event index
+    std::vector<VkCommandBuffer> cmdBuffs = {};
+    for (uint32_t i = 0; i < k_numOfRenderTargets; i++) {
+        if (i % 2 == 0) {
+            cmdBuffs.emplace_back(compositor->getCommandBuffer(i));
+        }
+    }
+    VkSubmitInfo submitInfo = {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = static_cast<uint32_t>(cmdBuffs.size());
+    submitInfo.pCommandBuffers = cmdBuffs.data();
+    ASSERT_EQ(k_vk->vkQueueSubmit(m_compositorVkQueue, 1, &submitInfo,
+                                  VK_NULL_HANDLE),
+              VK_SUCCESS);
+
+    ASSERT_EQ(k_vk->vkQueueWaitIdle(m_compositorVkQueue), VK_SUCCESS);
+    for (uint32_t i = 0; i < k_numOfRenderTargets; i++) {
+        auto maybeImagePixels = m_renderTargets[i]->read();
+        ASSERT_TRUE(maybeImagePixels.has_value());
+        auto imagePixels = maybeImagePixels.value();
+        for (uint32_t j = 0; j < k_renderTargetNumOfPixels; j++) {
+            const auto pixel =
+                reinterpret_cast<const uint8_t *>(&imagePixels[j]);
+            // should only render to render targets with even index
+            if (i % 2 == 0) {
+                ASSERT_EQ(pixel[0], 0);
+                ASSERT_EQ(pixel[1], 0);
+                ASSERT_EQ(pixel[2], 0);
+                ASSERT_EQ(pixel[3], 0xff);
+            } else {
+                ASSERT_EQ(pixels[j], imagePixels[j]);
+            }
+        }
     }
 }
