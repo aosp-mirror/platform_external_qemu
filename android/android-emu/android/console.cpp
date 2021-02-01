@@ -4043,22 +4043,6 @@ static int do_quit_extended_window(ControlClient client, char* args) {
     return 0;
 }
 
-static int do_set_ui_theme(ControlClient client, char* args) {
-    if (!args) {
-        control_write(client, "KO: argument missing, try 'setUiTheme <dark|light>'\r\n");
-        return -1;
-    }
-    if (!strcmp(args,"dark")) {
-        client->global->emu_agent->setUiTheme(SETTINGS_THEME_STUDIO_DARK);
-    } else if (!strcmp(args, "light")) {
-        client->global->emu_agent->setUiTheme(SETTINGS_THEME_STUDIO_LIGHT);
-    } else {
-        control_write( client, "KO: Failed to set UI theme to %s, try 'setUiTheme <dark|light>'\r\n", args);
-                return -1;
-    }
-    return 0;
-}
-
 static int do_fold(ControlClient client, char* args) {
     if (client->global->emu_agent->fold(true)) {
           return 0;
@@ -4183,9 +4167,6 @@ extern const CommandDefRec main_commands[] = {
 
         {"quitExtendedWindow", "Show the extended window", NULL, NULL,
          do_quit_extended_window, NULL},
-
-        {"setUiTheme", "Set emultaor's UI theme to either light or dark", NULL, NULL,
-        do_set_ui_theme, NULL},
 
         {"screenrecord", "Records the emulator's display", NULL, NULL, NULL,
          screenrecord_commands},
