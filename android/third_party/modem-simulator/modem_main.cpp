@@ -75,7 +75,9 @@ void receive_inbound_call(std::string number) {
     mymsg.type = MODEM_MSG_CALL;
     std::string ss("REM0");
     ss += "AT+REMOTECALL=4,0,0,";
+    ss += "\"";
     ss += number;
+    ss += "\"";
     ss += ",129\r";  // not international
     mymsg.sdata = ss;
     DD("inbound call from %s", number.c_str());
@@ -87,7 +89,9 @@ void disconnect_call(std::string number) {
     mymsg.type = MODEM_MSG_ENDCALL;
     std::string ss("");
     ss += "AT+REMOTECALL=6,0,0,";
+    ss += "\"";
     ss += number;
+    ss += "\"";
     ss += ",129\r";  // not international
     mymsg.sdata = ss;
     DD("disconnect call from %s", number.c_str());
@@ -101,7 +105,9 @@ void update_call(std::string number, int state) {
     ss += "AT+REMOTECALL=";
     ss += std::to_string(state);
     ss += ",0,0,";
+    ss += "\"";
     ss += number;
+    ss += "\"";
     ss += ",129\r";  // not international
     mymsg.sdata = ss;
     DD("update call from %s", number.c_str());
