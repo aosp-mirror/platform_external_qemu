@@ -174,6 +174,15 @@ void set_voice_registration(int state) {
     s_msg_channel.send(mymsg);
 }
 
+static ModemCallback* s_notify_call_back = nullptr;  // The function
+static void* s_notify_user_data =
+        nullptr;  // Some opaque data to give the function
+
+void set_notification_callback(void* callbackFunc, void* userData) {
+    s_notify_call_back = reinterpret_cast<ModemCallback*>(callbackFunc);
+    s_notify_user_data = userData;
+}
+
 static ModemList modem_simulators;
 static ChannelMonitor* s_channel_monitor = nullptr;
 static cuttlefish::SharedFD s_one_shot_monitor_sock;
@@ -208,6 +217,10 @@ void start_calling_thread(std::string ss) {
     } else {
         DD("ERROR: cannot making a connection to main host server %d",
            s_host_server_port);
+    }
+    if (s_notify_call_back) {
+        // no more active calls
+        s_notify_call_back(s_notify_user_data, 0);
     }
     s_current_call_monitor_sock = cuttlefish::SharedFD();
     DD("done with this thread");
