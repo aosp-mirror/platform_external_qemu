@@ -62,5 +62,12 @@ void ModemSimulator::set_voice_registration(AModem modem,
     cuttlefish::set_voice_registration(state);
 }
 
+void ModemSimulator::set_notification_callback_vx(AModem modem,
+                                                  ModemCallback callbackFunc,
+                                                  void* userData) {
+    (void)modem;
+    cuttlefish::set_notification_callback(reinterpret_cast<void*>(callbackFunc), userData);
+}
+
 }  // namespace modem
 }  // namespace android
