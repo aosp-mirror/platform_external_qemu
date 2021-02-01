@@ -41,4 +41,8 @@ extern void amodem_set_data_registration_vx(AModem modem,
 extern void amodem_set_voice_registration_vx(AModem modem,
                                              ARegistrationState state);
 
+extern void amodem_set_notification_callback_vx(AModem modem,
+                                                ModemCallback callbackFunc,
+                                                void* userData);
+
 ANDROID_END_HEADER
