@@ -15,23 +15,413 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
 #include <optional>
 
 #include "vulkan/VulkanDispatch.h"
 
+static std::optional<uint32_t> findMemoryType(
+    const goldfish_vk::VulkanDispatch &vk, VkPhysicalDevice device,
+    uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vk.vkGetPhysicalDeviceMemoryProperties(device, &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+        if ((typeFilter & (1 << i)) &&
+            (memProperties.memoryTypes[i].propertyFlags & properties) ==
+                properties) {
+            return i;
+        }
+    }
+    return std::nullopt;
+}
+
 class CompositorVkTest : public ::testing::Test {
    protected:
+    struct RenderTarget {
+       public:
+        static constexpr uint32_t k_bpp = 4;  // always R8G8B8A8
+
+        const goldfish_vk::VulkanDispatch &m_vk;
+        VkDevice m_vkDevice;
+        VkPhysicalDevice m_vkPhysicalDevice;
+        VkQueue m_vkQueue;
+        uint32_t m_width;
+        uint32_t m_height;
+
+        VkImage m_vkImage;
+        VkDeviceMemory m_imageVkDeviceMemory;
+
+        VkBuffer m_vkBuffer;
+        VkDeviceMemory m_bufferVkDeviceMemory;
+        uint32_t *m_memory;
+
+        VkCommandPool m_vkCommandPool;
+        VkCommandBuffer m_readCommandBuffer;
+        VkCommandBuffer m_writeCommandBuffer;
+
+        static std::unique_ptr<const RenderTarget> create(
+            const goldfish_vk::VulkanDispatch &vk, VkDevice device,
+            VkPhysicalDevice physicalDevice, VkQueue queue,
+            VkCommandPool commandPool, uint32_t width, uint32_t height) {
+            std::unique_ptr<RenderTarget> res(new RenderTarget(vk));
+            res->m_vkDevice = device;
+            res->m_vkPhysicalDevice = physicalDevice;
+            res->m_vkQueue = queue;
+            res->m_width = width;
+            res->m_height = height;
+            res->m_vkCommandPool = commandPool;
+            if (!res->setUpImage()) {
+                return nullptr;
+            }
+            if (!res->setUpBuffer()) {
+                return nullptr;
+            }
+            if (!res->setUpCommandBuffer()) {
+                return nullptr;
+            }
+
+            return res;
+        }
+
+        uint32_t numOfPixels() const { return m_width * m_height; }
+
+        bool write(const std::vector<uint32_t> &pixels) const {
+            if (pixels.size() != numOfPixels()) {
+                return false;
+            }
+            std::copy(pixels.begin(), pixels.end(), m_memory);
+            return submitCommandBufferAndWait(m_writeCommandBuffer);
+        }
+
+        std::optional<std::vector<uint32_t>> read() const {
+            std::vector<uint32_t> res(numOfPixels());
+            if (!submitCommandBufferAndWait(m_readCommandBuffer)) {
+                return std::nullopt;
+            }
+            std::copy(m_memory, m_memory + numOfPixels(), res.begin());
+            return res;
+        }
+
+        ~RenderTarget() {
+            std::vector<VkCommandBuffer> toFree;
+            if (m_writeCommandBuffer != VK_NULL_HANDLE) {
+                toFree.push_back(m_writeCommandBuffer);
+            }
+            if (m_readCommandBuffer != VK_NULL_HANDLE) {
+                toFree.push_back(m_readCommandBuffer);
+            }
+            if (!toFree.empty()) {
+                m_vk.vkFreeCommandBuffers(m_vkDevice, m_vkCommandPool,
+                                          static_cast<uint32_t>(toFree.size()),
+                                          toFree.data());
+            }
+            if (m_memory) {
+                m_vk.vkUnmapMemory(m_vkDevice, m_bufferVkDeviceMemory);
+            }
+            if (m_bufferVkDeviceMemory != VK_NULL_HANDLE) {
+                m_vk.vkFreeMemory(m_vkDevice, m_bufferVkDeviceMemory, nullptr);
+            }
+            if (m_vkBuffer != VK_NULL_HANDLE) {
+                m_vk.vkDestroyBuffer(m_vkDevice, m_vkBuffer, nullptr);
+            }
+            if (m_imageVkDeviceMemory != VK_NULL_HANDLE) {
+                m_vk.vkFreeMemory(m_vkDevice, m_imageVkDeviceMemory, nullptr);
+            }
+            if (m_vkImage != VK_NULL_HANDLE) {
+                m_vk.vkDestroyImage(m_vkDevice, m_vkImage, nullptr);
+            }
+        }
+
+       private:
+        RenderTarget(const goldfish_vk::VulkanDispatch &vk)
+            : m_vk(vk),
+              m_vkImage(VK_NULL_HANDLE),
+              m_imageVkDeviceMemory(VK_NULL_HANDLE),
+              m_vkBuffer(VK_NULL_HANDLE),
+              m_bufferVkDeviceMemory(VK_NULL_HANDLE),
+              m_memory(nullptr),
+              m_readCommandBuffer(VK_NULL_HANDLE),
+              m_writeCommandBuffer(VK_NULL_HANDLE) {}
+
+        bool setUpImage() {
+            VkImageCreateInfo imageCi{};
+            imageCi.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+            imageCi.imageType = VK_IMAGE_TYPE_2D;
+            imageCi.extent.width = m_width;
+            imageCi.extent.height = m_height;
+            imageCi.extent.depth = 1;
+            imageCi.mipLevels = 1;
+            imageCi.arrayLayers = 1;
+            imageCi.format = VK_FORMAT_R8G8B8A8_SRGB;
+            imageCi.tiling = VK_IMAGE_TILING_OPTIMAL;
+            imageCi.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            imageCi.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                            VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+            imageCi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            imageCi.samples = VK_SAMPLE_COUNT_1_BIT;
+            imageCi.flags = 0;
+            if (m_vk.vkCreateImage(m_vkDevice, &imageCi, nullptr, &m_vkImage) !=
+                VK_SUCCESS) {
+                m_vkImage = VK_NULL_HANDLE;
+                return false;
+            }
+
+            VkMemoryRequirements memRequirements;
+            m_vk.vkGetImageMemoryRequirements(m_vkDevice, m_vkImage,
+                                              &memRequirements);
+            auto maybeMemoryTypeIndex = findMemoryType(
+                m_vk, m_vkPhysicalDevice, memRequirements.memoryTypeBits,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            if (!maybeMemoryTypeIndex.has_value()) {
+                return false;
+            }
+            VkMemoryAllocateInfo allocInfo = {};
+            allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+            allocInfo.allocationSize = memRequirements.size;
+            allocInfo.memoryTypeIndex = maybeMemoryTypeIndex.value();
+            if (m_vk.vkAllocateMemory(m_vkDevice, &allocInfo, nullptr,
+                                      &m_imageVkDeviceMemory) != VK_SUCCESS) {
+                m_imageVkDeviceMemory = VK_NULL_HANDLE;
+                return false;
+            }
+            if (m_vk.vkBindImageMemory(m_vkDevice, m_vkImage,
+                                       m_imageVkDeviceMemory,
+                                       0) != VK_SUCCESS) {
+                return false;
+            }
+
+            VkCommandBuffer cmdBuff;
+            VkCommandBufferAllocateInfo cmdBuffAllocInfo = {};
+            cmdBuffAllocInfo.sType =
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+            cmdBuffAllocInfo.commandPool = m_vkCommandPool;
+            cmdBuffAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            cmdBuffAllocInfo.commandBufferCount = 1;
+            if (m_vk.vkAllocateCommandBuffers(m_vkDevice, &cmdBuffAllocInfo,
+                                              &cmdBuff) != VK_SUCCESS) {
+                return false;
+            }
+            VkCommandBufferBeginInfo beginInfo = {};
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+            bool res =
+                m_vk.vkBeginCommandBuffer(cmdBuff, &beginInfo) == VK_SUCCESS;
+            if (res) {
+                recordImageLayoutTransformCommands(
+                    cmdBuff, VK_IMAGE_LAYOUT_UNDEFINED,
+                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+                res = m_vk.vkEndCommandBuffer(cmdBuff) == VK_SUCCESS;
+            }
+            if (res) {
+                res = submitCommandBufferAndWait(cmdBuff);
+            }
+            m_vk.vkFreeCommandBuffers(m_vkDevice, m_vkCommandPool, 1, &cmdBuff);
+            return res;
+        }
+
+        void recordImageLayoutTransformCommands(VkCommandBuffer cmdBuff,
+                                                VkImageLayout oldLayout,
+                                                VkImageLayout newLayout) {
+            VkImageMemoryBarrier imageBarrier = {};
+            imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+            imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            imageBarrier.oldLayout = oldLayout;
+            imageBarrier.newLayout = newLayout;
+            imageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            imageBarrier.image = m_vkImage;
+            imageBarrier.subresourceRange.aspectMask =
+                VK_IMAGE_ASPECT_COLOR_BIT;
+            imageBarrier.subresourceRange.baseMipLevel = 0;
+            imageBarrier.subresourceRange.levelCount = 1;
+            imageBarrier.subresourceRange.baseArrayLayer = 0;
+            imageBarrier.subresourceRange.layerCount = 1;
+            m_vk.vkCmdPipelineBarrier(cmdBuff,
+                                      VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+                                      VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0,
+                                      nullptr, 0, nullptr, 1, &imageBarrier);
+        }
+
+        bool submitCommandBufferAndWait(VkCommandBuffer cmdBuff) const {
+            VkSubmitInfo submitInfo = {};
+            submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            submitInfo.commandBufferCount = 1;
+            submitInfo.pCommandBuffers = &cmdBuff;
+            if (m_vk.vkQueueSubmit(m_vkQueue, 1, &submitInfo, VK_NULL_HANDLE) !=
+                VK_SUCCESS) {
+                return false;
+            }
+            if (m_vk.vkQueueWaitIdle(m_vkQueue) != VK_SUCCESS) {
+                return false;
+            }
+            return true;
+        }
+
+        bool setUpBuffer() {
+            VkBufferCreateInfo bufferCi = {};
+            bufferCi.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+            bufferCi.size = m_width * m_height * k_bpp;
+            bufferCi.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
+                             VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+            bufferCi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+            if (m_vk.vkCreateBuffer(m_vkDevice, &bufferCi, nullptr,
+                                    &m_vkBuffer) != VK_SUCCESS) {
+                m_vkBuffer = VK_NULL_HANDLE;
+                return false;
+            }
+
+            VkMemoryRequirements memRequirements;
+            m_vk.vkGetBufferMemoryRequirements(m_vkDevice, m_vkBuffer,
+                                               &memRequirements);
+            auto maybeMemoryTypeIndex = findMemoryType(
+                m_vk, m_vkPhysicalDevice, memRequirements.memoryTypeBits,
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+            if (!maybeMemoryTypeIndex.has_value()) {
+                return false;
+            }
+            VkMemoryAllocateInfo allocInfo = {};
+            allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+            allocInfo.allocationSize = memRequirements.size;
+            allocInfo.memoryTypeIndex = maybeMemoryTypeIndex.value();
+            if (m_vk.vkAllocateMemory(m_vkDevice, &allocInfo, nullptr,
+                                      &m_bufferVkDeviceMemory) != VK_SUCCESS) {
+                m_bufferVkDeviceMemory = VK_NULL_HANDLE;
+                return false;
+            }
+            if (m_vk.vkBindBufferMemory(m_vkDevice, m_vkBuffer,
+                                        m_bufferVkDeviceMemory,
+                                        0) != VK_SUCCESS) {
+                return false;
+            }
+            if (m_vk.vkMapMemory(
+                    m_vkDevice, m_bufferVkDeviceMemory, 0, bufferCi.size, 0,
+                    reinterpret_cast<void **>(&m_memory)) != VK_SUCCESS) {
+                m_memory = nullptr;
+                return false;
+            }
+            return true;
+        }
+
+        bool setUpCommandBuffer() {
+            std::array<VkCommandBuffer, 2> cmdBuffs;
+            VkCommandBufferAllocateInfo cmdBuffAllocInfo = {};
+            cmdBuffAllocInfo.sType =
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+            cmdBuffAllocInfo.commandPool = m_vkCommandPool;
+            cmdBuffAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            cmdBuffAllocInfo.commandBufferCount =
+                static_cast<uint32_t>(cmdBuffs.size());
+            if (m_vk.vkAllocateCommandBuffers(m_vkDevice, &cmdBuffAllocInfo,
+                                              cmdBuffs.data()) != VK_SUCCESS) {
+                return false;
+            }
+            m_readCommandBuffer = cmdBuffs[0];
+            m_writeCommandBuffer = cmdBuffs[1];
+
+            VkCommandBufferBeginInfo beginInfo = {};
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            if (m_vk.vkBeginCommandBuffer(m_readCommandBuffer, &beginInfo) !=
+                VK_SUCCESS) {
+                return false;
+            }
+            recordImageLayoutTransformCommands(
+                m_readCommandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+            VkBufferImageCopy region = {};
+            region.bufferOffset = 0;
+            region.bufferRowLength = 0;
+            region.bufferImageHeight = 0;
+            region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            region.imageSubresource.mipLevel = 0;
+            region.imageSubresource.baseArrayLayer = 0;
+            region.imageSubresource.layerCount = 1;
+            region.imageOffset = {0, 0, 0};
+            region.imageExtent = {m_width, m_height, 1};
+            m_vk.vkCmdCopyImageToBuffer(m_readCommandBuffer, m_vkImage,
+                                        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                        m_vkBuffer, 1, &region);
+            recordImageLayoutTransformCommands(
+                m_readCommandBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            if (m_vk.vkEndCommandBuffer(m_readCommandBuffer) != VK_SUCCESS) {
+                return false;
+            }
+
+            if (m_vk.vkBeginCommandBuffer(m_writeCommandBuffer, &beginInfo) !=
+                VK_SUCCESS) {
+                return false;
+            }
+            recordImageLayoutTransformCommands(
+                m_writeCommandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+            m_vk.vkCmdCopyBufferToImage(
+                m_writeCommandBuffer, m_vkBuffer, m_vkImage,
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+            recordImageLayoutTransformCommands(
+                m_writeCommandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            if (m_vk.vkEndCommandBuffer(m_writeCommandBuffer) != VK_SUCCESS) {
+                return false;
+            }
+            return true;
+        }
+    };
+
     static void SetUpTestCase() {
         k_vk = emugl::vkDispatch(false);
     }
 
+    static constexpr uint32_t k_numOfRenderTargets = 10;
+    static constexpr uint32_t k_renderTargetWidth = 255;
+    static constexpr uint32_t k_renderTargetHeight = 255;
+    static constexpr uint32_t k_renderTargetNumOfPixels =
+        k_renderTargetWidth * k_renderTargetHeight;
+
     void SetUp() override {
+#ifndef __linux__
+        // TODO(b/179477624): Currently we only ensure the test works
+        // on Linux. SwiftShader on Windows and macOS needs to be
+        // updated before these tests can be run there.
+        m_earlySkipped = true;
+        GTEST_SKIP_("System not supported. Test skipped.");
+#endif
+
+        ASSERT_NE(k_vk, nullptr);
         createInstance();
         pickPhysicalDevice();
         createLogicalDevice();
+
+        VkCommandPoolCreateInfo commandPoolCi = {};
+        commandPoolCi.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        commandPoolCi.queueFamilyIndex = m_compositorQueueFamilyIndex;
+        ASSERT_EQ(k_vk->vkCreateCommandPool(m_vkDevice, &commandPoolCi, nullptr,
+                                            &m_vkCommandPool),
+                  VK_SUCCESS);
+        k_vk->vkGetDeviceQueue(m_vkDevice, m_compositorQueueFamilyIndex, 0,
+                               &m_compositorVkQueue);
+        ASSERT_TRUE(m_compositorVkQueue != VK_NULL_HANDLE);
+
+        for (uint32_t i = 0; i < k_numOfRenderTargets; i++) {
+            auto renderTarget = RenderTarget::create(
+                *k_vk, m_vkDevice, m_vkPhysicalDevice, m_compositorVkQueue,
+                m_vkCommandPool, k_renderTargetHeight, k_renderTargetWidth);
+            ASSERT_NE(renderTarget, nullptr);
+            m_renderTargets.emplace_back(std::move(renderTarget));
+        }
     }
 
     void TearDown() override {
+        if (m_earlySkipped) {
+            return;
+        }
+
+        m_renderTargets.clear();
+        k_vk->vkDestroyCommandPool(m_vkDevice, m_vkCommandPool, nullptr);
         k_vk->vkDestroyDevice(m_vkDevice, nullptr);
         m_vkDevice = VK_NULL_HANDLE;
         k_vk->vkDestroyInstance(m_vkInstance, nullptr);
@@ -43,6 +433,10 @@ class CompositorVkTest : public ::testing::Test {
     VkPhysicalDevice m_vkPhysicalDevice = VK_NULL_HANDLE;
     uint32_t m_compositorQueueFamilyIndex = 0;
     VkDevice m_vkDevice = VK_NULL_HANDLE;
+    std::vector<std::unique_ptr<const RenderTarget>> m_renderTargets;
+    VkCommandPool m_vkCommandPool = VK_NULL_HANDLE;
+    VkQueue m_compositorVkQueue = VK_NULL_HANDLE;
+    bool m_earlySkipped = false;
 
    private:
     void createInstance() {
@@ -149,14 +543,10 @@ class CompositorVkTest : public ::testing::Test {
 const goldfish_vk::VulkanDispatch *CompositorVkTest::k_vk = nullptr;
 
 TEST_F(CompositorVkTest, Init) {
-    ASSERT_NE(k_vk, nullptr);
-
     ASSERT_NE(CompositorVk::create(*k_vk, m_vkDevice), nullptr);
 }
 
 TEST_F(CompositorVkTest, ValidatePhysicalDeviceFeatures) {
-    ASSERT_NE(k_vk, nullptr);
-
     VkPhysicalDeviceFeatures2 features = {};
     features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     ASSERT_FALSE(CompositorVk::validatePhysicalDeviceFeatures(features));
@@ -170,8 +560,6 @@ TEST_F(CompositorVkTest, ValidatePhysicalDeviceFeatures) {
 }
 
 TEST_F(CompositorVkTest, ValidateQueueFamilyProperties) {
-    ASSERT_NE(k_vk, nullptr);
-
     VkQueueFamilyProperties properties = {};
     properties.queueFlags &= ~VK_QUEUE_GRAPHICS_BIT;
     ASSERT_FALSE(CompositorVk::validateQueueFamilyProperties(properties));
@@ -180,8 +568,6 @@ TEST_F(CompositorVkTest, ValidateQueueFamilyProperties) {
 }
 
 TEST_F(CompositorVkTest, EnablePhysicalDeviceFeatures) {
-    ASSERT_NE(k_vk, nullptr);
-
     VkPhysicalDeviceFeatures2 features = {};
     features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     ASSERT_FALSE(CompositorVk::enablePhysicalDeviceFeatures(features));
@@ -192,4 +578,22 @@ TEST_F(CompositorVkTest, EnablePhysicalDeviceFeatures) {
     ASSERT_TRUE(CompositorVk::enablePhysicalDeviceFeatures(features));
     ASSERT_EQ(descIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind,
               VK_TRUE);
+}
+
+TEST_F(CompositorVkTest, TestRenderTarget) {
+    std::vector<uint32_t> pixels(k_renderTargetNumOfPixels);
+    for (uint32_t i = 0; i < k_renderTargetNumOfPixels; i++) {
+        uint8_t v = static_cast<uint8_t>((i / 4) & 0xff);
+        uint8_t *pixel = reinterpret_cast<uint8_t*>(&pixels[i]);
+        pixel[0] = v;
+        pixel[1] = v;
+        pixel[2] = v;
+        pixel[3] = 0xff;
+    }
+    ASSERT_TRUE(m_renderTargets[0]->write(pixels));
+    auto maybeImageBytes = m_renderTargets[0]->read();
+    ASSERT_TRUE(maybeImageBytes.has_value());
+    for (uint32_t i = 0; i < k_renderTargetNumOfPixels; i++) {
+        ASSERT_EQ(pixels[i], maybeImageBytes.value()[i]);
+    }
 }
