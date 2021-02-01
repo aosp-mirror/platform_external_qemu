@@ -1,0 +1,11 @@
+Verified+1: Bo Hu <bohu@google.com>
+Code-Review+1: Bo Hu <bohu@google.com>
+Code-Review+2: Roman Kiryanov <rkir@google.com>
+Autosubmit+1: Bo Hu <bohu@google.com>
+Lint+1: Lint 🤖 <ayeaye-gerrit@google.com>
+Presubmit-Verified+2: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Mon, 01 Feb 2021 23:36:04 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1566388
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
