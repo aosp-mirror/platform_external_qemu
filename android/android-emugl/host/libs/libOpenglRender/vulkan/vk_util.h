@@ -27,6 +27,7 @@
 
 #include <vulkan/vulkan.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "common/vk_struct_id.h"
 
 struct vk_struct_common {
