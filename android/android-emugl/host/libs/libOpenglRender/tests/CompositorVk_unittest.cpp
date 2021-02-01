@@ -17,35 +17,21 @@
 
 #include <algorithm>
 #include <array>
+#include <glm/gtx/matrix_transform_2d.hpp>
 #include <optional>
 
 #include "vulkan/VulkanDispatch.h"
-
-static std::optional<uint32_t> findMemoryType(
-    const goldfish_vk::VulkanDispatch &vk, VkPhysicalDevice device,
-    uint32_t typeFilter, VkMemoryPropertyFlags properties) {
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vk.vkGetPhysicalDeviceMemoryProperties(device, &memProperties);
-
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
-        if ((typeFilter & (1 << i)) &&
-            (memProperties.memoryTypes[i].propertyFlags & properties) ==
-                properties) {
-            return i;
-        }
-    }
-    return std::nullopt;
-}
+#include "vulkan/vk_util.h"
 
 class CompositorVkTest : public ::testing::Test {
    protected:
-    struct RenderTarget {
-       public:
-        static constexpr VkFormat k_vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
-        static constexpr uint32_t k_bpp = 4;
-        static constexpr VkImageLayout k_vkImageLayout =
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
+    struct RenderResourceVkBase
+        : public vk_util::FindMemoryType<
+              RenderResourceVkBase,
+              vk_util::RunSingleTimeCommand<
+                  RenderResourceVkBase,
+                  vk_util::RecordImageLayoutTransformCommands<
+                      RenderResourceVkBase>>> {
         const goldfish_vk::VulkanDispatch &m_vk;
         VkDevice m_vkDevice;
         VkPhysicalDevice m_vkPhysicalDevice;
@@ -65,11 +51,31 @@ class CompositorVkTest : public ::testing::Test {
         VkCommandBuffer m_readCommandBuffer;
         VkCommandBuffer m_writeCommandBuffer;
 
-        static std::unique_ptr<const RenderTarget> create(
-            const goldfish_vk::VulkanDispatch &vk, VkDevice device,
-            VkPhysicalDevice physicalDevice, VkQueue queue,
-            VkCommandPool commandPool, uint32_t width, uint32_t height) {
-            std::unique_ptr<RenderTarget> res(new RenderTarget(vk));
+        explicit RenderResourceVkBase(const goldfish_vk::VulkanDispatch &vk)
+            : m_vk(vk),
+              m_vkImage(VK_NULL_HANDLE),
+              m_imageVkDeviceMemory(VK_NULL_HANDLE),
+              m_vkImageView(VK_NULL_HANDLE),
+              m_vkBuffer(VK_NULL_HANDLE),
+              m_bufferVkDeviceMemory(VK_NULL_HANDLE),
+              m_memory(nullptr),
+              m_readCommandBuffer(VK_NULL_HANDLE),
+              m_writeCommandBuffer(VK_NULL_HANDLE) {}
+    };
+
+    template <VkImageLayout imageLayout, VkImageUsageFlags imageUsage>
+    struct RenderResource : public RenderResourceVkBase {
+       public:
+        static constexpr VkFormat k_vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
+        static constexpr uint32_t k_bpp = 4;
+        static constexpr VkImageLayout k_vkImageLayout = imageLayout;
+
+        static std::unique_ptr<const RenderResource<imageLayout, imageUsage>>
+        create(const goldfish_vk::VulkanDispatch &vk, VkDevice device,
+               VkPhysicalDevice physicalDevice, VkQueue queue,
+               VkCommandPool commandPool, uint32_t width, uint32_t height) {
+            std::unique_ptr<RenderResource<imageLayout, imageUsage>> res(
+                new RenderResource<imageLayout, imageUsage>(vk));
             res->m_vkDevice = device;
             res->m_vkPhysicalDevice = physicalDevice;
             res->m_vkQueue = queue;
@@ -108,7 +114,7 @@ class CompositorVkTest : public ::testing::Test {
             return res;
         }
 
-        ~RenderTarget() {
+        ~RenderResource() {
             std::vector<VkCommandBuffer> toFree;
             if (m_writeCommandBuffer != VK_NULL_HANDLE) {
                 toFree.push_back(m_writeCommandBuffer);
@@ -142,16 +148,8 @@ class CompositorVkTest : public ::testing::Test {
         }
 
        private:
-        RenderTarget(const goldfish_vk::VulkanDispatch &vk)
-            : m_vk(vk),
-              m_vkImage(VK_NULL_HANDLE),
-              m_imageVkDeviceMemory(VK_NULL_HANDLE),
-              m_vkImageView(VK_NULL_HANDLE),
-              m_vkBuffer(VK_NULL_HANDLE),
-              m_bufferVkDeviceMemory(VK_NULL_HANDLE),
-              m_memory(nullptr),
-              m_readCommandBuffer(VK_NULL_HANDLE),
-              m_writeCommandBuffer(VK_NULL_HANDLE) {}
+        RenderResource(const goldfish_vk::VulkanDispatch &vk)
+            : RenderResourceVkBase(vk) {}
 
         bool setUpImage() {
             VkImageCreateInfo imageCi{};
@@ -166,8 +164,7 @@ class CompositorVkTest : public ::testing::Test {
             imageCi.tiling = VK_IMAGE_TILING_OPTIMAL;
             imageCi.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             imageCi.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-                            VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+                            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | imageUsage;
             imageCi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
             imageCi.samples = VK_SAMPLE_COUNT_1_BIT;
             imageCi.flags = 0;
@@ -180,9 +177,9 @@ class CompositorVkTest : public ::testing::Test {
             VkMemoryRequirements memRequirements;
             m_vk.vkGetImageMemoryRequirements(m_vkDevice, m_vkImage,
                                               &memRequirements);
-            auto maybeMemoryTypeIndex = findMemoryType(
-                m_vk, m_vkPhysicalDevice, memRequirements.memoryTypeBits,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            auto maybeMemoryTypeIndex =
+                findMemoryType(memRequirements.memoryTypeBits,
+                               VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
             if (!maybeMemoryTypeIndex.has_value()) {
                 return false;
             }
@@ -201,34 +198,12 @@ class CompositorVkTest : public ::testing::Test {
                 return false;
             }
 
-            VkCommandBuffer cmdBuff;
-            VkCommandBufferAllocateInfo cmdBuffAllocInfo = {};
-            cmdBuffAllocInfo.sType =
-                VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-            cmdBuffAllocInfo.commandPool = m_vkCommandPool;
-            cmdBuffAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-            cmdBuffAllocInfo.commandBufferCount = 1;
-            if (m_vk.vkAllocateCommandBuffers(m_vkDevice, &cmdBuffAllocInfo,
-                                              &cmdBuff) != VK_SUCCESS) {
-                return false;
-            }
-            VkCommandBufferBeginInfo beginInfo = {};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-            bool res =
-                m_vk.vkBeginCommandBuffer(cmdBuff, &beginInfo) == VK_SUCCESS;
-            if (res) {
-                recordImageLayoutTransformCommands(
-                    cmdBuff, VK_IMAGE_LAYOUT_UNDEFINED, k_vkImageLayout);
-                res = m_vk.vkEndCommandBuffer(cmdBuff) == VK_SUCCESS;
-            }
-            if (res) {
-                res = submitCommandBufferAndWait(cmdBuff);
-            }
-            m_vk.vkFreeCommandBuffers(m_vkDevice, m_vkCommandPool, 1, &cmdBuff);
-            if (!res) {
-                return false;
-            }
+            runSingleTimeCommands(m_vkQueue, [this](const auto &cmdBuff) {
+                recordImageLayoutTransformCommands(cmdBuff, m_vkImage,
+                                                   VK_IMAGE_LAYOUT_UNDEFINED,
+                                                   k_vkImageLayout);
+            });
+
             VkImageViewCreateInfo imageViewCi = {};
             imageViewCi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
             imageViewCi.image = m_vkImage;
@@ -248,30 +223,6 @@ class CompositorVkTest : public ::testing::Test {
                 return false;
             }
             return true;
-        }
-
-        void recordImageLayoutTransformCommands(VkCommandBuffer cmdBuff,
-                                                VkImageLayout oldLayout,
-                                                VkImageLayout newLayout) {
-            VkImageMemoryBarrier imageBarrier = {};
-            imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-            imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
-            imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            imageBarrier.oldLayout = oldLayout;
-            imageBarrier.newLayout = newLayout;
-            imageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            imageBarrier.image = m_vkImage;
-            imageBarrier.subresourceRange.aspectMask =
-                VK_IMAGE_ASPECT_COLOR_BIT;
-            imageBarrier.subresourceRange.baseMipLevel = 0;
-            imageBarrier.subresourceRange.levelCount = 1;
-            imageBarrier.subresourceRange.baseArrayLayer = 0;
-            imageBarrier.subresourceRange.layerCount = 1;
-            m_vk.vkCmdPipelineBarrier(cmdBuff,
-                                      VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-                                      VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0,
-                                      nullptr, 0, nullptr, 1, &imageBarrier);
         }
 
         bool submitCommandBufferAndWait(VkCommandBuffer cmdBuff) const {
@@ -306,10 +257,10 @@ class CompositorVkTest : public ::testing::Test {
             VkMemoryRequirements memRequirements;
             m_vk.vkGetBufferMemoryRequirements(m_vkDevice, m_vkBuffer,
                                                &memRequirements);
-            auto maybeMemoryTypeIndex = findMemoryType(
-                m_vk, m_vkPhysicalDevice, memRequirements.memoryTypeBits,
-                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
-                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+            auto maybeMemoryTypeIndex =
+                findMemoryType(memRequirements.memoryTypeBits,
+                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
+                                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
             if (!maybeMemoryTypeIndex.has_value()) {
                 return false;
             }
@@ -359,7 +310,7 @@ class CompositorVkTest : public ::testing::Test {
                 return false;
             }
             recordImageLayoutTransformCommands(
-                m_readCommandBuffer, k_vkImageLayout,
+                m_readCommandBuffer, m_vkImage, k_vkImageLayout,
                 VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
             VkBufferImageCopy region = {};
             region.bufferOffset = 0;
@@ -375,8 +326,8 @@ class CompositorVkTest : public ::testing::Test {
                                         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                         m_vkBuffer, 1, &region);
             recordImageLayoutTransformCommands(
-                m_readCommandBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                k_vkImageLayout);
+                m_readCommandBuffer, m_vkImage,
+                VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, k_vkImageLayout);
             if (m_vk.vkEndCommandBuffer(m_readCommandBuffer) != VK_SUCCESS) {
                 return false;
             }
@@ -386,20 +337,27 @@ class CompositorVkTest : public ::testing::Test {
                 return false;
             }
             recordImageLayoutTransformCommands(
-                m_writeCommandBuffer, k_vkImageLayout,
+                m_writeCommandBuffer, m_vkImage, k_vkImageLayout,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
             m_vk.vkCmdCopyBufferToImage(
                 m_writeCommandBuffer, m_vkBuffer, m_vkImage,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
             recordImageLayoutTransformCommands(
-                m_writeCommandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                k_vkImageLayout);
+                m_writeCommandBuffer, m_vkImage,
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, k_vkImageLayout);
             if (m_vk.vkEndCommandBuffer(m_writeCommandBuffer) != VK_SUCCESS) {
                 return false;
             }
             return true;
         }
     };
+
+    using RenderTarget =
+        RenderResource<VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT>;
+    using RenderTexture =
+        RenderResource<VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                       VK_IMAGE_USAGE_SAMPLED_BIT>;
 
     static void SetUpTestCase() { k_vk = emugl::vkDispatch(false); }
 
@@ -422,6 +380,20 @@ class CompositorVkTest : public ::testing::Test {
         createInstance();
         pickPhysicalDevice();
         createLogicalDevice();
+
+        VkFormatProperties formatProperties;
+        k_vk->vkGetPhysicalDeviceFormatProperties(
+            m_vkPhysicalDevice, RenderTarget::k_vkFormat, &formatProperties);
+        if (!(formatProperties.optimalTilingFeatures &
+              VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT)) {
+            GTEST_SKIP();
+        }
+        k_vk->vkGetPhysicalDeviceFormatProperties(
+            m_vkPhysicalDevice, RenderTexture::k_vkFormat, &formatProperties);
+        if (!(formatProperties.optimalTilingFeatures &
+              VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT)) {
+            GTEST_SKIP();
+        }
 
         VkCommandPoolCreateInfo commandPoolCi = {};
         commandPoolCi.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -466,11 +438,34 @@ class CompositorVkTest : public ::testing::Test {
     }
 
     std::unique_ptr<CompositorVk> createCompositor() {
-        return CompositorVk::create(*k_vk, m_vkDevice, RenderTarget::k_vkFormat,
-                                    RenderTarget::k_vkImageLayout,
-                                    RenderTarget::k_vkImageLayout,
-                                    k_renderTargetWidth, k_renderTargetHeight,
-                                    m_renderTargetImageViews, m_vkCommandPool);
+        return CompositorVk::create(
+            *k_vk, m_vkDevice, m_vkPhysicalDevice, m_compositorVkQueue,
+            RenderTarget::k_vkFormat, RenderTarget::k_vkImageLayout,
+            RenderTarget::k_vkImageLayout, k_renderTargetWidth,
+            k_renderTargetHeight, m_renderTargetImageViews, m_vkCommandPool);
+    }
+
+    VkSampler createSampler() {
+        VkSamplerCreateInfo samplerCi = {};
+        samplerCi.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerCi.magFilter = VK_FILTER_NEAREST;
+        samplerCi.minFilter = VK_FILTER_NEAREST;
+        samplerCi.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+        samplerCi.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+        samplerCi.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+        samplerCi.anisotropyEnable = VK_FALSE;
+        samplerCi.maxAnisotropy = 1.0f;
+        samplerCi.borderColor = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
+        samplerCi.unnormalizedCoordinates = VK_FALSE;
+        samplerCi.compareEnable = VK_FALSE;
+        samplerCi.compareOp = VK_COMPARE_OP_ALWAYS;
+        samplerCi.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        samplerCi.mipLodBias = 0.0f;
+        samplerCi.minLod = 0.0f;
+        samplerCi.maxLod = 0.0f;
+        VkSampler res;
+        VK_CHECK(k_vk->vkCreateSampler(m_vkDevice, &samplerCi, nullptr, &res));
+        return res;
     }
 
     static const goldfish_vk::VulkanDispatch *k_vk;
@@ -667,7 +662,7 @@ TEST_F(CompositorVkTest, EmptyCompositionShouldDrawABlackFrame) {
     for (uint32_t i = 0; i < k_numOfRenderTargets; i++) {
         auto maybeImagePixels = m_renderTargets[i]->read();
         ASSERT_TRUE(maybeImagePixels.has_value());
-        auto imagePixels = maybeImagePixels.value();
+        const auto &imagePixels = maybeImagePixels.value();
         for (uint32_t j = 0; j < k_renderTargetNumOfPixels; j++) {
             const auto pixel =
                 reinterpret_cast<const uint8_t *>(&imagePixels[j]);
@@ -682,4 +677,140 @@ TEST_F(CompositorVkTest, EmptyCompositionShouldDrawABlackFrame) {
             }
         }
     }
+}
+
+TEST_F(CompositorVkTest, SimpleComposition) {
+    constexpr uint32_t textureLeft = 30;
+    constexpr uint32_t textureRight = 50;
+    constexpr uint32_t textureTop = 10;
+    constexpr uint32_t textureBottom = 40;
+    constexpr uint32_t textureWidth = textureRight - textureLeft;
+    constexpr uint32_t textureHeight = textureBottom - textureTop;
+    auto sampler = createSampler();
+    auto texture = RenderTexture::create(*k_vk, m_vkDevice, m_vkPhysicalDevice,
+                                         m_compositorVkQueue, m_vkCommandPool,
+                                         textureWidth, textureHeight);
+    uint32_t textureColor;
+    uint8_t *textureColor_ = reinterpret_cast<uint8_t *>(&textureColor);
+    textureColor_[0] = 0xff;
+    textureColor_[1] = 0;
+    textureColor_[2] = 0;
+    textureColor_[3] = 0xff;
+    std::vector<uint32_t> pixels(textureWidth * textureHeight, textureColor);
+    ASSERT_TRUE(texture->write(pixels));
+    auto compositor = createCompositor();
+    ASSERT_NE(compositor, nullptr);
+    auto composition = std::make_unique<Composition>(
+        texture->m_vkImageView, sampler, textureWidth, textureHeight);
+    auto transform = glm::translate(glm::mat3(1.0f),
+                                    glm::vec2(static_cast<float>(textureLeft),
+                                              static_cast<float>(textureTop)));
+    composition->m_transform = transform;
+    compositor->setComposition(0, std::move(composition));
+    VkCommandBuffer cmdBuff = compositor->getCommandBuffer(0);
+    VkSubmitInfo submitInfo = {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmdBuff;
+    ASSERT_EQ(k_vk->vkQueueSubmit(m_compositorVkQueue, 1, &submitInfo,
+                                  VK_NULL_HANDLE),
+              VK_SUCCESS);
+    ASSERT_EQ(k_vk->vkQueueWaitIdle(m_compositorVkQueue), VK_SUCCESS);
+
+    auto maybeImagePixels = m_renderTargets[0]->read();
+    ASSERT_TRUE(maybeImagePixels.has_value());
+    const auto &imagePixels = maybeImagePixels.value();
+
+    for (uint32_t i = 0; i < k_renderTargetHeight; i++) {
+        for (uint32_t j = 0; j < k_renderTargetWidth; j++) {
+            uint32_t offset = i * k_renderTargetWidth + j;
+            const uint8_t *pixel =
+                reinterpret_cast<const uint8_t *>(&imagePixels[offset]);
+            EXPECT_EQ(pixel[1], 0);
+            EXPECT_EQ(pixel[2], 0);
+            EXPECT_EQ(pixel[3], 0xff);
+            if (i >= textureTop && i < textureBottom && j >= textureLeft &&
+                j < textureRight) {
+                EXPECT_EQ(pixel[0], 0xff);
+            } else {
+                EXPECT_EQ(pixel[0], 0);
+            }
+        }
+    }
+    k_vk->vkDestroySampler(m_vkDevice, sampler, nullptr);
+}
+
+TEST_F(CompositorVkTest, CompositingWithDifferentCompositionOnMultipleTargets) {
+    constexpr uint32_t textureWidth = 20;
+    constexpr uint32_t textureHeight = 30;
+    struct Rect {
+        uint32_t m_top;
+        uint32_t m_bottom;
+        uint32_t m_left;
+        uint32_t m_right;
+    };
+    std::vector<Rect> texturePositions(k_numOfRenderTargets);
+    for (int i = 0; i < k_numOfRenderTargets; i++) {
+        auto left = (i * 30) % (k_renderTargetWidth - textureWidth);
+        auto top = (i * 20) % (k_renderTargetHeight - textureHeight);
+        texturePositions[i].m_top = top;
+        texturePositions[i].m_bottom = top + textureHeight;
+        texturePositions[i].m_left = left;
+        texturePositions[i].m_right = left + textureWidth;
+    }
+    auto sampler = createSampler();
+    auto texture = RenderTexture::create(*k_vk, m_vkDevice, m_vkPhysicalDevice,
+                                         m_compositorVkQueue, m_vkCommandPool,
+                                         textureWidth, textureHeight);
+    uint32_t textureColor;
+    uint8_t *textureColor_ = reinterpret_cast<uint8_t *>(&textureColor);
+    textureColor_[0] = 0xff;
+    textureColor_[1] = 0;
+    textureColor_[2] = 0;
+    textureColor_[3] = 0xff;
+    std::vector<uint32_t> pixels(textureWidth * textureHeight, textureColor);
+    ASSERT_TRUE(texture->write(pixels));
+    auto compositor = createCompositor();
+    ASSERT_NE(compositor, nullptr);
+    for (int i = 0; i < k_numOfRenderTargets; i++) {
+        const auto &pos = texturePositions[i];
+        auto composition = std::make_unique<Composition>(
+            texture->m_vkImageView, sampler, textureWidth, textureHeight);
+        auto transform = glm::translate(
+            glm::mat3(1.0f), glm::vec2(static_cast<float>(pos.m_left),
+                                       static_cast<float>(pos.m_top)));
+        composition->m_transform = transform;
+        compositor->setComposition(i, std::move(composition));
+        VkCommandBuffer cmdBuff = compositor->getCommandBuffer(i);
+        VkSubmitInfo submitInfo = {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &cmdBuff;
+        ASSERT_EQ(k_vk->vkQueueSubmit(m_compositorVkQueue, 1, &submitInfo,
+                                      VK_NULL_HANDLE),
+                  VK_SUCCESS);
+        ASSERT_EQ(k_vk->vkQueueWaitIdle(m_compositorVkQueue), VK_SUCCESS);
+
+        auto maybeImagePixels = m_renderTargets[i]->read();
+        ASSERT_TRUE(maybeImagePixels.has_value());
+        const auto &imagePixels = maybeImagePixels.value();
+
+        for (uint32_t i = 0; i < k_renderTargetHeight; i++) {
+            for (uint32_t j = 0; j < k_renderTargetWidth; j++) {
+                uint32_t offset = i * k_renderTargetWidth + j;
+                const uint8_t *pixel =
+                    reinterpret_cast<const uint8_t *>(&imagePixels[offset]);
+                EXPECT_EQ(pixel[1], 0);
+                EXPECT_EQ(pixel[2], 0);
+                EXPECT_EQ(pixel[3], 0xff);
+                if (i >= pos.m_top && i < pos.m_bottom && j >= pos.m_left &&
+                    j < pos.m_right) {
+                    EXPECT_EQ(pixel[0], 0xff);
+                } else {
+                    EXPECT_EQ(pixel[0], 0);
+                }
+            }
+        }
+    }
+    k_vk->vkDestroySampler(m_vkDevice, sampler, nullptr);
 }

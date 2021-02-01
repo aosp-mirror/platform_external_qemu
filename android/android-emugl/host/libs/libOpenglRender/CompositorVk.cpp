@@ -13,6 +13,8 @@
 // limitations under the License.
 #include "CompositorVk.h"
 
+#include <glm/gtx/matrix_transform_2d.hpp>
+#include <cstring>
 #include <optional>
 
 #include "vulkan/vk_util.h"
@@ -35,50 +37,110 @@ static VkShaderModule createShaderModule(const goldfish_vk::VulkanDispatch &vk,
     return res;
 }
 
+Composition::Composition(VkImageView vkImageView, VkSampler vkSampler,
+                         uint32_t width, uint32_t height)
+    : m_vkImageView(vkImageView),
+      m_vkSampler(vkSampler),
+      m_width(width),
+      m_height(height),
+      m_transform(1.0f) {}
+
+const std::vector<CompositorVk::Vertex> CompositorVk::k_vertices = {
+    {{-1.0f, -1.0f}, {0.0f, 0.0f}},
+    {{1.0f, -1.0f}, {1.0f, 0.0f}},
+    {{1.0f, 1.0f}, {1.0f, 1.0f}},
+    {{-1.0f, 1.0f}, {0.0f, 1.0f}},
+};
+
+const std::vector<uint16_t> CompositorVk::k_indices = {0, 1, 2, 2, 3, 0};
+
+const VkExtent2D CompositorVk::k_emptyCompositionExtent = {1, 1};
+
 std::unique_ptr<CompositorVk> CompositorVk::create(
-    const goldfish_vk::VulkanDispatch &vk, VkDevice vkDevice, VkFormat format,
+    const goldfish_vk::VulkanDispatch &vk, VkDevice vkDevice,
+    VkPhysicalDevice vkPhysicalDevice, VkQueue vkQueue, VkFormat format,
     VkImageLayout initialLayout, VkImageLayout finalLayout, uint32_t width,
     uint32_t height, const std::vector<VkImageView> &renderTargets,
     VkCommandPool commandPool) {
-    auto res = std::unique_ptr<CompositorVk>(
-        new CompositorVk(vk, vkDevice, commandPool));
+    auto res = std::unique_ptr<CompositorVk>(new CompositorVk(
+        vk, vkDevice, vkPhysicalDevice, vkQueue, commandPool, width, height));
     res->setUpGraphicsPipeline(width, height, format, initialLayout,
                                finalLayout);
+    res->setUpVertexBuffers();
     res->setUpFramebuffers(renderTargets, width, height);
+    res->setUpUniformBuffers();
+    res->setUpDescriptorSets();
     res->setUpCommandBuffers(width, height);
+    res->setUpEmptyComposition(format);
+    res->m_currentCompositions.resize(renderTargets.size());
+    for (auto i = 0; i < renderTargets.size(); i++) {
+        res->setComposition(
+            i, std::make_unique<Composition>(res->m_emptyCompositionVkImageView,
+                                             res->m_emptyCompositionVkSampler,
+                                             k_emptyCompositionExtent.width,
+                                             k_emptyCompositionExtent.height));
+    }
     return res;
 }
 
 CompositorVk::CompositorVk(const goldfish_vk::VulkanDispatch &vk,
-                           VkDevice vkDevice, VkCommandPool vkCommandPool)
-    : m_vk(vk),
-      m_vkDevice(vkDevice),
-      m_vkPipelineLayout(VK_NULL_HANDLE),
-      m_vkRenderPass(VK_NULL_HANDLE),
-      m_graphicsVkPipeline(VK_NULL_HANDLE),
-      m_vkCommandBuffers(0),
-      m_renderTargetVkFrameBuffers(0),
-      m_vkCommandPool(vkCommandPool) {}
-
-CompositorVk::~CompositorVk() {
-    m_vk.vkFreeCommandBuffers(m_vkDevice, m_vkCommandPool,
-                              static_cast<uint32_t>(m_vkCommandBuffers.size()),
-                              m_vkCommandBuffers.data());
-    while (!m_renderTargetVkFrameBuffers.empty()) {
-        m_vk.vkDestroyFramebuffer(m_vkDevice,
-                                  m_renderTargetVkFrameBuffers.back(), nullptr);
-        m_renderTargetVkFrameBuffers.pop_back();
-    }
-    if (m_graphicsVkPipeline != VK_NULL_HANDLE) {
-        m_vk.vkDestroyPipeline(m_vkDevice, m_graphicsVkPipeline, nullptr);
-    }
-    if (m_vkRenderPass != VK_NULL_HANDLE) {
-        m_vk.vkDestroyRenderPass(m_vkDevice, m_vkRenderPass, nullptr);
-    }
-    if (m_vkPipelineLayout != VK_NULL_HANDLE) {
-        m_vk.vkDestroyPipelineLayout(m_vkDevice, m_vkPipelineLayout, nullptr);
-    }
+                           VkDevice vkDevice, VkPhysicalDevice vkPhysicalDevice,
+                           VkQueue vkQueue, VkCommandPool vkCommandPool,
+                           uint32_t renderTargetWidth,
+                           uint32_t renderTargetHeight)
+    : CompositorVkBase(vk, vkDevice, vkPhysicalDevice, vkQueue, vkCommandPool),
+      m_renderTargetWidth(renderTargetWidth),
+      m_renderTargetHeight(renderTargetHeight),
+      m_emptyCompositionVkImage(VK_NULL_HANDLE),
+      m_emptyCompositionVkDeviceMemory(VK_NULL_HANDLE),
+      m_emptyCompositionVkImageView(VK_NULL_HANDLE),
+      m_emptyCompositionVkSampler(VK_NULL_HANDLE),
+      m_currentCompositions(0),
+      m_uniformStorage({VK_NULL_HANDLE, VK_NULL_HANDLE, nullptr, 0}) {
+    VkPhysicalDeviceProperties physicalDeviceProperties;
+    m_vk.vkGetPhysicalDeviceProperties(m_vkPhysicalDevice,
+                                       &physicalDeviceProperties);
+    auto alignment =
+        physicalDeviceProperties.limits.minUniformBufferOffsetAlignment;
+    m_uniformStorage.m_stride =
+        ((sizeof(UniformBufferObject) - 1) / alignment + 1) * alignment;
 }
+
+      CompositorVk::~CompositorVk() {
+          m_vk.vkDestroySampler(m_vkDevice, m_emptyCompositionVkSampler,
+                                nullptr);
+          m_vk.vkDestroyImageView(m_vkDevice, m_emptyCompositionVkImageView,
+                                  nullptr);
+          m_vk.vkFreeMemory(m_vkDevice, m_emptyCompositionVkDeviceMemory,
+                            nullptr);
+          m_vk.vkDestroyImage(m_vkDevice, m_emptyCompositionVkImage, nullptr);
+          m_vk.vkDestroyDescriptorPool(m_vkDevice, m_vkDescriptorPool, nullptr);
+          m_vk.vkFreeCommandBuffers(
+              m_vkDevice, m_vkCommandPool,
+              static_cast<uint32_t>(m_vkCommandBuffers.size()),
+              m_vkCommandBuffers.data());
+          if (m_uniformStorage.m_vkDeviceMemory != VK_NULL_HANDLE) {
+              m_vk.vkUnmapMemory(m_vkDevice, m_uniformStorage.m_vkDeviceMemory);
+          }
+          m_vk.vkDestroyBuffer(m_vkDevice, m_uniformStorage.m_vkBuffer,
+                               nullptr);
+          m_vk.vkFreeMemory(m_vkDevice, m_uniformStorage.m_vkDeviceMemory,
+                            nullptr);
+          while (!m_renderTargetVkFrameBuffers.empty()) {
+              m_vk.vkDestroyFramebuffer(
+                  m_vkDevice, m_renderTargetVkFrameBuffers.back(), nullptr);
+              m_renderTargetVkFrameBuffers.pop_back();
+          }
+          m_vk.vkFreeMemory(m_vkDevice, m_vertexVkDeviceMemory, nullptr);
+          m_vk.vkDestroyBuffer(m_vkDevice, m_vertexVkBuffer, nullptr);
+          m_vk.vkFreeMemory(m_vkDevice, m_indexVkDeviceMemory, nullptr);
+          m_vk.vkDestroyBuffer(m_vkDevice, m_indexVkBuffer, nullptr);
+          m_vk.vkDestroyPipeline(m_vkDevice, m_graphicsVkPipeline, nullptr);
+          m_vk.vkDestroyRenderPass(m_vkDevice, m_vkRenderPass, nullptr);
+          m_vk.vkDestroyPipelineLayout(m_vkDevice, m_vkPipelineLayout, nullptr);
+          m_vk.vkDestroyDescriptorSetLayout(m_vkDevice, m_vkDescriptorSetLayout,
+                                            nullptr);
+      }
 
 void CompositorVk::setUpGraphicsPipeline(uint32_t width, uint32_t height,
                                          VkFormat renderTargetFormat,
@@ -107,11 +169,17 @@ void CompositorVk::setUpGraphicsPipeline(uint32_t width, uint32_t height,
     shaderStageCis[1].module = fragShaderMod;
     shaderStageCis[1].pName = "main";
 
+    auto bindingDescription = Vertex::getBindingDescription();
+    auto attributeDescription = Vertex::getAttributeDescription();
     VkPipelineVertexInputStateCreateInfo vertexInputStateCi = {};
     vertexInputStateCi.sType =
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputStateCi.vertexBindingDescriptionCount = 0;
-    vertexInputStateCi.vertexAttributeDescriptionCount = 0;
+    vertexInputStateCi.vertexBindingDescriptionCount = 1;
+    vertexInputStateCi.pVertexBindingDescriptions = &bindingDescription;
+    vertexInputStateCi.vertexAttributeDescriptionCount =
+        static_cast<uint32_t>(attributeDescription.size());
+    vertexInputStateCi.pVertexAttributeDescriptions =
+        attributeDescription.data();
 
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCi = {};
     inputAssemblyStateCi.sType =
@@ -173,9 +241,9 @@ void CompositorVk::setUpGraphicsPipeline(uint32_t width, uint32_t height,
     colorBlendAttachment.dstColorBlendFactor =
         VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-    colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+    colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+    colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_MAX;
 
     VkPipelineColorBlendStateCreateInfo colorBlendStateCi = {};
     colorBlendStateCi.sType =
@@ -184,9 +252,44 @@ void CompositorVk::setUpGraphicsPipeline(uint32_t width, uint32_t height,
     colorBlendStateCi.attachmentCount = 1;
     colorBlendStateCi.pAttachments = &colorBlendAttachment;
 
+    VkDescriptorSetLayoutBinding layoutBindings[2] = {};
+    layoutBindings[0].binding = 0;
+    layoutBindings[0].descriptorCount = 1;
+    layoutBindings[0].descriptorType =
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    layoutBindings[0].pImmutableSamplers = nullptr;
+    layoutBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    layoutBindings[1].binding = 1;
+    layoutBindings[1].descriptorCount = 1;
+    layoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    layoutBindings[1].pImmutableSamplers = nullptr;
+    layoutBindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    VkDescriptorBindingFlagsEXT bindingFlags[] = {
+        VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT, 0};
+    VkDescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCi = {};
+    bindingFlagsCi.sType =
+        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
+    bindingFlagsCi.bindingCount =
+        static_cast<uint32_t>(std::size(bindingFlags));
+    bindingFlagsCi.pBindingFlags = bindingFlags;
+    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCi = {};
+    descriptorSetLayoutCi.sType =
+        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    descriptorSetLayoutCi.bindingCount =
+        static_cast<uint32_t>(std::size(layoutBindings));
+    descriptorSetLayoutCi.pBindings = layoutBindings;
+    descriptorSetLayoutCi.pNext = &bindingFlagsCi;
+    descriptorSetLayoutCi.flags =
+        VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
+    VK_CHECK(m_vk.vkCreateDescriptorSetLayout(
+        m_vkDevice, &descriptorSetLayoutCi, nullptr, &m_vkDescriptorSetLayout));
+
     VkPipelineLayoutCreateInfo pipelineLayoutCi = {};
     pipelineLayoutCi.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutCi.setLayoutCount = 0;
+    pipelineLayoutCi.setLayoutCount = 1;
+    pipelineLayoutCi.pSetLayouts = &m_vkDescriptorSetLayout;
     pipelineLayoutCi.pushConstantRangeCount = 0;
 
     VK_CHECK(m_vk.vkCreatePipelineLayout(m_vkDevice, &pipelineLayoutCi, nullptr,
@@ -211,6 +314,10 @@ void CompositorVk::setUpGraphicsPipeline(uint32_t width, uint32_t height,
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
 
+    // TODO: to support multiple layer composition, we could run the same render
+    // pass for multiple time. In that case, we should use explicit
+    // VkImageMemoryBarriers to transform the image layout instead of relying on
+    // renderpass to do it.
     VkSubpassDependency subpassDependency = {};
     subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     subpassDependency.dstSubpass = 0;
@@ -260,6 +367,96 @@ void CompositorVk::setUpGraphicsPipeline(uint32_t width, uint32_t height,
     m_vk.vkDestroyShaderModule(m_vkDevice, fragShaderMod, nullptr);
 }
 
+// Create a VkBuffer and a bound VkDeviceMemory. When the specified memory type
+// can't be found, return std::nullopt. When Vulkan call fails, terminate the
+// program.
+std::optional<std::tuple<VkBuffer, VkDeviceMemory>> CompositorVk::createBuffer(
+    VkDeviceSize size, VkBufferUsageFlags usage,
+    VkMemoryPropertyFlags memProperty) const {
+    VkBufferCreateInfo bufferCi = {};
+    bufferCi.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferCi.size = size;
+    bufferCi.usage = usage;
+    bufferCi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    VkBuffer resBuffer;
+    VK_CHECK(m_vk.vkCreateBuffer(m_vkDevice, &bufferCi, nullptr, &resBuffer));
+    VkMemoryRequirements memRequirements;
+    m_vk.vkGetBufferMemoryRequirements(m_vkDevice, resBuffer, &memRequirements);
+    VkPhysicalDeviceMemoryProperties physicalMemProperties;
+    m_vk.vkGetPhysicalDeviceMemoryProperties(m_vkPhysicalDevice,
+                                             &physicalMemProperties);
+    auto maybeMemoryTypeIndex =
+        findMemoryType(memRequirements.memoryTypeBits, memProperty);
+    if (!maybeMemoryTypeIndex.has_value()) {
+        m_vk.vkDestroyBuffer(m_vkDevice, resBuffer, nullptr);
+        return std::nullopt;
+    }
+    VkMemoryAllocateInfo memAllocInfo = {};
+    memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    memAllocInfo.allocationSize = memRequirements.size;
+    memAllocInfo.memoryTypeIndex = maybeMemoryTypeIndex.value();
+    VkDeviceMemory resMemory;
+    VK_CHECK(
+        m_vk.vkAllocateMemory(m_vkDevice, &memAllocInfo, nullptr, &resMemory));
+    VK_CHECK(m_vk.vkBindBufferMemory(m_vkDevice, resBuffer, resMemory, 0));
+    return std::make_tuple(resBuffer, resMemory);
+}
+
+std::tuple<VkBuffer, VkDeviceMemory> CompositorVk::createStagingBufferWithData(
+    const void *srcData, VkDeviceSize size) const {
+    auto [stagingBuffer, stagingBufferMemory] =
+        createBuffer(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+            .value();
+    void *data;
+    VK_CHECK(
+        m_vk.vkMapMemory(m_vkDevice, stagingBufferMemory, 0, size, 0, &data));
+    memcpy(data, srcData, size);
+    m_vk.vkUnmapMemory(m_vkDevice, stagingBufferMemory);
+    return std::make_tuple(stagingBuffer, stagingBufferMemory);
+}
+
+void CompositorVk::copyBuffer(VkBuffer src, VkBuffer dst,
+                              VkDeviceSize size) const {
+    runSingleTimeCommands(m_vkQueue, [&, this](const auto &cmdBuff) {
+        VkBufferCopy copyRegion = {};
+        copyRegion.srcOffset = 0;
+        copyRegion.dstOffset = 0;
+        copyRegion.size = size;
+        m_vk.vkCmdCopyBuffer(cmdBuff, src, dst, 1, &copyRegion);
+    });
+}
+
+void CompositorVk::setUpVertexBuffers() {
+    const VkDeviceSize vertexBufferSize =
+        sizeof(k_vertices[0]) * k_vertices.size();
+    std::tie(m_vertexVkBuffer, m_vertexVkDeviceMemory) =
+        createBuffer(vertexBufferSize,
+                     VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+            .value();
+    auto [vertexStagingBuffer, vertexStagingBufferMemory] =
+        createStagingBufferWithData(k_vertices.data(), vertexBufferSize);
+    copyBuffer(vertexStagingBuffer, m_vertexVkBuffer, vertexBufferSize);
+    m_vk.vkDestroyBuffer(m_vkDevice, vertexStagingBuffer, nullptr);
+    m_vk.vkFreeMemory(m_vkDevice, vertexStagingBufferMemory, nullptr);
+
+    VkDeviceSize indexBufferSize = sizeof(k_indices[0]) * k_indices.size();
+    auto [indexStagingBuffer, indexStagingBufferMemory] =
+        createStagingBufferWithData(k_indices.data(), indexBufferSize);
+    std::tie(m_indexVkBuffer, m_indexVkDeviceMemory) =
+        createBuffer(
+            indexBufferSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+            .value();
+    copyBuffer(indexStagingBuffer, m_indexVkBuffer, indexBufferSize);
+    m_vk.vkDestroyBuffer(m_vkDevice, indexStagingBuffer, nullptr);
+    m_vk.vkFreeMemory(m_vkDevice, indexStagingBufferMemory, nullptr);
+}
+
 void CompositorVk::setUpFramebuffers(
     const std::vector<VkImageView> &renderTargets, uint32_t width,
     uint32_t height) {
@@ -276,6 +473,57 @@ void CompositorVk::setUpFramebuffers(
         VK_CHECK(
             m_vk.vkCreateFramebuffer(m_vkDevice, &fbCi, nullptr, &framebuffer));
         m_renderTargetVkFrameBuffers.push_back(framebuffer);
+    }
+}
+
+void CompositorVk::setUpDescriptorSets() {
+    uint32_t numOfFrames =
+        static_cast<uint32_t>(m_renderTargetVkFrameBuffers.size());
+
+    VkDescriptorPoolSize descriptorPoolSizes[2] = {};
+    descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorPoolSizes[0].descriptorCount = numOfFrames;
+    descriptorPoolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptorPoolSizes[1].descriptorCount = numOfFrames;
+
+    VkDescriptorPoolCreateInfo descriptorPoolCi = {};
+    descriptorPoolCi.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    descriptorPoolCi.poolSizeCount =
+        static_cast<uint32_t>(std::size(descriptorPoolSizes));
+    descriptorPoolCi.pPoolSizes = descriptorPoolSizes;
+    descriptorPoolCi.maxSets = static_cast<uint32_t>(numOfFrames);
+    descriptorPoolCi.flags =
+        VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT;
+    VK_CHECK(m_vk.vkCreateDescriptorPool(m_vkDevice, &descriptorPoolCi, nullptr,
+                                         &m_vkDescriptorPool));
+    std::vector<VkDescriptorSetLayout> layouts(numOfFrames,
+                                               m_vkDescriptorSetLayout);
+    VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
+    descriptorSetAllocInfo.sType =
+        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    descriptorSetAllocInfo.descriptorPool = m_vkDescriptorPool;
+    descriptorSetAllocInfo.descriptorSetCount = numOfFrames;
+    descriptorSetAllocInfo.pSetLayouts = layouts.data();
+    m_vkDescriptorSets.resize(numOfFrames);
+    VK_CHECK(m_vk.vkAllocateDescriptorSets(m_vkDevice, &descriptorSetAllocInfo,
+                                           m_vkDescriptorSets.data()));
+    for (size_t i = 0; i < numOfFrames; i++) {
+        VkDescriptorBufferInfo bufferInfo = {};
+        bufferInfo.buffer = m_uniformStorage.m_vkBuffer;
+        bufferInfo.offset = i * m_uniformStorage.m_stride;
+        bufferInfo.range = sizeof(UniformBufferObject);
+
+        VkWriteDescriptorSet descriptorSetWrite = {};
+        descriptorSetWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorSetWrite.dstSet = m_vkDescriptorSets[i];
+        descriptorSetWrite.dstBinding = 1;
+        descriptorSetWrite.dstArrayElement = 0;
+        descriptorSetWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorSetWrite.descriptorCount = 1;
+        descriptorSetWrite.pBufferInfo = &bufferInfo;
+
+        m_vk.vkUpdateDescriptorSets(m_vkDevice, 1, &descriptorSetWrite, 0,
+                                    nullptr);
     }
 }
 
@@ -315,11 +563,137 @@ void CompositorVk::setUpCommandBuffers(uint32_t width, uint32_t height) {
                                   VK_SUBPASS_CONTENTS_INLINE);
         m_vk.vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                m_graphicsVkPipeline);
-        m_vk.vkCmdDraw(cmdBuffer, 0, 1, 0, 0);
+        VkDeviceSize offsets[] = {0};
+        m_vk.vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &m_vertexVkBuffer,
+                                    offsets);
+        m_vk.vkCmdBindIndexBuffer(cmdBuffer, m_indexVkBuffer, 0,
+                                  VK_INDEX_TYPE_UINT16);
+        m_vk.vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                     m_vkPipelineLayout, 0, 1,
+                                     &m_vkDescriptorSets[i], 0, nullptr);
+        m_vk.vkCmdDrawIndexed(
+            cmdBuffer, static_cast<uint32_t>(k_indices.size()), 1, 0, 0, 0);
         m_vk.vkCmdEndRenderPass(cmdBuffer);
 
         VK_CHECK(m_vk.vkEndCommandBuffer(cmdBuffer));
     }
+}
+
+void CompositorVk::setUpEmptyComposition(VkFormat format) {
+    VkImageCreateInfo imageCi = {};
+    imageCi.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageCi.imageType = VK_IMAGE_TYPE_2D;
+    imageCi.extent.width = k_emptyCompositionExtent.width;
+    imageCi.extent.height = k_emptyCompositionExtent.height;
+    imageCi.extent.depth = 1;
+    imageCi.mipLevels = 1;
+    imageCi.arrayLayers = 1;
+    imageCi.format = format;
+    imageCi.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageCi.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageCi.usage =
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    imageCi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageCi.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageCi.flags = 0;
+    VK_CHECK(m_vk.vkCreateImage(m_vkDevice, &imageCi, nullptr,
+                                &m_emptyCompositionVkImage));
+
+    VkMemoryRequirements memRequirements;
+    m_vk.vkGetImageMemoryRequirements(m_vkDevice, m_emptyCompositionVkImage,
+                                      &memRequirements);
+    VkMemoryAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex =
+        findMemoryType(memRequirements.memoryTypeBits,
+                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+            .value();
+    VK_CHECK(m_vk.vkAllocateMemory(m_vkDevice, &allocInfo, nullptr,
+                                   &m_emptyCompositionVkDeviceMemory));
+    VK_CHECK(m_vk.vkBindImageMemory(m_vkDevice, m_emptyCompositionVkImage,
+                                    m_emptyCompositionVkDeviceMemory, 0));
+    runSingleTimeCommands(m_vkQueue, [&, this](const auto &cmdBuff) {
+        recordImageLayoutTransformCommands(
+            cmdBuff, m_emptyCompositionVkImage, VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        VkClearColorValue clearColor = {0.0, 0.0, 0.0, 1.0};
+        VkBufferImageCopy region = {};
+        VkImageSubresourceRange range = {};
+        range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        range.baseMipLevel = 0;
+        range.levelCount = 1;
+        range.baseArrayLayer = 0;
+        range.layerCount = 1;
+        m_vk.vkCmdClearColorImage(cmdBuff, m_emptyCompositionVkImage,
+                                  VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                  &clearColor, 1, &range);
+        recordImageLayoutTransformCommands(
+            cmdBuff, m_emptyCompositionVkImage,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    });
+
+    VkImageViewCreateInfo imageViewCi = {};
+    imageViewCi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    imageViewCi.image = m_emptyCompositionVkImage;
+    imageViewCi.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    imageViewCi.format = format;
+    imageViewCi.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    imageViewCi.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    imageViewCi.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    imageViewCi.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+    imageViewCi.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageViewCi.subresourceRange.baseMipLevel = 0;
+    imageViewCi.subresourceRange.levelCount = 1;
+    imageViewCi.subresourceRange.baseArrayLayer = 0;
+    imageViewCi.subresourceRange.layerCount = 1;
+    VK_CHECK(m_vk.vkCreateImageView(m_vkDevice, &imageViewCi, nullptr,
+                                    &m_emptyCompositionVkImageView));
+
+    VkSamplerCreateInfo samplerCi = {};
+    samplerCi.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerCi.magFilter = VK_FILTER_LINEAR;
+    samplerCi.minFilter = VK_FILTER_LINEAR;
+    samplerCi.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+    samplerCi.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+    samplerCi.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+    samplerCi.anisotropyEnable = VK_FALSE;
+    samplerCi.maxAnisotropy = 1.0f;
+    samplerCi.borderColor = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
+    samplerCi.unnormalizedCoordinates = VK_FALSE;
+    samplerCi.compareEnable = VK_FALSE;
+    samplerCi.compareOp = VK_COMPARE_OP_ALWAYS;
+    samplerCi.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerCi.mipLodBias = 0.0f;
+    samplerCi.minLod = 0.0f;
+    samplerCi.maxLod = 0.0f;
+    VK_CHECK(m_vk.vkCreateSampler(m_vkDevice, &samplerCi, nullptr,
+                                  &m_emptyCompositionVkSampler));
+}
+
+void CompositorVk::setUpUniformBuffers() {
+    auto numOfFrames = m_renderTargetVkFrameBuffers.size();
+    VkDeviceSize size = m_uniformStorage.m_stride * numOfFrames;
+    auto maybeBuffer = createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
+                                        VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
+    auto buffer = std::make_tuple<VkBuffer, VkDeviceMemory>(VK_NULL_HANDLE,
+                                                            VK_NULL_HANDLE);
+    if (maybeBuffer.has_value()) {
+        buffer = maybeBuffer.value();
+    } else {
+        buffer = createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+                     .value();
+    }
+    std::tie(m_uniformStorage.m_vkBuffer, m_uniformStorage.m_vkDeviceMemory) =
+        buffer;
+    VK_CHECK(m_vk.vkMapMemory(
+        m_vkDevice, m_uniformStorage.m_vkDeviceMemory, 0, size, 0,
+        reinterpret_cast<void **>(&m_uniformStorage.m_data)));
 }
 
 bool CompositorVk::validatePhysicalDeviceFeatures(
@@ -358,4 +732,69 @@ std::vector<const char *> CompositorVk::getRequiredDeviceExtensions() {
 
 VkCommandBuffer CompositorVk::getCommandBuffer(uint32_t i) const {
     return m_vkCommandBuffers[i];
+}
+
+void CompositorVk::setComposition(uint32_t i,
+                                  std::unique_ptr<Composition> &&composition) {
+    m_currentCompositions[i] = std::move(composition);
+    const auto &currentComposition = *m_currentCompositions[i];
+    VkDescriptorImageInfo imageInfo = {};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = currentComposition.m_vkImageView;
+    imageInfo.sampler = currentComposition.m_vkSampler;
+    VkWriteDescriptorSet descriptorSetWrite = {};
+    descriptorSetWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptorSetWrite.dstSet = m_vkDescriptorSets[i];
+    descriptorSetWrite.dstBinding = 0;
+    descriptorSetWrite.dstArrayElement = 0;
+    descriptorSetWrite.descriptorType =
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptorSetWrite.descriptorCount = 1;
+    descriptorSetWrite.pImageInfo = &imageInfo;
+    m_vk.vkUpdateDescriptorSets(m_vkDevice, 1, &descriptorSetWrite, 0, nullptr);
+
+    auto local2screen = glm::translate(glm::mat3(1.0f), glm::vec2(1.0f, 1.0f));
+    local2screen =
+        glm::scale(
+            glm::mat3(1.0f),
+            glm::vec2(static_cast<float>(currentComposition.m_width) / 2.0f,
+                      static_cast<float>(currentComposition.m_height) / 2.0f)) *
+        local2screen;
+    auto screen2ndc =
+        glm::scale(glm::mat3(1.0f),
+                   glm::vec2(2.0f / static_cast<float>(m_renderTargetWidth),
+                             2.0f / static_cast<float>(m_renderTargetHeight)));
+    screen2ndc =
+        glm::translate(glm::mat3(1.0f), glm::vec2(-1.0f, -1.0f)) * screen2ndc;
+    auto t = screen2ndc * currentComposition.m_transform * local2screen;
+    UniformBufferObject ubo{};
+    ubo.transform = glm::mat4(glm::vec4(t[0][0], t[0][1], 0.0f, t[0][2]),
+                              glm::vec4(t[1][0], t[1][1], 0.0f, t[1][2]),
+                              glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+                              glm::vec4(t[2][0], t[2][1], 0.0f, t[2][2]));
+    memcpy(reinterpret_cast<uint8_t *>(m_uniformStorage.m_data) +
+               i * m_uniformStorage.m_stride,
+           &ubo, sizeof(ubo));
+}
+
+VkVertexInputBindingDescription CompositorVk::Vertex::getBindingDescription() {
+    VkVertexInputBindingDescription res = {};
+    res.binding = 0;
+    res.stride = sizeof(struct Vertex);
+    res.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    return res;
+}
+
+std::array<VkVertexInputAttributeDescription, 2>
+CompositorVk::Vertex::getAttributeDescription() {
+    std::array<VkVertexInputAttributeDescription, 2> res = {};
+    res[0].binding = 0;
+    res[0].location = 0;
+    res[0].format = VK_FORMAT_R32G32_SFLOAT;
+    res[0].offset = offsetof(struct Vertex, pos);
+    res[1].binding = 0;
+    res[1].location = 1;
+    res[1].format = VK_FORMAT_R32G32_SFLOAT;
+    res[1].offset = offsetof(struct Vertex, texPos);
+    return res;
 }
