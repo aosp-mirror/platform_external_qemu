@@ -55,6 +55,8 @@ void set_data_registration(int state);
 
 void set_voice_registration(int state);
 
+void set_notification_callback(void* callbackFunc, void* userData);
+
 void queue_modem_message(ModemMessage msg);
 
 // listening for guest RIL connection
