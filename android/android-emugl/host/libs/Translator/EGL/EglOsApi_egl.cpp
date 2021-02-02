@@ -283,6 +283,7 @@ EglOsEglDisplay::EglOsEglDisplay() {
 
     mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
     mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
+    mDispatcher.eglSwapInterval(mDisplay, 0);
     auto clientExts = mDispatcher.eglQueryString(mDisplay, EGL_EXTENSIONS);
 
     if (mVerbose) {

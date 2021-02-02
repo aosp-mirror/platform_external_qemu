@@ -120,6 +120,13 @@ typedef struct coreaudioVoiceBase {
      * less frequently that it would had the host voice's framesize been set to
      * |audioDevicePropertyBufferFrameSize|. */
     uint32_t audioDeviceActualFrameSizeConsideringConversion;
+
+    /* A link to the other side (if this was input, otherVoice refers to
+     * output, and vice versa), along with a specifier for which is which  */
+    struct coreaudioVoiceBase* otherVoice;
+    bool aliased;
+    bool hasAlias;
+    bool playing;
 } coreaudioVoiceBase;
 
 typedef struct coreaudioVoiceOut {
@@ -131,6 +138,9 @@ typedef struct coreaudioVoiceIn {
     HWVoiceIn hw;
     coreaudioVoiceBase core;
 } coreaudioVoiceIn;
+
+static coreaudioVoiceIn* sInputVoice = NULL;
+static coreaudioVoiceOut* sOutputVoice = NULL;
 
 // Set to true when atexit() is running.
 static bool gIsAtExit = false;
@@ -924,25 +934,27 @@ static OSStatus coreaudio_init_or_redo_sample_rate_conversion(
                 core->converterInputFramesRequired,
                 core->converterOutputFramesRequired);
 
-        /* Use the resulting value to adjust the number of device frames used for input. */
-        DCORE("Adjusting device frame size to %d", core->converterInputFramesRequired);
+        if (!core->aliased) {
+            /* Use the resulting value to adjust the number of device frames used for input. */
+            DCORE("Adjusting device frame size to %d", core->converterInputFramesRequired);
 
-        core->audioDeviceActualFrameSizeConsideringConversion =
-            core->converterInputFramesRequired;
+            core->audioDeviceActualFrameSizeConsideringConversion =
+                core->converterInputFramesRequired;
 
-        status = coreaudio_set_framesize(core->deviceID,
-                &core->audioDeviceActualFrameSizeConsideringConversion,
-                isInput);
+            status = coreaudio_set_framesize(core->deviceID,
+                    &core->audioDeviceActualFrameSizeConsideringConversion,
+                    isInput);
 
-        if (status != kAudioHardwareNoError) {
-            coreaudio_logerr2 (status, typ,
-                    "Could not set device buffer frame size %" PRIu32
-                    " for conversion purposes\n",
-                    (uint32_t)core->audioDeviceActualFrameSizeConsideringConversion);
-            return -1;
-        } else {
-            DCORE("No error on set. Required now: %d",
-                    core->audioDeviceActualFrameSizeConsideringConversion);
+            if (status != kAudioHardwareNoError) {
+                coreaudio_logerr2 (status, typ,
+                        "Could not set device buffer frame size %" PRIu32
+                        " for conversion purposes\n",
+                        (uint32_t)core->audioDeviceActualFrameSizeConsideringConversion);
+                return -1;
+            } else {
+                DCORE("No error on set. Required now: %d",
+                        core->audioDeviceActualFrameSizeConsideringConversion);
+            }
         }
     } else {
         core->converterInputFramesRequired = currentBufferFrameSizeBytes / bytesPerFrame;
@@ -1231,6 +1243,20 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
         return -1;
     }
 
+    core->aliased = false;
+    core->hasAlias = false;
+    core->playing = false;
+
+    if (isInput) {
+        if (sOutputVoice) {
+            if (sOutputVoice->core.deviceID == core->deviceID) {
+                DCORE("Input is using the same device id as output!");
+                core->aliased = true;
+                sOutputVoice->core.hasAlias = true;
+            }
+        }
+    }
+
     /* get minimum and maximum buffer frame sizes */
     status = coreaudio_get_framesizerange(core->deviceID,
                                           &frameRange, isInput);
@@ -1337,7 +1363,6 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
     DCORE("sample rate: %f", core->hwBasicDescription.mSampleRate);
 
     /* Setup sample rate conversion if necessary. */
-
     err = coreaudio_init_or_redo_sample_rate_conversion(core, isInput);
 
     if (err)
@@ -1387,13 +1412,16 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
     }
 
     /* start Playback */
-    if (!isPlaying(core->deviceID, isInput)) {
-        status = AudioDeviceStart(core->deviceID, core->ioprocid);
-        if (status != kAudioHardwareNoError) {
-            coreaudio_logerr2 (status, typ, "Could not start playback\n");
-            AudioDeviceDestroyIOProcID(core->deviceID, core->ioprocid);
-            core->deviceID = kAudioDeviceUnknown;
-            return -1;
+    if (!core->aliased) {
+        if (!isPlaying(core->deviceID, isInput)) {
+            status = AudioDeviceStart(core->deviceID, core->ioprocid);
+            if (status != kAudioHardwareNoError) {
+                coreaudio_logerr2 (status, typ, "Could not start playback\n");
+                AudioDeviceDestroyIOProcID(core->deviceID, core->ioprocid);
+                core->deviceID = kAudioDeviceUnknown;
+                return -1;
+            }
+            core->playing = true;
         }
     }
 
@@ -1440,14 +1468,33 @@ static int coreaudio_ctl_base (coreaudioVoiceBase *core, int cmd)
 {
     OSStatus status;
 
+    /* For aliased audio device IDs, we need to only start in HW if we go from
+     * both voices stopped to one of them playing, * and to stop only if both
+     * sides transition from playing to stopped. */
+
     switch (cmd) {
     case VOICE_ENABLE:
         /* start playback */
-        if (!isPlaying(core->deviceID, core->isInput)) {
-            status = AudioDeviceStart(core->deviceID, core->ioprocid);
-            if (status != kAudioHardwareNoError) {
-                coreaudio_logerr (status, "Could not resume %s\n",
-                                  core->isInput ? "recording" : "playback");
+        if (core->aliased || core->hasAlias) {
+            bool startDevice =
+                !core->playing && !core->otherVoice->playing;
+
+            if (startDevice) {
+                status = AudioDeviceStart(core->deviceID, core->ioprocid);
+                if (status != kAudioHardwareNoError) {
+                    coreaudio_logerr (status, "Could not resume %s\n",
+                                      core->isInput ? "recording" : "playback");
+                }
+            }
+
+            core->playing = true;
+        } else {
+            if (!isPlaying(core->deviceID, core->isInput)) {
+                status = AudioDeviceStart(core->deviceID, core->ioprocid);
+                if (status != kAudioHardwareNoError) {
+                    coreaudio_logerr (status, "Could not resume %s\n",
+                                      core->isInput ? "recording" : "playback");
+                }
             }
         }
         break;
@@ -1455,12 +1502,27 @@ static int coreaudio_ctl_base (coreaudioVoiceBase *core, int cmd)
     case VOICE_DISABLE:
         /* stop playback */
         if (!audio_is_cleaning_up()) {
-            if (isPlaying(core->deviceID, core->isInput)) {
-                status = AudioDeviceStop(core->deviceID,
-                                         core->ioprocid);
-                if (status != kAudioHardwareNoError) {
-                    coreaudio_logerr (status, "Could not pause %s\n",
-                                      core->isInput ? "recording" : "playback");
+            if (core->aliased || core->hasAlias) {
+                core->playing = false;
+
+                bool stopDevice = !core->playing && !core->otherVoice->playing;
+
+                if (stopDevice) {
+                    status = AudioDeviceStop(core->deviceID,
+                                             core->ioprocid);
+                    if (status != kAudioHardwareNoError) {
+                        coreaudio_logerr (status, "Could not pause %s\n",
+                                          core->isInput ? "recording" : "playback");
+                    }
+                }
+            } else {
+                if (isPlaying(core->deviceID, core->isInput)) {
+                    status = AudioDeviceStop(core->deviceID,
+                                             core->ioprocid);
+                    if (status != kAudioHardwareNoError) {
+                        coreaudio_logerr (status, "Could not pause %s\n",
+                                          core->isInput ? "recording" : "playback");
+                    }
                 }
             }
         }
@@ -1533,6 +1595,54 @@ static OSStatus converterInputDataProc(
     return kAudioHardwareNoError;
 }
 
+static OSStatus audioOutputDeviceIOProc(
+    AudioDeviceID inDevice,
+    const AudioTimeStamp* inNow,
+    const AudioBufferList* inInputData,
+    const AudioTimeStamp* inInputTime,
+    AudioBufferList* outOutputData,
+    const AudioTimeStamp* inOutputTime,
+    void* hwptr);
+
+static OSStatus audioInputDeviceIOProc(
+    AudioDeviceID inDevice,
+    const AudioTimeStamp* inNow,
+    const AudioBufferList* inInputData,
+    const AudioTimeStamp* inInputTime,
+    AudioBufferList* outOutputData,
+    const AudioTimeStamp* inOutputTime,
+    void* hwptr);
+
+/* Sometimes we can create an audio device where both input and output voices
+ * map to the same CoreAudio handle. This is common with some USB headsets and
+ * microphones like the Elgato Wave:3 that are capable of both input and
+ * output. In these cases, we detect that one coreaudioVoiceBase is actually an
+ * alias of another (and assume that input is always the alias of output), and
+ * then re-purpose audioOutputDeviceIOProc to perform both input and output
+ * processing. */
+static void coreaudio_run_input_proc_for_alias(
+    coreaudioVoiceBase* core,
+    const AudioTimeStamp* inNow,
+    const AudioBufferList* inInputData,
+    const AudioTimeStamp* inInputTime,
+    AudioBufferList* outOutputData,
+    const AudioTimeStamp* inOutputTime) {
+    if (core->otherVoice &&
+        sInputVoice &&
+        core->otherVoice->deviceID == core->deviceID) {
+        if (inInputData->mBuffers[0].mDataByteSize) {
+            audioInputDeviceIOProc(
+                    core->deviceID,
+                    inNow,
+                    inInputData,
+                    inInputTime,
+                    outOutputData,
+                    inOutputTime,
+                    sInputVoice);
+        }
+    }
+}
+
 /* callback to feed audiooutput buffer */
 static OSStatus audioOutputDeviceIOProc(
     AudioDeviceID inDevice,
@@ -1579,6 +1689,10 @@ static OSStatus audioOutputDeviceIOProc(
     if (!live || (!core->conversionNeeded && live < frameCount)) {
         inInputTime = 0;
         coreaudio_unlock (core, "audioOutputDeviceIOProc(empty)");
+
+        /* If we're aliased, it's possible that we still have some input to read though. So try that. */
+        coreaudio_run_input_proc_for_alias(core, inNow, inInputData, inInputTime, outOutputData, inOutputTime);
+
         return 0;
     }
 
@@ -1730,12 +1844,32 @@ static OSStatus audioOutputDeviceIOProc(
     }
 
     coreaudio_unlock (core, "audioOutputDeviceIOProc");
+
+    /* Do we need to handle input for our alias too? */
+    coreaudio_run_input_proc_for_alias(core, inNow, inInputData, inInputTime, outOutputData, inOutputTime);
+
     return 0;
 }
 
 static int coreaudio_write (SWVoiceOut *sw, void *buf, int len)
 {
     return audio_pcm_sw_write (sw, buf, len);
+}
+
+static void coreaudio_link(void* obj, bool calledFromInput)
+{
+    if (calledFromInput) {
+        coreaudioVoiceIn* hwVoiceIn = (coreaudioVoiceIn*)obj;
+        sInputVoice = hwVoiceIn;
+    } else {
+        coreaudioVoiceOut* hwVoiceOut = (coreaudioVoiceOut*)obj;
+        sOutputVoice = hwVoiceOut;
+    }
+
+    if (sInputVoice && sOutputVoice) {
+        sInputVoice->core.otherVoice = &sOutputVoice->core;
+        sOutputVoice->core.otherVoice = &sInputVoice->core;
+    }
 }
 
 static int coreaudio_init_out(HWVoiceOut *hw, struct audsettings *as,
@@ -1753,6 +1887,8 @@ static int coreaudio_init_out(HWVoiceOut *hw, struct audsettings *as,
     }
 
     hw->samples = conf->nbuffers * core->audioDevicePropertyBufferFrameSize;
+
+    coreaudio_link(hw, false /* not called from input */);
 
     return 0;
 }
@@ -1845,6 +1981,7 @@ static OSStatus audioInputDeviceIOProc(
     if (core->conversionNeeded) {
 
         frameCountHw = inInputData->mBuffers[0].mDataByteSize / bytesPerFrame;
+        frameCount = 0;
 
         D("input conversion. hw frame count %d sw frame count %d",
           frameCountHw, frameCount);
@@ -1863,7 +2000,6 @@ static OSStatus audioInputDeviceIOProc(
         if (core->converterInputFramesCopiedForNextConversion <
                 core->converterInputFramesRequired) {
             /* not enough, set signal and return */
-            inInputTime = 0;
             coreaudio_unlock (core, "audioInputDeviceIOProc(empty)");
             return 0;
         }
@@ -1873,7 +2009,7 @@ static OSStatus audioInputDeviceIOProc(
         D("doing input conversion for required %d packets (should equal required)",
                 core->converterInputFramesRequired);
 
-        UInt32 convertedFrameCount = frameCount;
+        UInt32 convertedFrameCount = core->audioDevicePropertyBufferFrameSize;
         AudioBufferList outputBufferList;
         outputBufferList.mNumberBuffers = 1;
         outputBufferList.mBuffers[0].mNumberChannels = numChannels;
@@ -1908,10 +2044,15 @@ static OSStatus audioInputDeviceIOProc(
                     core->converterInputFramesCopiedForNextConversion,
                     core->converterInputFrameConsumedPos,
                     (core->converterInputFramesCopiedForNextConversion - core->converterInputFrameConsumedPos));
-            core->converterInputFramesCopiedForNextConversion -= core->converterInputFrameConsumedPos;
-        } else {
-            core->converterInputFramesCopiedForNextConversion = 0;
         }
+
+        core->converterInputFramesCopiedForNextConversion -= core->converterInputFrameConsumedPos;
+    }
+
+    if (core->conversionNeeded && !frameCount) {
+        /* We didn't convert enough hw microphone buffers to QEMU format this time around */
+        coreaudio_unlock (core, "audioInputDeviceIOProc");
+        return 0;
     }
 
     /* fill buffer */
@@ -1941,6 +2082,7 @@ static OSStatus audioInputDeviceIOProc(
     core->pos   = wpos;
 
     coreaudio_unlock (core, "audioInputDeviceIOProc");
+
     return 0;
 }
 
@@ -1965,6 +2107,7 @@ static int coreaudio_init_in(HWVoiceIn *hw, struct audsettings *as,
 
     hw->samples = conf->nbuffers * core->audioDevicePropertyBufferFrameSize;
 
+    coreaudio_link(hw, true /* called from input */);
     return 0;
 }
 static void coreaudio_fini_in (HWVoiceIn *hw)
