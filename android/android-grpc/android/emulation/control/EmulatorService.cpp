@@ -742,8 +742,8 @@ public:
                                     const ::google::protobuf::Empty* request,
                                     DisplayConfigurations* reply) override {
         if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
-            return Status(::grpc::StatusCode::UNIMPLEMENTED,
-                          "The multi display feature is not available", "");
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "The multi-display feature is not available", "");
         }
 
         uint32_t width, height, dpi, flags;
@@ -777,14 +777,14 @@ public:
                                     DisplayConfigurations* reply) override {
         // Check preconditions, do we have multi display and no duplicate ids?
         if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
-            return Status(::grpc::StatusCode::UNIMPLEMENTED,
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
                           "The multi-display feature is not available", "");
         }
 
         std::set<int> updatingDisplayIds;
         for (const auto& display : request->displays()) {
             if (updatingDisplayIds.count(display.display())) {
-                return Status(::grpc::StatusCode::ABORTED,
+                return Status(::grpc::StatusCode::INVALID_ARGUMENT,
                               "Duplicate display: " +
                                       std::to_string(display.display()) +
                                       " detected.",
@@ -794,7 +794,7 @@ public:
             if (!mAgents->multi_display->multiDisplayParamValidate(
                         display.display(), display.width(), display.height(),
                         display.dpi(), display.flags())) {
-                return Status(::grpc::StatusCode::ABORTED,
+                return Status(::grpc::StatusCode::INVALID_ARGUMENT,
                               "Display: " + std::to_string(display.display()) +
                                       " is an invalid configuration.",
                               "");
@@ -863,7 +863,7 @@ public:
             }
 
             // TODO(jansene): Extract detailed messages from setMultiDisplay
-            return Status(::grpc::StatusCode::ABORTED,
+            return Status(::grpc::StatusCode::INTERNAL,
                           "Internal error while trying to modify display: " +
                                   std::to_string(failureDisplay),
                           "");
