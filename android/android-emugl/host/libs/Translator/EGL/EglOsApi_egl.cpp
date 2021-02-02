@@ -101,7 +101,9 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
     X(EGLBoolean, eglSwapBuffers, (EGLDisplay display, EGLSurface surface))    \
     X(EGLSurface, eglCreateWindowSurface,                                      \
       (EGLDisplay display, EGLConfig config,                                   \
-       EGLNativeWindowType native_window, EGLint const* attrib_list))
+       EGLNativeWindowType native_window, EGLint const* attrib_list))          \
+    X(EGLBoolean, eglSwapInterval,                                             \
+      (EGLDisplay display, EGLint interval))                                   \
 
 using android::base::System;
 
@@ -285,6 +287,7 @@ EglOsEglDisplay::EglOsEglDisplay() {
 
     mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
     mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
+    mDispatcher.eglSwapInterval(mDisplay, 0);
     auto clientExts = mDispatcher.eglQueryString(mDisplay, EGL_EXTENSIONS);
 
     if (mVerbose) {
