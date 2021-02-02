@@ -25,6 +25,8 @@
 
 #include "android/base/async/AsyncSocketServer.h"
 #include "emulator/net/SocketForwarder.h"
+#include "android/emulation/control/TurnConfig.h"
+
 
 namespace android {
 namespace emulation {
@@ -41,18 +43,19 @@ namespace webrtc {
 class EmulatorGrpcClient;
 class Participant;
 
+using android::base::AsyncSocketServer;
 using android::emulation::control::KeyboardEvent;
 using android::emulation::control::MouseEvent;
 using android::emulation::control::RtcId;
 using android::emulation::control::TouchEvent;
-using android::base::AsyncSocketServer;
+using android::emulation::control::TurnConfig;
 
 using ClosedCallback = std::function<void()>;
 // A StandaloneConnection is a single connection to a remote running emulator
 // over webrtc.
 class StandaloneConnection : public RtcConnection {
 public:
-    StandaloneConnection(EmulatorGrpcClient* client, int adbPort);
+    StandaloneConnection(EmulatorGrpcClient* client, int adbPort, TurnConfig turnconfig);
     ~StandaloneConnection();
 
     // The connection has actually closed, and can be properly garbage
@@ -103,6 +106,7 @@ private:
     bool mAlive{false};
     int mAdbPort = 0;
     ClosedCallback mClosedCallback;
+    TurnConfig mTurnConfig;
 
     DISALLOW_COPY_AND_ASSIGN(StandaloneConnection);
 };
