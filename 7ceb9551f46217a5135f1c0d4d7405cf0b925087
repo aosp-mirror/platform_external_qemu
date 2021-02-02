@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8d4bb092_93da7cfa",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-02-02T01:47:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c1bc4cfa_ae489648",
+      "revId": "7ceb9551f46217a5135f1c0d4d7405cf0b925087",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1ab9e1d9_bc90cae8",
@@ -31,6 +49,24 @@
       "writtenOn": "2021-02-02T00:46:23Z",
       "side": 1,
       "message": "Could this be a MessageChannel instead? Then we can use the send() / recv() interface and not have to maintain a separate mPipesMtx field",
+      "revId": "7ceb9551f46217a5135f1c0d4d7405cf0b925087",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a7804f81_21f104d0",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-02-02T01:47:19Z",
+      "side": 1,
+      "message": "Unfortunately, I cannot remove mPipesMtx because it is changed in two threads.",
+      "parentUuid": "1ab9e1d9_bc90cae8",
       "revId": "7ceb9551f46217a5135f1c0d4d7405cf0b925087",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
@@ -52,6 +88,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "264a8d42_100f0f9a",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-02-02T01:47:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f21d15b9_73ba733e",
+      "revId": "7ceb9551f46217a5135f1c0d4d7405cf0b925087",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "270d3e37_43d1efd9",
@@ -65,6 +119,24 @@
       "writtenOn": "2021-02-02T00:36:05Z",
       "side": 1,
       "message": "add TODO perhaps?",
+      "revId": "7ceb9551f46217a5135f1c0d4d7405cf0b925087",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6366e2f4_abdcb9d2",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-02-02T01:47:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "270d3e37_43d1efd9",
       "revId": "7ceb9551f46217a5135f1c0d4d7405cf0b925087",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
