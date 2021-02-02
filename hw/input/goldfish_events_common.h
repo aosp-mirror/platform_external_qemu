@@ -32,7 +32,8 @@
 #include <pthread.h>
 #endif
 
-#define MAX_EVENTS (256 * 4)
+
+#define MAX_EVENTS (4096 * 4)
 
 /* Event types (as per Linux input event layer) */
 #define EV_SYN                  0x00

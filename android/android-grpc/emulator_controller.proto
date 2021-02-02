@@ -612,6 +612,10 @@ message KeyboardEvent {
   // Note that most printable ASCII characters (range [32-127) can be send
   // individually with the "key" param. Do not expect arbitrary UTF symbols to
   // arrive in the emulator (most will be ignored).
+  //
+  // Note that it is possible to overrun the keyboard buffer by slamming this
+  // endpoint with large quantities of text (>1kb). The clipboard api is better
+  // suited for transferring large quantities of text.
   string text = 5;
 }
 
