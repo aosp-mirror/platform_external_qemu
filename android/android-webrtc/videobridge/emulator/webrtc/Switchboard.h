@@ -25,7 +25,7 @@
 #include "android/base/system/System.h"                    // for System
 #include "android/emulation/control/RtcBridge.h"           // for RtcBridge:...
 #include "emulator/webrtc/RtcConnection.h"                 // for RtcConnection
-#include "android/emulation/control/TurnConfig.h"                    // for TurnConfig
+#include "android/emulation/control/TurnConfig.h"          // for TurnConfig
 #include "emulator/webrtc/capture/VideoCapturerFactory.h"  // for VideoCaptu...
 
 namespace emulator {
