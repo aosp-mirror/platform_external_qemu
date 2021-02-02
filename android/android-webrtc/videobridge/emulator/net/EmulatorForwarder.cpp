@@ -388,8 +388,8 @@ void EmulatorForwarder::wait() {
     }
 }
 
-EmulatorForwarder::EmulatorForwarder(EmulatorGrpcClient* client, int adbPort)
-    : mClient(client), mWebRtcConnection(client, adbPort), mAvd(client){};
+EmulatorForwarder::EmulatorForwarder(EmulatorGrpcClient* client, int adbPort, TurnConfig turnConfig)
+    : mClient(client), mWebRtcConnection(client, adbPort, turnConfig), mAvd(client){};
 
 EmulatorForwarder::~EmulatorForwarder() {}
 

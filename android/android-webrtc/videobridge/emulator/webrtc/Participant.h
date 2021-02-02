@@ -107,6 +107,7 @@ class Participant : public EmptyConnectionObserver {
 public:
     Participant(RtcConnection* board,
                 std::string id,
+                json rtcConfig,
                 VideoTrackReceiver* videoReceiver);
     ~Participant() override;
 
@@ -169,6 +170,7 @@ private:
     std::unique_ptr<SocketForwarder> mSocketForwarder;
     RtcConnection* mRtcConnection;
     VideoTrackReceiver* mVideoReceiver;
+    json mRtcConfig;
     std::string mPeerId;
     std::atomic<bool> mClosed{false};
 
@@ -176,7 +178,6 @@ private:
     std::condition_variable mCvClosed;
 
 public:
-    const static std::string kStunUri;
     const static std::string kAudioTrack;
     const static std::string kVideoTrack;
 };
