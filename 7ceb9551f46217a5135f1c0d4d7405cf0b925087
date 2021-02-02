@@ -71,6 +71,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b4a81422_9e7dc501",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-02T23:58:20Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a7804f81_21f104d0",
+      "revId": "7ceb9551f46217a5135f1c0d4d7405cf0b925087",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f21d15b9_73ba733e",
