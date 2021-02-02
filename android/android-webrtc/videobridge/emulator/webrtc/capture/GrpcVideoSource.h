@@ -24,8 +24,9 @@
 #include <memory>                             // for unique_ptr
 #include <mutex>                              // for mutex
 #include <thread>                             // for thread
-
+#include <rtc_base/ref_counted_object.h>    // for RefCountedObject
 #include "emulator/net/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
+#include "emulator/webrtc/capture/MediaSource.h"
 
 namespace rtc {
 struct VideoSinkWants;
@@ -52,7 +53,7 @@ using ::android::emulation::control::Image;
 class GrpcVideoSource
     : public ::webrtc::Notifier<::webrtc::VideoTrackSourceInterface> {
 public:
-    explicit GrpcVideoSource(EmulatorGrpcClient client);
+    explicit GrpcVideoSource(EmulatorGrpcClient* client);
     ~GrpcVideoSource() override;
 
     bool is_screencast() const override { return true; }
@@ -61,6 +62,10 @@ public:
         return ::webrtc::MediaSourceInterface::SourceState::kLive;
     }
     bool remote() const override { return false; }
+
+protected:
+    void cancel();
+    void run();
 
 private:
     // Implements rtc::VideoSourceInterface.
@@ -85,13 +90,11 @@ private:
 
     void captureFrames();
 
-    EmulatorGrpcClient mClient;
-    std::unique_ptr<::grpc::ClientContext> mContext;
+    EmulatorGrpcClient* mClient;
+    std::weak_ptr<::grpc::ClientContext> mContext;
     rtc::scoped_refptr<::webrtc::I420Buffer>
             mI420Buffer;  // Re-usable I420Buffer.
-    std::thread mVideoThread;
     std::atomic_bool mCaptureVideo{false};
-
     cricket::VideoAdapter mVideoAdapter;
 
     std::mutex mStatsMutex;
@@ -99,5 +102,8 @@ private:
 
     rtc::VideoBroadcaster mBroadcaster;
 };
+
+using GrpcVideoMediaSource = MediaSource<GrpcVideoSource>;
+using GrpcRefVideoSource = rtc::scoped_refptr<GrpcVideoMediaSource>;
 }  // namespace webrtc
 }  // namespace emulator

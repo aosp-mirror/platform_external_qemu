@@ -96,6 +96,7 @@ extern "C" {
 
 #ifdef ANDROID_WEBRTC
 #include "android/emulation/control/RtcService.h"
+#include "android/emulation/control/TurnConfig.h"
 #endif
 
 extern "C" {
@@ -331,8 +332,15 @@ int qemu_setup_grpc() {
         props["grpc.token"] = token;
     }
 #ifdef ANDROID_WEBRTC
+    if (android_cmdLineOptions->turncfg &&
+        !android::emulation::control::TurnConfig::producesValidTurn(
+                android_cmdLineOptions->turncfg)) {
+        printf("command `%s` does not produce a valid turn configuration.\n",
+               android_cmdLineOptions->turncfg);
+        exit(1);
+    }
     builder.withService(android::emulation::control::getRtcService(
-            getConsoleAgents(), android_cmdLineOptions->turncfg));
+            getConsoleAgents(), android_adb_port, android_cmdLineOptions->turncfg));
 #endif
     int port = -1;
     grpcService = builder.build();

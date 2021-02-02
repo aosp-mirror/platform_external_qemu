@@ -13,36 +13,43 @@
 // limitations under the License.
 #pragma once
 
-#include <api/data_channel_interface.h>       // for DataChannelInterface (p...
-#include <api/jsep.h>                         // for IceCandidateInterface (...
-#include <api/peer_connection_interface.h>    // for PeerConnectionInterface
-#include <api/scoped_refptr.h>                // for scoped_refptr
-#include <stdint.h>                           // for uint32_t, uint8_t
-#include <memory>                             // for unique_ptr
-#include <string>                             // for string, basic_string
-#include <unordered_map>                      // for unordered_map
-#include <unordered_set>                      // for unordered_set
-#include <vector>                             // for vector
+#include <api/data_channel_interface.h>     // for DataChannelInterface (ptr...
+#include <api/jsep.h>                       // for IceCandidateInterface (pt...
+#include <api/peer_connection_interface.h>  // for PeerConnectionInterface
+#include <api/scoped_refptr.h>              // for scoped_refptr
+#include <stdint.h>                         // for uint32_t
+#include <memory>                           // for unique_ptr, shared_ptr
+#include <string>                           // for string
+#include <unordered_map>                    // for unordered_map
 
-#include "emulator/net/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
-#include "emulator_controller.grpc.pb.h"      // for EmulatorController
-#include "nlohmann/json.hpp"                  // for json
+#include "emulator/webrtc/RtcConnection.h"  // for json, RtcConnection (ptr ...
+#include "emulator_controller.grpc.pb.h"    // for EmulatorController
+#include "nlohmann/json.hpp"                // for json
 
+namespace android {
+namespace base {
+class AsyncSocket;
+}  // namespace base
+}  // namespace android
 namespace emulator {
+namespace net {
+class SocketForwarder;
+}  // namespace net
 namespace webrtc {
+class EmulatorGrpcClient;
 class VideoCapturer;
+class VideoTrackReceiver;
 }  // namespace webrtc
 }  // namespace emulator
-
 namespace webrtc {
 class MediaStreamInterface;
 class RTCError;
-class RtpReceiverInterface;
 class RtpSenderInterface;
 class VideoTrackInterface;
 }  // namespace webrtc
 
 using json = nlohmann::json;
+using emulator::net::SocketForwarder;
 using rtc::scoped_refptr;
 using webrtc::PeerConnectionInterface;
 using webrtc::VideoTrackInterface;
@@ -50,40 +57,30 @@ using webrtc::VideoTrackInterface;
 namespace emulator {
 namespace webrtc {
 
-class Switchboard;
+// Used data channel labels, use lowercase labels otherwise the JS engine will
+// break.
+enum class DataChannelLabel { mouse, keyboard, touch, adb };
 
 // A default peer connection observer that does nothing
 class EmptyConnectionObserver : public ::webrtc::PeerConnectionObserver {
 public:
     void OnSignalingChange(::webrtc::PeerConnectionInterface::SignalingState
                                    new_state) override {}
-    void OnAddTrack(rtc::scoped_refptr<::webrtc::RtpReceiverInterface> receiver,
-                    const std::vector<
-                            rtc::scoped_refptr<::webrtc::MediaStreamInterface>>&
-                            streams) override {}
-    void OnRemoveTrack(rtc::scoped_refptr<::webrtc::RtpReceiverInterface>
-                               receiver) override {}
-    void OnDataChannel(rtc::scoped_refptr<::webrtc::DataChannelInterface>
-                               channel) override {}
     void OnRenegotiationNeeded() override {}
-    void OnIceConnectionChange(
-            ::webrtc::PeerConnectionInterface::IceConnectionState new_state)
-            override {}
     void OnIceGatheringChange(
             ::webrtc::PeerConnectionInterface::IceGatheringState new_state)
             override {}
     void OnIceCandidate(
             const ::webrtc::IceCandidateInterface* candidate) override {}
-    void OnIceConnectionReceivingChange(bool receiving) override {}
 };
 
 // An EventForwarder forwards mouse & keyevents to the emulator.
 
 class EventForwarder : public ::webrtc::DataChannelObserver {
 public:
-    EventForwarder(EmulatorGrpcClient client,
+    EventForwarder(EmulatorGrpcClient* client,
                    scoped_refptr<::webrtc::DataChannelInterface> channel,
-                   std::string label);
+                   DataChannelLabel label);
     ~EventForwarder();
     // The data channel state have changed.
     void OnStateChange() override;
@@ -91,10 +88,11 @@ public:
     void OnMessage(const ::webrtc::DataBuffer& buffer) override;
 
 private:
-    EmulatorGrpcClient mClient;
+    EmulatorGrpcClient* mClient;
     scoped_refptr<::webrtc::DataChannelInterface> mChannel;
-    std::unique_ptr<android::emulation::control::EmulatorController::Stub> mEmulatorGrpc;
-    std::string mLabel;
+    std::unique_ptr<android::emulation::control::EmulatorController::Stub>
+            mEmulatorGrpc;
+    DataChannelLabel mLabel;
 };
 
 // A Participant in an webrtc streaming session. This class is
@@ -104,80 +102,83 @@ private:
 // 2. Do network discovery (ice etc).
 // 3. Exchanging of offers between remote client.
 //
-// It talks with the switchboard to send/receive messages.
-class Participant : public EmptyConnectionObserver,
-                    public ::webrtc::CreateSessionDescriptionObserver {
+// It talks with the rtc connection to send/receive messages.
+class Participant : public EmptyConnectionObserver {
 public:
-    Participant(
-            Switchboard* board,
-            std::string id,
-            ::webrtc::PeerConnectionFactoryInterface* peerConnectionFactory);
+    Participant(RtcConnection* board,
+                std::string id,
+                VideoTrackReceiver* videoReceiver);
     ~Participant() override;
 
     // PeerConnectionObserver implementation.
     void OnIceCandidate(
             const ::webrtc::IceCandidateInterface* candidate) override;
+    void OnConnectionChange(
+            ::webrtc::PeerConnectionInterface::PeerConnectionState new_state) override;
 
-    // CreateSessionDescriptionObserver implementation.
-    void OnSuccess(::webrtc::SessionDescriptionInterface* desc) override;
-    // The OnFailure callback takes an RTCError, which consists of an¶
-    // error code and a string.¶
-    // RTCError is non-copyable, so it must be passed using std::move.¶
-    // Earlier versions of the API used a string argument. This version¶
-    // is deprecated; in order to let clients remove the old version, it has a¶
-    // default implementation. If both versions are unimplemented, the¶
-    // result will be a runtime error (stack overflow). This is intentional.¶
-    void OnFailure(::webrtc::RTCError error) override;
-    //void OnFailure(const std::string& error) override;
     void OnIceConnectionChange(
             ::webrtc::PeerConnectionInterface::IceConnectionState new_state)
             override;
+
+    void OnAddStream(
+            rtc::scoped_refptr<::webrtc::MediaStreamInterface> stream) override;
+    void OnDataChannel(rtc::scoped_refptr<::webrtc::DataChannelInterface>
+                               channel) override;
+    void ReceivedSessionDescription(
+            ::webrtc::SessionDescriptionInterface* desc);
     void IncomingMessage(json msg);
-    bool AddVideoTrack(std::string handle);
-    bool RemoveVideoTrack(std::string handle);
-    bool AddAudioTrack(std::string grpcAddress);
-    bool RemoveAudioTrack(std::string grpcAddress);
+    bool AddVideoTrack(int displayId);
+    bool AddAudioTrack();
+
     bool Initialize();
-    inline const std::string GetPeerId() const { return mPeerId; };
-    void SendToBridge(json msg);
+    void SendToDataChannel(DataChannelLabel label, std::string data);
     void CreateOffer();
     void Close();
+    void WaitForClose();
+
+    rtc::scoped_refptr<::webrtc::DataChannelInterface> GetDataChannel(
+            DataChannelLabel label);
+    inline const std::string GetPeerId() const { return mPeerId; };
+    // Register Adb Forwarder to the local running emulator.
+    bool RegisterLocalAdbForwarder(
+            std::shared_ptr<android::base::AsyncSocket> adbSocket);
 
 private:
+    void DoClose();
     void SendMessage(json msg);
-    void HandleOffer(const json& msg) const;
-    void HandleCandidate(const json& msg) const;
-    bool CreatePeerConnection(bool dtls);
-    void AddDataChannel(const std::string& channel);
+    void HandleOffer(const json& msg);
+    void HandleCandidate(const json& msg);
+    bool CreatePeerConnection(const json& description);
+    void AddDataChannel(const DataChannelLabel channel);
     VideoCapturer* OpenVideoCaptureDevice(const std::string& memoryHandle);
 
     scoped_refptr<PeerConnectionInterface> mPeerConnection;
-    ::webrtc::PeerConnectionFactoryInterface* mPeerConnectionFactory;
-    std::unordered_map<std::string,
-                       scoped_refptr<::webrtc::MediaStreamInterface>>
-            mStreams;
-
-    std::unordered_map<std::string, std::unique_ptr<EventForwarder>>
+    std::unordered_map<DataChannelLabel, std::unique_ptr<EventForwarder>>
             mEventForwarders;
 
+    std::unordered_map<std::string,
+                       scoped_refptr<::webrtc::DataChannelInterface>>
+            mDataChannels;
     std::unordered_map<std::string, scoped_refptr<::webrtc::RtpSenderInterface>>
-            mActiveVideoTracks;
-    std::unordered_map<std::string, scoped_refptr<::webrtc::RtpSenderInterface>>
-            mActiveAudioTracks;
+            mActiveTracks;
 
+    GrpcRefAudioSource mAudioSource;
+    std::vector<GrpcRefVideoSource> mVideoSources;
+    std::shared_ptr<android::base::AsyncSocket> mLocalAdbSocket;
 
-    Switchboard* mSwitchboard;
+    std::unique_ptr<SocketForwarder> mSocketForwarder;
+    RtcConnection* mRtcConnection;
+    VideoTrackReceiver* mVideoReceiver;
     std::string mPeerId;
-    uint32_t mId{0};
+    std::atomic<bool> mClosed{false};
 
-    const uint8_t kFps = 60;
-    const std::string kStunUri = "stun:stun.l.google.com:19302";
-    const std::string kAudioLabel = "emulator_audio_stream";
-    const std::string kVideoLabel = "emulator_video_stream";
-    const std::string kStreamLabel = "emulator_view";
+    std::mutex mClosedMutex;
+    std::condition_variable mCvClosed;
 
-    const std::unordered_set<std::string> mValidLabels{"mouse", "keyboard",
-                                                       "touch"};
+public:
+    const static std::string kStunUri;
+    const static std::string kAudioTrack;
+    const static std::string kVideoTrack;
 };
 }  // namespace webrtc
 }  // namespace emulator

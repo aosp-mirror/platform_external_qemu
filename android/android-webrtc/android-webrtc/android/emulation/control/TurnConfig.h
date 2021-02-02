@@ -1,4 +1,4 @@
-// Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2021 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include "android/console.h"  // for AndroidConsoleAgents
+#include <string>             // for string
+#include <vector>             // for vector
 
-namespace grpc {
-class Service;
-}  // namespace grpc
+#include "nlohmann/json.hpp"  // for json
 
 namespace android {
 namespace emulation {
 namespace control {
-class RtcBridge;
 
-grpc::Service* getRtcService(const AndroidConsoleAgents* agents,
-                             int adbPort,
-                             const char* turncfg);
-grpc::Service* getRtcService(RtcBridge* bridge);
+using nlohmann::json;
 
-}  // namespace control
-}  // namespace emulation
-}  // namespace android
+class TurnConfig {
+public:
+    explicit TurnConfig(std::string cmd);
+    ~TurnConfig() = default;
+
+    json getConfig();
+    bool validCommand();
+
+    static bool producesValidTurn(std::string cmd);
+private:
+    std::vector<std::string> mTurnCmd;
+
+    // We want the turn config delivered in under a second.
+    const int kMaxTurnConfigTime = 1000;
+};
+}
+}
+}
