@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "270d3e37_43d1efd9",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-02T00:36:05Z",
+      "side": 1,
+      "message": "add TODO perhaps?",
+      "revId": "7ceb9551f46217a5135f1c0d4d7405cf0b925087",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
