@@ -20,6 +20,40 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "1ab9e1d9_bc90cae8",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-02T00:46:23Z",
+      "side": 1,
+      "message": "Could this be a MessageChannel instead? Then we can use the send() / recv() interface and not have to maintain a separate mPipesMtx field",
+      "revId": "7ceb9551f46217a5135f1c0d4d7405cf0b925087",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f21d15b9_73ba733e",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-02T00:46:23Z",
+      "side": 1,
+      "message": "what drives the decision for 256 bytes here? could we get more performance by increasing this size?",
+      "revId": "7ceb9551f46217a5135f1c0d4d7405cf0b925087",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "270d3e37_43d1efd9",
         "filename": "android/android-emu/android/emulation/AdbVsockPipe.h",
         "patchSetId": 4
