@@ -85,6 +85,7 @@ extern "C" {
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/waterfall/WaterfallService.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/emulation/virtio_vsock_device.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
@@ -225,6 +226,8 @@ bool qemu_android_emulation_early_setup() {
     if (!qemu_android_sync_init(vmLock)) {
         return false;
     }
+
+    virtio_vsock_device_set_ops(virtio_vsock_device_get_host_ops());
 
     auto vm = getConsoleAgents()->vm;
     android::emulation::goldfish_address_space_set_vm_operations(vm);
