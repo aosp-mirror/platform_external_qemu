@@ -2296,6 +2296,14 @@ extern "C" int main(int argc, char** argv) {
                                                      true);
             }
 
+#ifdef __linux__
+            // On Linux enable it by default.
+            fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion,
+                                                 true);
+            fc::setIfNotOverridenOrGuestDisabled(fc::GLAsyncSwap,
+                                                 true);
+#endif
+
             if (fc::isEnabled(fc::ForceANGLE)) {
                 uiPreferredGlesBackend =
                         skin_winsys_override_glesbackend_if_auto(
