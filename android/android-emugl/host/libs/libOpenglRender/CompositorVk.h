@@ -24,7 +24,9 @@ class Composition {
     // transform matrix in screen coordinates
     glm::mat3 m_transform;
 
-    Composition(VkImageView, VkSampler, uint32_t width, uint32_t height);
+    Composition() = delete;
+    explicit Composition(VkImageView, VkSampler, uint32_t width,
+                         uint32_t height);
 };
 
 struct CompositorVkBase
