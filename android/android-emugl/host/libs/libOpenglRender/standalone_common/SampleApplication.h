@@ -33,6 +33,9 @@ namespace emugl {
 // Determines whether the host GPU should be used.
 bool shouldUseHostGpu();
 
+// Determines whether the test will use a Window.
+bool shouldUseWindow();
+
 // Creates or adjusts a persistent test window.
 // On some systems, test window creation can fail (such as when on a headless server).
 // In that case, this function will return nullptr.
