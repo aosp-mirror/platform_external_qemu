@@ -23,6 +23,8 @@
 #include "emugl/common/shared_library.h"
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <EGL/eglext_angle.h>
 #include <GLES2/gl2.h>
 #include <memory>
 
@@ -469,8 +471,14 @@ Surface* EglOsEglDisplay::createPbufferSurface(const PixelFormat* pixelFormat,
 Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
                                               EGLNativeWindowType win) {
     D("%s\n", __FUNCTION__);
+    std::vector<EGLint> surface_attribs;
+    if (System::getEnvironmentVariable("ANDROID_EMUGL_ANGLE_DIRECT_COMPOSITION") == "1") {
+        surface_attribs.push_back(EGL_DIRECT_COMPOSITION_ANGLE);
+        surface_attribs.push_back(EGL_TRUE);
+    }
+    surface_attribs.push_back(EGL_NONE);
     EGLSurface surface = mDispatcher.eglCreateWindowSurface(
-            mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, win, nullptr);
+            mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, win, surface_attribs.data());
     CHECK_EGL_ERR
     if (surface == EGL_NO_SURFACE) {
         D("create window surface failed\n");
