@@ -99,6 +99,7 @@ android_add_library(
       RenderThreadInfo.cpp
       RenderWindow.cpp
       RingStream.cpp
+      SwapChainStateVk.cpp
       SyncThread.cpp
       TextureDraw.cpp
       TextureResize.cpp
