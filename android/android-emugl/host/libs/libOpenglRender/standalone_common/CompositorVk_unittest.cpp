@@ -16,9 +16,7 @@ class CompositorVkTest : public ::testing::Test {
     using RenderTarget =
         emugl::RenderResourceVk<VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                                 VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT>;
-    using RenderTexture =
-        emugl::RenderResourceVk<VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                                VK_IMAGE_USAGE_SAMPLED_BIT>;
+    using RenderTexture = emugl::RenderTextureVk;
 
     static void SetUpTestCase() { k_vk = emugl::vkDispatch(false); }
 

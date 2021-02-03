@@ -82,6 +82,7 @@ android_add_library(
       ChannelStream.cpp
       ColorBuffer.cpp
       CompositorVk.cpp
+      DisplayVk.cpp
       FbConfig.cpp
       FenceSync.cpp
       FrameBuffer.cpp

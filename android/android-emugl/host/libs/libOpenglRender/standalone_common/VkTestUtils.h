@@ -328,6 +328,10 @@ struct RenderResourceVk : public RenderResourceVkBase {
     }
 };
 
+using RenderTextureVk =
+    emugl::RenderResourceVk<VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                            VK_IMAGE_USAGE_SAMPLED_BIT>;
+
 }  // namespace emugl
 
 #endif
