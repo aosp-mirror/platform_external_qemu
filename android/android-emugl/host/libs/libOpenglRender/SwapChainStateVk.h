@@ -27,7 +27,7 @@ class SwapChainStateVk {
     explicit SwapChainStateVk(const goldfish_vk::VulkanDispatch &, VkDevice,
                      const VkSwapchainCreateInfoKHR &);
     ~SwapChainStateVk();
-    static VkFormat getFormat();
+    VkFormat getFormat();
     const std::vector<VkImage>& getVkImages() const;
     const std::vector<VkImageView>& getVkImageViews() const;
     VkSwapchainKHR getSwapChain() const;
