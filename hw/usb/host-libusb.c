@@ -711,7 +711,7 @@ static void usb_host_iso_data_out(USBHostDevice *s, USBPacket *p)
 
 /* ------------------------------------------------------------------------ */
 
-static void usb_host_speed_compat(USBHostDevice *s)
+static void usb_host_speed_compat(USBHostDevice *s, unsigned int maxspeed)
 {
     USBDevice *udev = USB_DEVICE(s);
     struct libusb_config_descriptor *conf;
@@ -771,14 +771,14 @@ static void usb_host_speed_compat(USBHostDevice *s)
         libusb_free_config_descriptor(conf);
     }
 
-    udev->speedmask = (1 << udev->speed);
-    if (udev->speed == USB_SPEED_SUPER && compat_high) {
+    udev->speedmask = (1 << maxspeed);
+    if (maxspeed == USB_SPEED_SUPER && compat_high) {
         udev->speedmask |= USB_SPEED_MASK_HIGH;
     }
-    if (udev->speed == USB_SPEED_SUPER && compat_full) {
+    if (maxspeed == USB_SPEED_SUPER && compat_full) {
         udev->speedmask |= USB_SPEED_MASK_FULL;
     }
-    if (udev->speed == USB_SPEED_HIGH && compat_full) {
+    if (maxspeed == USB_SPEED_HIGH && compat_full) {
         udev->speedmask |= USB_SPEED_MASK_FULL;
     }
 }
@@ -889,7 +889,23 @@ static int usb_host_open(USBHostDevice *s, libusb_device *dev)
     usb_host_ep_update(s);
 
     udev->speed     = speed_map[libusb_get_device_speed(dev)];
-    usb_host_speed_compat(s);
+
+    int maxspeed = udev->speed;
+    struct libusb_device_descriptor device_descriptor;
+    rc = libusb_get_device_descriptor(s->dev, &device_descriptor);
+    int usb_major_version = device_descriptor.bcdUSB >> 8;
+    if (rc == 0) {
+        switch (usb_major_version) {
+        case 3:
+            maxspeed = USB_SPEED_SUPER;
+            break;
+        case 2:
+            maxspeed = USB_SPEED_HIGH;
+            break;
+        }
+    }
+
+    usb_host_speed_compat(s, maxspeed);
 
     if (s->ddesc.iProduct) {
         libusb_get_string_descriptor_ascii(s->dh, s->ddesc.iProduct,
