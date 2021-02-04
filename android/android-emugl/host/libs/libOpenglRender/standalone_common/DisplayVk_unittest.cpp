@@ -95,6 +95,7 @@ class DisplayVkTest : public ::testing::Test {
     void createWindowAndSurface() {
         m_window = emugl::createOrGetTestWindow(0, 0, k_width, k_height);
         ASSERT_NE(m_window, nullptr);
+        // TODO(kaiyili, b/179477624): add support for other platforms
 #ifdef _WIN32
         VkWin32SurfaceCreateInfoKHR surfaceCi = {};
         surfaceCi.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;

@@ -66,8 +66,8 @@ typedef ColorBuffer::RecursiveScopedHelperContext ScopedBind;
 // Implementation of a ColorBuffer::Helper instance that redirects calls
 // to a FrameBuffer instance.
 class ColorBufferHelper : public ColorBuffer::Helper {
-public:
-    ColorBufferHelper(FrameBuffer* fb) : mFb(fb) {}
+   public:
+    ColorBufferHelper(FrameBuffer* fb) : mFb(fb), mDisplayVk(nullptr) {}
 
     virtual bool setupContext() {
         mIsBound = mFb->bind_locked();
@@ -85,8 +85,17 @@ public:
 
     virtual bool isBound() const { return mIsBound; }
 
-private:
+    virtual void releaseDisplayImport(HandleType id) {
+        if (mDisplayVk) {
+            mDisplayVk->releaseImport(id);
+        }
+    }
+
+    void setDisplayVk(DisplayVk* displayVk) { mDisplayVk = displayVk; }
+
+   private:
     FrameBuffer* mFb;
+    DisplayVk* mDisplayVk;
     bool mIsBound = false;
 };
 
@@ -326,10 +335,15 @@ void FrameBuffer::finalize() {
     }
 
     m_readbackThread.enqueue({ReadbackCmd::Exit});
+    m_displayVk.reset();
+    if (m_vkSurface != VK_NULL_HANDLE) {
+        emugl::vkDispatch(false /* not for testing */)
+            ->vkDestroySurfaceKHR(m_vkInstance, m_vkSurface, nullptr);
+    }
 }
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
-        bool egl2egl) {
+                             bool egl2egl, bool useVulkan) {
     GL_LOG("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
         return true;
@@ -364,6 +378,14 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_USE_CREATE_RESOURCES_WITH_REQUIREMENTS").empty();
         goldfish_vk::setUseDeferredCommands(emu, useDeferredCommands);
         goldfish_vk::setUseCreateResourcesWithRequirements(emu, useCreateResourcesWithRequirements);
+        if (useVulkan) {
+            fb->m_displayVk = std::make_unique<DisplayVk>(
+                *dispatch, emu->physdev, emu->queueFamilyIndex,
+                emu->queueFamilyIndex, emu->device, emu->queue, emu->queue);
+            fb->m_vkInstance = emu->instance;
+            static_cast<ColorBufferHelper*>(fb->m_colorBufferHelper)
+                ->setDisplayVk(fb->m_displayVk.get());
+        }
     }
 
     if (s_egl.eglUseOsEglApi)
@@ -671,15 +693,12 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
 bool FrameBuffer::importMemoryToColorBuffer(
 #ifdef _WIN32
-        void* handle,
+    void* handle,
 #else
-        int handle,
+    int handle,
 #endif
-        uint64_t size,
-        bool dedicated,
-        bool linearTiling,
-        bool vulkanOnly,
-        uint32_t colorBufferHandle) {
+    uint64_t size, bool dedicated, bool linearTiling, bool vulkanOnly,
+    uint32_t colorBufferHandle, VkImage image, VkFormat format) {
     AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(colorBufferHandle));
@@ -689,7 +708,13 @@ bool FrameBuffer::importMemoryToColorBuffer(
         return false;
     }
 
-    return (*c).second.cb->importMemory(handle, size, dedicated, linearTiling, vulkanOnly);
+    auto& cb = *c->second.cb;
+    if (m_displayVk != nullptr) {
+        m_displayVk->importVkImage(colorBufferHandle, image, format,
+                                   static_cast<uint32_t>(cb.getWidth()),
+                                   static_cast<uint32_t>(cb.getHeight()));
+    }
+    return cb.importMemory(handle, size, dedicated, linearTiling, vulkanOnly);
 }
 
 void FrameBuffer::setColorBufferInUse(
@@ -858,16 +883,15 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
             m_prevReadSurf = prevReadSurf;
             m_prevDrawSurf = prevDrawSurf;
         }
-        m_postWorker.reset(new PostWorker([this]() {
-            if (m_subWin) {
-                return bindSubwin_locked();
-            } else {
-                return bindFakeWindow_locked();
-            }
-        },
-        postOnlyOnMainThread,
-        m_eglContext,
-        m_eglSurface));
+        m_postWorker.reset(new PostWorker(
+            [this]() {
+                if (m_subWin && m_displayVk == nullptr) {
+                    return bindSubwin_locked();
+                } else {
+                    return bindFakeWindow_locked();
+                }
+            },
+            postOnlyOnMainThread, m_eglContext, m_eglSurface));
         m_postThread.start();
     }
 
@@ -1029,20 +1053,39 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         if (m_subWin) {
             m_nativeWindow = p_window;
 
-            // create EGLSurface from the generated subwindow
-            m_eglSurface = s_egl.eglCreateWindowSurface(
-                    m_eglDisplay, m_eglConfig, m_subWin, NULL);
-
-            if (m_eglSurface == EGL_NO_SURFACE) {
-                // NOTE: This can typically happen with software-only renderers
-                // like OSMesa.
-                destroySubWindow(m_subWin);
-                m_subWin = (EGLNativeWindowType)0;
+            if (m_displayVk != nullptr) {
+                // create VkSurface from the generated subwindow, and bind to
+                // the DisplayVk
+                // TODO(kaiyili, b/179477624): add support for other platforms
+#ifdef _WIN32
+                VkWin32SurfaceCreateInfoKHR surfaceCi = {};
+                surfaceCi.sType =
+                    VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+                surfaceCi.hinstance = GetModuleHandle(nullptr);
+                surfaceCi.hwnd = m_subWin;
+                VK_CHECK(emugl::vkDispatch(false /* not for testing */)
+                             ->vkCreateWin32SurfaceKHR(m_vkInstance, &surfaceCi,
+                                                       nullptr, &m_vkSurface));
+#endif
+                m_displayVk->bindToSurface(
+                    m_vkSurface, static_cast<uint32_t>(m_windowWidth),
+                    static_cast<uint32_t>(m_windowHeight));
             } else {
-                m_px = 0;
-                m_py = 0;
+                // create EGLSurface from the generated subwindow
+                m_eglSurface = s_egl.eglCreateWindowSurface(
+                        m_eglDisplay, m_eglConfig, m_subWin, NULL);
 
-                success = true;
+                if (m_eglSurface == EGL_NO_SURFACE) {
+                    // NOTE: This can typically happen with software-only renderers
+                    // like OSMesa.
+                    destroySubWindow(m_subWin);
+                    m_subWin = (EGLNativeWindowType)0;
+                } else {
+                    m_px = 0;
+                    m_py = 0;
+
+                    success = true;
+                }
             }
         }
     }
@@ -1066,7 +1109,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                       m_windowWidth, m_windowHeight);
         }
 
-        if (success && redrawSubwindow) {
+        if (m_displayVk == nullptr && success && redrawSubwindow) {
             // Subwin creation or movement was successful,
             // update viewport and z rotation and draw
             // the last posted color buffer.
@@ -2456,10 +2499,16 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
     if (needLockAndBind) {
         m_lock.lock();
     }
-
     bool ret = false;
+    ColorBufferMap::iterator c;
 
-    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    // TODO(kaiyili, b/179481815): make DisplayVk::post asynchronous.
+    if (m_displayVk != nullptr) {
+        m_displayVk->post(p_colorbuffer);
+        goto EXIT;
+    }
+
+    c = m_colorbuffers.find(p_colorbuffer);
     if (c == m_colorbuffers.end()) {
         goto EXIT;
     }
@@ -3265,4 +3314,11 @@ void FrameBuffer::waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle) 
 
 void FrameBuffer::setGuestManagedColorBufferLifetime(bool guestManaged) {
     m_guestManagedColorBufferLifetime = guestManaged;
+}
+
+VkImageLayout FrameBuffer::getVkImageLayoutForPresent() const {
+    if (m_displayVk == nullptr) {
+        return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    }
+    return VK_IMAGE_LAYOUT_GENERAL;
 }

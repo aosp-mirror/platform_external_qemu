@@ -339,6 +339,8 @@ ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
 ColorBuffer::~ColorBuffer() {
     RecursiveScopedHelperContext context(m_helper);
 
+    m_helper->releaseDisplayImport(getHndl());
+
     if (m_blitEGLImage) {
         s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
     }

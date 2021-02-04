@@ -165,6 +165,8 @@ if(NOT LINUX_AARCH64)
         ../Translator/GLES_V2/ANGLEShaderParser.cpp
         ChannelStream.cpp
         ColorBuffer.cpp
+        CompositorVk.cpp
+        DisplayVk.cpp
         FbConfig.cpp
         FenceSync.cpp
         FrameBuffer.cpp
@@ -185,6 +187,7 @@ if(NOT LINUX_AARCH64)
         standalone_common/SampleApplication.cpp
         standalone_common/SearchPathsSetup.cpp
         standalone_common/ShaderUtils.cpp
+        SwapChainStateVk.cpp
         SyncThread.cpp
         TextureDraw.cpp
         TextureResize.cpp

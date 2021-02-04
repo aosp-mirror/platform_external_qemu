@@ -51,6 +51,9 @@ class DisplayVk {
         VkFormat m_vkFormat;
         VkImageView m_vkImageView;
     };
+    // This map won't automatically relaase all the created VkImageView. The
+    // client is responsible for calling releaseImport on all imported ids
+    // before this object is released.
     std::unordered_map<HandleType, ColorBufferInfo> m_colorBuffers;
 
     std::unique_ptr<SwapChainStateVk> m_swapChainStateVk;
