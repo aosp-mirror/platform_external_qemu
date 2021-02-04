@@ -24,6 +24,7 @@
 #include "android/base/EventNotificationSupport.h"
 
 #include "ColorBuffer.h"
+#include "DisplayVk.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
@@ -31,6 +32,7 @@
 #include "PostWorker.h"
 #include "ReadbackWorker.h"
 #include "RenderContext.h"
+#include "Renderer.h"
 #include "TextureDraw.h"
 #include "WindowSurface.h"
 #include "VkCommonOperations.h"
@@ -125,8 +127,8 @@ public:
     // own sub-windows. If false, this means the caller will use
     // setPostCallback() instead to retrieve the content.
     // Returns true on success, false otherwise.
-    static bool initialize(int width, int height, bool useSubWindow,
-            bool egl2egl);
+    static bool initialize(int width, int height, bool useSubWindow, bool egl2egl,
+                           bool useVulkan = false);
 
     // Setup a sub-window to display the content of the emulated GPU
     // on-top of an existing UI window. |p_window| is the platform-specific
@@ -146,17 +148,9 @@ public:
     // Return true on success, false otherwise.
     //
     // NOTE: This can return false for software-only EGL engines like OSMesa.
-    bool setupSubWindow(FBNativeWindowType p_window,
-                        int wx,
-                        int wy,
-                        int ww,
-                        int wh,
-                        int fbw,
-                        int fbh,
-                        float dpr,
-                        float zRot,
-                        bool deleteExisting,
-                        bool hideWindow);
+    bool setupSubWindow(FBNativeWindowType p_window, int wx, int wy, int ww,
+                        int wh, int fbw, int fbh, float dpr, float zRot,
+                        bool deleteExisting, bool hideWindow);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
@@ -167,7 +161,7 @@ public:
 
     // Return a pointer to the global instance. initialize() must be called
     // previously, or this will return NULL.
-    static FrameBuffer *getFB() { return s_theFrameBuffer; }
+    static FrameBuffer* getFB() { return s_theFrameBuffer; }
 
     // Wait for a FrameBuffer instance to be initialized and ready to use.
     // This function blocks the caller until there is a valid initialized
@@ -175,7 +169,7 @@ public:
     static void waitUntilInitialized();
 
     // Return the capabilities of the underlying display.
-    const FrameBufferCaps &getCaps() const { return m_caps; }
+    const FrameBufferCaps& getCaps() const { return m_caps; }
 
     // Return the emulated GPU display width in pixels.
     int getWidth() const { return m_framebufferWidth; }
@@ -190,15 +184,13 @@ public:
     // is updated. This can be relatively slow with host-based GPU emulation,
     // so only do this when you need to.
     void setPostCallback(emugl::Renderer::OnPostCallback onPost,
-                         void* onPostContext,
-                         uint32_t displayId,
+                         void* onPostContext, uint32_t displayId,
                          bool useBgraReadback = false);
 
     // Retrieve the GL strings of the underlying EGL/GLES implementation.
     // On return, |*vendor|, |*renderer| and |*version| will point to strings
     // that are owned by the instance (and must not be freed by the caller).
-    void getGLStrings(const char** vendor,
-                      const char** renderer,
+    void getGLStrings(const char** vendor, const char** renderer,
                       const char** version) const {
         *vendor = m_glVendor.c_str();
         *renderer = m_glRenderer.c_str();
@@ -548,11 +540,8 @@ public:
 #else
         int handle,
 #endif
-        uint64_t size,
-        bool dedicated,
-        bool linearTiling,
-        bool vulkanOnly,
-        uint32_t colorBufferHandle);
+        uint64_t size, bool dedicated, bool linearTiling, bool vulkanOnly,
+        uint32_t colorBufferHandle, VkImage, VkFormat);
     bool importSemaphoreToColorBuffer(
 #ifdef _WIN32
         void* handle,
@@ -652,7 +641,9 @@ public:
 
     void setGuestManagedColorBufferLifetime(bool guestManaged);
 
-private:
+    VkImageLayout getVkImageLayoutForPresent() const;
+
+   private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
 
@@ -883,5 +874,11 @@ private:
 
     android::base::MessageChannel<HandleType, 1024>
         mOutstandingColorBufferDestroys;
+
+    // The implementation for Vulkan native swapchain. Only initialized when
+    // useVulkan is set when calling FrameBuffer::initialize().
+    std::unique_ptr<DisplayVk> m_displayVk;
+    VkInstance m_vkInstance = VK_NULL_HANDLE;
+    VkSurfaceKHR m_vkSurface = VK_NULL_HANDLE;
 };
 #endif

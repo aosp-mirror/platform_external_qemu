@@ -80,6 +80,7 @@ public:
         virtual void teardownContext() = 0;
         virtual TextureDraw* getTextureDraw() const = 0;
         virtual bool isBound() const = 0;
+        virtual void releaseDisplayImport(HandleType) = 0;
     };
 
     // Helper class to use a ColorBuffer::Helper context.
