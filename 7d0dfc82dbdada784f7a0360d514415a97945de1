@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "64da2293_de68b07d",
+        "filename": "android/android-ui/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-02-04T18:31:46Z",
+      "side": 1,
+      "message": "wdu@: change to 1080x1920",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 27
+      },
+      "revId": "7d0dfc82dbdada784f7a0360d514415a97945de1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
