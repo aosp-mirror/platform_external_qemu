@@ -494,10 +494,10 @@ VkResult setAndroidNativeImageSemaphoreSignaled(
             VkImageMemoryBarrier backToPresentSrc = {
                 VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
                 VK_ACCESS_HOST_READ_BIT, 0,
-                VK_IMAGE_LAYOUT_GENERAL,
+                fb->getVkImageLayoutForPresent(),
                 VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                VK_QUEUE_FAMILY_IGNORED,
-                VK_QUEUE_FAMILY_IGNORED,
+                VK_QUEUE_FAMILY_EXTERNAL,
+                anbInfo->lastUsedQueueFamilyIndex,
                 anbInfo->image,
                 {
                     VK_IMAGE_ASPECT_COLOR_BIT,
@@ -540,9 +540,13 @@ VkResult setAndroidNativeImageSemaphoreSignaled(
                 &semaphore,
             };
 
-            if (!waitSwapchainSemaphore) {
-                vk->vkWaitForFences(anbInfo->device, 1, &queueState.fence, 0, ANB_MAX_WAIT_NS);
-            }
+// <<<<<<< HEAD:android/android-emugl/host/libs/libOpenglRender/vulkan/VkAndroidNativeBuffer.cpp
+//             if (!waitSwapchainSemaphore) {
+//                 vk->vkWaitForFences(anbInfo->device, 1, &queueState.fence, 0, ANB_MAX_WAIT_NS);
+//             }
+// =======
+            // TODO(kaiyili): initiate ownership transfer from DisplayVk here
+// >>>>>>> eac86a7d5e1 (Native VK Swapchain: Integrate DisplayVk with FrameBuffer):stream-servers/vulkan/VkAndroidNativeBuffer.cpp
             vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, fence);
         } else {
             const AndroidNativeBufferInfo::QueueState&
@@ -607,9 +611,9 @@ VkResult syncImageToColorBuffer(
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
             VK_ACCESS_HOST_READ_BIT, 0,
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            VK_IMAGE_LAYOUT_GENERAL,
-            VK_QUEUE_FAMILY_IGNORED,
-            VK_QUEUE_FAMILY_IGNORED,
+            fb->getVkImageLayoutForPresent(),
+            queueFamilyIndex,
+            VK_QUEUE_FAMILY_EXTERNAL,
             anbInfo->image,
             {
                 VK_IMAGE_ASPECT_COLOR_BIT,
@@ -725,8 +729,13 @@ VkResult syncImageToColorBuffer(
             &anbInfo->swapchainSynchronizationInfo.native.semaphore : nullptr,
     };
 
-    vk->vkResetFences(anbInfo->device, 1, &queueState.fence);
-    vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, queueState.fence);
+// <<<<<<< HEAD:android/android-emugl/host/libs/libOpenglRender/vulkan/VkAndroidNativeBuffer.cpp
+//     vk->vkResetFences(anbInfo->device, 1, &queueState.fence);
+//     vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, queueState.fence);
+// =======
+    // TODO(kaiyili): initiate ownership transfer to DisplayVk here.
+    vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, VK_NULL_HANDLE);
+// >>>>>>> eac86a7d5e1 (Native VK Swapchain: Integrate DisplayVk with FrameBuffer):stream-servers/vulkan/VkAndroidNativeBuffer.cpp
 
     fb->setColorBufferPendingSemaphoreSignalLocked(anbInfo->colorBufferHandle, anbInfo->swapchainSynchronizationInfo);
     fb->unlock();

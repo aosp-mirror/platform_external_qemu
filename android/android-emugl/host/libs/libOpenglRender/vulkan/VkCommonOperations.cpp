@@ -34,9 +34,11 @@
 #include <iomanip>
 #include <ostream>
 #include <sstream>
+#include <unordered_set>
 
-#include <stdio.h>
-#include <string.h>
+#include "FrameBuffer.h"
+#include "VulkanDispatch.h"
+#include "common/goldfish_vk_dispatch.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -547,6 +549,10 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             externalSemaphoreInstanceExtNames.end());
     }
 
+    for (auto extension : SwapChainStateVk::getRequiredInstanceExtensions()) {
+        finalInstanceExtensions.push_back(extension);
+    }
+
     instCi.enabledExtensionCount =
         finalInstanceExtensions.size();
     instCi.ppEnabledExtensionNames =
@@ -844,6 +850,13 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             finalDeviceExtensions.end(),
             externalSemaphoreDeviceExtNames.begin(),
             externalSemaphoreDeviceExtNames.end());
+    }
+
+    for (auto extension : CompositorVk::getRequiredDeviceExtensions()) {
+        finalDeviceExtensions.push_back(extension);
+    }
+    for (auto extension : SwapChainStateVk::getRequiredDeviceExtensions()) {
+        finalDeviceExtensions.push_back(extension);
     }
 
     VkDeviceCreateInfo dCi = {
@@ -1722,15 +1735,11 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     }
 
     if (sVkEmulation->deviceInfo.supportsExternalMemory &&
-        sVkEmulation->deviceInfo.glInteropSupported &&
-        glCompatible &&
+        sVkEmulation->deviceInfo.glInteropSupported && glCompatible &&
         FrameBuffer::getFB()->importMemoryToColorBuffer(
-            dupExternalMemory(res.memory.exportedHandle),
-            res.memory.size,
-            false /* dedicated */,
-            res.tiling == VK_IMAGE_TILING_LINEAR,
-            vulkanOnly,
-            colorBufferHandle)) {
+            dupExternalMemory(res.memory.exportedHandle), res.memory.size,
+            false /* dedicated */, res.tiling == VK_IMAGE_TILING_LINEAR,
+            vulkanOnly, colorBufferHandle, res.image, res.format)) {
         res.glExported = true;
     }
 
