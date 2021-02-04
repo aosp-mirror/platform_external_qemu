@@ -27,8 +27,9 @@
 #include "android/utils/system.h"
 // from cuttlefish modem-simulator library
 #include "modem_simulator.h"
+#include "thread_looper.h"
 
-#define MODEM_DEBUG 0
+#define MODEM_DEBUG 1
 
 #if MODEM_DEBUG
 #define DD(fmt, ...)                                                        \
@@ -143,6 +144,8 @@ void set_data_network_type(int type) {
     s_msg_channel.send(mymsg);
 }
 
+static void delayedSignalUpdate(ModemMessage mymsg, int count);
+
 void set_signal_strength_profile(int quality) {
     ModemMessage mymsg;
     mymsg.type = MODEM_MSG_SIGNAL;
@@ -151,7 +154,7 @@ void set_signal_strength_profile(int quality) {
     ss += std::to_string(quality);
     ss += "\r";
     mymsg.sdata = ss;
-    s_msg_channel.send(mymsg);
+    delayedSignalUpdate(mymsg, 1000);
 }
 
 void set_data_registration(int state) {
@@ -211,6 +214,8 @@ void start_calling_thread(std::string ss) {
                 } else if (ss == "OK") {
                     DD("got: %s", ss.c_str());
                     break;
+                } else {
+                    DD("got: %s", ss.c_str());
                 }
             }
         }
@@ -350,6 +355,7 @@ int stop_android_modem_simulator() {
 struct MyThread {
     std::thread mT1;
     std::thread mT2;
+    std::unique_ptr<ThreadLooper> mThreadLooper;
     ~MyThread() {
         ModemMessage msg;
         s_stop_requested = true;
@@ -378,6 +384,10 @@ struct MyThread {
             if (mT2.joinable()) {
                 mT2.join();
             }
+        }
+
+        if (mThreadLooper) {
+            mThreadLooper->Stop();
         }
     }
 };
@@ -421,9 +431,21 @@ int start_android_modem_simulator_detached() {
     std::thread t2(&main_host_thread);
     s_mythread.mT2 = std::move(t2);
 
+    s_mythread.mThreadLooper.reset(new ThreadLooper());
+
     DD("starring modem simulator ready at guest port %d host port %d",
        actual_guest_server_port, s_host_server_port);
     return actual_guest_server_port;
+}
+
+static void delayedSignalUpdate(ModemMessage mymsg, int count) {
+    s_msg_channel.send(mymsg);
+    -- count;
+    if (count <= 0) return;
+
+    s_mythread.mThreadLooper->PostWithDelay(
+      std::chrono::seconds(1),
+      [mymsg, count]() { delayedSignalUpdate(mymsg, count);});
 }
 
 void main_host_thread() {
