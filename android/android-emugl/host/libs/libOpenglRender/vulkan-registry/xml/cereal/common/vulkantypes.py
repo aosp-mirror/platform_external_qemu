@@ -155,7 +155,6 @@ DEVICE_MEMORY_INFO_KEYS = [
 ]
 
 TRANSFORMED_TYPES = [
-    "VkExternalMemoryProperties",
     "VkPhysicalDeviceExternalImageFormatInfo",
     "VkPhysicalDeviceExternalBufferInfo",
     "VkExternalMemoryImageCreateInfo",
