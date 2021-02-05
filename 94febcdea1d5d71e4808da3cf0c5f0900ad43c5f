@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "93c60218_c87bb146",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-05T08:07:22Z",
+      "side": 1,
+      "message": "Not ready yet as it needs a flag and fallback but this might help.",
+      "revId": "94febcdea1d5d71e4808da3cf0c5f0900ad43c5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
