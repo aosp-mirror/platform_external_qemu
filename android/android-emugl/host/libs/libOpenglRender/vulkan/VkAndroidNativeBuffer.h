@@ -65,6 +65,7 @@ struct AndroidNativeBufferInfo {
     // To be populated later as we go.
     VkImage image = VK_NULL_HANDLE;
     VkMemoryRequirements memReqs;
+    struct ColorBufferSwapchainSynchronizationInfo swapchainSynchronizationInfo;
 
     // The queue over which we send the buffer/image copy commands depends on
     // the queue over which vkQueueSignalReleaseImageANDROID happens.
