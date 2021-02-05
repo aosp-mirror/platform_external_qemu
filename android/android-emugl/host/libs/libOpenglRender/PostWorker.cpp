@@ -324,6 +324,7 @@ void PostWorker::composeLayer(ComposeLayer* l) {
             return;
         }
         cb->postLayer(l, mFb->getWidth(), mFb->getHeight());
+        cb->signalSemaphore(GL_LAYOUT_GENERAL_EXT);
     }
     else {
         // no Colorbuffer associated with SOLID_COLOR mode
