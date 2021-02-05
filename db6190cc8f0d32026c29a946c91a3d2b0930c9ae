@@ -22,6 +22,30 @@
       },
       "revId": "db6190cc8f0d32026c29a946c91a3d2b0930c9ae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "28a3f466_3c9a9b41",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 1017,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-02-05T18:11:13Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a73bee1d_ae0de718",
+      "range": {
+        "startLine": 1017,
+        "startChar": 4,
+        "endLine": 1017,
+        "endChar": 34
+      },
+      "revId": "db6190cc8f0d32026c29a946c91a3d2b0930c9ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
