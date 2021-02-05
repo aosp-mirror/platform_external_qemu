@@ -67,7 +67,6 @@ VkResult prepareAndroidNativeBufferImage(
     bool colorBufferVulkanCompatible =
         isColorBufferVulkanCompatible(out->colorBufferHandle);
     bool externalMemoryCompatible = false;
-
     auto emu = getGlobalVkEmulation();
 
     if (emu && emu->live) {
@@ -118,6 +117,14 @@ VkResult prepareAndroidNativeBufferImage(
             return VK_ERROR_INITIALIZATION_FAILED;
         }
 
+        // If we support external semaphores, use an external semaphore to
+        // synchronize w/ the host swapchain.
+        //
+        // TODO: Figure something out for
+        // situations where external semaphores aren't supported on the host
+        if (cbInfo.semaphore != VK_NULL_HANDLE) {
+            createAndImportExternalSemaphore(vk, device, cbInfo.semaphoreHandle, &out->semaphoreForSwapchain);
+        }
     } else {
         VkResult createResult =
             vk->vkCreateImage(
@@ -394,7 +401,7 @@ void AndroidNativeBufferInfo::QueueState::setup(
         &cb2);
 
     VkFenceCreateInfo fenceCreateInfo = {
-        VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, 0,
+        VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, VK_FENCE_CREATE_SIGNALED_BIT,
     };
 
     vk->vkCreateFence(
@@ -435,6 +442,9 @@ VkResult setAndroidNativeImageSemaphoreSignaled(
 
     anbInfo->everAcquired = true;
         // fprintf(stderr, "%s: call\n", __func__);
+
+    static constexpr uint64_t ANB_MAX_WAIT_NS =
+        5ULL * 1000ULL * 1000ULL * 1000ULL;
 
     if (firstTimeSetup) {
 
@@ -485,12 +495,16 @@ VkResult setAndroidNativeImageSemaphoreSignaled(
 
             vk->vkEndCommandBuffer(queueState.cb2);
 
+            VkPipelineStageFlags waitStageMask =
+                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+
+            bool waitSwapchainSemaphore = anbInfo->semaphoreForSwapchain != VK_NULL_HANDLE;
+
             VkSubmitInfo submitInfo = {
-                VK_STRUCTURE_TYPE_SUBMIT_INFO,
-                0,
-                0,
-                nullptr,
-                nullptr,
+                VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+                waitSwapchainSemaphore ? 1 : 0,
+                waitSwapchainSemaphore ? &anbInfo->semaphoreForSwapchain : nullptr,
+                waitSwapchainSemaphore ? &waitStageMask : nullptr,
                 1,
                 &queueState.cb2,
                 1,
@@ -666,18 +680,14 @@ VkResult syncImageToColorBuffer(
         waitSemaphoreCount, pWaitSemaphores,
         pipelineStageFlags.data(),
         1, &queueState.cb,
-        0, nullptr,
+        anbInfo->semaphoreForSwapchain != VK_NULL_HANDLE ? 1 : 0,
+        anbInfo->semaphoreForSwapchain != VK_NULL_HANDLE ?
+            &anbInfo->semaphoreForSwapchain : nullptr,
     };
 
-    vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, queueState.fence);
-
-    static constexpr uint64_t ANB_MAX_WAIT_NS =
-        5ULL * 1000ULL * 1000ULL * 1000ULL;
-
-    vk->vkWaitForFences(
-        anbInfo->device, 1, &queueState.fence, VK_TRUE, ANB_MAX_WAIT_NS);
     vk->vkResetFences(anbInfo->device, 1, &queueState.fence);
-
+    vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, queueState.fence);
+    fb->setColorBufferPendingSemaphoreSignalLocked(anbInfo->colorBufferHandle);
     fb->unlock();
 
     if (anbInfo->isGlTexture) {

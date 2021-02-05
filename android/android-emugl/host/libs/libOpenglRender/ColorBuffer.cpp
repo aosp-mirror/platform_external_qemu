@@ -344,6 +344,10 @@ ColorBuffer::~ColorBuffer() {
         s_gles2.glDeleteMemoryObjectsEXT(1, &m_memoryObject);
     }
 
+    if (m_semaphore) {
+        s_gles2.glDeleteSemaphoresEXT(1, &m_semaphore);
+    }
+
     delete m_resizer;
 }
 
@@ -762,7 +766,7 @@ bool ColorBuffer::bindToTexture() {
         return false;
     }
     touch();
-
+    waitSemaphore(GL_LAYOUT_GENERAL_EXT);
     if (tInfo->currContext->clientVersion() > GLESApi_CM) {
         s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     } else {
@@ -775,7 +779,7 @@ bool ColorBuffer::bindToTexture2() {
     if (!m_eglImage) {
         return false;
     }
-
+    waitSemaphore(GL_LAYOUT_GENERAL_EXT);
     s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     return true;
 }
@@ -789,6 +793,7 @@ bool ColorBuffer::bindToRenderbuffer() {
         return false;
     }
     touch();
+    waitSemaphore(GL_LAYOUT_GENERAL_EXT);
     if (tInfo->currContext->clientVersion() > GLESApi_CM) {
         s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES,
                                                        m_eglImage);
@@ -809,6 +814,7 @@ void ColorBuffer::setSync(bool debug) {
 }
 
 void ColorBuffer::waitSync(bool debug) {
+    waitSemaphore(GL_LAYOUT_GENERAL_EXT);
     if (debug) fprintf(stderr, "%s: %u sync %p\n", __func__, getHndl(), m_sync);
     if (m_sync) {
         s_egl.eglWaitImageFenceANDROID(m_display, m_sync);
@@ -818,13 +824,15 @@ void ColorBuffer::waitSync(bool debug) {
 bool ColorBuffer::post(GLuint tex, float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
     waitSync();
-    return m_helper->getTextureDraw()->draw(tex, rotation, dx, dy);
+    bool res = m_helper->getTextureDraw()->draw(tex, rotation, dx, dy);
+    return res;
 }
 
 bool ColorBuffer::postWithOverlay(GLuint tex, float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
     waitSync();
-    return m_helper->getTextureDraw()->drawWithOverlay(tex, rotation, dx, dy);
+    bool res = m_helper->getTextureDraw()->drawWithOverlay(tex, rotation, dx, dy);
+    return res;
 }
 
 void ColorBuffer::readback(unsigned char* img, bool readbackBgra) {
@@ -1016,6 +1024,45 @@ bool ColorBuffer::importMemory(
     }
 
     return true;
+}
+
+bool ColorBuffer::importSemaphore(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        bool vulkanOnly) {
+    (void)vulkanOnly;
+
+    RecursiveScopedHelperContext context(m_helper);
+
+    s_gles2.glGenSemaphoresEXT(1, &m_semaphore);
+
+#ifdef _WIN32
+    s_gles2.glImportSemaphoreWin32HandleEXT(m_semaphore, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, handle); 
+#else
+    s_gles2.glImportSemaphoreFdEXT(m_semaphore, GL_HANDLE_TYPE_OPAQUE_FD_EXT, handle); 
+#endif
+    return true;
+}
+
+void ColorBuffer::setPendingSemaphoreSignal() {
+    m_pending_semaphore_signal = true;
+}
+
+void ColorBuffer::waitSemaphore(GLenum textureSrcLayout) {
+    if (!m_semaphore) return;
+    if (!m_pending_semaphore_signal) {
+        return;
+    }
+    s_gles2.glWaitSemaphoreEXT(m_semaphore, 0, nullptr, 1, &m_tex, &textureSrcLayout);
+    m_pending_semaphore_signal = false;
+}
+
+void ColorBuffer::signalSemaphore(GLenum textureDstLayout) {
+    if (!m_semaphore) return;
+    s_gles2.glSignalSemaphoreEXT(m_semaphore, 0, nullptr, 1, &m_tex, &textureDstLayout);
 }
 
 void ColorBuffer::setInUse(bool inUse) {

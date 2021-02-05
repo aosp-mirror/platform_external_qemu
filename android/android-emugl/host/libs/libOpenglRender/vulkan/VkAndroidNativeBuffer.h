@@ -64,6 +64,7 @@ struct AndroidNativeBufferInfo {
 
     // To be populated later as we go.
     VkImage image = VK_NULL_HANDLE;
+    VkSemaphore semaphoreForSwapchain = VK_NULL_HANDLE;
     VkMemoryRequirements memReqs;
 
     // The queue over which we send the buffer/image copy commands depends on
