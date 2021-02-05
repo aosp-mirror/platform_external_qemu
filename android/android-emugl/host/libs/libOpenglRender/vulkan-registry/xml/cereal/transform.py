@@ -15,7 +15,7 @@
 
 from .common.codegen import CodeGen
 from .common.vulkantypes import \
-        VulkanCompoundType, VulkanAPI, makeVulkanTypeSimple, vulkanTypeNeedsTransform, vulkanTypeGetNeededTransformTypes, VulkanTypeIterator, iterateVulkanType, vulkanTypeforEachSubType, TRANSFORMED_TYPES
+        VulkanCompoundType, VulkanAPI, makeVulkanTypeSimple, vulkanTypeNeedsTransform, vulkanTypeGetNeededTransformTypes, VulkanTypeIterator, iterateVulkanType, vulkanTypeforEachSubType, TRIVIAL_TRANSFORMED_TYPES, NON_TRIVIAL_TRANSFORMED_TYPES, TRANSFORMED_TYPES
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE
@@ -236,9 +236,19 @@ class VulkanTransform(VulkanWrapperGenerator):
         # Set up a convenience macro fro the transformed structs
         # and forward-declare the resource tracker class
         self.codegen.stmt("class %s" % self.resourceTrackerTypeName)
-        self.codegen.line("#define LIST_TRANSFORMED_TYPES(f) \\")
-        for name in TRANSFORMED_TYPES:
+        self.codegen.line("#define LIST_TRIVIAL_TRANSFORMED_TYPES(f) \\")
+        for name in TRIVIAL_TRANSFORMED_TYPES:
             self.codegen.line("f(%s) \\" % name)
+        self.codegen.line("")
+
+        self.codegen.line("#define LIST_NON_TRIVIAL_TRANSFORMED_TYPES(f) \\")
+        for name in NON_TRIVIAL_TRANSFORMED_TYPES:
+            self.codegen.line("f(%s) \\" % name)
+        self.codegen.line("")
+
+        self.codegen.line("#define LIST_TRANSFORMED_TYPES(f) \\")
+        self.codegen.line("LIST_TRIVIAL_TRANSFORMED_TYPES(f) \\")
+        self.codegen.line("LIST_NON_TRIVIAL_TRANSFORMED_TYPES(f) \\")
         self.codegen.line("")
 
         self.module.appendHeader(self.codegen.swapCode())
