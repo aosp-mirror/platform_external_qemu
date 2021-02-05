@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a15cf997_57c94eab",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-02-05T18:46:26Z",
+      "side": 1,
+      "message": "Don\u0027t notify for creation?",
+      "revId": "19c9107e864155414d7c95bd3010ea36e0eabe2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
