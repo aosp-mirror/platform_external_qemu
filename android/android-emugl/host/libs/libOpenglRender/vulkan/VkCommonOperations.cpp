@@ -87,6 +87,22 @@ VK_EXT_MEMORY_HANDLE dupExternalMemory(VK_EXT_MEMORY_HANDLE h) {
 #endif
 }
 
+VK_EXT_SEMAPHORE_HANDLE dupExternalSemaphore(VK_EXT_SEMAPHORE_HANDLE h) {
+#ifdef _WIN32
+    auto myProcessHandle = GetCurrentProcess();
+    VK_EXT_MEMORY_HANDLE res;
+    DuplicateHandle(
+        myProcessHandle, h, // source process and handle
+        myProcessHandle, &res, // target process and pointer to handle
+        0 /* desired access (ignored) */,
+        true /* inherit */,
+        DUPLICATE_SAME_ACCESS /* same access option */);
+    return res;
+#else
+    return dup(h);
+#endif
+}
+
 bool getStagingMemoryTypeIndex(
     VulkanDispatch* vk,
     VkDevice device,
@@ -462,6 +478,10 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         "VK_KHR_get_physical_device_properties2",
     };
 
+    std::vector<const char*> externalSemaphoreInstanceExtNames = {
+        "VK_KHR_external_semaphore_capabilities",
+    };
+
     std::vector<const char*> externalMemoryDeviceExtNames = {
         "VK_KHR_dedicated_allocation",
         "VK_KHR_get_memory_requirements2",
@@ -473,6 +493,19 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 #endif
     };
 
+    std::vector<const char*> externalSemaphoreDeviceExtNames = {
+        "VK_KHR_external_semaphore",
+#ifdef _WIN32
+        "VK_KHR_external_semaphore_win32",
+#else
+#ifdef __linux__
+        "VK_KHR_external_memory_fd",
+#else
+        // TODO: MoltenVK external semaphore
+#endif
+#endif
+    };
+
     uint32_t extCount = 0;
     gvk->vkEnumerateInstanceExtensionProperties(nullptr, &extCount, nullptr);
     std::vector<VkExtensionProperties> exts(extCount);
@@ -480,6 +513,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     bool externalMemoryCapabilitiesSupported =
         extensionsSupported(exts, externalMemoryInstanceExtNames);
+    bool externalSemaphoreCapabilitiesSupported =
+        extensionsSupported(exts, externalSemaphoreInstanceExtNames);
     bool moltenVKSupported = (vk->vkGetMTLTextureMVK != nullptr) &&
         (vk->vkSetMTLTextureMVK != nullptr);
 
@@ -489,20 +524,34 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         0, nullptr,
     };
 
-    if (externalMemoryCapabilitiesSupported) {
-        instCi.enabledExtensionCount =
-            externalMemoryInstanceExtNames.size();
-        instCi.ppEnabledExtensionNames =
-            externalMemoryInstanceExtNames.data();
+    if (moltenVKSupported) {
+        // We don't need both moltenVK and external memory/semaphores. Disable
+        // them on moltenVK.
+        externalMemoryCapabilitiesSupported = false;
+        externalSemaphoreCapabilitiesSupported = false;
     }
 
-    if (moltenVKSupported) {
-        // We don't need both moltenVK and external memory. Disable
-        // external memory if moltenVK is supported.
-        externalMemoryCapabilitiesSupported = false;
-        instCi.enabledExtensionCount = 0u;
-        instCi.ppEnabledExtensionNames = nullptr;
+    std::vector<const char*> finalInstanceExtensions;
+
+    if (externalMemoryCapabilitiesSupported) {
+        finalInstanceExtensions.insert(
+            finalInstanceExtensions.end(),
+            externalMemoryInstanceExtNames.begin(),
+            externalMemoryInstanceExtNames.end());
     }
+
+    if (externalSemaphoreCapabilitiesSupported) {
+        finalInstanceExtensions.insert(
+            finalInstanceExtensions.end(),
+            externalSemaphoreInstanceExtNames.begin(),
+            externalSemaphoreInstanceExtNames.end());
+    }
+
+    instCi.enabledExtensionCount =
+        finalInstanceExtensions.size();
+    instCi.ppEnabledExtensionNames =
+        finalInstanceExtensions.size() > 0 ?
+        finalInstanceExtensions.data() : nullptr;
 
     VkApplicationInfo appInfo = {
         VK_STRUCTURE_TYPE_APPLICATION_INFO, 0,
@@ -584,9 +633,11 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         }
     }
 
+    sVkEmulation->instanceSupportsMoltenVK = moltenVKSupported;
     sVkEmulation->instanceSupportsExternalMemoryCapabilities =
         externalMemoryCapabilitiesSupported;
-    sVkEmulation->instanceSupportsMoltenVK = moltenVKSupported;
+    sVkEmulation->instanceSupportsExternalSemaphoreCapabilities =
+        externalSemaphoreCapabilitiesSupported;
 
     if (sVkEmulation->instanceSupportsExternalMemoryCapabilities) {
         sVkEmulation->getImageFormatProperties2Func = reinterpret_cast<
@@ -653,6 +704,11 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
                     deviceExts, externalMemoryDeviceExtNames);
         }
 
+        if (sVkEmulation->instanceSupportsExternalSemaphoreCapabilities) {
+            deviceInfos[i].supportsExternalSemaphores = extensionsSupported(
+                    deviceExts, externalSemaphoreDeviceExtNames);
+        }
+
         uint32_t queueFamilyCount = 0;
         ivk->vkGetPhysicalDeviceQueueFamilyProperties(
                 physdevs[i], &queueFamilyCount, nullptr);
@@ -717,6 +773,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         uint32_t deviceScore = 0;
         if (deviceInfos[i].hasGraphicsQueueFamily) deviceScore += 100;
         if (deviceInfos[i].supportsExternalMemory) deviceScore += 10;
+        if (deviceInfos[i].supportsExternalSemaphores) deviceScore += 10;
         if (deviceInfos[i].hasComputeQueueFamily) deviceScore += 1;
         deviceScores[i] = deviceScore;
     }
@@ -761,6 +818,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
                  << sVkEmulation->deviceInfo.hasGraphicsQueueFamily;
     LOG(VERBOSE) << "Has external memory support? "
                  << sVkEmulation->deviceInfo.supportsExternalMemory;
+    LOG(VERBOSE) << "Has external semaphore support? "
+                 << sVkEmulation->deviceInfo.supportsExternalSemaphores;
     LOG(VERBOSE) << "Has compute queue? "
                  << sVkEmulation->deviceInfo.hasComputeQueueFamily;
 
@@ -771,12 +830,20 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         1, &priority,
     };
 
-    uint32_t selectedDeviceExtensionCount = 0;
-    const char* const* selectedDeviceExtensionNames = nullptr;
+    std::vector<const char*> finalDeviceExtensions;
 
     if (sVkEmulation->deviceInfo.supportsExternalMemory) {
-        selectedDeviceExtensionCount = externalMemoryDeviceExtNames.size();
-        selectedDeviceExtensionNames = externalMemoryDeviceExtNames.data();
+        finalDeviceExtensions.insert(
+            finalDeviceExtensions.end(),
+            externalMemoryDeviceExtNames.begin(),
+            externalMemoryDeviceExtNames.end());
+    }
+
+    if (sVkEmulation->deviceInfo.supportsExternalSemaphores) {
+        finalDeviceExtensions.insert(
+            finalDeviceExtensions.end(),
+            externalSemaphoreDeviceExtNames.begin(),
+            externalSemaphoreDeviceExtNames.end());
     }
 
     VkDeviceCreateInfo dCi = {
@@ -784,8 +851,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         // TODO: add compute queue as well if appropriate
         1, &dqCi,
         0, nullptr, // no layers
-        selectedDeviceExtensionCount,
-        selectedDeviceExtensionNames, // no layers
+        (uint32_t)finalDeviceExtensions.size(),
+        finalDeviceExtensions.size() > 0 ? finalDeviceExtensions.data() : nullptr,
         nullptr, // no features
     };
 
@@ -844,6 +911,32 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 #endif
         if (!sVkEmulation->deviceInfo.getMemoryHandleFunc) {
             LOG(ERROR) << "Cannot find vkGetMemory(Fd|Win32Handle)KHR";
+            return sVkEmulation;
+        }
+    }
+
+    if (sVkEmulation->deviceInfo.supportsExternalSemaphores) {
+#ifdef _WIN32
+        sVkEmulation->deviceInfo.getSemaphoreHandleFunc =
+                reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(
+                        dvk->vkGetDeviceProcAddr(sVkEmulation->device,
+                                                "vkGetSemaphoreWin32HandleKHR"));
+        sVkEmulation->deviceInfo.importSemaphoreHandleFunc =
+                reinterpret_cast<PFN_vkImportSemaphoreWin32HandleKHR>(
+                        dvk->vkGetDeviceProcAddr(sVkEmulation->device,
+                                                "vkImportSemaphoreWin32HandleKHR"));
+#else
+        sVkEmulation->deviceInfo.getSemaphoreHandleFunc =
+                reinterpret_cast<PFN_vkGetSemaphoreFdKHR>(
+                        dvk->vkGetDeviceProcAddr(sVkEmulation->device,
+                                                "vkGetSemaphoreFdKHR"));
+        sVkEmulation->deviceInfo.importSemaphoreHandleFunc =
+                reinterpret_cast<PFN_vkImportSemaphoreFdKHR>(
+                        dvk->vkGetDeviceProcAddr(sVkEmulation->device,
+                                                "vkImportSemaphoreFdKHR"));
+#endif
+        if (!sVkEmulation->deviceInfo.getSemaphoreHandleFunc) {
+            LOG(ERROR) << "Cannot find vkGetSemaphore(Fd|Win32Handle)KHR";
             return sVkEmulation;
         }
     }
@@ -1260,6 +1353,47 @@ bool importExternalMemoryDedicatedImage(
     return true;
 }
 
+bool createAndImportExternalSemaphore(VulkanDispatch* vk,
+                             VkDevice targetDevice,
+                             VK_EXT_SEMAPHORE_HANDLE handle,
+                             VkSemaphore* semaphoreOut) {
+
+    VkSemaphoreCreateInfo semaphoreCi = {
+        VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, 0, 0,
+    };
+
+    VkResult res = vk->vkCreateSemaphore(targetDevice, &semaphoreCi, 0, semaphoreOut);
+
+    if (res != VK_SUCCESS) {
+        LOG(ERROR) << "Failed to create semaphore in createAndImportExternalSemaphore";
+        return res;
+    }
+
+#ifdef _WIN32
+    VkImportSemaphoreWin32HandleInfoKHR importInfo = {
+        VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR, 0,
+        *semaphoreOut, 0 /* permanent */,
+        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR,
+        dupExternalSemaphore(handle), L"",
+    };
+#else
+    VkImportSemaphoreFdInfoKHR importInfo = {
+        VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR, 0,
+        *semaphoreOut, 0 /* permanent */,
+        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT,
+        dupExternalSemaphore(handle),
+    };
+#endif
+    res = sVkEmulation->deviceInfo.importSemaphoreHandleFunc(targetDevice, &importInfo);
+
+    if (res != VK_SUCCESS) {
+        LOG(ERROR) << "Failed to import semaphore in createAndImportExternalSemaphore";
+        return res;
+    }
+
+    return true;
+}
+
 static VkFormat glFormat2VkFormat(GLint internalformat) {
     switch (internalformat) {
         case GL_LUMINANCE:
@@ -1563,6 +1697,24 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
 #endif
     }
 
+    if (sVkEmulation->deviceInfo.supportsExternalSemaphores) {
+        VkResult externalSemaphoreRes =
+            createExternalSemaphore(&res.semaphore, &res.semaphoreHandle);
+        if (externalSemaphoreRes != VK_SUCCESS) {
+            LOG(ERROR) << "Failed to create external semaphore for ColorBuffer";
+        }
+    }
+
+    if (sVkEmulation->deviceInfo.supportsExternalSemaphores &&
+        sVkEmulation->deviceInfo.glInteropSupported &&
+        glCompatible &&
+        FrameBuffer::getFB()->importSemaphoreToColorBuffer(
+            dupExternalSemaphore(res.semaphoreHandle),
+            vulkanOnly,
+            colorBufferHandle)) {
+            // success
+    }
+
     if (sVkEmulation->deviceInfo.supportsExternalMemory &&
         sVkEmulation->deviceInfo.glInteropSupported &&
         glCompatible &&
@@ -1602,6 +1754,10 @@ bool teardownVkColorBuffer(uint32_t colorBufferHandle) {
 
     vk->vkDestroyImage(sVkEmulation->device, info.image, nullptr);
     freeExternalMemoryLocked(vk, &info.memory);
+
+    if (info.semaphore) {
+        destroyExternalSemaphore(info.semaphore);
+    }
 
 #ifdef __APPLE__
     if (info.mtlTexture) {
@@ -2288,6 +2444,60 @@ VK_EXT_MEMORY_HANDLE getBufferExtMemoryHandle(uint32_t bufferHandle) {
     }
 
     return infoPtr->memory.exportedHandle;
+}
+
+bool externalSemaphoresSupported() {
+    if (!sVkEmulation) return false;
+    return sVkEmulation->deviceInfo.supportsExternalSemaphores;
+}
+
+VkResult createExternalSemaphore(VkSemaphore* semaphoreOut, VK_EXT_SEMAPHORE_HANDLE* handleOut) {
+
+    auto vk = sVkEmulation->dvk;
+    auto device = sVkEmulation->device;
+
+    VkExportSemaphoreCreateInfo exportSemaphoreCi = {
+        VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO, 0,
+        VK_EXT_SEMAPHORE_HANDLE_TYPE_BIT,
+    };
+
+    VkSemaphoreCreateInfo semaphoreCi = {
+        VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, &exportSemaphoreCi, 0,
+    };
+
+    VkResult res = vk->vkCreateSemaphore(device, &semaphoreCi, 0, semaphoreOut);
+
+    if (res != VK_SUCCESS) {
+        LOG(ERROR) << "Could not create external semaphore.";
+        return res;
+    }
+
+#ifdef _WIN32
+    VkSemaphoreGetWin32HandleInfoKHR getWin32 = {
+        VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR, 0,
+        *semaphoreOut,
+        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT,
+    };
+    res = sVkEmulation->deviceInfo.getSemaphoreHandleFunc(device, &getWin32, handleOut);
+#else
+    VkSemaphoreGetFdInfoKHR getFd = {
+        VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR, 0,
+        *semaphoreOut,
+        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT,
+    };
+    res = sVkEmulation->deviceInfo.getSemaphoreHandleFunc(device, &getFd, handleOut);
+#endif
+
+    if (res != VK_SUCCESS) {
+        LOG(ERROR) << "Could not get semaphore handle.";
+    }
+
+    return res;
+}
+
+void destroyExternalSemaphore(VkSemaphore semaphore) {
+    auto vk = sVkEmulation->dvk;
+    vk->vkDestroySemaphore(sVkEmulation->device, semaphore, nullptr);
 }
 
 VkExternalMemoryHandleTypeFlags
