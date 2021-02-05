@@ -88,7 +88,7 @@ private:
     std::condition_variable mCv;
     uint64_t mEventCounter{0};
     std::atomic<uint64_t> mLastEvent{0};
-    RemoveCallback mRemove;
+    RemoveCallback mRemove{nullptr};
 };
 
 }  // namespace control

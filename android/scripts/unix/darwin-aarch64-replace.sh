@@ -186,14 +186,10 @@ rm ./lib64/gles_swiftshader/libEGL.dylib
 rm ./lib64/gles_swiftshader/libGLES_CM.dylib
 rm ./lib64/gles_swiftshader/libGLESv2.dylib
 rm ./lib64/vulkan/vk_swiftshader_icd.json
-rm ./lib64/vulkan/portability-macos-debug.json
 rm ./lib64/vulkan/libvulkan.dylib
-rm ./lib64/vulkan/portability-macos.json
 rm ./lib64/vulkan/libMoltenVK.dylib
 rm ./lib64/vulkan/MoltenVK_icd.json
 rm ./lib64/vulkan/libvk_swiftshader.dylib
-rm ./lib64/vulkan/libportability_icd-debug.dylib
-rm ./lib64/vulkan/libportability_icd.dylib
 rm ./lib64/vulkan/glslangValidator
 rm ./lib64/libshadertranslator.dylib
 rm ./lib64/libOpenglRender.dylib

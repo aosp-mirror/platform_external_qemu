@@ -1688,6 +1688,14 @@ void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
         }
     }
 
+    {
+        auto procIte = m_procOwnedSequenceNumbers.find(puid);
+        if (procIte != m_procOwnedSequenceNumbers.end()) {
+            delete procIte->second;
+            m_procOwnedSequenceNumbers.erase(procIte);
+        }
+    }
+
     mutex.unlock();
 
     for (auto handle : colorBuffersToCleanup) {
@@ -2652,7 +2660,7 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
     if (desiredRotation == SKIN_ROTATION_90 || desiredRotation == SKIN_ROTATION_270) {
         std::swap(*width, *height);
     }
-    pixels.resize(4 * (*width) * (*height));
+    pixels.resize(nChannels * (*width) * (*height));
 
     GLenum format = nChannels == 3 ? GL_RGB : GL_RGBA;
 
@@ -2886,6 +2894,14 @@ bool FrameBuffer::onLoad(Stream* stream,
                 }
             }
 
+            while (m_procOwnedSequenceNumbers.size()) {
+                auto it = m_procOwnedSequenceNumbers.begin();
+                while (it != m_procOwnedSequenceNumbers.end()) {
+                    delete it->second;
+                    it = m_procOwnedSequenceNumbers.erase(it);
+                }
+            }
+
             performDelayedColorBufferCloseLocked(true);
 
             lock.unlock();
@@ -3041,6 +3057,29 @@ void FrameBuffer::unregisterProcessCleanupCallback(void* key) {
     }
     callbackMap.erase(key);
 }
+
+void FrameBuffer::registerProcessSequenceNumberForPuid(uint64_t puid) {
+    AutoLock mutex(m_lock);
+
+    auto procIte = m_procOwnedSequenceNumbers.find(puid);
+    if (procIte != m_procOwnedSequenceNumbers.end()) {
+        return;
+    }
+    uint32_t* seqnoPtr = new uint32_t;
+    *seqnoPtr = 0;
+    m_procOwnedSequenceNumbers[puid] = seqnoPtr;
+}
+
+uint32_t* FrameBuffer::getProcessSequenceNumberPtr(uint64_t puid) {
+    AutoLock mutex(m_lock);
+
+    auto procIte = m_procOwnedSequenceNumbers.find(puid);
+    if (procIte != m_procOwnedSequenceNumbers.end()) {
+        return procIte->second;
+    }
+    return nullptr;
+}
+
 int FrameBuffer::createDisplay(uint32_t *displayId) {
     return emugl::get_emugl_multi_display_operations().createDisplay(displayId);
 }

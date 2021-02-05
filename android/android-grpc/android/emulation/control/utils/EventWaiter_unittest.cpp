@@ -100,6 +100,13 @@ TEST_F(EventWaiterTest, times_out_not_enough) {
     EXPECT_GE(milliseconds.count(), 10);
 }
 
+TEST_F(EventWaiterTest, no_callback_no_crash) {
+    {
+        EventWaiter wt;
+    }
+    SUCCEED();
+}
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

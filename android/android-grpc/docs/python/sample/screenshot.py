@@ -45,8 +45,8 @@ IMAGE_FORMATS = {
 }
 
 TRANSPORT = {
-    "gRPC": p.ImageTransport.gRPC,
-    "mmap": p.ImageTransport.mmap,
+    "gRPC": p.ImageTransport.TRANSPORT_CHANNEL_UNSPECIFIED,
+    "mmap": p.ImageTransport.MMAP,
 }
 
 

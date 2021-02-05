@@ -291,6 +291,7 @@ struct ChardevStdio {
     /* Own members: */
     bool has_signal;
     bool signal;
+    bool echo;
 };
 
 static inline ChardevCommon *qapi_ChardevStdio_base(const ChardevStdio *obj)

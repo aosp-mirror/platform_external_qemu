@@ -529,7 +529,7 @@ static void virgl_cmd_resource_map(VirtIOGPU *g,
 
     memset(&resp, 0, sizeof(resp));
     resp.hdr.type = VIRTIO_GPU_RESP_OK_MAP_INFO;
-    resp.map_flags = 0x2;
+    resp.map_flags = 0x3;
     resp.padding = 0;
     virtio_gpu_ctrl_response(g, cmd, &resp.hdr, sizeof(resp));
 }

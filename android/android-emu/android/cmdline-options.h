@@ -163,6 +163,7 @@ OPT_FLAG( no_sim, "device has no SIM card" )
 OPT_FLAG( lowram, "device is a low ram device" )
 OPT_FLAG( version, "display emulator version number" )
 OPT_FLAG( no_passive_gps, "disable passive gps updates" )
+OPT_FLAG( virtio_console, "using virtio console as console")
 OPT_FLAG( read_only, "allow running multiple instances of emulators on the same"
         " AVD, but cannot save snapshot.")
 OPT_PARAM( is_restart, "<restart-pid>", "specifies that this emulator was a restart, and to wait out <restart-pid> before proceeding")
@@ -261,8 +262,6 @@ OPT_PARAM(record_session, "<file>,<delay>[,<duration>]", "Screen record the emul
 OPT_FLAG(legacy_fake_camera, "Use legacy camera HAL for the emulated fake camera.")
 
 OPT_FLAG(no_direct_adb, "Use external adb executable for internal communication.")
-
-OPT_FLAG(crostini, "Turn on optimizations for running in a VM on Chrome OS")
 
 OPT_PARAM(check_snapshot_loadable,
           "<snapshot name|exported snapshot tar file>",

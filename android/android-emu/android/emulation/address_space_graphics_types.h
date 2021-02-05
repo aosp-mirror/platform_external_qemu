@@ -102,6 +102,9 @@ enum asg_host_state {
 
     // Error: Something weird happened and we need to exit.
     ASG_HOST_STATE_ERROR = 3,
+
+    // Rendering
+    ASG_HOST_STATE_RENDERING = 4,
 };
 
 struct asg_ring_config;
@@ -297,19 +300,37 @@ struct ConsumerCallbacks {
 };
 
 using ConsumerCreateCallback =
-    std::function<void* (struct asg_context, ConsumerCallbacks)>;
+    std::function<void* (struct asg_context, base::Stream*, ConsumerCallbacks)>;
 using ConsumerDestroyCallback =
     std::function<void(void*)>;
+using ConsumerPreSaveCallback =
+    std::function<void(void*)>;
+using ConsumerGlobalPreSaveCallback =
+    std::function<void()>;
 using ConsumerSaveCallback =
     std::function<void(void*, base::Stream*)>;
-using ConsumerLoadCallback =
-    std::function<void(void*, base::Stream*)>;
+using ConsumerGlobalPostSaveCallback =
+    std::function<void()>;
+using ConsumerPostSaveCallback =
+    std::function<void(void*)>;
+using ConsumerPostLoadCallback = ConsumerPostSaveCallback;
+using ConsumerGlobalPreLoadCallback = ConsumerGlobalPostSaveCallback;
 
 struct ConsumerInterface {
     ConsumerCreateCallback create;
     ConsumerDestroyCallback destroy;
+
+    ConsumerPreSaveCallback preSave;
+    ConsumerGlobalPreSaveCallback globalPreSave;
+
     ConsumerSaveCallback save;
-    ConsumerLoadCallback load;
+
+    ConsumerGlobalPostSaveCallback globalPostSave;
+    ConsumerPostSaveCallback postSave;
+
+    ConsumerPostLoadCallback postLoad;
+
+    ConsumerGlobalPreLoadCallback globalPreLoad;
 };
 
 } // namespace asg

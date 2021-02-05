@@ -140,6 +140,11 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         mUi->tabWidget->removeTab(kAccelerometerTabIndex);
     }
+
+
+    if (!android_heart_rate_sensor_configured()) {
+        disableHeartRateSensor();
+    }
 }
 
 VirtualSensorsPage::~VirtualSensorsPage() {
@@ -993,4 +998,8 @@ void VirtualSensorsPage::updateUIPosture() {
             mUi->lbl_currentPostureValue->setText(tr("Unknown"));
             break;
     }
+}
+
+void VirtualSensorsPage::disableHeartRateSensor() {
+    mUi->heartRateSensorValueWidget->setEnabled(false);
 }

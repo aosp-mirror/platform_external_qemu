@@ -133,6 +133,16 @@ std::tuple<int, int> ScreenshotUtils::resizeKeepAspectRatio(
     return std::make_tuple(newWidth, newHeight);
 }
 
+bool ScreenshotUtils::equals(const DisplayConfiguration& a,
+                             const DisplayConfiguration& b) {
+    return a.width() == b.width() && a.height() == b.height() &&
+           a.dpi() == b.dpi() && a.flags() == b.flags() &&
+           a.display() == b.display();
+}
+
+int ScreenshotUtils::getBytesPerPixel(const ImageFormat& fmt) {
+    return fmt.format() == ImageFormat::RGB888 ? 3 : 4;
+}
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

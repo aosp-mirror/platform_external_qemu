@@ -49,6 +49,11 @@ public:
                                                       double height,
                                                       double desiredWidth,
                                                       double desiredHeight);
+
+    static bool equals(const DisplayConfiguration& a, const DisplayConfiguration& b);
+
+    // Gets the bytes per pixel for the given format.
+    static int getBytesPerPixel(const ImageFormat& fmt);
 };
 
 }  // namespace control

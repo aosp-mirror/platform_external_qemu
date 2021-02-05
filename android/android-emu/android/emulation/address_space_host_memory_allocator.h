@@ -37,6 +37,12 @@ public:
     void save(base::Stream* stream) const override;
     bool load(base::Stream* stream) override;
 
+    static void globalStateSave(base::Stream* stream);
+    static bool globalStateLoad(base::Stream* stream,
+                                const address_space_device_control_ops *ops,
+                                const AddressSpaceHwFuncs* hw);
+    static void globalStateClear();
+
 private:
     uint64_t allocate(AddressSpaceDevicePingInfo *info);
     uint64_t unallocate(AddressSpaceDevicePingInfo *info);

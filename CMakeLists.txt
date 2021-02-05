@@ -82,8 +82,6 @@ set(OPTION_MINBUILD
       BOOL
       "True if we should build a minimum set of components to support 64-bit guets only."
 )
-set(OPTION_WIN_LTO TRUE
-    CACHE BOOL "True if we should enable global link optimizations in windows (slow)")
 set(OPTION_TCMALLOC
     TRUE
     CACHE
@@ -201,6 +199,15 @@ prebuilt(Threads)
 # Copy emulator replacement script to the install dir.
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
     file(COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/darwin-aarch64-replace.sh
+         DESTINATION ${CMAKE_INSTALL_PREFIX})
+endif()
+
+if(LINUX_AARCH64)
+    file(COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/linux-aarch64-fixgcc.sh
+         DESTINATION ${CMAKE_INSTALL_PREFIX})
+    file(COPY ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-aarch64/lib/glibc-2.29.tgz
+         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib64)
+    file(COPY ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-aarch64/lib/patchelf.tgz
          DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
@@ -324,14 +331,6 @@ if(WINDOWS_MSVC_X86_64)
     # Disable rtti, we are not going to be needing it, this is the msvc
     # equivalent of -fno-rtti
     add_c_flag("-GR-")
-
-    # Link time optization tragically fails when cross compiling.
-    if(NOT CROSSCOMPILE AND OPTION_WIN_LTO)
-      # Do a global optimization pass (note, link times --> infinity)
-      add_c_flag("-flto=thin")
-      # Optimize a bit more on the vtables in use, note this requires -flto
-      add_c_flag("-fwhole-program-vtables")
-    endif()
   endif()
 endif()
 
@@ -507,10 +506,10 @@ if(WINDOWS)
   include(emu-windows-libs)
 endif()
 
-# Get the versions from git (Note that both functions are doing pretty much the
-# same)
+# Get the versions from git if possible, by default we point to
+# the latest qemu merge commit  (v2.12.0) if we are unable to fetch it.
+set(ANDROID_QEMU_VERSION "v2.12.0-19097-g85fa07f04ef")
 get_git_version(ANDROID_QEMU_VERSION)
-get_git_sha(ANDROID_QEMU_SHA)
 
 # Generate the qemu-version header.
 configure_file(qemu-version.h.in qemu-version.h @ONLY)

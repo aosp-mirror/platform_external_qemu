@@ -67,11 +67,6 @@ elseif(DARWIN_X86_64)
       "${PREBUILT_ROOT}/libvulkan.dylib>lib64/vulkan/libvulkan.dylib"
       "${PREBUILT_ROOT}/icds/libMoltenVK.dylib>lib64/vulkan/libMoltenVK.dylib"
       "${PREBUILT_ROOT}/icds/MoltenVK_icd.json>lib64/vulkan/MoltenVK_icd.json"
-      # gfx-rs libportability-icd
-      "${PREBUILT_ROOT}/icds/portability-macos.json>lib64/vulkan/portability-macos.json"
-      "${PREBUILT_ROOT}/icds/portability-macos-debug.json>lib64/vulkan/portability-macos-debug.json"
-      "${PREBUILT_ROOT}/icds/libportability_icd-debug.dylib>lib64/vulkan/libportability_icd-debug.dylib"
-      "${PREBUILT_ROOT}/icds/libportability_icd.dylib>lib64/vulkan/libportability_icd.dylib"
       # Shaders
       ${VULKAN_COMMON_DEPENDENCIES})
   set(VULKAN_TEST_DEPENDENCIES

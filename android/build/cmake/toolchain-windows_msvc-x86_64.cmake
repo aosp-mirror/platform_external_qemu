@@ -67,8 +67,8 @@ if(WIN32)
   set(CMAKE_CXX_FLAGS_DEBUG "/MD /Z7")
   set(CMAKE_C_FLAGS_DEBUG "/MD /Z7")
   # Set release flags such that we create pdbs..
-  set(CMAKE_C_FLAGS_RELEASE "/MD /Zi")
-  set(CMAKE_CXX_FLAGS_RELEASE "/MD /Zi")
+  set(CMAKE_C_FLAGS_RELEASE "/MD /Zi /GL")
+  set(CMAKE_CXX_FLAGS_RELEASE "/MD /Zi /GL")
 
   # Add compiler definition for Win7
   add_definitions("-D_WIN32_WINNT=0x0601")

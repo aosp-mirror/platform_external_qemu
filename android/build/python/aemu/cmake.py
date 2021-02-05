@@ -77,9 +77,16 @@ def configure(args):
 
     # Make darwin and msvc builds have QtWebEngine support for the default
     # build.
-    if args.target == "darwin" or args.target == "windows":
-        args.qtwebengine = True
-    cmake_cmd += ["-DQTWEBENGINE=%s" % args.qtwebengine]
+    build_qtwebengine = False
+    if args.qtwebengine and args.no_qtwebengine:
+        logging.error(
+            "--qtwebengine and --no-qtwebengine cannot be set at the same time!")
+        sys.exit(1)
+    if args.qtwebengine or args.target == "darwin" or args.target == "windows":
+        build_qtwebengine = True
+    if args.no_qtwebengine:
+        build_qtwebengine = False
+    cmake_cmd += ["-DQTWEBENGINE=%s" % build_qtwebengine]
 
     if args.cmake_option:
         additional_cmake_args = ["-D%s" % x for x in args.cmake_option]
@@ -219,13 +226,14 @@ def launch():
         dest="qtwebengine",
         default=False,
         action="store_true",
-        help="Build with QtWebEngine support",
+        help="Enforce building with QtWebEngine support (cannot be used together with --no-qtwebengine)",
     )
     parser.add_argument(
         "--no-qtwebengine",
-        dest="qtwebengine",
-        action="store_false",
-        help="Build without QtWebEngine support",
+        dest="no_qtwebengine",
+        default=False,
+        action="store_true",
+        help="Enforce building without QtWebEngine support (cannot be used together with --qtwebengine)",
     )
     parser.add_argument(
         "--no-tests", dest="tests", action="store_false", help="Do not run the tests"

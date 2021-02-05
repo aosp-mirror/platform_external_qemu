@@ -74,6 +74,7 @@ extern "C" {
 #include "android/emulation/VmLock.h"
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/address_space_device.hpp"
+#include "android/emulation/control/adb/AdbService.h"
 #include "android/emulation/control/EmulatorAdvertisement.h"
 #include "android/emulation/control/EmulatorService.h"
 #include "android/emulation/control/UiController.h"
@@ -302,6 +303,7 @@ int qemu_setup_grpc() {
     auto uiController =
             android::emulation::control::getUiControllerService(
                     getConsoleAgents());
+    auto adb = android::emulation::control::getAdbService();
     auto builder = EmulatorControllerService::Builder()
                            .withConsoleAgents(getConsoleAgents())
                            .withPortRange(grpc_start, grpc_end)
@@ -313,7 +315,8 @@ int qemu_setup_grpc() {
                            .withService(emulator)
                            .withService(h2o)
                            .withService(snapshot)
-                           .withService(uiController);
+                           .withService(uiController)
+                           .withSecureService(adb);
 
     int timeout = 0;
     if (android_cmdLineOptions->idle_grpc_timeout &&

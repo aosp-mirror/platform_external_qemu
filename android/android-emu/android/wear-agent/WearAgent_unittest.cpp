@@ -143,13 +143,7 @@ static bool testWearAgent(bool usbPhone) {
     if (usbPhone) {
         snprintf(phoneDevice, sizeof(phoneDevice), "070fe93a0b2c1fdb");
     } else {
-        // start a new server at port 6556
-        int consolePort = 6556;
-        consoleSocket.reset(testStartMockServer(&consolePort));
-        if (!consoleSocket.valid()) {
-            return false;
-        }
-        snprintf(phoneDevice, sizeof(phoneDevice), "emulator-%d", consolePort);
+        snprintf(phoneDevice, sizeof(phoneDevice), "emulator-5556");
     }
     const char kWearDevice[] = "emulator-6554";
     char kDevices[1024] = {'\0'};
@@ -162,10 +156,8 @@ static bool testWearAgent(bool usbPhone) {
     snprintf(buf, sizeof(buf), "%04x%s", (int)(strlen(kDevices)), kDevices);
     return testSendToSocket(agentSocketTracking.get(), buf) &&
            testRunMockAdbServer(adbServerSocket.get(),
-                                consoleSocket.get(),
                                 kWearDevice,
-                                phoneDevice,
-                                usbPhone);
+                                phoneDevice);
 }
 
 TEST(WearAgent, DISABLED_PairUpWearToUsbPhone) {

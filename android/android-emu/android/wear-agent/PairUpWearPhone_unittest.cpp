@@ -60,21 +60,14 @@ static bool testWrapper(bool usbPhone) {
                adbMockServerPort);
         return false;
     }
-    int consoleServerPort = -1;
-    ScopedSocket consoleServerSocket;
     char phoneDevice[128] = {'\0'};
     const char kUsbPhoneDevice[] = "070fe93a0b2c1fdb";
     if (usbPhone) {
         snprintf(phoneDevice, sizeof(phoneDevice), kUsbPhoneDevice);
     } else {
-        consoleServerSocket.reset(testStartMockServer(&consoleServerPort));
-        if (!consoleServerSocket.valid()) {
-            return false;
-        }
         snprintf(phoneDevice,
                  sizeof(phoneDevice),
-                 "emulator-%d",
-                 consoleServerPort);
+                 "emulator-5556");
     }
     const char kWearDevice[] = "emulator-6558";
 
@@ -92,10 +85,8 @@ static bool testWrapper(bool usbPhone) {
     }
     // In the parent process.
     bool status = testRunMockAdbServer(adbMockServerSocket.get(),
-                                       consoleServerSocket.get(),
                                        kWearDevice,
-                                       phoneDevice,
-                                       usbPhone);
+                                       phoneDevice);
     return status;
 }
 

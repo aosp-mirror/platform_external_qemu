@@ -23,7 +23,7 @@ import sys
 # Class capturing a .cpp file and a .h file (a "C++ module")
 class Module(object):
 
-    def __init__(self, directory, basename, customAbsDir = None, suppress = False):
+    def __init__(self, directory, basename, customAbsDir = None, suppress = False, implOnly = False):
         self.directory = directory
         self.basename = basename
 
@@ -39,6 +39,8 @@ class Module(object):
         self.customAbsDir = customAbsDir
 
         self.suppress = suppress
+
+        self.implOnly = implOnly
 
     def getMakefileSrcEntry(self):
         if self.customAbsDir:
@@ -68,20 +70,27 @@ class Module(object):
 
         filename = os.path.join(absDir, self.basename)
 
-        fpHeader = open(filename + ".h", "w", encoding="utf-8")
+        fpHeader = None
+
+        if not self.implOnly:
+            fpHeader = open(filename + ".h", "w", encoding="utf-8")
+
         fpImpl = open(filename + ".cpp", "w", encoding="utf-8")
 
         self.headerFileHandle = fpHeader
         self.implFileHandle = fpImpl
 
-        self.headerFileHandle.write(self.headerPreamble)
+        if not self.implOnly:
+            self.headerFileHandle.write(self.headerPreamble)
+
         self.implFileHandle.write(self.implPreamble)
 
     def appendHeader(self, toAppend):
         if self.suppress:
             return
 
-        self.headerFileHandle.write(toAppend)
+        if not self.implOnly:
+            self.headerFileHandle.write(toAppend)
 
     def appendImpl(self, toAppend):
         if self.suppress:
@@ -93,10 +102,14 @@ class Module(object):
         if self.suppress:
             return
 
-        self.headerFileHandle.write(self.headerPostamble)
+        if not self.implOnly:
+            self.headerFileHandle.write(self.headerPostamble)
+
         self.implFileHandle.write(self.implPostamble)
 
-        self.headerFileHandle.close()
+        if not self.implOnly:
+            self.headerFileHandle.close()
+
         self.implFileHandle.close()
 
 # Class capturing a .proto protobuf definition file
@@ -595,6 +608,27 @@ class CodeGen(object):
 
         return None
 
+    def makePrimitiveStreamMethodInPlace(self, typeInfo, typeName, direction="write"):
+        if not self.validPrimitive(typeInfo, typeName):
+            return None
+
+        size = typeInfo.getPrimitiveEncodingSize(typeName)
+        prefix = "to" if direction == "write" else "from"
+        suffix = None
+        if size == 1:
+            suffix = "Byte"
+        elif size == 2:
+            suffix = "Be16"
+        elif size == 4:
+            suffix = "Be32"
+        elif size == 8:
+            suffix = "Be64"
+
+        if suffix:
+            return prefix + suffix
+
+        return None
+
     def streamPrimitive(self, typeInfo, streamVar, accessExpr, accessType, direction="write"):
         accessTypeName = accessType.typeName
 
@@ -641,6 +675,77 @@ class CodeGen(object):
                        streamStorageVarType, ptrCast, accessExpr))
             self.stmt("%s->%s(%s)" % (streamVar, streamMethod, streamStorageVar))
 
+    def memcpyPrimitive(self, typeInfo, streamVar, accessExpr, accessType, direction="write"):
+        accessTypeName = accessType.typeName
+
+        if accessType.pointerIndirectionLevels == 0 and not self.validPrimitive(typeInfo, accessTypeName):
+            print("Tried to stream a non-primitive type: %s" % accessTypeName)
+            os.abort()
+
+        needPtrCast = False
+
+        streamSize = 8
+
+        if accessType.pointerIndirectionLevels > 0:
+            streamSize = 8
+            streamStorageVarType = "uint64_t"
+            needPtrCast = True
+            streamMethod = "toBe64" if direction == "write" else "fromBe64"
+        else:
+            streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
+            if streamSize == 1:
+                streamStorageVarType = "uint8_t"
+            elif streamSize == 2:
+                streamStorageVarType = "uint16_t"
+            elif streamSize == 4:
+                streamStorageVarType = "uint32_t"
+            elif streamSize == 8:
+                streamStorageVarType = "uint64_t"
+            streamMethod = self.makePrimitiveStreamMethodInPlace(
+                typeInfo, accessTypeName, direction=direction)
+
+        streamStorageVar = self.var()
+
+        accessCast = self.makeRichCTypeDecl(accessType, useParamName=False)
+
+        if direction == "read":
+            accessCast = self.makeRichCTypeDecl(accessType.getForNonConstAccess(), useParamName=False)
+
+        ptrCast = "(uintptr_t)" if needPtrCast else ""
+
+        if direction == "read":
+            self.stmt("memcpy((%s*)&%s, %s, %s)" %
+                (accessCast,
+                 accessExpr,
+                 streamVar,
+                 str(streamSize)))
+            self.stmt("android::base::Stream::%s((uint8_t*)&%s)" % (
+                streamMethod,
+                accessExpr))
+        else:
+            self.stmt("%s %s = (%s)%s%s" %
+                      (streamStorageVarType, streamStorageVar,
+                       streamStorageVarType, ptrCast, accessExpr))
+            self.stmt("memcpy(%s, &%s, %s)" % (streamVar, streamStorageVar, str(streamSize)))
+            self.stmt("android::base::Stream::%s((uint8_t*)%s)" % (
+                streamMethod,
+                streamVar))
+
+    def countPrimitive(self, typeInfo, accessType):
+        accessTypeName = accessType.typeName
+
+        if accessType.pointerIndirectionLevels == 0 and not self.validPrimitive(typeInfo, accessTypeName):
+            print("Tried to count a non-primitive type: %s" % accessTypeName)
+            os.abort()
+
+        needPtrCast = False
+
+        if accessType.pointerIndirectionLevels > 0:
+            streamSize = 8
+        else:
+            streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
+
+        return streamSize
 
 # Class to wrap a Vulkan API call.
 #

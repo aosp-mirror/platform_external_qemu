@@ -4748,7 +4748,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
         /* Enable ADB authenticaiton, or not. */
         if (feature_is_enabled(kFeature_PlayStoreImage)) {
-            boot_property_add("qemu.adb.secure", "1");
+            boot_property_add_qemu_adb_secure(1);
         }
 
         /* Set the VM's max heap size, passed as a boot property */
@@ -4763,8 +4763,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             boot_property_add("ro.config.low_ram", "true");
         }
 
-        /* Initialize presence of hardware nav button */
-        boot_property_add("qemu.hw.mainkeys", android_hw->hw_mainKeys ? "1" : "0");
+        boot_property_add_qemu_hw_mainkeys(android_hw->hw_mainKeys);
 
         if (android_hw->hw_gsmModem) {
             if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
@@ -4790,9 +4789,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         }
 
         if (lcd_density) {
-            char temp[8];
-            snprintf(temp, sizeof(temp), "%d", lcd_density);
-            boot_property_add("qemu.sf.lcd_density", temp);
+            boot_property_add_qemu_sf_lcd_density(lcd_density);
         }
     }
 
@@ -5477,12 +5474,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 combined = g_strdup_printf("%s mac80211_hwsim.radios=0",
                                            current_machine->kernel_cmdline);
 
-                snprintf(wifi_mac_prefix_str, sizeof(wifi_mac_prefix_str),
-                         "%d", android_serial_number_port);
-
-                // Userspace will use wifi_mac_prefix to generate MAC addresses
-                // for wifi radios.
-                boot_property_add("net.wifi_mac_prefix", wifi_mac_prefix_str);
+                boot_property_add_wifi_mac_prefix(android_serial_number_port);
             } else {
                 // Now that we know the serial number we can set it as the MAC prefix
                 // for wifi. This keeps the MAC addresses unique across several

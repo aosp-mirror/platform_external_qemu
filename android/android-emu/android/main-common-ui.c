@@ -422,7 +422,7 @@ bool emulator_parseInputCommandLineOptions(AndroidOptions* opts) {
         const char* android_keyboard_layout =
                 skin_keyboard_host_to_guest_layout_name(cur_keyboard_layout);
         if (android_keyboard_layout) {
-            boot_property_add("qemu.keyboard_layout", android_keyboard_layout);
+            boot_property_add_qemu_keyboard_layout(android_keyboard_layout);
         } else {
 // Always use keycode forwarding on Linux due to bug in prebuilt Libxkb.
 #if defined(_WIN32) || defined(__APPLE__)

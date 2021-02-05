@@ -435,7 +435,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                     for bin in $fix_bins; do
                         echo "Fixing $bin"
                         # change whatever Qt libs this binary uses to rpaths
-                        tofix=$(otool -LX $lib | grep "libQt.*.dylib" | cut -f1 -d ' ')
+                        tofix=$(otool -LX $bin | grep "libQt.*.dylib" | cut -f1 -d ' ')
                         for fix in $tofix; do
                             fix_basename=$(basename $fix)
                             echo "\t$fix ==> @rpath/$fix_basename"

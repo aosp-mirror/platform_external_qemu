@@ -347,7 +347,7 @@ static void inject_timezone_boot_property() {
     char* end = tzname + sizeof(tzname);
     char* p = bufprint_zoneinfo_timezone(tzname, end);
     if (p < end) {
-        boot_property_add("qemu.timezone", tzname);
+        boot_property_add_qemu_timezone(tzname);
     }
 }
 

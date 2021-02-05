@@ -201,7 +201,7 @@ typedef struct QAndroidVmOperations {
     bool (*isSnapshotSaveSkipped)(void);
 
     // Create/register/getinfo for host memory Id's
-    uint64_t (*hostmemRegister)(uint64_t hva, uint64_t size);
+    uint64_t (*hostmemRegister)(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id);
     void (*hostmemUnregister)(uint64_t id);
     struct HostmemEntry (*hostmemGetInfo)(uint64_t id);
     EmuRunState (*getRunState)();

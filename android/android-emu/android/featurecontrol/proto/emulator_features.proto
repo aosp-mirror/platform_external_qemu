@@ -103,4 +103,6 @@ enum Feature {
     TvRemote = 57;
 
     VirtioMouse = 58;
+
+    VirtconsoleLogcat = 59;
 }

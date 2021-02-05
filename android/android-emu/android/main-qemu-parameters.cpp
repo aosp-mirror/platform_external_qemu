@@ -13,6 +13,7 @@
 #include "android/main-qemu-parameters.h"
 
 #include "android/base/StringFormat.h"
+#include "android/boot-properties.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -57,7 +58,6 @@ QemuParameters* qemu_parameters_create(const char* argv0,
 
     params.add(argv0);
 
-    // net.shared_net_ip boot property value.
     char boot_prop_ip[64] = {};
     if (opts->shared_net_id) {
         char* end;
@@ -66,10 +66,7 @@ QemuParameters* qemu_parameters_create(const char* argv0,
             derror("option -shared-net-id must be an integer between 1 and 255\n");
             return NULL;
         }
-        snprintf(boot_prop_ip, sizeof(boot_prop_ip),
-                 "net.shared_net_ip=10.1.2.%ld", shared_net_id);
-
-        params.add2If("-boot-property", boot_prop_ip);
+        boot_property_add_shared_net_ip(shared_net_id);
     }
 
     params.add2If("-tcpdump", opts->tcpdump);

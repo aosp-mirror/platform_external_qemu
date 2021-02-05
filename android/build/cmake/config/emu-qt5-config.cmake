@@ -11,7 +11,7 @@
 
 # TODO: Remove this once we have -no-window working with absolutely no Qt
 # dependencies
-if(NOT QTWEBENGINE AND ANDROID_TARGET_TAG MATCHES "linux-x86_64")
+if(NOT QTWEBENGINE AND ((ANDROID_TARGET_TAG MATCHES "linux-x86_64") OR (ANDROID_TARGET_TAG MATCHES "darwin-x86_64")))
   get_filename_component(
     PREBUILT_ROOT
     "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_TARGET_TAG}-nowebengine"

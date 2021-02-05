@@ -125,6 +125,12 @@ Builder& Builder::withService(Service* service) {
     return *this;
 }
 
+Builder& Builder::withSecureService(Service* service) {
+    if (service != nullptr)
+        mSecureServices.emplace_back(std::shared_ptr<Service>(service));
+    return *this;
+}
+
 Builder& Builder::withAuthToken(std::string token) {
     mAuthToken = token;
     mValid = !token.empty();
@@ -156,6 +162,7 @@ Builder& Builder::withCertAndKey(const char* certfile,
         ssl_opts.pem_root_certs = ca;
         ssl_opts.client_certificate_request =
                 GRPC_SSL_REQUEST_AND_REQUIRE_CLIENT_CERTIFICATE_AND_VERIFY;
+        mCaCerts = true;
     }
 
     mCredentials = grpc::SslServerCredentials(ssl_opts);
@@ -183,7 +190,7 @@ Builder& Builder::withLogging(bool logging) {
     return *this;
 }
 
-Builder& Builder::withPortRange(int start,  int end) {
+Builder& Builder::withPortRange(int start, int end) {
     assert(end > start);
     int port = start;
     bool found = false;
@@ -265,13 +272,19 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         builder.RegisterService(service.get());
     }
 
+    if (mSecurity == Security::Tls && mCaCerts) {
+        for (auto service : mSecureServices) {
+            builder.RegisterService(service.get());
+        }
+    }
     // Register logging & metrics interceptor.
     std::vector<std::unique_ptr<
             grpc::experimental::ServerInterceptorFactoryInterface>>
             creators;
 
     if (mLogging) {
-        creators.emplace_back(std::make_unique<StdOutLoggingInterceptorFactory>());
+        creators.emplace_back(
+                std::make_unique<StdOutLoggingInterceptorFactory>());
     }
     creators.emplace_back(std::make_unique<MetricsInterceptorFactory>());
     if (mTimeout.count() > 0 && mAgents != nullptr) {
@@ -286,8 +299,8 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         return nullptr;
 
     LOG(INFO) << "Started GRPC server at " << server_address.c_str()
-                 << ", security: " << mSecurity
-                 << (mAuthToken.empty() ? "" : "+token");
+              << ", security: " << mSecurity
+              << (mAuthToken.empty() ? "" : "+token");
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(mPort, std::move(mServices),
                                               service.release()));
