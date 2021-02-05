@@ -43,13 +43,17 @@ typedef void* HANDLE;
 // External memory objects are HANDLE on Windows and fd's on POSIX systems.
 #ifdef _WIN32
 typedef HANDLE VK_EXT_MEMORY_HANDLE;
+typedef HANDLE VK_EXT_SEMAPHORE_HANDLE;
 // corresponds to INVALID_HANDLE_VALUE
 #define VK_EXT_MEMORY_HANDLE_INVALID (VK_EXT_MEMORY_HANDLE)(uintptr_t)(-1)
 #define VK_EXT_MEMORY_HANDLE_TYPE_BIT VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT
+#define VK_EXT_SEMAPHORE_HANDLE_TYPE_BIT VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT
 #else
 typedef int VK_EXT_MEMORY_HANDLE;
+typedef int VK_EXT_SEMAPHORE_HANDLE;
 #define VK_EXT_MEMORY_HANDLE_INVALID (-1)
 #define VK_EXT_MEMORY_HANDLE_TYPE_BIT VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT
+#define VK_EXT_SEMAPHORE_HANDLE_TYPE_BIT VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT
 #endif
 
 VK_EXT_MEMORY_HANDLE dupExternalMemory(VK_EXT_MEMORY_HANDLE);
@@ -81,6 +85,7 @@ struct VkEmulation {
     VulkanDispatch* dvk = nullptr;
 
     bool instanceSupportsExternalMemoryCapabilities = false;
+    bool instanceSupportsExternalSemaphoreCapabilities = false;
     PFN_vkGetPhysicalDeviceImageFormatProperties2KHR
             getImageFormatProperties2Func = nullptr;
 
@@ -125,6 +130,7 @@ struct VkEmulation {
         bool hasGraphicsQueueFamily = false;
         bool hasComputeQueueFamily = false;
         bool supportsExternalMemory = false;
+        bool supportsExternalSemaphores = false;
         bool glInteropSupported = false;
 
         std::vector<uint32_t> graphicsQueueFamilyIndices;
@@ -140,6 +146,14 @@ struct VkEmulation {
         PFN_vkGetMemoryWin32HandleKHR getMemoryHandleFunc = nullptr;
 #else
         PFN_vkGetMemoryFdKHR getMemoryHandleFunc = nullptr;
+#endif
+
+#ifdef _WIN32
+        PFN_vkGetSemaphoreWin32HandleKHR getSemaphoreHandleFunc = nullptr;
+        PFN_vkImportSemaphoreWin32HandleKHR importSemaphoreHandleFunc = nullptr;
+#else
+        PFN_vkGetSemaphoreFdKHR getSemaphoreHandleFunc = nullptr;
+        PFN_vkImportSemaphoreFdKHR importSemaphoreHandleFunc = nullptr;
 #endif
     };
 
@@ -225,6 +239,8 @@ struct VkEmulation {
     };
     struct ColorBufferInfo {
         ExternalMemoryInfo memory;
+        VkSemaphore semaphore = VK_NULL_HANDLE;
+        VK_EXT_SEMAPHORE_HANDLE semaphoreHandle;
 
         uint32_t handle;
 
@@ -342,6 +358,10 @@ bool importExternalMemoryDedicatedImage(
     const VkEmulation::ExternalMemoryInfo* info,
     VkImage image,
     VkDeviceMemory* out);
+bool createAndImportExternalSemaphore(VulkanDispatch* vk,
+                                      VkDevice targetDevice,
+                                      VK_EXT_SEMAPHORE_HANDLE handle,
+                                      VkSemaphore* semaphoreOut);
 
 // ColorBuffer operations
 
@@ -375,6 +395,11 @@ bool setupVkBuffer(uint32_t bufferHandle,
                    uint32_t* typeIndex = nullptr);
 bool teardownVkBuffer(uint32_t bufferHandle);
 VK_EXT_MEMORY_HANDLE getBufferExtMemoryHandle(uint32_t bufferHandle);
+
+// External semaphore support query and operations
+bool externalSemaphoresSupported();
+VkResult createExternalSemaphore(VkSemaphore* semaphoreOut, VK_EXT_SEMAPHORE_HANDLE* handleOut);
+void destroyExternalSemaphore(VkSemaphore);
 
 VkExternalMemoryHandleTypeFlags
 transformExternalMemoryHandleTypeFlags_tohost(
