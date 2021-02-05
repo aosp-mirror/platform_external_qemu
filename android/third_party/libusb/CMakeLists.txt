@@ -8,8 +8,8 @@ android_add_library(
   LICENSE LGPL-2.1
   SRC ${src}/libusb/core.c ${src}/libusb/descriptor.c ${src}/libusb/hotplug.c
       ${src}/libusb/io.c ${src}/libusb/strerror.c ${src}/libusb/sync.c
-  DARWIN ${src}/libusb/os/darwin_usb.c ${src}/libusb/os/poll_posix.c
-         ${src}/libusb/os/threads_posix.c
+  DARWIN ${src}/libusb/os/darwin_usb.c ${src}/libusb/os/threads_posix.c
+         ${src}/libusb/os/events_posix.c  ${src}/libusb/os/darwin_iousbhost.m
   LINUX ${src}/libusb/os/linux_netlink.c ${src}/libusb/os/linux_usbfs.c
         ${src}/libusb/os/poll_posix.c ${src}/libusb/os/threads_posix.c
   WINDOWS ${src}/libusb/os/poll_windows.c ${src}/libusb/os/threads_windows.c
@@ -39,7 +39,9 @@ android_target_include_directories(emulator-libusb darwin-aarch64 PRIVATE
                                    ${src}/Xcode)
 android_target_link_libraries(
   emulator-libusb darwin-x86_64 PRIVATE "-framework IOKit"
-                                        "-framework CoreFoundation")
+                                        "-framework Foundation"
+                                        "-framework CoreFoundation"
+                                        "-framework IOUSBHost")
 android_target_link_libraries(
   emulator-libusb darwin-aarch64 PRIVATE "-framework IOKit"
                                         "-framework CoreFoundation")
