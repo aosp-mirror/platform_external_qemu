@@ -154,8 +154,7 @@ DEVICE_MEMORY_INFO_KEYS = [
     "devicememorytypebits",
 ]
 
-TRANSFORMED_TYPES = [
-    "VkExternalMemoryProperties",
+TRIVIAL_TRANSFORMED_TYPES = [
     "VkPhysicalDeviceExternalImageFormatInfo",
     "VkPhysicalDeviceExternalBufferInfo",
     "VkExternalMemoryImageCreateInfo",
@@ -164,6 +163,12 @@ TRANSFORMED_TYPES = [
     "VkExternalImageFormatProperties",
     "VkExternalBufferProperties",
 ]
+
+NON_TRIVIAL_TRANSFORMED_TYPES = [
+    "VkExternalMemoryProperties",
+]
+
+TRANSFORMED_TYPES = TRIVIAL_TRANSFORMED_TYPES + NON_TRIVIAL_TRANSFORMED_TYPES
 
 # Holds information about a Vulkan type instance (i.e., not a type definition).
 # Type instances are used as struct field definitions or function parameters,
