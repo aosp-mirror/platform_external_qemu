@@ -264,6 +264,18 @@ public:
     void setInUse(bool inUse);
     bool isInUse() const { return m_inUse; }
 
+    bool importSemaphore(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        bool vulkanOnly);
+
+    void setPendingSemaphoreSignal();
+    void waitSemaphore(GLenum textureSrcLayout);
+    void signalSemaphore(GLenum textureDstLayout);
+
     void setSync(bool debug = false);
     void waitSync(bool debug = false);
     void setDisplay(uint32_t displayId) { m_displayId = displayId; }
@@ -285,6 +297,8 @@ private:
     GLuint m_fbo = 0;
     GLenum m_internalFormat = 0;
     GLenum m_sizedInternalFormat = 0;
+    GLuint m_semaphore = 0;
+    bool m_pending_semaphore_signal = false;
 
     // |m_format| and |m_type| are for reformatting purposes only
     // to work around bugs in the guest. No need to snapshot those.

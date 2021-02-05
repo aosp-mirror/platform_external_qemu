@@ -688,6 +688,45 @@ bool FrameBuffer::importMemoryToColorBuffer(
     return (*c).second.cb->importMemory(handle, size, dedicated, linearTiling, vulkanOnly);
 }
 
+bool FrameBuffer::importSemaphoreToColorBuffer(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        bool vulkanOnly,
+        uint32_t colorBufferHandle) {
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(colorBufferHandle));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        ERR("FB: importMemoryToColorBuffer cb handle %#x not found\n", colorBufferHandle);
+        return false;
+    }
+
+    return (*c).second.cb->importSemaphore(handle, vulkanOnly);
+}
+
+void FrameBuffer::setColorBufferPendingSemaphoreSignal(
+    uint32_t colorBufferHandle) {
+    AutoLock mutex(m_lock);
+    setColorBufferPendingSemaphoreSignalLocked(colorBufferHandle);
+}
+
+void FrameBuffer::setColorBufferPendingSemaphoreSignalLocked(
+    uint32_t colorBufferHandle) {
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(colorBufferHandle));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        ERR("FB: setColorBufferPendingSemaphoreSignal cb handle %#x not found\n", colorBufferHandle);
+        return;
+    }
+
+    (*c).second.cb->setPendingSemaphoreSignal();
+}
+
 void FrameBuffer::setColorBufferInUse(
     uint32_t colorBufferHandle,
     bool inUse) {

@@ -39,6 +39,8 @@ static void sDefaultRunOnUiThread(UiUpdateFunc f, void* data, bool wait) {
     (void)wait;
 }
 
+static std::vector<ColorBufferPtr> sComposedCbs;
+
 PostWorker::PostWorker(
         PostWorker::BindSubwinCallback&& cb,
         bool mainThreadPostingOnly,
@@ -324,6 +326,7 @@ void PostWorker::composeLayer(ComposeLayer* l) {
             return;
         }
         cb->postLayer(l, mFb->getWidth(), mFb->getHeight());
+        cb->signalSemaphore(GL_LAYOUT_GENERAL_EXT);
     }
     else {
         // no Colorbuffer associated with SOLID_COLOR mode

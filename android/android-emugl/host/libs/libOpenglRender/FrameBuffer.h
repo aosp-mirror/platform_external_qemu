@@ -546,6 +546,17 @@ public:
         bool linearTiling,
         bool vulkanOnly,
         uint32_t colorBufferHandle);
+    bool importSemaphoreToColorBuffer(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        bool vulkanOnly,
+        uint32_t colorBufferHandle);
+
+    void setColorBufferPendingSemaphoreSignal(uint32_t colorBufferHandle);
+    void setColorBufferPendingSemaphoreSignalLocked(uint32_t colorBufferHandle);
     void setColorBufferInUse(uint32_t colorBufferHandle, bool inUse);
 
     // Used during tests to disable fast blit.
