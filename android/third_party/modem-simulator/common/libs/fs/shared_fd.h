@@ -118,8 +118,11 @@ public:
 
     int getFd() const { return value_->getFd(); }
 
+    bool isIpv4() const { return isIpv4_; }
+
 private:
     std::shared_ptr<FileInstance> value_;
+    bool isIpv4_{false};
 };
 
 }  // namespace cuttlefish
