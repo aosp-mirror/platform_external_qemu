@@ -3055,6 +3055,16 @@ public:
         VkImage image,
         void** pIOSurface);
 #endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+    void vkQueueFlushCommandsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        VkCommandBuffer commandBuffer,
+        VkDeviceSize dataSize,
+        const void* pData);
+#endif
 
 private:
     class Impl;

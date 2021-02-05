@@ -77,24 +77,20 @@ static void initIcdPaths(bool forTesting) {
         } else {
             LOG(VERBOSE) << "Not in test environment. ICD (blank for default): ["
                          << androidIcd << "]";
-            // Mac: Use MoltenVK by default unless GPU mode is set to swiftshader,
-            // and switch between that and gfx-rs libportability-icd depending on
-            // the environment variable setting.
-    #ifdef __APPLE__
-            if (androidIcd == "portability") {
-                setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos.json"));
-            } else if (androidIcd == "portability-debug") {
-                setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos-debug.json"));
+            // Mac: Use MoltenVK by default unless GPU mode is set to
+            // swiftshader.
+#ifdef __APPLE__
+            if (androidIcd == "swiftshader" ||
+                emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER ||
+                emugl::getRenderer() ==
+                        SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+                setIcdPath(icdJsonNameToProgramAndLauncherPaths(
+                        "vk_swiftshader_icd.json"));
+                System::get()->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
             } else {
-                if (androidIcd == "swiftshader" ||
-                    emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER ||
-                    emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
-                    setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
-                    System::get()->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
-                } else {
-                    setIcdPath(icdJsonNameToProgramAndLauncherPaths("MoltenVK_icd.json"));
-                    System::get()->envSet("ANDROID_EMU_VK_ICD", "moltenvk");
-                }
+                setIcdPath(icdJsonNameToProgramAndLauncherPaths(
+                        "MoltenVK_icd.json"));
+                System::get()->envSet("ANDROID_EMU_VK_ICD", "moltenvk");
             }
 #else
             // By default, on other platforms, just use whatever the system

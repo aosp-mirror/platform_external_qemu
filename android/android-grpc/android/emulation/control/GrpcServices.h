@@ -94,6 +94,9 @@ public:
 
     Builder& withService(::grpc::Service* service);
 
+    // Add a service only if tls and client-ca is enabled.
+    Builder& withSecureService(::grpc::Service* service);
+
     // Shutdown the emulator after timeout seconds of gRPC inactivity.
     // The timeout should be at least 1 second, otherwise it will
     // be ignored.
@@ -113,6 +116,7 @@ private:
     int mPort{-1};
     std::chrono::seconds mTimeout{0};
     std::vector<std::shared_ptr<::grpc::Service>> mServices;
+    std::vector<std::shared_ptr<::grpc::Service>> mSecureServices;
     Security mSecurity{Security::Insecure};
     std::shared_ptr<grpc::ServerCredentials> mCredentials;
     std::string mBindAddress{"127.0.0.1"};
@@ -121,6 +125,7 @@ private:
     bool mValid{true};
     bool mVerbose{false};
     bool mLogging{true};
+    bool mCaCerts{false};
 };
 
 }  // namespace control

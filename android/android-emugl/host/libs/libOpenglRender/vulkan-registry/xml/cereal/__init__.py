@@ -5,6 +5,8 @@ from .extensionstructs import *
 from .frontend import *
 from .functable import *
 from .marshaling import *
+from .reservedmarshaling import *
+from .counting import *
 from .testing import *
 from .transform import *
 from .deepcopy import *
@@ -14,3 +16,4 @@ from .unbox import *
 from .baseprotodefs import *
 from .baseprotoconversion import *
 from .decodersnapshot import *
+from .subdecode import *

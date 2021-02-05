@@ -48,7 +48,7 @@ SharedMemoryLibrary::LibraryEntry SharedMemoryLibrary::borrow(
     // Invariant: mHandlesCnt.count(handle) == mMemMap.count(handle)
     // And mHandlesCnt.count(handle) > 0
     SharedMemory* shm = mMemMap[handle].get();
-    assert(shm->size() == size);
+    assert(shm->size() >= size);
 
     return android::base::makeCustomScopedPtr(
             shm, [this, handle](SharedMemory* shm) { release(handle); });

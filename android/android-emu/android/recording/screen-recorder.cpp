@@ -310,8 +310,8 @@ bool ScreenRecorder::parseRecordingInfo(RecordingInfo& info) {
     }
 
     if (info.timeLimit < 1) {
-        D("Defaulting time limit to %d seconds", kMaxTimeLimit);
-        info.timeLimit = kMaxTimeLimit;
+        D("Defaulting time limit to %d seconds", kDefaultTimeLimit);
+        info.timeLimit = kDefaultTimeLimit;
     } else if (info.timeLimit > kMaxTimeLimit &&
                !(android_cmdLineOptions && android_cmdLineOptions->record_session)) {
         // Allow indefinite recording for emulator recording sessions.

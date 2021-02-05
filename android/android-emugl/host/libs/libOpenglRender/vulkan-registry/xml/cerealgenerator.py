@@ -158,7 +158,9 @@ class IOStream;
 #include <cutils/properties.h>
 
 #include "goldfish_vk_marshaling_guest.h"
+#include "goldfish_vk_reserved_marshaling_guest.h"
 #include "goldfish_vk_deepcopy_guest.h"
+#include "goldfish_vk_counting_guest.h"
 #include "goldfish_vk_handlemap_guest.h"
 #include "goldfish_vk_private_defs.h"
 #include "goldfish_vk_transform_guest.h"
@@ -169,7 +171,7 @@ class IOStream;
 
         functableImplInclude = """
 #include "VkEncoder.h"
-#include "HostConnection.h"
+#include "../OpenglSystemCommon/HostConnection.h"
 #include "ResourceTracker.h"
 
 #include "goldfish_vk_private_defs.h"
@@ -194,6 +196,23 @@ class IOStream;
 #undef VK_KHR_android_surface
 #undef VK_ANDROID_external_memory_android_hardware_buffer
 """ % VULKAN_STREAM_TYPE_GUEST
+
+        reservedmarshalIncludeGuest = """
+#include "goldfish_vk_marshaling_guest.h"
+#include "goldfish_vk_private_defs.h"
+#include "%s.h"
+
+// Stuff we are not going to use but if included,
+// will cause compile errors. These are Android Vulkan
+// required extensions, but the approach will be to
+// implement them completely on the guest side.
+#undef VK_KHR_android_surface
+#undef VK_ANDROID_external_memory_android_hardware_buffer
+""" % VULKAN_STREAM_TYPE_GUEST
+
+        reservedmarshalImplIncludeGuest = """
+#include "Resources.h"
+"""
 
         vulkanStreamIncludeHost = """
 #include "goldfish_vk_private_defs.h"
@@ -287,6 +306,10 @@ using DlSymFunc = void* (void*, const char*);
 #include "goldfish_vk_extension_structs_guest.h"
 #include "goldfish_vk_private_defs.h"
 """
+        countingIncludes = """
+#include "vk_platform_compat.h"
+#include "goldfish_vk_private_defs.h"
+"""
 
         dispatchImplIncludes = """
 #include <stdio.h>
@@ -319,13 +342,16 @@ class BumpPool;
 
         decoderImplIncludes = """
 #include "common/goldfish_vk_marshaling.h"
+#include "common/goldfish_vk_reserved_marshaling.h"
 #include "common/goldfish_vk_private_defs.h"
 #include "common/goldfish_vk_transform.h"
 
 #include "android/base/BumpPool.h"
 #include "android/base/system/System.h"
+#include "android/base/Tracing.h"
 
 #include "IOStream.h"
+#include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 
 #include "VkDecoderGlobalState.h"
@@ -374,8 +400,14 @@ class BumpPool;
         self.addGuestEncoderModule("goldfish_vk_marshaling_guest",
                                    extraHeader=commonCerealIncludesGuest + marshalIncludeGuest,
                                    extraImpl=commonCerealImplIncludesGuest)
+        self.addGuestEncoderModule("goldfish_vk_reserved_marshaling_guest",
+                                   extraHeader=commonCerealIncludesGuest + reservedmarshalIncludeGuest,
+                                   extraImpl=commonCerealImplIncludesGuest + reservedmarshalImplIncludeGuest)
         self.addGuestEncoderModule("goldfish_vk_deepcopy_guest",
                                    extraHeader=commonCerealIncludesGuest + poolIncludeGuest,
+                                   extraImpl=commonCerealImplIncludesGuest)
+        self.addGuestEncoderModule("goldfish_vk_counting_guest",
+                                   extraHeader=countingIncludes,
                                    extraImpl=commonCerealImplIncludesGuest)
         self.addGuestEncoderModule("goldfish_vk_handlemap_guest",
                                    extraHeader=commonCerealIncludesGuest + handleMapIncludeGuest,
@@ -384,11 +416,14 @@ class BumpPool;
                                    extraHeader=commonCerealIncludesGuest + transformIncludeGuest,
                                    extraImpl=commonCerealImplIncludesGuest + transformImplIncludeGuest)
 
-        self.addGuestHalModule("func_table", extraImpl=functableImplInclude)
+        self.addGuestEncoderModule("func_table", extraImpl=functableImplInclude)
 
         self.addModule("common", "goldfish_vk_extension_structs",
                        extraHeader=extensionStructsInclude)
         self.addModule("common", "goldfish_vk_marshaling",
+                       extraHeader=vulkanStreamIncludeHost,
+                       extraImpl=commonCerealImplIncludes)
+        self.addModule("common", "goldfish_vk_reserved_marshaling",
                        extraHeader=vulkanStreamIncludeHost,
                        extraImpl=commonCerealImplIncludes)
         self.addModule("common", "goldfish_vk_testing",
@@ -414,16 +449,24 @@ class BumpPool;
                            extraHeader=decoderSnapshotHeaderIncludes,
                            extraImpl=decoderSnapshotImplIncludes,
                            useNamespace=False)
+        self.addHostModule("VkSubDecoder",
+                           extraHeader="",
+                           extraImpl="",
+                           useNamespace=False,
+                           implOnly=True)
 
         self.addWrapper(cereal.VulkanEncoder, "VkEncoder")
         self.addWrapper(cereal.VulkanExtensionStructs, "goldfish_vk_extension_structs_guest")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling_guest", variant = "guest")
+        self.addWrapper(cereal.VulkanReservedMarshaling, "goldfish_vk_reserved_marshaling_guest", variant = "guest")
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy_guest")
+        self.addWrapper(cereal.VulkanCounting, "goldfish_vk_counting_guest")
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap_guest")
         self.addWrapper(cereal.VulkanTransform, "goldfish_vk_transform_guest")
         self.addWrapper(cereal.VulkanFuncTable, "func_table")
         self.addWrapper(cereal.VulkanExtensionStructs, "goldfish_vk_extension_structs")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling")
+        self.addWrapper(cereal.VulkanReservedMarshaling, "goldfish_vk_reserved_marshaling", variant = "host")
         self.addWrapper(cereal.VulkanTesting, "goldfish_vk_testing")
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy")
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap")
@@ -431,6 +474,7 @@ class BumpPool;
         self.addWrapper(cereal.VulkanTransform, "goldfish_vk_transform", resourceTrackerTypeName="VkDecoderGlobalState")
         self.addWrapper(cereal.VulkanDecoder, "VkDecoder")
         self.addWrapper(cereal.VulkanDecoderSnapshot, "VkDecoderSnapshot")
+        self.addWrapper(cereal.VulkanSubDecoder, "VkSubDecoder")
 
         self.guestAndroidMkCppFiles = ""
         self.hostCMakeCppFiles = ""
@@ -464,21 +508,23 @@ class BumpPool;
                        customAbsDir = self.guest_abs_hal_destination,
                        useNamespace = useNamespace)
 
-    def addHostModule(self, basename, extraHeader = "", extraImpl = "", useNamespace = True):
+    def addHostModule(self, basename, extraHeader = "", extraImpl = "", useNamespace = True, implOnly = False):
         self.addModule(self.host_tag,
                        basename,
                        extraHeader = extraHeader,
                        extraImpl = extraImpl,
                        customAbsDir = self.host_abs_decoder_destination,
-                       useNamespace = useNamespace)
+                       useNamespace = useNamespace,
+                       implOnly = implOnly)
 
     def addModule(self, directory, basename,
                   extraHeader = "", extraImpl = "",
                   customAbsDir = None,
-                  useNamespace = True):
+                  useNamespace = True,
+                  implOnly = False):
         self.moduleList.append(basename)
         self.modules[basename] = \
-            cereal.Module(directory, basename, customAbsDir = customAbsDir)
+            cereal.Module(directory, basename, customAbsDir = customAbsDir, implOnly = implOnly)
         self.modules[basename].headerPreamble = copyrightHeader
         self.modules[basename].headerPreamble += \
                 autogeneratedHeaderTemplate % \
@@ -503,7 +549,8 @@ class BumpPool;
                 autogeneratedHeaderTemplate % \
                 (basename, "(impl) generated by %s" % \
                     banner_command(sys.argv))
-        self.modules[basename].implPreamble += """
+        if not implOnly:
+            self.modules[basename].implPreamble += """
 #include "%s.h"
 
 %s

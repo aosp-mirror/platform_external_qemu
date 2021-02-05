@@ -469,6 +469,10 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::S3TC_TEXTURE_SUPPORT;
         case android::featurecontrol::VirtioMouse:
             return android_studio::EmulatorFeatureFlagState::VIRTIO_MOUSE;
+        case android::featurecontrol::VirtconsoleLogcat:
+            return android_studio::EmulatorFeatureFlagState::VIRTCONSOLE_LOGCAT;
+        case android::featurecontrol::VulkanQueueSubmitWithCommands:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_QUEUE_SUBMIT_WITH_COMMANDS;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
@@ -592,7 +596,13 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
     if (android_cmdLineOptions->metrics_collection) {
         event->mutable_emulator_details()
                                 ->mutable_used_features()
-                                ->set_container_launch(true);
+                                ->set_launch_type(android_studio::EmulatorFeatures::CONTAINER);
+    }
+
+    if (android_cmdLineOptions->fuchsia) {
+        event->mutable_emulator_details()
+                                ->mutable_used_features()
+                                ->set_launch_type(android_studio::EmulatorFeatures::FUCHSIA);
     }
 
 }

@@ -1482,7 +1482,14 @@ static void machvirt_init(MachineState *machine)
 
     fdt_add_pmu_nodes(vms);
 
-    create_uart(vms, pic, VIRT_UART, sysmem, serial_hds[0]);
+    const char *virtio_console_env =
+        getenv("ANDROID_EMULATOR_USE_VIRTIO_CONSOLE");
+
+    if (virtio_console_env && !strcmp("1", virtio_console_env)) {
+        // ignore uart creation, since it crashes on some aarch64 hosts
+    } else {
+        create_uart(vms, pic, VIRT_UART, sysmem, serial_hds[0]);
+    }
 
     if (vms->secure) {
         create_secure_ram(vms, secure_sysmem);

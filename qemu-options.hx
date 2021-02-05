@@ -2533,7 +2533,7 @@ DEF("chardev", HAS_ARG, QEMU_OPTION_chardev,
     "-chardev serial,id=id,path=path[,mux=on|off][,logfile=PATH][,logappend=on|off]\n"
 #else
     "-chardev pty,id=id[,mux=on|off][,logfile=PATH][,logappend=on|off]\n"
-    "-chardev stdio,id=id[,mux=on|off][,signal=on|off][,logfile=PATH][,logappend=on|off]\n"
+    "-chardev stdio,id=id[,mux=on|off][,signal=on|off][,logfile=PATH][,logappend=on|off][,echo=on|off]\n"
 #endif
 #ifdef CONFIG_BRLAPI
     "-chardev braille,id=id[,mux=on|off][,logfile=PATH][,logappend=on|off]\n"
@@ -2788,12 +2788,15 @@ not take any options.
 
 @option{pty} is not available on Windows hosts.
 
-@item -chardev stdio,id=@var{id}[,signal=on|off]
+@item -chardev stdio,id=@var{id}[,signal=on|off][,echo=on|off]
 Connect to standard input and standard output of the QEMU process.
 
 @option{signal} controls if signals are enabled on the terminal, that includes
 exiting QEMU with the key sequence @key{Control-c}. This option is enabled by
 default, use @option{signal=off} to disable it.
+
+@option{echo} controls if the input contents will be echoed to the output. This
+option is disabled by default, use @option{echo=on} to enable it.
 
 @item -chardev braille,id=@var{id}
 

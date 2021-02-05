@@ -57,6 +57,9 @@ public:
     virtual AddressSpaceDeviceType getDeviceType() const = 0;
     virtual void save(base::Stream* stream) const = 0;
     virtual bool load(base::Stream* stream) = 0;
+
+    virtual void preSave() const { }
+    virtual void postSave() const { }
 };
 
 struct AddressSpaceContextDescription {

@@ -31,7 +31,7 @@ typedef void* (*address_space_device_get_host_ptr_t)(uint64_t gpa);
 typedef void* (*address_space_device_handle_to_context_t)(uint32_t handle);
 typedef void (*address_space_device_clear_t)(void);
 // virtio-gpu-next
-typedef uint64_t (*address_space_device_hostmem_register_t)(uint64_t hva, uint64_t size);
+typedef uint64_t (*address_space_device_hostmem_register_t)(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id);
 typedef void (*address_space_device_hostmem_unregister_t)(uint64_t id);
 typedef void (*address_space_device_ping_at_hva_t)(uint32_t handle, void* hva);
 // deallocation callbacks
@@ -83,6 +83,9 @@ struct AddressSpaceHwFuncs {
      * are relative to. */
     uint64_t (*getPhysAddrStart)(void);
     uint64_t (*getPhysAddrStartLocked)(void);
+
+    /* Version of allocSharedHostRegionLocked but for a fixed offset */
+    int (*allocSharedHostRegionFixedLocked)(uint64_t page_aligned_size, uint64_t offset);
 };
 
 extern const struct AddressSpaceHwFuncs* address_space_set_hw_funcs(

@@ -180,5 +180,79 @@ int64_t Stream::getPackedSignedNum() {
     return sign ? -int64_t(num >> 1) : (num >> 1);
 }
 
+// Static big-endian conversions
+
+// the |v| pointer is unlikely to be aligned---use memcpy throughout
+
+void Stream::toByte(uint8_t*) { } // no conversion
+
+void Stream::toBe16(uint8_t* v) {
+    uint16_t value;
+    memcpy(&value, v, sizeof(uint16_t));
+    uint8_t b[2] = { (uint8_t)(value >> 8), (uint8_t)value };
+    memcpy(v, b, sizeof(uint16_t));
+}
+
+void Stream::toBe32(uint8_t* v) {
+    uint32_t value;
+    memcpy(&value, v, sizeof(uint32_t));
+    uint8_t b[4] = {
+            (uint8_t)(value >> 24),
+            (uint8_t)(value >> 16),
+            (uint8_t)(value >> 8),
+            (uint8_t)value };
+    memcpy(v, b, sizeof(uint32_t));
+}
+
+void Stream::toBe64(uint8_t* v) {
+    uint64_t value;
+    memcpy(&value, v, sizeof(uint64_t));
+    uint8_t b[8] = {
+            (uint8_t)(value >> 56),
+            (uint8_t)(value >> 48),
+            (uint8_t)(value >> 40),
+            (uint8_t)(value >> 32),
+            (uint8_t)(value >> 24),
+            (uint8_t)(value >> 16),
+            (uint8_t)(value >> 8),
+            (uint8_t)value };
+    memcpy(v, b, sizeof(uint64_t));
+}
+
+void Stream::fromByte(uint8_t*) { } // no conversion
+
+void Stream::fromBe16(uint8_t* v) {
+    uint8_t b[2];
+    memcpy(b, v, sizeof(uint16_t));
+    uint16_t value = ((uint16_t)b[0] << 8) | (uint16_t)b[1];
+    memcpy(v, &value, sizeof(uint16_t));
+}
+
+void Stream::fromBe32(uint8_t* v) {
+    uint8_t b[4];
+    memcpy(b, v, sizeof(uint32_t));
+    uint32_t value =
+        ((uint32_t)b[0] << 24) |
+        ((uint32_t)b[1] << 16) |
+        ((uint32_t)b[2] << 8) |
+        (uint32_t)b[3];
+    memcpy(v, &value, sizeof(uint32_t));
+}
+
+void Stream::fromBe64(uint8_t* v) {
+    uint8_t b[8];
+    memcpy(b, v, sizeof(uint64_t));
+    uint64_t value =
+        ((uint64_t)b[0] << 56) |
+        ((uint64_t)b[1] << 48) |
+        ((uint64_t)b[2] << 40) |
+        ((uint64_t)b[3] << 32) |
+        ((uint64_t)b[4] << 24) |
+        ((uint64_t)b[5] << 16) |
+        ((uint64_t)b[6] << 8) |
+        (uint64_t)b[7];
+    memcpy(v, &value, sizeof(uint64_t));
+}
+
 }  // namespace base
 }  // namespace android

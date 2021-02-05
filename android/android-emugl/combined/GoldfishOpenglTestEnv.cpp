@@ -45,6 +45,7 @@
 #include "android/featurecontrol/Features.h"                 // for GLAsyncSwap
 #include "android/globals.h"                                 // for android_hw
 #include "android/opengl/emugl_config.h"                     // for emuglCon...
+#include "android/opengl/GLProcessPipe.h"
 #include "android/opengles-pipe.h"                           // for android_...
 #include "android/opengles.h"                                // for android_...
 #include "android/refcount-pipe.h"                           // for android_...
@@ -290,6 +291,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
             android::featurecontrol::VulkanShaderFloat16Int8, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GuestUsesAngle, false);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VulkanQueueSubmitWithCommands, false);
 
     bool useHostGpu =
             System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
@@ -369,20 +372,47 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     ConsumerInterface interface = {
             // create
             [openglesRenderer](struct asg_context context,
+                               android::base::Stream* loadStream,
                                ConsumerCallbacks callbacks) {
                 return openglesRenderer->addressSpaceGraphicsConsumerCreate(
-                        context, callbacks);
+                        context, loadStream, callbacks);
             },
             // destroy
             [openglesRenderer](void* consumer) {
                 return openglesRenderer->addressSpaceGraphicsConsumerDestroy(
                         consumer);
             },
-            // TODO
+            // pre save
+            [openglesRenderer](void* consumer) {
+               return openglesRenderer->addressSpaceGraphicsConsumerPreSave(consumer);
+            },
+            // global presave
+            [openglesRenderer]() {
+               return openglesRenderer->pauseAllPreSave();
+            },
             // save
-            [](void* consumer, android::base::Stream* stream) {},
-            // load
-            [](void* consumer, android::base::Stream* stream) {},
+            [openglesRenderer](void* consumer, android::base::Stream* stream) {
+               return openglesRenderer->addressSpaceGraphicsConsumerSave(consumer, stream);
+            },
+            // global postsave
+            [openglesRenderer]() {
+               return openglesRenderer->resumeAll();
+            },
+            // postSave
+            [openglesRenderer](void* consumer) {
+                return openglesRenderer->addressSpaceGraphicsConsumerPostSave(consumer);
+            },
+            // postLoad
+            [openglesRenderer](void* consumer) {
+                openglesRenderer->addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(consumer);
+            },
+            // global preload
+            [openglesRenderer]() {
+                android::opengl::forEachProcessPipeIdRunAndErase([openglesRenderer](uint64_t id) {
+                    openglesRenderer->cleanupProcGLObjects(id);
+                });
+                openglesRenderer->waitForProcessCleanup();
+            },
     };
     AddressSpaceGraphicsContext::setConsumer(interface);
 }

@@ -63,15 +63,8 @@ hwLcd_mapDensity(int density) {
 void
 hwLcd_setBootProperty(int density)
 {
-    char  temp[8];
-    int mapped_density;
-
-    mapped_density = hwLcd_mapDensity(density);
-
-
-    snprintf(temp, sizeof temp, "%d", mapped_density);
 #ifndef AEMU_MIN
-    boot_property_add("qemu.sf.lcd_density", temp);
+    boot_property_add_qemu_sf_lcd_density(hwLcd_mapDensity(density));
 #endif
 }
 

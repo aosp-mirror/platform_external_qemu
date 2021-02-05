@@ -58,7 +58,7 @@ public:
         GLuint start,
         GLuint end);
 
-    void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
+    void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct, bool* needEnablingPostDraw);
     void setVertexAttribDivisor(GLuint bindingindex, GLuint divisor);
     void setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex);
     void setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt = false);
@@ -127,7 +127,7 @@ protected:
 private:
     void setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                               GLenum arrayType, GLenum dataType,
-                              GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt);
+                              GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, bool* needEnablingPostDraw);
     void initExtensionString();
 
     float m_attribute0value[4] = {};
