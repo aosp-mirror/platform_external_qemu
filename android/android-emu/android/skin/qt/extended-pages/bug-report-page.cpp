@@ -37,10 +37,12 @@
 #include "android/base/StringFormat.h"                 // for StringFormat
 #include "android/base/Uri.h"                          // for Uri
 #include "android/base/Uuid.h"                         // for Uuid
+#include "android/base/async/ThreadLooper.h"           // for ThreadLooper
 #include "android/base/files/PathUtils.h"              // for PathUtils
 #include "android/base/system/System.h"                // for System, System...
 #include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
 #include "android/globals.h"                           // for android_avdInfo
+#include "android/metrics/AdbLivenessChecker.h"        // for AdbLivenessChecker
 #include "android/metrics/UiEventTracker.h"            // for UiEventTracker
 #include "android/skin/qt/emulator-qt-window.h"        // for EmulatorQtWindow
 #include "android/skin/qt/error-dialog.h"              // for showErrorDialog
@@ -54,23 +56,26 @@
 class QShowEvent;
 
 using android::base::PathUtils;
+using android::base::RecurrentTask;
 using android::base::StringAppendFormat;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
+using android::base::ThreadLooper;
 using android::base::Uri;
 using android::base::Uuid;
 using android::emulation::AdbInterface;
 using android::emulation::OptionalAdbCommandResult;
+using android::metrics::AdbLivenessChecker;
 
 static const int kDefaultUnknownAPILevel = 1000;
 static const int kReproStepsCharacterLimit = 2000;
 static const System::Duration kAdbCommandTimeoutMs = System::kInfinite;
+static const System::Duration kTaskInterval = 1000;  // ms
 
 static const char FILE_BUG_URL[] =
         "https://issuetracker.google.com/issues/new"
-        "?component=192727&description=%s&template=843117";
-
+        "?component=192708&description=%s&template=840533";
 // In reference to
 // https://developer.android.com/studio/report-bugs.html#emulator-bugs
 static const char BUG_REPORT_TEMPLATE[] =
@@ -79,11 +84,24 @@ Expected Behavior:
 
 Observed Behavior:)";
 BugreportPage::BugreportPage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::BugreportPage),
-       mBugTracker(new UiEventTracker(
+    : QWidget(parent),
+      mUi(new Ui::BugreportPage),
+      mBugTracker(new UiEventTracker(
               android_studio::EmulatorUiEvent::BUTTON_PRESS,
-              android_studio::EmulatorUiEvent::EXTENDED_BUG_TAB))
- {
+              android_studio::EmulatorUiEvent::EXTENDED_BUG_TAB)),
+      // A recurrent task to refresh and load data only after device boots up.
+      mTask(
+              ThreadLooper::get(),
+              [this]() {
+                  if (AdbLivenessChecker::isEmulatorBooted() ||
+                      guest_boot_completed) {
+                      refreshContents();
+                      return false;
+                  } else {
+                      return true;
+                  }
+              },
+              kTaskInterval) {
     mUi->setupUi(this);
     mUi->bug_deviceLabel->installEventFilter(this);
     mUi->bug_emulatorVersionLabel->setText(QString::fromStdString(
@@ -98,16 +116,6 @@ BugreportPage::BugreportPage(QWidget* parent)
     mUi->bug_deviceLabel->setText(elidedText);
     mUi->bug_hostMachineLabel->setText(
             QString::fromStdString(mReportingFields.hostOsName));
-
-    SettingsTheme theme = getSelectedTheme();
-    QMovie* movie = new QMovie(this);
-    movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
-                       "/circular_spinner");
-    if (movie->isValid()) {
-        movie->start();
-        mUi->bug_circularSpinner->setMovie(movie);
-    }
-
     mDeviceDetailsDialog = new QMessageBox(
             QMessageBox::NoIcon,
             QString::fromStdString(StringFormat("Details for %s",
@@ -120,6 +128,11 @@ BugreportPage::BugreportPage(QWidget* parent)
 }
 
 BugreportPage::~BugreportPage() {
+    // Stop the async timer;
+    if (mTask.inFlight()) {
+        mTask.stopAsync();
+    }
+
     if (System::get()->pathIsFile(mSavingStates.adbBugreportFilePath)) {
         System::get()->deleteFile(mSavingStates.adbBugreportFilePath);
     }
@@ -164,8 +177,14 @@ void BugreportPage::showEvent(QShowEvent* event) {
     mUi->bug_bugReportTextEdit->setStyleSheet(
             "background: transparent; border: 1px solid " +
             Ui::stylesheetValues(theme)["EDIT_COLOR"]);
-
     QWidget::showEvent(event);
+    // Refresh contents for screenshot, logcat and adb bugreport
+    // every time the page is shown unless its underlying command is still
+    // ongoing.
+    if (!mTask.inFlight())  mTask.start();
+}
+
+void BugreportPage::refreshContents() {
     // clean up the content loaded from last time.
     mUi->bug_bugReportTextEdit->clear();
     mUi->bug_reproStepsTextEdit->clear();
@@ -196,6 +215,40 @@ void BugreportPage::enableInput(bool enabled) {
     SettingsTheme theme = getSelectedTheme();
     setButtonEnabled(mUi->bug_sendToGoogle, theme, enabled);
     setButtonEnabled(mUi->bug_saveButton, theme, enabled);
+}
+
+void BugreportPage::showSpinningWheelAnimation(bool enabled) {
+    if (!mUi->bug_circularSpinner->movie()) {
+        SettingsTheme theme = getSelectedTheme();
+        QMovie* movie = new QMovie(this);
+        movie->setFileName(":/" +
+                           Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
+                           "/circular_spinner");
+        if (movie->isValid()) {
+            movie->start();
+            mUi->bug_circularSpinner->setMovie(movie);
+        }
+    }
+
+    if (enabled) {
+        mUi->bug_circularSpinner->show();
+        mUi->bug_collectingLabel->show();
+    } else {
+        mUi->bug_circularSpinner->hide();
+        mUi->bug_collectingLabel->hide();
+    }
+}
+
+void BugreportPage::on_bug_bugReportCheckBox_clicked() {
+    if(mUi->bug_bugReportCheckBox->isChecked()) {
+        if (mAdbBugreport && mAdbBugreport->inFlight()) {
+            showSpinningWheelAnimation(true);
+            enableInput(false);
+        }
+    } else {
+        showSpinningWheelAnimation(false);
+        enableInput(true);
+    }
 }
 
 void BugreportPage::on_bug_saveButton_clicked() {
@@ -309,8 +362,10 @@ void BugreportPage::loadAdbBugreport() {
 
     mSavingStates.adbBugreportSucceed = false;
     enableInput(false);
-    mUi->bug_circularSpinner->show();
-    mUi->bug_collectingLabel->show();
+    if (mUi->bug_bugReportCheckBox->isChecked()) {
+        showSpinningWheelAnimation(true);
+    }
+
     auto filePath = PathUtils::join(System::get()->getTempDir(),
                                     generateUniqueBugreportName());
     // In reference to
@@ -348,8 +403,7 @@ void BugreportPage::loadAdbBugreport() {
 
                 EmulatorQtWindow::getInstance()->runOnUiThread([this, success, filePath] {
                     enableInput(true);
-                    mUi->bug_circularSpinner->hide();
-                    mUi->bug_collectingLabel->hide();
+                    showSpinningWheelAnimation(false);
                     if (System::get()->pathIsFile(
                                 mSavingStates.adbBugreportFilePath)) {
                         System::get()->deleteFile(
@@ -380,7 +434,6 @@ void BugreportPage::loadAdbLogcat() {
     }
 
     if (!mAdb) return;
-
     // After apiLevel 19, buffer "all" become available
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     mAdbLogcat = mAdb->runAdbCommand(

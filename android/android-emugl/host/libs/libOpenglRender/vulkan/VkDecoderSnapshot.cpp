@@ -1351,7 +1351,7 @@ void vkAllocateCommandBuffers(
     android::base::AutoLock lock(mLock);
     // pCommandBuffers create
     mReconstruction.addHandles((const uint64_t*)pCommandBuffers, pAllocateInfo->commandBufferCount);
-    mReconstruction.addHandleDependency((const uint64_t*)pCommandBuffers, pAllocateInfo->commandBufferCount, (uint64_t)(uintptr_t)VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_VkCommandPool(pAllocateInfo->commandPool));
+    mReconstruction.addHandleDependency((const uint64_t*)pCommandBuffers, pAllocateInfo->commandBufferCount, (uint64_t)(uintptr_t)unboxed_to_boxed_non_dispatchable_VkCommandPool(pAllocateInfo->commandPool));
     if (!pCommandBuffers) return;
     auto apiHandle = mReconstruction.createApiInfo();
     auto apiInfo = mReconstruction.getApiInfo(apiHandle);
@@ -4297,7 +4297,7 @@ void vkMapMemoryIntoAddressSpaceGOOGLE(
     mReconstruction.setApiTrace(apiInfo, OP_vkMapMemoryIntoAddressSpaceGOOGLE, snapshotTraceBegin, snapshotTraceBytes);
     for (uint32_t i = 0; i < 1; ++i)
     {
-        VkDeviceMemory boxed = VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_VkDeviceMemory((&memory)[i]);
+        VkDeviceMemory boxed = unboxed_to_boxed_non_dispatchable_VkDeviceMemory((&memory)[i]);
         mReconstruction.forEachHandleAddModifyApi((const uint64_t*)(&boxed), 1, apiHandle);
     }
 }
@@ -4573,6 +4573,19 @@ void vkGetIOSurfaceMVK(
     android::base::BumpPool* pool,
     VkImage image,
     void** pIOSurface)
+{
+    // TODO: Implement
+}
+#endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+void vkQueueFlushCommandsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    VkCommandBuffer commandBuffer,
+    VkDeviceSize dataSize,
+    const void* pData)
 {
     // TODO: Implement
 }
@@ -9031,6 +9044,19 @@ void VkDecoderSnapshot::vkGetIOSurfaceMVK(
     void** pIOSurface)
 {
     mImpl->vkGetIOSurfaceMVK(snapshotTraceBegin, snapshotTraceBytes, pool, image, pIOSurface);
+}
+#endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+void VkDecoderSnapshot::vkQueueFlushCommandsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    VkCommandBuffer commandBuffer,
+    VkDeviceSize dataSize,
+    const void* pData)
+{
+    mImpl->vkQueueFlushCommandsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, commandBuffer, dataSize, pData);
 }
 #endif
 

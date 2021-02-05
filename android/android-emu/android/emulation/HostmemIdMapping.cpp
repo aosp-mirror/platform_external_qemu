@@ -31,10 +31,18 @@ HostmemIdMapping* HostmemIdMapping::get() {
 
 // TODO: Add registerHostmemFixed version that takes a predetermined id,
 // for snapshots
-HostmemIdMapping::Id HostmemIdMapping::add(uint64_t hva, uint64_t size) {
+HostmemIdMapping::Id HostmemIdMapping::add(uint64_t hva, uint64_t size, bool register_fixed, uint64_t fixed_id) {
     if (0 == hva || 0 == size) return kInvalidHostmemId;
 
-    Id wantedId = mCurrentId++;
+    Id wantedId;
+
+    if (register_fixed) { 
+        wantedId = fixed_id;
+        mCurrentId = wantedId + 1;
+    } else {
+        wantedId = mCurrentId++;
+    }
+
     HostmemIdMapping::Entry entry;
     entry.id = wantedId;
     entry.hva = hva;
@@ -71,9 +79,9 @@ void HostmemIdMapping::clear() {
 // C interface for use with vm operations
 extern "C" {
 
-uint64_t android_emulation_hostmem_register(uint64_t hva, uint64_t size) {
+uint64_t android_emulation_hostmem_register(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id) {
     return static_cast<uint64_t>(
-        android::emulation::HostmemIdMapping::get()->add(hva, size));
+        android::emulation::HostmemIdMapping::get()->add(hva, size, register_fixed, fixed_id));
 }
 
 void android_emulation_hostmem_unregister(uint64_t id) {

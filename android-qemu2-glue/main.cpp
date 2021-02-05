@@ -138,6 +138,12 @@ using android::base::System;
 using android::emulation::PassiveGpsUpdater;
 namespace fc = android::featurecontrol;
 
+#ifdef __linux__
+static bool is_linux = true;
+#else
+static bool is_linux = false;
+#endif
+
 namespace {
 
 enum ImageType {
@@ -675,6 +681,11 @@ static void enableSignalTermination() {
 #endif
 }
 
+static bool isCrostini() {
+    struct stat buf;
+    return is_linux && stat("/dev/.cros_milestone", &buf) == 0;
+}
+
 }  // namespace
 
 extern "C" int run_qemu_main(int argc,
@@ -1210,6 +1221,7 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::NoDelayCloseColorBuffer, true);
                 fc::setIfNotOverriden(fc::VulkanShaderFloat16Int8, true);
                 fc::setIfNotOverriden(fc::KeycodeForwarding, true);
+                fc::setIfNotOverriden(fc::VulkanQueueSubmitWithCommands, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;
@@ -1376,8 +1388,7 @@ extern "C" int main(int argc, char** argv) {
                     "255\n");
             return 1;
         }
-        args.add("-boot-property");
-        args.addFormat("net.shared_net_ip=10.1.2.%ld", shared_net_id);
+        boot_property_add_shared_net_ip(shared_net_id);
     }
 
     // Add bluetooth parameters if applicable.
@@ -1461,7 +1472,7 @@ extern "C" int main(int argc, char** argv) {
 #endif
 #endif
 
-            if (opts->crostini) {
+            if (isCrostini()) {
                 feature_set_if_not_overridden(kFeature_QuickbootFileBacked,
                                               false /* enable */);
             }
@@ -1542,26 +1553,14 @@ extern "C" int main(int argc, char** argv) {
 #endif  // QEMU2_SNAPSHOT_SUPPORT
     }
 
-    if (fc::isEnabled(fc::LogcatPipe)) {
-        boot_property_add_logcat_pipe("v:*");
-    }
-
-    if (opts->logcat) {
-        dwarning("Logcat tag filtering is currently disabled. b/132840817, everything will be placed on stdout");
-        // Output to std out if no file is provided.
-        if (!opts->logcat_output) {
-            auto str = new std::ostream(std::cout.rdbuf());
-            android::emulation::LogcatPipe::registerStream(str);
-        }
-    }
-
     // Always setup a single serial port, that can be connected
     // either to the 'null' chardev, or the -shell-serial one,
     // which by default will be either 'stdout' (Posix) or 'con:'
     // (Windows).
-    const char* serial = (opts->shell || opts->logcat || opts->show_kernel)
-                                 ? opts->shell_serial
-                                 : "null";
+    const char* const serial =
+        (!opts->virtio_console && (opts->shell || opts->show_kernel)) ?
+        opts->shell_serial : "null";
+
     args.add2("-serial", serial);
 
     args.add2If("-radio", opts->radio);
@@ -2029,6 +2028,58 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
+    const bool createVirtconsoles =
+        opts->virtio_console ||
+        fc::isEnabled(fc::VirtconsoleLogcat);
+
+    if (createVirtconsoles) {
+        args.add("-chardev");
+        args.addFormat("%s,id=forhvc0",
+            ((opts->virtio_console && opts->show_kernel)
+                ? "stdio,echo=on" : "null"));
+
+        args.add("-chardev");
+        if (fc::isEnabled(fc::VirtconsoleLogcat)) {
+            if (opts->logcat) {
+                if (opts->logcat_output) {
+                    args.addFormat("file,id=forhvc1,path=%s",
+                                   opts->logcat_output);
+                } else {
+                    args.add("stdio,id=forhvc1,echo=on");
+                }
+            } else {
+                args.add("null,id=forhvc1");
+            }
+
+            boot_property_add_logcat_pipe_virtconsole("*:V");
+        } else {
+            args.add("null,id=forhvc1");
+        }
+
+        args.add2("-device", "virtio-serial-pci");
+
+        // the order of virtconsoles must be preserved
+        args.add2("-device", "virtconsole,chardev=forhvc0");
+        args.add2("-device", "virtconsole,chardev=forhvc1");
+    } else {
+        // no virtconsoles here
+
+        if (!fc::isEnabled(fc::VirtconsoleLogcat)) {
+            if (fc::isEnabled(fc::LogcatPipe)) {
+                boot_property_add_logcat_pipe("*:V");
+            }
+
+            if (opts->logcat) {
+                dwarning("Logcat tag filtering is currently disabled. b/132840817, everything will be placed on stdout");
+                // Output to std out if no file is provided.
+                if (!opts->logcat_output) {
+                    auto str = new std::ostream(std::cout.rdbuf());
+                    android::emulation::LogcatPipe::registerStream(str);
+                }
+            }
+        }
+    }
+
     if (feature_is_enabled(kFeature_ModemSimulator)) {
         if (create_modem_simulator_configs_if_needed(hw)) {
             init_modem_simulator();
@@ -2040,7 +2091,7 @@ extern "C" int main(int argc, char** argv) {
             args.add("virtio-serial");
             args.add("-chardev");
             args.addFormat(
-                    "socket,port=%d,host=localhost,nowait,nodelay,ipv6,id="
+                    "socket,port=%d,host=::1,nowait,nodelay,ipv6,id="
                     "modem",
                     modem_simulator_guest_port);
             args.add("-device");
@@ -2051,6 +2102,8 @@ extern "C" int main(int argc, char** argv) {
                     "simulator disabled.");
         }
     }
+
+    getConsoleAgents()->location->gpsSetPassiveUpdate(!opts->no_passive_gps);
 
     // for headless mode, start a thread to feed guest gps hal with
     // passive gps locations; qt emulator already does that in location-page.cpp
@@ -2142,8 +2195,6 @@ extern "C" int main(int argc, char** argv) {
     if (battery && battery->setHasBattery) {
         battery->setHasBattery(android_hw->hw_battery);
     }
-
-    getConsoleAgents()->location->gpsSetPassiveUpdate(!opts->no_passive_gps);
 
     android_init_multi_display(getConsoleAgents()->emu, getConsoleAgents()->record);
 
@@ -2327,8 +2378,14 @@ extern "C" int main(int argc, char** argv) {
                                hwcodec_boot_params.begin(),
                                hwcodec_boot_params.end());
 
+        const char* real_console_tty_prefix = kTarget.ttyPrefix;
+
+        if (opts->virtio_console) {
+            real_console_tty_prefix = "hvc";
+        }
+
         ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
-                opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
+                opts, kTarget.androidArch, apiLevel, real_console_tty_prefix,
                 hw->kernel_parameters, hw->kernel_path, &all_boot_params,
                 rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,

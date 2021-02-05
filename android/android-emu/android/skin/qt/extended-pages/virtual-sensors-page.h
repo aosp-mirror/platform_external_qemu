@@ -157,6 +157,7 @@ private:
     void togglePostureButtonsVisibility(bool newVisibility);
     void setupRollableUI();
     void updateUIPosture();
+    void disableHeartRateSensor();
 
     static void onTargetStateChanged(void* context);
     static void onPhysicalStateChanging(void* context);

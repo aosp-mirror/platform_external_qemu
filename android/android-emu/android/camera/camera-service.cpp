@@ -80,6 +80,14 @@ struct CameraServiceDesc {
 /* One and only one camera service. */
 static CameraServiceDesc    _camera_service_desc;
 
+/* Camera callback descriptor. */
+struct CameraCallbackDesc {
+    void* context = nullptr;
+    camera_callback_t callback = nullptr;
+    CameraSourceType source;
+};
+
+static CameraCallbackDesc _camera_callback_desc;
 /********************************************************************************
  * Helper routines
  *******************************************************************************/
@@ -1027,7 +1035,10 @@ _camera_client_query_connect(CameraClient* cc, QemudClient* qc, const char* para
     }
 
     D("%s: Camera device '%s' is now connected", __FUNCTION__, cc->device_name);
-
+    if(cc->camera_info->camera_source == _camera_callback_desc.source &&
+        _camera_callback_desc.callback) {
+        _camera_callback_desc.callback(_camera_callback_desc.context, true);
+    }
     _qemu_client_reply_ok(qc, NULL);
 }
 
@@ -1063,7 +1074,6 @@ _camera_client_query_disconnect(CameraClient* cc,
     cc->camera = NULL;
 
     D("Camera device '%s' is now disconnected", cc->device_name);
-
     _qemu_client_reply_ok(qc, NULL);
 }
 
@@ -1420,6 +1430,11 @@ _camera_client_query_stop(CameraClient* cc, QemudClient* qc, const char* param)
     cc->staging_framebuffer = NULL;
 
     camera_metrics_report_stop_session(cc->frame_count);
+
+    if (cc->camera_info->camera_source == _camera_callback_desc.source &&
+        _camera_callback_desc.callback) {
+        _camera_callback_desc.callback(_camera_callback_desc.context, false);
+    }
 
     D("%s: Camera device '%s' is now stopped.", __FUNCTION__, cc->device_name);
     _qemu_client_reply_ok(qc, NULL);
@@ -2040,6 +2055,9 @@ static int _camera_client_load(Stream* f, QemudClient* client, void* opaque) {
             return -EIO;
         }
     }
+    if (cc->camera_info->camera_source == _camera_callback_desc.source &&
+        _camera_callback_desc.callback)
+        _camera_callback_desc.callback(_camera_callback_desc.context, is_camera_started);
 
     return 0;
 }
@@ -2087,6 +2105,12 @@ _camera_service_connect(void*          opaque,
     return client;
 }
 
+void register_camera_status_change_callback(camera_callback_t cb, void* ctx, CameraSourceType src) {
+    _camera_callback_desc.callback = cb;
+    _camera_callback_desc.context = ctx;
+    _camera_callback_desc.source = src;
+}
+
 void android_camera_service_init(void) {
     static int _inited = 0;
 
@@ -2106,16 +2130,16 @@ void android_camera_service_init(void) {
         if (strcmp(android_hw->hw_camera_back, "emulated") &&
                 strcmp(android_hw->hw_camera_front, "emulated")) {
             /* Fake camera is not used for camera emulation. */
-            boot_property_add("qemu.sf.fake_camera", "none");
+            boot_property_add_qemu_sf_fake_camera("none");
         } else {
             if(!strcmp(android_hw->hw_camera_back, "emulated") &&
                     !strcmp(android_hw->hw_camera_front, "emulated")) {
                 /* Fake camera is used for both, front and back camera emulation. */
-                boot_property_add("qemu.sf.fake_camera", "both");
+                boot_property_add_qemu_sf_fake_camera("both");
             } else if (!strcmp(android_hw->hw_camera_back, "emulated")) {
-                boot_property_add("qemu.sf.fake_camera", "back");
+                boot_property_add_qemu_sf_fake_camera("back");
             } else {
-                boot_property_add("qemu.sf.fake_camera", "front");
+                boot_property_add_qemu_sf_fake_camera("front");
             }
         }
 

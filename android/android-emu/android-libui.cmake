@@ -395,7 +395,7 @@ target_link_libraries(
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug.
 # This implies a direct dependency to libX11.so
 android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
-android_target_link_libraries(emulator-libui linux-aarch64 PRIVATE -lX11 -lxcb
+android_target_link_libraries(emulator-libui linux-aarch64 PRIVATE -lpulse -lX11 -lxcb
                                                                    -lXau)
 android_target_link_libraries(emulator-libui darwin-x86_64
                               PRIVATE "-framework Carbon")

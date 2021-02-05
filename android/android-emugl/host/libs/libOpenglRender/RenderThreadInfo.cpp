@@ -102,6 +102,10 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
     HandleType ctxHndl = stream->getBe32();
     HandleType drawSurf = stream->getBe32();
     HandleType readSurf = stream->getBe32();
+    currContextHandleFromLoad = ctxHndl;
+    currDrawSurfHandleFromLoad = drawSurf;
+    currReadSurfHandleFromLoad = readSurf;
+
     fb->lock();
     currContext = fb->getContext_locked(ctxHndl);
     currDrawSurf = fb->getWindowSurface_locked(drawSurf);
@@ -121,4 +125,14 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
     stream->getBe64();
 
     return true;
+}
+
+void RenderThreadInfo::postLoadRefreshCurrentContextSurfacePtrs() {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    assert(fb);
+    fb->lock();
+    currContext = fb->getContext_locked(currContextHandleFromLoad);
+    currDrawSurf = fb->getWindowSurface_locked(currDrawSurfHandleFromLoad);
+    currReadSurf = fb->getWindowSurface_locked(currReadSurfHandleFromLoad);
+    fb->unlock();
 }

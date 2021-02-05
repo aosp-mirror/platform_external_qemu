@@ -228,6 +228,9 @@ static constexpr android::base::StringView kHostSideTracing = "ANDROID_EMU_host_
 // rcDestroySyncKHR
 static constexpr android::base::StringView kAsyncFrameCommands = "ANDROID_EMU_async_frame_commands";
 
+// Queue submit with commands
+static constexpr android::base::StringView kVulkanQueueSubmitWithCommands = "ANDROID_EMU_vulkan_queue_submit_with_commands";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -336,6 +339,11 @@ static bool shouldEnableVulkanShaderFloat16Int8() {
 
 static bool shouldEnableAsyncQueueSubmit() {
     return shouldEnableVulkan();
+}
+
+static bool shouldEnableQueueSubmitWithCommands() {
+    return shouldEnableVulkan() &&
+        emugl_feature_is_enabled(android::featurecontrol::VulkanQueueSubmitWithCommands);
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
@@ -461,6 +469,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         shouldEnableVulkan();
     bool vulkanShaderFloat16Int8Enabled = shouldEnableVulkanShaderFloat16Int8();
     bool vulkanAsyncQueueSubmitEnabled = shouldEnableAsyncQueueSubmit();
+    bool vulkanQueueSubmitWithCommands = shouldEnableQueueSubmitWithCommands();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -566,6 +575,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (vulkanAsyncQueueSubmitEnabled && name == GL_EXTENSIONS) {
         glStr += kVulkanAsyncQueueSubmit;
+        glStr += " ";
+    }
+
+    if (vulkanQueueSubmitWithCommands && name == GL_EXTENSIONS) {
+        glStr += kVulkanQueueSubmitWithCommands;
         glStr += " ";
     }
 
@@ -1190,6 +1204,8 @@ static int rcDestroySyncKHR(uint64_t handle) {
 static void rcSetPuid(uint64_t puid) {
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
     tInfo->m_puid = puid;
+    FrameBuffer *fb = FrameBuffer::getFB();
+    fb->registerProcessSequenceNumberForPuid(puid);
 }
 
 static int rcCompose(uint32_t bufferSize, void* buffer) {

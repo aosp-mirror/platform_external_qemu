@@ -396,6 +396,14 @@ int vmstate_save_state(QEMUFile *f, const VMStateDescription *vmsd,
         json_end_array(vmdesc);
     }
 
+    if (vmsd->post_save) {
+        ret = vmsd->post_save(opaque);
+        if (ret) {
+            error_report("post-save failed: %s", vmsd->name);
+            return ret;
+        }
+    }
+
     return vmstate_subsection_save(f, vmsd, opaque, vmdesc);
 }
 

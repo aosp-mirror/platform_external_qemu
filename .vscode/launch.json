@@ -100,7 +100,7 @@
                     "-verbose",
                     "-feature",
                     "-HVF",
-                    "-no-window",
+                    "-qt-hide-window",
                     "-gpu",
                     "auto-no-window"
                 ],

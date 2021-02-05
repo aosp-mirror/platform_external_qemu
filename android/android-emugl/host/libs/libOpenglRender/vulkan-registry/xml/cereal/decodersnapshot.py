@@ -96,7 +96,7 @@ handleDependenciesDict = dict(SNAPSHOT_HANDLE_DEPENDENCIES)
 
 def extract_deps_vkAllocateCommandBuffers(param, access, lenExpr, api, cgen):
     cgen.stmt("mReconstruction.addHandleDependency((const uint64_t*)%s, %s, (uint64_t)(uintptr_t)%s)" % \
-              (access, lenExpr, "VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_VkCommandPool(pAllocateInfo->commandPool)"))
+              (access, lenExpr, "unboxed_to_boxed_non_dispatchable_VkCommandPool(pAllocateInfo->commandPool)"))
 
 specialCaseDependencyExtractors = {
     "vkAllocateCommandBuffers" : extract_deps_vkAllocateCommandBuffers,
@@ -167,9 +167,9 @@ def emit_impl(typeInfo, api, cgen):
             cgen.stmt("mReconstruction.setApiTrace(apiInfo, OP_%s, snapshotTraceBegin, snapshotTraceBytes)" % api.name)
             cgen.beginFor("uint32_t i = 0", "i < %s" % lenExpr, "++i")
             if p.isNonDispatchableHandleType():
-                cgen.stmt("%s boxed = VkDecoderGlobalState::get()->unboxed_to_boxed_non_dispatchable_%s(%s[i])" % (p.typeName, p.typeName, access))
+                cgen.stmt("%s boxed = unboxed_to_boxed_non_dispatchable_%s(%s[i])" % (p.typeName, p.typeName, access))
             else:
-                cgen.stmt("%s boxed = VkDecoderGlobalState::get()->unboxed_to_boxed_%s(%s[i])" % (p.typeName, p.typeName, access))
+                cgen.stmt("%s boxed = unboxed_to_boxed_%s(%s[i])" % (p.typeName, p.typeName, access))
             cgen.stmt("mReconstruction.forEachHandleAddModifyApi((const uint64_t*)(&boxed), 1, apiHandle)")
             cgen.endFor()
 

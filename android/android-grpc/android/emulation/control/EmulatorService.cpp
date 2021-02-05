@@ -22,13 +22,15 @@
 #include <grpcpp/grpcpp.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <ratio>
+#include <set>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -36,6 +38,7 @@
 #include <utility>
 #include <vector>
 
+#include "android/avd/info.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/Stopwatch.h"
@@ -45,11 +48,11 @@
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
-#include "android/emulation/MultiDisplay.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
 #include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/camera/Camera.h"
 #include "android/emulation/control/clipboard/Clipboard.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
@@ -59,6 +62,7 @@
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/logcat/LogcatParser.h"
 #include "android/emulation/control/logcat/RingStreambuf.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
@@ -89,6 +93,7 @@
 #include "emulator_controller.grpc.pb.h"
 #include "emulator_controller.pb.h"
 #include "studio_stats.pb.h"
+
 namespace android {
 namespace base {
 class Looper;
@@ -120,6 +125,7 @@ public:
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
           mTouchEventSender(agents),
+          mCamera(Camera::getCamera()),
           mClipboard(Clipboard::getClipboard(agents->clipboard)),
           mLooper(android::base::ThreadLooper::get()) {
         // the logcat pipe will take ownership of the created stream, and writes
@@ -512,7 +518,8 @@ public:
         if (request->transport().channel() == ImageTransport::MMAP) {
             entry = mSharedMemoryLibrary.borrow(
                     request->transport().handle(),
-                    request->width() * request->height() * 4);
+                    request->width() * request->height() *
+                            ScreenshotUtils::getBytesPerPixel(*request));
         }
 
         // Make sure we always write the first frame, this can be
@@ -569,8 +576,7 @@ public:
              request->format() == ImageFormat::RGBA8888)) {
             android::metrics::MetricsReporter::get().report(
                     [=](android_studio::AndroidStudioEvent* event) {
-                        int bpp = request->format() == ImageFormat::RGB888 ? 3
-                                                                           : 4;
+                        int bpp = ScreenshotUtils::getBytesPerPixel(*request);
                         auto screenshot = event->mutable_emulator_details()
                                                   ->mutable_screenshot();
                         screenshot->set_size(request->width() *
@@ -651,15 +657,6 @@ public:
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(newWidth, newHeight);
-        }
-
-        // Screenshot backend uses the _skin layout_'s orientation,
-        // which is clockwise instead of counterclockwise.
-        // This makes the 90/270 cases flipped.
-        if (desiredRotation == SKIN_ROTATION_270) {
-            desiredRotation = SKIN_ROTATION_90;
-        } else if (desiredRotation == SKIN_ROTATION_90) {
-            desiredRotation = SKIN_ROTATION_270;
         }
 
         // Screenshots can come from either the gl renderer, or the guest.
@@ -781,11 +778,12 @@ public:
         // Check preconditions, do we have multi display and no duplicate ids?
         if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
             return Status(::grpc::StatusCode::UNIMPLEMENTED,
-                          "The multi display feature is not available", "");
+                          "The multi-display feature is not available", "");
         }
-        std::set<int> newDisplays, updatedDisplays;
+
+        std::set<int> updatingDisplayIds;
         for (const auto& display : request->displays()) {
-            if (newDisplays.count(display.display())) {
+            if (updatingDisplayIds.count(display.display())) {
                 return Status(::grpc::StatusCode::ABORTED,
                               "Duplicate display: " +
                                       std::to_string(display.display()) +
@@ -801,18 +799,30 @@ public:
                                       " is an invalid configuration.",
                               "");
             }
-            newDisplays.insert(display.display());
+            updatingDisplayIds.insert(display.display());
         }
 
+        std::set<int> updatedDisplays;
         // Create a snapshot of the current display state.
         DisplayConfigurations previousState;
         getDisplayConfigurations(context, nullptr, &previousState);
+        auto existingDisplays = previousState.displays();
 
         int failureDisplay = 0;
         // Reconfigure to the desired state
         for (const auto& display : request->displays()) {
-            if (display.display() == 0) {
-                updatedDisplays.insert(display.display());
+            // Check if this display is non zero and is different
+            // than any existing one.
+            auto unchanged = std::find_if(
+                    std::begin(existingDisplays), std::end(existingDisplays),
+                    [&display](const DisplayConfiguration& cfg) {
+                        return display.display() == 0 ||
+                               ScreenshotUtils::equals(cfg, display);
+                    });
+
+            if (unchanged != std::end(existingDisplays)) {
+                // We are trying to change display 0, or we are trying to update
+                // a display with the exact same configuration.
                 continue;
             }
 
@@ -836,11 +846,9 @@ public:
             LOG(WARNING) << "Rolling back failed display updates.";
             // Bring back the old state of the displays we added.
             for (const auto& display : previousState.displays()) {
-                updatedDisplays.erase(display.display());
-                if (display.display() == 0) {
+                if (updatedDisplays.erase(display.display()) == 0) {
                     continue;
                 }
-
                 if (mAgents->multi_display->setMultiDisplay(
                             display.display(), -1, -1, display.width(),
                             display.height(), display.dpi(), display.flags(),
@@ -859,13 +867,12 @@ public:
                           "Internal error while trying to modify display: " +
                                   std::to_string(failureDisplay),
                           "");
+        }
 
-        } else {
-            // Delete displays we don't want.
-            for (const auto& display : previousState.displays()) {
-                if (updatedDisplays.count(display.display()) == 0) {
-                    deleteDisplay(display.display());
-                }
+        // Delete displays we don't want.
+        for (const auto& display : previousState.displays()) {
+            if (updatedDisplays.count(display.display()) == 0) {
+                deleteDisplay(display.display());
             }
         }
 
@@ -965,12 +972,43 @@ public:
         return Status::OK;
     }
 
+    void setNotificationEvent(Notification* reply) {
+        if (mCamera->isVirtualSceneConnected()) {
+            reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
+        } else {
+            reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
+        }
+    }
+
+    Status streamNotification(ServerContext* context,
+                              const Empty* request,
+                              ServerWriter<Notification>* writer) override {
+        Notification reply;
+        bool clientAvailable = !context->IsCancelled();
+        if (clientAvailable) {
+            setNotificationEvent(&reply);
+            clientAvailable = writer->Write(reply);
+        }
+        while (clientAvailable) {
+            const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
+            auto arrived = mCamera->eventWaiter()->next(kTimeToWaitForFrame);
+            if (arrived > 0 && !context->IsCancelled()) {
+                setNotificationEvent(&reply);
+                clientAvailable = writer->Write(reply);
+            }
+            clientAvailable = !context->IsCancelled() && clientAvailable;
+        }
+        return Status::OK;
+    }
+
+
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
     TouchEventSender mTouchEventSender;
     SharedMemoryLibrary mSharedMemoryLibrary;
 
+    Camera* mCamera;
     Clipboard* mClipboard;
     Looper* mLooper;
     RingStreambuf

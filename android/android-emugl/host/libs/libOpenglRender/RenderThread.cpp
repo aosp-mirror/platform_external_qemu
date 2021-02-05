@@ -97,8 +97,8 @@ RenderThread::RenderThread(RenderChannelImpl* channel,
 
 RenderThread::RenderThread(
         struct asg_context context,
-        android::emulation::asg::ConsumerCallbacks callbacks,
-        android::base::Stream* loadStream)
+        android::base::Stream* loadStream,
+        android::emulation::asg::ConsumerCallbacks callbacks)
     : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
       mRingStream(
           new RingStream(context, callbacks, kStreamBufferSize)) {
@@ -122,8 +122,14 @@ void RenderThread::pausePreSnapshot() {
     assert(mState == SnapshotState::Empty);
     mStream.emplace();
     mState = SnapshotState::StartSaving;
-    if (mChannel) mChannel->pausePreSnapshot();
-    mCondVar.broadcastAndUnlock(&lock);
+    if (mRingStream) {
+        mRingStream->pausePreSnapshot();
+        // mCondVar.broadcastAndUnlock(&lock);
+    }
+    if (mChannel) {
+        mChannel->pausePreSnapshot();
+        mCondVar.broadcastAndUnlock(&lock);
+    }
 }
 
 void RenderThread::resume() {
@@ -133,10 +139,12 @@ void RenderThread::resume() {
     if (mState == SnapshotState::Empty) {
         return;
     }
+    if (mRingStream) mRingStream->resume();
     waitForSnapshotCompletion(&lock);
     mStream.clear();
     mState = SnapshotState::Empty;
     if (mChannel) mChannel->resume();
+    if (mRingStream) mRingStream->resume();
     mCondVar.broadcastAndUnlock(&lock);
 }
 
@@ -324,6 +332,8 @@ intptr_t RenderThread::main() {
         delete[] fname;
     }
 
+    uint32_t* seqnoPtr = nullptr;
+
     while (1) {
         // Let's make sure we read enough data for at least some processing.
         int packetSize;
@@ -353,6 +363,10 @@ intptr_t RenderThread::main() {
                     break;
                 }
             } else if (needRestoreFromSnapshot) {
+                // If we're using RingStream that might load before FrameBuffer
+                // restores the contexts from the handles, so check again here.
+
+                tInfo.postLoadRefreshCurrentContextSurfacePtrs();
                 // We just loaded from a snapshot, need to initialize / bind
                 // the contexts.
                 needRestoreFromSnapshot = false;
@@ -402,11 +416,31 @@ intptr_t RenderThread::main() {
 
         do {
 
+            if (!seqnoPtr && tInfo.m_puid) {
+                seqnoPtr = FrameBuffer::getFB()->getProcessSequenceNumberPtr(tInfo.m_puid);
+            }
+
             if (mRunInLimitedMode) {
                 sThreadRunLimiter.lock();
             }
 
             progress = false;
+
+            size_t last;
+
+            //
+            // try to process some of the command buffer using the
+            // Vulkan decoder
+            //
+            {
+                (void)seqnoPtr;
+                last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
+                                            ioStream, seqnoPtr);
+                if (last > 0) {
+                    readBuf.consume(last);
+                    progress = true;
+                }
+            }
 
             // try to process some of the command buffer using the GLESv1
             // decoder
@@ -425,7 +459,6 @@ intptr_t RenderThread::main() {
             {
                 FrameBuffer::getFB()->lockContextStructureRead();
             }
-            size_t last;
 
             {
                 last = tInfo.m_glDec.decode(
@@ -468,18 +501,6 @@ intptr_t RenderThread::main() {
                 sThreadRunLimiter.unlock();
             }
 
-            //
-            // try to process some of the command buffer using the
-            // Vulkan decoder
-            //
-            {
-                last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
-                                            ioStream);
-                if (last > 0) {
-                    readBuf.consume(last);
-                    progress = true;
-                }
-            }
         } while (progress);
     }
 

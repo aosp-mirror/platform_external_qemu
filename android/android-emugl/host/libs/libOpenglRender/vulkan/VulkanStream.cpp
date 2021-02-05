@@ -29,143 +29,37 @@ using emugl::emugl_feature_is_enabled;
 
 namespace goldfish_vk {
 
-class VulkanStream::Impl : public android::base::Stream {
-public:
-    Impl(IOStream* stream)
-        : mStream(stream) {
+VulkanStream::VulkanStream(IOStream *stream) : mStream(stream) {
+    unsetHandleMapping();
 
-        unsetHandleMapping();
-
-        if (emugl_feature_is_enabled(android::featurecontrol::VulkanNullOptionalStrings)) {
-            mFeatureBits |= VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT;
-        }
-        if (emugl_feature_is_enabled(android::featurecontrol::VulkanIgnoredHandles)) {
-            mFeatureBits |= VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT;
-        }
-        if (emugl_feature_is_enabled(android::featurecontrol::VulkanShaderFloat16Int8)) {
-            mFeatureBits |= VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT;
-        }
+    if (emugl_feature_is_enabled(android::featurecontrol::VulkanNullOptionalStrings)) {
+        mFeatureBits |= VULKAN_STREAM_FEATURE_NULL_OPTIONAL_STRINGS_BIT;
     }
-
-    ~Impl() { }
-
-    void setStream(IOStream* stream) {
-        mStream = stream;
+    if (emugl_feature_is_enabled(android::featurecontrol::VulkanIgnoredHandles)) {
+        mFeatureBits |= VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT;
     }
-
-    bool valid() { return true; }
-
-    void alloc(void **ptrAddr, size_t bytes) {
-        if (!bytes) {
-            *ptrAddr = nullptr;
-            return;
-        }
-
-        *ptrAddr = mPool.alloc(bytes);
+    if (emugl_feature_is_enabled(android::featurecontrol::VulkanShaderFloat16Int8)) {
+        mFeatureBits |= VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT;
     }
-
-    ssize_t write(const void *buffer, size_t size) override {
-        return bufferedWrite(buffer, size);
-    }
-
-    ssize_t read(void *buffer, size_t size) override {
-        commitWrite();
-        if (!mStream->readFully(buffer, size)) {
-            E("FATAL: Could not read back %zu bytes", size);
-            abort();
-        }
-        return size;
-    }
-
-    void flush() {
-        commitWrite();
-    }
-
-    void clearPool() {
-        mPool.freeAll();
-    }
-
-    void setHandleMapping(VulkanHandleMapping* mapping) {
-        mCurrentHandleMapping = mapping;
-    }
-
-    void unsetHandleMapping() {
-        mCurrentHandleMapping = &mDefaultHandleMapping;
-    }
-
-    VulkanHandleMapping* handleMapping() const {
-        return mCurrentHandleMapping;
-    }
-
-    uint32_t getFeatureBits() const {
-        return mFeatureBits;
-    }
-
-private:
-    size_t oustandingWriteBuffer() const {
-        return mWritePos;
-    }
-
-    size_t remainingWriteBufferSize() const {
-        return mWriteBuffer.size() - mWritePos;
-    }
-
-    void commitWrite() {
-        if (!valid()) {
-            E("FATAL: Tried to commit write to vulkan pipe with invalid pipe!");
-            abort();
-        }
-
-        int written =
-            mStream->writeFully(mWriteBuffer.data(), mWritePos);
-
-        if (written) {
-            E("FATAL: Did not write exactly %zu bytes!", mWritePos);
-            abort();
-        }
-        mWritePos = 0;
-    }
-
-    ssize_t bufferedWrite(const void *buffer, size_t size) {
-        if (size > remainingWriteBufferSize()) {
-            mWriteBuffer.resize((mWritePos + size) << 1);
-        }
-        memcpy(mWriteBuffer.data() + mWritePos, buffer, size);
-        mWritePos += size;
-        return size;
-    }
-
-    android::base::BumpPool mPool;
-
-    size_t mWritePos = 0;
-    std::vector<uint8_t> mWriteBuffer;
-    IOStream* mStream = nullptr;
-    DefaultHandleMapping mDefaultHandleMapping;
-    VulkanHandleMapping* mCurrentHandleMapping;
-    uint32_t mFeatureBits = 0;
-};
-
-VulkanStream::VulkanStream(IOStream *stream) :
-    mImpl(new VulkanStream::Impl(stream)) { }
+}
 
 VulkanStream::~VulkanStream() = default;
 
 void VulkanStream::setStream(IOStream* stream) {
-    mImpl->setStream(stream);
+    mStream = stream;
 }
 
 bool VulkanStream::valid() {
-    return mImpl->valid();
+    return true;
 }
 
 void VulkanStream::alloc(void** ptrAddr, size_t bytes) {
-    // Do not free *ptrAddr if bytes == 0, which causes problems
-    // with the protocol and overwrites guest user data.
-    if (bytes == 0) {
+    if (!bytes) {
+        *ptrAddr = nullptr;
         return;
     }
-
-    mImpl->alloc(ptrAddr, bytes);
+    
+    *ptrAddr = mPool.alloc(bytes);
 }
 
 void VulkanStream::loadStringInPlace(char** forOutput) {
@@ -195,36 +89,106 @@ void VulkanStream::loadStringArrayInPlace(char*** forOutput) {
     }
 }
 
+void VulkanStream::loadStringInPlaceWithStreamPtr(char** forOutput, uint8_t** streamPtr) {
+    uint32_t len;
+    memcpy(&len, *streamPtr, sizeof(uint32_t));
+    *streamPtr += sizeof(uint32_t);
+    android::base::Stream::fromBe32((uint8_t*)&len);
+
+    alloc((void**)forOutput, len + 1);
+
+    memset(*forOutput, 0x0, len + 1);
+
+    if (len > 0) {
+        memcpy(*forOutput, *streamPtr, len);
+        *streamPtr += len;
+    }
+}
+
+void VulkanStream::loadStringArrayInPlaceWithStreamPtr(char*** forOutput, uint8_t** streamPtr) {
+    uint32_t count;
+    memcpy(&count, *streamPtr, sizeof(uint32_t));
+    *streamPtr += sizeof(uint32_t);
+    android::base::Stream::fromBe32((uint8_t*)&count);
+
+    if (!count) {
+        *forOutput = nullptr;
+        return;
+    }
+
+    alloc((void**)forOutput, count * sizeof(char*));
+
+    char **stringsForOutput = *forOutput;
+
+    for (size_t i = 0; i < count; i++) {
+        loadStringInPlaceWithStreamPtr(stringsForOutput + i, streamPtr);
+    }
+}
+
 ssize_t VulkanStream::read(void *buffer, size_t size) {
-    return mImpl->read(buffer, size);
+    commitWrite();
+    if (!mStream->readFully(buffer, size)) {
+        E("FATAL: Could not read back %zu bytes", size);
+        abort();
+    }
+    return size;
+}
+
+size_t VulkanStream::remainingWriteBufferSize() const {
+    return mWriteBuffer.size() - mWritePos;
+}
+
+ssize_t VulkanStream::bufferedWrite(const void *buffer, size_t size) {
+    if (size > remainingWriteBufferSize()) {
+        mWriteBuffer.resize((mWritePos + size) << 1);
+    }
+    memcpy(mWriteBuffer.data() + mWritePos, buffer, size);
+    mWritePos += size;
+    return size;
 }
 
 ssize_t VulkanStream::write(const void *buffer, size_t size) {
-    return mImpl->write(buffer, size);
+    return bufferedWrite(buffer, size);
 }
 
 void VulkanStream::commitWrite() {
-    mImpl->flush();
+    if (!valid()) {
+        E("FATAL: Tried to commit write to vulkan pipe with invalid pipe!");
+        abort();
+    }
+    
+    int written =
+        mStream->writeFully(mWriteBuffer.data(), mWritePos);
+    
+    if (written) {
+        E("FATAL: Did not write exactly %zu bytes!", mWritePos);
+        abort();
+    }
+    mWritePos = 0;
 }
 
 void VulkanStream::clearPool() {
-    mImpl->clearPool();
+    mPool.freeAll();
 }
 
 void VulkanStream::setHandleMapping(VulkanHandleMapping* mapping) {
-    mImpl->setHandleMapping(mapping);
+    mCurrentHandleMapping = mapping;
 }
 
 void VulkanStream::unsetHandleMapping() {
-    mImpl->unsetHandleMapping();
+    mCurrentHandleMapping = &mDefaultHandleMapping;
 }
 
 VulkanHandleMapping* VulkanStream::handleMapping() const {
-    return mImpl->handleMapping();
+    return mCurrentHandleMapping;
 }
 
 uint32_t VulkanStream::getFeatureBits() const {
-    return mImpl->getFeatureBits();
+    return mFeatureBits;
+}
+
+android::base::BumpPool* VulkanStream::pool() {
+    return &mPool;
 }
 
 VulkanMemReadingStream::VulkanMemReadingStream(uint8_t* start)
@@ -236,6 +200,14 @@ void VulkanMemReadingStream::setBuf(uint8_t* buf) {
     mStart = buf;
     mReadPos = 0;
     resetTrace();
+}
+
+uint8_t* VulkanMemReadingStream::getBuf() {
+    return mStart;
+}
+
+void VulkanMemReadingStream::setReadPos(uintptr_t pos) {
+    mReadPos = pos;
 }
 
 ssize_t VulkanMemReadingStream::read(void* buffer, size_t size) {

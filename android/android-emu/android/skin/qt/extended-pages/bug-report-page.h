@@ -20,6 +20,7 @@
 
 #include "android/avd/BugreportInfo.h"                   // for BugreportInfo
 #include "android/base/StringView.h"                     // for StringView
+#include "android/base/async/RecurrentTask.h"            // for RecurrentTask
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbCommandPtr
 #include "android/settings-agent.h"                      // for SettingsTheme
 
@@ -62,8 +63,10 @@ public:
 private slots:
     void on_bug_saveButton_clicked();
     void on_bug_sendToGoogle_clicked();
+    void on_bug_bugReportCheckBox_clicked();
 
 private:
+    void refreshContents();
     void loadAdbBugreport();
     void loadAdbLogcat();
     void loadCircularSpinner(SettingsTheme theme);
@@ -71,6 +74,7 @@ private:
     bool eventFilter(QObject* object, QEvent* event) override;
     bool launchIssueTracker();
     void enableInput(bool enabled);
+    void showSpinningWheelAnimation(bool enabled);
     bool saveBugReportTo(android::base::StringView location);
     bool saveToFile(android::base::StringView filePath,
                     const char* content,
@@ -78,7 +82,6 @@ private:
     std::string generateUniqueBugreportName();
     android::emulation::AdbInterface* mAdb = nullptr;
     QMessageBox* mDeviceDetailsDialog;
-    bool mFirstShowEvent = true;
     std::unique_ptr<Ui::BugreportPage> mUi;
     std::shared_ptr<UiEventTracker> mBugTracker;
     SavingStates mSavingStates;
@@ -86,4 +89,5 @@ private:
     std::string mReproSteps;
     android::emulation::AdbCommandPtr mAdbBugreport;
     android::emulation::AdbCommandPtr mAdbLogcat;
+    android::base::RecurrentTask mTask;
 };
