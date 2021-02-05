@@ -330,6 +330,7 @@ void PostWorker::composeLayer(ComposeLayer* l, uint32_t w, uint32_t h) {
             return;
         }
         cb->postLayer(l, w, h);
+        cb->signalSemaphore(GL_LAYOUT_GENERAL_EXT);
     }
     else {
         // no Colorbuffer associated with SOLID_COLOR mode
