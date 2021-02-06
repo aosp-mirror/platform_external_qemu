@@ -221,6 +221,7 @@ typedef void (VKAPI_PTR *PFN_vkGetIOSurfaceMVK)(VkImage image, void**  pIOSurfac
 #define VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT (1 << 1)
 #define VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT (1 << 2)
 
+#ifndef VK_KHR_shader_float16_int8
 // Stuff we advertised but didn't define the structs for it yet because
 // we also needed to update our vulkan headers and xml
 typedef struct VkPhysicalDeviceShaderFloat16Int8Features {
@@ -244,6 +245,7 @@ typedef struct VkPhysicalDeviceShaderFloat16Int8Features {
 #define VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME "VK_KHR_shader_float16_int8"
 typedef VkPhysicalDeviceShaderFloat16Int8Features VkPhysicalDeviceShaderFloat16Int8FeaturesKHR;
 typedef VkPhysicalDeviceShaderFloat16Int8Features VkPhysicalDeviceFloat16Int8FeaturesKHR;
+#endif  // VK_KHR_shader_float16_int8
 
 #define VK_GOOGLE_async_queue_submit 1
 
