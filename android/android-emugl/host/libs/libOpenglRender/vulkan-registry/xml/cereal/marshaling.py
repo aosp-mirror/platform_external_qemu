@@ -30,6 +30,8 @@ from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRIT
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 
+from .marshalingdefs import KNOWN_FUNCTION_OPCODES
+
 class VulkanMarshalingCodegen(VulkanTypeIterator):
 
     def __init__(self,
@@ -612,8 +614,12 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         # Begin Vulkan API opcodes from something high
         # that is not going to interfere with renderControl
         # opcodes
-        self.currentOpcode = 20000
-        self.endOpcode = 30000
+        self.beginOpcodeOld = 20000
+        self.endOpcodeOld = 30000
+
+        self.beginOpcode = 200000000
+        self.endOpcode = 300000000
+        self.knownOpcodes = set()
 
         self.extensionMarshalPrototype = \
             VulkanAPI(API_PREFIX_MARSHAL + "extension_struct",
@@ -765,10 +771,26 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
+        if name in KNOWN_FUNCTION_OPCODES:
+            opcode = KNOWN_FUNCTION_OPCODES[name]
+        else:
+            opcode = self.beginOpcode + \
+                hash(name) % (self.endOpcode - self.beginOpcode)
+            hasHashCollision = False
+            while opcode in self.knownOpcodes:
+                hasHashCollision = True
+                opcode += 1
+            if hasHashCollision:
+                print("Hash collision occurred on function '{}'. "
+                      "Please add the following line to marshalingdefs.py:".format(name), file=sys.stderr)
+                print("----------------------", file=sys.stderr)
+                print("    \"{}\": {},".format(name, opcode), file=sys.stderr)
+                print("----------------------", file=sys.stderr)
+
         self.module.appendHeader(
-            "#define OP_%s %d\n" % (name, self.currentOpcode))
-        self.apiOpcodes[name] = (self.currentOpcode, self.currentFeature)
-        self.currentOpcode += 1
+            "#define OP_%s %d\n" % (name, opcode))
+        self.apiOpcodes[name] = (opcode, self.currentFeature)
+        self.knownOpcodes.add(opcode)
 
     def doExtensionStructMarshalingCodegen(self, cgen, retType, extParam, forEach, funcproto, direction):
         accessVar = "structAccess"
@@ -897,5 +919,11 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 opcode2stringPrototype,
                 lambda cgen: emitOpcode2StringImpl(self.apiOpcodes, cgen)))
 
+        self.module.appendHeader(
+            "#define OP_vkFirst_old %d\n" % (self.beginOpcodeOld))
+        self.module.appendHeader(
+            "#define OP_vkLast_old %d\n" % (self.endOpcodeOld))
+        self.module.appendHeader(
+            "#define OP_vkFirst %d\n" % (self.beginOpcode))
         self.module.appendHeader(
             "#define OP_vkLast %d\n" % (self.endOpcode))
