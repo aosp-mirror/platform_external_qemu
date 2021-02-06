@@ -24,7 +24,7 @@ namespace control {
 
 // The Camera will register a callback with the camera qemud service and
 // will get notified when camera is connected or disconnected.
-class Camera : public base::EventNotificationSupport<Camera, bool> {
+class Camera : public base::EventNotificationSupport<bool> {
 public:
     Camera();
     bool isVirtualSceneConnected() const { return mVirtualSceneConnected; };

@@ -33,7 +33,7 @@ class UiEventTracker;
 using android::metrics::UiEventTracker;
 
 
-class MultiDisplayPage : public QWidget,  public android::base::EventNotificationSupport<MultiDisplayPage, MultiDisplayPageChangeEvent> {
+class MultiDisplayPage : public QWidget,  public android::base::EventNotificationSupport<MultiDisplayPageChangeEvent> {
     Q_OBJECT
 
 public:

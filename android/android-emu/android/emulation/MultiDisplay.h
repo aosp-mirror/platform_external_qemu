@@ -58,7 +58,7 @@ struct DisplayChangeEvent {
     uint32_t displayId;
 };
 
-class MultiDisplay :  public base::EventNotificationSupport<MultiDisplay, DisplayChangeEvent> {
+class MultiDisplay :  public base::EventNotificationSupport<DisplayChangeEvent> {
 public:
     MultiDisplay(const QAndroidEmulatorWindowAgent* const windowAgent,
                  const QAndroidRecordScreenAgent* const recordAgent,
