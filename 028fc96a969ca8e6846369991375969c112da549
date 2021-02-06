@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dd7e07ab_5ec096f5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/vk.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 13304,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-06T20:32:33Z",
+      "side": 1,
+      "message": "We\u0027ve got extension number 386 reserved from Khronos; can we move and pack up all our extensions into number 386?",
+      "revId": "028fc96a969ca8e6846369991375969c112da549",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
