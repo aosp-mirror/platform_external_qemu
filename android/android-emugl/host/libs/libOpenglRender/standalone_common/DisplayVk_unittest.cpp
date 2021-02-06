@@ -26,9 +26,9 @@ class DisplayVkTest : public ::testing::Test {
                                &m_compositorVkQueue);
         k_vk->vkGetDeviceQueue(m_vkDevice, m_swapChainQueueFamilyIndex, 0,
                                &m_swapChainVkQueue);
-        VkCommandPoolCreateInfo commandPoolCi = {};
-        commandPoolCi.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        commandPoolCi.queueFamilyIndex = m_compositorQueueFamilyIndex;
+        VkCommandPoolCreateInfo commandPoolCi = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+            .queueFamilyIndex = m_compositorQueueFamilyIndex};
         ASSERT_EQ(k_vk->vkCreateCommandPool(m_vkDevice, &commandPoolCi, nullptr,
                                             &m_vkCommandPool),
                   VK_SUCCESS);
@@ -72,21 +72,20 @@ class DisplayVkTest : public ::testing::Test {
 
    private:
     void createInstance() {
-        VkApplicationInfo appInfo = {};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pNext = nullptr;
-        appInfo.pApplicationName = "emulator SwapChainStateVk unittest";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "No Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_1;
+        VkApplicationInfo appInfo = {
+            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+            .pNext = nullptr,
+            .pApplicationName = "emulator SwapChainStateVk unittest",
+            .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+            .pEngineName = "No Engine",
+            .engineVersion = VK_MAKE_VERSION(1, 0, 0),
+            .apiVersion = VK_API_VERSION_1_1};
         auto extensions = SwapChainStateVk::getRequiredInstanceExtensions();
-        VkInstanceCreateInfo instanceCi = {};
-        instanceCi.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        instanceCi.ppEnabledExtensionNames = extensions.data();
-        instanceCi.enabledExtensionCount =
-            static_cast<uint32_t>(extensions.size());
-        instanceCi.pApplicationInfo = &appInfo;
+        VkInstanceCreateInfo instanceCi = {
+            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            .pApplicationInfo = &appInfo,
+            .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
+            .ppEnabledExtensionNames = extensions.data()};
         ASSERT_EQ(k_vk->vkCreateInstance(&instanceCi, nullptr, &m_vkInstance),
                   VK_SUCCESS);
         ASSERT_TRUE(m_vkInstance != VK_NULL_HANDLE);
@@ -97,10 +96,10 @@ class DisplayVkTest : public ::testing::Test {
         ASSERT_NE(m_window, nullptr);
         // TODO(kaiyili, b/179477624): add support for other platforms
 #ifdef _WIN32
-        VkWin32SurfaceCreateInfoKHR surfaceCi = {};
-        surfaceCi.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-        surfaceCi.hinstance = GetModuleHandle(nullptr);
-        surfaceCi.hwnd = m_window->getNativeWindow();
+        VkWin32SurfaceCreateInfoKHR surfaceCi = {
+            .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+            .hinstance = GetModuleHandle(nullptr),
+            .hwnd = m_window->getNativeWindow()};
         ASSERT_EQ(k_vk->vkCreateWin32SurfaceKHR(m_vkInstance, &surfaceCi,
                                                 nullptr, &m_vkSurface),
                   VK_SUCCESS);
@@ -119,13 +118,12 @@ class DisplayVkTest : public ::testing::Test {
                                              physicalDevices.data()),
             VK_SUCCESS);
         for (const auto &device : physicalDevices) {
-            VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures =
-                {};
-            descIndexingFeatures.sType =
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
-            VkPhysicalDeviceFeatures2 features = {};
-            features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-            features.pNext = &descIndexingFeatures;
+            VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {
+                .sType =
+                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT};
+            VkPhysicalDeviceFeatures2 features = {
+                .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+                .pNext = &descIndexingFeatures};
             k_vk->vkGetPhysicalDeviceFeatures2(device, &features);
             if (!CompositorVk::validatePhysicalDeviceFeatures(features)) {
                 continue;
@@ -176,35 +174,34 @@ class DisplayVkTest : public ::testing::Test {
         std::vector<VkDeviceQueueCreateInfo> queueCis(0);
         for (auto queueFamilyIndex : std::unordered_set(
                  {m_swapChainQueueFamilyIndex, m_compositorQueueFamilyIndex})) {
-            VkDeviceQueueCreateInfo queueCi = {};
-            queueCi.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            queueCi.queueFamilyIndex = queueFamilyIndex;
-            queueCi.queueCount = 1;
-            queueCi.pQueuePriorities = &queuePriority;
+            VkDeviceQueueCreateInfo queueCi = {
+                .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+                .queueFamilyIndex = queueFamilyIndex,
+                .queueCount = 1,
+                .pQueuePriorities = &queuePriority};
             queueCis.push_back(queueCi);
         }
-        VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {};
-        descIndexingFeatures.sType =
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
-        VkPhysicalDeviceFeatures2 features = {};
-        features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-        features.pNext = &descIndexingFeatures;
+        VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {
+            .sType =
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT};
+        VkPhysicalDeviceFeatures2 features = {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+            .pNext = &descIndexingFeatures};
         ASSERT_TRUE(CompositorVk::enablePhysicalDeviceFeatures(features));
         auto extensions = SwapChainStateVk::getRequiredDeviceExtensions();
         const auto compositorExtensions =
             CompositorVk::getRequiredDeviceExtensions();
         extensions.insert(extensions.end(), compositorExtensions.begin(),
                           compositorExtensions.end());
-        VkDeviceCreateInfo deviceCi = {};
-        deviceCi.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        deviceCi.pQueueCreateInfos = queueCis.data();
-        deviceCi.queueCreateInfoCount = static_cast<uint32_t>(queueCis.size());
-        deviceCi.pEnabledFeatures = nullptr;
-        deviceCi.enabledLayerCount = 0;
-        deviceCi.enabledExtensionCount =
-            static_cast<uint32_t>(extensions.size());
-        deviceCi.ppEnabledExtensionNames = extensions.data();
-        deviceCi.pNext = &features;
+        VkDeviceCreateInfo deviceCi = {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+            .pNext = &features,
+            .queueCreateInfoCount = static_cast<uint32_t>(queueCis.size()),
+            .pQueueCreateInfos = queueCis.data(),
+            .enabledLayerCount = 0,
+            .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
+            .ppEnabledExtensionNames = extensions.data(),
+            .pEnabledFeatures = nullptr};
         ASSERT_EQ(k_vk->vkCreateDevice(m_vkPhysicalDevice, &deviceCi, nullptr,
                                        &m_vkDevice),
                   VK_SUCCESS);

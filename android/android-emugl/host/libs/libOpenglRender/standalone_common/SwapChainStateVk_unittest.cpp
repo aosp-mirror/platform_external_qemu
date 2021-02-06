@@ -1,6 +1,6 @@
-#include "SwapChainStateVk.h"
-
 #include <gtest/gtest.h>
+
+#include "SwapChainStateVk.h"
 
 #include "Standalone.h"
 #include "vulkan/VulkanDispatch.h"
@@ -43,21 +43,20 @@ class SwapChainStateVkTest : public ::testing::Test {
 
    private:
     void createInstance() {
-        VkApplicationInfo appInfo = {};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pNext = nullptr;
-        appInfo.pApplicationName = "emulator SwapChainStateVk unittest";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "No Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_1;
+        VkApplicationInfo appInfo = {
+            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+            .pNext = nullptr,
+            .pApplicationName = "emulator SwapChainStateVk unittest",
+            .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+            .pEngineName = "No Engine",
+            .engineVersion = VK_MAKE_VERSION(1, 0, 0),
+            .apiVersion = VK_API_VERSION_1_1};
         auto extensions = SwapChainStateVk::getRequiredInstanceExtensions();
-        VkInstanceCreateInfo instanceCi = {};
-        instanceCi.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        instanceCi.ppEnabledExtensionNames = extensions.data();
-        instanceCi.enabledExtensionCount =
-            static_cast<uint32_t>(extensions.size());
-        instanceCi.pApplicationInfo = &appInfo;
+        VkInstanceCreateInfo instanceCi = {
+            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            .pApplicationInfo = &appInfo,
+            .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
+            .ppEnabledExtensionNames = extensions.data()};
         ASSERT_EQ(k_vk->vkCreateInstance(&instanceCi, nullptr, &m_vkInstance),
                   VK_SUCCESS);
         ASSERT_TRUE(m_vkInstance != VK_NULL_HANDLE);
@@ -68,10 +67,10 @@ class SwapChainStateVkTest : public ::testing::Test {
         ASSERT_NE(m_window, nullptr);
         // TODO(kaiyili, b/179477624): add support for other platforms
 #ifdef _WIN32
-        VkWin32SurfaceCreateInfoKHR surfaceCi = {};
-        surfaceCi.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-        surfaceCi.hinstance = GetModuleHandle(nullptr);
-        surfaceCi.hwnd = m_window->getNativeWindow();
+        VkWin32SurfaceCreateInfoKHR surfaceCi = {
+            .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+            .hinstance = GetModuleHandle(nullptr),
+            .hwnd = m_window->getNativeWindow()};
         ASSERT_EQ(k_vk->vkCreateWin32SurfaceKHR(m_vkInstance, &surfaceCi,
                                                 nullptr, &m_vkSurface),
                   VK_SUCCESS);
@@ -120,23 +119,23 @@ class SwapChainStateVkTest : public ::testing::Test {
 
     void createLogicalDevice() {
         const float queuePriority = 1.0f;
-        VkDeviceQueueCreateInfo queueCi = {};
-        queueCi.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCi.queueFamilyIndex = m_swapChainQueueFamilyIndex;
-        queueCi.queueCount = 1;
-        queueCi.pQueuePriorities = &queuePriority;
+        VkDeviceQueueCreateInfo queueCi = {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            .queueFamilyIndex = m_swapChainQueueFamilyIndex,
+            .queueCount = 1,
+            .pQueuePriorities = &queuePriority};
         VkPhysicalDeviceFeatures features = {};
         const std::vector<const char *> enabledDeviceExtensions =
             SwapChainStateVk::getRequiredDeviceExtensions();
-        VkDeviceCreateInfo deviceCi = {};
-        deviceCi.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        deviceCi.pQueueCreateInfos = &queueCi;
-        deviceCi.queueCreateInfoCount = 1;
-        deviceCi.pEnabledFeatures = &features;
-        deviceCi.enabledLayerCount = 0;
-        deviceCi.enabledExtensionCount =
-            static_cast<uint32_t>(enabledDeviceExtensions.size());
-        deviceCi.ppEnabledExtensionNames = enabledDeviceExtensions.data();
+        VkDeviceCreateInfo deviceCi = {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+            .queueCreateInfoCount = 1,
+            .pQueueCreateInfos = &queueCi,
+            .enabledLayerCount = 0,
+            .enabledExtensionCount =
+                static_cast<uint32_t>(enabledDeviceExtensions.size()),
+            .ppEnabledExtensionNames = enabledDeviceExtensions.data(),
+            .pEnabledFeatures = &features};
         ASSERT_EQ(k_vk->vkCreateDevice(m_vkPhysicalDevice, &deviceCi, nullptr,
                                        &m_vkDevice),
                   VK_SUCCESS);

@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include "ErrorLog.h"
-#include "NativeSubWindow.h"
 
 static void repaintCallback(void *) {}
 
@@ -25,40 +24,40 @@ DisplayVk::DisplayVk(const goldfish_vk::VulkanDispatch &vk,
       m_surfaceState(nullptr) {
     // TODO(kaiyili): validate the capabilites of the passed in Vulkan
     // components.
-    VkCommandPoolCreateInfo commandPoolCi = {};
-    commandPoolCi.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    commandPoolCi.queueFamilyIndex = m_compositorQueueFamilyIndex;
+    VkCommandPoolCreateInfo commandPoolCi = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .queueFamilyIndex = m_compositorQueueFamilyIndex,
+    };
     VK_CHECK(m_vk.vkCreateCommandPool(m_vkDevice, &commandPoolCi, nullptr,
                                       &m_vkCommandPool));
-    VkFenceCreateInfo fenceCi = {};
-    fenceCi.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceCi.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    VkFenceCreateInfo fenceCi = {.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+                                 .flags = VK_FENCE_CREATE_SIGNALED_BIT};
     VK_CHECK(m_vk.vkCreateFence(m_vkDevice, &fenceCi, nullptr,
                                 &m_frameDrawCompleteFence));
-    VkSemaphoreCreateInfo semaphoreCi = {};
-    semaphoreCi.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    VkSemaphoreCreateInfo semaphoreCi = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
     VK_CHECK(m_vk.vkCreateSemaphore(m_vkDevice, &semaphoreCi, nullptr,
                                     &m_imageReadySem));
     VK_CHECK(m_vk.vkCreateSemaphore(m_vkDevice, &semaphoreCi, nullptr,
                                     &m_frameDrawCompleteSem));
 
-    VkSamplerCreateInfo samplerCi = {};
-    samplerCi.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-    samplerCi.magFilter = VK_FILTER_NEAREST;
-    samplerCi.minFilter = VK_FILTER_NEAREST;
-    samplerCi.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-    samplerCi.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-    samplerCi.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-    samplerCi.anisotropyEnable = VK_FALSE;
-    samplerCi.maxAnisotropy = 1.0f;
-    samplerCi.borderColor = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
-    samplerCi.unnormalizedCoordinates = VK_FALSE;
-    samplerCi.compareEnable = VK_FALSE;
-    samplerCi.compareOp = VK_COMPARE_OP_ALWAYS;
-    samplerCi.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    samplerCi.mipLodBias = 0.0f;
-    samplerCi.minLod = 0.0f;
-    samplerCi.maxLod = 0.0f;
+    VkSamplerCreateInfo samplerCi = {
+        .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+        .magFilter = VK_FILTER_NEAREST,
+        .minFilter = VK_FILTER_NEAREST,
+        .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+        .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+        .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+        .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+        .mipLodBias = 0.0f,
+        .anisotropyEnable = VK_FALSE,
+        .maxAnisotropy = 1.0f,
+        .compareEnable = VK_FALSE,
+        .compareOp = VK_COMPARE_OP_ALWAYS,
+        .minLod = 0.0f,
+        .maxLod = 0.0f,
+        .borderColor = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK,
+        .unnormalizedCoordinates = VK_FALSE};
     VK_CHECK(m_vk.vkCreateSampler(m_vkDevice, &samplerCi, nullptr,
                                   &m_compositionVkSampler));
 }
@@ -158,26 +157,24 @@ void DisplayVk::post(
     VK_CHECK(m_vk.vkResetFences(m_vkDevice, 1, &m_frameDrawCompleteFence));
     VkPipelineStageFlags waitStages[] = {
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    VkSubmitInfo submitInfo = {};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &m_imageReadySem;
-    submitInfo.pWaitDstStageMask = waitStages;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &cmdBuff;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &m_frameDrawCompleteSem;
+    VkSubmitInfo submitInfo = {.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+                               .waitSemaphoreCount = 1,
+                               .pWaitSemaphores = &m_imageReadySem,
+                               .pWaitDstStageMask = waitStages,
+                               .commandBufferCount = 1,
+                               .pCommandBuffers = &cmdBuff,
+                               .signalSemaphoreCount = 1,
+                               .pSignalSemaphores = &m_frameDrawCompleteSem};
     VK_CHECK(m_vk.vkQueueSubmit(m_compositorVkQueue, 1, &submitInfo,
                                 m_frameDrawCompleteFence));
 
     auto swapChain = m_swapChainStateVk->getSwapChain();
-    VkPresentInfoKHR presentInfo = {};
-    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &m_frameDrawCompleteSem;
-    presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = &swapChain;
-    presentInfo.pImageIndices = &imageIndex;
+    VkPresentInfoKHR presentInfo = {.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+                                    .waitSemaphoreCount = 1,
+                                    .pWaitSemaphores = &m_frameDrawCompleteSem,
+                                    .swapchainCount = 1,
+                                    .pSwapchains = &swapChain,
+                                    .pImageIndices = &imageIndex};
     VK_CHECK(m_vk.vkQueuePresentKHR(m_swapChainVkQueue, &presentInfo));
     VK_CHECK(m_vk.vkWaitForFences(m_vkDevice, 1, &m_frameDrawCompleteFence,
                                   VK_TRUE, UINT64_MAX));
@@ -206,20 +203,20 @@ DisplayVk::DisplayBufferInfo::DisplayBufferInfo(
       m_height(height),
       m_vkFormat(format),
       m_vkImageView(VK_NULL_HANDLE) {
-    VkImageViewCreateInfo imageViewCi = {};
-    imageViewCi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    imageViewCi.image = image;
-    imageViewCi.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewCi.format = format;
-    imageViewCi.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    imageViewCi.subresourceRange.baseMipLevel = 0;
-    imageViewCi.subresourceRange.levelCount = 1;
-    imageViewCi.subresourceRange.baseArrayLayer = 0;
-    imageViewCi.subresourceRange.layerCount = 1;
+    VkImageViewCreateInfo imageViewCi = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image = image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = format,
+        .components = {.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                       .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                       .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                       .a = VK_COMPONENT_SWIZZLE_IDENTITY},
+        .subresourceRange = {.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                             .baseMipLevel = 0,
+                             .levelCount = 1,
+                             .baseArrayLayer = 0,
+                             .layerCount = 1}};
     VK_CHECK(m_vk.vkCreateImageView(m_vkDevice, &imageViewCi, nullptr,
                                     &m_vkImageView));
 }
