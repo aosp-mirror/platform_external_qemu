@@ -5117,6 +5117,25 @@ typedef void <name>CAMetalLayer</name>;
             <member><type>VkDeviceSize</type>                       <name>updateScratchSize</name></member>
             <member><type>VkDeviceSize</type>                       <name>buildScratchSize</name></member>
         </type>
+        <type category="struct" name="VkImportColorBufferGOOGLE" structextends="VkMemoryAllocateInfo">
+            <member values="VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
+            <member><type>void</type>*                  <name>pNext</name></member>
+            <member><type>uint32_t</type>   <name>colorBuffer</name></member>
+        </type>
+        <type category="struct" name="VkImportBufferGOOGLE" structextends="VkMemoryAllocateInfo">
+            <member values="VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
+            <member><type>void</type>*                  <name>pNext</name></member>
+            <member><type>uint32_t</type>   <name>buffer</name></member>
+        </type>
+        <type category="struct" name="VkImportPhysicalAddressGOOGLE" structextends="VkMemoryAllocateInfo">
+            <member values="VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
+            <member><type>void</type>*                  <name>pNext</name></member>
+            <member><type>uint64_t</type>   <name>physicalAddress</name></member>
+            <member><type>VkDeviceSize</type>   <name>size</name></member>
+            <member><type>VkFormat</type>   <name>format</name></member>
+            <member><type>VkImageTiling</type>   <name>tiling</name></member>
+            <member><type>uint32_t</type>   <name>tilingParameter</name></member>
+        </type>
     </types>
 
     <comment>Vulkan enumerant (token) definitions</comment>
@@ -8544,6 +8563,133 @@ typedef void <name>CAMetalLayer</name>;
             <param><type>VkQueue</type> <name>queue</name></param>
             <param optional="false,true"><type>uint32_t</type>* <name>pCheckpointDataCount</name></param>
             <param optional="true" len="pCheckpointDataCount"><type>VkCheckpointDataNV</type>* <name>pCheckpointData</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY,VK_ERROR_MEMORY_MAP_FAILED">
+            <proto><type>VkResult</type> <name>vkMapMemoryIntoAddressSpaceGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param externsync="true"><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param optional="false,true"><type>uint64_t</type>* <name>pAddress</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_INITIALIZATION_FAILED,VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY">
+            <proto><type>VkResult</type> <name>vkRegisterImageColorBufferGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param><type>VkImage</type> <name>image</name></param>
+            <param><type>uint32_t</type> <name>colorBuffer</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_INITIALIZATION_FAILED,VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY">
+            <proto><type>VkResult</type> <name>vkRegisterBufferColorBufferGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param><type>VkBuffer</type> <name>buffer</name></param>
+            <param><type>uint32_t</type> <name>colorBuffer</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkUpdateDescriptorSetWithTemplateSizedGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param externsync="true"><type>VkDescriptorSet</type> <name>descriptorSet</name></param>
+            <param><type>VkDescriptorUpdateTemplate</type> <name>descriptorUpdateTemplate</name></param>
+            <param><type>uint32_t</type> <name>imageInfoCount</name></param>
+            <param><type>uint32_t</type> <name>bufferInfoCount</name></param>
+            <param><type>uint32_t</type> <name>bufferViewCount</name></param>
+            <param optional="true" len="imageInfoCount">const <type>uint32_t</type>* <name>pImageInfoEntryIndices</name></param>
+            <param optional="true" len="bufferInfoCount">const <type>uint32_t</type>* <name>pBufferInfoEntryIndices</name></param>
+            <param optional="true" len="bufferViewCount">const <type>uint32_t</type>* <name>pBufferViewEntryIndices</name></param>
+            <param optional="true" len="imageInfoCount">const <type>VkDescriptorImageInfo</type>* <name>pImageInfos</name></param>
+            <param optional="true" len="bufferInfoCount">const <type>VkDescriptorBufferInfo</type>* <name>pBufferInfos</name></param>
+            <param optional="true" len="bufferViewCount">const <type>VkBufferView</type>* <name>pBufferViews</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkBeginCommandBufferAsyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
+            <param>const <type>VkCommandBufferBeginInfo</type>* <name>pBeginInfo</name></param>
+            <implicitexternsyncparams>
+                <param>the sname:VkCommandPool that pname:commandBuffer was allocated from</param>
+            </implicitexternsyncparams>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkEndCommandBufferAsyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
+            <implicitexternsyncparams>
+                <param>the sname:VkCommandPool that pname:commandBuffer was allocated from</param>
+            </implicitexternsyncparams>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkResetCommandBufferAsyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
+            <param optional="true"><type>VkCommandBufferResetFlags</type> <name>flags</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkCommandBufferHostSyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
+            <param><type>uint32_t</type> <name>needHostSync</name></param>
+            <param><type>uint32_t</type> <name>sequenceNumber</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY">
+            <proto><type>VkResult</type> <name>vkCreateImageWithRequirementsGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param>const <type>VkImageCreateInfo</type>* <name>pCreateInfo</name></param>
+            <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
+            <param><type>VkImage</type>* <name>pImage</name></param>
+            <param><type>VkMemoryRequirements</type>* <name>pMemoryRequirements</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY">
+            <proto><type>VkResult</type> <name>vkCreateBufferWithRequirementsGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param>const <type>VkBufferCreateInfo</type>* <name>pCreateInfo</name></param>
+            <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
+            <param><type>VkBuffer</type>* <name>pBuffer</name></param>
+            <param><type>VkMemoryRequirements</type>* <name>pMemoryRequirements</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY">
+            <proto><type>VkResult</type> <name>vkGetMemoryHostAddressInfoGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param externsync="true"><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param optional="false,true"><type>uint64_t</type>* <name>pAddress</name></param>
+            <param optional="false,true"><type>uint64_t</type>* <name>pSize</name></param>
+            <param optional="false,true"><type>uint64_t</type>* <name>pHostmemId</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY">
+            <proto><type>VkResult</type> <name>vkFreeMemorySyncGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param optional="true" externsync="true"><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkQueueHostSyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkQueue</type> <name>queue</name></param>
+            <param><type>uint32_t</type> <name>needHostSync</name></param>
+            <param><type>uint32_t</type> <name>sequenceNumber</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkQueueSubmitAsyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkQueue</type> <name>queue</name></param>
+            <param optional="true"><type>uint32_t</type> <name>submitCount</name></param>
+            <param len="submitCount" externsync="pSubmits[].pWaitSemaphores[],pSubmits[].pSignalSemaphores[]">const <type>VkSubmitInfo</type>* <name>pSubmits</name></param>
+            <param optional="true" externsync="true"><type>VkFence</type> <name>fence</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkQueueWaitIdleAsyncGOOGLE</name></proto>
+            <param><type>VkQueue</type> <name>queue</name></param>
+        </command>
+        <command queues="sparse_binding">
+            <proto><type>void</type> <name>vkQueueBindSparseAsyncGOOGLE</name></proto>
+            <param externsync="true"><type>VkQueue</type> <name>queue</name></param>
+            <param optional="true"><type>uint32_t</type> <name>bindInfoCount</name></param>
+            <param len="bindInfoCount" externsync="pBindInfo[].pWaitSemaphores[],pBindInfo[].pSignalSemaphores[],pBindInfo[].pBufferBinds[].buffer,pBindInfo[].pImageOpaqueBinds[].image,pBindInfo[].pImageBinds[].image">const <type>VkBindSparseInfo</type>* <name>pBindInfo</name></param>
+            <param optional="true" externsync="true"><type>VkFence</type> <name>fence</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkGetLinearImageLayoutGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param><type>VkFormat</type> <name>format</name></param>
+            <param><type>VkDeviceSize</type>* <name>pOffset</name></param>
+            <param><type>VkDeviceSize</type>* <name>pRowPitchAlignment</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkQueueFlushCommandsGOOGLE</name></proto>
+            <param externsync="true"><type>VkQueue</type> <name>queue</name></param>
+            <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
+            <param><type>VkDeviceSize</type> <name>dataSize</name></param>
+            <param len="dataSize">const <type>void</type>* <name>pData</name></param>
         </command>
         <command queues="graphics" renderpass="both" cmdbufferlevel="primary,secondary">
             <proto><type>void</type> <name>vkCmdBindTransformFeedbackBuffersEXT</name></proto>
@@ -13155,7 +13301,9 @@ typedef void <name>CAMetalLayer</name>;
                 <type name="CAMetalLayer"/>
             </require>
         </extension>
-        <extension name="VK_EXT_fragment_density_map" number="219" type="device" requires="VK_KHR_get_physical_device_properties2" author="EXT" contact="Matthew Netsch @mnetsch" supported="vulkan">
+        <!-- TODO(liyl): This extension number (219) collides with VK_GOOGLE_color_buffer, which has its extension id hardcoded in goldfish Vulkan ICD. -->
+        <!-- Thus we changed the number to an unused number and disabled it. -->
+        <extension name="VK_EXT_fragment_density_map" number="919" type="device" requires="VK_KHR_get_physical_device_properties2" author="EXT" contact="Matthew Netsch @mnetsch" supported="disabled">
             <require>
                 <enum value="1"                                             name="VK_EXT_FRAGMENT_DENSITY_MAP_SPEC_VERSION"/>
                 <enum value="&quot;VK_EXT_fragment_density_map&quot;"       name="VK_EXT_FRAGMENT_DENSITY_MAP_EXTENSION_NAME"/>
@@ -14514,6 +14662,103 @@ typedef void <name>CAMetalLayer</name>;
                 <enum value="&quot;VK_NV_extension_372&quot;"           name="VK_NV_EXTENSION_372_EXTENSION_NAME"/>
                 <enum bitpos="5" extends="VkBufferCreateFlagBits"       name="VK_BUFFER_CREATE_RESERVED_5_BIT_NV"/>
                 <enum bitpos="15" extends="VkImageCreateFlagBits"       name="VK_IMAGE_CREATE_RESERVED_15_BIT_NV"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_address_space" number="373" author="GOOGLE" contact="Roman Kiryanov @rkir,Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_ADDRESS_SPACE_SPEC_VERSION"/>
+                <enum value="373"                                           name="VK_GOOGLE_ADDRESS_SPACE_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_address_space&quot;"           name="VK_GOOGLE_ADDRESS_SPACE_EXTENSION_NAME"/>
+                <command name="vkMapMemoryIntoAddressSpaceGOOGLE"/>
+            </require>
+        </extension>
+        <!-- TODO(liyl): This extension number (219) collides with VK_EXT_fragment_density_map, though we have a few extension -->
+        <!-- IDs / struct type IDs hardcoded in goldfish Vulkan ICD. Thus we kept the number and changed -->
+        <!-- the extension number of VK_EXT_fragment_density_map to 919. -->
+        <extension name="VK_GOOGLE_color_buffer" number="219" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_COLOR_BUFFER_SPEC_VERSION"/>
+                <enum value="219"                                           name="VK_GOOGLE_COLOR_BUFFER_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_color_buffer&quot;"            name="VK_GOOGLE_COLOR_BUFFER_EXTENSION_NAME"/>
+                <enum offset="0" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE"/>
+                <enum offset="1" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE"/>
+                <enum offset="0" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_BUFFER_HANDLE_GOOGLE"/>
+                <type name="VkImportColorBufferGOOGLE"/>
+                <type name="VkImportBufferGOOGLE"/>
+                <type name="VkImportPhysicalAddressGOOGLE"/>
+                <command name="vkRegisterImageColorBufferGOOGLE"/>
+                <command name="vkRegisterBufferColorBufferGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_sized_descriptor_update_template" number="375" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_SIZED_DESCRIPTOR_UPDATE_TEMPLATE_SPEC_VERSION"/>
+                <enum value="375"                                           name="VK_GOOGLE_SIZED_DESCRIPTOR_UPDATE_TEMPLATE_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_color_buffer&quot;"            name="VK_GOOGLE_SIZED_DESCRIPTOR_UPDATE_TEMPLATE_EXTENSION_NAME"/>
+                <command name="vkUpdateDescriptorSetWithTemplateSizedGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_async_command_buffers" number="376" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_ASYNC_COMMAND_BUFFERS_SPEC_VERSION"/>
+                <enum value="376"                                           name="VK_GOOGLE_ASYNC_COMMAND_BUFFERS_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_async_command_buffers&quot;"            name="VK_GOOGLE_ASYNC_COMMAND_BUFFERS_EXTENSION_NAME"/>
+                <command name="vkBeginCommandBufferAsyncGOOGLE"/>
+                <command name="vkEndCommandBufferAsyncGOOGLE"/>
+                <command name="vkResetCommandBufferAsyncGOOGLE"/>
+                <command name="vkCommandBufferHostSyncGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_create_resources_with_requirements" number="377" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_CREATE_RESOURCES_WITH_REQUIREMENTS"/>
+                <enum value="377"                                           name="VK_GOOGLE_CREATE_RESOURCES_WITH_REQUIREMENTS_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_create_resources_with_requirements&quot;"            name="VK_GOOGLE_CREATE_RESOURCES_WITH_REQUIREMNTS_EXTENSION_NAME"/>
+                <command name="vkCreateImageWithRequirementsGOOGLE"/>
+                <command name="vkCreateBufferWithRequirementsGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_address_space_info" number="378" author="GOOGLE" contact="Roman Kiryanov @rkir,Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_ADDRESS_SPACE_INFO_SPEC_VERSION"/>
+                <enum value="378"                                           name="VK_GOOGLE_ADDRESS_SPACE_INFO_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_address_space_info&quot;"           name="VK_GOOGLE_ADDRESS_SPACE_INFO_EXTENSION_NAME"/>
+                <command name="vkGetMemoryHostAddressInfoGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_free_memory_sync" number="379" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_FREE_MEMORY_SYNC_SPEC_VERSION"/>
+                <enum value="379"                                           name="VK_GOOGLE_FREE_MEMORY_SYNC_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_free_memory_sync&quot;"           name="VK_GOOGLE_FREE_MEMORY_SYNC_EXTENSION_NAME"/>
+                <command name="vkFreeMemorySyncGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_async_queue_submit" number="381" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_ASYNC_QUEUE_SUBMIT_SPEC_VERSION"/>
+                <enum value="381"                                           name="VK_GOOGLE_ASYNC_QUEUE_SUBMIT_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_async_queue_submit&quot;"            name="VK_GOOGLE_QUEUE_SUBMIT_EXTENSION_NAME"/>
+                <command name="vkQueueHostSyncGOOGLE"/>
+                <command name="vkQueueSubmitAsyncGOOGLE"/>
+                <command name="vkQueueWaitIdleAsyncGOOGLE"/>
+                <command name="vkQueueBindSparseAsyncGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_linear_image_layout" number="382" author="GOOGLE" contact="Yilong Li @gnoliyil" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_SPEC_VERSION"/>
+                <enum value="382"                                           name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_linear_image_layout&quot;"     name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_EXTENSION_NAME"/>
+                <command name="vkGetLinearImageLayoutGOOGLE"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_queue_submit_with_commands" number="383" author="GOOGLE" contact="Lingfeng Yang @framk" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_QUEUE_SUBMIT_WITH_COMMANDS_SPEC_VERSION"/>
+                <enum value="383"                                           name="VK_GOOGLE_QUEUE_SUBMIT_WITH_COMMANDS_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_queue_submit_with_commands&quot;"            name="VK_GOOGLE_QUEUE_SUBMIT_WITH_COMMANDS_EXTENSION_NAME"/>
+                <command name="vkQueueFlushCommandsGOOGLE"/>
             </require>
         </extension>
     </extensions>
