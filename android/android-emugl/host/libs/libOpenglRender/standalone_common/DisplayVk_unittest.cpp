@@ -1,6 +1,6 @@
-#include "DisplayVk.h"
-
 #include <gtest/gtest.h>
+
+#include "DisplayVk.h"
 
 #include "Standalone.h"
 #include "tests/VkTestUtils.h"
