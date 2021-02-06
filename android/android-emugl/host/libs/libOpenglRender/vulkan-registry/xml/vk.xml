@@ -8664,6 +8664,36 @@ typedef void <name>CAMetalLayer</name>;
             <param><type>VkDeviceSize</type> <name>dataSize</name></param>
             <param len="dataSize">const <type>void</type>* <name>pData</name></param>
         </command>
+        <command>
+            <proto><type>void</type> <name>vkGetMTLDeviceMVK</name></proto>
+            <param><type>VkPhysicalDevice</type> <name>physicalDevice</name></param>
+            <param><type>void</type>** <name>pMTLDevice</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS">
+            <proto><type>VkResult</type> <name>vkSetMTLTextureMVK</name></proto>
+            <param><type>VkImage</type> <name>image</name></param>
+            <param><type>void</type>* <name>mtlTexture</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkGetMTLTextureMVK</name></proto>
+            <param><type>VkImage</type> <name>image</name></param>
+            <param><type>void</type>** <name>pMTLTexture</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkGetMTLBufferMVK</name></proto>
+            <param><type>VkBuffer</type> <name>buffer</name></param>
+            <param><type>void</type>** <name>pMTLBuffer</name></param>
+        </command>
+        <command successcodes="VK_SUCCESS">
+            <proto><type>VkResult</type> <name>vkUseIOSurfaceMVK</name></proto>
+            <param><type>VkImage</type> <name>image</name></param>
+            <param><type>void</type>* <name>ioSurface</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkGetIOSurfaceMVK</name></proto>
+            <param><type>VkImage</type> <name>image</name></param>
+            <param><type>void</type>**  <name>pIOSurface</name></param>
+        </command>
         <command queues="graphics" renderpass="both" cmdbufferlevel="primary,secondary">
             <proto><type>void</type> <name>vkCmdBindTransformFeedbackBuffersEXT</name></proto>
             <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
@@ -11931,10 +11961,16 @@ typedef void <name>CAMetalLayer</name>;
                 <command name="vkCreateMacOSSurfaceMVK"/>
             </require>
         </extension>
-        <extension name="VK_MVK_moltenvk" number="125" type="instance" author="MVK" contact="Bill Hollings @billhollings" supported="disabled">
+        <extension name="VK_MVK_moltenvk" number="125" type="instance" author="MVK" contact="Bill Hollings @billhollings" supported="vulkan">
             <require>
                 <enum value="0"                                             name="VK_MVK_MOLTENVK_SPEC_VERSION"/>
                 <enum value="&quot;VK_MVK_moltenvk&quot;"                   name="VK_MVK_MOLTENVK_EXTENSION_NAME"/>
+                <command name="vkGetMTLDeviceMVK"/>
+                <command name="vkSetMTLTextureMVK"/>
+                <command name="vkGetMTLTextureMVK"/>
+                <command name="vkGetMTLBufferMVK"/>
+                <command name="vkUseIOSurfaceMVK"/>
+                <command name="vkGetIOSurfaceMVK"/>
             </require>
         </extension>
         <extension name="VK_EXT_external_memory_dma_buf" number="126" type="device" requires="VK_KHR_external_memory_fd" author="EXT" contact="Chad Versace @chadversary" supported="vulkan">
