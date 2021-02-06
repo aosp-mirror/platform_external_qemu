@@ -110,21 +110,11 @@ struct RenderResourceVk : public RenderResourceVkBase {
         if (m_memory) {
             m_vk.vkUnmapMemory(m_vkDevice, m_bufferVkDeviceMemory);
         }
-        if (m_bufferVkDeviceMemory != VK_NULL_HANDLE) {
-            m_vk.vkFreeMemory(m_vkDevice, m_bufferVkDeviceMemory, nullptr);
-        }
-        if (m_vkBuffer != VK_NULL_HANDLE) {
-            m_vk.vkDestroyBuffer(m_vkDevice, m_vkBuffer, nullptr);
-        }
-        if (m_vkImageView != VK_NULL_HANDLE) {
-            m_vk.vkDestroyImageView(m_vkDevice, m_vkImageView, nullptr);
-        }
-        if (m_imageVkDeviceMemory != VK_NULL_HANDLE) {
-            m_vk.vkFreeMemory(m_vkDevice, m_imageVkDeviceMemory, nullptr);
-        }
-        if (m_vkImage != VK_NULL_HANDLE) {
-            m_vk.vkDestroyImage(m_vkDevice, m_vkImage, nullptr);
-        }
+        m_vk.vkFreeMemory(m_vkDevice, m_bufferVkDeviceMemory, nullptr);
+        m_vk.vkDestroyBuffer(m_vkDevice, m_vkBuffer, nullptr);
+        m_vk.vkDestroyImageView(m_vkDevice, m_vkImageView, nullptr);
+        m_vk.vkFreeMemory(m_vkDevice, m_imageVkDeviceMemory, nullptr);
+        m_vk.vkDestroyImage(m_vkDevice, m_vkImage, nullptr);
     }
 
    private:
@@ -132,22 +122,19 @@ struct RenderResourceVk : public RenderResourceVkBase {
         : RenderResourceVkBase(vk) {}
 
     bool setUpImage() {
-        VkImageCreateInfo imageCi{};
-        imageCi.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageCi.imageType = VK_IMAGE_TYPE_2D;
-        imageCi.extent.width = m_width;
-        imageCi.extent.height = m_height;
-        imageCi.extent.depth = 1;
-        imageCi.mipLevels = 1;
-        imageCi.arrayLayers = 1;
-        imageCi.format = k_vkFormat;
-        imageCi.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageCi.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageCi.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-                        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | imageUsage;
-        imageCi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageCi.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageCi.flags = 0;
+        VkImageCreateInfo imageCi{
+            .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+            .imageType = VK_IMAGE_TYPE_2D,
+            .format = k_vkFormat,
+            .extent = {.width = m_width, .height = m_height, .depth = 1},
+            .mipLevels = 1,
+            .arrayLayers = 1,
+            .samples = VK_SAMPLE_COUNT_1_BIT,
+            .tiling = VK_IMAGE_TILING_OPTIMAL,
+            .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | imageUsage,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED};
         if (m_vk.vkCreateImage(m_vkDevice, &imageCi, nullptr, &m_vkImage) !=
             VK_SUCCESS) {
             m_vkImage = VK_NULL_HANDLE;
@@ -163,10 +150,10 @@ struct RenderResourceVk : public RenderResourceVkBase {
         if (!maybeMemoryTypeIndex.has_value()) {
             return false;
         }
-        VkMemoryAllocateInfo allocInfo = {};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = maybeMemoryTypeIndex.value();
+        VkMemoryAllocateInfo allocInfo = {
+            .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+            .allocationSize = memRequirements.size,
+            .memoryTypeIndex = maybeMemoryTypeIndex.value()};
         if (m_vk.vkAllocateMemory(m_vkDevice, &allocInfo, nullptr,
                                   &m_imageVkDeviceMemory) != VK_SUCCESS) {
             m_imageVkDeviceMemory = VK_NULL_HANDLE;
@@ -182,20 +169,20 @@ struct RenderResourceVk : public RenderResourceVkBase {
                 cmdBuff, m_vkImage, VK_IMAGE_LAYOUT_UNDEFINED, k_vkImageLayout);
         });
 
-        VkImageViewCreateInfo imageViewCi = {};
-        imageViewCi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        imageViewCi.image = m_vkImage;
-        imageViewCi.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        imageViewCi.format = k_vkFormat;
-        imageViewCi.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCi.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCi.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCi.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCi.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        imageViewCi.subresourceRange.baseMipLevel = 0;
-        imageViewCi.subresourceRange.levelCount = 1;
-        imageViewCi.subresourceRange.baseArrayLayer = 0;
-        imageViewCi.subresourceRange.layerCount = 1;
+        VkImageViewCreateInfo imageViewCi = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .image = m_vkImage,
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .format = k_vkFormat,
+            .components = {.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                           .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                           .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                           .a = VK_COMPONENT_SWIZZLE_IDENTITY},
+            .subresourceRange = {.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                                 .baseMipLevel = 0,
+                                 .levelCount = 1,
+                                 .baseArrayLayer = 0,
+                                 .layerCount = 1}};
         if (m_vk.vkCreateImageView(m_vkDevice, &imageViewCi, nullptr,
                                    &m_vkImageView) != VK_SUCCESS) {
             return false;
@@ -204,10 +191,9 @@ struct RenderResourceVk : public RenderResourceVkBase {
     }
 
     bool submitCommandBufferAndWait(VkCommandBuffer cmdBuff) const {
-        VkSubmitInfo submitInfo = {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &cmdBuff;
+        VkSubmitInfo submitInfo = {.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+                                   .commandBufferCount = 1,
+                                   .pCommandBuffers = &cmdBuff};
         if (m_vk.vkQueueSubmit(m_vkQueue, 1, &submitInfo, VK_NULL_HANDLE) !=
             VK_SUCCESS) {
             return false;
@@ -219,12 +205,12 @@ struct RenderResourceVk : public RenderResourceVkBase {
     }
 
     bool setUpBuffer() {
-        VkBufferCreateInfo bufferCi = {};
-        bufferCi.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferCi.size = m_width * m_height * k_bpp;
-        bufferCi.usage =
-            VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-        bufferCi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        VkBufferCreateInfo bufferCi = {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size = m_width * m_height * k_bpp,
+            .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
+                     VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            .sharingMode = VK_SHARING_MODE_EXCLUSIVE};
 
         if (m_vk.vkCreateBuffer(m_vkDevice, &bufferCi, nullptr, &m_vkBuffer) !=
             VK_SUCCESS) {
@@ -242,10 +228,10 @@ struct RenderResourceVk : public RenderResourceVkBase {
         if (!maybeMemoryTypeIndex.has_value()) {
             return false;
         }
-        VkMemoryAllocateInfo allocInfo = {};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = maybeMemoryTypeIndex.value();
+        VkMemoryAllocateInfo allocInfo = {
+            .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+            .allocationSize = memRequirements.size,
+            .memoryTypeIndex = maybeMemoryTypeIndex.value()};
         if (m_vk.vkAllocateMemory(m_vkDevice, &allocInfo, nullptr,
                                   &m_bufferVkDeviceMemory) != VK_SUCCESS) {
             m_bufferVkDeviceMemory = VK_NULL_HANDLE;
@@ -266,12 +252,11 @@ struct RenderResourceVk : public RenderResourceVkBase {
 
     bool setUpCommandBuffer() {
         std::array<VkCommandBuffer, 2> cmdBuffs;
-        VkCommandBufferAllocateInfo cmdBuffAllocInfo = {};
-        cmdBuffAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        cmdBuffAllocInfo.commandPool = m_vkCommandPool;
-        cmdBuffAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        cmdBuffAllocInfo.commandBufferCount =
-            static_cast<uint32_t>(cmdBuffs.size());
+        VkCommandBufferAllocateInfo cmdBuffAllocInfo = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+            .commandPool = m_vkCommandPool,
+            .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+            .commandBufferCount = static_cast<uint32_t>(cmdBuffs.size())};
         if (m_vk.vkAllocateCommandBuffers(m_vkDevice, &cmdBuffAllocInfo,
                                           cmdBuffs.data()) != VK_SUCCESS) {
             return false;
@@ -279,8 +264,8 @@ struct RenderResourceVk : public RenderResourceVkBase {
         m_readCommandBuffer = cmdBuffs[0];
         m_writeCommandBuffer = cmdBuffs[1];
 
-        VkCommandBufferBeginInfo beginInfo = {};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        VkCommandBufferBeginInfo beginInfo = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
         if (m_vk.vkBeginCommandBuffer(m_readCommandBuffer, &beginInfo) !=
             VK_SUCCESS) {
             return false;
@@ -288,16 +273,16 @@ struct RenderResourceVk : public RenderResourceVkBase {
         recordImageLayoutTransformCommands(
             m_readCommandBuffer, m_vkImage, k_vkImageLayout,
             VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-        VkBufferImageCopy region = {};
-        region.bufferOffset = 0;
-        region.bufferRowLength = 0;
-        region.bufferImageHeight = 0;
-        region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        region.imageSubresource.mipLevel = 0;
-        region.imageSubresource.baseArrayLayer = 0;
-        region.imageSubresource.layerCount = 1;
-        region.imageOffset = {0, 0, 0};
-        region.imageExtent = {m_width, m_height, 1};
+        VkBufferImageCopy region = {
+            .bufferOffset = 0,
+            .bufferRowLength = 0,
+            .bufferImageHeight = 0,
+            .imageSubresource = {.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                                 .mipLevel = 0,
+                                 .baseArrayLayer = 0,
+                                 .layerCount = 1},
+            .imageOffset = {0, 0, 0},
+            .imageExtent = {m_width, m_height, 1}};
         m_vk.vkCmdCopyImageToBuffer(m_readCommandBuffer, m_vkImage,
                                     VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                     m_vkBuffer, 1, &region);
@@ -326,7 +311,7 @@ struct RenderResourceVk : public RenderResourceVkBase {
         }
         return true;
     }
-};
+};  // namespace emugl
 
 using RenderTextureVk =
     emugl::RenderResourceVk<VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
