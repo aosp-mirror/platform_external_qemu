@@ -75,6 +75,9 @@ NON_DISPATCHABLE_HANDLE_TYPES = [
     "VkValidationCacheEXT",
     "VkDebugReportCallbackEXT",
     "VkDebugUtilsMessengerEXT",
+    "VkAccelerationStructureNV",
+    "VkIndirectCommandsLayoutNV",
+    "VkAccelerationStructureKHR",
 ]
 
 CUSTOM_HANDLE_CREATE_TYPES = [
