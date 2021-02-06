@@ -15,11 +15,10 @@ namespace CompositorVkShader {
 static VkShaderModule createShaderModule(const goldfish_vk::VulkanDispatch &vk,
                                          VkDevice device,
                                          const std::vector<uint32_t> &code) {
-    VkShaderModuleCreateInfo shaderModuleCi = {};
-    shaderModuleCi.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    shaderModuleCi.codeSize =
-        static_cast<uint32_t>(code.size() * sizeof(uint32_t));
-    shaderModuleCi.pCode = code.data();
+    VkShaderModuleCreateInfo shaderModuleCi = {
+        .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        .codeSize = static_cast<uint32_t>(code.size() * sizeof(uint32_t)),
+        .pCode = code.data()};
     VkShaderModule res;
     VK_CHECK(vk.vkCreateShaderModule(device, &shaderModuleCi, nullptr, &res));
     return res;
@@ -94,41 +93,35 @@ CompositorVk::CompositorVk(const goldfish_vk::VulkanDispatch &vk,
         ((sizeof(UniformBufferObject) - 1) / alignment + 1) * alignment;
 }
 
-      CompositorVk::~CompositorVk() {
-          m_vk.vkDestroySampler(m_vkDevice, m_emptyCompositionVkSampler,
-                                nullptr);
-          m_vk.vkDestroyImageView(m_vkDevice, m_emptyCompositionVkImageView,
-                                  nullptr);
-          m_vk.vkFreeMemory(m_vkDevice, m_emptyCompositionVkDeviceMemory,
-                            nullptr);
-          m_vk.vkDestroyImage(m_vkDevice, m_emptyCompositionVkImage, nullptr);
-          m_vk.vkDestroyDescriptorPool(m_vkDevice, m_vkDescriptorPool, nullptr);
-          m_vk.vkFreeCommandBuffers(
-              m_vkDevice, m_vkCommandPool,
-              static_cast<uint32_t>(m_vkCommandBuffers.size()),
-              m_vkCommandBuffers.data());
-          if (m_uniformStorage.m_vkDeviceMemory != VK_NULL_HANDLE) {
-              m_vk.vkUnmapMemory(m_vkDevice, m_uniformStorage.m_vkDeviceMemory);
-          }
-          m_vk.vkDestroyBuffer(m_vkDevice, m_uniformStorage.m_vkBuffer,
-                               nullptr);
-          m_vk.vkFreeMemory(m_vkDevice, m_uniformStorage.m_vkDeviceMemory,
-                            nullptr);
-          while (!m_renderTargetVkFrameBuffers.empty()) {
-              m_vk.vkDestroyFramebuffer(
-                  m_vkDevice, m_renderTargetVkFrameBuffers.back(), nullptr);
-              m_renderTargetVkFrameBuffers.pop_back();
-          }
-          m_vk.vkFreeMemory(m_vkDevice, m_vertexVkDeviceMemory, nullptr);
-          m_vk.vkDestroyBuffer(m_vkDevice, m_vertexVkBuffer, nullptr);
-          m_vk.vkFreeMemory(m_vkDevice, m_indexVkDeviceMemory, nullptr);
-          m_vk.vkDestroyBuffer(m_vkDevice, m_indexVkBuffer, nullptr);
-          m_vk.vkDestroyPipeline(m_vkDevice, m_graphicsVkPipeline, nullptr);
-          m_vk.vkDestroyRenderPass(m_vkDevice, m_vkRenderPass, nullptr);
-          m_vk.vkDestroyPipelineLayout(m_vkDevice, m_vkPipelineLayout, nullptr);
-          m_vk.vkDestroyDescriptorSetLayout(m_vkDevice, m_vkDescriptorSetLayout,
-                                            nullptr);
-      }
+CompositorVk::~CompositorVk() {
+    m_vk.vkDestroySampler(m_vkDevice, m_emptyCompositionVkSampler, nullptr);
+    m_vk.vkDestroyImageView(m_vkDevice, m_emptyCompositionVkImageView, nullptr);
+    m_vk.vkFreeMemory(m_vkDevice, m_emptyCompositionVkDeviceMemory, nullptr);
+    m_vk.vkDestroyImage(m_vkDevice, m_emptyCompositionVkImage, nullptr);
+    m_vk.vkDestroyDescriptorPool(m_vkDevice, m_vkDescriptorPool, nullptr);
+    m_vk.vkFreeCommandBuffers(m_vkDevice, m_vkCommandPool,
+                              static_cast<uint32_t>(m_vkCommandBuffers.size()),
+                              m_vkCommandBuffers.data());
+    if (m_uniformStorage.m_vkDeviceMemory != VK_NULL_HANDLE) {
+        m_vk.vkUnmapMemory(m_vkDevice, m_uniformStorage.m_vkDeviceMemory);
+    }
+    m_vk.vkDestroyBuffer(m_vkDevice, m_uniformStorage.m_vkBuffer, nullptr);
+    m_vk.vkFreeMemory(m_vkDevice, m_uniformStorage.m_vkDeviceMemory, nullptr);
+    while (!m_renderTargetVkFrameBuffers.empty()) {
+        m_vk.vkDestroyFramebuffer(m_vkDevice,
+                                  m_renderTargetVkFrameBuffers.back(), nullptr);
+        m_renderTargetVkFrameBuffers.pop_back();
+    }
+    m_vk.vkFreeMemory(m_vkDevice, m_vertexVkDeviceMemory, nullptr);
+    m_vk.vkDestroyBuffer(m_vkDevice, m_vertexVkBuffer, nullptr);
+    m_vk.vkFreeMemory(m_vkDevice, m_indexVkDeviceMemory, nullptr);
+    m_vk.vkDestroyBuffer(m_vkDevice, m_indexVkBuffer, nullptr);
+    m_vk.vkDestroyPipeline(m_vkDevice, m_graphicsVkPipeline, nullptr);
+    m_vk.vkDestroyRenderPass(m_vkDevice, m_vkRenderPass, nullptr);
+    m_vk.vkDestroyPipelineLayout(m_vkDevice, m_vkPipelineLayout, nullptr);
+    m_vk.vkDestroyDescriptorSetLayout(m_vkDevice, m_vkDescriptorSetLayout,
+                                      nullptr);
+}
 
 void CompositorVk::setUpGraphicsPipeline(uint32_t width, uint32_t height,
                                          VkFormat renderTargetFormat,
@@ -145,207 +138,183 @@ void CompositorVk::setUpGraphicsPipeline(uint32_t width, uint32_t height,
     const auto fragShaderMod =
         createShaderModule(m_vk, m_vkDevice, fragSpvBuff);
 
-    VkPipelineShaderStageCreateInfo shaderStageCis[2] = {};
-    shaderStageCis[0].sType =
-        VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    shaderStageCis[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-    shaderStageCis[0].module = vertShaderMod;
-    shaderStageCis[0].pName = "main";
-    shaderStageCis[1].sType =
-        VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    shaderStageCis[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    shaderStageCis[1].module = fragShaderMod;
-    shaderStageCis[1].pName = "main";
+    VkPipelineShaderStageCreateInfo shaderStageCis[2] = {
+        {.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+         .stage = VK_SHADER_STAGE_VERTEX_BIT,
+         .module = vertShaderMod,
+         .pName = "main"},
+        {.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+         .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
+         .module = fragShaderMod,
+         .pName = "main"}};
 
     auto bindingDescription = Vertex::getBindingDescription();
     auto attributeDescription = Vertex::getAttributeDescription();
-    VkPipelineVertexInputStateCreateInfo vertexInputStateCi = {};
-    vertexInputStateCi.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputStateCi.vertexBindingDescriptionCount = 1;
-    vertexInputStateCi.pVertexBindingDescriptions = &bindingDescription;
-    vertexInputStateCi.vertexAttributeDescriptionCount =
-        static_cast<uint32_t>(attributeDescription.size());
-    vertexInputStateCi.pVertexAttributeDescriptions =
-        attributeDescription.data();
+    VkPipelineVertexInputStateCreateInfo vertexInputStateCi = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+        .vertexBindingDescriptionCount = 1,
+        .pVertexBindingDescriptions = &bindingDescription,
+        .vertexAttributeDescriptionCount =
+            static_cast<uint32_t>(attributeDescription.size()),
+        .pVertexAttributeDescriptions = attributeDescription.data()};
+    VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCi = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+        .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+        .primitiveRestartEnable = VK_FALSE,
+    };
 
-    VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCi = {};
-    inputAssemblyStateCi.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssemblyStateCi.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    inputAssemblyStateCi.primitiveRestartEnable = VK_FALSE;
+    VkViewport viewport = {.x = 0.0f,
+                           .y = 0.0f,
+                           .width = static_cast<float>(width),
+                           .height = static_cast<float>(height),
+                           .minDepth = 0.0f,
+                           .maxDepth = 1.0f};
 
-    VkViewport viewport = {};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(width);
-    viewport.height = static_cast<float>(height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
+    VkRect2D scissor = {.offset = {0, 0}, .extent = {width, height}};
 
-    VkRect2D scissor = {};
-    scissor.offset = {0, 0};
-    scissor.extent.width = width;
-    scissor.extent.height = height;
+    VkPipelineViewportStateCreateInfo viewportStateCi = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+        .viewportCount = 1,
+        .pViewports = &viewport,
+        .scissorCount = 1,
+        .pScissors = &scissor};
 
-    VkPipelineViewportStateCreateInfo viewportStateCi = {};
-    viewportStateCi.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewportStateCi.viewportCount = 1;
-    viewportStateCi.pViewports = &viewport;
-    viewportStateCi.scissorCount = 1;
-    viewportStateCi.pScissors = &scissor;
+    VkPipelineRasterizationStateCreateInfo rasterizerStateCi = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+        .depthClampEnable = VK_FALSE,
+        .rasterizerDiscardEnable = VK_FALSE,
+        .polygonMode = VK_POLYGON_MODE_FILL,
+        .cullMode = VK_CULL_MODE_BACK_BIT,
+        .frontFace = VK_FRONT_FACE_CLOCKWISE,
+        .depthBiasEnable = VK_FALSE,
+        .depthBiasConstantFactor = 0.0f,
+        .depthBiasClamp = 0.0f,
+        .depthBiasSlopeFactor = 0.0f,
+        .lineWidth = 1.0f};
 
-    VkPipelineRasterizationStateCreateInfo rasterizerStateCi = {};
-    rasterizerStateCi.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizerStateCi.depthClampEnable = VK_FALSE;
-    rasterizerStateCi.rasterizerDiscardEnable = VK_FALSE;
-    rasterizerStateCi.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizerStateCi.lineWidth = 1.0f;
-    rasterizerStateCi.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizerStateCi.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    rasterizerStateCi.depthBiasEnable = VK_FALSE;
-    rasterizerStateCi.depthBiasConstantFactor = 0.0f;
-    rasterizerStateCi.depthBiasClamp = 0.0f;
-    rasterizerStateCi.depthBiasSlopeFactor = 0.0f;
+    VkPipelineMultisampleStateCreateInfo multisampleStateCi = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+        .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+        .sampleShadingEnable = VK_FALSE,
+        .minSampleShading = 1.0f,
+        .pSampleMask = nullptr,
+        .alphaToCoverageEnable = VK_FALSE,
+        .alphaToOneEnable = VK_FALSE};
 
-    VkPipelineMultisampleStateCreateInfo multisampleStateCi = {};
-    multisampleStateCi.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampleStateCi.sampleShadingEnable = VK_FALSE;
-    multisampleStateCi.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-    multisampleStateCi.minSampleShading = 1.0f;
-    multisampleStateCi.pSampleMask = nullptr;
-    multisampleStateCi.alphaToCoverageEnable = VK_FALSE;
-    multisampleStateCi.alphaToOneEnable = VK_FALSE;
+    VkPipelineColorBlendAttachmentState colorBlendAttachment = {
+        .blendEnable = VK_TRUE,
+        .srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA,
+        .dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+        .colorBlendOp = VK_BLEND_OP_ADD,
+        .srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
+        .dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
+        .alphaBlendOp = VK_BLEND_OP_MAX,
+        .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+                          VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT};
 
-    VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
-    colorBlendAttachment.colorWriteMask =
-        VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-        VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = VK_TRUE;
-    colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-    colorBlendAttachment.dstColorBlendFactor =
-        VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-    colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_MAX;
+    VkPipelineColorBlendStateCreateInfo colorBlendStateCi = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+        .logicOpEnable = VK_FALSE,
+        .attachmentCount = 1,
+        .pAttachments = &colorBlendAttachment};
 
-    VkPipelineColorBlendStateCreateInfo colorBlendStateCi = {};
-    colorBlendStateCi.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlendStateCi.logicOpEnable = VK_FALSE;
-    colorBlendStateCi.attachmentCount = 1;
-    colorBlendStateCi.pAttachments = &colorBlendAttachment;
-
-    VkDescriptorSetLayoutBinding layoutBindings[2] = {};
-    layoutBindings[0].binding = 0;
-    layoutBindings[0].descriptorCount = 1;
-    layoutBindings[0].descriptorType =
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    layoutBindings[0].pImmutableSamplers = nullptr;
-    layoutBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    layoutBindings[1].binding = 1;
-    layoutBindings[1].descriptorCount = 1;
-    layoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    layoutBindings[1].pImmutableSamplers = nullptr;
-    layoutBindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    VkDescriptorSetLayoutBinding layoutBindings[2] = {
+        {.binding = 0,
+         .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+         .descriptorCount = 1,
+         .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+         .pImmutableSamplers = nullptr},
+        {.binding = 1,
+         .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+         .descriptorCount = 1,
+         .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+         .pImmutableSamplers = nullptr}};
 
     VkDescriptorBindingFlagsEXT bindingFlags[] = {
         VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT, 0};
-    VkDescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCi = {};
-    bindingFlagsCi.sType =
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
-    bindingFlagsCi.bindingCount =
-        static_cast<uint32_t>(std::size(bindingFlags));
-    bindingFlagsCi.pBindingFlags = bindingFlags;
-    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCi = {};
-    descriptorSetLayoutCi.sType =
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    descriptorSetLayoutCi.bindingCount =
-        static_cast<uint32_t>(std::size(layoutBindings));
-    descriptorSetLayoutCi.pBindings = layoutBindings;
-    descriptorSetLayoutCi.pNext = &bindingFlagsCi;
-    descriptorSetLayoutCi.flags =
-        VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
+    VkDescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCi = {
+        .sType =
+            VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT,
+        .bindingCount = static_cast<uint32_t>(std::size(bindingFlags)),
+        .pBindingFlags = bindingFlags,
+    };
+    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCi = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .pNext = &bindingFlagsCi,
+        .flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT,
+        .bindingCount = static_cast<uint32_t>(std::size(layoutBindings)),
+        .pBindings = layoutBindings};
     VK_CHECK(m_vk.vkCreateDescriptorSetLayout(
         m_vkDevice, &descriptorSetLayoutCi, nullptr, &m_vkDescriptorSetLayout));
 
-    VkPipelineLayoutCreateInfo pipelineLayoutCi = {};
-    pipelineLayoutCi.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutCi.setLayoutCount = 1;
-    pipelineLayoutCi.pSetLayouts = &m_vkDescriptorSetLayout;
-    pipelineLayoutCi.pushConstantRangeCount = 0;
+    VkPipelineLayoutCreateInfo pipelineLayoutCi = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+        .setLayoutCount = 1,
+        .pSetLayouts = &m_vkDescriptorSetLayout,
+        .pushConstantRangeCount = 0};
 
     VK_CHECK(m_vk.vkCreatePipelineLayout(m_vkDevice, &pipelineLayoutCi, nullptr,
                                          &m_vkPipelineLayout));
 
-    VkAttachmentDescription colorAttachment = {};
-    colorAttachment.format = renderTargetFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = initialLayout;
-    colorAttachment.finalLayout = finalLayout;
+    VkAttachmentDescription colorAttachment = {
+        .format = renderTargetFormat,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+        .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .initialLayout = initialLayout,
+        .finalLayout = finalLayout};
 
-    VkAttachmentReference colorAttachmentRef = {};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    VkAttachmentReference colorAttachmentRef = {
+        .attachment = 0, .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
 
-    VkSubpassDescription subpass = {};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
+    VkSubpassDescription subpass = {
+        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+        .colorAttachmentCount = 1,
+        .pColorAttachments = &colorAttachmentRef};
 
     // TODO: to support multiple layer composition, we could run the same render
     // pass for multiple time. In that case, we should use explicit
     // VkImageMemoryBarriers to transform the image layout instead of relying on
     // renderpass to do it.
-    VkSubpassDependency subpassDependency = {};
-    subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    subpassDependency.dstSubpass = 0;
-    subpassDependency.srcStageMask =
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    subpassDependency.srcAccessMask = 0;
-    subpassDependency.dstStageMask =
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    VkSubpassDependency subpassDependency = {
+        .srcSubpass = VK_SUBPASS_EXTERNAL,
+        .dstSubpass = 0,
+        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        .srcAccessMask = 0,
+        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT};
 
-    VkRenderPassCreateInfo renderPassCi = {};
-    renderPassCi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassCi.attachmentCount = 1;
-    renderPassCi.pAttachments = &colorAttachment;
-    renderPassCi.subpassCount = 1;
-    renderPassCi.pSubpasses = &subpass;
-    renderPassCi.dependencyCount = 1;
-    renderPassCi.pDependencies = &subpassDependency;
+    VkRenderPassCreateInfo renderPassCi = {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+        .attachmentCount = 1,
+        .pAttachments = &colorAttachment,
+        .subpassCount = 1,
+        .pSubpasses = &subpass,
+        .dependencyCount = 1,
+        .pDependencies = &subpassDependency};
 
     VK_CHECK(m_vk.vkCreateRenderPass(m_vkDevice, &renderPassCi, nullptr,
                                      &m_vkRenderPass));
 
-    VkGraphicsPipelineCreateInfo graphicsPipelineCi = {};
-    graphicsPipelineCi.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    graphicsPipelineCi.stageCount =
-        static_cast<uint32_t>(std::size(shaderStageCis));
-    graphicsPipelineCi.pStages = shaderStageCis;
-    graphicsPipelineCi.pVertexInputState = &vertexInputStateCi;
-    graphicsPipelineCi.pInputAssemblyState = &inputAssemblyStateCi;
-    graphicsPipelineCi.pViewportState = &viewportStateCi;
-    graphicsPipelineCi.pRasterizationState = &rasterizerStateCi;
-    graphicsPipelineCi.pMultisampleState = &multisampleStateCi;
-    graphicsPipelineCi.pDepthStencilState = nullptr;
-    graphicsPipelineCi.pColorBlendState = &colorBlendStateCi;
-    graphicsPipelineCi.pDynamicState = nullptr;
-    graphicsPipelineCi.layout = m_vkPipelineLayout;
-    graphicsPipelineCi.renderPass = m_vkRenderPass;
-    graphicsPipelineCi.subpass = 0;
-    graphicsPipelineCi.basePipelineHandle = VK_NULL_HANDLE;
-    graphicsPipelineCi.basePipelineIndex = -1;
+    VkGraphicsPipelineCreateInfo graphicsPipelineCi = {
+        .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+        .stageCount = static_cast<uint32_t>(std::size(shaderStageCis)),
+        .pStages = shaderStageCis,
+        .pVertexInputState = &vertexInputStateCi,
+        .pInputAssemblyState = &inputAssemblyStateCi,
+        .pViewportState = &viewportStateCi,
+        .pRasterizationState = &rasterizerStateCi,
+        .pMultisampleState = &multisampleStateCi,
+        .pDepthStencilState = nullptr,
+        .pColorBlendState = &colorBlendStateCi,
+        .pDynamicState = nullptr,
+        .layout = m_vkPipelineLayout,
+        .renderPass = m_vkRenderPass,
+        .subpass = 0,
+        .basePipelineHandle = VK_NULL_HANDLE,
+        .basePipelineIndex = -1};
 
     VK_CHECK(m_vk.vkCreateGraphicsPipelines(m_vkDevice, VK_NULL_HANDLE, 1,
                                             &graphicsPipelineCi, nullptr,
@@ -361,11 +330,11 @@ void CompositorVk::setUpGraphicsPipeline(uint32_t width, uint32_t height,
 std::optional<std::tuple<VkBuffer, VkDeviceMemory>> CompositorVk::createBuffer(
     VkDeviceSize size, VkBufferUsageFlags usage,
     VkMemoryPropertyFlags memProperty) const {
-    VkBufferCreateInfo bufferCi = {};
-    bufferCi.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferCi.size = size;
-    bufferCi.usage = usage;
-    bufferCi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    VkBufferCreateInfo bufferCi = {
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .size = size,
+        .usage = usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE};
     VkBuffer resBuffer;
     VK_CHECK(m_vk.vkCreateBuffer(m_vkDevice, &bufferCi, nullptr, &resBuffer));
     VkMemoryRequirements memRequirements;
@@ -379,10 +348,10 @@ std::optional<std::tuple<VkBuffer, VkDeviceMemory>> CompositorVk::createBuffer(
         m_vk.vkDestroyBuffer(m_vkDevice, resBuffer, nullptr);
         return std::nullopt;
     }
-    VkMemoryAllocateInfo memAllocInfo = {};
-    memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    memAllocInfo.allocationSize = memRequirements.size;
-    memAllocInfo.memoryTypeIndex = maybeMemoryTypeIndex.value();
+    VkMemoryAllocateInfo memAllocInfo = {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex = maybeMemoryTypeIndex.value()};
     VkDeviceMemory resMemory;
     VK_CHECK(
         m_vk.vkAllocateMemory(m_vkDevice, &memAllocInfo, nullptr, &resMemory));
@@ -449,14 +418,14 @@ void CompositorVk::setUpFramebuffers(
     const std::vector<VkImageView> &renderTargets, uint32_t width,
     uint32_t height) {
     for (size_t i = 0; i < renderTargets.size(); i++) {
-        VkFramebufferCreateInfo fbCi = {};
-        fbCi.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        fbCi.renderPass = m_vkRenderPass;
-        fbCi.attachmentCount = 1;
-        fbCi.pAttachments = &renderTargets[i];
-        fbCi.width = width;
-        fbCi.height = height;
-        fbCi.layers = 1;
+        VkFramebufferCreateInfo fbCi = {
+            .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+            .renderPass = m_vkRenderPass,
+            .attachmentCount = 1,
+            .pAttachments = &renderTargets[i],
+            .width = width,
+            .height = height,
+            .layers = 1};
         VkFramebuffer framebuffer;
         VK_CHECK(
             m_vk.vkCreateFramebuffer(m_vkDevice, &fbCi, nullptr, &framebuffer));
@@ -468,85 +437,74 @@ void CompositorVk::setUpDescriptorSets() {
     uint32_t numOfFrames =
         static_cast<uint32_t>(m_renderTargetVkFrameBuffers.size());
 
-    VkDescriptorPoolSize descriptorPoolSizes[2] = {};
-    descriptorPoolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorPoolSizes[0].descriptorCount = numOfFrames;
-    descriptorPoolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptorPoolSizes[1].descriptorCount = numOfFrames;
+    VkDescriptorPoolSize descriptorPoolSizes[2] = {
+        {.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+         .descriptorCount = numOfFrames},
+        {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+         .descriptorCount = numOfFrames}};
 
-    VkDescriptorPoolCreateInfo descriptorPoolCi = {};
-    descriptorPoolCi.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    descriptorPoolCi.poolSizeCount =
-        static_cast<uint32_t>(std::size(descriptorPoolSizes));
-    descriptorPoolCi.pPoolSizes = descriptorPoolSizes;
-    descriptorPoolCi.maxSets = static_cast<uint32_t>(numOfFrames);
-    descriptorPoolCi.flags =
-        VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT;
+    VkDescriptorPoolCreateInfo descriptorPoolCi = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT,
+        .maxSets = static_cast<uint32_t>(numOfFrames),
+        .poolSizeCount = static_cast<uint32_t>(std::size(descriptorPoolSizes)),
+        .pPoolSizes = descriptorPoolSizes};
     VK_CHECK(m_vk.vkCreateDescriptorPool(m_vkDevice, &descriptorPoolCi, nullptr,
                                          &m_vkDescriptorPool));
     std::vector<VkDescriptorSetLayout> layouts(numOfFrames,
                                                m_vkDescriptorSetLayout);
-    VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
-    descriptorSetAllocInfo.sType =
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    descriptorSetAllocInfo.descriptorPool = m_vkDescriptorPool;
-    descriptorSetAllocInfo.descriptorSetCount = numOfFrames;
-    descriptorSetAllocInfo.pSetLayouts = layouts.data();
+    VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = m_vkDescriptorPool,
+        .descriptorSetCount = numOfFrames,
+        .pSetLayouts = layouts.data()};
     m_vkDescriptorSets.resize(numOfFrames);
     VK_CHECK(m_vk.vkAllocateDescriptorSets(m_vkDevice, &descriptorSetAllocInfo,
                                            m_vkDescriptorSets.data()));
     for (size_t i = 0; i < numOfFrames; i++) {
-        VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer = m_uniformStorage.m_vkBuffer;
-        bufferInfo.offset = i * m_uniformStorage.m_stride;
-        bufferInfo.range = sizeof(UniformBufferObject);
-
-        VkWriteDescriptorSet descriptorSetWrite = {};
-        descriptorSetWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorSetWrite.dstSet = m_vkDescriptorSets[i];
-        descriptorSetWrite.dstBinding = 1;
-        descriptorSetWrite.dstArrayElement = 0;
-        descriptorSetWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorSetWrite.descriptorCount = 1;
-        descriptorSetWrite.pBufferInfo = &bufferInfo;
-
+        VkDescriptorBufferInfo bufferInfo = {
+            .buffer = m_uniformStorage.m_vkBuffer,
+            .offset = i * m_uniformStorage.m_stride,
+            .range = sizeof(UniformBufferObject)};
+        VkWriteDescriptorSet descriptorSetWrite = {
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = m_vkDescriptorSets[i],
+            .dstBinding = 1,
+            .dstArrayElement = 0,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .pBufferInfo = &bufferInfo};
         m_vk.vkUpdateDescriptorSets(m_vkDevice, 1, &descriptorSetWrite, 0,
                                     nullptr);
     }
 }
 
 void CompositorVk::setUpCommandBuffers(uint32_t width, uint32_t height) {
-    VkCommandBufferAllocateInfo cmdBuffAllocInfo = {};
-    cmdBuffAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    cmdBuffAllocInfo.commandPool = m_vkCommandPool;
-    cmdBuffAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    cmdBuffAllocInfo.commandBufferCount =
-        static_cast<uint32_t>(m_renderTargetVkFrameBuffers.size());
+    VkCommandBufferAllocateInfo cmdBuffAllocInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .commandPool = m_vkCommandPool,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount =
+            static_cast<uint32_t>(m_renderTargetVkFrameBuffers.size())};
     m_vkCommandBuffers.resize(m_renderTargetVkFrameBuffers.size());
     VK_CHECK(m_vk.vkAllocateCommandBuffers(m_vkDevice, &cmdBuffAllocInfo,
                                            m_vkCommandBuffers.data()));
 
     for (size_t i = 0; i < m_vkCommandBuffers.size(); i++) {
-        VkCommandBufferBeginInfo beginInfo = {};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        VkCommandBufferBeginInfo beginInfo = {
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
         const auto &cmdBuffer = m_vkCommandBuffers[i];
         VK_CHECK(m_vk.vkBeginCommandBuffer(cmdBuffer, &beginInfo));
 
-        VkClearValue clearColor = {};
-        clearColor.color.float32[0] = 0.0f;
-        clearColor.color.float32[1] = 0.0f;
-        clearColor.color.float32[2] = 0.0f;
-        clearColor.color.float32[3] = 1.0f;
-
-        VkRenderPassBeginInfo renderPassBeginInfo = {};
-        renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassBeginInfo.renderPass = m_vkRenderPass;
-        renderPassBeginInfo.framebuffer = m_renderTargetVkFrameBuffers[i];
-        renderPassBeginInfo.clearValueCount = 1;
-        renderPassBeginInfo.pClearValues = &clearColor;
-        renderPassBeginInfo.renderArea.offset = {0, 0};
-        renderPassBeginInfo.renderArea.extent = {width, height};
-
+        VkClearValue clearColor = {
+            .color = {.float32 = {0.0f, 0.0f, 0.0f, 1.0f}}};
+        VkRenderPassBeginInfo renderPassBeginInfo = {
+            .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+            .renderPass = m_vkRenderPass,
+            .framebuffer = m_renderTargetVkFrameBuffers[i],
+            .renderArea = {.offset = {0, 0}, .extent = {width, height}},
+            .clearValueCount = 1,
+            .pClearValues = &clearColor};
         m_vk.vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo,
                                   VK_SUBPASS_CONTENTS_INLINE);
         m_vk.vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -568,35 +526,33 @@ void CompositorVk::setUpCommandBuffers(uint32_t width, uint32_t height) {
 }
 
 void CompositorVk::setUpEmptyComposition(VkFormat format) {
-    VkImageCreateInfo imageCi = {};
-    imageCi.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageCi.imageType = VK_IMAGE_TYPE_2D;
-    imageCi.extent.width = k_emptyCompositionExtent.width;
-    imageCi.extent.height = k_emptyCompositionExtent.height;
-    imageCi.extent.depth = 1;
-    imageCi.mipLevels = 1;
-    imageCi.arrayLayers = 1;
-    imageCi.format = format;
-    imageCi.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageCi.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageCi.usage =
-        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    imageCi.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    imageCi.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageCi.flags = 0;
+    VkImageCreateInfo imageCi = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .flags = 0,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = format,
+        .extent = {.width = k_emptyCompositionExtent.width,
+                   .height = k_emptyCompositionExtent.height,
+                   .depth = 1},
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED};
     VK_CHECK(m_vk.vkCreateImage(m_vkDevice, &imageCi, nullptr,
                                 &m_emptyCompositionVkImage));
 
     VkMemoryRequirements memRequirements;
     m_vk.vkGetImageMemoryRequirements(m_vkDevice, m_emptyCompositionVkImage,
                                       &memRequirements);
-    VkMemoryAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex =
-        findMemoryType(memRequirements.memoryTypeBits,
-                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
-            .value();
+    VkMemoryAllocateInfo allocInfo = {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits,
+                                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+                               .value()};
     VK_CHECK(m_vk.vkAllocateMemory(m_vkDevice, &allocInfo, nullptr,
                                    &m_emptyCompositionVkDeviceMemory));
     VK_CHECK(m_vk.vkBindImageMemory(m_vkDevice, m_emptyCompositionVkImage,
@@ -605,14 +561,13 @@ void CompositorVk::setUpEmptyComposition(VkFormat format) {
         recordImageLayoutTransformCommands(
             cmdBuff, m_emptyCompositionVkImage, VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-        VkClearColorValue clearColor = {0.0, 0.0, 0.0, 1.0};
-        VkBufferImageCopy region = {};
-        VkImageSubresourceRange range = {};
-        range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        range.baseMipLevel = 0;
-        range.levelCount = 1;
-        range.baseArrayLayer = 0;
-        range.layerCount = 1;
+        VkClearColorValue clearColor = {.float32 = {0.0, 0.0, 0.0, 1.0}};
+        VkImageSubresourceRange range = {
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .baseMipLevel = 0,
+            .levelCount = 1,
+            .baseArrayLayer = 0,
+            .layerCount = 1};
         m_vk.vkCmdClearColorImage(cmdBuff, m_emptyCompositionVkImage,
                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                   &clearColor, 1, &range);
@@ -622,40 +577,40 @@ void CompositorVk::setUpEmptyComposition(VkFormat format) {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     });
 
-    VkImageViewCreateInfo imageViewCi = {};
-    imageViewCi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    imageViewCi.image = m_emptyCompositionVkImage;
-    imageViewCi.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewCi.format = format;
-    imageViewCi.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    imageViewCi.subresourceRange.baseMipLevel = 0;
-    imageViewCi.subresourceRange.levelCount = 1;
-    imageViewCi.subresourceRange.baseArrayLayer = 0;
-    imageViewCi.subresourceRange.layerCount = 1;
+    VkImageViewCreateInfo imageViewCi = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image = m_emptyCompositionVkImage,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = format,
+        .components = {.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                       .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                       .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                       .a = VK_COMPONENT_SWIZZLE_IDENTITY},
+        .subresourceRange{.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                          .baseMipLevel = 0,
+                          .levelCount = 1,
+                          .baseArrayLayer = 0,
+                          .layerCount = 1}};
     VK_CHECK(m_vk.vkCreateImageView(m_vkDevice, &imageViewCi, nullptr,
                                     &m_emptyCompositionVkImageView));
 
-    VkSamplerCreateInfo samplerCi = {};
-    samplerCi.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-    samplerCi.magFilter = VK_FILTER_LINEAR;
-    samplerCi.minFilter = VK_FILTER_LINEAR;
-    samplerCi.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-    samplerCi.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-    samplerCi.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-    samplerCi.anisotropyEnable = VK_FALSE;
-    samplerCi.maxAnisotropy = 1.0f;
-    samplerCi.borderColor = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
-    samplerCi.unnormalizedCoordinates = VK_FALSE;
-    samplerCi.compareEnable = VK_FALSE;
-    samplerCi.compareOp = VK_COMPARE_OP_ALWAYS;
-    samplerCi.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    samplerCi.mipLodBias = 0.0f;
-    samplerCi.minLod = 0.0f;
-    samplerCi.maxLod = 0.0f;
+    VkSamplerCreateInfo samplerCi = {
+        .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+        .magFilter = VK_FILTER_LINEAR,
+        .minFilter = VK_FILTER_LINEAR,
+        .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+        .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+        .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+        .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+        .mipLodBias = 0.0f,
+        .anisotropyEnable = VK_FALSE,
+        .maxAnisotropy = 1.0f,
+        .compareEnable = VK_FALSE,
+        .compareOp = VK_COMPARE_OP_ALWAYS,
+        .minLod = 0.0f,
+        .maxLod = 0.0f,
+        .borderColor = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK,
+        .unnormalizedCoordinates = VK_FALSE};
     VK_CHECK(m_vk.vkCreateSampler(m_vkDevice, &samplerCi, nullptr,
                                   &m_emptyCompositionVkSampler));
 }
@@ -726,19 +681,18 @@ void CompositorVk::setComposition(uint32_t i,
                                   std::unique_ptr<Composition> &&composition) {
     m_currentCompositions[i] = std::move(composition);
     const auto &currentComposition = *m_currentCompositions[i];
-    VkDescriptorImageInfo imageInfo = {};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = currentComposition.m_vkImageView;
-    imageInfo.sampler = currentComposition.m_vkSampler;
-    VkWriteDescriptorSet descriptorSetWrite = {};
-    descriptorSetWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorSetWrite.dstSet = m_vkDescriptorSets[i];
-    descriptorSetWrite.dstBinding = 0;
-    descriptorSetWrite.dstArrayElement = 0;
-    descriptorSetWrite.descriptorType =
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorSetWrite.descriptorCount = 1;
-    descriptorSetWrite.pImageInfo = &imageInfo;
+    VkDescriptorImageInfo imageInfo = {
+        .sampler = currentComposition.m_vkSampler,
+        .imageView = currentComposition.m_vkImageView,
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
+    VkWriteDescriptorSet descriptorSetWrite = {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .dstSet = m_vkDescriptorSets[i],
+        .dstBinding = 0,
+        .dstArrayElement = 0,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        .pImageInfo = &imageInfo};
     m_vk.vkUpdateDescriptorSets(m_vkDevice, 1, &descriptorSetWrite, 0, nullptr);
 
     auto local2screen = glm::translate(glm::mat3(1.0f), glm::vec2(1.0f, 1.0f));
@@ -766,23 +720,21 @@ void CompositorVk::setComposition(uint32_t i,
 }
 
 VkVertexInputBindingDescription CompositorVk::Vertex::getBindingDescription() {
-    VkVertexInputBindingDescription res = {};
-    res.binding = 0;
-    res.stride = sizeof(struct Vertex);
-    res.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-    return res;
+    return {.binding = 0,
+            .stride = sizeof(struct Vertex),
+            .inputRate = VK_VERTEX_INPUT_RATE_VERTEX};
 }
 
 std::array<VkVertexInputAttributeDescription, 2>
 CompositorVk::Vertex::getAttributeDescription() {
-    std::array<VkVertexInputAttributeDescription, 2> res = {};
-    res[0].binding = 0;
-    res[0].location = 0;
-    res[0].format = VK_FORMAT_R32G32_SFLOAT;
-    res[0].offset = offsetof(struct Vertex, pos);
-    res[1].binding = 0;
-    res[1].location = 1;
-    res[1].format = VK_FORMAT_R32G32_SFLOAT;
-    res[1].offset = offsetof(struct Vertex, texPos);
-    return res;
+    return {VkVertexInputAttributeDescription{
+                .location = 0,
+                .binding = 0,
+                .format = VK_FORMAT_R32G32_SFLOAT,
+                .offset = offsetof(struct Vertex, pos)},
+            VkVertexInputAttributeDescription{
+                .location = 1,
+                .binding = 0,
+                .format = VK_FORMAT_R32G32_SFLOAT,
+                .offset = offsetof(struct Vertex, texPos)}};
 }

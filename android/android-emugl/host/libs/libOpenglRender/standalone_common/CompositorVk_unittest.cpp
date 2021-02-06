@@ -1,6 +1,6 @@
-#include "CompositorVk.h"
-
 #include <gtest/gtest.h>
+
+#include "CompositorVk.h"
 
 #include <algorithm>
 #include <array>
@@ -46,9 +46,9 @@ class CompositorVkTest : public ::testing::Test {
             GTEST_SKIP();
         }
 
-        VkCommandPoolCreateInfo commandPoolCi = {};
-        commandPoolCi.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        commandPoolCi.queueFamilyIndex = m_compositorQueueFamilyIndex;
+        VkCommandPoolCreateInfo commandPoolCi = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+            .queueFamilyIndex = m_compositorQueueFamilyIndex};
         ASSERT_EQ(k_vk->vkCreateCommandPool(m_vkDevice, &commandPoolCi, nullptr,
                                             &m_vkCommandPool),
                   VK_SUCCESS);
@@ -93,23 +93,23 @@ class CompositorVkTest : public ::testing::Test {
     }
 
     VkSampler createSampler() {
-        VkSamplerCreateInfo samplerCi = {};
-        samplerCi.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerCi.magFilter = VK_FILTER_NEAREST;
-        samplerCi.minFilter = VK_FILTER_NEAREST;
-        samplerCi.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-        samplerCi.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-        samplerCi.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-        samplerCi.anisotropyEnable = VK_FALSE;
-        samplerCi.maxAnisotropy = 1.0f;
-        samplerCi.borderColor = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
-        samplerCi.unnormalizedCoordinates = VK_FALSE;
-        samplerCi.compareEnable = VK_FALSE;
-        samplerCi.compareOp = VK_COMPARE_OP_ALWAYS;
-        samplerCi.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-        samplerCi.mipLodBias = 0.0f;
-        samplerCi.minLod = 0.0f;
-        samplerCi.maxLod = 0.0f;
+        VkSamplerCreateInfo samplerCi = {
+            .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+            .magFilter = VK_FILTER_NEAREST,
+            .minFilter = VK_FILTER_NEAREST,
+            .mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+            .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+            .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+            .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+            .mipLodBias = 0.0f,
+            .anisotropyEnable = VK_FALSE,
+            .maxAnisotropy = 1.0f,
+            .compareEnable = VK_FALSE,
+            .compareOp = VK_COMPARE_OP_ALWAYS,
+            .minLod = 0.0f,
+            .maxLod = 0.0f,
+            .borderColor = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK,
+            .unnormalizedCoordinates = VK_FALSE};
         VkSampler res;
         VK_CHECK(k_vk->vkCreateSampler(m_vkDevice, &samplerCi, nullptr, &res));
         return res;
@@ -127,19 +127,19 @@ class CompositorVkTest : public ::testing::Test {
 
    private:
     void createInstance() {
-        VkApplicationInfo appInfo = {};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pNext = nullptr;
-        appInfo.pApplicationName = "emulator CompositorVk unittest";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "No Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_1;
-        VkInstanceCreateInfo instanceCi = {};
-        instanceCi.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        instanceCi.ppEnabledExtensionNames = nullptr;
-        instanceCi.enabledExtensionCount = 0;
-        instanceCi.pApplicationInfo = &appInfo;
+        VkApplicationInfo appInfo = {
+            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+            .pNext = nullptr,
+            .pApplicationName = "emulator CompositorVk unittest",
+            .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+            .pEngineName = "No Engine",
+            .engineVersion = VK_MAKE_VERSION(1, 0, 0),
+            .apiVersion = VK_API_VERSION_1_1};
+        VkInstanceCreateInfo instanceCi = {
+            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            .pApplicationInfo = &appInfo,
+            .enabledExtensionCount = 0,
+            .ppEnabledExtensionNames = nullptr};
         ASSERT_EQ(k_vk->vkCreateInstance(&instanceCi, nullptr, &m_vkInstance),
                   VK_SUCCESS);
         ASSERT_TRUE(m_vkInstance != VK_NULL_HANDLE);
@@ -157,13 +157,12 @@ class CompositorVkTest : public ::testing::Test {
                                              physicalDevices.data()),
             VK_SUCCESS);
         for (const auto &device : physicalDevices) {
-            VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures =
-                {};
-            descIndexingFeatures.sType =
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
-            VkPhysicalDeviceFeatures2 features = {};
-            features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-            features.pNext = &descIndexingFeatures;
+            VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {
+                .sType =
+                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT};
+            VkPhysicalDeviceFeatures2 features = {
+                .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+                .pNext = &descIndexingFeatures};
             k_vk->vkGetPhysicalDeviceFeatures2(device, &features);
             if (!CompositorVk::validatePhysicalDeviceFeatures(features)) {
                 continue;
@@ -196,30 +195,29 @@ class CompositorVkTest : public ::testing::Test {
 
     void createLogicalDevice() {
         const float queuePriority = 1.0f;
-        VkDeviceQueueCreateInfo queueCi = {};
-        queueCi.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCi.queueFamilyIndex = m_compositorQueueFamilyIndex;
-        queueCi.queueCount = 1;
-        queueCi.pQueuePriorities = &queuePriority;
-        VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {};
-        descIndexingFeatures.sType =
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
-        VkPhysicalDeviceFeatures2 features = {};
-        features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-        features.pNext = &descIndexingFeatures;
+        VkDeviceQueueCreateInfo queueCi = {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            .queueFamilyIndex = m_compositorQueueFamilyIndex,
+            .queueCount = 1,
+            .pQueuePriorities = &queuePriority};
+        VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {
+            .sType =
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT};
+        VkPhysicalDeviceFeatures2 features = {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+            .pNext = &descIndexingFeatures};
         ASSERT_TRUE(CompositorVk::enablePhysicalDeviceFeatures(features));
         const std::vector<const char *> enabledDeviceExtensions =
             CompositorVk::getRequiredDeviceExtensions();
-        VkDeviceCreateInfo deviceCi = {};
-        deviceCi.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        deviceCi.pQueueCreateInfos = &queueCi;
-        deviceCi.queueCreateInfoCount = 1;
-        deviceCi.pEnabledFeatures = nullptr;
-        deviceCi.enabledLayerCount = 0;
-        deviceCi.enabledExtensionCount =
-            static_cast<uint32_t>(enabledDeviceExtensions.size());
-        deviceCi.ppEnabledExtensionNames = enabledDeviceExtensions.data();
-        deviceCi.pNext = &features;
+        VkDeviceCreateInfo deviceCi = {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+            .pNext = &features,
+            .queueCreateInfoCount = 1,
+            .pQueueCreateInfos = &queueCi,
+            .enabledLayerCount = 0,
+            .enabledExtensionCount =
+                static_cast<uint32_t>(enabledDeviceExtensions.size()),
+            .ppEnabledExtensionNames = enabledDeviceExtensions.data()};
         ASSERT_EQ(k_vk->vkCreateDevice(m_vkPhysicalDevice, &deviceCi, nullptr,
                                        &m_vkDevice),
                   VK_SUCCESS);
@@ -229,18 +227,16 @@ class CompositorVkTest : public ::testing::Test {
 
 const goldfish_vk::VulkanDispatch *CompositorVkTest::k_vk = nullptr;
 
-TEST_F(CompositorVkTest, Init) {
-    ASSERT_NE(createCompositor(), nullptr);
-}
+TEST_F(CompositorVkTest, Init) { ASSERT_NE(createCompositor(), nullptr); }
 
 TEST_F(CompositorVkTest, ValidatePhysicalDeviceFeatures) {
-    VkPhysicalDeviceFeatures2 features = {};
-    features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    VkPhysicalDeviceFeatures2 features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
     ASSERT_FALSE(CompositorVk::validatePhysicalDeviceFeatures(features));
-    VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {};
-    descIndexingFeatures.sType =
-        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
-    features.pNext = &descIndexingFeatures;
+    VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {
+        .sType =
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT,
+        .pNext = &descIndexingFeatures};
     ASSERT_FALSE(CompositorVk::validatePhysicalDeviceFeatures(features));
     descIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
     ASSERT_TRUE(CompositorVk::validatePhysicalDeviceFeatures(features));
@@ -255,13 +251,13 @@ TEST_F(CompositorVkTest, ValidateQueueFamilyProperties) {
 }
 
 TEST_F(CompositorVkTest, EnablePhysicalDeviceFeatures) {
-    VkPhysicalDeviceFeatures2 features = {};
-    features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    VkPhysicalDeviceFeatures2 features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
     ASSERT_FALSE(CompositorVk::enablePhysicalDeviceFeatures(features));
-    VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {};
-    descIndexingFeatures.sType =
-        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
-    features.pNext = &descIndexingFeatures;
+    VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {
+        .sType =
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT,
+        .pNext = &descIndexingFeatures};
     ASSERT_TRUE(CompositorVk::enablePhysicalDeviceFeatures(features));
     ASSERT_EQ(descIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind,
               VK_TRUE);
@@ -296,10 +292,10 @@ TEST_F(CompositorVkTest, EmptyCompositionShouldDrawABlackFrame) {
             cmdBuffs.emplace_back(compositor->getCommandBuffer(i));
         }
     }
-    VkSubmitInfo submitInfo = {};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = static_cast<uint32_t>(cmdBuffs.size());
-    submitInfo.pCommandBuffers = cmdBuffs.data();
+    VkSubmitInfo submitInfo = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .commandBufferCount = static_cast<uint32_t>(cmdBuffs.size()),
+        .pCommandBuffers = cmdBuffs.data()};
     ASSERT_EQ(k_vk->vkQueueSubmit(m_compositorVkQueue, 1, &submitInfo,
                                   VK_NULL_HANDLE),
               VK_SUCCESS);
@@ -354,10 +350,9 @@ TEST_F(CompositorVkTest, SimpleComposition) {
     composition->m_transform = transform;
     compositor->setComposition(0, std::move(composition));
     VkCommandBuffer cmdBuff = compositor->getCommandBuffer(0);
-    VkSubmitInfo submitInfo = {};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &cmdBuff;
+    VkSubmitInfo submitInfo = {.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+                               .commandBufferCount = 1,
+                               .pCommandBuffers = &cmdBuff};
     ASSERT_EQ(k_vk->vkQueueSubmit(m_compositorVkQueue, 1, &submitInfo,
                                   VK_NULL_HANDLE),
               VK_SUCCESS);
@@ -428,10 +423,9 @@ TEST_F(CompositorVkTest, CompositingWithDifferentCompositionOnMultipleTargets) {
         composition->m_transform = transform;
         compositor->setComposition(i, std::move(composition));
         VkCommandBuffer cmdBuff = compositor->getCommandBuffer(i);
-        VkSubmitInfo submitInfo = {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &cmdBuff;
+        VkSubmitInfo submitInfo = {.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+                                   .commandBufferCount = 1,
+                                   .pCommandBuffers = &cmdBuff};
         ASSERT_EQ(k_vk->vkQueueSubmit(m_compositorVkQueue, 1, &submitInfo,
                                       VK_NULL_HANDLE),
                   VK_SUCCESS);

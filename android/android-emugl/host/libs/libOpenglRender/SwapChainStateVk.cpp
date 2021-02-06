@@ -19,20 +19,20 @@ SwapChainStateVk::SwapChainStateVk(const goldfish_vk::VulkanDispatch &vk,
     VK_CHECK(m_vk.vkGetSwapchainImagesKHR(m_vkDevice, m_vkSwapChain,
                                           &imageCount, m_vkImages.data()));
     for (auto i = 0; i < m_vkImages.size(); i++) {
-        VkImageViewCreateInfo imageViewCi = {};
-        imageViewCi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        imageViewCi.image = m_vkImages[i];
-        imageViewCi.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        imageViewCi.format = k_vkFormat;
-        imageViewCi.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCi.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCi.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCi.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCi.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        imageViewCi.subresourceRange.baseMipLevel = 0;
-        imageViewCi.subresourceRange.levelCount = 1;
-        imageViewCi.subresourceRange.baseArrayLayer = 0;
-        imageViewCi.subresourceRange.layerCount = 1;
+        VkImageViewCreateInfo imageViewCi = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .image = m_vkImages[i],
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .format = k_vkFormat,
+            .components = {.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                           .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                           .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                           .a = VK_COMPONENT_SWIZZLE_IDENTITY},
+            .subresourceRange = {.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                                 .baseMipLevel = 0,
+                                 .levelCount = 1,
+                                 .baseArrayLayer = 0,
+                                 .layerCount = 1}};
         VkImageView vkImageView;
         VK_CHECK(m_vk.vkCreateImageView(m_vkDevice, &imageViewCi, nullptr,
                                         &vkImageView));
@@ -133,24 +133,25 @@ SwapChainStateVk::createSwapChainCi(
         imageCount = surfaceCaps.maxImageCount;
     }
     VkSwapchainCreateInfoKHRPtr swapChainCi(
-        new VkSwapchainCreateInfoKHR({}), [](VkSwapchainCreateInfoKHR *p) {
+        new VkSwapchainCreateInfoKHR{
+            .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+            .surface = surface,
+            .minImageCount = imageCount,
+            .imageFormat = iSurfaceFormat->format,
+            .imageColorSpace = iSurfaceFormat->colorSpace,
+            .imageExtent = extent,
+            .imageArrayLayers = 1,
+            .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+            .preTransform = surfaceCaps.currentTransform,
+            .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+            .presentMode = *iPresentMode,
+            .clipped = VK_TRUE,
+            .oldSwapchain = VK_NULL_HANDLE},
+        [](VkSwapchainCreateInfoKHR *p) {
             if (p->pQueueFamilyIndices != nullptr) {
                 delete[] p->pQueueFamilyIndices;
             }
         });
-    swapChainCi->sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    swapChainCi->surface = surface;
-    swapChainCi->minImageCount = imageCount;
-    swapChainCi->imageFormat = iSurfaceFormat->format;
-    swapChainCi->imageColorSpace = iSurfaceFormat->colorSpace;
-    swapChainCi->imageExtent = extent;
-    swapChainCi->imageArrayLayers = 1;
-    swapChainCi->imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    swapChainCi->preTransform = surfaceCaps.currentTransform;
-    swapChainCi->compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    swapChainCi->presentMode = *iPresentMode;
-    swapChainCi->clipped = VK_TRUE;
-    swapChainCi->oldSwapchain = VK_NULL_HANDLE;
     if (queueFamilyIndices.empty()) {
         return nullptr;
     }

@@ -290,23 +290,22 @@ class RunSingleTimeCommand : public U {
         std::function<void(const VkCommandBuffer &commandBuffer)> f) const {
         const T &self = static_cast<const T &>(*this);
         VkCommandBuffer cmdBuff;
-        VkCommandBufferAllocateInfo cmdBuffAllocInfo = {};
-        cmdBuffAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        cmdBuffAllocInfo.commandPool = self.m_vkCommandPool;
-        cmdBuffAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        cmdBuffAllocInfo.commandBufferCount = 1;
+        VkCommandBufferAllocateInfo cmdBuffAllocInfo = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+            .commandPool = self.m_vkCommandPool,
+            .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+            .commandBufferCount = 1};
         VK_CHECK(self.m_vk.vkAllocateCommandBuffers(
             self.m_vkDevice, &cmdBuffAllocInfo, &cmdBuff));
-        VkCommandBufferBeginInfo beginInfo = {};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        VkCommandBufferBeginInfo beginInfo = {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+            .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT};
         VK_CHECK(self.m_vk.vkBeginCommandBuffer(cmdBuff, &beginInfo));
         f(cmdBuff);
         VK_CHECK(self.m_vk.vkEndCommandBuffer(cmdBuff));
-        VkSubmitInfo submitInfo = {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &cmdBuff;
+        VkSubmitInfo submitInfo = {.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+                                   .commandBufferCount = 1,
+                                   .pCommandBuffers = &cmdBuff};
         VK_CHECK(
             self.m_vk.vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
         VK_CHECK(self.m_vk.vkQueueWaitIdle(queue));
@@ -322,20 +321,20 @@ class RecordImageLayoutTransformCommands : public U {
                                             VkImageLayout oldLayout,
                                             VkImageLayout newLayout) const {
         const T &self = static_cast<const T &>(*this);
-        VkImageMemoryBarrier imageBarrier = {};
-        imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        imageBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
-        imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-        imageBarrier.oldLayout = oldLayout;
-        imageBarrier.newLayout = newLayout;
-        imageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        imageBarrier.image = image;
-        imageBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        imageBarrier.subresourceRange.baseMipLevel = 0;
-        imageBarrier.subresourceRange.levelCount = 1;
-        imageBarrier.subresourceRange.baseArrayLayer = 0;
-        imageBarrier.subresourceRange.layerCount = 1;
+        VkImageMemoryBarrier imageBarrier = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+            .oldLayout = oldLayout,
+            .newLayout = newLayout,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .image = image,
+            .subresourceRange{.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                              .baseMipLevel = 0,
+                              .levelCount = 1,
+                              .baseArrayLayer = 0,
+                              .layerCount = 1}};
         self.m_vk.vkCmdPipelineBarrier(cmdBuff,
                                        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
                                        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0,
