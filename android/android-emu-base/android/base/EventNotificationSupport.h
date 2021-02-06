@@ -26,10 +26,10 @@ namespace base {
 //
 // You basically specify an EventObject type, subclass from the support class
 // and simply call fireEvent when an event needs to be delivered.
-template <class Source, class EventObject>
+template <class EventObject>
 class EventNotificationSupport {
     using EventListener =
-            std::function<void(Source* src, const EventObject evt)>;
+            std::function<void(const EventObject evt)>;
 
 public:
     EventNotificationSupport() = default;
@@ -52,13 +52,9 @@ public:
 
 protected:
     void fireEvent(EventObject evt) {
-        fireEvent(static_cast<Source*>(this), evt);
-    }
-
-    void fireEvent(Source* src, EventObject evt) {
         std::lock_guard<std::mutex> lock(mStreamLock);
         for (const auto& listener : mListeners) {
-            (*listener)(src, evt);
+            (*listener)(evt);
         }
     }
 
@@ -73,9 +69,9 @@ template <class Source, class EventObject>
 class RaiiEventListener {
 public:
     using EventListener =
-            std::function<void(Source* src, const EventObject evt)>;
+            std::function<void(const EventObject evt)>;
 
-    RaiiEventListener(EventNotificationSupport<Source, EventObject>* src,
+    RaiiEventListener(Source* src,
                       EventListener listener)
         : mSource(src), mListener(std::move(listener)) {
         mSource->addListener(&mListener);
@@ -84,7 +80,7 @@ public:
     ~RaiiEventListener() { mSource->removeListener(&mListener); }
 
 private:
-    EventNotificationSupport<Source, EventObject>* mSource;
+    Source* mSource;
     EventListener mListener;
 };
 }  // namespace base

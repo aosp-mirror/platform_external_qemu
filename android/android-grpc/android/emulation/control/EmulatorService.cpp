@@ -1005,16 +1005,16 @@ public:
 
         // Register temporary listeners for multi display & camera changes.
         RaiiEventListener<Camera, bool> cameraListener(
-                mCamera, [&](auto camera, auto state) {
+                mCamera, [&](auto state) {
                     std::lock_guard<std::mutex> lock(notificationLock);
                     activeNotifications.push_back(getCameraNotificationEvent());
                     notifier.newEvent();
                 });
 
-        RaiiEventListener<android::MultiDisplay, android::DisplayChangeEvent>
+        RaiiEventListener<MultiDisplay, android::DisplayChangeEvent>
                 displayListener(
                         MultiDisplay::getInstance(),
-                        [&](auto multiDisplay, auto state) {
+                        [&](const android::DisplayChangeEvent state) {
                             if (state.change ==
                                 DisplayChange::DisplayTransactionCompleted) {
                                 Notification display;
