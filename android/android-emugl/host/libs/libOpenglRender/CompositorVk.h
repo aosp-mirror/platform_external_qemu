@@ -2,8 +2,6 @@
 #define COMPOSITOR_VK_H
 
 #include <array>
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/glm.hpp>
 #include <memory>
 #include <optional>

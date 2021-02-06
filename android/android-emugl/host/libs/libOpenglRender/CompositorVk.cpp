@@ -1,5 +1,7 @@
 #include "CompositorVk.h"
 
+#include <string.h>
+
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include <optional>
 
