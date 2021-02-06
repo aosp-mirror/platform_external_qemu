@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <unordered_map>
 
 #include "ColorBuffer.h"
 #include "CompositorVk.h"

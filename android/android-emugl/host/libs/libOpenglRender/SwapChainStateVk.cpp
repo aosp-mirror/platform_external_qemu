@@ -56,7 +56,7 @@ std::vector<const char *> SwapChainStateVk::getRequiredInstanceExtensions() {
 #ifdef __APPLE__
         VK_EXT_METAL_SURFACE_EXTENSION_NAME,
 #endif
-#ifdef __linux__
+#ifdef VK_USE_PLATFORM_XCB_KHR
         VK_KHR_XCB_SURFACE_EXTENSION_NAME,
 #endif
     };
