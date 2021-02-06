@@ -630,10 +630,11 @@ class OutputGenerator:
                 os.makedirs(path)
             self.madeDirs[path] = None
 
-    def beginFile(self, genOpts):
+    def beginFile(self, genOpts, suppress = False):
         """Start a new interface file
 
         - genOpts - GeneratorOptions controlling what's generated and how"""
+        self.suppress = suppress
         self.genOpts = genOpts
         self.should_insert_may_alias_macro = \
             self.genOpts.conventions.should_insert_may_alias_macro(self.genOpts)
@@ -652,7 +653,7 @@ class OutputGenerator:
         self.conventions = genOpts.conventions
 
         # Open a temporary file for accumulating output.
-        if self.genOpts.filename is not None:
+        if self.genOpts.filename is not None and not self.suppress:
             self.outFile = tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', newline='\n', delete=False)
         else:
             self.outFile = sys.stdout
