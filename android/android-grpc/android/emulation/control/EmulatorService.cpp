@@ -515,9 +515,6 @@ public:
     Status streamScreenshot(ServerContext* context,
                             const ImageFormat* request,
                             ServerWriter<Image>* writer) override {
-        EventWaiter frameEvent(&gpu_register_shared_memory_callback,
-                               &gpu_unregister_shared_memory_callback);
-
         SharedMemoryLibrary::LibraryEntry entry;
         if (request->transport().channel() == ImageTransport::MMAP) {
             entry = mSharedMemoryLibrary.borrow(
@@ -539,6 +536,29 @@ public:
         bool lastFrameWasEmpty = first.format().width() == 0;
         int frame = 0;
 
+        std::unique_ptr<EventWaiter> frameEvent;
+
+        std::unique_ptr<RaiiEventListener<emugl::Renderer,
+                                          emugl::FrameBufferChangeEvent>>
+                frameListener;
+        // Screenshots can come from either the gl renderer, or the guest.
+        const auto& renderer = android_getOpenglesRenderer();
+        if (renderer.get()) {
+            // Fast mode..
+            frameEvent = std::make_unique<EventWaiter>();
+            frameListener = std::make_unique<RaiiEventListener<
+                    emugl::Renderer, emugl::FrameBufferChangeEvent>>(
+                    renderer.get(),
+                    [&](const emugl::FrameBufferChangeEvent state) {
+                        frameEvent->newEvent();
+                    });
+        } else {
+            // slow mode, you are likely using older api..
+            LOG(VERBOSE) << "Reverting to slow callbacks";
+            frameEvent = std::make_unique<EventWaiter>(
+                    &gpu_register_shared_memory_callback,
+                    &gpu_unregister_shared_memory_callback);
+        }
         // Track percentiles, and report if we have seen at least 32 frames.
         metrics::Percentiles perfEstimator(32, {0.5, 0.95});
         while (clientAvailable) {
@@ -550,7 +570,7 @@ public:
             // interval. Since this is a synchronous call we want to wait at
             // most kTimeToWaitForFrame so we can check if the client is still
             // there. (All clients get disconnected on emulator shutdown).
-            auto arrived = frameEvent.next(kTimeToWaitForFrame);
+            auto arrived = frameEvent->next(kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
                 frame += arrived;
                 Stopwatch sw;
