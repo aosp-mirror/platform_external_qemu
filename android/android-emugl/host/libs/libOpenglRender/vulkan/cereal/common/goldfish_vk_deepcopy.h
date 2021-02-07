@@ -35,45 +35,125 @@ using android::base::BumpPool;
 namespace goldfish_vk {
 
 #ifdef VK_VERSION_1_0
-void deepcopy_VkApplicationInfo(
+void deepcopy_VkExtent2D(
     BumpPool* pool,
-    const VkApplicationInfo* from,
-    VkApplicationInfo* to);
-
-void deepcopy_VkInstanceCreateInfo(
-    BumpPool* pool,
-    const VkInstanceCreateInfo* from,
-    VkInstanceCreateInfo* to);
-
-void deepcopy_VkAllocationCallbacks(
-    BumpPool* pool,
-    const VkAllocationCallbacks* from,
-    VkAllocationCallbacks* to);
-
-void deepcopy_VkPhysicalDeviceFeatures(
-    BumpPool* pool,
-    const VkPhysicalDeviceFeatures* from,
-    VkPhysicalDeviceFeatures* to);
-
-void deepcopy_VkFormatProperties(
-    BumpPool* pool,
-    const VkFormatProperties* from,
-    VkFormatProperties* to);
+    const VkExtent2D* from,
+    VkExtent2D* to);
 
 void deepcopy_VkExtent3D(
     BumpPool* pool,
     const VkExtent3D* from,
     VkExtent3D* to);
 
+void deepcopy_VkOffset2D(
+    BumpPool* pool,
+    const VkOffset2D* from,
+    VkOffset2D* to);
+
+void deepcopy_VkOffset3D(
+    BumpPool* pool,
+    const VkOffset3D* from,
+    VkOffset3D* to);
+
+void deepcopy_VkRect2D(
+    BumpPool* pool,
+    const VkRect2D* from,
+    VkRect2D* to);
+
+void deepcopy_VkBaseInStructure(
+    BumpPool* pool,
+    const VkBaseInStructure* from,
+    VkBaseInStructure* to);
+
+void deepcopy_VkBaseOutStructure(
+    BumpPool* pool,
+    const VkBaseOutStructure* from,
+    VkBaseOutStructure* to);
+
+void deepcopy_VkBufferMemoryBarrier(
+    BumpPool* pool,
+    const VkBufferMemoryBarrier* from,
+    VkBufferMemoryBarrier* to);
+
+void deepcopy_VkDispatchIndirectCommand(
+    BumpPool* pool,
+    const VkDispatchIndirectCommand* from,
+    VkDispatchIndirectCommand* to);
+
+void deepcopy_VkDrawIndexedIndirectCommand(
+    BumpPool* pool,
+    const VkDrawIndexedIndirectCommand* from,
+    VkDrawIndexedIndirectCommand* to);
+
+void deepcopy_VkDrawIndirectCommand(
+    BumpPool* pool,
+    const VkDrawIndirectCommand* from,
+    VkDrawIndirectCommand* to);
+
+void deepcopy_VkImageSubresourceRange(
+    BumpPool* pool,
+    const VkImageSubresourceRange* from,
+    VkImageSubresourceRange* to);
+
+void deepcopy_VkImageMemoryBarrier(
+    BumpPool* pool,
+    const VkImageMemoryBarrier* from,
+    VkImageMemoryBarrier* to);
+
+void deepcopy_VkMemoryBarrier(
+    BumpPool* pool,
+    const VkMemoryBarrier* from,
+    VkMemoryBarrier* to);
+
+void deepcopy_VkAllocationCallbacks(
+    BumpPool* pool,
+    const VkAllocationCallbacks* from,
+    VkAllocationCallbacks* to);
+
+void deepcopy_VkApplicationInfo(
+    BumpPool* pool,
+    const VkApplicationInfo* from,
+    VkApplicationInfo* to);
+
+void deepcopy_VkFormatProperties(
+    BumpPool* pool,
+    const VkFormatProperties* from,
+    VkFormatProperties* to);
+
 void deepcopy_VkImageFormatProperties(
     BumpPool* pool,
     const VkImageFormatProperties* from,
     VkImageFormatProperties* to);
 
+void deepcopy_VkInstanceCreateInfo(
+    BumpPool* pool,
+    const VkInstanceCreateInfo* from,
+    VkInstanceCreateInfo* to);
+
+void deepcopy_VkMemoryHeap(
+    BumpPool* pool,
+    const VkMemoryHeap* from,
+    VkMemoryHeap* to);
+
+void deepcopy_VkMemoryType(
+    BumpPool* pool,
+    const VkMemoryType* from,
+    VkMemoryType* to);
+
+void deepcopy_VkPhysicalDeviceFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceFeatures* from,
+    VkPhysicalDeviceFeatures* to);
+
 void deepcopy_VkPhysicalDeviceLimits(
     BumpPool* pool,
     const VkPhysicalDeviceLimits* from,
     VkPhysicalDeviceLimits* to);
+
+void deepcopy_VkPhysicalDeviceMemoryProperties(
+    BumpPool* pool,
+    const VkPhysicalDeviceMemoryProperties* from,
+    VkPhysicalDeviceMemoryProperties* to);
 
 void deepcopy_VkPhysicalDeviceSparseProperties(
     BumpPool* pool,
@@ -89,21 +169,6 @@ void deepcopy_VkQueueFamilyProperties(
     BumpPool* pool,
     const VkQueueFamilyProperties* from,
     VkQueueFamilyProperties* to);
-
-void deepcopy_VkMemoryType(
-    BumpPool* pool,
-    const VkMemoryType* from,
-    VkMemoryType* to);
-
-void deepcopy_VkMemoryHeap(
-    BumpPool* pool,
-    const VkMemoryHeap* from,
-    VkMemoryHeap* to);
-
-void deepcopy_VkPhysicalDeviceMemoryProperties(
-    BumpPool* pool,
-    const VkPhysicalDeviceMemoryProperties* from,
-    VkPhysicalDeviceMemoryProperties* to);
 
 void deepcopy_VkDeviceQueueCreateInfo(
     BumpPool* pool,
@@ -130,30 +195,20 @@ void deepcopy_VkSubmitInfo(
     const VkSubmitInfo* from,
     VkSubmitInfo* to);
 
-void deepcopy_VkMemoryAllocateInfo(
-    BumpPool* pool,
-    const VkMemoryAllocateInfo* from,
-    VkMemoryAllocateInfo* to);
-
 void deepcopy_VkMappedMemoryRange(
     BumpPool* pool,
     const VkMappedMemoryRange* from,
     VkMappedMemoryRange* to);
 
+void deepcopy_VkMemoryAllocateInfo(
+    BumpPool* pool,
+    const VkMemoryAllocateInfo* from,
+    VkMemoryAllocateInfo* to);
+
 void deepcopy_VkMemoryRequirements(
     BumpPool* pool,
     const VkMemoryRequirements* from,
     VkMemoryRequirements* to);
-
-void deepcopy_VkSparseImageFormatProperties(
-    BumpPool* pool,
-    const VkSparseImageFormatProperties* from,
-    VkSparseImageFormatProperties* to);
-
-void deepcopy_VkSparseImageMemoryRequirements(
-    BumpPool* pool,
-    const VkSparseImageMemoryRequirements* from,
-    VkSparseImageMemoryRequirements* to);
 
 void deepcopy_VkSparseMemoryBind(
     BumpPool* pool,
@@ -175,11 +230,6 @@ void deepcopy_VkImageSubresource(
     const VkImageSubresource* from,
     VkImageSubresource* to);
 
-void deepcopy_VkOffset3D(
-    BumpPool* pool,
-    const VkOffset3D* from,
-    VkOffset3D* to);
-
 void deepcopy_VkSparseImageMemoryBind(
     BumpPool* pool,
     const VkSparseImageMemoryBind* from,
@@ -194,6 +244,16 @@ void deepcopy_VkBindSparseInfo(
     BumpPool* pool,
     const VkBindSparseInfo* from,
     VkBindSparseInfo* to);
+
+void deepcopy_VkSparseImageFormatProperties(
+    BumpPool* pool,
+    const VkSparseImageFormatProperties* from,
+    VkSparseImageFormatProperties* to);
+
+void deepcopy_VkSparseImageMemoryRequirements(
+    BumpPool* pool,
+    const VkSparseImageMemoryRequirements* from,
+    VkSparseImageMemoryRequirements* to);
 
 void deepcopy_VkFenceCreateInfo(
     BumpPool* pool,
@@ -240,11 +300,6 @@ void deepcopy_VkComponentMapping(
     const VkComponentMapping* from,
     VkComponentMapping* to);
 
-void deepcopy_VkImageSubresourceRange(
-    BumpPool* pool,
-    const VkImageSubresourceRange* from,
-    VkImageSubresourceRange* to);
-
 void deepcopy_VkImageViewCreateInfo(
     BumpPool* pool,
     const VkImageViewCreateInfo* from,
@@ -275,6 +330,11 @@ void deepcopy_VkPipelineShaderStageCreateInfo(
     const VkPipelineShaderStageCreateInfo* from,
     VkPipelineShaderStageCreateInfo* to);
 
+void deepcopy_VkComputePipelineCreateInfo(
+    BumpPool* pool,
+    const VkComputePipelineCreateInfo* from,
+    VkComputePipelineCreateInfo* to);
+
 void deepcopy_VkVertexInputBindingDescription(
     BumpPool* pool,
     const VkVertexInputBindingDescription* from,
@@ -304,21 +364,6 @@ void deepcopy_VkViewport(
     BumpPool* pool,
     const VkViewport* from,
     VkViewport* to);
-
-void deepcopy_VkOffset2D(
-    BumpPool* pool,
-    const VkOffset2D* from,
-    VkOffset2D* to);
-
-void deepcopy_VkExtent2D(
-    BumpPool* pool,
-    const VkExtent2D* from,
-    VkExtent2D* to);
-
-void deepcopy_VkRect2D(
-    BumpPool* pool,
-    const VkRect2D* from,
-    VkRect2D* to);
 
 void deepcopy_VkPipelineViewportStateCreateInfo(
     BumpPool* pool,
@@ -365,11 +410,6 @@ void deepcopy_VkGraphicsPipelineCreateInfo(
     const VkGraphicsPipelineCreateInfo* from,
     VkGraphicsPipelineCreateInfo* to);
 
-void deepcopy_VkComputePipelineCreateInfo(
-    BumpPool* pool,
-    const VkComputePipelineCreateInfo* from,
-    VkComputePipelineCreateInfo* to);
-
 void deepcopy_VkPushConstantRange(
     BumpPool* pool,
     const VkPushConstantRange* from,
@@ -385,15 +425,20 @@ void deepcopy_VkSamplerCreateInfo(
     const VkSamplerCreateInfo* from,
     VkSamplerCreateInfo* to);
 
-void deepcopy_VkDescriptorSetLayoutBinding(
+void deepcopy_VkCopyDescriptorSet(
     BumpPool* pool,
-    const VkDescriptorSetLayoutBinding* from,
-    VkDescriptorSetLayoutBinding* to);
+    const VkCopyDescriptorSet* from,
+    VkCopyDescriptorSet* to);
 
-void deepcopy_VkDescriptorSetLayoutCreateInfo(
+void deepcopy_VkDescriptorBufferInfo(
     BumpPool* pool,
-    const VkDescriptorSetLayoutCreateInfo* from,
-    VkDescriptorSetLayoutCreateInfo* to);
+    const VkDescriptorBufferInfo* from,
+    VkDescriptorBufferInfo* to);
+
+void deepcopy_VkDescriptorImageInfo(
+    BumpPool* pool,
+    const VkDescriptorImageInfo* from,
+    VkDescriptorImageInfo* to);
 
 void deepcopy_VkDescriptorPoolSize(
     BumpPool* pool,
@@ -410,30 +455,20 @@ void deepcopy_VkDescriptorSetAllocateInfo(
     const VkDescriptorSetAllocateInfo* from,
     VkDescriptorSetAllocateInfo* to);
 
-void deepcopy_VkDescriptorImageInfo(
+void deepcopy_VkDescriptorSetLayoutBinding(
     BumpPool* pool,
-    const VkDescriptorImageInfo* from,
-    VkDescriptorImageInfo* to);
+    const VkDescriptorSetLayoutBinding* from,
+    VkDescriptorSetLayoutBinding* to);
 
-void deepcopy_VkDescriptorBufferInfo(
+void deepcopy_VkDescriptorSetLayoutCreateInfo(
     BumpPool* pool,
-    const VkDescriptorBufferInfo* from,
-    VkDescriptorBufferInfo* to);
+    const VkDescriptorSetLayoutCreateInfo* from,
+    VkDescriptorSetLayoutCreateInfo* to);
 
 void deepcopy_VkWriteDescriptorSet(
     BumpPool* pool,
     const VkWriteDescriptorSet* from,
     VkWriteDescriptorSet* to);
-
-void deepcopy_VkCopyDescriptorSet(
-    BumpPool* pool,
-    const VkCopyDescriptorSet* from,
-    VkCopyDescriptorSet* to);
-
-void deepcopy_VkFramebufferCreateInfo(
-    BumpPool* pool,
-    const VkFramebufferCreateInfo* from,
-    VkFramebufferCreateInfo* to);
 
 void deepcopy_VkAttachmentDescription(
     BumpPool* pool,
@@ -444,6 +479,11 @@ void deepcopy_VkAttachmentReference(
     BumpPool* pool,
     const VkAttachmentReference* from,
     VkAttachmentReference* to);
+
+void deepcopy_VkFramebufferCreateInfo(
+    BumpPool* pool,
+    const VkFramebufferCreateInfo* from,
+    VkFramebufferCreateInfo* to);
 
 void deepcopy_VkSubpassDescription(
     BumpPool* pool,
@@ -490,16 +530,6 @@ void deepcopy_VkImageSubresourceLayers(
     const VkImageSubresourceLayers* from,
     VkImageSubresourceLayers* to);
 
-void deepcopy_VkImageCopy(
-    BumpPool* pool,
-    const VkImageCopy* from,
-    VkImageCopy* to);
-
-void deepcopy_VkImageBlit(
-    BumpPool* pool,
-    const VkImageBlit* from,
-    VkImageBlit* to);
-
 void deepcopy_VkBufferImageCopy(
     BumpPool* pool,
     const VkBufferImageCopy* from,
@@ -530,55 +560,25 @@ void deepcopy_VkClearRect(
     const VkClearRect* from,
     VkClearRect* to);
 
+void deepcopy_VkImageBlit(
+    BumpPool* pool,
+    const VkImageBlit* from,
+    VkImageBlit* to);
+
+void deepcopy_VkImageCopy(
+    BumpPool* pool,
+    const VkImageCopy* from,
+    VkImageCopy* to);
+
 void deepcopy_VkImageResolve(
     BumpPool* pool,
     const VkImageResolve* from,
     VkImageResolve* to);
 
-void deepcopy_VkMemoryBarrier(
-    BumpPool* pool,
-    const VkMemoryBarrier* from,
-    VkMemoryBarrier* to);
-
-void deepcopy_VkBufferMemoryBarrier(
-    BumpPool* pool,
-    const VkBufferMemoryBarrier* from,
-    VkBufferMemoryBarrier* to);
-
-void deepcopy_VkImageMemoryBarrier(
-    BumpPool* pool,
-    const VkImageMemoryBarrier* from,
-    VkImageMemoryBarrier* to);
-
 void deepcopy_VkRenderPassBeginInfo(
     BumpPool* pool,
     const VkRenderPassBeginInfo* from,
     VkRenderPassBeginInfo* to);
-
-void deepcopy_VkDispatchIndirectCommand(
-    BumpPool* pool,
-    const VkDispatchIndirectCommand* from,
-    VkDispatchIndirectCommand* to);
-
-void deepcopy_VkDrawIndexedIndirectCommand(
-    BumpPool* pool,
-    const VkDrawIndexedIndirectCommand* from,
-    VkDrawIndexedIndirectCommand* to);
-
-void deepcopy_VkDrawIndirectCommand(
-    BumpPool* pool,
-    const VkDrawIndirectCommand* from,
-    VkDrawIndirectCommand* to);
-
-void deepcopy_VkBaseOutStructure(
-    BumpPool* pool,
-    const VkBaseOutStructure* from,
-    VkBaseOutStructure* to);
-
-void deepcopy_VkBaseInStructure(
-    BumpPool* pool,
-    const VkBaseInStructure* from,
-    VkBaseInStructure* to);
 
 #endif
 #ifdef VK_VERSION_1_1
@@ -767,10 +767,10 @@ void deepcopy_VkPhysicalDeviceMultiviewProperties(
     const VkPhysicalDeviceMultiviewProperties* from,
     VkPhysicalDeviceMultiviewProperties* to);
 
-void deepcopy_VkPhysicalDeviceVariablePointerFeatures(
+void deepcopy_VkPhysicalDeviceVariablePointersFeatures(
     BumpPool* pool,
-    const VkPhysicalDeviceVariablePointerFeatures* from,
-    VkPhysicalDeviceVariablePointerFeatures* to);
+    const VkPhysicalDeviceVariablePointersFeatures* from,
+    VkPhysicalDeviceVariablePointersFeatures* to);
 
 void deepcopy_VkPhysicalDeviceProtectedMemoryFeatures(
     BumpPool* pool,
@@ -917,10 +917,267 @@ void deepcopy_VkDescriptorSetLayoutSupport(
     const VkDescriptorSetLayoutSupport* from,
     VkDescriptorSetLayoutSupport* to);
 
-void deepcopy_VkPhysicalDeviceShaderDrawParameterFeatures(
+void deepcopy_VkPhysicalDeviceShaderDrawParametersFeatures(
     BumpPool* pool,
-    const VkPhysicalDeviceShaderDrawParameterFeatures* from,
-    VkPhysicalDeviceShaderDrawParameterFeatures* to);
+    const VkPhysicalDeviceShaderDrawParametersFeatures* from,
+    VkPhysicalDeviceShaderDrawParametersFeatures* to);
+
+#endif
+#ifdef VK_VERSION_1_2
+void deepcopy_VkPhysicalDeviceVulkan11Features(
+    BumpPool* pool,
+    const VkPhysicalDeviceVulkan11Features* from,
+    VkPhysicalDeviceVulkan11Features* to);
+
+void deepcopy_VkPhysicalDeviceVulkan11Properties(
+    BumpPool* pool,
+    const VkPhysicalDeviceVulkan11Properties* from,
+    VkPhysicalDeviceVulkan11Properties* to);
+
+void deepcopy_VkPhysicalDeviceVulkan12Features(
+    BumpPool* pool,
+    const VkPhysicalDeviceVulkan12Features* from,
+    VkPhysicalDeviceVulkan12Features* to);
+
+void deepcopy_VkConformanceVersion(
+    BumpPool* pool,
+    const VkConformanceVersion* from,
+    VkConformanceVersion* to);
+
+void deepcopy_VkPhysicalDeviceVulkan12Properties(
+    BumpPool* pool,
+    const VkPhysicalDeviceVulkan12Properties* from,
+    VkPhysicalDeviceVulkan12Properties* to);
+
+void deepcopy_VkImageFormatListCreateInfo(
+    BumpPool* pool,
+    const VkImageFormatListCreateInfo* from,
+    VkImageFormatListCreateInfo* to);
+
+void deepcopy_VkAttachmentDescription2(
+    BumpPool* pool,
+    const VkAttachmentDescription2* from,
+    VkAttachmentDescription2* to);
+
+void deepcopy_VkAttachmentReference2(
+    BumpPool* pool,
+    const VkAttachmentReference2* from,
+    VkAttachmentReference2* to);
+
+void deepcopy_VkSubpassDescription2(
+    BumpPool* pool,
+    const VkSubpassDescription2* from,
+    VkSubpassDescription2* to);
+
+void deepcopy_VkSubpassDependency2(
+    BumpPool* pool,
+    const VkSubpassDependency2* from,
+    VkSubpassDependency2* to);
+
+void deepcopy_VkRenderPassCreateInfo2(
+    BumpPool* pool,
+    const VkRenderPassCreateInfo2* from,
+    VkRenderPassCreateInfo2* to);
+
+void deepcopy_VkSubpassBeginInfo(
+    BumpPool* pool,
+    const VkSubpassBeginInfo* from,
+    VkSubpassBeginInfo* to);
+
+void deepcopy_VkSubpassEndInfo(
+    BumpPool* pool,
+    const VkSubpassEndInfo* from,
+    VkSubpassEndInfo* to);
+
+void deepcopy_VkPhysicalDevice8BitStorageFeatures(
+    BumpPool* pool,
+    const VkPhysicalDevice8BitStorageFeatures* from,
+    VkPhysicalDevice8BitStorageFeatures* to);
+
+void deepcopy_VkPhysicalDeviceDriverProperties(
+    BumpPool* pool,
+    const VkPhysicalDeviceDriverProperties* from,
+    VkPhysicalDeviceDriverProperties* to);
+
+void deepcopy_VkPhysicalDeviceShaderAtomicInt64Features(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderAtomicInt64Features* from,
+    VkPhysicalDeviceShaderAtomicInt64Features* to);
+
+void deepcopy_VkPhysicalDeviceShaderFloat16Int8Features(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderFloat16Int8Features* from,
+    VkPhysicalDeviceShaderFloat16Int8Features* to);
+
+void deepcopy_VkPhysicalDeviceFloatControlsProperties(
+    BumpPool* pool,
+    const VkPhysicalDeviceFloatControlsProperties* from,
+    VkPhysicalDeviceFloatControlsProperties* to);
+
+void deepcopy_VkDescriptorSetLayoutBindingFlagsCreateInfo(
+    BumpPool* pool,
+    const VkDescriptorSetLayoutBindingFlagsCreateInfo* from,
+    VkDescriptorSetLayoutBindingFlagsCreateInfo* to);
+
+void deepcopy_VkPhysicalDeviceDescriptorIndexingFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceDescriptorIndexingFeatures* from,
+    VkPhysicalDeviceDescriptorIndexingFeatures* to);
+
+void deepcopy_VkPhysicalDeviceDescriptorIndexingProperties(
+    BumpPool* pool,
+    const VkPhysicalDeviceDescriptorIndexingProperties* from,
+    VkPhysicalDeviceDescriptorIndexingProperties* to);
+
+void deepcopy_VkDescriptorSetVariableDescriptorCountAllocateInfo(
+    BumpPool* pool,
+    const VkDescriptorSetVariableDescriptorCountAllocateInfo* from,
+    VkDescriptorSetVariableDescriptorCountAllocateInfo* to);
+
+void deepcopy_VkDescriptorSetVariableDescriptorCountLayoutSupport(
+    BumpPool* pool,
+    const VkDescriptorSetVariableDescriptorCountLayoutSupport* from,
+    VkDescriptorSetVariableDescriptorCountLayoutSupport* to);
+
+void deepcopy_VkSubpassDescriptionDepthStencilResolve(
+    BumpPool* pool,
+    const VkSubpassDescriptionDepthStencilResolve* from,
+    VkSubpassDescriptionDepthStencilResolve* to);
+
+void deepcopy_VkPhysicalDeviceDepthStencilResolveProperties(
+    BumpPool* pool,
+    const VkPhysicalDeviceDepthStencilResolveProperties* from,
+    VkPhysicalDeviceDepthStencilResolveProperties* to);
+
+void deepcopy_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceScalarBlockLayoutFeatures* from,
+    VkPhysicalDeviceScalarBlockLayoutFeatures* to);
+
+void deepcopy_VkImageStencilUsageCreateInfo(
+    BumpPool* pool,
+    const VkImageStencilUsageCreateInfo* from,
+    VkImageStencilUsageCreateInfo* to);
+
+void deepcopy_VkSamplerReductionModeCreateInfo(
+    BumpPool* pool,
+    const VkSamplerReductionModeCreateInfo* from,
+    VkSamplerReductionModeCreateInfo* to);
+
+void deepcopy_VkPhysicalDeviceSamplerFilterMinmaxProperties(
+    BumpPool* pool,
+    const VkPhysicalDeviceSamplerFilterMinmaxProperties* from,
+    VkPhysicalDeviceSamplerFilterMinmaxProperties* to);
+
+void deepcopy_VkPhysicalDeviceVulkanMemoryModelFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceVulkanMemoryModelFeatures* from,
+    VkPhysicalDeviceVulkanMemoryModelFeatures* to);
+
+void deepcopy_VkPhysicalDeviceImagelessFramebufferFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceImagelessFramebufferFeatures* from,
+    VkPhysicalDeviceImagelessFramebufferFeatures* to);
+
+void deepcopy_VkFramebufferAttachmentImageInfo(
+    BumpPool* pool,
+    const VkFramebufferAttachmentImageInfo* from,
+    VkFramebufferAttachmentImageInfo* to);
+
+void deepcopy_VkFramebufferAttachmentsCreateInfo(
+    BumpPool* pool,
+    const VkFramebufferAttachmentsCreateInfo* from,
+    VkFramebufferAttachmentsCreateInfo* to);
+
+void deepcopy_VkRenderPassAttachmentBeginInfo(
+    BumpPool* pool,
+    const VkRenderPassAttachmentBeginInfo* from,
+    VkRenderPassAttachmentBeginInfo* to);
+
+void deepcopy_VkPhysicalDeviceUniformBufferStandardLayoutFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceUniformBufferStandardLayoutFeatures* from,
+    VkPhysicalDeviceUniformBufferStandardLayoutFeatures* to);
+
+void deepcopy_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures* from,
+    VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures* to);
+
+void deepcopy_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures* from,
+    VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures* to);
+
+void deepcopy_VkAttachmentReferenceStencilLayout(
+    BumpPool* pool,
+    const VkAttachmentReferenceStencilLayout* from,
+    VkAttachmentReferenceStencilLayout* to);
+
+void deepcopy_VkAttachmentDescriptionStencilLayout(
+    BumpPool* pool,
+    const VkAttachmentDescriptionStencilLayout* from,
+    VkAttachmentDescriptionStencilLayout* to);
+
+void deepcopy_VkPhysicalDeviceHostQueryResetFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceHostQueryResetFeatures* from,
+    VkPhysicalDeviceHostQueryResetFeatures* to);
+
+void deepcopy_VkPhysicalDeviceTimelineSemaphoreFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceTimelineSemaphoreFeatures* from,
+    VkPhysicalDeviceTimelineSemaphoreFeatures* to);
+
+void deepcopy_VkPhysicalDeviceTimelineSemaphoreProperties(
+    BumpPool* pool,
+    const VkPhysicalDeviceTimelineSemaphoreProperties* from,
+    VkPhysicalDeviceTimelineSemaphoreProperties* to);
+
+void deepcopy_VkSemaphoreTypeCreateInfo(
+    BumpPool* pool,
+    const VkSemaphoreTypeCreateInfo* from,
+    VkSemaphoreTypeCreateInfo* to);
+
+void deepcopy_VkTimelineSemaphoreSubmitInfo(
+    BumpPool* pool,
+    const VkTimelineSemaphoreSubmitInfo* from,
+    VkTimelineSemaphoreSubmitInfo* to);
+
+void deepcopy_VkSemaphoreWaitInfo(
+    BumpPool* pool,
+    const VkSemaphoreWaitInfo* from,
+    VkSemaphoreWaitInfo* to);
+
+void deepcopy_VkSemaphoreSignalInfo(
+    BumpPool* pool,
+    const VkSemaphoreSignalInfo* from,
+    VkSemaphoreSignalInfo* to);
+
+void deepcopy_VkPhysicalDeviceBufferDeviceAddressFeatures(
+    BumpPool* pool,
+    const VkPhysicalDeviceBufferDeviceAddressFeatures* from,
+    VkPhysicalDeviceBufferDeviceAddressFeatures* to);
+
+void deepcopy_VkBufferDeviceAddressInfo(
+    BumpPool* pool,
+    const VkBufferDeviceAddressInfo* from,
+    VkBufferDeviceAddressInfo* to);
+
+void deepcopy_VkBufferOpaqueCaptureAddressCreateInfo(
+    BumpPool* pool,
+    const VkBufferOpaqueCaptureAddressCreateInfo* from,
+    VkBufferOpaqueCaptureAddressCreateInfo* to);
+
+void deepcopy_VkMemoryOpaqueCaptureAddressAllocateInfo(
+    BumpPool* pool,
+    const VkMemoryOpaqueCaptureAddressAllocateInfo* from,
+    VkMemoryOpaqueCaptureAddressAllocateInfo* to);
+
+void deepcopy_VkDeviceMemoryOpaqueCaptureAddressInfo(
+    BumpPool* pool,
+    const VkDeviceMemoryOpaqueCaptureAddressInfo* from,
+    VkDeviceMemoryOpaqueCaptureAddressInfo* to);
 
 #endif
 #ifdef VK_KHR_surface
@@ -978,25 +1235,20 @@ void deepcopy_VkDeviceGroupSwapchainCreateInfoKHR(
 
 #endif
 #ifdef VK_KHR_display
-void deepcopy_VkDisplayPropertiesKHR(
-    BumpPool* pool,
-    const VkDisplayPropertiesKHR* from,
-    VkDisplayPropertiesKHR* to);
-
 void deepcopy_VkDisplayModeParametersKHR(
     BumpPool* pool,
     const VkDisplayModeParametersKHR* from,
     VkDisplayModeParametersKHR* to);
 
-void deepcopy_VkDisplayModePropertiesKHR(
-    BumpPool* pool,
-    const VkDisplayModePropertiesKHR* from,
-    VkDisplayModePropertiesKHR* to);
-
 void deepcopy_VkDisplayModeCreateInfoKHR(
     BumpPool* pool,
     const VkDisplayModeCreateInfoKHR* from,
     VkDisplayModeCreateInfoKHR* to);
+
+void deepcopy_VkDisplayModePropertiesKHR(
+    BumpPool* pool,
+    const VkDisplayModePropertiesKHR* from,
+    VkDisplayModePropertiesKHR* to);
 
 void deepcopy_VkDisplayPlaneCapabilitiesKHR(
     BumpPool* pool,
@@ -1007,6 +1259,11 @@ void deepcopy_VkDisplayPlanePropertiesKHR(
     BumpPool* pool,
     const VkDisplayPlanePropertiesKHR* from,
     VkDisplayPlanePropertiesKHR* to);
+
+void deepcopy_VkDisplayPropertiesKHR(
+    BumpPool* pool,
+    const VkDisplayPropertiesKHR* from,
+    VkDisplayPropertiesKHR* to);
 
 void deepcopy_VkDisplaySurfaceCreateInfoKHR(
     BumpPool* pool,
@@ -1040,13 +1297,6 @@ void deepcopy_VkWaylandSurfaceCreateInfoKHR(
     BumpPool* pool,
     const VkWaylandSurfaceCreateInfoKHR* from,
     VkWaylandSurfaceCreateInfoKHR* to);
-
-#endif
-#ifdef VK_KHR_mir_surface
-void deepcopy_VkMirSurfaceCreateInfoKHR(
-    BumpPool* pool,
-    const VkMirSurfaceCreateInfoKHR* from,
-    VkMirSurfaceCreateInfoKHR* to);
 
 #endif
 #ifdef VK_KHR_android_surface
@@ -1172,6 +1422,8 @@ void deepcopy_VkPhysicalDevicePushDescriptorPropertiesKHR(
     VkPhysicalDevicePushDescriptorPropertiesKHR* to);
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+#endif
 #ifdef VK_KHR_16bit_storage
 #endif
 #ifdef VK_KHR_incremental_present
@@ -1193,42 +1445,9 @@ void deepcopy_VkPresentRegionsKHR(
 #endif
 #ifdef VK_KHR_descriptor_update_template
 #endif
+#ifdef VK_KHR_imageless_framebuffer
+#endif
 #ifdef VK_KHR_create_renderpass2
-void deepcopy_VkAttachmentDescription2KHR(
-    BumpPool* pool,
-    const VkAttachmentDescription2KHR* from,
-    VkAttachmentDescription2KHR* to);
-
-void deepcopy_VkAttachmentReference2KHR(
-    BumpPool* pool,
-    const VkAttachmentReference2KHR* from,
-    VkAttachmentReference2KHR* to);
-
-void deepcopy_VkSubpassDescription2KHR(
-    BumpPool* pool,
-    const VkSubpassDescription2KHR* from,
-    VkSubpassDescription2KHR* to);
-
-void deepcopy_VkSubpassDependency2KHR(
-    BumpPool* pool,
-    const VkSubpassDependency2KHR* from,
-    VkSubpassDependency2KHR* to);
-
-void deepcopy_VkRenderPassCreateInfo2KHR(
-    BumpPool* pool,
-    const VkRenderPassCreateInfo2KHR* from,
-    VkRenderPassCreateInfo2KHR* to);
-
-void deepcopy_VkSubpassBeginInfoKHR(
-    BumpPool* pool,
-    const VkSubpassBeginInfoKHR* from,
-    VkSubpassBeginInfoKHR* to);
-
-void deepcopy_VkSubpassEndInfoKHR(
-    BumpPool* pool,
-    const VkSubpassEndInfoKHR* from,
-    VkSubpassEndInfoKHR* to);
-
 #endif
 #ifdef VK_KHR_shared_presentable_image
 void deepcopy_VkSharedPresentSurfaceCapabilitiesKHR(
@@ -1268,6 +1487,48 @@ void deepcopy_VkFenceGetFdInfoKHR(
     BumpPool* pool,
     const VkFenceGetFdInfoKHR* from,
     VkFenceGetFdInfoKHR* to);
+
+#endif
+#ifdef VK_KHR_performance_query
+void deepcopy_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    BumpPool* pool,
+    const VkPhysicalDevicePerformanceQueryFeaturesKHR* from,
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* to);
+
+void deepcopy_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    BumpPool* pool,
+    const VkPhysicalDevicePerformanceQueryPropertiesKHR* from,
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* to);
+
+void deepcopy_VkPerformanceCounterKHR(
+    BumpPool* pool,
+    const VkPerformanceCounterKHR* from,
+    VkPerformanceCounterKHR* to);
+
+void deepcopy_VkPerformanceCounterDescriptionKHR(
+    BumpPool* pool,
+    const VkPerformanceCounterDescriptionKHR* from,
+    VkPerformanceCounterDescriptionKHR* to);
+
+void deepcopy_VkQueryPoolPerformanceCreateInfoKHR(
+    BumpPool* pool,
+    const VkQueryPoolPerformanceCreateInfoKHR* from,
+    VkQueryPoolPerformanceCreateInfoKHR* to);
+
+void deepcopy_VkPerformanceCounterResultKHR(
+    BumpPool* pool,
+    const VkPerformanceCounterResultKHR* from,
+    VkPerformanceCounterResultKHR* to);
+
+void deepcopy_VkAcquireProfilingLockInfoKHR(
+    BumpPool* pool,
+    const VkAcquireProfilingLockInfoKHR* from,
+    VkAcquireProfilingLockInfoKHR* to);
+
+void deepcopy_VkPerformanceQuerySubmitInfoKHR(
+    BumpPool* pool,
+    const VkPerformanceQuerySubmitInfoKHR* from,
+    VkPerformanceQuerySubmitInfoKHR* to);
 
 #endif
 #ifdef VK_KHR_maintenance2
@@ -1327,32 +1588,204 @@ void deepcopy_VkDisplayPlaneCapabilities2KHR(
 #ifdef VK_KHR_get_memory_requirements2
 #endif
 #ifdef VK_KHR_image_format_list
-void deepcopy_VkImageFormatListCreateInfoKHR(
-    BumpPool* pool,
-    const VkImageFormatListCreateInfoKHR* from,
-    VkImageFormatListCreateInfoKHR* to);
-
 #endif
 #ifdef VK_KHR_sampler_ycbcr_conversion
 #endif
 #ifdef VK_KHR_bind_memory2
 #endif
+#ifdef VK_KHR_portability_subset
+void deepcopy_VkPhysicalDevicePortabilitySubsetFeaturesKHR(
+    BumpPool* pool,
+    const VkPhysicalDevicePortabilitySubsetFeaturesKHR* from,
+    VkPhysicalDevicePortabilitySubsetFeaturesKHR* to);
+
+void deepcopy_VkPhysicalDevicePortabilitySubsetPropertiesKHR(
+    BumpPool* pool,
+    const VkPhysicalDevicePortabilitySubsetPropertiesKHR* from,
+    VkPhysicalDevicePortabilitySubsetPropertiesKHR* to);
+
+#endif
 #ifdef VK_KHR_maintenance3
 #endif
 #ifdef VK_KHR_draw_indirect_count
 #endif
+#ifdef VK_KHR_shader_subgroup_extended_types
+#endif
 #ifdef VK_KHR_8bit_storage
-void deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR(
+#endif
+#ifdef VK_KHR_shader_atomic_int64
+#endif
+#ifdef VK_KHR_shader_clock
+void deepcopy_VkPhysicalDeviceShaderClockFeaturesKHR(
     BumpPool* pool,
-    const VkPhysicalDevice8BitStorageFeaturesKHR* from,
-    VkPhysicalDevice8BitStorageFeaturesKHR* to);
+    const VkPhysicalDeviceShaderClockFeaturesKHR* from,
+    VkPhysicalDeviceShaderClockFeaturesKHR* to);
 
 #endif
-#ifdef VK_KHR_shader_float16_int8
-void deepcopy_VkPhysicalDeviceShaderFloat16Int8Features(
+#ifdef VK_KHR_driver_properties
+#endif
+#ifdef VK_KHR_shader_float_controls
+#endif
+#ifdef VK_KHR_depth_stencil_resolve
+#endif
+#ifdef VK_KHR_swapchain_mutable_format
+#endif
+#ifdef VK_KHR_timeline_semaphore
+#endif
+#ifdef VK_KHR_vulkan_memory_model
+#endif
+#ifdef VK_KHR_shader_terminate_invocation
+void deepcopy_VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR(
     BumpPool* pool,
-    const VkPhysicalDeviceShaderFloat16Int8Features* from,
-    VkPhysicalDeviceShaderFloat16Int8Features* to);
+    const VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR* from,
+    VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR* to);
+
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+void deepcopy_VkFragmentShadingRateAttachmentInfoKHR(
+    BumpPool* pool,
+    const VkFragmentShadingRateAttachmentInfoKHR* from,
+    VkFragmentShadingRateAttachmentInfoKHR* to);
+
+void deepcopy_VkPipelineFragmentShadingRateStateCreateInfoKHR(
+    BumpPool* pool,
+    const VkPipelineFragmentShadingRateStateCreateInfoKHR* from,
+    VkPipelineFragmentShadingRateStateCreateInfoKHR* to);
+
+void deepcopy_VkPhysicalDeviceFragmentShadingRateFeaturesKHR(
+    BumpPool* pool,
+    const VkPhysicalDeviceFragmentShadingRateFeaturesKHR* from,
+    VkPhysicalDeviceFragmentShadingRateFeaturesKHR* to);
+
+void deepcopy_VkPhysicalDeviceFragmentShadingRatePropertiesKHR(
+    BumpPool* pool,
+    const VkPhysicalDeviceFragmentShadingRatePropertiesKHR* from,
+    VkPhysicalDeviceFragmentShadingRatePropertiesKHR* to);
+
+void deepcopy_VkPhysicalDeviceFragmentShadingRateKHR(
+    BumpPool* pool,
+    const VkPhysicalDeviceFragmentShadingRateKHR* from,
+    VkPhysicalDeviceFragmentShadingRateKHR* to);
+
+#endif
+#ifdef VK_KHR_spirv_1_4
+#endif
+#ifdef VK_KHR_surface_protected_capabilities
+void deepcopy_VkSurfaceProtectedCapabilitiesKHR(
+    BumpPool* pool,
+    const VkSurfaceProtectedCapabilitiesKHR* from,
+    VkSurfaceProtectedCapabilitiesKHR* to);
+
+#endif
+#ifdef VK_KHR_separate_depth_stencil_layouts
+#endif
+#ifdef VK_KHR_uniform_buffer_standard_layout
+#endif
+#ifdef VK_KHR_buffer_device_address
+#endif
+#ifdef VK_KHR_deferred_host_operations
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+void deepcopy_VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR(
+    BumpPool* pool,
+    const VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR* from,
+    VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR* to);
+
+void deepcopy_VkPipelineInfoKHR(
+    BumpPool* pool,
+    const VkPipelineInfoKHR* from,
+    VkPipelineInfoKHR* to);
+
+void deepcopy_VkPipelineExecutablePropertiesKHR(
+    BumpPool* pool,
+    const VkPipelineExecutablePropertiesKHR* from,
+    VkPipelineExecutablePropertiesKHR* to);
+
+void deepcopy_VkPipelineExecutableInfoKHR(
+    BumpPool* pool,
+    const VkPipelineExecutableInfoKHR* from,
+    VkPipelineExecutableInfoKHR* to);
+
+void deepcopy_VkPipelineExecutableStatisticValueKHR(
+    BumpPool* pool,
+    const VkPipelineExecutableStatisticValueKHR* from,
+    VkPipelineExecutableStatisticValueKHR* to);
+
+void deepcopy_VkPipelineExecutableStatisticKHR(
+    BumpPool* pool,
+    const VkPipelineExecutableStatisticKHR* from,
+    VkPipelineExecutableStatisticKHR* to);
+
+void deepcopy_VkPipelineExecutableInternalRepresentationKHR(
+    BumpPool* pool,
+    const VkPipelineExecutableInternalRepresentationKHR* from,
+    VkPipelineExecutableInternalRepresentationKHR* to);
+
+#endif
+#ifdef VK_KHR_pipeline_library
+void deepcopy_VkPipelineLibraryCreateInfoKHR(
+    BumpPool* pool,
+    const VkPipelineLibraryCreateInfoKHR* from,
+    VkPipelineLibraryCreateInfoKHR* to);
+
+#endif
+#ifdef VK_KHR_shader_non_semantic_info
+#endif
+#ifdef VK_KHR_copy_commands2
+void deepcopy_VkBufferCopy2KHR(
+    BumpPool* pool,
+    const VkBufferCopy2KHR* from,
+    VkBufferCopy2KHR* to);
+
+void deepcopy_VkCopyBufferInfo2KHR(
+    BumpPool* pool,
+    const VkCopyBufferInfo2KHR* from,
+    VkCopyBufferInfo2KHR* to);
+
+void deepcopy_VkImageCopy2KHR(
+    BumpPool* pool,
+    const VkImageCopy2KHR* from,
+    VkImageCopy2KHR* to);
+
+void deepcopy_VkCopyImageInfo2KHR(
+    BumpPool* pool,
+    const VkCopyImageInfo2KHR* from,
+    VkCopyImageInfo2KHR* to);
+
+void deepcopy_VkBufferImageCopy2KHR(
+    BumpPool* pool,
+    const VkBufferImageCopy2KHR* from,
+    VkBufferImageCopy2KHR* to);
+
+void deepcopy_VkCopyBufferToImageInfo2KHR(
+    BumpPool* pool,
+    const VkCopyBufferToImageInfo2KHR* from,
+    VkCopyBufferToImageInfo2KHR* to);
+
+void deepcopy_VkCopyImageToBufferInfo2KHR(
+    BumpPool* pool,
+    const VkCopyImageToBufferInfo2KHR* from,
+    VkCopyImageToBufferInfo2KHR* to);
+
+void deepcopy_VkImageBlit2KHR(
+    BumpPool* pool,
+    const VkImageBlit2KHR* from,
+    VkImageBlit2KHR* to);
+
+void deepcopy_VkBlitImageInfo2KHR(
+    BumpPool* pool,
+    const VkBlitImageInfo2KHR* from,
+    VkBlitImageInfo2KHR* to);
+
+void deepcopy_VkImageResolve2KHR(
+    BumpPool* pool,
+    const VkImageResolve2KHR* from,
+    VkImageResolve2KHR* to);
+
+void deepcopy_VkResolveImageInfo2KHR(
+    BumpPool* pool,
+    const VkResolveImageInfo2KHR* from,
+    VkResolveImageInfo2KHR* to);
 
 #endif
 #ifdef VK_ANDROID_native_buffer
@@ -1422,6 +1855,35 @@ void deepcopy_VkDedicatedAllocationMemoryAllocateInfoNV(
     VkDedicatedAllocationMemoryAllocateInfoNV* to);
 
 #endif
+#ifdef VK_EXT_transform_feedback
+void deepcopy_VkPhysicalDeviceTransformFeedbackFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceTransformFeedbackFeaturesEXT* from,
+    VkPhysicalDeviceTransformFeedbackFeaturesEXT* to);
+
+void deepcopy_VkPhysicalDeviceTransformFeedbackPropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceTransformFeedbackPropertiesEXT* from,
+    VkPhysicalDeviceTransformFeedbackPropertiesEXT* to);
+
+void deepcopy_VkPipelineRasterizationStateStreamCreateInfoEXT(
+    BumpPool* pool,
+    const VkPipelineRasterizationStateStreamCreateInfoEXT* from,
+    VkPipelineRasterizationStateStreamCreateInfoEXT* to);
+
+#endif
+#ifdef VK_NVX_image_view_handle
+void deepcopy_VkImageViewHandleInfoNVX(
+    BumpPool* pool,
+    const VkImageViewHandleInfoNVX* from,
+    VkImageViewHandleInfoNVX* to);
+
+void deepcopy_VkImageViewAddressPropertiesNVX(
+    BumpPool* pool,
+    const VkImageViewAddressPropertiesNVX* from,
+    VkImageViewAddressPropertiesNVX* to);
+
+#endif
 #ifdef VK_AMD_draw_indirect_count
 #endif
 #ifdef VK_AMD_negative_viewport_height
@@ -1450,6 +1912,20 @@ void deepcopy_VkShaderStatisticsInfoAMD(
 
 #endif
 #ifdef VK_AMD_shader_image_load_store_lod
+#endif
+#ifdef VK_GGP_stream_descriptor_surface
+void deepcopy_VkStreamDescriptorSurfaceCreateInfoGGP(
+    BumpPool* pool,
+    const VkStreamDescriptorSurfaceCreateInfoGGP* from,
+    VkStreamDescriptorSurfaceCreateInfoGGP* to);
+
+#endif
+#ifdef VK_NV_corner_sampled_image
+void deepcopy_VkPhysicalDeviceCornerSampledImageFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceCornerSampledImageFeaturesNV* from,
+    VkPhysicalDeviceCornerSampledImageFeaturesNV* to);
+
 #endif
 #ifdef VK_IMG_format_pvrtc
 #endif
@@ -1509,6 +1985,25 @@ void deepcopy_VkViSurfaceCreateInfoNN(
 #endif
 #ifdef VK_EXT_shader_subgroup_vote
 #endif
+#ifdef VK_EXT_texture_compression_astc_hdr
+void deepcopy_VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT* from,
+    VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT* to);
+
+#endif
+#ifdef VK_EXT_astc_decode_mode
+void deepcopy_VkImageViewASTCDecodeModeEXT(
+    BumpPool* pool,
+    const VkImageViewASTCDecodeModeEXT* from,
+    VkImageViewASTCDecodeModeEXT* to);
+
+void deepcopy_VkPhysicalDeviceASTCDecodeFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceASTCDecodeFeaturesEXT* from,
+    VkPhysicalDeviceASTCDecodeFeaturesEXT* to);
+
+#endif
 #ifdef VK_EXT_conditional_rendering
 void deepcopy_VkConditionalRenderingBeginInfoEXT(
     BumpPool* pool,
@@ -1524,78 +2019,6 @@ void deepcopy_VkCommandBufferInheritanceConditionalRenderingInfoEXT(
     BumpPool* pool,
     const VkCommandBufferInheritanceConditionalRenderingInfoEXT* from,
     VkCommandBufferInheritanceConditionalRenderingInfoEXT* to);
-
-#endif
-#ifdef VK_NVX_device_generated_commands
-void deepcopy_VkDeviceGeneratedCommandsFeaturesNVX(
-    BumpPool* pool,
-    const VkDeviceGeneratedCommandsFeaturesNVX* from,
-    VkDeviceGeneratedCommandsFeaturesNVX* to);
-
-void deepcopy_VkDeviceGeneratedCommandsLimitsNVX(
-    BumpPool* pool,
-    const VkDeviceGeneratedCommandsLimitsNVX* from,
-    VkDeviceGeneratedCommandsLimitsNVX* to);
-
-void deepcopy_VkIndirectCommandsTokenNVX(
-    BumpPool* pool,
-    const VkIndirectCommandsTokenNVX* from,
-    VkIndirectCommandsTokenNVX* to);
-
-void deepcopy_VkIndirectCommandsLayoutTokenNVX(
-    BumpPool* pool,
-    const VkIndirectCommandsLayoutTokenNVX* from,
-    VkIndirectCommandsLayoutTokenNVX* to);
-
-void deepcopy_VkIndirectCommandsLayoutCreateInfoNVX(
-    BumpPool* pool,
-    const VkIndirectCommandsLayoutCreateInfoNVX* from,
-    VkIndirectCommandsLayoutCreateInfoNVX* to);
-
-void deepcopy_VkCmdProcessCommandsInfoNVX(
-    BumpPool* pool,
-    const VkCmdProcessCommandsInfoNVX* from,
-    VkCmdProcessCommandsInfoNVX* to);
-
-void deepcopy_VkCmdReserveSpaceForCommandsInfoNVX(
-    BumpPool* pool,
-    const VkCmdReserveSpaceForCommandsInfoNVX* from,
-    VkCmdReserveSpaceForCommandsInfoNVX* to);
-
-void deepcopy_VkObjectTableCreateInfoNVX(
-    BumpPool* pool,
-    const VkObjectTableCreateInfoNVX* from,
-    VkObjectTableCreateInfoNVX* to);
-
-void deepcopy_VkObjectTableEntryNVX(
-    BumpPool* pool,
-    const VkObjectTableEntryNVX* from,
-    VkObjectTableEntryNVX* to);
-
-void deepcopy_VkObjectTablePipelineEntryNVX(
-    BumpPool* pool,
-    const VkObjectTablePipelineEntryNVX* from,
-    VkObjectTablePipelineEntryNVX* to);
-
-void deepcopy_VkObjectTableDescriptorSetEntryNVX(
-    BumpPool* pool,
-    const VkObjectTableDescriptorSetEntryNVX* from,
-    VkObjectTableDescriptorSetEntryNVX* to);
-
-void deepcopy_VkObjectTableVertexBufferEntryNVX(
-    BumpPool* pool,
-    const VkObjectTableVertexBufferEntryNVX* from,
-    VkObjectTableVertexBufferEntryNVX* to);
-
-void deepcopy_VkObjectTableIndexBufferEntryNVX(
-    BumpPool* pool,
-    const VkObjectTableIndexBufferEntryNVX* from,
-    VkObjectTableIndexBufferEntryNVX* to);
-
-void deepcopy_VkObjectTablePushConstantEntryNVX(
-    BumpPool* pool,
-    const VkObjectTablePushConstantEntryNVX* from,
-    VkObjectTablePushConstantEntryNVX* to);
 
 #endif
 #ifdef VK_NV_clip_space_w_scaling
@@ -1714,6 +2137,18 @@ void deepcopy_VkPipelineRasterizationConservativeStateCreateInfoEXT(
     VkPipelineRasterizationConservativeStateCreateInfoEXT* to);
 
 #endif
+#ifdef VK_EXT_depth_clip_enable
+void deepcopy_VkPhysicalDeviceDepthClipEnableFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceDepthClipEnableFeaturesEXT* from,
+    VkPhysicalDeviceDepthClipEnableFeaturesEXT* to);
+
+void deepcopy_VkPipelineRasterizationDepthClipStateCreateInfoEXT(
+    BumpPool* pool,
+    const VkPipelineRasterizationDepthClipStateCreateInfoEXT* from,
+    VkPipelineRasterizationDepthClipStateCreateInfoEXT* to);
+
+#endif
 #ifdef VK_EXT_swapchain_colorspace
 #endif
 #ifdef VK_EXT_hdr_metadata
@@ -1742,25 +2177,22 @@ void deepcopy_VkMacOSSurfaceCreateInfoMVK(
     VkMacOSSurfaceCreateInfoMVK* to);
 
 #endif
+#ifdef VK_MVK_moltenvk
+#endif
 #ifdef VK_EXT_external_memory_dma_buf
 #endif
 #ifdef VK_EXT_queue_family_foreign
 #endif
 #ifdef VK_EXT_debug_utils
-void deepcopy_VkDebugUtilsObjectNameInfoEXT(
-    BumpPool* pool,
-    const VkDebugUtilsObjectNameInfoEXT* from,
-    VkDebugUtilsObjectNameInfoEXT* to);
-
-void deepcopy_VkDebugUtilsObjectTagInfoEXT(
-    BumpPool* pool,
-    const VkDebugUtilsObjectTagInfoEXT* from,
-    VkDebugUtilsObjectTagInfoEXT* to);
-
 void deepcopy_VkDebugUtilsLabelEXT(
     BumpPool* pool,
     const VkDebugUtilsLabelEXT* from,
     VkDebugUtilsLabelEXT* to);
+
+void deepcopy_VkDebugUtilsObjectNameInfoEXT(
+    BumpPool* pool,
+    const VkDebugUtilsObjectNameInfoEXT* from,
+    VkDebugUtilsObjectNameInfoEXT* to);
 
 void deepcopy_VkDebugUtilsMessengerCallbackDataEXT(
     BumpPool* pool,
@@ -1771,6 +2203,11 @@ void deepcopy_VkDebugUtilsMessengerCreateInfoEXT(
     BumpPool* pool,
     const VkDebugUtilsMessengerCreateInfoEXT* from,
     VkDebugUtilsMessengerCreateInfoEXT* to);
+
+void deepcopy_VkDebugUtilsObjectTagInfoEXT(
+    BumpPool* pool,
+    const VkDebugUtilsObjectTagInfoEXT* from,
+    VkDebugUtilsObjectTagInfoEXT* to);
 
 #endif
 #ifdef VK_ANDROID_external_memory_android_hardware_buffer
@@ -1806,22 +2243,34 @@ void deepcopy_VkExternalFormatANDROID(
 
 #endif
 #ifdef VK_EXT_sampler_filter_minmax
-void deepcopy_VkSamplerReductionModeCreateInfoEXT(
-    BumpPool* pool,
-    const VkSamplerReductionModeCreateInfoEXT* from,
-    VkSamplerReductionModeCreateInfoEXT* to);
-
-void deepcopy_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(
-    BumpPool* pool,
-    const VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT* from,
-    VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT* to);
-
 #endif
 #ifdef VK_AMD_gpu_shader_int16
 #endif
 #ifdef VK_AMD_mixed_attachment_samples
 #endif
 #ifdef VK_AMD_shader_fragment_mask
+#endif
+#ifdef VK_EXT_inline_uniform_block
+void deepcopy_VkPhysicalDeviceInlineUniformBlockFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceInlineUniformBlockFeaturesEXT* from,
+    VkPhysicalDeviceInlineUniformBlockFeaturesEXT* to);
+
+void deepcopy_VkPhysicalDeviceInlineUniformBlockPropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceInlineUniformBlockPropertiesEXT* from,
+    VkPhysicalDeviceInlineUniformBlockPropertiesEXT* to);
+
+void deepcopy_VkWriteDescriptorSetInlineUniformBlockEXT(
+    BumpPool* pool,
+    const VkWriteDescriptorSetInlineUniformBlockEXT* from,
+    VkWriteDescriptorSetInlineUniformBlockEXT* to);
+
+void deepcopy_VkDescriptorPoolInlineUniformBlockCreateInfoEXT(
+    BumpPool* pool,
+    const VkDescriptorPoolInlineUniformBlockCreateInfoEXT* from,
+    VkDescriptorPoolInlineUniformBlockCreateInfoEXT* to);
+
 #endif
 #ifdef VK_EXT_shader_stencil_export
 #endif
@@ -1900,7 +2349,51 @@ void deepcopy_VkPipelineCoverageModulationStateCreateInfoNV(
 #endif
 #ifdef VK_NV_fill_rectangle
 #endif
+#ifdef VK_NV_shader_sm_builtins
+void deepcopy_VkPhysicalDeviceShaderSMBuiltinsPropertiesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderSMBuiltinsPropertiesNV* from,
+    VkPhysicalDeviceShaderSMBuiltinsPropertiesNV* to);
+
+void deepcopy_VkPhysicalDeviceShaderSMBuiltinsFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderSMBuiltinsFeaturesNV* from,
+    VkPhysicalDeviceShaderSMBuiltinsFeaturesNV* to);
+
+#endif
 #ifdef VK_EXT_post_depth_coverage
+#endif
+#ifdef VK_EXT_image_drm_format_modifier
+void deepcopy_VkDrmFormatModifierPropertiesEXT(
+    BumpPool* pool,
+    const VkDrmFormatModifierPropertiesEXT* from,
+    VkDrmFormatModifierPropertiesEXT* to);
+
+void deepcopy_VkDrmFormatModifierPropertiesListEXT(
+    BumpPool* pool,
+    const VkDrmFormatModifierPropertiesListEXT* from,
+    VkDrmFormatModifierPropertiesListEXT* to);
+
+void deepcopy_VkPhysicalDeviceImageDrmFormatModifierInfoEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceImageDrmFormatModifierInfoEXT* from,
+    VkPhysicalDeviceImageDrmFormatModifierInfoEXT* to);
+
+void deepcopy_VkImageDrmFormatModifierListCreateInfoEXT(
+    BumpPool* pool,
+    const VkImageDrmFormatModifierListCreateInfoEXT* from,
+    VkImageDrmFormatModifierListCreateInfoEXT* to);
+
+void deepcopy_VkImageDrmFormatModifierExplicitCreateInfoEXT(
+    BumpPool* pool,
+    const VkImageDrmFormatModifierExplicitCreateInfoEXT* from,
+    VkImageDrmFormatModifierExplicitCreateInfoEXT* to);
+
+void deepcopy_VkImageDrmFormatModifierPropertiesEXT(
+    BumpPool* pool,
+    const VkImageDrmFormatModifierPropertiesEXT* from,
+    VkImageDrmFormatModifierPropertiesEXT* to);
+
 #endif
 #ifdef VK_EXT_validation_cache
 void deepcopy_VkValidationCacheCreateInfoEXT(
@@ -1915,33 +2408,138 @@ void deepcopy_VkShaderModuleValidationCacheCreateInfoEXT(
 
 #endif
 #ifdef VK_EXT_descriptor_indexing
-void deepcopy_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
-    BumpPool* pool,
-    const VkDescriptorSetLayoutBindingFlagsCreateInfoEXT* from,
-    VkDescriptorSetLayoutBindingFlagsCreateInfoEXT* to);
-
-void deepcopy_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
-    BumpPool* pool,
-    const VkPhysicalDeviceDescriptorIndexingFeaturesEXT* from,
-    VkPhysicalDeviceDescriptorIndexingFeaturesEXT* to);
-
-void deepcopy_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
-    BumpPool* pool,
-    const VkPhysicalDeviceDescriptorIndexingPropertiesEXT* from,
-    VkPhysicalDeviceDescriptorIndexingPropertiesEXT* to);
-
-void deepcopy_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
-    BumpPool* pool,
-    const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT* from,
-    VkDescriptorSetVariableDescriptorCountAllocateInfoEXT* to);
-
-void deepcopy_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(
-    BumpPool* pool,
-    const VkDescriptorSetVariableDescriptorCountLayoutSupportEXT* from,
-    VkDescriptorSetVariableDescriptorCountLayoutSupportEXT* to);
-
 #endif
 #ifdef VK_EXT_shader_viewport_index_layer
+#endif
+#ifdef VK_NV_shading_rate_image
+void deepcopy_VkShadingRatePaletteNV(
+    BumpPool* pool,
+    const VkShadingRatePaletteNV* from,
+    VkShadingRatePaletteNV* to);
+
+void deepcopy_VkPipelineViewportShadingRateImageStateCreateInfoNV(
+    BumpPool* pool,
+    const VkPipelineViewportShadingRateImageStateCreateInfoNV* from,
+    VkPipelineViewportShadingRateImageStateCreateInfoNV* to);
+
+void deepcopy_VkPhysicalDeviceShadingRateImageFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceShadingRateImageFeaturesNV* from,
+    VkPhysicalDeviceShadingRateImageFeaturesNV* to);
+
+void deepcopy_VkPhysicalDeviceShadingRateImagePropertiesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceShadingRateImagePropertiesNV* from,
+    VkPhysicalDeviceShadingRateImagePropertiesNV* to);
+
+void deepcopy_VkCoarseSampleLocationNV(
+    BumpPool* pool,
+    const VkCoarseSampleLocationNV* from,
+    VkCoarseSampleLocationNV* to);
+
+void deepcopy_VkCoarseSampleOrderCustomNV(
+    BumpPool* pool,
+    const VkCoarseSampleOrderCustomNV* from,
+    VkCoarseSampleOrderCustomNV* to);
+
+void deepcopy_VkPipelineViewportCoarseSampleOrderStateCreateInfoNV(
+    BumpPool* pool,
+    const VkPipelineViewportCoarseSampleOrderStateCreateInfoNV* from,
+    VkPipelineViewportCoarseSampleOrderStateCreateInfoNV* to);
+
+#endif
+#ifdef VK_NV_ray_tracing
+void deepcopy_VkRayTracingShaderGroupCreateInfoNV(
+    BumpPool* pool,
+    const VkRayTracingShaderGroupCreateInfoNV* from,
+    VkRayTracingShaderGroupCreateInfoNV* to);
+
+void deepcopy_VkRayTracingPipelineCreateInfoNV(
+    BumpPool* pool,
+    const VkRayTracingPipelineCreateInfoNV* from,
+    VkRayTracingPipelineCreateInfoNV* to);
+
+void deepcopy_VkGeometryTrianglesNV(
+    BumpPool* pool,
+    const VkGeometryTrianglesNV* from,
+    VkGeometryTrianglesNV* to);
+
+void deepcopy_VkGeometryAABBNV(
+    BumpPool* pool,
+    const VkGeometryAABBNV* from,
+    VkGeometryAABBNV* to);
+
+void deepcopy_VkGeometryDataNV(
+    BumpPool* pool,
+    const VkGeometryDataNV* from,
+    VkGeometryDataNV* to);
+
+void deepcopy_VkGeometryNV(
+    BumpPool* pool,
+    const VkGeometryNV* from,
+    VkGeometryNV* to);
+
+void deepcopy_VkAccelerationStructureInfoNV(
+    BumpPool* pool,
+    const VkAccelerationStructureInfoNV* from,
+    VkAccelerationStructureInfoNV* to);
+
+void deepcopy_VkAccelerationStructureCreateInfoNV(
+    BumpPool* pool,
+    const VkAccelerationStructureCreateInfoNV* from,
+    VkAccelerationStructureCreateInfoNV* to);
+
+void deepcopy_VkBindAccelerationStructureMemoryInfoNV(
+    BumpPool* pool,
+    const VkBindAccelerationStructureMemoryInfoNV* from,
+    VkBindAccelerationStructureMemoryInfoNV* to);
+
+void deepcopy_VkWriteDescriptorSetAccelerationStructureNV(
+    BumpPool* pool,
+    const VkWriteDescriptorSetAccelerationStructureNV* from,
+    VkWriteDescriptorSetAccelerationStructureNV* to);
+
+void deepcopy_VkAccelerationStructureMemoryRequirementsInfoNV(
+    BumpPool* pool,
+    const VkAccelerationStructureMemoryRequirementsInfoNV* from,
+    VkAccelerationStructureMemoryRequirementsInfoNV* to);
+
+void deepcopy_VkPhysicalDeviceRayTracingPropertiesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceRayTracingPropertiesNV* from,
+    VkPhysicalDeviceRayTracingPropertiesNV* to);
+
+void deepcopy_VkAabbPositionsKHR(
+    BumpPool* pool,
+    const VkAabbPositionsKHR* from,
+    VkAabbPositionsKHR* to);
+
+#endif
+#ifdef VK_NV_representative_fragment_test
+void deepcopy_VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV* from,
+    VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV* to);
+
+void deepcopy_VkPipelineRepresentativeFragmentTestStateCreateInfoNV(
+    BumpPool* pool,
+    const VkPipelineRepresentativeFragmentTestStateCreateInfoNV* from,
+    VkPipelineRepresentativeFragmentTestStateCreateInfoNV* to);
+
+#endif
+#ifdef VK_EXT_filter_cubic
+void deepcopy_VkPhysicalDeviceImageViewImageFormatInfoEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceImageViewImageFormatInfoEXT* from,
+    VkPhysicalDeviceImageViewImageFormatInfoEXT* to);
+
+void deepcopy_VkFilterCubicImageViewImageFormatPropertiesEXT(
+    BumpPool* pool,
+    const VkFilterCubicImageViewImageFormatPropertiesEXT* from,
+    VkFilterCubicImageViewImageFormatPropertiesEXT* to);
+
+#endif
+#ifdef VK_QCOM_render_pass_shader_resolve
 #endif
 #ifdef VK_EXT_global_priority
 void deepcopy_VkDeviceQueueGlobalPriorityCreateInfoEXT(
@@ -1969,11 +2567,32 @@ void deepcopy_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(
 #endif
 #ifdef VK_AMD_buffer_marker
 #endif
+#ifdef VK_AMD_pipeline_compiler_control
+void deepcopy_VkPipelineCompilerControlCreateInfoAMD(
+    BumpPool* pool,
+    const VkPipelineCompilerControlCreateInfoAMD* from,
+    VkPipelineCompilerControlCreateInfoAMD* to);
+
+#endif
+#ifdef VK_EXT_calibrated_timestamps
+void deepcopy_VkCalibratedTimestampInfoEXT(
+    BumpPool* pool,
+    const VkCalibratedTimestampInfoEXT* from,
+    VkCalibratedTimestampInfoEXT* to);
+
+#endif
 #ifdef VK_AMD_shader_core_properties
 void deepcopy_VkPhysicalDeviceShaderCorePropertiesAMD(
     BumpPool* pool,
     const VkPhysicalDeviceShaderCorePropertiesAMD* from,
     VkPhysicalDeviceShaderCorePropertiesAMD* to);
+
+#endif
+#ifdef VK_AMD_memory_overallocation_behavior
+void deepcopy_VkDeviceMemoryOverallocationCreateInfoAMD(
+    BumpPool* pool,
+    const VkDeviceMemoryOverallocationCreateInfoAMD* from,
+    VkDeviceMemoryOverallocationCreateInfoAMD* to);
 
 #endif
 #ifdef VK_EXT_vertex_attribute_divisor
@@ -1992,8 +2611,82 @@ void deepcopy_VkPipelineVertexInputDivisorStateCreateInfoEXT(
     const VkPipelineVertexInputDivisorStateCreateInfoEXT* from,
     VkPipelineVertexInputDivisorStateCreateInfoEXT* to);
 
+void deepcopy_VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT* from,
+    VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT* to);
+
+#endif
+#ifdef VK_GGP_frame_token
+void deepcopy_VkPresentFrameTokenGGP(
+    BumpPool* pool,
+    const VkPresentFrameTokenGGP* from,
+    VkPresentFrameTokenGGP* to);
+
+#endif
+#ifdef VK_EXT_pipeline_creation_feedback
+void deepcopy_VkPipelineCreationFeedbackEXT(
+    BumpPool* pool,
+    const VkPipelineCreationFeedbackEXT* from,
+    VkPipelineCreationFeedbackEXT* to);
+
+void deepcopy_VkPipelineCreationFeedbackCreateInfoEXT(
+    BumpPool* pool,
+    const VkPipelineCreationFeedbackCreateInfoEXT* from,
+    VkPipelineCreationFeedbackCreateInfoEXT* to);
+
 #endif
 #ifdef VK_NV_shader_subgroup_partitioned
+#endif
+#ifdef VK_NV_compute_shader_derivatives
+void deepcopy_VkPhysicalDeviceComputeShaderDerivativesFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceComputeShaderDerivativesFeaturesNV* from,
+    VkPhysicalDeviceComputeShaderDerivativesFeaturesNV* to);
+
+#endif
+#ifdef VK_NV_mesh_shader
+void deepcopy_VkPhysicalDeviceMeshShaderFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceMeshShaderFeaturesNV* from,
+    VkPhysicalDeviceMeshShaderFeaturesNV* to);
+
+void deepcopy_VkPhysicalDeviceMeshShaderPropertiesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceMeshShaderPropertiesNV* from,
+    VkPhysicalDeviceMeshShaderPropertiesNV* to);
+
+void deepcopy_VkDrawMeshTasksIndirectCommandNV(
+    BumpPool* pool,
+    const VkDrawMeshTasksIndirectCommandNV* from,
+    VkDrawMeshTasksIndirectCommandNV* to);
+
+#endif
+#ifdef VK_NV_fragment_shader_barycentric
+void deepcopy_VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV* from,
+    VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV* to);
+
+#endif
+#ifdef VK_NV_shader_image_footprint
+void deepcopy_VkPhysicalDeviceShaderImageFootprintFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderImageFootprintFeaturesNV* from,
+    VkPhysicalDeviceShaderImageFootprintFeaturesNV* to);
+
+#endif
+#ifdef VK_NV_scissor_exclusive
+void deepcopy_VkPipelineViewportExclusiveScissorStateCreateInfoNV(
+    BumpPool* pool,
+    const VkPipelineViewportExclusiveScissorStateCreateInfoNV* from,
+    VkPipelineViewportExclusiveScissorStateCreateInfoNV* to);
+
+void deepcopy_VkPhysicalDeviceExclusiveScissorFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceExclusiveScissorFeaturesNV* from,
+    VkPhysicalDeviceExclusiveScissorFeaturesNV* to);
+
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
 void deepcopy_VkQueueFamilyCheckpointPropertiesNV(
@@ -2007,7 +2700,87 @@ void deepcopy_VkCheckpointDataNV(
     VkCheckpointDataNV* to);
 
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_INTEL_shader_integer_functions2
+void deepcopy_VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL* from,
+    VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL* to);
+
+#endif
+#ifdef VK_INTEL_performance_query
+void deepcopy_VkPerformanceValueDataINTEL(
+    BumpPool* pool,
+    const VkPerformanceValueDataINTEL* from,
+    VkPerformanceValueDataINTEL* to);
+
+void deepcopy_VkPerformanceValueINTEL(
+    BumpPool* pool,
+    const VkPerformanceValueINTEL* from,
+    VkPerformanceValueINTEL* to);
+
+void deepcopy_VkInitializePerformanceApiInfoINTEL(
+    BumpPool* pool,
+    const VkInitializePerformanceApiInfoINTEL* from,
+    VkInitializePerformanceApiInfoINTEL* to);
+
+void deepcopy_VkQueryPoolPerformanceQueryCreateInfoINTEL(
+    BumpPool* pool,
+    const VkQueryPoolPerformanceQueryCreateInfoINTEL* from,
+    VkQueryPoolPerformanceQueryCreateInfoINTEL* to);
+
+void deepcopy_VkPerformanceMarkerInfoINTEL(
+    BumpPool* pool,
+    const VkPerformanceMarkerInfoINTEL* from,
+    VkPerformanceMarkerInfoINTEL* to);
+
+void deepcopy_VkPerformanceStreamMarkerInfoINTEL(
+    BumpPool* pool,
+    const VkPerformanceStreamMarkerInfoINTEL* from,
+    VkPerformanceStreamMarkerInfoINTEL* to);
+
+void deepcopy_VkPerformanceOverrideInfoINTEL(
+    BumpPool* pool,
+    const VkPerformanceOverrideInfoINTEL* from,
+    VkPerformanceOverrideInfoINTEL* to);
+
+void deepcopy_VkPerformanceConfigurationAcquireInfoINTEL(
+    BumpPool* pool,
+    const VkPerformanceConfigurationAcquireInfoINTEL* from,
+    VkPerformanceConfigurationAcquireInfoINTEL* to);
+
+#endif
+#ifdef VK_EXT_pci_bus_info
+void deepcopy_VkPhysicalDevicePCIBusInfoPropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDevicePCIBusInfoPropertiesEXT* from,
+    VkPhysicalDevicePCIBusInfoPropertiesEXT* to);
+
+#endif
+#ifdef VK_AMD_display_native_hdr
+void deepcopy_VkDisplayNativeHdrSurfaceCapabilitiesAMD(
+    BumpPool* pool,
+    const VkDisplayNativeHdrSurfaceCapabilitiesAMD* from,
+    VkDisplayNativeHdrSurfaceCapabilitiesAMD* to);
+
+void deepcopy_VkSwapchainDisplayNativeHdrCreateInfoAMD(
+    BumpPool* pool,
+    const VkSwapchainDisplayNativeHdrCreateInfoAMD* from,
+    VkSwapchainDisplayNativeHdrCreateInfoAMD* to);
+
+#endif
+#ifdef VK_FUCHSIA_imagepipe_surface
+void deepcopy_VkImagePipeSurfaceCreateInfoFUCHSIA(
+    BumpPool* pool,
+    const VkImagePipeSurfaceCreateInfoFUCHSIA* from,
+    VkImagePipeSurfaceCreateInfoFUCHSIA* to);
+
+#endif
+#ifdef VK_EXT_metal_surface
+void deepcopy_VkMetalSurfaceCreateInfoEXT(
+    BumpPool* pool,
+    const VkMetalSurfaceCreateInfoEXT* from,
+    VkMetalSurfaceCreateInfoEXT* to);
+
 #endif
 #ifdef VK_GOOGLE_color_buffer
 void deepcopy_VkImportColorBufferGOOGLE(
@@ -2026,6 +2799,459 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
     VkImportPhysicalAddressGOOGLE* to);
 
 #endif
+#ifdef VK_EXT_scalar_block_layout
+#endif
+#ifdef VK_GOOGLE_hlsl_functionality1
+#endif
+#ifdef VK_GOOGLE_decorate_string
+#endif
+#ifdef VK_EXT_subgroup_size_control
+void deepcopy_VkPhysicalDeviceSubgroupSizeControlFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceSubgroupSizeControlFeaturesEXT* from,
+    VkPhysicalDeviceSubgroupSizeControlFeaturesEXT* to);
+
+void deepcopy_VkPhysicalDeviceSubgroupSizeControlPropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceSubgroupSizeControlPropertiesEXT* from,
+    VkPhysicalDeviceSubgroupSizeControlPropertiesEXT* to);
+
+void deepcopy_VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT(
+    BumpPool* pool,
+    const VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT* from,
+    VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT* to);
+
+#endif
+#ifdef VK_AMD_shader_core_properties2
+void deepcopy_VkPhysicalDeviceShaderCoreProperties2AMD(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderCoreProperties2AMD* from,
+    VkPhysicalDeviceShaderCoreProperties2AMD* to);
+
+#endif
+#ifdef VK_AMD_device_coherent_memory
+void deepcopy_VkPhysicalDeviceCoherentMemoryFeaturesAMD(
+    BumpPool* pool,
+    const VkPhysicalDeviceCoherentMemoryFeaturesAMD* from,
+    VkPhysicalDeviceCoherentMemoryFeaturesAMD* to);
+
+#endif
+#ifdef VK_EXT_shader_image_atomic_int64
+void deepcopy_VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT* from,
+    VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT* to);
+
+#endif
+#ifdef VK_EXT_memory_budget
+void deepcopy_VkPhysicalDeviceMemoryBudgetPropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceMemoryBudgetPropertiesEXT* from,
+    VkPhysicalDeviceMemoryBudgetPropertiesEXT* to);
+
+#endif
+#ifdef VK_EXT_memory_priority
+void deepcopy_VkPhysicalDeviceMemoryPriorityFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceMemoryPriorityFeaturesEXT* from,
+    VkPhysicalDeviceMemoryPriorityFeaturesEXT* to);
+
+void deepcopy_VkMemoryPriorityAllocateInfoEXT(
+    BumpPool* pool,
+    const VkMemoryPriorityAllocateInfoEXT* from,
+    VkMemoryPriorityAllocateInfoEXT* to);
+
+#endif
+#ifdef VK_NV_dedicated_allocation_image_aliasing
+void deepcopy_VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV* from,
+    VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV* to);
+
+#endif
+#ifdef VK_EXT_buffer_device_address
+void deepcopy_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceBufferDeviceAddressFeaturesEXT* from,
+    VkPhysicalDeviceBufferDeviceAddressFeaturesEXT* to);
+
+void deepcopy_VkBufferDeviceAddressCreateInfoEXT(
+    BumpPool* pool,
+    const VkBufferDeviceAddressCreateInfoEXT* from,
+    VkBufferDeviceAddressCreateInfoEXT* to);
+
+#endif
+#ifdef VK_EXT_tooling_info
+void deepcopy_VkPhysicalDeviceToolPropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceToolPropertiesEXT* from,
+    VkPhysicalDeviceToolPropertiesEXT* to);
+
+#endif
+#ifdef VK_EXT_separate_stencil_usage
+#endif
+#ifdef VK_EXT_validation_features
+void deepcopy_VkValidationFeaturesEXT(
+    BumpPool* pool,
+    const VkValidationFeaturesEXT* from,
+    VkValidationFeaturesEXT* to);
+
+#endif
+#ifdef VK_NV_cooperative_matrix
+void deepcopy_VkCooperativeMatrixPropertiesNV(
+    BumpPool* pool,
+    const VkCooperativeMatrixPropertiesNV* from,
+    VkCooperativeMatrixPropertiesNV* to);
+
+void deepcopy_VkPhysicalDeviceCooperativeMatrixFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceCooperativeMatrixFeaturesNV* from,
+    VkPhysicalDeviceCooperativeMatrixFeaturesNV* to);
+
+void deepcopy_VkPhysicalDeviceCooperativeMatrixPropertiesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceCooperativeMatrixPropertiesNV* from,
+    VkPhysicalDeviceCooperativeMatrixPropertiesNV* to);
+
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+void deepcopy_VkPhysicalDeviceCoverageReductionModeFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceCoverageReductionModeFeaturesNV* from,
+    VkPhysicalDeviceCoverageReductionModeFeaturesNV* to);
+
+void deepcopy_VkPipelineCoverageReductionStateCreateInfoNV(
+    BumpPool* pool,
+    const VkPipelineCoverageReductionStateCreateInfoNV* from,
+    VkPipelineCoverageReductionStateCreateInfoNV* to);
+
+void deepcopy_VkFramebufferMixedSamplesCombinationNV(
+    BumpPool* pool,
+    const VkFramebufferMixedSamplesCombinationNV* from,
+    VkFramebufferMixedSamplesCombinationNV* to);
+
+#endif
+#ifdef VK_EXT_fragment_shader_interlock
+void deepcopy_VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT* from,
+    VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT* to);
+
+#endif
+#ifdef VK_EXT_ycbcr_image_arrays
+void deepcopy_VkPhysicalDeviceYcbcrImageArraysFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceYcbcrImageArraysFeaturesEXT* from,
+    VkPhysicalDeviceYcbcrImageArraysFeaturesEXT* to);
+
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+void deepcopy_VkSurfaceFullScreenExclusiveInfoEXT(
+    BumpPool* pool,
+    const VkSurfaceFullScreenExclusiveInfoEXT* from,
+    VkSurfaceFullScreenExclusiveInfoEXT* to);
+
+void deepcopy_VkSurfaceCapabilitiesFullScreenExclusiveEXT(
+    BumpPool* pool,
+    const VkSurfaceCapabilitiesFullScreenExclusiveEXT* from,
+    VkSurfaceCapabilitiesFullScreenExclusiveEXT* to);
+
+void deepcopy_VkSurfaceFullScreenExclusiveWin32InfoEXT(
+    BumpPool* pool,
+    const VkSurfaceFullScreenExclusiveWin32InfoEXT* from,
+    VkSurfaceFullScreenExclusiveWin32InfoEXT* to);
+
+#endif
+#ifdef VK_EXT_headless_surface
+void deepcopy_VkHeadlessSurfaceCreateInfoEXT(
+    BumpPool* pool,
+    const VkHeadlessSurfaceCreateInfoEXT* from,
+    VkHeadlessSurfaceCreateInfoEXT* to);
+
+#endif
+#ifdef VK_EXT_line_rasterization
+void deepcopy_VkPhysicalDeviceLineRasterizationFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceLineRasterizationFeaturesEXT* from,
+    VkPhysicalDeviceLineRasterizationFeaturesEXT* to);
+
+void deepcopy_VkPhysicalDeviceLineRasterizationPropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceLineRasterizationPropertiesEXT* from,
+    VkPhysicalDeviceLineRasterizationPropertiesEXT* to);
+
+void deepcopy_VkPipelineRasterizationLineStateCreateInfoEXT(
+    BumpPool* pool,
+    const VkPipelineRasterizationLineStateCreateInfoEXT* from,
+    VkPipelineRasterizationLineStateCreateInfoEXT* to);
+
+#endif
+#ifdef VK_EXT_shader_atomic_float
+void deepcopy_VkPhysicalDeviceShaderAtomicFloatFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderAtomicFloatFeaturesEXT* from,
+    VkPhysicalDeviceShaderAtomicFloatFeaturesEXT* to);
+
+#endif
+#ifdef VK_EXT_host_query_reset
+#endif
+#ifdef VK_EXT_index_type_uint8
+void deepcopy_VkPhysicalDeviceIndexTypeUint8FeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceIndexTypeUint8FeaturesEXT* from,
+    VkPhysicalDeviceIndexTypeUint8FeaturesEXT* to);
+
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+void deepcopy_VkPhysicalDeviceExtendedDynamicStateFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* from,
+    VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* to);
+
+#endif
+#ifdef VK_EXT_shader_demote_to_helper_invocation
+void deepcopy_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT* from,
+    VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT* to);
+
+#endif
+#ifdef VK_NV_device_generated_commands
+void deepcopy_VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV* from,
+    VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV* to);
+
+void deepcopy_VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV* from,
+    VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV* to);
+
+void deepcopy_VkGraphicsShaderGroupCreateInfoNV(
+    BumpPool* pool,
+    const VkGraphicsShaderGroupCreateInfoNV* from,
+    VkGraphicsShaderGroupCreateInfoNV* to);
+
+void deepcopy_VkGraphicsPipelineShaderGroupsCreateInfoNV(
+    BumpPool* pool,
+    const VkGraphicsPipelineShaderGroupsCreateInfoNV* from,
+    VkGraphicsPipelineShaderGroupsCreateInfoNV* to);
+
+void deepcopy_VkBindShaderGroupIndirectCommandNV(
+    BumpPool* pool,
+    const VkBindShaderGroupIndirectCommandNV* from,
+    VkBindShaderGroupIndirectCommandNV* to);
+
+void deepcopy_VkBindIndexBufferIndirectCommandNV(
+    BumpPool* pool,
+    const VkBindIndexBufferIndirectCommandNV* from,
+    VkBindIndexBufferIndirectCommandNV* to);
+
+void deepcopy_VkBindVertexBufferIndirectCommandNV(
+    BumpPool* pool,
+    const VkBindVertexBufferIndirectCommandNV* from,
+    VkBindVertexBufferIndirectCommandNV* to);
+
+void deepcopy_VkSetStateFlagsIndirectCommandNV(
+    BumpPool* pool,
+    const VkSetStateFlagsIndirectCommandNV* from,
+    VkSetStateFlagsIndirectCommandNV* to);
+
+void deepcopy_VkIndirectCommandsStreamNV(
+    BumpPool* pool,
+    const VkIndirectCommandsStreamNV* from,
+    VkIndirectCommandsStreamNV* to);
+
+void deepcopy_VkIndirectCommandsLayoutTokenNV(
+    BumpPool* pool,
+    const VkIndirectCommandsLayoutTokenNV* from,
+    VkIndirectCommandsLayoutTokenNV* to);
+
+void deepcopy_VkIndirectCommandsLayoutCreateInfoNV(
+    BumpPool* pool,
+    const VkIndirectCommandsLayoutCreateInfoNV* from,
+    VkIndirectCommandsLayoutCreateInfoNV* to);
+
+void deepcopy_VkGeneratedCommandsInfoNV(
+    BumpPool* pool,
+    const VkGeneratedCommandsInfoNV* from,
+    VkGeneratedCommandsInfoNV* to);
+
+void deepcopy_VkGeneratedCommandsMemoryRequirementsInfoNV(
+    BumpPool* pool,
+    const VkGeneratedCommandsMemoryRequirementsInfoNV* from,
+    VkGeneratedCommandsMemoryRequirementsInfoNV* to);
+
+#endif
+#ifdef VK_EXT_texel_buffer_alignment
+void deepcopy_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT* from,
+    VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT* to);
+
+void deepcopy_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT* from,
+    VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT* to);
+
+#endif
+#ifdef VK_QCOM_render_pass_transform
+void deepcopy_VkRenderPassTransformBeginInfoQCOM(
+    BumpPool* pool,
+    const VkRenderPassTransformBeginInfoQCOM* from,
+    VkRenderPassTransformBeginInfoQCOM* to);
+
+void deepcopy_VkCommandBufferInheritanceRenderPassTransformInfoQCOM(
+    BumpPool* pool,
+    const VkCommandBufferInheritanceRenderPassTransformInfoQCOM* from,
+    VkCommandBufferInheritanceRenderPassTransformInfoQCOM* to);
+
+#endif
+#ifdef VK_EXT_device_memory_report
+void deepcopy_VkPhysicalDeviceDeviceMemoryReportFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceDeviceMemoryReportFeaturesEXT* from,
+    VkPhysicalDeviceDeviceMemoryReportFeaturesEXT* to);
+
+void deepcopy_VkDeviceMemoryReportCallbackDataEXT(
+    BumpPool* pool,
+    const VkDeviceMemoryReportCallbackDataEXT* from,
+    VkDeviceMemoryReportCallbackDataEXT* to);
+
+void deepcopy_VkDeviceDeviceMemoryReportCreateInfoEXT(
+    BumpPool* pool,
+    const VkDeviceDeviceMemoryReportCreateInfoEXT* from,
+    VkDeviceDeviceMemoryReportCreateInfoEXT* to);
+
+#endif
+#ifdef VK_EXT_robustness2
+void deepcopy_VkPhysicalDeviceRobustness2FeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceRobustness2FeaturesEXT* from,
+    VkPhysicalDeviceRobustness2FeaturesEXT* to);
+
+void deepcopy_VkPhysicalDeviceRobustness2PropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceRobustness2PropertiesEXT* from,
+    VkPhysicalDeviceRobustness2PropertiesEXT* to);
+
+#endif
+#ifdef VK_EXT_custom_border_color
+void deepcopy_VkSamplerCustomBorderColorCreateInfoEXT(
+    BumpPool* pool,
+    const VkSamplerCustomBorderColorCreateInfoEXT* from,
+    VkSamplerCustomBorderColorCreateInfoEXT* to);
+
+void deepcopy_VkPhysicalDeviceCustomBorderColorPropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceCustomBorderColorPropertiesEXT* from,
+    VkPhysicalDeviceCustomBorderColorPropertiesEXT* to);
+
+void deepcopy_VkPhysicalDeviceCustomBorderColorFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceCustomBorderColorFeaturesEXT* from,
+    VkPhysicalDeviceCustomBorderColorFeaturesEXT* to);
+
+#endif
+#ifdef VK_GOOGLE_user_type
+#endif
+#ifdef VK_EXT_private_data
+void deepcopy_VkPhysicalDevicePrivateDataFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDevicePrivateDataFeaturesEXT* from,
+    VkPhysicalDevicePrivateDataFeaturesEXT* to);
+
+void deepcopy_VkDevicePrivateDataCreateInfoEXT(
+    BumpPool* pool,
+    const VkDevicePrivateDataCreateInfoEXT* from,
+    VkDevicePrivateDataCreateInfoEXT* to);
+
+void deepcopy_VkPrivateDataSlotCreateInfoEXT(
+    BumpPool* pool,
+    const VkPrivateDataSlotCreateInfoEXT* from,
+    VkPrivateDataSlotCreateInfoEXT* to);
+
+#endif
+#ifdef VK_EXT_pipeline_creation_cache_control
+void deepcopy_VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT* from,
+    VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT* to);
+
+#endif
+#ifdef VK_NV_device_diagnostics_config
+void deepcopy_VkPhysicalDeviceDiagnosticsConfigFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceDiagnosticsConfigFeaturesNV* from,
+    VkPhysicalDeviceDiagnosticsConfigFeaturesNV* to);
+
+void deepcopy_VkDeviceDiagnosticsConfigCreateInfoNV(
+    BumpPool* pool,
+    const VkDeviceDiagnosticsConfigCreateInfoNV* from,
+    VkDeviceDiagnosticsConfigCreateInfoNV* to);
+
+#endif
+#ifdef VK_QCOM_render_pass_store_ops
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+void deepcopy_VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV* from,
+    VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV* to);
+
+void deepcopy_VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV(
+    BumpPool* pool,
+    const VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV* from,
+    VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV* to);
+
+void deepcopy_VkPipelineFragmentShadingRateEnumStateCreateInfoNV(
+    BumpPool* pool,
+    const VkPipelineFragmentShadingRateEnumStateCreateInfoNV* from,
+    VkPipelineFragmentShadingRateEnumStateCreateInfoNV* to);
+
+#endif
+#ifdef VK_EXT_fragment_density_map2
+void deepcopy_VkPhysicalDeviceFragmentDensityMap2FeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceFragmentDensityMap2FeaturesEXT* from,
+    VkPhysicalDeviceFragmentDensityMap2FeaturesEXT* to);
+
+void deepcopy_VkPhysicalDeviceFragmentDensityMap2PropertiesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceFragmentDensityMap2PropertiesEXT* from,
+    VkPhysicalDeviceFragmentDensityMap2PropertiesEXT* to);
+
+#endif
+#ifdef VK_QCOM_rotated_copy_commands
+void deepcopy_VkCopyCommandTransformInfoQCOM(
+    BumpPool* pool,
+    const VkCopyCommandTransformInfoQCOM* from,
+    VkCopyCommandTransformInfoQCOM* to);
+
+#endif
+#ifdef VK_EXT_image_robustness
+void deepcopy_VkPhysicalDeviceImageRobustnessFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDeviceImageRobustnessFeaturesEXT* from,
+    VkPhysicalDeviceImageRobustnessFeaturesEXT* to);
+
+#endif
+#ifdef VK_EXT_4444_formats
+void deepcopy_VkPhysicalDevice4444FormatsFeaturesEXT(
+    BumpPool* pool,
+    const VkPhysicalDevice4444FormatsFeaturesEXT* from,
+    VkPhysicalDevice4444FormatsFeaturesEXT* to);
+
+#endif
+#ifdef VK_EXT_directfb_surface
+void deepcopy_VkDirectFBSurfaceCreateInfoEXT(
+    BumpPool* pool,
+    const VkDirectFBSurfaceCreateInfoEXT* from,
+    VkDirectFBSurfaceCreateInfoEXT* to);
+
+#endif
+#ifdef VK_GOOGLE_address_space
+#endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 #endif
 #ifdef VK_GOOGLE_async_command_buffers
@@ -2040,9 +3266,148 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
-#ifdef VK_MVK_moltenvk
-#endif
 #ifdef VK_GOOGLE_queue_submit_with_commands
+#endif
+#ifdef VK_KHR_acceleration_structure
+void deepcopy_VkDeviceOrHostAddressKHR(
+    BumpPool* pool,
+    const VkDeviceOrHostAddressKHR* from,
+    VkDeviceOrHostAddressKHR* to);
+
+void deepcopy_VkDeviceOrHostAddressConstKHR(
+    BumpPool* pool,
+    const VkDeviceOrHostAddressConstKHR* from,
+    VkDeviceOrHostAddressConstKHR* to);
+
+void deepcopy_VkAccelerationStructureBuildRangeInfoKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureBuildRangeInfoKHR* from,
+    VkAccelerationStructureBuildRangeInfoKHR* to);
+
+void deepcopy_VkAccelerationStructureGeometryTrianglesDataKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureGeometryTrianglesDataKHR* from,
+    VkAccelerationStructureGeometryTrianglesDataKHR* to);
+
+void deepcopy_VkAccelerationStructureGeometryAabbsDataKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureGeometryAabbsDataKHR* from,
+    VkAccelerationStructureGeometryAabbsDataKHR* to);
+
+void deepcopy_VkAccelerationStructureGeometryInstancesDataKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureGeometryInstancesDataKHR* from,
+    VkAccelerationStructureGeometryInstancesDataKHR* to);
+
+void deepcopy_VkAccelerationStructureGeometryDataKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureGeometryDataKHR* from,
+    VkAccelerationStructureGeometryDataKHR* to);
+
+void deepcopy_VkAccelerationStructureGeometryKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureGeometryKHR* from,
+    VkAccelerationStructureGeometryKHR* to);
+
+void deepcopy_VkAccelerationStructureBuildGeometryInfoKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureBuildGeometryInfoKHR* from,
+    VkAccelerationStructureBuildGeometryInfoKHR* to);
+
+void deepcopy_VkAccelerationStructureCreateInfoKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureCreateInfoKHR* from,
+    VkAccelerationStructureCreateInfoKHR* to);
+
+void deepcopy_VkWriteDescriptorSetAccelerationStructureKHR(
+    BumpPool* pool,
+    const VkWriteDescriptorSetAccelerationStructureKHR* from,
+    VkWriteDescriptorSetAccelerationStructureKHR* to);
+
+void deepcopy_VkPhysicalDeviceAccelerationStructureFeaturesKHR(
+    BumpPool* pool,
+    const VkPhysicalDeviceAccelerationStructureFeaturesKHR* from,
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR* to);
+
+void deepcopy_VkPhysicalDeviceAccelerationStructurePropertiesKHR(
+    BumpPool* pool,
+    const VkPhysicalDeviceAccelerationStructurePropertiesKHR* from,
+    VkPhysicalDeviceAccelerationStructurePropertiesKHR* to);
+
+void deepcopy_VkAccelerationStructureDeviceAddressInfoKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureDeviceAddressInfoKHR* from,
+    VkAccelerationStructureDeviceAddressInfoKHR* to);
+
+void deepcopy_VkAccelerationStructureVersionInfoKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureVersionInfoKHR* from,
+    VkAccelerationStructureVersionInfoKHR* to);
+
+void deepcopy_VkCopyAccelerationStructureToMemoryInfoKHR(
+    BumpPool* pool,
+    const VkCopyAccelerationStructureToMemoryInfoKHR* from,
+    VkCopyAccelerationStructureToMemoryInfoKHR* to);
+
+void deepcopy_VkCopyMemoryToAccelerationStructureInfoKHR(
+    BumpPool* pool,
+    const VkCopyMemoryToAccelerationStructureInfoKHR* from,
+    VkCopyMemoryToAccelerationStructureInfoKHR* to);
+
+void deepcopy_VkCopyAccelerationStructureInfoKHR(
+    BumpPool* pool,
+    const VkCopyAccelerationStructureInfoKHR* from,
+    VkCopyAccelerationStructureInfoKHR* to);
+
+void deepcopy_VkAccelerationStructureBuildSizesInfoKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureBuildSizesInfoKHR* from,
+    VkAccelerationStructureBuildSizesInfoKHR* to);
+
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+void deepcopy_VkRayTracingShaderGroupCreateInfoKHR(
+    BumpPool* pool,
+    const VkRayTracingShaderGroupCreateInfoKHR* from,
+    VkRayTracingShaderGroupCreateInfoKHR* to);
+
+void deepcopy_VkRayTracingPipelineInterfaceCreateInfoKHR(
+    BumpPool* pool,
+    const VkRayTracingPipelineInterfaceCreateInfoKHR* from,
+    VkRayTracingPipelineInterfaceCreateInfoKHR* to);
+
+void deepcopy_VkRayTracingPipelineCreateInfoKHR(
+    BumpPool* pool,
+    const VkRayTracingPipelineCreateInfoKHR* from,
+    VkRayTracingPipelineCreateInfoKHR* to);
+
+void deepcopy_VkPhysicalDeviceRayTracingPipelineFeaturesKHR(
+    BumpPool* pool,
+    const VkPhysicalDeviceRayTracingPipelineFeaturesKHR* from,
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR* to);
+
+void deepcopy_VkPhysicalDeviceRayTracingPipelinePropertiesKHR(
+    BumpPool* pool,
+    const VkPhysicalDeviceRayTracingPipelinePropertiesKHR* from,
+    VkPhysicalDeviceRayTracingPipelinePropertiesKHR* to);
+
+void deepcopy_VkStridedDeviceAddressRegionKHR(
+    BumpPool* pool,
+    const VkStridedDeviceAddressRegionKHR* from,
+    VkStridedDeviceAddressRegionKHR* to);
+
+void deepcopy_VkTraceRaysIndirectCommandKHR(
+    BumpPool* pool,
+    const VkTraceRaysIndirectCommandKHR* from,
+    VkTraceRaysIndirectCommandKHR* to);
+
+#endif
+#ifdef VK_KHR_ray_query
+void deepcopy_VkPhysicalDeviceRayQueryFeaturesKHR(
+    BumpPool* pool,
+    const VkPhysicalDeviceRayQueryFeaturesKHR* from,
+    VkPhysicalDeviceRayQueryFeaturesKHR* to);
+
 #endif
 
 } // namespace goldfish_vk
