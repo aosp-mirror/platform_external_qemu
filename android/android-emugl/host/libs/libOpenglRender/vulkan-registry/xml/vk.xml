@@ -3065,14 +3065,14 @@ typedef void <name>CAMetalLayer</name>;
             <member><type>VkBool32</type>                         <name>shaderDrawParameters</name></member>
         </type>
         <type category="struct" name="VkPhysicalDeviceShaderDrawParameterFeatures"             alias="VkPhysicalDeviceShaderDrawParametersFeatures"/>
-        <type category="struct" name="VkPhysicalDeviceShaderFloat16Int8Features" structextends="VkPhysicalDeviceFeatures2,VkDeviceCreateInfo">
+        <type category="struct" name="VkPhysicalDeviceShaderFloat16Int8Features" structextends="VkPhysicalDeviceFeatures2,VkDeviceCreateInfo" optional="streamFeature:VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT">
             <member values="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES"><type>VkStructureType</type> <name>sType</name></member>
             <member optional="true"><type>void</type>*      <name>pNext</name></member>
             <member><type>VkBool32</type>                         <name>shaderFloat16</name><comment>16-bit floats (halfs) in shaders</comment></member>
             <member><type>VkBool32</type>                         <name>shaderInt8</name><comment>8-bit integers in shaders</comment></member>
         </type>
-        <type category="struct" name="VkPhysicalDeviceShaderFloat16Int8FeaturesKHR"            alias="VkPhysicalDeviceShaderFloat16Int8Features"/>
-        <type category="struct" name="VkPhysicalDeviceFloat16Int8FeaturesKHR"                  alias="VkPhysicalDeviceShaderFloat16Int8Features"/>
+        <type category="struct" name="VkPhysicalDeviceShaderFloat16Int8FeaturesKHR"            alias="VkPhysicalDeviceShaderFloat16Int8Features" optional="streamFeature:VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT"/>
+        <type category="struct" name="VkPhysicalDeviceFloat16Int8FeaturesKHR"                  alias="VkPhysicalDeviceShaderFloat16Int8Features" optional="streamFeature:VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT"/>
         <type category="struct" name="VkPhysicalDeviceFloatControlsProperties" returnedonly="true" structextends="VkPhysicalDeviceProperties2">
             <member values="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FLOAT_CONTROLS_PROPERTIES"><type>VkStructureType</type> <name>sType</name></member>
             <member optional="true"><type>void</type>*                            <name>pNext</name></member>
