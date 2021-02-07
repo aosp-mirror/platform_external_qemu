@@ -1247,7 +1247,7 @@ typedef void <name>CAMetalLayer</name>;
             <member noautovalidity="true" optional="streamFeature:VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT">const <type>VkPipelineInputAssemblyStateCreateInfo</type>* <name>pInputAssemblyState</name></member>
             <member noautovalidity="true" optional="true" filterVar="hasTessellation">const <type>VkPipelineTessellationStateCreateInfo</type>* <name>pTessellationState</name></member>
             <member noautovalidity="true" optional="true" filterVar="hasRasterization">const <type>VkPipelineViewportStateCreateInfo</type>* <name>pViewportState</name></member>
-            <member optional="streamFeature:VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT">const <type>VkPipelineRasterizationStateCreateInfo</type>* <name>pRasterizationState</name></member>
+            <member noautovalidity="true" optional="streamFeature:VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT">const <type>VkPipelineRasterizationStateCreateInfo</type>* <name>pRasterizationState</name></member>
             <member noautovalidity="true" optional="true" filterVar="hasRasterization">const <type>VkPipelineMultisampleStateCreateInfo</type>* <name>pMultisampleState</name></member>
             <member noautovalidity="true" optional="true" filterVar="hasRasterization">const <type>VkPipelineDepthStencilStateCreateInfo</type>* <name>pDepthStencilState</name></member>
             <member noautovalidity="true" optional="true" filterVar="hasRasterization">const <type>VkPipelineColorBlendStateCreateInfo</type>* <name>pColorBlendState</name></member>
@@ -1335,7 +1335,7 @@ typedef void <name>CAMetalLayer</name>;
             <member><type>VkFramebuffer</type>          <name>framebuffer</name></member>
             <member><type>VkRect2D</type>               <name>renderArea</name></member>
             <member optional="true"><type>uint32_t</type>               <name>clearValueCount</name></member>
-            <member len="clearValueCount">const <type>VkClearValue</type>*    <name>pClearValues</name></member>
+            <member len="clearValueCount" noautovalidity="true">const <type>VkClearValue</type>*    <name>pClearValues</name></member>
         </type>
         <type category="union" name="VkClearColorValue" comment="// Union allowing specification of floating point, integer, or unsigned integer color data. Actual value selected is based on image/attachment being cleared.">
             <member><type>float</type>                  <name>float32</name>[4]</member>
@@ -1612,7 +1612,7 @@ typedef void <name>CAMetalLayer</name>;
             <member optional="true"><type>VkFramebufferCreateFlags</type>    <name>flags</name></member>
             <member><type>VkRenderPass</type>           <name>renderPass</name></member>
             <member optional="true"><type>uint32_t</type>               <name>attachmentCount</name></member>
-            <member noautovalidity="true" len="attachmentCount">const <type>VkImageView</type>*     <name>pAttachments</name></member>
+            <member len="attachmentCount">const <type>VkImageView</type>*     <name>pAttachments</name></member>
             <member><type>uint32_t</type>               <name>width</name></member>
             <member><type>uint32_t</type>               <name>height</name></member>
             <member><type>uint32_t</type>               <name>layers</name></member>
@@ -2669,7 +2669,7 @@ typedef void <name>CAMetalLayer</name>;
             <member optional="true">const <type>void</type>*            <name>pNext</name></member>
             <member optional="true"><type>VkPipelineViewportSwizzleStateCreateFlagsNV</type>    <name>flags</name></member>
             <member><type>uint32_t</type>               <name>viewportCount</name></member>
-            <member len="viewportCount">const <type>VkViewportSwizzleNV</type>*      <name>pViewportSwizzles</name></member>
+            <member noautovalidity="true" optional="true" len="viewportCount">const <type>VkViewportSwizzleNV</type>*      <name>pViewportSwizzles</name></member>
         </type>
         <type category="struct" name="VkPhysicalDeviceDiscardRectanglePropertiesEXT" returnedonly="true" structextends="VkPhysicalDeviceProperties2">
             <member values="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DISCARD_RECTANGLE_PROPERTIES_EXT"><type>VkStructureType</type> <name>sType</name></member>
@@ -3179,11 +3179,11 @@ typedef void <name>CAMetalLayer</name>;
             <member optional="true"><type>int32_t</type>                                                            <name>messageIdNumber</name></member>
             <member len="null-terminated">const <type>char</type>*                                                  <name>pMessage</name></member>
             <member optional="true"><type>uint32_t</type>                                                           <name>queueLabelCount</name></member>
-            <member len="queueLabelCount">const <type>VkDebugUtilsLabelEXT</type>*                  <name>pQueueLabels</name></member>
+            <member noautovalidity="true" optional="true" len="queueLabelCount"><type>VkDebugUtilsLabelEXT</type>*  <name>pQueueLabels</name></member>
             <member optional="true"><type>uint32_t</type>                                                           <name>cmdBufLabelCount</name></member>
-            <member len="cmdBufLabelCount">const <type>VkDebugUtilsLabelEXT</type>*                 <name>pCmdBufLabels</name></member>
-            <member optional="true"><type>uint32_t</type>                                                           <name>objectCount</name></member>
-            <member len="objectCount">const <type>VkDebugUtilsObjectNameInfoEXT</type>*             <name>pObjects</name></member>
+            <member noautovalidity="true" optional="true" len="cmdBufLabelCount"><type>VkDebugUtilsLabelEXT</type>* <name>pCmdBufLabels</name></member>
+            <member><type>uint32_t</type>                                                                           <name>objectCount</name></member>
+            <member noautovalidity="true" len="objectCount"><type>VkDebugUtilsObjectNameInfoEXT</type>*             <name>pObjects</name></member>
         </type>
         <type category="struct" name="VkPhysicalDeviceDeviceMemoryReportFeaturesEXT" structextends="VkPhysicalDeviceFeatures2,VkDeviceCreateInfo">
             <member values="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_MEMORY_REPORT_FEATURES_EXT"><type>VkStructureType</type> <name>sType</name></member>
