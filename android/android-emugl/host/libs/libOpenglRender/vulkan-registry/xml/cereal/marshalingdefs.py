@@ -356,3 +356,52 @@ KNOWN_FUNCTION_OPCODES = {
     "vkGetIOSurfaceMVK": 20339,
     "vkQueueFlushCommandsGOOGLE": 20340,
 }
+
+CUSTOM_MARSHAL_TYPES = {
+    "VkAccelerationStructureInstanceKHR": {
+        "common": """
+typedef struct VkAccelerationStructureInstanceKHRWithoutBitFields {
+    VkTransformMatrixKHR          transform;
+    uint32_t                      dwords[2];
+    uint64_t                      accelerationStructureReference;
+} VkAccelerationStructureInstanceKHRWithoutBitFields;
+""",
+        "marshaling": """
+const VkAccelerationStructureInstanceKHRWithoutBitFields* {newInputVarName} = (const VkAccelerationStructureInstanceKHRWithoutBitFields*)({inputVarName});
+marshal_VkTransformMatrixKHR({streamVarName}, (VkTransformMatrixKHR*)(&{newInputVarName}->transform));
+for (uint32_t i = 0; i < 2; i++) {{
+    {streamVarName}->write((uint32_t*)&({newInputVarName}->dwords[i]), sizeof(uint32_t));
+}}
+{streamVarName}->write((uint64_t*)&{newInputVarName}->accelerationStructureReference, sizeof(uint64_t));
+""",
+        "unmarshaling": """
+VkAccelerationStructureInstanceKHRWithoutBitFields* {newInputVarName} = (VkAccelerationStructureInstanceKHRWithoutBitFields*)({inputVarName});
+unmarshal_VkTransformMatrixKHR({streamVarName}, (VkTransformMatrixKHR*)(&{newInputVarName}->transform));
+for (uint32_t i = 0; i < 2; i++) {{
+    {streamVarName}->read((uint32_t*)&({newInputVarName}->dwords[i]), sizeof(uint32_t));
+}}
+{streamVarName}->read((uint64_t*)&{newInputVarName}->accelerationStructureReference, sizeof(uint64_t));
+""",
+        "reservedmarshaling": """
+(void)vkStream;
+const VkAccelerationStructureInstanceKHRWithoutBitFields* {newInputVarName} = (const VkAccelerationStructureInstanceKHRWithoutBitFields*)({inputVarName});
+reservedmarshal_VkTransformMatrixKHR({streamVarName}, (VkTransformMatrixKHR*)(&{newInputVarName}->transform), ptr);
+for (uint32_t i = 0; i < 2; i++) {{
+    memcpy(*ptr, (uint32_t*)&({newInputVarName}->dwords[i]), sizeof(uint32_t));
+    *ptr += sizeof(uint32_t);
+}}
+memcpy(*ptr, (uint64_t*)&{newInputVarName}->accelerationStructureReference, sizeof(uint64_t));
+*ptr += sizeof(uint64_t);
+""",
+        "reservedunmarshaling": """
+VkAccelerationStructureInstanceKHRWithoutBitFields* {newInputVarName} = (VkAccelerationStructureInstanceKHRWithoutBitFields*)({inputVarName});
+reservedunmarshal_VkTransformMatrixKHR(vkStream, (VkTransformMatrixKHR*)(&{newInputVarName}->transform), ptr);
+for (uint32_t i = 0; i < 2; i++) {{
+    memcpy((uint32_t*)&({newInputVarName}->dwords[i]), *ptr, sizeof(uint32_t));
+    *ptr += sizeof(uint32_t);
+}}
+memcpy((uint64_t*)&{newInputVarName}->accelerationStructureReference, *ptr, sizeof(uint64_t));
+*ptr += sizeof(uint64_t);
+""",
+    },
+}

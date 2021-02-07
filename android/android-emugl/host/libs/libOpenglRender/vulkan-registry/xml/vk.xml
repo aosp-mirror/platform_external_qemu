@@ -4795,7 +4795,7 @@ typedef void <name>CAMetalLayer</name>;
             <member><type>float</type>                                                   <name>matrix</name>[3][4]</member>
         </type>
         <type category="struct" name="VkTransformMatrixNV"                                     alias="VkTransformMatrixKHR"/>
-        <!--type category="struct" name="VkAccelerationStructureInstanceKHR">
+        <type category="struct" name="VkAccelerationStructureInstanceKHR">
             <comment>The bitfields in this structure are non-normative since bitfield ordering is implementation-defined in C. The specification defines the normative layout.</comment>
             <member><type>VkTransformMatrixKHR</type>                                    <name>transform</name></member>
             <member><type>uint32_t</type>                                                <name>instanceCustomIndex</name>:24</member>
@@ -4803,8 +4803,8 @@ typedef void <name>CAMetalLayer</name>;
             <member><type>uint32_t</type>                                                <name>instanceShaderBindingTableRecordOffset</name>:24</member>
             <member optional="true"><type>VkGeometryInstanceFlagsKHR</type>              <name>flags</name>:8</member>
             <member><type>uint64_t</type>                                                <name>accelerationStructureReference</name></member>
-        </type-->
-        <!--type category="struct" name="VkAccelerationStructureInstanceNV"                       alias="VkAccelerationStructureInstanceKHR"/-->
+        </type>
+        <type category="struct" name="VkAccelerationStructureInstanceNV"                       alias="VkAccelerationStructureInstanceKHR"/>
         <type category="struct" name="VkAccelerationStructureDeviceAddressInfoKHR">
             <member values="VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR"><type>VkStructureType</type> <name>sType</name></member>
             <member optional="true">const <type>void</type>*                                            <name>pNext</name></member>
@@ -12327,7 +12327,7 @@ typedef void <name>CAMetalLayer</name>;
                 <type name="VkAccelerationStructureBuildGeometryInfoKHR"/>
                 <type name="VkAccelerationStructureBuildTypeKHR"/>
                 <type name="VkAccelerationStructureGeometryAabbsDataKHR"/>
-                <!-- type name="VkAccelerationStructureInstanceKHR"/ -->
+                <type name="VkAccelerationStructureInstanceKHR"/>
                 <type name="VkAccelerationStructureGeometryInstancesDataKHR"/>
                 <type name="VkAccelerationStructureGeometryDataKHR"/>
                 <type name="VkAccelerationStructureGeometryKHR"/>
@@ -12764,7 +12764,7 @@ typedef void <name>CAMetalLayer</name>;
                 <type name="VkAccelerationStructureMemoryRequirementsTypeNV"/>
                 <type name="VkTransformMatrixNV"/>
                 <type name="VkAabbPositionsNV"/>
-                <!-- type name="VkAccelerationStructureInstanceNV"/ -->
+                <type name="VkAccelerationStructureInstanceNV"/>
                 <command name="vkCreateAccelerationStructureNV"/>
                 <command name="vkDestroyAccelerationStructureNV"/>
                 <command name="vkGetAccelerationStructureMemoryRequirementsNV"/>
