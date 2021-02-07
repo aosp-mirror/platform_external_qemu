@@ -651,6 +651,14 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
         category = self.typeInfo.categoryOf(name)
 
+        if category in ["struct", "union"] and alias:
+            self.module.appendHeader(
+                self.cgenHeader.makeFuncAlias(API_PREFIX_MARSHAL + name,
+                                              API_PREFIX_MARSHAL + alias))
+            self.module.appendHeader(
+                self.cgenHeader.makeFuncAlias(API_PREFIX_UNMARSHAL + name,
+                                              API_PREFIX_UNMARSHAL + alias))
+
         if category in ["struct", "union"] and not alias:
 
             structInfo = self.typeInfo.structs[name]
