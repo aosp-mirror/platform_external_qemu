@@ -4791,11 +4791,10 @@ typedef void <name>CAMetalLayer</name>;
             <member><type>float</type>                                                   <name>maxZ</name></member>
         </type>
         <type category="struct" name="VkAabbPositionsNV"                                       alias="VkAabbPositionsKHR"/>
-        <!-- TODO(liyl): We need to support multidimensional array in Vulkan cereal. -->
-        <!-- type category="struct" name="VkTransformMatrixKHR">
+        <type category="struct" name="VkTransformMatrixKHR">
             <member><type>float</type>                                                   <name>matrix</name>[3][4]</member>
         </type>
-        <type category="struct" name="VkTransformMatrixNV"                                     alias="VkTransformMatrixKHR"/ -->
+        <type category="struct" name="VkTransformMatrixNV"                                     alias="VkTransformMatrixKHR"/>
         <!--type category="struct" name="VkAccelerationStructureInstanceKHR">
             <comment>The bitfields in this structure are non-normative since bitfield ordering is implementation-defined in C. The specification defines the normative layout.</comment>
             <member><type>VkTransformMatrixKHR</type>                                    <name>transform</name></member>
@@ -12324,7 +12323,7 @@ typedef void <name>CAMetalLayer</name>;
                 <type name="VkAccelerationStructureBuildRangeInfoKHR"/>
                 <type name="VkAabbPositionsKHR"/>
                 <type name="VkAccelerationStructureGeometryTrianglesDataKHR"/>
-                <!-- type name="VkTransformMatrixKHR"/ -->
+                <type name="VkTransformMatrixKHR"/>
                 <type name="VkAccelerationStructureBuildGeometryInfoKHR"/>
                 <type name="VkAccelerationStructureBuildTypeKHR"/>
                 <type name="VkAccelerationStructureGeometryAabbsDataKHR"/>
@@ -12763,7 +12762,7 @@ typedef void <name>CAMetalLayer</name>;
                 <type name="VkPhysicalDeviceRayTracingPropertiesNV"/>
                 <type name="VkMemoryRequirements2KHR"/>
                 <type name="VkAccelerationStructureMemoryRequirementsTypeNV"/>
-                <!-- type name="VkTransformMatrixNV"/ -->
+                <type name="VkTransformMatrixNV"/>
                 <type name="VkAabbPositionsNV"/>
                 <!-- type name="VkAccelerationStructureInstanceNV"/ -->
                 <command name="vkCreateAccelerationStructureNV"/>

@@ -196,9 +196,13 @@ class VulkanType(object):
 
         self.isConst = False
 
-        self.staticArrExpr = ""  # "" means not static array
-        # 0 means the array size is not a numeric literal
-        self.staticArrCount = 0
+        # "" means it's not a static array, otherwise this is the total size of
+        # all elements. e.g. staticArrExpr of "x[3][2][8]" will be "((3)*(2)*(8))".
+        self.staticArrExpr = ""
+        # "" means it's not a static array, otherwise it's the raw expression
+        # of static array size, which can be one-dimensional or multi-dimensional.
+        self.rawStaticArrExpr = ""
+
         self.pointerIndirectionLevels = 0  # 0 means not pointer
         self.isPointerToConstPointer = False
 
@@ -492,9 +496,15 @@ def makeVulkanTypeFromXMLTag(typeInfo, tag):
     if enumtag is not None:
         res.staticArrExpr = enumtag.text
     elif nametag is not None:
-        res.staticArrExpr = noneStr(nametag.tail)[1:-1]
-        if res.staticArrExpr != "":
-            res.staticArrCount = int(res.staticArrExpr)
+        res.rawStaticArrExpr = noneStr(nametag.tail)
+
+        dimensions = res.rawStaticArrExpr.count('[')
+        if dimensions == 1:
+            res.staticArrExpr = res.rawStaticArrExpr[1:-1]
+        elif dimensions > 1:
+            arraySizes = res.rawStaticArrExpr[1:-1].split('][')
+            res.staticArrExpr = '(' + \
+                '*'.join(f'({size})' for size in arraySizes) + ')'
 
     # Determine const
 
@@ -1077,7 +1087,8 @@ class VulkanTypeProtobufInfo(object):
 
         self.needsMessage = typeInfo.isCompoundType(vulkanType.typeName)
         self.isRepeatedString = vulkanType.isArrayOfStrings()
-        self.isString = vulkanType.isString() or (vulkanType.typeName == "char" and (vulkanType.staticArrExpr != None))
+        self.isString = vulkanType.isString() or (
+            vulkanType.typeName == "char" and (vulkanType.staticArrExpr != ""))
 
         if structInfo is not None:
             self.lengthInfo = vulkanTypeGetStructFieldLengthInfo(
