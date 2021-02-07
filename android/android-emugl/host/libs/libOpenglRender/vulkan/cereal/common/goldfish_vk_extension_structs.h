@@ -46,6 +46,8 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_VERSION_1_1
 #endif
+#ifdef VK_VERSION_1_2
+#endif
 #ifdef VK_KHR_surface
 #endif
 #ifdef VK_KHR_swapchain
@@ -59,8 +61,6 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #ifdef VK_KHR_xcb_surface
 #endif
 #ifdef VK_KHR_wayland_surface
-#endif
-#ifdef VK_KHR_mir_surface
 #endif
 #ifdef VK_KHR_android_surface
 #endif
@@ -100,11 +100,15 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_KHR_push_descriptor
 #endif
+#ifdef VK_KHR_shader_float16_int8
+#endif
 #ifdef VK_KHR_16bit_storage
 #endif
 #ifdef VK_KHR_incremental_present
 #endif
 #ifdef VK_KHR_descriptor_update_template
+#endif
+#ifdef VK_KHR_imageless_framebuffer
 #endif
 #ifdef VK_KHR_create_renderpass2
 #endif
@@ -117,6 +121,8 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #ifdef VK_KHR_external_fence_win32
 #endif
 #ifdef VK_KHR_external_fence_fd
+#endif
+#ifdef VK_KHR_performance_query
 #endif
 #ifdef VK_KHR_maintenance2
 #endif
@@ -140,13 +146,55 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_KHR_bind_memory2
 #endif
+#ifdef VK_KHR_portability_subset
+#endif
 #ifdef VK_KHR_maintenance3
 #endif
 #ifdef VK_KHR_draw_indirect_count
 #endif
+#ifdef VK_KHR_shader_subgroup_extended_types
+#endif
 #ifdef VK_KHR_8bit_storage
 #endif
-#ifdef VK_KHR_shader_float16_int8
+#ifdef VK_KHR_shader_atomic_int64
+#endif
+#ifdef VK_KHR_shader_clock
+#endif
+#ifdef VK_KHR_driver_properties
+#endif
+#ifdef VK_KHR_shader_float_controls
+#endif
+#ifdef VK_KHR_depth_stencil_resolve
+#endif
+#ifdef VK_KHR_swapchain_mutable_format
+#endif
+#ifdef VK_KHR_timeline_semaphore
+#endif
+#ifdef VK_KHR_vulkan_memory_model
+#endif
+#ifdef VK_KHR_shader_terminate_invocation
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+#endif
+#ifdef VK_KHR_spirv_1_4
+#endif
+#ifdef VK_KHR_surface_protected_capabilities
+#endif
+#ifdef VK_KHR_separate_depth_stencil_layouts
+#endif
+#ifdef VK_KHR_uniform_buffer_standard_layout
+#endif
+#ifdef VK_KHR_buffer_device_address
+#endif
+#ifdef VK_KHR_deferred_host_operations
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+#endif
+#ifdef VK_KHR_pipeline_library
+#endif
+#ifdef VK_KHR_shader_non_semantic_info
+#endif
+#ifdef VK_KHR_copy_commands2
 #endif
 #ifdef VK_ANDROID_native_buffer
 #endif
@@ -170,6 +218,10 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_NV_dedicated_allocation
 #endif
+#ifdef VK_EXT_transform_feedback
+#endif
+#ifdef VK_NVX_image_view_handle
+#endif
 #ifdef VK_AMD_draw_indirect_count
 #endif
 #ifdef VK_AMD_negative_viewport_height
@@ -183,6 +235,10 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #ifdef VK_AMD_shader_info
 #endif
 #ifdef VK_AMD_shader_image_load_store_lod
+#endif
+#ifdef VK_GGP_stream_descriptor_surface
+#endif
+#ifdef VK_NV_corner_sampled_image
 #endif
 #ifdef VK_IMG_format_pvrtc
 #endif
@@ -202,9 +258,11 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_EXT_shader_subgroup_vote
 #endif
-#ifdef VK_EXT_conditional_rendering
+#ifdef VK_EXT_texture_compression_astc_hdr
 #endif
-#ifdef VK_NVX_device_generated_commands
+#ifdef VK_EXT_astc_decode_mode
+#endif
+#ifdef VK_EXT_conditional_rendering
 #endif
 #ifdef VK_NV_clip_space_w_scaling
 #endif
@@ -232,6 +290,8 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_EXT_conservative_rasterization
 #endif
+#ifdef VK_EXT_depth_clip_enable
+#endif
 #ifdef VK_EXT_swapchain_colorspace
 #endif
 #ifdef VK_EXT_hdr_metadata
@@ -239,6 +299,8 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #ifdef VK_MVK_ios_surface
 #endif
 #ifdef VK_MVK_macos_surface
+#endif
+#ifdef VK_MVK_moltenvk
 #endif
 #ifdef VK_EXT_external_memory_dma_buf
 #endif
@@ -256,6 +318,8 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_AMD_shader_fragment_mask
 #endif
+#ifdef VK_EXT_inline_uniform_block
+#endif
 #ifdef VK_EXT_shader_stencil_export
 #endif
 #ifdef VK_EXT_sample_locations
@@ -268,7 +332,11 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_NV_fill_rectangle
 #endif
+#ifdef VK_NV_shader_sm_builtins
+#endif
 #ifdef VK_EXT_post_depth_coverage
+#endif
+#ifdef VK_EXT_image_drm_format_modifier
 #endif
 #ifdef VK_EXT_validation_cache
 #endif
@@ -276,23 +344,151 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_EXT_shader_viewport_index_layer
 #endif
+#ifdef VK_NV_shading_rate_image
+#endif
+#ifdef VK_NV_ray_tracing
+#endif
+#ifdef VK_NV_representative_fragment_test
+#endif
+#ifdef VK_EXT_filter_cubic
+#endif
+#ifdef VK_QCOM_render_pass_shader_resolve
+#endif
 #ifdef VK_EXT_global_priority
 #endif
 #ifdef VK_EXT_external_memory_host
 #endif
 #ifdef VK_AMD_buffer_marker
 #endif
+#ifdef VK_AMD_pipeline_compiler_control
+#endif
+#ifdef VK_EXT_calibrated_timestamps
+#endif
 #ifdef VK_AMD_shader_core_properties
+#endif
+#ifdef VK_AMD_memory_overallocation_behavior
 #endif
 #ifdef VK_EXT_vertex_attribute_divisor
 #endif
+#ifdef VK_GGP_frame_token
+#endif
+#ifdef VK_EXT_pipeline_creation_feedback
+#endif
 #ifdef VK_NV_shader_subgroup_partitioned
+#endif
+#ifdef VK_NV_compute_shader_derivatives
+#endif
+#ifdef VK_NV_mesh_shader
+#endif
+#ifdef VK_NV_fragment_shader_barycentric
+#endif
+#ifdef VK_NV_shader_image_footprint
+#endif
+#ifdef VK_NV_scissor_exclusive
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_INTEL_shader_integer_functions2
+#endif
+#ifdef VK_INTEL_performance_query
+#endif
+#ifdef VK_EXT_pci_bus_info
+#endif
+#ifdef VK_AMD_display_native_hdr
+#endif
+#ifdef VK_FUCHSIA_imagepipe_surface
+#endif
+#ifdef VK_EXT_metal_surface
 #endif
 #ifdef VK_GOOGLE_color_buffer
+#endif
+#ifdef VK_EXT_scalar_block_layout
+#endif
+#ifdef VK_GOOGLE_hlsl_functionality1
+#endif
+#ifdef VK_GOOGLE_decorate_string
+#endif
+#ifdef VK_EXT_subgroup_size_control
+#endif
+#ifdef VK_AMD_shader_core_properties2
+#endif
+#ifdef VK_AMD_device_coherent_memory
+#endif
+#ifdef VK_EXT_shader_image_atomic_int64
+#endif
+#ifdef VK_EXT_memory_budget
+#endif
+#ifdef VK_EXT_memory_priority
+#endif
+#ifdef VK_NV_dedicated_allocation_image_aliasing
+#endif
+#ifdef VK_EXT_buffer_device_address
+#endif
+#ifdef VK_EXT_tooling_info
+#endif
+#ifdef VK_EXT_separate_stencil_usage
+#endif
+#ifdef VK_EXT_validation_features
+#endif
+#ifdef VK_NV_cooperative_matrix
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+#endif
+#ifdef VK_EXT_fragment_shader_interlock
+#endif
+#ifdef VK_EXT_ycbcr_image_arrays
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+#endif
+#ifdef VK_EXT_headless_surface
+#endif
+#ifdef VK_EXT_line_rasterization
+#endif
+#ifdef VK_EXT_shader_atomic_float
+#endif
+#ifdef VK_EXT_host_query_reset
+#endif
+#ifdef VK_EXT_index_type_uint8
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+#endif
+#ifdef VK_EXT_shader_demote_to_helper_invocation
+#endif
+#ifdef VK_NV_device_generated_commands
+#endif
+#ifdef VK_EXT_texel_buffer_alignment
+#endif
+#ifdef VK_QCOM_render_pass_transform
+#endif
+#ifdef VK_EXT_device_memory_report
+#endif
+#ifdef VK_EXT_robustness2
+#endif
+#ifdef VK_EXT_custom_border_color
+#endif
+#ifdef VK_GOOGLE_user_type
+#endif
+#ifdef VK_EXT_private_data
+#endif
+#ifdef VK_EXT_pipeline_creation_cache_control
+#endif
+#ifdef VK_NV_device_diagnostics_config
+#endif
+#ifdef VK_QCOM_render_pass_store_ops
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+#endif
+#ifdef VK_EXT_fragment_density_map2
+#endif
+#ifdef VK_QCOM_rotated_copy_commands
+#endif
+#ifdef VK_EXT_image_robustness
+#endif
+#ifdef VK_EXT_4444_formats
+#endif
+#ifdef VK_EXT_directfb_surface
+#endif
+#ifdef VK_GOOGLE_address_space
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 #endif
@@ -308,9 +504,13 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
-#ifdef VK_MVK_moltenvk
-#endif
 #ifdef VK_GOOGLE_queue_submit_with_commands
+#endif
+#ifdef VK_KHR_acceleration_structure
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+#endif
+#ifdef VK_KHR_ray_query
 #endif
 
 } // namespace goldfish_vk
