@@ -436,6 +436,12 @@ class CodeGen(object):
                     "lenExprMember": "rasterizationSamples",
                     "postprocess": lambda expr: "(((%s) + 31) / 32)" % expr
                 },
+                {
+                    "structName": "VkAccelerationStructureVersionInfoKHR",
+                    "field": "pVersionData",
+                    "lenExprMember": "",
+                    "postprocess": lambda _: "2*VK_UUID_SIZE"
+                },
             ]
 
             for c in cases:
